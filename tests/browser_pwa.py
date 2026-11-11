@@ -132,10 +132,13 @@ def run():
                 assert not online_errors, online_errors
                 evidence["checks"]["responsiveSafeAreaCSSReducedMotionSmartHeaderScrollTop"] = "PASS"
                 context.set_offline(True)
-                assert page.evaluate("fetch('network-probe').then(() => false).catch(() => true)")
                 page.reload(wait_until="networkidle")
                 assert page.locator(".design-card").count() == len(catalog["designs"])
-                assert page.locator("#connection-notice").is_visible()
+                page.wait_for_function("() => !document.querySelector('#connection-notice').hidden")
+                page.goto(base + "companies/gjh/index.html?review=keep&reconnected=1", wait_until="networkidle")
+                page.wait_for_function("() => document.querySelector('#connection-notice').hidden")
+                context.set_offline(True)
+                page.wait_for_function("() => !document.querySelector('#connection-notice').hidden")
                 page.select_option("#style-filter", "minimal")
                 assert page.locator(".design-card:visible").count() == 1
                 page.goto(base, wait_until="networkidle")

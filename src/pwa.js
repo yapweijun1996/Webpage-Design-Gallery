@@ -128,13 +128,36 @@ applyButton.addEventListener('click', async () => {
 dialog.addEventListener('cancel', (event) => { if (applying) event.preventDefault(); });
 closeButton.addEventListener('click', () => { dialog.close(); applyButton.focus(); });
 
-function connectionState() {
-  document.querySelector('#connection-notice').hidden = navigator.onLine;
+let connectionCheck = 0;
+async function connectionState() {
+  const check = ++connectionCheck;
+  const notice = document.querySelector('#connection-notice');
+  notice.hidden = navigator.onLine;
   if (!navigator.onLine) status.textContent = 'Offline · Saved company browsing is available.';
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+  try {
+    const response = await fetch(new URL('version.json', root), {
+      method: 'HEAD', cache: 'no-store', signal: controller.signal,
+    });
+    if (check === connectionCheck) {
+      notice.hidden = response.ok;
+      if (!response.ok) status.textContent = 'Offline · Saved company browsing is available.';
+    }
+  } catch {
+    if (check === connectionCheck) {
+      document.querySelector('#connection-notice').hidden = false;
+      status.textContent = 'Offline · Saved company browsing is available.';
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 window.addEventListener('online', () => { connectionState(); checkUpdates(true); });
 window.addEventListener('offline', connectionState);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checkUpdates(); });
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { connectionState(); checkUpdates(); }
+});
 checkButton.addEventListener('click', () => checkUpdates(true));
 connectionState();
 
