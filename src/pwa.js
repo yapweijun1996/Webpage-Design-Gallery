@@ -44,7 +44,7 @@ async function offerUpdate(worker) {
     applyButton.textContent = 'Update to ' + label(release);
     notice.hidden = false;
     chrome.classList.remove('is-hidden');
-    status.textContent = 'Update available · ' + label(current) + ' → ' + label(release);
+    status.textContent = 'Update available · ' + label(current) + ' to ' + label(release);
   } catch {
     status.textContent = 'An update was detected, but its version is unavailable. Check again shortly.';
   }
