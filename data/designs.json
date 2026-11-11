@@ -231,5 +231,44 @@
       "mobile"
     ],
     "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v10",
+    "companyId": "gjh",
+    "slug": "v10",
+    "version": "v10",
+    "title": "Virtual Stores 3D",
+    "description": "Explore New Moon, MILI and GOGO in a real 3D scene rendered locally with Three.js, with camera-driven store navigation and an accessible list alternative.",
+    "styles": [
+      "immersive",
+      "heritage"
+    ],
+    "status": "concept",
+    "order": 70,
+    "demoPath": "demos/corporate/gjh/v10/index.html",
+    "thumbnail": "demos/corporate/gjh/v10/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v10/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v10/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v10/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
   }
 ]

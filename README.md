@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **one company and five designs**. All concepts are unofficial and do not imply company endorsement.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **one company and seven designs**. All concepts are unofficial and do not imply company endorsement.
 
 ## Browse
 
@@ -9,7 +9,7 @@ A company-first design exploration platform. Browse companies, enter a company c
 - `/companies/gjh/index.html`: GJH's design collection, style filters and two-design comparison selection.
 - `/designs/index.html?company=gjh&design=v6`: design details and captured desktop/tablet/mobile screenshots.
 - `/compare/index.html?company=gjh&left=v5&right=v7`: two live previews or screenshots, device widths, optional relative scroll synchronization, and fullscreen preview where supported.
-- Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/`, `v7/` and `v8/` URLs are preserved.
+- Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/`, `v7/`, `v8/` and `v9/` URLs are preserved; `v10/` adds a real 3D store arcade.
 
 ## Local development
 
@@ -38,6 +38,7 @@ python scripts/build_gallery.py --check
 python -m unittest discover -s tests -p test_gallery.py -v
 python tests/browser_gallery.py
 python tests/browser_gjh_demos.py
+python tests/browser_gjh_v10.py
 python tests/browser_pwa.py
 ```
 
@@ -64,3 +65,8 @@ The curated [GJH / New Moon source-verified library](assets/companies/gjh/offici
 ## GJH V8 candidate
 
 [Generations of Goodness](demos/corporate/gjh/v8/README.md) adds a forest-green/gold/ivory immersive direction with seven scenes, a disclosed AI-created family illustration, verified brand artwork, 2.5D layers and an accessible schematic network. The existing four versions and deployment configuration are preserved. See the [V8 logic and motion contract](demos/corporate/gjh/v8/logic.md) and [local candidate review](docs/gjh-v8-review.md) for evidence, limits and release status.
+
+## GJH V10 — Virtual Stores 3D
+
+[Virtual Stores 3D](demos/corporate/gjh/v10/README.md) connects three real, low-poly rooms through a warm evening arcade. The self-contained local Three.js ES module is the only vendored dependency; the gallery generator includes demo `vendor/` files in the static publication artifact. Waypoint travel, bounded drag look and verified product raycasts have keyboard-accessible DOM alternatives. The complete HTML store list survives JavaScript/WebGL failure. Run `python tests/browser_gjh_v10.py --capture` to refresh only v10's lobby screenshots and thumbnail; interior review captures stay in a temporary directory. Physical-phone frame rate is unverified.
+

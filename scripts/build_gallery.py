@@ -147,6 +147,9 @@ def runtime_resources(catalog):
         directory = Path(design["demoPath"]).parent
         resources.update(directory / name for name in ("index.html", "style.css", "script.js"))
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
+        vendor = ROOT / directory / "vendor"
+        if vendor.is_dir():
+            resources.update(p.relative_to(ROOT) for p in vendor.iterdir() if p.is_file())
         resources.update(Path(s["path"]) for s in design["screenshots"].values())
     return sorted(resources)
 
