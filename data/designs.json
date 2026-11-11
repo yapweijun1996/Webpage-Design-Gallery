@@ -212,17 +212,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v9/screenshots/1440.png",
         "width": 1440,
-        "height": 1085
+        "height": 1151
       },
       "tablet": {
         "path": "demos/corporate/gjh/v9/screenshots/768.png",
         "width": 768,
-        "height": 1109
+        "height": 1175
       },
       "mobile": {
         "path": "demos/corporate/gjh/v9/screenshots/390.png",
         "width": 390,
-        "height": 978
+        "height": 946
       }
     },
     "devices": [
