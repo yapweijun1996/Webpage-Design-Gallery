@@ -22,7 +22,7 @@ New Moon shows four official eShop packshots with their individual sizes and mat
 
 Asset origins, local copies and icon catalog references are recorded in `assets/sources.json`. Official logos are separate from brand-cover artwork; original covers and packshots remain unchanged. The scene uses semantic HTML and layered CSS, not WebGL, a canvas or a 3D dependency.
 
-The street signs share warm-ivory plates with thin gold borders. CSS frames the original logo marks at roughly 70% of each plate's width without modifying the verified files. All facades share a floor baseline; decorative door numbers are omitted. The headline, lantern and fully visible moon occupy separate safe zones at desktop, tablet and mobile widths.
+The street signs share warm-ivory plates with thin gold borders. MILI and GOGO logos stay at or below half their verified 319px and 318px source widths, are centred, and use automatic image rendering; the brand-room panels use the same restrained logo scale and plate treatment. The original logo files remain untouched.
 
 A single quiet disclaimer sits directly below the artwork. The floor plan occupies a separate navigation bar, never the scene: Street, New Moon, MILI and GOGO form one four-button row, with the live current location above it on mobile. The footer retains only the official eShop link.
 

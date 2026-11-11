@@ -211,18 +211,18 @@
     "screenshots": {
       "desktop": {
         "path": "demos/corporate/gjh/v9/screenshots/1440.png",
-        "width": 1440,
-        "height": 1151
+        "width": 2880,
+        "height": 1776
       },
       "tablet": {
         "path": "demos/corporate/gjh/v9/screenshots/768.png",
-        "width": 768,
-        "height": 1175
+        "width": 1536,
+        "height": 1824
       },
       "mobile": {
         "path": "demos/corporate/gjh/v9/screenshots/390.png",
-        "width": 390,
-        "height": 946
+        "width": 780,
+        "height": 1368
       }
     },
     "devices": [

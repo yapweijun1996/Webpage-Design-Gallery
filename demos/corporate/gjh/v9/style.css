@@ -363,19 +363,14 @@ button svg {
 }
 .shop-sign img {
   width:100%;
+  max-width:159px;
   height:auto;
   flex-shrink:0;
+  image-rendering:auto;
   mix-blend-mode:multiply;
 }
-/* Frame the marks, not the whitespace in the untouched official JPEGs. */
-.facade-mili .shop-sign img {
-  width:208%;
-  max-width:none;
-}
-.facade-gogo .shop-sign img {
-  width:167%;
-  max-width:none;
-}
+/* Keep the original JPEGs below half their 319/318px native width. */
+ 
 .awning {
   position:absolute;
   left:-9px;
@@ -740,11 +735,15 @@ button svg {
   box-shadow:15px 15px 0 #0a291f,0 20px 30px #0004;
 }
 .brand-plinth img {
-  height:65px;
-  width:100%;
+  display:block;
+  width:min(100%,159px);
+  height:auto;
+  margin:0 auto;
   object-fit:contain;
-  background:#fff;
+  background:var(--cream);
+  border:1px solid var(--gold);
   padding:8px;
+  image-rendering:auto;
 }
 .brand-plinth p {
   margin-top:20px;
