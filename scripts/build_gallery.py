@@ -223,7 +223,8 @@ def build(output=ROOT, check=False):
         for name, text in pages.items():
             target = output / name
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(text, encoding="utf-8", newline="\n")
+            with target.open("w", encoding="utf-8", newline="\n") as page_file:
+                page_file.write(text)
         if output.resolve() != ROOT:
             # Publish only the gallery and known demo runtime resources, never research downloads.
             for name in runtime_resources(catalog):
