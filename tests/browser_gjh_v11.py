@@ -37,6 +37,18 @@ def targets(page):
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
 
 
+def mobile_hud(page):
+    overlaps = page.locator('.site-header,#keyboard-help,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt').evaluate_all('''els => {
+      const visible=els.map(el=>({name:el.id || el.className,rect:el.getBoundingClientRect()}))
+        .filter(({rect:r})=>r.width && r.height);
+      return visible.flatMap((a,i)=>visible.slice(i+1).filter(b=>
+        a.rect.left<b.rect.right && a.rect.right>b.rect.left &&
+        a.rect.top<b.rect.bottom && a.rect.bottom>b.rect.top
+      ).map(b=>[a.name,b.name]));
+    }''')
+    assert not overlaps, overlaps
+
+
 def state(page):
     return page.evaluate('window.__mall.state')
 
@@ -70,16 +82,19 @@ def run(capture=False):
                         page.goto(url); page.wait_for_function('window.__mall?.ready && window.__sceneReady')
                         page.evaluate('__mall.setInput({})')
                         initial = state(page); assert initial['drawCalls'] <= 200, initial
+                        draw_calls = {'atrium': initial['drawCalls']}
                         assert initial['pixelRatio'] <= (1.5 if width<600 else 2)
                         targets(page)
                         if width == 390:
                             mall_map = page.locator('#mall-map')
+                            mobile_hud(page)
                             assert not mall_map.evaluate('el=>el.open')
                             page.locator('#keyboard-help summary').click()
                             page.locator('#mall-map summary').click()
                             page.wait_for_function('!document.querySelector("#keyboard-help").open')
                             assert mall_map.evaluate('el=>el.open')
                             targets(page)
+                            mobile_hud(page)
                             # Full labels must fit within distinct, usable store targets.
                             assert page.locator('.map-store-button').evaluate_all('''els=>els.every(el=>{
                               const range=document.createRange();range.selectNodeContents(el);
@@ -122,6 +137,7 @@ def run(capture=False):
                         moved = drive(page, 800, right=1)
                         assert moved['x'] > before['x'] + 1.7 and moved['animation']=='walk', moved
                         page.screenshot(path=str(review / f'walking-{width}.png'), scale='css')
+                        draw_calls['walking'] = moved['drawCalls']
                         ran = drive(page, 300, right=1, run=True)
                         assert ran['animation']=='run' and ran['x'] > moved['x']+1.2, ran
                         # Repeated high-speed steps cannot tunnel through the outer wall.
@@ -144,6 +160,7 @@ def run(capture=False):
                             # Enter through a real opening; then strafe around the gathering table.
                             inside = drive(page, 1500, forward=1)
                             assert inside['zone']==zone and inside['z'] < -.5, inside
+                            draw_calls[zone] = inside['drawCalls']
                             page.screenshot(path=str(review / f'{zone}-{width}.png'), scale='css')
                             if zone == 'newmoon':
                                 drive(page, 300, right=-1)
@@ -162,6 +179,8 @@ def run(capture=False):
                             page.keyboard.press('Tab')
                             assert page.locator('#product-dialog').evaluate('el=>el.contains(document.activeElement)')
                             targets(page)
+                            if width == 390:
+                                mobile_hud(page)
                             page.screenshot(path=str(review / f'{zone}-panel-{width}.png'), scale='css')
                             page.keyboard.press('Escape'); assert not page.locator('#product-dialog').is_visible()
                         # Drag camera changes orbit without moving the player.
@@ -174,7 +193,8 @@ def run(capture=False):
                         page.locator('#view-toggle').click(); assert page.locator('#scene').is_visible()
                         assert not errors, errors
                         assert not external, external
-                        evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'walkingCollisionDoorsInspection':'PASS', 'errors':errors})
+                        assert max(draw_calls.values()) <= 200, draw_calls
+                        evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'errors':errors})
                         context.close()
                     context = browser.new_context(reduced_motion='reduce')
                     page = context.new_page(); page.goto(url); page.wait_for_function('window.__mall?.ready')

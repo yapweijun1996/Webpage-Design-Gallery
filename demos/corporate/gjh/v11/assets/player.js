@@ -8,14 +8,24 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   avatar.rotation.y = Math.PI;
   const visual = new T.Group(); visual.add(avatar); scene.add(visual);
   const contact = new T.Mesh(contactPlane, contactMaterial);
-  contact.rotation.x = -Math.PI / 2; contact.scale.set(1.35, 1, 1); scene.add(contact);
+  contact.rotation.x = -Math.PI / 2; contact.scale.set(1.55, 1.12, 1); scene.add(contact);
+  // A view-space edge fill separates the original mesh without extra geometry,
+  // shadow passes, or a light that spills onto the surrounding architecture.
+  const shopperRim = shader => {
+    shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', `
+      float shopperRim = 1.0 - max(dot(normal, normalize(vViewPosition)), 0.0);
+      shopperRim = smoothstep(0.28, 1.0, shopperRim);
+      outgoingLight += vec3(0.09, 0.13, 0.12) * shopperRim;
+      #include <opaque_fragment>
+    `);
+  };
   avatar.traverse(object => {
     if (!object.isMesh) return;
     object.castShadow = true; object.receiveShadow = true;
     // A restrained, texture-matched fill keeps the back readable in shop shadows.
     const material = object.material;
-    material.emissive.setHex(0xffffff); material.emissiveMap = material.map; material.emissiveIntensity = .075;
-    material.roughness = .9;
+    material.emissive.setHex(0xffffff); material.emissiveMap = material.map; material.emissiveIntensity = .1;
+    material.roughness = .88; material.onBeforeCompile = shopperRim;
   });
   // These rigid, T-pose arms have no elbow joints. Shorten their reach slightly
   // at the shoulder so lowered hands clear the shoes without lifting the avatar.
@@ -43,11 +53,11 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       const drop = side === 'left' ? -1 : 1;
       for (let frame = 0; frame < arm.times.length; frame++) {
         const time = arm.times[frame];
-        let swing = -.045, rest = 1.12;
+        let swing = -.065, rest = state === 'run' ? 1.21 : 1.28;
         if (stride) {
           const rotation = stride.evaluate(time);
           const legAngle = 2 * Math.atan2(rotation[0] * (rotation[3] < 0 ? -1 : 1), Math.abs(rotation[3]));
-          swing -= legAngle * (state === 'run' ? .62 : .52);
+          swing -= legAngle * (state === 'run' ? .58 : .44);
         } else if (!reducedMotion.matches) {
           const breath = Math.sin(time / clip.duration * Math.PI * 2);
           swing += breath * .012; rest += breath * .018;
@@ -58,14 +68,16 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     actions[state] = mixer.clipAction(clip);
   }
-  let animation = 'idle'; actions.idle.play(); actions.idle.paused = reducedMotion.matches; mixer.update(0);
+  const animationStates = ['idle', 'walk', 'run'], animationActions = animationStates.map(state => actions[state]);
+  for (let i = 0; i < animationActions.length; i++) animationActions[i].setEffectiveWeight(i === 0 ? 1 : 0).play();
+  let animation = 'idle'; actions.idle.paused = reducedMotion.matches; mixer.update(0);
   const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(-2, .89, 12));
   const capsule = physics.createCollider(R.ColliderDesc.capsule(.55, .3).setFriction(0), body);
   const controller = physics.createCharacterController(.025);
   controller.enableAutostep(.2, .28, true); controller.enableSnapToGround(.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
-  let yaw = 0, pitch = .13, drag = null, stickPointer = null;
+  let yaw = 0, pitch = .1, drag = null, stickPointer = null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
   const ray = new R.Ray({x: 0, y: 0, z: 0}, {x: 0, y: 0, z: -1});
@@ -125,7 +137,22 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     next.x = position.x + corrected.x; next.y = position.y + corrected.y; next.z = position.z + corrected.z; body.setNextKinematicTranslation(next);
     const walking = Math.hypot(corrected.x, corrected.z) > .001;
     const state = walking ? running ? 'run' : 'walk' : 'idle';
-    if (state !== animation) { actions[animation].fadeOut(.18); actions[state].reset().fadeIn(.18).play(); animation = state; }
+    if (state !== animation) {
+      // Keep footfall phase when changing pace; blend from current weights so
+      // quick starts and stops never restart a half-finished fade at full weight.
+      if (state !== 'idle') {
+        actions[state].time = animation === 'idle' ? 0
+          : actions[animation].time / actions[animation].getClip().duration * actions[state].getClip().duration;
+      }
+      animation = state;
+    }
+    const blend = 1 - Math.exp(-10 * dt);
+    for (let i = 0; i < animationActions.length; i++) {
+      const action = animationActions[i], weight = animationStates[i] === state ? 1 : 0;
+      if (action.getEffectiveWeight() === weight) continue;
+      const nextWeight = T.MathUtils.lerp(action.getEffectiveWeight(), weight, blend);
+      action.setEffectiveWeight(Math.abs(weight - nextWeight) < .001 ? weight : nextWeight);
+    }
     if (walking) {
       const angle = Math.atan2(-dx, -dz), delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
       visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
@@ -135,7 +162,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function sync() {
     const p = body.translation(); visual.position.set(p.x, p.y - .875, p.z);
-    contact.position.set(p.x, Math.max(.052, p.y - .823), p.z);
+    // Clear the visual floor/rug inlays as well as the physical walking slab.
+    contact.position.set(p.x, Math.max(.05, p.y - .83), p.z);
+    contact.rotation.z = visual.rotation.y;
   }
   function constrain(point) {
     direction.copy(point).sub(target); const distance = direction.length(); if (!distance) return;
@@ -145,8 +174,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (hit) point.copy(target).addScaledVector(direction, Math.max(.18, hit.timeOfImpact - .32));
   }
   function updateCamera(dt, instant = false) {
-    sync(); target.copy(visual.position); target.y += 1.32;
-    const distance = canvas.clientWidth < 600 ? 5.7 : 6.8;
+    sync(); target.copy(visual.position); target.y += 1.24;
+    const distance = canvas.clientWidth < 600 ? 5.5 : 6.5;
     offset.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(distance);
     desired.copy(target).add(offset); constrain(desired);
     if (instant) camera.position.copy(desired); else camera.position.lerp(desired, 1 - Math.exp(-12 * dt));
@@ -155,7 +184,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function teleport(zone) {
     const destinations = {atrium: [-2, 12], newmoon: [-10, 2.4], mili: [0, 2.4], gogo: [10, 2.4]};
     if (!destinations[zone]) return false;
-    const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .13; visual.rotation.y = 0; clearInput();
+    const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }
