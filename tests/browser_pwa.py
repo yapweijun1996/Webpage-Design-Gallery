@@ -132,9 +132,19 @@ def run():
                 assert not online_errors, online_errors
                 evidence["checks"]["responsiveSafeAreaCSSReducedMotionSmartHeaderScrollTop"] = "PASS"
                 context.set_offline(True)
+                # Chromium may fail offline fetches while leaving navigator.onLine true.
+                page.add_init_script(
+                    "if (sessionStorage.getItem('gallery-test-offline') === '1') "
+                    "Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })"
+                )
+                page.evaluate("sessionStorage.setItem('gallery-test-offline', '1')")
                 assert page.evaluate("fetch('network-probe').then(() => false).catch(() => true)")
                 page.reload(wait_until="networkidle")
                 assert page.locator(".design-card").count() == len(catalog["designs"])
+                page.wait_for_function(
+                    "() => document.querySelector('#connection-notice')?.hidden === false",
+                    timeout=5000,
+                )
                 assert page.locator("#connection-notice").is_visible()
                 page.select_option("#style-filter", "minimal")
                 assert page.locator(".design-card:visible").count() == 1
@@ -146,6 +156,7 @@ def run():
                 page.wait_for_url("**/offline.html")
                 assert page.get_by_role("heading", name="This preview needs a connection.").is_visible()
                 evidence["checks"]["offlineLaunchSearchFiltersAndExplicitDemoFallback"] = "PASS"
+                page.evaluate("sessionStorage.removeItem('gallery-test-offline')")
                 context.set_offline(False)
                 page.goto(base + "companies/gjh/index.html?review=keep", wait_until="networkidle")
                 page.evaluate("caches.open('other-app-sentinel')")
