@@ -72,6 +72,25 @@ def run(capture=False):
                         initial = state(page); assert initial['drawCalls'] <= 200, initial
                         assert initial['pixelRatio'] <= (1.5 if width<600 else 2)
                         targets(page)
+                        if width == 390:
+                            mall_map = page.locator('#mall-map')
+                            assert not mall_map.evaluate('el=>el.open')
+                            page.locator('#keyboard-help summary').click()
+                            page.locator('#mall-map summary').click()
+                            page.wait_for_function('!document.querySelector("#keyboard-help").open')
+                            assert mall_map.evaluate('el=>el.open')
+                            targets(page)
+                            # Full labels must fit within distinct, usable store targets.
+                            assert page.locator('.map-store-button').evaluate_all('''els=>els.every(el=>{
+                              const range=document.createRange();range.selectNodeContents(el);
+                              const text=range.getBoundingClientRect(),box=el.getBoundingClientRect();
+                              return text.left>=box.left && text.right<=box.right &&
+                                text.top>=box.top && text.bottom<=box.bottom;
+                            })''')
+                            page.screenshot(path=str(review / 'map-390.png'), scale='css')
+                            page.keyboard.press('Escape')
+                            assert not mall_map.evaluate('el=>el.open')
+                            assert page.locator('#mall-map summary').evaluate('el=>el===document.activeElement')
                         page.screenshot(path=str(review / f'atrium-{width}.png'), scale='css')
                         if capture:
                             (DEMO / 'screenshots').mkdir(exist_ok=True)
@@ -113,7 +132,11 @@ def run(capture=False):
                         drive(page, 100)
                         assert state(page)['animation']=='idle'
                         for zone in ('newmoon', 'mili', 'gogo'):
+                            if width == 390:
+                                page.locator('#mall-map summary').click()
                             page.locator(f'[data-teleport="{zone}"]').click()
+                            if width == 390:
+                                assert not page.locator('#mall-map').evaluate('el=>el.open')
                             page.evaluate('__mall.setInput({})')
                             assert abs(state(page)['x']-{'newmoon':-10,'mili':0,'gogo':10}[zone])<.05
                             opened = drive(page, 400)

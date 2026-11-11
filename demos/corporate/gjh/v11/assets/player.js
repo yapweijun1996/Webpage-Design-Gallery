@@ -3,20 +3,62 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   const gltf = await new GLTFLoader().loadAsync('assets/shopper.glb');
   const avatar = gltf.scene;
   const bounds = new T.Box3().setFromObject(avatar), height = bounds.max.y - bounds.min.y;
-  avatar.scale.setScalar(1.72 / height); avatar.position.y = -bounds.min.y * avatar.scale.y;
+  avatar.scale.setScalar(1.65 / height); avatar.position.y = -bounds.min.y * avatar.scale.y;
   // The loaded skinned character presents its face along +Z; locomotion uses -Z.
   avatar.rotation.y = Math.PI;
   const visual = new T.Group(); visual.add(avatar); scene.add(visual);
   const contact = new T.Mesh(contactPlane, contactMaterial);
   contact.rotation.x = -Math.PI / 2; contact.scale.set(1.35, 1, 1); scene.add(contact);
-  avatar.traverse(object => { if (object.isMesh) { object.castShadow = true; object.receiveShadow = true; } });
+  avatar.traverse(object => {
+    if (!object.isMesh) return;
+    object.castShadow = true; object.receiveShadow = true;
+    // A restrained, texture-matched fill keeps the back readable in shop shadows.
+    const material = object.material;
+    material.emissive.setHex(0xffffff); material.emissiveMap = material.map; material.emissiveIntensity = .075;
+    material.roughness = .9;
+  });
+  // These rigid, T-pose arms have no elbow joints. Shorten their reach slightly
+  // at the shoulder so lowered hands clear the shoes without lifting the avatar.
+  avatar.getObjectByName('arm-left').scale.x = .86;
+  avatar.getObjectByName('arm-right').scale.x = .86;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const armPose = new T.Euler(0, 0, 0, 'XYZ'), armRotation = new T.Quaternion(), neutralRotation = new T.Quaternion();
   const mixer = new T.AnimationMixer(avatar), actions = {};
   for (const [state, clipName] of Object.entries({idle: 'idle', walk: 'walk', run: 'sprint'})) {
     const clip = gltf.animations.find(clip => clip.name === clipName);
     if (!clip) throw new Error(`Character animation missing: ${clipName}`);
+    // Bake the shoulder correction once; the mixer still owns all blending.
+    // The source clips splay the arms 30–60 degrees and swing around local Y.
+    // Counter the same-side leg's sagittal motion, with a relaxed arm drop.
+    for (const side of ['left', 'right']) {
+      const arm = clip.tracks.find(track => track.name === `arm-${side}.quaternion`);
+      const leg = clip.tracks.find(track => track.name === `leg-${side}.quaternion`);
+      if (leg) {
+        // Keep the source gait, but avoid the rigid legs' exaggerated high kick.
+        for (let frame = 0; frame < leg.times.length; frame++) {
+          armRotation.fromArray(leg.values, frame * 4).slerp(neutralRotation, state === 'run' ? .2 : .4).toArray(leg.values, frame * 4);
+        }
+      }
+      const stride = leg?.createInterpolant(new Float32Array(4));
+      const drop = side === 'left' ? -1 : 1;
+      for (let frame = 0; frame < arm.times.length; frame++) {
+        const time = arm.times[frame];
+        let swing = -.045, rest = 1.12;
+        if (stride) {
+          const rotation = stride.evaluate(time);
+          const legAngle = 2 * Math.atan2(rotation[0] * (rotation[3] < 0 ? -1 : 1), Math.abs(rotation[3]));
+          swing -= legAngle * (state === 'run' ? .62 : .52);
+        } else if (!reducedMotion.matches) {
+          const breath = Math.sin(time / clip.duration * Math.PI * 2);
+          swing += breath * .012; rest += breath * .018;
+        }
+        armPose.set(swing, 0, drop * rest);
+        armRotation.setFromEuler(armPose).toArray(arm.values, frame * 4);
+      }
+    }
     actions[state] = mixer.clipAction(clip);
   }
-  let animation = 'idle'; actions.idle.play();
+  let animation = 'idle'; actions.idle.play(); actions.idle.paused = reducedMotion.matches; mixer.update(0);
   const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(-2, .89, 12));
   const capsule = physics.createCollider(R.ColliderDesc.capsule(.55, .3).setFriction(0), body);
   const controller = physics.createCharacterController(.025);
@@ -88,11 +130,12 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       const angle = Math.atan2(-dx, -dz), delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
       visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
     }
+    actions.idle.paused = reducedMotion.matches;
     mixer.update(dt);
   }
   function sync() {
     const p = body.translation(); visual.position.set(p.x, p.y - .875, p.z);
-    contact.position.set(p.x, Math.max(.025, p.y - .85), p.z);
+    contact.position.set(p.x, Math.max(.052, p.y - .823), p.z);
   }
   function constrain(point) {
     direction.copy(point).sub(target); const distance = direction.length(); if (!distance) return;

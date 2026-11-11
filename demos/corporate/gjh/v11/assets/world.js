@@ -6,6 +6,8 @@ export async function createWorld(T, R, physics, shadows) {
   const mat = (color, extra = {}) => new T.MeshStandardMaterial({color, roughness: .72, ...extra});
   const materials = {
     jade: mat(0x21483e, {roughness: .24, metalness: .22}), jadeAlt: mat(0x244c42, {roughness: .28, metalness: .18}),
+    courtStone: mat(0x49665b, {roughness: .32, metalness: .16}),
+    rugSand: mat(0x8c8063, {roughness: 1}), rugSage: mat(0x5b6d58, {roughness: 1}),
     green: mat(0x153c30), dark: mat(0x0c2923), ivory: mat(0xe3d6b7), cream: mat(0xf5e8cb),
     brass: mat(0xb59b62, {metalness: .68, roughness: .31}), wood: mat(0x6b4931), oak: mat(0xa28055),
     timber: mat(0xa48b67), timberAlt: mat(0xa08763),
@@ -77,6 +79,25 @@ export async function createWorld(T, R, physics, shadows) {
   for (let x = -14; x <= 14; x += 2) for (let z = 1; z <= 17; z += 2) box((x + z) % 4 === 1 ? 'jade' : 'jadeAlt', x, -.005, z, 1.99, .04, 1.99);
   for (const x of [-14.6, -5, 5, 14.6]) box('brass', x, .022, 9, .025, .012, 17.8);
   for (const z of [.6, 4, 11.5, 17.3]) box('brass', 0, .023, z, 29.3, .012, .025);
+  // A shallow stone-and-brass promenade gives the arrival view a designed foreground.
+  // These inlays are visual only: the continuous collision slab stays unchanged.
+  box('courtStone', 0, .026, 13.8, 8.4, .012, 5.8);
+  for (const x of [-4.23, 4.23]) box('brass', x, .037, 13.8, .055, .008, 5.91);
+  for (const z of [10.87, 16.73]) box('brass', 0, .037, z, 8.51, .008, .055);
+  for (const x of [-3.98, 3.98]) box('dark', x, .037, 13.8, .025, .008, 5.36);
+  for (const z of [11.13, 16.47]) box('dark', 0, .037, z, 7.98, .008, .025);
+  for (const radius of [1.15, 1.55]) {
+    for (const side of [-1, 1]) for (const end of [-1, 1]) {
+      solid('box', 'brass', side * radius / 2, .039, 13.6 + end * radius / 2, radius * Math.SQRT2, .008, .035, side * end * Math.PI / 4);
+    }
+  }
+  for (const side of [-1, 1]) {
+    box('brass', side * 2.9, .039, 13.6, 1.6, .008, .035);
+    for (const z of [11.8, 15.8]) {
+      solid('box', 'brass', side * 2.9, .039, z, .34, .008, .34, Math.PI / 4);
+      solid('box', 'jade', side * 2.9, .045, z, .25, .004, .25, Math.PI / 4);
+    }
+  }
   box('green', -15, 3.3, 3.5, .3, 6.6, 29, true); box('green', 15, 3.3, 3.5, .3, 6.6, 29, true);
   box('green', 0, 3.3, 18, 30, 6.6, .3, true);
   box('ivory', 0, 6.5, 9, 30, .3, 18);
@@ -121,6 +142,26 @@ export async function createWorld(T, R, physics, shadows) {
     }
     box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
     box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
+    // Layered skirting and cornices add depth without moving the walls or artwork.
+    for (const side of [-1, 1]) {
+      box('oak', x + side * 4.665, .13, -5.25, .055, .2, 10.15);
+      box('brass', x + side * 4.63, .245, -5.25, .025, .025, 10.15);
+      box('oak', x + side * 4.65, 5.37, -5.25, .09, .16, 10.15);
+      box('brass', x + side * 4.59, 5.26, -5.25, .025, .025, 10.15);
+    }
+    box('oak', x, .13, -10.33, 9.3, .16, .06);
+    box('oak', x, 5.37, -10.31, 9.3, .16, .09);
+    box('brass', x, 5.26, -10.25, 9.3, .025, .025);
+    // Flat woven fields sit above the timber; no raised collision or blocked thresholds.
+    const rugX = x + (zone === 'newmoon' ? -.35 : 0);
+    const rugZ = zone === 'newmoon' ? -5.1 : -5.9;
+    const rugWidth = zone === 'newmoon' ? 5.2 : 6.8, rugDepth = zone === 'newmoon' ? 5.4 : 4.8;
+    box('oak', rugX, .025, rugZ, rugWidth, .012, rugDepth);
+    box(zone === 'gogo' ? 'rugSage' : 'rugSand', rugX, .034, rugZ, rugWidth - .14, .006, rugDepth - .14);
+    for (const side of [-1, 1]) {
+      box('timber', rugX + side * (rugWidth / 2 - .19), .04, rugZ, .025, .004, rugDepth - .35);
+      box('timber', rugX, .04, rugZ + side * (rugDepth / 2 - .19), rugWidth - .35, .004, .025);
+    }
     box('brass', x, .03, .25, 4.7, .025, .7);
     const logo = zone === 'newmoon' ? 'new-moon-logo.svg' : `${zone}-logo.jpg`;
     box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05); art(logo, x, 4.67, .4, 2.2);

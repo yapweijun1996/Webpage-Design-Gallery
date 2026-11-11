@@ -13,6 +13,19 @@ export function createUI() {
   const inspectButton = document.getElementById('inspect');
   const nearbyName = document.getElementById('nearby-name');
   const help = document.getElementById('keyboard-help');
+  const mallMap = document.getElementById('mall-map');
+  const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
+  const resetMap = () => { mallMap.open = !compactMap.matches; };
+  resetMap();
+  compactMap.addEventListener('change', resetMap);
+  mallMap.addEventListener('toggle', () => { if (compactMap.matches && mallMap.open) help.open = false; });
+  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; });
+  mallMap.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && compactMap.matches && mallMap.open) {
+      mallMap.open = false;
+      mallMap.querySelector('summary').focus();
+    }
+  });
   const dialog = document.getElementById('product-dialog');
   const closeButton = document.getElementById('product-close');
   const productTitle = document.getElementById('product-title');
@@ -115,6 +128,7 @@ export function createUI() {
     button.addEventListener('click', () => {
       if (!showing3D || dialog.open) return;
       help.open = false;
+      if (compactMap.matches) mallMap.open = false;
       teleportListener?.(button.dataset.teleport);
       announce(`At the ${zones[button.dataset.teleport]} storefront.`);
       scene.focus({ preventScroll: true });
