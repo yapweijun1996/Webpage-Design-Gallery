@@ -1,0 +1,28 @@
+{
+  "icons": [
+    {
+      "id": "arrow-down",
+      "source": "SVG-Icon-Studio/icons/catalog/arrow-down.svg"
+    },
+    {
+      "id": "arrow-left",
+      "source": "SVG-Icon-Studio/icons/catalog/arrow-left.svg"
+    },
+    {
+      "id": "arrow-right",
+      "source": "SVG-Icon-Studio/icons/catalog/arrow-right.svg"
+    },
+    {
+      "id": "arrow-up",
+      "source": "SVG-Icon-Studio/icons/catalog/arrow-up.svg"
+    },
+    {
+      "id": "arrow-up-right",
+      "source": "SVG-Icon-Studio/icons/catalog/arrow-up-right.svg"
+    },
+    {
+      "id": "info",
+      "source": "SVG-Icon-Studio/icons/catalog/info.svg"
+    }
+  ]
+}
