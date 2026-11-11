@@ -1,0 +1,275 @@
+{
+  "observedAt": "2026-11-11T08:43:42.996738+00:00",
+  "method": "Read-only HTTP and HTML image-reference audit; not a browser or accessibility test.",
+  "versions": [
+    {
+      "version": "v1",
+      "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v1/",
+      "httpStatus": 200,
+      "imageElementCount": 1,
+      "officialLogoReferences": [],
+      "officialProductReferences": [],
+      "assets": [
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v1/assets/hero.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 195620,
+          "sha256": "a82024bc98db93155a6b687c9305f701b62bd64d9952906594a8a61c5c0bc64c"
+        }
+      ]
+    },
+    {
+      "version": "v5",
+      "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/",
+      "httpStatus": 200,
+      "imageElementCount": 8,
+      "officialLogoReferences": [],
+      "officialProductReferences": [],
+      "assets": [
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/hero.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 181334,
+          "sha256": "30553c5c2fb778a7b9b086efaa66ab51d5769dec61048278ae007b4ed4016633"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/food.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 192172,
+          "sha256": "e3730adad53f6fcdce7d26ff7293da809a041157639b6fa1802e1b9c7004f710"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/electronics.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 115696,
+          "sha256": "f54631396ff1c788c64f7948722f5a7422eb1c66046b9494e59c00353fb51747"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/wellness.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 172134,
+          "sha256": "4cdbef1ad01198efdf41f7437143bccbe26759e73d0d1b348c3df63b06275af1"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/newmoon.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 142250,
+          "sha256": "314379d7149d5958bd1eb156aa35610ba85c16317396bc1fb8ef6f61569af450"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/mili.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 167150,
+          "sha256": "1bcfebdad1b6148606c8bbfd0ebd361851eae89e1b6f1a64774f11b43633f252"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/gogo.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 138238,
+          "sha256": "a617ae76897903eb4418b89b7e573f0a022d323f407be57eb7eefcf5f1f47354"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v5/assets/network.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 122672,
+          "sha256": "dde57ea2b92186d8192c4c23584ccc93bdf82557ce1abceec763156c8c652c30"
+        }
+      ]
+    },
+    {
+      "version": "v6",
+      "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/",
+      "httpStatus": 200,
+      "imageElementCount": 11,
+      "officialLogoReferences": [
+        "assets/newmoon-official-logo.jpg",
+        "assets/mili-official-logo.jpg",
+        "assets/gogo-official-logo.jpg"
+      ],
+      "officialProductReferences": [
+        "assets/newmoon-official-product.jpg"
+      ],
+      "assets": [
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/hero.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 181334,
+          "sha256": "30553c5c2fb778a7b9b086efaa66ab51d5769dec61048278ae007b4ed4016633"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/food.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 192172,
+          "sha256": "e3730adad53f6fcdce7d26ff7293da809a041157639b6fa1802e1b9c7004f710"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/electronics.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 115696,
+          "sha256": "f54631396ff1c788c64f7948722f5a7422eb1c66046b9494e59c00353fb51747"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/wellness.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 172134,
+          "sha256": "4cdbef1ad01198efdf41f7437143bccbe26759e73d0d1b348c3df63b06275af1"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/newmoon-official-product.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 101475,
+          "sha256": "5dbf5812f21c195f461066ca1b8e10609ff2d0a3aae3a182457b6473e4390c34"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/newmoon-official-logo.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 3149,
+          "sha256": "cd0913078b3e93dd829fdc9b3421bcb527f5d02db225face42a14e50918917f0"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/mili.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 167150,
+          "sha256": "1bcfebdad1b6148606c8bbfd0ebd361851eae89e1b6f1a64774f11b43633f252"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/mili-official-logo.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 4015,
+          "sha256": "842f5793ddd4da0c51d2a35d210f273c9c082742f10a1a2465b66f5de454ab9d"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/gogo.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 138238,
+          "sha256": "a617ae76897903eb4418b89b7e573f0a022d323f407be57eb7eefcf5f1f47354"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/gogo-official-logo.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 2757,
+          "sha256": "51c2d3354c7271e1c92e34f8bf0509b60d055eda4b3e29b44eede70edd373a77"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v6/assets/network.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 122672,
+          "sha256": "dde57ea2b92186d8192c4c23584ccc93bdf82557ce1abceec763156c8c652c30"
+        }
+      ]
+    },
+    {
+      "version": "v7",
+      "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/",
+      "httpStatus": 200,
+      "imageElementCount": 11,
+      "officialLogoReferences": [
+        "assets/newmoon-official-logo.jpg",
+        "assets/mili-official-logo.jpg",
+        "assets/gogo-official-logo.jpg"
+      ],
+      "officialProductReferences": [
+        "assets/newmoon-official-product.jpg"
+      ],
+      "assets": [
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/hero.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 181334,
+          "sha256": "30553c5c2fb778a7b9b086efaa66ab51d5769dec61048278ae007b4ed4016633"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/food.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 192172,
+          "sha256": "e3730adad53f6fcdce7d26ff7293da809a041157639b6fa1802e1b9c7004f710"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/electronics.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 115696,
+          "sha256": "f54631396ff1c788c64f7948722f5a7422eb1c66046b9494e59c00353fb51747"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/wellness.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 172134,
+          "sha256": "4cdbef1ad01198efdf41f7437143bccbe26759e73d0d1b348c3df63b06275af1"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/newmoon-official-product.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 101475,
+          "sha256": "5dbf5812f21c195f461066ca1b8e10609ff2d0a3aae3a182457b6473e4390c34"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/newmoon-official-logo.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 3149,
+          "sha256": "cd0913078b3e93dd829fdc9b3421bcb527f5d02db225face42a14e50918917f0"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/mili.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 167150,
+          "sha256": "1bcfebdad1b6148606c8bbfd0ebd361851eae89e1b6f1a64774f11b43633f252"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/mili-official-logo.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 4015,
+          "sha256": "842f5793ddd4da0c51d2a35d210f273c9c082742f10a1a2465b66f5de454ab9d"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/gogo.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 138238,
+          "sha256": "a617ae76897903eb4418b89b7e573f0a022d323f407be57eb7eefcf5f1f47354"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/gogo-official-logo.jpg",
+          "httpStatus": 200,
+          "contentType": "image/jpeg",
+          "bytes": 2757,
+          "sha256": "51c2d3354c7271e1c92e34f8bf0509b60d055eda4b3e29b44eede70edd373a77"
+        },
+        {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v7/assets/network.webp",
+          "httpStatus": 200,
+          "contentType": "image/webp",
+          "bytes": 122672,
+          "sha256": "dde57ea2b92186d8192c4c23584ccc93bdf82557ce1abceec763156c8c652c30"
+        }
+      ]
+    }
+  ]
+}

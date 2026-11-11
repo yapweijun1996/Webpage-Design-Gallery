@@ -48,3 +48,5 @@ Pages uses the manually triggered **Deploy demo to GitHub Pages** workflow. Afte
 ## Assets and research
 
 Downloaded third-party research files remain ignored by Git. Official brand assets explicitly used in V6/V7 are included with user-confirmed permission and attributed in those demo READMEs. Other scene images are AI-generated illustrations. The sourced company profile is in `demos/corporate/gjh/research/`. Current commercial relationships and claims should be rechecked before commercial use.
+
+The curated [GJH / New Moon source-verified library](assets/companies/gjh/official/README.md) contains original official files with page-context receipts, timestamps and hashes. It is research input for a future redesign and is not currently included in the Pages build. See the [Brand Research Report](docs/gjh-newmoon-brand-research.md) and [web asset plan](docs/gjh-newmoon-asset-plan.md). Validate the recorded capture with `python scripts/verify_gjh_asset_library.py`.
