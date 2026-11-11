@@ -128,7 +128,7 @@ body[data-view="3d"]:not([data-room="lobby"]) .page-intro h1 { display: none; }
 .site-footer p span { color: var(--gold); }
 .site-footer a { display: inline-flex; align-items: center; }
 
-.product-dialog { width: min(820px, calc(100% - 40px)); max-height: calc(100svh - 40px); padding: 0; border: 1px solid rgb(217 189 128 / 55%); color: var(--ivory); background: var(--forest); box-shadow: 0 28px 100px rgb(0 0 0 / 40%); }
+.product-dialog { width: min(820px, calc(100% - 40px)); max-height: calc(100svh - 40px); padding: 0; border: 1px solid rgb(217 189 128 / 55%); border-radius: 4px; color: var(--ivory); background: var(--forest); box-shadow: 0 28px 100px rgb(0 0 0 / 40%); }
 .product-dialog::backdrop { background: rgb(3 12 9 / 80%); backdrop-filter: blur(7px); }
 .dialog-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 10px 24px; border-bottom: 1px solid var(--line); }
 #product-close { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); background: transparent; }
@@ -176,15 +176,14 @@ body[data-view="3d"]:not([data-room="lobby"]) .page-intro h1 { display: none; }
   .page-intro .eyebrow { font-size: 8px; letter-spacing: .13em; }
   .scene-frame { height: calc(100svh - 70px); min-height: 580px; }
   .scene-edition { display: none; }
-  .scene-controls { gap: 10px 12px; padding: 10px 14px max(12px, env(safe-area-inset-bottom)); }
+  .scene-controls { gap: 7px 12px; padding: 8px 14px max(10px, env(safe-area-inset-bottom)); }
   .room-copy { max-width: 100%; align-self: center; }
   .room-copy .eyebrow { font-size: 8px; }
   .room-copy h2 { font-size: 20px; }
-  .room-copy > p:last-child { display: block; margin-top: 4px; font-size: 9px; line-height: 1.45; }
   .map-rooms { gap: 5px; }
   .map-rooms button { padding: 7px 4px; gap: 4px; font-size: 10px; }
   .room-number { font-size: 8px; }
-  .room-steps { align-self: center; }
+  .room-copy > p:last-child { display: none; }
   .room-steps button { min-width: 44px; padding: 8px 6px; gap: 4px; font-size: 10px; }
   .room-steps svg { width: 15px; height: 15px; }
   .scene-products summary { padding: 18px 22px; }
@@ -212,9 +211,9 @@ body[data-view="3d"]:not([data-room="lobby"]) .page-intro h1 { display: none; }
   .site-footer { align-items: flex-start; flex-direction: column; padding: 20px 22px; gap: 4px; }
   .product-dialog { width: calc(100% - 28px); max-height: calc(100svh - 28px); }
   .dialog-content { grid-template-columns: 1fr; }
-  .dialog-image img { max-height: 250px; }
-  .dialog-copy { padding: 24px; }
-  .dialog-copy h2 { font-size: 26px; }
+  .dialog-image img { max-height: 230px; }
+  .dialog-copy { padding: 22px; }
+  .dialog-copy h2 { font-size: 24px; margin-bottom: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

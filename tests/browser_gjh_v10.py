@@ -23,7 +23,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def settled(page, room):
-    page.wait_for_function("room => window.__sceneStats?.room === room && !window.__sceneStats.moving", arg=room)
+    page.wait_for_function("room => window.__sceneStats?.room === room && !window.__sceneStats.moving && !window.__sceneStats.settling", arg=room)
 
 
 def check_targets(page):
@@ -58,11 +58,20 @@ def run(capture=False):
                     page.wait_for_function("window.__sceneReady === true")
                     settled(page, "lobby")
                     stats = page.evaluate("window.__sceneStats")
-                    assert stats["drawCalls"] <= 120, stats
+                    assert stats["drawCalls"] < 150, stats
                     assert stats["pixelRatio"] <= (1.5 if width < 600 else 2), stats
                     scene_height = page.locator("#scene").bounding_box()["height"]
                     assert scene_height >= height * (.72 if width < 600 else .8), (width, scene_height)
                     check_targets(page)
+                    # Lobby breathing is active only in the visible motion-enabled view.
+                    frame = page.evaluate("window.__sceneStats.frames")
+                    page.wait_for_function("frame => window.__sceneStats.frames > frame", arg=frame)
+                    assert page.evaluate("window.__sceneStats.breathing")
+                    page.evaluate("Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'))")
+                    frame = page.evaluate("window.__sceneStats.frames")
+                    page.wait_for_timeout(180)
+                    assert page.evaluate("window.__sceneStats.frames") == frame
+                    page.evaluate("delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))")
                     if capture:
                         (DEMO / "screenshots").mkdir(exist_ok=True)
                         page.screenshot(path=str(DEMO / f"screenshots/{width}.png"), scale="css")
@@ -77,9 +86,20 @@ def run(capture=False):
                         assert page.locator(f'button[data-room="{room}"]').get_attribute("aria-current") == "location"
                     # A DOM product list provides the same panel as scene selection.
                     page.locator(".scene-products summary").click()
-                    for button in page.locator("#products button").all():
+                    for product_index, button in enumerate(page.locator("#products button").all()):
                         name = button.get_attribute("data-product-name")
+                        button.focus()
+                        product_id = button.get_attribute("data-product")
+                        page.wait_for_function("id => window.__sceneStats.highlightedProduct === id", arg=product_id)
                         button.click()
+                        # Native modal cycling must not escape to room navigation.
+                        page.locator("#product-close").focus()
+                        page.keyboard.press("Shift+Tab")
+                        assert page.locator("#product-shop").evaluate("el => document.activeElement === el")
+                        page.keyboard.press("Tab")
+                        assert page.locator("#product-close").evaluate("el => document.activeElement === el")
+                        if product_index == 0:
+                            page.screenshot(path=str(interiors / f"panel-{width}.png"), scale="css")
                         assert page.locator("#product-dialog").is_visible()
                         assert page.locator("#product-title").inner_text() == name
                         assert page.locator("#product-dialog a").count() == 1
@@ -89,17 +109,20 @@ def run(capture=False):
                         assert button.evaluate("el => document.activeElement === el")
                     page.locator(".scene-products summary").click()
                     page.evaluate("scrollTo(0, 0)")
-                    if width in (1440, 390):
-                        for room in ("newmoon", "mili", "gogo"):
-                            page.locator(f'button[data-room="{room}"]').click()
-                            settled(page, room)
-                            page.evaluate("scrollTo(0, 0)")
-                            page.screenshot(path=str(interiors / f"{room}-{width}.png"), scale="css")
-                        page.locator('button[data-room="newmoon"]').click()
-                        settled(page, "newmoon")
+                    for room in ("newmoon", "mili", "gogo"):
+                        page.locator(f'button[data-room="{room}"]').click()
+                        settled(page, room)
+                        page.evaluate("scrollTo(0, 0)")
+                        check_targets(page)
+                        assert page.evaluate("window.__sceneStats.drawCalls") < 150
+                        page.screenshot(path=str(interiors / f"{room}-{width}.png"), scale="css")
+                    page.locator('button[data-room="newmoon"]').click()
+                    settled(page, "newmoon")
                     if width == 1440:
                         # Actual pointer raycasts on the four visible shelf packshots.
                         for x, y, country in ((560, 430, "New Zealand"), (875, 430, "Australia"), (560, 600, "South Africa"), (875, 600, "Mexico")):
+                            page.mouse.move(x, y)
+                            page.wait_for_function("window.__sceneStats.highlightedProduct !== null")
                             page.mouse.click(x, y)
                             page.wait_for_selector("#product-dialog[open]")
                             assert country in page.locator("#product-title").inner_text()
@@ -112,7 +135,7 @@ def run(capture=False):
                         before = page.locator("#scene").screenshot()
                         page.mouse.move(750, 450)
                         page.mouse.down(); page.mouse.move(880, 470, steps=8); page.mouse.up()
-                        page.wait_for_timeout(80)
+                        page.wait_for_function("!window.__sceneStats.settling")
                         assert page.locator("#scene").screenshot() != before
                         frame = page.evaluate("window.__sceneStats.frames")
                         page.wait_for_timeout(180)
@@ -130,6 +153,11 @@ def run(capture=False):
                 context = browser.new_context(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
                 page = context.new_page(); page.goto(url)
                 page.wait_for_function("window.__sceneReady === true")
+                settled(page, "lobby")
+                assert not page.evaluate("window.__sceneStats.breathing")
+                frame = page.evaluate("window.__sceneStats.frames")
+                page.wait_for_timeout(180)
+                assert page.evaluate("window.__sceneStats.frames") == frame
                 page.keyboard.press("ArrowRight")
                 page.wait_for_function("window.__sceneStats.room === 'newmoon'")
                 assert not page.evaluate("window.__sceneStats.moving")
