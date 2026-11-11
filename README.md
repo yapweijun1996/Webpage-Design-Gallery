@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A collection of independent, interactive webpage design concepts. The first demo is an unofficial Goh Joo Hin corporate landing page; it is not affiliated with or endorsed by the company.
+A collection of independent, interactive webpage design concepts. The gallery includes unofficial Goh Joo Hin corporate landing page concepts; it is not affiliated with or endorsed by the company.
 
 ## Local preview
 
@@ -8,7 +8,7 @@ Run `python -m http.server 8000` from the repository root and open `http://local
 
 ## GitHub Pages
 
-Set the Pages source to GitHub Actions. After the commit is pushed, run **Deploy demo to GitHub Pages** manually from the Actions tab and select `main`. The workflow does not deploy on push. It publishes only the gallery entry page and the GJH V1 demo files; research downloads, screenshots, and documentation are excluded from the Pages artifact.
+Set the Pages source to GitHub Actions. After the commit is pushed, run **Deploy demo to GitHub Pages** manually from the Actions tab and select `main`. The workflow does not deploy on push. It publishes only the gallery entry page and the GJH V1 and V5 demo files; research downloads, screenshots, and documentation are excluded from the Pages artifact.
 
 ## Research assets
 

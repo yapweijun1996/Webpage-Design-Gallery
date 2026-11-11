@@ -29,6 +29,9 @@ jobs:
           cp index.html _site/index.html
           cp demos/corporate/gjh/v1/{index.html,style.css,script.js} _site/demos/corporate/gjh/v1/
           cp demos/corporate/gjh/v1/assets/{hero.webp,thumbnail.webp} _site/demos/corporate/gjh/v1/assets/
+          mkdir -p _site/demos/corporate/gjh/v5/assets
+          cp demos/corporate/gjh/v5/{index.html,style.css,script.js} _site/demos/corporate/gjh/v5/
+          cp demos/corporate/gjh/v5/assets/*.webp _site/demos/corporate/gjh/v5/assets/
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
