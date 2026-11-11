@@ -22,9 +22,15 @@ New Moon shows four official eShop packshots with their individual sizes and mat
 
 Asset origins, local copies and icon catalog references are recorded in `assets/sources.json`. Official logos are separate from brand-cover artwork; original covers and packshots remain unchanged. The scene uses semantic HTML and layered CSS, not WebGL, a canvas or a 3D dependency.
 
+The street signs share warm-ivory plates with thin gold borders. CSS frames the original logo marks at roughly 70% of each plate's width without modifying the verified files. All facades share a floor baseline; decorative door numbers are omitted. The headline, lantern and fully visible moon occupy separate safe zones at desktop, tablet and mobile widths.
+
+A single quiet disclaimer sits directly below the artwork. The floor plan occupies a separate navigation bar, never the scene: Street, New Moon, MILI and GOGO form one four-button row, with the live current location above it on mobile. The footer retains only the official eShop link.
+
 ## Verification — 2026-11-11
 
 Local Chrome / Python Playwright smoke passed at 1440×1000, 768×1024 and 390×844. The three refreshed street captures were visually reviewed. Checks covered keyboard-only entry into every store, the intermediate camera dolly, Back/Escape, all four product dialogs and focus restoration, mini-map state, rapid-navigation cancellation, list switching, image loading, no console errors or external requests, no horizontal overflow and visible controls at least 44×44 CSS pixels. Reduced-motion emulation retained the static depth layers with no running animations; touch emulation exercised CSS drift and its reduced-motion shutdown. The no-JavaScript list and native product disclosure also passed.
+
+The polish smoke additionally checked navigation below the scene, moon containment, headline/lantern separation, aligned facade baselines, one disclaimer in both visual and list modes, and page captures ending at the footer. Final captures at 1440, 768 and 390 were reviewed after refinement; page heights are 1151, 1175 and 946 CSS pixels respectively. The original V9 smoke also exited 0. No asset originals, external links or functional SVG icons changed.
 
 `scripts/build_gallery.py`, `scripts/build_gallery.py --check`, the eight `test_gallery.py` unit tests and `tests/browser_gallery.py` exited 0. Browser suites ran against an identical temporary copy because the legacy runners overwrite unrelated demo captures.
 

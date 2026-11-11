@@ -136,10 +136,16 @@ button svg {
   color:#e5c88f;
 }
 .visual-experience {
+  display:block;
+}
+.world-shell,.street-controls {
   display:none;
 }
-.js.visual-ready[data-view=visual] .visual-experience {
+.js.visual-ready[data-view=visual] .world-shell {
   display:block;
+}
+.js.visual-ready[data-view=visual] .street-controls {
+  display:flex;
 }
 .world-shell {
   overflow:clip;
@@ -285,7 +291,7 @@ button svg {
   box-shadow:0 -12px 0 #263d30,0 -14px 0 #b9a16f66;
 }
 .facades {
-  inset:29% 16% auto;
+  inset:auto 16% 20%;
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:25px;
@@ -316,7 +322,6 @@ button svg {
   right:3px;
 }
 .facade-mili {
-  margin-bottom:12px;
   background:repeating-linear-gradient(0deg,transparent 0 32px,#b7c49c0b 33px 34px),linear-gradient(90deg,#305044,#436357 50%,#27463a);
 }
 .facade-newmoon {
@@ -337,24 +342,45 @@ button svg {
   box-shadow:0 -5px 0 #315142;
 }
 .shop-sign {
-  height:64px;
+  height:clamp(52px,7vw,96px);
   max-width:210px;
-  margin:0 auto 18px;
-  background:#fff;
-  padding:8px 18px;
-  border:4px double #a58e5b;
+  margin:0 auto;
+  background:var(--cream);
+  border:1px solid var(--gold);
   box-shadow:0 0 25px #f9dca626;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  isolation:isolate;
+}
+.sign-art {
+  width:70%;
+  height:90%;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .shop-sign img {
   width:100%;
-  height:100%;
-  object-fit:contain;
+  height:auto;
+  flex-shrink:0;
+  mix-blend-mode:multiply;
+}
+/* Frame the marks, not the whitespace in the untouched official JPEGs. */
+.facade-mili .shop-sign img {
+  width:208%;
+  max-width:none;
+}
+.facade-gogo .shop-sign img {
+  width:167%;
+  max-width:none;
 }
 .awning {
   position:absolute;
   left:-9px;
   right:-9px;
-  top:108px;
+  top:calc(44px + clamp(52px,7vw,96px));
   height:28px;
   background:repeating-linear-gradient(90deg,#dac492 0 22px,#153b2e 22px 44px);
   border-top:3px solid #cfbd8b;
@@ -367,8 +393,8 @@ button svg {
   background:repeating-linear-gradient(90deg,#b9c6ab 0 22px,#315347 22px 44px);
 }
 .shop-window {
-  height:clamp(145px,17vw,235px);
-  margin-top:35px;
+  height:clamp(145px,14vw,210px);
+  margin-top:44px;
   padding:15px 20px 22px;
   background:radial-gradient(ellipse at top,#ffdfa4,#9e8958 70%);
   border:7px solid #0b291f;
@@ -422,25 +448,14 @@ button svg {
 .door-brand {
   font-weight:700;
 }
-.shop-number {
-  position:absolute;
-  left:50%;
-  bottom:-39px;
-  font:11px Georgia,serif;
-  letter-spacing:.1em;
-  color:#dfc99d;
-  background:#1a392d;
-  padding:2px 7px;
-  border:1px solid #a99465;
-}
 .foreground {
   inset:0;
   transform:translateZ(145px) scale(.89);
   pointer-events:none;
 }
 .lantern-near {
-  left:7%;
-  top:21%;
+  left:4%;
+  top:25%;
   width:44px;
   height:65px;
   box-shadow:0 0 70px #f0b84e29;
@@ -495,15 +510,15 @@ button svg {
 .street-title {
   position:absolute;
   z-index:3;
-  top:5%;
-  left:5%;
+  top:4%;
+  left:11%;
   padding:14px 22px 18px;
   background:linear-gradient(90deg,#061d18f5,#061d18e8 85%,#061d18cc);
   border-left:1px solid #bda47088;
   pointer-events:none;
 }
 .street-title h1 {
-  font-size:clamp(30px,3.5vw,51px);
+  font-size:clamp(30px,3.1vw,45px);
   letter-spacing:-.035em;
   margin:10px 0;
   color:#fff3d8;
@@ -515,78 +530,44 @@ button svg {
 .scene-world:not([data-current-room=lobby]) .street-title {
   display:none;
 }
-.scene-caption {
-  position:absolute;
-  left:5%;
-  bottom:28px;
-  z-index:6;
-  display:flex;
+.street-controls {
   align-items:center;
-  gap:10px;
-  background:#061d18ed;
-  padding:12px 15px;
-  border:1px solid #9d8a5a55;
-  min-height:48px;
+  justify-content:space-between;
+  gap:24px;
+  padding:14px 5%;
+  background:var(--deep);
+  border-top:1px solid var(--line);
 }
-.scene-caption p {
+.scene-caption {
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:2px 18px;
+}
+.scene-caption .eyebrow {
+  grid-column:1 / -1;
+  font-size:8px;
+}
+.scene-caption #room-heading {
   font-size:13px;
-}
-.status-light {
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#edce8e;
-  box-shadow:0 0 9px #edce8e88;
 }
 .keyboard-hint {
   font-size:10px;
   color:#d7d7c6;
-  border-left:1px solid var(--line);
-  padding-left:12px;
-  margin-left:5px;
 }
 .mini-map {
-  position:absolute;
-  z-index:6;
-  bottom:24px;
-  right:4%;
-  width:256px;
-  padding:10px 14px;
-  background:#061d18f5;
-  border:1px solid #a68e5e77;
-  box-shadow:0 10px 25px #0002;
-}
-.mini-map>p {
-  font-size:9px;
-  letter-spacing:.17em;
-  text-transform:uppercase;
-  color:#e5c88f;
-  margin-bottom:6px;
+  width:min(420px,50%);
 }
 .map-layout {
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:5px;
-  position:relative;
-}
-.map-layout:after {
-  content:'';
-  position:absolute;
-  inset:auto 16% 22px;
-  height:1px;
-  background:#bda47077;
-  z-index:-1;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
 }
 .map-layout button {
   border:1px solid #a68e5e77;
   background:#12372b;
-  padding:5px 4px;
-  font-size:10px;
-  position:relative;
-}
-.map-layout [data-map-room=lobby] {
-  grid-column:2;
-  background:#08271f;
+  padding:8px 10px;
+  font-size:11px;
 }
 .map-layout button[aria-current] {
   background:#dfc18a;
@@ -595,7 +576,7 @@ button svg {
   font-weight:700;
 }
 .concept-note {
-  min-height:40px;
+  min-height:32px;
   background:#061d18;
   display:flex;
   align-items:center;
@@ -618,9 +599,6 @@ button svg {
 }
 .room-intro .eyebrow {
   color:#fff4dc;
-}
-.scene-world:not([data-current-room=lobby]) .keyboard-hint {
-  display:none;
 }
 .room:after {
   content:'';
@@ -888,7 +866,7 @@ button svg {
   border-top:1px solid var(--line);
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:flex-end;
   gap:20px;
   font-size:10px;
   color:#dcd7c5;
@@ -896,7 +874,7 @@ button svg {
 .js.visual-ready[data-view=visual] .list-view,.js.visual-ready[data-view=visual] .product-panels,.js.visual-ready[data-view=visual] .story-list {
   display:none;
 }
-.js.visual-ready[data-view=list] .visual-experience {
+.js.visual-ready[data-view=list] .world-shell,.js.visual-ready[data-view=list] .street-controls {
   display:none;
 }
 #product-dialog {
@@ -956,15 +934,17 @@ button svg {
 }
 @media(max-width:1000px) {
   .facades {
-    inset:32% 9% auto;
+    inset:auto 9% 20%;
     gap:18px;
   }
   .shop-sign {
-    padding:6px 10px;
-    height:57px;
+    height:80px;
   }
   .awning {
-    top:101px;
+    top:124px;
+  }
+  .moon {
+    top:13%;
   }
   .shop-window {
     padding:12px 8px 23px;
@@ -984,7 +964,7 @@ button svg {
     font-size:42px;
   }
   .street-title {
-    top:5%;
+    top:12%;
   }
   .keyboard-hint {
     display:none;
@@ -1066,13 +1046,13 @@ button svg {
     font-size:11px;
   }
   .scene-world {
-    height:calc(100svh - 116px);
-    min-height:650px;
+    height:calc(100svh - 160px);
+    min-height:600px;
     max-height:none;
   }
   .street-title {
-    left:6%;
-    top:5%;
+    left:9%;
+    top:12%;
     padding:10px 15px 13px;
     max-width:82%;
   }
@@ -1089,8 +1069,8 @@ button svg {
     font-size:10px;
   }
   .moon {
-    right:14%;
-    top:12%;
+    right:24%;
+    top:13%;
     width:39px;
   }
   .trees {
@@ -1101,7 +1081,7 @@ button svg {
     top:33%;
   }
   .facades {
-    inset:35% 5% auto;
+    inset:auto 5% 18%;
     gap:10px;
   }
   .facade {
@@ -1124,20 +1104,17 @@ button svg {
     height:14px;
   }
   .shop-sign {
-    height:43px;
-    padding:4px;
-    border-width:2px;
-    margin-bottom:12px;
+    height:52px;
   }
   .awning {
     left:-4px;
     right:-4px;
-    top:67px;
+    top:78px;
     height:21px;
     background-size:30px;
   }
   .shop-window {
-    margin-top:29px;
+    margin-top:35px;
     height:108px;
     border-width:4px;
     padding:9px 4px 18px;
@@ -1162,15 +1139,8 @@ button svg {
     width:15px;
     height:15px;
   }
-  .shop-number {
-    bottom:-31px;
-    font-size:9px;
-  }
-  .facade-mili {
-    margin-bottom:9px;
-  }
   .street-floor {
-    top:76%;
+    top:82%;
     height:120%;
     left:-60%;
     right:-60%;
@@ -1189,7 +1159,7 @@ button svg {
   .plant {
     width:38px;
     height:60px;
-    bottom:14%;
+    bottom:0;
   }
   .plant-left {
     left:-4%;
@@ -1210,41 +1180,29 @@ button svg {
   .plant i:nth-child(4) {
     height:90px;
   }
-  .mini-map {
-    width:222px;
-    bottom:19px;
-    right:5%;
-    padding:8px 10px;
-  }
-  .mini-map>p {
-    font-size:8px;
-  }
-  .map-layout {
-    gap:4px;
-  }
-  .map-layout button {
-    font-size:9px;
-    min-height:44px;
+  .js.visual-ready[data-view=visual] .street-controls {
+    display:block;
+    padding:12px 20px 16px;
   }
   .scene-caption {
-    left:5%;
-    bottom:22px;
-    padding:10px 8px;
-    min-height:44px;
-    gap:6px;
-    max-width:105px;
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
   }
-  .scene-caption p {
+  .scene-caption #room-heading {
+    font-size:11px;
+  }
+  .mini-map {
+    width:100%;
+  }
+  .map-layout button {
     font-size:10px;
-  }
-  .scene-caption .status-light {
-    width:4px;
-    height:4px;
+    padding:8px 4px;
   }
   .concept-note {
     font-size:9px;
     line-height:1.5;
-    min-height:52px;
+    min-height:32px;
     padding-inline:20px;
   }
   .room {
@@ -1360,8 +1318,8 @@ button svg {
     font-size:23px;
   }
   .site-footer {
-    flex-direction:column;
-    align-items:flex-start;
+    justify-content:center;
+    padding:10px 20px;
     font-size:9px;
   }
   .dialog-bar h2 {

@@ -6,6 +6,8 @@ The visual experience is a progressive enhancement over the store list, native p
 
 The evening street is layered HTML/CSS, not WebGL or full 3D. A `.street-camera` translates and scales around its center; `.street-stage` carries bounded pointer rotation and CSS ambient motion. Storefronts are semantic buttons. The lobby panel represents the street, and only the active room panel is exposed. The mini-map and live room heading describe the panel actually displayed, not a destination still in transit.
 
+The live heading and floor-plan controls remain outside `.scene-world` in a dedicated bar below the artwork and its single disclaimer. The buttons follow visual and keyboard order: Street, New Moon, MILI, GOGO. On mobile the current-location text precedes the four-button row. This keeps map interaction out of the camera transform, storefronts and foreground plants.
+
 ## Navigation and camera
 
 `script.js` owns the active room, pending destination, last entered storefront, travel timer and cancellation version. Entering starts at the neutral street camera, measures the selected facade button with camera/stage transforms temporarily neutralized, and computes its center relative to the scene bounds. Translation percentages compensate for a 2.6 scale with the CSS transform order `translate(...) scale(...)`. After the 850ms dolly, the selected room is revealed and its heading receives focus.
