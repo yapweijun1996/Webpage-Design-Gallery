@@ -1,0 +1,3920 @@
+{
+  "scope": "Public media referenced by HTML of sitemap pages and requested homepage; direct same-site URLs only. No CSS file recursion, third-party assets, scripts, or dynamically loaded resources.",
+  "sitemap": "https://www.gjhglobal.com/page-sitemap.xml",
+  "retrieved_date": "2026-11-11",
+  "page_count": 31,
+  "page_failures": [
+    {
+      "page": "https://www.gjhglobal.com/pian-tze-huang/",
+      "error": "500 Server Error: Internal Server Error for url: https://www.gjhglobal.com/pian-tze-huang/"
+    }
+  ],
+  "assets": [
+    {
+      "url": "https://gjh.creaworld.sg/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "excluded_external_host"
+    },
+    {
+      "url": "https://gjh.creaworld.sg/wp-content/uploads/2023/04/e50.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "excluded_external_host"
+    },
+    {
+      "url": "https://gjh.creaworld.sg/wp-content/uploads/2023/05/reward-thumb.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/gogo-2/"
+      ],
+      "status": "excluded_external_host"
+    },
+    {
+      "url": "https://gjh.creaworld.sg/wp-content/uploads/2023/06/Website-revamp_243-x-96-3.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "excluded_external_host"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "0e9c6bbc12a8-brand-cover-gogo-1.jpg",
+      "sha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "bytes": 20934,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "8295ae806f3c-brand-cover-nm.jpg",
+      "sha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "bytes": 219929,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/genuinity-small-300x131.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "76de76998d16-genuinity-small-300x131.jpg",
+      "sha256": "76de76998d16663c421a78665febb97386512ae819f93fa4a52423b462146cbd",
+      "bytes": 9467,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/genuinity-small-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/genuinity-small.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "09b36de73822-genuinity-small.jpg",
+      "sha256": "09b36de73822f85a0b1ee3f39ecdd51c0a5df302d48be069c91ce3ca5b200b44",
+      "bytes": 15180,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/genuinity-small.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/health-small-300x131.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "a98753928e5b-health-small-300x131.jpg",
+      "sha256": "a98753928e5b3bce1f9dff1fbc53a1fb1c0ab04747facf223e358da6c7e0b0db",
+      "bytes": 7138,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/health-small-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/health-small.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "860476709e61-health-small.jpg",
+      "sha256": "860476709e611e6fcb239f96571cf817124b727c523dad530cb6b2140a5eca78",
+      "bytes": 11677,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/health-small.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/joy-home-300x131.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "e38e4dd2b3ed-joy-home-300x131.jpg",
+      "sha256": "e38e4dd2b3ed0fab6003170754fe557c305d8ff057437fe800b06a51952d6b58",
+      "bytes": 9699,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/joy-home-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/joy-home.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "60879c82b305-joy-home.jpg",
+      "sha256": "60879c82b30598aad1e9e73cf8f5ae0811b8371d698954ba3fa5e7c5608e3fa3",
+      "bytes": 16733,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/07/joy-home.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2022/08/logo-trans.png",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "25202d0cb3e5-logo-trans.png",
+      "sha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "bytes": 14860,
+      "content_type": "image/png",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2022/08/logo-trans.png"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-hormel.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "560443625f66-brand-cover-hormel.jpg",
+      "sha256": "560443625f66690ec781c8109aece8497550b6a9452023a6f251f683a9c97a31",
+      "bytes": 45343,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-hormel.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "b5d43fcc03b4-brand-cover-mili2.jpg",
+      "sha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "bytes": 35812,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-skippy2.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "fb8eea80c28c-brand-cover-skippy2.jpg",
+      "sha256": "fb8eea80c28c3e7560005e227b012edecb0b67ccda275290b1877c37989d12b4",
+      "bytes": 42585,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-skippy2.jpg"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-180x180.png",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "2c78aa2e0488-cropped-gjh-eshop-logo2023-m-180x180.png",
+      "sha256": "2c78aa2e04881c20ee5cdfec3de9f87b9dd6532abf9c08cfccd27c610d868910",
+      "bytes": 11545,
+      "content_type": "image/png",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-180x180.png"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-192x192.png",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "b72a5b324a3a-cropped-gjh-eshop-logo2023-m-192x192.png",
+      "sha256": "b72a5b324a3afe689b62e1df089b5e7998c6fbf365a4d6e77e8c705c6a8be488",
+      "bytes": 12620,
+      "content_type": "image/png",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-192x192.png"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-270x270.png",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "7bedd42869fa-cropped-gjh-eshop-logo2023-m-270x270.png",
+      "sha256": "7bedd42869fa17391d9c06c0d90e825c1eb351947ebc11d0377ae7199a85f64c",
+      "bytes": 19102,
+      "content_type": "image/png",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-270x270.png"
+    },
+    {
+      "url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-32x32.png",
+      "pages": [
+        "https://www.gjh.com.sg/"
+      ],
+      "status": "downloaded",
+      "file": "9a2cef552551-cropped-gjh-eshop-logo2023-m-32x32.png",
+      "sha256": "9a2cef552551f5bc8a6b9f1e23812dc0bab4d33d62580bba9704dfe837235dff",
+      "bytes": 1147,
+      "content_type": "image/png",
+      "final_url": "https://www.gjh.com.sg/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-32x32.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/GP-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "749176416553-GP-brand.jpg",
+      "sha256": "749176416553f45d6790de963f36cd303350837e1c41b37b794a927b384c89f0",
+      "bytes": 3039,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/GP-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/casio-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "9c0bc706539b-casio-brand.jpg",
+      "sha256": "9c0bc706539bf9eeea99f905995af310821335d0595812fe5f33e8d276663726",
+      "bytes": 2752,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/casio-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/cm-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "4096e5783535-cm-brand.jpg",
+      "sha256": "4096e5783535677685cf6d52c37884700b4b8a3e54fb6f690856dae6e8b1227a",
+      "bytes": 3895,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/cm-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/flyingwheel-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "67078e05eddb-flyingwheel-brand.jpg",
+      "sha256": "67078e05eddb1353180fddeaaab9511c23af8fdfdf5da29882dc15a83d4b6893",
+      "bytes": 5263,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/flyingwheel-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "51c2d3354c72-gogo-brand.jpg",
+      "sha256": "51c2d3354c7271e1c92e34f8bf0509b60d055eda4b3e29b44eede70edd373a77",
+      "bytes": 2757,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/hormel-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "493bb897e22b-hormel-brand.jpg",
+      "sha256": "493bb897e22b3211dda39b5b3dc70ba5266114560788fcdc9f99beb69470fb08",
+      "bytes": 2733,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/hormel-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/lg-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "2191e72ec1dd-lg-brand.jpg",
+      "sha256": "2191e72ec1dda7f4fa4a95a8e525e61ba28042fa576233e1a603fa3e50bece75",
+      "bytes": 2677,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/lg-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "842f5793ddd4-mili-brand.jpg",
+      "sha256": "842f5793ddd4da0c51d2a35d210f273c9c082742f10a1a2465b66f5de454ab9d",
+      "bytes": 4015,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/nm-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "cd0913078b3e-nm-brand.jpg",
+      "sha256": "cd0913078b3e93dd829fdc9b3421bcb527f5d02db225face42a14e50918917f0",
+      "bytes": 3149,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/nm-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/skippy-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "d32f060c2f70-skippy-brand.jpg",
+      "sha256": "d32f060c2f7007165d44d39eeba16c6a711712aadbb8f6cbdd47a2a05571a024",
+      "bytes": 4335,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/skippy-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/sony-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "04d91758c7c5-sony-brand.jpg",
+      "sha256": "04d91758c7c5f3d3f67f9805de932e405d612e395ffda5a928eb2d0ce3be60dd",
+      "bytes": 2172,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/sony-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/spam-brand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "70c579f9bd70-spam-brand.jpg",
+      "sha256": "70c579f9bd707777aa775f5100534643c7d567d50f62494022dff81c3ed3aca5",
+      "bytes": 2255,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/04/spam-brand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-aeris-swiss.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "7833477046a5-aboutus-timeline-aeris-swiss.jpg",
+      "sha256": "7833477046a51739807f2836457a8e6cba90e2caea8fbf1789b99ee523538540",
+      "bytes": 5863,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-aeris-swiss.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-bm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "24a790f036ba-aboutus-timeline-bm.jpg",
+      "sha256": "24a790f036ba7f8ddbbbf111d29092bcfd17645bf949659c48e721656f91e603",
+      "bytes": 9485,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-bm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-casio-lg.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "058389ed6f0d-aboutus-timeline-casio-lg.jpg",
+      "sha256": "058389ed6f0df2e4dac53a951d110732034638d3b1dd1b9347dfc38dbc0081ae",
+      "bytes": 6886,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-casio-lg.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-gjh.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "3e69d2d7a7c7-aboutus-timeline-gjh.jpg",
+      "sha256": "3e69d2d7a7c7df674d9880f91371adc255de1ccffcc178718378553d875d1434",
+      "bytes": 8928,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-gjh.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-gogo-flying.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "a60d89037fae-aboutus-timeline-gogo-flying.jpg",
+      "sha256": "a60d89037faefa3dc0bed9a25042099634261fe8fee8f3fecf37b843c70a957e",
+      "bytes": 10884,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-gogo-flying.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-gp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "c8c212a083db-aboutus-timeline-gp.jpg",
+      "sha256": "c8c212a083dbaccac99a5fa120437a92b94f09191cb02520a999c7834cc92bf2",
+      "bytes": 12266,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-gp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-mili2.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "0e5f7b3ac7c8-aboutus-timeline-mili2.jpg",
+      "sha256": "0e5f7b3ac7c8851ff4d63280c33bccd264a77591ae7918f53e1a3739a9f32a8a",
+      "bytes": 9550,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-mili2.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-newmoon.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "78e0171336ba-aboutus-timeline-newmoon.jpg",
+      "sha256": "78e0171336ba0287da20e3a230f19376620273d1a0b02521c828d3ea59bfeda8",
+      "bytes": 8991,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-newmoon.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-sonylogo.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "4411b055f678-aboutus-timeline-sonylogo.jpg",
+      "sha256": "4411b055f67851b0df62eb24e8d9365cfffea0b7e2e20dcd5d469a01cbef054b",
+      "bytes": 4800,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/aboutus-timeline-sonylogo.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/bm-brand2.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "1135d2beb389-bm-brand2.jpg",
+      "sha256": "1135d2beb38992b84dd12a898789532c2679eddc772eb1396dd6e60b0e8d4d07",
+      "bytes": 4163,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/06/bm-brand2.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "0e9c6bbc12a8-brand-cover-gogo-1.jpg",
+      "sha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "bytes": 20934,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/brand-cover-nm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "8295ae806f3c-brand-cover-nm.jpg",
+      "sha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "bytes": 219929,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/brand-cover-nm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/genuinity-small-300x131.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "76de76998d16-genuinity-small-300x131.jpg",
+      "sha256": "76de76998d16663c421a78665febb97386512ae819f93fa4a52423b462146cbd",
+      "bytes": 9467,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/genuinity-small-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/genuinity-small.jpg",
+      "pages": [
+        "https://www.gjh.com.sg/",
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "09b36de73822-genuinity-small.jpg",
+      "sha256": "09b36de73822f85a0b1ee3f39ecdd51c0a5df302d48be069c91ce3ca5b200b44",
+      "bytes": 15180,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/genuinity-small.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/health-small-300x131.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "a98753928e5b-health-small-300x131.jpg",
+      "sha256": "a98753928e5b3bce1f9dff1fbc53a1fb1c0ab04747facf223e358da6c7e0b0db",
+      "bytes": 7138,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/health-small-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/health-small.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "860476709e61-health-small.jpg",
+      "sha256": "860476709e611e6fcb239f96571cf817124b727c523dad530cb6b2140a5eca78",
+      "bytes": 11677,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/health-small.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1-300x131.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "195cfe0940ee-history1940-cover-1-300x131.jpg",
+      "sha256": "195cfe0940ee894db61715482fcc1d559a16c8f40387062a1d3520555377159b",
+      "bytes": 13388,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "89a674fd1946-history1940-cover-1.jpg",
+      "sha256": "89a674fd19460ffae08b7863193e0d7fec80e83101a5c865a98e3ebf1bfd00c6",
+      "bytes": 34191,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/joy-home-300x131.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "e38e4dd2b3ed-joy-home-300x131.jpg",
+      "sha256": "e38e4dd2b3ed0fab6003170754fe557c305d8ff057437fe800b06a51952d6b58",
+      "bytes": 9699,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/joy-home-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/joy-home.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "60879c82b305-joy-home.jpg",
+      "sha256": "60879c82b30598aad1e9e73cf8f5ae0811b8371d698954ba3fa5e7c5608e3fa3",
+      "bytes": 16733,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/joy-home.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-1024x179.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "2d39b0162d6f-prod-stripe-nm-1024x179.jpg",
+      "sha256": "2d39b0162d6f4062935d8b514970d006628280d50c341aaf05a0bdf7fa711f5e",
+      "bytes": 36680,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-1024x179.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-1536x269.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "4d87b4efc5c7-prod-stripe-nm-1536x269.jpg",
+      "sha256": "4d87b4efc5c703d79e60a4b70a678819616a96cda42309b721995aacaa64e157",
+      "bytes": 70990,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-1536x269.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-300x53.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "ccdacfc28465-prod-stripe-nm-300x53.jpg",
+      "sha256": "ccdacfc28465bcf6d6bdfc2de41b5cb258ab8966344378beb77e82a5498253d6",
+      "bytes": 6320,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-300x53.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-600x105.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "3db370cd324c-prod-stripe-nm-600x105.jpg",
+      "sha256": "3db370cd324cbfaf3f54d82b6ffa57cf8d24c1286c1ce079000c395c9db749f1",
+      "bytes": 15875,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-600x105.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-768x134.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "bf4fd29f7ff3-prod-stripe-nm-768x134.jpg",
+      "sha256": "bf4fd29f7ff308c39f0a4d81af81a4f69a255efd933b19dd5dbfb7f9973beff4",
+      "bytes": 23182,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm-768x134.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "fd1a60c29eda-prod-stripe-nm.jpg",
+      "sha256": "fd1a60c29eda8dcb2179045dfe7a78b1264ffbde3540e989eb5664d16ed85c24",
+      "bytes": 127459,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/07/prod-stripe-nm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/Gulong.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "28cc96a79eaa-Gulong.jpg",
+      "sha256": "28cc96a79eaaa16d768f01b7467974531c7bbdfdd53c2f1d2b8a2eb5e876f7b1",
+      "bytes": 233213,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/Gulong.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/LOGO_PTH_4C.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "6e78101c04b0-LOGO_PTH_4C.png",
+      "sha256": "6e78101c04b0877aa538603e21d2ca9566746e8103aa2564e183a33a88d89c26",
+      "bytes": 50043,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/LOGO_PTH_4C.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/gigaset-new-logo.svg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "967bf0cbbbc3-gigaset-new-logo.svg",
+      "sha256": "967bf0cbbbc3d3ad002d182edfa214dbd1f6c6a445d061bf69ff16f40e875653",
+      "bytes": 3116,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/gigaset-new-logo.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png",
+      "pages": [
+        "https://www.gjh.com.sg/",
+        "https://www.gjhglobal.com/",
+        "https://www.gjhglobal.com/about-us/",
+        "https://www.gjhglobal.com/awards-recognition/",
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/contact-us/",
+        "https://www.gjhglobal.com/corporate-sales/",
+        "https://www.gjhglobal.com/explore-our-brand/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gjh-one-service/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/investment/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/newsroom/",
+        "https://www.gjhglobal.com/our-people/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "25202d0cb3e5-logo-trans.png",
+      "sha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "bytes": 14860,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/philips-logo.svg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "eab8f8c6ee0e-philips-logo.svg",
+      "sha256": "eab8f8c6ee0ecbaa6b637ae5fc70bc92fbb89c9d8fe1722c25d9413606e03063",
+      "bytes": 3332,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/08/philips-logo.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "5dbf5812f21c-BN-250ml-Range-1024x683.jpg",
+      "sha256": "5dbf5812f21c195f461066ca1b8e10609ff2d0a3aae3a182457b6473e4390c34",
+      "bytes": 101475,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "583d00bb8501-BN-250ml-Range-300x200.jpg",
+      "sha256": "583d00bb8501a17402d98ed1f005a6755af61e1e7845efc914b421d66b841c9a",
+      "bytes": 13163,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "eb4c2a2c58d9-BN-250ml-Range-600x400.jpg",
+      "sha256": "eb4c2a2c58d9d0e610f93a78d152519e63160f6b6c01335022d843dae755f8aa",
+      "bytes": 41901,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "8461d170a477-BN-250ml-Range-768x512.jpg",
+      "sha256": "8461d170a4771297fd157a5f3964d58e871dbd6a580d5589d52171fceb7c7b07",
+      "bytes": 63400,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "541cd3453449-BN-250ml-Range.jpg",
+      "sha256": "541cd3453449d5a847405d47cb1f6cfbbb892adb2391c3f753128a3edd3e257e",
+      "bytes": 119784,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/BN-250ml-Range.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "63fbcf8ce997-EOC-Range-1024x683.jpg",
+      "sha256": "63fbcf8ce997a859d60e068750f57a083286251e9d757d0cab1016c8efb69598",
+      "bytes": 64196,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "93d7dcc7ff10-EOC-Range-300x200.jpg",
+      "sha256": "93d7dcc7ff10326b0a5b9af4a76a2c5a7697ae75d6cb2c354a5b193fe070683d",
+      "bytes": 9174,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "96b573fd04e3-EOC-Range-600x400.jpg",
+      "sha256": "96b573fd04e39c92666172e626ff2f919019e20a70293901ac1d4fdc86c18bd5",
+      "bytes": 27042,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "0bc0663d3dcd-EOC-Range-768x512.jpg",
+      "sha256": "0bc0663d3dcd2ef74ab01f455d5746fcee7b515dd9b7ef6e51d28b36add418b9",
+      "bytes": 40369,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "be5d7e7167f3-EOC-Range.jpg",
+      "sha256": "be5d7e7167f3def2782b94e0ed45c934bd9a87b14ce75c0aab8dcc3e8d54ac19",
+      "bytes": 72325,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/EOC-Range.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "59d454477ce9-Pastes-1024x683.jpg",
+      "sha256": "59d454477ce955d71e5f639da87e743c30662caa27a4ad3107c52415a67b9dab",
+      "bytes": 110883,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "61bb393ba3c9-Pastes-300x200.jpg",
+      "sha256": "61bb393ba3c98ee5f64884556a9023804aabb09de7a0fa1c14893c4db92a64c7",
+      "bytes": 13385,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "8db4c7846793-Pastes-600x400.jpg",
+      "sha256": "8db4c7846793ef74288d91cfab4d5722b1b7cf41ec9a18b888f671e595152cc0",
+      "bytes": 43706,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "9c82b9658658-Pastes-768x512.jpg",
+      "sha256": "9c82b965865899e4fd44cb1d754db4ae5ed3311b5ce0dc2918b04bfcc0a8bf33",
+      "bytes": 67832,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "94341d595591-Pastes.jpg",
+      "sha256": "94341d59559118fda56439dd462f4a0f2efb34f8f720dd222214f4f05e630c4a",
+      "bytes": 144800,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Pastes.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "f45a5faa845c-Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-1024x683.jpg",
+      "sha256": "f45a5faa845ca6d5309b42cd33013d9a7ddf230abc459d612d8fba0c198f582b",
+      "bytes": 60228,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "69b9f1df80d8-Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-300x200.jpg",
+      "sha256": "69b9f1df80d86d6f57e928ee500c7e8beef0c5eb2f6c7060b5b4f27cb7e02e98",
+      "bytes": 8999,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "dd836bfada3a-Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-600x400.jpg",
+      "sha256": "dd836bfada3af6b28b41fe1567c0c1ba8704647515692f6ed2b3de6a37808675",
+      "bytes": 25955,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "dc106c21f84e-Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-768x512.jpg",
+      "sha256": "dc106c21f84ed2e15ac374bccea69807eb2a6134b712e54ab1e8b107044d5780",
+      "bytes": 38178,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "e9ded5512f58-Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g.jpg",
+      "sha256": "e9ded5512f583a10b9b7a25d9f559b0f6a3f05db05b478b307e01d52239a523c",
+      "bytes": 61183,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/Premium-Concentrated-Birds-Nest-with-Rock-Sugar-150g.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "247560a7e4de-b-07-1024x683.jpg",
+      "sha256": "247560a7e4deadfdd597753ffbc79aaafefaeb89738ac839d40136c690b33e93",
+      "bytes": 55856,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "cc6048ce14fa-b-07-300x200.jpg",
+      "sha256": "cc6048ce14fad65e65a6dce8f3135a48461b26068f6ee784a313bcf3cdd8506b",
+      "bytes": 7282,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "ea421cb1340c-b-07-600x400.jpg",
+      "sha256": "ea421cb1340c991bacbee677f4022de44a6d8ff29ed4c12d6a74b36a342deb5b",
+      "bytes": 22911,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "bcf8d75f8cc2-b-07-768x512.jpg",
+      "sha256": "bcf8d75f8cc2e1a8551508c992df8c15bb5f9e1df49a0ab0870d072bfda3bba8",
+      "bytes": 34772,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "4914bd2ea965-b-07.jpg",
+      "sha256": "4914bd2ea965d52ec7b2e948e753c6c8c319ed1f37a8baa25d8c0f7a4da3d5a2",
+      "bytes": 57699,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-07.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "d4e9452bb4b8-b-08-fp-1024x683.jpg",
+      "sha256": "d4e9452bb4b84d86d2ebbf1c23d43b614b2cbf6c65499904008a193a66ecb431",
+      "bytes": 63726,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "0c76772142f4-b-08-fp-300x200.jpg",
+      "sha256": "0c76772142f4173710a2fca3536f397bd37a26ec1ba87f00433bf1d0d7a8fe5c",
+      "bytes": 8844,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "d4548f9fb4e0-b-08-fp-600x400.jpg",
+      "sha256": "d4548f9fb4e0239d8e9a951845580fb2abb1015dc041aa93f833ea9bc0d67036",
+      "bytes": 26471,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "bb0979381a79-b-08-fp-768x512.jpg",
+      "sha256": "bb0979381a79620e59b6528ccbc63af83c8c8e2c36a9213f812b1a3a5d589024",
+      "bytes": 39831,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "0b2043b53c07-b-08-fp.jpg",
+      "sha256": "0b2043b53c0763fd7c95dd0377ebd49c8894ecb3f412c356003d9450777256d8",
+      "bytes": 67317,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-08-fp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "40af711b3cc9-b-2014-fp-1024x683.jpg",
+      "sha256": "40af711b3cc992599894aca552aed69c9e7a981e009e47022e8d79cfe638b69b",
+      "bytes": 106991,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "516fa3849990-b-2014-fp-300x200.jpg",
+      "sha256": "516fa3849990bb6ac4579a9dc9dfc6c9954292ac4e2fb1b4567a1d61294b703e",
+      "bytes": 13596,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "6594f12bb369-b-2014-fp-600x400.jpg",
+      "sha256": "6594f12bb369a34c5adc264959d35f1a8e5be8d9a12977c5be4a7759c3037741",
+      "bytes": 43663,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "9f027b7b0876-b-2014-fp-768x512.jpg",
+      "sha256": "9f027b7b087696c4902cf00c35004f5f1090ef4e1af2f2fe6cc2b91cbe7a4ddd",
+      "bytes": 66498,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "bef7c7850227-b-2014-fp.jpg",
+      "sha256": "bef7c78502274545c76dca789b59823ea21d9b147f4a0804066788e48636d963",
+      "bytes": 126023,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2014-fp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "11b0f7f40c79-b-2020-fp-1024x683.jpg",
+      "sha256": "11b0f7f40c7915a37cae1541f0afca85d2e11f4b2ff69617e83bd8fbef6a1081",
+      "bytes": 42035,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "b42b37ed2159-b-2020-fp-300x200.jpg",
+      "sha256": "b42b37ed2159283963e1bd0cfb046eae795c325b420f33996b67f2174cf51fd1",
+      "bytes": 5698,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "098effa70929-b-2020-fp-600x400.jpg",
+      "sha256": "098effa7092940fa9734eaf4dcd1117fc71d4e7e3391ea6f1513087d0b38b5d8",
+      "bytes": 17473,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "41d4afee94fd-b-2020-fp-768x512.jpg",
+      "sha256": "41d4afee94fd98d0d6a1c5f210dad573c5553b5bdc63a13905a3194c6cb32eb7",
+      "bytes": 26588,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "3fca7d151277-b-2020-fp.jpg",
+      "sha256": "3fca7d151277c179175ea6315947d41c35022680b5c34a5740dae1c75f42d802",
+      "bytes": 45522,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/b-2020-fp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "7d6a283816d9-logo-newmoon-1.svg",
+      "sha256": "7d6a283816d9b7eed99beee80b4f71b7fa6ad483d418ccce675201f0999f0a08",
+      "bytes": 13046,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "65d5122edf78-nm-2007fp-1024x683.jpg",
+      "sha256": "65d5122edf78ff222988a4eb6e6d9d2dbc45b829170d4265eec0e5d97f28c32d",
+      "bytes": 124142,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "c470f84d5698-nm-2007fp-300x200.jpg",
+      "sha256": "c470f84d569873e5f9d5764740be202a96a8af4de94f3d76b156fe25ab01fdf8",
+      "bytes": 15043,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "2c64291d4561-nm-2007fp-600x400.jpg",
+      "sha256": "2c64291d456188fb10fe64195e6f684bc7e59af7b4a6e474a926fcb0533060b0",
+      "bytes": 49784,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "d8dac66c34a0-nm-2007fp-768x512.jpg",
+      "sha256": "d8dac66c34a03883e50813228602dcdbd9e88a27ff676110ac5ad99991b5845a",
+      "bytes": 76533,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "9285551fd003-nm-2007fp.jpg",
+      "sha256": "9285551fd003c5350dc2f78d51e6598081c1758e1558740d80f12c058e1c9992",
+      "bytes": 157086,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2007fp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "f9aa587ebb20-nm-2015fp-1024x683.jpg",
+      "sha256": "f9aa587ebb20c80b0d5b7fbb48fb08cce333e1b9538401602fde3858d86e1ea7",
+      "bytes": 153409,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "a65c3d368e05-nm-2015fp-300x200.jpg",
+      "sha256": "a65c3d368e0585f6fb416edacc0a6eb3049c74be7e4d96099a530ae247c617c4",
+      "bytes": 18718,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "f25be58c5cb7-nm-2015fp-600x400.jpg",
+      "sha256": "f25be58c5cb7c08839775f95c9d674d5b27e37c827ee5b75d9bdd5711d0cfe7f",
+      "bytes": 61903,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "029205fcc953-nm-2015fp-768x512.jpg",
+      "sha256": "029205fcc953ea4ac41feed5ba8aa9079dc7e5b51e42f00b4001d38d7230f7e1",
+      "bytes": 95165,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "bd7626fc8ae0-nm-2015fp.jpg",
+      "sha256": "bd7626fc8ae0d51e5cb5eeb23b56a68b772492341e4ddd128db28c3037cb0f11",
+      "bytes": 188896,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2015fp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "0cac61a3fc53-nm-2019-fp-1024x683.jpg",
+      "sha256": "0cac61a3fc5355db0b8034af45ab89394565e302419e4a62daf69f493d7fd97b",
+      "bytes": 96606,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "da867a5ed09c-nm-2019-fp-300x200.jpg",
+      "sha256": "da867a5ed09cea50edc8dd877a324062790faf001f35edd51597682fb1e21afa",
+      "bytes": 12721,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "099f36995fbd-nm-2019-fp-600x400.jpg",
+      "sha256": "099f36995fbdd43f1683b24df712ae958b06360de961f4f4b4a1a9f4184a78f5",
+      "bytes": 40463,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "e491fb47231c-nm-2019-fp-768x512.jpg",
+      "sha256": "e491fb47231c345c462133d1503bba05c095fea10831a7a07ddad49e5eaa44e6",
+      "bytes": 60821,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "0fe6f392d7ff-nm-2019-fp.jpg",
+      "sha256": "0fe6f392d7ff88cb2fdf330c902c61dacc6dafdb2e992023fdf4bc249f3bc098",
+      "bytes": 113519,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2019-fp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-1024x683.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "179c2b4ca40f-nm-2022-fp-1024x683.jpg",
+      "sha256": "179c2b4ca40f69e3d0b594aaf3afcc140d90290dce923778054b52107eba26ff",
+      "bytes": 127205,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-1024x683.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-300x200.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "172d091e2630-nm-2022-fp-300x200.jpg",
+      "sha256": "172d091e2630d79f443d8e892703f31ca8bf5a9126c887ea4002a900abee74d9",
+      "bytes": 17287,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-300x200.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-600x400.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "7937266d815e-nm-2022-fp-600x400.jpg",
+      "sha256": "7937266d815ea1676584e12edf26e917949a985b8f76b30430480d2120f8fb95",
+      "bytes": 53495,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-600x400.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-768x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "28e6cf8b8f77-nm-2022-fp-768x512.jpg",
+      "sha256": "28e6cf8b8f772882abb73c4eb8441df1d82d7ace7576dc7335d693cf0414b1c3",
+      "bytes": 80110,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp-768x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "c225cb0d6ac6-nm-2022-fp.jpg",
+      "sha256": "c225cb0d6ac6802fdf85df92d11f82b75d405e1a73f71a63213d17e4d5dbef2c",
+      "bytes": 152431,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/10/nm-2022-fp.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-291x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "3bfbe6df5625-GC-46-291x300.jpg",
+      "sha256": "3bfbe6df56253bf56d5ad4cedd56c64a36707b88612dd613de102857e909584f",
+      "bytes": 42427,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-291x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-600x618.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "e53c6d8f8ed9-GC-46-600x618.jpg",
+      "sha256": "e53c6d8f8ed92188acecd71853f9fc2fcc9358f242aac3c7e9193688f89371e1",
+      "bytes": 110934,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-600x618.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-768x791.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "87ef8c560b0d-GC-46-768x791.jpg",
+      "sha256": "87ef8c560b0d87dbb11eae95b587f8a48a17a64c5c94235c69d0138ecf31efdb",
+      "bytes": 163148,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-768x791.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-994x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "a71f57840b15-GC-46-994x1024.jpg",
+      "sha256": "a71f57840b15a42379aaf11f39e80b53672d2bbbace6d1e345553be7fe58fcbc",
+      "bytes": 248951,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46-994x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "10c7f07f4643-GC-46.jpg",
+      "sha256": "10c7f07f464325d7b30c90cb6ee5c6a8364bce37c0c1324c0b7a81de13e42942",
+      "bytes": 1722903,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GC-46.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-100x100.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "b8ecb038bc62-GHA-16-100x100.jpg",
+      "sha256": "b8ecb038bc62f9848b729606036c750a0b368f0f5775a7f4ccd16af478852993",
+      "bytes": 18842,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-100x100.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "bee2f4c5bf3b-GHA-16-1024x1024.jpg",
+      "sha256": "bee2f4c5bf3be0fc00a1322da34244a3a3e581b4a34bc654b013409701bfe800",
+      "bytes": 301531,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "c6e20a49d889-GHA-16-150x150.jpg",
+      "sha256": "c6e20a49d8898783bd1af2b69a63308d20db72838a4fa741613548297a53c5a1",
+      "bytes": 23455,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "7e5ff7b46dfd-GHA-16-300x300.jpg",
+      "sha256": "7e5ff7b46dfd609053add24e6cf49072368125433930d7a2c37291a50be66922",
+      "bytes": 47535,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-600x600.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "711558d2da9d-GHA-16-600x600.jpg",
+      "sha256": "711558d2da9de5fd9944dfd1e9f4a5dd93f752ccf6b19946b55d9a05c8ad81f8",
+      "bytes": 130635,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-600x600.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "602ea89a098d-GHA-16-768x768.jpg",
+      "sha256": "602ea89a098d0e9356b73ecef17ded88a783a3b33a3172b1343f5be426172cf1",
+      "bytes": 192445,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "8e343b0fc56a-GHA-16.jpg",
+      "sha256": "8e343b0fc56a5f5b3a99ce654685e6e3db1f75a244a37d7104ea9d479377e3f4",
+      "bytes": 959142,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-16.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-100x100.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "f3dd1ca42756-GHA-17-100x100.jpg",
+      "sha256": "f3dd1ca42756061b47ab27c947cdb763ad1fecf0a4c20c64da1b0b92bd8cda6f",
+      "bytes": 14770,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-100x100.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "8f016b1f53c2-GHA-17-1024x1024.jpg",
+      "sha256": "8f016b1f53c2ff5d40b8c8faae11f6715591022fced6c87ba3001ec153768576",
+      "bytes": 97947,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "a6c7f9978dfe-GHA-17-150x150.jpg",
+      "sha256": "a6c7f9978dfe942f9c9433c3db45f7a672835f1128ab0130f417cff2801862dc",
+      "bytes": 16684,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "7612a32e57e3-GHA-17-300x300.jpg",
+      "sha256": "7612a32e57e30974f1978d4648851d10eb8fe559c3a2a1968b99aa0b59ffafb1",
+      "bytes": 24767,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-600x600.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "8534fbb45050-GHA-17-600x600.jpg",
+      "sha256": "8534fbb450501f748b2c842e2cac4d879123bfc0c9d08064e4c33d6cc1838791",
+      "bytes": 48481,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-600x600.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "d5963e8e976c-GHA-17-768x768.jpg",
+      "sha256": "d5963e8e976cd49f96b2d01caf700cc66371b7e04c0c8c6a59a8efece060ba04",
+      "bytes": 65736,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "0f290272a4b2-GHA-17.jpg",
+      "sha256": "0f290272a4b2c771ea04592d4d972a2cfb637ad944beb4626d0888a59dc76ac9",
+      "bytes": 420867,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-17.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-100x100.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "382e75a2ff41-GHA-3-100x100.jpg",
+      "sha256": "382e75a2ff41eebe942f7236d18c74a0a04d2573e277bab9d8b3f545d487d007",
+      "bytes": 15390,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-100x100.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "0d325a40cd68-GHA-3-1024x1024.jpg",
+      "sha256": "0d325a40cd68d792873f981f16d963cdf74ab79146d8126cbd3f72a898790dea",
+      "bytes": 110318,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "957ff20f73ec-GHA-3-150x150.jpg",
+      "sha256": "957ff20f73ecfb7393b0b61db6b77b91ca8a13c9a96cbbded5519cbe6cc11081",
+      "bytes": 17686,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "bc7f3f645b38-GHA-3-300x300.jpg",
+      "sha256": "bc7f3f645b388b79e4332ce4aef6cff563c6bd90e4fb49c0abbad0e7eb8310ab",
+      "bytes": 27341,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-600x600.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "64cc93fb5dcb-GHA-3-600x600.jpg",
+      "sha256": "64cc93fb5dcb103ad16746e5510d3c816a39176be37822c2182f69bedc34bea4",
+      "bytes": 55231,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-600x600.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "f3f078be3fc1-GHA-3-768x768.jpg",
+      "sha256": "f3f078be3fc1aaf22ea128086a1ff0668dfa676ba427b7ff97348ce3f6809df6",
+      "bytes": 75402,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "bd70c6a970aa-GHA-3.jpg",
+      "sha256": "bd70c6a970aa2e97cd65229d487fa4c44d8f0dff246de73a3421c94152f03a33",
+      "bytes": 426952,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-3.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-100x100.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "47770b728bb2-GHA-6-100x100.jpg",
+      "sha256": "47770b728bb2cbd8c576f817c7f15b2df32309b5537c500cc20224def7ed7d0c",
+      "bytes": 16910,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-100x100.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "22c292b87338-GHA-6-1024x1024.jpg",
+      "sha256": "22c292b8733801b7b9a64bbaed9f7db2cf428550ad1e9fe0e07524814688f2bf",
+      "bytes": 160440,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "f0a327392f20-GHA-6-150x150.jpg",
+      "sha256": "f0a327392f2037b71e88a5d244f2026b75bd92cdd3820e2c14966f59be278f16",
+      "bytes": 19936,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "c614e883a22e-GHA-6-300x300.jpg",
+      "sha256": "c614e883a22e55fdc14e6514198c53bd1fc4e95d8f125c3eb3260352b607b9c5",
+      "bytes": 33480,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-600x600.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "cfa2e76b0237-GHA-6-600x600.jpg",
+      "sha256": "cfa2e76b02372777472a8dc81a2b9c43074a36ab7b57ecaf937a1cc68a2ac61a",
+      "bytes": 74824,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-600x600.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "2fdfa18021d4-GHA-6-768x768.jpg",
+      "sha256": "2fdfa18021d4973087f9ba4e40cb2d972d6ba8de4dab79c134e08560458b87e7",
+      "bytes": 105404,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "bf06dbc4c1b3-GHA-6.jpg",
+      "sha256": "bf06dbc4c1b35c03076f3d59d651ea6372daed30a9865d08688ed9c7f8ba79d8",
+      "bytes": 586749,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2022/11/GHA-6.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/e50.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "aa2b4e599e1c-e50.jpg",
+      "sha256": "aa2b4e599e1cec619e4adc662ec01f8830d5cac3a8fd925a76993ce8215bb63c",
+      "bytes": 21040,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/e50.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/eoy-m.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "128b683cf7e2-eoy-m.jpg",
+      "sha256": "128b683cf7e235ede0ea1d4e4f0ee89717dc2f6a0560a61f04e22c60a7e71dc7",
+      "bytes": 34409,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/eoy-m.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/gsfg.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "b99bf03efd62-gsfg.jpg",
+      "sha256": "b99bf03efd626059c9816fbf82513fa6db91d40503fd50469ebc5cb309a823c6",
+      "bytes": 31352,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/gsfg.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/heritage-b.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "959fdb2cb1a2-heritage-b.jpg",
+      "sha256": "959fdb2cb1a25fac7f24a3a70ce7582b8a33e674b56405eac95a6b7414ea4a9a",
+      "bytes": 31168,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/heritage-b.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "696c796256f4-nm-video1.jpg",
+      "sha256": "696c796256f489ae96a3a12e8803855ed88bbc7a83a6a824d48c549aec27152b",
+      "bytes": 100855,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video2.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "e6e65e387868-nm-video2.jpg",
+      "sha256": "e6e65e387868e59a4d58d4ae83a69a04ab7b5fb2bf8a588e2e0c0bd890d50aa0",
+      "bytes": 78188,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video2.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video3.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "f0e8a509eb3a-nm-video3.jpg",
+      "sha256": "f0e8a509eb3afffba8b9aa63ee3abb88b8f98dcd2b8ede0c11b4d6ba242596ea",
+      "bytes": 78784,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video3.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video4.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "fc68443f7336-nm-video4.jpg",
+      "sha256": "fc68443f733621c4a668bc15dfabf4d7e6a94d3d58ee3ec4b56258ae2fa502c9",
+      "bytes": 137056,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video4.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video5.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon/"
+      ],
+      "status": "downloaded",
+      "file": "2afbb061c912-nm-video5.jpg",
+      "sha256": "2afbb061c912679d8cf54f588de12c0ae361bbb90a7cf83c79df3df1ba7629ef",
+      "bytes": 103196,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/nm-video5.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/pbrand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "cb78cc005035-pbrand.jpg",
+      "sha256": "cb78cc005035686cc6d0c4acc75918c1b3000175aeaf4f2f4de2271c0064fdbd",
+      "bytes": 26862,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/pbrand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/sg50-M.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "55f9b94bc4f5-sg50-M.jpg",
+      "sha256": "55f9b94bc4f57834c1b1721c635f30f756c5fcbe97fc5cc7011a0582ee4504c1",
+      "bytes": 32485,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/sg50-M.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/star.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "e890cb5c4a13-star.jpg",
+      "sha256": "e890cb5c4a131a007c0a365a0f8f2e2717a99ee659f7b745615416c0921bcab5",
+      "bytes": 24160,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/star.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/staraward.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "3e57f970c5e8-staraward.jpg",
+      "sha256": "3e57f970c5e83cc789cd01473c2fbd056c0789cfc57cefaa5c216e7f1e2170d2",
+      "bytes": 33169,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/staraward.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/superbrand.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/awards-recognition/"
+      ],
+      "status": "downloaded",
+      "file": "87ededef57c4-superbrand.jpg",
+      "sha256": "87ededef57c4fad0256c6c328c282c4c0aae9706c419d673980226bd0af1d6c8",
+      "bytes": 25872,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/04/superbrand.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/reward-thumb-300x131.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "a5daff7f50fa-reward-thumb-300x131.jpg",
+      "sha256": "a5daff7f50fa583bb8838fdd646039d56de297fbfe7d3331968c193a317c1362",
+      "bytes": 6627,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/reward-thumb-300x131.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/reward-thumb.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "207fe9d8efdf-reward-thumb.jpg",
+      "sha256": "207fe9d8efdf04edb90ac0d158fd49566545a479b0686fa7e810f4b7cbac57d1",
+      "bytes": 9742,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/reward-thumb.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video1-bm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "2c7be78dbb71-video1-bm.jpg",
+      "sha256": "2c7be78dbb71af51b31c07c7997d8fd451146f222fc400f3cf45bb0837c3d373",
+      "bytes": 79514,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video1-bm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video2-bm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "9f6f6fa0a0ba-video2-bm.jpg",
+      "sha256": "9f6f6fa0a0bae9f9bee8e5eb279c515228d53a302596fa50294ded5eaa759027",
+      "bytes": 49461,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video2-bm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video3-bm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "049bee6860d1-video3-bm.jpg",
+      "sha256": "049bee6860d1f384d22bbd36333b4bd580012a1bce995e766e037cc943cefc65",
+      "bytes": 103488,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video3-bm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video4-bm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "c63aba66c332-video4-bm.jpg",
+      "sha256": "c63aba66c3327513a0619b0e0afe4dc8507e9a37e1ba3e65462b3fc75f94cb70",
+      "bytes": 56447,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video4-bm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video5-bm.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "de19836b8f79-video5-bm.jpg",
+      "sha256": "de19836b8f7969d132a535b84d710fb615ff6402136d3c66110ac019a6a7403b",
+      "bytes": 56255,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/05/video5-bm.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/1-300x144.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "2619236c0314-1-300x144.png",
+      "sha256": "2619236c03144204b99f40e933a0da6e40b907f0f3963d78e858fe51d86c579e",
+      "bytes": 92721,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/1-300x144.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/1.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "a986af32b846-1.png",
+      "sha256": "a986af32b846bffa763c8b1ff0bf919a7a12a42348bb9016494127ba8bf5cd2e",
+      "bytes": 236579,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/1.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/2-300x144.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "70171eb4a55d-2-300x144.png",
+      "sha256": "70171eb4a55d3c26ce7407ae926bedbf2554ddcbae72f41155fb81777e79b68c",
+      "bytes": 82188,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/2-300x144.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/2.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "096833979e6b-2.png",
+      "sha256": "096833979e6b9a4dfcc362429b7e6f9fdf00e499a6d50c5dae0ed7a44355d1e6",
+      "bytes": 227644,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/2.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/3-300x144.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "c36c37eca091-3-300x144.png",
+      "sha256": "c36c37eca091979d09f4b4ec143ef70b1f5e1ae8df71d3d30dcad663e6a1fdaa",
+      "bytes": 70199,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/3-300x144.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/3.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "38caf9470e08-3.png",
+      "sha256": "38caf9470e08a9a67cda106eaf9e73ad96f895c0a9472d061958888af6b7dbcf",
+      "bytes": 189759,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/3.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/4-300x144.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "6d5cef60ed83-4-300x144.png",
+      "sha256": "6d5cef60ed83bce4c2a1d4d04caab63f81eda44c89b1e623c1615f056e271ff6",
+      "bytes": 93441,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/4-300x144.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/4.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "8ab79cfcea2e-4.png",
+      "sha256": "8ab79cfcea2efd71e9b90d2c6e60f3de2ed4eec08ab16a808e72aee2a3dc9b36",
+      "bytes": 237772,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/4.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/5-300x144.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "0918eef98fb4-5-300x144.png",
+      "sha256": "0918eef98fb4ad5c06468d3aa98e9c0be84afcc17f2a66bf64c57b57b50071f1",
+      "bytes": 73480,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/5-300x144.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/5.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/"
+      ],
+      "status": "downloaded",
+      "file": "3fb00985201a-5.png",
+      "sha256": "3fb00985201a19527a52d08144e8afdcc61090832c6f5b34eca930e27acdfdbf",
+      "bytes": 191942,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/5.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941-1024x737.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "c1288ddec685-Screenshot-2023-06-28-092941-1024x737.jpg",
+      "sha256": "c1288ddec685ebee5a5cd03a548d61ab447433585e513a3bf5336bb088ec8bf3",
+      "bytes": 114596,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941-1024x737.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941-300x216.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "82cd1e134d36-Screenshot-2023-06-28-092941-300x216.jpg",
+      "sha256": "82cd1e134d36eda04a8968dc228671b1c8435d25338c98e21a9c1fede31f44df",
+      "bytes": 15620,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941-300x216.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941-768x553.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "8a30664f5344-Screenshot-2023-06-28-092941-768x553.jpg",
+      "sha256": "8a30664f53446f26602ab825a3f8d925f5f5d7f8bd1c044fac7529008e50543e",
+      "bytes": 72456,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941-768x553.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/newmoon-history/"
+      ],
+      "status": "downloaded",
+      "file": "76d46ce2346c-Screenshot-2023-06-28-092941.jpg",
+      "sha256": "76d46ce2346c5fce9b471736376e953e016ac3081f679590292e99460e20da69",
+      "bytes": 176405,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Screenshot-2023-06-28-092941.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Website-revamp_243-x-96-1.png",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "3c35caabae11-Website-revamp_243-x-96-1.png",
+      "sha256": "3c35caabae11d2db21b5717473bc3ce0f9be3354e4219458b44b2a293ec74b00",
+      "bytes": 13385,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Website-revamp_243-x-96-1.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Website-revamp_243-x-96-2.png",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "82bf3cad3bfa-Website-revamp_243-x-96-2.png",
+      "sha256": "82bf3cad3bfab1c447fdb7982bbced956e09b15dd7ad474677e4317a0f8b6261",
+      "bytes": 7348,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Website-revamp_243-x-96-2.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Website-revamp_243-x-96-3.png",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med-history/"
+      ],
+      "status": "downloaded",
+      "file": "99da53be17e8-Website-revamp_243-x-96-3.png",
+      "sha256": "99da53be17e8d6dfb1ebfdf7f0e36c5dd33808ab92b6e7c713246af635e58796",
+      "bytes": 8463,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/06/Website-revamp_243-x-96-3.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "76dd0493db84-BM_7_Best-Seller-Products-Feature-02-1-1024x1024.jpg",
+      "sha256": "76dd0493db84ed4344dc62a76bc7ab2614b1eacd5a05fd0bb37531a49b366c66",
+      "bytes": 178703,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "98ca04cf956a-BM_7_Best-Seller-Products-Feature-02-1-150x150.jpg",
+      "sha256": "98ca04cf956abde597cd43fb945f878b65a8dcce4669f531b3c04e99becd9646",
+      "bytes": 41805,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-1536x1536.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "bf297d93f477-BM_7_Best-Seller-Products-Feature-02-1-1536x1536.jpg",
+      "sha256": "bf297d93f4773a91911d37d8e3a7ef40d1da5abb9f6aeaac41d143cb209281a6",
+      "bytes": 320964,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-1536x1536.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "7bb91ab5b5c1-BM_7_Best-Seller-Products-Feature-02-1-300x300.jpg",
+      "sha256": "7bb91ab5b5c175d505ef5691d3ed779934795213882af05f8f5633bd622e12fb",
+      "bytes": 55037,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "b90915312c89-BM_7_Best-Seller-Products-Feature-02-1-768x768.jpg",
+      "sha256": "b90915312c89d788089af23f93a321ad9dee312958f242f177a2c354ddc45a2e",
+      "bytes": 124545,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "dc77335650c4-BM_7_Best-Seller-Products-Feature-02-1.jpg",
+      "sha256": "dc77335650c408936be24c88551266e7e34e047cabb352519e5c680c08fab0f4",
+      "bytes": 2442093,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-02-1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "aa111a685fab-BM_7_Best-Seller-Products-Feature-03-1-1-1024x1024.jpg",
+      "sha256": "aa111a685fabbb137f2e7ce98661aca2c727413a0e7f85baa7dec2a766d1f92a",
+      "bytes": 161656,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "233a87cf9991-BM_7_Best-Seller-Products-Feature-03-1-1-150x150.jpg",
+      "sha256": "233a87cf9991336ec1b8d218cc53c3ae0dc6e80f07e56df05025294c030ec325",
+      "bytes": 41661,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-1536x1536.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "3c0a3bfea26c-BM_7_Best-Seller-Products-Feature-03-1-1-1536x1536.jpg",
+      "sha256": "3c0a3bfea26c901bd446403b9b9a0547b4b4e109f3006179b326c1864d126804",
+      "bytes": 286465,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-1536x1536.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "21b6007a1c19-BM_7_Best-Seller-Products-Feature-03-1-1-300x300.jpg",
+      "sha256": "21b6007a1c19c8b333d1e342860d903a87ecc61b94ffd2156e583c3a60eeb95d",
+      "bytes": 53699,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "834cae86753c-BM_7_Best-Seller-Products-Feature-03-1-1-768x768.jpg",
+      "sha256": "834cae86753c83c3be77abad8ab372ac19139224b24f7b3ddcc1052098785af7",
+      "bytes": 113869,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "0bdd3c609f62-BM_7_Best-Seller-Products-Feature-03-1-1.jpg",
+      "sha256": "0bdd3c609f62ee4ee52ff758303a6ceb9a045f486328a39f82180e9f1d371171",
+      "bytes": 2465092,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-03-1-1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "ce6a43bca0c4-BM_7_Best-Seller-Products-Feature-04-1-1024x1024.jpg",
+      "sha256": "ce6a43bca0c408257bacd20c071915be22ff4a54f6d345d394e02b23cd5764b5",
+      "bytes": 218980,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "bca7158346b0-BM_7_Best-Seller-Products-Feature-04-1-150x150.jpg",
+      "sha256": "bca7158346b0ebe412fd087d67fbad5f948551beb2b8f72c2783128e4da73555",
+      "bytes": 43519,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-1536x1536.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "d483cb46ad83-BM_7_Best-Seller-Products-Feature-04-1-1536x1536.jpg",
+      "sha256": "d483cb46ad833f76a22db374be9ec3ed82be153fd9b7df54721b7c6bd2f0e8e6",
+      "bytes": 385027,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-1536x1536.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "3cf06aff9a2b-BM_7_Best-Seller-Products-Feature-04-1-300x300.jpg",
+      "sha256": "3cf06aff9a2b7575f65f193fc22dc258af8f3c697de3cb88c9fd7e9390150490",
+      "bytes": 61305,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "f714679493da-BM_7_Best-Seller-Products-Feature-04-1-768x768.jpg",
+      "sha256": "f714679493dabece05203072ca385c3e86a80eefd4da0dae87b663d891f0b7f1",
+      "bytes": 151206,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "58dc46abce11-BM_7_Best-Seller-Products-Feature-04-1.jpg",
+      "sha256": "58dc46abce119faa0821c100d3256769ff4107565b20a569df5f36f244d54941",
+      "bytes": 2476705,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-04-1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-1024x1024.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "16ce82fa20e2-BM_7_Best-Seller-Products-Feature-05-1-1024x1024.jpg",
+      "sha256": "16ce82fa20e283e735ad55b56a58eeffbedad337a4740604bf55e49a73f0ba6b",
+      "bytes": 194712,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-1024x1024.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "f2bff3f8d772-BM_7_Best-Seller-Products-Feature-05-1-150x150.jpg",
+      "sha256": "f2bff3f8d7723d99b765b45819abacad6d0859e7f0e2dc05d9d20cc4577b8ca1",
+      "bytes": 41987,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-1536x1536.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "0a12cfdb8a0a-BM_7_Best-Seller-Products-Feature-05-1-1536x1536.jpg",
+      "sha256": "0a12cfdb8a0a2466af43e802406b7b53d1606f37ebf6da2f15cb216569c3d6f3",
+      "bytes": 355711,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-1536x1536.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "f6fa40b32ab2-BM_7_Best-Seller-Products-Feature-05-1-300x300.jpg",
+      "sha256": "f6fa40b32ab213f33a057f915e72fbecb83693dde2bb59f2b96ee050122745f6",
+      "bytes": 56282,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-768x768.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "754250411dc3-BM_7_Best-Seller-Products-Feature-05-1-768x768.jpg",
+      "sha256": "754250411dc3c35b032eabb45c9440f4acff2475d88e4af3df72a1220ebc430f",
+      "bytes": 134107,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1-768x768.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "7363f0643330-BM_7_Best-Seller-Products-Feature-05-1.jpg",
+      "sha256": "7363f064333046d9518c6f8f93cbb0ce39505184381f45aa374c93b0655f7df9",
+      "bytes": 2340045,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/BM_7_Best-Seller-Products-Feature-05-1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/brand-cover-hormel.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "560443625f66-brand-cover-hormel.jpg",
+      "sha256": "560443625f66690ec781c8109aece8497550b6a9452023a6f251f683a9c97a31",
+      "bytes": 45343,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/brand-cover-hormel.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "b5d43fcc03b4-brand-cover-mili2.jpg",
+      "sha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "bytes": 35812,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/brand-cover-mili2.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/brand-cover-skippy2.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/"
+      ],
+      "status": "downloaded",
+      "file": "fb8eea80c28c-brand-cover-skippy2.jpg",
+      "sha256": "fb8eea80c28c3e7560005e227b012edecb0b67ccda275290b1877c37989d12b4",
+      "bytes": 42585,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/07/brand-cover-skippy2.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/6-1.svg",
+      "pages": [
+        "https://www.gjhglobal.com/corporate-sales/"
+      ],
+      "status": "downloaded",
+      "file": "4a880f373918-6-1.svg",
+      "sha256": "4a880f37391800b014b2e549b52d2d6738c65999fb9f2de3cc206716ec79a9de",
+      "bytes": 6740,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/6-1.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/7.svg",
+      "pages": [
+        "https://www.gjhglobal.com/corporate-sales/"
+      ],
+      "status": "downloaded",
+      "file": "fb1e79874894-7.svg",
+      "sha256": "fb1e79874894f82c0038837ac292e8b510654cd86026149b5a212fea41b288d6",
+      "bytes": 6265,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/7.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-1024x107.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "99fb151f2198-BM_7_Best-Seller-Products-Feature-02-3-1024x107.jpg",
+      "sha256": "99fb151f219845c89a4e39b79e73335d497c5939ccef6ebdb5f6b8fc9661b489",
+      "bytes": 46985,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-1024x107.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-1536x160.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "d34c248f5b6b-BM_7_Best-Seller-Products-Feature-02-3-1536x160.jpg",
+      "sha256": "d34c248f5b6b3215facea6a4c7cd7386882031f3fbe942739e636b5dc1e032a4",
+      "bytes": 64560,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-1536x160.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-2048x213.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "36b4a20990ec-BM_7_Best-Seller-Products-Feature-02-3-2048x213.jpg",
+      "sha256": "36b4a20990ec0edf6874f4b7a5608ca57b23ae7042311cadcd2b323f1c80c3e4",
+      "bytes": 87905,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-2048x213.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-300x31.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "d889cc93de03-BM_7_Best-Seller-Products-Feature-02-3-300x31.jpg",
+      "sha256": "d889cc93de03af20b0730400d3364902fd6289da2abfe614ddf9e7eadc0757b4",
+      "bytes": 28513,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-300x31.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-768x80.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "b8f55f60b92f-BM_7_Best-Seller-Products-Feature-02-3-768x80.jpg",
+      "sha256": "b8f55f60b92fddbc0ed17bc2322138b7148dbc4cf11df99ce406f86e88950105",
+      "bytes": 39516,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/BM_7_Best-Seller-Products-Feature-02-3-768x80.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/cert.svg",
+      "pages": [
+        "https://www.gjhglobal.com/corporate-sales/"
+      ],
+      "status": "downloaded",
+      "file": "890eec271870-cert.svg",
+      "sha256": "890eec271870e6c49c1344fcd76b13cdcc7fb0876c998159d4cb173459e5c588",
+      "bytes": 6620,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/cert.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/deliver.svg",
+      "pages": [
+        "https://www.gjhglobal.com/corporate-sales/"
+      ],
+      "status": "downloaded",
+      "file": "5296167ba656-deliver.svg",
+      "sha256": "5296167ba656907a70ece411f0b1b92471267c362779dd640f210480a9cbad68",
+      "bytes": 14175,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/deliver.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/discount.svg",
+      "pages": [
+        "https://www.gjhglobal.com/corporate-sales/"
+      ],
+      "status": "downloaded",
+      "file": "0398f11784d9-discount.svg",
+      "sha256": "0398f11784d9ea8f420e8bffde4dcccf672e16ccab72b93cbf733c6959ad2c3f",
+      "bytes": 8513,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/discount.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/easy.svg",
+      "pages": [
+        "https://www.gjhglobal.com/corporate-sales/"
+      ],
+      "status": "downloaded",
+      "file": "af2a8f7d06bb-easy.svg",
+      "sha256": "af2a8f7d06bb7a513d8c193482332f69fd95f6dc5bb656bb09e3c3c2bc50db7f",
+      "bytes": 6564,
+      "content_type": "image/svg+xml",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/09/easy.svg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-1024x439.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "5527d512e02c-BM-20th-Anniversary-Customer-Testimonial_700X300-1024x439.jpg",
+      "sha256": "5527d512e02c38f12496056e374be593c1028697c008d4ab970da796db0419f8",
+      "bytes": 154192,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-1024x439.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-1536x658.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "d52346fd281d-BM-20th-Anniversary-Customer-Testimonial_700X300-1536x658.jpg",
+      "sha256": "d52346fd281d83970d3db9689f1722f719307fa6611d044bc8e8ef92f9df652b",
+      "bytes": 254693,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-1536x658.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-2048x878.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "8532e5f557d8-BM-20th-Anniversary-Customer-Testimonial_700X300-2048x878.jpg",
+      "sha256": "8532e5f557d803762ad1aa848c42b771913d710393f6b9cebeb7ace07bb88482",
+      "bytes": 371158,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-2048x878.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-300x129.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "5f1d53cee46e-BM-20th-Anniversary-Customer-Testimonial_700X300-300x129.jpg",
+      "sha256": "5f1d53cee46e91f7dc94fae30728dbe78c1c66ed9c1d199b8de7e77ceb67962c",
+      "bytes": 47660,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-300x129.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-768x329.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "db5d3af272db-BM-20th-Anniversary-Customer-Testimonial_700X300-768x329.jpg",
+      "sha256": "db5d3af272db4ef3024de3a63973fa9c8e54cb5271af82d683310f2074040f40",
+      "bytes": 108875,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-768x329.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-scaled.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "181eb8af08da-BM-20th-Anniversary-Customer-Testimonial_700X300-scaled.jpg",
+      "sha256": "181eb8af08daf5cf3ec3b89d26eb37bcb0e9ee5eb6389e9351c0e02e4722e7c0",
+      "bytes": 496632,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/BM-20th-Anniversary-Customer-Testimonial_700X300-scaled.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Borsch-Med-Website-Thumbnail_V1-1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "cf3e6f59af7e-Borsch-Med-Website-Thumbnail_V1-1-300x300.jpg",
+      "sha256": "cf3e6f59af7e1021adf313fa959d1b1ce16247f4bb5a526e04596e38284b3587",
+      "bytes": 40069,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Borsch-Med-Website-Thumbnail_V1-1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/California-Mexico-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "729114a399a6-California-Mexico-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "729114a399a6402e916fb6c94e8dac78e51a3166184cb5531238c36d9a67319e",
+      "bytes": 51772,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/California-Mexico-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Casio-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "87357541eedf-Casio-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "87357541eedf867ea355c4a5f17d52498f4d42fc2348e4b190418177e130c972",
+      "bytes": 43210,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Casio-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Flying-Wheel-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "daec5d723cd4-Flying-Wheel-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "daec5d723cd48be44e362e4a035b1bfa41261747dcd9de43b778e1330fe39476",
+      "bytes": 46150,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Flying-Wheel-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/GOGO-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "9e315759d31f-GOGO-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "9e315759d31f241c6043979509314804801a299ba63bb5cadf118f38422d7458",
+      "bytes": 52787,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/GOGO-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/GP-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "9557ccf17b66-GP-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "9557ccf17b66ffab75a66851b440c9c42049059d72ffde6a69e64de32696d2e1",
+      "bytes": 31624,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/GP-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Gigaset-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "355e2ef62d8a-Gigaset-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "355e2ef62d8ac660578b776d9267c7e4130d834a9e15d1cecdd166e946ccd4cf",
+      "bytes": 23170,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Gigaset-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Gulong-Website-Thumbnail-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "a1080313b906-Gulong-Website-Thumbnail-300x300.jpg",
+      "sha256": "a1080313b906f84eb152230f9dae4c2d5f859fccf573269a0cc02179422e1275",
+      "bytes": 33751,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Gulong-Website-Thumbnail-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Hormel-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "781f987573f2-Hormel-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "781f987573f2a51857b4624012ee4db12e3630768bbed0732d6d9748c2fb8d33",
+      "bytes": 45209,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Hormel-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/LG-Website-Thumbnail_V2-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "6361a51e6f0d-LG-Website-Thumbnail_V2-300x300.jpg",
+      "sha256": "6361a51e6f0de33684916e5e9b4a26b31618f1c5b07be7c86f1db6075745af52",
+      "bytes": 22617,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/LG-Website-Thumbnail_V2-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Mili-Website-Thumbnail-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "f35c60b67934-Mili-Website-Thumbnail-300x300.jpg",
+      "sha256": "f35c60b679344ed5058422b81822f1514959cc4c0e204a5859dc59c488020c57",
+      "bytes": 40714,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Mili-Website-Thumbnail-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/New-Moon-Website-Thumbnail_V3-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "d123f1f58e48-New-Moon-Website-Thumbnail_V3-300x300.jpg",
+      "sha256": "d123f1f58e48459a9ddd1a25e306d16c34c7381646f0463c722413ba2ed47352",
+      "bytes": 49811,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/New-Moon-Website-Thumbnail_V3-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/SPAM-Website-Thumbnail_V2-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "78dd0b1146f8-SPAM-Website-Thumbnail_V2-300x300.jpg",
+      "sha256": "78dd0b1146f82f7d3af7b254a7675910177ab6e9dd51355e238ec7d704dcd8bb",
+      "bytes": 51514,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/SPAM-Website-Thumbnail_V2-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Skippy-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "15aa48b114b0-Skippy-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "15aa48b114b0726adfc76a594cf39ff2ad96140bad24edf2eb52011f7e898ed2",
+      "bytes": 36834,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Skippy-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Sony-Website-Thumbnail_V1-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "3fa5762f7717-Sony-Website-Thumbnail_V1-300x300.jpg",
+      "sha256": "3fa5762f7717b65163b3bfdd503620f8310120bb1fae6ef40cb72751afedd650",
+      "bytes": 29038,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Sony-Website-Thumbnail_V1-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Website-revamp_445-x-445-150x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "d24f652fa589-Website-revamp_445-x-445-150x150.jpg",
+      "sha256": "d24f652fa5890bc3763af52182865304ef10788d6c29a641566bd66801d3e4b2",
+      "bytes": 7148,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Website-revamp_445-x-445-150x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Website-revamp_445-x-445-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "d22262e4cad7-Website-revamp_445-x-445-300x300.jpg",
+      "sha256": "d22262e4cad7e17d655de174dbdb15bf1b927a1550b8d292d2d7011f9da610b0",
+      "bytes": 15987,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Website-revamp_445-x-445-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Website-revamp_445-x-445.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "7ccd86d86d5b-Website-revamp_445-x-445.jpg",
+      "sha256": "7ccd86d86d5bec5aead9b7eacddc804d5a1e4c2b1d8d6e80b2676fca4a653888",
+      "bytes": 28783,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/10/Website-revamp_445-x-445.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2023/11/20231027_PTH-Website-Thumbnail_V3-300x300.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/explore-our-brand/"
+      ],
+      "status": "downloaded",
+      "file": "678d966d1359-20231027_PTH-Website-Thumbnail_V3-300x300.jpg",
+      "sha256": "678d966d13592d9c6b9e39706a58ec702a8ea749124f3a9fd0841fcebd441ac9",
+      "bytes": 42568,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2023/11/20231027_PTH-Website-Thumbnail_V3-300x300.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-180x180.png",
+      "pages": [
+        "https://www.gjhglobal.com/",
+        "https://www.gjhglobal.com/about-us/",
+        "https://www.gjhglobal.com/awards-recognition/",
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/contact-us/",
+        "https://www.gjhglobal.com/corporate-sales/",
+        "https://www.gjhglobal.com/explore-our-brand/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gjh-one-service/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/investment/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/newsroom/",
+        "https://www.gjhglobal.com/our-people/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "2c78aa2e0488-cropped-gjh-eshop-logo2023-m-180x180.png",
+      "sha256": "2c78aa2e04881c20ee5cdfec3de9f87b9dd6532abf9c08cfccd27c610d868910",
+      "bytes": 11545,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-180x180.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-192x192.png",
+      "pages": [
+        "https://www.gjhglobal.com/",
+        "https://www.gjhglobal.com/about-us/",
+        "https://www.gjhglobal.com/awards-recognition/",
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/contact-us/",
+        "https://www.gjhglobal.com/corporate-sales/",
+        "https://www.gjhglobal.com/explore-our-brand/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gjh-one-service/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/investment/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/newsroom/",
+        "https://www.gjhglobal.com/our-people/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "b72a5b324a3a-cropped-gjh-eshop-logo2023-m-192x192.png",
+      "sha256": "b72a5b324a3afe689b62e1df089b5e7998c6fbf365a4d6e77e8c705c6a8be488",
+      "bytes": 12620,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-192x192.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-270x270.png",
+      "pages": [
+        "https://www.gjhglobal.com/",
+        "https://www.gjhglobal.com/about-us/",
+        "https://www.gjhglobal.com/awards-recognition/",
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/contact-us/",
+        "https://www.gjhglobal.com/corporate-sales/",
+        "https://www.gjhglobal.com/explore-our-brand/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gjh-one-service/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/investment/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/newsroom/",
+        "https://www.gjhglobal.com/our-people/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "7bedd42869fa-cropped-gjh-eshop-logo2023-m-270x270.png",
+      "sha256": "7bedd42869fa17391d9c06c0d90e825c1eb351947ebc11d0377ae7199a85f64c",
+      "bytes": 19102,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-270x270.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-32x32.png",
+      "pages": [
+        "https://www.gjhglobal.com/",
+        "https://www.gjhglobal.com/about-us/",
+        "https://www.gjhglobal.com/awards-recognition/",
+        "https://www.gjhglobal.com/borsch-med-history/",
+        "https://www.gjhglobal.com/borsch-med/",
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/",
+        "https://www.gjhglobal.com/california-mexico/",
+        "https://www.gjhglobal.com/casio/",
+        "https://www.gjhglobal.com/contact-us/",
+        "https://www.gjhglobal.com/corporate-sales/",
+        "https://www.gjhglobal.com/explore-our-brand/",
+        "https://www.gjhglobal.com/flying-wheel/",
+        "https://www.gjhglobal.com/gigaset/",
+        "https://www.gjhglobal.com/gjh-one-service/",
+        "https://www.gjhglobal.com/gogo-2/",
+        "https://www.gjhglobal.com/gogo/",
+        "https://www.gjhglobal.com/gp-batteries/",
+        "https://www.gjhglobal.com/gu-long/",
+        "https://www.gjhglobal.com/hormel/",
+        "https://www.gjhglobal.com/investment/",
+        "https://www.gjhglobal.com/lg/",
+        "https://www.gjhglobal.com/mili/",
+        "https://www.gjhglobal.com/newmoon-history/",
+        "https://www.gjhglobal.com/newmoon/",
+        "https://www.gjhglobal.com/newsroom/",
+        "https://www.gjhglobal.com/our-people/",
+        "https://www.gjhglobal.com/skippy/",
+        "https://www.gjhglobal.com/sony/",
+        "https://www.gjhglobal.com/the-spam/"
+      ],
+      "status": "downloaded",
+      "file": "9a2cef552551-cropped-gjh-eshop-logo2023-m-32x32.png",
+      "sha256": "9a2cef552551f5bc8a6b9f1e23812dc0bab4d33d62580bba9704dfe837235dff",
+      "bytes": 1147,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/04/cropped-gjh-eshop-logo2023-m-32x32.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/01_logo_SS_horizontalblack-300x43.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "b0a62516f322-01_logo_SS_horizontalblack-300x43.jpg",
+      "sha256": "b0a62516f32235fbf142c7d18f1d563ecbd5987c825c691837a3cbc37f015db0",
+      "bytes": 5848,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/01_logo_SS_horizontalblack-300x43.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/01_logo_SS_horizontalblack-768x110.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "3b725b37fc70-01_logo_SS_horizontalblack-768x110.jpg",
+      "sha256": "3b725b37fc70a76a48d115d83389f14d869b2b663b01a9e0d02f2d263af61f92",
+      "bytes": 16616,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/01_logo_SS_horizontalblack-768x110.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/01_logo_SS_horizontalblack.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "632fbb48ab68-01_logo_SS_horizontalblack.jpg",
+      "sha256": "632fbb48ab689e228246f90af48bf08c0f1f5485bf30c940226094d577e70861",
+      "bytes": 45572,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/01_logo_SS_horizontalblack.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/zeria-brand-logo_WBG-243x96px.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/about-us/"
+      ],
+      "status": "downloaded",
+      "file": "434ec91d2ddc-zeria-brand-logo_WBG-243x96px.jpg",
+      "sha256": "434ec91d2ddc9190f64a6d9ad597937b8beab2ac183c74ddbbd8eac616944236",
+      "bytes": 8376,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/06/zeria-brand-logo_WBG-243x96px.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-1024x320.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "c4670542caf6-BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-1024x320.jpg",
+      "sha256": "c4670542caf6812cde544b7a01cae9e478f466307b0a69936bc24d848fbcbbf6",
+      "bytes": 77339,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-1024x320.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-300x94.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "2eb89de8c4a9-BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-300x94.jpg",
+      "sha256": "2eb89de8c4a9fe6b7855c5861f3c54e6b355b85424b2a6f14df3f89ded9133b4",
+      "bytes": 25864,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-300x94.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-768x240.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "35adbd3a82dc-BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-768x240.jpg",
+      "sha256": "35adbd3a82dce0f0524473a8b091b04170ca0b2df741abe1b876409937ee7265",
+      "bytes": 57101,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1-768x240.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "35773a5903a5-BM-20th-Anniversary-Voucher-Banner-02-1536x480-1.jpg",
+      "sha256": "35773a5903a53b430ea15d2e13c69cecd9928fb6b68b6abe3cfc8bbdac640843",
+      "bytes": 127465,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/07/BM-20th-Anniversary-Voucher-Banner-02-1536x480-1.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/08/The-brand-name-in-Chinese-宝狮康-signifies-a-treasured-health-supplement-that-is-manufactured-locally-in-Singapore.mp4",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "0cffb0233f2a-The-brand-name-in-Chinese-----signifies-a-treasured-health-supplement-that-is-manufactured-locally-in-Singapore.mp4",
+      "sha256": "0cffb0233f2adf5b9805533fbe5102458b07f0ee0c01828250bd90e255f6195b",
+      "bytes": 2180760,
+      "content_type": "video/mp4",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/08/The-brand-name-in-Chinese-%E5%AE%9D%E7%8B%AE%E5%BA%B7-signifies-a-treasured-health-supplement-that-is-manufactured-locally-in-Singapore.mp4"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-1024x512.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "732adf9487ca-BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-1024x512.jpg",
+      "sha256": "732adf9487cae0523d12599a364e24386d0217c2d36d730c6cdb3220fcc3583c",
+      "bytes": 117840,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-1024x512.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-300x150.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "eea533da8c43-BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-300x150.jpg",
+      "sha256": "eea533da8c43bcb886ab5bd01d02673bc44aeb38ffb65e08f2314a3ecbb55910",
+      "bytes": 19004,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-300x150.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-768x384.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "6d72b20082ec-BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-768x384.jpg",
+      "sha256": "6d72b20082ec20a6bb57b54dbf0dfc1693c216945127c18bc9f27099a98907eb",
+      "bytes": 75515,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px-768x384.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "fdc6691fd107-BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px.jpg",
+      "sha256": "fdc6691fd10727136856329b30a5b9d70b038200a7d400a8d0edf159198c681a",
+      "bytes": 263365,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2025/09/BM25-For-Them-For-Us-For-Generations_Banner_Shopee-Lazada_W1200-x-H600px.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-1024x320.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "72a234340d90-BM26_GJH-website_1920x600px-1024x320.jpg",
+      "sha256": "72a234340d904e65574267045e143027206d4d0a4b86c010d9b523077c2c7489",
+      "bytes": 85644,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-1024x320.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-1536x480.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "58c3020a2bd0-BM26_GJH-website_1920x600px-1536x480.jpg",
+      "sha256": "58c3020a2bd0239a8248d6d8a96d6d16cbebf0057cddb73886a34e2ec1719487",
+      "bytes": 152595,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-1536x480.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-300x94.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "08cf7d7159e0-BM26_GJH-website_1920x600px-300x94.jpg",
+      "sha256": "08cf7d7159e056c37f34fa80ae1259193501b812ec3dfc1e47edbfb1d9338c34",
+      "bytes": 11893,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-300x94.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-768x240.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "c66ff5640a7b-BM26_GJH-website_1920x600px-768x240.jpg",
+      "sha256": "c66ff5640a7be13000aff55efc513501153d50120d98fee9645263026c9ed71b",
+      "bytes": 55106,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px-768x240.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/borsch-med/20th-anniversary/"
+      ],
+      "status": "downloaded",
+      "file": "5f742ed5b20e-BM26_GJH-website_1920x600px.jpg",
+      "sha256": "5f742ed5b20e4d47ccfda28cf9239d5ea063a7b4a3062de4cece5d35bfc8c8d7",
+      "bytes": 394885,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/03/BM26_GJH-website_1920x600px.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD-1024x625.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "c08b332ac701-GoogleForm-Header_R3-CD-1024x625.jpg",
+      "sha256": "c08b332ac701dd87928cf602d7e534e7e120937fc9d58e5f5fcd9d3f4da6670c",
+      "bytes": 115758,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD-1024x625.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD-300x183.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "41bb9ce5bbfa-GoogleForm-Header_R3-CD-300x183.jpg",
+      "sha256": "41bb9ce5bbfac956a66d905abb174047c36713dbffff2cdac93a9355a3d32f24",
+      "bytes": 20072,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD-300x183.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD-768x469.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "1a0cdd20eae5-GoogleForm-Header_R3-CD-768x469.jpg",
+      "sha256": "1a0cdd20eae5bdbbf31523b5998e314ffe9340c9a37f17bff7e39dc84976f3f9",
+      "bytes": 78383,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD-768x469.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD.jpg",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "dfe71dbc44e3-GoogleForm-Header_R3-CD.jpg",
+      "sha256": "dfe71dbc44e328cbd508780220223d870fd269ff931fa30e2ba40f42056ad395",
+      "bytes": 425161,
+      "content_type": "image/jpeg",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/GoogleForm-Header_R3-CD.jpg"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5-1024x687.png",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "f48ffc7cc447-Thank-you5-1024x687.png",
+      "sha256": "f48ffc7cc44762af51da670d4d5c5909d6e73b270f8e11252e196b5d79f591a6",
+      "bytes": 754082,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5-1024x687.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5-300x201.png",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "185f42935133-Thank-you5-300x201.png",
+      "sha256": "185f42935133484af14b714f53d056e3aaa63d6b34ca14ba2c0eb5abd25e655e",
+      "bytes": 79702,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5-300x201.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5-768x515.png",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "fa619c0a0afa-Thank-you5-768x515.png",
+      "sha256": "fa619c0a0afa2d0a8cdaaffa0be32cbf8e5d9e529365366a8079f35679f6c946",
+      "bytes": 456886,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5-768x515.png"
+    },
+    {
+      "url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5.png",
+      "pages": [
+        "https://www.gjhglobal.com/gjh-one-service/"
+      ],
+      "status": "downloaded",
+      "file": "0890b831f346-Thank-you5.png",
+      "sha256": "0890b831f346678088ff5b551237691af6d29588e2c83bb78544fc1bd1b73eca",
+      "bytes": 1381135,
+      "content_type": "image/png",
+      "final_url": "https://www.gjhglobal.com/wp-content/uploads/2026/07/Thank-you5.png"
+    }
+  ]
+}

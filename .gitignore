@@ -1,0 +1,4 @@
+# Downloaded third-party reference assets remain local until reuse rights are confirmed.
+demos/corporate/gjh/research/source-assets/*
+!demos/corporate/gjh/research/source-assets/manifest.json
+!demos/corporate/gjh/research/source-assets/README.md
