@@ -7,5 +7,13 @@
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v1/",
   "officialWebsite": "https://www.gjh.com.sg/",
-  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v1",
+  "companyId": "gjh",
+  "displayTitle": "Corporate",
+  "summary": "The original warm corporate concept, with a balanced split-screen introduction.",
+  "styles": [
+    "corporate"
+  ],
+  "order": 10
 }

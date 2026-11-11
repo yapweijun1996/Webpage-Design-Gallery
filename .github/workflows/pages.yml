@@ -23,20 +23,12 @@ jobs:
         uses: actions/checkout@v6
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Prepare demo
-        run: |
-          mkdir -p _site/demos/corporate/gjh/v1/assets
-          cp index.html _site/index.html
-          cp demos/corporate/gjh/v1/{index.html,style.css,script.js} _site/demos/corporate/gjh/v1/
-          cp demos/corporate/gjh/v1/assets/{hero.webp,thumbnail.webp} _site/demos/corporate/gjh/v1/assets/
-          mkdir -p _site/demos/corporate/gjh/v5/assets
-          cp demos/corporate/gjh/v5/{index.html,style.css,script.js} _site/demos/corporate/gjh/v5/
-          cp demos/corporate/gjh/v5/assets/*.webp _site/demos/corporate/gjh/v5/assets/
-          for version in v6 v7; do
-            mkdir -p "_site/demos/corporate/gjh/$version/assets"
-            cp "demos/corporate/gjh/$version/"{index.html,style.css,script.js} "_site/demos/corporate/gjh/$version/"
-            cp "demos/corporate/gjh/$version/assets/"*.webp "demos/corporate/gjh/$version/assets/"*.jpg "_site/demos/corporate/gjh/$version/assets/"
-          done
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build company gallery
+        run: python scripts/build_gallery.py --output _site
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:

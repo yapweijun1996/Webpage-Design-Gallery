@@ -1,0 +1,17 @@
+[
+  {
+    "id": "gjh",
+    "slug": "gjh",
+    "name": "Goh Joo Hin",
+    "legalName": "Goh Joo Hin Pte Ltd",
+    "initials": "GJH",
+    "industry": "FMCG",
+    "categories": ["corporate"],
+    "location": "Singapore",
+    "description": "Food, lifestyle and wellness. Explore independent website concepts for Goh Joo Hin.",
+    "demoDirectory": "demos/corporate/gjh",
+    "featuredVersion": "v7",
+    "status": "published",
+    "officialWebsite": "https://www.gjh.com.sg/"
+  }
+]

@@ -1,15 +1,50 @@
 # Webpage Design Gallery
 
-A collection of independent, interactive webpage design concepts. The gallery includes unofficial Goh Joo Hin corporate landing page concepts; it is not affiliated with or endorsed by the company.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. The public collection currently contains **one company and four designs**. All concepts are unofficial and do not imply company endorsement.
 
-## Local preview
+## Browse
 
-Run `python -m http.server 8000` from the repository root and open `http://localhost:8000/`. The gallery links to the demo. No build or backend is needed.
+- `/index.html`: company discovery with search, category filtering, sorting and pagination.
+- `/companies/index.html`: the complete company directory.
+- `/companies/gjh/index.html`: GJH's design collection, style filters and two-design comparison selection.
+- `/designs/index.html?company=gjh&design=v6`: design details and captured desktop/tablet/mobile screenshots.
+- `/compare/index.html?company=gjh&left=v5&right=v7`: two live previews or screenshots, device widths, optional relative scroll synchronization, and fullscreen preview where supported.
+- Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/` and `v7/` URLs are preserved.
+
+## Local development
+
+Python 3.10+ is required for the static generator. No npm packages, backend, database or account system are required.
+
+```sh
+python scripts/build_gallery.py
+python -m http.server 8000
+```
+
+Open `http://localhost:8000/`. The generated company and demo links work without JavaScript; search, filters, design details and comparison need JavaScript and an HTTP server. Do not edit generated HTML directly.
+
+## Add a company or design
+
+1. Add a company to `data/companies.json` with a stable `id`, unique `slug`, category IDs, official website and demo directory. Keep IDs stable when renaming a company.
+2. Add independent demos under that company's demo directory. Each version needs `index.html`, `style.css`, `script.js`, `assets/`, screenshots at `1440.png`, `768.png` and `390.png`, and `metadata.json` following an existing version's contract.
+3. Give each design a stable unique `id`, matching `companyId`, `displayTitle`, `summary`, `styles` and explicit numeric `order`. Version labels do not determine sorting; gaps between versions are allowed.
+4. Run the generator. It reads demo metadata, validates paths and references, creates static gallery pages and emits `data/designs.json`. Commit those generated outputs with their sources.
+
+`data/categories.json` and `data/styles.json` define the filter vocabularies. Company categories and design styles are arrays. Gallery templates live in `templates/gallery/`; shared presentation and behavior live in `assets/gallery.css` and `src/gallery.js`. `data/designs.json` is generated, not a second authoring source.
+
+## Verification
+
+```sh
+python scripts/build_gallery.py --check
+python -m unittest discover -s tests -p test_gallery.py -v
+python tests/browser_gallery.py
+```
+
+The browser check uses the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. It builds into a temporary directory and verifies a GitHub Pages-style path prefix. See [verification evidence](docs/gallery-v2-review.md) for coverage and limitations.
 
 ## GitHub Pages
 
-Set the Pages source to GitHub Actions. After the commit is pushed, run **Deploy demo to GitHub Pages** manually from the Actions tab and select `main`. The workflow does not deploy on push. It publishes only the gallery entry page and the GJH V1, V5, V6 and V7 demo files; research downloads, screenshots, and documentation are excluded from the Pages artifact.
+Pages uses the manually triggered **Deploy demo to GitHub Pages** workflow. After pushing a verified commit, run it on `main`. The workflow generates `_site` from metadata, includes only gallery resources and known demo runtime assets/screenshots, and excludes research downloads and project documentation. Local staging uses `python scripts/build_gallery.py --output _site`.
 
-## Research assets
+## Assets and research
 
-The GJH research folder includes a sourced company profile and a download manifest. Downloaded third-party reference files remain local and are ignored by Git until their rights and intended use have been reviewed. Public availability is not permission to republish or reuse them.
+Downloaded third-party research files remain ignored by Git. Official brand assets explicitly used in V6/V7 are included with user-confirmed permission and attributed in those demo READMEs. Other scene images are AI-generated illustrations. The sourced company profile is in `demos/corporate/gjh/research/`. Current commercial relationships and claims should be rechecked before commercial use.

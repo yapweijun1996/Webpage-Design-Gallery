@@ -1,0 +1,5 @@
+[
+  {"id": "corporate", "slug": "corporate", "name": "Corporate", "parentId": null},
+  {"id": "retail", "slug": "retail", "name": "Retail", "parentId": null},
+  {"id": "food-beverage", "slug": "food-beverage", "name": "Food & Beverage", "parentId": null}
+]

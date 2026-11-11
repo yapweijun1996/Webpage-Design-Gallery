@@ -7,5 +7,14 @@
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v6/",
   "officialWebsite": "https://www.gjh.com.sg/",
-  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v6",
+  "companyId": "gjh",
+  "displayTitle": "Modern Minimal",
+  "summary": "A clean, image-led direction with generous white space and simple pathways.",
+  "styles": [
+    "corporate",
+    "minimal"
+  ],
+  "order": 30
 }

@@ -1,0 +1,157 @@
+[
+  {
+    "id": "gjh-v1",
+    "companyId": "gjh",
+    "slug": "v1",
+    "version": "v1",
+    "title": "Corporate",
+    "description": "The original warm corporate concept, with a balanced split-screen introduction.",
+    "styles": [
+      "corporate"
+    ],
+    "status": "concept",
+    "order": 10,
+    "demoPath": "demos/corporate/gjh/v1/index.html",
+    "thumbnail": "demos/corporate/gjh/v1/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v1/screenshots/1440.png",
+        "width": 1440,
+        "height": 5246
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v1/screenshots/768.png",
+        "width": 768,
+        "height": 5057
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v1/screenshots/390.png",
+        "width": 390,
+        "height": 7519
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v5",
+    "companyId": "gjh",
+    "slug": "v5",
+    "version": "v5",
+    "title": "Heritage Modern",
+    "description": "An editorial approach balancing heritage, everyday life and business partnership.",
+    "styles": [
+      "heritage",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 20,
+    "demoPath": "demos/corporate/gjh/v5/index.html",
+    "thumbnail": "demos/corporate/gjh/v5/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v5/screenshots/1440.png",
+        "width": 1440,
+        "height": 5450
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v5/screenshots/768.png",
+        "width": 768,
+        "height": 5528
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v5/screenshots/390.png",
+        "width": 390,
+        "height": 8949
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v6",
+    "companyId": "gjh",
+    "slug": "v6",
+    "version": "v6",
+    "title": "Modern Minimal",
+    "description": "A clean, image-led direction with generous white space and simple pathways.",
+    "styles": [
+      "corporate",
+      "minimal"
+    ],
+    "status": "concept",
+    "order": 30,
+    "demoPath": "demos/corporate/gjh/v6/index.html",
+    "thumbnail": "demos/corporate/gjh/v6/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v6/screenshots/1440.png",
+        "width": 1440,
+        "height": 5767
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v6/screenshots/768.png",
+        "width": 768,
+        "height": 5931
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v6/screenshots/390.png",
+        "width": 390,
+        "height": 9063
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v7",
+    "companyId": "gjh",
+    "slug": "v7",
+    "version": "v7",
+    "title": "Heritage Noir",
+    "description": "A dramatic dark-green editorial direction with a heritage-first story.",
+    "styles": [
+      "heritage",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 40,
+    "demoPath": "demos/corporate/gjh/v7/index.html",
+    "thumbnail": "demos/corporate/gjh/v7/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v7/screenshots/1440.png",
+        "width": 1440,
+        "height": 6074
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v7/screenshots/768.png",
+        "width": 768,
+        "height": 6228
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v7/screenshots/390.png",
+        "width": 390,
+        "height": 9266
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  }
+]

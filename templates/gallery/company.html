@@ -1,0 +1,17 @@
+  <div class="container"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../index.html">All companies</a><span aria-hidden="true">/</span><span aria-current="page">$company_name</span></nav></div>
+  <section class="company-intro container">
+    <div class="company-avatar" aria-hidden="true">$initials<span></span></div>
+    <div class="company-intro-copy"><p class="eyebrow">THE DESIGN COLLECTION</p><h1>$company_name<span class="company-title-dot">.</span></h1><p>$company_description</p><div class="company-tags"><span>$industry</span><span>$location</span><span>$design_summary</span></div></div>
+    <a class="official-link" href="$official_website">Official company website <span aria-hidden="true">&nearr;</span></a>
+  </section>
+  <section class="design-section container" aria-labelledby="designs-heading">
+    <div class="collection-heading"><div><p class="eyebrow">ONE COMPANY. DIFFERENT PERSPECTIVES.</p><h2 id="designs-heading">Explore the designs<span class="count-badge">$design_count</span></h2></div><p>Choose a direction. Make it your own.</p></div>
+    <div class="filter-bar" id="filters"><label>Design style<select id="style-filter"><option value="">All styles</option>$style_options</select></label><label>Sort designs<select id="design-sort"><option value="curated">Collection order</option><option value="title">Name A–Z</option></select></label><p class="filter-hint">Select two different designs to compare.</p></div>
+    <noscript><p>Filters and comparison selection need JavaScript. You can open every live demo directly below.</p></noscript>
+    <p class="results-status" role="status" aria-live="polite"></p>
+    <div class="design-grid">$design_cards</div>
+    <div class="empty-results" hidden><h3>No matching designs</h3><p>Choose another style to explore more directions.</p><button type="button" data-reset>Clear filters</button></div>
+    <div class="compare-tray" aria-label="Design comparison selection"><div><strong id="selection-count" role="status" aria-live="polite">0 of 2 selected</strong><p id="selection-names">Choose two designs from this collection.</p></div><button type="button" id="clear-selection">Clear</button><a class="primary-link" id="compare-selected" aria-disabled="true" tabindex="-1">Compare selected <span aria-hidden="true">&rarr;</span></a></div>
+    <aside class="concept-note"><span class="note-icon" aria-hidden="true">i</span><p>These are independent, unofficial design concepts. They are not affiliated with or endorsed by $company_name. Each demo identifies its official brand assets and illustrative imagery.</p></aside>
+    <a class="back-link" href="../../index.html">&larr; Back to all companies</a>
+  </section>

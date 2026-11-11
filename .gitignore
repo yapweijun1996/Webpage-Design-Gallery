@@ -2,3 +2,5 @@
 demos/corporate/gjh/research/source-assets/*
 !demos/corporate/gjh/research/source-assets/manifest.json
 !demos/corporate/gjh/research/source-assets/README.md
+_site/
+__pycache__/

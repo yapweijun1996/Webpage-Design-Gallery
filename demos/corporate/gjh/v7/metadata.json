@@ -7,5 +7,14 @@
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v7/",
   "officialWebsite": "https://www.gjh.com.sg/",
-  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v7",
+  "companyId": "gjh",
+  "displayTitle": "Heritage Noir",
+  "summary": "A dramatic dark-green editorial direction with a heritage-first story.",
+  "styles": [
+    "heritage",
+    "editorial"
+  ],
+  "order": 40
 }

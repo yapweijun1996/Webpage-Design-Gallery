@@ -7,5 +7,14 @@
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v5/",
   "officialWebsite": "https://www.gjh.com.sg/",
-  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v5",
+  "companyId": "gjh",
+  "displayTitle": "Heritage Modern",
+  "summary": "An editorial approach balancing heritage, everyday life and business partnership.",
+  "styles": [
+    "heritage",
+    "editorial"
+  ],
+  "order": 20
 }
