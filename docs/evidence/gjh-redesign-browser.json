@@ -1,10 +1,9 @@
 {
-  "capturedAt": "2026-11-11T09:21:22.020307+00:00",
+  "capturedAt": "2026-11-11T11:31:58.729630+00:00",
   "runtime": "Local headless Chrome, GitHub Pages-style project prefix",
   "axe": {
-    "version": "4.10.3",
-    "sha256": "880970c081707360e64f34cea25ff91892f5bc95675b0776925b9709dd8a68bb",
-    "status": "PASS"
+    "status": "UNVERIFIED",
+    "reason": "No local audit bundle supplied"
   },
   "cases": [
     {
@@ -17,16 +16,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".text-link[href$=\"#brands\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v1",
@@ -38,16 +28,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".text-link[href$=\"#brands\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v1",
@@ -59,19 +40,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#brands\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v1",
@@ -83,19 +52,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#brands\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v1",
@@ -107,19 +64,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#brands\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v1",
@@ -131,19 +76,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#brands\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v1",
@@ -155,19 +88,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#brands\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v5",
@@ -179,16 +100,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".text-link[href$=\"#about\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v5",
@@ -200,16 +112,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".text-link[href$=\"#about\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v5",
@@ -221,19 +124,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#about\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v5",
@@ -245,19 +136,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#about\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v5",
@@ -269,19 +148,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#about\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v5",
@@ -293,19 +160,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#about\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v5",
@@ -317,19 +172,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#about\"] > span[aria-hidden=\"true\"]"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v6",
@@ -341,16 +184,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".bento-photo > p"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v6",
@@ -362,16 +196,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".bento-photo > p"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v6",
@@ -383,19 +208,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".bento-photo > p"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v6",
@@ -407,19 +220,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".bento-photo > p"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v6",
@@ -431,19 +232,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".bento-photo > p"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v6",
@@ -455,19 +244,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".bento-photo > p"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v6",
@@ -479,19 +256,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".bento-photo > p"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v7",
@@ -503,25 +268,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".text-link[href$=\"#business\"] > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".hero-visual > figcaption"
-            ],
-            [
-              ".image-label > span"
-            ],
-            [
-              ".image-label > strong"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v7",
@@ -533,25 +280,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              ".text-link[href$=\"#business\"] > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".hero-visual > figcaption"
-            ],
-            [
-              ".image-label > span"
-            ],
-            [
-              ".image-label > strong"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v7",
@@ -563,28 +292,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#business\"] > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".hero-visual > figcaption"
-            ],
-            [
-              ".image-label > span"
-            ],
-            [
-              ".image-label > strong"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v7",
@@ -596,28 +304,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#business\"] > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".hero-visual > figcaption"
-            ],
-            [
-              ".image-label > span"
-            ],
-            [
-              ".image-label > strong"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v7",
@@ -629,28 +316,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#business\"] > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".hero-visual > figcaption"
-            ],
-            [
-              ".image-label > span"
-            ],
-            [
-              ".image-label > strong"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v7",
@@ -662,28 +328,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#business\"] > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".hero-visual > figcaption"
-            ],
-            [
-              ".image-label > span"
-            ],
-            [
-              ".image-label > strong"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     },
     {
       "version": "v7",
@@ -695,28 +340,7 @@
       "consoleErrors": [],
       "failedResponses": [],
       "axeViolations": [],
-      "axeNeedsManualReview": [
-        {
-          "id": "color-contrast",
-          "targets": [
-            [
-              "button > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".text-link[href$=\"#business\"] > span[aria-hidden=\"true\"]"
-            ],
-            [
-              ".hero-visual > figcaption"
-            ],
-            [
-              ".image-label > span"
-            ],
-            [
-              ".image-label > strong"
-            ]
-          ]
-        }
-      ]
+      "axeNeedsManualReview": []
     }
   ],
   "limitations": [
@@ -725,6 +349,6 @@
     "No owner design approval or measured business conversion result is implied."
   ],
   "unalteredOfficialAssetCopies": "PASS",
-  "browserVersion": "157.0.8103.40",
+  "browserVersion": "157.0.8103.51",
   "noJavaScriptNavigation": "PASS"
 }
