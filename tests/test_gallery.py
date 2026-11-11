@@ -16,7 +16,7 @@ class GalleryTests(unittest.TestCase):
     def test_real_company_contains_all_versions(self):
         catalog = gallery.load_catalog()
         versions = [d["version"] for d in catalog["designs"]]
-        self.assertEqual(versions, ["v1", "v5", "v6", "v7", "v8"])
+        self.assertEqual(versions, ["v1", "v5", "v6", "v7", "v8", "v9"])
         self.assertEqual({d["companyId"] for d in catalog["designs"]}, {"gjh"})
 
     def test_v8_metadata_exposes_immersive_concept_contract(self):

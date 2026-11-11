@@ -92,6 +92,10 @@ def run():
                 page = context.new_page()
                 online_errors = []
                 page.on("pageerror", lambda error: online_errors.append(str(error)))
+                viewport = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+                for path in ("index.html", "companies/gjh/index.html", "designs/index.html", "compare/index.html", "offline.html"):
+                    page.goto(base + path, wait_until="networkidle")
+                    assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport, path
                 page.goto(base + "companies/gjh/index.html?review=keep", wait_until="networkidle")
                 page.wait_for_function("() => navigator.serviceWorker.ready.then(r => r.active?.state === 'activated')")
                 page.reload(wait_until="networkidle")
@@ -114,7 +118,7 @@ def run():
                     page.evaluate("document.activeElement.blur(); scrollTo(0, 0)")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
                     assert page.locator("#check-update").bounding_box()["height"] >= 44
-                    assert page.locator('meta[name="viewport"]').get_attribute("content").endswith("viewport-fit=cover")
+                    assert page.locator('meta[name="viewport"]').get_attribute("content") == "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
                     assert page.locator('meta[name="theme-color"]').get_attribute("content") == "#ffffff"
                     assert page.locator(".app-chrome").evaluate("e => getComputedStyle(e).transitionDuration") == "0s"
                     page.screenshot(path=str(screenshots / f"company-{width}.png"), full_page=True)

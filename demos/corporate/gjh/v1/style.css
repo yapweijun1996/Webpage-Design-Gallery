@@ -1,3 +1,6 @@
+.icon { width: 1em; height: 1em; flex: 0 0 auto; vertical-align: middle; }
+.icon-menu { width: 20px; height: 20px; }
+.arrow .icon { width: 21px; height: 21px; }
 @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('assets/manrope-latin.woff2') format('woff2'); }
 :root {
   --accent: #d31b47;
