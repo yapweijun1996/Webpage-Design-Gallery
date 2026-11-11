@@ -1,0 +1,21 @@
+{
+  "runtime": "Real headless Chrome service workers under /Webpage-Design-Gallery/",
+  "checks": {
+    "manifestAndChromeInstallability": "PASS",
+    "responsiveSafeAreaCSSReducedMotionSmartHeaderScrollTop": "PASS",
+    "offlineLaunchSearchFiltersAndExplicitDemoFallback": "PASS",
+    "identityMismatchAndMixedFileHashFailClosed": "PASS",
+    "waitingVersionPromptLoaderSingleReloadAndOtherTabConsent": "PASS",
+    "onlyOwnedOldCachesDeleted": "PASS",
+    "activationTimeoutRecovery": "PASS"
+  },
+  "limitations": [
+    "Physical iOS/Safari installation and status-bar rendering NOT RUN",
+    "Native OS install dialog NOT RUN; browser manifest/installability inspected",
+    "Light-only gallery; dark-mode system chrome N/A"
+  ],
+  "installability": {
+    "installabilityErrors": []
+  },
+  "browserVersion": "157.0.8103.40"
+}

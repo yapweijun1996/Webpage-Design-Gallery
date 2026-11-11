@@ -38,9 +38,18 @@ python scripts/build_gallery.py --check
 python -m unittest discover -s tests -p test_gallery.py -v
 python tests/browser_gallery.py
 python tests/browser_gjh_demos.py
+python tests/browser_pwa.py
 ```
 
 Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. Both build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.
+
+## PWA and updates
+
+The Gallery is a standalone PWA with project-scoped caching. Its header shows the application version/build and **Check updates**. New releases download automatically during visible-tab checks; **Update to v…** activates the verified waiting worker only when clicked, displays an updating dialog, then reloads the same URL. Other open tabs require their own reload consent. Checks run on startup, on returning to a visible tab (throttled to ten minutes), on reconnect and manually.
+
+`data/app.json` owns the semantic version. The generator derives a changing build ID from runtime sources, templates, catalog and demo assets; it emits `version.json` and `sw.js`. Edit `templates/gallery/sw.js`, not the generated worker. Every precached file is SHA-256 checked before a candidate release can install. Failed/mixed CDN releases leave the current cache intact.
+
+After the first successful installation, company browsing, search, filters, collections and thumbnails work offline. Independent live demos, full screenshots and official external sites require a connection; an explicit fallback explains this. The Gallery has light system chrome, safe-area CSS, a smart scrolling header and a contextual back-to-top action. Physical iOS and native installation dialogs remain unverified. See [PWA verification](docs/pwa-review.md).
 
 ## GitHub Pages
 

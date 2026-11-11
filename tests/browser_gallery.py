@@ -103,9 +103,9 @@ def run():
                     page.screenshot(path=str(screenshots / f"compare-{width}.png"), full_page=True)
                     if width == 1440 and page.evaluate("document.fullscreenEnabled"):
                         page.locator('[data-fullscreen="0"]').click()
-                        page.wait_for_function("document.fullscreenElement !== null")
+                        page.wait_for_function("() => document.fullscreenElement !== null")
                         page.evaluate("document.exitFullscreen()")
-                        page.wait_for_function("document.fullscreenElement === null")
+                        page.wait_for_function("() => document.fullscreenElement === null")
                     frames[0].evaluate("scrollTo(0, 800)")
                     page.wait_for_timeout(120)
                     assert frames[1].evaluate("scrollY") == 0
@@ -133,7 +133,9 @@ def run():
                     assert not errors, errors
                     evidence.append({"width": width, "companyFlow": "PASS", "filters": "PASS", "compare": "PASS", "deviceWidths": "PASS", "syncScroll": "PASS", "images": "PASS", "consoleErrors": errors})
                     context.close()
-                context = browser.new_context(viewport={"width": 1440, "height": 1000})
+                # These fixtures deliberately abort/replace network responses; isolate
+                # them from the real service worker tested in browser_pwa.py.
+                context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
                 page = context.new_page()
                 for query in ("company=gjh&left=v5&right=v5", "company=unknown&left=v1&right=v7", "company=gjh&left=v1"):
                     page.goto(base + "compare/index.html?" + query)

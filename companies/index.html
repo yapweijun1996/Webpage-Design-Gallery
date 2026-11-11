@@ -2,16 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Explore independent website design concepts, organized by company.">
-  <meta name="theme-color" content="#f7f8fa">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Webpage Gallery">
+  <meta name="app-version" content="1.0.0">
+  <meta name="app-build" content="a72afdff9dd5ba5f">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>Companies — Webpage Design Gallery</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="../assets/icons/gallery.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/icons/gallery-180.png">
+  <link rel="manifest" href="../manifest.webmanifest">
   <link rel="stylesheet" href="../assets/gallery.css">
+  <link rel="stylesheet" href="../assets/pwa.css">
   <script type="module" src="../src/gallery.js"></script>
+  <script type="module" src="../src/pwa.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+  <div class="system-chrome" aria-hidden="true"></div>
+  <div class="app-chrome">
   <header class="site-header">
     <div class="header-inner">
       <a class="site-identity" href="../index.html" aria-label="Webpage Design Gallery home">
@@ -23,9 +36,14 @@
         <a class="nav-link categories-link" href="../companies/index.html#filters">Categories</a>
         <a class="nav-link about-link" href="#about-gallery">About the gallery</a>
       </nav>
-      <span class="header-note"><span aria-hidden="true"></span> A collection of possibilities</span>
+      <div class="app-release"><span class="app-version">v1.0.0 <small>a72afdff9dd5ba5f</small></span><button type="button" id="check-update" hidden>Check updates</button></div>
     </div>
   </header>
+  <aside class="update-notice" id="update-notice" hidden aria-label="Gallery update">
+    <p id="update-message" role="status" aria-live="polite"></p><button type="button" id="apply-update">Update now</button>
+  </aside>
+  <p class="connection-notice" id="connection-notice" hidden role="status">Offline: company browsing is saved. Live demos and full screenshots need a connection.</p>
+  </div>
   <main id="main" data-page="companies">  <section class="home-intro container">
     <div class="intro-copy"><p class="eyebrow"><span aria-hidden="true"></span> DESIGN EXPLORATION PLATFORM</p><h1>All companies.<br><span>Find your next direction.</span></h1><p class="intro-description">Explore website design concepts by company, industry and visual style. Find a company. Discover a direction. Experience a live demo.</p><a class="primary-link" href="#companies">Explore companies <span aria-hidden="true">&darr;</span></a></div>
     <div class="intro-aside"><p class="aside-label">YOUR NEXT DESIGN STARTS HERE</p><ol class="browse-steps"><li><span>01</span>Choose a company</li><li><span>02</span>Explore design directions</li><li><span>03</span>Open a live demo <i aria-hidden="true">&nearr;</i></li></ol></div>
@@ -48,5 +66,8 @@
     <div><span class="footer-brand">Good ideas deserve a place.</span><p>Independent website design concepts, organized by company.<br>Explore the possibilities. Open a demo. Find a direction.</p></div>
     <div class="footer-note"><p>Concepts are unofficial and do not imply company endorsement.</p><a href="../index.html">All companies <span aria-hidden="true">&nearr;</span></a></div>
   </footer>
+  <div class="app-tools"><p id="app-status" role="status" aria-live="polite">Version v1.0.0 · a72afdff9dd5ba5f</p><button type="button" id="install-app" hidden>Install gallery</button><details><summary>Install help &amp; offline access</summary><p>Use your browser's Install action. On iPhone or iPad, open Share and choose Add to Home Screen. Company browsing, search, design collections and thumbnails work offline once saved. Demos and large screenshots need a connection.</p></details></div>
+  <button class="scroll-top" type="button" id="scroll-top" aria-label="Back to top" hidden>↑</button>
+  <dialog id="update-dialog" aria-labelledby="update-title"><div class="update-spinner" aria-hidden="true"></div><h2 id="update-title">Updating Webpage Gallery</h2><p id="update-progress" role="status">Preparing the latest version…</p><button type="button" id="close-update" hidden>Close and try again</button></dialog>
 </body>
 </html>

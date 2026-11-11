@@ -2,16 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="$description">
-  <meta name="theme-color" content="#f7f8fa">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Webpage Gallery">
+  <meta name="app-version" content="$app_version">
+  <meta name="app-build" content="$app_build">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>$title</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="${prefix}assets/icons/gallery.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="${prefix}assets/icons/gallery-180.png">
+  <link rel="manifest" href="${prefix}manifest.webmanifest">
   <link rel="stylesheet" href="${prefix}assets/gallery.css">
+  <link rel="stylesheet" href="${prefix}assets/pwa.css">
   <script type="module" src="${prefix}src/gallery.js"></script>
+  <script type="module" src="${prefix}src/pwa.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+  <div class="system-chrome" aria-hidden="true"></div>
+  <div class="app-chrome">
   <header class="site-header">
     <div class="header-inner">
       <a class="site-identity" href="${prefix}index.html" aria-label="Webpage Design Gallery home">
@@ -23,13 +36,21 @@
         <a class="nav-link categories-link" href="${prefix}companies/index.html#filters">Categories</a>
         <a class="nav-link about-link" href="#about-gallery">About the gallery</a>
       </nav>
-      <span class="header-note"><span aria-hidden="true"></span> A collection of possibilities</span>
+      <div class="app-release"><span class="app-version">v$app_version <small>$app_build</small></span><button type="button" id="check-update" hidden>Check updates</button></div>
     </div>
   </header>
+  <aside class="update-notice" id="update-notice" hidden aria-label="Gallery update">
+    <p id="update-message" role="status" aria-live="polite"></p><button type="button" id="apply-update">Update now</button>
+  </aside>
+  <p class="connection-notice" id="connection-notice" hidden role="status">Offline: company browsing is saved. Live demos and full screenshots need a connection.</p>
+  </div>
   <main id="main" data-page="$page_kind">$content</main>
   <footer class="site-footer" id="about-gallery">
     <div><span class="footer-brand">Good ideas deserve a place.</span><p>Independent website design concepts, organized by company.<br>Explore the possibilities. Open a demo. Find a direction.</p></div>
     <div class="footer-note"><p>Concepts are unofficial and do not imply company endorsement.</p><a href="${prefix}index.html">All companies <span aria-hidden="true">&nearr;</span></a></div>
   </footer>
+  <div class="app-tools"><p id="app-status" role="status" aria-live="polite">Version v$app_version · $app_build</p><button type="button" id="install-app" hidden>Install gallery</button><details><summary>Install help &amp; offline access</summary><p>Use your browser's Install action. On iPhone or iPad, open Share and choose Add to Home Screen. Company browsing, search, design collections and thumbnails work offline once saved. Demos and large screenshots need a connection.</p></details></div>
+  <button class="scroll-top" type="button" id="scroll-top" aria-label="Back to top" hidden>↑</button>
+  <dialog id="update-dialog" aria-labelledby="update-title"><div class="update-spinner" aria-hidden="true"></div><h2 id="update-title">Updating Webpage Gallery</h2><p id="update-progress" role="status">Preparing the latest version…</p><button type="button" id="close-update" hidden>Close and try again</button></dialog>
 </body>
 </html>

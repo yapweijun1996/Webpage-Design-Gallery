@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Webpage Design Gallery",
+  "short_name": "Webpage Gallery",
+  "description": "Explore independent website design concepts, organized by company.",
+  "lang": "en",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8fa",
+  "theme_color": "#ffffff",
+  "prefer_related_applications": false,
+  "icons": [
+    {"src": "assets/icons/gallery-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "assets/icons/gallery-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
