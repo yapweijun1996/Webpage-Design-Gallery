@@ -74,6 +74,7 @@ ui.onView(visual => { if (visual) { last = performance.now(); resume(); render()
 document.addEventListener('keydown', event => {
   if (event.code === 'KeyE' && nearby && !ui.paused() && !event.repeat) { event.preventDefault(); player.clearInput(); ui.inspect(nearby); }
 });
+document.addEventListener('click', () => { if (ui.paused()) player?.clearInput(); });
 document.addEventListener('visibilitychange', () => {
   player?.clearInput();
   if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else resume();
@@ -92,7 +93,7 @@ async function initialize() {
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = quality; renderer.shadowMap.type = T.PCFSoftShadowMap;
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, quality);
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas);
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane);
   player.setPaused(() => ui.paused());
   function resize() {
     const width = canvas.clientWidth, height = canvas.clientHeight; if (!width || !height) return;

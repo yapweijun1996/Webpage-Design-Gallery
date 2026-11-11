@@ -8,6 +8,7 @@ export async function createWorld(T, R, physics, shadows) {
     jade: mat(0x21483e, {roughness: .24, metalness: .22}), jadeAlt: mat(0x244c42, {roughness: .28, metalness: .18}),
     green: mat(0x153c30), dark: mat(0x0c2923), ivory: mat(0xe3d6b7), cream: mat(0xf5e8cb),
     brass: mat(0xb59b62, {metalness: .68, roughness: .31}), wood: mat(0x6b4931), oak: mat(0xa28055),
+    timber: mat(0xa48b67), timberAlt: mat(0xa08763),
     foliage: mat(0x315b38), leaf: mat(0x527548), pot: mat(0xb6ab8c), seat: mat(0xc8b38e),
     glow: mat(0xffe7b4, {emissive: 0xffd08a, emissiveIntensity: 1.2}),
     water: mat(0x4f8c80, {metalness: .48, roughness: .15}),
@@ -98,8 +99,9 @@ export async function createWorld(T, R, physics, shadows) {
   bench(-7.8, 9.5); bench(7.8, 9.5); bench(-7.8, 13, -1); bench(7.8, 13, -1);
   // Low water court, not a wall blocking the whole concourse.
   cylinder('brass', 0, .12, 7.5, 2.25, .22); cylinder('ivory', 0, .38, 7.5, 2.04, .48);
-  cylinder('water', 0, .63, 7.5, 1.88, .045); cylinder('brass', 0, .88, 7.5, .45, .65);
-  sphere('brass', 0, 1.36, 7.5, .62, .32, .62);
+  cylinder('water', 0, .63, 7.5, 1.88, .045); cylinder('brass', 0, .88, 7.5, .08, .65);
+  const sculpture = new T.Mesh(new T.TorusGeometry(.64, .045, 8, 48), materials.brass);
+  sculpture.position.set(0, 1.65, 7.5); scene.add(sculpture);
   physics.createCollider(R.ColliderDesc.cylinder(.6, 2.25).setTranslation(0, .5, 7.5)); shadow(0, 7.5, 5.4, 5.4);
   const ring = new T.Mesh(new T.RingGeometry(2.55, 2.58, 64), materials.brass); ring.rotation.x = -Math.PI / 2; ring.position.set(0, .026, 7.5); scene.add(ring);
   // Three 12cm steps provide a real auto-step path to a quiet seating terrace.
@@ -109,7 +111,7 @@ export async function createWorld(T, R, physics, shadows) {
   const stores = {newmoon: -10, mili: 0, gogo: 10};
   for (const [zone, x] of Object.entries(stores)) {
     const wall = zone === 'mili' ? 'cream' : 'green';
-    for (let i = 0; i < 18; i++) box(i % 3 ? 'oak' : 'wood', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
+    for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     box(wall, x, 2.85, -10.5, 10, 5.7, .25, true);
     for (const side of [-1, 1]) {
       box(wall, x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5, true);
@@ -122,6 +124,7 @@ export async function createWorld(T, R, physics, shadows) {
     box('brass', x, .03, .25, 4.7, .025, .7);
     const logo = zone === 'newmoon' ? 'new-moon-logo.svg' : `${zone}-logo.jpg`;
     box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05); art(logo, x, 4.67, .4, 2.2);
+    box('brass', x, 4.02, .29, 9.3, .025, .04);
     sign(zone === 'newmoon' ? '01  /  THE PROVISION ROOM' : zone === 'mili' ? '02  /  THE GATHERING ROOM' : '03  /  THE GARDEN ROOM', x, 3.75, .32, 3.9, .32);
     // Two independently kinematic glass leaves slide clear of the walking capsule.
     const leaves = [];

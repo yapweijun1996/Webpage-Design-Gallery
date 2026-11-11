@@ -498,8 +498,8 @@
     "animationInspection": "Parsed GLB JSON and animation sampler data via Python struct/json. Walk and sprint root-translation X and Z are identically zero; Y is a cyclic bob returning to zero. No horizontal root motion.",
     "coordinateSystem": {
       "up": "+Y",
-      "forward": "-Z",
-      "forwardEvidence": "Software orthographic raster of original mesh triangles and colormap from both Z directions shows the face/glasses from -Z and back of head from +Z. Inspection image was not retained.",
+      "forward": "+Z",
+      "forwardEvidence": "Actual Three.js render inspection showed the face toward the +Z follow camera. Runtime rotates the avatar by PI to face the -Z walking direction; this supersedes the initial software-raster interpretation.",
       "bindPoseBounds": {
         "min": [
           -0.3835841417312622,

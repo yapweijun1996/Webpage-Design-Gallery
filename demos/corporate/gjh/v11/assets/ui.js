@@ -156,6 +156,7 @@ export function createUI() {
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
         nearby = next;
+        document.body.classList.toggle('is-nearby', Boolean(nearby));
         inspectPrompt.hidden = !nearby;
         nearbyName.textContent = nearby ? records.get(nearby).name : '';
         inspectButton.setAttribute('aria-label', nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
