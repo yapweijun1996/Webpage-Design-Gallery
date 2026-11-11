@@ -1,0 +1,129 @@
+{
+  "capturedAt": "2026-11-11T09:52:10.113407+00:00",
+  "route": "/demos/corporate/gjh/v8/index.html",
+  "runtime": "Local headless Chrome, GitHub Pages-style project prefix",
+  "viewportCases": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "status": "PASS",
+      "reducedMotion": true,
+      "images": 13,
+      "consoleErrors": [],
+      "httpFailures": [],
+      "keyboardAndControls": "PASS"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "status": "PASS",
+      "reducedMotion": true,
+      "images": 13,
+      "consoleErrors": [],
+      "httpFailures": [],
+      "keyboardAndControls": "PASS"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "status": "PASS",
+      "reducedMotion": true,
+      "images": 13,
+      "consoleErrors": [],
+      "httpFailures": [],
+      "keyboardAndControls": "PASS"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "status": "PASS",
+      "reducedMotion": true,
+      "images": 13,
+      "consoleErrors": [],
+      "httpFailures": [],
+      "keyboardAndControls": "PASS"
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "status": "PASS",
+      "reducedMotion": true,
+      "images": 13,
+      "consoleErrors": [],
+      "httpFailures": [],
+      "keyboardAndControls": "PASS"
+    }
+  ],
+  "normalMotion": {
+    "desktop": {
+      "status": "PASS",
+      "checks": {
+        "heroY": "17.11111111111111px",
+        "heroScale": "1.039",
+        "brandDepthValues": [
+          "-5.649224022641744px",
+          "0px",
+          "5.649224022641744px"
+        ],
+        "brandTilt": {
+          "x": "2.1000002156362134deg",
+          "y": "0.9999998615394288deg"
+        },
+        "automaticMilestone": "2004",
+        "journeyProgress": "100%"
+      },
+      "consoleErrors": [],
+      "httpFailures": [],
+      "skipLinkEnterFocus": "PASS"
+    },
+    "mobile": {
+      "status": "PASS",
+      "checks": [
+        "normal-motion media query",
+        "mobile menu target focus",
+        "900px breakpoint focus recovery"
+      ],
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  },
+  "artifacts": {
+    "sourceScreenshots": [
+      "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\screenshots\\1440.png",
+      "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\screenshots\\768.png",
+      "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\screenshots\\390.png"
+    ],
+    "thumbnail": "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\assets\\thumbnail.webp",
+    "thumbnail_sha256": "40c4abc8041bc62e9a66c8f9638a480198dfeb1358e9f154873a890050b2ecaa",
+    "thumbnail_size": [720, 450],
+    "captureState": "clean initial page after reload and image decode"
+  },
+  "axe": {
+    "status": "PASS",
+    "version": "4.14.0",
+    "script_sha256": "20c09fe157a8a34a30e241aaa1fcdade657734f08ab379ecfbeb7d45cc46e878",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "violations": []
+  },
+  "limitations": [
+    "Automated browser checks do not establish complete WCAG conformance.",
+    "No physical-device, Safari/iOS/Android, screen-reader or field Core Web Vitals validation.",
+    "No owner approval or conversion result is implied by this concept review."
+  ],
+  "personaReview": {
+    "Accessibility Specialist": "PASS for tested keyboard, reduced-motion and no-JS paths; complete WCAG remains unverified.",
+    "Mobile UX Specialist": "PASS for required emulated widths and menu behavior; physical devices remain unverified.",
+    "QA Engineer": "PASS when all assertions complete; this report preserves actual failures.",
+    "Performance Engineer": "PASS for no-console-error/static local load checks only; no Lighthouse or field metric claim.",
+    "SEO Specialist": "PASS for page title/description and semantic section structure; search indexing was not tested."
+  }
+}

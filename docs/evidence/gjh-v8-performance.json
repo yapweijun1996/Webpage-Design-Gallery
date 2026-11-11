@@ -1,0 +1,20 @@
+{
+  "measurement": "Chrome DevTools performance trace; cold local navigation",
+  "date": "2026-11-11",
+  "url": "http://127.0.0.1:8088/demos/corporate/gjh/v8/index.html",
+  "cpuThrottling": "1x",
+  "networkThrottling": "none",
+  "cache": "bypassed on reload",
+  "lcpMs": 258,
+  "ttfbMs": 4,
+  "renderDelayMs": 254,
+  "cls": 0,
+  "imageDeliveryEstimatedWasteBytes": 206900,
+  "lighthousePerformanceScore": null,
+  "limitations": [
+    "Local unthrottled observation is not representative of mobile-network or field performance.",
+    "The available Lighthouse tool excludes the Performance category; no 90+ performance score is claimed.",
+    "No field Core Web Vitals or INP measurement is available.",
+    "Original official artwork is retained; image delivery can be further optimized with separately approved derivatives."
+  ]
+}

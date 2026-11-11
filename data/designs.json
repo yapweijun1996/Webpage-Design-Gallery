@@ -153,5 +153,44 @@
       "mobile"
     ],
     "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v8",
+    "companyId": "gjh",
+    "slug": "v8",
+    "version": "v8",
+    "title": "Generations of Goodness",
+    "description": "An immersive green-and-gold story of Singapore roots, distinct everyday brands and regional connections.",
+    "styles": [
+      "heritage",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 50,
+    "demoPath": "demos/corporate/gjh/v8/index.html",
+    "thumbnail": "demos/corporate/gjh/v8/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v8/screenshots/1440.png",
+        "width": 1440,
+        "height": 6362
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v8/screenshots/768.png",
+        "width": 768,
+        "height": 5609
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v8/screenshots/390.png",
+        "width": 390,
+        "height": 7317
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
   }
 ]

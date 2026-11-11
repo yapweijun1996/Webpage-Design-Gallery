@@ -1,0 +1,81 @@
+{
+  "run": {
+    "capturedAt": "2026-11-11T09:48:28.769653+00:00",
+    "runner": "tests/browser_gjh_demos.py",
+    "scope": "V1, V5, V6 and V7 legacy GJH demos",
+    "execution": "Temporary copy of Webpage-Design-Gallery-v8; original worktree screenshots and evidence were not overwritten",
+    "browser": "Chrome 157.0.8103.40",
+    "axeScript": "C:/Users/tno/Documents/GitHub/PWA-AI-Meeting-Memo-BYOK/node_modules/axe-core/axe.min.js",
+    "axePackageVersionObserved": "4.14.0",
+    "runnerReportedAxeVersion": "4.10.3",
+    "returnCode": 1
+  },
+  "result": "PARTIAL_REGRESSION_PASS",
+  "summary": {
+    "cases": 28,
+    "layoutOverflow": "PASS in all 28 cases",
+    "navigationAndKeyboard": "PASS in all 28 cases",
+    "images": "PASS in all 28 cases",
+    "reducedMotion": "PASS in all 28 cases",
+    "consoleErrors": "PASS in all 28 cases",
+    "failedResponses": "PASS in all 28 cases",
+    "noJavaScriptNavigation": "PASS",
+    "axeZeroViolationCases": 20,
+    "axeViolationCases": 8,
+    "failureReason": "The legacy runner asserts that every axe result is empty. Eight desktop/tablet cases expose the same existing label-content-name-mismatch violation on .identity."
+  },
+  "axeViolation": {
+    "id": "label-content-name-mismatch",
+    "impact": "serious",
+    "target": ".identity",
+    "affected": [
+      "v1@1440",
+      "v1@768",
+      "v5@1440",
+      "v5@768",
+      "v6@1440",
+      "v6@768",
+      "v7@1440",
+      "v7@768"
+    ],
+    "interpretation": "Pre-existing legacy-demo accessibility issue surfaced by the independent regression runner; V8 was not part of this runner's VERSIONS tuple."
+  },
+  "manualReview": {
+    "common": "color-contrast findings on small decorative arrows or image-overlay text were reported for the legacy demos",
+    "scope": "Needs manual review only; these did not cause the runner assertion failure"
+  },
+  "baseline": {
+    "source": "git archive HEAD, extracted into a separate temporary directory before running the same command",
+    "capturedAt": "2026-11-11T09:50:47.707147+00:00",
+    "browser": "Chrome 157.0.8103.40",
+    "runner": "tests/browser_gjh_demos.py",
+    "catalog": "1 company, 4 designs",
+    "cases": 28,
+    "returnCode": 1,
+    "layoutOverflow": "PASS in all 28 cases",
+    "navigationAndKeyboard": "PASS in all 28 cases",
+    "images": "PASS in all 28 cases",
+    "reducedMotion": "PASS in all 28 cases",
+    "consoleErrors": "PASS in all 28 cases",
+    "failedResponses": "PASS in all 28 cases",
+    "noJavaScriptNavigation": "PASS",
+    "axeViolationCount": 8,
+    "axeViolationIdentifiers": [
+      "label-content-name-mismatch"
+    ],
+    "axeViolationTargets": [
+      ".identity"
+    ],
+    "affected": [
+      "v1@1440", "v1@768", "v5@1440", "v5@768",
+      "v6@1440", "v6@768", "v7@1440", "v7@768"
+    ],
+    "comparison": "The candidate and HEAD baseline have the same eight legacy axe violation cases, identifier and target. No candidate-specific legacy axe violation was observed."
+  },
+  "limitations": [
+    "This legacy runner covers V1/V5/V6/V7 only; V8 has a separate browser suite.",
+    "The runner labels the supplied axe bundle as 4.10.3 even though the inspected local package is 4.14.0; the bundle hash was not copied into this summary.",
+    "Axe, headless Chrome and emulated viewports do not establish complete WCAG conformance or physical-device behavior.",
+    "No source or legacy implementation was changed to hide this pre-existing failure."
+  ]
+}

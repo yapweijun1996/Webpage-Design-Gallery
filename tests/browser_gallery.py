@@ -73,14 +73,16 @@ def run():
                     page.get_by_role("button", name="Clear filters").click()
                     page.locator(".company-card").click()
                     assert page.url.endswith("companies/gjh/index.html")
-                    assert page.locator(".design-card").count() == 4
+                    expected_designs = len(gallery.load_catalog()["designs"])
+                    assert page.locator(".design-card").count() == expected_designs
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
                     page.screenshot(path=str(screenshots / f"company-{width}.png"), full_page=True)
                     page.select_option("#style-filter", "minimal")
                     assert page.locator(".design-card:visible").count() == 1
                     assert page.locator(".design-card:visible").get_attribute("data-design") == "v6"
                     page.select_option("#style-filter", "heritage")
-                    assert page.locator(".design-card:visible").count() == 2
+                    heritage_count = sum("heritage" in design["styles"] for design in gallery.load_catalog()["designs"])
+                    assert page.locator(".design-card:visible").count() == heritage_count
                     page.select_option("#style-filter", "")
                     assert page.locator("#compare-selected").get_attribute("aria-disabled") == "true"
                     page.locator('input[value="v5"]').focus()
@@ -172,7 +174,7 @@ def run():
                 context = browser.new_context(java_script_enabled=False)
                 page = context.new_page(); page.goto(base)
                 page.locator(".company-card").click()
-                assert page.locator(".design-card").count() == 4
+                assert page.locator(".design-card").count() == len(gallery.load_catalog()["designs"])
                 page.locator('.design-card[data-design="v7"] .card-action').click()
                 assert "/demos/corporate/gjh/v7/" in page.url
                 evidence.append({"noJavaScriptBrowseAndOpenDemo": "PASS", "invalidCompareAndDetail": "PASS"})

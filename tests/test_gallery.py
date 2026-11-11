@@ -15,8 +15,19 @@ SPEC.loader.exec_module(gallery)
 class GalleryTests(unittest.TestCase):
     def test_real_company_contains_all_versions(self):
         catalog = gallery.load_catalog()
-        self.assertEqual([d["version"] for d in catalog["designs"]], ["v1", "v5", "v6", "v7"])
+        versions = [d["version"] for d in catalog["designs"]]
+        self.assertEqual(versions, ["v1", "v5", "v6", "v7", "v8"])
         self.assertEqual({d["companyId"] for d in catalog["designs"]}, {"gjh"})
+
+    def test_v8_metadata_exposes_immersive_concept_contract(self):
+        catalog = gallery.load_catalog()
+        design = next(item for item in catalog["designs"] if item["version"] == "v8")
+        self.assertEqual(design["id"], "gjh-v8")
+        self.assertEqual(design["companyId"], "gjh")
+        self.assertIn("heritage", design["styles"])
+        self.assertIn("editorial", design["styles"])
+        self.assertEqual(design["devices"], ["desktop", "tablet", "mobile"])
+        self.assertTrue(design["demoPath"].endswith("demos/corporate/gjh/v8/index.html"))
 
     def test_home_only_links_to_company_collections(self):
         page = gallery.build_pages(gallery.load_catalog())["index.html"]
