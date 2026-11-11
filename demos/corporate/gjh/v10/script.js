@@ -151,7 +151,9 @@ async function initialize() {
   await Promise.all(filenames.map(async name => {
     const texture = await loader.loadAsync(`assets/${name}`);
     texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     textures.set(name, texture);
   }));
   const material = (color, extra = {}) => new THREE.MeshStandardMaterial({color, roughness: .78, ...extra});
@@ -160,7 +162,8 @@ async function initialize() {
     wood: material(0x73543c), woodLight: material(0x846447), brass: material(0xb89a59, {metalness: .62, roughness: .37}),
     stone: material(0x40594b, {metalness: .12, roughness: .29}), stoneAlt: material(0x394e42, {metalness: .1, roughness: .34}),
     rug: material(0x253d32, {roughness: .96}), rugBorder: material(0x8d794b, {roughness: .88}),
-    upholstery: material(0x55654a), terracotta: material(0x936d50), foliage: material(0x314e35),
+    upholstery: material(0x55654a), terracotta: material(0x936d50),
+    foliage: material(0x314e35, {roughness: .95}), foliageLight: material(0x486646, {roughness: .95}),
     glow: material(0xffe4ae, {emissive: 0xffc773, emissiveIntensity: 1.1})
   };
   // Instancing keeps architectural detail inexpensive: one draw per geometry/material pair.
@@ -175,10 +178,10 @@ async function initialize() {
   const scale = new THREE.Vector3();
   const position = new THREE.Vector3();
   const rotation = new THREE.Euler();
-  function solid(type, mat, x, y, z, sx, sy, sz, ry = 0) {
+  function solid(type, mat, x, y, z, sx, sy, sz, ry = 0, rx = 0, rz = 0) {
     const key = `${type}:${mat}`;
     if (!batches.has(key)) batches.set(key, {geometry: geometries[type], material: materials[mat], transforms: []});
-    position.set(x, y, z); scale.set(sx, sy, sz); rotation.set(0, ry, 0); quaternion.setFromEuler(rotation);
+    position.set(x, y, z); scale.set(sx, sy, sz); rotation.set(rx, ry, rz); quaternion.setFromEuler(rotation);
     matrix.compose(position, quaternion, scale);
     batches.get(key).transforms.push(matrix.clone());
   }
@@ -307,12 +310,28 @@ async function initialize() {
     box('upholstery', x + Math.sin(ry) * .35, .92, z + Math.cos(ry) * .35, 2.15, .65, .18, ry);
     shadow(x, z, 3.3, 2.5);
   }
+  // Smooth, overlapping leaves share the existing sphere batches: no per-leaf draws.
+  function foliage(x, y, z, size = 1) {
+    // Stagger branch heights and leaf tilt rather than stacking conical whorls.
+    for (let branch = 0; branch < 9; branch++) {
+      const angle = branch * 2.39996;
+      const spread = Math.sin((branch + 1) / 10 * Math.PI) * .36;
+      for (let leaf = 0; leaf < 4; leaf++) {
+        const turn = angle + leaf * 1.7;
+        solid('sphere', (branch + leaf) % 4 ? 'foliage' : 'foliageLight',
+          x + (Math.sin(angle) * spread + Math.sin(turn) * .14) * size,
+          y + ((branch / 8 - .5) * .9 + Math.cos(turn) * .13) * size,
+          z + (Math.cos(angle) * spread + Math.cos(turn) * .14) * size,
+          .135 * size, .25 * size, .055 * size,
+          turn, .35 + Math.cos(turn) * .45, Math.sin(turn * 1.3) * .65);
+      }
+    }
+  }
   function plant(x, z) {
     cylinder('terracotta', x, .36, z, .34, .7);
     cylinder('brass', x, .71, z, .355, .045);
     cylinder('wood', x, 1.05, z, .045, 1.3);
-    sphere('foliage', x, 1.65, z, .55, .85, .48);
-    sphere('foliage', x + .28, 1.9, z - .12, .36, .62, .35);
+    foliage(x, 1.65, z);
     shadow(x, z, 2, 2);
   }
   // Layered cornices and softly lit pilasters articulate the arcade edges.
@@ -381,10 +400,11 @@ async function initialize() {
       const cans = createProductModels(THREE, arcade, textures, materials.brass);
       interactive.push(...cans);
       cans.forEach(mesh => proportioned.push({mesh, width: mesh.scale.x}));
-      artwork('new-moon-brand-cover.jpg', x - 3.35, 2.6, -5.8, 2.4, Math.PI / 2);
+      // Keep both faces clear of the wall and each other; coplanar backing caused jagged gold patches.
+      artwork('new-moon-brand-cover.jpg', x - 3.29, 2.6, -5.8, 2.4, Math.PI / 2);
       const coverTexture = textures.get('new-moon-brand-cover.jpg');
       const coverFrame = new THREE.Mesh(geometries.box, materials.brass);
-      coverFrame.position.set(x - 3.38, 2.6, -5.8);
+      coverFrame.position.set(x - 3.34, 2.6, -5.8);
       coverFrame.scale.set(.06, 2.4 * coverTexture.image.height / coverTexture.image.width + .12, 2.52);
       arcade.add(coverFrame);
       artwork('new-moon-logo.svg', x + 2.35, .65, -4.52, .7);
@@ -402,6 +422,19 @@ async function initialize() {
       box(room === 'mili' ? 'ivory' : 'green', x, .42, -7.7, 3.8, .8, 1.1);
       box('brass', x, .84, -7.7, 3.9, .045, 1.15);
       artwork(`${room}-logo.jpg`, x, .47, -7.12, 1.45);
+      // Layer the room edges, leaving the artwork and central approach unobstructed.
+      for (const side of [-1, 1]) {
+        for (const y of [.18, 1.18, 4.65]) box('woodLight', x + side * 3.3, y, -5.5, .06, .075, 8.6);
+        box('brass', x + side * 3.25, 1.24, -5.5, .025, .025, 8.6);
+        for (const z of [-8.8, -7, -5.2, -3.4]) box('woodLight', x + side * 3.3, .68, z, .06, .95, .045);
+        box('brass', x + side * 2.45, 3.05, -9.79, .23, .7, .12);
+        cylinder('glow', x + side * 2.45, 3.08, -9.6, .1, .42);
+        cylinder('brass', x + side * 2.45, 3.32, -9.6, .15, .045);
+        halo(x + side * 2.45, 3.08, -9.45, 1.3);
+      }
+      // Fine woven-style rug border, not additional merchandise.
+      for (const dx of [-2.05, 2.05]) box('rugBorder', x + dx, .084, -5.6, .025, .006, 5.2);
+      for (const z of [-8.2, -3]) box('rugBorder', x, .084, z, 4.1, .006, .025);
       // Shelves contain architectural decor only, never fictional products.
       for (const side of [-1, 1]) {
         const sx = x + side * 2.85;
@@ -409,9 +442,10 @@ async function initialize() {
         for (const y of [.45, 1.4, 2.35]) {
           box('woodLight', sx, y, -6.6, .85, .1, .85);
           cylinder('terracotta', sx, y + .21, -6.6, .17, .32);
-          if (side > 0) sphere('foliage', sx, y + .55, -6.6, .24, .28, .24);
+          if (side > 0) foliage(sx, y + .49, -6.6, .34);
           else {
             box('ivory', sx + .24, y + .25, -6.6, .07, .4, .3);
+            box('wood', sx + .12, y + .28, -6.6, .065, .46, .3, -.12);
             box('brass', sx + .33, y + .23, -6.6, .06, .36, .3);
           }
         }
@@ -419,7 +453,7 @@ async function initialize() {
       bench(x - 2.55, -3.9, Math.PI / 2);
       plant(x + 2.5, -8.9);
       if (room === 'gogo') {
-        plant(x - 2.5, -8.9); plant(x + 2.5, -3.6);
+        plant(x - 2.5, -8.9);
         for (let z = -8.8; z < -3; z += .5) box('woodLight', x - 3.32, 2.6, z, .065, 4.7, .045);
         box('brass', x - 3.27, 3.9, -6, .035, .035, 6);
       } else {

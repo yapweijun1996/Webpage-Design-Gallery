@@ -23,8 +23,8 @@ function frontLabelTexture(THREE, source) {
 
   // This is a front-view projection, not a reconstruction of unseen artwork.
   // Inverse cylindrical projection preserves the photographed face proportions:
-  // an angular strip samples x = centre + radius * sin(angle). Only the front
-  // hemisphere carries the verified image; the unseen rear remains plain brass.
+  // an angular strip samples x = centre + radius * sin(angle). The same verified
+  // face repeats on the rear; this is not a claim about unseen packaging artwork.
   for (let column = 0; column < canvas.width; column++) {
     const angle0 = (column / canvas.width - .5) * Math.PI;
     const angle1 = ((column + 1) / canvas.width - .5) * Math.PI;
@@ -41,6 +41,8 @@ function frontLabelTexture(THREE, source) {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = source.anisotropy;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.repeat.x = 2;
   return texture;
 }
 
@@ -54,7 +56,7 @@ export function createProductModels(THREE, scene, textures, brassMaterial) {
   ].map(([radius, height]) => new THREE.Vector2(radius, height));
   const canGeometry = new THREE.LatheGeometry(profile, 32);
   const labelGeometry = new THREE.CylinderGeometry(
-    .974, .974, LABEL_CROP.height / 594, 32, 1, true, -Math.PI / 2, Math.PI
+    .974, .974, LABEL_CROP.height / 594, 64, 1, true, -Math.PI / 2, Math.PI * 2
   );
   const selectable = [];
 
