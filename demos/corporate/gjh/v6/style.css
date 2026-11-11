@@ -58,6 +58,9 @@ section[id] { scroll-margin-top: 28px; }
 .button.yellow { background: var(--yellow); color: #272326; }
 .button.yellow:hover { background: #f3c900; }
 .arrow { font-size: 21px; line-height: 1; }
+.icon-arrow { width: 1em; height: 1em; flex: 0 0 auto; vertical-align: middle; }
+.button .icon-arrow { width: 21px; height: 21px; }
+.menu-toggle .icon-menu { width: 20px; height: 20px; flex: 0 0 auto; vertical-align: middle; }
 .actions { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-top: 32px; }
 .text-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 44px; font-size: 15px; font-weight: 600; border-bottom: 1px solid currentColor; }
 .section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 60px; margin-bottom: 48px; }
