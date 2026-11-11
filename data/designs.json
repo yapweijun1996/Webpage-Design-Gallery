@@ -17,17 +17,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v1/screenshots/1440.png",
         "width": 1440,
-        "height": 5283
+        "height": 5288
       },
       "tablet": {
         "path": "demos/corporate/gjh/v1/screenshots/768.png",
         "width": 768,
-        "height": 6582
+        "height": 6587
       },
       "mobile": {
         "path": "demos/corporate/gjh/v1/screenshots/390.png",
         "width": 390,
-        "height": 8737
+        "height": 8743
       }
     },
     "devices": [
@@ -56,17 +56,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v5/screenshots/1440.png",
         "width": 1440,
-        "height": 5743
+        "height": 5748
       },
       "tablet": {
         "path": "demos/corporate/gjh/v5/screenshots/768.png",
         "width": 768,
-        "height": 6114
+        "height": 6119
       },
       "mobile": {
         "path": "demos/corporate/gjh/v5/screenshots/390.png",
         "width": 390,
-        "height": 8463
+        "height": 8469
       }
     },
     "devices": [
@@ -95,17 +95,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v6/screenshots/1440.png",
         "width": 1440,
-        "height": 6569
+        "height": 6574
       },
       "tablet": {
         "path": "demos/corporate/gjh/v6/screenshots/768.png",
         "width": 768,
-        "height": 8115
+        "height": 8120
       },
       "mobile": {
         "path": "demos/corporate/gjh/v6/screenshots/390.png",
         "width": 390,
-        "height": 10165
+        "height": 10171
       }
     },
     "devices": [
@@ -134,17 +134,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v7/screenshots/1440.png",
         "width": 1440,
-        "height": 5883
+        "height": 5894
       },
       "tablet": {
         "path": "demos/corporate/gjh/v7/screenshots/768.png",
         "width": 768,
-        "height": 7008
+        "height": 7019
       },
       "mobile": {
         "path": "demos/corporate/gjh/v7/screenshots/390.png",
         "width": 390,
-        "height": 9535
+        "height": 9541
       }
     },
     "devices": [
@@ -211,18 +211,18 @@
     "screenshots": {
       "desktop": {
         "path": "demos/corporate/gjh/v9/screenshots/1440.png",
-        "width": 1440,
-        "height": 1849
+        "width": 2880,
+        "height": 1776
       },
       "tablet": {
         "path": "demos/corporate/gjh/v9/screenshots/768.png",
-        "width": 768,
-        "height": 1438
+        "width": 1536,
+        "height": 1824
       },
       "mobile": {
         "path": "demos/corporate/gjh/v9/screenshots/390.png",
-        "width": 390,
-        "height": 1785
+        "width": 780,
+        "height": 1368
       }
     },
     "devices": [

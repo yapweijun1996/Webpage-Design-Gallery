@@ -1,8 +1,9 @@
 {
   "schemaVersion": "1.0",
   "source": "SVG-Icon-Studio inline catalog geometry",
+  "sourceRoot": "~/Documents/GitHub/SVG-Icon-Studio",
   "icons": [
-    {"id": "arrow-left", "sourcePath": "icons/catalog/arrow-left.svg", "use": "Previous room control"},
-    {"id": "arrow-right", "sourcePath": "icons/catalog/arrow-right.svg", "use": "Next room control"}
+    {"id": "arrow-left", "sourcePath": "icons/catalog/arrow-left.svg", "use": "Back to street control"},
+    {"id": "arrow-right", "sourcePath": "icons/catalog/arrow-right.svg", "use": "Enter brand room controls"}
   ]
 }

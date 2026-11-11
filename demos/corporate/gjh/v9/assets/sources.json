@@ -11,22 +11,278 @@
     "formalBrandApproval": false
   },
   "assets": [
-    {"id":"new-moon-brand-cover","localPath":"assets/new-moon-brand-cover.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-brand-cover.jpg","sourceUrl":"https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg","sourcePage":"https://www.gjh.com.sg/","sha256":"8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8","sourceStatus":"verified_official_source","useNote":"Official New Moon brand cover; not a product packshot."},
-    {"id":"mili-brand-cover","localPath":"assets/mili-brand-cover.jpg","canonicalLibraryPath":"assets/companies/gjh/official/mili-brand-cover.jpg","sourceUrl":"https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg","sourcePage":"https://www.gjh.com.sg/","sha256":"b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39","sourceStatus":"verified_official_source","useNote":"Official MILI brand cover; no verified product packshots are represented."},
-    {"id":"gogo-brand-cover","localPath":"assets/gogo-brand-cover.jpg","canonicalLibraryPath":"assets/companies/gjh/official/gogo-brand-cover.jpg","sourceUrl":"https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg","sourcePage":"https://www.gjh.com.sg/","sha256":"0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380","sourceStatus":"verified_official_source","useNote":"Official GOGO brand cover; no verified product packshots are represented."},
-    {"id":"new-moon-nz-425g-front","sku":"New Moon Premium Wild Caught New Zealand Abalone 425g","view":"front","localPath":"assets/new-moon-nz-425g-front.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-nz-425g-front.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/","sha256":"5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-nz-425g-back","sku":"New Moon Premium Wild Caught New Zealand Abalone 425g","view":"back","localPath":"assets/new-moon-nz-425g-back.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-nz-425g-back.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Back.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/","sha256":"8cbdbeb68255d9f4b5d04a97326b8332dac653de502221d88585e981aeffc0ac","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-nz-425g-nutrition","sku":"New Moon Premium Wild Caught New Zealand Abalone 425g","view":"nutrition","localPath":"assets/new-moon-nz-425g-nutrition.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-nz-425g-nutrition.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-NIP.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/","sha256":"ce52927629cdf060c9a4adecd265efb0d0f9e2e8b98ab937ab216731af718cf1","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-au-425g-front","sku":"New Moon Premium Wild Caught Australia Abalone 425g","view":"front","localPath":"assets/new-moon-au-425g-front.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-au-425g-front.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Front.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/","sha256":"5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-au-425g-back","sku":"New Moon Premium Wild Caught Australia Abalone 425g","view":"back","localPath":"assets/new-moon-au-425g-back.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-au-425g-back.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Back.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/","sha256":"37d7de5e7ef591ac7b3b64e4ddad53f355f7dd28a4a4305a55e1eed9f6b98ebd","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-au-425g-nutrition","sku":"New Moon Premium Wild Caught Australia Abalone 425g","view":"nutrition","localPath":"assets/new-moon-au-425g-nutrition.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-au-425g-nutrition.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-NIP.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/","sha256":"86a69d1972b86bb80b7955c88540c917064ae89b454f5f6364f56d134bd910e4","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-sa-425g-front","sku":"New Moon Premium South Africa Abalone 425g","view":"front","localPath":"assets/new-moon-sa-425g-front.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-sa-425g-front.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Front-1.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/","sha256":"c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-sa-425g-back","sku":"New Moon Premium South Africa Abalone 425g","view":"back","localPath":"assets/new-moon-sa-425g-back.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-sa-425g-back.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Back-1.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/","sha256":"aae438ba58182074055c682c33c18dab839344345d1e0b89359614d86d0a0dd8","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-sa-425g-nutrition","sku":"New Moon Premium South Africa Abalone 425g","view":"nutrition","localPath":"assets/new-moon-sa-425g-nutrition.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-sa-425g-nutrition.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-NIP-1.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/","sha256":"34b196ed941a276a470342f7e80d9b82860ff32ec9f59156758284476acb2af5","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-mx-454g-front","sku":"New Moon Premium Mexico Abalone 454g","view":"front","localPath":"assets/new-moon-mx-454g-front.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-mx-454g-front.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Front.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/","sha256":"68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"new-moon-mx-454g-back","sku":"New Moon Premium Mexico Abalone 454g","view":"back","localPath":"assets/new-moon-mx-454g-back.jpg","canonicalLibraryPath":"assets/companies/gjh/official/new-moon-mx-454g-back.jpg","sourceUrl":"https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Back.jpg","sourcePage":"https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/","sha256":"c5d408f1e39d1673ea19159828f0583c587a52ec5b7cf509e52a6d6fcb012413","sourceStatus":"verified_official_source","editionStatus":"listed_on_current_page_not_brand_approved"},
-    {"id":"gjh-v9-thumbnail","entity":"gjh-concept","kind":"derived-gallery-thumbnail","localPath":"assets/thumbnail.webp","sourceStatus":"derived_local_artifact","sha256":"77ed479b282707041226f34a50e06071bd440cf6474b16a4270740921b108c9d","sourceUrl":null,"formalBrandApproval":false,"useNote":"Derived from the 1440px Chrome screenshot for Gallery preview."}
+    {
+      "id": "gjh-corporate-logo",
+      "entity": "gjh",
+      "kind": "company-logo",
+      "localPath": "assets/gjh-logo.png",
+      "canonicalLibraryPath": "assets/companies/gjh/official/gjh-logo.png",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png",
+      "sourcePage": "https://www.gjhglobal.com/about-us/",
+      "sha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "not_confirmed_current",
+      "dimensions": {
+        "width": 167,
+        "height": 73
+      },
+      "useNote": "Official corporate logo; small raster, retain proportions and avoid large placements."
+    },
+    {
+      "id": "new-moon-logo",
+      "entity": "new-moon",
+      "kind": "brand-logo",
+      "localPath": "assets/new-moon-logo.svg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-logo.svg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+      "sourcePage": "https://www.gjhglobal.com/newmoon-history/",
+      "sha256": "7d6a283816d9b7eed99beee80b4f71b7fa6ad483d418ccce675201f0999f0a08",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "not_confirmed_current",
+      "dimensions": {
+        "width": "690px",
+        "height": "144px",
+        "viewBox": "0 0 690 144"
+      },
+      "sourceByteNote": "Restored original CRLF line endings from the LF-normalized library checkout; resulting 13046 bytes match the official manifest SHA-256 exactly.",
+      "useNote": "Official vector logo; retain original proportions and colors."
+    },
+    {
+      "id": "mili-logo",
+      "entity": "mili",
+      "kind": "brand-logo",
+      "localPath": "assets/mili-logo.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/mili-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg",
+      "sourcePage": "https://www.gjhglobal.com/mili/",
+      "sha256": "842f5793ddd4da0c51d2a35d210f273c9c082742f10a1a2465b66f5de454ab9d",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "not_confirmed_current",
+      "dimensions": {
+        "width": 319,
+        "height": 170
+      },
+      "useNote": "Official MILI brand tile; preserve embedded background and proportions, not a product packshot."
+    },
+    {
+      "id": "gogo-logo",
+      "entity": "gogo",
+      "kind": "brand-logo",
+      "localPath": "assets/gogo-logo.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/gogo-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg",
+      "sourcePage": "https://www.gjhglobal.com/gogo/",
+      "sha256": "51c2d3354c7271e1c92e34f8bf0509b60d055eda4b3e29b44eede70edd373a77",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "not_confirmed_current",
+      "dimensions": {
+        "width": 318,
+        "height": 170
+      },
+      "useNote": "Official GOGO brand tile; preserve embedded background and proportions, not a product packshot."
+    },
+    {
+      "id": "new-moon-brand-cover",
+      "localPath": "assets/new-moon-brand-cover.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "sha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "sourceStatus": "verified_official_source",
+      "useNote": "Official New Moon brand cover; not a product packshot."
+    },
+    {
+      "id": "mili-brand-cover",
+      "localPath": "assets/mili-brand-cover.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/mili-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "sha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "sourceStatus": "verified_official_source",
+      "useNote": "Official MILI brand cover; no verified product packshots are represented."
+    },
+    {
+      "id": "gogo-brand-cover",
+      "localPath": "assets/gogo-brand-cover.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/gogo-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "sha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "sourceStatus": "verified_official_source",
+      "useNote": "Official GOGO brand cover; no verified product packshots are represented."
+    },
+    {
+      "id": "new-moon-nz-425g-front",
+      "sku": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+      "view": "front",
+      "localPath": "assets/new-moon-nz-425g-front.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/",
+      "sha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-nz-425g-back",
+      "sku": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+      "view": "back",
+      "localPath": "assets/new-moon-nz-425g-back.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-nz-425g-back.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Back.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/",
+      "sha256": "8cbdbeb68255d9f4b5d04a97326b8332dac653de502221d88585e981aeffc0ac",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-nz-425g-nutrition",
+      "sku": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+      "view": "nutrition",
+      "localPath": "assets/new-moon-nz-425g-nutrition.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-nz-425g-nutrition.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-NIP.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/",
+      "sha256": "ce52927629cdf060c9a4adecd265efb0d0f9e2e8b98ab937ab216731af718cf1",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-au-425g-front",
+      "sku": "New Moon Premium Wild Caught Australia Abalone 425g",
+      "view": "front",
+      "localPath": "assets/new-moon-au-425g-front.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-au-425g-front.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Front.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/",
+      "sha256": "5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-au-425g-back",
+      "sku": "New Moon Premium Wild Caught Australia Abalone 425g",
+      "view": "back",
+      "localPath": "assets/new-moon-au-425g-back.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-au-425g-back.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Back.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/",
+      "sha256": "37d7de5e7ef591ac7b3b64e4ddad53f355f7dd28a4a4305a55e1eed9f6b98ebd",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-au-425g-nutrition",
+      "sku": "New Moon Premium Wild Caught Australia Abalone 425g",
+      "view": "nutrition",
+      "localPath": "assets/new-moon-au-425g-nutrition.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-au-425g-nutrition.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-NIP.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/",
+      "sha256": "86a69d1972b86bb80b7955c88540c917064ae89b454f5f6364f56d134bd910e4",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-sa-425g-front",
+      "sku": "New Moon Premium South Africa Abalone 425g",
+      "view": "front",
+      "localPath": "assets/new-moon-sa-425g-front.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-sa-425g-front.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Front-1.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
+      "sha256": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-sa-425g-back",
+      "sku": "New Moon Premium South Africa Abalone 425g",
+      "view": "back",
+      "localPath": "assets/new-moon-sa-425g-back.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-sa-425g-back.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Back-1.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
+      "sha256": "aae438ba58182074055c682c33c18dab839344345d1e0b89359614d86d0a0dd8",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-sa-425g-nutrition",
+      "sku": "New Moon Premium South Africa Abalone 425g",
+      "view": "nutrition",
+      "localPath": "assets/new-moon-sa-425g-nutrition.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-sa-425g-nutrition.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-NIP-1.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
+      "sha256": "34b196ed941a276a470342f7e80d9b82860ff32ec9f59156758284476acb2af5",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-mx-454g-front",
+      "sku": "New Moon Premium Mexico Abalone 454g",
+      "view": "front",
+      "localPath": "assets/new-moon-mx-454g-front.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-mx-454g-front.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Front.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/",
+      "sha256": "68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "new-moon-mx-454g-back",
+      "sku": "New Moon Premium Mexico Abalone 454g",
+      "view": "back",
+      "localPath": "assets/new-moon-mx-454g-back.jpg",
+      "canonicalLibraryPath": "assets/companies/gjh/official/new-moon-mx-454g-back.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Back.jpg",
+      "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/",
+      "sha256": "c5d408f1e39d1673ea19159828f0583c587a52ec5b7cf509e52a6d6fcb012413",
+      "sourceStatus": "verified_official_source",
+      "editionStatus": "listed_on_current_page_not_brand_approved"
+    },
+    {
+      "id": "gjh-v9-thumbnail",
+      "entity": "gjh-concept",
+      "kind": "derived-gallery-thumbnail",
+      "localPath": "assets/thumbnail.webp",
+      "sourceStatus": "derived_local_artifact",
+      "sha256": "a4181570808974422c2c40cf1238fa1a7ce95e8c1b0038a7d360cccf6ca14ccf",
+      "sourceUrl": null,
+      "formalBrandApproval": false,
+      "useNote": "Derived from the 1440px Chrome screenshot for Gallery preview."
+    }
   ],
-  "font": {"name":"Manrope Latin variable subset","localPath":"assets/manrope-latin.woff2","canonicalLibraryPath":"demos/corporate/gjh/v7/assets/manrope-latin.woff2","sha256":"8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e","license":"SIL Open Font License 1.1","licenseFile":"assets/OFL-Manrope.txt","licenseFileSha256":"58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b","licenseSource":"https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt"},
-  "officialLinks": {"eshop":"https://www.gjheshop.com/"}
+  "font": {
+    "name": "Manrope Latin variable subset",
+    "localPath": "assets/manrope-latin.woff2",
+    "canonicalLibraryPath": "demos/corporate/gjh/v7/assets/manrope-latin.woff2",
+    "sha256": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+    "license": "SIL Open Font License 1.1",
+    "licenseFile": "assets/OFL-Manrope.txt",
+    "licenseFileSha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b",
+    "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt"
+  },
+  "icons": {
+    "source": "SVG-Icon-Studio",
+    "sourceRoot": "~/Documents/GitHub/SVG-Icon-Studio",
+    "receipt": "assets/icons-sources.json",
+    "items": [
+      {
+        "id": "arrow-left",
+        "sourcePath": "icons/catalog/arrow-left.svg",
+        "use": "Back to street control"
+      },
+      {
+        "id": "arrow-right",
+        "sourcePath": "icons/catalog/arrow-right.svg",
+        "use": "Enter brand room controls"
+      }
+    ]
+  },
+  "officialLinks": {
+    "eshop": "https://www.gjheshop.com/"
+  }
 }
