@@ -151,7 +151,7 @@ export async function createWorld(T, R, physics, shadows) {
       const cover = `${zone}-brand-cover.jpg`;
       box('brass', x, 2.85, -10.3, 3.65, 3.65, .08); art(cover, x, 2.85, -10.24, 3.48);
       interactables.push({id: zone, x, z: -9, radius: 2.5});
-      bench(x - 2.5, -6.2); bench(x + 2.5, -6.2);
+      bench(x - 3, -6.8); bench(x + 3, -6.8);
       cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1); collider(x, .4, -5.5, 1.5, .8, 1.5);
       plant(x - 3.8, -8.8, 1.15); plant(x + 3.8, -8.8, 1.15); plant(x + 3.8, -2.5);
       if (zone === 'gogo') {
