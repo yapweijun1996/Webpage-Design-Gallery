@@ -8,7 +8,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; touch-action: manipulation; }
+.gallery-icon { display: inline-block; width: 1em; height: 1em; vertical-align: -.15em; }
 body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.6 Arial, sans-serif; }
 a { color: inherit; text-decoration: none; }
 a:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
@@ -85,8 +86,8 @@ h2 { font-size: 27px; letter-spacing: -.04em; line-height: 1.4; font-weight: 600
 .company-intro-copy > p:not(.eyebrow) { max-width: 560px; color: var(--muted); font-size: 15px; line-height: 1.7; }
 .company-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .company-tags > span { border: 1px solid var(--line); background: white; padding: 4px 10px; border-radius: 5px; color: #596371; font-size: 11px; }
-.official-link { margin-left: auto; align-self: flex-start; margin-top: 36px; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 4px; white-space: nowrap; padding: 8px 0; }
 .official-link > span { margin-left: 6px; }
+.official-link > svg { margin-left: 6px; }
 .design-section { padding-top: 35px; padding-bottom: 75px; border-top: 1px solid var(--line); }
 .design-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px; }
 .design-card { border: 1px solid var(--line); background: white; border-radius: 11px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
@@ -102,7 +103,8 @@ h2 { font-size: 27px; letter-spacing: -.04em; line-height: 1.4; font-weight: 600
 .design-card .card-bottom { font-size: 12px; }
 .concept-note { background: #f0f2f6; border: 1px solid #e2e6ee; display: flex; gap: 13px; align-items: flex-start; padding: 18px; border-radius: 8px; margin-top: 35px; }
 .concept-note p { margin-bottom: 0; color: #5a6674; font-size: 12px; }
-.note-icon { flex: 0 0 17px; border: 1px solid #6e7c8e; width: 17px; height: 17px; display: grid; place-content: center; border-radius: 50%; font: 12px Georgia, serif; margin-top: 2px; }
+.note-icon { flex: 0 0 17px; width: 17px; height: 17px; display: grid; place-content: center; margin-top: 2px; }
+.note-icon .gallery-icon { width: 17px; height: 17px; }
 .back-link { display: inline-block; font-size: 13px; color: var(--muted); margin-top: 28px; padding: 8px 0; }
 .back-link:hover { color: var(--accent); }
 .site-footer { max-width: 1280px; margin: auto; padding: 40px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 50px; }
