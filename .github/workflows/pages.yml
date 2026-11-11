@@ -32,6 +32,11 @@ jobs:
           mkdir -p _site/demos/corporate/gjh/v5/assets
           cp demos/corporate/gjh/v5/{index.html,style.css,script.js} _site/demos/corporate/gjh/v5/
           cp demos/corporate/gjh/v5/assets/*.webp _site/demos/corporate/gjh/v5/assets/
+          for version in v6 v7; do
+            mkdir -p "_site/demos/corporate/gjh/$version/assets"
+            cp "demos/corporate/gjh/$version/"{index.html,style.css,script.js} "_site/demos/corporate/gjh/$version/"
+            cp "demos/corporate/gjh/$version/assets/"*.webp "demos/corporate/gjh/$version/assets/"*.jpg "_site/demos/corporate/gjh/$version/assets/"
+          done
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:

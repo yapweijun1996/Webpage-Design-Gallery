@@ -8,7 +8,7 @@ Run `python -m http.server 8000` from the repository root and open `http://local
 
 ## GitHub Pages
 
-Set the Pages source to GitHub Actions. After the commit is pushed, run **Deploy demo to GitHub Pages** manually from the Actions tab and select `main`. The workflow does not deploy on push. It publishes only the gallery entry page and the GJH V1 and V5 demo files; research downloads, screenshots, and documentation are excluded from the Pages artifact.
+Set the Pages source to GitHub Actions. After the commit is pushed, run **Deploy demo to GitHub Pages** manually from the Actions tab and select `main`. The workflow does not deploy on push. It publishes only the gallery entry page and the GJH V1, V5, V6 and V7 demo files; research downloads, screenshots, and documentation are excluded from the Pages artifact.
 
 ## Research assets
 
