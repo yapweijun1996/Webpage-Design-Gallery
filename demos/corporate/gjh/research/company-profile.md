@@ -46,6 +46,8 @@ For this project, the user confirmed authorization to use GJH/New Moon official 
 
 ## New Moon — Deeper Research
 
+The subsequent [New Moon heritage/gifting brief](../../../../docs/new-moon-story-gifting-brief.md) separates the owner's proposed consumer-brand experience from this company profile, reconciles conflicting supplied claims, and records the Option A concept board. Its generated visuals and placeholder wordmark are not official brand or product assets.
+
 Research reviewed on 11 November 2026. This section records public-source evidence and editorial implications, not legal ownership certification or an independent product-quality assessment.
 
 ### Company, Brand and Product

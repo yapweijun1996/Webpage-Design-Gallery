@@ -1,0 +1,27 @@
+{
+  "reviewDate": "2026-11-11",
+  "newMoonDomain": {
+    "url": "https://www.newmoon.com.sg/",
+    "webFetchToolReportedDestination": "https://www.gjheshop.com/brand/new-moon/",
+    "directLocalCheck": {
+      "status": "UNVERIFIED",
+      "reason": "SSLError",
+      "note": "Direct local TLS connection failed; no TLS validation bypass used."
+    },
+    "conclusion": "Treat hostname routing as environment/time dependent; do not assert a current Shopify password page as a verified fact."
+  },
+  "primarySources": [
+    {
+      "url": "https://www.gjh.com.sg/newmoon-history/",
+      "finding": "Company source states 1959 establishment and abalone as first product."
+    },
+    {
+      "url": "https://www.gjh.com.sg/about-us/",
+      "finding": "History exists; identifies the Goh brothers and 1940s provision-store beginnings."
+    },
+    {
+      "url": "https://www.nas.gov.sg/archivesonline/data/pdfdoc/AVA20090116001.pdf",
+      "finding": "AVA release dated 16 January 2009; specific 400g Thailand concentrated abalone-broth batch, not all abalone products or a current recall."
+    }
+  ]
+}

@@ -114,6 +114,10 @@ Baseline evidence: [HTTP audit JSON](evidence/gjh-brand-http-audit.json). The re
 
 The [asset production plan](gjh-newmoon-asset-plan.md) tracks missing masters and future content. The rebuilt concepts implement these rules; they remain independent proposals awaiting the owner's design judgment.
 
+## New Moon Story and Gifting Proposal
+
+The owner's later strategy and yellow/teal mockup request are reconciled in the [New Moon product brief](new-moon-story-gifting-brief.md). Its `#F2B705` accent, serif placeholder wordmark, generated archive cards and gift packaging are concept choices, separate from this library's verified originals. The brief corrects the supplied claims about missing history, unknown first product and unmeasured logo fills, while retaining the proposed gifting/concierge user journeys. No guessed prices, delivery promises, WhatsApp number or conversion uplift has been adopted as a fact.
+
 ## Independent Advisor Review
 
 One independent AI brand/ecommerce advisor reviewed the local library, contact sheet and official sources. This was an expert-style review, not a legal opinion, brand-owner approval or user study. Its main recommendations were accepted: separate source verification from current-master approval; prioritize a higher-resolution corporate mark and SKU-bound packshots; avoid fake facility/heritage imagery; preserve packaging pixels in any derivative; and keep actual implementation screenshots separate from brand assets.
