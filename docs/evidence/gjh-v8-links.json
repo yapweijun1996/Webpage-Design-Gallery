@@ -1,0 +1,56 @@
+{
+  "capturedAt": "2026-11-11T09:52:28.233490+00:00",
+  "method": "HEAD; redirects followed; no form submitted",
+  "results": [
+    {
+      "url": "https://www.gjh.com.sg/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/about-us/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/about-us/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/newmoon/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/newmoon/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/mili/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/mili/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/gogo/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/gogo/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/explore-our-brand/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/explore-our-brand/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/sony/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/sony/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/borsch-med/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/borsch-med/"
+    },
+    {
+      "url": "https://www.gjh.com.sg/contact-us/",
+      "status": 200,
+      "finalUrl": "https://www.gjh.com.sg/contact-us/"
+    },
+    {
+      "url": "https://www.gjheshop.com/",
+      "status": 200,
+      "finalUrl": "https://www.gjheshop.com/"
+    }
+  ]
+}

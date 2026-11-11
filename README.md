@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. The public collection currently contains **one company and four designs**. All concepts are unofficial and do not imply company endorsement.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **one company and five designs**. All concepts are unofficial and do not imply company endorsement.
 
 ## Browse
 
@@ -9,7 +9,7 @@ A company-first design exploration platform. Browse companies, enter a company c
 - `/companies/gjh/index.html`: GJH's design collection, style filters and two-design comparison selection.
 - `/designs/index.html?company=gjh&design=v6`: design details and captured desktop/tablet/mobile screenshots.
 - `/compare/index.html?company=gjh&left=v5&right=v7`: two live previews or screenshots, device widths, optional relative scroll synchronization, and fullscreen preview where supported.
-- Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/` and `v7/` URLs are preserved.
+- Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/`, `v7/` and `v8/` URLs are preserved.
 
 ## Local development
 
@@ -57,6 +57,10 @@ Pages uses the manually triggered **Deploy demo to GitHub Pages** workflow. Afte
 
 ## Assets and research
 
-The four GJH concepts now use original corporate/brand marks and official-site photographs, with project use authorized by the user. Invented company lettering and obsolete AI scenes were removed. Each demo retains independent runtime files, exact original image copies, a self-hosted OFL-licensed Manrope font and `assets/sources.json` receipts. Its HTML/CSS/JavaScript are handwritten authoring sources; only the surrounding Gallery HTML/data index and captured previews are generated.
+The V1/V5/V6/V7 GJH concepts use original corporate/brand marks and official-site photographs, with project use authorized by the user. Invented company lettering and obsolete AI scenes were removed. Each demo retains independent runtime files, exact original image copies, a self-hosted OFL-licensed Manrope font and `assets/sources.json` receipts. Its HTML/CSS/JavaScript are handwritten authoring sources; only the surrounding Gallery HTML/data index and captured previews are generated.
 
 The curated [GJH / New Moon source-verified library](assets/companies/gjh/official/README.md) contains 26 originals with page-context receipts, timestamps and hashes. Selected unaltered copies are published inside the demos; the full library, reports and bulk research downloads are excluded from the Pages artifact. See the [Brand Research Report](docs/gjh-newmoon-brand-research.md), [redesign review](docs/gjh-redesign-review.md) and [asset plan](docs/gjh-newmoon-asset-plan.md). Validate the recorded library capture with `python scripts/verify_gjh_asset_library.py`. Current packaging masters and a formal brand manual remain unavailable; no endorsement is implied.
+
+## GJH V8 candidate
+
+[Generations of Goodness](demos/corporate/gjh/v8/README.md) adds a forest-green/gold/ivory immersive direction with seven scenes, a disclosed AI-created family illustration, verified brand artwork, 2.5D layers and an accessible schematic network. The existing four versions and deployment configuration are preserved. See the [V8 logic and motion contract](demos/corporate/gjh/v8/logic.md) and [local candidate review](docs/gjh-v8-review.md) for evidence, limits and release status.
