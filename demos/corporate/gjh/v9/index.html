@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An independent GJH virtual-store concept exploring New Moon, MILI and GOGO in layered 2.5D scenes.">
+  <meta name="theme-color" content="#092e25">
+  <title>GJH — Virtual Stores | Independent Concept</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="assets/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header" role="banner">
+    <a class="wordmark" href="#top" aria-label="Virtual Stores home">GJH <span>VIRTUAL STORES</span></a>
+    <nav aria-label="Page navigation"><a href="#main">Explore stores</a><a href="#store-list">Store and product list</a></nav>
+    <button class="view-toggle" type="button" aria-pressed="false" hidden>List view</button>
+  </header>
+  <main id="main">
+    <section class="intro" id="top" aria-labelledby="page-title">
+      <p class="eyebrow">A layered brand experience</p>
+      <h1 id="page-title">Step into a world<br>of <em>everyday stories.</em></h1>
+      <p>Explore three distinct brand spaces in a calm, layered 2.5D environment. Choose a doorway or use the store map.</p>
+      <p class="concept-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
+    </section>
+
+    <section class="visual-experience" aria-label="Interactive virtual stores">
+      <div class="experience-bar">
+        <p id="room-heading" aria-live="polite">The Lobby</p>
+        <div class="room-actions">
+          <button class="direction" type="button" data-direction="previous" aria-label="Previous room"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Previous</span></button>
+          <button class="direction" type="button" data-direction="next" aria-label="Next room"><span>Next</span><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+      <div class="world-shell">
+        <div class="scene-world" data-current-room="lobby" aria-label="Virtual store scene">
+          <div class="scene-backdrop" aria-hidden="true"><span class="moon"></span><span class="canopy canopy-one"></span><span class="canopy canopy-two"></span><span class="floor"></span></div>
+          <section class="room lobby-room" data-room-panel="lobby" aria-label="Lobby">
+            <div class="lobby-copy"><p class="eyebrow">Welcome to the GJH brand world</p><h2 tabindex="-1">The Lobby</h2><p>Choose a store to explore.</p></div>
+            <div class="arch-row">
+              <button class="store-door door-newmoon" type="button" data-room="newmoon"><span class="door-glow"></span><img src="assets/new-moon-brand-cover.jpg" alt="New Moon official brand artwork" width="438" height="438"><span class="door-label">New Moon</span><span class="door-visit">Enter store</span></button>
+              <button class="store-door door-mili" type="button" data-room="mili"><span class="door-glow"></span><img src="assets/mili-brand-cover.jpg" alt="MILI official brand artwork" width="500" height="500"><span class="door-label">MILI</span><span class="door-visit">Enter store</span></button>
+              <button class="store-door door-gogo" type="button" data-room="gogo"><span class="door-glow"></span><img src="assets/gogo-brand-cover.jpg" alt="GOGO official brand artwork" width="438" height="438"><span class="door-label">GOGO</span><span class="door-visit">Enter store</span></button>
+            </div>
+          </section>
+          <section class="room brand-room" data-room-panel="newmoon" aria-label="New Moon store" hidden>
+            <div class="store-heading"><p class="eyebrow">New Moon</p><h2 tabindex="-1">Goodness, shared.</h2><p>Four verified packshots, shown with their individual SKU and pack size attached.</p></div>
+            <div class="store-wall"><div class="shelf shelf-upper"><button class="hotspot" type="button" data-product="sku-nz" aria-label="Open New Zealand abalone 425g details"><img src="assets/new-moon-nz-425g-front.jpg" alt="New Moon New Zealand abalone pack, 425g, front view" width="1000" height="1000"><span>New Zealand · 425g</span></button><button class="hotspot" type="button" data-product="sku-au" aria-label="Open Australia abalone 425g details"><img src="assets/new-moon-au-425g-front.jpg" alt="New Moon Australia abalone pack, 425g, front view" width="1000" height="1000"><span>Australia · 425g</span></button></div><div class="shelf shelf-lower"><button class="hotspot" type="button" data-product="sku-sa" aria-label="Open South Africa abalone 425g details"><img src="assets/new-moon-sa-425g-front.jpg" alt="New Moon South Africa abalone pack, 425g, front view" width="1000" height="1000"><span>South Africa · 425g</span></button><button class="hotspot" type="button" data-product="sku-mx" aria-label="Open Mexico abalone 454g details"><img src="assets/new-moon-mx-454g-front.jpg" alt="New Moon Mexico abalone pack, 454g, front view" width="1000" height="1000"><span>Mexico · 454g</span></button></div></div>
+          </section>
+          <section class="room brand-room story-room" data-room-panel="mili" aria-label="MILI store" hidden><div class="brand-story"><img src="assets/mili-brand-cover.jpg" alt="Official MILI brand cover artwork" width="500" height="500"><div><p class="eyebrow">MILI</p><h2 tabindex="-1">A story of the brand.</h2><p>This space presents official MILI brand artwork. Verified product packshots are not available for this concept, so no products are depicted or listed.</p></div></div></section>
+          <section class="room brand-room story-room" data-room-panel="gogo" aria-label="GOGO store" hidden><div class="brand-story"><img src="assets/gogo-brand-cover.jpg" alt="Official GOGO brand cover artwork" width="438" height="438"><div><p class="eyebrow">GOGO</p><h2 tabindex="-1">A story of the brand.</h2><p>This space presents official GOGO brand artwork. Verified product packshots are not available for this concept, so no products are depicted or listed.</p></div></div></section>
+        </div>
+      </div>
+      <nav class="mini-map" aria-label="Store map">
+        <p>Floor plan</p>
+        <div class="map-layout"><button type="button" data-map-room="newmoon">New Moon</button><button type="button" data-map-room="mili">MILI</button><button type="button" data-map-room="lobby">Lobby</button><button type="button" data-map-room="gogo">GOGO</button></div>
+      </nav>
+    </section>
+      <section class="product-panels" id="product-panels" aria-label="New Moon product details">
+        <h2>New Moon product details</h2>
+        <details class="product-panel" id="sku-nz"><summary>New Zealand abalone · 425g</summary><div class="product-content"><h3>New Moon Premium Wild Caught New Zealand Abalone 425g</h3><p>Original product images associated with the official eShop listing; current brand-approved packaging edition is unconfirmed.</p><div class="product-views"><figure><img src="assets/new-moon-nz-425g-front.jpg" alt="Front view of New Moon New Zealand abalone, 425g" width="1000" height="1000"><figcaption>Front</figcaption></figure><figure><img src="assets/new-moon-nz-425g-back.jpg" alt="Back view of New Moon New Zealand abalone, 425g" width="1000" height="1000"><figcaption>Back</figcaption></figure><figure><img src="assets/new-moon-nz-425g-nutrition.jpg" alt="Nutrition information view of New Moon New Zealand abalone, 425g" width="1000" height="1000"><figcaption>Nutrition information</figcaption></figure></div><a class="eshop-link" href="https://www.gjheshop.com/" target="_blank" rel="noopener noreferrer">Visit the official GJH eShop</a></div></details>
+        <details class="product-panel" id="sku-au"><summary>Australia abalone · 425g</summary><div class="product-content"><h3>New Moon Premium Wild Caught Australia Abalone 425g</h3><p>Original product images associated with the official eShop listing; current brand-approved packaging edition is unconfirmed.</p><div class="product-views"><figure><img src="assets/new-moon-au-425g-front.jpg" alt="Front view of New Moon Australia abalone, 425g" width="1000" height="1000"><figcaption>Front</figcaption></figure><figure><img src="assets/new-moon-au-425g-back.jpg" alt="Back view of New Moon Australia abalone, 425g" width="1000" height="1000"><figcaption>Back</figcaption></figure><figure><img src="assets/new-moon-au-425g-nutrition.jpg" alt="Nutrition information view of New Moon Australia abalone, 425g" width="1000" height="1000"><figcaption>Nutrition information</figcaption></figure></div><a class="eshop-link" href="https://www.gjheshop.com/" target="_blank" rel="noopener noreferrer">Visit the official GJH eShop</a></div></details>
+        <details class="product-panel" id="sku-sa"><summary>South Africa abalone · 425g</summary><div class="product-content"><h3>New Moon Premium South Africa Abalone 425g</h3><p>Original product images associated with the official eShop listing; current brand-approved packaging edition is unconfirmed.</p><div class="product-views"><figure><img src="assets/new-moon-sa-425g-front.jpg" alt="Front view of New Moon South Africa abalone, 425g" width="1000" height="1000"><figcaption>Front</figcaption></figure><figure><img src="assets/new-moon-sa-425g-back.jpg" alt="Back view of New Moon South Africa abalone, 425g" width="1000" height="1000"><figcaption>Back</figcaption></figure><figure><img src="assets/new-moon-sa-425g-nutrition.jpg" alt="Nutrition information view of New Moon South Africa abalone, 425g" width="1000" height="1000"><figcaption>Nutrition information</figcaption></figure></div><a class="eshop-link" href="https://www.gjheshop.com/" target="_blank" rel="noopener noreferrer">Visit the official GJH eShop</a></div></details>
+        <details class="product-panel" id="sku-mx"><summary>Mexico abalone · 454g</summary><div class="product-content"><h3>New Moon Premium Mexico Abalone 454g</h3><p>Original product images associated with the official eShop listing; current brand-approved packaging edition is unconfirmed.</p><div class="product-views"><figure><img src="assets/new-moon-mx-454g-front.jpg" alt="Front view of New Moon Mexico abalone, 454g" width="1000" height="1000"><figcaption>Front</figcaption></figure><figure><img src="assets/new-moon-mx-454g-back.jpg" alt="Back view of New Moon Mexico abalone, 454g" width="1000" height="1000"><figcaption>Back</figcaption></figure></div><a class="eshop-link" href="https://www.gjheshop.com/" target="_blank" rel="noopener noreferrer">Visit the official GJH eShop</a></div></details>
+      </section>
+
+    <section class="list-view" id="store-list" aria-labelledby="list-title">
+      <p class="eyebrow">Accessible alternative</p><h2 id="list-title">Browse stores and products</h2><section><h3>New Moon</h3><p>Four source-verified eShop listings, each shown with its pack size.</p><ul><li><a href="#sku-nz">New Zealand abalone · 425g</a></li><li><a href="#sku-au">Australia abalone · 425g</a></li><li><a href="#sku-sa">South Africa abalone · 425g</a></li><li><a href="#sku-mx">Mexico abalone · 454g</a></li></ul></section><section><h3>MILI</h3><p>Official MILI brand artwork and story. Verified product packshots are unavailable.</p><a href="#mili-story">Read the MILI brand story</a></section><section><h3>GOGO</h3><p>Official GOGO brand artwork and story. Verified product packshots are unavailable.</p><a href="#gogo-story">Read the GOGO brand story</a></section></section>
+    <section class="story-list" aria-label="Brand stories"><article id="mili-story"><h2>MILI</h2><img src="assets/mili-brand-cover.jpg" alt="Official MILI brand cover artwork" width="500" height="500"><p>Official brand artwork only; no verified product packshots are available for this concept.</p></article><article id="gogo-story"><h2>GOGO</h2><img src="assets/gogo-brand-cover.jpg" alt="Official GOGO brand cover artwork" width="438" height="438"><p>Official brand artwork only; no verified product packshots are available for this concept.</p></article></section>
+  </main>
+  <footer class="site-footer"><p>Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p><a href="https://www.gjheshop.com/" target="_blank" rel="noopener noreferrer">Official GJH eShop</a></footer>
+</body>
+</html>

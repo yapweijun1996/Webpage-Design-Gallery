@@ -1,0 +1,17 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Virtual Stores",
+  "version": "v9",
+  "designStyle": "A layered 2.5D virtual-store concept in forest green, champagne gold and warm ivory.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v9/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v9",
+  "companyId": "gjh",
+  "displayTitle": "Virtual Stores",
+  "summary": "An immersive 2.5D brand world lets visitors explore New Moon, MILI and GOGO through layered virtual storefronts.",
+  "styles": ["immersive", "heritage"],
+  "order": 60
+}

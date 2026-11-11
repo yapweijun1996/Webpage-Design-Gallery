@@ -2,5 +2,6 @@
   {"id": "corporate", "slug": "corporate", "name": "Corporate"},
   {"id": "heritage", "slug": "heritage", "name": "Heritage"},
   {"id": "minimal", "slug": "minimal", "name": "Minimal"},
-  {"id": "editorial", "slug": "editorial", "name": "Editorial"}
+  {"id": "editorial", "slug": "editorial", "name": "Editorial"},
+  {"id": "immersive", "slug": "immersive", "name": "Immersive"}
 ]

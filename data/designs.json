@@ -192,5 +192,44 @@
       "mobile"
     ],
     "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v9",
+    "companyId": "gjh",
+    "slug": "v9",
+    "version": "v9",
+    "title": "Virtual Stores",
+    "description": "An immersive 2.5D brand world lets visitors explore New Moon, MILI and GOGO through layered virtual storefronts.",
+    "styles": [
+      "immersive",
+      "heritage"
+    ],
+    "status": "concept",
+    "order": 60,
+    "demoPath": "demos/corporate/gjh/v9/index.html",
+    "thumbnail": "demos/corporate/gjh/v9/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v9/screenshots/1440.png",
+        "width": 1440,
+        "height": 1849
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v9/screenshots/768.png",
+        "width": 768,
+        "height": 1438
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v9/screenshots/390.png",
+        "width": 390,
+        "height": 1785
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
   }
 ]
