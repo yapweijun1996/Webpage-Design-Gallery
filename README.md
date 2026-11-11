@@ -37,9 +37,10 @@ Open `http://localhost:8000/`. The generated company and demo links work without
 python scripts/build_gallery.py --check
 python -m unittest discover -s tests -p test_gallery.py -v
 python tests/browser_gallery.py
+python tests/browser_gjh_demos.py
 ```
 
-The browser check uses the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. It builds into a temporary directory and verifies a GitHub Pages-style path prefix. See [verification evidence](docs/gallery-v2-review.md) for coverage and limitations.
+Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. Both build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.
 
 ## GitHub Pages
 
@@ -47,6 +48,6 @@ Pages uses the manually triggered **Deploy demo to GitHub Pages** workflow. Afte
 
 ## Assets and research
 
-Downloaded third-party research files remain ignored by Git. Official brand assets explicitly used in V6/V7 are included with user-confirmed permission and attributed in those demo READMEs. Other scene images are AI-generated illustrations. The sourced company profile is in `demos/corporate/gjh/research/`. Current commercial relationships and claims should be rechecked before commercial use.
+The four GJH concepts now use original corporate/brand marks and official-site photographs, with project use authorized by the user. Invented company lettering and obsolete AI scenes were removed. Each demo retains independent runtime files, exact original image copies, a self-hosted OFL-licensed Manrope font and `assets/sources.json` receipts. Its HTML/CSS/JavaScript are handwritten authoring sources; only the surrounding Gallery HTML/data index and captured previews are generated.
 
-The curated [GJH / New Moon source-verified library](assets/companies/gjh/official/README.md) contains original official files with page-context receipts, timestamps and hashes. It is research input for a future redesign and is not currently included in the Pages build. See the [Brand Research Report](docs/gjh-newmoon-brand-research.md) and [web asset plan](docs/gjh-newmoon-asset-plan.md). Validate the recorded capture with `python scripts/verify_gjh_asset_library.py`.
+The curated [GJH / New Moon source-verified library](assets/companies/gjh/official/README.md) contains 26 originals with page-context receipts, timestamps and hashes. Selected unaltered copies are published inside the demos; the full library, reports and bulk research downloads are excluded from the Pages artifact. See the [Brand Research Report](docs/gjh-newmoon-brand-research.md), [redesign review](docs/gjh-redesign-review.md) and [asset plan](docs/gjh-newmoon-asset-plan.md). Validate the recorded library capture with `python scripts/verify_gjh_asset_library.py`. Current packaging masters and a formal brand manual remain unavailable; no endorsement is implied.

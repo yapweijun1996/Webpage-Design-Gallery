@@ -1,17 +1,17 @@
 {
   "company": "Goh Joo Hin Pte Ltd",
   "industry": "FMCG, Electronics, Health & Nutrition",
-  "title": "Goh Joo Hin - Modern Minimal",
+  "title": "Goh Joo Hin - Portfolio Modern",
   "version": "v6",
-  "designStyle": "A contemporary, image-led expression",
+  "designStyle": "Modular berry-and-yellow company introduction with a product-aware brand portfolio.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v6/",
   "officialWebsite": "https://www.gjh.com.sg/",
   "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
   "id": "gjh-v6",
   "companyId": "gjh",
-  "displayTitle": "Modern Minimal",
-  "summary": "A clean, image-led direction with generous white space and simple pathways.",
+  "displayTitle": "Portfolio Modern",
+  "summary": "A modular portfolio direction with original brand imagery and four source-matched New Moon SKUs.",
   "styles": [
     "corporate",
     "minimal"

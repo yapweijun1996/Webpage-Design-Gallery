@@ -1,10 +1,10 @@
 # GJH & New Moon — Brand Research Report
 
-Review date: 11 November 2026. Scope: official company/brand/shop information, original visual assets, existing public demos and requirements for a future V3 design. This is an independent research report, not a GJH brand manual or approval certificate.
+Review date: 11 November 2026. Scope: official company/brand/shop information, original visual assets, observed website styles and four rebuilt corporate concepts. This is an independent research report, not a GJH brand manual or approval certificate.
 
 ## Executive Finding
 
-The GJH company, New Moon consumer brand and GJH eShop storefront need distinct identities and user journeys. The current green serif GJH lettering in the demos is concept typography, not the official logo. Premium presentation should preserve authentic marks and packaging, and use factual content to establish relevance.
+The GJH company, New Moon consumer brand and GJH eShop storefront need distinct identities and user journeys. The rebuilt V1, V5, V6 and V7 replace invented green serif lettering with the original corporate mark. Authentic portfolio photography, exact SKU images and bounded company facts now establish relevance.
 
 ## Evidence Model
 
@@ -51,6 +51,37 @@ The original New Moon SVG contains `#2E3192`, `#FFF200` and `#FFFFFF`. These are
 
 The logo's embedded date is part of the original artwork. Preserve it; retain the official profile's "1940s" wording for narrative history unless an exact founding date is separately confirmed. Do not infer an official Chinese brand name from the English translation "new moon"; use the supplied approved mark or English name until localization is evidenced.
 
+## Website Color and Typography Research
+
+The official homepage links to Elementor's [site configuration CSS](https://www.gjh.com.sg/wp-content/uploads/elementor/css/post-13.css). A fresh HTTP capture and real Chrome computed-style read-back confirmed the following values. Receipts, hashes and computed values are retained in [style evidence](evidence/gjh-brand-style-audit.json), with an [official-home browser capture](screenshots/gjh-assets/official-home-1440.png).
+
+| Layer | Captured evidence | Application in the concepts |
+| --- | --- | --- |
+| Corporate artwork | Original GJH PNG is visibly red/yellow; raster edge colors vary | Preserve the original, without tracing, tinting or enlarging beyond its useful resolution |
+| Website action color | `--e-global-color-accent: #D31B47` | Berry-red actions and key hierarchy in the light concepts |
+| Website supporting colors | `#FFD801` yellow, `#A20C3B` deep berry, `#E82543` red | Yellow with dark text; deep berry as an accessible action/surface color |
+| Website neutrals | Primary `#404040`, secondary `#454545`, text `#646464`, white and `#F7F7F7` | Readable neutral content, quiet surfaces and generous separation |
+| Website typography | Manrope: body configuration 17px/400/1.5; headline configurations include 800 | Self-host the open-source Manrope Latin variable subset; preserve an independent concept type scale |
+| New Moon artwork | SVG fills `#2E3192`, `#FFF200`, `#FFFFFF` | Keep these within the original brand artwork, rather than recoloring GJH |
+
+Website configuration is implementation evidence, not a formal trademark palette, Pantone specification or corporate type licence. The raster corporate logo's red/yellow pixels do not exactly equal the website's berry/yellow UI tokens. The concepts distinguish those layers. Georgia in V5/V7, ivory surfaces, dark plum-charcoal and light berry tints are proposed design choices, not official standards.
+
+The 24,532-byte Manrope WOFF2 subset is self-hosted in each independent demo, with the [SIL Open Font License](https://github.com/google/fonts/blob/main/ofl/manrope/OFL.txt) and source/hash receipts in `assets/sources.json`. Runtime pages do not request Google Fonts or third-party analytics.
+
+## Research Patterns and Design Translation
+
+| Reference | Pattern and user need | Adaptation and limit |
+| --- | --- | --- |
+| GJH company profile | Corporate history, business scope and distribution establish partner context | Company identity leads; no invented scale statistics or implied facilities |
+| GJH brand pages | Each portfolio brand has its own recognizable mark and product story | Separate brand cards; a listing does not imply ownership of every represented brand |
+| GJH eShop | Exact SKU pages connect origin, pack size and product imagery | Four source-matched New Moon cards in V6; shopping remains a distinct official channel |
+| W3C disclosure navigation | Normal links and a disclosure button support a familiar keyboard journey | `aria-expanded`, Escape, focus restoration, no artificial ARIA menu role |
+| W3C reflow guidance | Narrow layouts must preserve readable content and controls | Recompose at tablet/mobile; test 320 CSS pixels without horizontal scrolling |
+
+Accessibility references: [W3C disclosure navigation](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/) and [reflow guidance](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html). These provide interaction constraints rather than visual branding to copy.
+
+The primary audience is a prospective business partner or brand explorer. The two journeys are **understand GJH → explore business capabilities → contact the official company**, and **identify a portfolio brand → read its official story or visit its official shop**. The independent Gallery remains company-first and outside the corporate concept's navigation hierarchy.
+
 ## Product Verification
 
 The library includes original product-page images for New Zealand 425g, Australia 425g, South Africa 4–5 pieces/425g and Mexico 454g abalone. Each asset is linked to its exact official SKU page, rather than matched by color alone. [4–7]
@@ -59,9 +90,9 @@ The official collection also lists bird's nest, chicken essence, rice, sauces an
 
 Do not extend a particular SKU's origin, nutritional information, allergen statement or Halal field to all New Moon products. The official brand page's cited best-selling claim concerns Nielsen research for 1999–2011; it does not demonstrate a 2026 ranking. Awards and certifications must retain their own dates and scope. [2]
 
-## Current Demo Audit
+## Pre-redesign Demo Baseline
 
-A new read-only HTTP/HTML audit reproduced these image-element counts. It fetched every referenced image, rather than relying on the user-pasted claim about another tool or device.
+The preceding read-only HTTP/HTML audit recorded these image-element counts before the four-page rebuild. These are historical baseline findings, not a description of the replacement pages.
 
 | Demo | Image elements | Official marks / products in HTML | Result |
 | --- | ---: | --- | --- |
@@ -70,7 +101,7 @@ A new read-only HTTP/HTML audit reproduced these image-element counts. It fetche
 | V6 | 11 | Three brand-logo references and one New Moon product-image reference | All image responses 200 |
 | V7 | 11 | Same official-asset combination as V6 | All image responses 200 |
 
-Evidence: [HTTP audit JSON](evidence/gjh-brand-http-audit.json). This establishes resource reachability and HTML references, not a new browser/accessibility audit. The corporate concept lettering still needs replacement in any future brand-authentic redesign. Existing design thumbnails are captured webpage previews, not official company pictures; retain that classification.
+Baseline evidence: [HTTP audit JSON](evidence/gjh-brand-http-audit.json). The rebuilt concepts use original corporate/brand assets; obsolete AI scenes and invented corporate lettering were removed from their runtime assets. Actual implementation thumbnails and device screenshots were recaptured. Current browser evidence and remaining gaps are documented in the [redesign review](gjh-redesign-review.md).
 
 ## V3 Content and Asset Rules
 
@@ -81,7 +112,7 @@ Evidence: [HTTP audit JSON](evidence/gjh-brand-http-audit.json). This establishe
 5. AI may explore backgrounds, non-factual textures and generic illustrations. Product packaging, logo letters, certification marks and historical/documentary subjects must remain authentic. The earlier product-image enhancement was rejected because it altered packaging details.
 6. A polished concept must not be labelled "official" or "brand approved" merely because some assets have official sources.
 
-The [asset production plan](gjh-newmoon-asset-plan.md) defines the next deliverables and acceptance criteria. This research does not implement or approve a new mockup.
+The [asset production plan](gjh-newmoon-asset-plan.md) tracks missing masters and future content. The rebuilt concepts implement these rules; they remain independent proposals awaiting the owner's design judgment.
 
 ## Independent Advisor Review
 

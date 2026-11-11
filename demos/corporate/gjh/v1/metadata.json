@@ -1,17 +1,17 @@
 {
   "company": "Goh Joo Hin Pte Ltd",
   "industry": "FMCG, Electronics, Health & Nutrition",
-  "title": "Goh Joo Hin — Everyday, Connected",
+  "title": "Goh Joo Hin - Corporate Clarity",
   "version": "v1",
-  "designStyle": "Premium editorial corporate",
+  "designStyle": "Company-led white space, GJH website berry accents and a clear business-first layout.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v1/",
   "officialWebsite": "https://www.gjh.com.sg/",
   "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
   "id": "gjh-v1",
   "companyId": "gjh",
-  "displayTitle": "Corporate",
-  "summary": "The original warm corporate concept, with a balanced split-screen introduction.",
+  "displayTitle": "Corporate Clarity",
+  "summary": "Corporate clarity with authentic portfolio imagery and a direct partnership journey.",
   "styles": [
     "corporate"
   ],

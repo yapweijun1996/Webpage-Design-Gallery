@@ -1,0 +1,65 @@
+{
+  "meaning": "Unmodified copies of source-verified official assets. User authorized project use; no endorsement or formal brand approval is implied.",
+  "canonicalManifest": "../../../../../assets/companies/gjh/official/manifest.json",
+  "assets": [
+    {
+      "file": "gjh-logo.png",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png",
+      "sourcePage": "https://www.gjhglobal.com/about-us/",
+      "sha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "note": "Official GJH corporate logo; small raster, request a larger master for large placements."
+    },
+    {
+      "file": "mili-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg",
+      "sourcePage": "https://www.gjhglobal.com/mili/",
+      "sha256": "842f5793ddd4da0c51d2a35d210f273c9c082742f10a1a2465b66f5de454ab9d",
+      "note": "Official MILI brand tile, not a GJH corporate logo."
+    },
+    {
+      "file": "gogo-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg",
+      "sourcePage": "https://www.gjhglobal.com/gogo/",
+      "sha256": "51c2d3354c7271e1c92e34f8bf0509b60d055eda4b3e29b44eede70edd373a77",
+      "note": "Official GOGO brand tile, not a GJH corporate logo."
+    },
+    {
+      "file": "gjh-history-composite.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1.jpg",
+      "sourcePage": "https://www.gjhglobal.com/about-us/",
+      "sha256": "89a674fd19460ffae08b7863193e0d7fec80e83101a5c865a98e3ebf1bfd00c6",
+      "note": "Official website composite with baked-in 1940 text; not an original archive photograph."
+    },
+    {
+      "file": "new-moon-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "sha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks."
+    },
+    {
+      "file": "mili-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "sha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks."
+    },
+    {
+      "file": "gogo-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "sha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks."
+    }
+  ],
+  "font": {
+    "name": "Manrope Latin variable subset, 400-700",
+    "sourceUrl": "https://fonts.gstatic.com/s/manrope/v23/xn7gYHE41ni1AdIRggexSg.woff2",
+    "sha256": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+    "file": "manrope-latin.woff2",
+    "license": "SIL Open Font License 1.1",
+    "licenseFile": "OFL-Manrope.txt",
+    "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
+    "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
+  }
+}

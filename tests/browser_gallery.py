@@ -128,7 +128,8 @@ def run():
                     assert image.get_attribute("src").endswith("v6/screenshots/390.png")
                     page.get_by_role("link", name="Open live demo", exact=False).click()
                     assert "/demos/corporate/gjh/v6/" in page.url
-                    assert page.locator("h1").inner_text().startswith("For the moments")
+                    assert page.locator("h1").inner_text().startswith("Everyday brands.")
+                    assert page.locator(".identity img").get_attribute("src") == "assets/gjh-logo.png"
                     assert not errors, errors
                     evidence.append({"width": width, "companyFlow": "PASS", "filters": "PASS", "compare": "PASS", "deviceWidths": "PASS", "syncScroll": "PASS", "images": "PASS", "consoleErrors": errors})
                     context.close()

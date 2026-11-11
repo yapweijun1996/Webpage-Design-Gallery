@@ -1,17 +1,23 @@
-# Goh Joo Hin — Heritage Modern V5
+# Goh Joo Hin - Heritage Editorial (V5)
 
-This is an independent, unofficial design concept. It is not affiliated with or endorsed by Goh Joo Hin. Brand names are used only to identify the product lines discussed; no official logos or product images are used.
+An independent, unofficial corporate website concept, not affiliated with or endorsed by Goh Joo Hin Pte Ltd.
 
-## Preview
+## Direction
 
-From the repository root, run `python -m http.server 8000` and visit `http://localhost:8000/demos/corporate/gjh/v5/`. No build, dependencies, or backend are required. Contact links open the official GJH contact page.
+Warm editorial typography, GJH berry accents and a story-led heritage layout. The corporate GJH mark, consumer brand marks and official eShop remain distinct. This is an owner-review proposal, not a company-approved brand standard.
 
-## Visual assets
+## Local preview
 
-The eight WebP photographs are AI-generated illustrative scenes, not photographs of GJH products, people, premises, or history. The thumbnail is derived from the rendered desktop page. Assets are compressed for the web. The illustrations must not be presented as documentary evidence.
+From the repository root run `python -m http.server 8000 --bind 127.0.0.1`, then open `http://localhost:8000/demos/corporate/gjh/v5/`. No backend or npm dependency is required. This directory contains its own editable HTML, CSS, JavaScript and assets; changing another concept does not change this one.
 
-## Sources and limitations
+## Sources and rights
 
-The company history, business categories, regional references, and brand relationships are based on GJH's [About Us](https://www.gjh.com.sg/about-us/), [New Moon](https://www.gjh.com.sg/newmoon/), [New Moon history](https://www.gjh.com.sg/newmoon-history/), [MILI](https://www.gjh.com.sg/mili/), [GOGO](https://www.gjh.com.sg/gogo/), [Sony](https://www.gjh.com.sg/sony/), and [Borsch Med](https://www.gjh.com.sg/borsch-med/) pages. See the [research profile](../research/company-profile.md) for detail and an unresolved historical discrepancy. Claims and current partnerships need confirmation before commercial use.
+`assets/sources.json` records original official image URLs, source pages and hashes. Images and marks preserve their original bytes; the user confirmed project-use authorization. Lifestyle subjects are not identified as GJH employees. The small corporate PNG is not a high-resolution master. Manrope is self-hosted with `assets/OFL-Manrope.txt`; Georgia is a concept editorial choice in applicable versions. There are no AI-generated company scenes or regenerated product labels.
 
-The design responds to a 13-persona heuristic review supplied by the user; it is not evidence of user testing or measured conversion. A complete screen-reader and WCAG conformance audit remains necessary. External links require network access.
+See the [brand research](../../../../docs/gjh-newmoon-brand-research.md) and [source library](../../../../assets/companies/gjh/official/README.md). New Moon's 1959 brand origin is distinct from GJH's 1940s business beginnings. Selected regional markets do not imply every product is available in each location.
+
+## Verification
+
+Run `python tests/browser_gjh_demos.py` from the repository root. A reviewed local axe-core bundle can be supplied with `--axe-script /path/to/axe.min.js`. Browser captures are in `screenshots/`; `assets/thumbnail.webp` is derived from the real desktop capture. Rebuild Gallery metadata after recapture with `python scripts/build_gallery.py`.
+
+The [redesign review](../../../../docs/gjh-redesign-review.md) owns the current test matrix and limitations. Automated accessibility checks do not establish full WCAG conformance. Contact and shopping links open the official sites in a new tab; this demo submits no enquiries or orders.

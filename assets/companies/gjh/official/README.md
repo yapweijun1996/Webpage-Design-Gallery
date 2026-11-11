@@ -17,10 +17,11 @@ This proves source provenance at capture. It does not establish the current pack
 | New Moon range photographs | 2 | Official-site composites with 2022 upload paths; confirm editions before using as current product imagery. |
 | GJH historical composite | 1 | Official-site image with baked-in 1940 text; not an original archive photograph. |
 | GJH capabilities graphic | 1 | Official-site self-description; not independent certification evidence. |
+| Official-site lifestyle and brand photography | 5 | Two lifestyle banners and New Moon, MILI and GOGO covers. People are not identified as GJH staff. Preserve embedded marks. |
 
 The 167 × 73px corporate logo is suitable only for small placements. Obtain a higher-resolution or vector master for large use; do not trace or regenerate it with AI. The New Moon logo is an original SVG. Existing low-resolution brand tiles also need higher-quality masters for larger placements.
 
-See the [contact sheet](../../../../docs/screenshots/gjh-assets/source-contact-sheet.jpg), [brand research](../../../../docs/gjh-newmoon-brand-research.md) and [asset plan](../../../../docs/gjh-newmoon-asset-plan.md).
+There are 26 original assets. The [contact sheet](../../../../docs/screenshots/gjh-assets/source-contact-sheet.jpg) covers the initial 21; the five added photographs were visually reviewed separately and appear in the rebuilt demo screenshots. See [brand research](../../../../docs/gjh-newmoon-brand-research.md) and the [asset plan](../../../../docs/gjh-newmoon-asset-plan.md). Corporate banner references are declared in the homepage's linked Elementor CSS; the manifest records that context URL.
 
 ## Verification
 

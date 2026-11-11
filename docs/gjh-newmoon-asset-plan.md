@@ -60,7 +60,7 @@ These are project production recommendations, not official GJH/New Moon standard
 - Web derivatives: prefer WebP/AVIF where readable, with explicit dimensions, lazy loading below the fold and an eager primary hero. Start around 100–200 KB for a card and 200–350 KB for a hero, then measure actual quality and loading.
 - Accessibility: meaningful product alt text, readable HTML headings, decorative images with empty alt text, and controls independent of image text.
 
-## Acceptance Before V3 Mockups
+## Acceptance for New Design Work
 
 1. Every selected visual has an asset ID, original URL, referring official page, hash and source status.
 2. Source provenance, project authorization and current packaging/brand approval are separate fields.
@@ -79,7 +79,7 @@ These are project production recommendations, not official GJH/New Moon standard
 - Existing implementation state: [read-only HTTP audit](evidence/gjh-brand-http-audit.json).
 - Asset validation: `python scripts/verify_gjh_asset_library.py`.
 
-The first release should use this authentic core set. Additional assets should fill specific missing sections or product families, rather than expanding to 100 images without a clear role.
+The four corporate concepts now use selected original copies from the 26-asset library. Five official-site photographs were added: two lifestyle banners plus New Moon, MILI and GOGO covers. These fill lifestyle/brand presentation needs without claiming to depict GJH employees or facilities. V6 also uses four exact eShop SKU fronts. The remaining corporate-master, documentary-photo, gift-set and current-edition gaps above remain open. Additional assets should fill specific missing sections or product families, rather than expanding to 100 images without a clear role.
 
 ## Advisor Review Disposition
 

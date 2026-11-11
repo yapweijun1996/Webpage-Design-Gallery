@@ -1,17 +1,17 @@
 {
   "company": "Goh Joo Hin Pte Ltd",
   "industry": "FMCG, Electronics, Health & Nutrition",
-  "title": "Goh Joo Hin - Heritage Noir",
+  "title": "Goh Joo Hin - Signature Dark",
   "version": "v7",
-  "designStyle": "A dramatic editorial expression",
+  "designStyle": "Dark plum-charcoal, restrained yellow highlights and a business-partnership narrative.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v7/",
   "officialWebsite": "https://www.gjh.com.sg/",
   "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
   "id": "gjh-v7",
   "companyId": "gjh",
-  "displayTitle": "Heritage Noir",
-  "summary": "A dramatic dark-green editorial direction with a heritage-first story.",
+  "displayTitle": "Signature Dark",
+  "summary": "A dark editorial direction emphasizing company connections, heritage and business partnerships.",
   "styles": [
     "heritage",
     "editorial"

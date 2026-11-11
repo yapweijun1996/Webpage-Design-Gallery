@@ -395,11 +395,11 @@
       "id": "new-moon-sa-425g-front",
       "entity": "new-moon",
       "kind": "product-front",
-      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-–-5pcs-425g-Front-1.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-\u00e2\u20ac\u201c-5pcs-425g-Front-1.jpg",
       "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
       "note": "Original image associated with the official product page at capture; current brand-approved packaging edition remains unconfirmed.",
       "editionStatus": "listed_on_current_page_not_brand_approved",
-      "productTitle": "New Moon Premium South Africa Abalone (4 – 5pcs) 425g",
+      "productTitle": "New Moon Premium South Africa Abalone (4 \u00e2\u20ac\u201c 5pcs) 425g",
       "path": "assets/companies/gjh/official/new-moon-sa-425g-front.jpg",
       "sha256": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
       "bytes": 140822,
@@ -419,11 +419,11 @@
       "id": "new-moon-sa-425g-back",
       "entity": "new-moon",
       "kind": "product-back",
-      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-–-5pcs-425g-Back-1.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-\u00e2\u20ac\u201c-5pcs-425g-Back-1.jpg",
       "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
       "note": "Original image associated with the official product page at capture; current brand-approved packaging edition remains unconfirmed.",
       "editionStatus": "listed_on_current_page_not_brand_approved",
-      "productTitle": "New Moon Premium South Africa Abalone (4 – 5pcs) 425g",
+      "productTitle": "New Moon Premium South Africa Abalone (4 \u00e2\u20ac\u201c 5pcs) 425g",
       "path": "assets/companies/gjh/official/new-moon-sa-425g-back.jpg",
       "sha256": "aae438ba58182074055c682c33c18dab839344345d1e0b89359614d86d0a0dd8",
       "bytes": 159710,
@@ -443,11 +443,11 @@
       "id": "new-moon-sa-425g-nutrition",
       "entity": "new-moon",
       "kind": "product-nutrition",
-      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-–-5pcs-425g-NIP-1.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-\u00e2\u20ac\u201c-5pcs-425g-NIP-1.jpg",
       "sourcePage": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
       "note": "Original image associated with the official product page at capture; current brand-approved packaging edition remains unconfirmed.",
       "editionStatus": "listed_on_current_page_not_brand_approved",
-      "productTitle": "New Moon Premium South Africa Abalone (4 – 5pcs) 425g",
+      "productTitle": "New Moon Premium South Africa Abalone (4 \u00e2\u20ac\u201c 5pcs) 425g",
       "path": "assets/companies/gjh/official/new-moon-sa-425g-nutrition.jpg",
       "sha256": "34b196ed941a276a470342f7e80d9b82860ff32ec9f59156758284476acb2af5",
       "bytes": 136508,
@@ -510,6 +510,126 @@
       },
       "formatCheck": "image_verified",
       "pageContextVerified": true
+    },
+    {
+      "id": "gjh-family-lifestyle",
+      "entity": "gjh",
+      "kind": "lifestyle-photo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/family-banner.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks.",
+      "editionStatus": "not_confirmed_current",
+      "path": "assets/companies/gjh/official/family-lifestyle.jpg",
+      "sha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "bytes": 181411,
+      "httpStatus": 200,
+      "finalUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/family-banner.jpg",
+      "contentType": "image/jpeg",
+      "retrievedAt": "2026-11-11T09:02:32.364306+00:00",
+      "sourceStatus": "verified_official_source",
+      "dimensions": {
+        "width": 1920,
+        "height": 850
+      },
+      "formatCheck": "image_verified",
+      "pageContextVerified": true,
+      "contextEvidence": "https://www.gjh.com.sg/wp-content/uploads/elementor/css/post-4236.css"
+    },
+    {
+      "id": "gjh-connected-lifestyle",
+      "entity": "gjh",
+      "kind": "lifestyle-photo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/banner-com.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks.",
+      "editionStatus": "not_confirmed_current",
+      "path": "assets/companies/gjh/official/connected-lifestyle.jpg",
+      "sha256": "b2f33ff5807d40dbe98b671943f5c6c1c6d3797f395cab9387ecfd2d9fadb557",
+      "bytes": 175782,
+      "httpStatus": 200,
+      "finalUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/banner-com.jpg",
+      "contentType": "image/jpeg",
+      "retrievedAt": "2026-11-11T09:02:32.364306+00:00",
+      "sourceStatus": "verified_official_source",
+      "dimensions": {
+        "width": 1920,
+        "height": 850
+      },
+      "formatCheck": "image_verified",
+      "pageContextVerified": true,
+      "contextEvidence": "https://www.gjh.com.sg/wp-content/uploads/elementor/css/post-4236.css"
+    },
+    {
+      "id": "new-moon-brand-cover",
+      "entity": "new-moon",
+      "kind": "brand-photo",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks.",
+      "editionStatus": "not_confirmed_current",
+      "path": "assets/companies/gjh/official/new-moon-brand-cover.jpg",
+      "sha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "bytes": 219929,
+      "httpStatus": 200,
+      "finalUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg",
+      "contentType": "image/jpeg",
+      "retrievedAt": "2026-11-11T09:02:32.364306+00:00",
+      "sourceStatus": "verified_official_source",
+      "dimensions": {
+        "width": 438,
+        "height": 438
+      },
+      "formatCheck": "image_verified",
+      "pageContextVerified": true,
+      "contextEvidence": "https://www.gjh.com.sg/"
+    },
+    {
+      "id": "mili-brand-cover",
+      "entity": "mili",
+      "kind": "brand-photo",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks.",
+      "editionStatus": "not_confirmed_current",
+      "path": "assets/companies/gjh/official/mili-brand-cover.jpg",
+      "sha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "bytes": 35812,
+      "httpStatus": 200,
+      "finalUrl": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "contentType": "image/jpeg",
+      "retrievedAt": "2026-11-11T09:02:32.364306+00:00",
+      "sourceStatus": "verified_official_source",
+      "dimensions": {
+        "width": 500,
+        "height": 500
+      },
+      "formatCheck": "image_verified",
+      "pageContextVerified": true,
+      "contextEvidence": "https://www.gjh.com.sg/"
+    },
+    {
+      "id": "gogo-brand-cover",
+      "entity": "gogo",
+      "kind": "brand-photo",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "sourcePage": "https://www.gjh.com.sg/",
+      "note": "Original official-site lifestyle/brand photograph; people are not identified as GJH employees. Preserve baked-in marks.",
+      "editionStatus": "not_confirmed_current",
+      "path": "assets/companies/gjh/official/gogo-brand-cover.jpg",
+      "sha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "bytes": 20934,
+      "httpStatus": 200,
+      "finalUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "contentType": "image/jpeg",
+      "retrievedAt": "2026-11-11T09:02:32.364306+00:00",
+      "sourceStatus": "verified_official_source",
+      "dimensions": {
+        "width": 438,
+        "height": 438
+      },
+      "formatCheck": "image_verified",
+      "pageContextVerified": true,
+      "contextEvidence": "https://www.gjh.com.sg/"
     }
   ],
   "sourcePages": [
@@ -582,6 +702,13 @@
       "httpStatus": 200,
       "sha256": "1c9e6c5f2ccd3294acb1a8dbfc0a1a21acfa438d827fed5f7400e25358ce06dc",
       "retrievedAt": "2026-11-11T08:41:34.542081+00:00"
+    },
+    {
+      "url": "https://www.gjh.com.sg/",
+      "finalUrl": "https://www.gjh.com.sg/",
+      "httpStatus": 200,
+      "sha256": "04bfc1e998a4911f9ffa8ab8a2275e9abf2554fc41b86ffba5b153733a34d49a",
+      "retrievedAt": "2026-11-11T09:02:32.364306+00:00"
     }
   ],
   "collectionErrors": [],
@@ -593,5 +720,11 @@
       "independent AI brand/ecommerce advisor"
     ],
     "scope": "Identity, grouping and pack-view association; not current-edition approval or a complete packaging-label proofread."
+  },
+  "additionalVisualReview": {
+    "scope": "Five official-site photographs added for the four-concept redesign",
+    "reviewer": "Primary implementation agent",
+    "evidence": "New Moon/MILI/GOGO covers and two lifestyle banners inspected together in a contact sheet, then in actual browser captures",
+    "result": "Accepted for concept use with factual captions; people not identified as GJH staff; embedded marks preserved"
   }
 }

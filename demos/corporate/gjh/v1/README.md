@@ -1,15 +1,23 @@
-# Goh Joo Hin — Landing Page V1
+# Goh Joo Hin - Corporate Clarity (V1)
 
-An independent, unofficial design concept. It is not affiliated with or endorsed by Goh Joo Hin Pte Ltd. Brand names are used only for identification; no official logos or product imagery are included. The hero is an AI-generated illustrative image, not a photograph of company products or premises.
+An independent, unofficial corporate website concept, not affiliated with or endorsed by Goh Joo Hin Pte Ltd.
 
-## Preview
+## Direction
 
-From the repository root, run `python -m http.server 8000`, then visit `http://localhost:8000/demos/corporate/gjh/v1/`. Alternatively, open `index.html` directly. No build, dependencies, or backend are required. The contact action opens the official website; this concept does not collect messages.
+Company-led white space, GJH website berry accents and a clear business-first layout. The corporate GJH mark, consumer brand marks and official eShop remain distinct. This is an owner-review proposal, not a company-approved brand standard.
 
-## Sources
+## Local preview
 
-Company information and selected milestones are based on GJH's [About Us](https://www.gjh.com.sg/about-us/), [New Moon history](https://www.gjh.com.sg/newmoon-history/), [MILI](https://www.gjh.com.sg/mili/), [GOGO](https://www.gjh.com.sg/gogo/), and [Borsch Med](https://www.gjh.com.sg/borsch-med/) pages, consulted 2026-11-11. The official About page and GOGO page state different years for GOGO's origin; this demo does not state a year. Regional locations are selected examples reported by GJH, not a claim that all products are available in every market. Relationships and availability should be rechecked before any publication.
+From the repository root run `python -m http.server 8000 --bind 127.0.0.1`, then open `http://localhost:8000/demos/corporate/gjh/v1/`. No backend or npm dependency is required. This directory contains its own editable HTML, CSS, JavaScript and assets; changing another concept does not change this one.
 
-## Review and limitations
+## Sources and rights
 
-Screenshots in `screenshots/` capture the design at 1440, 768, 390 and 375 CSS pixels. The hero uses a compressed WebP; the thumbnail is derived from the desktop screenshot. The business category illustrations are decorative, not product representations. The design uses system fonts for an offline-friendly preview. External links require internet access, and the demo does not implement a contact form or a live gallery. A full screen-reader and WCAG conformance audit has not been performed.
+`assets/sources.json` records original official image URLs, source pages and hashes. Images and marks preserve their original bytes; the user confirmed project-use authorization. Lifestyle subjects are not identified as GJH employees. The small corporate PNG is not a high-resolution master. Manrope is self-hosted with `assets/OFL-Manrope.txt`; Georgia is a concept editorial choice in applicable versions. There are no AI-generated company scenes or regenerated product labels.
+
+See the [brand research](../../../../docs/gjh-newmoon-brand-research.md) and [source library](../../../../assets/companies/gjh/official/README.md). New Moon's 1959 brand origin is distinct from GJH's 1940s business beginnings. Selected regional markets do not imply every product is available in each location.
+
+## Verification
+
+Run `python tests/browser_gjh_demos.py` from the repository root. A reviewed local axe-core bundle can be supplied with `--axe-script /path/to/axe.min.js`. Browser captures are in `screenshots/`; `assets/thumbnail.webp` is derived from the real desktop capture. Rebuild Gallery metadata after recapture with `python scripts/build_gallery.py`.
+
+The [redesign review](../../../../docs/gjh-redesign-review.md) owns the current test matrix and limitations. Automated accessibility checks do not establish full WCAG conformance. Contact and shopping links open the official sites in a new tab; this demo submits no enquiries or orders.

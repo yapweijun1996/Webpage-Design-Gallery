@@ -4,8 +4,8 @@
     "companyId": "gjh",
     "slug": "v1",
     "version": "v1",
-    "title": "Corporate",
-    "description": "The original warm corporate concept, with a balanced split-screen introduction.",
+    "title": "Corporate Clarity",
+    "description": "Corporate clarity with authentic portfolio imagery and a direct partnership journey.",
     "styles": [
       "corporate"
     ],
@@ -17,17 +17,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v1/screenshots/1440.png",
         "width": 1440,
-        "height": 5246
+        "height": 5283
       },
       "tablet": {
         "path": "demos/corporate/gjh/v1/screenshots/768.png",
         "width": 768,
-        "height": 5057
+        "height": 6582
       },
       "mobile": {
         "path": "demos/corporate/gjh/v1/screenshots/390.png",
         "width": 390,
-        "height": 7519
+        "height": 8737
       }
     },
     "devices": [
@@ -42,8 +42,8 @@
     "companyId": "gjh",
     "slug": "v5",
     "version": "v5",
-    "title": "Heritage Modern",
-    "description": "An editorial approach balancing heritage, everyday life and business partnership.",
+    "title": "Heritage Editorial",
+    "description": "A warm journal-inspired direction connecting company heritage with distinct portfolio brands.",
     "styles": [
       "heritage",
       "editorial"
@@ -56,17 +56,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v5/screenshots/1440.png",
         "width": 1440,
-        "height": 5450
+        "height": 5743
       },
       "tablet": {
         "path": "demos/corporate/gjh/v5/screenshots/768.png",
         "width": 768,
-        "height": 5528
+        "height": 6114
       },
       "mobile": {
         "path": "demos/corporate/gjh/v5/screenshots/390.png",
         "width": 390,
-        "height": 8949
+        "height": 8463
       }
     },
     "devices": [
@@ -81,8 +81,8 @@
     "companyId": "gjh",
     "slug": "v6",
     "version": "v6",
-    "title": "Modern Minimal",
-    "description": "A clean, image-led direction with generous white space and simple pathways.",
+    "title": "Portfolio Modern",
+    "description": "A modular portfolio direction with original brand imagery and four source-matched New Moon SKUs.",
     "styles": [
       "corporate",
       "minimal"
@@ -95,17 +95,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v6/screenshots/1440.png",
         "width": 1440,
-        "height": 5767
+        "height": 6569
       },
       "tablet": {
         "path": "demos/corporate/gjh/v6/screenshots/768.png",
         "width": 768,
-        "height": 5931
+        "height": 8115
       },
       "mobile": {
         "path": "demos/corporate/gjh/v6/screenshots/390.png",
         "width": 390,
-        "height": 9063
+        "height": 10165
       }
     },
     "devices": [
@@ -120,8 +120,8 @@
     "companyId": "gjh",
     "slug": "v7",
     "version": "v7",
-    "title": "Heritage Noir",
-    "description": "A dramatic dark-green editorial direction with a heritage-first story.",
+    "title": "Signature Dark",
+    "description": "A dark editorial direction emphasizing company connections, heritage and business partnerships.",
     "styles": [
       "heritage",
       "editorial"
@@ -134,17 +134,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v7/screenshots/1440.png",
         "width": 1440,
-        "height": 6074
+        "height": 5883
       },
       "tablet": {
         "path": "demos/corporate/gjh/v7/screenshots/768.png",
         "width": 768,
-        "height": 6228
+        "height": 7008
       },
       "mobile": {
         "path": "demos/corporate/gjh/v7/screenshots/390.png",
         "width": 390,
-        "height": 9266
+        "height": 9535
       }
     },
     "devices": [

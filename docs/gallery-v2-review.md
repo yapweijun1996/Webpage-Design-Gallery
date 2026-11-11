@@ -2,7 +2,7 @@
 
 ## Scope and decisions
 
-The original entry page opened individual designs directly. V2 implements company-first navigation: directory → company collection → design detail/live demo. Existing demo URLs and demo implementations remain unchanged.
+The original entry page opened individual designs directly. V2 implements company-first navigation: directory → company collection → design detail/live demo. Existing demo URLs remain unchanged. The subsequent [GJH brand rebuild](gjh-redesign-review.md) replaces all four demo implementations and refreshes their metadata/previews while preserving these Gallery contracts.
 
 Company/category/style records and each demo's metadata own catalog information. A dependency-free Python generator renders static directory/company pages and a normalized design index. The release workflow uses the same generator, replacing a manually maintained list of published versions. JavaScript enhances discovery and implements detail/compare views; company browsing and direct demo links still work without it.
 

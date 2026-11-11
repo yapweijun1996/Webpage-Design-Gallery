@@ -1,0 +1,84 @@
+{
+  "reviewedAt": "2026-11-11T09:02:32.364306+00:00",
+  "scope": "Observed official website implementation, not an approved brand manual",
+  "home": {
+    "url": "https://www.gjh.com.sg/",
+    "status": 200,
+    "sha256": "04bfc1e998a4911f9ffa8ab8a2275e9abf2554fc41b86ffba5b153733a34d49a"
+  },
+  "stylesheet": {
+    "url": "https://www.gjh.com.sg/wp-content/uploads/elementor/css/post-13.css",
+    "status": 200,
+    "sha256": "47509138732e1063da5e22bb5e3b6a3514767d3218d2c9b5ff8ef095d8d1d2a4",
+    "bytes": 25433,
+    "variables": {
+      "--e-global-color-primary": "#404040",
+      "--e-global-color-secondary": "#454545",
+      "--e-global-color-text": "#646464",
+      "--e-global-color-accent": "#D31B47",
+      "--e-global-color-4b08ff0": "#FFD801",
+      "--e-global-color-1318fc8": "#E82543",
+      "--e-global-color-8e1fffa": "#F7F7F7",
+      "--e-global-color-dbe2410": "#FFFFFF",
+      "--e-global-color-0326745": "#A20C3B",
+      "--e-global-color-efcc81f": "#E3E3E3",
+      "--e-global-color-8680e14": "#FBFBFB",
+      "--e-global-typography-primary-font-family": "\"Manrope\"",
+      "--e-global-typography-primary-font-size": "22px",
+      "--e-global-typography-primary-font-weight": "800",
+      "--e-global-typography-secondary-font-family": "\"Manrope\"",
+      "--e-global-typography-secondary-font-size": "16px",
+      "--e-global-typography-secondary-font-weight": "800",
+      "--e-global-typography-text-font-family": "\"Manrope\"",
+      "--e-global-typography-text-font-size": "17px",
+      "--e-global-typography-text-font-weight": "400",
+      "--e-global-typography-text-line-height": "1.5em",
+      "--e-global-typography-accent-font-family": "\"Manrope\"",
+      "--e-global-typography-accent-font-size": "17px",
+      "--e-global-typography-accent-font-weight": "800",
+      "--e-global-typography-7a0520c-font-size": "56px",
+      "--e-global-typography-7a0520c-font-weight": "800",
+      "--e-global-typography-7a0520c-line-height": "1.2em",
+      "--e-global-typography-3edab62-font-family": "\"Manrope\"",
+      "--e-global-typography-3edab62-font-size": "46px",
+      "--e-global-typography-3edab62-font-weight": "800",
+      "--e-global-typography-3edab62-line-height": "1.2em",
+      "--e-global-typography-3edab62-letter-spacing": "-0.8px",
+      "--e-global-typography-a27fa6c-font-size": "21px",
+      "--e-global-typography-a27fa6c-font-weight": "400",
+      "--e-global-typography-a27fa6c-line-height": "1.28em",
+      "--e-global-typography-1959af9-font-family": "\"Manrope\"",
+      "--e-global-typography-1959af9-font-size": "14px",
+      "--e-global-typography-1959af9-font-weight": "400",
+      "--e-global-typography-6b31ce9-font-family": "\"Manrope\"",
+      "--e-global-typography-6b31ce9-font-size": "18px",
+      "--e-global-typography-6b31ce9-font-weight": "800",
+      "--e-global-typography-a1222e0-font-family": "\"Manrope\"",
+      "--e-global-typography-a1222e0-font-size": "15px",
+      "--e-global-typography-a1222e0-font-weight": "800"
+    }
+  },
+  "homeStylesheet": {
+    "url": "https://www.gjh.com.sg/wp-content/uploads/elementor/css/post-4236.css",
+    "status": 200,
+    "sha256": "1d7729f85adb0cdd71ebcf59f714a676affacda12f8d98524fe6b5c8c9dfae4c"
+  },
+  "newMoonArtworkFills": [
+    "#2E3192",
+    "#FFF200",
+    "#FFFFFF"
+  ],
+  "limitations": [
+    "No formal brand manual obtained",
+    "Website tokens are distinct from sampled raster logo colors",
+    "Uploaded lifestyle photographs do not establish staff or facility identity"
+  ],
+  "browserReadback": {
+    "url": "https://www.gjh.com.sg/",
+    "siteAccent": "#D31B47",
+    "siteYellow": "#FFD801",
+    "siteFont": "\"Manrope\"",
+    "headerLogo": "https://www.gjh.com.sg/wp-content/uploads/2022/08/logo-trans.png",
+    "screenshot": "docs/screenshots/gjh-assets/official-home-1440.png"
+  }
+}

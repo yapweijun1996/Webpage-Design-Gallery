@@ -1,0 +1,77 @@
+[
+  {
+    "url": "https://www.gjh.com.sg/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/about-us/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/about-us/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/borsch-med/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/borsch-med/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/contact-us/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/contact-us/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/explore-our-brand/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/explore-our-brand/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/gogo/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/gogo/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/mili/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/mili/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/newmoon/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/newmoon/"
+  },
+  {
+    "url": "https://www.gjh.com.sg/sony/",
+    "status": 200,
+    "finalUrl": "https://www.gjh.com.sg/sony/"
+  },
+  {
+    "url": "https://www.gjheshop.com/",
+    "status": 200,
+    "finalUrl": "https://www.gjheshop.com/"
+  },
+  {
+    "url": "https://www.gjheshop.com/brand/new-moon/",
+    "status": 200,
+    "finalUrl": "https://www.gjheshop.com/brand/new-moon/"
+  },
+  {
+    "url": "https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/",
+    "status": 200,
+    "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/"
+  },
+  {
+    "url": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
+    "status": 200,
+    "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/"
+  },
+  {
+    "url": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/",
+    "status": 200,
+    "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/"
+  },
+  {
+    "url": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/",
+    "status": 200,
+    "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/"
+  }
+]
