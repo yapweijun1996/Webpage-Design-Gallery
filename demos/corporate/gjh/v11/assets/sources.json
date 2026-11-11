@@ -437,7 +437,9 @@
     "commercialUse": true,
     "licenseSource": "https://creativecommons.org/publicdomain/zero/1.0/",
     "licenseFile": "assets/shopper-LICENSE.txt",
-    "licenseFileSha256": "92aba6c40f4d09ea7c637c50b36147946632e5ade3c0296ca78be1effcd81661",
+    "licenseFileSha256": "379715600213eef4104ce85092e8c8d47093d2edcc26f84a4a36e9e840d1979e",
+    "sourceLicenseFileSha256": "92aba6c40f4d09ea7c637c50b36147946632e5ade3c0296ca78be1effcd81661",
+    "licenseHashNote": "Published/Git text uses LF line endings; original pack licence uses CRLF. The words are unchanged.",
     "acquisitionEvidence": [
       {
         "url": "https://quaternius.com/packs/universalbasecharacters.html",
@@ -517,7 +519,7 @@
         "height": 0.6713248640298843,
         "depth": 0.33999985456466675
       },
-      "integration": "Normalize height from a loaded Box3 to desired human height; feet are effectively at Y=0. Rotate visual model by PI around Y if controller facing is +Z. Locomotion translation belongs to physics controller."
+      "integration": "Normalize height from a loaded Box3 to 1.72m; feet are effectively at Y=0. Actual Three.js review established +Z facing, so rotate the visual by PI for -Z locomotion. Translation belongs to the physics controller."
     }
   },
   "packaging": {

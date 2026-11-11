@@ -270,5 +270,44 @@
       "mobile"
     ],
     "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v11",
+    "companyId": "gjh",
+    "slug": "v11",
+    "version": "v11",
+    "title": "Virtual Mall",
+    "description": "Walk, run and explore one continuous mall with an animated character, physical collisions, opening storefronts and verified New Moon, MILI and GOGO displays. Includes an accessible store directory.",
+    "styles": [
+      "immersive",
+      "heritage"
+    ],
+    "status": "concept",
+    "order": 80,
+    "demoPath": "demos/corporate/gjh/v11/index.html",
+    "thumbnail": "demos/corporate/gjh/v11/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v11/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v11/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v11/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
   }
 ]

@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **one company and seven designs**. All concepts are unofficial and do not imply company endorsement.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **one company and eight designs**. All concepts are unofficial and do not imply company endorsement.
 
 ## Browse
 
@@ -9,7 +9,7 @@ A company-first design exploration platform. Browse companies, enter a company c
 - `/companies/gjh/index.html`: GJH's design collection, style filters and two-design comparison selection.
 - `/designs/index.html?company=gjh&design=v6`: design details and captured desktop/tablet/mobile screenshots.
 - `/compare/index.html?company=gjh&left=v5&right=v7`: two live previews or screenshots, device widths, optional relative scroll synchronization, and fullscreen preview where supported.
-- Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/`, `v7/`, `v8/` and `v9/` URLs are preserved; `v10/` adds a real 3D store arcade.
+- Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/`, `v7/`, `v8/` and `v9/` URLs are preserved; `v10/` adds a real 3D store arcade and `v11/` adds a freely walkable virtual mall.
 
 ## Local development
 
@@ -39,6 +39,7 @@ python -m unittest discover -s tests -p test_gallery.py -v
 python tests/browser_gallery.py
 python tests/browser_gjh_demos.py
 python tests/browser_gjh_v10.py
+python tests/browser_gjh_v11.py
 python tests/browser_pwa.py
 ```
 
@@ -70,3 +71,7 @@ The curated [GJH / New Moon source-verified library](assets/companies/gjh/offici
 
 [Virtual Stores 3D](demos/corporate/gjh/v10/README.md) connects three real, low-poly rooms through a warm evening arcade. The self-contained local Three.js ES module is the only vendored dependency; the gallery generator includes demo `vendor/` files in the static publication artifact. Waypoint travel, bounded drag look and verified product raycasts have keyboard-accessible DOM alternatives. The complete HTML store list survives JavaScript/WebGL failure. Run `python tests/browser_gjh_v10.py --capture` to refresh only v10's lobby screenshots and thumbnail; interior review captures stay in a temporary directory. Physical-phone frame rate is unverified.
 
+
+## GJH V11 — Virtual Mall
+
+[Virtual Mall](demos/corporate/gjh/v11/README.md) adds free third-person walking and running through one continuous mall, using a locally vendored CC0 Kenney character and Rapier kinematic capsule physics. Automatic glass doors connect three real-scale stores; verified products and brand panels open accessible inspection dialogs. The complete HTML directory survives JavaScript, WebGL and WASM failure. The existing PWA policy excludes heavy live-demo dependencies from precaching. Run `python tests/browser_gjh_v11.py` for SwiftShader walking, collision, touch, inspection and fallback checks.
