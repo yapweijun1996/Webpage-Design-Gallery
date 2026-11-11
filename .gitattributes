@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+assets/companies/gjh/official/*.svg -text
+demos/corporate/gjh/*/assets/*.svg -text
