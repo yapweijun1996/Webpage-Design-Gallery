@@ -60,7 +60,8 @@ def run(capture=False):
                     stats = page.evaluate("window.__sceneStats")
                     assert stats["drawCalls"] <= 120, stats
                     assert stats["pixelRatio"] <= (1.5 if width < 600 else 2), stats
-                    assert page.locator("#scene").bounding_box()["height"] >= height * (.72 if width < 600 else .8)
+                    scene_height = page.locator("#scene").bounding_box()["height"]
+                    assert scene_height >= height * (.72 if width < 600 else .8), (width, scene_height)
                     check_targets(page)
                     if capture:
                         (DEMO / "screenshots").mkdir(exist_ok=True)
@@ -88,6 +89,14 @@ def run(capture=False):
                         assert button.evaluate("el => document.activeElement === el")
                     page.locator(".scene-products summary").click()
                     page.evaluate("scrollTo(0, 0)")
+                    if width in (1440, 390):
+                        for room in ("newmoon", "mili", "gogo"):
+                            page.locator(f'button[data-room="{room}"]').click()
+                            settled(page, room)
+                            page.evaluate("scrollTo(0, 0)")
+                            page.screenshot(path=str(interiors / f"{room}-{width}.png"), scale="css")
+                        page.locator('button[data-room="newmoon"]').click()
+                        settled(page, "newmoon")
                     if width == 1440:
                         # Actual pointer raycasts on the four visible shelf packshots.
                         for x, y, country in ((560, 430, "New Zealand"), (875, 430, "Australia"), (560, 600, "South Africa"), (875, 600, "Mexico")):
@@ -95,10 +104,6 @@ def run(capture=False):
                             page.wait_for_selector("#product-dialog[open]")
                             assert country in page.locator("#product-title").inner_text()
                             page.keyboard.press("Escape")
-                        for room in ("newmoon", "mili", "gogo"):
-                            page.locator(f'button[data-room="{room}"]').click()
-                            settled(page, room)
-                            page.screenshot(path=str(interiors / f"{room}-1440.png"), scale="css")
                         page.keyboard.press("Escape")
                         settled(page, "lobby")
                         page.mouse.click(700, 440)
@@ -120,7 +125,7 @@ def run(capture=False):
                     assert page.locator("#scene").is_visible()
                     assert not errors, errors
                     assert not external, external
-                    evidence.append({"width": width, "drawCalls": stats["drawCalls"], "keyboard": "PASS", "products": "PASS", "targetsAndOverflow": "PASS", "consoleErrors": errors})
+                    evidence.append({"width": width, "drawCalls": stats["drawCalls"], "quality": stats["quality"], "keyboard": "PASS", "products": "PASS", "targetsAndOverflow": "PASS", "consoleErrors": errors})
                     context.close()
                 context = browser.new_context(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
                 page = context.new_page(); page.goto(url)
