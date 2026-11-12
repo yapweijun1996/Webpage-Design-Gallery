@@ -1,7 +1,7 @@
 {
   "release": {
     "version": "1.1.2",
-    "build": "f0a35c4fbc5533ac"
+    "build": "4b182b2caf8c3a64"
   },
   "status": "PASS",
   "checks": [
@@ -70,5 +70,20 @@
     "ssot": "PASS",
     "unitTests": 35,
     "unitResult": "PASS"
+  },
+  "provenanceCompletion": {
+    "changedInputs": [
+      "demos/corporate/gjh/v11/assets/character-sources.json"
+    ],
+    "purpose": "Record upstream PR #5 merge after initial implementation deployment",
+    "applicationCodeAndAssetBytesUnchanged": true,
+    "sourceCommit": "1a091b18e29b34ca468baf506968e1e65d815005",
+    "upstreamMergeCommit": "4c9f57eddb25562a50ee1ab171b40e128b403767",
+    "build": "PASS",
+    "ssot": "PASS",
+    "generated": "PASS",
+    "unitTests": 35,
+    "unitResult": "PASS",
+    "pwa": "PASS"
   }
 }

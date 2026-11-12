@@ -2,7 +2,7 @@
 
 Application version: **1.1.2**. Design-system contract: **1.0.0**.
 
-This is an implementation evidence record, not a deployment certificate. The user confirmed the green-polo mascot direction. Revision 3 geometry and animation are frozen and have local source and V11 evidence below. The source and byte-identical website receipt are pinned to `1a091b18e29b34ca468baf506968e1e65d815005` (pushed upstream; PR #5 remains open). The final post-continuity V11 and six focused character cases passed. All local release gates passed; deployment is verified separately after publication. No reference image is embedded or published with the website.
+This is an implementation evidence record, not a deployment certificate. The user confirmed the green-polo mascot direction. Revision 3 geometry and animation are frozen and have local source and V11 evidence below. The source and byte-identical website receipt are pinned to `1a091b18e29b34ca468baf506968e1e65d815005` (pushed upstream; PR #5 is merged). The final post-continuity V11 and six focused character cases passed. All local release gates passed. Implementation commit `20611fde90d0d349c106991963c49427a284fdea` deployed successfully and passed live desktop/mobile verification. A subsequent provenance-only update records the now-merged upstream PR. No reference image is embedded or published with the website.
 
 ## Source and ownership
 
@@ -31,11 +31,11 @@ Statuses describe the verified revision-3 export and final continuity implementa
 | Gate | Status | Evidence / acceptance |
 |---|---|---|
 | Runtime JavaScript syntax | PASS | `node --check` on `assets/player.js` and `assets/character.js` in the isolated runtime worktree |
-| Final source commit and byte-identical receipt | PASS | Verified pushed source `1a091b18e29b34ca468baf506968e1e65d815005` and byte-identical website receipt; upstream PR #5 open |
+| Final source commit and byte-identical receipt | PASS | Verified pushed source `1a091b18e29b34ca468baf506968e1e65d815005` and byte-identical website receipt; upstream PR #5 merged |
 | Native bounds, self-contained buffers and animations | PASS | Character unit checks included in the passing 35-test release unit suite |
 | glTF validator errors and warnings | PASS | Khronos validator 2.0.0-dev.3.10: zero errors and zero warnings, recorded in upstream `reports/assets.json` |
 | Editable Blender source inspection | PASS | Blender 5.2.3 LTS reopened the source; 12 editable meshes and idle/walk/sprint tracks across 11 articulated nodes, recorded in `reports/sources.json` |
-| Upstream repository tests and build | PASS | Release owner reports 90 npm tests, 57 build checks, three upstream browser cases and nine library cases passing; upstream PR #5 remains open |
+| Upstream repository tests and build | PASS | Release owner reports 90 npm tests, 57 build checks, three upstream browser cases and nine library cases passing; upstream PR #5 is merged |
 | Actual mall visual review | PASS with limitations | Independent review of 18 mall screenshots accepts the avatar; existing scene/UI occlusion limitations are recorded below. Subjective staging score: 86/100, not a measured release threshold |
 | Focused front / side / back and clip transitions | PASS | [Six focused character cases](evidence/gjh-character-browser.json) passed after the continuity fix |
 | Actual mall at 1440 / 768 / 390 | PASS | Full V11 browser suite: sampled maximum draw calls 130 / 114 / 101, all below 200; no console errors |
@@ -46,13 +46,13 @@ Statuses describe the verified revision-3 export and final continuity implementa
 | Build, generated freshness, SSOT and units | PASS | Release owner completed build, generated-output check, SSOT and 35 unit tests |
 | Gallery browser regression | PASS | Final release driver completed the Gallery suite |
 | Complete release gate report, including PWA | PASS | [Release gates](evidence/gjh-character-release-gates.json): Gallery, 28 legacy cases plus four no-JavaScript journeys, seven furniture cases and PWA update/offline/cache-integrity recovery passed |
-| Remote commit, Actions and deployment | UNVERIFIED | Parent release owner records only after verified delivery |
+| Remote commit, Actions and deployment | PASS | [Live evidence](evidence/gjh-character-live.json): implementation commit remotely verified, Actions 43166975701 succeeded; live version, exact model hash, 1440/390 layouts and all four product dialogs passed |
 
 ## Accepted asset measurements
 
 | Property | Measured value |
 |---|---|
-| Upstream commit | `1a091b18e29b34ca468baf506968e1e65d815005`; PR #5 open |
+| Upstream commit | `1a091b18e29b34ca468baf506968e1e65d815005`; PR #5 merged |
 | Export SHA-256 | `43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2` |
 | Bytes / triangles / primitives | 369,976 / 10,356 / 25 |
 | Materials / textures | 8 / 0 |
@@ -60,7 +60,7 @@ Statuses describe the verified revision-3 export and final continuity implementa
 | Animation clips and durations | idle 2.008333 s; walk 1.008333 s; sprint 0.741667 s; 33 tracks each |
 | Horizontal drift / maximum sole-floor error | Zero drift in all clips; idle <0.000001 m, walk 0.000191 m, sprint 0.001261 m |
 | Local browser / renderer | Headless Chrome / SwiftShader; full V11 suite completed |
-| Application build | `f0a35c4fbc5533ac`; unchanged by final documentation completion |
+| Application build | `4b182b2caf8c3a64`; original browser-tested implementation `f0a35c4fbc5533ac`, followed only by upstream merge receipt metadata; build, SSOT, 35 units and PWA passed again |
 
 Evidence inputs: upstream `models/gjh-mall-visitor/reports/assets.json` and `reports/sources.json`; [motion diagnostic](evidence/gjh-character-motion-diagnostic.json), [final V11 regression](evidence/gjh-v11-character-regression.json), and [focused character browser results](evidence/gjh-character-browser.json), and [furniture regression](evidence/gjh-character-furnishings-regression.json). Screenshots referenced by these reports were inspected locally; temporary review directories are not published artifacts.
 
@@ -69,4 +69,4 @@ Evidence inputs: upstream `models/gjh-mall-visitor/reports/assets.json` and `rep
 Independent mall review noted existing MILI/GOGO table-topiary occlusion, the mobile Inspect control covering the visitor’s legs, and a small map/Inspect corner overlap at 768px. Avatar acceptance does not certify these surrounding scene/UI details as flawless. The 86/100 staging assessment is subjective and does not establish an independent ≥88 score on every shot.
 
 
-An original stylized model is not a photorealistic replica or a claim of exact reference matching. Physical-phone GPU performance, native installed iOS/Android behavior, screen-reader sessions and field Core Web Vitals require separate evidence. Local software-rendered screenshots and automated tests must be described as such. Deployment remains unverified until the required release gates, remote commit and live checks are recorded.
+An original stylized model is not a photorealistic replica or a claim of exact reference matching. Physical-phone GPU performance, native installed iOS/Android behavior, screen-reader sessions and field Core Web Vitals require separate evidence. Local software-rendered screenshots and automated tests must be described as such. Live verification is recorded in [deployment evidence](evidence/gjh-character-live.json). The provenance-only completion retains identical application JavaScript, CSS and GLB bytes; its generated release identity is verified separately.

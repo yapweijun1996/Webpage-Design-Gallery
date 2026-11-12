@@ -23,5 +23,6 @@
   "collection": "gjh-mall-visitor",
   "retrieved": "2026-11-12",
   "source_pr": "https://github.com/yapweijun1996/Blender-3D-Gallery/pull/5",
-  "upstream_status": "Proposed collection on feat/gjh-mall-visitor; not yet merged to upstream main."
+  "upstream_status": "Merged through pull request #5 at 4c9f57eddb25562a50ee1ab171b40e128b403767; the byte-identical export remains pinned to source_commit.",
+  "upstream_merge_commit": "4c9f57eddb25562a50ee1ab171b40e128b403767"
 }

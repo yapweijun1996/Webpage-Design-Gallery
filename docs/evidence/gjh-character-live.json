@@ -1,0 +1,65 @@
+{
+  "release": {
+    "version": "1.1.2",
+    "build": "f0a35c4fbc5533ac"
+  },
+  "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/index.html",
+  "assetSHA256": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+  "assetHashes": "PASS",
+  "results": [
+    {
+      "width": 1440,
+      "status": "PASS",
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "pageErrors": [],
+      "listAndFourDialogs": "PASS",
+      "overflow": "PASS"
+    },
+    {
+      "width": 390,
+      "status": "PASS",
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "pageErrors": [],
+      "listAndFourDialogs": "PASS",
+      "overflow": "PASS"
+    }
+  ],
+  "implementationCommit": "20611fde90d0d349c106991963c49427a284fdea",
+  "actions": {
+    "id": 43166975701,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/43166975701"
+  },
+  "sourceMergeCommit": "4c9f57eddb25562a50ee1ab171b40e128b403767"
+}
