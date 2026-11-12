@@ -64,7 +64,10 @@ class CharacterAssetTests(unittest.TestCase):
         dimensions, triangles = scene_metrics(doc, self.binary)
         self.assertTrue(1.60 <= dimensions[1] <= 1.85, dimensions)
         self.assertTrue(.20 < dimensions[0] < 1.6 and .12 < dimensions[2] < 1.2, dimensions)
-        self.assertTrue(500 < triangles < 30_000, triangles)
+        # The reference's 2–5k aspiration has a documented art-quality exception;
+        # retain a hard 15k ceiling and the integrated scene's draw-call budget.
+        self.assertTrue(500 < triangles <= 15_000, triangles)
+        self.assertLessEqual(sum(len(mesh["primitives"]) for mesh in doc["meshes"]), 25)
         self.assertTrue(3 <= len(doc["materials"]) <= 32)
         roots = doc["scenes"][doc.get("scene", 0)]["nodes"]
         self.assertIn("GJHMallVisitor", [doc["nodes"][node].get("name") for node in roots])
@@ -88,10 +91,12 @@ class CharacterAssetTests(unittest.TestCase):
                     self.assertEqual(len(times), len(values))
                     self.assertGreaterEqual(len(times), 2)
                     self.assertTrue(all(a < b for a, b in zip(times, times[1:])))
-                    self.assertAlmostEqual(times[0], 0, delta=.001)
+                    # Blender may export frame 1 as 1/FPS. glTF permits a
+                    # nonzero first sample; it is not evidence of root travel.
+                    self.assertGreaterEqual(times[0], 0)
                     if any(any(abs(a - b) > 1e-5 for a, b in zip(values[0], row)) for row in values[1:]):
                         moving_channels += 1
-                    duration = max(duration, times[-1])
+                    duration = max(duration, times[-1] - times[0])
                     target = channel["target"]
                     if target["path"] == "rotation":
                         for row in values:
