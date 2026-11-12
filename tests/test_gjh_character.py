@@ -77,6 +77,21 @@ class CharacterAssetTests(unittest.TestCase):
         clips = {clip["name"]: clip for clip in doc["animations"]}
         self.assertTrue({"idle", "walk", "sprint"}.issubset(clips))
         scene_roots = set(doc["scenes"][doc.get("scene", 0)]["nodes"])
+        parents = {child: index for index, node in enumerate(doc["nodes"])
+                   for child in node.get("children", [])}
+        ancestry = []
+        for index, node in enumerate(doc["nodes"]):
+            if "mesh" not in node:
+                continue
+            chain = {index}
+            while index in parents:
+                index = parents[index]
+                self.assertNotIn(index, chain, "Cyclic character hierarchy")
+                chain.add(index)
+            ancestry.append(chain)
+        # Exporters often place the actual animated body under an empty scene
+        # root. Its name is not a reliable way to identify global locomotion.
+        placement_nodes = scene_roots | set.intersection(*ancestry)
         for name in ("idle", "walk", "sprint"):
             with self.subTest(clip=name):
                 clip = clips[name]
@@ -110,7 +125,7 @@ class CharacterAssetTests(unittest.TestCase):
                         for axis in (0, 2):
                             self.assertAlmostEqual(values[0][axis], values[-1][axis], delta=.02)
                             node_name = doc["nodes"][target["node"]].get("name", "").lower()
-                            if target["node"] in scene_roots or node_name in ("root", "hips", "pelvis"):
+                            if target["node"] in placement_nodes or node_name in ("root", "hips", "pelvis"):
                                 self.assertLess(max(v[axis] for v in values) - min(v[axis] for v in values), .04)
                 self.assertTrue(.3 <= duration <= 10, duration)
                 self.assertGreater(moving_channels, 0)
