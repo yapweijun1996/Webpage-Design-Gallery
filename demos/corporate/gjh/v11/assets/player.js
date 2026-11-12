@@ -1,97 +1,11 @@
+import {createCharacter} from './character.js';
+
 export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane) {
-  const {GLTFLoader} = await import('../vendor/GLTFLoader.js');
-  const gltf = await new GLTFLoader().loadAsync('assets/shopper.glb');
-  const avatar = gltf.scene;
-  const bounds = new T.Box3().setFromObject(avatar), height = bounds.max.y - bounds.min.y;
-  avatar.scale.setScalar(1.65 / height); avatar.position.y = -bounds.min.y * avatar.scale.y;
-  // The loaded skinned character presents its face along +Z; locomotion uses -Z.
-  avatar.rotation.y = Math.PI;
-  const visual = new T.Group(); visual.add(avatar); scene.add(visual);
+  const character = await createCharacter(T);
+  const visual = character.visual;
+  scene.add(visual);
   const contact = new T.Mesh(contactPlane, contactMaterial);
   contact.rotation.x = -Math.PI / 2; contact.scale.set(1.55, 1.12, 1); scene.add(contact);
-  // A view-space edge fill separates the original mesh without extra geometry,
-  // shadow passes, or a light that spills onto the surrounding architecture.
-  const shopperRim = shader => {
-    shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', `
-      float shopperRim = 1.0 - max(dot(normal, normalize(vViewPosition)), 0.0);
-      shopperRim = smoothstep(0.28, 1.0, shopperRim);
-      outgoingLight += vec3(0.09, 0.13, 0.12) * shopperRim;
-      #include <opaque_fragment>
-    `);
-  };
-  // The head shares the body atlas. Recolour only its dark hair texels, retaining
-  // the Kenney mesh/texture and adding a swept part without another draw pass.
-  avatar.getObjectByName('head-mesh').material = avatar.getObjectByName('head-mesh').material.clone();
-  const hairForm = shader => {
-    shopperRim(shader);
-    shader.vertexShader = 'varying vec3 vHairPosition;\n' + shader.vertexShader;
-    shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvHairPosition = position;');
-    shader.fragmentShader = 'varying vec3 vHairPosition;\n' + shader.fragmentShader;
-    shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `
-      #include <color_fragment>
-      float hair = 1.0 - smoothstep(0.09, 0.13, max(diffuseColor.r, max(diffuseColor.g, diffuseColor.b)));
-      float crown = smoothstep(0.49, 0.66, vHairPosition.y);
-      float sweep = vHairPosition.x + 0.055 - 0.12 * (vHairPosition.y - 0.5);
-      float part = 1.0 - smoothstep(0.004, 0.012, abs(sweep));
-      float ridge = exp(-180.0 * pow(sweep - 0.045, 2.0));
-      vec3 chestnut = mix(vec3(0.065, 0.035, 0.019), vec3(0.16, 0.095, 0.048), crown);
-      chestnut += vec3(0.035, 0.022, 0.011) * ridge;
-      chestnut *= 1.0 - 0.48 * part;
-      diffuseColor.rgb = mix(diffuseColor.rgb, chestnut, hair);
-    `);
-  };
-  avatar.traverse(object => {
-    if (!object.isMesh) return;
-    object.castShadow = true; object.receiveShadow = true;
-    // A restrained, texture-matched fill keeps the back readable in shop shadows.
-    const material = object.material;
-    material.emissive.setHex(0xffffff); material.emissiveMap = material.map; material.emissiveIntensity = .1;
-    material.roughness = .88; material.onBeforeCompile = object.name === 'head-mesh' ? hairForm : shopperRim;
-  });
-  // These rigid, T-pose arms have no elbow joints. Shorten their reach slightly
-  // at the shoulder so lowered hands clear the shoes without lifting the avatar.
-  avatar.getObjectByName('arm-left').scale.x = .86;
-  avatar.getObjectByName('arm-right').scale.x = .86;
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const armPose = new T.Euler(0, 0, 0, 'XYZ'), armRotation = new T.Quaternion(), neutralRotation = new T.Quaternion();
-  const mixer = new T.AnimationMixer(avatar), actions = {};
-  for (const [state, clipName] of Object.entries({idle: 'idle', walk: 'walk', run: 'sprint'})) {
-    const clip = gltf.animations.find(clip => clip.name === clipName);
-    if (!clip) throw new Error(`Character animation missing: ${clipName}`);
-    // Bake the shoulder correction once; the mixer still owns all blending.
-    // The source clips splay the arms 30–60 degrees and swing around local Y.
-    // Counter the same-side leg's sagittal motion, with a relaxed arm drop.
-    for (const side of ['left', 'right']) {
-      const arm = clip.tracks.find(track => track.name === `arm-${side}.quaternion`);
-      const leg = clip.tracks.find(track => track.name === `leg-${side}.quaternion`);
-      if (leg) {
-        // Keep the source gait, but avoid the rigid legs' exaggerated high kick.
-        for (let frame = 0; frame < leg.times.length; frame++) {
-          armRotation.fromArray(leg.values, frame * 4).slerp(neutralRotation, state === 'run' ? .2 : .4).toArray(leg.values, frame * 4);
-        }
-      }
-      const stride = leg?.createInterpolant(new Float32Array(4));
-      const drop = side === 'left' ? -1 : 1;
-      for (let frame = 0; frame < arm.times.length; frame++) {
-        const time = arm.times[frame];
-        let swing = -.065, rest = state === 'run' ? 1.21 : 1.28;
-        if (stride) {
-          const rotation = stride.evaluate(time);
-          const legAngle = 2 * Math.atan2(rotation[0] * (rotation[3] < 0 ? -1 : 1), Math.abs(rotation[3]));
-          swing -= legAngle * (state === 'run' ? .58 : .44);
-        } else if (!reducedMotion.matches) {
-          const breath = Math.sin(time / clip.duration * Math.PI * 2);
-          swing += breath * .012; rest += breath * .018;
-        }
-        armPose.set(swing, 0, drop * rest);
-        armRotation.setFromEuler(armPose).toArray(arm.values, frame * 4);
-      }
-    }
-    actions[state] = mixer.clipAction(clip);
-  }
-  const animationStates = ['idle', 'walk', 'run'], animationActions = animationStates.map(state => actions[state]);
-  for (let i = 0; i < animationActions.length; i++) animationActions[i].setEffectiveWeight(i === 0 ? 1 : 0).play();
-  let animation = 'idle'; actions.idle.paused = reducedMotion.matches; mixer.update(0);
   const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(-2, .89, 12));
   const capsule = physics.createCollider(R.ColliderDesc.capsule(.55, .3).setFriction(0), body);
   const controller = physics.createCharacterController(.025);
@@ -162,28 +76,11 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     next.x = position.x + corrected.x; next.y = position.y + corrected.y; next.z = position.z + corrected.z; body.setNextKinematicTranslation(next);
     const walking = Math.hypot(corrected.x, corrected.z) > .001;
     const state = walking ? running ? 'run' : 'walk' : 'idle';
-    if (state !== animation) {
-      // Keep footfall phase when changing pace; blend from current weights so
-      // quick starts and stops never restart a half-finished fade at full weight.
-      if (state !== 'idle') {
-        actions[state].time = animation === 'idle' ? 0
-          : actions[animation].time / actions[animation].getClip().duration * actions[state].getClip().duration;
-      }
-      animation = state;
-    }
-    const blend = 1 - Math.exp(-10 * dt);
-    for (let i = 0; i < animationActions.length; i++) {
-      const action = animationActions[i], weight = animationStates[i] === state ? 1 : 0;
-      if (action.getEffectiveWeight() === weight) continue;
-      const nextWeight = T.MathUtils.lerp(action.getEffectiveWeight(), weight, blend);
-      action.setEffectiveWeight(Math.abs(weight - nextWeight) < .001 ? weight : nextWeight);
-    }
+    character.update(state, dt);
     if (walking) {
       const angle = Math.atan2(-dx, -dz), delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
       visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
     }
-    actions.idle.paused = reducedMotion.matches;
-    mixer.update(dt);
   }
   function sync() {
     const p = body.translation(); visual.position.set(p.x, p.y - .875, p.z);
@@ -216,6 +113,6 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   return {body, capsule, camera, update, sync, updateCamera, teleport, clearInput,
     setPaused: fn => { isPaused = fn; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, animation, yaw, pitch}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, animation: character.animation, yaw, pitch, character: character.state}; }
   };
 }
