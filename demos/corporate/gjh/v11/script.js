@@ -8,6 +8,7 @@ const STEP = 1 / 60;
 const snapshot = () => Object.freeze({...(player?.state || {}), zone: currentZone, nearby,
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
   drawCalls: renderer?.info.render.calls || 0, frames, reducedMotion: reducedMotion.matches,
+  roomSigns: Object.freeze((world?.roomSigns || []).map(({zone, mesh, left, right, top, bottom}) => Object.freeze({zone, visible: mesh.visible, left, right, top, bottom}))),
   pixelRatio: renderer?.getPixelRatio() || 1, hidden: document.hidden});
 Object.defineProperty(window, '__mall', {value: Object.freeze({
   get ready() { return ready; }, get state() { return snapshot(); },
@@ -52,7 +53,12 @@ function tick() {
   }
   player.update(STEP); physics.step(); player.sync(); player.updateCamera(STEP); updateHUD();
 }
-function render() { if (ready && !document.hidden && !ui.paused()) { renderer.render(world.scene, player.camera); frames++; } }
+function render() {
+  if (ready && !document.hidden && !ui.paused()) {
+    player.camera.updateMatrixWorld();
+    world.updateSigns(player.camera, canvas); renderer.render(world.scene, player.camera); frames++;
+  }
+}
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;

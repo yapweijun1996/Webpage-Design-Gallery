@@ -57,6 +57,20 @@ def drive(page, ms, **inputs):
     return page.evaluate('([input,ms])=>{__mall.setInput(input);return __mall.step(ms)}', [inputs, ms])
 
 
+def room_signs(page):
+    """Visible room plaques must clear the mobile HUD, including expanded controls."""
+    if page.viewport_size['width'] != 390:
+        return
+    rectangles = page.locator('.site-header,#keyboard-help,#mall-map').evaluate_all(
+        'els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}})')
+    for sign in state(page)['roomSigns']:
+        if not sign['visible']:
+            continue
+        for rect in rectangles:
+            assert not (sign['left'] < rect['right'] + 8 and sign['right'] > rect['left'] - 8
+                        and sign['top'] < rect['bottom'] + 8 and sign['bottom'] > rect['top'] - 8), (sign, rect)
+
+
 def run(capture=False):
     spec = importlib.util.spec_from_file_location('gallery', ROOT / 'scripts/build_gallery.py')
     gallery = importlib.util.module_from_spec(spec); spec.loader.exec_module(gallery)
@@ -83,6 +97,7 @@ def run(capture=False):
                         page.evaluate('__mall.setInput({})')
                         initial = state(page); assert initial['drawCalls'] <= 200, initial
                         draw_calls = {'atrium': initial['drawCalls']}
+                        max_draw_calls = initial['drawCalls']
                         assert initial['pixelRatio'] <= (1.5 if width<600 else 2)
                         targets(page)
                         if width == 390:
@@ -107,6 +122,13 @@ def run(capture=False):
                             assert not mall_map.evaluate('el=>el.open')
                             assert page.locator('#mall-map summary').evaluate('el=>el===document.activeElement')
                         page.screenshot(path=str(review / f'atrium-{width}.png'), scale='css')
+                        room_signs(page)
+                        page.locator('#mall-map').evaluate('el=>el.open=true')
+                        page.evaluate('__mall.step(17)')
+                        room_signs(page)
+                        page.screenshot(path=str(review / f'map-{width}.png'), scale='css')
+                        if width == 390:
+                            page.locator('#mall-map').evaluate('el=>el.open=false')
                         if capture:
                             (DEMO / 'screenshots').mkdir(exist_ok=True)
                             page.screenshot(path=str(DEMO / f'screenshots/{width}.png'), scale='css')
@@ -157,11 +179,30 @@ def run(capture=False):
                             assert abs(state(page)['x']-{'newmoon':-10,'mili':0,'gogo':10}[zone])<.05
                             opened = drive(page, 400)
                             assert opened['doors'][zone] > .99, opened
+                            draw_calls[f'{zone}-portal'] = opened['drawCalls']
+                            room_signs(page)
+                            page.screenshot(path=str(review / f'{zone}-portal-{width}.png'), scale='css')
                             # Enter through a real opening; then strafe around the gathering table.
-                            inside = drive(page, 1500, forward=1)
+                            for _ in range(15):
+                                inside = drive(page, 100, forward=1)
+                                max_draw_calls = max(max_draw_calls, inside['drawCalls'])
+                                room_signs(page)
                             assert inside['zone']==zone and inside['z'] < -.5, inside
                             draw_calls[zone] = inside['drawCalls']
                             page.screenshot(path=str(review / f'{zone}-{width}.png'), scale='css')
+                            label = next(label for label in inside['roomSigns'] if label['zone'] == zone)
+                            if width >= 768:
+                                header_bottom = page.locator('.site-header').bounding_box()['height']
+                                assert label['visible'] and label['top'] >= header_bottom + 8, label
+                                assert 0 <= label['left'] < label['right'] <= width, label
+                            else:
+                                # Close entry framing used to put all three plaques under HUD buttons.
+                                assert not label['visible'], label
+                                for control in ('#keyboard-help', '#mall-map'):
+                                    page.locator(control).evaluate('el=>el.open=true')
+                                    drive(page, 17)
+                                    room_signs(page)
+                                    page.locator(control).evaluate('el=>el.open=false')
                             if zone == 'newmoon':
                                 drive(page, 300, right=-1)
                                 near = drive(page, 2300, forward=1)
@@ -170,6 +211,9 @@ def run(capture=False):
                                 drive(page, 2300, forward=1)
                                 near = drive(page, 500, right=1)
                             assert near['nearby'], near
+                            draw_calls[f'{zone}-interior'] = near['drawCalls']
+                            page.screenshot(path=str(review / f'{zone}-interior-{width}.png'), scale='css')
+                            room_signs(page)
                             page.keyboard.press('e'); assert page.locator('#product-dialog').is_visible()
                             assert page.locator('#product-dialog a').count()==1
                             assert page.locator('#product-dialog a').get_attribute('href')=='https://www.gjheshop.com/'
@@ -193,6 +237,7 @@ def run(capture=False):
                         page.locator('#view-toggle').click(); assert page.locator('#scene').is_visible()
                         assert not errors, errors
                         assert not external, external
+                        draw_calls['max'] = max(max_draw_calls, *draw_calls.values())
                         assert max(draw_calls.values()) <= 200, draw_calls
                         evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'errors':errors})
                         context.close()

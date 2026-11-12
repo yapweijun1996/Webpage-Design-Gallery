@@ -19,13 +19,34 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       #include <opaque_fragment>
     `);
   };
+  // The head shares the body atlas. Recolour only its dark hair texels, retaining
+  // the Kenney mesh/texture and adding a swept part without another draw pass.
+  avatar.getObjectByName('head-mesh').material = avatar.getObjectByName('head-mesh').material.clone();
+  const hairForm = shader => {
+    shopperRim(shader);
+    shader.vertexShader = 'varying vec3 vHairPosition;\n' + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvHairPosition = position;');
+    shader.fragmentShader = 'varying vec3 vHairPosition;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `
+      #include <color_fragment>
+      float hair = 1.0 - smoothstep(0.09, 0.13, max(diffuseColor.r, max(diffuseColor.g, diffuseColor.b)));
+      float crown = smoothstep(0.49, 0.66, vHairPosition.y);
+      float sweep = vHairPosition.x + 0.055 - 0.12 * (vHairPosition.y - 0.5);
+      float part = 1.0 - smoothstep(0.004, 0.012, abs(sweep));
+      float ridge = exp(-180.0 * pow(sweep - 0.045, 2.0));
+      vec3 chestnut = mix(vec3(0.065, 0.035, 0.019), vec3(0.16, 0.095, 0.048), crown);
+      chestnut += vec3(0.035, 0.022, 0.011) * ridge;
+      chestnut *= 1.0 - 0.48 * part;
+      diffuseColor.rgb = mix(diffuseColor.rgb, chestnut, hair);
+    `);
+  };
   avatar.traverse(object => {
     if (!object.isMesh) return;
     object.castShadow = true; object.receiveShadow = true;
     // A restrained, texture-matched fill keeps the back readable in shop shadows.
     const material = object.material;
     material.emissive.setHex(0xffffff); material.emissiveMap = material.map; material.emissiveIntensity = .1;
-    material.roughness = .88; material.onBeforeCompile = shopperRim;
+    material.roughness = .88; material.onBeforeCompile = object.name === 'head-mesh' ? hairForm : shopperRim;
   });
   // These rigid, T-pose arms have no elbow joints. Shorten their reach slightly
   // at the shoulder so lowered hands clear the shoes without lifting the avatar.

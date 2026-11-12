@@ -49,12 +49,19 @@ export async function createWorld(T, R, physics, shadows) {
     mesh.position.set(x, y, z); mesh.rotation.y = ry; mesh.scale.set(width, height, 1); scene.add(mesh);
     return mesh;
   }
-  function sign(text, x, y, z, width, height = .4) {
+  const roomSigns = [];
+  function sign(text, x, y, z, width, height = .4, framed = false) {
     const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 128;
-    const context = canvas.getContext('2d'); context.fillStyle = '#e9d6a9'; context.font = '500 42px Georgia'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 512, 64);
+    const context = canvas.getContext('2d');
+    if (framed) {
+      context.fillStyle = '#17372e'; context.fillRect(0, 0, 1024, 128);
+      context.strokeStyle = '#b59b62'; context.lineWidth = 3; context.strokeRect(8, 8, 1008, 112);
+    }
+    context.fillStyle = '#e9d6a9'; context.font = '500 42px Georgia'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 512, 64);
     const texture = new T.CanvasTexture(canvas); texture.colorSpace = T.SRGBColorSpace;
     const mesh = new T.Mesh(plane, new T.MeshBasicMaterial({map: texture, transparent: true, depthWrite: false}));
     mesh.position.set(x, y, z); mesh.scale.set(width, height, 1); scene.add(mesh);
+    return mesh;
   }
   const shadowCanvas = document.createElement('canvas'); shadowCanvas.width = shadowCanvas.height = 64;
   const shadowContext = shadowCanvas.getContext('2d'), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -182,10 +189,17 @@ export async function createWorld(T, R, physics, shadows) {
     box(wall, x, 2.85, -10.5, 10, 5.7, .25, true);
     for (const side of [-1, 1]) {
       box(wall, x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5, true);
-      box('dark', x + side * 3.55, 2.6, 0, 2.4, 5.2, .35, true);
+      box('courtStone', x + side * 3.55, 2.6, 0, 2.4, 5.2, .35, true);
+      // Pale jade inset faces and brass borders lighten both sides of the portal.
+      // The original solid collision and sliding-door clearance remain unchanged.
+      for (const face of [-1, 1]) {
+        box('glass', x + side * 3.6, 2.08, face * .23, 2.12, 3.5, .055);
+        for (const edge of [-1, 1]) {
+          box('brass', x + side * 3.6 + edge * 1.1, 2.08, face * .28, .035, 3.57, .045);
+          box('brass', x + side * 3.6, 2.08 + edge * 1.785, face * .28, 2.23, .035, .045);
+        }
+      }
       box('brass', x + side * 2.36, 1.9, .22, .065, 3.8, .08);
-      box('glass', x + side * 3.6, 1.9, .23, 2.2, 3.7, .055);
-      box('brass', x + side * 3.6, .32, .28, 2.2, .055, .075);
       box('glow', x + side * 3.6, 3.67, .28, 2.12, .035, .04);
       lightPool(x + side * 3.6, .053, 1.15, 3.4, 3.7);
     }
@@ -243,7 +257,8 @@ export async function createWorld(T, R, physics, shadows) {
     box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05); art(logo, x, 4.67, .4, 2.2);
     box('glow', x, 5.36, .36, 2.42, .025, .045);
     box('brass', x, 4.02, .29, 9.3, .025, .04);
-    sign(zone === 'newmoon' ? '01  /  THE PROVISION ROOM' : zone === 'mili' ? '02  /  THE GATHERING ROOM' : '03  /  THE GARDEN ROOM', x, 3.75, .32, 3.9, .32);
+    const label = sign(zone === 'newmoon' ? '01  /  THE PROVISION ROOM' : zone === 'mili' ? '02  /  THE GATHERING ROOM' : '03  /  THE GARDEN ROOM', x, 3.42, .38, 3.9, .32, true);
+    roomSigns.push({zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0});
     // Two independently kinematic glass leaves slide clear of the walking capsule.
     const leaves = [];
     for (const side of [-1, 1]) {
@@ -324,5 +339,28 @@ export async function createWorld(T, R, physics, shadows) {
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
   const fill = new T.DirectionalLight(0xb7d7e8, 1); fill.position.set(4, 8, -5); scene.add(fill);
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
-  return {scene, doors, interactables, contact, plane};
+  const signPoint = new T.Vector3();
+  const signHUD = ['.site-header', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));
+  function updateSigns(camera, canvas) {
+    const frame = canvas.getBoundingClientRect();
+    for (const label of roomSigns) {
+      const mesh = label.mesh;
+      label.left = label.top = Infinity; label.right = label.bottom = -Infinity;
+      for (const dx of [-.5, .5]) for (const dy of [-.5, .5]) {
+        signPoint.set(mesh.position.x + dx * mesh.scale.x, mesh.position.y + dy * mesh.scale.y, mesh.position.z).project(camera);
+        const x = frame.left + (signPoint.x + 1) * frame.width / 2;
+        const y = frame.top + (1 - signPoint.y) * frame.height / 2;
+        label.left = Math.min(label.left, x); label.right = Math.max(label.right, x);
+        label.top = Math.min(label.top, y); label.bottom = Math.max(label.bottom, y);
+      }
+      let overlaps = false;
+      if (frame.width < 600) for (const hud of signHUD) {
+        const rect = hud.getBoundingClientRect();
+        if (label.left < rect.right + 8 && label.right > rect.left - 8 &&
+            label.top < rect.bottom + 8 && label.bottom > rect.top - 8) overlaps = true;
+      }
+      mesh.visible = !overlaps;
+    }
+  }
+  return {scene, doors, interactables, contact, plane, roomSigns, updateSigns};
 }
