@@ -1,6 +1,6 @@
 # Gallery Design System — SSOT
 
-**Specification version: 1.0.0** · **Application release: 1.1.1** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
+**Specification version: 1.0.0** · **Application release: 1.1.2** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
 
 This document is the single source of truth for shared gallery design decisions, component contracts, UX rules and acceptance criteria. Version 1.0.0 establishes the contract and tracks its incremental implementation. It does **not** certify complete application compliance. The issue register records the reviewed baseline; the adoption record distinguishes delivered source changes from verified behavior and remaining work.
 
@@ -283,3 +283,11 @@ See [model integration verification](docs/gjh-furnishings-review.md) for this pa
 | Version | Change | Implementation status |
 |---|---|---|
 | 1.0.0 | Initial issue register, SSOT ownership, executable local registry, design/UX contracts, reuse architecture and acceptance matrix | Implemented locally; see verification scope and remaining limits above |
+
+### Visitor presentation contract (application 1.1.2)
+
+The [character module](demos/corporate/gjh/v11/assets/character.js) owns only visitor presentation: one locally vendored, original GLB at native metre scale, unchanged authored PBR materials, and phase-continuous blending of `idle`, `walk` and `sprint` clips. The existing player API continues to report `idle`, `walk` and `run`; `run` selects the authored `sprint` clip. Reduced-motion mode pauses the idle animation while preserving readable locomotion feedback. Model geometry, clothing colors and PBR materials belong to the upstream Blender asset, not the Gallery CSS token registry.
+
+The [player module](demos/corporate/gjh/v11/assets/player.js) remains the sole owner of capsule dimensions, gravity, movement speeds, inputs, collision handling and camera obstruction. The GLB is authored near 1.72 metres, with glTF +Y up, feet at floor zero and the face along +Z; its presentation group applies only the existing forward-axis correction. Runtime code must not resculpt body proportions, recolor named mesh parts, rewrite clips or substitute the legacy Kenney model after a loading error. The established directory fallback handles failed scene initialization.
+
+Editable sources remain in `Blender-3D-Gallery/models/gjh-mall-visitor/`. [Character provenance](demos/corporate/gjh/v11/assets/character-sources.json) owns the exact upstream pin and export hash. The DS version stays 1.0.0 because no shared token or component API changes. See [the character review](docs/gjh-character-review.md) for candidate-specific measured evidence and limitations; prior release results do not certify this candidate.

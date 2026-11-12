@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
+  "source_commit": null,
+  "assets": [
+    {
+      "file": "gjh-mall-visitor.glb",
+      "source": "models/gjh-mall-visitor/exports/gjh-mall-visitor.glb",
+      "sha256": null,
+      "triangles": null,
+      "dimensions": null,
+      "license": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
+    }
+  ]
+}

@@ -4,7 +4,7 @@ A company-first design exploration platform. Browse companies, enter a company c
 
 The [Design System SSOT](ds.md) owns shared gallery design and UX contracts, the prioritized UI audit, cross-project reuse boundaries and acceptance criteria. Its version 1.0.0 tracks the executable token/icon registry, gallery adoption and remaining verification. Run `python scripts/check_ssot.py` to check generated artifacts and prevent new design-system debt.
 
-Application **1.1.0** adopts the compact gallery layouts, responsive previews, shareable discovery state, accessible comparison controls and shared GJH interaction/theme foundations. The design-system contract remains **1.0.0**; application and DS versions are independent.
+Application **1.1.0** introduced the compact gallery layouts, responsive previews, shareable discovery state, accessible comparison controls and shared GJH interaction/theme foundations. The design-system contract remains **1.0.0**; application and DS versions are independent.
 
 See the [1.1.0 release review](docs/ssot-release-review.md) for the actual verification scope. The static gate reports zero remaining declarations in its measured raw-style categories; this does not mean every layout dimension is tokenized. Physical-device testing, screen-reader sessions and field performance remain separate from the local browser evidence.
 
@@ -50,6 +50,8 @@ python tests/browser_gjh_v9.py
 python tests/browser_gjh_v10.py
 python tests/browser_gjh_v11.py
 python tests/browser_gjh_furnishings.py
+python -m unittest discover -s tests -p test_gjh_character.py -v
+python tests/browser_gjh_character.py
 python tests/browser_pwa.py
 ```
 
@@ -88,6 +90,12 @@ The curated [GJH / New Moon source-verified library](assets/companies/gjh/offici
 
 ## GJH V11 — Virtual Mall
 
-[Virtual Mall](demos/corporate/gjh/v11/README.md) adds free third-person walking and running through one continuous mall, using a locally vendored CC0 Kenney character and Rapier kinematic capsule physics. Automatic glass doors connect three real-scale stores; verified products and brand panels open accessible inspection dialogs. The complete HTML directory survives JavaScript, WebGL and WASM failure. The existing PWA policy excludes heavy live-demo dependencies from precaching. Run `python tests/browser_gjh_v11.py` for SwiftShader walking, collision, touch, inspection and fallback checks.
+[Virtual Mall](demos/corporate/gjh/v11/README.md) adds free third-person walking and running through one continuous mall, using a local authored visitor and Rapier kinematic capsule physics. Automatic glass doors connect three real-scale stores; verified products and brand panels open accessible inspection dialogs. The complete HTML directory survives JavaScript, WebGL and WASM failure. The existing PWA policy excludes heavy live-demo dependencies from precaching. Run `python tests/browser_gjh_v11.py` for SwiftShader walking, collision, touch, inspection and fallback checks.
 
 Original Blender-authored lounge benches and areca-inspired planters are reused from the owner's [Blender-3D-Gallery collection PR](https://github.com/yapweijun1996/Blender-3D-Gallery/pull/4). Editable sources stay upstream; local GLBs are pinned by commit and SHA-256, loaded once and instanced across the mall. Per-asset procedural fallback preserves the scene on load failure. See [furniture source and verification](docs/gjh-furnishings-review.md); `python tests/browser_gjh_furnishings.py` covers responsive loading, instance reuse and independent failure recovery.
+
+### Reference-led visitor (application 1.1.2)
+
+The current **1.1.2** candidate replaces the legacy shopper rendering with an original, locally vendored `gjh-mall-visitor.glb`. Editable geometry and the reproducible authoring script belong to `Blender-3D-Gallery/models/gjh-mall-visitor/`; [character receipts](demos/corporate/gjh/v11/assets/character-sources.json) must pin the accepted export's commit and SHA-256 before release. The original Kenney model and its license remain preserved as legacy assets, without serving as an automatic fallback.
+
+`assets/character.js` owns the native-scale PBR model and authored `idle`, `walk` and `sprint` clips. `assets/player.js` retains movement, physics and camera behavior. A failed character load uses the existing accessible directory fallback. The GLB remains outside the PWA installation cache. See [character acceptance and verification](docs/gjh-character-review.md) for the current evidence status; source receipts and rendered pose review must be complete before this candidate is published.

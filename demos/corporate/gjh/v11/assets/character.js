@@ -8,7 +8,7 @@ export async function createCharacter(T) {
   const bounds = new T.Box3().setFromObject(avatar);
   const nativeHeight = bounds.max.y - bounds.min.y;
   if (!Number.isFinite(nativeHeight) || nativeHeight < 1.6 || nativeHeight > 1.85 || Math.abs(bounds.min.y) > .08) {
-    throw new Error('Visitor model must be authored at adult metre scale with feet at floor zero');
+    throw new Error('Visitor model must be authored at metre scale with feet at floor zero');
   }
   // The authored face points +Z; the existing controller moves forward along -Z.
   // No mesh, material, skeletal pose or animation track is modified at runtime.
