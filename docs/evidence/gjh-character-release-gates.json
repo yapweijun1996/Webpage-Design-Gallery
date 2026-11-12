@@ -1,0 +1,74 @@
+{
+  "release": {
+    "version": "1.1.2",
+    "build": "f0a35c4fbc5533ac"
+  },
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "build",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-build.log"
+    },
+    {
+      "check": "ssot",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-ssot.log"
+    },
+    {
+      "check": "units",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-units.log"
+    },
+    {
+      "check": "generated",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-generated.log"
+    },
+    {
+      "check": "character",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-character.log"
+    },
+    {
+      "check": "gallery",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-gallery.log"
+    },
+    {
+      "check": "legacy",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-legacy.log"
+    },
+    {
+      "check": "furnishings",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-furnishings.log"
+    },
+    {
+      "check": "pwa",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-pwa.log"
+    },
+    {
+      "check": "final-generated",
+      "exitCode": 0,
+      "log": "/tmp/gjh-character-release-final-generated.log"
+    }
+  ],
+  "characterEvidence": "/tmp/gjh-character-release-browser",
+  "notes": "All checks ran serially. Gallery, legacy and PWA runners used an isolated copy. Full V11 interactions and capture are a separate prerequisite, not certified by this driver. See gjh-character-review.md for those results and physical-device limitations. Final documentation completion left the release identity and all 267 non-document inputs byte-identical. Build, generated freshness, SSOT and all 35 units passed again after regeneration.",
+  "browserTestedRelease": {
+    "version": "1.1.2",
+    "build": "f0a35c4fbc5533ac"
+  },
+  "documentationCompletion": {
+    "nonDocumentInputsCompared": 267,
+    "changedNonDocumentInputs": 0,
+    "build": "PASS",
+    "generated": "PASS",
+    "ssot": "PASS",
+    "unitTests": 35,
+    "unitResult": "PASS"
+  }
+}

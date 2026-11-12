@@ -2,7 +2,7 @@
 
 Application version: **1.1.2**. Design-system contract: **1.0.0**.
 
-This is an implementation evidence record, not a deployment certificate. The user confirmed the green-polo mascot direction. Revision 3 geometry and animation are frozen and have local source and V11 evidence below. The source and byte-identical website receipt are pinned to `1a091b18e29b34ca468baf506968e1e65d815005` (pushed upstream; PR #5 remains open). The final post-continuity V11 and six focused character cases passed. The complete release-gate report and deployment verification remain pending. No reference image is embedded or published with the website.
+This is an implementation evidence record, not a deployment certificate. The user confirmed the green-polo mascot direction. Revision 3 geometry and animation are frozen and have local source and V11 evidence below. The source and byte-identical website receipt are pinned to `1a091b18e29b34ca468baf506968e1e65d815005` (pushed upstream; PR #5 remains open). The final post-continuity V11 and six focused character cases passed. All local release gates passed; deployment is verified separately after publication. No reference image is embedded or published with the website.
 
 ## Source and ownership
 
@@ -45,7 +45,7 @@ Statuses describe the verified revision-3 export and final continuity implementa
 | Final V11 movement, collisions, doors and inspection | PASS | [Final V11 regression](evidence/gjh-v11-character-regression.json): all three widths, reduced motion, hidden pause, context loss, WebGL/WASM failure and no-JavaScript fallback |
 | Build, generated freshness, SSOT and units | PASS | Release owner completed build, generated-output check, SSOT and 35 unit tests |
 | Gallery browser regression | PASS | Final release driver completed the Gallery suite |
-| Complete release gate report, including PWA | UNVERIFIED | Release driver still in progress; final report must confirm all remaining suites |
+| Complete release gate report, including PWA | PASS | [Release gates](evidence/gjh-character-release-gates.json): Gallery, 28 legacy cases plus four no-JavaScript journeys, seven furniture cases and PWA update/offline/cache-integrity recovery passed |
 | Remote commit, Actions and deployment | UNVERIFIED | Parent release owner records only after verified delivery |
 
 ## Accepted asset measurements
@@ -60,9 +60,9 @@ Statuses describe the verified revision-3 export and final continuity implementa
 | Animation clips and durations | idle 2.008333 s; walk 1.008333 s; sprint 0.741667 s; 33 tracks each |
 | Horizontal drift / maximum sole-floor error | Zero drift in all clips; idle <0.000001 m, walk 0.000191 m, sprint 0.001261 m |
 | Local browser / renderer | Headless Chrome / SwiftShader; full V11 suite completed |
-| Application build | Pending final generation |
+| Application build | `f0a35c4fbc5533ac`; unchanged by final documentation completion |
 
-Evidence inputs: upstream `models/gjh-mall-visitor/reports/assets.json` and `reports/sources.json`; [motion diagnostic](evidence/gjh-character-motion-diagnostic.json), [final V11 regression](evidence/gjh-v11-character-regression.json), and [focused character browser results](evidence/gjh-character-browser.json). Screenshots referenced by these reports were inspected locally; temporary review directories are not published artifacts.
+Evidence inputs: upstream `models/gjh-mall-visitor/reports/assets.json` and `reports/sources.json`; [motion diagnostic](evidence/gjh-character-motion-diagnostic.json), [final V11 regression](evidence/gjh-v11-character-regression.json), and [focused character browser results](evidence/gjh-character-browser.json), and [furniture regression](evidence/gjh-character-furnishings-regression.json). Screenshots referenced by these reports were inspected locally; temporary review directories are not published artifacts.
 
 ## Remaining limits
 

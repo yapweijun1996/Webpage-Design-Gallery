@@ -89,7 +89,7 @@ def verify_module(browser, base):
             character.update('idle', dt, 'walk');
             const row = sample('sustained-block-' + tick);
             if (tick <= 3) check(row.animation === 'walk', 'Grace expired before 50ms');
-            if (tick === 4) check(row.animation === 'idle', 'Block grace exceeded 60ms');
+            if (tick === 4) check(row.animation === 'idle', 'Block grace exceeded four fixed ticks');
           }
           for (let tick=0; tick<30; tick++) character.update('idle', dt, 'walk');
           check(sample('blocked-settled').weights.idle > .95, 'Held wall retained walk weights');

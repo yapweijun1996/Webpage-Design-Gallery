@@ -1,15 +1,27 @@
 {
   "schema_version": 1,
   "source_repository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
-  "source_commit": null,
+  "source_commit": "1a091b18e29b34ca468baf506968e1e65d815005",
   "assets": [
     {
       "file": "gjh-mall-visitor.glb",
       "source": "models/gjh-mall-visitor/exports/gjh-mall-visitor.glb",
-      "sha256": null,
-      "triangles": null,
-      "dimensions": null,
-      "license": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
+      "sha256": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+      "triangles": 10356,
+      "dimensions": [
+        0.7069495154715217,
+        1.719999952978403,
+        0.43689485464122235
+      ],
+      "license": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+      "bytes": 369976,
+      "primitives": 25,
+      "materials": 8,
+      "transform": "glTF +Y up, metres, native height 1.72, floor Y=0, front +Z; original idle/walk/sprint clips remain horizontally in place."
     }
-  ]
+  ],
+  "collection": "gjh-mall-visitor",
+  "retrieved": "2026-11-12",
+  "source_pr": "https://github.com/yapweijun1996/Blender-3D-Gallery/pull/5",
+  "upstream_status": "Proposed collection on feat/gjh-mall-visitor; not yet merged to upstream main."
 }

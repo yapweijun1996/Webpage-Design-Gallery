@@ -1,0 +1,685 @@
+{
+  "browser": "157.0.8103.78",
+  "environment": "Local Chrome/SwiftShader; manual-step GPU fence; DPR2",
+  "release": {
+    "version": "1.1.2",
+    "build": "f0a35c4fbc5533ac"
+  },
+  "limitations": "Screenshots require human reference review; not physical-device performance or all-camera coverage.",
+  "modelNotPrecached": true,
+  "results": [
+    {
+      "case": "actual-character-module",
+      "passed": true,
+      "records": [
+        {
+          "label": "held-at-rest",
+          "animation": "idle",
+          "weights": {
+            "idle": 1,
+            "walk": 0,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-0",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.8464817248906141,
+            "walk": 0.15351827510938587,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-1",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.7165313105737894,
+            "walk": 0.2834686894262106,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-2",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.6065306597126335,
+            "walk": 0.39346934028736646,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-3",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.5134171190325921,
+            "walk": 0.48658288096740787,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-4",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.43459820850707837,
+            "walk": 0.5654017914929217,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-5",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.36787944117144245,
+            "walk": 0.6321205588285576,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-6",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.3114032239145978,
+            "walk": 0.6885967760854022,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-7",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.2635971381157269,
+            "walk": 0.7364028618842731,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-8",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.22313016014842993,
+            "walk": 0.77686983985157,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-9",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.18887560283756194,
+            "walk": 0.811124397162438,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-10",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.159879746079694,
+            "walk": 0.840120253920306,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-11",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.13533528323661276,
+            "walk": 0.8646647167633872,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-12",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.11455884399268779,
+            "walk": 0.8854411560073122,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-13",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.09697196786440512,
+            "walk": 0.9030280321355949,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-14",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.08208499862389886,
+            "walk": 0.9179150013761012,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-15",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.06948345122280158,
+            "walk": 0.9305165487771985,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-16",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.05881647164242994,
+            "walk": 0.9411835283575701,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-17",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.049787068367863986,
+            "walk": 0.950212931632136,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-18",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.04214384350927644,
+            "walk": 0.9578561564907236,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-19",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.035673993347252436,
+            "walk": 0.9643260066527476,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-20",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.030197383422318536,
+            "walk": 0.9698026165776815,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-21",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.02556153320650743,
+            "walk": 0.9744384667934927,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-22",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.02163737071949312,
+            "walk": 0.978362629280507,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-23",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.018315638888734206,
+            "walk": 0.9816843611112659,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-24",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.015503853599009342,
+            "walk": 0.9844961464009907,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-25",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.013123728736940983,
+            "walk": 0.9868762712630591,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-26",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.011108996538242325,
+            "walk": 0.9888910034617577,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-27",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.009403562551495225,
+            "walk": 0.9905964374485048,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-28",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.007959943848706463,
+            "walk": 0.9920400561512935,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-29",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.006737946999085481,
+            "walk": 0.9932620530009145,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-30",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.005703548998007415,
+            "walk": 0.9942964510019926,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-31",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.00482794999383145,
+            "walk": 0.9951720500061686,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-32",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.004086771438464076,
+            "walk": 0.995913228561536,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-33",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.0034593773364647675,
+            "walk": 0.9965406226635353,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-34",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.002928299694818195,
+            "walk": 0.9970717003051819,
+            "run": 0
+          }
+        },
+        {
+          "label": "walk-35",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.0024787521766663646,
+            "walk": 0.9975212478233337,
+            "run": 0
+          }
+        },
+        {
+          "label": "pace-change-on-contact-drop",
+          "animation": "run",
+          "weights": {
+            "idle": 0.0020982184180809087,
+            "walk": 0.8443835064725334,
+            "run": 0.15351827510938587
+          }
+        },
+        {
+          "label": "running",
+          "animation": "run",
+          "weights": {
+            "idle": 0,
+            "walk": 0.015465423388154091,
+            "run": 0.9844961464009907
+          }
+        },
+        {
+          "label": "released",
+          "animation": "idle",
+          "weights": {
+            "idle": 0.15351827510938587,
+            "walk": 0.01309119826576832,
+            "run": 0.8333579961536732
+          }
+        },
+        {
+          "label": "released-settled",
+          "animation": "idle",
+          "weights": {
+            "idle": 0.9942964510019926,
+            "walk": 0,
+            "run": 0.005615122009347531
+          }
+        },
+        {
+          "label": "sustained-block-1",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.7124445391353253,
+            "walk": 0.2834686894262106,
+            "run": 0.004023410732389516
+          }
+        },
+        {
+          "label": "sustained-block-2",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.6030712823761688,
+            "walk": 0.39346934028736646,
+            "run": 0.003405743656696487
+          }
+        },
+        {
+          "label": "sustained-block-3",
+          "animation": "walk",
+          "weights": {
+            "idle": 0.510488819337774,
+            "walk": 0.48658288096740787,
+            "run": 0.0028828997650557097
+          }
+        },
+        {
+          "label": "sustained-block-4",
+          "animation": "idle",
+          "weights": {
+            "idle": 0.5856377314397979,
+            "walk": 0.41188351638353576,
+            "run": 0.0024403219658111035
+          }
+        },
+        {
+          "label": "blocked-settled",
+          "animation": "idle",
+          "weights": {
+            "idle": 0.9972080489960206,
+            "walk": 0.0027752493031892203,
+            "run": 0
+          }
+        }
+      ],
+      "actualWalkAndSprintTransformsChanged": true,
+      "model": "gjh-mall-visitor"
+    },
+    {
+      "width": 1440,
+      "case": "loaded",
+      "poses": {
+        "idle-back": {
+          "yaw": 0,
+          "drawCalls": 129
+        },
+        "idle-side": {
+          "yaw": 1.5707963267948966,
+          "drawCalls": 82
+        },
+        "idle-front": {
+          "yaw": 3.141592653589793,
+          "drawCalls": 67
+        }
+      },
+      "transitions": {
+        "idleToWalk": {
+          "idle": 0.8464817248906141,
+          "walk": 0.15351827510938587,
+          "run": 0
+        },
+        "walkToRun": {
+          "idle": 0.013123728736940983,
+          "walk": 0.8333579961536732,
+          "run": 0.15351827510938587
+        },
+        "runToIdle": {
+          "idle": 0.15351827510938587,
+          "walk": 0.01292026036793034,
+          "run": 0.8333579961536732
+        }
+      },
+      "servedSha256": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "motion": {
+        "walkZ": 12.936824798583984,
+        "runZ": 14.93664836883545
+      },
+      "pageErrors": [],
+      "externalRequests": [],
+      "modelRequests": 1,
+      "passed": true
+    },
+    {
+      "width": 768,
+      "case": "loaded",
+      "poses": {
+        "idle-back": {
+          "yaw": 0,
+          "drawCalls": 114
+        },
+        "idle-side": {
+          "yaw": 1.5707963267948966,
+          "drawCalls": 63
+        },
+        "idle-front": {
+          "yaw": 3.141592653589793,
+          "drawCalls": 64
+        }
+      },
+      "transitions": {
+        "idleToWalk": {
+          "idle": 0.8464817248906141,
+          "walk": 0.15351827510938587,
+          "run": 0
+        },
+        "walkToRun": {
+          "idle": 0.013123728736940983,
+          "walk": 0.8333579961536732,
+          "run": 0.15351827510938587
+        },
+        "runToIdle": {
+          "idle": 0.15351827510938587,
+          "walk": 0.01292026036793034,
+          "run": 0.8333579961536732
+        }
+      },
+      "servedSha256": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "motion": {
+        "walkZ": 12.936824798583984,
+        "runZ": 14.93664836883545
+      },
+      "pageErrors": [],
+      "externalRequests": [],
+      "modelRequests": 1,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "case": "loaded",
+      "poses": {
+        "idle-back": {
+          "yaw": 0,
+          "drawCalls": 101
+        },
+        "idle-side": {
+          "yaw": 1.5707963267948966,
+          "drawCalls": 60
+        },
+        "idle-front": {
+          "yaw": 3.141592653589793,
+          "drawCalls": 62
+        }
+      },
+      "transitions": {
+        "idleToWalk": {
+          "idle": 0.8464817248906141,
+          "walk": 0.15351827510938587,
+          "run": 0
+        },
+        "walkToRun": {
+          "idle": 0.013123728736940983,
+          "walk": 0.8333579961536732,
+          "run": 0.15351827510938587
+        },
+        "runToIdle": {
+          "idle": 0.15351827510938587,
+          "walk": 0.01292026036793034,
+          "run": 0.8333579961536732
+        }
+      },
+      "servedSha256": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "motion": {
+        "walkZ": 12.936824798583984,
+        "runZ": 14.93664836883545
+      },
+      "pageErrors": [],
+      "externalRequests": [],
+      "modelRequests": 1,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "case": "missing",
+      "poses": {},
+      "transitions": {},
+      "directoryAndProductFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": [],
+      "modelRequests": 1,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "case": "reduced",
+      "poses": {
+        "idle-back": {
+          "yaw": 0,
+          "drawCalls": 101
+        },
+        "idle-side": {
+          "yaw": 1.5707963267948966,
+          "drawCalls": 60
+        },
+        "idle-front": {
+          "yaw": 3.141592653589793,
+          "drawCalls": 62
+        }
+      },
+      "transitions": {
+        "idleToWalk": {
+          "idle": 0.8464817248906141,
+          "walk": 0.15351827510938587,
+          "run": 0
+        },
+        "walkToRun": {
+          "idle": 0.013123728736940983,
+          "walk": 0.8333579961536732,
+          "run": 0.15351827510938587
+        },
+        "runToIdle": {
+          "idle": 0.15351827510938587,
+          "walk": 0.01292026036793034,
+          "run": 0.8333579961536732
+        }
+      },
+      "servedSha256": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "motion": {
+        "walkZ": 12.936824798583984,
+        "runZ": 14.93664836883545
+      },
+      "pageErrors": [],
+      "externalRequests": [],
+      "modelRequests": 1,
+      "passed": true
+    }
+  ]
+}

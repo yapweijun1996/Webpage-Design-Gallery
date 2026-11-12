@@ -1,0 +1,279 @@
+{
+  "browser": "157.0.8103.78",
+  "comparison": "Same current built world/physics, only baseline vs current player presentation; temporary instrumentation only",
+  "equalTickCount": 90,
+  "identicalPhysicsAndAnimationBeforeFix": true,
+  "results": {
+    "current": {
+      "walk": {
+        "idleTicks": [
+          8,
+          19,
+          33
+        ],
+        "zeroHorizontalTicks": [
+          8,
+          19,
+          33
+        ],
+        "start": {
+          "x": -1.9999998807907104,
+          "y": -0.02009403705596924,
+          "z": 12.044167518615723,
+          "animation": "walk"
+        },
+        "end": {
+          "x": -1.999979853630066,
+          "y": -0.01853048801422119,
+          "z": 13.378815650939941,
+          "animation": "walk"
+        },
+        "endWeights": {
+          "idle": 0.12485181660494091,
+          "walk": 0.8751481833950591,
+          "run": 0
+        }
+      },
+      "run": {
+        "idleTicks": [],
+        "zeroHorizontalTicks": [],
+        "start": {
+          "x": -1.9999898672103882,
+          "y": -0.020022332668304443,
+          "z": 13.462146759033203,
+          "animation": "run"
+        },
+        "end": {
+          "x": -2.000882387161255,
+          "y": -0.019924700260162354,
+          "z": 15.37855339050293,
+          "animation": "run"
+        },
+        "endWeights": {
+          "idle": 0.0022867407875385667,
+          "walk": 0.016028898101195642,
+          "run": 0.9816843611112659
+        }
+      },
+      "stop": {
+        "idleTicks": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29
+        ],
+        "zeroHorizontalTicks": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29
+        ],
+        "start": {
+          "x": -2.000882387161255,
+          "y": -0.01990818977355957,
+          "z": 15.37855339050293,
+          "animation": "idle"
+        },
+        "end": {
+          "x": -2.000882863998413,
+          "y": -0.02005922794342041,
+          "z": 15.378554344177246,
+          "animation": "idle"
+        },
+        "endWeights": {
+          "idle": 0.9932774609391416,
+          "walk": 0,
+          "run": 0.006614537194998802
+        }
+      }
+    },
+    "baseline-720599": {
+      "walk": {
+        "idleTicks": [
+          8,
+          19,
+          33
+        ],
+        "zeroHorizontalTicks": [
+          8,
+          19,
+          33
+        ],
+        "start": {
+          "x": -1.9999998807907104,
+          "y": -0.02009403705596924,
+          "z": 12.044167518615723,
+          "animation": "walk"
+        },
+        "end": {
+          "x": -1.999979853630066,
+          "y": -0.01853048801422119,
+          "z": 13.378815650939941,
+          "animation": "walk"
+        },
+        "endWeights": {
+          "idle": 0.12485181660494091,
+          "walk": 0.8751481833950591,
+          "run": 0
+        }
+      },
+      "run": {
+        "idleTicks": [],
+        "zeroHorizontalTicks": [],
+        "start": {
+          "x": -1.9999898672103882,
+          "y": -0.020022332668304443,
+          "z": 13.462146759033203,
+          "animation": "run"
+        },
+        "end": {
+          "x": -2.000882387161255,
+          "y": -0.019924700260162354,
+          "z": 15.37855339050293,
+          "animation": "run"
+        },
+        "endWeights": {
+          "idle": 0.0022867407875385667,
+          "walk": 0.016028898101195642,
+          "run": 0.9816843611112659
+        }
+      },
+      "stop": {
+        "idleTicks": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29
+        ],
+        "zeroHorizontalTicks": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29
+        ],
+        "start": {
+          "x": -2.000882387161255,
+          "y": -0.01990818977355957,
+          "z": 15.37855339050293,
+          "animation": "idle"
+        },
+        "end": {
+          "x": -2.000882863998413,
+          "y": -0.02005922794342041,
+          "z": 15.378554344177246,
+          "animation": "idle"
+        },
+        "endWeights": {
+          "idle": 0.9932774609391416,
+          "walk": 0,
+          "run": 0.006614537194998802
+        }
+      }
+    }
+  },
+  "conclusion": "The original and new presentation returned identical positions and raw state/weights. Isolated zero corrected-motion ticks are a pre-existing controller contact behavior. The subsequent fix only bridges presentation briefly while input stays held."
+}
