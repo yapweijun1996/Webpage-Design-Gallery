@@ -173,8 +173,8 @@ export function createUI() {
         document.body.classList.toggle('is-nearby', Boolean(nearby));
         inspectPrompt.hidden = !nearby;
         nearbyName.textContent = nearby ? records.get(nearby).name : '';
-        inspectButton.setAttribute('aria-label', nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
-        if (nearby && showing3D) announce(`${records.get(nearby).name}. Press E or tap Inspect for details.`);
+        inspectButton.setAttribute('aria-label', nearby ? `Inspect ${records.get(nearby).name}. Press F or tap.` : 'Inspect nearby display');
+        if (nearby && showing3D) announce(`${records.get(nearby).name}. Press F or tap Inspect for details.`);
       }
     },
     paused() {

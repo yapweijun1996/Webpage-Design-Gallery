@@ -78,6 +78,52 @@ def drive(page, ms, **inputs):
     }''', [inputs, ms])
 
 
+def keyboard_turning(page):
+    """Actual held keys turn camera/avatar without manufacturing translation."""
+    page.evaluate('__mall.teleport("atrium"); __mall.setInput(null)')
+    page.locator('#scene').focus()
+    before = state(page)
+    page.keyboard.down('q')
+    left = page.evaluate('__mall.step(300)')
+    page.keyboard.up('q')
+    assert left['yaw'] > before['yaw'] + .5 and left['facing'] > before['facing'] + .3, left
+    assert abs(left['x']-before['x']) < .01 and abs(left['z']-before['z']) < .01, left
+    released = page.evaluate('__mall.step(200)')
+    assert abs(released['yaw']-left['yaw']) < 1e-8
+    page.keyboard.down('e')
+    right = page.evaluate('__mall.step(300)')
+    page.keyboard.up('e')
+    assert right['yaw'] < left['yaw']-.5 and right['facing'] < left['facing']-.2, right
+    assert abs(right['x']-before['x']) < .01 and abs(right['z']-before['z']) < .01
+    page.keyboard.down('q'); page.keyboard.down('e')
+    cancelled = page.evaluate('__mall.step(200)')
+    page.keyboard.up('q'); page.keyboard.up('e')
+    assert abs(cancelled['yaw']-right['yaw']) < 1e-8
+    page.keyboard.down('w'); page.keyboard.down('q'); page.keyboard.down('Shift')
+    moving = page.evaluate('__mall.step(300)')
+    page.keyboard.up('w'); page.keyboard.up('q'); page.keyboard.up('Shift')
+    assert moving['yaw'] > cancelled['yaw']+.5 and moving['z'] < cancelled['z']-.5, moving
+    assert moving['animation'] == 'run', moving
+    # Native controls and modifier shortcuts must not become game input.
+    page.locator('#view-toggle').focus()
+    page.keyboard.down('e')
+    focused = page.evaluate('__mall.step(100)')
+    page.keyboard.up('e')
+    assert focused['yaw'] == moving['yaw']
+    page.locator('#scene').focus()
+    page.keyboard.down('Control'); page.keyboard.down('q')
+    modified = page.evaluate('__mall.step(100)')
+    page.keyboard.up('q'); page.keyboard.up('Control')
+    assert modified['yaw'] == focused['yaw']
+    page.keyboard.down('q')
+    page.evaluate('window.dispatchEvent(new Event("blur"))')
+    blurred = page.evaluate('__mall.step(100)')
+    page.keyboard.up('q')
+    assert blurred['yaw'] == modified['yaw']
+    page.evaluate('__mall.teleport("atrium"); __mall.setInput({})')
+    drive(page, 17)
+
+
 def room_signs(page):
     """Visible room plaques must clear the mobile HUD, including expanded controls."""
     if page.viewport_size['width'] != 390:
@@ -153,6 +199,7 @@ def run(capture=False):
                         if capture:
                             (DEMO / 'screenshots').mkdir(exist_ok=True)
                             page.screenshot(path=str(DEMO / f'screenshots/{width}.png'), scale='css')
+                        keyboard_turning(page)
                         # Real keyboard input exercises the same capsule controller as deterministic input.
                         page.evaluate('__mall.setInput(null)'); page.locator('#scene').focus()
                         before = state(page); page.keyboard.down('w')
@@ -235,10 +282,20 @@ def run(capture=False):
                             draw_calls[f'{zone}-interior'] = near['drawCalls']
                             page.screenshot(path=str(review / f'{zone}-interior-{width}.png'), scale='css')
                             room_signs(page)
-                            page.keyboard.press('e'); assert page.locator('#product-dialog').is_visible()
+                            page.locator('#scene').focus()
+                            page.keyboard.down('e')
+                            turning_near = page.evaluate('__mall.step(100)')
+                            page.keyboard.up('e')
+                            assert not page.locator('#product-dialog').is_visible()
+                            assert turning_near['yaw'] < near['yaw']-.1
+                            page.keyboard.press('f'); assert page.locator('#product-dialog').is_visible()
                             assert page.locator('#product-dialog a').count()==1
                             assert page.locator('#product-dialog a').get_attribute('href')=='https://www.gjheshop.com/'
                             paused = state(page)
+                            page.keyboard.down('q')
+                            page.evaluate('__mall.step(100)')
+                            page.keyboard.up('q')
+                            assert state(page)['yaw'] == paused['yaw']
                             drive(page, 500, forward=1, run=True)
                             assert state(page)['z']==paused['z']
                             page.keyboard.press('Tab')
@@ -260,7 +317,7 @@ def run(capture=False):
                         assert not external, external
                         draw_calls['max'] = max(max_draw_calls, *draw_calls.values())
                         assert max(draw_calls.values()) <= 200, draw_calls
-                        evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'errors':errors})
+                        evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'keyboardTurningAndFInspection':'PASS', 'errors':errors})
                         context.close()
                     context = browser.new_context(reduced_motion='reduce')
                     page = context.new_page(); page.goto(url); page.wait_for_function('window.__mall?.ready')

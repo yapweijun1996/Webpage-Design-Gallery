@@ -25,9 +25,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (event.target !== canvas && event.target !== document.body) clearInput();
   });
   document.addEventListener('keydown', event => {
-    if (isPaused() || event.altKey || event.ctrlKey || event.metaKey ||
+    if (event.altKey || event.ctrlKey || event.metaKey) { clearInput(); return; }
+    if (isPaused() ||
         (event.target !== canvas && event.target !== document.body)) return;
-    if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
+    if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
       // Space and tab retain their native page and focus semantics.
       if (event.target === canvas || event.target === document.body) event.preventDefault();
       keys.add(event.code);
@@ -67,6 +68,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY);
     const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX);
     const running = injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight'));
+    const turning = (keys.has('KeyQ') ? 1 : 0) - (keys.has('KeyE') ? 1 : 0);
+    yaw += turning * (110 * Math.PI / 180) * dt;
     const length = Math.max(1, Math.hypot(forward, right)), speed = running ? 5 : 2.65;
     const dx = (-Math.sin(yaw) * forward + Math.cos(yaw) * right) / length, dz = (-Math.cos(yaw) * forward - Math.sin(yaw) * right) / length;
     vertical = controller.computedGrounded() ? -.5 : Math.max(-18, vertical - 24 * dt);
@@ -78,8 +81,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const state = walking ? running ? 'run' : 'walk' : 'idle';
     const requested = Math.hypot(forward, right) > .001 ? running ? 'run' : 'walk' : 'idle';
     character.update(state, dt, requested);
-    if (walking) {
-      const angle = Math.atan2(-dx, -dz), delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
+    if (walking || turning) {
+      const angle = walking ? Math.atan2(-dx, -dz) : yaw, delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
       visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
     }
   }
@@ -114,6 +117,6 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   return {body, capsule, camera, update, sync, updateCamera, teleport, clearInput,
     setPaused: fn => { isPaused = fn; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, animation: character.animation, yaw, pitch, character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
   };
 }
