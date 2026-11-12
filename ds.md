@@ -1,6 +1,6 @@
 # Gallery Design System — SSOT
 
-**Specification version: 1.0.0** · **Application release: 1.1.2** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
+**Specification version: 1.0.0** · **Application release: 1.1.3** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
 
 This document is the single source of truth for shared gallery design decisions, component contracts, UX rules and acceptance criteria. Version 1.0.0 establishes the contract and tracks its incremental implementation. It does **not** certify complete application compliance. The issue register records the reviewed baseline; the adoption record distinguishes delivered source changes from verified behavior and remaining work.
 
@@ -293,3 +293,7 @@ The [player module](demos/corporate/gjh/v11/assets/player.js) remains the sole o
 Editable sources remain in `Blender-3D-Gallery/models/gjh-mall-visitor/`. [Character provenance](demos/corporate/gjh/v11/assets/character-sources.json) owns the exact upstream pin and export hash. The DS version stays 1.0.0 because no shared token or component API changes. See [the character review](docs/gjh-character-review.md) for revision-3 measured evidence and limitations: the original green-polo visitor is below the 15,000-triangle asset budget and passed the full V11 suite. The verified upstream pin, real-GLB module checks and final browser evidence are recorded there; the canonical review owns release and deployment status.
 
 Visitor presentation may bridge isolated zero-motion contact ticks for 60 ms after actual movement while input remains held. The current requested pace controls the visual target; released input clears the interval immediately, and held blockage from rest remains idle. Expiry is observed on the fourth 60 Hz step (66.7 ms). This does not alter physical displacement or movement speeds. The [character evidence](docs/gjh-character-review.md) records the identical 90-tick baseline trace and real-GLB continuity tests.
+
+### V11 keyboard turning (application 1.1.3)
+
+Hold Q/E to turn left/right with the camera and visitor; turning alone does not move the capsule. WASD/arrows, Shift, drag and touch retain their existing behavior. F inspects a nearby display; the click/tap action remains available. Native control focus, modifier shortcuts, blur and paused views must not retain game input. Verify actual key events, opposing keys, release, moving turns and F/Escape inspection in `tests/browser_gjh_v11.py`.

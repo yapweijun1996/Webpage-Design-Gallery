@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / 'demos/corporate/gjh/v11'
-ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
+ARGS = ['--use-angle=' + os.environ.get('GALLERY_WEBGL_BACKEND', 'swiftshader'), '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
@@ -161,7 +161,8 @@ def run(capture=False):
                         page.on('console', lambda m: errors.append(m.text) if m.type=='error' else None)
                         page.on('request', lambda r: external.append(r.url) if r.url.startswith('http') and not r.url.startswith(base) else None)
                         page.goto(url); page.wait_for_function('window.__mall?.ready && window.__sceneReady')
-                        page.evaluate('__mall.setInput({})')
+                        # Drain the initial frame before capturing a frozen scene.
+                        drive(page, 0)
                         initial = state(page); assert initial['drawCalls'] <= 200, initial
                         draw_calls = {'atrium': initial['drawCalls']}
                         max_draw_calls = initial['drawCalls']
