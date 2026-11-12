@@ -98,25 +98,28 @@ def verify(browser, url, base, viewport, directory, missing=False, reduced=False
             # blend, not instantly snap to the requested action.
             page.evaluate("__mall.teleport('atrium')")
             drive(page, 400, yaw=0)
-            entering = drive(page, 17, right=1, yaw=0)
+            # The rear aisle at x=-2, z=12..16 avoids the central court at
+            # (0, 7.5), side seating at x=+/-7.8 and the terrace at x=-11.
+            # Probe locomotion on a clear path rather than against furniture.
+            entering = drive(page, 17, forward=-1, yaw=0)
             assert entering["animation"] == "walk", entering
             result["transitions"]["idleToWalk"] = weights(entering, blended=True)
-            walked = drive(page, 400, right=1, yaw=0)
-            assert walked["x"] > initial["x"] + .5, walked
+            walked = drive(page, 400, forward=-1, yaw=0)
+            assert walked["z"] > initial["z"] + .5, walked
             weights(walked, "walk")
             page.screenshot(path=str(directory / f"{label}-walk-{width}.png"), scale="css")
-            entering_run = drive(page, 17, right=1, run=True, yaw=0)
+            entering_run = drive(page, 17, forward=-1, run=True, yaw=0)
             assert entering_run["animation"] == "run", entering_run
             result["transitions"]["walkToRun"] = weights(entering_run, blended=True)
-            ran = drive(page, 400, right=1, run=True, yaw=0)
-            assert ran["x"] - walked["x"] > walked["x"] - entering["x"], (walked, ran)
+            ran = drive(page, 400, forward=-1, run=True, yaw=0)
+            assert ran["z"] - walked["z"] > walked["z"] - entering["z"], (walked, ran)
             weights(ran, "run")
             page.screenshot(path=str(directory / f"{label}-run-{width}.png"), scale="css")
             stopping = drive(page, 17)
             assert stopping["animation"] == "idle", stopping
             result["transitions"]["runToIdle"] = weights(stopping, blended=True)
             weights(drive(page, 500), "idle")
-            result["motion"] = {"walkX": walked["x"], "runX": ran["x"]}
+            result["motion"] = {"walkZ": walked["z"], "runZ": ran["z"]}
             page.locator("#view-toggle").click()
             assert page.locator("#store-list").is_visible()
             page.locator("#view-toggle").click()
