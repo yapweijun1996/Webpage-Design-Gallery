@@ -3,7 +3,7 @@
   "source_repository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
   "source_commit": "46ca13c07a497b2d1514cf681101eab8fd25365f",
   "collection": "gjh-mall-furniture",
-  "upstream_status": "Proposed collection on feat/gjh-mall-furniture; not yet merged to upstream main.",
+  "upstream_status": "Merged through pull request #4 at 8b21a337f522c12ce4eb1627b4ca7ee2aa0b8fa1; the byte-identical export content remains pinned to source_commit.",
   "retrieved": "2026-11-12",
   "assets": [
     {
@@ -37,5 +37,6 @@
       "transform": "glTF Y-up, metres, floor-centred origin; bench back +Z. Existing placement height/facing transforms apply."
     }
   ],
-  "source_pr": "https://github.com/yapweijun1996/Blender-3D-Gallery/pull/4"
+  "source_pr": "https://github.com/yapweijun1996/Blender-3D-Gallery/pull/4",
+  "upstream_merge_commit": "8b21a337f522c12ce4eb1627b4ca7ee2aa0b8fa1"
 }
