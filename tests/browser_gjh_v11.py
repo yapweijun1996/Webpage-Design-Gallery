@@ -54,7 +54,28 @@ def state(page):
 
 
 def drive(page, ms, **inputs):
-    return page.evaluate('([input,ms])=>{__mall.setInput(input);return __mall.step(ms)}', [inputs, ms])
+    # Manual physics steps can submit frames much faster than SwiftShader draws
+    # them. Wait for the actual GPU work instead of accumulating it until the
+    # next screenshot. Keep the same DPR, frames, assertions and 30s deadline.
+    return page.evaluate('''async ([input,ms]) => {
+      __mall.setInput(input);
+      const state = __mall.step(ms);
+      const gl = document.querySelector('#scene').getContext('webgl2');
+      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      if (!sync) throw Error('Could not create render-completion fence');
+      gl.flush();
+      const start = performance.now();
+      try {
+        while (true) {
+          const status = gl.clientWaitSync(sync, 0, 0);
+          if (status === gl.ALREADY_SIGNALED || status === gl.CONDITION_SATISFIED) break;
+          if (status === gl.WAIT_FAILED || performance.now() - start > 30000)
+            throw Error('Render-completion fence failed or timed out');
+          await new Promise(resolve => setTimeout(resolve, 8));
+        }
+      } finally { gl.deleteSync(sync); }
+      return state;
+    }''', [inputs, ms])
 
 
 def room_signs(page):

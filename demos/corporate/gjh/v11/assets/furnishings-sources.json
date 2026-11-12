@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
+  "source_commit": "46ca13c07a497b2d1514cf681101eab8fd25365f",
+  "collection": "gjh-mall-furniture",
+  "upstream_status": "Proposed collection on feat/gjh-mall-furniture; not yet merged to upstream main.",
+  "retrieved": "2026-11-12",
+  "assets": [
+    {
+      "file": "gjh-lounge-bench.glb",
+      "sha256": "ae13cf00da96d45878d633e8d1d1f6a9bbbf35d0bc89a4a162f055254b3ea442",
+      "source": "models/gjh-mall-furniture/exports/gjh-lounge-bench.glb",
+      "license": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+      "dimensions": [
+        2.579999804496765,
+        1.3174999952316284,
+        0.921999990940094
+      ],
+      "triangles": 5640,
+      "bytes": 234288,
+      "attribution": "Original Blender geometry and materials authored for the owner's GJH mall concept. No third-party assets or textures.",
+      "transform": "glTF Y-up, metres, floor-centred origin; bench back +Z. Existing placement height/facing transforms apply."
+    },
+    {
+      "file": "gjh-areca-planter.glb",
+      "sha256": "0d1caad269b9838b695924b2b2242277597d304443959394cebeb84a9a675267",
+      "source": "models/gjh-mall-furniture/exports/gjh-areca-planter.glb",
+      "license": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+      "dimensions": [
+        1.230091154575348,
+        2.347566843032837,
+        1.1915507912635803
+      ],
+      "triangles": 5160,
+      "bytes": 119760,
+      "attribution": "Original Blender geometry and materials authored for the owner's GJH mall concept. No third-party assets or textures.",
+      "transform": "glTF Y-up, metres, floor-centred origin; bench back +Z. Existing placement height/facing transforms apply."
+    }
+  ],
+  "source_pr": "https://github.com/yapweijun1996/Blender-3D-Gallery/pull/4"
+}

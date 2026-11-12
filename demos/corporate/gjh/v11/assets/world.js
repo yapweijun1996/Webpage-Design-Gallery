@@ -1,5 +1,8 @@
+import {createFurnishings} from './furnishings.js';
+
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, shadows) {
+  const furnishings = await createFurnishings(T, shadows);
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
   scene.fog = new T.Fog(0x53625a, 32, 85);
@@ -79,28 +82,33 @@ export async function createWorld(T, R, physics, shadows) {
     solid('plane', 'lightPool', x, y, z, width, height, 1, ry, rx);
   }
   function plant(x, z, tall = 1) {
-    cylinder('pot', x, .32, z, .42, .64); cylinder('brass', x, .64, z, .43, .045);
-    cylinder('brass', x, .055, z, .4, .075); cylinder('wood', x, .656, z, .37, .016);
-    for (let i = 0; i < 8; i++) {
-      const a = i * Math.PI / 4;
-      solid('box', 'brass', x + Math.cos(a) * .416, .32, z + Math.sin(a) * .416, .018, .44, .018, a);
+    if (!furnishings.place('planter', x, z, tall)) {
+      cylinder('pot', x, .32, z, .42, .64); cylinder('brass', x, .64, z, .43, .045);
+      cylinder('brass', x, .055, z, .4, .075); cylinder('wood', x, .656, z, .37, .016);
+      for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4;
+        solid('box', 'brass', x + Math.cos(a) * .416, .32, z + Math.sin(a) * .416, .018, .44, .018, a);
+      }
+      cylinder('wood', x, .9 * tall, z, .04, 1.2 * tall);
+      for (let i = 0; i < 5; i++) { const a = i * 2.4; sphere(i % 2 ? 'leaf' : 'foliage', x + Math.cos(a) * .26, (1.25 + i * .12) * tall, z + Math.sin(a) * .26, .36, .6 * tall, .34); }
     }
-    cylinder('wood', x, .9 * tall, z, .04, 1.2 * tall);
-    for (let i = 0; i < 5; i++) { const a = i * 2.4; sphere(i % 2 ? 'leaf' : 'foliage', x + Math.cos(a) * .26, (1.25 + i * .12) * tall, z + Math.sin(a) * .26, .36, .6 * tall, .34); }
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
   function bench(x, z, facing = 1) {
-    box('wood', x, .3, z, 2.5, .4, .85, true); box('seat', x, .56, z, 2.55, .18, .9);
-    box('seat', x, .94, z + facing * .35, 2.55, .7, .18);
-    box('brass', x, .47, z - facing * .451, 2.52, .035, .025);
-    box('oak', x, 1.285, z + facing * .35, 2.58, .065, .21);
-    for (const dx of [-.42, .42]) {
-      box('wood', x + dx, .653, z, .018, .006, .82);
-      box('wood', x + dx, .96, z + facing * .253, .018, .52, .008);
-    }
-    for (const dx of [-1.15, 1.15]) {
-      box('brass', x + dx, .68, z, .08, .5, .9);
-      box('oak', x + dx, .955, z, .13, .065, .92);
+    collider(x, .3, z, 2.5, .4, .85);
+    if (!furnishings.place('bench', x, z, 1, facing)) {
+      box('wood', x, .3, z, 2.5, .4, .85); box('seat', x, .56, z, 2.55, .18, .9);
+      box('seat', x, .94, z + facing * .35, 2.55, .7, .18);
+      box('brass', x, .47, z - facing * .451, 2.52, .035, .025);
+      box('oak', x, 1.285, z + facing * .35, 2.58, .065, .21);
+      for (const dx of [-.42, .42]) {
+        box('wood', x + dx, .653, z, .018, .006, .82);
+        box('wood', x + dx, .96, z + facing * .253, .018, .52, .008);
+      }
+      for (const dx of [-1.15, 1.15]) {
+        box('brass', x + dx, .68, z, .08, .5, .9);
+        box('oak', x + dx, .955, z, .13, .065, .92);
+      }
     }
     shadow(x, z, 3.6, 2);
     lightPool(x, .051, z - facing * .6, 3.6, 2.4);
@@ -362,5 +370,5 @@ export async function createWorld(T, R, physics, shadows) {
       mesh.visible = !overlaps;
     }
   }
-  return {scene, doors, interactables, contact, plane, roomSigns, updateSigns};
+  return {scene, doors, interactables, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene)};
 }

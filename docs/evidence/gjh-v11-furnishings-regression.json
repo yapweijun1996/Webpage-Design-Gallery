@@ -1,0 +1,70 @@
+[
+  {
+    "width": 1440,
+    "drawCalls": 106,
+    "drawCallsByView": {
+      "atrium": 106,
+      "walking": 107,
+      "newmoon-portal": 81,
+      "newmoon": 65,
+      "newmoon-interior": 56,
+      "mili-portal": 101,
+      "mili": 75,
+      "mili-interior": 59,
+      "gogo-portal": 81,
+      "gogo": 66,
+      "gogo-interior": 55,
+      "max": 107
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 768,
+    "drawCalls": 91,
+    "drawCallsByView": {
+      "atrium": 91,
+      "walking": 91,
+      "newmoon-portal": 60,
+      "newmoon": 57,
+      "newmoon-interior": 51,
+      "mili-portal": 70,
+      "mili": 63,
+      "mili-interior": 52,
+      "gogo-portal": 63,
+      "gogo": 59,
+      "gogo-interior": 51,
+      "max": 91
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 390,
+    "drawCalls": 78,
+    "drawCallsByView": {
+      "atrium": 78,
+      "walking": 76,
+      "newmoon-portal": 57,
+      "newmoon": 53,
+      "newmoon-interior": 47,
+      "mili-portal": 68,
+      "mili": 57,
+      "mili-interior": 51,
+      "gogo-portal": 59,
+      "gogo": 54,
+      "gogo-interior": 51,
+      "max": 78
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "errors": []
+  },
+  {
+    "reducedMotion": "PASS",
+    "hiddenPause": "PASS",
+    "contextLoss": "PASS",
+    "WebGLAndWasmFailure": "PASS",
+    "noJS": "PASS",
+    "review": "/var/folders/p7/f_99nxmj7s16qrxbl0cbpz4r0000gn/T/gjh-v11-review-er6vpcl7"
+  }
+]

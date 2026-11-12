@@ -1,0 +1,243 @@
+{
+  "release": {
+    "version": "1.1.1",
+    "build": "3fef3cc3717ecd3b"
+  },
+  "browser": "157.0.8103.78",
+  "case": "all",
+  "environment": "Local Chrome/SwiftShader; physical mobile performance not measured",
+  "offlineModelsExcluded": "PASS",
+  "results": [
+    {
+      "width": 1440,
+      "failure": null,
+      "failedModel": null,
+      "furnishings": {
+        "bench": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        }
+      },
+      "modelRequests": {
+        "gjh-lounge-bench.glb": 1,
+        "gjh-areca-planter.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 106,
+        "newmoon": 81,
+        "mili": 101,
+        "gogo": 81
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "N/A",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 768,
+      "failure": null,
+      "failedModel": null,
+      "furnishings": {
+        "bench": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        }
+      },
+      "modelRequests": {
+        "gjh-lounge-bench.glb": 1,
+        "gjh-areca-planter.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 91,
+        "newmoon": 60,
+        "mili": 70,
+        "gogo": 63
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "N/A",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": null,
+      "failedModel": null,
+      "furnishings": {
+        "bench": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        }
+      },
+      "modelRequests": {
+        "gjh-lounge-bench.glb": 1,
+        "gjh-areca-planter.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 78,
+        "newmoon": 58,
+        "mili": 68,
+        "gogo": 60
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "N/A",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "bench",
+      "furnishings": {
+        "bench": {
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 8,
+          "primitives": 0
+        },
+        "planter": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        }
+      },
+      "modelRequests": {
+        "gjh-lounge-bench.glb": 1,
+        "gjh-areca-planter.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 75,
+        "newmoon": 55,
+        "mili": 65,
+        "gogo": 57
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "planter",
+      "furnishings": {
+        "bench": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 11,
+          "primitives": 0
+        }
+      },
+      "modelRequests": {
+        "gjh-lounge-bench.glb": 1,
+        "gjh-areca-planter.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 72,
+        "newmoon": 54,
+        "mili": 62,
+        "gogo": 55
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "bench",
+      "furnishings": {
+        "bench": {
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 8,
+          "primitives": 0
+        },
+        "planter": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        }
+      },
+      "modelRequests": {
+        "gjh-lounge-bench.glb": 1,
+        "gjh-areca-planter.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 75,
+        "newmoon": 55,
+        "mili": 65,
+        "gogo": 57
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "planter",
+      "furnishings": {
+        "bench": {
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 11,
+          "primitives": 0
+        }
+      },
+      "modelRequests": {
+        "gjh-lounge-bench.glb": 1,
+        "gjh-areca-planter.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 72,
+        "newmoon": 54,
+        "mili": 62,
+        "gogo": 55
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    }
+  ]
+}

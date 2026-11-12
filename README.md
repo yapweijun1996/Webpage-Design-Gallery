@@ -43,13 +43,13 @@ Open `http://localhost:8000/`. The generated company and demo links work without
 python scripts/build_design_system.py --check
 python scripts/check_ssot.py
 python scripts/build_gallery.py --check
-python -m unittest discover -s tests -p test_gallery.py -v
-python -m unittest discover -s tests -p test_design_system.py -v
+python -m unittest discover -s tests -p 'test_*.py' -v
 python tests/browser_gallery.py
 python tests/browser_gjh_demos.py
 python tests/browser_gjh_v9.py
 python tests/browser_gjh_v10.py
 python tests/browser_gjh_v11.py
+python tests/browser_gjh_furnishings.py
 python tests/browser_pwa.py
 ```
 
@@ -89,3 +89,5 @@ The curated [GJH / New Moon source-verified library](assets/companies/gjh/offici
 ## GJH V11 — Virtual Mall
 
 [Virtual Mall](demos/corporate/gjh/v11/README.md) adds free third-person walking and running through one continuous mall, using a locally vendored CC0 Kenney character and Rapier kinematic capsule physics. Automatic glass doors connect three real-scale stores; verified products and brand panels open accessible inspection dialogs. The complete HTML directory survives JavaScript, WebGL and WASM failure. The existing PWA policy excludes heavy live-demo dependencies from precaching. Run `python tests/browser_gjh_v11.py` for SwiftShader walking, collision, touch, inspection and fallback checks.
+
+Original Blender-authored lounge benches and areca-inspired planters are reused from the owner's [Blender-3D-Gallery collection PR](https://github.com/yapweijun1996/Blender-3D-Gallery/pull/4). Editable sources stay upstream; local GLBs are pinned by commit and SHA-256, loaded once and instanced across the mall. Per-asset procedural fallback preserves the scene on load failure. See [furniture source and verification](docs/gjh-furnishings-review.md); `python tests/browser_gjh_furnishings.py` covers responsive loading, instance reuse and independent failure recovery.

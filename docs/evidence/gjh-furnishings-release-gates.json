@@ -1,0 +1,54 @@
+{
+  "release": {
+    "version": "1.1.1",
+    "build": "3fef3cc3717ecd3b"
+  },
+  "checks": [
+    {
+      "check": "build",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-build.log"
+    },
+    {
+      "check": "ssot",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-ssot.log"
+    },
+    {
+      "check": "units",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-units.log"
+    },
+    {
+      "check": "generated",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-generated.log"
+    },
+    {
+      "check": "gallery",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-gallery.log"
+    },
+    {
+      "check": "legacy",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-legacy.log"
+    },
+    {
+      "check": "furnishings",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-furnishings.log"
+    },
+    {
+      "check": "pwa",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-pwa.log"
+    },
+    {
+      "check": "final-generated",
+      "exitCode": 0,
+      "log": "/tmp/gjh-release-final-generated.log"
+    }
+  ],
+  "notes": "Gallery and legacy screenshot writers ran in an isolated copy. Full V11 interactions/capture ran separately; see gjh-furnishings-review.md."
+}

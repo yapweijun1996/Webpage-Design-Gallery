@@ -1,6 +1,6 @@
 # Gallery Design System — SSOT
 
-**Specification version: 1.0.0** · **Application release: 1.1.0** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
+**Specification version: 1.0.0** · **Application release: 1.1.1** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
 
 This document is the single source of truth for shared gallery design decisions, component contracts, UX rules and acceptance criteria. Version 1.0.0 establishes the contract and tracks its incremental implementation. It does **not** certify complete application compliance. The issue register records the reviewed baseline; the adoption record distinguishes delivered source changes from verified behavior and remaining work.
 
@@ -271,6 +271,14 @@ See [release review](docs/ssot-release-review.md) for the final delivery evidenc
 | UI-12 | Shared readable-label typography, stronger semantic control border and per-theme registries; responsive preview defaults and keyboard-accessible screenshot region | Semantic contrast gate and tested-state axe checks pass; human screen-reader and full conformance audits remain separate |
 
 No published shared package, registry service or ERP/AI adapter is claimed. The local adoption and tested states above are verified; physical-device, field-performance and future cross-product acceptance criteria remain explicitly open.
+
+### Reusable 3D artwork (application 1.1.1)
+
+V11's original furniture source is the owner's `Blender-3D-Gallery` collection `models/gjh-mall-furniture/`. Editable Blender files, deterministic authoring code and validated exports belong there. This repository consumes pinned, byte-identical GLBs with [source receipts](demos/corporate/gjh/v11/assets/furnishings-sources.json); it does not fork the authoring generator or fetch upstream files at runtime. Source changes require revalidation, a new pinned commit and regenerated gallery artifacts.
+
+The V11 [furnishings module](demos/corporate/gjh/v11/assets/furnishings.js) owns optional model loading and repeated geometry instances. `world.js` owns placement, collisions, contact shadows and the procedural fallback; `script.js` exposes read-only verification state. Materials embedded in original 3D artwork are scene assets, not CSS UI tokens. Existing semantic UI tokens, component contracts and DS version remain unchanged. Rights and provenance remain per asset; permission to reuse the owner's work does not relabel third-party assets or establish a public artwork license.
+
+See [model integration verification](docs/gjh-furnishings-review.md) for this patch's executed checks. The 1.1.0 SSOT audit above remains a historical audit of its stated build.
 
 | Version | Change | Implementation status |
 |---|---|---|

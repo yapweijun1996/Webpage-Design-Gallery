@@ -1,0 +1,105 @@
+{
+  "environment": "Local macOS ARM64 Chrome using SwiftShader, 1440x900 viewport, deviceScaleFactor2; not physical-device performance",
+  "scenario": "New Moon approach, sixteen deterministic 100 ms manual steps, GPU fence after each render",
+  "observations": [
+    {
+      "cpuMs": 2.800000011920929,
+      "gpuWaitMs": 7421.0999999940395,
+      "z": 2.135260820388794,
+      "drawCalls": 81
+    },
+    {
+      "cpuMs": 1.9000000059604645,
+      "gpuWaitMs": 847.7999999970198,
+      "z": 1.8702590465545654,
+      "drawCalls": 79
+    },
+    {
+      "cpuMs": 1.5999999940395355,
+      "gpuWaitMs": 883.4000000059605,
+      "z": 1.6053744554519653,
+      "drawCalls": 78
+    },
+    {
+      "cpuMs": 2,
+      "gpuWaitMs": 903.0999999940395,
+      "z": 1.3840433359146118,
+      "drawCalls": 78
+    },
+    {
+      "cpuMs": 1.9000000059604645,
+      "gpuWaitMs": 911.0999999940395,
+      "z": 1.1190048456192017,
+      "drawCalls": 77
+    },
+    {
+      "cpuMs": 2,
+      "gpuWaitMs": 909.4000000059605,
+      "z": 0.9419080018997192,
+      "drawCalls": 77
+    },
+    {
+      "cpuMs": 1.7999999970197678,
+      "gpuWaitMs": 881.9000000059605,
+      "z": 0.6769486665725708,
+      "drawCalls": 77
+    },
+    {
+      "cpuMs": 1.6000000089406967,
+      "gpuWaitMs": 931.3999999910593,
+      "z": 0.455179363489151,
+      "drawCalls": 75
+    },
+    {
+      "cpuMs": 1.699999988079071,
+      "gpuWaitMs": 911,
+      "z": 0.18989276885986328,
+      "drawCalls": 73
+    },
+    {
+      "cpuMs": 1.8999999910593033,
+      "gpuWaitMs": 919.5,
+      "z": -0.07524092495441437,
+      "drawCalls": 72
+    },
+    {
+      "cpuMs": 1.5999999940395355,
+      "gpuWaitMs": 963.6000000089407,
+      "z": -0.29607483744621277,
+      "drawCalls": 72
+    },
+    {
+      "cpuMs": 1.699999988079071,
+      "gpuWaitMs": 973.7000000029802,
+      "z": -0.5613251328468323,
+      "drawCalls": 69
+    },
+    {
+      "cpuMs": 1.3999999910593033,
+      "gpuWaitMs": 956.7000000029802,
+      "z": -0.7381355166435242,
+      "drawCalls": 67
+    },
+    {
+      "cpuMs": 1.5,
+      "gpuWaitMs": 1006.4000000059605,
+      "z": -1.0030522346496582,
+      "drawCalls": 67
+    },
+    {
+      "cpuMs": 1.3999999910593033,
+      "gpuWaitMs": 1039.6000000089407,
+      "z": -1.2680622339248657,
+      "drawCalls": 65
+    },
+    {
+      "cpuMs": 1.5,
+      "gpuWaitMs": 1064.2999999970198,
+      "z": -1.5331103801727295,
+      "drawCalls": 65
+    }
+  ],
+  "screenshot_seconds_after_fence": 0.12709495800663717,
+  "interpretation": "Manual JavaScript steps submitted frames before GPU completion. The first fence drained pre-existing work. Subsequent waits include rendering and scheduling, not isolated GPU timer measurements. Synchronizing each submitted frame prevents screenshot queue accumulation without reducing resolution, skipping steps, changing assertions or increasing the 30-second deadline.",
+  "prior_failures": "Two unchanged full-suite runs timed out at Page.screenshot after 30 seconds. The diagnostic fenced capture succeeded; the full revised suite is recorded separately."
+}
