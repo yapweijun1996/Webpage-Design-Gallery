@@ -1,4 +1,21 @@
 /** Authored visitor presentation; locomotion and collision belong to player.js. */
+export function createLocomotionContinuity() {
+  // Bridge isolated contact corrections, never movement from rest or released input.
+  let grace = 0;
+  return (actual, requested, dt) => {
+    if (requested === 'idle') {
+      grace = 0;
+      return 'idle';
+    }
+    if (actual !== 'idle') {
+      grace = .06;
+      return requested;
+    }
+    grace = Math.max(0, grace - dt);
+    return grace > 0 ? requested : 'idle';
+  };
+}
+
 export async function createCharacter(T) {
   const {GLTFLoader} = await import('../vendor/GLTFLoader.js');
   const model = 'gjh-mall-visitor';
@@ -33,10 +50,12 @@ export async function createCharacter(T) {
     actions[state].setEffectiveWeight(state === 'idle' ? 1 : 0).play();
   }
   let animation = 'idle';
+  const resolveLocomotion = createLocomotionContinuity();
   actions.idle.paused = reducedMotion.matches;
   mixer.update(0);
 
-  function update(state, dt) {
+  function update(actual, dt, requested = actual) {
+    const state = resolveLocomotion(actual, requested, dt);
     if (state !== animation) {
       // Preserve footfall phase when changing pace, including interrupted fades.
       if (state !== 'idle') {
