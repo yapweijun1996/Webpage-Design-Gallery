@@ -1,0 +1,39 @@
+{
+  "capturedAt": "2026-11-12T04:24:26.624261+00:00",
+  "cases": [
+    {
+      "width": 1440,
+      "keyboardAndModal": "PASS",
+      "listAndDeepLink": "PASS",
+      "overflow": "PASS",
+      "errors": []
+    },
+    {
+      "width": 768,
+      "keyboardAndModal": "PASS",
+      "listAndDeepLink": "PASS",
+      "overflow": "PASS",
+      "errors": []
+    },
+    {
+      "width": 390,
+      "keyboardAndModal": "PASS",
+      "listAndDeepLink": "PASS",
+      "overflow": "PASS",
+      "errors": []
+    },
+    {
+      "width": 320,
+      "keyboardAndModal": "PASS",
+      "listAndDeepLink": "PASS",
+      "overflow": "PASS",
+      "errors": []
+    }
+  ],
+  "limitations": [
+    "Local Chrome only; physical devices and screen readers not tested.",
+    "No automated axe bundle or field Core Web Vitals measurement."
+  ],
+  "browserVersion": "157.0.8103.78",
+  "noJavaScript": "PASS"
+}

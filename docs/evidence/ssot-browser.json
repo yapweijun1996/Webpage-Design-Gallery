@@ -1,0 +1,723 @@
+{
+  "release": {
+    "version": "1.1.0",
+    "build": "3674a64035981f2c"
+  },
+  "axeVersion": "4.10.3",
+  "environment": "Local Chrome, reduced motion, service workers blocked; laboratory LCP/CLS only, not field CWV or INP",
+  "results": [
+    {
+      "route": "",
+      "name": "home",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 2396,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "",
+      "name": "home",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 196,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "",
+      "name": "home",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 76,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "companies/",
+      "name": "directory",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 132,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "companies/",
+      "name": "directory",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 132,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "companies/",
+      "name": "directory",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 48,
+        "cls": 0.007151378865289155,
+        "shifts": [
+          {
+            "value": 0.007151378865289155,
+            "sources": [
+              "company-grid"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "companies/gjh/",
+      "name": "company",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 236,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "companies/gjh/",
+      "name": "company",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 96,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "companies/gjh/",
+      "name": "company",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 88,
+        "cls": 0.009018562693728803,
+        "shifts": [
+          {
+            "value": 0.009018562693728803,
+            "sources": [
+              "design-grid"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "designs/?company=gjh&design=v6",
+      "name": "detail",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 104,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "designs/?company=gjh&design=v6",
+      "name": "detail",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 208,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "designs/?company=gjh&design=v6",
+      "name": "detail",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 168,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "compare/?company=gjh&left=v5&right=v7",
+      "name": "compare",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 72,
+        "cls": 0.0002246266557355967,
+        "shifts": [
+          {
+            "value": 0.0002246266557355967,
+            "sources": [
+              "compare-back"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "compare/?company=gjh&left=v5&right=v7",
+      "name": "compare",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 52,
+        "cls": 0.0005205562338232994,
+        "shifts": [
+          {
+            "value": 0.0005205562338232994,
+            "sources": [
+              "compare-back"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "compare/?company=gjh&left=v5&right=v7",
+      "name": "compare",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 88,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "offline.html",
+      "name": "offline",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 136,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "offline.html",
+      "name": "offline",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 124,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "offline.html",
+      "name": "offline",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 128,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v1/index.html",
+      "name": "v1",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 96,
+        "cls": 0.0015708839615349577,
+        "shifts": [
+          {
+            "value": 0.0015708839615349577,
+            "sources": [
+              "#text",
+              "#text",
+              "#text",
+              "navigation",
+              "text-link"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v1/index.html",
+      "name": "v1",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 124,
+        "cls": 0.002232525497674942,
+        "shifts": [
+          {
+            "value": 0.002232525497674942,
+            "sources": [
+              "#text",
+              "#text",
+              "#text",
+              "text-link",
+              {}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v1/index.html",
+      "name": "v1",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 144,
+        "cls": 0.0017294453093008833,
+        "shifts": [
+          {
+            "value": 0.0017294453093008833,
+            "sources": [
+              "#text",
+              "#text",
+              "#text",
+              {}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v5/index.html",
+      "name": "v5",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 144,
+        "cls": 0.00021563766751596792,
+        "shifts": [
+          {
+            "value": 0.00021563766751596792,
+            "sources": [
+              "navigation",
+              {}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v5/index.html",
+      "name": "v5",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 48,
+        "cls": 0.0001607488957233727,
+        "shifts": [
+          {
+            "value": 0.0001607488957233727,
+            "sources": [
+              "history-image",
+              {}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v5/index.html",
+      "name": "v5",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 120,
+        "cls": 4.343948588220252e-06,
+        "shifts": [
+          {
+            "value": 4.343948588220252e-06,
+            "sources": [
+              {}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v6/index.html",
+      "name": "v6",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 152,
+        "cls": 0.0013263090157214505,
+        "shifts": [
+          {
+            "value": 0.0013263090157214505,
+            "sources": [
+              "#text",
+              "#text",
+              "navigation",
+              "#text",
+              "#text"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v6/index.html",
+      "name": "v6",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 100,
+        "cls": 0.0009141825139522552,
+        "shifts": [
+          {
+            "value": 0.0009141825139522552,
+            "sources": [
+              "#text",
+              "#text",
+              "#text",
+              "#text",
+              "#text"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v6/index.html",
+      "name": "v6",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 144,
+        "cls": 0.013061320329008525,
+        "shifts": [
+          {
+            "value": 0.013061320329008525,
+            "sources": [
+              "bento-photo",
+              "#text",
+              "#text",
+              "button"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v7/index.html",
+      "name": "v7",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 364,
+        "cls": 0.000554599421832133,
+        "shifts": [
+          {
+            "value": 0.000554599421832133,
+            "sources": [
+              "navigation",
+              "#text",
+              "#text",
+              {}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v7/index.html",
+      "name": "v7",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 52,
+        "cls": 2.5791426499684653e-06,
+        "shifts": [
+          {
+            "value": 2.5791426499684653e-06,
+            "sources": [
+              {}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v7/index.html",
+      "name": "v7",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 144,
+        "cls": 0.009269350513392125,
+        "shifts": [
+          {
+            "value": 0.009269350513392125,
+            "sources": [
+              "hero-title",
+              "actions",
+              "intro-copy",
+              null,
+              "eyebrow kicker-line"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v8/index.html",
+      "name": "v8",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 1000,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v8/index.html",
+      "name": "v8",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 136,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v8/index.html",
+      "name": "v8",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 148,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v9/index.html",
+      "name": "v9",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 2476,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v9/index.html",
+      "name": "v9",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 308,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v9/index.html",
+      "name": "v9",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 168,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v10/index.html",
+      "name": "v10",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 292,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v10/index.html",
+      "name": "v10",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 80,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v10/index.html",
+      "name": "v10",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 124,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v11/index.html",
+      "name": "v11",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 56,
+        "cls": 0.007980654794198495,
+        "shifts": [
+          {
+            "value": 0.007980654794198495,
+            "sources": [
+              "wordmark",
+              "header-location"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v11/index.html",
+      "name": "v11",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 108,
+        "cls": 0.006836589425802231,
+        "shifts": [
+          {
+            "value": 0.006836589425802231,
+            "sources": [
+              "wordmark",
+              "header-location"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v11/index.html",
+      "name": "v11",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 100,
+        "cls": 0.0016837689725181547,
+        "shifts": [
+          {
+            "value": 0.0016837689725181547,
+            "sources": [
+              "wordmark",
+              "header-location"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

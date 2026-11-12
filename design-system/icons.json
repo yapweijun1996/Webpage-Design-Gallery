@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "provenance": "Existing Gallery SVG-Icon-Studio shapes; see assets/icons-sources.json.",
+  "icons": [
+    {
+      "id": "arrow-down",
+      "shapes": [
+        {
+          "tag": "path",
+          "d": "M12 5v14M18 13l-6 6-6-6"
+        }
+      ]
+    },
+    {
+      "id": "arrow-left",
+      "shapes": [
+        {
+          "tag": "path",
+          "d": "M19 12H5M11 6l-6 6 6 6"
+        }
+      ]
+    },
+    {
+      "id": "arrow-right",
+      "shapes": [
+        {
+          "tag": "path",
+          "d": "M5 12h14M13 6l6 6-6 6"
+        }
+      ]
+    },
+    {
+      "id": "arrow-up",
+      "shapes": [
+        {
+          "tag": "path",
+          "d": "M12 19V5M6 11l6-6 6 6"
+        }
+      ]
+    },
+    {
+      "id": "arrow-up-right",
+      "shapes": [
+        {
+          "tag": "path",
+          "d": "M5 19 19 5M7 5h12v12"
+        }
+      ]
+    },
+    {
+      "id": "info",
+      "shapes": [
+        {
+          "tag": "circle",
+          "cx": "12",
+          "cy": "12",
+          "r": "9.25"
+        },
+        {
+          "tag": "path",
+          "d": "M12 11v5M12 7.8h.01"
+        }
+      ]
+    }
+  ]
+}

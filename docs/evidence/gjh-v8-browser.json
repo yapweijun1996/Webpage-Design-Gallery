@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-11T09:52:10.113407+00:00",
+  "capturedAt": "2026-11-12T04:39:33.916192+00:00",
   "route": "/demos/corporate/gjh/v8/index.html",
   "runtime": "Local headless Chrome, GitHub Pages-style project prefix",
   "viewportCases": [
@@ -67,7 +67,7 @@
         ],
         "brandTilt": {
           "x": "2.1000002156362134deg",
-          "y": "0.9999998615394288deg"
+          "y": "0.9983178885167068deg"
         },
         "automaticMilestone": "2004",
         "journeyProgress": "100%"
@@ -89,30 +89,21 @@
   },
   "artifacts": {
     "sourceScreenshots": [
-      "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\screenshots\\1440.png",
-      "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\screenshots\\768.png",
-      "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\screenshots\\390.png"
+      "/Users/admin/Documents/GitHub/Webpage-Design-Gallery/demos/corporate/gjh/v8/screenshots/1440.png",
+      "/Users/admin/Documents/GitHub/Webpage-Design-Gallery/demos/corporate/gjh/v8/screenshots/768.png",
+      "/Users/admin/Documents/GitHub/Webpage-Design-Gallery/demos/corporate/gjh/v8/screenshots/390.png"
     ],
-    "thumbnail": "C:\\Users\\tno\\Documents\\GitHub\\Webpage-Design-Gallery-v8\\demos\\corporate\\gjh\\v8\\assets\\thumbnail.webp",
-    "thumbnail_sha256": "40c4abc8041bc62e9a66c8f9638a480198dfeb1358e9f154873a890050b2ecaa",
-    "thumbnail_size": [720, 450],
+    "thumbnail": "/Users/admin/Documents/GitHub/Webpage-Design-Gallery/demos/corporate/gjh/v8/assets/thumbnail.webp",
+    "thumbnail_sha256": "a3d23e7e7cecb9a17fd5e21a6a1efc3d92482d6248052d17e2e04556a3ac5596",
+    "thumbnail_size": [
+      720,
+      450
+    ],
     "captureState": "clean initial page after reload and image decode"
   },
   "axe": {
-    "status": "PASS",
-    "version": "4.14.0",
-    "script_sha256": "20c09fe157a8a34a30e241aaa1fcdade657734f08ab379ecfbeb7d45cc46e878",
-    "viewports": [
-      {
-        "width": 1440,
-        "height": 900
-      },
-      {
-        "width": 390,
-        "height": 844
-      }
-    ],
-    "violations": []
+    "status": "UNVERIFIED",
+    "reason": "No local axe bundle supplied"
   },
   "limitations": [
     "Automated browser checks do not establish complete WCAG conformance.",

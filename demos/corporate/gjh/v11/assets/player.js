@@ -107,8 +107,12 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let isPaused = () => false;
   const clearInput = () => { keys.clear(); stickX = stickY = 0; drag = null; stickPointer = null; thumb.style.transform = ''; };
   window.addEventListener('blur', clearInput);
+  document.addEventListener('focusin', event => {
+    if (event.target !== canvas && event.target !== document.body) clearInput();
+  });
   document.addEventListener('keydown', event => {
-    if (isPaused() || /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)) return;
+    if (isPaused() || event.altKey || event.ctrlKey || event.metaKey ||
+        (event.target !== canvas && event.target !== document.body)) return;
     if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
       // Space and tab retain their native page and focus semantics.
       if (event.target === canvas || event.target === document.body) event.preventDefault();

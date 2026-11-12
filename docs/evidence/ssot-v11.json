@@ -1,0 +1,69 @@
+[
+  {
+    "width": 1440,
+    "drawCalls": 97,
+    "drawCallsByView": {
+      "atrium": 97,
+      "walking": 98,
+      "newmoon-portal": 73,
+      "newmoon": 57,
+      "newmoon-interior": 49,
+      "mili-portal": 92,
+      "mili": 67,
+      "mili-interior": 51,
+      "gogo-portal": 73,
+      "gogo": 58,
+      "gogo-interior": 48,
+      "max": 98
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 768,
+    "drawCalls": 82,
+    "drawCallsByView": {
+      "atrium": 82,
+      "walking": 82,
+      "newmoon-portal": 53,
+      "newmoon": 50,
+      "newmoon-interior": 45,
+      "mili-portal": 61,
+      "mili": 55,
+      "mili-interior": 44,
+      "gogo-portal": 55,
+      "gogo": 51,
+      "gogo-interior": 43,
+      "max": 82
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 390,
+    "drawCalls": 69,
+    "drawCallsByView": {
+      "atrium": 69,
+      "walking": 67,
+      "newmoon-portal": 50,
+      "newmoon": 46,
+      "newmoon-interior": 42,
+      "mili-portal": 59,
+      "mili": 49,
+      "mili-interior": 43,
+      "gogo-portal": 51,
+      "gogo": 46,
+      "gogo-interior": 43,
+      "max": 69
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "errors": []
+  },
+  {
+    "reducedMotion": "PASS",
+    "hiddenPause": "PASS",
+    "contextLoss": "PASS",
+    "WebGLAndWasmFailure": "PASS",
+    "noJS": "PASS"
+  }
+]

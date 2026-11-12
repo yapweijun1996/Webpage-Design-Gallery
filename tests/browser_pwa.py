@@ -72,8 +72,9 @@ def run():
         gallery.build(a)
         catalog = gallery.load_catalog()
         release_a = json.loads((a / "version.json").read_text(encoding="utf-8"))
-        release_b = {"version": "1.0.1", "build": "b" * 16}
-        release_c = {"version": "1.0.2", "build": "c" * 16}
+        major, minor, patch = map(int, release_a["version"].split("."))
+        release_b = {"version": f"{major}.{minor}.{patch + 1}", "build": "b" * 16}
+        release_c = {"version": f"{major}.{minor}.{patch + 2}", "build": "c" * 16}
         b = folder / "b/Webpage-Design-Gallery"
         c = folder / "c/Webpage-Design-Gallery"
         alternate_release(a, b, catalog, release_b, activation_delay=True)
@@ -92,7 +93,7 @@ def run():
                 page = context.new_page()
                 online_errors = []
                 page.on("pageerror", lambda error: online_errors.append(str(error)))
-                viewport = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+                viewport = "width=device-width, initial-scale=1, viewport-fit=cover"
                 for path in ("index.html", "companies/gjh/index.html", "designs/index.html", "compare/index.html", "offline.html"):
                     page.goto(base + path, wait_until="networkidle")
                     assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport, path
@@ -118,7 +119,12 @@ def run():
                     page.evaluate("document.activeElement.blur(); scrollTo(0, 0)")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
                     assert page.locator("#check-update").bounding_box()["height"] >= 44
-                    assert page.locator('meta[name="viewport"]').get_attribute("content") == "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+                    assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport
+                    assert page.evaluate("""() => {
+                        const event = new Event('gesturestart', {cancelable: true});
+                        document.dispatchEvent(event);
+                        return !event.defaultPrevented;
+                    }"""), "Gallery must not suppress browser zoom gestures"
                     assert page.locator('meta[name="theme-color"]').get_attribute("content") == "#ffffff"
                     assert page.locator(".app-chrome").evaluate("e => getComputedStyle(e).transitionDuration") == "0s"
                     page.screenshot(path=str(screenshots / f"company-{width}.png"), full_page=True)
@@ -132,9 +138,23 @@ def run():
                 assert not online_errors, online_errors
                 evidence["checks"]["responsiveSafeAreaCSSReducedMotionSmartHeaderScrollTop"] = "PASS"
                 context.set_offline(True)
+                # Playwright's network block does not set navigator.onLine in this
+                # Chrome build. Model the OS connectivity signal separately through
+                # CDP, while retaining the actual failed-network assertion below.
+                connectivity_session = context.new_cdp_session(page)
+                connectivity_session.send("Network.overrideNetworkState", {
+                    "offline": True, "latency": 0,
+                    "downloadThroughput": -1, "uploadThroughput": -1,
+                })
+                assert page.evaluate("navigator.onLine") is False
                 assert page.evaluate("fetch('network-probe').then(() => false).catch(() => true)")
                 page.reload(wait_until="networkidle")
                 assert page.locator(".design-card").count() == len(catalog["designs"])
+                offline_signal = page.evaluate("""() => ({ online: navigator.onLine,
+                    noticeHidden: document.querySelector('#connection-notice').hidden,
+                    status: document.querySelector('#app-status').textContent,
+                    controlled: Boolean(navigator.serviceWorker.controller) })""")
+                print("Offline signal evidence:", json.dumps(offline_signal), flush=True)
                 assert page.locator("#connection-notice").is_visible()
                 page.select_option("#style-filter", "minimal")
                 assert page.locator(".design-card:visible").count() == 1
@@ -147,6 +167,11 @@ def run():
                 assert page.get_by_role("heading", name="This preview needs a connection.").is_visible()
                 evidence["checks"]["offlineLaunchSearchFiltersAndExplicitDemoFallback"] = "PASS"
                 context.set_offline(False)
+                connectivity_session.send("Network.overrideNetworkState", {
+                    "offline": False, "latency": 0,
+                    "downloadThroughput": -1, "uploadThroughput": -1,
+                })
+                assert page.evaluate("navigator.onLine") is True
                 page.goto(base + "companies/gjh/index.html?review=keep", wait_until="networkidle")
                 page.evaluate("caches.open('other-app-sentinel')")
                 server.release_directory = folder / "b"
@@ -170,7 +195,7 @@ def run():
                 except Exception:
                     print("Update diagnostic:", page.locator("#app-status").inner_text(), page.evaluate("navigator.serviceWorker.getRegistration().then(r=>({active:r.active?.state,waiting:r.waiting?.state,installing:r.installing?.state}))"), page.evaluate("caches.keys()"), flush=True)
                     raise
-                assert "v1.0.1" in page.locator("#apply-update").inner_text()
+                assert "v" + release_b["version"] in page.locator("#apply-update").inner_text()
                 assert page.locator('meta[name="app-build"]').get_attribute("content") == release_a["build"]
                 second = context.new_page()
                 second.goto(base + "companies/gjh/index.html", wait_until="networkidle")

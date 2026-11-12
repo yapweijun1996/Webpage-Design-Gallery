@@ -1,38 +1,5 @@
-/* Enhancements never hide essential content or replace native anchor navigation. */
-const toggle = document.querySelector('.menu-toggle');
-const navigation = document.querySelector('#navigation');
-const mobile = matchMedia('(max-width: 900px)');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(pointer: fine) and (min-width: 901px)');
-document.documentElement.classList.add('js');
-let lastFocus = document.activeElement;
-document.addEventListener('focusin', event => { lastFocus = event.target; });
-function closeMenu(returnFocus = false) {
-  navigation.classList.remove('open');
-  toggle.setAttribute('aria-expanded', 'false');
-  if (returnFocus) toggle.focus();
-}
-toggle.addEventListener('click', () => {
-  const open = toggle.getAttribute('aria-expanded') !== 'true';
-  navigation.classList.toggle('open', open);
-  toggle.setAttribute('aria-expanded', String(open));
-});
-navigation.addEventListener('click', event => {
-  const link = event.target.closest('a');
-  if (!link) return;
-  closeMenu();
-  if (mobile.matches && link.hash) document.querySelector(link.hash)?.focus({preventScroll:true});
-});
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') closeMenu(true);
-});
-document.addEventListener('click', event => {
-  if (!event.target.closest('.header') && toggle.getAttribute('aria-expanded') === 'true') {
-    const focusInside = navigation.contains(document.activeElement);
-    closeMenu(focusInside);
-  }
-});
-mobile.addEventListener('change', () => closeMenu(mobile.matches && navigation.contains(lastFocus)));
 
 const eras = {
   '1940s': {title:'A provision store. A beginning.',copy:'The Goh brothers’ Rochor Road store supplied everyday food essentials.',image:'gjh-history-composite.jpg',alt:'Historical shopfront composite published on the official GJH website',caption:'Official-site historical composite; not an original archival photograph.'},

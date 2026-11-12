@@ -52,7 +52,9 @@ def run(capture=False):
                     page = context.new_page()
                     errors, external = [], []
                     page.on("pageerror", lambda error: errors.append(str(error)))
-                    page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
+                    page.on("console", lambda message: errors.append({"text": message.text, "location": message.location}) if message.type == "error" else None)
+                    page.on("response", lambda response: errors.append({"status": response.status, "url": response.url}) if response.status >= 400 else None)
+                    page.on("requestfailed", lambda request: errors.append({"request": request.url, "failure": request.failure}))
                     page.on("request", lambda request: external.append(request.url) if request.url.startswith("http") and not request.url.startswith(f"http://127.0.0.1:{server.server_port}/") else None)
                     page.goto(url, wait_until="networkidle")
                     page.wait_for_function("window.__sceneReady === true")
@@ -90,7 +92,11 @@ def run(capture=False):
                         name = button.get_attribute("data-product-name")
                         button.focus()
                         product_id = button.get_attribute("data-product")
-                        page.wait_for_function("id => window.__sceneStats.highlightedProduct === id", arg=product_id)
+                        try:
+                            page.wait_for_function("id => window.__sceneStats.highlightedProduct === id", arg=product_id)
+                        except Exception:
+                            print({"width": width, "product": product_id, "focus": page.evaluate("document.activeElement.outerHTML"), "stats": page.evaluate("window.__sceneStats")}, flush=True)
+                            raise
                         button.click()
                         # Native modal cycling must not escape to room navigation.
                         page.locator("#product-close").focus()

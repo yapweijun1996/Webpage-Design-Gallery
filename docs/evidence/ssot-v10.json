@@ -1,0 +1,36 @@
+[
+  {
+    "width": 1440,
+    "drawCalls": 128,
+    "quality": "desktop",
+    "keyboard": "PASS",
+    "products": "PASS",
+    "targetsAndOverflow": "PASS",
+    "consoleErrors": []
+  },
+  {
+    "width": 768,
+    "drawCalls": 99,
+    "quality": "mobile",
+    "keyboard": "PASS",
+    "products": "PASS",
+    "targetsAndOverflow": "PASS",
+    "consoleErrors": []
+  },
+  {
+    "width": 390,
+    "drawCalls": 106,
+    "quality": "mobile",
+    "keyboard": "PASS",
+    "products": "PASS",
+    "targetsAndOverflow": "PASS",
+    "consoleErrors": []
+  },
+  {
+    "reducedMotion": "PASS",
+    "visibilityPause": "PASS (visibility override)",
+    "contextLoss": "PASS",
+    "forcedWebGLUnavailable": "PASS",
+    "noJavaScriptAndFileList": "PASS"
+  }
+]

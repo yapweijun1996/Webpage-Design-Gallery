@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-11T11:31:58.729630+00:00",
+  "capturedAt": "2026-11-12T04:39:32.755077+00:00",
   "runtime": "Local headless Chrome, GitHub Pages-style project prefix",
   "axe": {
     "status": "UNVERIFIED",
@@ -349,6 +349,6 @@
     "No owner design approval or measured business conversion result is implied."
   ],
   "unalteredOfficialAssetCopies": "PASS",
-  "browserVersion": "157.0.8103.51",
+  "browserVersion": "157.0.8103.78",
   "noJavaScriptNavigation": "PASS"
 }

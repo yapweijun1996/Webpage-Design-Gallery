@@ -2,6 +2,8 @@
 
 import copy
 import importlib.util
+import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -61,6 +63,36 @@ class GalleryTests(unittest.TestCase):
         page = gallery.build_pages(catalog)["index.html"]
         self.assertNotIn('<script>alert("test")</script>', page)
         self.assertIn("&lt;script&gt;", page)
+
+    def test_published_shared_resources_and_precache_boundary(self):
+        catalog = gallery.load_catalog()
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            gallery.build(output)
+            for name in ("assets/tokens.css", "assets/icons.svg",
+                         "demos/corporate/gjh/shared/interaction.css",
+                         "demos/corporate/gjh/shared/navigation.js"):
+                self.assertEqual((output / name).read_bytes(), (ROOT / name).read_bytes())
+            self.assertFalse((output / "design-system/tokens.json").exists())
+            self.assertFalse((output / "demos/corporate/gjh/research").exists())
+            worker = (output / "sw.js").read_text()
+            entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", worker, re.S).group(1))
+            cached = {entry["path"] for entry in entries}
+            self.assertIn("assets/tokens.css", cached)
+            self.assertIn("assets/icons.svg", cached)
+            self.assertNotIn("demos/corporate/gjh/shared/navigation.js", cached)
+            self.assertNotIn("demos/corporate/gjh/v11/vendor/rapier.mjs", cached)
+            self.assertTrue(all(design["thumbnail"] in cached for design in catalog["designs"]))
+
+    def test_nested_pages_use_prefix_safe_sprite_and_company_identity(self):
+        pages = gallery.build_pages(gallery.load_catalog())
+        self.assertIn('href="../assets/icons.svg#arrow-down"', pages["companies/index.html"])
+        company = pages["companies/gjh/index.html"]
+        self.assertIn('data-company="gjh"', company)
+        self.assertIn('href="../../assets/icons.svg#arrow-right"', company)
+        self.assertNotIn("<path ", company)
+        with self.assertRaisesRegex(ValueError, "Unknown Gallery icon"):
+            gallery.icon("unapproved")
 
 
 if __name__ == "__main__":

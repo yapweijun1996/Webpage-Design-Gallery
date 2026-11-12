@@ -67,6 +67,10 @@ def run():
                     page.screenshot(path=str(screenshots / f"home-{width}.png"), full_page=True)
                     page.locator("#company-search").fill("not-present")
                     assert page.locator(".empty-results").is_visible()
+                    assert "q=not-present" in page.url
+                    page.reload(wait_until="networkidle")
+                    assert page.locator("#company-search").input_value() == "not-present"
+                    assert page.locator(".empty-results").is_visible()
                     page.get_by_role("button", name="Clear filters").click()
                     page.locator("#category-filter").select_option("retail")
                     assert page.locator(".company-card:visible").count() == 0
@@ -80,6 +84,10 @@ def run():
                     page.select_option("#style-filter", "minimal")
                     assert page.locator(".design-card:visible").count() == 1
                     assert page.locator(".design-card:visible").get_attribute("data-design") == "v6"
+                    assert "style=minimal" in page.url
+                    page.reload(wait_until="networkidle")
+                    assert page.locator("#style-filter").input_value() == "minimal"
+                    assert page.locator(".design-card:visible").count() == 1
                     page.select_option("#style-filter", "heritage")
                     heritage_count = sum("heritage" in design["styles"] for design in gallery.load_catalog()["designs"])
                     assert page.locator(".design-card:visible").count() == heritage_count
@@ -91,6 +99,19 @@ def run():
                     page.locator('input[value="v7"]').check()
                     assert page.locator('input[value="v1"]').is_disabled()
                     assert page.locator("#selection-count").inner_text() == "2 of 2 selected"
+                    page.select_option("#style-filter", "minimal")
+                    assert page.locator('#selection-items button').count() == 2
+                    page.locator('#selection-items button').first.click()
+                    assert page.locator("#selection-count").inner_text() == "1 of 2 selected"
+                    assert page.locator("#compare-selected").get_attribute("aria-disabled") == "true"
+                    page.select_option("#style-filter", "")
+                    page.locator('input[value="v5"]').check()
+                    page.locator('#clear-selection').click()
+                    assert page.locator('.compare-tray').is_hidden()
+                    assert page.locator('#style-filter').evaluate("element => document.activeElement === element")
+                    assert page.locator('.compare-checkbox input:checked').count() == 0
+                    page.locator('input[value="v5"]').check()
+                    page.locator('input[value="v7"]').check()
                     page.get_by_role("link", name="Compare selected").click()
                     page.wait_for_selector("iframe")
                     page.wait_for_load_state("networkidle")
@@ -128,6 +149,11 @@ def run():
                     image = page.locator("#detail-screenshot")
                     image.evaluate("(image) => image.decode()")
                     assert image.get_attribute("src").endswith("v6/screenshots/390.png")
+                    screenshot_region = page.get_by_role("region", name="Design screenshot. Use arrow keys to scroll.")
+                    assert screenshot_region.evaluate("element => element.scrollHeight > element.clientHeight")
+                    screenshot_region.focus()
+                    screenshot_region.press("PageDown")
+                    page.wait_for_function("() => document.querySelector('.detail-image').scrollTop > 0")
                     page.get_by_role("link", name="Open live demo", exact=False).click()
                     assert "/demos/corporate/gjh/v6/" in page.url
                     assert page.locator("h1").inner_text().startswith("Everyday brands.")
@@ -166,8 +192,14 @@ def run():
                 assert page.locator(".company-card:visible").count() == 12
                 page.get_by_role("button", name="Next", exact=True).click()
                 assert "Page 2 of 10" in page.locator(".pagination").inner_text()
+                assert "page=2" in page.url
+                page.go_back()
+                assert "Page 1 of 10" in page.locator(".pagination").inner_text()
+                page.go_forward()
+                assert "Page 2 of 10" in page.locator(".pagination").inner_text()
                 page.locator("#company-search").fill("Fixture Company 119")
                 assert page.locator(".company-card:visible").count() == 1
+                assert "page=" not in page.url
                 page.locator("#company-search").fill("")
                 page.select_option("#category-filter", "retail")
                 assert "60 matching companies" in page.locator(".results-status").inner_text()

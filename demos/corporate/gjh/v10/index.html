@@ -1,14 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-gjh-design="v10">
 <head>
+  <script src="../shared/scene-loading.js"></script>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="An independent architectural virtual-store concept featuring New Moon, MILI and GOGO. Explore the 3D arcade or browse the complete accessible store list.">
   <meta name="theme-color" content="#102b24">
   <title>GJH Virtual Stores — An Evening at the Arcade</title>
   <link rel="icon" href="data:,">
   <link rel="preload" href="assets/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../../../assets/tokens.css">
+  <link rel="stylesheet" href="../../../../assets/gjh-themes.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../shared/interaction.css">
   <script type="module" src="script.js"></script>
 </head>
 <body>
@@ -27,6 +31,7 @@
 
     <section id="experience" class="experience" aria-label="3D virtual store arcade">
       <div class="scene-frame">
+        <p class="scene-loading" role="status">Preparing the 3D arcade. The complete store directory is available below.</p>
         <canvas id="scene" tabindex="0" aria-label="3D arcade with New Moon, MILI and GOGO stores. Arrow keys or WASD change rooms; Escape returns to the lobby. Drag to look, or use the room navigation and product buttons."></canvas>
         <p class="scene-edition" aria-hidden="true">The virtual stores collection <span>01 — 03</span></p>
         <div class="scene-controls">
@@ -69,7 +74,7 @@
     <noscript><p class="noscript-note">JavaScript is off, so the 3D arcade is unavailable. All three stores, the verified product images and official eShop links are available in the list below.</p></noscript>
 
     <section id="store-list" class="store-list" aria-labelledby="list-title">
-      <div class="list-heading"><div><p class="eyebrow">The store directory</p><h2 id="list-title">Goodness, in good company.</h2></div><p>Three distinct stores.<br>Explore at your own pace.</p></div>
+      <div class="list-heading"><div><p class="eyebrow">The store directory</p><h2 id="list-title" tabindex="-1">Goodness, in good company.</h2></div><p>Three distinct stores.<br>Explore at your own pace.</p></div>
 
       <article class="store-article newmoon-store" aria-labelledby="newmoon-title">
         <div class="store-overview">

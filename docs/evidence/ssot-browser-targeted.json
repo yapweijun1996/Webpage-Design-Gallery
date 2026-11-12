@@ -1,0 +1,138 @@
+{
+  "release": {
+    "version": "1.1.0",
+    "build": "59d2d4f4b21315b2"
+  },
+  "axeVersion": "4.10.3",
+  "environment": "Local Chrome, reduced motion, service workers blocked; laboratory LCP/CLS only, not field CWV or INP",
+  "results": [
+    {
+      "route": "demos/corporate/gjh/v1/index.html",
+      "name": "v1",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 3892,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v1/index.html",
+      "name": "v1",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 964,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v1/index.html",
+      "name": "v1",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 2588,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v6/index.html",
+      "name": "v6",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 3080,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v6/index.html",
+      "name": "v6",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 592,
+        "cls": 0.0009141825139522552,
+        "shifts": [
+          {
+            "value": 0.0009141825139522552,
+            "sources": [
+              "#text",
+              "#text",
+              "#text",
+              "#text",
+              "#text"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v6/index.html",
+      "name": "v6",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 248,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v7/index.html",
+      "name": "v7",
+      "width": 1440,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 1812,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v7/index.html",
+      "name": "v7",
+      "width": 768,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 1532,
+        "cls": 0,
+        "shifts": []
+      }
+    },
+    {
+      "route": "demos/corporate/gjh/v7/index.html",
+      "name": "v7",
+      "width": 390,
+      "overflow": false,
+      "errors": [],
+      "axe": [],
+      "lab": {
+        "lcp": 820,
+        "cls": 0,
+        "shifts": []
+      }
+    }
+  ]
+}

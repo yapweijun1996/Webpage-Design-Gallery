@@ -1,0 +1,124 @@
+/* Shared interaction contract; each demo still owns its composition and palette. */
+:root[data-gjh-design] {
+  --gjh-safe-top: env(safe-area-inset-top, 0px);
+  --gjh-safe-right: env(safe-area-inset-right, 0px);
+  --gjh-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --gjh-safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* Keep each viewport zoomable; only direct-manipulation canvases suppress gestures. */
+html[data-gjh-design] { -webkit-text-size-adjust: 100%; }
+[data-gjh-design] body {
+  padding-left: var(--gjh-safe-left);
+  padding-right: var(--gjh-safe-right);
+  padding-bottom: var(--gjh-safe-bottom);
+}
+[data-gjh-design] :is(button, summary, .button, .text-link, .view-toggle, .nav-cta) {
+  min-height: var(--size-control);
+}
+[data-gjh-design] :is(button, summary, .button, .text-link, .view-toggle) {
+  touch-action: manipulation;
+}
+[data-gjh-design] :is(input, select, textarea) { font-size: var(--font-size-base); }
+[data-gjh-design] :is(.concept-notice a, .footer-links a, .footer-top a, .site-footer > a) {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-control);
+}
+[data-gjh-design] :is(.skip, .skip-link) {
+  left: max(var(--space-4), var(--gjh-safe-left));
+}
+[data-gjh-design] :is(.skip, .skip-link):focus {
+  top: max(var(--space-3), var(--gjh-safe-top));
+}
+[data-gjh-design] :focus-visible {
+  outline-width: var(--focus-width);
+  outline-offset: var(--focus-offset-link);
+}
+[data-gjh-design] .concept-notice {
+  padding-top: max(var(--space-3), var(--gjh-safe-top));
+}
+[data-gjh-design="v8"] .header {
+  padding-top: max(var(--space-4), var(--gjh-safe-top));
+}
+[data-gjh-design] dialog {
+  max-height: calc(100dvh - var(--space-8) - var(--gjh-safe-top) - var(--gjh-safe-bottom));
+  overscroll-behavior: contain;
+}
+
+/* Body copy and operational controls must remain readable in the immersive kits. */
+[data-gjh-design="v9"] :is(.product-content p, .dialog-content p),
+[data-gjh-design="v10"] :is(.store-story > p:not(.eyebrow), .product-copy h4, .dialog-copy > p:not(.concept-note), .shop-link),
+[data-gjh-design="v11"] :is(.store-story p:not(.eyebrow), .product-copy h3, .product-copy .text-link, .dialog-copy > p:not(.eyebrow), .shop-link) {
+  font-size: var(--font-size-sm);
+}
+[data-gjh-design] :is(.view-toggle, .product-inspect, .brand-inspect, #product-close) {
+  font-size: var(--font-size-xs);
+}
+[data-gjh-design="v10"] :is(.concept-note, #scene-status, .packaging-note),
+[data-gjh-design="v11"] :is(.packaging-note, .site-footer > p:not(.footer-name)) {
+  font-size: var(--font-size-xs);
+}
+
+/* Fixed immersive viewports reserve the same measured header and safe areas. */
+:root[data-gjh-design="v9"] { --gjh-header-size: 72px; }
+:root[data-gjh-design="v10"] { --gjh-header-size: 80px; }
+:root[data-gjh-design="v11"] { --gjh-header-size: 100px; }
+[data-gjh-design="v11"] body.is-3d { --gjh-header-size: 83px; }
+[data-gjh-design] .site-header {
+  min-height: calc(var(--gjh-header-size) + var(--gjh-safe-top));
+  height: auto;
+  padding-top: var(--gjh-safe-top);
+}
+[data-gjh-design="v11"] body.is-3d .site-header {
+  height: calc(var(--gjh-header-size) + var(--gjh-safe-top));
+  padding-top: var(--gjh-safe-top);
+  padding-left: max(var(--space-4), var(--gjh-safe-left));
+  padding-right: max(var(--space-4), var(--gjh-safe-right));
+}
+[data-gjh-design="v11"] .experience {
+  top: calc(var(--gjh-header-size) + var(--gjh-safe-top));
+  right: var(--gjh-safe-right);
+  bottom: var(--gjh-safe-bottom);
+  left: var(--gjh-safe-left);
+}
+[data-gjh-design="v10"] .scene-frame {
+  height: calc(100svh - var(--gjh-header-size) - var(--gjh-safe-top));
+}
+[data-gjh-design="v10"] .scene-loading { display: none; }
+[data-gjh-design="v10"][data-scene-state="loading"] .scene-loading {
+  display: block;
+  position: absolute;
+  inset: 45% var(--space-6) auto;
+  text-align: center;
+  color: var(--ivory);
+  font-size: var(--font-size-sm);
+}
+[data-gjh-design="v10"][data-scene-state="loading"] :is(#scene, .scene-controls, .scene-edition) {
+  visibility: hidden;
+}
+@media (max-width: 650px) {
+  /* A disclosure and a return link share one row instead of consuming a hero. */
+  [data-gjh-design] .concept-notice {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  :root[data-gjh-design="v11"] { --gjh-header-size: 82px; }
+  [data-gjh-design="v11"] body.is-3d { --gjh-header-size: 72px; }
+}
+@media (max-width: 600px) {
+  :root[data-gjh-design="v10"] { --gjh-header-size: 70px; }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  [data-gjh-design="v11"] body.is-3d { --gjh-header-size: 61px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-gjh-design] { scroll-behavior: auto; }
+  [data-gjh-design] *, [data-gjh-design] *::before, [data-gjh-design] *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

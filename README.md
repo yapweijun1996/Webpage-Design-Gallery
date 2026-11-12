@@ -2,6 +2,12 @@
 
 A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **one company and eight designs**. All concepts are unofficial and do not imply company endorsement.
 
+The [Design System SSOT](ds.md) owns shared gallery design and UX contracts, the prioritized UI audit, cross-project reuse boundaries and acceptance criteria. Its version 1.0.0 tracks the executable token/icon registry, gallery adoption and remaining verification. Run `python scripts/check_ssot.py` to check generated artifacts and prevent new design-system debt.
+
+Application **1.1.0** adopts the compact gallery layouts, responsive previews, shareable discovery state, accessible comparison controls and shared GJH interaction/theme foundations. The design-system contract remains **1.0.0**; application and DS versions are independent.
+
+See the [1.1.0 release review](docs/ssot-release-review.md) for the actual verification scope. The static gate reports zero remaining declarations in its measured raw-style categories; this does not mean every layout dimension is tokenized. Physical-device testing, screen-reader sessions and field performance remain separate from the local browser evidence.
+
 ## Browse
 
 - `/index.html`: company discovery with search, category filtering, sorting and pagination.
@@ -34,16 +40,24 @@ Open `http://localhost:8000/`. The generated company and demo links work without
 ## Verification
 
 ```sh
+python scripts/build_design_system.py --check
+python scripts/check_ssot.py
 python scripts/build_gallery.py --check
 python -m unittest discover -s tests -p test_gallery.py -v
+python -m unittest discover -s tests -p test_design_system.py -v
 python tests/browser_gallery.py
 python tests/browser_gjh_demos.py
+python tests/browser_gjh_v9.py
 python tests/browser_gjh_v10.py
 python tests/browser_gjh_v11.py
 python tests/browser_pwa.py
 ```
 
-Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. Both build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.
+Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. The Gallery and PWA suites build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.
+
+Run `python tests/browser_ssot.py --axe-script /path/to/axe.min.js` for the generated Gallery and all eight GJH routes at desktop, tablet and mobile widths. It uses an already-reviewed local axe-core bundle, records runtime errors and overflow, and writes [SSOT browser evidence](docs/evidence/ssot-browser.json). Its LCP/CLS values are local laboratory observations, not field Core Web Vitals or INP measurements. See [GJH shared interaction review](docs/gjh-ssot-review.md) for theme boundaries and remaining device limitations.
+
+Canonical shared values live in `design-system/tokens.json`, icons in `design-system/icons.json`, and per-version GJH themes in `design-system/themes.json`. `scripts/build_design_system.py` generates their CSS/SVG artifacts. Edit these registries rather than generated `assets/tokens.css`, `assets/icons.svg` or `assets/gjh-themes.css`; local demo styles retain their independent compositions.
 
 ## PWA and updates
 
@@ -55,7 +69,7 @@ After the first successful installation, company browsing, search, filters, coll
 
 ## GitHub Pages
 
-Pages uses the manually triggered **Deploy demo to GitHub Pages** workflow. After pushing a verified commit, run it on `main`. The workflow generates `_site` from metadata, includes only gallery resources and known demo runtime assets/screenshots, and excludes research downloads and project documentation. Local staging uses `python scripts/build_gallery.py --output _site`.
+Pages uses the **Deploy demo to GitHub Pages** workflow, triggered automatically by pushes to `main` or manually through `workflow_dispatch`. Pushing a verified commit to `main` therefore initiates deployment. The workflow generates `_site` from metadata, includes only gallery resources and known demo runtime assets/screenshots, and excludes research downloads and project documentation. Local staging uses `python scripts/build_gallery.py --output _site`.
 
 ## Assets and research
 

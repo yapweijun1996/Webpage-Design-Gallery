@@ -19,9 +19,14 @@ let returnFocus;
 
 function setView(view) {
   const visual = view === '3d' && available;
+  const previous = document.activeElement;
+  const focusWillHide = visual ? previous.closest('#store-list') : previous.closest('#experience');
   document.body.dataset.view = visual ? '3d' : 'list';
+  document.documentElement.dataset.sceneState = visual ? 'ready' : 'fallback';
   toggle.textContent = visual ? 'List view' : '3D view';
+  toggle.setAttribute('aria-label', visual ? 'Switch to the accessible store directory' : 'Switch to the 3D arcade');
   toggle.setAttribute('aria-controls', visual ? 'store-list' : 'experience');
+  if (focusWillHide) (visual ? canvas : document.querySelector('#list-title')).focus({preventScroll: true});
   if (visual) requestRender();
 }
 function fallback(message) {
@@ -32,6 +37,7 @@ function fallback(message) {
 }
 toggle.addEventListener('click', () => {
   if (!available) {
+    document.documentElement.dataset.sceneState = 'fallback';
     status.textContent = '3D is unavailable here. Browse all three stores and verified products below. For local 3D, open this folder through a static web server.';
     document.querySelector('#store-list').scrollIntoView({block: 'start'});
     return;
@@ -89,7 +95,7 @@ document.querySelectorAll('[data-step]').forEach(button => button.addEventListen
   selectRoom(rooms[(rooms.indexOf(current) + Number(button.dataset.step) + rooms.length) % rooms.length]);
 }));
 document.addEventListener('keydown', event => {
-  if (document.body.dataset.view !== '3d' || dialog.open || event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input,textarea,select,[contenteditable]')) return;
+  if (document.body.dataset.view !== '3d' || dialog.open || event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input,textarea,select,button,a,summary,[contenteditable]')) return;
   if (event.key === 'Escape') { event.preventDefault(); selectRoom('lobby'); return; }
   const key = event.key.toLowerCase();
   if (['arrowright', 'arrowup', 'w', 'd', 'arrowleft', 'arrowdown', 's', 'a'].includes(key)) {
@@ -682,7 +688,8 @@ async function initialize() {
   available = true;
   const initial = destination('lobby'); camera.position.copy(initial.position); target.copy(initial.target);
   endPosition.copy(initial.position); endTarget.copy(initial.target);
-  setView('3d'); selectRoom('lobby'); moving = false; resize();
+  const initialView = document.documentElement.dataset.sceneState === 'fallback' || scrollY > 0 ? 'list' : '3d';
+  setView(initialView); selectRoom('lobby'); moving = false; resize();
   status.textContent = '';
   requestAnimationFrame(() => { render(performance.now()); window.__sceneReady = true; });
 }

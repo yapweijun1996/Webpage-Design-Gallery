@@ -1,11 +1,25 @@
 const appRoot = new URL('../', import.meta.url);
 const main = document.querySelector('main');
 const urlFor = (path) => new URL(path, appRoot).href;
+const icon = (name) => `<svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="${urlFor('assets/icons.svg')}#${name}"></use></svg>`;
 const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const params = new URLSearchParams(location.search);
 
-if ('ongesturestart' in window) {
-  document.addEventListener('gesturestart', (event) => event.preventDefault(), { passive: false });
+function setQuery(values, push = false) {
+  const url = new URL(location.href);
+  Object.entries(values).forEach(([key, value]) => value ? url.searchParams.set(key, value) : url.searchParams.delete(key));
+  if (url.href !== location.href) history[push ? 'pushState' : 'replaceState'](null, '', url);
+}
+
+function selectValue(control, value, fallback) {
+  control.value = [...control.options].some((option) => option.value === value) ? value : fallback;
+}
+
+function initialPreviewDevice() {
+  const tokens = getComputedStyle(document.documentElement);
+  const matches = (name) => matchMedia(`(max-width: ${tokens.getPropertyValue(name).trim()})`).matches;
+  if (matches('--breakpoint-narrow')) return 'mobile';
+  return matches('--breakpoint-medium') ? 'tablet' : 'desktop';
 }
 
 function initCompanies() {
@@ -17,26 +31,35 @@ function initCompanies() {
   const pages = document.querySelector('.pagination');
   const perPage = 12;
   let currentPage = 1;
-  search.value = params.get('q') || '';
-  if ([...category.options].some((option) => option.value === params.get('category'))) category.value = params.get('category');
-  function update(reset = true) {
+  function restore() {
+    const state = new URLSearchParams(location.search);
+    search.value = state.get('q') || '';
+    selectValue(category, state.get('category'), '');
+    selectValue(sort, state.get('sort'), 'name');
+    currentPage = Math.max(1, Number.parseInt(state.get('page'), 10) || 1);
+  }
+  restore();
+  sort.closest('label').hidden = cards.length < 2;
+  function update(reset = true, push = false) {
     if (reset) currentPage = 1;
     const query = search.value.trim().toLowerCase();
     const matches = cards.filter((card) => card.dataset.search.toLowerCase().includes(query) && (!category.value || card.dataset.categories.split(' ').includes(category.value)));
     matches.sort((a, b) => sort.value === 'designs' ? Number(b.dataset.count) - Number(a.dataset.count) || a.dataset.name.localeCompare(b.dataset.name) : a.dataset.name.localeCompare(b.dataset.name));
     const pageCount = Math.ceil(matches.length / perPage);
     currentPage = Math.max(1, Math.min(currentPage, pageCount || 1));
+    setQuery({ q: search.value.trim(), category: category.value, sort: sort.value === 'name' ? '' : sort.value, page: currentPage > 1 ? String(currentPage) : '' }, push);
     cards.forEach((card) => { card.hidden = true; });
     matches.forEach((card, index) => { grid.append(card); card.hidden = index < (currentPage - 1) * perPage || index >= currentPage * perPage; });
     document.querySelector('.empty-results').hidden = matches.length > 0;
     const shown = Math.min(perPage, Math.max(0, matches.length - (currentPage - 1) * perPage));
     document.querySelector('.results-status').textContent = `Showing ${shown} of ${matches.length} matching ${matches.length === 1 ? 'company' : 'companies'}`;
+    document.querySelector('.results-status').classList.toggle('visually-hidden', cards.length === 1 && !query && !category.value);
     pages.replaceChildren();
     if (pageCount > 1) {
       for (const [label, next, disabled] of [['Previous', currentPage - 1, currentPage === 1], ['Next', currentPage + 1, currentPage === pageCount]]) {
         const button = document.createElement('button');
         button.type = 'button'; button.textContent = label; button.disabled = disabled;
-        button.addEventListener('click', () => { currentPage = next; update(false); document.querySelector('#companies-heading').focus(); });
+        button.addEventListener('click', () => { currentPage = next; update(false, true); document.querySelector('#companies-heading').focus(); });
         pages.append(button);
       }
       const summary = document.createElement('span'); summary.textContent = `Page ${currentPage} of ${pageCount}`; pages.prepend(summary);
@@ -45,7 +68,8 @@ function initCompanies() {
   document.querySelector('#companies-heading').tabIndex = -1;
   search.addEventListener('input', () => update()); category.addEventListener('change', () => update()); sort.addEventListener('change', () => update());
   document.querySelector('[data-reset]').addEventListener('click', () => { search.value = ''; category.value = ''; update(); search.focus(); });
-  update();
+  window.addEventListener('popstate', () => { restore(); update(false); });
+  update(false);
 }
 
 function initCompany() {
@@ -54,12 +78,31 @@ function initCompany() {
   const sort = document.querySelector('#design-sort');
   const selected = new Set();
   const compare = document.querySelector('#compare-selected');
-  const companyId = cards[0]?.querySelector('.details-link')?.href;
-  const company = companyId ? new URL(companyId).searchParams.get('company') : null;
+  const tray = document.querySelector('.compare-tray');
+  new ResizeObserver(() => document.documentElement.style.setProperty('--compare-tray-height', tray.hidden ? '0px' : tray.offsetHeight + 'px')).observe(tray);
+  const company = document.querySelector('.design-section').dataset.company;
   function updateSelection() {
     const choices = [...selected];
     document.querySelector('#selection-count').textContent = `${choices.length} of 2 selected`;
-    document.querySelector('#selection-names').textContent = choices.length ? cards.filter((card) => selected.has(card.dataset.design)).map((card) => card.dataset.title).join(' + ') : 'Choose two designs from this collection.';
+    document.querySelector('#selection-names').textContent = choices.length === 2 ? 'Ready to compare. Remove a design to choose another.' : choices.length ? 'Choose one more design. Selections stay when you filter.' : 'Choose two designs from this collection.';
+    const items = document.querySelector('#selection-items');
+    items.replaceChildren();
+    choices.forEach((id) => {
+      const card = cards.find((item) => item.dataset.design === id);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = card.dataset.title + ' ×';
+      button.setAttribute('aria-label', 'Remove ' + card.dataset.title + ' from comparison');
+      button.addEventListener('click', () => {
+        selected.delete(id); updateSelection();
+        const next = items.querySelector('button') || card.querySelector('input');
+        if (!card.hidden || items.querySelector('button')) next.focus();
+        else style.focus();
+      });
+      items.append(button);
+    });
+    tray.hidden = choices.length === 0;
+    tray.classList.toggle('has-selection', choices.length > 0);
     cards.forEach((card) => {
       const input = card.querySelector('input');
       input.checked = selected.has(input.value); input.disabled = choices.length === 2 && !input.checked;
@@ -71,7 +114,13 @@ function initCompany() {
     else compare.removeAttribute('href');
     document.querySelector('#clear-selection').disabled = choices.length === 0;
   }
+  function restoreFilters() {
+    const state = new URLSearchParams(location.search);
+    selectValue(style, state.get('style'), '');
+    selectValue(sort, state.get('sort'), 'curated');
+  }
   function filter() {
+    setQuery({ style: style.value, sort: sort.value === 'curated' ? '' : sort.value });
     let visible = 0;
     const ordered = [...cards].sort((a, b) => sort.value === 'title' ? a.dataset.title.localeCompare(b.dataset.title) : Number(a.dataset.order) - Number(b.dataset.order));
     ordered.forEach((card) => { document.querySelector('.design-grid').append(card); card.hidden = !!style.value && !card.dataset.styles.split(' ').includes(style.value); if (!card.hidden) visible += 1; });
@@ -85,9 +134,12 @@ function initCompany() {
   }));
   style.addEventListener('change', filter); sort.addEventListener('change', filter);
   document.querySelector('[data-reset]').addEventListener('click', () => { style.value = ''; filter(); style.focus(); });
-  document.querySelector('#clear-selection').addEventListener('click', () => { selected.clear(); updateSelection(); });
+  document.querySelector('#clear-selection').addEventListener('click', () => {
+    selected.clear(); updateSelection(); style.focus();
+  });
   compare.addEventListener('click', (event) => { if (selected.size !== 2) event.preventDefault(); });
-  updateSelection(); filter();
+  window.addEventListener('popstate', () => { restoreFilters(); filter(); });
+  restoreFilters(); updateSelection(); filter();
 }
 
 async function catalog() {
@@ -98,7 +150,7 @@ async function catalog() {
 }
 
 function errorState(container, message) {
-  container.innerHTML = `<div class="empty-results error-state"><h2>Let’s find another direction.</h2><p>${escape(message)}</p><a class="primary-link" href="${urlFor('index.html')}">Browse companies <svg class="gallery-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>`;
+  container.innerHTML = `<div class="empty-results error-state"><h2>Let’s find another direction.</h2><p>${escape(message)}</p><a class="primary-link" href="${urlFor('index.html')}">Browse companies ${icon('arrow-right')}</a></div>`;
 }
 
 async function initDesign() {
@@ -110,7 +162,7 @@ async function initDesign() {
     if (!company || !design) throw new Error('This design could not be found. Choose a company to explore its available designs.');
     document.title = `${design.title} — ${company.name} design concept`;
     document.querySelector('#detail-breadcrumb').innerHTML = `<a href="${urlFor(`companies/${company.slug}/index.html`)}">${escape(company.name)}</a> / ${escape(design.title)}`;
-    container.innerHTML = `<section class="detail-intro"><div><p class="eyebrow">${escape(company.name)} / ${escape(design.version.toUpperCase())}</p><h1>${escape(design.title)}</h1><p class="muted">${escape(design.description)}</p><div class="company-tags">${design.styles.map((style) => `<span>${escape(style)}</span>`).join('')}<span>Independent concept</span></div></div><a class="primary-link" href="${urlFor(design.demoPath)}">Open live demo <svg class="gallery-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 19 19 5M7 5h12v12"/></svg></a></section><div class="detail-screen"><div class="device-control" role="group" aria-label="Screenshot device">${['desktop', 'tablet', 'mobile'].map((device) => `<button type="button" data-device="${device}" aria-pressed="${device === 'desktop'}">${device}</button>`).join('')}</div><div class="detail-image"><img id="detail-screenshot" alt="${escape(design.title)} desktop screenshot"></div></div><div class="detail-meta"><div><strong>Company</strong><p>${escape(company.legalName)}</p></div><div><strong>Version</strong><p>${escape(design.version.toUpperCase())}</p></div><div><strong>Preview sizes</strong><p>1440 / 768 / 390px</p></div><div><strong>Gallery</strong><p><a href="${urlFor(`companies/${company.slug}/index.html`)}">All ${escape(company.name)} designs <svg class="gallery-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p></div></div><aside class="concept-note"><p>${escape(design.disclaimer)} Screenshots show the captured design; open the live demo to explore its interactions.</p></aside>`;
+    container.innerHTML = `<section class="detail-intro"><div><p class="eyebrow">${escape(company.name)} / ${escape(design.version.toUpperCase())}</p><h1>${escape(design.title)}</h1><p class="muted">${escape(design.description)}</p><div class="company-tags">${design.styles.map((style) => `<span>${escape(style)}</span>`).join('')}<span>Independent concept</span></div></div><a class="primary-link" href="${urlFor(design.demoPath)}">Open live demo ${icon('arrow-up-right')}</a></section><div class="detail-screen"><div class="device-control" role="group" aria-label="Screenshot device">${['desktop', 'tablet', 'mobile'].map((device) => `<button type="button" data-device="${device}" aria-pressed="${device === 'desktop'}">${device}</button>`).join('')}</div><div class="detail-image" tabindex="0" role="region" aria-label="Design screenshot. Use arrow keys to scroll."><img id="detail-screenshot" alt="${escape(design.title)} desktop screenshot"></div></div><div class="detail-meta"><div><strong>Company</strong><p>${escape(company.legalName)}</p></div><div><strong>Version</strong><p>${escape(design.version.toUpperCase())}</p></div><div><strong>Preview sizes</strong><p>1440 / 768 / 390px</p></div><div><strong>Gallery</strong><p><a href="${urlFor(`companies/${company.slug}/index.html`)}">All ${escape(company.name)} designs ${icon('arrow-right')}</a></p></div></div><aside class="concept-note"><p>${escape(design.disclaimer)} Screenshots show the captured design; open the live demo to explore its interactions.</p></aside>`;
     const image = document.querySelector('#detail-screenshot');
     function show(device) {
       const screenshot = design.screenshots[device]; image.src = urlFor(screenshot.path); image.width = screenshot.width; image.height = screenshot.height; image.alt = `${design.title} ${device} screenshot`; image.dataset.device = device;
@@ -118,7 +170,7 @@ async function initDesign() {
     }
     image.addEventListener('error', () => { image.alt = 'Screenshot unavailable. Please open the live demo.'; });
     container.querySelectorAll('button[data-device]').forEach((button) => button.addEventListener('click', () => show(button.dataset.device)));
-    show('desktop');
+    show(initialPreviewDevice());
   } catch (error) { errorState(container, error.message); }
 }
 
@@ -133,10 +185,10 @@ async function initCompare() {
     const back = document.querySelector('#compare-back'); back.href = urlFor(`companies/${company.slug}/index.html`); back.textContent = `Back to ${company.name} designs`;
     document.querySelector('#compare-breadcrumb').textContent = company.name + ' / Compare';
     document.title = `${choices[0].title} vs ${choices[1].title} — ${company.name}`;
-    container.innerHTML = `<div class="compare-toolbar"><div class="device-control" role="group" aria-label="Preview device">${['desktop', 'tablet', 'mobile'].map((device) => `<button type="button" data-device="${device}" aria-pressed="${device === 'desktop'}">${device}</button>`).join('')}</div><label class="sync-control"><input type="checkbox" id="sync-scroll">Sync scroll</label><label class="mode-control">View<select id="compare-mode"><option value="live">Live demos</option><option value="screenshots">Screenshots</option></select></label></div><p class="compare-help">Live previews scale to fit. Scroll each preview independently, or enable sync scroll to compare relative page positions.</p><p class="visually-hidden" id="compare-status" role="status" aria-live="polite"></p><div class="compare-grid">${choices.map((design, index) => `<section class="compare-panel" aria-label="${escape(design.title)} preview"><div class="compare-panel-header"><div><span class="version-badge">${escape(design.version.toUpperCase())}</span><h2>${escape(design.title)}</h2></div><a href="${urlFor(design.demoPath)}">Open demo <svg class="gallery-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 19 19 5M7 5h12v12"/></svg></a></div><div class="frame-stage" data-panel="${index}"><iframe title="${escape(design.title)} live demo" src="${urlFor(design.demoPath)}"></iframe></div><div class="screenshot-stage" hidden><img alt="${escape(design.title)} comparison screenshot"></div><div class="panel-footer"><span data-size-label></span><button type="button" data-fullscreen="${index}">Fullscreen preview</button></div></section>`).join('')}</div><p class="small-note">Independent concepts. Sync scroll matches relative page position; different section heights can result in different content being visible.</p>`;
+    container.innerHTML = `<div class="compare-toolbar"><div class="device-control" role="group" aria-label="Preview device">${['desktop', 'tablet', 'mobile'].map((device) => `<button type="button" data-device="${device}" aria-pressed="${device === 'desktop'}">${device}</button>`).join('')}</div><label class="sync-control"><input type="checkbox" id="sync-scroll">Sync scroll</label><label class="mode-control">View<select id="compare-mode"><option value="live">Live demos</option><option value="screenshots">Screenshots</option></select></label></div><p class="compare-help">Live previews scale to fit. Scroll each preview independently, or enable sync scroll to compare relative page positions.</p><p class="visually-hidden" id="compare-status" role="status" aria-live="polite"></p><div class="compare-grid">${choices.map((design, index) => `<section class="compare-panel" aria-label="${escape(design.title)} preview"><div class="compare-panel-header"><div><span class="version-badge">${escape(design.version.toUpperCase())}</span><h2>${escape(design.title)}</h2></div><a href="${urlFor(design.demoPath)}">Open demo ${icon('arrow-up-right')}</a></div><div class="frame-stage" data-panel="${index}"><iframe title="${escape(design.title)} live demo" src="${urlFor(design.demoPath)}"></iframe></div><div class="screenshot-stage" hidden><img alt="${escape(design.title)} comparison screenshot"></div><div class="panel-footer"><span data-size-label></span><button type="button" data-fullscreen="${index}">Fullscreen preview</button></div></section>`).join('')}</div><p class="small-note">Independent concepts. Sync scroll matches relative page position; different section heights can result in different content being visible.</p>`;
     const frames = [...container.querySelectorAll('iframe')];
     const sizes = { desktop: [1440, 900], tablet: [768, 1024], mobile: [390, 844] };
-    let device = 'desktop'; let mode = 'live'; let syncing = false;
+    let device = initialPreviewDevice(); let mode = 'live'; let syncing = false;
     const sync = document.querySelector('#sync-scroll');
     function resize() {
       const [width, height] = sizes[device];

@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "sourceCommit": "e42153f",
+  "originalCount": 1211,
+  "policy": "All recorded CSS color/type/radius/shadow/layer debt has been migrated. Zero-debt ratchet: authored CSS must use canonical tokens, including per-version brand values in themes.json. Layout geometry remains version-specific. Never increase this baseline to accept a regression.",
+  "declarations": {}
+}

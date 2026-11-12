@@ -3,6 +3,7 @@
 import argparse
 import html
 import hashlib
+import importlib.util
 import json
 import re
 import struct
@@ -11,6 +12,9 @@ from string import Template
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
+DS_SPEC = importlib.util.spec_from_file_location("build_design_system", ROOT / "scripts/build_design_system.py")
+design_system = importlib.util.module_from_spec(DS_SPEC)
+DS_SPEC.loader.exec_module(design_system)
 
 
 def read_json(path):
@@ -111,6 +115,13 @@ def card_data(attributes):
     return " ".join(f'data-{key}="{escape(value)}"' for key, value in attributes.items())
 
 
+def icon(name, prefix=""):
+    known = {item["id"] for item in read_json(ROOT / "design-system/icons.json")["icons"]}
+    if name not in known:
+        raise ValueError(f"Unknown Gallery icon: {name}")
+    return f'<svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="{escape(prefix)}assets/icons.svg#{name}"></use></svg>'
+
+
 def company_card(company, designs, prefix, categories):
     own = [d for d in designs if d["companyId"] == company["id"]]
     featured = next(d for d in own if d["version"] == company["featuredVersion"])
@@ -122,7 +133,7 @@ def company_card(company, designs, prefix, categories):
     return f'''<a class="company-card" href="{prefix}companies/{escape(company['slug'])}/index.html" {attrs}>
       <div class="company-cover"><img src="{prefix}{escape(featured['thumbnail'])}" alt="Design preview for {name}" width="720" height="450" loading="lazy"><span class="cover-badge">DESIGN COLLECTION</span></div>
       <div class="company-card-copy"><div class="card-topline"><span class="company-monogram" aria-hidden="true">{escape(company['initials'])}</span><span class="industry-label">{escape(category_name)} &middot; {escape(company['location'])}</span></div>
-      <h3>{name}</h3><p class="card-description">{escape(company['description'])}</p><div class="card-bottom"><span>{plural(len(own), 'design concept')}</span><span class="card-action">Explore designs <span aria-hidden="true"><svg class="gallery-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></div></div></a>'''
+      <h3>{name}</h3><p class="card-description">{escape(company['description'])}</p><div class="card-bottom"><span>{plural(len(own), 'design concept')}</span><span class="card-action">Explore designs <span aria-hidden="true">{icon("arrow-right", prefix)}</span></span></div></div></a>'''
 
 
 def design_card(design, company):
@@ -134,15 +145,20 @@ def design_card(design, company):
     return f'''<article class="design-card" {attrs}>
       <a class="design-preview" href="{prefix}designs/index.html?{query}" aria-label="View {title} details"><img src="{prefix}{escape(design['thumbnail'])}" alt="{title} desktop preview" width="720" height="450" loading="lazy"></a>
       <div class="design-card-copy"><div class="version-row"><span class="version-badge">{escape(design['version'].upper())}</span><span class="design-status">Independent concept</span><label class="compare-checkbox"><input type="checkbox" value="{escape(design['version'])}">Compare<span class="visually-hidden"> {title}</span></label></div>
-      <h3><a href="{prefix}designs/index.html?{query}">{title}</a></h3><p class="card-description">{escape(design['description'])}</p><div class="card-bottom"><a class="details-link" href="{prefix}designs/index.html?{query}">View details</a><a class="card-action" href="{prefix}{escape(design['demoPath'])}">Open live demo <span aria-hidden="true"><svg class="gallery-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 19 19 5M7 5h12v12"/></svg></span><span class="visually-hidden">: {title}</span></a></div></div></article>'''
+      <h3><a href="{prefix}designs/index.html?{query}">{title}</a></h3><p class="card-description">{escape(design['description'])}</p><div class="card-bottom"><a class="details-link" href="{prefix}designs/index.html?{query}">View details</a><a class="card-action" href="{prefix}{escape(design['demoPath'])}">Open live demo <span aria-hidden="true">{icon("arrow-up-right", prefix)}</span><span class="visually-hidden">: {title}</span></a></div></div></article>'''
 
 
 def runtime_resources(catalog):
     resources = {Path(name) for name in (
-        "assets/gallery.css", "assets/pwa.css", "src/gallery.js", "src/pwa.js",
+        "assets/tokens.css", "assets/gjh-themes.css", "assets/icons.svg", "assets/gallery.css", "assets/pwa.css", "src/gallery.js", "src/pwa.js",
         "data/companies.json", "data/categories.json", "data/styles.json", "manifest.webmanifest",
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png",
     )}
+    for company in catalog["companies"]:
+        shared = ROOT / company["demoDirectory"] / "shared"
+        if shared.is_dir():
+            resources.update(path.relative_to(ROOT) for path in shared.iterdir()
+                             if path.is_file() and path.suffix in (".css", ".js"))
     for design in catalog["designs"]:
         directory = Path(design["demoPath"]).parent
         resources.update(directory / name for name in ("index.html", "style.css", "script.js"))
@@ -156,12 +172,13 @@ def runtime_resources(catalog):
 
 def source_bytes(path):
     """Match Git/Linux publication bytes when building from a Windows checkout."""
-    if path.suffix in (".html", ".css", ".js", ".json", ".webmanifest", ".txt"):
+    if path.suffix in (".html", ".css", ".js", ".json", ".webmanifest", ".txt") or path == ROOT / "assets/icons.svg":
         return path.read_text(encoding="utf-8-sig").encode("utf-8")
     return path.read_bytes()
 
 
 def release_info(catalog):
+    design_system.build(ROOT, check=True)
     version = read_json(ROOT / "data/app.json")["version"]
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise ValueError("Application version must use major.minor.patch")
@@ -183,7 +200,7 @@ def build_pages(catalog, release=None):
         filters = '<div class="filter-bar" id="filters"><label class="search-field">Find a company<input id="company-search" type="search" placeholder="Search companies, industries or locations" autocomplete="off"></label><label>Category<select id="category-filter"><option value="">All categories</option>'
         filters += "".join(f'<option value="{escape(c["id"])}">{escape(c["name"])}</option>' for c in catalog["categories"])
         filters += '</select></label><label>Sort by<select id="company-sort"><option value="name">Name A–Z</option><option value="designs">Most designs</option></select></label></div>'
-        content = render("home", company_count=len(companies), company_summary=plural(len(companies), "company") if len(companies) == 1 else f"{len(companies)} companies", design_summary=plural(len(designs), "design"), company_filters=filters, company_cards="".join(company_card(c, designs, prefix, category_names) for c in companies))
+        content = render("home", prefix=prefix, company_count=len(companies), company_summary=plural(len(companies), "company") if len(companies) == 1 else f"{len(companies)} companies", design_summary=plural(len(designs), "design"), company_filters=filters, company_cards="".join(company_card(c, designs, prefix, category_names) for c in companies))
         if path != "index.html":
             content = content.replace("One company.<br><span>Many creative directions.</span>", "All companies.<br><span>Find your next direction.</span>")
         pages[path] = shell(title="Companies — Webpage Design Gallery", description="Explore independent website design concepts, organized by company.", prefix=prefix, current='aria-current="page"', page_kind="companies", content=content)
@@ -191,12 +208,12 @@ def build_pages(catalog, release=None):
         own = [d for d in designs if d["companyId"] == company["id"]]
         available_styles = {style for d in own for style in d["styles"]}
         options = "".join(f'<option value="{escape(s["id"])}">{escape(s["name"])}</option>' for s in catalog["styles"] if s["id"] in available_styles)
-        content = render("company", company_name=escape(company["name"]), initials=escape(company["initials"]), company_description=escape(company["description"]), industry=escape(company["industry"]), location=escape(company["location"]), design_summary=plural(len(own), "design concept"), official_website=escape(company["officialWebsite"]), design_count=len(own), design_cards="".join(design_card(d, company) for d in own), style_options=options)
+        content = render("company", prefix="../../", company_id=escape(company["id"]), company_name=escape(company["name"]), initials=escape(company["initials"]), company_description=escape(company["description"]), industry=escape(company["industry"]), location=escape(company["location"]), design_summary=plural(len(own), "design concept"), official_website=escape(company["officialWebsite"]), design_count=len(own), design_cards="".join(design_card(d, company) for d in own), style_options=options)
         pages[f"companies/{company['slug']}/index.html"] = shell(title=escape(company["name"]) + " — Design collection", description=escape(company["description"]), prefix="../../", current="", page_kind="company", content=content)
     for page in ("design", "compare"):
         path = "designs/index.html" if page == "design" else "compare/index.html"
         pages[path] = shell(title=f"{page.title()} — Webpage Design Gallery", description="Explore and compare independent website design concepts.", prefix="../", current="", page_kind=page, content=render(page))
-    pages["offline.html"] = shell(title="Connection needed — Webpage Design Gallery", description="Browse saved company collections or reconnect to open a live demo.", prefix="", current="", page_kind="offline", content=render("offline"))
+    pages["offline.html"] = shell(title="Connection needed — Webpage Design Gallery", description="Browse saved company collections or reconnect to open a live demo.", prefix="", current="", page_kind="offline", content=render("offline", prefix=""))
     pages["data/designs.json"] = json.dumps(designs, indent=2, ensure_ascii=False) + "\n"
     return pages
 
@@ -214,6 +231,7 @@ def pwa_outputs(pages, catalog, release):
 
 
 def build(output=ROOT, check=False):
+    design_system.build(ROOT, check=check)
     catalog = load_catalog()
     release = release_info(catalog)
     pages = build_pages(catalog, release)
