@@ -24,14 +24,14 @@
 
   <main id="main" tabindex="-1">
     <section id="experience" class="experience" aria-label="Walkable 3D virtual mall" hidden>
-      <canvas id="scene" tabindex="0" aria-label="Interactive 3D mall. Use W A S D or arrow keys to walk, Shift to run, and drag to turn the camera. Press E near a display to inspect it. The store directory provides the same product information without 3D." aria-describedby="controls-copy"></canvas>
+      <canvas id="scene" tabindex="0" aria-label="Interactive 3D mall. Use W A S D or arrow keys to walk, Shift to run, Q/E to turn left/right, and drag to turn the camera. Press F near a display to inspect it. The store directory provides the same product information without 3D." aria-describedby="controls-copy"></canvas>
       <div class="mall-overlay">
         <div class="mall-intro"><p class="eyebrow">A little closer to goodness</p><h1>Everyday, <em>explored.</em></h1><p>Three stores. One open invitation.</p></div>
         <details id="keyboard-help" class="keyboard-help">
           <summary>How to explore</summary>
-          <div id="controls-copy"><p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to walk.<br><kbd>Shift</kbd> to run. Drag the scene to look around.<br><kbd>E</kbd> to inspect a nearby display.</p><p>On touch screens, use the left joystick to walk, drag the scene on the right to look, and tap Run to change pace.</p><p>Choose any store on the map to go to its entrance. Prefer a page? Choose List view above.</p></div>
+          <div id="controls-copy"><p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to walk.<br><kbd>Shift</kbd> to run. <kbd>Q</kbd> / <kbd>E</kbd> to turn left / right. Drag the scene to look around.<br><kbd>F</kbd> to inspect a nearby display.</p><p>On touch screens, use the left joystick to walk, drag the scene on the right to look, and tap Run to change pace.</p><p>Choose any store on the map to go to its entrance. Prefer a page? Choose List view above.</p></div>
         </details>
-        <div class="inspect-prompt" id="inspect-prompt" hidden><span id="nearby-name"></span><button id="inspect" type="button">Press E / tap Inspect</button></div>
+        <div class="inspect-prompt" id="inspect-prompt" hidden><span id="nearby-name"></span><button id="inspect" type="button">Press F / tap Inspect</button></div>
         <details id="mall-map" class="mall-map" open>
           <summary aria-label="Mall map"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2Z"/><path d="M9 3v16M15 5v16"/></svg></summary>
           <div class="map-content">

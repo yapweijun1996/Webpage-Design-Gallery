@@ -78,7 +78,9 @@ function fallback(message) {
 ui.onTeleport(zone => { if (ready) { manual = false; player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
 ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else player?.clearInput(); });
 document.addEventListener('keydown', event => {
-  if (event.code === 'KeyE' && nearby && !ui.paused() && !event.repeat) { event.preventDefault(); player.clearInput(); ui.inspect(nearby); }
+  if (event.code === 'KeyF' && nearby && !ui.paused() && !event.repeat &&
+      !event.altKey && !event.ctrlKey && !event.metaKey &&
+      (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); ui.inspect(nearby); }
 });
 document.addEventListener('click', () => { if (ui.paused()) player?.clearInput(); });
 document.addEventListener('visibilitychange', () => {
