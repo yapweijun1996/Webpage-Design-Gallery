@@ -76,7 +76,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     next.x = position.x + corrected.x; next.y = position.y + corrected.y; next.z = position.z + corrected.z; body.setNextKinematicTranslation(next);
     const walking = Math.hypot(corrected.x, corrected.z) > .001;
     const state = walking ? running ? 'run' : 'walk' : 'idle';
-    character.update(state, dt);
+    const requested = Math.hypot(forward, right) > .001 ? running ? 'run' : 'walk' : 'idle';
+    character.update(state, dt, requested);
     if (walking) {
       const angle = Math.atan2(-dx, -dz), delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
       visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
