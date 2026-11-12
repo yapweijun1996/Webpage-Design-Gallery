@@ -22,6 +22,90 @@ ASSET = "demos/corporate/gjh/v11/assets/" + MODEL
 VIEWPORTS = ((1440, 900), (768, 1024), (390, 844))
 
 
+def verify_module(browser, base):
+    """Replay observed contact drops against the real module and loaded GLB.
+
+    This isolates presentation from Rapier without mocking the asset or mixer;
+    the full mall cases below retain their original end-to-end assertions.
+    """
+    context = browser.new_context(service_workers="block", reduced_motion="no-preference")
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/Webpage-Design-Gallery/version.json")
+        result = page.evaluate("""async base => {
+          const T = await import(base + '/vendor/three.module.min.js');
+          const {createCharacter} = await import(base + '/assets/character.js');
+          const character = await createCharacter(T);
+          const dt = 1 / 60;
+          const records = [];
+          function check(condition, message) { if (!condition) throw Error(message); }
+          function sample(label) {
+            const row = {label, animation: character.animation, weights: {...character.state.weights}};
+            const values = Object.values(row.weights);
+            check(values.every(v => Number.isFinite(v) && v >= 0 && v <= 1), label + ': invalid weights');
+            check(Math.abs(values.reduce((a,b) => a+b,0) - 1) < .005, label + ': unnormalized weights');
+            records.push(row);
+            return row;
+          }
+          function pose() {
+            const values = [];
+            character.visual.traverse(object => values.push(...object.position.toArray(), ...object.quaternion.toArray()));
+            return values;
+          }
+          function changed(before) {
+            return pose().some((value, index) => Math.abs(value - before[index]) > 1e-5);
+          }
+          // Holding against an obstacle from rest must never invent locomotion.
+          for (let tick=0; tick<10; tick++) character.update('idle', dt, 'walk');
+          check(sample('held-at-rest').animation === 'idle', 'Blocked rest invented walking');
+          const beforeWalk = pose();
+          // Recorded baseline/current Rapier trace: ticks 8, 19 and 33 returned
+          // zero corrected motion despite held input on the clear rear aisle.
+          for (let tick=0; tick<36; tick++) {
+            character.update([8,19,33].includes(tick) ? 'idle' : 'walk', dt, 'walk');
+            check(character.animation === 'walk', 'Single contact drop interrupted walking at ' + tick);
+            sample('walk-' + tick);
+          }
+          check(changed(beforeWalk), 'Real walk clip did not change any node transform');
+          check(character.state.weights.walk > .95, 'Walk failed to settle under observed contact trace');
+          // Requested pace still responds during a brief zero-motion tick.
+          character.update('idle', dt, 'run');
+          check(sample('pace-change-on-contact-drop').animation === 'run', 'Pace change was lost');
+          check(character.state.weights.walk > .005 && character.state.weights.run > .005,
+                'Walk-to-run snapped instead of blending');
+          const beforeRun = pose();
+          for (let tick=0; tick<24; tick++) character.update('run', dt, 'run');
+          check(sample('running').weights.run > .95, 'Run failed to settle');
+          check(changed(beforeRun), 'Real sprint clip did not change any node transform');
+          // Release changes the target immediately; weights still cross-fade.
+          character.update('idle', dt, 'idle');
+          check(sample('released').animation === 'idle', 'Release retained locomotion target');
+          for (let tick=0; tick<30; tick++) character.update('idle', dt, 'idle');
+          check(sample('released-settled').weights.idle > .95, 'Released idle failed to settle');
+          character.update('walk', dt, 'walk');
+          for (let tick=1; tick<=4; tick++) {
+            character.update('idle', dt, 'walk');
+            const row = sample('sustained-block-' + tick);
+            if (tick <= 3) check(row.animation === 'walk', 'Grace expired before 50ms');
+            if (tick === 4) check(row.animation === 'idle', 'Block grace exceeded 60ms');
+          }
+          for (let tick=0; tick<30; tick++) character.update('idle', dt, 'walk');
+          check(sample('blocked-settled').weights.idle > .95, 'Held wall retained walk weights');
+          character.visual.traverse(object => {
+            object.geometry?.dispose();
+            for (const material of (Array.isArray(object.material) ? object.material : [object.material])) material?.dispose();
+          });
+          return {case:'actual-character-module', passed:true, records,
+                  actualWalkAndSprintTransformsChanged:true, model:character.state.model};
+        }""", base + "/Webpage-Design-Gallery/demos/corporate/gjh/v11")
+        assert not errors, errors
+        return result
+    finally:
+        context.close()
+
+
 def weights(snapshot, dominant=None, blended=False):
     values = snapshot["character"]["weights"]
     assert set(values) == {"idle", "walk", "run"}, values
@@ -154,6 +238,11 @@ def run(output, case):
             with sync_playwright() as playwright:
                 browser = playwright.chromium.launch(executable_path=os.environ["GALLERY_CHROME"], args=ARGS)
                 try:
+                    if case in ("all", "module"):
+                        result = verify_module(browser, base)
+                        results.append(result)
+                        (directory / "results.json").write_text(json.dumps({"browser": browser.version, "results": results}, indent=2) + "\n")
+                        print(json.dumps(result), flush=True)
                     cases = [(viewport, False, False) for viewport in VIEWPORTS] if case in ("all", "loaded") else []
                     if case in ("all", "missing"):
                         cases.append(((390, 844), True, False))
@@ -182,6 +271,6 @@ def run(output, case):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", help="Evidence directory (defaults to a new temporary directory)")
-    parser.add_argument("--case", choices=("all", "loaded", "missing", "reduced"), default="all")
+    parser.add_argument("--case", choices=("all", "loaded", "missing", "reduced", "module"), default="all")
     options = parser.parse_args()
     run(options.output, options.case)
