@@ -1,0 +1,42 @@
+test_all_version_themes_are_isolated_and_complete (test_design_system.DesignSystemTests.test_all_version_themes_are_isolated_and_complete) ... ok
+test_brand_primitive_must_live_in_registry (test_design_system.DesignSystemTests.test_brand_primitive_must_live_in_registry) ... ok
+test_comma_selector_cannot_hide_duplicate_ownership (test_design_system.DesignSystemTests.test_comma_selector_cannot_hide_duplicate_ownership) ... ok
+test_custom_primitive_cannot_bypass_registry (test_design_system.DesignSystemTests.test_custom_primitive_cannot_bypass_registry) ... ok
+test_demo_filename_cannot_impersonate_generated_tokens (test_design_system.DesignSystemTests.test_demo_filename_cannot_impersonate_generated_tokens) ... ok
+test_duplicate_component_ownership_is_rejected (test_design_system.DesignSystemTests.test_duplicate_component_ownership_is_rejected) ... ok
+test_font_shorthand_cannot_hide_literal (test_design_system.DesignSystemTests.test_font_shorthand_cannot_hide_literal) ... ok
+test_generation_is_deterministic_and_compatible (test_design_system.DesignSystemTests.test_generation_is_deterministic_and_compatible) ... ok
+test_low_contrast_semantic_pair_is_rejected (test_design_system.DesignSystemTests.test_low_contrast_semantic_pair_is_rejected) ... ok
+test_migrated_legacy_debt_cannot_return (test_design_system.DesignSystemTests.test_migrated_legacy_debt_cannot_return) ... ok
+test_missing_and_circular_references_are_rejected (test_design_system.DesignSystemTests.test_missing_and_circular_references_are_rejected) ... ok
+test_named_and_modern_color_literals_are_rejected (test_design_system.DesignSystemTests.test_named_and_modern_color_literals_are_rejected) ... ok
+test_new_hardcoded_color_is_rejected (test_design_system.DesignSystemTests.test_new_hardcoded_color_is_rejected) ... ok
+test_registry_versions_must_match (test_design_system.DesignSystemTests.test_registry_versions_must_match) ... ok
+test_removing_legacy_debt_is_allowed (test_design_system.DesignSystemTests.test_removing_legacy_debt_is_allowed) ... ok
+test_same_count_color_substitution_is_rejected (test_design_system.DesignSystemTests.test_same_count_color_substitution_is_rejected) ... ok
+test_stale_generated_artifact_is_rejected (test_design_system.DesignSystemTests.test_stale_generated_artifact_is_rejected) ... ok
+test_stale_theme_artifact_is_rejected (test_design_system.DesignSystemTests.test_stale_theme_artifact_is_rejected) ... ok
+test_unapproved_icon_is_rejected (test_design_system.DesignSystemTests.test_unapproved_icon_is_rejected) ... ok
+test_unregistered_gallery_breakpoint_is_rejected (test_design_system.DesignSystemTests.test_unregistered_gallery_breakpoint_is_rejected) ... ok
+test_variable_fallback_cannot_hide_literal (test_design_system.DesignSystemTests.test_variable_fallback_cannot_hide_literal) ... ok
+test_directory_order_matches_inventory_and_company_route_title (test_gallery.GalleryTests.test_directory_order_matches_inventory_and_company_route_title) ... ok
+test_duplicate_stable_ids_are_rejected (test_gallery.GalleryTests.test_duplicate_stable_ids_are_rejected) ... ok
+test_generation_is_deterministic (test_gallery.GalleryTests.test_generation_is_deterministic) ... ok
+test_home_only_links_to_company_collections (test_gallery.GalleryTests.test_home_only_links_to_company_collections) ... ok
+test_metadata_text_is_escaped (test_gallery.GalleryTests.test_metadata_text_is_escaped) ... ok
+test_missing_assets_stop_build (test_gallery.GalleryTests.test_missing_assets_stop_build) ... ok
+test_nested_pages_use_prefix_safe_sprite_and_company_identity (test_gallery.GalleryTests.test_nested_pages_use_prefix_safe_sprite_and_company_identity) ... ok
+test_paths_cannot_escape_repository (test_gallery.GalleryTests.test_paths_cannot_escape_repository) ... ok
+test_published_shared_resources_and_precache_boundary (test_gallery.GalleryTests.test_published_shared_resources_and_precache_boundary) ... ok
+test_real_company_contains_all_versions (test_gallery.GalleryTests.test_real_company_contains_all_versions) ... ok
+test_v8_metadata_exposes_immersive_concept_contract (test_gallery.GalleryTests.test_v8_metadata_exposes_immersive_concept_contract) ... ok
+test_clips_have_finite_looping_articulation_without_root_travel (test_gjh_character.CharacterAssetTests.test_clips_have_finite_looping_articulation_without_root_travel) ... ok
+test_embedded_geometry_materials_and_native_scale (test_gjh_character.CharacterAssetTests.test_embedded_geometry_materials_and_native_scale) ... ok
+test_pinned_source_receipt (test_gjh_character.CharacterAssetTests.test_pinned_source_receipt) ... ok
+test_models_match_original_source_receipts_and_physical_bounds (test_gjh_furnishings.FurnishingAssetTests.test_models_match_original_source_receipts_and_physical_bounds) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 0.518s
+
+OK
+Gallery built: 1 companies, 8 designs

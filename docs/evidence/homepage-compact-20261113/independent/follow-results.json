@@ -1,0 +1,40 @@
+{
+  "empty": true,
+  "focus": {
+    "tag": "A",
+    "text": "All companies "
+  },
+  "restored": 1,
+  "categoryEmpty": true,
+  "zoom": {
+    "overflow": 0,
+    "bodyWidth": 640,
+    "buttons": [
+      {
+        "text": "Check updates",
+        "disabled": false
+      },
+      {
+        "text": "Update now",
+        "disabled": false
+      },
+      {
+        "text": "Clear filters",
+        "disabled": false
+      },
+      {
+        "text": "Install gallery",
+        "disabled": false
+      },
+      {
+        "text": "",
+        "disabled": false
+      },
+      {
+        "text": "Close and try again",
+        "disabled": false
+      }
+    ]
+  },
+  "limitation": "CSS zoom 200% at viewport640, not native browser zoom; PWA suite delegated"
+}

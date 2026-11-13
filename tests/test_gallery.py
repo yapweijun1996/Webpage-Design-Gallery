@@ -37,6 +37,25 @@ class GalleryTests(unittest.TestCase):
         self.assertNotIn('class="design-card"', page)
         self.assertNotIn('href="demos/', page)
 
+    def test_directory_order_matches_inventory_and_company_route_title(self):
+        catalog = copy.deepcopy(gallery.load_catalog())
+        pages = gallery.build_pages(catalog)
+        self.assertIn("All companies.", pages["companies/index.html"])
+        page = pages["index.html"]
+        self.assertLess(page.index('class="company-grid"'), page.index('id="company-search"'))
+        self.assertLess(page.index('class="company-cover"'), page.index('class="company-card-copy"'))
+        self.assertEqual(page.count('id="company-search"'), 1)
+        second = copy.deepcopy(catalog["companies"][0])
+        second.update(id="second", slug="second", name="Second Company")
+        catalog["companies"].append(second)
+        for design in list(catalog["designs"]):
+            duplicate = copy.deepcopy(design)
+            duplicate.update(id="second-" + design["version"], companyId="second")
+            catalog["designs"].append(duplicate)
+        page = gallery.build_pages(catalog)["index.html"]
+        self.assertLess(page.index('id="company-search"'), page.index('class="company-grid"'))
+        self.assertEqual(page.count('id="company-search"'), 1)
+
     def test_generation_is_deterministic(self):
         catalog = gallery.load_catalog()
         self.assertEqual(gallery.build_pages(catalog), gallery.build_pages(copy.deepcopy(catalog)))

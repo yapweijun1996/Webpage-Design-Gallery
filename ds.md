@@ -1,6 +1,6 @@
 # Gallery Design System — SSOT
 
-**Specification version: 1.0.0** · **Application release: 1.1.3** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
+**Specification version: 1.0.0** · **Application release: 1.1.4** · **Status: implemented local contract with verified scope and stated limits** · **Audit baseline: `e42153f`** · **Date: 2026-11-12**
 
 This document is the single source of truth for shared gallery design decisions, component contracts, UX rules and acceptance criteria. Version 1.0.0 establishes the contract and tracks its incremental implementation. It does **not** certify complete application compliance. The issue register records the reviewed baseline; the adoption record distinguishes delivered source changes from verified behavior and remaining work.
 

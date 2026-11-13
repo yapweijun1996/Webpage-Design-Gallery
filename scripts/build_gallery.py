@@ -200,9 +200,9 @@ def build_pages(catalog, release=None):
         filters = '<div class="filter-bar" id="filters"><label class="search-field">Find a company<input id="company-search" type="search" placeholder="Search companies, industries or locations" autocomplete="off"></label><label>Category<select id="category-filter"><option value="">All categories</option>'
         filters += "".join(f'<option value="{escape(c["id"])}">{escape(c["name"])}</option>' for c in catalog["categories"])
         filters += '</select></label><label>Sort by<select id="company-sort"><option value="name">Name A–Z</option><option value="designs">Most designs</option></select></label></div>'
-        content = render("home", prefix=prefix, company_count=len(companies), company_summary=plural(len(companies), "company") if len(companies) == 1 else f"{len(companies)} companies", design_summary=plural(len(designs), "design"), company_filters=filters, company_cards="".join(company_card(c, designs, prefix, category_names) for c in companies))
+        content = render("home", prefix=prefix, company_count=len(companies), company_summary=plural(len(companies), "company") if len(companies) == 1 else f"{len(companies)} companies", design_summary=plural(len(designs), "design"), company_filters_before=filters if len(companies) != 1 else "", company_filters_after=filters if len(companies) == 1 else "", company_cards="".join(company_card(c, designs, prefix, category_names) for c in companies))
         if path != "index.html":
-            content = content.replace("One company.<br><span>Many creative directions.</span>", "All companies.<br><span>Find your next direction.</span>")
+            content = content.replace("One company. <span>Many creative directions.</span>", "All companies. <span>Find your next direction.</span>")
         pages[path] = shell(title="Companies — Webpage Design Gallery", description="Explore independent website design concepts, organized by company.", prefix=prefix, current='aria-current="page"', page_kind="companies", content=content)
     for company in companies:
         own = [d for d in designs if d["companyId"] == company["id"]]

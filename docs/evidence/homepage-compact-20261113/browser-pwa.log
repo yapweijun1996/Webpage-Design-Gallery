@@ -1,0 +1,23 @@
+Gallery built: 1 companies, 8 designs
+Offline signal evidence: {"online": false, "noticeHidden": false, "status": "Offline \u00b7 Reconnect to check for updates. Current version: v1.1.3 \u00b7 fbb8e499", "controlled": true}
+{
+  "runtime": "Real headless Chrome service workers under /Webpage-Design-Gallery/",
+  "checks": {
+    "manifestAndChromeInstallability": "PASS",
+    "responsiveSafeAreaCSSReducedMotionSmartHeaderScrollTop": "PASS",
+    "offlineLaunchSearchFiltersAndExplicitDemoFallback": "PASS",
+    "identityMismatchAndMixedFileHashFailClosed": "PASS",
+    "waitingVersionPromptLoaderSingleReloadAndOtherTabConsent": "PASS",
+    "onlyOwnedOldCachesDeleted": "PASS",
+    "activationTimeoutRecovery": "PASS"
+  },
+  "limitations": [
+    "Physical iOS/Safari installation and status-bar rendering NOT RUN",
+    "Native OS install dialog NOT RUN; browser manifest/installability inspected",
+    "Light-only gallery; dark-mode system chrome N/A"
+  ],
+  "installability": {
+    "installabilityErrors": []
+  },
+  "browserVersion": "157.0.8103.38"
+}

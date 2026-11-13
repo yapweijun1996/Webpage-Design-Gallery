@@ -1,0 +1,650 @@
+[
+  {
+    "width": 320,
+    "errors": [],
+    "data": {
+      "overflow": 0,
+      "headings": [
+        "One company. Many creative directions.",
+        "Companies\n1",
+        "Updating Webpage Gallery"
+      ],
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Skip to content",
+          "label": null,
+          "type": "",
+          "top": -100
+        },
+        {
+          "tag": "A",
+          "text": "WebpageDesign Gallery",
+          "label": "Webpage Design Gallery home",
+          "type": "",
+          "top": 14
+        },
+        {
+          "tag": "A",
+          "text": "Companies",
+          "label": null,
+          "type": "",
+          "top": 64
+        },
+        {
+          "tag": "A",
+          "text": "About the gallery",
+          "label": null,
+          "type": "",
+          "top": 64
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Checking…",
+          "label": null,
+          "type": "button",
+          "top": 12
+        },
+        {
+          "tag": "A",
+          "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh Joo HinFood",
+          "label": null,
+          "type": "",
+          "top": 343.875
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "label": null,
+          "type": "search",
+          "top": 802.34375
+        },
+        {
+          "tag": "SELECT",
+          "text": "All categoriesCorporateRetailFood & Beverage",
+          "label": null,
+          "type": "select-one",
+          "top": 886.125
+        },
+        {
+          "tag": "A",
+          "text": "All companies",
+          "label": null,
+          "type": "",
+          "top": 1276.25
+        }
+      ],
+      "cover": [
+        {
+          "src": "demos/corporate/gjh/v7/assets/thumbnail.webp",
+          "top": 356.875,
+          "width": 250,
+          "loaded": true
+        }
+      ]
+    },
+    "tabs": [
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      },
+      {
+        "tag": "SELECT",
+        "text": "All categoriesCorporateRetailFood & Beverage",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "All companies",
+        "label": null
+      },
+      {
+        "tag": "SUMMARY",
+        "text": "Install help & offline access",
+        "label": null
+      },
+      {
+        "tag": "BODY",
+        "text": "Skip to content\n  \n  \n  \n    \n      \n        \n        Webpag",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "Skip to content",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "errors": [],
+    "data": {
+      "overflow": 0,
+      "headings": [
+        "One company. Many creative directions.",
+        "Companies\n1",
+        "Updating Webpage Gallery"
+      ],
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Skip to content",
+          "label": null,
+          "type": "",
+          "top": -100
+        },
+        {
+          "tag": "A",
+          "text": "WebpageDesign Gallery",
+          "label": "Webpage Design Gallery home",
+          "type": "",
+          "top": 14
+        },
+        {
+          "tag": "A",
+          "text": "Companies",
+          "label": null,
+          "type": "",
+          "top": 64
+        },
+        {
+          "tag": "A",
+          "text": "About the gallery",
+          "label": null,
+          "type": "",
+          "top": 64
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Checking…",
+          "label": null,
+          "type": "button",
+          "top": 12
+        },
+        {
+          "tag": "A",
+          "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh Joo HinFood",
+          "label": null,
+          "type": "",
+          "top": 343.875
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "label": null,
+          "type": "search",
+          "top": 779.25
+        },
+        {
+          "tag": "SELECT",
+          "text": "All categoriesCorporateRetailFood & Beverage",
+          "label": null,
+          "type": "select-one",
+          "top": 863.03125
+        },
+        {
+          "tag": "A",
+          "text": "All companies",
+          "label": null,
+          "type": "",
+          "top": 1212.375
+        }
+      ],
+      "cover": [
+        {
+          "src": "demos/corporate/gjh/v7/assets/thumbnail.webp",
+          "top": 356.875,
+          "width": 320,
+          "loaded": true
+        }
+      ]
+    },
+    "tabs": [
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      },
+      {
+        "tag": "SELECT",
+        "text": "All categoriesCorporateRetailFood & Beverage",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "All companies",
+        "label": null
+      },
+      {
+        "tag": "SUMMARY",
+        "text": "Install help & offline access",
+        "label": null
+      },
+      {
+        "tag": "BODY",
+        "text": "Skip to content\n  \n  \n  \n    \n      \n        \n        Webpag",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "Skip to content",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      }
+    ]
+  },
+  {
+    "width": 768,
+    "errors": [],
+    "data": {
+      "overflow": 0,
+      "headings": [
+        "One company. Many creative directions.",
+        "Companies1",
+        "Updating Webpage Gallery"
+      ],
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Skip to content",
+          "label": null,
+          "type": "",
+          "top": -100
+        },
+        {
+          "tag": "A",
+          "text": "WebpageDesign Gallery",
+          "label": "Webpage Design Gallery home",
+          "type": "",
+          "top": 17.75
+        },
+        {
+          "tag": "A",
+          "text": "Companies",
+          "label": null,
+          "type": "",
+          "top": 14.796875
+        },
+        {
+          "tag": "A",
+          "text": "About the gallery",
+          "label": null,
+          "type": "",
+          "top": 14.796875
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Checking…",
+          "label": null,
+          "type": "button",
+          "top": 16
+        },
+        {
+          "tag": "A",
+          "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh Joo HinFood",
+          "label": null,
+          "type": "",
+          "top": 310.28125
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "label": null,
+          "type": "search",
+          "top": 681.53125
+        },
+        {
+          "tag": "SELECT",
+          "text": "All categoriesCorporateRetailFood & Beverage",
+          "label": null,
+          "type": "select-one",
+          "top": 683.125
+        },
+        {
+          "tag": "A",
+          "text": "All companies",
+          "label": null,
+          "type": "",
+          "top": 960.09375
+        }
+      ],
+      "cover": [
+        {
+          "src": "demos/corporate/gjh/v7/assets/thumbnail.webp",
+          "top": 335.28125,
+          "width": 333.109375,
+          "loaded": true
+        }
+      ]
+    },
+    "tabs": [
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      },
+      {
+        "tag": "SELECT",
+        "text": "All categoriesCorporateRetailFood & Beverage",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "All companies",
+        "label": null
+      },
+      {
+        "tag": "SUMMARY",
+        "text": "Install help & offline access",
+        "label": null
+      },
+      {
+        "tag": "BODY",
+        "text": "Skip to content\n  \n  \n  \n    \n      \n        \n        Webpag",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "Skip to content",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "errors": [],
+    "data": {
+      "overflow": 0,
+      "headings": [
+        "One company. Many creative directions.",
+        "Companies1",
+        "Updating Webpage Gallery"
+      ],
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Skip to content",
+          "label": null,
+          "type": "",
+          "top": -100
+        },
+        {
+          "tag": "A",
+          "text": "WebpageDesign Gallery",
+          "label": "Webpage Design Gallery home",
+          "type": "",
+          "top": 17.75
+        },
+        {
+          "tag": "A",
+          "text": "Companies",
+          "label": null,
+          "type": "",
+          "top": 14.796875
+        },
+        {
+          "tag": "A",
+          "text": "About the gallery",
+          "label": null,
+          "type": "",
+          "top": 14.796875
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Checking…",
+          "label": null,
+          "type": "button",
+          "top": 16
+        },
+        {
+          "tag": "A",
+          "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh Joo HinFood",
+          "label": null,
+          "type": "",
+          "top": 310.28125
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "label": null,
+          "type": "search",
+          "top": 748.46875
+        },
+        {
+          "tag": "SELECT",
+          "text": "All categoriesCorporateRetailFood & Beverage",
+          "label": null,
+          "type": "select-one",
+          "top": 750.0625
+        },
+        {
+          "tag": "A",
+          "text": "All companies",
+          "label": null,
+          "type": "",
+          "top": 1027.03125
+        }
+      ],
+      "cover": [
+        {
+          "src": "demos/corporate/gjh/v7/assets/thumbnail.webp",
+          "top": 335.28125,
+          "width": 617.546875,
+          "loaded": true
+        }
+      ]
+    },
+    "tabs": [
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      },
+      {
+        "tag": "SELECT",
+        "text": "All categoriesCorporateRetailFood & Beverage",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "All companies",
+        "label": null
+      },
+      {
+        "tag": "SUMMARY",
+        "text": "Install help & offline access",
+        "label": null
+      },
+      {
+        "tag": "BODY",
+        "text": "Skip to content\n  \n  \n  \n    \n      \n        \n        Webpag",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "Skip to content",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "WebpageDesign Gallery",
+        "label": "Webpage Design Gallery home"
+      },
+      {
+        "tag": "A",
+        "text": "Companies",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "About the gallery",
+        "label": null
+      },
+      {
+        "tag": "A",
+        "text": "DESIGN COLLECTION\n      GJHCorporate · Singapore\n      Goh J",
+        "label": null
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "label": null
+      }
+    ]
+  }
+]
