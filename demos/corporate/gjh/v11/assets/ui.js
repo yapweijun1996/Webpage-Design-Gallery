@@ -47,7 +47,7 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
-  const records = new Map();
+  const records = new Map([['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   const zones = { atrium: 'The courtyard', newmoon: 'New Moon', mili: 'MILI', gogo: 'GOGO' };
   let available = false;
   let showing3D = false;
@@ -102,6 +102,13 @@ export function createUI() {
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || guidePaused) return;
+    if (record.action === 'map') {
+      if (!available || !showing3D) return;
+      help.open = false; mallMap.open = true;
+      mapButtons[0]?.focus({preventScroll: true});
+      announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
+      return;
+    }
     returnFocus = document.activeElement;
     productTitle.textContent = record.name;
     productImage.src = record.image;
@@ -227,8 +234,10 @@ export function createUI() {
         document.body.classList.toggle('is-nearby', Boolean(nearby));
         inspectPrompt.hidden = !nearby;
         nearbyName.textContent = nearby ? records.get(nearby).name : '';
-        inspectButton.setAttribute('aria-label', nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
-        if (nearby && showing3D) announce(`${records.get(nearby).name}. Press F or tap Inspect for details.`);
+        const isMap = nearby && records.get(nearby).action === 'map';
+        inspectButton.textContent = isMap ? 'Press F / tap Map' : 'Press F / tap Inspect';
+        inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
+        if (nearby && showing3D) announce(isMap ? 'Directory kiosk. Decorative screen. Press F or tap Map for the three-store map.' : `${records.get(nearby).name}. Press F or tap Inspect for details.`);
       }
     },
     paused() {

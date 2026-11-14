@@ -190,6 +190,16 @@ export async function createWorld(T, R, physics, shadows) {
   for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   const doors = [], interactables = [];
+  // Original decorative kiosk beside the entrance, outside the central walking line.
+  // The actual wayfinding interaction opens the existing three-store DOM map.
+  if (!furnishings.place('kiosk', -3.3, 9.9, 1, -1)) {
+    box('jade', -3.3, 1.22, 9.9, .94, 1.6, .22);
+    box('brass', -3.3, .08, 9.9, .96, .16, .68);
+    box('dark', -3.3, 1.3, 10.03, .78, 1.25, .035);
+  }
+  collider(-3.3, 1.025, 9.9, .96, 2.05, .68);
+  shadow(-3.3, 9.9, 1.2, .9);
+  interactables.push({id: 'mall-directory', x: -3.3, z: 9.9, radius: 2.8});
   const stores = {newmoon: -10, mili: 0, gogo: 10};
   for (const [zone, x] of Object.entries(stores)) {
     const wall = zone === 'mili' ? 'cream' : 'green';

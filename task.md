@@ -63,8 +63,8 @@ Acceptance: desktop, touch and keyboard users can inspect and close product deta
 
 Depends on Phase 1; coordinate layouts with Phase 2.
 
-- [ ] Evaluate the mall directory kiosk as an entrance focal point connected to the existing three-store map and teleport actions.
-- [ ] Distinguish the model's decorative screen from functional wayfinding; do not present its fictional map as real navigation.
+- [x] Evaluate the mall directory kiosk as an entrance focal point connected to the existing three-store map and teleport actions.
+- [x] Distinguish the model's decorative screen from functional wayfinding; do not present its fictional map as real navigation.
 - [ ] Improve sightlines and store-name visibility from the entrance.
 - [ ] Selectively place existing display shelves, lightboxes or bins where they support the scene.
 - [ ] Keep circulation paths clear and avoid overcrowding or hiding existing controls.
@@ -148,3 +148,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.8 adds a repeatable five-viewport payload/draw-call/viewer-lifecycle budget check and fixes compact-landscape map overlap with Run. Same-page orientation, hit testing and keyboard evidence are in `docs/v11-performance-review.md`. Physical devices, actual notched-screen safe areas and screen readers remain unverified.
 
 - Application 1.1.9 repairs optional furniture cleanup when GLB parsing arrives after the timeout or parsed primitives fail validation. Real-GLB fault-injection evidence and regression coverage are in `docs/v11-furniture-lifecycle-review.md`. Existing models, placement and successful-load materials remain unchanged.
+
+- Application 1.1.10 adds the original entrance kiosk with F/touch access to the real three-store map, explicit decorative-screen disclosure, a physical collider and failed-asset fallback. Source rights, hash, dimensions, screenshots and tests are recorded in `docs/v11-kiosk-review.md`. Other fixtures and branded product phases remain pending.

@@ -17,7 +17,7 @@ from playwright.sync_api import sync_playwright
 from browser_gjh_v11 import ARGS, QuietHandler, state, targets
 
 ROOT = Path(__file__).resolve().parents[1]
-MODELS = {"bench": "gjh-lounge-bench.glb", "planter": "gjh-areca-planter.glb"}
+MODELS = {"bench": "gjh-lounge-bench.glb", "planter": "gjh-areca-planter.glb", "kiosk": "mall-directory-kiosk.glb"}
 VIEWPORTS = ((1440, 900), (768, 1024), (390, 844))
 
 
@@ -62,7 +62,7 @@ def verify_case(browser, url, base, viewport, screenshots, failed_model=None, fa
         for key, model in MODELS.items():
             expected = "fallback" if key == failed_model else "loaded"
             assert furnishings[key]["status"] == expected, furnishings
-            assert furnishings[key]["instances"] > 1, furnishings
+            assert (furnishings[key]["instances"] == 1 if key == "kiosk" else furnishings[key]["instances"] > 1), furnishings
             if expected == "loaded":
                 assert furnishings[key]["primitives"] > 0, furnishings
                 assert furnishings[key]["reason"] is None, furnishings

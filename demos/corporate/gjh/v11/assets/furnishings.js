@@ -1,7 +1,7 @@
 // Optional, self-contained furniture. Each source primitive is instanced across placements.
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
-const sources = Object.freeze({bench: 'gjh-lounge-bench.glb', planter: 'gjh-areca-planter.glb'});
+const sources = Object.freeze({bench: 'gjh-lounge-bench.glb', planter: 'gjh-areca-planter.glb', kiosk: 'mall-directory-kiosk.glb'});
 const deadline = 8000;
 
 function validateContainer(buffer) {

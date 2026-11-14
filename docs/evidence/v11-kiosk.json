@@ -1,0 +1,38 @@
+[
+  {
+    "width": 390,
+    "failure": false,
+    "asset": {
+      "status": "loaded",
+      "reason": null,
+      "instances": 1,
+      "primitives": 6
+    },
+    "mapThreeStores": "PASS",
+    "collisionAndCentralPath": "PASS"
+  },
+  {
+    "width": 1440,
+    "failure": false,
+    "asset": {
+      "status": "loaded",
+      "reason": null,
+      "instances": 1,
+      "primitives": 6
+    },
+    "mapThreeStores": "PASS",
+    "collisionAndCentralPath": "PASS"
+  },
+  {
+    "width": 390,
+    "failure": true,
+    "asset": {
+      "status": "fallback",
+      "reason": "unavailable",
+      "instances": 1,
+      "primitives": 0
+    },
+    "mapThreeStores": "PASS",
+    "collisionAndCentralPath": "PASS"
+  }
+]
