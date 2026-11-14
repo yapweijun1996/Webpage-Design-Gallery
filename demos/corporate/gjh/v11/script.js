@@ -1,13 +1,22 @@
 import {createUI} from './assets/ui.js';
+import {createModes, deriveMode} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 
-const ui = createUI(), canvas = document.querySelector('#scene');
+const ui = createUI(), canvas = document.querySelector('#scene'), modes = createModes();
 setupOriginalTin(ui);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let nearby = null, currentZone = 'atrium';
+function syncMode(signals = ui.modeSignals()) {
+  const mode = deriveMode({...signals, seated: Boolean(player?.state.seated),
+    cartActive: Boolean(player?.state.character?.cart?.active)});
+  modes.sync(mode, 'Derived UI/player state');
+  document.body.dataset.mode = mode;
+}
+ui.onModeState(syncMode);
 const STEP = 1 / 60;
-const snapshot = () => Object.freeze({...(player?.state || {}), zone: currentZone, nearby, furnishings: world?.furnishings || null,
+const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null,
+  illegalCount: modes.illegalCount(),
   productAssets: world?.productAssets || null,
   seats:world?.seats?.map(({id,name,x,z,exitX,exitZ,facing})=>({id,name,x,z,exitX,exitZ,facing}))||[],
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
@@ -16,6 +25,7 @@ const snapshot = () => Object.freeze({...(player?.state || {}), zone: currentZon
   pixelRatio: renderer?.getPixelRatio() || 1, hidden: document.hidden});
 Object.defineProperty(window, '__mall', {value: Object.freeze({
   get ready() { return ready; }, get state() { return snapshot(); },
+  get mode() { return modes.current(); },
   teleport(zone) { if (!ready || !player.teleport(zone)) return false; updateHUD(); render(); return true; },
   setInput(input) {
     if (!ready) return;
@@ -43,6 +53,7 @@ function updateHUD() {
     if (distance < item.radius && distance < best) { nearby = item.id; best = distance; }
   }
   ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
+  syncMode();
 }
 function tick() {
   if (ui.paused()) return;

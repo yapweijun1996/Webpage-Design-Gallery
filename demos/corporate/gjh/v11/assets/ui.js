@@ -33,6 +33,12 @@ export function createUI() {
     guide.querySelector('[data-guide-touch]').hidden = !touchGuide.matches;
   }
   updateGuideInput(); touchGuide.addEventListener('change', updateGuideInput);
+  let modeListener = null;
+  const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open,
+    bagOpen: document.getElementById('bag-dialog').open,
+    panelOpen: document.body.classList.contains('is-panel-open') || !showing3D ||
+      help.open || mallMap.open || guide.open});
+  const notifyMode = () => modeListener?.(modeSignals());
   let panelPauseListener=null;
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
   function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);if(paused)panelPauseListener?.();}
@@ -45,18 +51,25 @@ export function createUI() {
   mallMap.addEventListener('toggle', () => {
     if (compactMap.matches && mallMap.open) help.open = false;
     headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
+    notifyMode();
   });
-  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; updateCompactPanels(); });
+  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; updateCompactPanels(); notifyMode(); });
   headerMap.addEventListener('click', () => {
     if (!showing3D || guidePaused || dialog.open || bag.open) return;
     help.open = false;
     mallMap.open = !mallMap.open;
     headerMap.setAttribute('aria-expanded', String(mallMap.open));
     if (mallMap.open) mapButtons[0]?.focus({preventScroll: true});
+    notifyMode();
   });
   const dialog = document.getElementById('product-dialog');
   const newMoonPreview = setupNewMoonPreview();
   const bag = setupDemoBag();
+  const bagDialog = document.getElementById('bag-dialog');
+  const modePanels = [dialog, bagDialog, help, guide, mallMap];
+  const modeObserver = new MutationObserver(notifyMode);
+  for (const panel of modePanels) modeObserver.observe(panel, {attributes: true, attributeFilter: ['open']});
+  for (const panel of [dialog, bagDialog, guide]) panel.addEventListener('close', notifyMode);
   const closeButton = document.getElementById('product-close');
   const productTitle = document.getElementById('product-title');
   const productImage = document.getElementById('product-image');
@@ -123,6 +136,7 @@ export function createUI() {
     headerMap.setAttribute('aria-expanded', String(next && compactMap.matches && mallMap.open));
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
     announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open How to explore for controls.` : 'Store directory open. All three stores and verified product images are available below.');
+    notifyMode();
     viewListener?.(next);
   }
 
@@ -147,6 +161,7 @@ export function createUI() {
     bag.select(id);
     dialog.showModal();
     closeButton.focus({ preventScroll: true });
+    notifyMode();
   }
 
   function showGuide(event) {
@@ -155,6 +170,7 @@ export function createUI() {
     help.open = false; mallMap.open = false;
     guidePaused = true;
     guide.showModal(); guideTitle.focus({preventScroll: true});
+    notifyMode();
     return true;
   }
   guideClose.addEventListener('click', () => guide.close('dismiss'));
@@ -204,6 +220,7 @@ export function createUI() {
     } else if (showing3D) {
       scene.focus({ preventScroll: true });
     }
+    notifyMode();
   });
   dialog.addEventListener('keydown', (event) => {
     if (event.key !== 'Tab') return;
@@ -234,6 +251,8 @@ export function createUI() {
   document.getElementById('list-title').tabIndex = -1;
 
   return {
+    modeSignals,
+    onModeState(listener) { modeListener = listener; },
     show3D() {
       available = true;
       guideReopen.hidden = false;
@@ -296,6 +315,7 @@ export function createUI() {
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
       if(seatNotice)nearbyName.textContent=seatNotice;
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
+      notifyMode();
     },
     paused() {
       return guidePaused || externalPaused || !showing3D || dialog.open || bag.open || (compactMap.matches && (mallMap.open || help.open));
