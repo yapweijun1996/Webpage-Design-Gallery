@@ -256,4 +256,8 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 .product-preview-status{font-size:var(--font-size-sm);line-height:1.6;margin:12px 0}.product-dialog .dialog-image{align-content:start;gap:12px;max-height:none}
 #product-preview-canvas:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 @media(max-width:650px){#product-preview-canvas{height:250px}.product-dialog #product-image{display:block;margin:auto}.product-dialog #product-image[hidden]{display:none}}
-@media(max-height:560px) and (orientation:landscape){#product-preview-canvas{height:220px}.product-dialog .dialog-top{position:sticky;top:0;background:var(--paper);z-index:var(--z-tray)}}
+@media(max-height:560px) and (orientation:landscape){#product-preview-canvas{height:220px}}
+
+/* Keep the existing close action reachable after reading long product details. */
+.product-dialog{scroll-padding-top:calc(var(--size-control) + var(--space-8))}
+.product-dialog .dialog-top{position:sticky;top:0;background:var(--paper);z-index:var(--z-tray)}

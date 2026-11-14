@@ -1,0 +1,266 @@
+[
+  {
+    "viewport": [
+      320,
+      740
+    ],
+    "preview": false,
+    "close": {
+      "top": 27,
+      "bottom": 71,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-load",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      320,
+      740
+    ],
+    "preview": true,
+    "close": {
+      "top": 27,
+      "bottom": 71,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-canvas",
+      "product-preview-image",
+      "product-preview-reset",
+      "Rotate left",
+      "Rotate right",
+      "Zoom out",
+      "Zoom in",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "preview": false,
+    "close": {
+      "top": 27,
+      "bottom": 71,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-load",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "preview": true,
+    "close": {
+      "top": 27,
+      "bottom": 71,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-canvas",
+      "product-preview-image",
+      "product-preview-reset",
+      "Rotate left",
+      "Rotate right",
+      "Zoom out",
+      "Zoom in",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "preview": false,
+    "close": {
+      "top": 45.234375,
+      "bottom": 89.234375,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-load",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "preview": true,
+    "close": {
+      "top": 27,
+      "bottom": 71,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-canvas",
+      "product-preview-image",
+      "product-preview-reset",
+      "Rotate left",
+      "Rotate right",
+      "Zoom out",
+      "Zoom in",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "preview": false,
+    "close": {
+      "top": 230.125,
+      "bottom": 274.125,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-load",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "preview": true,
+    "close": {
+      "top": 229.109375,
+      "bottom": 273.109375,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-canvas",
+      "product-preview-image",
+      "product-preview-reset",
+      "Rotate left",
+      "Rotate right",
+      "Zoom out",
+      "Zoom in",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "preview": false,
+    "close": {
+      "top": 32,
+      "bottom": 76,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-load",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "preview": true,
+    "close": {
+      "top": 32,
+      "bottom": 76,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-canvas",
+      "product-preview-image",
+      "product-preview-reset",
+      "Rotate left",
+      "Rotate right",
+      "Zoom out",
+      "Zoom in",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "preview": false,
+    "close": {
+      "top": 153.109375,
+      "bottom": 197.109375,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-load",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "preview": true,
+    "close": {
+      "top": 167.109375,
+      "bottom": 211.109375,
+      "width": 69.75,
+      "height": 44,
+      "hit": true
+    },
+    "keyboardPath": [
+      "product-preview-canvas",
+      "product-preview-image",
+      "product-preview-reset",
+      "Rotate left",
+      "Rotate right",
+      "Zoom out",
+      "Zoom in",
+      "product-shop"
+    ],
+    "tapCloseAndReturnFocus": true
+  }
+]
