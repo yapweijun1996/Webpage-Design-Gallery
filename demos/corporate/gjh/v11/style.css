@@ -357,3 +357,5 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 .is-pushing .joystick:not(.is-floating){visibility:hidden}
 .is-pushing .inspect-prompt{left:50%;transform:translateX(-50%);bottom:max(58px,env(safe-area-inset-bottom));width:260px;max-width:calc(100% - 36px)}
 @media(max-height:560px) and (orientation:landscape){.is-pushing .inspect-prompt{left:18px;transform:none;width:220px}}
+/* Portrait seated/cart prompt clears the three-line disclaimer on narrow phones. */
+@media(max-width:650px) and (orientation:portrait){.is-seated .inspect-prompt,.is-pushing .inspect-prompt{bottom:calc(70px + env(safe-area-inset-bottom))}}
