@@ -1,4 +1,5 @@
 export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 
 export function createUI() {
   const scene = document.getElementById('scene');
@@ -41,6 +42,7 @@ export function createUI() {
     }
   });
   const dialog = document.getElementById('product-dialog');
+  const newMoonPreview = setupNewMoonPreview();
   const closeButton = document.getElementById('product-close');
   const productTitle = document.getElementById('product-title');
   const productImage = document.getElementById('product-image');
@@ -115,6 +117,7 @@ export function createUI() {
     productImage.alt = record.alt;
     productKind.textContent = record.kind;
     productDescription.textContent = record.description;
+    newMoonPreview.open(id);
     dialog.showModal();
     closeButton.focus({ preventScroll: true });
   }

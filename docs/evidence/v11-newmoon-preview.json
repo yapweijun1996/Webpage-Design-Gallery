@@ -1,0 +1,75 @@
+[
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "skuControls": [
+      "nz-425g",
+      "au-425g",
+      "sa-425g",
+      "mx-454g"
+    ],
+    "pointer": "CDP touch",
+    "defaultBoundsFit": true,
+    "cleanup": true,
+    "errors": []
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "skuControls": [
+      "nz-425g",
+      "au-425g",
+      "sa-425g",
+      "mx-454g"
+    ],
+    "pointer": "CDP touch",
+    "defaultBoundsFit": true,
+    "cleanup": true,
+    "errors": []
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "skuControls": [
+      "nz-425g",
+      "au-425g",
+      "sa-425g",
+      "mx-454g"
+    ],
+    "pointer": "mouse",
+    "defaultBoundsFit": true,
+    "cleanup": true,
+    "errors": []
+  },
+  {
+    "fault": "404",
+    "reason": "unavailable"
+  },
+  {
+    "fault": "hash",
+    "reason": "hash-mismatch"
+  },
+  {
+    "fault": "close/reopen late fetch",
+    "PASS": true
+  },
+  {
+    "fault": "real context loss and retry",
+    "PASS": true
+  },
+  {
+    "orientationResize": true
+  },
+  {
+    "lateParseDisposed": 3
+  },
+  {
+    "noWebGLImageFallback": true
+  }
+]

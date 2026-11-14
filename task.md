@@ -6,7 +6,7 @@ Status: **partially implemented; remaining phases are not complete**. This file 
 
 Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/Blender-3D-Gallery) to improve product discovery, navigation and presentation in the existing GJH V11 mall. Prioritize the New Moon product experience, then wayfinding and selective scene improvements. Preserve existing URLs, content, business behavior, controls, accessibility fallbacks and the mall's visual direction.
 
-The mall already has three stores, the green-polo visitor, benches, planters, walking and turning controls, inspection dialogs and a list view. Its four canned products now use owner-authorized conceptual GLBs with photo-derived labels; the product-detail dialogs still show the existing packshots rather than a branded 3D viewer. Confirm these observations against current source and the deployed site before making changes.
+The mall already has three stores, the green-polo visitor, benches, planters, walking and turning controls, inspection dialogs and a list view. Its four canned products now use owner-authorized conceptual GLBs with photo-derived labels; product-detail dialogs retain default packshots and offer an opt-in unofficial 3D preview in application 1.1.14. Confirm these observations against current source and the deployed site before making changes.
 
 ## Phase 0 — Audit and baseline
 
@@ -56,6 +56,8 @@ Depends on Phase 2.
 - [ ] Disclose relevant packaging limitations without presenting estimates as verified facts.
 - [ ] Provide loading, error and non-WebGL image alternatives.
 - [ ] Pause mall movement while a dialog is open and restore focus when it closes.
+
+V11 bounded progress — 2026-11-14: New Moon-only detail previews are implemented with explicit lazy loading of the four owner-authorized conceptual GLBs, SHA-256 checks, image fallback, bounded pointer/touch/keyboard controls, context-loss and close/generation cleanup. Focused browser verification and evidence are recorded in `docs/v11-newmoon-preview-review.md`. Physical iOS/Android, actual packaging accuracy and independent artwork rights remain unverified.
 
 Acceptance: desktop, touch and keyboard users can inspect and close product details; product information remains available if 3D fails.
 
@@ -156,3 +158,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.12 restores keyboard focus to the accessible directory when graphics loss hides the active 3D control, without interrupting an already-open directory product dialog or unrelated header focus. Twelve real context-loss cases and regression evidence are in `docs/v11-fallback-focus-review.md`; remaining asset and physical-device gates stay open.
 
 - Application 1.1.13 integrates four owner-authorized conceptual New Moon LOD1 cans and four reusable shelf instances onto the latest main without reverting guide, kiosk, input or focus fixes. Current GLB hashes, per-SKU detail IDs, native scale, shelf collision, independent failures, disposal and rendered previews are reviewed in `docs/v11-newmoon-demo-review.md`. The Mexico blank sector remains disclosed. This is demo technical acceptance, not official packaging certification or completion of the branded 3D-detail phase.
+
+- Application 1.1.14 adds opt-in four-SKU interactive detail previews, preserving default images, text, eShop links and conceptual-packaging disclosures. Mouse, browser touch, keyboard, resizing, focus, image fallbacks, context-loss retry and late-parse cleanup passed focused checks. See `docs/v11-newmoon-preview-review.md`. Physical devices and packaging fidelity remain unverified; unchanged broader gates are not marked complete.

@@ -1,12 +1,13 @@
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
 // Replaceable candidate configuration; this is not a claim that future generic cans are this SKU set.
-const cans = Object.freeze([
+export const NEW_MOON_CANS = Object.freeze([
   {sku: 'nz-425g', file: 'new-moon-can-nz-425g-lod1.glb', sha256: 'fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb'},
   {sku: 'au-425g', file: 'new-moon-can-au-425g-lod1.glb', sha256: 'd1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde'},
   {sku: 'sa-425g', file: 'new-moon-can-sa-425g-lod1.glb', sha256: '7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5'},
   {sku: 'mx-454g', file: 'new-moon-can-mx-454g-lod1.glb', sha256: '52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb'},
 ]);
+const cans = NEW_MOON_CANS;
 const shelf = Object.freeze({file: 'mall-display-shelf.glb', sha256: '9538cc7b954a1510397e4f1dffc47bbed6c99f7460edfb1e55ef4dc28561966d'});
 const canBounds = Object.freeze({x: .0775, y: .12399169057607651, z: .0775});
 const shelfBounds = Object.freeze({x: 1.5200000405311584, y: 1.9600000381469727, z: .5799999535083771});
