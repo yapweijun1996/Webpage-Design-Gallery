@@ -1,0 +1,18 @@
+[
+  {
+    "viewport": [
+      390,
+      680
+    ],
+    "dialogBounds": {
+      "x": 17,
+      "y": 120.375,
+      "width": 356,
+      "height": 439.234375
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  }
+]

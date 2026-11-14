@@ -21,7 +21,11 @@ def run():
     for x,y in [(5,5),(w/2,box['y']+90)]:
      cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]});cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x+40,'y':y+20}]});cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
     page.keyboard.press('w');page.evaluate('__mall.step(200)');after=state(page);assert all(before[k]==after[k] for k in ['x','z','yaw']),[before,after]
-    page.locator('#guide-close').click();closed(page);page.wait_for_function('document.activeElement.id==="scene"');assert all(before[k]==state(page)[k] for k in ['x','z','yaw'])
+    page.locator('#guide-close').click();closed(page);page.wait_for_function('document.activeElement.id==="scene"')
+    # Physics resumes after dismissal; sample once and allow only 10 micrometres
+    # of ground-correction rounding, far below a 44mm normal walking tick.
+    resumed=state(page);delta={k:resumed[k]-before[k] for k in ['x','z','yaw']}
+    assert abs(delta['x'])<=1e-5 and abs(delta['z'])<=1e-5 and delta['yaw']==0, {'before':before,'resumed':resumed,'delta':delta}
     reopen(page);page.locator('#guide-close').click();closed(page);page.wait_for_function('document.activeElement.id==="guide-reopen"');assert page.locator('#guide-reopen').is_visible()
     reopen(page);page.keyboard.press('Escape');closed(page);page.wait_for_function('document.activeElement.id==="guide-reopen"')
     reopen(page);page.set_viewport_size({'width':w,'height':320});page.wait_for_timeout(100);d.locator('#guide-list').scroll_into_view_if_needed();assert d.evaluate('e=>e.scrollWidth<=e.clientWidth+1');assert page.locator('#guide-close').evaluate('e=>{const r=e.getBoundingClientRect();return r.y>=0&&r.bottom<=innerHeight}')

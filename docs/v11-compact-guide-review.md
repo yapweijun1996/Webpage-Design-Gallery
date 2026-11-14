@@ -28,3 +28,10 @@ SSOT/generated-release checks pass. Unchanged product geometry, packaging, physi
 Real iPhone Safari/in-app dynamic toolbar, hardware safe-area and assistive-technology behavior still need device confirmation. User screenshot is baseline evidence only, not proof the new build has run on that phone.
 
 Rollback: revert to prior main `04fa16ba4e2b2ae07619a0291fb11a103349dc91` and rebuild generated release artifacts; no shared-history rewrite. A local backup branch and reverse-applicable binary patch are prepared before publishing.
+
+### Live acceptance and floating-point measurement correction
+Pages run 43584723742 deployed main a5bf503 successfully. First live acceptance passed open-modal touch isolation but failed exact position equality after dismissal. The original failure is retained as job 190f4489-e3a9-4dfa-a55b-059edce10734. Its changed value was not logged, so the original cause remains unproven; an unchanged diagnostic rerun passed. Four live runtime file hashes matched the released files.
+
+A bounded five-session read-only observation found all paused x/z/yaw values exactly unchanged. After dismissal, asynchronous Rapier ticks resume; in three sessions z changed by 9.5367431640625e-7 metres after 250ms while idle with unchanged yaw. This supports correcting the measurement contract, not rewriting the original failure as a confirmed same-root-cause event. Independent source/evidence advisor review agreed: sample resumed state once, use absolute tolerance 1e-5 metres for x/z only, retain exact yaw and exact modal-open isolation assertions, and report before/resumed/deltas if failure occurs. This 10-micrometre tolerance is over 4,000 times smaller than one ordinary walking tick (~44mm). No runtime change, disabled check or frozen-input fixture was introduced. Raw observations are preserved in v11-guide-close-observations.json.
+
+Corrected live targeted acceptance: PASS at 390×680, including Close/Escape/reopen, keyboard ring, background isolation and height reduction to 320px. Runtime version remains 1.1.18.
