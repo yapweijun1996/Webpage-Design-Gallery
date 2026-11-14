@@ -10,6 +10,7 @@ import tempfile
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from gjh_shelf_helpers import shelf_details
 
 from browser_gjh_guide import Quiet, ROOT, state
 from browser_gjh_modes import activate_cart, approach_seat, close_bag
@@ -422,6 +423,8 @@ def run():
             assert before['pushing'] and before['character']['physicalProduct']['phase'] == 'empty'
             assert page.locator('#bag-open').inner_text() == 'Bag (1)'
             page.locator('#inspect').click()
+            observe(page, 'Cart product Shelf', 'shelf', True, ['cart', 'shelf'])
+            shelf_details(page)
             page.locator('#product-dialog').wait_for(state='visible')
             observe(page, 'Cart product Inspect', 'inspect', True, ['cart', 'inspect'])
             assert state(page)['pushing']
@@ -500,6 +503,8 @@ def run():
                     page.locator('#view-toggle').click()
                     approach_product(page)
                     page.locator('#inspect').click()
+                    observe(page, 'actual 3D Shelf before details', 'shelf', True, ['explore', 'shelf'])
+                    shelf_details(page)
                     page.locator('#product-dialog').wait_for(state='visible')
                     observe(page, 'actual 3D product before loss', 'inspect', True, ['explore', 'inspect'])
                     close_event_before_action(page, '#product-dialog')

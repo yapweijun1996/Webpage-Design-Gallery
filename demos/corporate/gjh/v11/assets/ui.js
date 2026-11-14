@@ -37,11 +37,15 @@ export function createUI() {
     guide.querySelector('[data-guide-touch]').hidden = !touchGuide.matches;
   }
   updateGuideInput(); touchGuide.addEventListener('change', updateGuideInput);
-  let modeListener = null;
+  let modeListener = null, shelfFocus = null;
   const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open || externalPaused || document.getElementById('original-tin-dialog').open,
-    bagOpen: document.getElementById('bag-dialog').open,
+    bagOpen: document.getElementById('bag-dialog').open, shelfOpen: Boolean(shelfFocus?.open),
     panelOpen: !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
-  const notifyMode = () => modeListener?.(modeSignals());
+  const notifyMode = () => {
+    const signals = modeSignals();
+    if (signals.shelfOpen && (signals.productOpen || signals.bagOpen || signals.panelOpen)) shelfFocus.close({focus: false});
+    modeListener?.(modeSignals());
+  };
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
   function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);}
   const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
@@ -53,8 +57,10 @@ export function createUI() {
     // A details element may stay open across this breakpoint. Publish regardless
     // of toggle events and recover focus only if its control just became hidden.
     if (showing3D && ((active === headerMap && headerMap.hidden) ||
-        (mallMap.contains(active) && !mallMap.open && active !== mallMap.querySelector('summary'))))
-      (compactMap.matches ? headerMap : scene).focus({preventScroll: true});
+        (mallMap.contains(active) && !mallMap.open && active !== mallMap.querySelector('summary')))) {
+      if (shelfFocus?.open) shelfFocus.focus();
+      else (compactMap.matches ? headerMap : scene).focus({preventScroll: true});
+    }
     notifyMode();
   });
   mallMap.addEventListener('toggle', () => {
@@ -159,6 +165,7 @@ export function createUI() {
   for (const card of document.querySelectorAll('[data-product]')) {
     records.set(card.dataset.product, {
       name: card.dataset.productName,
+      compactName: card.dataset.productName.replace(/^New Moon Premium /, '').replace(/^Wild Caught /, '').replace(/ \(.*?\)/, ''),
       image: card.dataset.productImage,
       alt: `Front packshot of ${card.dataset.productName}`,
       kind: 'New Moon / Product detail',
@@ -182,6 +189,7 @@ export function createUI() {
   function setView(show, moveFocus = false) {
     const next = show && available;
     if (next === showing3D) return;
+    shelfFocus?.close({focus: false});
     if (dialog.open) dialog.close();
     if (guide.open) guide.close('view-change');
     showing3D = next;
@@ -202,6 +210,7 @@ export function createUI() {
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || guidePaused) return;
+    shelfFocus?.close();
     if(record.action==='elevator'){const ok=elevatorListener?.();announce(ok?'Elevator travelling to the other level.':'Return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
     if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice='Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce('Seat path blocked. Approach the clear front of the bench.');}scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
@@ -224,8 +233,16 @@ export function createUI() {
     notifyMode();
   }
 
+  function inspectNearby(id) {
+    const record = records.get(id);
+    if (showing3D && id === nearby && record?.image && !record.action && !dialog.open && !bag.open && !guidePaused &&
+        !modeSignals().panelOpen && shelfFocus?.openShelf(id, record)) return;
+    inspect(id);
+  }
+
   function showGuide(event) {
     if (!available || !showing3D || guide.open || dialog.open || bag.open || externalPaused || document.hidden) return false;
+    shelfFocus?.close({focus: false});
     guideFromHelp = event?.currentTarget === guideReopen;
     help.open = false; mallMap.open = false;
     guidePaused = true;
@@ -276,7 +293,7 @@ export function createUI() {
   guide.addEventListener('close', notifyMode);
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
-  inspectButton.addEventListener('click', () => { if(seated){seatNotice=null;if(!seatListener?.(false)){seatNotice='Exit blocked. Use the map to leave safely.';nearbyName.textContent=seatNotice;announce('Exit blocked. Use the map to leave safely.');}scene.focus({preventScroll:true});}else if (nearby) inspect(nearby); });
+  inspectButton.addEventListener('click', () => { if(seated){seatNotice=null;if(!seatListener?.(false)){seatNotice='Exit blocked. Use the map to leave safely.';nearbyName.textContent=seatNotice;announce('Exit blocked. Use the map to leave safely.');}scene.focus({preventScroll:true});}else if (nearby) inspectNearby(nearby); });
   closeButton.addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => {
     const target = returnFocus;
@@ -318,6 +335,15 @@ export function createUI() {
 
   return {
     modeSignals,
+    setShelfFocus(controller) {
+      shelfFocus = controller;
+      bag.subscribe(value => controller.quantities(value));
+      // Existing native owners retain their own focus. Cancel before their entry.
+      document.getElementById('bag-open').addEventListener('click', () => controller.close({focus: false}), true);
+      headerMap.addEventListener('click', () => controller.close({focus: false}), true);
+    },
+    shelfChanged: notifyMode,
+    addToBag(id) { bag.change(id, 1); },
     projectMode(mode) {
       contextNavigation.update({mode, available, destination: showing3D ? 'home' : 'shops',
         host: bag.open ? document.getElementById('context-navigation-bag') :
@@ -373,10 +399,20 @@ export function createUI() {
         nearby = next;seatNotice=null;
         document.body.classList.toggle('is-nearby', Boolean(nearby));
         inspectPrompt.hidden = !nearby;
-        nearbyName.textContent = nearby ? records.get(nearby).name : '';
+        const product = nearby && records.get(nearby);
+        const image = document.getElementById('nearby-image');
+        const isShelf = Boolean(product?.image && nearby.startsWith('new-moon-'));
+        inspectPrompt.classList.toggle('is-shelf-nearby', isShelf);
+        image.hidden = !isShelf;
+        if (isShelf) image.src = product.image;
+        nearbyName.textContent = isShelf ? product.compactName : product?.name || '';
+        const identity = inspectPrompt.querySelector('.nearby-card');
+        if (isShelf) { identity.setAttribute('role', 'group'); identity.setAttribute('aria-label', product.name); }
+        else { identity.removeAttribute('role'); identity.removeAttribute('aria-label'); }
         const isMap = nearby && records.get(nearby).action === 'map';
         const touchOnly = matchMedia('(pointer: coarse)').matches;
         inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? 'Tap Inspect' : 'Press F / tap Inspect');
+        if (isShelf) inspectButton.textContent = 'Inspect';
         inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
         if (nearby && showing3D) {
           const action = isMap ? (touchOnly ? 'Tap Map' : 'press F or tap Map') : (touchOnly ? 'Tap Inspect' : 'press F or tap Inspect');
@@ -397,6 +433,7 @@ export function createUI() {
     offerFirstGuide() { if (!guideSeen) showGuide(); },
     setExternalPaused(value) { externalPaused = Boolean(value); notifyMode(); },
     inspect,
+    inspectNearby,
     onCollect(test, listener) {
       bag.configureCollect(id=>available&&test(id),id=>{
         if(!available||!test(id))return false;

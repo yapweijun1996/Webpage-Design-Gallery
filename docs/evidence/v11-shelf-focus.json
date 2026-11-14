@@ -1,0 +1,719 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_ACCEPTED_PARENT_RELEASE_PENDING",
+  "branch": "codex/task-shelf-focus",
+  "base": "27414203881ba54d0a30231493699ad7bc4e11c7",
+  "environment": {
+    "python": "/private/tmp/gallery-task-qa-venv/bin/python",
+    "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "backend": "metal",
+    "browser": "157.0.8103.51",
+    "axe": "/private/tmp/gallery-a11y-tools/package/axe.min.js",
+    "legacyWrapper": "/private/tmp/gallery-mode-worker/run_legacy.py"
+  },
+  "runtimeSHA256": {
+    "demos/corporate/gjh/v11/index.html": "745fe702069b959e3a04f6c7fc3037aee6546376ca9abba2eb10163a75bca64e",
+    "demos/corporate/gjh/v11/script.js": "edf2e0fe54dd8749df345f3fc356bd9c70ff96f6e79ab954c60d8f4946cc0052",
+    "demos/corporate/gjh/v11/style.css": "2b8af8ac7443154b0c069e790ad63911ce0ce16bcddd60c82a34e7228e0ddc2d",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/ui.js": "866697b3327a26bc27d062943177acc8430235672a6547a70477ec0173a032b8",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/products.js": "809e414b75ef821c57ba2111884b7ca7b4dc9e7f2e44baa7f44098c716a38742",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/world.js": "12e3658b4b4afef49e6f9fcf723e9fcca5a754f58dfcf2c9d41b99b94a915487",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "085c8782a9a2818f702708c6f2322a14c420db628d4b119020bfeb52796663c4",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "ccbee77666249b090bb73faf105ba662b275b43c4ac973597cc71debb59022c9",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "048891652f549fc893e83caf362d1ad03d4a287ab23958232fe83279437fe10b",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/player.js": "17958925972120e2164eb3b031efebe362416e9652527c27bd7ed637dd6aeb9f",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "fixtureSHA256": {
+    "tests/browser_gjh_shelf_focus.py": "b0bcf2149bc09c24bf42ee36628c304f75709572b591f6e28987108ce375eb80",
+    "tests/gjh_shelf_helpers.py": "f819ddaac70fe5a1fb50e48cd0a9c9dc3cf633ce7f3a50aa36372ae760893041",
+    "tests/gjh_modes.test.mjs": "2057ebfb5849001d10a2986fcb94f935a46f873c167dca1da836eaf65e40f4b4",
+    "tests/browser_gjh_compact_guide.py": "3efbe32200f397d8e640556c1936f9ddef3b02468b5345edbf7e7664367bbe12",
+    "tests/browser_gjh_v11.py": "4daf5b12757d17a48547410a4ee7f12b4fa1d5390930d5e5f91b4c6ebb2e9af9",
+    "tests/browser_gjh_modes.py": "bf2ded76bd86b16b50d3df42a819a312ca4cf30b28034170c56e31ce7cb63b81",
+    "tests/browser_gjh_mode_review.py": "679bad5542078f433006e940e8fc318d30666f9d1b2a55d0ffdf1b1bfc85d96b",
+    "tests/browser_gjh_newmoon_review.py": "17a344d317d46d4b25c04b3c6ef052a1cb20b28b84612125a90dad74c21de3b8"
+  },
+  "checks": [
+    {
+      "name": "mode-units",
+      "command": "node --test tests/gjh_modes.test.mjs",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/mode-units.log",
+      "sourceStable": true
+    },
+    {
+      "name": "shelf",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_shelf_focus.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-shelf-focus-fix/accepted/shelf",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf.log",
+      "sourceStable": true
+    },
+    {
+      "name": "asset-units",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python -m unittest discover -s tests -p test_gjh_newmoon_assets.py -v",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/asset-units.log",
+      "sourceStable": true
+    },
+    {
+      "name": "ssot",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python scripts/check_ssot.py",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/ssot.log",
+      "sourceStable": true
+    },
+    {
+      "name": "modes",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_modes.py --output /private/tmp/gallery-shelf-focus-fix/accepted/modes --evidence /private/tmp/gallery-shelf-focus-fix/accepted/modes.json",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/modes.log",
+      "sourceStable": true
+    },
+    {
+      "name": "mode-review",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_mode_review.py --output /private/tmp/gallery-shelf-focus-fix/accepted/mode-review --evidence /private/tmp/gallery-shelf-focus-fix/accepted/mode-review.json",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/mode-review.log",
+      "sourceStable": true
+    },
+    {
+      "name": "navigation",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_context_navigation.py --output /private/tmp/gallery-shelf-focus-fix/accepted/navigation --evidence /private/tmp/gallery-shelf-focus-fix/accepted/navigation.json",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/navigation.log",
+      "sourceStable": true
+    },
+    {
+      "name": "accessibility",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_accessibility.py --axe-script /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-shelf-focus-fix/accepted/accessibility",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/accessibility.log",
+      "sourceStable": true
+    },
+    {
+      "name": "guide",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_guide.py",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/guide.log",
+      "sourceStable": true
+    },
+    {
+      "name": "compact-guide",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_compact_guide.py",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/compact-guide.log",
+      "sourceStable": true
+    },
+    {
+      "name": "bag",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_bag.py",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/bag.log",
+      "sourceStable": true
+    },
+    {
+      "name": "preview",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_preview_mode.py",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/preview.log",
+      "sourceStable": true
+    },
+    {
+      "name": "newmoon-review",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_newmoon_review.py --output /private/tmp/gallery-shelf-focus-fix/accepted/newmoon-review",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/newmoon-review.log",
+      "sourceStable": true
+    },
+    {
+      "name": "v11",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_v11.py",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/v11.log",
+      "sourceStable": true
+    },
+    {
+      "name": "shelf-strict",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_shelf_focus.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-shelf-focus-fix/accepted/shelf-strict",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf-strict.log",
+      "sourceStable": true
+    }
+  ],
+  "rawShelfEvidence": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf-strict/results.json",
+  "baselineEvidence": "/private/tmp/gallery-shelf-focus-fix/baseline-verified/results.json",
+  "baselineHashVerification": "28 files matched git show at the exact base; earlier worker baseline hash metadata was incorrect and was preserved, not relabelled.",
+  "resources": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "baselineCount": 52,
+      "candidateCount": 53,
+      "baselineDecodedBytes": 8898891,
+      "candidateDecodedBytes": 8916759,
+      "addedPaths": [
+        "assets/shelf-focus.js"
+      ],
+      "removedPaths": [],
+      "baselineDrawCalls": 145,
+      "candidateDrawCalls": 145
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "baselineCount": 52,
+      "candidateCount": 53,
+      "baselineDecodedBytes": 8898891,
+      "candidateDecodedBytes": 8916759,
+      "addedPaths": [
+        "assets/shelf-focus.js"
+      ],
+      "removedPaths": [],
+      "baselineDrawCalls": 180,
+      "candidateDrawCalls": 180
+    }
+  ],
+  "viewports": [
+    [
+      320,
+      568
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      667,
+      375
+    ],
+    [
+      844,
+      390
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      1440,
+      900
+    ],
+    [
+      650,
+      844
+    ],
+    [
+      651,
+      844
+    ],
+    [
+      599,
+      844
+    ],
+    [
+      600,
+      844
+    ],
+    [
+      844,
+      560
+    ],
+    [
+      844,
+      561
+    ]
+  ],
+  "shelfCoverage": {
+    "skusPerViewport": 4,
+    "projectedCanHitsPerSKU": 9,
+    "minimumInteractiveSize": 44,
+    "minimumFocusRingEnvelope": 8,
+    "fivePointTargetHits": true,
+    "completeVisibleTextInsideOwner": true,
+    "assetFallbacks": [
+      "shelf-unavailable",
+      "can-nz-425g-unavailable",
+      "can-au-425g-unavailable",
+      "can-sa-425g-unavailable",
+      "can-mx-454g-unavailable"
+    ],
+    "repeatEntries": 12,
+    "gpuAndResourceBalancesUnchanged": true
+  },
+  "hud": {
+    "baselineFullPromptHeight": 120.59375,
+    "finalFullPromptHeight": 121.59375,
+    "identityRowHeight": 26,
+    "actionRowHeight": 44,
+    "fullPromptDelta": 1,
+    "historical12Percent": "Advisory; no combined HUD 12% pass claimed.",
+    "physicalReturnAnimation": "Existing prompt suppression retained and photographed."
+  },
+  "physicalStock": {
+    "configured": 36,
+    "sourceInferredVisibleWhileOneHeld": 35,
+    "source": "Existing reserveProduct hides one shared instance until return; not a pixel count.",
+    "shelfAdd": "Only shared demo quantity changes. Held token is retained and physical return/re-pick passes."
+  },
+  "groundRestore": {
+    "heldKeyboard": "PASS",
+    "synchronousExactCameraRestore": true,
+    "resumedGroundDeltaY": 0.0,
+    "groundToleranceMetres": 1e-05
+  },
+  "trustedTouch": [
+    {
+      "trustedHeldTouch": "stale-move-end",
+      "status": "PASS",
+      "movementBeforeEntryMetres": 0.288576602935791,
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": 3,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 3,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "pointermove",
+          "id": 3,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 3,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "pointermove",
+          "id": 3,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "pointerup",
+          "id": 3,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        }
+      ],
+      "exactImmediateRestore": true,
+      "noResidualMovement": true,
+      "visibleFocus": "Shelf close and restored scene"
+    },
+    {
+      "trustedHeldTouch": "cancel-while-shelf",
+      "status": "PASS",
+      "movementBeforeEntryMetres": 0.288576602935791,
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": 4,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 4,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "pointermove",
+          "id": 4,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 4,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "scene"
+        },
+        {
+          "type": "pointercancel",
+          "id": 4,
+          "trusted": true,
+          "pointerType": "touch",
+          "target": "shelf-target"
+        }
+      ],
+      "exactImmediateRestore": true,
+      "noResidualMovement": true,
+      "visibleFocus": "Shelf close and restored scene"
+    }
+  ],
+  "resizeFocus": [
+    {
+      "from": [
+        390,
+        844
+      ],
+      "to": [
+        768,
+        1024
+      ],
+      "owner": "shelf-close"
+    },
+    {
+      "from": [
+        650,
+        844
+      ],
+      "to": [
+        651,
+        844
+      ],
+      "owner": "shelf-close"
+    },
+    {
+      "from": [
+        844,
+        560
+      ],
+      "to": [
+        844,
+        561
+      ],
+      "owner": "shelf-close"
+    }
+  ],
+  "visibility": [
+    {
+      "realWindowBlur": "PASS",
+      "documentHiddenObserved": false
+    },
+    {
+      "injectedDocumentHiddenFixture": "PASS",
+      "realDocumentHidden": "NOT_VERIFIED: actual window blur observed, document.hidden stayed false"
+    }
+  ],
+  "axeShelf": [
+    {
+      "axeNearby": {
+        "violations": [],
+        "passes": 11
+      }
+    },
+    {
+      "axeShelf": {
+        "violations": [],
+        "passes": 12
+      }
+    }
+  ],
+  "actuallyViewedFrames": [
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/nearby-sa-425g-320x568.png",
+      "sha256": "bd5ab2d1ec08c7d33c79f9c61571f1cf7763db5b2c89df9350bb0cbca79c0f92"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/nearby-sa-425g-390x844.png",
+      "sha256": "84532a0b40cccf71d7b201bfcb89312882e9f1af5326c0b5ba0a52b7478cc574"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/held-sa-425g-390x844.png",
+      "sha256": "65c080905f1d2e775f04c2d41de780cac0ec8458327924a61c2edb05b32897c3"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/returning-sa-425g-320x568.png",
+      "sha256": "16500d0c1810a91c0114099c2ef095743a17a8e3e47c49b0e7e1abfba367efaa"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-320x568.png",
+      "sha256": "f8956d1470517bb10b96b01c9541eb36fc728d26cdff05a4242c858d093ce5d3"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-390x844.png",
+      "sha256": "25000f4b7cfbbf13350d3d4a21d8ecbb707e518c43f8a2b47308d6cb6d77db07"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-nz-425g-667x375.png",
+      "sha256": "6b8824f9ae8bf2d789d88cbde836f5a75954bbd6f7dabb6df4f157bebdb0f1de"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-au-425g-844x390.png",
+      "sha256": "7d57904f45ca44e46d75f6ba87297ccdd595cc7ea3d62ace272208d3e6d4e3a3"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-mx-454g-768x1024.png",
+      "sha256": "9e41d59a2f559714c490d6a9c8b7059a9cef9d00c96007d36f7df56210be1a70"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-1440x900.png",
+      "sha256": "de0a757ae72e415263d8c5dc39555a5de86f21cabb0982a54791b625c36934ae"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-insets-667.png",
+      "sha256": "14a20715aad04b466780c89c1facc1f3d5e50192041e987032affe2075610b8a"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-650x844.png",
+      "sha256": "e7e27d652fd814799cc43a92b2e2ca6e420d9a44b0a44a52327afdb546b782d2"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-651x844.png",
+      "sha256": "7da9b8559712ec6930ae0370959772278d606d19ab7bc52c442950afd9bad26e"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-599x844.png",
+      "sha256": "ee027d110c8324717fdf7e34cf626e656b28cae67ceb536deff9bf9f60e81a15"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-600x844.png",
+      "sha256": "554788b74a668b0ea56ec951496560a37ea361a40f88bc6c209a9d8271f15b73"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-844x560.png",
+      "sha256": "a25fdfe76bf8138fe7a3177ecd9bf4190a71153891eb6f3ac0707fa28a36a135"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/shelf-target-focus-sa-425g-844x561.png",
+      "sha256": "3d3a73f3625d38bdcd7905a1a49dba301095c70c694c9a1a01a8e2981a6ce368"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/held-touch-cancel-while-shelf.png",
+      "sha256": "06cae296e9583b5349c9a9bc3dadcc4b54b2439e4d55adf67a539e57928775f4"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/held-sa-425g-320x568.png",
+      "sha256": "dabfd3a62ae24696642949ce950624e87ff977a41e58585b3d4728ad59debcd2"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/returning-sa-425g-390x844.png",
+      "sha256": "2b528c781909c52be8eb35e5d694c9f7ca81bc4411be2306163146313d3b956c"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/held-sa-425g-667x375.png",
+      "sha256": "d79052ca3a6c1e9a5ac3dc7b81c232e20b0b26b47d6dc4c8fcf525cc85026232"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/returning-sa-425g-667x375.png",
+      "sha256": "fe53093edc58e81802870f047eecfb70bc0c130067d7c47def1e4b9dff86b6f6"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/resize-map-focus-650x844-651x844.png",
+      "sha256": "3b61b72381e76c0f0e4ceb1750b3ea5f3698eeea977cda33e0a3d9d98a6cb558"
+    },
+    {
+      "path": "/private/tmp/gallery-shelf-focus-fix/accepted/shelf/can-mx-454g-unavailable.png",
+      "sha256": "609242e039391d1046ac89d15f3f948b8e597f58039b759fde0949269f7fc488"
+    },
+    {
+      "path": "/private/tmp/evidence/v11-compact-guide/after-390x680.png",
+      "sha256": "b7e3b8bd65bbb9044525d8ae52a40e677723b22b06bbc118cfc00fea7c290362"
+    }
+  ],
+  "rejectedIterations": [
+    {
+      "run": "iteration1",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/iteration1.log",
+      "reason": "Interim smoke only; old capture order produced a post-context-loss directory frame. Not final visual evidence."
+    },
+    {
+      "run": "iteration2",
+      "exitCode": 1,
+      "log": "/private/tmp/gallery-shelf-focus-fix/iteration2.log",
+      "reason": "Fixture incorrectly required the concise South Africa name to be contiguous in the full name containing piece count."
+    },
+    {
+      "run": "iteration3",
+      "exitCode": 1,
+      "log": "/private/tmp/gallery-shelf-focus-fix/iteration3.log",
+      "reason": "Fixture expected a visible Returning prompt; existing physical transfer intentionally hides it."
+    },
+    {
+      "run": "iteration4",
+      "exitCode": 1,
+      "log": "/private/tmp/gallery-shelf-focus-fix/iteration4.log",
+      "reason": "Canvas-only cancellation logger missed native pointercancel retargeted to Shelf after capture release."
+    },
+    {
+      "run": "iteration5",
+      "exitCode": 1,
+      "log": "/private/tmp/gallery-shelf-focus-fix/iteration5.log",
+      "reason": "Confirmed tablet nearby prompt overlapped joystick; moved only Shelf prompt to upper left."
+    },
+    {
+      "run": "iteration6",
+      "exitCode": 0,
+      "log": "/private/tmp/gallery-shelf-focus-fix/iteration6.log",
+      "reason": "Earlier full matrix passed; superseded by stricter Cart/text checks and the final inset layout correction."
+    },
+    {
+      "run": "final",
+      "exitCode": 130,
+      "log": "/private/tmp/gallery-shelf-focus-fix/final.log",
+      "reason": "Interrupted the test harness waiting for a nonexistent Bag-close event when stowing Cart; stow correctly requires explicit Close."
+    },
+    {
+      "run": "final-v2",
+      "exitCode": 1,
+      "log": "/private/tmp/gallery-shelf-focus-fix/final-v2.log",
+      "reason": "Text range exceeded an unclipped paragraph line box; corrected ownership to full sheet bounds without numerical tolerance."
+    },
+    {
+      "run": "final-v3",
+      "exitCode": 1,
+      "log": "/private/tmp/gallery-shelf-focus-fix/final-v3.log",
+      "reason": "Confirmed 667x375 software-inset status clipping; tightened only short-landscape Shelf spacing."
+    }
+  ],
+  "otherRetainedFailures": [
+    {
+      "log": "/private/tmp/gallery-shelf-focus-fix/compact-guide.log",
+      "baselineLog": "/private/tmp/gallery-shelf-focus-fix/compact-guide-baseline.log",
+      "cause": "Stale pre-navigation ShiftTab endpoint."
+    },
+    {
+      "log": "/private/tmp/gallery-shelf-focus-fix/compact-guide-final.log",
+      "baselineLog": "/private/tmp/gallery-shelf-focus-fix/compact-guide-baseline-height.log",
+      "cause": "Stale whole-dialog height ownership after shipped separate navigation footer. Original 75% content budget retained; strict complete dialog/footer/Close bounds added."
+    },
+    {
+      "log": "/private/tmp/gallery-shelf-focus-fix/v11.log",
+      "diagnostic": "/private/tmp/gallery-shelf-focus-fix/v11-hud-failure.json",
+      "cause": "Closed native details content retains layout boxes; only closed Map content excluded from overlap checks. Open Map and all actual visible targets remain checked."
+    },
+    {
+      "log": "/private/tmp/gallery-shelf-focus-fix/cart-probe.log",
+      "cause": "Live pre-open sampling contained a sub-micrometre Cart settling tick. Final test freezes before entry and still requires exact synchronous restoration."
+    }
+  ],
+  "limits": [
+    "Independent visual review passed 86/100; parent final repository/release gates remain.",
+    "No physical iPhone/Android, Safari, screen reader, real safe-area or device FPS verification.",
+    "Actual window blur observed; document.hidden remained false. Hidden-document branch used an explicit fixture, not an OS hidden event.",
+    "GL balances and draw-call counts are browser observations, not device memory/FPS measurements.",
+    "Mexico packaging placeholder and other established asset-fidelity limitations remain.",
+    "No task/version/generated file edits, staging, commit, push or publication by this writer. Parent Gallery/legacy/PWA passed; parent owns version/generation/artifact-prefix/Git/CI/live gates."
+  ],
+  "independentReview": {
+    "score": 86,
+    "scale": 100,
+    "status": "ACCEPTED pending parent release gates",
+    "blockingFindings": [],
+    "unresolvedFunctionalP2": [],
+    "sourcePrefixesVerified": true,
+    "evidence": "/private/tmp/gallery-shelf-focus-release/independent-review.json",
+    "sha256": "3a566840e1d48c8aad72f926c8868ebbcfbf67688fb3796e8467c5a80758cb9a",
+    "rubric": {
+      "hierarchy": [
+        18,
+        20
+      ],
+      "spacing": [
+        17,
+        20
+      ],
+      "typography": [
+        12,
+        15
+      ],
+      "colour": [
+        14,
+        15
+      ],
+      "consistency": [
+        13,
+        15
+      ],
+      "responsive": [
+        12,
+        15
+      ]
+    },
+    "viewedWidths": [
+      320,
+      390,
+      667,
+      844,
+      768,
+      1440
+    ]
+  },
+  "baselineCommand": {
+    "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_shelf_focus.py --baseline-ref 27414203881ba54d0a30231493699ad7bc4e11c7 --output /private/tmp/gallery-shelf-focus-fix/baseline-verified",
+    "exitCode": 0,
+    "log": "/private/tmp/gallery-shelf-focus-fix/baseline-verified.log"
+  },
+  "parentRepositoryQA": {
+    "owner": "Parent",
+    "results": "/private/tmp/gallery-shelf-focus-release/results.json",
+    "checks": [
+      {
+        "name": "gallery",
+        "command": [
+          "/private/tmp/gallery-task-qa-venv/bin/python",
+          "/private/tmp/gallery-mode-worker/run_legacy.py",
+          "tests/browser_gallery.py"
+        ],
+        "exitCode": 0,
+        "seconds": 21.01
+      },
+      {
+        "name": "legacy",
+        "command": [
+          "/private/tmp/gallery-task-qa-venv/bin/python",
+          "/private/tmp/gallery-mode-worker/run_legacy.py",
+          "tests/browser_gjh_demos.py",
+          "--axe-script",
+          "/private/tmp/gallery-a11y-tools/package/axe.min.js"
+        ],
+        "exitCode": 0,
+        "seconds": 35.58
+      },
+      {
+        "name": "pwa",
+        "command": [
+          "/private/tmp/gallery-task-qa-venv/bin/python",
+          "/private/tmp/gallery-mode-worker/run_legacy.py",
+          "tests/browser_pwa.py"
+        ],
+        "exitCode": 0,
+        "seconds": 37.36
+      }
+    ]
+  }
+}

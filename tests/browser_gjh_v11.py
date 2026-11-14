@@ -11,6 +11,7 @@ from pathlib import Path
 
 from PIL import Image
 from playwright.sync_api import sync_playwright
+from gjh_shelf_helpers import shelf_details
 
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / 'demos/corporate/gjh/v11'
@@ -39,7 +40,10 @@ def targets(page):
 
 def mobile_hud(page):
     overlaps = page.locator('.site-header,#keyboard-help,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt').evaluate_all('''els => {
-      const visible=els.map(el=>({name:el.id || el.className,rect:el.getBoundingClientRect()}))
+      // Closed details retain descendant layout boxes in current Chrome; those
+      // boxes are not painted map content. Keep all open-map overlap assertions.
+      const visible=els.filter(el=>!el.matches('.map-content') || el.closest('details').open)
+        .map(el=>({name:el.id || el.className,rect:el.getBoundingClientRect()}))
         .filter(({rect:r})=>r.width && r.height);
       return visible.flatMap((a,i)=>visible.slice(i+1).filter(b=>
         a.rect.left<b.rect.right && a.rect.right>b.rect.left &&
@@ -300,7 +304,9 @@ def run(capture=False):
                             page.keyboard.up('e')
                             assert not page.locator('#product-dialog').is_visible()
                             assert turning_near['yaw'] < near['yaw']-.1
-                            page.keyboard.press('f'); assert page.locator('#product-dialog').is_visible()
+                            page.keyboard.press('f')
+                            if zone == 'newmoon': shelf_details(page)
+                            assert page.locator('#product-dialog').is_visible()
                             assert page.locator('#product-dialog a').count()==1
                             assert page.locator('#product-dialog a').get_attribute('href')=='https://www.gjheshop.com/'
                             paused = state(page)

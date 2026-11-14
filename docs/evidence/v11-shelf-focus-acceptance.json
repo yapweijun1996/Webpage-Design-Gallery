@@ -1,0 +1,108 @@
+{
+  "task": "Phase 7 Shelf focus",
+  "application": {
+    "version": "1.1.39",
+    "build": "276a97a8850f6aaf"
+  },
+  "status": "LOCAL_ACCEPTANCE_PASS; remote publication is subsequent",
+  "baseCommit": "27414203881ba54d0a30231493699ad7bc4e11c7",
+  "parentChecks": [
+    {
+      "name": "gallery",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gallery.py"
+      ],
+      "exitCode": 0,
+      "seconds": 21.01
+    },
+    {
+      "name": "legacy",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_demos.py",
+        "--axe-script",
+        "/private/tmp/gallery-a11y-tools/package/axe.min.js"
+      ],
+      "exitCode": 0,
+      "seconds": 35.58
+    },
+    {
+      "name": "pwa",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_pwa.py"
+      ],
+      "exitCode": 0,
+      "seconds": 37.36
+    }
+  ],
+  "pythonTests": {
+    "count": 47,
+    "exitCode": 0
+  },
+  "generator": "PASS",
+  "ssot": "PASS; no new debt",
+  "productionPrefix": {
+    "status": "PASS",
+    "viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        1440,
+        900
+      ]
+    ],
+    "allFourSKUs": true,
+    "exactRestore": true,
+    "bagAndDirectoryNav": true,
+    "docsTestsExcluded": true,
+    "moduleMatchesSource": true
+  },
+  "focusedEvidence": "v11-shelf-focus.json",
+  "independentReview": "v11-shelf-focus-independent-review.json",
+  "runtimeSHA256": {
+    "demos/corporate/gjh/v11/index.html": "745fe702069b959e3a04f6c7fc3037aee6546376ca9abba2eb10163a75bca64e",
+    "demos/corporate/gjh/v11/script.js": "edf2e0fe54dd8749df345f3fc356bd9c70ff96f6e79ab954c60d8f4946cc0052",
+    "demos/corporate/gjh/v11/style.css": "2b8af8ac7443154b0c069e790ad63911ce0ce16bcddd60c82a34e7228e0ddc2d",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/ui.js": "866697b3327a26bc27d062943177acc8430235672a6547a70477ec0173a032b8",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/products.js": "809e414b75ef821c57ba2111884b7ca7b4dc9e7f2e44baa7f44098c716a38742",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/world.js": "12e3658b4b4afef49e6f9fcf723e9fcca5a754f58dfcf2c9d41b99b94a915487",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "085c8782a9a2818f702708c6f2322a14c420db628d4b119020bfeb52796663c4",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "ccbee77666249b090bb73faf105ba662b275b43c4ac973597cc71debb59022c9",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "048891652f549fc893e83caf362d1ad03d4a287ab23958232fe83279437fe10b",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/player.js": "17958925972120e2164eb3b031efebe362416e9652527c27bd7ed637dd6aeb9f",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "limits": [
+    "Independent visual review passed 86/100; parent final repository/release gates remain.",
+    "No physical iPhone/Android, Safari, screen reader, real safe-area or device FPS verification.",
+    "Actual window blur observed; document.hidden remained false. Hidden-document branch used an explicit fixture, not an OS hidden event.",
+    "GL balances and draw-call counts are browser observations, not device memory/FPS measurements.",
+    "Mexico packaging placeholder and other established asset-fidelity limitations remain.",
+    "No task/version/generated file edits, staging, commit, push or publication by this writer. Parent Gallery/legacy/PWA passed; parent owns version/generation/artifact-prefix/Git/CI/live gates."
+  ]
+}

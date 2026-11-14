@@ -15,6 +15,7 @@ import threading
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from gjh_shelf_helpers import shelf_details
 
 from browser_gjh_all_seats import move
 from browser_gjh_guide import Quiet, ROOT, state
@@ -390,6 +391,8 @@ def run():
                 held = state(page)['character']['physicalProduct']
                 assert held['phase'] == 'held'
                 page.locator('#inspect').click()
+                capture('held product Shelf', 'shelf', True)
+                shelf_details(page)
                 capture('held product Inspect', 'inspect', True)
                 page.locator('#product-close').click()
                 capture('held product Inspect close', 'explore', False)

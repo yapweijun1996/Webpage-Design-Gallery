@@ -1,12 +1,13 @@
 /** Gameplay belongs to the player; UI overlays suspend it without changing posture. */
 const BASE_EDGES = Object.freeze({explore: ['seated', 'cart'], seated: ['explore'], cart: ['explore']});
-const OVERLAYS = new Set(['menu', 'inspect', 'shop']);
-const SIGNALS = ['seated', 'cartActive', 'panelOpen', 'productOpen', 'bagOpen'];
+const OVERLAYS = new Set(['menu', 'inspect', 'shop', 'shelf']);
+const SIGNALS = ['seated', 'cartActive', 'panelOpen', 'productOpen', 'bagOpen', 'shelfOpen'];
 
 export function deriveMode(s) {
   if (s.productOpen) return 'inspect';
   if (s.bagOpen) return 'shop';
   if (s.panelOpen) return 'menu';
+  if (s.shelfOpen) return 'shelf';
   if (s.seated) return 'seated';
   if (s.cartActive) return 'cart';
   return 'explore';
@@ -54,6 +55,7 @@ export function createModes({onExit = () => {}, onCleanup = () => {}, onEnter = 
       if (typeof next !== 'string' || (!OVERLAYS.has(next) && !Object.hasOwn(BASE_EDGES, next))) return reject(next, reason);
       if (next === current()) return true;
       if (layers.length > 1 && next === layers.at(-2)) return commit(layers.slice(0, -1), reason);
+      if (next === 'shelf' && layers.length > 1) return reject(next, reason);
       if (!OVERLAYS.has(next) || (layers.length > 1 && current() !== 'menu') || layers.includes(next))
         return reject(next, reason);
       return commit([...layers, next], reason);
@@ -63,7 +65,8 @@ export function createModes({onExit = () => {}, onCleanup = () => {}, onEnter = 
     observe(signals, reason = 'UI/player observation') {
       if (!signals || typeof signals !== 'object' || Array.isArray(signals) || Object.keys(signals).some(key => !SIGNALS.includes(key)) ||
           SIGNALS.some(key => typeof signals[key] !== 'boolean') ||
-          (signals.seated && signals.cartActive) || (signals.productOpen && signals.bagOpen))
+          (signals.seated && signals.cartActive) || (signals.productOpen && signals.bagOpen) ||
+          (signals.shelfOpen && (signals.panelOpen || signals.productOpen || signals.bagOpen)))
         return reject('invalid-observation', reason);
       const base = signals.seated ? 'seated' : signals.cartActive ? 'cart' : 'explore';
       if (base !== layers[0] && !BASE_EDGES[layers[0]].includes(base)) return reject(base, reason);
@@ -71,6 +74,11 @@ export function createModes({onExit = () => {}, onCleanup = () => {}, onEnter = 
       if (signals.panelOpen) next.push('menu');
       if (signals.productOpen) next.push('inspect');
       if (signals.bagOpen) next.push('shop');
+      if (signals.shelfOpen) next.push('shelf');
+      // Shelf is a standalone presentation overlay, never a retained modal owner.
+      // Its controller restores it before any other blocking surface can enter.
+      if (current() === 'shelf' && next.at(-1) !== 'shelf' && next.length > 1) return reject(next.at(-1), reason);
+      if (next.at(-1) === 'shelf' && layers.length > 1 && current() !== 'shelf') return reject('shelf', reason);
       // Inspect and Shop can return to retained layers, but cannot replace each
       // other directly. Their native dialogs must close before opening another.
       if (['inspect', 'shop'].includes(current()) && ['inspect', 'shop'].includes(next.at(-1)) && current() !== next.at(-1))

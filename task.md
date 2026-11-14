@@ -113,7 +113,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] Explicit mode state machine (Explore, Menu, Inspect, Seated, Cart, Shop) with enter, exit, cleanup, restore.
 - [x] Mode-state review and focused browser verification: `docs/v11-mode-state-review.md`.
 - [x] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
-- [ ] Shelf focus mode (proposal, depends on the mode state machine): one-page scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
+- [x] Shelf focus mode: implemented scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
 - [ ] Interaction target highlight and distance hint.
 - [ ] WebGL context-loss recovery and low-end quality tiers.
 - [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
@@ -338,3 +338,23 @@ See [acceptance receipt](docs/evidence/v11-context-navigation-acceptance.json) a
 [implementation review](docs/v11-context-navigation-review.md). This completes
 only contextual navigation; physical devices, screen readers, packaging fidelity,
 Shelf focus and graphics recovery/quality tiers retain their separate gates.
+
+## Shelf focus — 2026-11-15
+
+Application 1.1.39 adds the canonical Shelf presentation, whole-shelf selection
+and full-shelf framing for the four existing SKUs. It reuses M056 assets and
+preserves all 36 configured placements, physical reservation/return and the
+quantity-only Demo bag. A temporary camera preserves player/camera state; native
+detail, Bag, List and interruption handoffs clean up before entering another mode.
+The compact nearby unit measures 121.59px versus its 120.59px baseline, retaining
+two 44px actions, a small packshot and the visible physical-product notice.
+Strict 12-viewport four-SKU checks, five asset-failure cases, 13 mode units, 165
+mode snapshots, 15 mode-review scenarios, existing 70 axe scans plus Shelf,
+Guide/Bag/preview/New Moon/full V11 checks pass. Independent review scores 86/100.
+Parent 47 Python tests, Gallery, 28 legacy cases, four no-JavaScript paths, PWA,
+generation/SSOT and two-viewport production-prefix journeys also pass. See
+[acceptance](docs/evidence/v11-shelf-focus-acceptance.json) and
+[review](docs/v11-shelf-focus-review.md). Actual window blur was observed; hidden
+handling is fixture-backed. Physical devices, Safari, screen readers, device FPS
+and full packaging fidelity remain unverified. This completes Shelf only;
+general target-distance guidance and graphics recovery/tiers remain separate.

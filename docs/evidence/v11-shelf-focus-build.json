@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "prefix": "gallery",
+      "checks": [
+        {
+          "sku": "nz-425g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        },
+        {
+          "sku": "au-425g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        },
+        {
+          "sku": "sa-425g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        },
+        {
+          "sku": "mx-454g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        }
+      ],
+      "bag": "Bag (4)",
+      "directoryAndNav": "PASS",
+      "illegal": 0,
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "prefix": "gallery",
+      "checks": [
+        {
+          "sku": "nz-425g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        },
+        {
+          "sku": "au-425g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        },
+        {
+          "sku": "sa-425g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        },
+        {
+          "sku": "mx-454g",
+          "completeShelfSheet": "PASS",
+          "exactRestore": "PASS",
+          "sharedBagOnly": "PASS"
+        }
+      ],
+      "bag": "Bag (4)",
+      "directoryAndNav": "PASS",
+      "illegal": 0,
+      "pageErrors": []
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createModes, deriveMode} from '../demos/corporate/gjh/v11/assets/modes.js';
 
 const observation = (changes = {}) => ({seated: false, cartActive: false,
-  productOpen: false, bagOpen: false, panelOpen: false, ...changes});
+  productOpen: false, bagOpen: false, panelOpen: false, shelfOpen: false, ...changes});
 
 function fixture() {
   const calls = [];
@@ -65,7 +65,7 @@ test('repeated observations and requests are idempotent without lifecycle effect
 
 test('commands cannot manufacture gameplay or bypass the retained underlay', () => {
   const {modes, calls} = fixture();
-  for (const next of ['seated', 'cart', 'shelf', 'unknown', null, undefined, {}, Symbol('mode')]) {
+  for (const next of ['seated', 'cart', 'unknown', null, undefined, {}, Symbol('mode')]) {
     assert.equal(modes.request(next, 'unsupported command'), false);
     assert.equal(modes.current(), 'explore');
   }
@@ -80,7 +80,7 @@ test('commands cannot manufacture gameplay or bypass the retained underlay', () 
   assert.deepEqual(calls, []);
   assert.equal(modes.request('menu', 'close product'), true);
   assert.equal(modes.request('explore', 'close menu'), true);
-  assert.equal(modes.illegalCount(), 13);
+  assert.equal(modes.illegalCount(), 12);
 });
 
 test('invalid observations fail atomically with no lifecycle effects', () => {
@@ -141,7 +141,7 @@ test('history is bounded and distinguishes restores, rejection and interruptions
     modes.observe(observation({productOpen: true}));
     modes.observe(observation());
   }
-  modes.request('shelf', 'reserved');
+  modes.request('unknown', 'unsupported');
   modes.interrupt('blur');
   assert.equal(modes.history().length, 20);
   assert.deepEqual(modes.history().slice(-3).map(entry => entry.kind), ['restore', 'reject', 'interrupt']);
@@ -150,6 +150,66 @@ test('history is bounded and distinguishes restores, rejection and interruptions
   assert.equal(modes.history().length, 20);
   assert.equal(Object.isFrozen(modes.history()[0]), true);
   assert.equal(modes.sync, undefined, 'forced-invalid sync back door is removed');
+});
+
+test('Shelf suspends each real base and restores through the same ordered lifecycle', () => {
+  for (const base of ['explore', 'cart', 'seated']) {
+    const {modes, calls} = fixture();
+    const actual = observation({seated: base === 'seated', cartActive: base === 'cart'});
+    modes.observe(actual); calls.length = 0;
+    assert.equal(modes.observe({...actual, shelfOpen: true}), true);
+    assert.deepEqual(modes.layers(), [base, 'shelf']);
+    assert.equal(modes.paused(), true);
+    assert.deepEqual(calls.map(c => c[0]), ['Exit', 'Cleanup', 'Suspend', 'Enter']);
+    calls.length = 0;
+    assert.equal(modes.observe({...actual, shelfOpen: true}), true);
+    assert.deepEqual(calls, []);
+    modes.interrupt('held input');
+    assert.deepEqual(calls.map(c => c[0]), ['Cleanup']);
+    calls.length = 0;
+    assert.equal(modes.observe(actual), true);
+    assert.deepEqual(calls.map(c => c[0]), ['Exit', 'Cleanup', 'Enter', 'Restore']);
+    assert.equal(modes.current(), base);
+    assert.equal(modes.illegalCount(), 0);
+  }
+});
+
+test('complete boolean observations validate all Shelf combinations atomically', () => {
+  const keys = Object.keys(observation());
+  for (let bits = 0; bits < 2 ** keys.length; bits++) {
+    const signals = Object.fromEntries(keys.map((key, i) => [key, Boolean(bits & (1 << i))]));
+    const valid = !(signals.seated && signals.cartActive) && !(signals.productOpen && signals.bagOpen) &&
+      !(signals.shelfOpen && (signals.panelOpen || signals.productOpen || signals.bagOpen));
+    const {modes, calls} = fixture();
+    assert.equal(modes.observe(signals), valid, JSON.stringify(signals));
+    if (valid) assert.equal(modes.current(), deriveMode(signals));
+    else { assert.deepEqual(calls, []); assert.deepEqual(modes.layers(), ['explore']); }
+  }
+  for (const key of keys) for (const invalid of [undefined, null, 0, 1, 'true', {}, []]) {
+    const {modes, calls} = fixture();
+    assert.equal(modes.observe(observation({[key]: invalid})), false);
+    assert.deepEqual(calls, []);
+  }
+});
+
+test('Shelf cannot be stacked with or directly replaced by another overlay', () => {
+  for (const overlay of ['panelOpen', 'productOpen', 'bagOpen']) {
+    const {modes, calls} = fixture();
+    modes.observe(observation({shelfOpen: true})); calls.length = 0;
+    assert.equal(modes.observe(observation({[overlay]: true})), false);
+    assert.deepEqual(calls, []);
+    assert.deepEqual(modes.layers(), ['explore', 'shelf']);
+    modes.observe(observation());
+    modes.observe(observation({[overlay]: true})); calls.length = 0;
+    assert.equal(modes.observe(observation({shelfOpen: true})), false);
+    assert.equal(modes.request('shelf'), false);
+    assert.deepEqual(calls, []);
+    modes.observe(observation());
+    assert.equal(modes.observe(observation({shelfOpen: true})), true);
+  }
+  const modes = createModes();
+  assert.equal(modes.request('shelf'), true);
+  assert.equal(modes.request('explore'), true);
 });
 
 test('derived mode priority agrees with accepted observation', () => {

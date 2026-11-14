@@ -1,6 +1,7 @@
 """Published-demo integration checks and rendered review outputs for four conceptual cans."""
 from browser_gjh_budget import ROOT, Quiet, functools, http, threading, sync_playwright, os, json
 from browser_gjh_v11 import drive
+from gjh_shelf_helpers import shelf_details
 from pathlib import Path
 import argparse
 
@@ -28,7 +29,7 @@ def run():
       drive(page,min(50,abs(delta)/2.65*1000+17),right=1 if delta>0 else -1)
      state=page.evaluate('__mall.state');assert abs(state['x']-x)<.12,state
      drive(page,17);assert page.evaluate('__mall.state.nearby')==f'new-moon-{sku}-front'
-     page.locator('#scene').focus();page.keyboard.press('f');page.locator('#product-dialog').wait_for(state='visible')
+     page.locator('#scene').focus();page.keyboard.press('f');shelf_details(page);page.locator('#product-dialog').wait_for(state='visible')
      title=page.locator('#product-title').inner_text();expected=page.locator(f'[data-product="new-moon-{sku}-front"]').get_attribute('data-product-name');assert title==expected
      assert 'unofficial photo-derived demo' in page.locator('#product-description').inner_text()
      if sku=='mx-454g':assert '121-degree' in page.locator('#product-description').inner_text()

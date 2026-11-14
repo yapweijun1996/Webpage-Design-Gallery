@@ -110,6 +110,10 @@ export async function addProducts(T, scene, textures, brass) {
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
   }
   const interactables = [], stock = new Map();
+  // The same bounds own collision, focus framing and the projected whole-shelf target.
+  const shelves = shelfXs.map((x, index) => Object.freeze({id: `new-moon-${cans[index].sku}-front`,
+    min: Object.freeze({x: x - shelfBounds.x / 2, y: 0, z: -9.25 - shelfBounds.z / 2}),
+    max: Object.freeze({x: x + shelfBounds.x / 2, y: shelfBounds.y, z: -9.25 + shelfBounds.z / 2})}));
   canRecords.forEach((record, productIndex) => {
     const sku = cans[productIndex].sku, x = shelfXs[productIndex], placements = [];
     for (const y of shelfTops) for (const dx of [-.55, 0, .55]) placements.push(new T.Vector3(x + dx, y, -9.23));
@@ -122,7 +126,7 @@ export async function addProducts(T, scene, textures, brass) {
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {shelfPositions:shelfXs, reserveProduct(id) {
+  return {shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);
     if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
     entry.reserved = true;
@@ -142,7 +146,7 @@ export async function addProducts(T, scene, textures, brass) {
     for(const primitive of record.primitives){const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);group.add(mesh);}
     // Geometry/materials are shared with the shelf: never dispose on gesture completion.
     return group;
-  }, interactables, colliders: shelfXs.map(x => ({x, y: shelfBounds.y / 2, z: -9.25, sx: shelfBounds.x, sy: shelfBounds.y, sz: shelfBounds.z})), assets: Object.freeze({
+  }, interactables, colliders: shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})), assets: Object.freeze({
     shelf: Object.freeze({model:'GJH-M056', lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4, primitives: shelfRecord.primitives.length, dimensions: shelfRecord.size}),
     cans: Object.freeze(Object.fromEntries(canRecords.map((record, index) => {
       const x = shelfXs[index];

@@ -221,6 +221,13 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     return true;
   }
   return {body, capsule, camera, sit, stand, setCart, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+    renderShelf(draw) {
+      // The visitor can stand directly in front of the selected shelf. Exclude
+      // only that presentation during the draw; retain all authored/gameplay state.
+      const visible = visual.visible, contactVisible = contact.visible;
+      visual.visible = contact.visible = false;
+      try { draw(); } finally { visual.visible = visible; contact.visible = contactVisible; }
+    },
     pickProduct: token=>{clearInput();injected=null;return character.pickProduct?.(token);},
     returnProduct: ()=>character.returnProduct?.(),
     customize: changes => character.customize?.(changes),

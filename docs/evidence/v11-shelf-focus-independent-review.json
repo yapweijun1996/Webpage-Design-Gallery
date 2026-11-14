@@ -1,0 +1,68 @@
+{
+  "reviewer": "/root/lod_review",
+  "independent": true,
+  "score": 86,
+  "scale": 100,
+  "status": "ACCEPTED pending parent release gates",
+  "blockingFindings": [],
+  "unresolvedFunctionalP2": [],
+  "resolved": [
+    "Nearby HUD density: 121.59px vs 120.59px baseline",
+    "Disappearing focused header Map on Shelf breakpoint resize",
+    "Complete Shelf/Sheet text and transparent target focus-ring clearance"
+  ],
+  "rubric": {
+    "hierarchy": [
+      18,
+      20
+    ],
+    "spacing": [
+      17,
+      20
+    ],
+    "typography": [
+      12,
+      15
+    ],
+    "colour": [
+      14,
+      15
+    ],
+    "consistency": [
+      13,
+      15
+    ],
+    "responsive": [
+      12,
+      15
+    ]
+  },
+  "framesRoot": "/private/tmp/gallery-shelf-focus-fix/accepted",
+  "viewedWidths": [
+    320,
+    390,
+    667,
+    844,
+    768,
+    1440
+  ],
+  "sourcePrefixes": {
+    "shelf-focus.js": "085c8782a9a2818f",
+    "ui.js": "866697b3327a26bc",
+    "script.js": "edf2e0fe54dd8749",
+    "modes.js": "4cf405da13500774",
+    "products.js": "809e414b75ef821c",
+    "player.js": "17958925972120e2"
+  },
+  "assessment": {
+    "ownership": "Canonical pause owner, cloned presentation camera, preserved physical reservations and shared geometry; synchronous handoffs",
+    "security": "Text-only DOM, fixed existing SKU mapping, no new external-fetch or untrusted HTML path",
+    "accessibility": "Inspected stage rings and complete Sheet text; compact HUD retains two 44px actions and physical-product notice",
+    "performance": "Strict 12-viewport report and 14 source-stable QA runs passed; GPU balances are laboratory observations"
+  },
+  "limits": [
+    "Physical devices, Safari and screen readers not run",
+    "Device FPS/driver-memory certification not claimed",
+    "Full packaging fidelity remains unverified"
+  ]
+}

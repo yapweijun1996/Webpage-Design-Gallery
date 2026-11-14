@@ -203,7 +203,7 @@ export async function createWorld(T, R, physics, shadows) {
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   const doors = [], interactables = [];
   let createCollectProp = () => null, reserveProduct = () => null;
-  let worldProductAssets = Object.freeze({status: 'not-loaded'});
+  let worldProductAssets = Object.freeze({status: 'not-loaded'}), shelves = [];
   // Original decorative kiosk beside the entrance, outside the central walking line.
   // The actual wayfinding interaction opens the existing three-store DOM map.
   if (!furnishings.place('kiosk', -3.3, 9.9, 1, -1)) {
@@ -324,7 +324,7 @@ export async function createWorld(T, R, physics, shadows) {
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
         sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true);
       }
-      worldProductAssets = productDisplay.assets; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
+      worldProductAssets = productDisplay.assets; shelves = productDisplay.shelves; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
       plant(x - 3.6, -2.3);
     } else {
       const cover = `${zone}-brand-cover.jpg`;
@@ -396,5 +396,5 @@ export async function createWorld(T, R, physics, shadows) {
     }
   }
   interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.1,seat})));
-  return {scene, doors, seats, interactables, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, seats, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
 }
