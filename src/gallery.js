@@ -22,6 +22,46 @@ function initialPreviewDevice() {
   return matches('--breakpoint-medium') ? 'tablet' : 'desktop';
 }
 
+function initSettings() {
+  const settings = document.querySelector('.gallery-settings');
+  if (!settings) return;
+  const summary = settings.querySelector('summary');
+  const compact = matchMedia('(max-width: 1000px)');
+  const sync = () => {
+    if (compact.matches && settings.contains(document.activeElement)) summary.focus();
+    settings.open = !compact.matches;
+  };
+  sync();
+  compact.addEventListener('change', sync);
+  // Reveal the verified update action instead of leaving it under settings.
+  window.addEventListener('wdg:updateavailable', () => {
+    if (compact.matches && settings.open) {
+      const restore = settings.contains(document.activeElement);
+      settings.open = false;
+      if (restore) summary.focus();
+    }
+  });
+  settings.addEventListener('toggle', () => {
+    if (!compact.matches) return;
+    if (settings.open && document.activeElement === summary) {
+      settings.querySelector('select:not([disabled])')?.focus();
+    } else if (!settings.open && settings.contains(document.activeElement)) summary.focus();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && compact.matches && settings.open) {
+      settings.open = false;
+      summary.focus();
+    }
+  });
+  document.addEventListener('click', (event) => {
+    if (compact.matches && settings.open && !settings.contains(event.target)) {
+      const restore = settings.contains(document.activeElement);
+      settings.open = false;
+      if (restore) summary.focus();
+    }
+  });
+}
+
 function initCompanies() {
   const cards = [...document.querySelectorAll('.company-card')];
   const search = document.querySelector('#company-search');
@@ -245,6 +285,8 @@ async function initCompare() {
     update();
   } catch (error) { errorState(container, error.message); }
 }
+
+initSettings();
 
 if (main?.dataset.page === 'companies') initCompanies();
 if (main?.dataset.page === 'company') initCompany();

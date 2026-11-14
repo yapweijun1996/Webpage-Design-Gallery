@@ -1,4 +1,6 @@
 """Real service-worker lifecycle tests against two releases under a project prefix."""
+from gallery_browser_helpers import open_settings, select_preference
+
 
 import functools
 import http.server
@@ -102,6 +104,7 @@ def run():
                 page.reload(wait_until="networkidle")
                 page.wait_for_function("() => navigator.serviceWorker.controller !== null")
                 assert page.locator('meta[name="app-build"]').get_attribute("content") == release_a["build"]
+                open_settings(page)
                 assert page.locator("#check-update").is_visible()
                 await_status = "() => document.querySelector('#app-status').textContent.includes('Up to date')"
                 page.wait_for_function(await_status)
@@ -118,6 +121,7 @@ def run():
                     page.set_viewport_size({"width": width, "height": height})
                     page.evaluate("document.activeElement.blur(); scrollTo(0, 0)")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
+                    open_settings(page)
                     assert page.locator("#check-update").bounding_box()["height"] >= 44
                     assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport
                     assert page.evaluate("""() => {
@@ -128,7 +132,8 @@ def run():
                     assert page.locator('meta[name="theme-color"]').get_attribute("content") == page.locator('.site-header').evaluate('(element) => getComputedStyle(element).backgroundColor')
                     assert page.locator(".app-chrome").evaluate("e => getComputedStyle(e).transitionDuration") == "0s"
                     page.screenshot(path=str(screenshots / f"company-{width}.png"), full_page=True)
-                    page.evaluate("scrollTo(0, innerHeight + 200)")
+                    page.keyboard.press("Escape")
+                    page.evaluate("document.activeElement.blur(); scrollTo(0, innerHeight + 200)")
                     page.wait_for_function("() => document.querySelector('.app-chrome').classList.contains('is-hidden')")
                     assert page.locator("#scroll-top").is_visible()
                     page.evaluate("scrollBy(0, -100)")
@@ -176,11 +181,13 @@ def run():
                 page.evaluate("caches.open('other-app-sentinel')")
                 server.release_directory = folder / "b"
                 server.mixed_files = {"version.json": (a / "version.json").read_bytes()}
+                open_settings(page)
                 page.locator("#check-update").click()
                 page.wait_for_function("() => !document.querySelector('#check-update').disabled")
                 assert page.evaluate("navigator.serviceWorker.getRegistration().then(r => !r.waiting)")
                 assert page.locator("#update-notice").is_hidden()
                 server.mixed_files = {"index.html": (a / "index.html").read_bytes()}
+                open_settings(page)
                 page.locator("#check-update").click()
                 page.wait_for_function("() => !document.querySelector('#check-update').disabled")
                 assert page.evaluate("navigator.serviceWorker.getRegistration().then(r => !r.waiting)")
@@ -189,6 +196,7 @@ def run():
                 assert not any(release_b["build"] in key for key in keys)
                 evidence["checks"]["identityMismatchAndMixedFileHashFailClosed"] = "PASS"
                 server.mixed_files = {}
+                open_settings(page)
                 page.locator("#check-update").click()
                 try:
                     page.wait_for_function("() => !document.querySelector('#update-notice').hidden")
@@ -202,8 +210,8 @@ def run():
                 second.wait_for_function("() => !document.querySelector('#update-notice').hidden")
                 page.screenshot(path=str(screenshots / "update-available-375.png"), full_page=True)
                 page.wait_for_selector('html[data-preferences-ready]')
-                page.select_option('#theme-select', 'dark')
-                page.select_option('#language-select', 'zh-Hans')
+                select_preference(page, '#theme-select', 'dark')
+                select_preference(page, '#language-select', 'zh-Hans')
                 page.locator('input[value="v5"]').check()
                 page.locator('#apply-update').click()
                 page.wait_for_function("() => document.querySelector('#app-status').textContent.includes('请先清除比较选择')")
@@ -223,7 +231,7 @@ def run():
                 page.wait_for_selector('html[data-preferences-ready]')
                 assert page.locator('html').get_attribute('lang') == 'zh-Hans'
                 assert page.locator('html').get_attribute('data-theme') == 'dark'
-                page.select_option('#language-select', 'en')
+                select_preference(page, '#language-select', 'en')
                 evidence['checks']['languageAndThemeSurviveVerifiedUpdate'] = 'PASS'
                 assert second.locator('meta[name="app-build"]').get_attribute("content") == release_a["build"]
                 keys = page.evaluate("caches.keys()")
@@ -234,6 +242,7 @@ def run():
                 evidence["checks"]["onlyOwnedOldCachesDeleted"] = "PASS"
                 second.close()
                 server.release_directory = folder / "c"
+                open_settings(page)
                 page.locator("#check-update").click()
                 page.wait_for_function("() => !document.querySelector('#update-notice').hidden")
                 page.locator("#apply-update").click()

@@ -169,7 +169,8 @@
     "Preferences apply to this tab. Storage is unavailable.": "Pilihan digunakan pada tab ini. Storan tidak tersedia.",
     "Clear your comparison selections before updating so they are not lost.": "Kosongkan pilihan perbandingan sebelum mengemas kini supaya pilihan tidak hilang.",
     "Sort by": "Susun mengikut",
-    "Company pages": "Halaman syarikat"
+    "Company pages": "Halaman syarikat",
+    "Settings": "Tetapan"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "Memaparkan {shown} daripada {total} syarikat sepadan",
@@ -216,6 +217,7 @@
     "{name} / Compare": "{name} / Bandingkan",
     "{title} — {name} design concept": "{title} — Konsep reka bentuk {name}",
     "Build {build}": "Binaan {build}",
-    ": {title}": ": {title}"
+    ": {title}": ": {title}",
+    "Independent, unofficial concepts. Not affiliated with or endorsed by {name}.": "Konsep bebas dan tidak rasmi. Tidak berkaitan dengan atau disokong oleh {name}."
   }
 }

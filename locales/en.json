@@ -169,7 +169,8 @@
     "Preferences apply to this tab. Storage is unavailable.": "Preferences apply to this tab. Storage is unavailable.",
     "Clear your comparison selections before updating so they are not lost.": "Clear your comparison selections before updating so they are not lost.",
     "Sort by": "Sort by",
-    "Company pages": "Company pages"
+    "Company pages": "Company pages",
+    "Settings": "Settings"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "Showing {shown} of {total} matching company",
@@ -216,6 +217,7 @@
     "{name} / Compare": "{name} / Compare",
     "{title} — {name} design concept": "{title} — {name} design concept",
     "Build {build}": "Build {build}",
-    ": {title}": ": {title}"
+    ": {title}": ": {title}",
+    "Independent, unofficial concepts. Not affiliated with or endorsed by {name}.": "Independent, unofficial concepts. Not affiliated with or endorsed by {name}."
   }
 }

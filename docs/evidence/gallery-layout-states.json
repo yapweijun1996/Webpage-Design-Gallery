@@ -1,0 +1,32 @@
+[
+  {
+    "width": 390,
+    "headerHeight": 73,
+    "firstCard": {
+      "x": 22,
+      "y": 335.65625,
+      "width": 346,
+      "height": 400.1875
+    }
+  },
+  {
+    "width": 639,
+    "headerHeight": 73,
+    "firstCard": {
+      "x": 22,
+      "y": 335.875,
+      "width": 289.5,
+      "height": 422.96875
+    }
+  },
+  {
+    "width": 1440,
+    "headerHeight": 92.1875,
+    "firstCard": {
+      "x": 120,
+      "y": -74.578125,
+      "width": 592,
+      "height": 588.9375
+    }
+  }
+]

@@ -42,6 +42,7 @@ async function offerUpdate(worker) {
     target = release;
     document.querySelector('#update-message').textContent = 'New version ready: ' + label(release) + '. This page stays open until you choose to update.';
     applyButton.textContent = 'Update to ' + label(release);
+    window.dispatchEvent(new Event('wdg:updateavailable'));
     notice.hidden = false;
     chrome.classList.remove('is-hidden');
     status.textContent = 'Update available · ' + label(current) + ' to ' + label(release);

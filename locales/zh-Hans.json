@@ -169,7 +169,8 @@
     "Preferences apply to this tab. Storage is unavailable.": "偏好已应用于此标签页。无法持久保存。",
     "Clear your comparison selections before updating so they are not lost.": "请先清除比较选择，再更新应用，以免丢失选择。",
     "Sort by": "排序方式",
-    "Company pages": "公司分页"
+    "Company pages": "公司分页",
+    "Settings": "设置"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "显示 {total} 家匹配公司中的 {shown} 家",
@@ -216,6 +217,7 @@
     "{name} / Compare": "{name} / 比较",
     "{title} — {name} design concept": "{title} — {name} 设计概念",
     "Build {build}": "构建 {build}",
-    ": {title}": ": {title}"
+    ": {title}": ": {title}",
+    "Independent, unofficial concepts. Not affiliated with or endorsed by {name}.": "独立、非官方设计概念。与 {name} 无隶属关系，亦未获其背书。"
   }
 }

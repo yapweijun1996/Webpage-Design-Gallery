@@ -1,0 +1,45 @@
+{
+  "build": {
+    "version": "1.1.30",
+    "build": "13fb6636389bbdb3"
+  },
+  "checks": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "routes": 6,
+      "status": "PASS"
+    }
+  ],
+  "pageErrors": []
+}

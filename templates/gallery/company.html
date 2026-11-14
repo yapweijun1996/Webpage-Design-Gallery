@@ -6,13 +6,14 @@
   </section>
   <section class="design-section container" data-company="$company_id" aria-labelledby="designs-heading">
     <div class="collection-heading"><div><p class="eyebrow">ONE COMPANY. DIFFERENT PERSPECTIVES.</p><h2 id="designs-heading">Explore the designs<span class="count-badge">$design_count</span></h2></div><p>Choose a direction. Make it your own.</p></div>
+    <aside class="concept-note"><span class="note-icon" aria-hidden="true"><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="${prefix}assets/icons.svg#info"></use></svg></span><p>Independent, unofficial concepts. Not affiliated with or endorsed by $company_name.</p></aside>
     <div class="filter-bar" id="filters"><label>Design style<select id="style-filter"><option value="">All styles</option>$style_options</select></label><label>Sort designs<select id="design-sort"><option value="curated">Collection order</option><option value="title">Name A–Z</option></select></label><p class="filter-hint">Select two different designs to compare.</p></div>
     <noscript><p>Filters and comparison selection need JavaScript. You can open every live demo directly below.</p></noscript>
     <p class="results-status" role="status" aria-live="polite"></p>
-    <div class="compare-tray" aria-label="Design comparison selection"><div><strong id="selection-count" role="status" aria-live="polite">0 of 2 selected</strong><p id="selection-names">Choose two designs from this collection.</p><div id="selection-items" class="selection-items"></div></div><button type="button" id="clear-selection">Clear</button><a class="primary-link" id="compare-selected" aria-disabled="true" tabindex="-1">Compare selected <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="${prefix}assets/icons.svg#arrow-right"></use></svg></a></div>
+    <div class="compare-tray" aria-label="Design comparison selection"><div><strong id="selection-count" role="status" aria-live="polite">0 of 2 selected</strong><p id="selection-names" class="visually-hidden">Choose two designs from this collection.</p><div id="selection-items" class="selection-items"></div></div><button type="button" id="clear-selection">Clear</button><a class="primary-link" id="compare-selected" aria-disabled="true" tabindex="-1">Compare selected <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="${prefix}assets/icons.svg#arrow-right"></use></svg></a></div>
     <div class="design-grid">$design_cards</div>
     <div class="empty-results" hidden><h3>No matching designs</h3><p>Choose another style to explore more directions.</p><button type="button" data-reset>Clear filters</button></div>
 
-    <aside class="concept-note"><span class="note-icon" aria-hidden="true"><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="${prefix}assets/icons.svg#info"></use></svg></span><p>These are independent, unofficial design concepts. They are not affiliated with or endorsed by $company_name. Each demo identifies its official brand assets and illustrative imagery.</p></aside>
+
     <a class="back-link" href="../../index.html"><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="${prefix}assets/icons.svg#arrow-left"></use></svg> Back to all companies</a>
   </section>

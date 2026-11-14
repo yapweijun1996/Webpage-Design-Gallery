@@ -1,4 +1,6 @@
 """Real Chrome checks for persisted appearance, localization and offline language packs."""
+from gallery_browser_helpers import open_settings, select_preference
+
 import functools
 import http.server
 import importlib.util
@@ -74,8 +76,8 @@ def run():
                         for theme in ('light', 'dark'):
                             page.goto(base, wait_until='networkidle')
                             page.wait_for_selector('html[data-preferences-ready="true"]')
-                            page.select_option('#language-select', lang)
-                            page.select_option('#theme-select', theme)
+                            select_preference(page, '#language-select', lang)
+                            select_preference(page, '#theme-select', theme)
                             page.wait_for_function('([lang, theme]) => document.documentElement.lang === lang && document.documentElement.dataset.theme === theme', arg=[lang, theme])
                             assert page.locator('h2').first.inner_text().startswith(packs[lang]['messages']['Companies'])
                             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, lang, theme)
@@ -92,19 +94,19 @@ def run():
                             page.wait_for_function('(message)=>document.querySelector(".empty-results h3").textContent === message', arg=packs[lang]['messages']['No matching companies'])
                             page.locator('[data-reset]').click()
                 checks.append('24 responsive language/theme combinations, localized empty state, controls and text/control contrast')
-                page.select_option('#theme-select', 'system')
+                select_preference(page, '#theme-select', 'system')
                 page.emulate_media(color_scheme='dark')
                 page.wait_for_function('() => document.documentElement.dataset.theme === "dark"')
                 page.emulate_media(color_scheme='light')
                 page.wait_for_function('() => document.documentElement.dataset.theme === "light"')
-                page.select_option('#theme-select', 'dark')
+                select_preference(page, '#theme-select', 'dark')
                 page.reload(wait_until='networkidle')
                 assert page.locator('html').get_attribute('data-theme') == 'dark'
                 assert page.locator('#theme-select').input_value() == 'dark'
-                page.select_option('#language-select', 'zh-Hans')
+                select_preference(page, '#language-select', 'zh-Hans')
                 page.locator('#company-search').fill('新加坡')
                 assert page.locator('.company-card:visible').count() == 1
-                page.select_option('#language-select', 'ms')
+                select_preference(page, '#language-select', 'ms')
                 assert page.locator('#company-search').input_value() == '新加坡'
                 page.locator('#company-search').fill('')
                 page.locator('.company-card').click()
@@ -112,7 +114,7 @@ def run():
                 assert page.locator('html').get_attribute('lang') == 'ms'
                 page.locator('input[value="v5"]').check()
                 page.locator('input[value="v7"]').check()
-                page.select_option('#language-select', 'zh-Hans')
+                select_preference(page, '#language-select', 'zh-Hans')
                 page.wait_for_function('() => document.querySelector("#selection-count").textContent.includes("已选 2")')
                 assert page.locator('input[value="v5"]').is_checked()
                 assert page.locator('input[value="v7"]').is_checked()
@@ -138,12 +140,12 @@ def run():
                 other = context.new_page()
                 other.goto(base, wait_until='networkidle')
                 other.wait_for_selector('html[data-preferences-ready]')
-                other.select_option('#language-select', 'en')
+                select_preference(other, '#language-select', 'en')
                 page.wait_for_function('() => document.documentElement.lang === "en"')
-                other.select_option('#theme-select', 'light')
+                select_preference(other, '#theme-select', 'light')
                 page.wait_for_function('() => document.documentElement.dataset.theme === "light"')
                 page.evaluate("() => {const text=document.createElement('p'); text.id='future-name'; text.textContent='constructor'; document.body.append(text);}")
-                other.select_option('#language-select', 'zh-Hans')
+                select_preference(other, '#language-select', 'zh-Hans')
                 page.wait_for_function('() => document.documentElement.lang === "zh-Hans"')
                 assert page.locator('#future-name').text_content() == 'constructor'
                 checks.append('Cross-tab preference synchronization and safe unknown message fallback')
@@ -152,21 +154,21 @@ def run():
                 denied = browser.new_context(service_workers='block')
                 denied.add_init_script("Storage.prototype.getItem = Storage.prototype.setItem = () => { throw new DOMException('Blocked', 'SecurityError'); };")
                 d = denied.new_page(); d.goto(base, wait_until='networkidle'); d.wait_for_selector('html[data-preferences-ready]')
-                d.select_option('#theme-select', 'dark'); d.select_option('#language-select', 'ms')
+                select_preference(d, '#theme-select', 'dark'); select_preference(d, '#language-select', 'ms')
                 d.wait_for_function('() => document.documentElement.lang === "ms"')
                 assert 'tab ini' in d.locator('#preferences-status').text_content()
                 denied.close()
                 fallback = browser.new_context(service_workers='block')
                 fallback.route('**/locales/zh-Hans.json', lambda route: route.abort())
                 f = fallback.new_page(); f.goto(base, wait_until='networkidle'); f.wait_for_selector('html[data-preferences-ready]')
-                f.select_option('#language-select', 'zh-Hans')
+                select_preference(f, '#language-select', 'zh-Hans')
                 assert f.locator('html').get_attribute('lang') == 'en'
                 assert 'Language unavailable' in f.locator('#preferences-status').inner_text()
                 fallback.close()
                 fallback_en = browser.new_context(service_workers='block')
                 fallback_en.route('**/locales/en.json', lambda route: route.abort())
                 f = fallback_en.new_page(); f.goto(base, wait_until='networkidle'); f.wait_for_selector('html[data-preferences-ready]')
-                f.select_option('#language-select', 'zh-Hans')
+                select_preference(f, '#language-select', 'zh-Hans')
                 f.locator('#company-search').fill('not-present')
                 f.wait_for_function('() => document.querySelector(".results-status").textContent.includes("匹配公司")')
                 fallback_en.close()
@@ -176,7 +178,7 @@ def run():
                 f.goto(base, wait_until='domcontentloaded')
                 f.wait_for_selector('html[data-preferences-ready]', timeout=8000)
                 assert time.monotonic() - started < 7.5
-                f.select_option('#language-select', 'zh-Hans')
+                select_preference(f, '#language-select', 'zh-Hans')
                 assert f.locator('html').get_attribute('lang') == 'en'
                 stalled.close(); server.stall_locale = False
                 checks.append('Blocked storage, missing English/Chinese packs and stalled response bodies recover to usable UI')
@@ -190,10 +192,10 @@ def run():
                 assert o.evaluate('fetch("missing-network-probe").then(()=>false,()=>true)')
                 o.reload(wait_until='networkidle'); o.wait_for_selector('html[data-preferences-ready]')
                 for lang in ('zh-Hans', 'ms', 'en'):
-                    o.select_option('#language-select', lang)
+                    select_preference(o, '#language-select', lang)
                     assert o.locator('html').get_attribute('lang') == lang
                     assert o.evaluate('document.documentElement.scrollWidth <= innerWidth')
-                o.select_option('#language-select', 'ms'); o.select_option('#theme-select', 'dark')
+                select_preference(o, '#language-select', 'ms'); select_preference(o, '#theme-select', 'dark')
                 o.goto(base + 'companies/gjh/index.html', wait_until='networkidle')
                 o.wait_for_selector('html[data-preferences-ready]')
                 assert o.locator('html').get_attribute('lang') == 'ms'

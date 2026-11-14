@@ -160,6 +160,27 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - [Mall Essentials models](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/main/models/mall-essentials)
 - [GJH mall visitor](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/main/models/gjh-mall-visitor)
 
+## Gallery design collection redesign — advisor plan, 2026-11-15
+
+Status: **implemented and headless-Chrome E2E verified; physical-device and cross-browser acceptance remain open**. This is a separate Gallery task for `/companies/gjh/index.html`, prompted by the owner's annotated 639x826 browser view. The implementation follows the screenshot/source advisor review; final results are documented in [collection redesign verification](docs/gallery-collection-redesign.md).
+
+Baseline E2E review, 15 November 2026: Gallery, PWA, preferences, 28 GJH demo browser cases and supplemental navigation/sort checks passed. Measured header/card heights support the advisor's layout concerns. Original generated outputs failed synchronization; regeneration and `--check` passed in the isolated test copy. See [E2E and advisor review](docs/gjh-gallery-advisor-e2e-review.md) for scope, evidence and limitations. This baseline does not complete redesigned-interface acceptance below.
+
+Objective: make all eight design directions easier to scan, compare and open. The baseline 650px breakpoint switched to full-width cards at 639px; large previews, repeated disclosures, generous spacing and a tall navigation/settings header slow browsing.
+
+- [x] Obtain an independent read-only UI/UX advisor recommendation.
+- [x] Rework the collection as compact cards: two columns at 639px with approximately 16px gaps and padding, using the existing design-system tokens where suitable.
+- [x] Use consistent 16:10 thumbnails; below 560px, use one column with a proposed preview height of approximately 180–200px. Verify image legibility and cropping before accepting these dimensions.
+- [x] Keep version, title and one concise direction description; place Compare consistently and make Open live demo the primary action, with View details secondary.
+- [x] Present the independent-concept disclosure once near the collection heading while retaining any required design-specific disclosures.
+- [x] After card density is resolved, compact narrow-screen navigation by moving theme, language and update controls into an accessible settings surface.
+- [x] Preserve existing filters, sorting, two-design comparison, detail/demo routes, theme and language behavior.
+- [x] Implement through `templates/gallery/company.html`, the card rendering in `scripts/build_gallery.py`, and `assets/gallery.css`; regenerate output rather than editing generated pages.
+- [x] Capture and review the redesigned 390px, 639px and desktop views, including scrolling, settings open/close, comparison selection and keyboard navigation.
+- [x] Run the required repository checks and relevant Gallery/preferences regressions after implementation; record evidence before marking acceptance complete.
+
+Proposed acceptance targets: at 639x826, two designs are identifiable together when the collection is in view; at 390px, a card is approximately 360–400px tall without clipping content. Interactive targets are at least 44x44 CSS px, focus remains visible, and the selected-comparison tray does not obscure content or focused actions. Check the 560px and 650px breakpoint boundaries and desktop layout for overflow and wrapping. Headless-Chrome results: 390px first card approximately 400px; 639px uses two columns with approximately 423px cards. All eight tested widths passed in three languages and two themes. Long content may grow naturally; physical-device and screen-reader coverage remain unverified.
+
 ## Verified progress — 2026-11-14
 
 - Company-first homepage redesign is published (application 1.1.4).

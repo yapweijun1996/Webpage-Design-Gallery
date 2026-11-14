@@ -1,4 +1,6 @@
 """Keep the homepage theme consistent across gallery routes, isolated from demos."""
+from gallery_browser_helpers import open_settings, select_preference
+
 import functools
 import http.server
 import importlib.util
@@ -27,6 +29,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             super().copyfile(source, outputfile)
         except (BrokenPipeError, ConnectionResetError):
             pass
+
+
+def choose_theme(page, theme):
+    control = page.locator('#theme-select')
+    summary = page.locator('.gallery-settings > summary')
+    if not control.is_visible() and summary.count():
+        summary.click()
+    control.select_option(theme)
+    if summary.count() and summary.is_visible() and page.locator('.gallery-settings').get_attribute('open') is not None:
+        summary.click()
 
 
 def signature(page):
@@ -61,7 +73,7 @@ def run():
                     for theme in ('light', 'dark'):
                         page.goto(base, wait_until='networkidle')
                         page.wait_for_selector('html[data-preferences-ready]')
-                        page.select_option('#theme-select', theme)
+                        select_preference(page, '#theme-select', theme)
                         expected = signature(page)
                         for route in ROUTES:
                             page.goto(base + route, wait_until='networkidle')
@@ -81,9 +93,9 @@ def run():
                                 frame = page.locator('iframe').first
                                 baseline = frame.content_frame.locator('body').evaluate('(e)=>getComputedStyle(e).backgroundColor')
                                 assert frame.content_frame.locator('body.gallery').count() == 0
-                                page.select_option('#theme-select', 'dark' if theme == 'light' else 'light')
+                                select_preference(page, '#theme-select', 'dark' if theme == 'light' else 'light')
                                 assert frame.content_frame.locator('body').evaluate('(e)=>getComputedStyle(e).backgroundColor') == baseline
-                                page.select_option('#theme-select', theme)
+                                select_preference(page, '#theme-select', theme)
                         evidence.append({'width':width, 'theme':theme, 'routes':len(ROUTES), 'status':'PASS'})
                 assert not errors, errors
                 browser.close()

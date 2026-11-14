@@ -144,7 +144,7 @@ def design_card(design, company):
                        "styles": " ".join(design["styles"]), "order": design["order"]})
     return f'''<article class="design-card" {attrs}>
       <a class="design-preview" href="{prefix}designs/index.html?{query}" aria-label="View {title} details"><img src="{prefix}{escape(design['thumbnail'])}" alt="{title} desktop preview" width="720" height="450" loading="lazy"></a>
-      <div class="design-card-copy"><div class="version-row"><span class="version-badge">{escape(design['version'].upper())}</span><span class="design-status">Independent concept</span><label class="compare-checkbox"><input type="checkbox" value="{escape(design['version'])}">Compare<span class="visually-hidden"> {title}</span></label></div>
+      <div class="design-card-copy"><div class="version-row"><span class="version-badge">{escape(design['version'].upper())}</span><label class="compare-checkbox"><input type="checkbox" value="{escape(design['version'])}">Compare<span class="visually-hidden"> {title}</span></label></div>
       <h3><a href="{prefix}designs/index.html?{query}">{title}</a></h3><p class="card-description">{escape(design['description'])}</p><div class="card-bottom"><a class="details-link" href="{prefix}designs/index.html?{query}">View details</a><a class="card-action" href="{prefix}{escape(design['demoPath'])}">Open live demo <span aria-hidden="true">{icon("arrow-up-right", prefix)}</span><span class="visually-hidden">: {title}</span></a></div></div></article>'''
 
 

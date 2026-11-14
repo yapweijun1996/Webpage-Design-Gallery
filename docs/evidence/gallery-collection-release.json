@@ -1,0 +1,19 @@
+{
+  "capturedAt": "2026-11-14T16:52:35.094272+00:00",
+  "baseCommit": "53a3e6e3f160da9def53bf6dc21d397621f039d8",
+  "release": {
+    "version": "1.1.32",
+    "build": "d289a11893039e5e"
+  },
+  "checks": {
+    "unitTests46": "PASS",
+    "ssot": "PASS",
+    "generatedOutput": "PASS",
+    "galleryE2E": "PASS",
+    "layout48Combinations": "PASS",
+    "pwaLifecycle": "PASS"
+  },
+  "limitations": [
+    "Headless Chrome on macOS; physical devices and Safari not tested."
+  ]
+}

@@ -114,6 +114,9 @@
   --palette-night-paper-line: #464b40;
   --palette-night-paper-accent: #f6a38d;
   --palette-night-paper-wash: #2c3028;
+  --radius-none: 0;
+  --breakpoint-collection-grid: 560px;
+  --breakpoint-collection-single: 559px;
   --color-text: var(--palette-ink);
   --color-text-muted: var(--palette-muted);
   --color-action: var(--palette-indigo);

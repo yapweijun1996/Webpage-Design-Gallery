@@ -1,0 +1,191 @@
+[
+  {
+    "width": 390,
+    "homeLinkAndSortPersistence": "PASS",
+    "metrics": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 212.1875
+      },
+      "card": {
+        "x": 22,
+        "y": 887.984375,
+        "width": 346,
+        "height": 487.375
+      },
+      "gridColumns": "346px",
+      "overflow": false,
+      "firstPreview": {
+        "x": 35,
+        "y": 900.984375,
+        "width": 320,
+        "height": 191
+      }
+    },
+    "runtimeErrors": []
+  },
+  {
+    "width": 559,
+    "homeLinkAndSortPersistence": "PASS",
+    "metrics": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 559,
+        "height": 152.1875
+      },
+      "card": {
+        "x": 22,
+        "y": 773,
+        "width": 515,
+        "height": 593
+      },
+      "gridColumns": "515px",
+      "overflow": false,
+      "firstPreview": {
+        "x": 35,
+        "y": 786,
+        "width": 489,
+        "height": 296.625
+      }
+    },
+    "runtimeErrors": []
+  },
+  {
+    "width": 560,
+    "homeLinkAndSortPersistence": "PASS",
+    "metrics": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 560,
+        "height": 152.1875
+      },
+      "card": {
+        "x": 22,
+        "y": 773,
+        "width": 516,
+        "height": 593.625
+      },
+      "gridColumns": "516px",
+      "overflow": false,
+      "firstPreview": {
+        "x": 35,
+        "y": 786,
+        "width": 490,
+        "height": 297.25
+      }
+    },
+    "runtimeErrors": []
+  },
+  {
+    "width": 639,
+    "homeLinkAndSortPersistence": "PASS",
+    "metrics": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 639,
+        "height": 152.1875
+      },
+      "card": {
+        "x": 22,
+        "y": 773,
+        "width": 595,
+        "height": 642.8125
+      },
+      "gridColumns": "595px",
+      "overflow": false,
+      "firstPreview": {
+        "x": 35,
+        "y": 786,
+        "width": 569,
+        "height": 346.625
+      }
+    },
+    "runtimeErrors": []
+  },
+  {
+    "width": 650,
+    "homeLinkAndSortPersistence": "PASS",
+    "metrics": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 650,
+        "height": 152.1875
+      },
+      "card": {
+        "x": 22,
+        "y": 749.203125,
+        "width": 606,
+        "height": 649.6875
+      },
+      "gridColumns": "606px",
+      "overflow": false,
+      "firstPreview": {
+        "x": 35,
+        "y": 762.203125,
+        "width": 580,
+        "height": 353.5
+      }
+    },
+    "runtimeErrors": []
+  },
+  {
+    "width": 651,
+    "homeLinkAndSortPersistence": "PASS",
+    "metrics": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 651,
+        "height": 154.578125
+      },
+      "card": {
+        "x": 40,
+        "y": 804.828125,
+        "width": 270.5,
+        "height": 444.46875
+      },
+      "gridColumns": "270.5px 270.5px",
+      "overflow": false,
+      "firstPreview": {
+        "x": 59,
+        "y": 823.828125,
+        "width": 232.5,
+        "height": 131.8125
+      }
+    },
+    "runtimeErrors": []
+  },
+  {
+    "width": 1440,
+    "homeLinkAndSortPersistence": "PASS",
+    "metrics": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 92.1875
+      },
+      "card": {
+        "x": 120,
+        "y": 668.046875,
+        "width": 585,
+        "height": 617.9375
+      },
+      "gridColumns": "585px 585px",
+      "overflow": false,
+      "firstPreview": {
+        "x": 139,
+        "y": 687.046875,
+        "width": 547,
+        "height": 328.375
+      }
+    },
+    "runtimeErrors": []
+  }
+]
