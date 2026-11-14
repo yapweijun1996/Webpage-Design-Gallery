@@ -1,0 +1,9 @@
+{"viewport": [390, 844], "captureLossMovementDelta": 0.4239964485168457, "events": [{"type": "pointerdown", "id": 2, "trusted": true}, {"type": "gotpointercapture", "id": 2, "trusted": true}, {"type": "lostpointercapture", "id": 2, "trusted": true}]}
+Traceback (most recent call last):
+  File "/srv/agent-workstation/workspaces/webpage-first-use-guide-20261114/repo/tests/browser_gjh_pointer.py", line 46, in <module>
+    if __name__=='__main__':run()
+                            ^^^^^
+  File "/srv/agent-workstation/workspaces/webpage-first-use-guide-20261114/repo/tests/browser_gjh_pointer.py", line 28, in run
+    assert delta<.01,'Lost capture must stop joystick movement'
+           ^^^^^^^^^
+AssertionError: Lost capture must stop joystick movement

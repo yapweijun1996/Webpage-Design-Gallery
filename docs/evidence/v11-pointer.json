@@ -1,0 +1,123 @@
+{
+  "environment": "Linux ARM64 Chromium/SwiftShader; real browser CDP touch/mouse inputs and explicit capture release; not physical devices",
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "joystickLossStops": "PASS",
+      "joystickCancelStops": "PASS",
+      "freshTouchRecovers": "PASS",
+      "mouseLossStopsDrag": "PASS",
+      "keyboardRecovers": "PASS",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": 2,
+          "trusted": true
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 2,
+          "trusted": true
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 2,
+          "trusted": true
+        },
+        {
+          "type": "pointerdown",
+          "id": 3,
+          "trusted": true
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 3,
+          "trusted": true
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 3,
+          "trusted": true
+        },
+        {
+          "type": "pointerdown",
+          "id": 1,
+          "trusted": true
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 1,
+          "trusted": true
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 1,
+          "trusted": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "joystickLossStops": "PASS",
+      "joystickCancelStops": "PASS",
+      "freshTouchRecovers": "PASS",
+      "mouseLossStopsDrag": "PASS",
+      "keyboardRecovers": "PASS",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": 2,
+          "trusted": true
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 2,
+          "trusted": true
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 2,
+          "trusted": true
+        },
+        {
+          "type": "pointerdown",
+          "id": 3,
+          "trusted": true
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 3,
+          "trusted": true
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 3,
+          "trusted": true
+        },
+        {
+          "type": "pointerdown",
+          "id": 1,
+          "trusted": true
+        },
+        {
+          "type": "gotpointercapture",
+          "id": 1,
+          "trusted": true
+        },
+        {
+          "type": "lostpointercapture",
+          "id": 1,
+          "trusted": true
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

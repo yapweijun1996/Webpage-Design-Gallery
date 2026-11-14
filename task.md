@@ -141,7 +141,7 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Company-first homepage redesign is published (application 1.1.4).
 - An independent original demo-tin viewer is implemented and tested for application 1.1.5. It uses no New Moon GLBs and is explicitly not an official SKU representation. See `docs/original-tin-viewer-review.md`.
 - The four-SKU New Moon source integration remains an unpublished local candidate; public redistribution rights and close-up label review are unresolved. It is not counted as released Phase 1–3 work.
-- First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Wayfinding/kiosk integration, wider scene improvements and the remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.
+- First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Kiosk integration was subsequently completed in 1.1.10; wider scene improvements and remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.
 
 - V11 List view redesigned as an independent 1.1.7 slice: compact store discovery, visible product inspection actions and matching store order, retaining all products and 3D entry. See `docs/v11-directory-review.md`. This does not complete the remaining model integration and device gates.
 
@@ -150,3 +150,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.9 repairs optional furniture cleanup when GLB parsing arrives after the timeout or parsed primitives fail validation. Real-GLB fault-injection evidence and regression coverage are in `docs/v11-furniture-lifecycle-review.md`. Existing models, placement and successful-load materials remain unchanged.
 
 - Application 1.1.10 adds the original entrance kiosk with F/touch access to the real three-store map, explicit decorative-screen disclosure, a physical collider and failed-asset fallback. Source rights, hash, dimensions, screenshots and tests are recorded in `docs/v11-kiosk-review.md`. Other fixtures and branded product phases remain pending.
+
+- Application 1.1.11 fixes stuck joystick movement and camera dragging after pointer capture is interrupted. Real browser touch/mouse reproduction and recovery evidence are in `docs/v11-pointer-review.md`; physical-device and remaining branded-model gates remain unverified.

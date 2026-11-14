@@ -62,7 +62,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (event.pointerId === stickPointer) { stickPointer = null; stickX = stickY = 0; thumb.style.transform = ''; }
     if (event.pointerId === drag?.id) drag = null;
   }
-  canvas.addEventListener('pointerup', releasePointer); canvas.addEventListener('pointercancel', releasePointer);
+  // Capture can be revoked without pointerup/cancel (for example by another UI).
+  // Clear only the affected pointer so an independent touch remains usable.
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) canvas.addEventListener(type, releasePointer);
   function update(dt) {
     if (isPaused()) { clearInput(); return; }
     const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY);
