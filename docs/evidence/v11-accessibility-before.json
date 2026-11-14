@@ -1,0 +1,3388 @@
+{
+  "baselineCommit": "da360bab7df090911279f8769e8c5f8695280b51",
+  "cartFocus": {
+    "active": "bag-open",
+    "focusLog": [
+      "bag-open",
+      "bag-close",
+      "cart-toggle",
+      "bag-open",
+      "scene",
+      "bag-open"
+    ],
+    "cartActive": true,
+    "distanceMoved": 1.9073486328125e-06
+  },
+  "scans": [
+    {
+      "width": 390,
+      "state": "guide",
+      "violations": [],
+      "incomplete": [],
+      "active": "guide-title",
+      "controls": [
+        {
+          "id": "guide-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": "Close quick guide",
+          "width": 63.03125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-start",
+          "tag": "BUTTON",
+          "text": "Start exploring",
+          "label": null,
+          "width": 314,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "guide-map",
+          "tag": "BUTTON",
+          "text": "Choose a store",
+          "label": null,
+          "width": 153,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-list",
+          "tag": "BUTTON",
+          "text": "Browse directory",
+          "label": null,
+          "width": 153,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "explore",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "6.0pt (8px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<span class=\"joystick-label\">MOVE</span>",
+              "target": [
+                ".joystick-label"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button id=\"run-toggle\" class=\"run-toggle\" type=\"button\" aria-pressed=\"false\">Run</button>",
+              "target": [
+                "#run-toggle"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"scene-disclaimer\">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>",
+              "target": [
+                ".scene-disclaimer"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            }
+          ]
+        }
+      ],
+      "active": "scene",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 68.9375,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "header-map",
+          "tag": "BUTTON",
+          "text": "Map",
+          "label": "Open mall map",
+          "width": 48,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 82,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "List view",
+          "label": "Switch to the accessible store directory",
+          "width": 63.640625,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "How to explore",
+          "label": null,
+          "width": 98.609375,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-reopen",
+          "tag": "BUTTON",
+          "text": "Show quick guide",
+          "label": null,
+          "width": 66.609375,
+          "height": 87.28125,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "inspect",
+          "tag": "BUTTON",
+          "text": "Tap to open map",
+          "label": "Open the three-store map from the directory kiosk",
+          "width": 85.140625,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(217, 186, 119)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "",
+          "label": "Mall map",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(12, 35, 29, 0.97)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "01New Moon",
+          "label": "Go to the New Moon storefront",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "02MILI",
+          "label": "Go to the MILI storefront",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "03GOGO",
+          "label": "Go to the GOGO storefront",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "run-toggle",
+          "tag": "BUTTON",
+          "text": "Run",
+          "label": null,
+          "width": 58,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(12, 35, 29, 0.94)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "map",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "6.0pt (8px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<span class=\"joystick-label\">MOVE</span>",
+              "target": [
+                ".joystick-label"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button id=\"run-toggle\" class=\"run-toggle\" type=\"button\" aria-pressed=\"false\">Run</button>",
+              "target": [
+                "#run-toggle"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"scene-disclaimer\">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>",
+              "target": [
+                ".scene-disclaimer"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            }
+          ]
+        }
+      ],
+      "active": "",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 68.9375,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "header-map",
+          "tag": "BUTTON",
+          "text": "Map",
+          "label": "Open mall map",
+          "width": 48,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 82,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "List view",
+          "label": "Switch to the accessible store directory",
+          "width": 63.640625,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "How to explore",
+          "label": null,
+          "width": 98.609375,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-reopen",
+          "tag": "BUTTON",
+          "text": "Show quick guide",
+          "label": null,
+          "width": 66.609375,
+          "height": 87.28125,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "",
+          "label": "Mall map",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(12, 35, 29, 0.97)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "01New Moon",
+          "label": "Go to the New Moon storefront",
+          "width": 63.828125,
+          "height": 97.4375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "02MILI",
+          "label": "Go to the MILI storefront",
+          "width": 63.828125,
+          "height": 97.4375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "03GOGO",
+          "label": "Go to the GOGO storefront",
+          "width": 63.828125,
+          "height": 97.4375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "help",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"scene-disclaimer\">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>",
+              "target": [
+                ".scene-disclaimer"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            }
+          ]
+        }
+      ],
+      "active": "",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 68.9375,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "header-map",
+          "tag": "BUTTON",
+          "text": "Map",
+          "label": "Open mall map",
+          "width": 48,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 82,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "List view",
+          "label": "Switch to the accessible store directory",
+          "width": 63.640625,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "How to explore",
+          "label": null,
+          "width": 290,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-reopen",
+          "tag": "BUTTON",
+          "text": "Show quick guide",
+          "label": null,
+          "width": 138.21875,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "",
+          "label": "Mall map",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(12, 35, 29, 0.97)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "01New Moon",
+          "label": "Go to the New Moon storefront",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "02MILI",
+          "label": "Go to the MILI storefront",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "03GOGO",
+          "label": "Go to the GOGO storefront",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "empty-bag",
+      "violations": [],
+      "incomplete": [],
+      "active": "bag-close",
+      "controls": [
+        {
+          "id": "bag-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 67.03125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "cart-toggle",
+          "tag": "BUTTON",
+          "text": "Use cart in 3D",
+          "label": null,
+          "width": 118.640625,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "list",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2"
+          ],
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "help": "Elements must only use permitted ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/aria-prohibited-attr?application=axeAPI",
+          "nodes": [
+            {
+              "any": [],
+              "all": [],
+              "none": [
+                {
+                  "id": "aria-prohibited-attr",
+                  "data": {
+                    "role": null,
+                    "nodeName": "div",
+                    "messageKey": "noRoleSingular",
+                    "prohibited": [
+                      "aria-label"
+                    ]
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute is not well supported on a div with no valid role attribute."
+                }
+              ],
+              "impact": "serious",
+              "html": "<div class=\"product-grid\" aria-label=\"New Moon products\">",
+              "target": [
+                ".product-grid"
+              ],
+              "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ],
+      "active": "list-title",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 128.3125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 88,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "3D view",
+          "label": "Switch to the 3D virtual mall",
+          "width": 73.34375,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "01 New Moon",
+          "label": null,
+          "width": 179,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "02 MILI",
+          "label": null,
+          "width": 179,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "03 GOGO",
+          "label": null,
+          "width": 179,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "DEMO Original tin",
+          "label": null,
+          "width": 179,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 140.375,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "label": null,
+          "width": 173,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium Wild Caught Australia Abalone 425g",
+          "label": null,
+          "width": 173,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium South Africa Abalone (4 \u2013 5pcs) 425g",
+          "label": null,
+          "width": 173,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium Mexico Abalone 454g",
+          "label": null,
+          "width": 173,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 140.375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "View brand artwork",
+          "label": null,
+          "width": 134.796875,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 140.375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "View brand artwork",
+          "label": null,
+          "width": 134.796875,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "original-tin-open",
+          "tag": "BUTTON",
+          "text": "Open original tin viewer",
+          "label": null,
+          "width": 316,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 84.28125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "product",
+      "violations": [],
+      "incomplete": [],
+      "active": "product-close",
+      "controls": [
+        {
+          "id": "product-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 69.75,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-preview-load",
+          "tag": "BUTTON",
+          "text": "Load 3D preview",
+          "label": null,
+          "width": 130.375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-add",
+          "tag": "BUTTON",
+          "text": "Add to demo bag",
+          "label": null,
+          "width": 146.203125,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "product-collect",
+          "tag": "BUTTON",
+          "text": "Add + collect in 3D",
+          "label": null,
+          "width": 155.359375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-shop",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 310,
+          "height": 48,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "preview",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-preview-orbit=\"left\" aria-label=\"Rotate left\">\u2190</button>",
+              "target": [
+                "button[data-preview-orbit=\"left\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-preview-orbit=\"right\" aria-label=\"Rotate right\">\u2192</button>",
+              "target": [
+                "button[data-preview-orbit=\"right\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-preview-zoom=\"out\" aria-label=\"Zoom out\">\u2212</button>",
+              "target": [
+                "button[data-preview-zoom=\"out\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "active": "product-preview-canvas",
+      "controls": [
+        {
+          "id": "product-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 69.75,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-preview-image",
+          "tag": "BUTTON",
+          "text": "Show official image",
+          "label": null,
+          "width": 149.578125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-preview-reset",
+          "tag": "BUTTON",
+          "text": "Reset view",
+          "label": null,
+          "width": 96,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2190",
+          "label": "Rotate left",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2192",
+          "label": "Rotate right",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2212",
+          "label": "Zoom out",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "+",
+          "label": "Zoom in",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-add",
+          "tag": "BUTTON",
+          "text": "Add to demo bag",
+          "label": null,
+          "width": 146.203125,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "product-collect",
+          "tag": "BUTTON",
+          "text": "Add + collect in 3D",
+          "label": null,
+          "width": 155.359375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-shop",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 310,
+          "height": 48,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "populated-bag",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2"
+          ],
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "help": "Elements must only use permitted ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/aria-prohibited-attr?application=axeAPI",
+          "nodes": [
+            {
+              "any": [],
+              "all": [],
+              "none": [
+                {
+                  "id": "aria-prohibited-attr",
+                  "data": {
+                    "role": null,
+                    "nodeName": "span",
+                    "messageKey": "noRoleSingular",
+                    "prohibited": [
+                      "aria-label"
+                    ]
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute is not well supported on a span with no valid role attribute."
+                }
+              ],
+              "impact": "serious",
+              "html": "<span aria-label=\"Quantity 1\">1</span>",
+              "target": [
+                "span[aria-label=\"Quantity 1\"]"
+              ],
+              "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on a span with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p id=\"bag-description\">",
+              "target": [
+                "#bag-description"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "bold",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<h3>New Moon Premium Wild Caught New Zealand Abalone 425g</h3>",
+              "target": [
+                "li > h3"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" aria-label=\"Decrease New Moon Premium Wild Caught New Zealand Abalone 425g\" data-bag-focus=\"new-moon-nz-425g-front-0\">\u2212</button>",
+              "target": [
+                "button[data-bag-focus=\"new-moon-nz-425g-front-0\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "active": "bag-close",
+      "controls": [
+        {
+          "id": "bag-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 67.03125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "cart-toggle",
+          "tag": "BUTTON",
+          "text": "Use cart in 3D",
+          "label": null,
+          "width": 118.640625,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2212",
+          "label": "Decrease New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "+",
+          "label": "Increase New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Remove",
+          "label": "Remove New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "width": 81.65625,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-clear",
+          "tag": "BUTTON",
+          "text": "Clear demo bag",
+          "label": null,
+          "width": 130.5,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "state": "original-tin",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"left\" aria-label=\"Orbit tin left\">\u2190</button>",
+              "target": [
+                "button[data-tin-orbit=\"left\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"right\" aria-label=\"Orbit tin right\">\u2192</button>",
+              "target": [
+                "button[data-tin-orbit=\"right\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"up\" aria-label=\"Orbit tin up\">\u2191</button>",
+              "target": [
+                "button[data-tin-orbit=\"up\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"down\" aria-label=\"Orbit tin down\">\u2193</button>",
+              "target": [
+                "button[data-tin-orbit=\"down\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-zoom=\"out\" aria-label=\"Zoom out\">\u2212</button>",
+              "target": [
+                "button[data-tin-zoom=\"out\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "active": "original-tin-close",
+      "controls": [
+        {
+          "id": "original-tin-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": "Close original demo tin viewer",
+          "width": 76,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2190",
+          "label": "Orbit tin left",
+          "width": 98,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2192",
+          "label": "Orbit tin right",
+          "width": 98,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2191",
+          "label": "Orbit tin up",
+          "width": 98,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2193",
+          "label": "Orbit tin down",
+          "width": 98,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2212",
+          "label": "Zoom out",
+          "width": 98,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "+",
+          "label": "Zoom in",
+          "width": 98,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "original-tin-reset",
+          "tag": "BUTTON",
+          "text": "Reset view",
+          "label": null,
+          "width": 98,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "original-tin-clip",
+          "tag": "INPUT",
+          "text": "",
+          "label": "Open close animation amount",
+          "width": 310,
+          "height": 44,
+          "colour": "rgb(16, 16, 16)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "id": "original-tin-explode",
+          "tag": "INPUT",
+          "text": "",
+          "label": "Exploded view animation amount",
+          "width": 310,
+          "height": 44,
+          "colour": "rgb(16, 16, 16)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "guide",
+      "violations": [],
+      "incomplete": [],
+      "active": "guide-title",
+      "controls": [
+        {
+          "id": "guide-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": "Close quick guide",
+          "width": 63.03125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-start",
+          "tag": "BUTTON",
+          "text": "Start exploring",
+          "label": null,
+          "width": 518,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "guide-map",
+          "tag": "BUTTON",
+          "text": "Choose a store",
+          "label": null,
+          "width": 255,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-list",
+          "tag": "BUTTON",
+          "text": "Browse directory",
+          "label": null,
+          "width": 255,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "explore",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "6.0pt (8px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"scene-disclaimer\">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>",
+              "target": [
+                ".scene-disclaimer"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            }
+          ]
+        }
+      ],
+      "active": "scene",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 147.875,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 88,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "List view",
+          "label": "Switch to the accessible store directory",
+          "width": 140,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "How to explore",
+          "label": null,
+          "width": 106,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-reopen",
+          "tag": "BUTTON",
+          "text": "Show quick guide",
+          "label": null,
+          "width": 74,
+          "height": 87.28125,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "inspect",
+          "tag": "BUTTON",
+          "text": "Press F / tap Map",
+          "label": "Open the three-store map from the directory kiosk",
+          "width": 123.421875,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(217, 186, 119)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "01New Moon",
+          "label": "Go to the New Moon storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "02MILI",
+          "label": "Go to the MILI storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "03GOGO",
+          "label": "Go to the GOGO storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "map",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "6.0pt (8px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"scene-disclaimer\">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>",
+              "target": [
+                ".scene-disclaimer"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            }
+          ]
+        }
+      ],
+      "active": "",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 147.875,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 88,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "List view",
+          "label": "Switch to the accessible store directory",
+          "width": 140,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "How to explore",
+          "label": null,
+          "width": 106,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-reopen",
+          "tag": "BUTTON",
+          "text": "Show quick guide",
+          "label": null,
+          "width": 74,
+          "height": 87.28125,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "inspect",
+          "tag": "BUTTON",
+          "text": "Press F / tap Map",
+          "label": "Open the three-store map from the directory kiosk",
+          "width": 123.421875,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(217, 186, 119)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "01New Moon",
+          "label": "Go to the New Moon storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "02MILI",
+          "label": "Go to the MILI storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "03GOGO",
+          "label": "Go to the GOGO storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "help",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "6.0pt (8px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Unable to determine contrast ratio"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"scene-disclaimer\">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>",
+              "target": [
+                ".scene-disclaimer"
+              ],
+              "failureSummary": "Fix any of the following:\n  Unable to determine contrast ratio"
+            }
+          ]
+        }
+      ],
+      "active": "",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 147.875,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 88,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "List view",
+          "label": "Switch to the accessible store directory",
+          "width": 140,
+          "height": 44,
+          "colour": "rgb(245, 242, 233)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "SUMMARY",
+          "text": "How to explore",
+          "label": null,
+          "width": 328,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "guide-reopen",
+          "tag": "BUTTON",
+          "text": "Show quick guide",
+          "label": null,
+          "width": 138.21875,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "inspect",
+          "tag": "BUTTON",
+          "text": "Press F / tap Map",
+          "label": "Open the three-store map from the directory kiosk",
+          "width": 123.421875,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(217, 186, 119)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "01New Moon",
+          "label": "Go to the New Moon storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "02MILI",
+          "label": "Go to the MILI storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "03GOGO",
+          "label": "Go to the GOGO storefront",
+          "width": 52.796875,
+          "height": 80.59375,
+          "colour": "rgb(23, 53, 44)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "empty-bag",
+      "violations": [],
+      "incomplete": [],
+      "active": "bag-close",
+      "controls": [
+        {
+          "id": "bag-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 67.03125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "cart-toggle",
+          "tag": "BUTTON",
+          "text": "Use cart in 3D",
+          "label": null,
+          "width": 118.640625,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "list",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2"
+          ],
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "help": "Elements must only use permitted ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/aria-prohibited-attr?application=axeAPI",
+          "nodes": [
+            {
+              "any": [],
+              "all": [],
+              "none": [
+                {
+                  "id": "aria-prohibited-attr",
+                  "data": {
+                    "role": null,
+                    "nodeName": "div",
+                    "messageKey": "noRoleSingular",
+                    "prohibited": [
+                      "aria-label"
+                    ]
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute is not well supported on a div with no valid role attribute."
+                }
+              ],
+              "impact": "serious",
+              "html": "<div class=\"product-grid\" aria-label=\"New Moon products\">",
+              "target": [
+                ".product-grid"
+              ],
+              "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        }
+      ],
+      "active": "list-title",
+      "controls": [
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Skip to mall and store directory",
+          "label": null,
+          "width": 233.6875,
+          "height": 47.09375,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "GJH.VIRTUALMALL",
+          "label": "GJH Virtual Mall home",
+          "width": 165.53125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-open",
+          "tag": "BUTTON",
+          "text": "Bag (0)",
+          "label": "Open demo bag, 0 items",
+          "width": 88,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "view-toggle",
+          "tag": "BUTTON",
+          "text": "3D view",
+          "label": "Switch to the 3D virtual mall",
+          "width": 140,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "01 New Moon",
+          "label": null,
+          "width": 302.25,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "02 MILI",
+          "label": null,
+          "width": 331.25,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "03 GOGO",
+          "label": null,
+          "width": 331.25,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "DEMO Original tin",
+          "label": null,
+          "width": 331.25,
+          "height": 52,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 140.375,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "label": null,
+          "width": 309,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium Wild Caught Australia Abalone 425g",
+          "label": null,
+          "width": 309,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium South Africa Abalone (4 \u2013 5pcs) 425g",
+          "label": null,
+          "width": 309,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Closer look at New Moon Premium Mexico Abalone 454g",
+          "label": null,
+          "width": 309,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgb(255, 252, 245)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 117.984375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 140.375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "View brand artwork",
+          "label": null,
+          "width": 134.796875,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 140.375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "View brand artwork",
+          "label": null,
+          "width": 134.796875,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "original-tin-open",
+          "tag": "BUTTON",
+          "text": "Open original tin viewer",
+          "label": null,
+          "width": 191.796875,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "",
+          "tag": "A",
+          "text": "Official GJH eShop",
+          "label": null,
+          "width": 84.28125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "product",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p id=\"product-description\">Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.</p>",
+              "target": [
+                "#product-description"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"collection-note\">Either action adds one item. Collect shows a simplified gesture with the demo can, not a physical shelf pickup. Reduced motion skips the gesture.</p>",
+              "target": [
+                ".collection-note"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            }
+          ]
+        }
+      ],
+      "active": "product-close",
+      "controls": [
+        {
+          "id": "product-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 69.75,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-preview-load",
+          "tag": "BUTTON",
+          "text": "Load 3D preview",
+          "label": null,
+          "width": 130.375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-add",
+          "tag": "BUTTON",
+          "text": "Add to demo bag",
+          "label": null,
+          "width": 146.203125,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "product-collect",
+          "tag": "BUTTON",
+          "text": "Add + collect in 3D",
+          "label": null,
+          "width": 155.359375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-shop",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 360,
+          "height": 48,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "preview",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p id=\"product-preview-status\" class=\"product-preview-status\" role=\"status\" aria-live=\"polite\">Unofficial 3D demo. Drag or use the controls to rotate; arrows rotate, +/\u2212 zoom, R resets.</p>",
+              "target": [
+                "#product-preview-status"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-preview-orbit=\"left\" aria-label=\"Rotate left\">\u2190</button>",
+              "target": [
+                "button[data-preview-orbit=\"left\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-preview-orbit=\"right\" aria-label=\"Rotate right\">\u2192</button>",
+              "target": [
+                "button[data-preview-orbit=\"right\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-preview-zoom=\"out\" aria-label=\"Zoom out\">\u2212</button>",
+              "target": [
+                "button[data-preview-zoom=\"out\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p id=\"product-description\">Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.</p>",
+              "target": [
+                "#product-description"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "8.3pt (11px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p class=\"collection-note\">Either action adds one item. Collect shows a simplified gesture with the demo can, not a physical shelf pickup. Reduced motion skips the gesture.</p>",
+              "target": [
+                ".collection-note"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            }
+          ]
+        }
+      ],
+      "active": "product-preview-canvas",
+      "controls": [
+        {
+          "id": "product-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 69.75,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-preview-image",
+          "tag": "BUTTON",
+          "text": "Show official image",
+          "label": null,
+          "width": 149.578125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-preview-reset",
+          "tag": "BUTTON",
+          "text": "Reset view",
+          "label": null,
+          "width": 96,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2190",
+          "label": "Rotate left",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2192",
+          "label": "Rotate right",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2212",
+          "label": "Zoom out",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "+",
+          "label": "Zoom in",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-add",
+          "tag": "BUTTON",
+          "text": "Add to demo bag",
+          "label": null,
+          "width": 146.203125,
+          "height": 44,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        },
+        {
+          "id": "product-collect",
+          "tag": "BUTTON",
+          "text": "Add + collect in 3D",
+          "label": null,
+          "width": 155.359375,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "product-shop",
+          "tag": "A",
+          "text": "Visit the official GJH eShop",
+          "label": null,
+          "width": 360,
+          "height": 48,
+          "colour": "rgb(255, 252, 245)",
+          "background": "rgb(16, 45, 38)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "populated-bag",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2"
+          ],
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "help": "Elements must only use permitted ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/aria-prohibited-attr?application=axeAPI",
+          "nodes": [
+            {
+              "any": [],
+              "all": [],
+              "none": [
+                {
+                  "id": "aria-prohibited-attr",
+                  "data": {
+                    "role": null,
+                    "nodeName": "span",
+                    "messageKey": "noRoleSingular",
+                    "prohibited": [
+                      "aria-label"
+                    ]
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute is not well supported on a span with no valid role attribute."
+                }
+              ],
+              "impact": "serious",
+              "html": "<span aria-label=\"Quantity 1\">1</span>",
+              "target": [
+                "span[aria-label=\"Quantity 1\"]"
+              ],
+              "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on a span with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p id=\"bag-description\">",
+              "target": [
+                "#bag-description"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" aria-label=\"Decrease New Moon Premium Wild Caught New Zealand Abalone 425g\" data-bag-focus=\"new-moon-nz-425g-front-0\">\u2212</button>",
+              "target": [
+                "button[data-bag-focus=\"new-moon-nz-425g-front-0\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "active": "bag-close",
+      "controls": [
+        {
+          "id": "bag-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": null,
+          "width": 67.03125,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "cart-toggle",
+          "tag": "BUTTON",
+          "text": "Use cart in 3D",
+          "label": null,
+          "width": 118.640625,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2212",
+          "label": "Decrease New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "+",
+          "label": "Increase New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "width": 44,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "Remove",
+          "label": "Remove New Moon Premium Wild Caught New Zealand Abalone 425g",
+          "width": 81.65625,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "bag-clear",
+          "tag": "BUTTON",
+          "text": "Clear demo bag",
+          "label": null,
+          "width": 130.5,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "state": "original-tin",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": null,
+                    "bgColor": null,
+                    "contrastRatio": 0,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "messageKey": "elmPartiallyObscuring",
+                    "expectedContrastRatio": "4.5:1",
+                    "shadowColor": null
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element's background color could not be determined because it partially overlaps other elements"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<p id=\"original-tin-description\">A generic, original tin study for interaction testing. Not New Moon packaging and not an official SKU.</p>",
+              "target": [
+                "#original-tin-description"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"left\" aria-label=\"Orbit tin left\">\u2190</button>",
+              "target": [
+                "button[data-tin-orbit=\"left\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"right\" aria-label=\"Orbit tin right\">\u2192</button>",
+              "target": [
+                "button[data-tin-orbit=\"right\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"up\" aria-label=\"Orbit tin up\">\u2191</button>",
+              "target": [
+                "button[data-tin-orbit=\"up\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-orbit=\"down\" aria-label=\"Orbit tin down\">\u2193</button>",
+              "target": [
+                "button[data-tin-orbit=\"down\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "messageKey": "nonBmp"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element content contains only non-text characters"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" data-tin-zoom=\"out\" aria-label=\"Zoom out\">\u2212</button>",
+              "target": [
+                "button[data-tin-zoom=\"out\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "active": "original-tin-close",
+      "controls": [
+        {
+          "id": "original-tin-close",
+          "tag": "BUTTON",
+          "text": "Close",
+          "label": "Close original demo tin viewer",
+          "width": 76,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2190",
+          "label": "Orbit tin left",
+          "width": 98.25,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2192",
+          "label": "Orbit tin right",
+          "width": 98.25,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2191",
+          "label": "Orbit tin up",
+          "width": 98.25,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2193",
+          "label": "Orbit tin down",
+          "width": 98.25,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "\u2212",
+          "label": "Zoom out",
+          "width": 98.25,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "+",
+          "label": "Zoom in",
+          "width": 98.25,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "original-tin-reset",
+          "tag": "BUTTON",
+          "text": "Reset view",
+          "label": null,
+          "width": 98.25,
+          "height": 44,
+          "colour": "rgb(16, 45, 38)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "original-tin-clip",
+          "tag": "INPUT",
+          "text": "",
+          "label": "Open close animation amount",
+          "width": 310.75,
+          "height": 44,
+          "colour": "rgb(16, 16, 16)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "id": "original-tin-explode",
+          "tag": "INPUT",
+          "text": "",
+          "label": "Exploded view animation amount",
+          "width": 310.75,
+          "height": 44,
+          "colour": "rgb(16, 16, 16)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ]
+    }
+  ]
+}

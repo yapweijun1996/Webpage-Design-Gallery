@@ -41,7 +41,7 @@ Runtime baseline: main `d1d091d513b6188582cb4ac15b8ce99d53d1dfbb`, application *
 | Phase 5 / 4 | PASS | Preserve reduced-motion behavior and the accessible list view. |
 | Phase 6 / 1 | PASS | Compare transferred bytes, render calls and observed performance with the recorded baseline. |
 | Phase 6 / 2 | PASS | Load assets on demand where appropriate; measure before changing texture, shadow or LOD quality. |
-| Phase 6 / 3 | PARTIAL | Verify keyboard focus, accessible names, touch targets, dialog focus and contrast. |
+| Phase 6 / 3 | PASS | Verify keyboard focus, accessible names, touch targets, dialog focus and contrast. |
 | Phase 6 / 4 | PASS | Exercise reduced motion, WebGL/WASM failures and no-JavaScript alternatives. |
 | Phase 6 / 5 | PASS | Preserve the existing PWA update and cache policy; assess download size and update integrity before expanding offline scope. |
 | Phase 6 / 6 | PASS | Record physical-device, browser and assistive-technology coverage separately from simulated results. |
@@ -127,3 +127,15 @@ near-door views were reviewed. Existing moving-camera/HUD regression and all
 three keyboard map destinations pass. See `docs/v11-wayfinding-review.md`.
 The camera and geometry are retained; portrait side stores still require Map.
 Historical decisions above retain their date and scope.
+
+
+## DOM accessibility reconciliation — 2026-11-15
+
+Phase 6 / 3 is complete under this matrix's laboratory contract. Application
+1.1.34 fixes confirmed focus, sticky-scroll and ARIA issues and records five
+viewports / 70 states of DOM focus, names, targets, dialogs and contrast evidence.
+See `docs/v11-accessibility-review.md` for source hashes, failed baselines,
+independent review and exact limitations. Physical/device/screen-reader gates
+remain open. Native popup option-key choice is explicitly NOT VERIFIED against
+an independent failing host fixture; selection events are not substituted for
+that missing keyboard proof. Historical evidence above retains its original scope.

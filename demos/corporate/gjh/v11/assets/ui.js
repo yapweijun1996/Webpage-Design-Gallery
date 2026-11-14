@@ -82,7 +82,7 @@ export function createUI() {
   let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   cartToggle.addEventListener('click',()=>{const state=cartState();const next=!state.active;const ok=cartListener?.(next);if(!ok){cartStatus.textContent=state.seated?'Stand up before using the cart.':'Move to an open space, then try again. The cart needs a wide turning clearance.';return;}
-    if(next){document.querySelector('#bag-dialog').close();setView(true);scene.focus({preventScroll:true});}
+    if(next){setView(true);bag.closeTo(scene);}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';});
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   const zones = { atrium: 'The courtyard', newmoon: 'New Moon', mili: 'MILI', gogo: 'GOGO', upper: 'Upper level' };

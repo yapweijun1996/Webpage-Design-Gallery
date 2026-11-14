@@ -91,7 +91,7 @@ Runs throughout implementation and is completed after Phases 2–5.
 
 - [x] Compare transferred bytes, render calls and observed performance with the recorded baseline.
 - [x] Load assets on demand where appropriate; measure before changing texture, shadow or LOD quality.
-- [ ] Verify keyboard focus, accessible names, touch targets, dialog focus and contrast.
+- [x] Verify keyboard focus, accessible names, touch targets, dialog focus and contrast.
 - [x] Exercise reduced motion, WebGL/WASM failures and no-JavaScript alternatives.
 - [x] Preserve the existing PWA update and cache policy; assess download size and update integrity before expanding offline scope.
 - [x] Record physical-device, browser and assistive-technology coverage separately from simulated results.
@@ -252,3 +252,20 @@ visual review accepted 1440/768/390 entrance views and the tablet doorway at
 See `docs/v11-wayfinding-review.md`. Portrait side stores remain offscreen and
 use the existing Map; physical devices and screen-reader/contrast certification
 are not claimed. This completes the Phase 4 entrance visibility item only.
+
+
+## V11 DOM accessibility — 2026-11-15
+
+Application 1.1.34 completes Phase 6 DOM focus/name/target/dialog/contrast
+verification in five browser viewports. It fixes the Bag-to-cart focus race,
+sticky-header focus obstruction and unsupported generic ARIA names, clarifies
+the quantity-nine limit, and applies the shared focus treatment to Visitor v2
+selects. The synchronized default v2 passes 70 state scans, all seven appearance
+focus paths, shelf pickup/return and elevator round trips. DOM contrast-incomplete
+checks have a conservative minimum 5.6185:1; measured controls are at least 44px.
+Full V11, 46 unit, Gallery, Bag/Cart and PWA regressions pass; independent visual
+review is 86/100 (subjective). See `docs/v11-accessibility-review.md`.
+Native popup keyboard option choice is NOT VERIFIED: the same sequence fails in
+an isolated HTML fixture on this host. Actual control selection events and model
+updates pass separately. Physical devices and screen-reader sessions remain open;
+this does not complete the separate final/device acceptance gates.

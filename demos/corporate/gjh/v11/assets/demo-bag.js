@@ -28,6 +28,10 @@ export function setupDemoBag() {
   const dialog = document.querySelector('#bag-dialog'), open = document.querySelector('#bag-open'), close = document.querySelector('#bag-close'), items = document.querySelector('#bag-items'), empty = document.querySelector('#bag-empty'), clear = document.querySelector('#bag-clear'), add = document.querySelector('#product-add'), note = document.querySelector('#product-bag-status'), status = document.querySelector('#bag-status');
   const collect=document.querySelector('#product-collect');
   let current = null, collectListener=null, canCollect=()=>false;
+  let returnFocus = open;
+  const header=dialog.querySelector('.bag-top');
+  const measureHeader=()=>dialog.style.setProperty('--bag-header-height',`${header.getBoundingClientRect().height}px`);
+  new ResizeObserver(measureHeader).observe(header);
   function button(text, label, action) { const el = document.createElement('button'); el.type='button'; el.textContent=text; el.setAttribute('aria-label',label); el.addEventListener('click',action); return el; }
   function render(value) {
     const active = document.activeElement, focusKey = active?.dataset.bagFocus;
@@ -35,8 +39,8 @@ export function setupDemoBag() {
     open.textContent = `Bag (${total})`; open.setAttribute('aria-label',`Open demo bag, ${total} items`);
     items.replaceChildren(); empty.hidden = total > 0; clear.hidden = total === 0;
     for (const [id,quantity] of Object.entries(value)) {
-      const record=records.get(id), row=document.createElement('li'), image=document.createElement('img'), name=document.createElement('h3'), controls=document.createElement('div'), count=document.createElement('span');
-      image.src=record.image;image.alt='';image.width=64;image.height=64;name.textContent=record.name;count.textContent=`${quantity}`;count.setAttribute('aria-label',`Quantity ${quantity}`);
+      const record=records.get(id), row=document.createElement('li'), image=document.createElement('img'), name=document.createElement('h3'), controls=document.createElement('div'), count=document.createElement('output');
+      image.src=record.image;image.alt='';image.width=64;image.height=64;name.textContent=record.name;count.textContent=quantity===9?'9 (max)':`${quantity}`;count.setAttribute('aria-label',`Quantity ${quantity}${quantity===9?', maximum per item':''}`);
       const minus=button('−',`Decrease ${record.name}`,()=>{store.change(id,-1);status.textContent=`${record.name} quantity decreased.`;}), plus=button('+',`Increase ${record.name}`,()=>{store.change(id,1);status.textContent=`${record.name} quantity increased.`;}), remove=button('Remove',`Remove ${record.name}`,()=>{store.remove(id);status.textContent=`${record.name} removed.`;});
       [minus,plus,remove].forEach((el,i)=>el.dataset.bagFocus=`${id}-${i}`);plus.disabled=quantity===9;
       controls.className='bag-quantity';controls.append(minus,count,plus,remove);row.append(image,name,controls);items.append(row);
@@ -45,10 +49,14 @@ export function setupDemoBag() {
     if (focusKey && dialog.open) { const replacement=[...items.querySelectorAll('button')].find(el=>el.dataset.bagFocus===focusKey&&!el.disabled); (replacement||close).focus({preventScroll:true}); }
   }
   store.subscribe(render);open.hidden=false;
-  open.addEventListener('click',()=>{dialog.showModal();close.focus({preventScroll:true});});
-  close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>open.focus({preventScroll:true}));
+  open.addEventListener('click',()=>{dialog.showModal();measureHeader();close.focus({preventScroll:true});});
+  close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>{
+    // Restore focus once, after the native close event, including scene handoffs.
+    const target=returnFocus;returnFocus=open;
+    (target instanceof HTMLElement&&target.isConnected&&!target.closest('[hidden]')?target:open).focus({preventScroll:true});
+  });
   clear.addEventListener('click',()=>{store.clear();status.textContent='Demo bag cleared.';close.focus({preventScroll:true});});
   add.addEventListener('click',()=>{if(current){store.change(current,1);note.textContent=`Added to demo bag. ${store.snapshot()[current]} of this item. No order created.`;}});
   collect.addEventListener('click',()=>{if(!current||!document.querySelector('#product-dialog').open||(store.snapshot()[current]||0)>=9)return;const id=current;if(collectListener?.(id)){store.change(id,1);}});
-  return {configureCollect(test,listener){canCollect=test;collectListener=listener;}, subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
+  return {closeTo(target){returnFocus=target;dialog.close();}, configureCollect(test,listener){canCollect=test;collectListener=listener;}, subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
 }
