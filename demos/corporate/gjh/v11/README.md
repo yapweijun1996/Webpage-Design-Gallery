@@ -42,6 +42,10 @@ Textures are at most 1024px. Repeated architecture and cans use instancing/share
 
 The generator already publishes direct-child `vendor/` and `assets/` files. The uncompressed vendor payload is approximately 5.19MB; the asset directory measured approximately 1.53MB before adding the original visitor; the original visitor adds 369,976 bytes. Its existing PWA policy excludes live demos from precaching, caching only the mall thumbnail with gallery browsing resources. The embedded WASM and furniture therefore do not inflate offline installation; a locally served complete checkout works without internet, while the gallery's existing offline fallback applies to uncached live demos.
 
+## Mobile HUD (touch and narrow screens)
+
+On coarse pointers or widths up to 650px the header is one slim row (logo, Map, Bag, List view), the interaction prompt is a one-row chip with touch labels ("Tap ..."), and controls and prompts respect `env(safe-area-inset-*)`. In short landscape the disclaimer is centred at the bottom so it never covers Run. Seated and cart prompts sit above the disclaimer in portrait. Planned work and the design decision about the bottom navigation are in `../../../../docs/gjh-v11-mobile-redesign-gap-report.md`.
+
 ## Review and hooks
 
 `window.__mall` is frozen and read-only: `ready`, a snapshot `state`, `teleport(zone)`, `setInput({forward,right,run,yaw,pitch})`, and `step(ms)`. Teleport accepts `atrium`, `newmoon`, `mili`, `gogo`. Input values are bounded. Supplying input enters deterministic manual stepping; `setInput(null)` restores live input. Steps are bounded to ten seconds and cannot advance paused/hidden controls. `window.__sceneReady` marks the first completed render; initialization failure sets `window.__sceneFailed`.

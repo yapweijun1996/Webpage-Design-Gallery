@@ -98,6 +98,26 @@ Runs throughout implementation and is completed after Phases 2–5.
 
 Acceptance: no unacceptable measured regression; key information remains available without 3D; offline claims match the assets actually cached.
 
+## Phase 7 — Mobile HUD redesign (design specified; partly implemented)
+
+Specification and status table: `docs/gjh-v11-mobile-redesign-gap-report.md`. The external proposals (P0/P1/P2 counts, token values, 100 E2E tests, concept images) are design input, not audit results.
+
+Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, Profile) is not shown permanently. Free exploration keeps the joystick and the contextual interaction action; full navigation appears only in menu or shop mode.
+
+- [x] Compact single-row header on touch and narrow screens (72px at 390x844); Bag width stays constant from 0 to 99.
+- [x] One-row contextual prompt chip with touch labels ("Tap ...") instead of "Press F"; prompt no longer covers the avatar.
+- [x] Safe-area insets in the header, controls and prompts (real device insets not yet verified).
+- [x] Landscape disclaimer no longer covers Run; seated and cart prompts clear the disclaimer in portrait.
+- [x] HUD buttons at least 44x44 CSS px; no horizontal overflow at 320, 360, 390, 667, 844, 1024, 1280.
+- [ ] Explicit mode state machine (Explore, Menu, Inspect, Seated, Cart, Shop) with enter, exit, cleanup, restore.
+- [ ] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
+- [ ] Interaction target highlight and distance hint.
+- [ ] WebGL context-loss recovery and low-end quality tiers.
+- [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
+- [ ] Decide the commerce rule: the demo has no prices, stock or cart; "checkout" stays a link to the official eShop unless the owner changes this.
+
+Optional scoped item, not committed: Diner Dash-style 4-table restaurant mini-game, see `docs/gjh-v11-restaurant-minigame-scope.md`.
+
 ## Verification and release gates
 
 - [x] Verify each product model, associated record, preview and existing link, including failed asset loading.
@@ -168,3 +188,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.16 improves readability of the product-dialog independent-demo disclaimer from 9px to the existing 14px small-text token, without changing its wording or colour. Screenshot-led advisor review and focused four-viewport reflow/close checks are recorded in `docs/v11-disclosure-type-review.md`.
 
 - Application 1.1.24 adds optional pushable demo cart mode with one shared bag state, conservative full-turn collision clearance, reversible stowing and explicitly simplified pushing pose. See `docs/v11-cart-review.md`. This does not complete sitting transitions or all-seat interaction requirements.
+
+- Mobile HUD P0 round (2026-11-14): compact header, one-row touch prompt chip, safe-area insets, landscape and portrait overlap fixes, 44px targets and no horizontal overflow were verified with Playwright mobile emulation and SwiftShader WebGL (repository root served), then reviewed on screenshots. Physical devices, real safe-area insets, context loss and the full browser suites were not run. See `docs/gjh-v11-mobile-redesign-gap-report.md`.

@@ -89,3 +89,22 @@ Per-slice release evidence and scoped final incremental audit. Unchanged suites 
 Automated color-contrast incomplete flags were individually checked against computed solid backgrounds and hit testing; they are not an outstanding implementation blocker. These scoped checks still do not replace assistive-technology certification.
 
 Optional changes: additional bins/lightboxes, new entrance geometry and dynamic LOD are not added merely to clear checkboxes. Existing reusable shelves/kiosk satisfy the useful scene scope; payload/draw-call budgets remain within limits. No new commerce, product SKUs or brand claims are needed.
+
+## Mobile HUD P0 round — 2026-11-14
+
+Evidence source: OMP Playwright mobile emulation with SwiftShader WebGL, repository root served so `assets/tokens.css` loads, followed by manager review of the screenshots. A first round served only the v11 folder and was discarded as invalid.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Compact header (touch/narrow) | PASS | 72px at 390x844, 61px landscape, 83px desktop. |
+| Bag width stable 0 to 99 | PASS | 82px portrait, 88px landscape. |
+| No horizontal overflow | PASS | `scrollWidth == innerWidth` at 320, 360, 390, 667, 844, 1024, 1280. |
+| HUD touch targets | PASS | Smallest visible HUD button 44x44 CSS px. |
+| Disclaimer vs Run, joystick, chip | PASS | Zero intersections at 844x390, 667x375, 390x844, 320x568. |
+| Seated / cart prompt vs disclaimer | FIXED | 0.9px touch found after merging main; prompt lifted in portrait. |
+| Gallery build and unit tests | PASS | `build_gallery.py --check` clean after regeneration; `test_gallery.py` passes (Python 3.15). |
+| Physical devices, real safe-area insets | NOT RUN | Needs iPhone Safari and Android Chrome. |
+| WebGL context loss, FPS on devices | NOT RUN | Needs real devices. |
+| Full repository browser suites | NOT RUN | Only the HUD-specific checks above were run in this round. |
+
+| Portrait seated/cart prompt lift (4857d53) | Re-verified 2026-11-14: chip vs disclaimer 0 px² at 390x844, 320x568, 844x390, 667x375 (seated + pushing); header 0; scrollWidth == innerWidth; real screenshots inspected | Not run: physical devices, real safe-area insets, context loss, device FPS |
