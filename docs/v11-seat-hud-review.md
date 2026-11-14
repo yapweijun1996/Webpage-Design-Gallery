@@ -15,3 +15,7 @@ Final advisor actually inspected six comparison/long-label/focus/landscape scree
 
 ## Rollback
 Revert this CSS slice and generated release metadata to 99a9323. No model or stored-state migration. A local backup and reverse-patch check are prepared before publication.
+
+## 1.1.28 touch seat label
+
+A rendered 390×844 touch baseline still displayed `Press F / tap Sit`, unlike the touch-specific product and kiosk actions. The seat branch now uses `Tap Sit` on coarse-pointer devices and preserves `Press F / tap Sit` for keyboard/mouse. The accessible name, event handlers, seated Cancel/Stand labels and layout are unchanged. Screenshot advisor reviewed the baseline and after images. Chromium simulated touch verified the button remains at least 44px high and tap sit/stand still works; desktop 1440×900 verified the keyboard label and F sitting. This is a small clarity fix, not a critical functionality failure or real-device certification. Rollback: revert this label/version commit and regenerate the gallery.
