@@ -76,7 +76,7 @@ Acceptance: visitors can find all three stores; critical controls remain visible
 
 Depends on the finalized interaction design from Phases 3 and 4.
 
-- [ ] Add concise, dismissible first-use guidance for movement, Q/E turning and F inspection, with appropriate touch instructions.
+- [x] Add concise, dismissible first-use guidance for movement, Q/E turning and F inspection, with appropriate touch instructions.
 - [ ] Preserve WASD, arrow keys, Shift, Q/E, scene dragging and touch controls.
 - [ ] Check visitor animation, camera obstruction and collisions around new models.
 - [ ] Preserve reduced-motion behavior and the accessible list view.
@@ -141,4 +141,4 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Company-first homepage redesign is published (application 1.1.4).
 - An independent original demo-tin viewer is implemented and tested for application 1.1.5. It uses no New Moon GLBs and is explicitly not an official SKU representation. See `docs/original-tin-viewer-review.md`.
 - The four-SKU New Moon source integration remains an unpublished local candidate; public redistribution rights and close-up label review are unresolved. It is not counted as released Phase 1–3 work.
-- Wayfinding/kiosk integration, wider scene improvements, first-visit guidance and the remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.
+- First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Wayfinding/kiosk integration, wider scene improvements and the remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.

@@ -59,6 +59,7 @@ function render() {
   if (ready && !document.hidden && !ui.paused()) {
     player.camera.updateMatrixWorld();
     world.updateSigns(player.camera, canvas); renderer.render(world.scene, player.camera); frames++;
+    if (window.__sceneReady) ui.offerFirstGuide();
   }
 }
 function animate(now) {
@@ -112,6 +113,6 @@ async function initialize() {
     renderer.shadowMap.enabled = quality && width >= 1000; player.updateCamera(0, true); render();
   }
   ready = true; ui.show3D(); new ResizeObserver(resize).observe(canvas); resize(); player.teleport('atrium'); updateHUD();
-  for (let i = 0; i < 5; i++) tick(); render(); window.__sceneReady = true; resume();
+  for (let i = 0; i < 5; i++) tick(); render(); window.__sceneReady = true; ui.offerFirstGuide(); resume();
 }
 initialize().catch(() => fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.'));

@@ -14,8 +14,22 @@ export function createUI() {
   const nearbyName = document.getElementById('nearby-name');
   const help = document.getElementById('keyboard-help');
   const mallMap = document.getElementById('mall-map');
+  const guide = document.getElementById('guide-dialog');
+  const guideStart = document.getElementById('guide-start');
+  const guideMap = document.getElementById('guide-map');
+  const guideList = document.getElementById('guide-list');
+  const guideReopen = document.getElementById('guide-reopen');
+  const guideSessionKey = 'gjh-v11-guide-seen-v1';
+  const touchGuide = matchMedia('(pointer: coarse)');
+  let guideSeen = false, guidePaused = false;
+  try { guideSeen = sessionStorage.getItem(guideSessionKey) === '1'; } catch { /* Storage may be unavailable; keep this page usable. */ }
+  function updateGuideInput() {
+    guide.querySelector('[data-guide-desktop]').hidden = touchGuide.matches;
+    guide.querySelector('[data-guide-touch]').hidden = !touchGuide.matches;
+  }
+  updateGuideInput(); touchGuide.addEventListener('change', updateGuideInput);
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
-  const resetMap = () => { mallMap.open = !compactMap.matches; };
+  const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
   resetMap();
   compactMap.addEventListener('change', resetMap);
   mallMap.addEventListener('toggle', () => { if (compactMap.matches && mallMap.open) help.open = false; });
@@ -71,6 +85,7 @@ export function createUI() {
     const next = show && available;
     if (next === showing3D) return;
     if (dialog.open) dialog.close();
+    if (guide.open) guide.close('view-change');
     showing3D = next;
     experience.hidden = !next;
     storeList.hidden = next;
@@ -86,7 +101,7 @@ export function createUI() {
 
   function inspect(id) {
     const record = records.get(id);
-    if (!record || dialog.open) return;
+    if (!record || dialog.open || guidePaused) return;
     returnFocus = document.activeElement;
     productTitle.textContent = record.name;
     productImage.src = record.image;
@@ -96,6 +111,41 @@ export function createUI() {
     dialog.showModal();
     closeButton.focus({ preventScroll: true });
   }
+
+  function showGuide() {
+    if (!available || !showing3D || guide.open || dialog.open || externalPaused || document.hidden) return false;
+    help.open = false; mallMap.open = false;
+    guidePaused = true;
+    guide.showModal(); guideStart.focus({preventScroll: true});
+    return true;
+  }
+  guideStart.addEventListener('click', () => guide.close('start'));
+  guideMap.addEventListener('click', () => guide.close('map'));
+  guideList.addEventListener('click', () => guide.close('list'));
+  guideReopen.addEventListener('click', showGuide);
+  guide.addEventListener('cancel', event => { event.preventDefault(); guide.close('start'); });
+  guide.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    if (event.shiftKey && document.activeElement === guideStart) { event.preventDefault(); guideList.focus(); }
+    else if (!event.shiftKey && document.activeElement === guideList) { event.preventDefault(); guideStart.focus(); }
+  });
+  guide.addEventListener('close', () => {
+    guidePaused = false;
+    const action = guide.returnValue;
+    if (action === 'fallback' || action === 'view-change') return;
+    guideSeen = true;
+    try { sessionStorage.setItem(guideSessionKey, '1'); } catch { /* The in-memory flag still prevents repeated automatic prompts. */ }
+    if (!available || !showing3D) return;
+    if (action === 'list') { setView(false, true); return; }
+    if (action === 'map') {
+      help.open = false; mallMap.open = true;
+      mapButtons[0]?.focus({preventScroll: true});
+      announce('Choose a store on the map. Your location has not changed.');
+      return;
+    }
+    scene.focus({preventScroll: true});
+    announce('Ready to explore. Open How to explore to review the controls.');
+  });
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
   inspectButton.addEventListener('click', () => { if (nearby) inspect(nearby); });
@@ -127,7 +177,7 @@ export function createUI() {
   }
   for (const button of mapButtons) {
     button.addEventListener('click', () => {
-      if (!showing3D || dialog.open) return;
+      if (!showing3D || dialog.open || guidePaused) return;
       help.open = false;
       if (compactMap.matches) mallMap.open = false;
       teleportListener?.(button.dataset.teleport);
@@ -140,11 +190,14 @@ export function createUI() {
   return {
     show3D() {
       available = true;
+      guideReopen.hidden = false;
       viewToggle.hidden = false;
       fallbackMessage.hidden = true;
       setView(true);
     },
     fallback(message) {
+      if (guide.open) guide.close('fallback');
+      guidePaused = false; guideReopen.hidden = true;
       setView(false);
       available = false;
       viewToggle.hidden = true;
@@ -179,8 +232,9 @@ export function createUI() {
       }
     },
     paused() {
-      return externalPaused || !showing3D || dialog.open;
+      return guidePaused || externalPaused || !showing3D || dialog.open;
     },
+    offerFirstGuide() { if (!guideSeen) showGuide(); },
     setExternalPaused(value) { externalPaused = Boolean(value); },
     inspect,
     onTeleport(listener) {

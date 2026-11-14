@@ -185,3 +185,17 @@ body.is-3d .product-dialog :is(button,a):focus-visible{outline-color:var(--gjh-c
 
 .original-tin-dialog :is(button,input,canvas):focus-visible{outline:3px solid var(--green);outline-offset:3px}.original-tin-stage{min-width:0}.original-tin-dialog{overflow:auto}.original-tin-note{overflow-wrap:anywhere}
 @media(max-width:650px){#original-tin-canvas{height:300px}.original-tin-top h2{font-size:var(--gjh-type-dialog-copy-h2-max-width-650px)}}
+
+/* First-use help shares the existing mall palette and type system. */
+.quick-guide{width:min(560px,calc(100% - 28px));max-height:calc(100dvh - 28px);padding:var(--space-7);overflow:auto;border:1px solid var(--line);background:var(--paper);color:var(--green);box-shadow:var(--gjh-shadow-product-dialog)}
+.quick-guide::backdrop{background:var(--gjh-color-product-dialog-backdrop)}
+.quick-guide h2{font-size:var(--gjh-type-dialog-copy-h2);margin-bottom:var(--space-4)}
+.quick-guide>p:not(.eyebrow){font-size:var(--font-size-sm);line-height:var(--line-height-body)}
+.guide-steps{display:grid;gap:var(--space-4);padding-left:var(--space-6);margin:var(--space-6) 0;font-size:var(--font-size-sm)}
+.guide-steps strong,.guide-steps span{display:block}.guide-steps strong{margin-bottom:var(--space-1)}
+.guide-actions{display:grid;grid-template-columns:1fr;gap:var(--space-2)}
+.guide-actions button,#guide-reopen{min-width:44px;min-height:44px;padding:var(--space-2) var(--space-4);font-size:var(--font-size-sm)}
+#guide-start{background:var(--green);color:var(--paper)}
+.quick-guide .guide-footnote{margin:var(--space-4) 0 0;color:var(--muted)}
+body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-button-focus-visible)}
+@media(max-width:360px),(max-height:560px){.quick-guide{padding:var(--space-4)}.quick-guide h2{font-size:var(--font-size-xl)}.guide-steps{gap:var(--space-2);margin:var(--space-4) 0}}

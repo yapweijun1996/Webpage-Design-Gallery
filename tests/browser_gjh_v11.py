@@ -161,6 +161,10 @@ def run(capture=False):
                         page.on('console', lambda m: errors.append(m.text) if m.type=='error' else None)
                         page.on('request', lambda r: external.append(r.url) if r.url.startswith('http') and not r.url.startswith(base) else None)
                         page.goto(url); page.wait_for_function('window.__mall?.ready && window.__sceneReady')
+                        # Complete the genuine first-use flow before existing walking/asset assertions.
+                        page.locator("#guide-dialog").wait_for(state="visible")
+                        page.locator("#guide-start").click()
+                        page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
                         # Drain the initial frame before capturing a frozen scene.
                         drive(page, 0)
                         initial = state(page); assert initial['drawCalls'] <= 200, initial
@@ -322,6 +326,10 @@ def run(capture=False):
                         context.close()
                     context = browser.new_context(reduced_motion='reduce')
                     page = context.new_page(); page.goto(url); page.wait_for_function('window.__mall?.ready')
+                    # Complete the genuine first-use flow before existing walking/asset assertions.
+                    page.locator("#guide-dialog").wait_for(state="visible")
+                    page.locator("#guide-start").click()
+                    page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
                     page.evaluate('__mall.setInput({});__mall.teleport("mili");__mall.step(17)')
                     assert state(page)['reducedMotion'] and state(page)['doors']['mili']==1
                     count = state(page)['frames']

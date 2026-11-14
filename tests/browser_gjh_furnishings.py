@@ -50,6 +50,10 @@ def verify_case(browser, url, base, viewport, screenshots, failed_model=None, fa
         page.on("request", observe_request)
         page.goto(url, wait_until="domcontentloaded")
         page.wait_for_function("window.__mall?.ready && window.__sceneReady", timeout=60000)
+        # Complete the genuine first-use flow before existing walking/asset assertions.
+        page.locator("#guide-dialog").wait_for(state="visible")
+        page.locator("#guide-start").click()
+        page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
         page.evaluate("__mall.setInput({}); __mall.step(17)")
         initial = state(page)
         furnishings = initial["furnishings"]

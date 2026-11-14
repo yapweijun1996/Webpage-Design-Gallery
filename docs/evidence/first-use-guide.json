@@ -1,0 +1,71 @@
+[
+  {
+    "viewport": [
+      320,
+      740
+    ],
+    "touch": true,
+    "firstUse": "PASS",
+    "pause": "PASS",
+    "mapDirectoryFocus": "PASS",
+    "reopenEscape": "PASS",
+    "sessionMemory": "PASS",
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "touch": true,
+    "firstUse": "PASS",
+    "pause": "PASS",
+    "mapDirectoryFocus": "PASS",
+    "reopenEscape": "PASS",
+    "sessionMemory": "PASS",
+    "errors": []
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "touch": true,
+    "firstUse": "PASS",
+    "pause": "PASS",
+    "mapDirectoryFocus": "PASS",
+    "reopenEscape": "PASS",
+    "sessionMemory": "PASS",
+    "errors": []
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "touch": false,
+    "firstUse": "PASS",
+    "pause": "PASS",
+    "mapDirectoryFocus": "PASS",
+    "reopenEscape": "PASS",
+    "sessionMemory": "PASS",
+    "errors": []
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "touch": true,
+    "firstUse": "PASS",
+    "pause": "PASS",
+    "mapDirectoryFocus": "PASS",
+    "reopenEscape": "PASS",
+    "sessionMemory": "PASS",
+    "errors": []
+  },
+  {
+    "storageUnavailable": "PASS",
+    "WASMAndNoJSDirectory": "PASS"
+  }
+]
