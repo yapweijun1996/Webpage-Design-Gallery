@@ -1,0 +1,37 @@
+[
+  {
+    "id": "courtyard-seat",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-2",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-3",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-4",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-5",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-6",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-7",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-8",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "reverseContinuousModalPauseRepeatedCancel": "PASS"
+  }
+]

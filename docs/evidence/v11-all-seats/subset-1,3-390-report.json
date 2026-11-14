@@ -1,0 +1,16 @@
+[
+  {
+    "id": "bench-seat-2",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "id": "bench-seat-4",
+    "approachTransitionStand": "PASS"
+  },
+  {
+    "reverseContinuousModalPauseRepeatedCancel": "PASS"
+  },
+  {
+    "transitionListTeleportResetCartBlocked": "PASS"
+  }
+]

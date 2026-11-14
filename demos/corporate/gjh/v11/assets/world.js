@@ -3,6 +3,7 @@ import {createFurnishings} from './furnishings.js';
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, shadows) {
   const furnishings = await createFurnishings(T, shadows);
+  const seats=[];
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
   scene.fog = new T.Fog(0x53625a, 32, 85);
@@ -95,7 +96,10 @@ export async function createWorld(T, R, physics, shadows) {
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
   function bench(x, z, facing = 1) {
-    collider(x, .3, z, 2.5, .4, .85);
+    const seatCollider=collider(x, .3, z, 2.5, .4, .85);
+    const index=seats.length,id=index===0?'courtyard-seat':`bench-seat-${index+1}`;
+    const name=z>0?`Courtyard bench ${index+1}`:`${x<5?'MILI':'GOGO'} bench ${index%2+1}`;
+    seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2):.45,collider:seatCollider.handle});
     if (!furnishings.place('bench', x, z, 1, facing)) {
       box('wood', x, .3, z, 2.5, .4, .85); box('seat', x, .56, z, 2.55, .18, .9);
       box('seat', x, .94, z + facing * .35, 2.55, .7, .18);
@@ -189,7 +193,7 @@ export async function createWorld(T, R, physics, shadows) {
   // Three 12cm steps provide a real auto-step path to a quiet seating terrace.
   for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
-  const doors = [], interactables = [{id:'courtyard-seat',x:-7.8,z:8.3,radius:1.25,frontZMax:9.0}];
+  const doors = [], interactables = [];
   let createCollectProp = () => null;
   let worldProductAssets = Object.freeze({status: 'not-loaded'});
   // Original decorative kiosk beside the entrance, outside the central walking line.
@@ -383,5 +387,6 @@ export async function createWorld(T, R, physics, shadows) {
       mesh.visible = !overlaps;
     }
   }
-  return {scene, doors, interactables, createCollectProp, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
+  interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.1,seat})));
+  return {scene, doors, seats, interactables, createCollectProp, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
 }

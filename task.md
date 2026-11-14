@@ -168,3 +168,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.16 improves readability of the product-dialog independent-demo disclaimer from 9px to the existing 14px small-text token, without changing its wording or colour. Screenshot-led advisor review and focused four-viewport reflow/close checks are recorded in `docs/v11-disclosure-type-review.md`.
 
 - Application 1.1.24 adds optional pushable demo cart mode with one shared bag state, conservative full-turn collision clearance, reversible stowing and explicitly simplified pushing pose. See `docs/v11-cart-review.md`. This does not complete sitting transitions or all-seat interaction requirements.
+
+- Application 1.1.25 extends sitting to all eight actual V11 benches (one centre anchor each), adds visible procedural sit/stand transitions, continuous cancellation and independent safe exits. Sit/stand and collection use an action close-up that restores the previous view. See `docs/v11-all-seats-review.md`. No IK, foot planting or bag-placement animation is claimed.

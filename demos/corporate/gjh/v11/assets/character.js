@@ -90,12 +90,13 @@ export async function createCharacter(T) {
     update,
     setBagCount(value){carryBag.setCount(value);cart.setCount(value);},
     setCart(value){collection.cancel();const ok=cart.set(value);carryBag.setHidden(ok&&value);return ok;},
+    setSeatProgress(value){seated.setProgress(value);carryBag.setSeated(value===1);},
     setSeated(value){collection.cancel();seated.set(value);carryBag.setSeated(value);},
     startCollection: collection.start, cancelCollection: collection.cancel,
     get animation() { return animation; },
     get state() {
       return Object.freeze({
-        model, asset, nativeHeight, scale: 1, clips, cart:cart.state, seated:seated.active, carrying: carryBag.state, collection: collection.state,
+        model, asset, nativeHeight, scale: 1, clips, cart:cart.state, seated:seated.active,seatWeight:seated.weight, carrying: carryBag.state, collection: collection.state,
         weights: Object.freeze(Object.fromEntries(Object.entries(actions).map(([name, action]) => [name, action.getEffectiveWeight()])))
       });
     }

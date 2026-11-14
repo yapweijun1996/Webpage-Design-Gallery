@@ -9,6 +9,7 @@ let nearby = null, currentZone = 'atrium';
 const STEP = 1 / 60;
 const snapshot = () => Object.freeze({...(player?.state || {}), zone: currentZone, nearby, furnishings: world?.furnishings || null,
   productAssets: world?.productAssets || null,
+  seats:world?.seats?.map(({id,name,x,z,exitX,exitZ,facing})=>({id,name,x,z,exitX,exitZ,facing}))||[],
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
   drawCalls: renderer?.info.render.calls || 0, frames, reducedMotion: reducedMotion.matches,
   roomSigns: Object.freeze((world?.roomSigns || []).map(({zone, mesh, left, right, top, bottom}) => Object.freeze({zone, visible: mesh.visible, left, right, top, bottom}))),
@@ -37,11 +38,11 @@ function updateHUD() {
   currentZone = p.z < .1 ? (p.x < -5 ? 'newmoon' : p.x > 5 ? 'gogo' : 'mili') : 'atrium';
   nearby = null; let best = Infinity;
   for (const item of world.interactables) {
-    if(item.frontZMax!==undefined && p.z>item.frontZMax)continue;
+    if(item.seat && (p.z-item.seat.z)*item.seat.facing>-.25)continue;
     const distance = Math.hypot(p.x - item.x, p.z - item.z);
     if (distance < item.radius && distance < best) { nearby = item.id; best = distance; }
   }
-  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated});
+  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
 }
 function tick() {
   if (ui.paused()) return;
@@ -81,8 +82,8 @@ function fallback(message) {
   cancelAnimationFrame(frame); frame = 0; player?.clearInput(); ui.fallback(message);
 }
 ui.onTeleport(zone => { if (ready) { manual = false; player.cancelCollection(); player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
-ui.onSeat(sit=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit():player.stand();updateHUD();render();return ok;});
-ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand();player?.clearInput();player?.cancelCollection();} });
+ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit(id):player.stand();updateHUD();render();return ok;});
+ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();} });
 document.addEventListener('keydown', event => {
   if(event.code==='Escape'&&!ui.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
   if (event.code === 'KeyF' && nearby && !ui.paused() && !event.repeat &&
@@ -110,10 +111,11 @@ async function initialize() {
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = quality; renderer.shadowMap.type = T.PCFSoftShadowMap;
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, quality);
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane);
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats);
+  ui.setSeats(world.seats);
   player.setPaused(() => ui.paused());
   ui.onCart(()=>({...player.state.character.cart,seated:player.state.seated}),value=>{const ok=player.setCart(value);updateHUD();render();return ok;});
-  ui.onCollect(id=>Boolean(world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
+  ui.onCollect(id=>Boolean(!player.state.seated&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;
     player.setCart(false);player.clearInput();player.setInput(null);manual=false;
     if(reducedMotion.matches)return true;
