@@ -111,6 +111,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] HUD buttons at least 44x44 CSS px; no horizontal overflow at 320, 360, 390, 667, 844, 1024, 1280.
 - [ ] Explicit mode state machine (Explore, Menu, Inspect, Seated, Cart, Shop) with enter, exit, cleanup, restore.
 - [ ] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
+- [ ] Shelf focus mode (proposal, depends on the mode state machine): one-page scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
 - [ ] Interaction target highlight and distance hint.
 - [ ] WebGL context-loss recovery and low-end quality tiers.
 - [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
