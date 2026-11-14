@@ -37,19 +37,24 @@ export function createUI() {
   }
   updateGuideInput(); touchGuide.addEventListener('change', updateGuideInput);
   let modeListener = null;
-  const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open,
+  const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open || externalPaused || document.getElementById('original-tin-dialog').open,
     bagOpen: document.getElementById('bag-dialog').open,
-    panelOpen: document.body.classList.contains('is-panel-open') || !showing3D ||
-      help.open || mallMap.open || guide.open});
+    panelOpen: !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
   const notifyMode = () => modeListener?.(modeSignals());
-  let panelPauseListener=null;
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
-  function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);if(paused)panelPauseListener?.();}
+  function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);}
   const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
   compactMap.addEventListener('change', () => {
+    const active = document.activeElement;
     resetMap();
     headerMap.hidden = !showing3D || !compactMap.matches;
     headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
+    // A details element may stay open across this breakpoint. Publish regardless
+    // of toggle events and recover focus only if its control just became hidden.
+    if (showing3D && ((active === headerMap && headerMap.hidden) ||
+        (mallMap.contains(active) && !mallMap.open && active !== mallMap.querySelector('summary'))))
+      (compactMap.matches ? headerMap : scene).focus({preventScroll: true});
+    notifyMode();
   });
   mallMap.addEventListener('toggle', () => {
     if (compactMap.matches && mallMap.open) help.open = false;
@@ -69,10 +74,10 @@ export function createUI() {
   const newMoonPreview = setupNewMoonPreview();
   const bag = setupDemoBag();
   const bagDialog = document.getElementById('bag-dialog');
-  const modePanels = [dialog, bagDialog, help, guide, mallMap];
+  const modePanels = [dialog, bagDialog, help, guide, mallMap, document.getElementById('original-tin-dialog')];
   const modeObserver = new MutationObserver(notifyMode);
   for (const panel of modePanels) modeObserver.observe(panel, {attributes: true, attributeFilter: ['open']});
-  for (const panel of [dialog, bagDialog, guide]) panel.addEventListener('close', notifyMode);
+  for (const panel of [dialog, bagDialog]) panel.addEventListener('close', notifyMode);
   const closeButton = document.getElementById('product-close');
   const productTitle = document.getElementById('product-title');
   const productImage = document.getElementById('product-image');
@@ -139,8 +144,8 @@ export function createUI() {
     headerMap.setAttribute('aria-expanded', String(next && compactMap.matches && mallMap.open));
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
     announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open How to explore for controls.` : 'Store directory open. All three stores and verified product images are available below.');
-    notifyMode();
     viewListener?.(next);
+    notifyMode();
   }
 
   function inspect(id) {
@@ -212,6 +217,10 @@ export function createUI() {
       : 'Open How to explore to review the controls.';
     announce(`Ready to explore. ${hint}`);
   });
+
+  // Keep the guide's blocking lifetime through its native close action, so a
+  // guide-to-map/list handoff never briefly resumes the covered gameplay.
+  guide.addEventListener('close', notifyMode);
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
   inspectButton.addEventListener('click', () => { if(seated){seatNotice=null;if(!seatListener?.(false)){seatNotice='Exit blocked. Use the map to leave safely.';nearbyName.textContent=seatNotice;announce('Exit blocked. Use the map to leave safely.');}scene.focus({preventScroll:true});}else if (nearby) inspect(nearby); });
@@ -323,11 +332,8 @@ export function createUI() {
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
       notifyMode();
     },
-    paused() {
-      return guidePaused || externalPaused || !showing3D || dialog.open || bag.open || (compactMap.matches && (mallMap.open || help.open));
-    },
     offerFirstGuide() { if (!guideSeen) showGuide(); },
-    setExternalPaused(value) { externalPaused = Boolean(value); },
+    setExternalPaused(value) { externalPaused = Boolean(value); notifyMode(); },
     inspect,
     onCollect(test, listener) {
       bag.configureCollect(id=>available&&test(id),id=>{
@@ -341,7 +347,6 @@ export function createUI() {
     onCart(state,listener){cartState=state;cartListener=listener;},
     setElevator(listener){records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
     setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
-    onPanelPause(listener){panelPauseListener=listener;if(compactMap.matches&&(mallMap.open||help.open))listener();},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {

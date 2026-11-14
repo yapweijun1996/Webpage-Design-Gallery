@@ -73,6 +73,8 @@ Browser checks use the locally installed Playwright Python package and Chrome. S
 
 Run `python tests/browser_gjh_accessibility.py --axe-script /path/to/axe.min.js` for V11's five-viewport DOM accessibility, dialog keyboard, focus, touch-target and contrast checks. It requires the pinned axe-core 4.10.3 checksum recorded in the test. Set `GALLERY_WEBGL_BACKEND=metal` on macOS to use native ANGLE Metal. Browser automation does not certify physical-device or screen-reader behavior.
 
+Run `node --test tests/gjh_modes.test.mjs` and `python tests/browser_gjh_modes.py` for V11's six-mode lifecycle, retained posture, overlay pause, input cleanup and breakpoint focus checks. The browser suite uses the same Chrome/backend settings and includes the default Visitor v2 and a legacy v1 smoke. See [mode ownership and evidence](docs/v11-mode-state-review.md).
+
 The [compact collection redesign](docs/gallery-collection-redesign.md) adds two-column browsing from 560px, primary demo actions and a compact comparison tray. At 1000px and below, open Settings for theme, language and update controls. The layout runner checks eight widths, three languages, two themes, settings dismissal/focus and comparison interactions.
 
 Run `python tests/browser_ssot.py --axe-script /path/to/axe.min.js` for the generated Gallery and all eight GJH routes at desktop, tablet and mobile widths. It uses an already-reviewed local axe-core bundle, records runtime errors and overflow, and writes [SSOT browser evidence](docs/evidence/ssot-browser.json). Its LCP/CLS values are local laboratory observations, not field Core Web Vitals or INP measurements. See [GJH shared interaction review](docs/gjh-ssot-review.md) for theme boundaries and remaining device limitations.

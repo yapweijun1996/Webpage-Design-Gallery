@@ -1,0 +1,2350 @@
+[
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "snapshots": [
+      {
+        "label": "first guide",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "guide start",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "guide reopened",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "guide Map handoff",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "guide before List handoff",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 1",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 1 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 2",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 2 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 3",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 3 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 4",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 4 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "original viewer",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "original close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory Bag button",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ]
+      },
+      {
+        "label": "directory Bag return button",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory Bag escape",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ]
+      },
+      {
+        "label": "directory Bag return escape",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory exit",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "input interruption",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "input resumed",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "held touch Bag interruption",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "held touch Bag return",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "seated Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "seated Bag return",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "seated help",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "menu"
+        ]
+      },
+      {
+        "label": "seated help close",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "seated map",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "menu"
+        ]
+      },
+      {
+        "label": "seated map close",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "kiosk map",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "map Escape",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "help",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "help close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "cart activate",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "cart Bag button",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "cart",
+          "shop"
+        ]
+      },
+      {
+        "label": "cart Bag return button",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "cart Bag escape",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "cart",
+          "shop"
+        ]
+      },
+      {
+        "label": "cart Bag return escape",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "cart map",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "cart",
+          "menu"
+        ]
+      },
+      {
+        "label": "cart map close",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "stow under Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "stowed return",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "breakpoint compact map",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "breakpoint wide map still open",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "breakpoint compact collapsed",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "breakpoint reopen map",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "breakpoint compact help",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "breakpoint wide help still open",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "breakpoint compact help retained",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "breakpoint help Escape",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "held product Inspect",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "inspect"
+        ]
+      },
+      {
+        "label": "held product Inspect close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "held product Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "held product Bag close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "courtyard-seat",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "courtyard-seat Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "courtyard-seat restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-2",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-2 Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "bench-seat-2 restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-3",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-3 Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "bench-seat-3 restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-4",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-4 Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "bench-seat-4 restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-5",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-5 Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "bench-seat-5 restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-6",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-6 Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "bench-seat-6 restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-7",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-7 Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "bench-seat-7 restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-8",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "bench-seat-8 Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "bench-seat-8 restored",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      }
+    ],
+    "frames": {
+      "guide": 0,
+      "explore": 1,
+      "product 1": 0,
+      "product 2": 0,
+      "product 3": 0,
+      "product 4": 0,
+      "original viewer": 0,
+      "input release resumes live frames": 1,
+      "seated Bag": 0,
+      "map": 0,
+      "help": 0,
+      "breakpoint wide running": 1,
+      "breakpoint wide help running": 1
+    },
+    "seats": [
+      "courtyard-seat",
+      "bench-seat-2",
+      "bench-seat-3",
+      "bench-seat-4",
+      "bench-seat-5",
+      "bench-seat-6",
+      "bench-seat-7",
+      "bench-seat-8"
+    ],
+    "errors": [],
+    "illegalCount": 0,
+    "history": [
+      {
+        "from": "explore",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "seated",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "seated",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "explore",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "seated",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "seated",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "explore",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "seated",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "seated",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "explore",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "seated",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "seated",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "explore",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "seated",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "seated",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      }
+    ]
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "snapshots": [
+      {
+        "label": "first guide",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "guide start",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "guide reopened",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "guide Map handoff",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "guide before List handoff",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 1",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 1 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 2",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 2 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 3",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 3 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 4",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 4 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "original viewer",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "original close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory Bag button",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ]
+      },
+      {
+        "label": "directory Bag return button",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory Bag escape",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ]
+      },
+      {
+        "label": "directory Bag return escape",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory exit",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "input interruption",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "input resumed",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "seated Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "seated Bag return",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "seated help",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "seated help close",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "kiosk map",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "help",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "help close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "cart activate",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "cart Bag button",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "cart",
+          "shop"
+        ]
+      },
+      {
+        "label": "cart Bag return button",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "cart Bag escape",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "cart",
+          "shop"
+        ]
+      },
+      {
+        "label": "cart Bag return escape",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "stow under Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "stowed return",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "held product Inspect",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "inspect"
+        ]
+      },
+      {
+        "label": "held product Inspect close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "held product Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "held product Bag close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      }
+    ],
+    "frames": {
+      "guide": 0,
+      "explore": 1,
+      "product 1": 0,
+      "product 2": 0,
+      "product 3": 0,
+      "product 4": 0,
+      "original viewer": 0,
+      "input release resumes live frames": 1,
+      "seated Bag": 0,
+      "map": 1,
+      "help": 2
+    },
+    "errors": [],
+    "illegalCount": 0,
+    "history": [
+      {
+        "from": "explore",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "seated",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "seated",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "explore",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "underlay"
+      },
+      {
+        "from": "shop",
+        "to": "cart",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "cart",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "cart",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "cart",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "cart",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "cart",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "underlay"
+      },
+      {
+        "from": "shop",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "inspect",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "inspect",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "snapshots": [
+      {
+        "label": "first guide",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "guide start",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "guide reopened",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "guide Map handoff",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "guide before List handoff",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 1",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 1 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 2",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 2 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 3",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 3 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "product 4",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "product 4 close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "original viewer",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "inspect"
+        ]
+      },
+      {
+        "label": "original close",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory Bag button",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ]
+      },
+      {
+        "label": "directory Bag return button",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory Bag escape",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ]
+      },
+      {
+        "label": "directory Bag return escape",
+        "mode": "menu",
+        "snapshot": "menu",
+        "body": "menu",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "menu"
+        ]
+      },
+      {
+        "label": "directory exit",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "input interruption",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "input resumed",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "seated Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "seated",
+          "shop"
+        ]
+      },
+      {
+        "label": "seated Bag return",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "seated help",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "seated help close",
+        "mode": "seated",
+        "snapshot": "seated",
+        "body": "seated",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "seated"
+        ]
+      },
+      {
+        "label": "kiosk map",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "help",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "help close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "cart activate",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "cart Bag button",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "cart",
+          "shop"
+        ]
+      },
+      {
+        "label": "cart Bag return button",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "cart Bag escape",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "cart",
+          "shop"
+        ]
+      },
+      {
+        "label": "cart Bag return escape",
+        "mode": "cart",
+        "snapshot": "cart",
+        "body": "cart",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "cart"
+        ]
+      },
+      {
+        "label": "stow under Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "stowed return",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "held product Inspect",
+        "mode": "inspect",
+        "snapshot": "inspect",
+        "body": "inspect",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "inspect"
+        ]
+      },
+      {
+        "label": "held product Inspect close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      },
+      {
+        "label": "held product Bag",
+        "mode": "shop",
+        "snapshot": "shop",
+        "body": "shop",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shop"
+        ]
+      },
+      {
+        "label": "held product Bag close",
+        "mode": "explore",
+        "snapshot": "explore",
+        "body": "explore",
+        "illegal": 0,
+        "paused": false,
+        "layers": [
+          "explore"
+        ]
+      }
+    ],
+    "frames": {
+      "guide": 0,
+      "explore": 1,
+      "product 1": 0,
+      "product 2": 0,
+      "product 3": 0,
+      "product 4": 0,
+      "original viewer": 0,
+      "input release resumes live frames": 1,
+      "seated Bag": 0,
+      "map": 1,
+      "help": 2
+    },
+    "errors": [],
+    "illegalCount": 0,
+    "history": [
+      {
+        "from": "explore",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "seated",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "seated",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "seated",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "enter"
+      },
+      {
+        "from": "explore",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "underlay"
+      },
+      {
+        "from": "shop",
+        "to": "cart",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "cart",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "cart",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "cart",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "cart",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "cart",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "underlay"
+      },
+      {
+        "from": "shop",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "inspect",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "inspect",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "shop",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shop",
+        "to": "explore",
+        "reason": "UI/player observation",
+        "kind": "restore"
+      }
+    ]
+  },
+  {
+    "legacyVisitorV1": "PASS",
+    "illegalCount": 0
+  }
+]

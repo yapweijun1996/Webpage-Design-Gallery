@@ -1,40 +1,9 @@
-import http from 'node:http';
-import fs from 'node:fs';
-import path from 'node:path';
-import {pathToFileURL} from 'node:url';
-const {chromium} = await import(pathToFileURL('/Users/admin/omp-tasks/tools/node_modules/playwright/index.mjs'));
-const root = process.cwd();
-const mime = {'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2'};
-const server = http.createServer((req,res)=>{const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const file=path.resolve(root,'.'+pathname);if(!file.startsWith(root)){res.writeHead(403).end();return;}fs.readFile(file,(err,data)=>{if(err){res.writeHead(404).end();return;}res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');res.end(data);});});
-await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
-const browser = await chromium.launch({headless:true,args:['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-try {
- const page=await browser.newPage({viewport:{width:390,height:844}});
- await page.goto(`http://127.0.0.1:${server.address().port}/demos/corporate/gjh/v11/index.html`);
- await page.waitForFunction(()=>window.__mall?.ready,undefined,{timeout:60000});
- await page.waitForFunction(()=>document.querySelector('#guide-dialog').open);
- if(await page.evaluate(()=>__mall.mode)!=='menu') throw Error('First-use guide must derive menu mode');
- await page.locator('#guide-start').click();
- await page.waitForFunction(()=>!document.querySelector('#guide-dialog').open);
- await page.waitForFunction(()=>__mall.mode==='explore');
- const seen=['explore'];
- const capture=async expected=>{await page.waitForFunction(mode=>__mall.mode===mode,expected,{timeout:15000});seen.push(await page.evaluate(()=>__mall.mode));};
- await page.locator('#view-toggle').click();
- await page.locator('.product-card [data-inspect]').first().click();
- await page.waitForFunction(()=>document.querySelector('#product-dialog').open,{timeout:15000}); await capture('inspect');
- await page.locator('#product-close').click(); await capture('menu');
- await page.locator('#view-toggle').click(); await capture('explore');
- await page.locator('#bag-open').click(); await capture('shop');
- await page.locator('#bag-close').click(); await capture('explore');
- await page.evaluate(()=>{__mall.teleport('atrium');__mall.setInput({right:-1});__mall.step(1400);__mall.setInput({forward:1});__mall.step(1400);__mall.setInput({right:-1});__mall.step(750);__mall.setInput({forward:0});__mall.step(20);});
- await page.waitForFunction(()=>__mall.state.nearby==='courtyard-seat',{timeout:15000});
- await page.locator('#inspect').click(); await capture('seated');
- await page.locator('#inspect').click(); await capture('explore');
- await page.evaluate(()=>__mall.teleport('atrium'));
- await page.locator('#bag-open').click();
- await page.locator('#cart-toggle').click(); await capture('cart');
- await page.locator('#bag-open').click();
- await page.locator('#cart-toggle').click();
- await page.locator('#bag-close').click(); await capture('explore');
- console.log(JSON.stringify({sequence:seen,illegalCount:await page.evaluate(()=>__mall.state.illegalCount)},null,2));
-} finally {await browser.close();server.close();}
+// Compatibility entrypoint: use the repository's Python Playwright conventions.
+// Set GALLERY_PYTHON when Playwright is installed in a dedicated environment.
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+const result = spawnSync(process.env.GALLERY_PYTHON || 'python3',
+  [fileURLToPath(new URL('./browser_gjh_modes.py', import.meta.url)), ...process.argv.slice(2)],
+  {stdio: 'inherit'});
+if (result.error) console.error(result.error.message);
+process.exit(result.status ?? 1);

@@ -110,7 +110,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] Safe-area insets in the header, controls and prompts (real device insets not yet verified).
 - [x] Landscape disclaimer no longer covers Run; seated and cart prompts clear the disclaimer in portrait.
 - [x] HUD buttons at least 44x44 CSS px; no horizontal overflow at 320, 360, 390, 667, 844, 1024, 1280.
-- [ ] Explicit mode state machine (Explore, Menu, Inspect, Seated, Cart, Shop) with enter, exit, cleanup, restore.
+- [x] Explicit mode state machine (Explore, Menu, Inspect, Seated, Cart, Shop) with enter, exit, cleanup, restore.
 - [ ] Mode-state review and focused browser verification: `docs/v11-mode-state-review.md`.
 - [ ] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
 - [ ] Shelf focus mode (proposal, depends on the mode state machine): one-page scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
@@ -289,3 +289,19 @@ concepts, not original artwork, print masters, seamless UV textures or proof of
 full physical-packaging fidelity; the source-matching item remains open.
 
 - Application 1.1.35 integrates four owner-authorized original M056 premium shelf instances in New Moon, preserving 36 native-scale existing cans and Visitor v2 pickup/return. See [M056 integration evidence](docs/v11-m056-integration.md). This asset substitution does not complete the reserved Shelf focus mode.
+
+## Explicit mode lifecycle — 2026-11-15
+
+Application 1.1.36 gives the six existing modes one lifecycle and pause owner,
+retains Seated/Cart beneath overlays, includes Original tin inspection, and fixes
+compact/wide Map classification and hidden-focus recovery. It preserves native
+Bag focus, posture, camera, physical products and session selections. After
+synchronizing M056 shelves, 10 mode unit tests, 162 browser snapshots plus v1 smoke,
+70 accessibility states, 47 Python tests, full V11, Gallery, 28 legacy demo cases,
+four no-JavaScript journeys, Bag/legacy Cart and PWA checks pass. Normal mode flows
+record zero illegal transitions; independent source review has no P0/P1 findings
+and visual preservation scores 85/100. See `docs/v11-mode-state-review.md` and its
+acceptance receipt. This completes the implementation item only; the separate
+mode-state review task, contextual navigation, Shelf, device and packaging gates
+remain open. Physical devices, screen readers and native select popup choice are
+not certified by these laboratory checks.

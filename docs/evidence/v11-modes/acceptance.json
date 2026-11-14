@@ -1,0 +1,62 @@
+{
+  "application": {
+    "version": "1.1.36",
+    "build": "b375d72196543f6c"
+  },
+  "base": "574b742",
+  "environment": "Darwin arm64, Chromium 157.0.8103.51, ANGLE Metal, local HTTP; browser touch/keyboard emulation",
+  "runtimeSHA256": {
+    "script.js": "36d1b8683cd51fa7b96d659aa63dc0e7e9573778c2c806e7748a5d268f2ad237",
+    "assets/ui.js": "5ee88f18e193b0e08047ce067b0a8e5db1745ee7d794ea2c23d5075d00ff7e11",
+    "assets/modes.js": "454803af72f6b523036194fcfd0e07453acd7323cadda11a66c96cc5be98e886"
+  },
+  "checks": {
+    "generation": "PASS",
+    "SSOT": "PASS",
+    "pythonUnitTests": 47,
+    "modeUnitTests": 10,
+    "modeBrowserSnapshots": 162,
+    "legacyV1ModeSmoke": "PASS",
+    "normalModeIllegalTransitions": 0,
+    "fullV11ThreeViewports": "PASS",
+    "accessibilityStates": 70,
+    "gallery": "PASS",
+    "legacyDemoBrowserCases": 28,
+    "legacyDemoNoJSJourneys": 4,
+    "PWAUpdateOfflineInstallability": "PASS",
+    "defaultV2BagThreeViewportsAndStorageFallback": "PASS",
+    "legacyV1CartThreeViewportsAndLoadFallback": "PASS"
+  },
+  "adaptations": [
+    "Old browser launch arguments use native ANGLE Metal on this macOS host; assertions unchanged",
+    "Cart regression selects existing ?visitor=v1 because its carrying-bag assertions describe legacy v1. Default v2 cart is independently covered in mode and accessibility suites",
+    "Temporary runpy wrapper restores tests directory on sys.path; initial PWA wrapper import failure was rerun successfully",
+    "Mode test awaits actual native Bag close event before focusing scene; immediate focus restoration alone is not a stable close boundary"
+  ],
+  "independentReview": {
+    "verdict": "No P0/P1 in merged mode lifecycle",
+    "visualScore": 85,
+    "rubric": {
+      "hierarchy": 17,
+      "spacing": 17,
+      "typography": 12,
+      "colour": 14,
+      "consistency": 14,
+      "responsive": 11
+    },
+    "views": [
+      "Explore 390",
+      "Seated restored 390",
+      "Cart restored 768",
+      "Map 390"
+    ],
+    "upstreamShelfCompatibility": "PASS: no new input, overlay or pause owner"
+  },
+  "limits": [
+    "Physical iOS/Android and real safe-area insets NOT VERIFIED",
+    "Screen-reader sessions NOT VERIFIED",
+    "Native popup keyboard choice NOT VERIFIED: same behavior in standalone host fixture",
+    "Physical packaging fidelity is not established",
+    "Separate mode-state review checklist remains pending its own task"
+  ]
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "snapshots": [],
+    "frames": {},
+    "directoryProductClose": {
+      "mode": "menu",
+      "illegal": 1
+    },
+    "seatedBagClose": {
+      "mode": "seated",
+      "seated": true,
+      "illegal": 3
+    },
+    "map": {
+      "mode": "menu",
+      "framesAdvanced": 0
+    }
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "snapshots": [],
+    "frames": {},
+    "directoryProductClose": {
+      "mode": "menu",
+      "illegal": 1
+    },
+    "seatedBagClose": {
+      "mode": "seated",
+      "seated": true,
+      "illegal": 3
+    },
+    "map": {
+      "mode": "menu",
+      "framesAdvanced": 15
+    }
+  }
+]

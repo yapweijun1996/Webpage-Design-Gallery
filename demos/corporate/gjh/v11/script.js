@@ -1,23 +1,33 @@
 import {createUI} from './assets/ui.js';
-import {createModes, deriveMode} from './assets/modes.js';
+import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 
-const ui = createUI(), canvas = document.querySelector('#scene'), modes = createModes();
-setupOriginalTin(ui);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let productControl=null;
 let nearby = null, currentZone = 'atrium';
+function clearTransientState(event) {
+  player?.clearInput();
+  player?.setInput(null);
+  // Overlays suspend the collection/action camera. Real interruptions cancel the
+  // transient demo gesture; physical shelf products remain owned by the player.
+  if (event.kind === 'interrupt') player?.cancelCollection();
+  manual = false; accumulator = 0; last = performance.now();
+}
+const modes = createModes({onCleanup: clearTransientState,
+  onEnter(mode) { document.body.dataset.mode = mode; }});
+const ui = createUI(), canvas = document.querySelector('#scene');
 function syncMode(signals = ui.modeSignals()) {
-  const mode = deriveMode({...signals, seated: Boolean(player?.state.seated),
+  modes.observe({...signals, seated: Boolean(player?.state.seated),
     cartActive: Boolean(player?.state.character?.cart?.active)});
-  modes.sync(mode, 'Derived UI/player state');
-  document.body.dataset.mode = mode;
+  document.body.dataset.mode = modes.current();
 }
 ui.onModeState(syncMode);
+setupOriginalTin(ui);
+syncMode();
 const STEP = 1 / 60;
 const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null,
-  illegalCount: modes.illegalCount(),
+  illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
   productAssets: world?.productAssets || null,
   seats:world?.seats?.map(({id,name,x,z,exitX,exitZ,facing})=>({id,name,x,z,exitX,exitZ,facing}))||[],
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
@@ -37,7 +47,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
     player.setInput(clean);
   },
   step(ms) {
-    if (!ready || !Number.isFinite(ms) || document.hidden || ui.paused()) return snapshot();
+    if (!ready || !Number.isFinite(ms) || document.hidden || modes.paused()) return snapshot();
     manual = true;
     const count = Math.max(0, Math.min(600, Math.floor(ms / (STEP * 1000))));
     for (let i = 0; i < count; i++) tick();
@@ -56,10 +66,9 @@ function updateHUD() {
   }
   productControl?.update(p,nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
-  syncMode();
 }
 function tick() {
-  if (ui.paused()) return;
+  if (modes.paused()) return;
   const p = player.state;
   for (const door of world.doors) {
     const open = p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
@@ -73,7 +82,7 @@ function tick() {
   player.update(STEP); physics.step(); player.sync(); player.updateCamera(STEP); updateHUD();
 }
 function render() {
-  if (ready && !document.hidden && !ui.paused()) {
+  if (ready && !document.hidden && !modes.paused()) {
     player.camera.updateMatrixWorld();
     world.updateSigns(player.camera, canvas); renderer.render(world.scene, player.camera); frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
@@ -83,7 +92,7 @@ function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;
   const elapsed = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now;
-  if (!manual && !ui.paused()) {
+  if (!manual && !modes.paused()) {
     accumulator += elapsed;
     while (accumulator >= STEP) { tick(); accumulator -= STEP; }
     render();
@@ -93,23 +102,22 @@ function animate(now) {
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message) {
   ready = false; window.__sceneFailed = true;
-  cancelAnimationFrame(frame); frame = 0; player?.clearInput(); ui.fallback(message);
+  cancelAnimationFrame(frame); frame = 0; modes.interrupt('fallback'); ui.fallback(message);
 }
 ui.onTeleport(zone => { if (ready) { manual = false; player.cancelCollection(); player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit(id):player.stand();updateHUD();render();return ok;});
-ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();} });
+ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
 document.addEventListener('keydown', event => {
-  if(event.code==='Escape'&&!ui.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
-  if (event.code === 'KeyF' && nearby && !ui.paused() && !event.repeat &&
+  if(event.code==='Escape'&&!modes.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
+  if (event.code === 'KeyF' && nearby && !modes.paused() && !event.repeat &&
       !event.altKey && !event.ctrlKey && !event.metaKey &&
       (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); if(player.state.seated){player.stand();updateHUD();}else ui.inspect(nearby); }
 });
-document.addEventListener('focusin',()=>{if(ui.paused())player?.cancelCollection();});
-document.addEventListener('click', () => { if (ui.paused()) {player?.clearInput();player?.cancelCollection();} });
-window.addEventListener('blur',()=>player?.cancelCollection());
+window.addEventListener('blur', () => modes.interrupt('window blur'));
+window.addEventListener('resize', () => modes.interrupt('viewport resize'));
 document.addEventListener('visibilitychange', () => {
-  player?.clearInput(); player?.cancelCollection();
-  if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else resume();
+  if (document.hidden) { modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
+  else resume();
 });
 canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); fallback('The 3D graphics context was interrupted. All stores and verified products remain available in list view. Reload to retry.'); });
 async function initialize() {
@@ -133,7 +141,7 @@ async function initialize() {
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats);
   if (elevator) {
     const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
-    productControl=installPhysicalProductControl(player,world,()=>ui.paused());
+    productControl=installPhysicalProductControl(player,world,()=>modes.paused());
     const {installVisitorV2Controls} = await import('./assets/visitor-v2-controls.js');
     installVisitorV2Controls(document.querySelector('#controls-copy'), changes => { player.customize(changes); render(); });
   }
@@ -142,8 +150,7 @@ async function initialize() {
     const ok=player.useElevator(elevator); updateHUD(); render(); return ok;
   });
   ui.setSeats(world.seats);
-  player.setPaused(() => ui.paused());
-  ui.onPanelPause(()=>{player.clearInput();player.setInput(null);player.cancelCollection();manual=false;});
+  player.setPaused(() => modes.paused());
   ui.onCart(()=>({...player.state.character.cart,seated:player.state.seated}),value=>{const ok=player.setCart(value);updateHUD();render();return ok;});
   ui.onCollect(id=>Boolean(!player.state.seated&&player.state.character.collection.available!==false&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;
