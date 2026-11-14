@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Illustration: editorial redesign for the Webpage Design Gallery homepage</title>
+  <desc id="desc">A warm paper desktop and mobile homepage concept featuring Goh Joo Hin, one company, eight design concepts, and search and category fields below the feature card.</desc>
+  <defs>
+    <style>
+      .sans { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .serif { font-family: Georgia, "Times New Roman", serif; }
+      .ink { fill: #25231f; }
+      .muted { fill: #746f66; }
+      .orange { fill: #a65030; }
+      .micro { font-size: 9px; letter-spacing: 1.45px; font-weight: 700; }
+    </style>
+    <clipPath id="previewClip"><rect x="116" y="394" width="465" height="276" rx="5"/></clipPath>
+  </defs>
+
+  <rect width="1600" height="1120" fill="#eee8de"/>
+  <text x="64" y="54" class="sans ink micro">WEBPAGE DESIGN GALLERY  /  HOMEPAGE STUDY</text>
+  <rect x="1430" y="31" width="106" height="32" rx="16" fill="#f8f5ef" stroke="#c9c0b4"/>
+  <text x="1483" y="51" text-anchor="middle" class="sans ink micro">ILLUSTRATION</text>
+  <text x="64" y="82" class="sans muted" font-size="12">Editorial direction · warm paper, dark ink, restrained burnt orange</text>
+
+  <!-- Desktop homepage illustration -->
+  <rect x="64" y="112" width="1045" height="930" rx="10" fill="#f8f5ef" stroke="#d6cec2"/>
+  <rect x="64" y="112" width="1045" height="68" rx="10" fill="#fbf9f5"/>
+  <path d="M64 180H1109" stroke="#ddd5ca"/>
+  <rect x="96" y="130" width="38" height="38" rx="9" fill="#e9e0d3"/>
+  <circle cx="108" cy="142" r="4" fill="#a65030"/><circle cx="122" cy="142" r="4" fill="#25231f"/>
+  <circle cx="108" cy="156" r="4" fill="#25231f"/><circle cx="122" cy="156" r="4" fill="#b9ac9b"/>
+  <text x="146" y="146" class="sans ink" font-size="15" font-weight="750">Webpage</text>
+  <text x="146" y="161" class="sans muted" font-size="10">Design Gallery</text>
+  <text x="838" y="153" class="sans orange" font-size="11" font-weight="650">Companies</text>
+  <text x="920" y="153" class="sans muted" font-size="11">About the gallery</text>
+
+  <text x="116" y="224" class="sans orange micro">DESIGN EXPLORATION PLATFORM</text>
+  <text x="116" y="276" class="serif ink" font-size="39" font-weight="700" letter-spacing="-1.1">One company. Many creative directions.</text>
+  <text x="116" y="307" class="sans muted" font-size="14">Find a company, explore its design directions, and try a live demo.</text>
+  <path d="M116 332H1057" stroke="#ddd5ca"/>
+  <text x="116" y="372" class="serif ink" font-size="25" font-weight="700">Companies</text>
+  <rect x="250" y="351" width="36" height="28" rx="4" fill="#f2ede5" stroke="#d8cfc3"/>
+  <text x="268" y="370" text-anchor="middle" class="sans ink" font-size="12">01</text>
+  <text x="1057" y="369" text-anchor="end" class="sans muted" font-size="11">8 designs to explore</text>
+
+  <!-- Featured company card -->
+  <rect x="96" y="391" width="961" height="296" rx="8" fill="#fcfaf6" stroke="#d4cabe"/>
+  <rect x="96" y="391" width="501" height="296" rx="8" fill="#e7ded2"/>
+  <g clip-path="url(#previewClip)">
+    <rect x="116" y="394" width="465" height="276" fill="#282421"/>
+    <rect x="116" y="394" width="465" height="27" fill="#201d1b"/>
+    <text x="132" y="411" class="sans" fill="#eee5da" font-size="8" font-weight="700">GJH</text>
+    <text x="169" y="411" class="sans" fill="#c9beb2" font-size="6.5">Food · Lifestyle · Wellness</text>
+    <text x="560" y="411" text-anchor="end" class="sans" fill="#c9beb2" font-size="6.5">OUR BUSINESS 　OUR STORY 　CONTACT</text>
+    <path d="M116 426H581" stroke="#51473f"/>
+    <text x="142" y="470" class="sans" fill="#d9a157" font-size="7" letter-spacing="1.3" font-weight="700">SINGAPORE HERITAGE · REGIONAL AMBITION</text>
+    <text x="142" y="510" class="serif" fill="#f8f1e9" font-size="30">The connections</text>
+    <text x="142" y="543" class="serif" fill="#f8f1e9" font-size="30">behind everyday life.</text>
+    <text x="142" y="568" class="sans" fill="#c7bbb0" font-size="8">Independent concepts for a regional food and wellness company.</text>
+    <rect x="142" y="589" width="113" height="28" rx="2" fill="#c87848"/>
+    <text x="153" y="607" class="sans" fill="#fff9f0" font-size="8" font-weight="700">EXPLORE THE COLLECTION →</text>
+    <rect x="368" y="437" width="188" height="216" rx="4" fill="#d6b78d"/>
+    <rect x="368" y="437" width="188" height="216" rx="4" fill="#ab6949" opacity=".18"/>
+    <circle cx="455" cy="526" r="68" fill="#e2a84e"/>
+    <circle cx="455" cy="526" r="52" fill="#f2d294"/>
+    <circle cx="455" cy="526" r="9" fill="#f8f1e9"/>
+    <path d="M455 474V517M455 535V578M403 526H446M464 526H507M419 490L449 520M461 532L491 562M491 490L461 520M449 532L419 562" stroke="#d39547" stroke-width="3"/>
+    <path d="M447 458C451 444 465 438 478 443C473 455 461 462 447 458Z" fill="#69734d"/>
+    <text x="462" y="628" text-anchor="middle" class="serif" fill="#fff9f0" font-size="14">Everyday connections</text>
+  </g>
+  <rect x="479" y="405" width="100" height="24" rx="12" fill="#fbf9f5" stroke="#d7cec2"/>
+  <text x="529" y="421" text-anchor="middle" class="sans ink micro" font-size="7">DESIGN COLLECTION</text>
+
+  <text x="626" y="426" class="sans orange micro">FEATURED COMPANY · 01 / 01</text>
+  <rect x="626" y="449" width="54" height="36" rx="4" fill="#eee7dc"/>
+  <text x="653" y="473" text-anchor="middle" class="serif ink" font-size="19" font-weight="700">GJH</text>
+  <text x="1023" y="470" text-anchor="end" class="sans muted" font-size="10">Corporate · Singapore</text>
+  <text x="626" y="522" class="serif ink" font-size="30" font-weight="700">Goh Joo Hin</text>
+  <text x="626" y="550" class="sans muted" font-size="12">Food, lifestyle and wellness. Explore independent</text>
+  <text x="626" y="569" class="sans muted" font-size="12">website concepts for Goh Joo Hin.</text>
+  <path d="M626 593H1024" stroke="#ded6cb"/>
+  <text x="626" y="625" class="sans muted" font-size="11">8 design concepts</text>
+  <text x="1024" y="625" text-anchor="end" class="sans orange" font-size="11" font-weight="700">Explore designs  →</text>
+  <text x="626" y="661" class="sans muted" font-size="9">Company card opens the collection · concepts are unofficial</text>
+
+  <!-- Search and category controls stay below the featured card -->
+  <text x="116" y="729" class="sans ink micro">FIND A COMPANY</text>
+  <text x="824" y="729" class="sans ink micro">CATEGORY</text>
+  <rect x="116" y="742" width="674" height="45" rx="4" fill="#fcfaf6" stroke="#bdb2a4"/>
+  <text x="134" y="770" class="sans muted" font-size="12">Search companies, industries or locations</text>
+  <rect x="806" y="742" width="251" height="45" rx="4" fill="#fcfaf6" stroke="#bdb2a4"/>
+  <text x="824" y="770" class="sans ink" font-size="12">All categories</text>
+  <path d="M1034 761L1040 767L1046 761" fill="none" stroke="#746f66" stroke-width="1.5"/>
+  <text x="116" y="824" class="sans muted" font-size="11">A growing collection, one company at a time.</text>
+
+  <path d="M96 873H1057" stroke="#ddd5ca"/>
+  <text x="116" y="911" class="serif ink" font-size="16" font-weight="700">Good ideas deserve a place.</text>
+  <text x="116" y="936" class="sans muted" font-size="10">Independent website design concepts, organized by company.</text>
+  <text x="116" y="953" class="sans muted" font-size="10">Explore the possibilities. Open a demo. Find a direction.</text>
+  <text x="738" y="915" class="sans muted" font-size="10">Concepts are unofficial and do not imply company endorsement.</text>
+  <text x="738" y="940" class="sans orange" font-size="10" font-weight="650">All companies ↗</text>
+  <text x="116" y="994" class="sans muted" font-size="9">Offline installation is unavailable. You can continue browsing online.</text>
+  <text x="116" y="1022" class="sans ink" font-size="9">▸  Install help &amp; offline access</text>
+
+  <!-- Mobile responsive illustration -->
+  <text x="1147" y="214" class="sans ink micro">MOBILE / STACKED CARD</text>
+  <text x="1147" y="236" class="sans muted" font-size="11">Same hierarchy, one comfortable column</text>
+  <rect x="1147" y="255" width="389" height="760" rx="28" fill="#25231f"/>
+  <rect x="1157" y="265" width="369" height="740" rx="20" fill="#f8f5ef"/>
+  <rect x="1288" y="273" width="106" height="14" rx="7" fill="#25231f"/>
+  <rect x="1176" y="302" width="30" height="30" rx="7" fill="#e9e0d3"/>
+  <circle cx="1186" cy="312" r="3.5" fill="#a65030"/><circle cx="1197" cy="312" r="3.5" fill="#25231f"/>
+  <circle cx="1186" cy="323" r="3.5" fill="#25231f"/><circle cx="1197" cy="323" r="3.5" fill="#b9ac9b"/>
+  <text x="1215" y="317" class="sans ink" font-size="12" font-weight="750">Webpage</text>
+  <text x="1215" y="330" class="sans muted" font-size="9">Design Gallery</text>
+  <text x="1489" y="320" text-anchor="end" class="sans orange" font-size="9">Companies</text>
+  <text x="1176" y="365" class="sans orange micro" font-size="7">DESIGN EXPLORATION</text>
+  <text x="1176" y="394" class="serif ink" font-size="22" font-weight="700">One company. Many</text>
+  <text x="1176" y="419" class="serif ink" font-size="22" font-weight="700">creative directions.</text>
+  <text x="1176" y="441" class="sans muted" font-size="9">Find a company, explore its design</text>
+  <text x="1176" y="455" class="sans muted" font-size="9">directions, and try a live demo.</text>
+  <text x="1176" y="486" class="serif ink" font-size="18" font-weight="700">Companies</text>
+  <text x="1507" y="485" text-anchor="end" class="sans muted" font-size="9">8 designs</text>
+
+  <rect x="1176" y="500" width="331" height="298" rx="7" fill="#fcfaf6" stroke="#d4cabe"/>
+  <rect x="1176" y="500" width="331" height="116" rx="7" fill="#282421"/>
+  <rect x="1176" y="500" width="331" height="20" rx="7" fill="#201d1b"/>
+  <text x="1188" y="514" class="sans" fill="#eee5da" font-size="7" font-weight="700">GJH</text>
+  <text x="1199" y="546" class="serif" fill="#f8f1e9" font-size="18">The connections</text>
+  <text x="1199" y="568" class="serif" fill="#f8f1e9" font-size="18">behind everyday life.</text>
+  <circle cx="1452" cy="560" r="37" fill="#e2a84e"/>
+  <circle cx="1452" cy="560" r="27" fill="#f2d294"/>
+  <circle cx="1452" cy="560" r="5" fill="#f8f1e9"/>
+  <path d="M1452 533V555M1452 565V587M1425 560H1447M1457 560H1479M1433 541L1449 557M1455 563L1471 579M1471 541L1455 557M1449 563L1433 579" stroke="#d39547" stroke-width="2"/>
+  <rect x="1192" y="629" width="43" height="28" rx="4" fill="#eee7dc"/>
+  <text x="1213" y="648" text-anchor="middle" class="serif ink" font-size="15" font-weight="700">GJH</text>
+  <text x="1491" y="646" text-anchor="end" class="sans muted" font-size="8">Corporate · Singapore</text>
+  <text x="1192" y="681" class="serif ink" font-size="22" font-weight="700">Goh Joo Hin</text>
+  <text x="1192" y="701" class="sans muted" font-size="9">Food, lifestyle and wellness. Explore</text>
+  <text x="1192" y="715" class="sans muted" font-size="9">independent website concepts.</text>
+  <path d="M1192 733H1491" stroke="#ded6cb"/>
+  <text x="1192" y="755" class="sans muted" font-size="9">8 design concepts</text>
+  <text x="1491" y="755" text-anchor="end" class="sans orange" font-size="9" font-weight="700">Explore designs →</text>
+
+  <text x="1176" y="829" class="sans ink micro" font-size="7">FIND A COMPANY</text>
+  <rect x="1176" y="839" width="331" height="38" rx="4" fill="#fcfaf6" stroke="#bdb2a4"/>
+  <text x="1188" y="863" class="sans muted" font-size="9">Search companies, industries or locations</text>
+  <text x="1176" y="901" class="sans ink micro" font-size="7">CATEGORY</text>
+  <rect x="1176" y="911" width="331" height="38" rx="4" fill="#fcfaf6" stroke="#bdb2a4"/>
+  <text x="1188" y="935" class="sans ink" font-size="9">All categories</text>
+  <path d="M1481 927L1486 932L1491 927" fill="none" stroke="#746f66" stroke-width="1.3"/>
+  <text x="1176" y="978" class="sans muted" font-size="8">Footer stacks below the filters on mobile.</text>
+
+  <text x="64" y="1080" class="sans muted" font-size="10">CONCEPT MOCKUP  ·  Inventory shown: 1 company / 8 designs  ·  No additional inventory implied</text>
+</svg>

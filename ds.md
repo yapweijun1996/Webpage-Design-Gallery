@@ -86,6 +86,7 @@ flowchart TD
 | Page semantics | [templates/gallery/](templates/gallery/) | Landmarks, headings, static page composition |
 | Card and filter generation | [scripts/build_gallery.py](scripts/build_gallery.py) | Existing generated component markup; future extraction must preserve one template owner |
 | Discovery/detail/compare state | [src/gallery.js](src/gallery.js) | One controller per behavior; DOM is a projection of state |
+| Appearance and language | [src/preferences-boot.js](src/preferences-boot.js), [src/preferences.js](src/preferences.js), [locales](locales/) | Pre-paint appearance, persisted preferences, original-source message rendering and regional formatting; independent demos remain separate |
 | PWA state | [src/pwa.js](src/pwa.js), [worker template](templates/gallery/sw.js) | Update/install/cache behavior; do not duplicate in gallery controller |
 | Catalog facts | [companies](data/companies.json), [categories](data/categories.json), [styles](data/styles.json), demo `metadata.json` files | Content IDs, titles, classification and order; not DS-owned |
 | Canonical shared icons | [design-system/icons.json](design-system/icons.json) | Approved SVG-Icon-Studio definitions generate `assets/icons.svg`; [existing receipts](assets/icons-sources.json) preserve provenance |
@@ -123,7 +124,7 @@ The former six variables in `assets/gallery.css` are now compatibility aliases e
 
 Migration aliases: `--ink` → `--color-text`, `--muted` → `--color-text-muted`, `--accent` → `--color-action`, `--line` → `--color-border-subtle`, `--surface` → `--color-surface`, `--page` → `--color-page`. Preserve explicit differences between decorative separators and essential control boundaries. The measured raw-style categories now have zero remaining declarations against the original 1,211-entry baseline. The check measures literal colors plus `border-radius`, `box-shadow`, `text-shadow`, `font-size`, `font` and `z-index`, together with shared ownership rules. It does not prohibit every CSS number: intentional geometry, layout dimensions, media-query syntax and independent scene construction remain in component styles.
 
-If themes are later needed, keep theme, palette, component kit and density as independent configuration axes. A dense ERP adapter must not silently change semantic status colors; an independent demo theme does not inherit gallery density. Only introduce supported combinations with actual consumer evidence.
+Light/Dark/System appearance is supported by the gallery preference owner. Keep theme, palette, component kit and density as independent configuration axes. A dense ERP adapter must not silently change semantic status colors; an independent demo theme does not inherit gallery density. Only introduce supported combinations with actual consumer evidence.
 
 ## 6. Layout and responsive contracts
 
@@ -297,3 +298,13 @@ Visitor presentation may bridge isolated zero-motion contact ticks for 60 ms aft
 ### V11 keyboard turning (application 1.1.3)
 
 Hold Q/E to turn left/right with the camera and visitor; turning alone does not move the capsule. WASD/arrows, Shift, drag and touch retain their existing behavior. F inspects a nearby display; the click/tap action remains available. Native control focus, modifier shortcuts, blur and paused views must not retain game input. Verify actual key events, opposing keys, release, moving turns and F/Escape inspection in `tests/browser_gjh_v11.py`.
+
+### Editorial discovery presentation (2026-11-14)
+
+The company directory uses an editorial presentation scoped by `main[data-page="companies"]`: warm paper, dark ink, a restrained burnt-orange action accent, system serif display type, and a prominent company preview. Canonical values belong to `design-system/tokens.json`; `assets/tokens.css` is regenerated. Other gallery routes and independent demos retain their existing themes. Search/category source order remains inventory-aware, company cards keep their collection destination, and PWA update consent remains intact.
+
+The advisor [proposal](ui/home-redesign-proposal.md) and [illustration](ui/home-redesign-proposal.png) are design references, not runtime screenshots. Real before/after images and verification scope are recorded in [the local review](ui/README.md).
+
+### PWA appearance and localization (2026-11-15)
+
+Light/Dark/System and English/Simplified Chinese/Bahasa Melayu are available on gallery routes. Canonical theme values remain in the token registry; locale messages and placeholder patterns live in independent JSON packs. Explicit update consent and integrity checks are retained, with a guard for active comparison selections. See [the acceptance contract](docs/pwa-preferences.md) for offline scope, state ownership, budgets, evidence and unverified platforms.

@@ -110,6 +110,11 @@ async function reloadVerifiedController() {
 
 applyButton.addEventListener('click', async () => {
   if (applying || !target || !registration) return;
+  if (document.querySelector('.compare-tray.has-selection')) {
+    status.textContent = 'Clear your comparison selections before updating so they are not lost.';
+    document.querySelector('#clear-selection').focus();
+    return;
+  }
   applying = true; applyButton.disabled = true; checkButton.disabled = true;
   closeButton.hidden = true; dialog.classList.remove('has-error');
   progress.textContent = 'Installing ' + label(target) + '… Your current URL will be preserved.';

@@ -43,7 +43,7 @@ function initCompanies() {
   function update(reset = true, push = false) {
     if (reset) currentPage = 1;
     const query = search.value.trim().toLowerCase();
-    const matches = cards.filter((card) => card.dataset.search.toLowerCase().includes(query) && (!category.value || card.dataset.categories.split(' ').includes(category.value)));
+    const matches = cards.filter((card) => (card.dataset.search + ' ' + card.textContent).toLowerCase().includes(query) && (!category.value || card.dataset.categories.split(' ').includes(category.value)));
     matches.sort((a, b) => sort.value === 'designs' ? Number(b.dataset.count) - Number(a.dataset.count) || a.dataset.name.localeCompare(b.dataset.name) : a.dataset.name.localeCompare(b.dataset.name));
     const pageCount = Math.ceil(matches.length / perPage);
     currentPage = Math.max(1, Math.min(currentPage, pageCount || 1));
@@ -69,6 +69,7 @@ function initCompanies() {
   search.addEventListener('input', () => update()); category.addEventListener('change', () => update()); sort.addEventListener('change', () => update());
   document.querySelector('[data-reset]').addEventListener('click', () => { search.value = ''; category.value = ''; update(); search.focus(); });
   window.addEventListener('popstate', () => { restore(); update(false); });
+  window.addEventListener('wdg:languagechange', () => update(false));
   update(false);
 }
 

@@ -1,0 +1,32 @@
+{
+  "standard": "pwa:product-standard",
+  "profile": "CONTENT",
+  "test_id": "PREFERENCES-FINAL-SMOKE",
+  "status": "PASS",
+  "build": {
+    "version": "1.1.30",
+    "build": "ae3c4cadd8db777b"
+  },
+  "base_commit": "d636ce0f658c7fb2df7342648ed44b5d45012dfe",
+  "browser": "157.0.8103.51",
+  "timestamp": "2026-11-14T16:19:27.447280+00:00",
+  "checks": [
+    "3 languages x 2 appearances",
+    "No overflow or page exceptions"
+  ],
+  "source_sha256": {
+    "src/preferences.js": "e9dbc7e985f9177fc38d933973739c2ef9a5bbac4a3a180090ee85fdebb5934f",
+    "src/preferences-boot.js": "0f25b4136dcd9c24f17952a9bd3d194c06cab515022560e3da4cc3a1a96d5030",
+    "locales/en.json": "1163e5bad0cc3c30ac05a2b764f6ed905eefdc834b9dc6753b1471af566d7a57",
+    "locales/zh-Hans.json": "c588aa2bf4a3914cad9d67e3efb08448248608baf1919924f9107a8231dfed2b",
+    "locales/ms.json": "00310656d5ebdbac82dd2cd619da2997a4ef9b24f07d5c0d807fb43ae2ea000c",
+    "assets/gallery.css": "2712a92ad6dbc27715d817f10c9bd90b4fd8f9dc5947194b9a5253f866559a99",
+    "assets/tokens.css": "4114da0e32b04b21b5866705c68f58161cfd921332fed15d377ba8f55effecdb",
+    "src/pwa.js": "94e05a165180c8824ac4eb309f565221d0da391c048040e451ca8169e1ded8b2",
+    "src/gallery.js": "022efdabe3d079cda3fe52ff69b220b134b61614337d9a92f627072e42d49dc4",
+    "templates/gallery/base.html": "2c9135e32c46649ddab5a4ba9ab719b75302a2ac9f4b4f1f912873492312faf6",
+    "scripts/build_gallery.py": "06959c2064ff8177b859f16f188212dbff5a43051d791efe060626b825d70b95"
+  },
+  "artifact": "docs/screenshots/preferences/final-zh-dark-829.png",
+  "artifact_sha256": "21175aab2211b6b18025ff0a2926db9394ebd40e6a05bb953cfd184c65eac7c5"
+}

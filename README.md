@@ -32,6 +32,12 @@ python -m http.server 8000
 
 Open `http://localhost:8000/`. The generated company and demo links work without JavaScript; search, filters, design details and comparison need JavaScript and an HTTP server. Do not edit generated HTML directly.
 
+## Appearance and language
+
+The gallery header offers **Light / Dark / System** appearance and **English / 简体中文 / Bahasa Melayu**. Choices persist across gallery routes and updates, synchronize across tabs and remain available offline after the shell is saved. Independent demo websites retain their own language and visual identity.
+
+Translations live in `locales/*.json`; update every pack when adding gallery copy. The build rejects missing keys and broken placeholders. See [PWA preferences and acceptance](docs/pwa-preferences.md) for scope, ownership, recovery, performance budget and device limitations.
+
 ## Add a company or design
 
 1. Add a company to `data/companies.json` with a stable `id`, unique `slug`, category IDs, official website and demo directory. Keep IDs stable when renaming a company.
@@ -57,6 +63,8 @@ python tests/browser_gjh_furnishings.py
 python -m unittest discover -s tests -p test_gjh_character.py -v
 python tests/browser_gjh_character.py
 python tests/browser_pwa.py
+python -m unittest discover -s tests -p test_preferences.py -v
+python tests/browser_preferences.py
 ```
 
 Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. The Gallery and PWA suites build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.

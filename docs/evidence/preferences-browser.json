@@ -1,0 +1,23 @@
+{
+  "standard": "pwa:product-standard",
+  "profile": "CONTENT",
+  "build": {
+    "version": "1.1.30",
+    "build": "ae3c4cadd8db777b"
+  },
+  "timestamp": "2026-11-14T16:19:25.531369+00:00",
+  "os": "macOS-27.2-arm64-arm-64bit-Mach-O",
+  "browser": "Chromium",
+  "browser_version": "157.0.8103.51",
+  "status": "PASS",
+  "checks": [
+    "24 responsive language/theme combinations, localized empty state, controls and text/control contrast",
+    "System tracking, persistence, localized search, state-preserving language change, detail/compare/error/offline routes, Intl formats",
+    "Cross-tab preference synchronization and safe unknown message fallback",
+    "Blocked storage, missing English/Chinese packs and stalled response bodies recover to usable UI",
+    "Real failed network probe, offline cold reload, all cached languages and persisted dark Malay deep link"
+  ],
+  "limitations": [
+    "Physical iOS/Android install, Safari, Firefox, Edge and screen readers NOT_RUN; field performance INSUFFICIENT_DATA"
+  ]
+}

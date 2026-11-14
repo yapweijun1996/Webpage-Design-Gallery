@@ -65,7 +65,7 @@ def alternate_release(source, target, catalog, release, activation_delay=False, 
 def run():
     screenshots = ROOT / "docs/screenshots/pwa"
     screenshots.mkdir(parents=True, exist_ok=True)
-    evidence = {"runtime": "Real headless Chrome service workers under /Webpage-Design-Gallery/", "checks": {}, "limitations": ["Physical iOS/Safari installation and status-bar rendering NOT RUN", "Native OS install dialog NOT RUN; browser manifest/installability inspected", "Light-only gallery; dark-mode system chrome N/A"]}
+    evidence = {"runtime": "Real headless Chrome service workers under /Webpage-Design-Gallery/", "checks": {}, "limitations": ["Physical iOS/Safari installation and status-bar rendering NOT RUN", "Native OS install dialog NOT RUN; browser manifest/installability inspected", "Light/dark browser chrome covered separately by browser_preferences.py; physical OS chrome NOT RUN"]}
     with tempfile.TemporaryDirectory(prefix="gallery-pwa-") as temporary:
         folder = Path(temporary)
         a = folder / "a/Webpage-Design-Gallery"
@@ -125,7 +125,7 @@ def run():
                         document.dispatchEvent(event);
                         return !event.defaultPrevented;
                     }"""), "Gallery must not suppress browser zoom gestures"
-                    assert page.locator('meta[name="theme-color"]').get_attribute("content") == "#ffffff"
+                    assert page.locator('meta[name="theme-color"]').get_attribute("content") == page.locator('.site-header').evaluate('(element) => getComputedStyle(element).backgroundColor')
                     assert page.locator(".app-chrome").evaluate("e => getComputedStyle(e).transitionDuration") == "0s"
                     page.screenshot(path=str(screenshots / f"company-{width}.png"), full_page=True)
                     page.evaluate("scrollTo(0, innerHeight + 200)")
@@ -201,6 +201,16 @@ def run():
                 second.goto(base + "companies/gjh/index.html", wait_until="networkidle")
                 second.wait_for_function("() => !document.querySelector('#update-notice').hidden")
                 page.screenshot(path=str(screenshots / "update-available-375.png"), full_page=True)
+                page.wait_for_selector('html[data-preferences-ready]')
+                page.select_option('#theme-select', 'dark')
+                page.select_option('#language-select', 'zh-Hans')
+                page.locator('input[value="v5"]').check()
+                page.locator('#apply-update').click()
+                page.wait_for_function("() => document.querySelector('#app-status').textContent.includes('请先清除比较选择')")
+                assert page.locator('meta[name="app-build"]').get_attribute('content') == release_a['build']
+                assert not page.locator('#update-dialog').is_visible()
+                page.locator('#clear-selection').click()
+                evidence['checks']['comparisonSelectionBlocksUpdate'] = 'PASS'
                 navigations = []
                 page.on("framenavigated", lambda frame: navigations.append(frame.url) if frame == page.main_frame else None)
                 page.locator("#apply-update").click()
@@ -210,6 +220,11 @@ def run():
                 page.wait_for_function("() => document.querySelector('meta[name=app-build]').content === 'bbbbbbbbbbbbbbbb'", timeout=30000)
                 assert len(navigations) == 1, navigations
                 assert "?review=keep" in page.url
+                page.wait_for_selector('html[data-preferences-ready]')
+                assert page.locator('html').get_attribute('lang') == 'zh-Hans'
+                assert page.locator('html').get_attribute('data-theme') == 'dark'
+                page.select_option('#language-select', 'en')
+                evidence['checks']['languageAndThemeSurviveVerifiedUpdate'] = 'PASS'
                 assert second.locator('meta[name="app-build"]').get_attribute("content") == release_a["build"]
                 keys = page.evaluate("caches.keys()")
                 assert "other-app-sentinel" in keys

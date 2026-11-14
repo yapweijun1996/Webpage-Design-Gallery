@@ -148,9 +148,25 @@ def design_card(design, company):
       <h3><a href="{prefix}designs/index.html?{query}">{title}</a></h3><p class="card-description">{escape(design['description'])}</p><div class="card-bottom"><a class="details-link" href="{prefix}designs/index.html?{query}">View details</a><a class="card-action" href="{prefix}{escape(design['demoPath'])}">Open live demo <span aria-hidden="true">{icon("arrow-up-right", prefix)}</span><span class="visually-hidden">: {title}</span></a></div></div></article>'''
 
 
+def validate_locales(directory=ROOT / "locales"):
+    """Reject incomplete packs and broken dynamic placeholders before publication."""
+    packs = {code: read_json(directory / f"{code}.json") for code in ("en", "zh-Hans", "ms")}
+    for code, pack in packs.items():
+        for kind in ("messages", "patterns"):
+            messages = pack.get(kind)
+            if not isinstance(messages, dict) or not all(isinstance(value, str) and value for value in messages.values()):
+                raise ValueError(f"Invalid locale map: {code}/{kind}")
+            if messages.keys() != packs["en"][kind].keys():
+                raise ValueError(f"Incomplete locale keys: {code}/{kind}")
+            for key, value in messages.items():
+                if sorted(re.findall(r"\{\w+\}", key)) != sorted(re.findall(r"\{\w+\}", value)):
+                    raise ValueError(f"Invalid locale placeholders: {code}/{key}")
+
+
 def runtime_resources(catalog):
     resources = {Path(name) for name in (
-        "assets/tokens.css", "assets/gjh-themes.css", "assets/icons.svg", "assets/gallery.css", "assets/pwa.css", "src/gallery.js", "src/pwa.js",
+        "assets/tokens.css", "assets/gjh-themes.css", "assets/icons.svg", "assets/gallery.css", "assets/pwa.css", "src/gallery.js", "src/pwa.js", "src/preferences-boot.js", "src/preferences.js",
+        "locales/en.json", "locales/zh-Hans.json", "locales/ms.json",
         "data/companies.json", "data/categories.json", "data/styles.json", "manifest.webmanifest",
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png",
     )}
@@ -231,6 +247,7 @@ def pwa_outputs(pages, catalog, release):
 
 
 def build(output=ROOT, check=False):
+    validate_locales()
     design_system.build(ROOT, check=check)
     catalog = load_catalog()
     release = release_info(catalog)
