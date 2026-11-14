@@ -1,0 +1,88 @@
+[
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "sku": "nz-425g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "sku": "au-425g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "sku": "sa-425g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "sku": "mx-454g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "loadingFailureRetry": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "sku": "nz-425g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "sku": "au-425g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "sku": "sa-425g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "sku": "mx-454g",
+    "modeRoundtrips": 2,
+    "guidanceAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "loadingFailureRetry": "PASS"
+  }
+]

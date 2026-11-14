@@ -34,6 +34,9 @@ export function setupNewMoonPreview() {
   Object.defineProperty(window,'__newMoonPreview',{value:Object.freeze({get state(){return snapshot();}}),configurable:true});
   function setMode(next) {
     mode=next;host.dataset.previewState=next;image.hidden=next!=='image';canvas.hidden=next!=='3d';
+    if(current?.loaded) status.textContent=next==='3d'
+      ? 'Unofficial 3D demo. Drag or use the controls to rotate; arrows rotate, +/− zoom, R resets.'
+      : 'Official packshot shown. Choose Show 3D preview to return to the unofficial interactive demo.';
     imageButton.hidden=next!=='3d';threeButton.hidden=next!=='image'||!current?.loaded;
     resetButton.hidden=controls.hidden=next!=='3d'||!current?.loaded;
     loadButton.hidden=!sku||!!current?.loaded;loadButton.disabled=current?.status==='loading';
@@ -103,7 +106,6 @@ export function setupNewMoonPreview() {
       s.camera=new T.PerspectiveCamera(35,1,.001,10);s.renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});s.renderer.setClearColor(0x000000,0);
       s.scene.add(new T.HemisphereLight(0xffffff,0x777777,2));const light=new T.DirectionalLight(0xffffff,2);light.position.set(-1,2,4);s.scene.add(light);
       s.loaded=true;s.status='loaded';last={status:'loaded',reason:null};setMode('3d');s.observer=new ResizeObserver(()=>resize(s));s.observer.observe(canvas);resize(s);
-      status.textContent='Unofficial 3D demo. Drag or use the controls to rotate; arrows rotate, +/− zoom, R resets.';
       if(document.activeElement===loadButton||document.activeElement===document.body)canvas.focus({preventScroll:true});
     }catch(error){fail(s,error.message||'unavailable');}finally{clearTimeout(s.timer);}
   }
