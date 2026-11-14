@@ -164,3 +164,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Final incremental reconciliation after 1.1.14: 320/768 preview layout, scoped axe scan, two-viewport payload/draw calls and five repeated preview cycles per viewport passed the stated laboratory limits. See `docs/v11-final-incremental-review.md` and the item-by-item evidence matrix. This documentation/test-only update does not change application assets or require a new application version.
 
 - Application 1.1.15 keeps the existing product Close bar visible while scrolling long details in portrait as well as landscape. Before/after screenshots were reviewed by an independent read-only advisor under KB ask-advisor/UI-auditor guidance; 12 viewport/mode cases verify touch close and unobscured keyboard focus. See `docs/v11-sticky-details-review.md`.
+
+- Application 1.1.16 improves readability of the product-dialog independent-demo disclaimer from 9px to the existing 14px small-text token, without changing its wording or colour. Screenshot-led advisor review and focused four-viewport reflow/close checks are recorded in `docs/v11-disclosure-type-review.md`.

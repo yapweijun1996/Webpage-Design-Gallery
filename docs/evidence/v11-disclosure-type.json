@@ -1,0 +1,82 @@
+[
+  {
+    "viewport": [
+      320,
+      740
+    ],
+    "disclosure": {
+      "fontSize": "14px",
+      "color": "rgb(93, 105, 94)",
+      "lineHeight": "26.6px",
+      "text": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+      "height": 79.78125,
+      "left": 40,
+      "right": 280,
+      "top": 618.5,
+      "bottom": 698.28125,
+      "gap": 18,
+      "hit": true
+    },
+    "tapCloseAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "disclosure": {
+      "fontSize": "14px",
+      "color": "rgb(93, 105, 94)",
+      "lineHeight": "26.6px",
+      "text": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+      "height": 53.1875,
+      "left": 40,
+      "right": 350,
+      "top": 748.921875,
+      "bottom": 802.109375,
+      "gap": 18,
+      "hit": true
+    },
+    "tapCloseAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "disclosure": {
+      "fontSize": "14px",
+      "color": "rgb(93, 105, 94)",
+      "lineHeight": "26.6px",
+      "text": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+      "height": 53.1875,
+      "left": 454,
+      "right": 787,
+      "top": 281.953125,
+      "bottom": 335.140625,
+      "gap": 25,
+      "hit": true
+    },
+    "tapCloseAndFocus": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "disclosure": {
+      "fontSize": "14px",
+      "color": "rgb(93, 105, 94)",
+      "lineHeight": "26.6px",
+      "text": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+      "height": 53.1875,
+      "left": 752,
+      "right": 1112,
+      "top": 620.46875,
+      "bottom": 673.65625,
+      "gap": 25,
+      "hit": true
+    },
+    "tapCloseAndFocus": "PASS"
+  }
+]
