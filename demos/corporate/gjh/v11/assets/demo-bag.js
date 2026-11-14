@@ -26,7 +26,8 @@ export function setupDemoBag() {
   let storage = null; try { storage = sessionStorage; } catch { /* Memory-only fallback. */ }
   const store = createBagStore(records.keys(), storage);
   const dialog = document.querySelector('#bag-dialog'), open = document.querySelector('#bag-open'), close = document.querySelector('#bag-close'), items = document.querySelector('#bag-items'), empty = document.querySelector('#bag-empty'), clear = document.querySelector('#bag-clear'), add = document.querySelector('#product-add'), note = document.querySelector('#product-bag-status'), status = document.querySelector('#bag-status');
-  let current = null;
+  const collect=document.querySelector('#product-collect');
+  let current = null, collectListener=null, canCollect=()=>false;
   function button(text, label, action) { const el = document.createElement('button'); el.type='button'; el.textContent=text; el.setAttribute('aria-label',label); el.addEventListener('click',action); return el; }
   function render(value) {
     const active = document.activeElement, focusKey = active?.dataset.bagFocus;
@@ -40,7 +41,7 @@ export function setupDemoBag() {
       [minus,plus,remove].forEach((el,i)=>el.dataset.bagFocus=`${id}-${i}`);plus.disabled=quantity===9;
       controls.className='bag-quantity';controls.append(minus,count,plus,remove);row.append(image,name,controls);items.append(row);
     }
-    if (current) { const n=value[current]||0;add.disabled=n===9;note.textContent=n ? `${n} in your demo bag · maximum 9 per item.` : 'Demo only. No payment or order is created.'; }
+    if (current) { const n=value[current]||0;add.disabled=n===9;collect.hidden=!canCollect(current);collect.disabled=n===9;note.textContent=n ? `${n} in your demo bag · maximum 9 per item.` : 'Demo only. No payment or order is created.'; }
     if (focusKey && dialog.open) { const replacement=[...items.querySelectorAll('button')].find(el=>el.dataset.bagFocus===focusKey&&!el.disabled); (replacement||close).focus({preventScroll:true}); }
   }
   store.subscribe(render);open.hidden=false;
@@ -48,5 +49,6 @@ export function setupDemoBag() {
   close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>open.focus({preventScroll:true}));
   clear.addEventListener('click',()=>{store.clear();status.textContent='Demo bag cleared.';close.focus({preventScroll:true});});
   add.addEventListener('click',()=>{if(current){store.change(current,1);note.textContent=`Added to demo bag. ${store.snapshot()[current]} of this item. No order created.`;}});
-  return {subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
+  collect.addEventListener('click',()=>{if(!current||!document.querySelector('#product-dialog').open||(store.snapshot()[current]||0)>=9)return;const id=current;if(collectListener?.(id)){store.change(id,1);}});
+  return {configureCollect(test,listener){canCollect=test;collectListener=listener;}, subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
 }

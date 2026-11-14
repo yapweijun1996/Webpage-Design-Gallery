@@ -190,6 +190,7 @@ export async function createWorld(T, R, physics, shadows) {
   for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   const doors = [], interactables = [];
+  let createCollectProp = () => null;
   let worldProductAssets = Object.freeze({status: 'not-loaded'});
   // Original decorative kiosk beside the entrance, outside the central walking line.
   // The actual wayfinding interaction opens the existing three-store DOM map.
@@ -311,7 +312,7 @@ export async function createWorld(T, R, physics, shadows) {
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
         sign(country, -12.85 + index * 1.9, 2.22, -8.72, 1.35, .16, true);
       }
-      worldProductAssets = productDisplay.assets;
+      worldProductAssets = productDisplay.assets; createCollectProp = productDisplay.createCollectProp;
       plant(x - 3.6, -2.3);
     } else {
       const cover = `${zone}-brand-cover.jpg`;
@@ -382,5 +383,5 @@ export async function createWorld(T, R, physics, shadows) {
       mesh.visible = !overlaps;
     }
   }
-  return {scene, doors, interactables, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, interactables, createCollectProp, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
 }

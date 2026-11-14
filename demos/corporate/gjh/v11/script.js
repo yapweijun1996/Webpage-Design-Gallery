@@ -40,7 +40,7 @@ function updateHUD() {
     const distance = Math.hypot(p.x - item.x, p.z - item.z);
     if (distance < item.radius && distance < best) { nearby = item.id; best = distance; }
   }
-  ui.update({zone: currentZone, x: p.x, z: p.z, nearby});
+  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active});
 }
 function tick() {
   if (ui.paused()) return;
@@ -79,16 +79,19 @@ function fallback(message) {
   ready = false; window.__sceneFailed = true;
   cancelAnimationFrame(frame); frame = 0; player?.clearInput(); ui.fallback(message);
 }
-ui.onTeleport(zone => { if (ready) { manual = false; player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
-ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else player?.clearInput(); });
+ui.onTeleport(zone => { if (ready) { manual = false; player.cancelCollection(); player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
+ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.clearInput();player?.cancelCollection();} });
 document.addEventListener('keydown', event => {
+  if(event.code==='Escape'&&!ui.paused())player?.cancelCollection();
   if (event.code === 'KeyF' && nearby && !ui.paused() && !event.repeat &&
       !event.altKey && !event.ctrlKey && !event.metaKey &&
       (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); ui.inspect(nearby); }
 });
-document.addEventListener('click', () => { if (ui.paused()) player?.clearInput(); });
+document.addEventListener('focusin',()=>{if(ui.paused())player?.cancelCollection();});
+document.addEventListener('click', () => { if (ui.paused()) {player?.clearInput();player?.cancelCollection();} });
+window.addEventListener('blur',()=>player?.cancelCollection());
 document.addEventListener('visibilitychange', () => {
-  player?.clearInput();
+  player?.clearInput(); player?.cancelCollection();
   if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else resume();
 });
 canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); fallback('The 3D graphics context was interrupted. All stores and verified products remain available in list view. Reload to retry.'); });
@@ -107,6 +110,12 @@ async function initialize() {
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, quality);
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane);
   player.setPaused(() => ui.paused());
+  ui.onCollect(id=>Boolean(world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
+    if(player.state.character.collection.active)return false;
+    player.clearInput();player.setInput(null);manual=false;
+    if(reducedMotion.matches)return true;
+    return player.startCollection(world.createCollectProp(id),id);
+  });
   ui.onBagChange(value => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
   function resize() {
     const width = canvas.clientWidth, height = canvas.clientHeight; if (!width || !height) return;

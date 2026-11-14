@@ -1,3 +1,4 @@
+import {createCollectionGesture} from './collection-gesture.js';
 import {createCarryBag} from './carry-bag.js';
 /** Authored visitor presentation; locomotion and collision belong to player.js. */
 export function createLocomotionContinuity() {
@@ -37,6 +38,7 @@ export async function createCharacter(T) {
     object.receiveShadow = true;
   });
   const carryBag = createCarryBag(T, avatar);
+  const collection = createCollectionGesture(T, avatar);
   const visual = new T.Group();
   visual.add(avatar);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -74,19 +76,20 @@ export async function createCharacter(T) {
       action.setEffectiveWeight(Math.abs(weight - nextWeight) < .001 ? weight : nextWeight);
     }
     actions.idle.paused = reducedMotion.matches;
-    carryBag.restore();
+    carryBag.restore(); collection.restore();
     mixer.update(dt);
-    carryBag.apply();
+    carryBag.apply(); collection.update(dt);
   }
 
   return {
     visual,
     update,
     setBagCount: carryBag.setCount,
+    startCollection: collection.start, cancelCollection: collection.cancel,
     get animation() { return animation; },
     get state() {
       return Object.freeze({
-        model, asset, nativeHeight, scale: 1, clips, carrying: carryBag.state,
+        model, asset, nativeHeight, scale: 1, clips, carrying: carryBag.state, collection: collection.state,
         weights: Object.freeze(Object.fromEntries(Object.entries(actions).map(([name, action]) => [name, action.getEffectiveWeight()])))
       });
     }

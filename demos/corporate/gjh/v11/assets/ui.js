@@ -230,7 +230,7 @@ export function createUI() {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, nearby: nextNearby }) {
+    update({ zone, x, z, nearby: nextNearby, collectionActive = false }) {
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
         if (showing3D) {
@@ -257,6 +257,7 @@ export function createUI() {
         inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
         if (nearby && showing3D) announce(isMap ? 'Directory kiosk. Decorative screen. Press F or tap Map for the three-store map.' : `${records.get(nearby).name}. Press F or tap Inspect for details.`);
       }
+      inspectPrompt.hidden = !nearby || collectionActive;
     },
     paused() {
       return guidePaused || externalPaused || !showing3D || dialog.open || bag.open;
@@ -264,6 +265,15 @@ export function createUI() {
     offerFirstGuide() { if (!guideSeen) showGuide(); },
     setExternalPaused(value) { externalPaused = Boolean(value); },
     inspect,
+    onCollect(test, listener) {
+      bag.configureCollect(id=>available&&test(id),id=>{
+        if(!available||!test(id))return false;
+        returnFocus=null;dialog.close('collect');setView(true);scene.focus({preventScroll:true});
+        if(!listener(id))return false;
+        announce('One item added to demo bag. Simplified collection gesture, not a physical shelf pickup.');
+        return true;
+      });
+    },
     onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {
       teleportListener = listener;

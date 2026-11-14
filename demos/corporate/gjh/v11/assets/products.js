@@ -120,7 +120,14 @@ export async function addProducts(T, scene, textures, brass) {
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {interactables, colliders: shelfXs.map(x => ({x, y: shelfBounds.y / 2, z: -9.25, sx: shelfBounds.x, sy: shelfBounds.y, sz: shelfBounds.z})), assets: Object.freeze({
+  return {createCollectProp(id) {
+    const index=cans.findIndex(item => `new-moon-${item.sku}-front`===id), record=canRecords[index];
+    if(!record || record.status!=='loaded') return null;
+    const group=new T.Group();group.name='SelectedDemoCan';
+    for(const primitive of record.primitives){const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);group.add(mesh);}
+    // Geometry/materials are shared with the shelf: never dispose on gesture completion.
+    return group;
+  }, interactables, colliders: shelfXs.map(x => ({x, y: shelfBounds.y / 2, z: -9.25, sx: shelfBounds.x, sy: shelfBounds.y, sz: shelfBounds.z})), assets: Object.freeze({
     shelf: Object.freeze({status: shelfRecord.status, reason: shelfRecord.reason, instances: 4, primitives: shelfRecord.primitives.length, dimensions: shelfRecord.size}),
     cans: Object.freeze(Object.fromEntries(canRecords.map((record, index) => {
       const x = shelfXs[index];
