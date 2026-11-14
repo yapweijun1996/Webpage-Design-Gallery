@@ -1,0 +1,2897 @@
+{
+  "status": "Historical bounded verification; superseded for current source by ring follow-up evidence.",
+  "baseHEAD": "6a1f31c39a17e5ecd367dfd9608182c083b329ee",
+  "environment": "Darwin arm64 Chrome 157.0.8103.51 / metal",
+  "sourceSHA256": {
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/ui.js": "122fbeed21f9a2ce0e2a1317ecb4cbe73421e300fd552c8dfd277db8a3069b73",
+    "demos/corporate/gjh/v11/script.js": "eb1a9e12b70ef4e89b08d384f0dd2f09bb8794a0bf124667f0ffe410ba73e329",
+    "demos/corporate/gjh/v11/style.css": "672f4e0d82f95439eb58ebcb9c765dd07a2ede26719503a4ec7243777449adce",
+    "demos/corporate/gjh/v11/index.html": "9f7785d42081648c08ef22a401f07ce7038970f0d4449ee3f5f0a312427ee7d0",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "06742a16c6710ecc277d2b8b3ef006cf4b9d8745252d21e569aa9c37a8e0d214",
+    "tests/browser_gjh_context_navigation.py": "6958f17eca24c55ab3acb27670c5a135d28e8d6bd1040823cf260c00744a378e",
+    "tests/browser_gjh_guide.py": "e1692de0a1f45d6fec49e62bf5434cf7ddacf2442e4a329e71bce8971a81b4c9",
+    "tests/browser_gjh_accessibility.py": "2f4e1107c9d9384602ebac393a5ba6499d6b83372e08363b79e0861d7f6f8390",
+    "docs/v11-context-navigation-plan.md": "62f4b630084b1c6fce49b16f7027f3efed316f5949673e6b288f1ea9f4d95054",
+    "docs/v11-context-navigation-review.md": "c9a637a1ea7b0a520c3bbac2aca8bde663c5ee30868a59684e7673a8fb8ae545"
+  },
+  "servedBuildRuntimeSHA256": {
+    "assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "assets/ui.js": "122fbeed21f9a2ce0e2a1317ecb4cbe73421e300fd552c8dfd277db8a3069b73",
+    "script.js": "eb1a9e12b70ef4e89b08d384f0dd2f09bb8794a0bf124667f0ffe410ba73e329",
+    "style.css": "672f4e0d82f95439eb58ebcb9c765dd07a2ede26719503a4ec7243777449adce",
+    "index.html": "9f7785d42081648c08ef22a401f07ce7038970f0d4449ee3f5f0a312427ee7d0",
+    "assets/demo-bag.js": "06742a16c6710ecc277d2b8b3ef006cf4b9d8745252d21e569aa9c37a8e0d214"
+  },
+  "commands": [
+    {
+      "name": "mode-unit",
+      "command": [
+        "node",
+        "--test",
+        "tests/gjh_modes.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.07,
+      "log": "/private/tmp/gallery-context-nav-fix/mode-unit.log"
+    },
+    {
+      "name": "navigation-final",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "tests/browser_gjh_context_navigation.py",
+        "--output",
+        "/private/tmp/gallery-context-nav-fix/navigation-final",
+        "--evidence",
+        "docs/evidence/v11-context-navigation.json"
+      ],
+      "exitCode": 0,
+      "seconds": 29.63,
+      "log": "/private/tmp/gallery-context-nav-fix/navigation-final.log"
+    },
+    {
+      "name": "parent-inspect-final",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-context-nav-fix/parent-inspect-return.py"
+      ],
+      "exitCode": 0,
+      "seconds": 13.19,
+      "log": "/private/tmp/gallery-context-nav-fix/parent-inspect-final.log"
+    },
+    {
+      "name": "parent-focus-final",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-context-nav-fix/parent-footer-focus.py"
+      ],
+      "exitCode": 0,
+      "seconds": 13.58,
+      "log": "/private/tmp/gallery-context-nav-fix/parent-focus-final.log"
+    },
+    {
+      "name": "modes",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "tests/browser_gjh_modes.py",
+        "--output",
+        "/private/tmp/gallery-context-nav-fix/modes",
+        "--evidence",
+        "docs/evidence/v11-context-navigation-modes.json"
+      ],
+      "exitCode": 0,
+      "seconds": 23.2,
+      "log": "/private/tmp/gallery-context-nav-fix/modes.log"
+    },
+    {
+      "name": "mode-review",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "tests/browser_gjh_mode_review.py",
+        "--output",
+        "/private/tmp/gallery-context-nav-fix/mode-review",
+        "--evidence",
+        "docs/evidence/v11-context-navigation-mode-review.json"
+      ],
+      "exitCode": 0,
+      "seconds": 15.16,
+      "log": "/private/tmp/gallery-context-nav-fix/mode-review.log"
+    },
+    {
+      "name": "guide",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_guide.py"
+      ],
+      "exitCode": 0,
+      "seconds": 14.35,
+      "log": "/private/tmp/gallery-context-nav-fix/guide.log"
+    },
+    {
+      "name": "bag",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_bag.py"
+      ],
+      "exitCode": 0,
+      "seconds": 14.44,
+      "log": "/private/tmp/gallery-context-nav-fix/bag.log"
+    },
+    {
+      "name": "a11y",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "tests/browser_gjh_accessibility.py",
+        "--output",
+        "/private/tmp/gallery-context-nav-fix/a11y"
+      ],
+      "exitCode": 0,
+      "seconds": 16.0,
+      "log": "/private/tmp/gallery-context-nav-fix/a11y.log"
+    },
+    {
+      "name": "full-v11",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_v11.py"
+      ],
+      "exitCode": 0,
+      "seconds": 18.59,
+      "log": "/private/tmp/gallery-context-nav-fix/full-v11.log"
+    },
+    {
+      "name": "isolated-build",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-context-nav-fix/build-source/scripts/build_gallery.py",
+        "--output",
+        "/private/tmp/gallery-context-nav-fix/site"
+      ],
+      "exitCode": 0,
+      "seconds": 0.19,
+      "log": "/private/tmp/gallery-context-nav-fix/isolated-build.log"
+    },
+    {
+      "name": "nav-build",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "tests/browser_gjh_context_navigation.py",
+        "--root",
+        "/private/tmp/gallery-context-nav-fix/site",
+        "--prefix",
+        "gallery",
+        "--smoke",
+        "--output",
+        "/private/tmp/gallery-context-nav-fix/nav-build",
+        "--evidence",
+        "docs/evidence/v11-context-navigation-build.json"
+      ],
+      "exitCode": 0,
+      "seconds": 16.47,
+      "log": "/private/tmp/gallery-context-nav-fix/nav-build.log"
+    },
+    {
+      "name": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 0.03,
+      "log": "/private/tmp/gallery-context-nav-fix/diff-check.log"
+    },
+    {
+      "name": "parent-inspect-red-fixture",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-context-nav-fix/parent-inspect-red-fixture.py"
+      ],
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "seconds": 13.39,
+      "log": "/private/tmp/gallery-context-nav-fix/parent-inspect-red-fixture.log"
+    },
+    {
+      "name": "payload",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-context-nav-fix/measure_payload.py"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 12.61,
+      "log": "/private/tmp/gallery-context-nav-fix/payload.log"
+    },
+    {
+      "name": "guide-bottom",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-context-nav-fix/capture_guide_bottom.py"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 11.26,
+      "log": "/private/tmp/gallery-context-nav-fix/guide-bottom.log"
+    },
+    {
+      "name": "ssot",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "scripts/check_ssot.py"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 0.06,
+      "log": "/private/tmp/gallery-context-nav-fix/ssot.log"
+    }
+  ],
+  "expectedFailures": [
+    {
+      "log": "/private/tmp/gallery-context-nav-fix/parent-inspect-before.log",
+      "reason": "Exact parent reproduction before fix; offscreen responsive opener"
+    },
+    {
+      "log": "/private/tmp/gallery-context-nav-fix/navigation-iteration1.log",
+      "reason": "Expanded GOGO Escape reproduction caught a focus target captured before the queued frame"
+    },
+    {
+      "log": "/private/tmp/gallery-context-nav-fix/parent-inspect-red-fixture.log",
+      "reason": "Preserved candidate fixture reproduces the same offscreen return; SHA256 matches initial worker evidence"
+    }
+  ],
+  "preservedCandidateRuntimeSHA256": {
+    "assets/context-navigation.js": "f921b39f1be7f94ff3b57b181315b901448250b795bd9383fcef679788d05814",
+    "assets/ui.js": "c8fb8aca896823ee3a8357a3b78e2be381fc3e7d1d84d0d46254d8b8c9cb5ae2",
+    "script.js": "eb1a9e12b70ef4e89b08d384f0dd2f09bb8794a0bf124667f0ffe410ba73e329",
+    "style.css": "8f9baeb09ec2679d4a2a6a2be755abacd0ece1b486cd337ea53547c2250fe817",
+    "index.html": "9f7785d42081648c08ef22a401f07ce7038970f0d4449ee3f5f0a312427ee7d0",
+    "assets/demo-bag.js": "06742a16c6710ecc277d2b8b3ef006cf4b9d8745252d21e569aa9c37a8e0d214"
+  },
+  "screenshotsOpenedSHA256": {
+    "/private/tmp/gallery-context-nav-fix/before/guide-320.png": "7b957bb39fb97798d983543e73753a793d2d9c887da61cb27fe1a384caeb2aa7",
+    "/private/tmp/gallery-context-nav-fix/before/bag-scroll-1-320.png": "8bc3c75a6d4400615a7c8ad2da813eaeb6444dc5bf1f0ba8f0e29cf2a5381d36",
+    "/private/tmp/gallery-context-nav-fix/before/map-667.png": "c1982d2ecac1272a31a6a69821a54f81cf0bc78a637a41c2626cd284fe27568f",
+    "/private/tmp/gallery-context-nav-fix/before/help-667.png": "5f168e540fbeaebcec597cc5cddd25970c876e0675d8f8c93a1f0c1539de012f",
+    "/private/tmp/gallery-context-nav-fix/before/directory-1440.png": "bdd6d51e7047e60475a86ac2ffc2cac4d8d9040a353ad5c886ae69f3467d1ccb",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/guide-320.png": "4aac4077a0a1cb0440581500a6f7b70c2766e171f7b408312c3f231f789f3a22",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/bag-scroll-1-320.png": "002196e66006d70e40b4ec1dbf89e9f8cb171cdf68e6dc8cd6fad382dd6f5bde",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/bag-scroll-1-667.png": "6d141c9026c8be1fcd0b79537381e5ee9550e811d64074c0a9bfb9b089358995",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/map-667.png": "28bc37f1489d5a49d878aa2f903323f4d03c9598d8dc1af2ce48c60287dbd587",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/help-667.png": "be49444e242c936f102e98505e94223ba4416c28c108b893434906b24226be2f",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/directory-1440.png": "7909a2bd41fd36d13132347485264d61194467c97a0267a79cc512dbd912cf20",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/inspect-return-667-to-320.png": "6be55c6e884e356e063736d80c33a248d024171ba50eaae03e89b13ce955eea7",
+    "/private/tmp/gallery-context-nav-fix/navigation-final/directory-bag-context-loss-390.png": "4b4e9faf2cfa094db870e50888183d69001dbfba4b8a5e3239c49a1647baa4bf",
+    "/private/tmp/gallery-context-nav-fix/visual/guide-bottom-320.png": "8fe7295b5b2484a8de71764367606dfc13f358bc72651625d41ecdd18f567fd6",
+    "/private/tmp/gallery-context-nav-fix/parent-inspect-red-frames/return-667-escape-resize.png": "8d87fec9e3ff0fb4725f679be23e5219da61c52cb00c30e464f81655f35bc257"
+  },
+  "navigation": {
+    "viewports": 7,
+    "groups": 14,
+    "regressions": {
+      "inspectionReturnRegression": [
+        {
+          "viewport": [
+            320,
+            568
+          ],
+          "selector": "#original-tin-open",
+          "method": "button",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 2865,
+            "rect": {
+              "x": 37,
+              "y": 162.65625,
+              "width": 246,
+              "height": 44,
+              "top": 162.65625,
+              "right": 283,
+              "bottom": 206.65625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 3,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "original-tin-close",
+            "scrollY": 2760,
+            "rect": {
+              "x": 210,
+              "y": 51.875,
+              "width": 76,
+              "height": 44,
+              "top": 51.875,
+              "right": 286,
+              "bottom": 95.875,
+              "left": 210
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 6,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 2760,
+            "rect": {
+              "x": 37,
+              "y": 267.65625,
+              "width": 246,
+              "height": 44,
+              "top": 267.65625,
+              "right": 283,
+              "bottom": 311.65625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            320,
+            568
+          ],
+          "selector": "#original-tin-open",
+          "method": "escape",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 2865,
+            "rect": {
+              "x": 37,
+              "y": 162.65625,
+              "width": 246,
+              "height": 44,
+              "top": 162.65625,
+              "right": 283,
+              "bottom": 206.65625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "original-tin-close",
+            "scrollY": 2760,
+            "rect": {
+              "x": 210,
+              "y": 51.875,
+              "width": 76,
+              "height": 44,
+              "top": 51.875,
+              "right": 286,
+              "bottom": 95.875,
+              "left": 210
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 6,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 2760,
+            "rect": {
+              "x": 37,
+              "y": 267.65625,
+              "width": 246,
+              "height": 44,
+              "top": 267.65625,
+              "right": 283,
+              "bottom": 311.65625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            320,
+            568
+          ],
+          "selector": "#store-list [data-inspect=\"gogo\"]",
+          "method": "button",
+          "before": {
+            "focus": "gogo",
+            "scrollY": 2375,
+            "rect": {
+              "x": 123,
+              "y": 251.28125,
+              "width": 134.796875,
+              "height": 44,
+              "top": 251.28125,
+              "right": 257.796875,
+              "bottom": 295.28125,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "product-close",
+            "scrollY": 2375,
+            "rect": {
+              "x": 219.25,
+              "y": 27,
+              "width": 69.75,
+              "height": 44,
+              "top": 27,
+              "right": 289,
+              "bottom": 71,
+              "left": 219.25
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "gogo",
+            "scrollY": 2375,
+            "rect": {
+              "x": 123,
+              "y": 251.28125,
+              "width": 134.796875,
+              "height": 44,
+              "top": 251.28125,
+              "right": 257.796875,
+              "bottom": 295.28125,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            320,
+            568
+          ],
+          "selector": "#store-list [data-inspect=\"gogo\"]",
+          "method": "escape",
+          "before": {
+            "focus": "gogo",
+            "scrollY": 2865,
+            "rect": {
+              "x": 123,
+              "y": -238.71875,
+              "width": 134.796875,
+              "height": 44,
+              "top": -238.71875,
+              "right": 257.796875,
+              "bottom": -194.71875,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": false,
+            "clear": false,
+            "overflow": false
+          },
+          "open": {
+            "focus": "product-close",
+            "scrollY": 2760,
+            "rect": {
+              "x": 219.25,
+              "y": 27,
+              "width": 69.75,
+              "height": 44,
+              "top": 27,
+              "right": 289,
+              "bottom": 71,
+              "left": 219.25
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "gogo",
+            "scrollY": 2526,
+            "rect": {
+              "x": 123,
+              "y": 100.28125,
+              "width": 134.796875,
+              "height": 44,
+              "top": 100.28125,
+              "right": 257.796875,
+              "bottom": 144.28125,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            320,
+            568
+          ],
+          "alreadyClearNoScroll": true,
+          "queuedCurrentFocusIdentity": "list-title",
+          "queuedScrollY": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "selector": "#original-tin-open",
+          "method": "button",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 2286,
+            "rect": {
+              "x": 37,
+              "y": 457.140625,
+              "width": 316,
+              "height": 44,
+              "top": 457.140625,
+              "right": 353,
+              "bottom": 501.140625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 3,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "original-tin-close",
+            "scrollY": 2200,
+            "rect": {
+              "x": 280,
+              "y": 37.03125,
+              "width": 76,
+              "height": 44,
+              "top": 37.03125,
+              "right": 356,
+              "bottom": 81.03125,
+              "left": 280
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 6,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 2200,
+            "rect": {
+              "x": 37,
+              "y": 543.140625,
+              "width": 316,
+              "height": 44,
+              "top": 543.140625,
+              "right": 353,
+              "bottom": 587.140625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "selector": "#original-tin-open",
+          "method": "escape",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 2286,
+            "rect": {
+              "x": 37,
+              "y": 457.140625,
+              "width": 316,
+              "height": 44,
+              "top": 457.140625,
+              "right": 353,
+              "bottom": 501.140625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "original-tin-close",
+            "scrollY": 2200,
+            "rect": {
+              "x": 280,
+              "y": 37.03125,
+              "width": 76,
+              "height": 44,
+              "top": 37.03125,
+              "right": 356,
+              "bottom": 81.03125,
+              "left": 280
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 6,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 2200,
+            "rect": {
+              "x": 37,
+              "y": 543.140625,
+              "width": 316,
+              "height": 44,
+              "top": 543.140625,
+              "right": 353,
+              "bottom": 587.140625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "selector": "#store-list [data-inspect=\"gogo\"]",
+          "method": "button",
+          "before": {
+            "focus": "gogo",
+            "scrollY": 2286,
+            "rect": {
+              "x": 123,
+              "y": 123.5625,
+              "width": 134.796875,
+              "height": 44,
+              "top": 123.5625,
+              "right": 257.796875,
+              "bottom": 167.5625,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "product-close",
+            "scrollY": 2200,
+            "rect": {
+              "x": 289.25,
+              "y": 83.625,
+              "width": 69.75,
+              "height": 44,
+              "top": 83.625,
+              "right": 359,
+              "bottom": 127.625,
+              "left": 289.25
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "gogo",
+            "scrollY": 2200,
+            "rect": {
+              "x": 123,
+              "y": 209.5625,
+              "width": 134.796875,
+              "height": 44,
+              "top": 209.5625,
+              "right": 257.796875,
+              "bottom": 253.5625,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "selector": "#store-list [data-inspect=\"gogo\"]",
+          "method": "escape",
+          "before": {
+            "focus": "gogo",
+            "scrollY": 2286,
+            "rect": {
+              "x": 123,
+              "y": 123.5625,
+              "width": 134.796875,
+              "height": 44,
+              "top": 123.5625,
+              "right": 257.796875,
+              "bottom": 167.5625,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "product-close",
+            "scrollY": 2200,
+            "rect": {
+              "x": 289.25,
+              "y": 83.625,
+              "width": 69.75,
+              "height": 44,
+              "top": 83.625,
+              "right": 359,
+              "bottom": 127.625,
+              "left": 289.25
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "gogo",
+            "scrollY": 2200,
+            "rect": {
+              "x": 123,
+              "y": 209.5625,
+              "width": 134.796875,
+              "height": 44,
+              "top": 209.5625,
+              "right": 257.796875,
+              "bottom": 253.5625,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 758.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 758.8125,
+              "right": 382,
+              "bottom": 844,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "alreadyClearNoScroll": true,
+          "queuedCurrentFocusIdentity": "list-title",
+          "queuedScrollY": 0
+        },
+        {
+          "viewport": [
+            667,
+            375
+          ],
+          "selector": "#original-tin-open",
+          "method": "button",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 1556,
+            "rect": {
+              "x": 416.859375,
+              "y": 164.53125,
+              "width": 191.796875,
+              "height": 44,
+              "top": 164.53125,
+              "right": 608.65625,
+              "bottom": 208.53125,
+              "left": 416.859375
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 3,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "original-tin-close",
+            "scrollY": 1556,
+            "rect": {
+              "x": 551,
+              "y": 42.6875,
+              "width": 76,
+              "height": 44,
+              "top": 42.6875,
+              "right": 627,
+              "bottom": 86.6875,
+              "left": 551
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 6,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 1556,
+            "rect": {
+              "x": 416.859375,
+              "y": 164.53125,
+              "width": 191.796875,
+              "height": 44,
+              "top": 164.53125,
+              "right": 608.65625,
+              "bottom": 208.53125,
+              "left": 416.859375
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            667,
+            375
+          ],
+          "selector": "#original-tin-open",
+          "method": "escape",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 1713,
+            "rect": {
+              "x": 416.859375,
+              "y": 7.53125,
+              "width": 191.796875,
+              "height": 44,
+              "top": 7.53125,
+              "right": 608.65625,
+              "bottom": 51.53125,
+              "left": 416.859375
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "open": {
+            "focus": "original-tin-close",
+            "scrollY": 1627,
+            "rect": {
+              "x": 551,
+              "y": 42.6875,
+              "width": 76,
+              "height": 44,
+              "top": 42.6875,
+              "right": 627,
+              "bottom": 86.6875,
+              "left": 551
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 6,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 1621,
+            "rect": {
+              "x": 416.859375,
+              "y": 99.53125,
+              "width": 191.796875,
+              "height": 44,
+              "top": 99.53125,
+              "right": 608.65625,
+              "bottom": 143.53125,
+              "left": 416.859375
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            667,
+            375
+          ],
+          "selector": "#store-list [data-inspect=\"gogo\"]",
+          "method": "button",
+          "before": {
+            "focus": "gogo",
+            "scrollY": 1362,
+            "rect": {
+              "x": 484.5,
+              "y": 164.75,
+              "width": 128.15625,
+              "height": 44,
+              "top": 164.75,
+              "right": 612.65625,
+              "bottom": 208.75,
+              "left": 484.5
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "product-close",
+            "scrollY": 1362,
+            "rect": {
+              "x": 550.25,
+              "y": 32,
+              "width": 69.75,
+              "height": 44,
+              "top": 32,
+              "right": 620,
+              "bottom": 76,
+              "left": 550.25
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "gogo",
+            "scrollY": 1362,
+            "rect": {
+              "x": 484.5,
+              "y": 164.75,
+              "width": 128.15625,
+              "height": 44,
+              "top": 164.75,
+              "right": 612.65625,
+              "bottom": 208.75,
+              "left": 484.5
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            667,
+            375
+          ],
+          "selector": "#store-list [data-inspect=\"gogo\"]",
+          "method": "escape",
+          "before": {
+            "focus": "gogo",
+            "scrollY": 1713,
+            "rect": {
+              "x": 484.5,
+              "y": -186.25,
+              "width": 128.15625,
+              "height": 44,
+              "top": -186.25,
+              "right": 612.65625,
+              "bottom": -142.25,
+              "left": 484.5
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": false,
+            "clear": false,
+            "overflow": false
+          },
+          "open": {
+            "focus": "product-close",
+            "scrollY": 1627,
+            "rect": {
+              "x": 550.25,
+              "y": 32,
+              "width": 69.75,
+              "height": 44,
+              "top": 32,
+              "right": 620,
+              "bottom": 76,
+              "left": 550.25
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "gogo",
+            "scrollY": 1427,
+            "rect": {
+              "x": 484.5,
+              "y": 99.75,
+              "width": 128.15625,
+              "height": 44,
+              "top": 99.75,
+              "right": 612.65625,
+              "bottom": 143.75,
+              "left": 484.5
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "viewport": [
+            667,
+            375
+          ],
+          "alreadyClearNoScroll": true,
+          "queuedCurrentFocusIdentity": "list-title",
+          "queuedScrollY": 0
+        },
+        {
+          "resize": [
+            667,
+            375,
+            320,
+            568
+          ],
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 1556,
+            "rect": {
+              "x": 416.859375,
+              "y": 164.53125,
+              "width": 191.796875,
+              "height": 44,
+              "top": 164.53125,
+              "right": 608.65625,
+              "bottom": 208.53125,
+              "left": 416.859375
+            },
+            "footer": {
+              "x": 8,
+              "y": 289.8125,
+              "width": 651,
+              "height": 85.1875,
+              "top": 289.8125,
+              "right": 659,
+              "bottom": 375,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "open": {
+            "focus": "original-tin-close",
+            "scrollY": 1556,
+            "rect": {
+              "x": 210,
+              "y": 51.875,
+              "width": 76,
+              "height": 44,
+              "top": 51.875,
+              "right": 286,
+              "bottom": 95.875,
+              "left": 210
+            },
+            "footer": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "ring": 6,
+            "hit": true,
+            "clear": false,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 2625,
+            "rect": {
+              "x": 37,
+              "y": 402.65625,
+              "width": 246,
+              "height": 44,
+              "top": 402.65625,
+              "right": 283,
+              "bottom": 446.65625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 463.625,
+              "width": 304,
+              "height": 104.375,
+              "top": 463.625,
+              "right": 312,
+              "bottom": 568,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        }
+      ]
+    },
+    "minimumTextContrast": 5.618532860656267,
+    "focusContrast": 4.257922766007005
+  },
+  "bagHeaderMeasurements": [
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "measurements": [
+        {
+          "position": 0,
+          "shell": {
+            "x": 18,
+            "y": 17,
+            "width": 284,
+            "height": 429.625
+          },
+          "header": {
+            "x": 34,
+            "y": 17,
+            "width": 252,
+            "height": 114
+          },
+          "title": {
+            "x": 34,
+            "y": 49,
+            "width": 171.875,
+            "height": 66
+          },
+          "close": {
+            "x": 221.875,
+            "y": 60,
+            "width": 64.125,
+            "height": 44
+          },
+          "footer": {
+            "x": 18,
+            "y": 446.625,
+            "width": 284,
+            "height": 104.375
+          }
+        },
+        {
+          "position": 0.5,
+          "shell": {
+            "x": 18,
+            "y": 17,
+            "width": 284,
+            "height": 429.625
+          },
+          "header": {
+            "x": 34,
+            "y": 17,
+            "width": 252,
+            "height": 114
+          },
+          "title": {
+            "x": 34,
+            "y": 49,
+            "width": 171.875,
+            "height": 66
+          },
+          "close": {
+            "x": 221.875,
+            "y": 60,
+            "width": 64.125,
+            "height": 44
+          },
+          "footer": {
+            "x": 18,
+            "y": 446.625,
+            "width": 284,
+            "height": 104.375
+          }
+        },
+        {
+          "position": 1,
+          "shell": {
+            "x": 18,
+            "y": 17,
+            "width": 284,
+            "height": 429.625
+          },
+          "header": {
+            "x": 34,
+            "y": 17,
+            "width": 252,
+            "height": 114
+          },
+          "title": {
+            "x": 34,
+            "y": 49,
+            "width": 171.875,
+            "height": 66
+          },
+          "close": {
+            "x": 221.875,
+            "y": 60,
+            "width": 64.125,
+            "height": 44
+          },
+          "footer": {
+            "x": 18,
+            "y": 446.625,
+            "width": 284,
+            "height": 104.375
+          }
+        }
+      ]
+    },
+    {
+      "viewport": [
+        667,
+        375
+      ],
+      "measurements": [
+        {
+          "position": 0,
+          "shell": {
+            "x": 24.5,
+            "y": 17,
+            "width": 618,
+            "height": 255.8125
+          },
+          "header": {
+            "x": 40.5,
+            "y": 17,
+            "width": 586,
+            "height": 92
+          },
+          "title": {
+            "x": 40.5,
+            "y": 54.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 559.46875,
+            "y": 49,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 24.5,
+            "y": 272.8125,
+            "width": 618,
+            "height": 85.1875
+          }
+        },
+        {
+          "position": 0.5,
+          "shell": {
+            "x": 24.5,
+            "y": 17,
+            "width": 618,
+            "height": 255.8125
+          },
+          "header": {
+            "x": 40.5,
+            "y": 17,
+            "width": 586,
+            "height": 92
+          },
+          "title": {
+            "x": 40.5,
+            "y": 54.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 559.46875,
+            "y": 49,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 24.5,
+            "y": 272.8125,
+            "width": 618,
+            "height": 85.1875
+          }
+        },
+        {
+          "position": 1,
+          "shell": {
+            "x": 24.5,
+            "y": 17,
+            "width": 618,
+            "height": 255.8125
+          },
+          "header": {
+            "x": 40.5,
+            "y": 17,
+            "width": 586,
+            "height": 92
+          },
+          "title": {
+            "x": 40.5,
+            "y": 54.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 559.46875,
+            "y": 49,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 24.5,
+            "y": 272.8125,
+            "width": 618,
+            "height": 85.1875
+          }
+        }
+      ]
+    }
+  ],
+  "unrelatedFocusLossProbe": [
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "before": {
+        "focus": "new-moon-mx-454g-front-2",
+        "rect": {
+          "x": 204.34375,
+          "y": 300.5625,
+          "width": 81.65625,
+          "height": 44,
+          "top": 300.5625,
+          "right": 286,
+          "bottom": 344.5625,
+          "left": 204.34375
+        },
+        "scroller": {
+          "x": 18,
+          "y": 17,
+          "width": 284,
+          "height": 429.625,
+          "top": 17,
+          "right": 302,
+          "bottom": 446.625,
+          "left": 18
+        },
+        "scroll": 691,
+        "footer": {
+          "x": 18,
+          "y": 446.625,
+          "width": 284,
+          "height": 104.375,
+          "top": 446.625,
+          "right": 302,
+          "bottom": 551,
+          "left": 18
+        },
+        "hit": true
+      },
+      "after": {
+        "focus": "new-moon-mx-454g-front-2",
+        "rect": {
+          "x": 204.34375,
+          "y": 300.5625,
+          "width": 81.65625,
+          "height": 44,
+          "top": 300.5625,
+          "right": 286,
+          "bottom": 344.5625,
+          "left": 204.34375
+        },
+        "scroller": {
+          "x": 18,
+          "y": 17,
+          "width": 284,
+          "height": 387.25,
+          "top": 17,
+          "right": 302,
+          "bottom": 404.25,
+          "left": 18
+        },
+        "scroll": 559,
+        "footer": {
+          "x": 18,
+          "y": 404.25,
+          "width": 284,
+          "height": 146.75,
+          "top": 404.25,
+          "right": 302,
+          "bottom": 551,
+          "left": 18
+        },
+        "hit": true
+      }
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "before": {
+        "focus": "new-moon-mx-454g-front-2",
+        "rect": {
+          "x": 274.34375,
+          "y": 596.46875,
+          "width": 81.65625,
+          "height": 44,
+          "top": 596.46875,
+          "right": 356,
+          "bottom": 640.46875,
+          "left": 274.34375
+        },
+        "scroller": {
+          "x": 18,
+          "y": 17,
+          "width": 354,
+          "height": 724.8125,
+          "top": 17,
+          "right": 372,
+          "bottom": 741.8125,
+          "left": 18
+        },
+        "scroll": 350,
+        "footer": {
+          "x": 18,
+          "y": 741.8125,
+          "width": 354,
+          "height": 85.1875,
+          "top": 741.8125,
+          "right": 372,
+          "bottom": 827,
+          "left": 18
+        },
+        "hit": true
+      },
+      "after": {
+        "focus": "new-moon-mx-454g-front-2",
+        "rect": {
+          "x": 274.34375,
+          "y": 596.46875,
+          "width": 81.65625,
+          "height": 44,
+          "top": 596.46875,
+          "right": 356,
+          "bottom": 640.46875,
+          "left": 274.34375
+        },
+        "scroller": {
+          "x": 18,
+          "y": 17,
+          "width": 354,
+          "height": 682.4375,
+          "top": 17,
+          "right": 372,
+          "bottom": 699.4375,
+          "left": 18
+        },
+        "scroll": 218,
+        "footer": {
+          "x": 18,
+          "y": 699.4375,
+          "width": 354,
+          "height": 127.5625,
+          "top": 699.4375,
+          "right": 372,
+          "bottom": 827,
+          "left": 18
+        },
+        "hit": true
+      }
+    },
+    {
+      "viewport": [
+        667,
+        375
+      ],
+      "before": {
+        "focus": "new-moon-mx-454g-front-2",
+        "rect": {
+          "x": 252.5,
+          "y": 166.78125,
+          "width": 81.65625,
+          "height": 44,
+          "top": 166.78125,
+          "right": 334.15625,
+          "bottom": 210.78125,
+          "left": 252.5
+        },
+        "scroller": {
+          "x": 24.5,
+          "y": 17,
+          "width": 618,
+          "height": 255.8125,
+          "top": 17,
+          "right": 642.5,
+          "bottom": 272.8125,
+          "left": 24.5
+        },
+        "scroll": 717,
+        "footer": {
+          "x": 24.5,
+          "y": 272.8125,
+          "width": 618,
+          "height": 85.1875,
+          "top": 272.8125,
+          "right": 642.5,
+          "bottom": 358,
+          "left": 24.5
+        },
+        "hit": true
+      },
+      "after": {
+        "focus": "new-moon-mx-454g-front-2",
+        "rect": {
+          "x": 252.5,
+          "y": 167.28125,
+          "width": 81.65625,
+          "height": 44,
+          "top": 167.28125,
+          "right": 334.15625,
+          "bottom": 211.28125,
+          "left": 252.5
+        },
+        "scroller": {
+          "x": 24.5,
+          "y": 17,
+          "width": 618,
+          "height": 232.625,
+          "top": 17,
+          "right": 642.5,
+          "bottom": 249.625,
+          "left": 24.5
+        },
+        "scroll": 601,
+        "footer": {
+          "x": 24.5,
+          "y": 249.625,
+          "width": 618,
+          "height": 108.375,
+          "top": 249.625,
+          "right": 642.5,
+          "bottom": 358,
+          "left": 24.5
+        },
+        "hit": true
+      }
+    }
+  ],
+  "payload": {
+    "assets/context-navigation.js": {
+      "baselineBytes": 0,
+      "bytes": 5812,
+      "deltaBytes": 5812,
+      "baselineGzipBytes": 0,
+      "gzipBytes": 1919
+    },
+    "assets/ui.js": {
+      "baselineBytes": 22583,
+      "bytes": 24507,
+      "deltaBytes": 1924,
+      "baselineGzipBytes": 6323,
+      "gzipBytes": 6875
+    },
+    "script.js": {
+      "baselineBytes": 11108,
+      "bytes": 11143,
+      "deltaBytes": 35,
+      "baselineGzipBytes": 4016,
+      "gzipBytes": 4027
+    },
+    "style.css": {
+      "baselineBytes": 40516,
+      "bytes": 44260,
+      "deltaBytes": 3744,
+      "baselineGzipBytes": 8266,
+      "gzipBytes": 8756
+    },
+    "index.html": {
+      "baselineBytes": 21875,
+      "bytes": 22176,
+      "deltaBytes": 301,
+      "baselineGzipBytes": 5837,
+      "gzipBytes": 5899
+    },
+    "assets/demo-bag.js": {
+      "baselineBytes": 6030,
+      "bytes": 6030,
+      "deltaBytes": 0,
+      "baselineGzipBytes": 2248,
+      "gzipBytes": 2248
+    }
+  },
+  "networkBaselineAndCandidate": [
+    {
+      "variant": "baseline",
+      "viewport": [
+        390,
+        844
+      ],
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 40516
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4740
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 11108
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 22583
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 4181
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 6030
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 26507
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 11835
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-m056-shelf-lod1.glb",
+          "bytes": 338236
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/elevator-v2.js",
+          "bytes": 2661
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 17977
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4972
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character-v2.js",
+          "bytes": 6461
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-customization.js",
+          "bytes": 2640
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-contact.js",
+          "bytes": 3769
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-lod.js",
+          "bytes": 1697
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2.glb",
+          "bytes": 577004
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js",
+          "bytes": 1858
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-controls.js",
+          "bytes": 1565
+        }
+      ],
+      "count": 51,
+      "decodedBytes": 8886678,
+      "drawCalls": {
+        "atrium": 145,
+        "newmoon": 111,
+        "mili": 111,
+        "gogo": 73
+      }
+    },
+    {
+      "variant": "baseline",
+      "viewport": [
+        1440,
+        900
+      ],
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 40516
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4740
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 11108
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 22583
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 4181
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 6030
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 26507
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 11835
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-m056-shelf-lod1.glb",
+          "bytes": 338236
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/elevator-v2.js",
+          "bytes": 2661
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 17977
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4972
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character-v2.js",
+          "bytes": 6461
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-customization.js",
+          "bytes": 2640
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-lod.js",
+          "bytes": 1697
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-contact.js",
+          "bytes": 3769
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2.glb",
+          "bytes": 577004
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js",
+          "bytes": 1858
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-controls.js",
+          "bytes": 1565
+        }
+      ],
+      "count": 51,
+      "decodedBytes": 8886678,
+      "drawCalls": {
+        "atrium": 180,
+        "newmoon": 134,
+        "mili": 157,
+        "gogo": 128
+      }
+    },
+    {
+      "variant": "candidate",
+      "viewport": [
+        390,
+        844
+      ],
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4740
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 44260
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 11143
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 24507
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 4181
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 6030
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/context-navigation.js",
+          "bytes": 5812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 26507
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 11835
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-m056-shelf-lod1.glb",
+          "bytes": 338236
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/elevator-v2.js",
+          "bytes": 2661
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 17977
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4972
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character-v2.js",
+          "bytes": 6461
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-lod.js",
+          "bytes": 1697
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-contact.js",
+          "bytes": 3769
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-customization.js",
+          "bytes": 2640
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2.glb",
+          "bytes": 577004
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js",
+          "bytes": 1858
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-controls.js",
+          "bytes": 1565
+        }
+      ],
+      "count": 52,
+      "decodedBytes": 8898193,
+      "drawCalls": {
+        "atrium": 145,
+        "newmoon": 111,
+        "mili": 111,
+        "gogo": 73
+      }
+    },
+    {
+      "variant": "candidate",
+      "viewport": [
+        1440,
+        900
+      ],
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4740
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 44260
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 11143
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 24507
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 4181
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/context-navigation.js",
+          "bytes": 5812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 6030
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 26507
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 11835
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-m056-shelf-lod1.glb",
+          "bytes": 338236
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/elevator-v2.js",
+          "bytes": 2661
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 17977
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4972
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character-v2.js",
+          "bytes": 6461
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-lod.js",
+          "bytes": 1697
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-customization.js",
+          "bytes": 2640
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-contact.js",
+          "bytes": 3769
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2.glb",
+          "bytes": 577004
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js",
+          "bytes": 1858
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/visitor-v2-controls.js",
+          "bytes": 1565
+        }
+      ],
+      "count": 52,
+      "decodedBytes": 8898193,
+      "drawCalls": {
+        "atrium": 180,
+        "newmoon": 134,
+        "mili": 157,
+        "gogo": 128
+      }
+    }
+  ],
+  "limits": [
+    "Parent owns independent visual >=85 gate; pre-fix provisional score was 82/100",
+    "No physical devices, real safe-area insets, Safari or human screen-reader certification",
+    "No native OS select-popup choice certification",
+    "Parent owns final repository Gallery/legacy/PWA generation, task/version/Git/push; only disposable copy generated here",
+    "Historical 45-request ceiling is pre-existing below pinned base 51; measured candidate 52; unchanged 10MiB/200 draw-call ceilings pass"
+  ],
+  "evidenceStatus": "Historical pre-inset/ring source snapshot; original hashes and measurements retained.",
+  "currentSourceEvidence": "v11-context-navigation-ring.json"
+}

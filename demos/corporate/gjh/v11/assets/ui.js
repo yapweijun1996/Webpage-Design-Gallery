@@ -1,4 +1,5 @@
 export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 
@@ -67,13 +68,44 @@ export function createUI() {
     help.open = false;
     mallMap.open = !mallMap.open;
     headerMap.setAttribute('aria-expanded', String(mallMap.open));
-    if (mallMap.open) mapButtons[0]?.focus({preventScroll: true});
+    if (mallMap.open) focusMap();
     notifyMode();
   });
   const dialog = document.getElementById('product-dialog');
   const newMoonPreview = setupNewMoonPreview();
   const bag = setupDemoBag();
   const bagDialog = document.getElementById('bag-dialog');
+  const listTitle = document.getElementById('list-title');
+  const contextNavigation = createContextNavigation({
+    globalHost: document.getElementById('context-navigation-global'),
+    directory: storeList,
+    recoverFocus() {
+      // Native modal owners control their own entry and close focus.
+      if (!document.querySelector('dialog[open]')) (showing3D ? scene : listTitle).focus({preventScroll: true});
+    },
+    onHome() {
+      // Recheck readiness at activation, including synthetic stale clicks.
+      if (!available) return;
+      if (compactMap.matches) { help.open = false; mallMap.open = false; }
+      if (guide.open) { guide.close('start'); return; }
+      setView(true, !bag.open);
+      if (bag.open) bag.closeTo(scene);
+      else scene.focus({preventScroll: true});
+      notifyMode();
+    },
+    onShops() {
+      if (guide.open) { guide.close('list'); return; }
+      const fromBag = bag.open;
+      setView(false, !fromBag);
+      focusDirectory(!fromBag);
+      if (fromBag) bag.closeTo(listTitle);
+      notifyMode();
+    },
+  });
+  function focusDirectory(moveFocus = true) {
+    window.scrollTo({top: 0, behavior: 'instant'});
+    if (moveFocus) listTitle.focus({preventScroll: true});
+  }
   const modePanels = [dialog, bagDialog, help, guide, mallMap, document.getElementById('original-tin-dialog')];
   const modeObserver = new MutationObserver(notifyMode);
   for (const panel of modePanels) modeObserver.observe(panel, {attributes: true, attributeFilter: ['open']});
@@ -84,6 +116,12 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
+  function focusMap() {
+    // Publish the footer reservation before revealing the focused destination.
+    notifyMode();
+    mapButtons[0]?.focus({preventScroll: true});
+    mapButtons[0]?.scrollIntoView({block: 'nearest', behavior: 'instant'});
+  }
   let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   function updateCartControls() {
@@ -169,7 +207,7 @@ export function createUI() {
     if (record.action === 'map') {
       if (!available || !showing3D) return;
       help.open = false; mallMap.open = true;
-      mapButtons[0]?.focus({preventScroll: true});
+      focusMap();
       announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
       return;
     }
@@ -203,8 +241,10 @@ export function createUI() {
   guide.addEventListener('cancel', event => { event.preventDefault(); guide.close('dismiss'); });
   guide.addEventListener('keydown', event => {
     if (event.key !== 'Tab') return;
-    if (event.shiftKey && [guideTitle,guideClose].includes(document.activeElement)) { event.preventDefault(); guideList.focus(); }
-    else if (!event.shiftKey && document.activeElement === guideList) { event.preventDefault(); guideClose.focus(); }
+    const controls = [...guide.querySelectorAll('button:not(:disabled)')].filter(button => !button.closest('[hidden]'));
+    const first = controls[0], last = controls.at(-1);
+    if (event.shiftKey && [guideTitle, first].includes(document.activeElement)) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   });
   guide.addEventListener('close', () => {
     guidePaused = false;
@@ -213,10 +253,10 @@ export function createUI() {
     guideSeen = true;
     try { sessionStorage.setItem(guideSessionKey, '1'); } catch { /* The in-memory flag still prevents repeated automatic prompts. */ }
     if (!available || !showing3D) return;
-    if (action === 'list') { setView(false, true); return; }
+    if (action === 'list') { setView(false, true); focusDirectory(); return; }
     if (action === 'map') {
       help.open = false; mallMap.open = true;
-      mapButtons[0]?.focus({preventScroll: true});
+      focusMap();
       announce('Choose a store on the map. Your location has not changed.');
       return;
     }
@@ -278,6 +318,11 @@ export function createUI() {
 
   return {
     modeSignals,
+    projectMode(mode) {
+      contextNavigation.update({mode, available, destination: showing3D ? 'home' : 'shops',
+        host: bag.open ? document.getElementById('context-navigation-bag') :
+          guide.open ? document.getElementById('context-navigation-guide') : undefined});
+    },
     onModeState(listener) { modeListener = listener; },
     show3D() {
       available = true;
@@ -300,6 +345,7 @@ export function createUI() {
       // Directory fallback can leave setView unchanged, so refresh independently
       // of view/HUD callbacks and recover only disappearing cart-control focus.
       updateCartControls();
+      notifyMode();
       viewToggle.hidden = true;
       fallbackMessage.textContent = message || 'The 3D mall is unavailable on this device. Explore the complete store directory below.';
       fallbackMessage.hidden = false;

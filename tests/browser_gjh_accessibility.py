@@ -205,7 +205,7 @@ def run():
                         page.screenshot(path=str(args.output / f'bag-keyboard-{resized_width}.png'))
                         resized_bag.append([resized_width, resized_height])
                 for position in [0, 0.5, 1]:
-                    page.locator('#bag-dialog').evaluate('(e,p) => e.scrollTop=p*e.scrollHeight', position)
+                    page.locator('#bag-dialog .bag-scroll').evaluate('(e,p) => e.scrollTop=p*e.scrollHeight', position)
                     assert page.locator('#bag-close').evaluate('e => {const r=e.getBoundingClientRect();'
                         'return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}')
                 page.keyboard.press('Escape')

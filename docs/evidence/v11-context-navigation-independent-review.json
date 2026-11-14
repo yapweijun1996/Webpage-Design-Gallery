@@ -1,0 +1,61 @@
+{
+  "reviewer": "/root/lod_review",
+  "independent": true,
+  "score": 85,
+  "scale": 100,
+  "blockingFindings": [],
+  "unresolvedFunctionalP2": [],
+  "resolved": [
+    "Truthful current destination aria-current and visual state",
+    "Exact inspection opener focus restored and revealed after reflow",
+    "Safe-area Map/disclosure/navigation overlap",
+    "Narrow safe-area label bounds",
+    "Complete short-landscape Map target and focus ring containment"
+  ],
+  "withdrawn": "Bag title clipping was disproved by actual image and DOM bounds",
+  "mapGeometry": {
+    "scrollport": [
+      155,
+      234
+    ],
+    "buttonHeight": 52,
+    "buttonBounds": [
+      168.421875,
+      220.421875
+    ],
+    "ringBounds": [
+      160.421875,
+      228.421875
+    ]
+  },
+  "rubric": {
+    "hierarchy": [
+      17,
+      20
+    ],
+    "spacing": [
+      17,
+      20
+    ],
+    "typography": [
+      11,
+      15
+    ],
+    "colour": [
+      14,
+      15
+    ],
+    "consistency": [
+      14,
+      15
+    ],
+    "responsive": [
+      12,
+      15
+    ]
+  },
+  "nonblocking": "Narrow 320px modal navigation, including software-inset stress, can wrap Rewards over two lines; contained and readable with a visible unavailable note.",
+  "limits": "Browser safe-area emulation only; physical devices, Safari and screen reader sessions not certified",
+  "framesRoot": "/private/tmp/gallery-context-nav-ring/final-insets",
+  "status": "ACCEPTED pending parent regression and release verification"
+}

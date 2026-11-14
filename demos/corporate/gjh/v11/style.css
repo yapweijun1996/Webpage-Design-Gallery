@@ -381,3 +381,45 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 .has-physical-product #nearby-name,.has-physical-product p{grid-column:1/-1}
 .has-physical-product p{font-size:var(--font-size-xs);line-height:1.4;margin:0;white-space:normal}
 .has-physical-product button{width:100%;min-width:0;min-height:44px;white-space:normal}
+
+/* One contextual component moves between the viewport and native modal footers. */
+.context-navigation-global{position:fixed;left:max(var(--space-2),env(safe-area-inset-left));right:max(var(--space-2),env(safe-area-inset-right));bottom:env(safe-area-inset-bottom);max-width:680px;margin-inline:auto;z-index:var(--gjh-layer-site-header)}
+.context-navigation{background:var(--paper);color:var(--green);border:1px solid var(--line);padding:var(--space-2);font-size:var(--font-size-sm);line-height:var(--line-height-body)}
+.context-navigation-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--space-1)}
+.context-navigation-actions button{min-width:0;min-height:44px;padding:0;border-color:transparent;font-size:var(--font-size-sm);line-height:var(--line-height-body);overflow-wrap:anywhere}
+.context-navigation-actions button:enabled{background:var(--paper);color:var(--green);border-color:var(--green)}
+.context-navigation-actions button[aria-current="page"]{background:var(--green);color:var(--paper)}
+.context-navigation-actions button:disabled{color:var(--muted);opacity:1;cursor:not-allowed}
+.context-navigation p{margin:var(--space-1) 0 0;font-size:var(--font-size-xs);line-height:var(--line-height-body);color:var(--muted)}
+body.is-3d .context-navigation button:focus-visible,.context-navigation button:focus-visible{outline-color:var(--gjh-color-button-focus-visible);outline-offset:2px}
+.context-navigation-footer:empty{display:none}
+.context-navigation-footer{flex:0 0 auto;padding-bottom:env(safe-area-inset-bottom)}
+.quick-guide,.demo-bag{padding:0;overflow:hidden}
+.demo-bag:has(.context-navigation:not([hidden])){width:min(620px,calc(100vw - 2 * max(var(--space-4),var(--gjh-safe-left),var(--gjh-safe-right))))}
+.quick-guide[open],.demo-bag[open]{display:flex;flex-direction:column}
+.guide-scroll,.bag-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 var(--space-5) var(--space-5);scroll-padding-bottom:var(--space-3)}
+.guide-scroll{scroll-padding-top:calc(var(--size-control) + var(--space-4))}
+.bag-scroll{padding:0 var(--space-6) var(--space-6);scroll-padding-top:calc(var(--bag-header-height,var(--size-control)) + var(--space-2))}
+.guide-scroll>p:not(.eyebrow){font-size:var(--font-size-sm);line-height:var(--line-height-body)}
+.bag-scroll .bag-top{top:0;padding-top:calc(var(--space-6) + var(--space-4))}
+/* The global footer is lifted by the shared safe bottom; root scrolling reserves both. */
+html:has(.context-navigation-global:not([hidden])){--context-navigation-bottom-extent:calc(var(--context-navigation-height) + var(--gjh-safe-bottom));scroll-padding-bottom:calc(var(--context-navigation-bottom-extent) + var(--space-4))}
+body:not(.is-3d):has(.context-navigation-global:not([hidden])){padding-bottom:var(--context-navigation-bottom-extent)}
+/* Experience already ends above the safe bottom, so its disclosure reserves only the bar. */
+body.is-3d:has(.context-navigation-global:not([hidden])) .scene-disclaimer{bottom:calc(var(--context-navigation-height,0px) + var(--space-2))}
+@media(max-width:650px),(max-height:560px) and (orientation:landscape){
+ body.is-3d:has(.context-navigation-global:not([hidden])) .map-content{max-height:calc(100dvh - 165px - var(--gjh-safe-top) - var(--context-navigation-bottom-extent) - var(--context-disclosure-height,0px));overflow:auto;scroll-padding:var(--space-3)}
+ body.is-3d:has(.context-navigation-global:not([hidden])) #controls-copy{max-height:calc(100dvh - 155px - var(--gjh-safe-top) - var(--context-navigation-bottom-extent) - var(--context-disclosure-height,0px));scroll-padding:var(--space-3)}
+ .bag-scroll{padding:0 var(--space-4) var(--space-4)}
+ .bag-scroll .bag-top{padding-top:var(--space-8)}
+}
+@media(max-width:360px),(max-height:560px){.guide-scroll{padding:0 var(--space-4) var(--space-4)}}
+@media(max-width:360px){
+ .context-navigation{padding-inline:var(--space-1)}
+ .context-navigation-actions{gap:var(--space-1)}
+}
+@media(max-height:560px) and (orientation:landscape){
+ body.is-3d:has(.context-navigation-global:not([hidden])) .map-content{max-height:calc(100dvh - 145px - var(--gjh-safe-top) - var(--context-navigation-bottom-extent) - var(--context-disclosure-height,0px))}
+ /* Keep each complete destination and focus ring inside the short scrollport. */
+ body.is-3d:has(.context-navigation-global:not([hidden])) .map-store-button{height:calc(var(--size-control) + var(--space-2));gap:var(--space-1)}
+}

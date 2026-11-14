@@ -1,0 +1,80 @@
+{
+  "application": {
+    "version": "1.1.38",
+    "build": "7df78238a03883bb"
+  },
+  "task": "Phase 7 contextual navigation",
+  "status": "LOCAL_ACCEPTANCE_PASS; remote publication is a subsequent gate",
+  "baseCommit": "6a1f31c39a17e5ecd367dfd9608182c083b329ee",
+  "parentChecks": [
+    {
+      "name": "full-v11",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_v11.py"
+      ],
+      "exitCode": 0,
+      "seconds": 18.08
+    },
+    {
+      "name": "gallery",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gallery.py"
+      ],
+      "exitCode": 0,
+      "seconds": 29.81
+    },
+    {
+      "name": "legacy",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_demos.py",
+        "--axe-script",
+        "/private/tmp/gallery-a11y-tools/package/axe.min.js"
+      ],
+      "exitCode": 0,
+      "seconds": 41.18
+    },
+    {
+      "name": "pwa",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_pwa.py"
+      ],
+      "exitCode": 0,
+      "seconds": 37.4
+    }
+  ],
+  "pythonTests": {
+    "count": 47,
+    "exitCode": 0
+  },
+  "generator": "PASS",
+  "ssot": "PASS; no new debt",
+  "generatedPrefix": {
+    "navigation": "PASS (390/1440)",
+    "insets": "PASS (two software profiles; strict ring and real journeys)",
+    "runtimeModuleMatches": true,
+    "docsAndTestsExcluded": true
+  },
+  "workerFinalEvidence": "v11-context-navigation-ring.json",
+  "independentReview": "v11-context-navigation-independent-review.json",
+  "runtimeSHA256": {
+    "assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "assets/ui.js": "122fbeed21f9a2ce0e2a1317ecb4cbe73421e300fd552c8dfd277db8a3069b73",
+    "index.html": "9f7785d42081648c08ef22a401f07ce7038970f0d4449ee3f5f0a312427ee7d0",
+    "script.js": "eb1a9e12b70ef4e89b08d384f0dd2f09bb8794a0bf124667f0ffe410ba73e329",
+    "style.css": "b02bc6a7f9d5de72dc07bb51aa10c3fcef0998ef0cae8ce8ee6f24c82c7fd285"
+  },
+  "limits": [
+    "Physical iPhone/Android/Safari/screen readers not run",
+    "AI-generated label candidates do not prove packaging fidelity",
+    "Native OS select popup keyboard option choice remains NOT_VERIFIED",
+    "Narrow 320px modal Rewards label can wrap to two readable lines"
+  ]
+}

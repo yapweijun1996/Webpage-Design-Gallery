@@ -31,7 +31,7 @@ def run():
     context=browser.new_context(viewport={'width':width,'height':height},has_touch=touch,reduced_motion='reduce');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     ready(page,url);guide(page)
     assert page.locator('#guide-dialog :focus').count()==1
-    page.keyboard.press('Shift+Tab');assert page.evaluate('document.activeElement.id')=='guide-list'
+    page.keyboard.press('Shift+Tab');assert page.evaluate('document.activeElement.id')=='context-shops'
     page.keyboard.press('Tab');assert page.evaluate('document.activeElement.id')=='guide-close'
     assert page.locator('[data-guide-touch]').is_visible()==touch
     assert page.locator('[data-guide-desktop]').is_visible()!=touch

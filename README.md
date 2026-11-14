@@ -77,6 +77,8 @@ Run `node --test tests/gjh_modes.test.mjs` and `python tests/browser_gjh_modes.p
 
 Run `python tests/browser_gjh_mode_review.py` for the additional nested-menu, animation and real context-loss review, including unavailable Cart actions and Bag focus/selection preservation.
 
+Run `python tests/browser_gjh_context_navigation.py` for V11 contextual navigation, modal footer ownership, focus return, mode visibility and 11 responsive viewports. Run `python tests/browser_gjh_context_navigation_insets.py` for strict target/focus-ring and panel clearance checks using Chrome CDP safe-area overrides. These are software emulation, not physical-device certification. Both accept `--root`, `--prefix` and `--output` for generated-build verification.
+
 The [compact collection redesign](docs/gallery-collection-redesign.md) adds two-column browsing from 560px, primary demo actions and a compact comparison tray. At 1000px and below, open Settings for theme, language and update controls. The layout runner checks eight widths, three languages, two themes, settings dismissal/focus and comparison interactions.
 
 Run `python tests/browser_ssot.py --axe-script /path/to/axe.min.js` for the generated Gallery and all eight GJH routes at desktop, tablet and mobile widths. It uses an already-reviewed local axe-core bundle, records runtime errors and overflow, and writes [SSOT browser evidence](docs/evidence/ssot-browser.json). Its LCP/CLS values are local laboratory observations, not field Core Web Vitals or INP measurements. See [GJH shared interaction review](docs/gjh-ssot-review.md) for theme boundaries and remaining device limitations.

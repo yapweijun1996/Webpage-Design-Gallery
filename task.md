@@ -112,7 +112,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] HUD buttons at least 44x44 CSS px; no horizontal overflow at 320, 360, 390, 667, 844, 1024, 1280.
 - [x] Explicit mode state machine (Explore, Menu, Inspect, Seated, Cart, Shop) with enter, exit, cleanup, restore.
 - [x] Mode-state review and focused browser verification: `docs/v11-mode-state-review.md`.
-- [ ] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
+- [x] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
 - [ ] Shelf focus mode (proposal, depends on the mode state machine): one-page scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
 - [ ] Interaction target highlight and distance hint.
 - [ ] WebGL context-loss recovery and low-end quality tiers.
@@ -322,3 +322,19 @@ closes the P2 with no P0/P1 findings and scores 86/100. See
 `docs/evidence/v11-mode-review/acceptance.json`. This completes only the mode-state
 review item; context restoration/quality tiers and physical-device gates remain
 separate and unverified.
+
+## Contextual navigation — 2026-11-15
+
+Application 1.1.38 projects the canonical mode into one five-item navigation node,
+shown only in Menu/Shop and moved inside native Guide/Bag footer hosts. Home
+retains the current 3D position/posture/camera; Shops opens the existing directory.
+Events, Rewards and Profile are disabled with visible demo explanations. Readiness
+guards, exact inspection-focus return, current-destination state, measured footer
+reservation and strict emulated-inset target/ring clearance passed verification.
+11 viewports / 18 scenario groups, 162 mode snapshots, 15 mode-review groups,
+70 axe scans, 47 Python tests, full V11, Gallery, 28 legacy cases, four no-JavaScript
+journeys, PWA and generated-prefix checks pass. Independent review scores 85/100.
+See [acceptance receipt](docs/evidence/v11-context-navigation-acceptance.json) and
+[implementation review](docs/v11-context-navigation-review.md). This completes
+only contextual navigation; physical devices, screen readers, packaging fidelity,
+Shelf focus and graphics recovery/quality tiers retain their separate gates.

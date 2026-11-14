@@ -1,0 +1,3045 @@
+{
+  "status": "PASS",
+  "profiles": [
+    {
+      "name": "landscape",
+      "viewport": [
+        667,
+        375
+      ],
+      "insets": {
+        "top": 20,
+        "bottom": 24,
+        "left": 30,
+        "right": 30
+      },
+      "states": [
+        {
+          "name": "guide",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 667,
+            "height": 81,
+            "top": 0,
+            "right": 667,
+            "bottom": 81,
+            "left": 0
+          },
+          "experience": {
+            "x": 30,
+            "y": 81,
+            "width": 607,
+            "height": 270,
+            "top": 81,
+            "right": 637,
+            "bottom": 351,
+            "left": 30
+          },
+          "panel": {
+            "x": 49,
+            "y": 144,
+            "width": 98.609375,
+            "height": 125,
+            "top": 144,
+            "right": 147.609375,
+            "bottom": 269,
+            "left": 49
+          },
+          "disclosure": {
+            "x": 103.5,
+            "y": 298,
+            "width": 460,
+            "height": 21,
+            "top": 298,
+            "right": 563.5,
+            "bottom": 319,
+            "left": 103.5
+          },
+          "nav": {
+            "x": 54.5,
+            "y": 226.8125,
+            "width": 558,
+            "height": 85.1875,
+            "top": 226.8125,
+            "right": 612.5,
+            "bottom": 312,
+            "left": 54.5
+          },
+          "host": "context-navigation-guide",
+          "globalBottom": "24px",
+          "headerBase": 61,
+          "scrollPaddingBottom": 0,
+          "bodyPaddingBottom": 24,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 96.953125,
+                "y": 247.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 247.609375,
+                "right": 134.84375,
+                "bottom": 266.609375,
+                "left": 96.953125
+              },
+              "button": {
+                "x": 63.5,
+                "y": 235.8125,
+                "width": 104.796875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 168.296875,
+                "bottom": 279.8125,
+                "left": 63.5
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 204.296875,
+                "y": 247.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 247.609375,
+                "right": 245.09375,
+                "bottom": 266.609375,
+                "left": 204.296875
+              },
+              "button": {
+                "x": 172.296875,
+                "y": 235.8125,
+                "width": 104.796875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 277.09375,
+                "bottom": 279.8125,
+                "left": 172.296875
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 311.453125,
+                "y": 247.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 247.609375,
+                "right": 355.53125,
+                "bottom": 266.609375,
+                "left": 311.453125
+              },
+              "button": {
+                "x": 281.09375,
+                "y": 235.8125,
+                "width": 104.796875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 385.890625,
+                "bottom": 279.8125,
+                "left": 281.09375
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 414.59375,
+                "y": 247.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 247.609375,
+                "right": 469.984375,
+                "bottom": 266.609375,
+                "left": 414.59375
+              },
+              "button": {
+                "x": 389.890625,
+                "y": 235.8125,
+                "width": 104.796875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 494.6875,
+                "bottom": 279.8125,
+                "left": 389.890625
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 530.3125,
+                "y": 247.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 247.609375,
+                "right": 571.859375,
+                "bottom": 266.609375,
+                "left": 530.3125
+              },
+              "button": {
+                "x": 498.6875,
+                "y": 235.8125,
+                "width": 104.8125,
+                "height": 44,
+                "top": 235.8125,
+                "right": 603.5,
+                "bottom": 279.8125,
+                "left": 498.6875
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 63.5,
+                "y": 235.8125,
+                "width": 104.796875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 168.296875,
+                "bottom": 279.8125,
+                "left": 63.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 172.296875,
+                "y": 235.8125,
+                "width": 104.796875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 277.09375,
+                "bottom": 279.8125,
+                "left": 172.296875
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "map",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 667,
+            "height": 81,
+            "top": 0,
+            "right": 667,
+            "bottom": 81,
+            "left": 0
+          },
+          "experience": {
+            "x": 30,
+            "y": 81,
+            "width": 607,
+            "height": 270,
+            "top": 81,
+            "right": 637,
+            "bottom": 351,
+            "left": 30
+          },
+          "panel": {
+            "x": 319,
+            "y": 155,
+            "width": 300,
+            "height": 79,
+            "top": 155,
+            "right": 619,
+            "bottom": 234,
+            "left": 319
+          },
+          "disclosure": {
+            "x": 103.5,
+            "y": 236,
+            "width": 460,
+            "height": 21,
+            "top": 236,
+            "right": 563.5,
+            "bottom": 257,
+            "left": 103.5
+          },
+          "nav": {
+            "x": 30,
+            "y": 265.8125,
+            "width": 607,
+            "height": 85.1875,
+            "top": 265.8125,
+            "right": 637,
+            "bottom": 351,
+            "left": 30
+          },
+          "host": "context-navigation-global",
+          "globalBottom": "24px",
+          "headerBase": 61,
+          "scrollPaddingBottom": 126,
+          "bodyPaddingBottom": 24,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 77.34375,
+                "y": 286.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 286.609375,
+                "right": 115.234375,
+                "bottom": 305.609375,
+                "left": 77.34375
+              },
+              "button": {
+                "x": 39,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 153.59375,
+                "bottom": 318.8125,
+                "left": 39
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 194.484375,
+                "y": 286.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 286.609375,
+                "right": 235.28125,
+                "bottom": 305.609375,
+                "left": 194.484375
+              },
+              "button": {
+                "x": 157.59375,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 272.1875,
+                "bottom": 318.8125,
+                "left": 157.59375
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 311.453125,
+                "y": 286.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 286.609375,
+                "right": 355.53125,
+                "bottom": 305.609375,
+                "left": 311.453125
+              },
+              "button": {
+                "x": 276.1875,
+                "y": 274.8125,
+                "width": 114.609375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 390.796875,
+                "bottom": 318.8125,
+                "left": 276.1875
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 424.390625,
+                "y": 286.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 286.609375,
+                "right": 479.78125,
+                "bottom": 305.609375,
+                "left": 424.390625
+              },
+              "button": {
+                "x": 394.796875,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 509.390625,
+                "bottom": 318.8125,
+                "left": 394.796875
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 549.90625,
+                "y": 286.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 286.609375,
+                "right": 591.453125,
+                "bottom": 305.609375,
+                "left": 549.90625
+              },
+              "button": {
+                "x": 513.390625,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 627.984375,
+                "bottom": 318.8125,
+                "left": 513.390625
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 39,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 153.59375,
+                "bottom": 318.8125,
+                "left": 39
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 157.59375,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 272.1875,
+                "bottom": 318.8125,
+                "left": 157.59375
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "map-bag",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 667,
+            "height": 81,
+            "top": 0,
+            "right": 667,
+            "bottom": 81,
+            "left": 0
+          },
+          "experience": {
+            "x": 30,
+            "y": 81,
+            "width": 607,
+            "height": 270,
+            "top": 81,
+            "right": 637,
+            "bottom": 351,
+            "left": 30
+          },
+          "panel": {
+            "x": 319,
+            "y": 155,
+            "width": 300,
+            "height": 220,
+            "top": 155,
+            "right": 619,
+            "bottom": 375,
+            "left": 319
+          },
+          "disclosure": {
+            "x": 103.5,
+            "y": 298,
+            "width": 460,
+            "height": 21,
+            "top": 298,
+            "right": 563.5,
+            "bottom": 319,
+            "left": 103.5
+          },
+          "nav": {
+            "x": 31,
+            "y": 226.8125,
+            "width": 605,
+            "height": 85.1875,
+            "top": 226.8125,
+            "right": 636,
+            "bottom": 312,
+            "left": 31
+          },
+          "host": "context-navigation-bag",
+          "globalBottom": "24px",
+          "headerBase": 61,
+          "scrollPaddingBottom": 0,
+          "bodyPaddingBottom": 24,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 78.140625,
+                "y": 247.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 247.609375,
+                "right": 116.03125,
+                "bottom": 266.609375,
+                "left": 78.140625
+              },
+              "button": {
+                "x": 40,
+                "y": 235.8125,
+                "width": 114.1875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 154.1875,
+                "bottom": 279.8125,
+                "left": 40
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 194.890625,
+                "y": 247.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 247.609375,
+                "right": 235.6875,
+                "bottom": 266.609375,
+                "left": 194.890625
+              },
+              "button": {
+                "x": 158.1875,
+                "y": 235.8125,
+                "width": 114.203125,
+                "height": 44,
+                "top": 235.8125,
+                "right": 272.390625,
+                "bottom": 279.8125,
+                "left": 158.1875
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 311.453125,
+                "y": 247.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 247.609375,
+                "right": 355.53125,
+                "bottom": 266.609375,
+                "left": 311.453125
+              },
+              "button": {
+                "x": 276.390625,
+                "y": 235.8125,
+                "width": 114.203125,
+                "height": 44,
+                "top": 235.8125,
+                "right": 390.59375,
+                "bottom": 279.8125,
+                "left": 276.390625
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 424,
+                "y": 247.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 247.609375,
+                "right": 479.390625,
+                "bottom": 266.609375,
+                "left": 424
+              },
+              "button": {
+                "x": 394.59375,
+                "y": 235.8125,
+                "width": 114.203125,
+                "height": 44,
+                "top": 235.8125,
+                "right": 508.796875,
+                "bottom": 279.8125,
+                "left": 394.59375
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 549.109375,
+                "y": 247.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 247.609375,
+                "right": 590.65625,
+                "bottom": 266.609375,
+                "left": 549.109375
+              },
+              "button": {
+                "x": 512.796875,
+                "y": 235.8125,
+                "width": 114.1875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 626.984375,
+                "bottom": 279.8125,
+                "left": 512.796875
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 40,
+                "y": 235.8125,
+                "width": 114.1875,
+                "height": 44,
+                "top": 235.8125,
+                "right": 154.1875,
+                "bottom": 279.8125,
+                "left": 40
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 158.1875,
+                "y": 235.8125,
+                "width": 114.203125,
+                "height": 44,
+                "top": 235.8125,
+                "right": 272.390625,
+                "bottom": 279.8125,
+                "left": 158.1875
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "help",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 667,
+            "height": 81,
+            "top": 0,
+            "right": 667,
+            "bottom": 81,
+            "left": 0
+          },
+          "experience": {
+            "x": 30,
+            "y": 81,
+            "width": 607,
+            "height": 270,
+            "top": 81,
+            "right": 637,
+            "bottom": 351,
+            "left": 30
+          },
+          "panel": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "disclosure": {
+            "x": 103.5,
+            "y": 236,
+            "width": 460,
+            "height": 21,
+            "top": 236,
+            "right": 563.5,
+            "bottom": 257,
+            "left": 103.5
+          },
+          "nav": {
+            "x": 30,
+            "y": 265.8125,
+            "width": 607,
+            "height": 85.1875,
+            "top": 265.8125,
+            "right": 637,
+            "bottom": 351,
+            "left": 30
+          },
+          "host": "context-navigation-global",
+          "globalBottom": "24px",
+          "headerBase": 61,
+          "scrollPaddingBottom": 126,
+          "bodyPaddingBottom": 24,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 77.34375,
+                "y": 286.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 286.609375,
+                "right": 115.234375,
+                "bottom": 305.609375,
+                "left": 77.34375
+              },
+              "button": {
+                "x": 39,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 153.59375,
+                "bottom": 318.8125,
+                "left": 39
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 194.484375,
+                "y": 286.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 286.609375,
+                "right": 235.28125,
+                "bottom": 305.609375,
+                "left": 194.484375
+              },
+              "button": {
+                "x": 157.59375,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 272.1875,
+                "bottom": 318.8125,
+                "left": 157.59375
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 311.453125,
+                "y": 286.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 286.609375,
+                "right": 355.53125,
+                "bottom": 305.609375,
+                "left": 311.453125
+              },
+              "button": {
+                "x": 276.1875,
+                "y": 274.8125,
+                "width": 114.609375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 390.796875,
+                "bottom": 318.8125,
+                "left": 276.1875
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 424.390625,
+                "y": 286.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 286.609375,
+                "right": 479.78125,
+                "bottom": 305.609375,
+                "left": 424.390625
+              },
+              "button": {
+                "x": 394.796875,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 509.390625,
+                "bottom": 318.8125,
+                "left": 394.796875
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 549.90625,
+                "y": 286.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 286.609375,
+                "right": 591.453125,
+                "bottom": 305.609375,
+                "left": 549.90625
+              },
+              "button": {
+                "x": 513.390625,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 627.984375,
+                "bottom": 318.8125,
+                "left": 513.390625
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 39,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 153.59375,
+                "bottom": 318.8125,
+                "left": 39
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 157.59375,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 272.1875,
+                "bottom": 318.8125,
+                "left": 157.59375
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "directory",
+          "header": {
+            "x": 30,
+            "y": -4,
+            "width": 607,
+            "height": 120,
+            "top": -4,
+            "right": 637,
+            "bottom": 116,
+            "left": 30
+          },
+          "experience": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "panel": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "nav": {
+            "x": 30,
+            "y": 265.8125,
+            "width": 607,
+            "height": 85.1875,
+            "top": 265.8125,
+            "right": 637,
+            "bottom": 351,
+            "left": 30
+          },
+          "host": "context-navigation-global",
+          "globalBottom": "24px",
+          "headerBase": 100,
+          "scrollPaddingBottom": 126,
+          "bodyPaddingBottom": 110,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 77.34375,
+                "y": 286.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 286.609375,
+                "right": 115.234375,
+                "bottom": 305.609375,
+                "left": 77.34375
+              },
+              "button": {
+                "x": 39,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 153.59375,
+                "bottom": 318.8125,
+                "left": 39
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 194.484375,
+                "y": 286.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 286.609375,
+                "right": 235.28125,
+                "bottom": 305.609375,
+                "left": 194.484375
+              },
+              "button": {
+                "x": 157.59375,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 272.1875,
+                "bottom": 318.8125,
+                "left": 157.59375
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 311.453125,
+                "y": 286.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 286.609375,
+                "right": 355.53125,
+                "bottom": 305.609375,
+                "left": 311.453125
+              },
+              "button": {
+                "x": 276.1875,
+                "y": 274.8125,
+                "width": 114.609375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 390.796875,
+                "bottom": 318.8125,
+                "left": 276.1875
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 424.390625,
+                "y": 286.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 286.609375,
+                "right": 479.78125,
+                "bottom": 305.609375,
+                "left": 424.390625
+              },
+              "button": {
+                "x": 394.796875,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 509.390625,
+                "bottom": 318.8125,
+                "left": 394.796875
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 549.90625,
+                "y": 286.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 286.609375,
+                "right": 591.453125,
+                "bottom": 305.609375,
+                "left": 549.90625
+              },
+              "button": {
+                "x": 513.390625,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 627.984375,
+                "bottom": 318.8125,
+                "left": 513.390625
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 39,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 153.59375,
+                "bottom": 318.8125,
+                "left": 39
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 157.59375,
+                "y": 274.8125,
+                "width": 114.59375,
+                "height": 44,
+                "top": 274.8125,
+                "right": 272.1875,
+                "bottom": 318.8125,
+                "left": 157.59375
+              },
+              "hit": true
+            }
+          ]
+        }
+      ],
+      "mapKeyboard": [
+        {
+          "id": "newmoon",
+          "rect": {
+            "x": 348.421875,
+            "y": 168.421875,
+            "width": 63.828125,
+            "height": 52,
+            "top": 168.421875,
+            "right": 412.25,
+            "bottom": 220.421875,
+            "left": 348.421875
+          },
+          "scroller": {
+            "x": 319,
+            "y": 155,
+            "width": 300,
+            "height": 79,
+            "top": 155,
+            "right": 619,
+            "bottom": 234,
+            "left": 319
+          },
+          "ring": 8,
+          "label": {
+            "x": 354.921875,
+            "y": 179.828125,
+            "width": 50.8125,
+            "height": 29.1875,
+            "top": 179.828125,
+            "right": 405.734375,
+            "bottom": 209.015625,
+            "left": 354.921875
+          },
+          "scrollTop": 74,
+          "hit": true
+        },
+        {
+          "id": "mili",
+          "rect": {
+            "x": 437.078125,
+            "y": 168.421875,
+            "width": 63.828125,
+            "height": 52,
+            "top": 168.421875,
+            "right": 500.90625,
+            "bottom": 220.421875,
+            "left": 437.078125
+          },
+          "scroller": {
+            "x": 319,
+            "y": 155,
+            "width": 300,
+            "height": 79,
+            "top": 155,
+            "right": 619,
+            "bottom": 234,
+            "left": 319
+          },
+          "ring": 8,
+          "label": {
+            "x": 459.015625,
+            "y": 179.828125,
+            "width": 19.9375,
+            "height": 29.1875,
+            "top": 179.828125,
+            "right": 478.953125,
+            "bottom": 209.015625,
+            "left": 459.015625
+          },
+          "scrollTop": 74,
+          "hit": true
+        },
+        {
+          "id": "gogo",
+          "rect": {
+            "x": 525.734375,
+            "y": 168.421875,
+            "width": 63.828125,
+            "height": 52,
+            "top": 168.421875,
+            "right": 589.5625,
+            "bottom": 220.421875,
+            "left": 525.734375
+          },
+          "scroller": {
+            "x": 319,
+            "y": 155,
+            "width": 300,
+            "height": 79,
+            "top": 155,
+            "right": 619,
+            "bottom": 234,
+            "left": 319
+          },
+          "ring": 8,
+          "label": {
+            "x": 542.65625,
+            "y": 179.828125,
+            "width": 29.984375,
+            "height": 29.1875,
+            "top": 179.828125,
+            "right": 572.640625,
+            "bottom": 209.015625,
+            "left": 542.65625
+          },
+          "scrollTop": 74,
+          "hit": true
+        }
+      ],
+      "mapJourneys": [
+        {
+          "zone": "newmoon",
+          "x": -10,
+          "focus": "scene"
+        },
+        {
+          "zone": "mili",
+          "x": 0,
+          "focus": "scene"
+        },
+        {
+          "zone": "gogo",
+          "x": 10,
+          "focus": "scene"
+        }
+      ],
+      "helpKeyboard": [
+        {
+          "id": "guide-reopen",
+          "rect": {
+            "x": 65,
+            "y": 156.5,
+            "width": 138.21875,
+            "height": 44,
+            "top": 156.5,
+            "right": 203.21875,
+            "bottom": 200.5,
+            "left": 65
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 288,
+          "hit": true
+        },
+        {
+          "id": "hair",
+          "rect": {
+            "x": 306.5,
+            "y": 156.640625,
+            "width": 220.5,
+            "height": 44,
+            "top": 156.640625,
+            "right": 527,
+            "bottom": 200.640625,
+            "left": 306.5
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 403,
+          "hit": true
+        },
+        {
+          "id": "hairColor",
+          "rect": {
+            "x": 306.5,
+            "y": 156.640625,
+            "width": 220.5,
+            "height": 44,
+            "top": 156.640625,
+            "right": 527,
+            "bottom": 200.640625,
+            "left": 306.5
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 457,
+          "hit": true
+        },
+        {
+          "id": "outfit",
+          "rect": {
+            "x": 306.5,
+            "y": 156.640625,
+            "width": 220.5,
+            "height": 44,
+            "top": 156.640625,
+            "right": 527,
+            "bottom": 200.640625,
+            "left": 306.5
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 511,
+          "hit": true
+        },
+        {
+          "id": "skin",
+          "rect": {
+            "x": 306.5,
+            "y": 156.640625,
+            "width": 220.5,
+            "height": 44,
+            "top": 156.640625,
+            "right": 527,
+            "bottom": 200.640625,
+            "left": 306.5
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 565,
+          "hit": true
+        },
+        {
+          "id": "glasses",
+          "rect": {
+            "x": 306.5,
+            "y": 156.640625,
+            "width": 220.5,
+            "height": 44,
+            "top": 156.640625,
+            "right": 527,
+            "bottom": 200.640625,
+            "left": 306.5
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 619,
+          "hit": true
+        },
+        {
+          "id": "backpack",
+          "rect": {
+            "x": 306.5,
+            "y": 156.640625,
+            "width": 220.5,
+            "height": 44,
+            "top": 156.640625,
+            "right": 527,
+            "bottom": 200.640625,
+            "left": 306.5
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 673,
+          "hit": true
+        },
+        {
+          "id": "watch",
+          "rect": {
+            "x": 306.5,
+            "y": 156.640625,
+            "width": 220.5,
+            "height": 44,
+            "top": 156.640625,
+            "right": 527,
+            "bottom": 200.640625,
+            "left": 306.5
+          },
+          "scroller": {
+            "x": 49,
+            "y": 144,
+            "width": 507,
+            "height": 69,
+            "top": 144,
+            "right": 556,
+            "bottom": 213,
+            "left": 49
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 727,
+          "hit": true
+        }
+      ],
+      "inspectionReturns": [
+        {
+          "selector": "#original-tin-open",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 1749,
+            "rect": {
+              "x": 386.859375,
+              "y": 152.671875,
+              "width": 191.796875,
+              "height": 44,
+              "top": 152.671875,
+              "right": 578.65625,
+              "bottom": 196.671875,
+              "left": 386.859375
+            },
+            "footer": {
+              "x": 30,
+              "y": 265.8125,
+              "width": 607,
+              "height": 85.1875,
+              "top": 265.8125,
+              "right": 637,
+              "bottom": 351,
+              "left": 30
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 2958,
+            "rect": {
+              "x": 67,
+              "y": 372.015625,
+              "width": 186,
+              "height": 48.1875,
+              "top": 372.015625,
+              "right": 253,
+              "bottom": 420.203125,
+              "left": 67
+            },
+            "footer": {
+              "x": 30,
+              "y": 436.84375,
+              "width": 260,
+              "height": 107.15625,
+              "top": 436.84375,
+              "right": 290,
+              "bottom": 544,
+              "left": 30
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "selector": "#store-list [data-inspect=\"mili\"]",
+          "before": {
+            "focus": "mili",
+            "scrollY": 1533,
+            "rect": {
+              "x": 204.34375,
+              "y": 152.890625,
+              "width": 97.65625,
+              "height": 44,
+              "top": 152.890625,
+              "right": 302,
+              "bottom": 196.890625,
+              "left": 204.34375
+            },
+            "footer": {
+              "x": 30,
+              "y": 265.8125,
+              "width": 607,
+              "height": 85.1875,
+              "top": 265.8125,
+              "right": 637,
+              "bottom": 351,
+              "left": 30
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "after": {
+            "focus": "mili",
+            "scrollY": 1533,
+            "rect": {
+              "x": 204.34375,
+              "y": 152.890625,
+              "width": 97.65625,
+              "height": 44,
+              "top": 152.890625,
+              "right": 302,
+              "bottom": 196.890625,
+              "left": 204.34375
+            },
+            "footer": {
+              "x": 30,
+              "y": 265.8125,
+              "width": 607,
+              "height": 85.1875,
+              "top": 265.8125,
+              "right": 637,
+              "bottom": 351,
+              "left": 30
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "name": "portrait",
+      "viewport": [
+        390,
+        844
+      ],
+      "insets": {
+        "top": 44,
+        "bottom": 34,
+        "left": 0,
+        "right": 0
+      },
+      "states": [
+        {
+          "name": "guide",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 116,
+            "top": 0,
+            "right": 390,
+            "bottom": 116,
+            "left": 0
+          },
+          "experience": {
+            "x": 0,
+            "y": 116,
+            "width": 390,
+            "height": 694,
+            "top": 116,
+            "right": 390,
+            "bottom": 810,
+            "left": 0
+          },
+          "panel": {
+            "x": 19,
+            "y": 179,
+            "width": 98.609375,
+            "height": 594,
+            "top": 179,
+            "right": 117.609375,
+            "bottom": 773,
+            "left": 19
+          },
+          "disclosure": {
+            "x": 178,
+            "y": 717.109375,
+            "width": 200,
+            "height": 50.890625,
+            "top": 717.109375,
+            "right": 378,
+            "bottom": 768,
+            "left": 178
+          },
+          "nav": {
+            "x": 18,
+            "y": 581.015625,
+            "width": 354,
+            "height": 85.1875,
+            "top": 581.015625,
+            "right": 372,
+            "bottom": 666.203125,
+            "left": 18
+          },
+          "host": "context-navigation-guide",
+          "globalBottom": "34px",
+          "headerBase": 72,
+          "scrollPaddingBottom": 0,
+          "bodyPaddingBottom": 34,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 40.046875,
+                "y": 601.8125,
+                "width": 37.890625,
+                "height": 19,
+                "top": 601.8125,
+                "right": 77.9375,
+                "bottom": 620.8125,
+                "left": 40.046875
+              },
+              "button": {
+                "x": 27,
+                "y": 590.015625,
+                "width": 64,
+                "height": 44,
+                "top": 590.015625,
+                "right": 91,
+                "bottom": 634.015625,
+                "left": 27
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 106.59375,
+                "y": 601.8125,
+                "width": 40.796875,
+                "height": 19,
+                "top": 601.8125,
+                "right": 147.390625,
+                "bottom": 620.8125,
+                "left": 106.59375
+              },
+              "button": {
+                "x": 95,
+                "y": 590.015625,
+                "width": 64,
+                "height": 44,
+                "top": 590.015625,
+                "right": 159,
+                "bottom": 634.015625,
+                "left": 95
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 172.953125,
+                "y": 601.8125,
+                "width": 44.078125,
+                "height": 19,
+                "top": 601.8125,
+                "right": 217.03125,
+                "bottom": 620.8125,
+                "left": 172.953125
+              },
+              "button": {
+                "x": 163,
+                "y": 590.015625,
+                "width": 64,
+                "height": 44,
+                "top": 590.015625,
+                "right": 227,
+                "bottom": 634.015625,
+                "left": 163
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 235.296875,
+                "y": 601.8125,
+                "width": 55.390625,
+                "height": 19,
+                "top": 601.8125,
+                "right": 290.6875,
+                "bottom": 620.8125,
+                "left": 235.296875
+              },
+              "button": {
+                "x": 231,
+                "y": 590.015625,
+                "width": 64,
+                "height": 44,
+                "top": 590.015625,
+                "right": 295,
+                "bottom": 634.015625,
+                "left": 231
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 310.21875,
+                "y": 601.8125,
+                "width": 41.546875,
+                "height": 19,
+                "top": 601.8125,
+                "right": 351.765625,
+                "bottom": 620.8125,
+                "left": 310.21875
+              },
+              "button": {
+                "x": 299,
+                "y": 590.015625,
+                "width": 64,
+                "height": 44,
+                "top": 590.015625,
+                "right": 363,
+                "bottom": 634.015625,
+                "left": 299
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 27,
+                "y": 590.015625,
+                "width": 64,
+                "height": 44,
+                "top": 590.015625,
+                "right": 91,
+                "bottom": 634.015625,
+                "left": 27
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 95,
+                "y": 590.015625,
+                "width": 64,
+                "height": 44,
+                "top": 590.015625,
+                "right": 159,
+                "bottom": 634.015625,
+                "left": 95
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "map",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 116,
+            "top": 0,
+            "right": 390,
+            "bottom": 116,
+            "left": 0
+          },
+          "experience": {
+            "x": 0,
+            "y": 116,
+            "width": 390,
+            "height": 694,
+            "top": 116,
+            "right": 390,
+            "bottom": 810,
+            "left": 0
+          },
+          "panel": {
+            "x": 72,
+            "y": 190,
+            "width": 300,
+            "height": 367.65625,
+            "top": 190,
+            "right": 372,
+            "bottom": 557.65625,
+            "left": 72
+          },
+          "disclosure": {
+            "x": 178,
+            "y": 665.109375,
+            "width": 200,
+            "height": 50.890625,
+            "top": 665.109375,
+            "right": 378,
+            "bottom": 716,
+            "left": 178
+          },
+          "nav": {
+            "x": 8,
+            "y": 724.8125,
+            "width": 374,
+            "height": 85.1875,
+            "top": 724.8125,
+            "right": 382,
+            "bottom": 810,
+            "left": 8
+          },
+          "host": "context-navigation-global",
+          "globalBottom": "34px",
+          "headerBase": 72,
+          "scrollPaddingBottom": 136,
+          "bodyPaddingBottom": 34,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 32.046875,
+                "y": 745.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 745.609375,
+                "right": 69.9375,
+                "bottom": 764.609375,
+                "left": 32.046875
+              },
+              "button": {
+                "x": 17,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 85,
+                "bottom": 777.8125,
+                "left": 17
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 102.59375,
+                "y": 745.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 745.609375,
+                "right": 143.390625,
+                "bottom": 764.609375,
+                "left": 102.59375
+              },
+              "button": {
+                "x": 89,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 157,
+                "bottom": 777.8125,
+                "left": 89
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 172.953125,
+                "y": 745.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 745.609375,
+                "right": 217.03125,
+                "bottom": 764.609375,
+                "left": 172.953125
+              },
+              "button": {
+                "x": 161,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 229,
+                "bottom": 777.8125,
+                "left": 161
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 239.296875,
+                "y": 745.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 745.609375,
+                "right": 294.6875,
+                "bottom": 764.609375,
+                "left": 239.296875
+              },
+              "button": {
+                "x": 233,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 301,
+                "bottom": 777.8125,
+                "left": 233
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 318.21875,
+                "y": 745.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 745.609375,
+                "right": 359.765625,
+                "bottom": 764.609375,
+                "left": 318.21875
+              },
+              "button": {
+                "x": 305,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 373,
+                "bottom": 777.8125,
+                "left": 305
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 17,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 85,
+                "bottom": 777.8125,
+                "left": 17
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 89,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 157,
+                "bottom": 777.8125,
+                "left": 89
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "map-bag",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 116,
+            "top": 0,
+            "right": 390,
+            "bottom": 116,
+            "left": 0
+          },
+          "experience": {
+            "x": 0,
+            "y": 116,
+            "width": 390,
+            "height": 694,
+            "top": 116,
+            "right": 390,
+            "bottom": 810,
+            "left": 0
+          },
+          "panel": {
+            "x": 72,
+            "y": 190,
+            "width": 300,
+            "height": 367.65625,
+            "top": 190,
+            "right": 372,
+            "bottom": 557.65625,
+            "left": 72
+          },
+          "disclosure": {
+            "x": 178,
+            "y": 717.109375,
+            "width": 200,
+            "height": 50.890625,
+            "top": 717.109375,
+            "right": 378,
+            "bottom": 768,
+            "left": 178
+          },
+          "nav": {
+            "x": 18,
+            "y": 583.234375,
+            "width": 354,
+            "height": 85.1875,
+            "top": 583.234375,
+            "right": 372,
+            "bottom": 668.421875,
+            "left": 18
+          },
+          "host": "context-navigation-bag",
+          "globalBottom": "34px",
+          "headerBase": 72,
+          "scrollPaddingBottom": 0,
+          "bodyPaddingBottom": 34,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 40.046875,
+                "y": 604.03125,
+                "width": 37.890625,
+                "height": 19,
+                "top": 604.03125,
+                "right": 77.9375,
+                "bottom": 623.03125,
+                "left": 40.046875
+              },
+              "button": {
+                "x": 27,
+                "y": 592.234375,
+                "width": 64,
+                "height": 44,
+                "top": 592.234375,
+                "right": 91,
+                "bottom": 636.234375,
+                "left": 27
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 106.59375,
+                "y": 604.03125,
+                "width": 40.796875,
+                "height": 19,
+                "top": 604.03125,
+                "right": 147.390625,
+                "bottom": 623.03125,
+                "left": 106.59375
+              },
+              "button": {
+                "x": 95,
+                "y": 592.234375,
+                "width": 64,
+                "height": 44,
+                "top": 592.234375,
+                "right": 159,
+                "bottom": 636.234375,
+                "left": 95
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 172.953125,
+                "y": 604.03125,
+                "width": 44.078125,
+                "height": 19,
+                "top": 604.03125,
+                "right": 217.03125,
+                "bottom": 623.03125,
+                "left": 172.953125
+              },
+              "button": {
+                "x": 163,
+                "y": 592.234375,
+                "width": 64,
+                "height": 44,
+                "top": 592.234375,
+                "right": 227,
+                "bottom": 636.234375,
+                "left": 163
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 235.296875,
+                "y": 604.03125,
+                "width": 55.390625,
+                "height": 19,
+                "top": 604.03125,
+                "right": 290.6875,
+                "bottom": 623.03125,
+                "left": 235.296875
+              },
+              "button": {
+                "x": 231,
+                "y": 592.234375,
+                "width": 64,
+                "height": 44,
+                "top": 592.234375,
+                "right": 295,
+                "bottom": 636.234375,
+                "left": 231
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 310.21875,
+                "y": 604.03125,
+                "width": 41.546875,
+                "height": 19,
+                "top": 604.03125,
+                "right": 351.765625,
+                "bottom": 623.03125,
+                "left": 310.21875
+              },
+              "button": {
+                "x": 299,
+                "y": 592.234375,
+                "width": 64,
+                "height": 44,
+                "top": 592.234375,
+                "right": 363,
+                "bottom": 636.234375,
+                "left": 299
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 27,
+                "y": 592.234375,
+                "width": 64,
+                "height": 44,
+                "top": 592.234375,
+                "right": 91,
+                "bottom": 636.234375,
+                "left": 27
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 95,
+                "y": 592.234375,
+                "width": 64,
+                "height": 44,
+                "top": 592.234375,
+                "right": 159,
+                "bottom": 636.234375,
+                "left": 95
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "help",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 116,
+            "top": 0,
+            "right": 390,
+            "bottom": 116,
+            "left": 0
+          },
+          "experience": {
+            "x": 0,
+            "y": 116,
+            "width": 390,
+            "height": 694,
+            "top": 116,
+            "right": 390,
+            "bottom": 810,
+            "left": 0
+          },
+          "panel": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "disclosure": {
+            "x": 178,
+            "y": 665.109375,
+            "width": 200,
+            "height": 50.890625,
+            "top": 665.109375,
+            "right": 378,
+            "bottom": 716,
+            "left": 178
+          },
+          "nav": {
+            "x": 8,
+            "y": 724.8125,
+            "width": 374,
+            "height": 85.1875,
+            "top": 724.8125,
+            "right": 382,
+            "bottom": 810,
+            "left": 8
+          },
+          "host": "context-navigation-global",
+          "globalBottom": "34px",
+          "headerBase": 72,
+          "scrollPaddingBottom": 136,
+          "bodyPaddingBottom": 34,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 32.046875,
+                "y": 745.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 745.609375,
+                "right": 69.9375,
+                "bottom": 764.609375,
+                "left": 32.046875
+              },
+              "button": {
+                "x": 17,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 85,
+                "bottom": 777.8125,
+                "left": 17
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 102.59375,
+                "y": 745.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 745.609375,
+                "right": 143.390625,
+                "bottom": 764.609375,
+                "left": 102.59375
+              },
+              "button": {
+                "x": 89,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 157,
+                "bottom": 777.8125,
+                "left": 89
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 172.953125,
+                "y": 745.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 745.609375,
+                "right": 217.03125,
+                "bottom": 764.609375,
+                "left": 172.953125
+              },
+              "button": {
+                "x": 161,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 229,
+                "bottom": 777.8125,
+                "left": 161
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 239.296875,
+                "y": 745.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 745.609375,
+                "right": 294.6875,
+                "bottom": 764.609375,
+                "left": 239.296875
+              },
+              "button": {
+                "x": 233,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 301,
+                "bottom": 777.8125,
+                "left": 233
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 318.21875,
+                "y": 745.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 745.609375,
+                "right": 359.765625,
+                "bottom": 764.609375,
+                "left": 318.21875
+              },
+              "button": {
+                "x": 305,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 373,
+                "bottom": 777.8125,
+                "left": 305
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 17,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 85,
+                "bottom": 777.8125,
+                "left": 17
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 89,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 157,
+                "bottom": 777.8125,
+                "left": 89
+              },
+              "hit": true
+            }
+          ]
+        },
+        {
+          "name": "directory",
+          "header": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 126,
+            "top": 0,
+            "right": 390,
+            "bottom": 126,
+            "left": 0
+          },
+          "experience": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "panel": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "nav": {
+            "x": 8,
+            "y": 724.8125,
+            "width": 374,
+            "height": 85.1875,
+            "top": 724.8125,
+            "right": 382,
+            "bottom": 810,
+            "left": 8
+          },
+          "host": "context-navigation-global",
+          "globalBottom": "34px",
+          "headerBase": 82,
+          "scrollPaddingBottom": 136,
+          "bodyPaddingBottom": 120,
+          "count": 1,
+          "overflow": false,
+          "labels": [
+            {
+              "text": "Home",
+              "rect": {
+                "x": 32.046875,
+                "y": 745.609375,
+                "width": 37.890625,
+                "height": 19,
+                "top": 745.609375,
+                "right": 69.9375,
+                "bottom": 764.609375,
+                "left": 32.046875
+              },
+              "button": {
+                "x": 17,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 85,
+                "bottom": 777.8125,
+                "left": 17
+              }
+            },
+            {
+              "text": "Shops",
+              "rect": {
+                "x": 102.59375,
+                "y": 745.609375,
+                "width": 40.796875,
+                "height": 19,
+                "top": 745.609375,
+                "right": 143.390625,
+                "bottom": 764.609375,
+                "left": 102.59375
+              },
+              "button": {
+                "x": 89,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 157,
+                "bottom": 777.8125,
+                "left": 89
+              }
+            },
+            {
+              "text": "Events",
+              "rect": {
+                "x": 172.953125,
+                "y": 745.609375,
+                "width": 44.078125,
+                "height": 19,
+                "top": 745.609375,
+                "right": 217.03125,
+                "bottom": 764.609375,
+                "left": 172.953125
+              },
+              "button": {
+                "x": 161,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 229,
+                "bottom": 777.8125,
+                "left": 161
+              }
+            },
+            {
+              "text": "Rewards",
+              "rect": {
+                "x": 239.296875,
+                "y": 745.609375,
+                "width": 55.390625,
+                "height": 19,
+                "top": 745.609375,
+                "right": 294.6875,
+                "bottom": 764.609375,
+                "left": 239.296875
+              },
+              "button": {
+                "x": 233,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 301,
+                "bottom": 777.8125,
+                "left": 233
+              }
+            },
+            {
+              "text": "Profile",
+              "rect": {
+                "x": 318.21875,
+                "y": 745.609375,
+                "width": 41.546875,
+                "height": 19,
+                "top": 745.609375,
+                "right": 359.765625,
+                "bottom": 764.609375,
+                "left": 318.21875
+              },
+              "button": {
+                "x": 305,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 373,
+                "bottom": 777.8125,
+                "left": 305
+              }
+            }
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "rect": {
+                "x": 17,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 85,
+                "bottom": 777.8125,
+                "left": 17
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "rect": {
+                "x": 89,
+                "y": 733.8125,
+                "width": 68,
+                "height": 44,
+                "top": 733.8125,
+                "right": 157,
+                "bottom": 777.8125,
+                "left": 89
+              },
+              "hit": true
+            }
+          ]
+        }
+      ],
+      "mapKeyboard": [
+        {
+          "id": "newmoon",
+          "rect": {
+            "x": 101.421875,
+            "y": 277.421875,
+            "width": 63.828125,
+            "height": 97.4375,
+            "top": 277.421875,
+            "right": 165.25,
+            "bottom": 374.859375,
+            "left": 101.421875
+          },
+          "scroller": {
+            "x": 72,
+            "y": 190,
+            "width": 300,
+            "height": 367.65625,
+            "top": 190,
+            "right": 372,
+            "bottom": 557.65625,
+            "left": 72
+          },
+          "ring": 8,
+          "label": {
+            "x": 107.921875,
+            "y": 309.546875,
+            "width": 50.8125,
+            "height": 33.1875,
+            "top": 309.546875,
+            "right": 158.734375,
+            "bottom": 342.734375,
+            "left": 107.921875
+          },
+          "scrollTop": 0,
+          "hit": true
+        },
+        {
+          "id": "mili",
+          "rect": {
+            "x": 190.078125,
+            "y": 277.421875,
+            "width": 63.828125,
+            "height": 97.4375,
+            "top": 277.421875,
+            "right": 253.90625,
+            "bottom": 374.859375,
+            "left": 190.078125
+          },
+          "scroller": {
+            "x": 72,
+            "y": 190,
+            "width": 300,
+            "height": 367.65625,
+            "top": 190,
+            "right": 372,
+            "bottom": 557.65625,
+            "left": 72
+          },
+          "ring": 8,
+          "label": {
+            "x": 212.015625,
+            "y": 309.546875,
+            "width": 19.9375,
+            "height": 33.1875,
+            "top": 309.546875,
+            "right": 231.953125,
+            "bottom": 342.734375,
+            "left": 212.015625
+          },
+          "scrollTop": 0,
+          "hit": true
+        },
+        {
+          "id": "gogo",
+          "rect": {
+            "x": 278.734375,
+            "y": 277.421875,
+            "width": 63.828125,
+            "height": 97.4375,
+            "top": 277.421875,
+            "right": 342.5625,
+            "bottom": 374.859375,
+            "left": 278.734375
+          },
+          "scroller": {
+            "x": 72,
+            "y": 190,
+            "width": 300,
+            "height": 367.65625,
+            "top": 190,
+            "right": 372,
+            "bottom": 557.65625,
+            "left": 72
+          },
+          "ring": 8,
+          "label": {
+            "x": 295.65625,
+            "y": 309.546875,
+            "width": 29.984375,
+            "height": 33.1875,
+            "top": 309.546875,
+            "right": 325.640625,
+            "bottom": 342.734375,
+            "left": 295.65625
+          },
+          "scrollTop": 0,
+          "hit": true
+        }
+      ],
+      "mapJourneys": [
+        {
+          "zone": "newmoon",
+          "x": -10,
+          "focus": "scene"
+        },
+        {
+          "zone": "mili",
+          "x": 0,
+          "focus": "scene"
+        },
+        {
+          "zone": "gogo",
+          "x": 10,
+          "focus": "scene"
+        }
+      ],
+      "helpKeyboard": [
+        {
+          "id": "guide-reopen",
+          "rect": {
+            "x": 35,
+            "y": 596.5,
+            "width": 138.21875,
+            "height": 44,
+            "top": 596.5,
+            "right": 173.21875,
+            "bottom": 640.5,
+            "left": 35
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 23,
+          "hit": true
+        },
+        {
+          "id": "hair",
+          "rect": {
+            "x": 168,
+            "y": 393.640625,
+            "width": 112,
+            "height": 44,
+            "top": 393.640625,
+            "right": 280,
+            "bottom": 437.640625,
+            "left": 168
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 356,
+          "hit": true
+        },
+        {
+          "id": "hairColor",
+          "rect": {
+            "x": 168,
+            "y": 447.640625,
+            "width": 112,
+            "height": 44,
+            "top": 447.640625,
+            "right": 280,
+            "bottom": 491.640625,
+            "left": 168
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 356,
+          "hit": true
+        },
+        {
+          "id": "outfit",
+          "rect": {
+            "x": 168,
+            "y": 501.640625,
+            "width": 112,
+            "height": 44,
+            "top": 501.640625,
+            "right": 280,
+            "bottom": 545.640625,
+            "left": 168
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 356,
+          "hit": true
+        },
+        {
+          "id": "skin",
+          "rect": {
+            "x": 168,
+            "y": 555.640625,
+            "width": 112,
+            "height": 44,
+            "top": 555.640625,
+            "right": 280,
+            "bottom": 599.640625,
+            "left": 168
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 356,
+          "hit": true
+        },
+        {
+          "id": "glasses",
+          "rect": {
+            "x": 168,
+            "y": 596.640625,
+            "width": 112,
+            "height": 44,
+            "top": 596.640625,
+            "right": 280,
+            "bottom": 640.640625,
+            "left": 168
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 369,
+          "hit": true
+        },
+        {
+          "id": "backpack",
+          "rect": {
+            "x": 168,
+            "y": 525.640625,
+            "width": 112,
+            "height": 44,
+            "top": 525.640625,
+            "right": 280,
+            "bottom": 569.640625,
+            "left": 168
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 494,
+          "hit": true
+        },
+        {
+          "id": "watch",
+          "rect": {
+            "x": 168,
+            "y": 579.640625,
+            "width": 112,
+            "height": 44,
+            "top": 579.640625,
+            "right": 280,
+            "bottom": 623.640625,
+            "left": 168
+          },
+          "scroller": {
+            "x": 19,
+            "y": 179,
+            "width": 290,
+            "height": 474,
+            "top": 179,
+            "right": 309,
+            "bottom": 653,
+            "left": 19
+          },
+          "ring": 8,
+          "label": null,
+          "scrollTop": 494,
+          "hit": true
+        }
+      ],
+      "inspectionReturns": [
+        {
+          "selector": "#original-tin-open",
+          "before": {
+            "focus": "original-tin-open",
+            "scrollY": 2364,
+            "rect": {
+              "x": 37,
+              "y": 423.140625,
+              "width": 316,
+              "height": 44,
+              "top": 423.140625,
+              "right": 353,
+              "bottom": 467.140625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 724.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 724.8125,
+              "right": 382,
+              "bottom": 810,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "after": {
+            "focus": "original-tin-open",
+            "scrollY": 2278,
+            "rect": {
+              "x": 37,
+              "y": 509.140625,
+              "width": 316,
+              "height": 44,
+              "top": 509.140625,
+              "right": 353,
+              "bottom": 553.140625,
+              "left": 37
+            },
+            "footer": {
+              "x": 8,
+              "y": 724.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 724.8125,
+              "right": 382,
+              "bottom": 810,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        },
+        {
+          "selector": "#store-list [data-inspect=\"gogo\"]",
+          "before": {
+            "focus": "gogo",
+            "scrollY": 2354,
+            "rect": {
+              "x": 123,
+              "y": 99.5625,
+              "width": 134.796875,
+              "height": 44,
+              "top": 99.5625,
+              "right": 257.796875,
+              "bottom": 143.5625,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 724.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 724.8125,
+              "right": 382,
+              "bottom": 810,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          },
+          "after": {
+            "focus": "gogo",
+            "scrollY": 2278,
+            "rect": {
+              "x": 123,
+              "y": 175.5625,
+              "width": 134.796875,
+              "height": 44,
+              "top": 175.5625,
+              "right": 257.796875,
+              "bottom": 219.5625,
+              "left": 123
+            },
+            "footer": {
+              "x": 8,
+              "y": 724.8125,
+              "width": 374,
+              "height": 85.1875,
+              "top": 724.8125,
+              "right": 382,
+              "bottom": 810,
+              "left": 8
+            },
+            "ring": 8,
+            "hit": true,
+            "clear": true,
+            "overflow": false
+          }
+        }
+      ],
+      "pageErrors": []
+    }
+  ],
+  "failures": [],
+  "method": "Emulation.setSafeAreaInsetsOverride",
+  "protocolSource": "https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/master/json/browser_protocol.json",
+  "limits": "Software CSS env override only; physical hardware, Safari and screen readers not verified.",
+  "hashes": {
+    "demos/corporate/gjh/v11/style.css": "b02bc6a7f9d5de72dc07bb51aa10c3fcef0998ef0cae8ce8ee6f24c82c7fd285"
+  },
+  "browser": "157.0.8103.51"
+}

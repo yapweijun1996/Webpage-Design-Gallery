@@ -21,6 +21,7 @@ function syncMode(signals = ui.modeSignals()) {
   modes.observe({...signals, seated: Boolean(player?.state.seated),
     cartActive: Boolean(player?.state.character?.cart?.active)});
   document.body.dataset.mode = modes.current();
+  ui.projectMode(modes.current());
 }
 ui.onModeState(syncMode);
 setupOriginalTin(ui);
