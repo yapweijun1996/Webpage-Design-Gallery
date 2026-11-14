@@ -6,7 +6,7 @@ Status: **partially implemented; remaining phases are not complete**. This file 
 
 Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/Blender-3D-Gallery) to improve product discovery, navigation and presentation in the existing GJH V11 mall. Prioritize the New Moon product experience, then wayfinding and selective scene improvements. Preserve existing URLs, content, business behavior, controls, accessibility fallbacks and the mall's visual direction.
 
-The mall already has three stores, the green-polo visitor, benches, planters, walking and turning controls, inspection dialogs and a list view. Its four canned products currently use simplified geometry with front-label presentation. Confirm these observations against current source and the deployed site before making changes.
+The mall already has three stores, the green-polo visitor, benches, planters, walking and turning controls, inspection dialogs and a list view. Its four canned products now use owner-authorized conceptual GLBs with photo-derived labels; the product-detail dialogs still show the existing packshots rather than a branded 3D viewer. Confirm these observations against current source and the deployed site before making changes.
 
 ## Phase 0 — Audit and baseline
 
@@ -140,7 +140,7 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 
 - Company-first homepage redesign is published (application 1.1.4).
 - An independent original demo-tin viewer is implemented and tested for application 1.1.5. It uses no New Moon GLBs and is explicitly not an official SKU representation. See `docs/original-tin-viewer-review.md`.
-- The four-SKU New Moon source integration remains an unpublished local candidate; public redistribution rights and close-up label review are unresolved. It is not counted as released Phase 1–3 work.
+- The earlier four-SKU New Moon candidate was unpublished pending owner permission. The owner subsequently authorized these four cans and shelf for public demo use. Application 1.1.13 integrates them as explicitly unofficial, estimated packaging; independent artwork rights and physical packaging accuracy remain unverified. Phase 3 branded interactive detail viewing is not implemented by this integration.
 - First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Kiosk integration was subsequently completed in 1.1.10; wider scene improvements and remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.
 
 - V11 List view redesigned as an independent 1.1.7 slice: compact store discovery, visible product inspection actions and matching store order, retaining all products and 3D entry. See `docs/v11-directory-review.md`. This does not complete the remaining model integration and device gates.
@@ -154,3 +154,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.11 fixes stuck joystick movement and camera dragging after pointer capture is interrupted. Real browser touch/mouse reproduction and recovery evidence are in `docs/v11-pointer-review.md`; physical-device and remaining branded-model gates remain unverified.
 
 - Application 1.1.12 restores keyboard focus to the accessible directory when graphics loss hides the active 3D control, without interrupting an already-open directory product dialog or unrelated header focus. Twelve real context-loss cases and regression evidence are in `docs/v11-fallback-focus-review.md`; remaining asset and physical-device gates stay open.
+
+- Application 1.1.13 integrates four owner-authorized conceptual New Moon LOD1 cans and four reusable shelf instances onto the latest main without reverting guide, kiosk, input or focus fixes. Current GLB hashes, per-SKU detail IDs, native scale, shelf collision, independent failures, disposal and rendered previews are reviewed in `docs/v11-newmoon-demo-review.md`. The Mexico blank sector remains disclosed. This is demo technical acceptance, not official packaging certification or completion of the branded 3D-detail phase.

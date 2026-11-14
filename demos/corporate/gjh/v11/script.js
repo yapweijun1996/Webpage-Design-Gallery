@@ -8,6 +8,7 @@ let ready = false, player, world, physics, renderer, manual = false, frame = 0, 
 let nearby = null, currentZone = 'atrium';
 const STEP = 1 / 60;
 const snapshot = () => Object.freeze({...(player?.state || {}), zone: currentZone, nearby, furnishings: world?.furnishings || null,
+  productAssets: world?.productAssets || null,
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
   drawCalls: renderer?.info.render.calls || 0, frames, reducedMotion: reducedMotion.matches,
   roomSigns: Object.freeze((world?.roomSigns || []).map(({zone, mesh, left, right, top, bottom}) => Object.freeze({zone, visible: mesh.visible, left, right, top, bottom}))),

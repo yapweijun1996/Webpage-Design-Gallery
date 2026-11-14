@@ -64,7 +64,7 @@ export function createUI() {
       image: card.dataset.productImage,
       alt: `Front packshot of ${card.dataset.productName}`,
       kind: 'New Moon / Product detail',
-      description: 'Official product imagery. A current brand-approved packaging edition has not been confirmed.',
+      description: 'Official product imagery shown here. The mall’s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.' + (card.dataset.product.includes('-mx-') ? ' The Mexico 3D can includes a 121-degree unprinted placeholder sector.' : ''),
     });
   }
   for (const card of document.querySelectorAll('[data-brand]')) {

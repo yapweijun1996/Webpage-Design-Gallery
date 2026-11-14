@@ -1,0 +1,37 @@
+{
+  "upstreamRepository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
+  "upstreamRevisionRecordedInCandidate": "1abda0ff96a4b787877a32ff8915555873a0b686",
+  "candidateCommit": "e96f3d1eaa9307d2896ca4d914a5ac607bb807d0",
+  "integrationBase": "f4b3505755617e5bc808567edfde2ce2a9278ded",
+  "ownerApprovalDate": "2026-11-14",
+  "ownerApprovedPurpose": "Public use of these four New Moon can candidates and shelf in this unofficial demo, with deployment.",
+  "rightsLimit": "Owner authorization is not independent verification of third-party artwork rights and grants no general redistribution license. Historical upstream metadata is retained unchanged.",
+  "accuracyLimit": "Photo-derived conceptual packaging; nominal dimensions and panel layouts are estimates. Mexico has a 121-degree unprinted placeholder. Not verified replicas or brand-approved editions.",
+  "files": [
+    {
+      "file": "mall-display-shelf.glb",
+      "bytes": 172420,
+      "sha256": "9538cc7b954a1510397e4f1dffc47bbed6c99f7460edfb1e55ef4dc28561966d"
+    },
+    {
+      "file": "new-moon-can-nz-425g-lod1.glb",
+      "bytes": 158528,
+      "sha256": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb"
+    },
+    {
+      "file": "new-moon-can-au-425g-lod1.glb",
+      "bytes": 153464,
+      "sha256": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde"
+    },
+    {
+      "file": "new-moon-can-sa-425g-lod1.glb",
+      "bytes": 156540,
+      "sha256": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5"
+    },
+    {
+      "file": "new-moon-can-mx-454g-lod1.glb",
+      "bytes": 119196,
+      "sha256": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb"
+    }
+  ]
+}

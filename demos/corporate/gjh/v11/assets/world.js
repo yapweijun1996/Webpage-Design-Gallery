@@ -190,6 +190,7 @@ export async function createWorld(T, R, physics, shadows) {
   for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   const doors = [], interactables = [];
+  let worldProductAssets = Object.freeze({status: 'not-loaded'});
   // Original decorative kiosk beside the entrance, outside the central walking line.
   // The actual wayfinding interaction opens the existing three-store DOM map.
   if (!furnishings.place('kiosk', -3.3, 9.9, 1, -1)) {
@@ -292,12 +293,7 @@ export async function createWorld(T, R, physics, shadows) {
     const light = new T.PointLight(zone === 'gogo' ? 0xcce9c2 : 0xffdfa9, 45, 15, 2); light.position.set(x, 4.5, -6); scene.add(light);
     box('brass', x, .22, -10.32, 9.3, .045, .04);
     if (zone === 'newmoon') {
-      box('dark', x, 1.55, -9.85, 7.9, 3.1, .35, true);
-      for (const dx of [-3.9, -1.3, 1.3, 3.9]) box('brass', x + dx, 1.65, -9.4, .055, 3.3, .7);
-      for (const y of [.42, 1.25, 2.08, 2.91]) { box('oak', x, y, -9.25, 7.9, .09, 1.1, true); box('glow', x, y - .06, -8.72, 7.6, .025, .025); }
-      box('oak', x, 3.37, -9.32, 8.08, .15, 1.02);
-      box('brass', x, 3.46, -8.8, 8.1, .035, .055);
-      for (const dx of [-2.6, 0, 2.6]) box('oak', x + dx, 1.65, -9.65, .055, 2.9, .07);
+      // The asset display owns its geometry and collision bounds; no legacy rack remains.
       lightPool(x, .054, -8.6, 7.5, 2.1);
       const cover = art('new-moon-brand-cover.jpg', x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
       box('brass', x - 4.665, 2.8, -5.8, .035, cover.scale.y + .14, 3.74);
@@ -309,7 +305,13 @@ export async function createWorld(T, R, physics, shadows) {
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
-      interactables.push(...addProducts(T, scene, textures, materials.brass));
+      const productDisplay = await addProducts(T, scene, textures, materials.brass);
+      interactables.push(...productDisplay.interactables);
+      for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
+      for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
+        sign(country, -12.85 + index * 1.9, 2.22, -8.72, 1.35, .16, true);
+      }
+      worldProductAssets = productDisplay.assets;
       plant(x - 3.6, -2.3);
     } else {
       const cover = `${zone}-brand-cover.jpg`;
@@ -380,5 +382,5 @@ export async function createWorld(T, R, physics, shadows) {
       mesh.visible = !overlaps;
     }
   }
-  return {scene, doors, interactables, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene)};
+  return {scene, doors, interactables, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
 }

@@ -1,0 +1,79 @@
+[
+  {
+    "mode": "loaded",
+    "elapsedMs": 21,
+    "nzStatus": "loaded",
+    "reason": null,
+    "disposal": {
+      "geometry": 0,
+      "material": 0,
+      "texture": 0
+    }
+  },
+  {
+    "mode": "404",
+    "elapsedMs": 20,
+    "nzStatus": "fallback",
+    "reason": "unavailable",
+    "disposal": {
+      "geometry": 0,
+      "material": 0,
+      "texture": 0
+    }
+  },
+  {
+    "mode": "body-timeout",
+    "elapsedMs": 8018.400000035763,
+    "nzStatus": "fallback",
+    "reason": "timeout",
+    "disposal": {
+      "geometry": 0,
+      "material": 0,
+      "texture": 0
+    }
+  },
+  {
+    "mode": "hash-mismatch",
+    "elapsedMs": 19.19999998807907,
+    "nzStatus": "fallback",
+    "reason": "hash-mismatch",
+    "disposal": {
+      "geometry": 0,
+      "material": 0,
+      "texture": 0
+    }
+  },
+  {
+    "mode": "invalid-dimensions",
+    "elapsedMs": 21.899999976158142,
+    "nzStatus": "fallback",
+    "reason": "invalid-dimensions",
+    "disposal": {
+      "geometry": 3,
+      "material": 3,
+      "texture": 1
+    }
+  },
+  {
+    "mode": "late-parse",
+    "elapsedMs": 8004.699999988079,
+    "nzStatus": "fallback",
+    "reason": "timeout",
+    "disposal": {
+      "geometry": 3,
+      "material": 3,
+      "texture": 1
+    }
+  },
+  {
+    "mode": "missing-texture",
+    "elapsedMs": 22,
+    "nzStatus": "fallback",
+    "reason": "invalid-label-texture",
+    "disposal": {
+      "geometry": 0,
+      "material": 0,
+      "texture": 0
+    }
+  }
+]
