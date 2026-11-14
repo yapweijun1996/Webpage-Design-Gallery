@@ -52,7 +52,7 @@ try:
    assert all(a['cans'][sku]['status']=='loaded' for sku in ['au-425g','sa-425g','mx-454g']),result
    nz=a['cans']['nz-425g'];assert nz['status']==('loaded' if mode=='loaded' else 'fallback'),result
    if mode!='loaded':
-    b=result['bounds'][0];assert abs(b['min'][1]-.6825)<1e-5,b
+    b=result['bounds'][0];assert abs(b['min'][1]-.451)<1e-5,b
     assert abs(b['max'][1]-b['min'][1]-.12399169057607651)<1e-5,b
     assert abs(b['max'][0]-b['min'][0]-.0775)<1e-5,b
    if mode=='body-timeout': assert nz['reason']=='timeout' and 7900<result['elapsed']<9500,result

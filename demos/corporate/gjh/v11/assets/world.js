@@ -322,7 +322,7 @@ export async function createWorld(T, R, physics, shadows) {
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
-        sign(country, -12.85 + index * 1.9, 2.22, -8.72, 1.35, .16, true);
+        sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true);
       }
       worldProductAssets = productDisplay.assets; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
       plant(x - 3.6, -2.3);

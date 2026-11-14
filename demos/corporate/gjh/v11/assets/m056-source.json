@@ -1,0 +1,21 @@
+{
+  "upstreamRepository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
+  "upstreamRevision": "4e9787ddc010cdabbee37d200aaa1aff5730437d",
+  "upstreamPath": "models/gjh-m056-premium-wall-shelf-straight/exports/lod1.glb",
+  "file": "gjh-m056-shelf-lod1.glb",
+  "sha256": "949e8278034779c129e3494e614a002d5542108b74e081296acffd8e9d7c6037",
+  "bytes": 338236,
+  "triangles": 3132,
+  "primitives": 29,
+  "embeddedTextures": 2,
+  "dimensionsMetres": [
+    2.4,
+    2.4,
+    0.55
+  ],
+  "frontAxis": "+Z",
+  "origin": "floor centre",
+  "provenance": "Original procedural geometry and baked wood/stone material textures; no logos or product packaging embedded. Owner authorized reuse in the public V11 demo. No general third-party redistribution license granted.",
+  "runtime": "Four native-scale instances; fixed LOD1, not automatic shelf LOD. Emissive strips are visual materials, not dynamic illumination. Existing conceptual SKU assets remain separate.",
+  "legacy": "mall-display-shelf.glb and its original provenance retained unchanged for history; no longer used by this display."
+}

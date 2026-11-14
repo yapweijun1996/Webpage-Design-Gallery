@@ -287,3 +287,5 @@ GLBs, primary photo-derived labels and application 1.1.34 remain unchanged.
 See the folder README, prompts.json and acceptance.json. These are comparison
 concepts, not original artwork, print masters, seamless UV textures or proof of
 full physical-packaging fidelity; the source-matching item remains open.
+
+- Application 1.1.35 integrates four owner-authorized original M056 premium shelf instances in New Moon, preserving 36 native-scale existing cans and Visitor v2 pickup/return. See [M056 integration evidence](docs/v11-m056-integration.md). This asset substitution does not complete the reserved Shelf focus mode.

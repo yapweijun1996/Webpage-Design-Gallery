@@ -1,0 +1,23 @@
+[
+  {
+    "width": 390,
+    "shelf": "PASS",
+    "fourSKURepeatedPickupReturn": "PASS",
+    "nativePlacement": "PASS",
+    "collision": "PASS",
+    "drawCalls": 104,
+    "pageErrors": []
+  },
+  {
+    "width": 1440,
+    "shelf": "PASS",
+    "fourSKURepeatedPickupReturn": "PASS",
+    "nativePlacement": "PASS",
+    "collision": "PASS",
+    "drawCalls": 110,
+    "pageErrors": []
+  },
+  {
+    "shelfFailureFallback": "PASS"
+  }
+]

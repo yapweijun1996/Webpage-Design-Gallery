@@ -13,7 +13,7 @@ def run():
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
    for width,height,failed in [(1440,900,False),(768,1024,False),(390,844,False),(390,844,True)]:
     page=browser.new_page(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    if failed:page.route('**/assets/mall-display-shelf.glb',lambda r:r.fulfill(status=404,body=''))
+    if failed:page.route('**/assets/gjh-m056-shelf-lod1.glb',lambda r:r.fulfill(status=404,body=''))
     page.goto(url);page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-start').click();page.wait_for_function('document.activeElement.id==="scene"')
     assets=page.evaluate('__mall.state.productAssets');assert assets['shelf']['status']==('fallback' if failed else 'loaded');assert all(c['status']=='loaded' for c in assets['cans'].values());assert assets['totalInstances']==36
     page.screenshot(path=str(out/f'entrance-{width}-{failed}.png'))
