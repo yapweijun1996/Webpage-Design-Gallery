@@ -54,10 +54,17 @@ self.addEventListener('fetch', (event) => {
   if (PRECACHE.some((entry) => entry.path === path)) {
     // One coherent shell stays active until the user accepts a waiting release.
     // Query parameters remain in the page URL; only the cache key is canonical.
-    event.respondWith(caches.open(CACHE_NAME).then(async (cache) => {
+    event.respondWith((async () => {
+      // Live demos are network-only, including shared styles. An older gallery
+      // worker must not combine the latest demo with its cached theme tokens.
+      const client = event.clientId && await self.clients.get(event.clientId);
+      if (request.mode !== 'navigate' && client?.url.startsWith(new URL('demos/', BASE).href)) {
+        return fetch(request, { cache: 'no-cache' });
+      }
+      const cache = await caches.open(CACHE_NAME);
       const response = await cache.match(new URL(path, BASE));
       return response || new Response('Saved gallery resource unavailable. Reconnect and check for updates.', { status: 503 });
-    }));
+    })());
     return;
   }
   // Independent demos and large screenshots are network-only, never silently stale.
