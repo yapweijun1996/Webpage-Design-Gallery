@@ -1,0 +1,50 @@
+[
+  {
+    "foreground": "rgb(16, 45, 38)",
+    "background": "rgb(255, 255, 255)",
+    "fontSize": "14px",
+    "visibleCenter": true,
+    "ratio": 14.73,
+    "selector": "[data-preview-orbit=\"left\"]"
+  },
+  {
+    "foreground": "rgb(16, 45, 38)",
+    "background": "rgb(255, 255, 255)",
+    "fontSize": "14px",
+    "visibleCenter": true,
+    "ratio": 14.73,
+    "selector": "[data-preview-orbit=\"right\"]"
+  },
+  {
+    "foreground": "rgb(16, 45, 38)",
+    "background": "rgb(255, 255, 255)",
+    "fontSize": "14px",
+    "visibleCenter": true,
+    "ratio": 14.73,
+    "selector": "[data-preview-zoom=\"out\"]"
+  },
+  {
+    "foreground": "rgb(16, 45, 38)",
+    "background": "rgb(255, 252, 245)",
+    "fontSize": "30px",
+    "visibleCenter": true,
+    "ratio": 14.38,
+    "selector": "#product-title"
+  },
+  {
+    "foreground": "rgb(16, 45, 38)",
+    "background": "rgb(255, 252, 245)",
+    "fontSize": "14px",
+    "visibleCenter": true,
+    "ratio": 14.38,
+    "selector": "#product-description"
+  },
+  {
+    "foreground": "rgb(93, 105, 94)",
+    "background": "rgb(255, 252, 245)",
+    "fontSize": "9px",
+    "visibleCenter": true,
+    "ratio": 5.62,
+    "selector": "#product-disclaimer"
+  }
+]

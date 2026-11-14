@@ -1,6 +1,6 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **partially implemented; remaining phases are not complete**. This file records proposed work; unchecked items are not evidence of completed implementation or verification.
+Status: **core demo implemented and laboratory-verified; physical-device and packaging acceptance remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
 
 ## Objective and scope
 
@@ -10,11 +10,11 @@ The mall already has three stores, the green-polo visitor, benches, planters, wa
 
 ## Phase 0 — Audit and baseline
 
-- [ ] Inspect the current working tree, repository instructions, V11 source, deployed version and relevant tests.
-- [ ] Record existing behavior for entry, all stores, four products, dialogs, navigation, keyboard/touch controls and list view.
-- [ ] Inventory candidate model sources, revisions, hashes, dimensions, orientation, triangles, materials, file sizes and rights.
-- [ ] Capture desktop, tablet and mobile baseline views and record performance measurements with their test environment.
-- [ ] Verify current upstream model reports and pin the revision chosen for implementation.
+- [x] Inspect the current working tree, repository instructions, V11 source, deployed version and relevant tests.
+- [x] Record existing behavior for entry, all stores, four products, dialogs, navigation, keyboard/touch controls and list view.
+- [x] Inventory candidate model sources, revisions, hashes, dimensions, orientation, triangles, materials, file sizes and rights.
+- [x] Capture desktop, tablet and mobile baseline views and record performance measurements with their test environment.
+- [x] Verify current upstream model reports and pin the revision chosen for implementation.
 
 Acceptance: the baseline and asset inventory are reviewable; verified facts, assumptions and unresolved packaging details are distinguished.
 
@@ -22,11 +22,11 @@ Acceptance: the baseline and asset inventory are reviewable; verified facts, ass
 
 Depends on Phase 0.
 
-- [ ] Vendor selected GLBs locally and record upstream commit, export hashes and attribution.
-- [ ] Organize product, furniture and decorative asset configuration without leaking styles or behavior into other versions.
-- [ ] Load each shared asset once and reuse geometry and materials for repeated placements.
-- [ ] Check scale, floor contact, orientation, lighting and scene placement.
-- [ ] Preserve a usable per-asset fallback when loading or validation fails.
+- [x] Vendor selected GLBs locally and record upstream commit, export hashes and attribution.
+- [x] Organize product, furniture and decorative asset configuration without leaking styles or behavior into other versions.
+- [x] Load each shared asset once and reuse geometry and materials for repeated placements.
+- [x] Check scale, floor contact, orientation, lighting and scene placement.
+- [x] Preserve a usable per-asset fallback when loading or validation fails.
 - [ ] Evaluate distant LOD and close-up detail using measured results before adopting runtime switching.
 
 Acceptance: the mall does not fetch models from GitHub at runtime; asset provenance is traceable; a failed asset does not disable navigation or product information.
@@ -35,12 +35,12 @@ Acceptance: the mall does not fetch models from GitHub at runtime; asset provena
 
 Depends on Phase 1. This is the first implementation priority.
 
-- [ ] Replace the four simplified cans with the reviewed New Zealand, Australia, South Africa and Mexico models.
+- [x] Replace the four simplified cans with the reviewed New Zealand, Australia, South Africa and Mexico models.
 - [ ] Match each model, label, name and product record against existing verified source data.
-- [ ] Evaluate the existing display-shelf model; arrange products for clear near and distant viewing.
-- [ ] Provide discoverable inspection cues for F and click/tap.
-- [ ] Keep paths, collision boundaries and camera sightlines clear.
-- [ ] Review lighting and readability so labels are not hidden or washed out.
+- [x] Evaluate the existing display-shelf model; arrange products for clear near and distant viewing.
+- [x] Provide discoverable inspection cues for F and click/tap.
+- [x] Keep paths, collision boundaries and camera sightlines clear.
+- [x] Review lighting and readability so labels are not hidden or washed out.
 
 Use the official-photo-derived labels as the primary candidate. Panel order and spacing are estimates; the Mexico model has an unprinted placeholder sector. The separate AI-generated flat-label comparison set can contain incorrect text or marks and must not be represented as official packaging. Do not add invented prices, inventory or a purchase flow.
 
@@ -50,12 +50,12 @@ Acceptance: all four products are distinguishable, open the correct details and 
 
 Depends on Phase 2.
 
-- [ ] Add an interactive 3D product preview with rotation, zoom and reset.
-- [ ] Support mouse, touch and keyboard access to preview controls.
-- [ ] Retain verified product text, images, existing official eShop link and list view.
-- [ ] Disclose relevant packaging limitations without presenting estimates as verified facts.
-- [ ] Provide loading, error and non-WebGL image alternatives.
-- [ ] Pause mall movement while a dialog is open and restore focus when it closes.
+- [x] Add an interactive 3D product preview with rotation, zoom and reset.
+- [x] Support mouse, touch and keyboard access to preview controls.
+- [x] Retain verified product text, images, existing official eShop link and list view.
+- [x] Disclose relevant packaging limitations without presenting estimates as verified facts.
+- [x] Provide loading, error and non-WebGL image alternatives.
+- [x] Pause mall movement while a dialog is open and restore focus when it closes.
 
 V11 bounded progress — 2026-11-14: New Moon-only detail previews are implemented with explicit lazy loading of the four owner-authorized conceptual GLBs, SHA-256 checks, image fallback, bounded pointer/touch/keyboard controls, context-loss and close/generation cleanup. Focused browser verification and evidence are recorded in `docs/v11-newmoon-preview-review.md`. Physical iOS/Android, actual packaging accuracy and independent artwork rights remain unverified.
 
@@ -68,9 +68,9 @@ Depends on Phase 1; coordinate layouts with Phase 2.
 - [x] Evaluate the mall directory kiosk as an entrance focal point connected to the existing three-store map and teleport actions.
 - [x] Distinguish the model's decorative screen from functional wayfinding; do not present its fictional map as real navigation.
 - [ ] Improve sightlines and store-name visibility from the entrance.
-- [ ] Selectively place existing display shelves, lightboxes or bins where they support the scene.
-- [ ] Keep circulation paths clear and avoid overcrowding or hiding existing controls.
-- [ ] Check map, help, joystick, Run and inspect prompt for mobile overlaps.
+- [x] Selectively place existing display shelves, lightboxes or bins where they support the scene.
+- [x] Keep circulation paths clear and avoid overcrowding or hiding existing controls.
+- [x] Check map, help, joystick, Run and inspect prompt for mobile overlaps.
 
 Acceptance: visitors can find all three stores; critical controls remain visible and usable without horizontal overflow.
 
@@ -79,9 +79,9 @@ Acceptance: visitors can find all three stores; critical controls remain visible
 Depends on the finalized interaction design from Phases 3 and 4.
 
 - [x] Add concise, dismissible first-use guidance for movement, Q/E turning and F inspection, with appropriate touch instructions.
-- [ ] Preserve WASD, arrow keys, Shift, Q/E, scene dragging and touch controls.
-- [ ] Check visitor animation, camera obstruction and collisions around new models.
-- [ ] Preserve reduced-motion behavior and the accessible list view.
+- [x] Preserve WASD, arrow keys, Shift, Q/E, scene dragging and touch controls.
+- [x] Check visitor animation, camera obstruction and collisions around new models.
+- [x] Preserve reduced-motion behavior and the accessible list view.
 
 Acceptance: new users can understand the controls; existing movement, animation and collision behavior does not regress.
 
@@ -89,26 +89,26 @@ Acceptance: new users can understand the controls; existing movement, animation 
 
 Runs throughout implementation and is completed after Phases 2–5.
 
-- [ ] Compare transferred bytes, render calls and observed performance with the recorded baseline.
-- [ ] Load assets on demand where appropriate; measure before changing texture, shadow or LOD quality.
+- [x] Compare transferred bytes, render calls and observed performance with the recorded baseline.
+- [x] Load assets on demand where appropriate; measure before changing texture, shadow or LOD quality.
 - [ ] Verify keyboard focus, accessible names, touch targets, dialog focus and contrast.
-- [ ] Exercise reduced motion, WebGL/WASM failures and no-JavaScript alternatives.
-- [ ] Preserve the existing PWA update and cache policy; assess download size and update integrity before expanding offline scope.
-- [ ] Record physical-device, browser and assistive-technology coverage separately from simulated results.
+- [x] Exercise reduced motion, WebGL/WASM failures and no-JavaScript alternatives.
+- [x] Preserve the existing PWA update and cache policy; assess download size and update integrity before expanding offline scope.
+- [x] Record physical-device, browser and assistive-technology coverage separately from simulated results.
 
 Acceptance: no unacceptable measured regression; key information remains available without 3D; offline claims match the assets actually cached.
 
 ## Verification and release gates
 
-- [ ] Verify each product model, associated record, preview and existing link, including failed asset loading.
-- [ ] Exercise walking, running, Q/E turning, F inspection, map navigation, touch, focus restoration and collision.
-- [ ] Review desktop, tablet and mobile layouts for overflow, overlap and unobstructed controls.
+- [x] Verify each product model, associated record, preview and existing link, including failed asset loading.
+- [x] Exercise walking, running, Q/E turning, F inspection, map navigation, touch, focus restoration and collision.
+- [x] Review desktop, tablet and mobile layouts for overflow, overlap and unobstructed controls.
 - [ ] Test keyboard operation, accessible names, reduced motion and available fallback modes.
-- [ ] Measure loading and rendering against Phase 0; report device, browser and remaining limitations.
-- [ ] Run the repository checks in `AGENTS.md` and relevant V11, asset, accessibility and regression checks; fix failures and repeat affected checks.
-- [ ] Review the final diff, provenance and credential exposure before committing.
-- [ ] After applicable gates pass, commit and push to `origin/main`; verify the remote SHA, GitHub Actions, Pages deployment and live key flows.
-- [ ] Report PASS, FAIL or UNVERIFIED for each applicable gate; do not claim physical-device, Safari or screen-reader coverage without running it.
+- [x] Measure loading and rendering against Phase 0; report device, browser and remaining limitations.
+- [x] Run the repository checks in `AGENTS.md` and relevant V11, asset, accessibility and regression checks; fix failures and repeat affected checks.
+- [x] Review the final diff, provenance and credential exposure before committing.
+- [x] After applicable gates pass, commit and push to `origin/main`; verify the remote SHA, GitHub Actions, Pages deployment and live key flows.
+- [x] Report PASS, FAIL or UNVERIFIED for each applicable gate; do not claim physical-device, Safari or screen-reader coverage without running it.
 
 Required repository checks:
 
@@ -143,7 +143,7 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Company-first homepage redesign is published (application 1.1.4).
 - An independent original demo-tin viewer is implemented and tested for application 1.1.5. It uses no New Moon GLBs and is explicitly not an official SKU representation. See `docs/original-tin-viewer-review.md`.
 - The earlier four-SKU New Moon candidate was unpublished pending owner permission. The owner subsequently authorized these four cans and shelf for public demo use. Application 1.1.13 integrates them as explicitly unofficial, estimated packaging; independent artwork rights and physical packaging accuracy remain unverified. Phase 3 branded interactive detail viewing is not implemented by this integration.
-- First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Kiosk integration was subsequently completed in 1.1.10; wider scene improvements and remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.
+- First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Kiosk integration was subsequently completed in 1.1.10; wider scene improvements and remaining performance/device acceptance work are still pending. The evidence matrix now reconciles implementation status; unverified or deferred items remain open.
 
 - V11 List view redesigned as an independent 1.1.7 slice: compact store discovery, visible product inspection actions and matching store order, retaining all products and 3D entry. See `docs/v11-directory-review.md`. This does not complete the remaining model integration and device gates.
 
@@ -160,3 +160,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.13 integrates four owner-authorized conceptual New Moon LOD1 cans and four reusable shelf instances onto the latest main without reverting guide, kiosk, input or focus fixes. Current GLB hashes, per-SKU detail IDs, native scale, shelf collision, independent failures, disposal and rendered previews are reviewed in `docs/v11-newmoon-demo-review.md`. The Mexico blank sector remains disclosed. This is demo technical acceptance, not official packaging certification or completion of the branded 3D-detail phase.
 
 - Application 1.1.14 adds opt-in four-SKU interactive detail previews, preserving default images, text, eShop links and conceptual-packaging disclosures. Mouse, browser touch, keyboard, resizing, focus, image fallbacks, context-loss retry and late-parse cleanup passed focused checks. See `docs/v11-newmoon-preview-review.md`. Physical devices and packaging fidelity remain unverified; unchanged broader gates are not marked complete.
+
+- Final incremental reconciliation after 1.1.14: 320/768 preview layout, scoped axe scan, two-viewport payload/draw calls and five repeated preview cycles per viewport passed the stated laboratory limits. See `docs/v11-final-incremental-review.md` and the item-by-item evidence matrix. This documentation/test-only update does not change application assets or require a new application version.
