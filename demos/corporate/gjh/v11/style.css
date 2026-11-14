@@ -187,18 +187,23 @@ body.is-3d .product-dialog :is(button,a):focus-visible{outline-color:var(--gjh-c
 @media(max-width:650px){#original-tin-canvas{height:300px}.original-tin-top h2{font-size:var(--gjh-type-dialog-copy-h2-max-width-650px)}}
 
 /* First-use help shares the existing mall palette and type system. */
-.quick-guide{width:min(560px,calc(100% - 28px));max-height:calc(100dvh - 28px);padding:var(--space-7);overflow:auto;border:1px solid var(--line);background:var(--paper);color:var(--green);box-shadow:var(--gjh-shadow-product-dialog)}
+.quick-guide{width:min(560px,calc(100% - 2 * max(16px,env(safe-area-inset-left),env(safe-area-inset-right))));max-height:calc(100vh - 32px);max-height:calc(100dvh - 2 * max(16px,env(safe-area-inset-top),env(safe-area-inset-bottom)));padding:0 var(--space-5) var(--space-5);overflow:auto;overscroll-behavior:contain;scroll-padding-top:var(--size-control);border:1px solid var(--line);background:var(--paper);color:var(--green);box-shadow:var(--gjh-shadow-product-dialog)}
 .quick-guide::backdrop{background:var(--gjh-color-product-dialog-backdrop)}
-.quick-guide h2{font-size:var(--gjh-type-dialog-copy-h2);margin-bottom:var(--space-4)}
+.guide-header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);position:sticky;top:0;background:var(--paper);z-index:var(--z-tray);padding:var(--space-2) 0}
+.guide-header .eyebrow{margin:0}.guide-header button{flex-shrink:0}
+.quick-guide h2{font-size:var(--font-size-xl);margin:var(--space-2) 0}
+#guide-title:focus{outline:none}
 .quick-guide>p:not(.eyebrow){font-size:var(--font-size-sm);line-height:var(--line-height-body)}
-.guide-steps{display:grid;gap:var(--space-4);padding-left:var(--space-6);margin:var(--space-6) 0;font-size:var(--font-size-sm)}
-.guide-steps strong,.guide-steps span{display:block}.guide-steps strong{margin-bottom:var(--space-1)}
-.guide-actions{display:grid;grid-template-columns:1fr;gap:var(--space-2)}
-.guide-actions button,#guide-reopen{min-width:44px;min-height:44px;padding:var(--space-2) var(--space-4);font-size:var(--font-size-sm)}
+.guide-steps{display:grid;gap:var(--space-2);list-style:none;padding:0;margin:var(--space-4) 0;font-size:var(--font-size-sm)}
+.guide-steps li{display:grid;grid-template-columns:5em 1fr;gap:var(--space-2)}
+.guide-actions{display:grid;gap:var(--space-2)}
+.guide-secondary{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.guide-secondary button{flex:1;border-color:transparent;text-decoration:underline;text-underline-offset:var(--space-1)}
+.quick-guide button,#guide-reopen{min-width:44px;min-height:44px;padding:var(--space-2) var(--space-3);font-size:var(--font-size-sm)}
 #guide-start{background:var(--green);color:var(--paper)}
-.quick-guide .guide-footnote{margin:var(--space-4) 0 0;color:var(--muted)}
+.quick-guide .guide-footnote{margin:var(--space-3) 0 0;color:var(--muted)}
 body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-button-focus-visible)}
-@media(max-width:360px),(max-height:560px){.quick-guide{padding:var(--space-4)}.quick-guide h2{font-size:var(--font-size-xl)}.guide-steps{gap:var(--space-2);margin:var(--space-4) 0}}
+@media(max-width:360px),(max-height:560px){.quick-guide{padding:0 var(--space-4) var(--space-4)}.guide-secondary{gap:0}.guide-secondary button{padding-inline:var(--space-1)}}
 
 /* Directory-only presentation. The 3D HUD and shared dialog contracts are unchanged. */
 .store-list{padding:var(--space-7) 5vw var(--space-8)}

@@ -1,0 +1,114 @@
+[
+  {
+    "viewport": [
+      320,
+      480
+    ],
+    "dialogBounds": {
+      "x": 17,
+      "y": 16,
+      "width": 286,
+      "height": 448
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      680
+    ],
+    "dialogBounds": {
+      "x": 17,
+      "y": 120.375,
+      "width": 356,
+      "height": 439.234375
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "dialogBounds": {
+      "x": 17,
+      "y": 202.375,
+      "width": 356,
+      "height": 439.234375
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "dialogBounds": {
+      "x": 17,
+      "y": 257.578125,
+      "width": 396,
+      "height": 416.84375
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "dialogBounds": {
+      "x": 104,
+      "y": 314.765625,
+      "width": 560,
+      "height": 394.453125
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "dialogBounds": {
+      "x": 142,
+      "y": 16,
+      "width": 560,
+      "height": 358
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "dialogBounds": {
+      "x": 440,
+      "y": 252.765625,
+      "width": 560,
+      "height": 394.453125
+    },
+    "backgroundTouchIsolation": "PASS",
+    "closeEscapeReopenFocus": "PASS",
+    "height320Reflow": "PASS",
+    "keyboardFocusRing": "PASS"
+  }
+]

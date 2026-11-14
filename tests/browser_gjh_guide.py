@@ -32,7 +32,7 @@ def run():
     ready(page,url);guide(page)
     assert page.locator('#guide-dialog :focus').count()==1
     page.keyboard.press('Shift+Tab');assert page.evaluate('document.activeElement.id')=='guide-list'
-    page.keyboard.press('Tab');assert page.evaluate('document.activeElement.id')=='guide-start'
+    page.keyboard.press('Tab');assert page.evaluate('document.activeElement.id')=='guide-close'
     assert page.locator('[data-guide-touch]').is_visible()==touch
     assert page.locator('[data-guide-desktop]').is_visible()!=touch
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
@@ -50,7 +50,7 @@ def run():
     assert page.locator('#store-list').is_visible() and page.locator('.product-card').count()==4
     assert page.evaluate('document.activeElement.id')=='list-title'
     page.locator('#view-toggle').click();assert not page.locator('#guide-dialog').is_visible()
-    reopen(page);page.keyboard.press('Escape');closed(page);page.wait_for_function('document.activeElement.id==="scene"')
+    reopen(page);page.keyboard.press('Escape');closed(page);page.wait_for_function('document.activeElement.id==="guide-reopen"')
     page.reload();page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);assert not page.locator('#guide-dialog').is_visible()
     assert not errors,errors
     records.append({'viewport':[width,height],'touch':touch,'firstUse':'PASS','pause':'PASS','mapDirectoryFocus':'PASS','reopenEscape':'PASS','sessionMemory':'PASS','errors':errors});context.close()

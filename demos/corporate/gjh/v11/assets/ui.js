@@ -16,6 +16,9 @@ export function createUI() {
   const help = document.getElementById('keyboard-help');
   const mallMap = document.getElementById('mall-map');
   const guide = document.getElementById('guide-dialog');
+  const guideClose = document.getElementById('guide-close');
+  const guideTitle = document.getElementById('guide-title');
+  let guideFromHelp = false;
   const guideStart = document.getElementById('guide-start');
   const guideMap = document.getElementById('guide-map');
   const guideList = document.getElementById('guide-list');
@@ -122,22 +125,24 @@ export function createUI() {
     closeButton.focus({ preventScroll: true });
   }
 
-  function showGuide() {
+  function showGuide(event) {
     if (!available || !showing3D || guide.open || dialog.open || externalPaused || document.hidden) return false;
+    guideFromHelp = event?.currentTarget === guideReopen;
     help.open = false; mallMap.open = false;
     guidePaused = true;
-    guide.showModal(); guideStart.focus({preventScroll: true});
+    guide.showModal(); guideTitle.focus({preventScroll: true});
     return true;
   }
+  guideClose.addEventListener('click', () => guide.close('dismiss'));
   guideStart.addEventListener('click', () => guide.close('start'));
   guideMap.addEventListener('click', () => guide.close('map'));
   guideList.addEventListener('click', () => guide.close('list'));
   guideReopen.addEventListener('click', showGuide);
-  guide.addEventListener('cancel', event => { event.preventDefault(); guide.close('start'); });
+  guide.addEventListener('cancel', event => { event.preventDefault(); guide.close('dismiss'); });
   guide.addEventListener('keydown', event => {
     if (event.key !== 'Tab') return;
-    if (event.shiftKey && document.activeElement === guideStart) { event.preventDefault(); guideList.focus(); }
-    else if (!event.shiftKey && document.activeElement === guideList) { event.preventDefault(); guideStart.focus(); }
+    if (event.shiftKey && [guideTitle,guideClose].includes(document.activeElement)) { event.preventDefault(); guideList.focus(); }
+    else if (!event.shiftKey && document.activeElement === guideList) { event.preventDefault(); guideClose.focus(); }
   });
   guide.addEventListener('close', () => {
     guidePaused = false;
@@ -153,7 +158,9 @@ export function createUI() {
       announce('Choose a store on the map. Your location has not changed.');
       return;
     }
-    scene.focus({preventScroll: true});
+    if (action === 'dismiss' && guideFromHelp) {
+      help.open = true; guideReopen.focus({preventScroll: true});
+    } else scene.focus({preventScroll: true});
     announce('Ready to explore. Open How to explore to review the controls.');
   });
 
