@@ -189,4 +189,8 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 
 - Application 1.1.24 adds optional pushable demo cart mode with one shared bag state, conservative full-turn collision clearance, reversible stowing and explicitly simplified pushing pose. See `docs/v11-cart-review.md`. This does not complete sitting transitions or all-seat interaction requirements.
 
+- Application 1.1.25 extends sitting to all eight actual V11 benches (one centre anchor each), adds visible procedural sit/stand transitions, continuous cancellation and independent safe exits. Sit/stand and collection use an action close-up that restores the previous view. See `docs/v11-all-seats-review.md`. No IK, foot planting or bag-placement animation is claimed.
+
+- Application 1.1.26 compacts only the portrait seated action bar (95px to 62px in tested views), exposing shoes/seat edge while retaining readable labels and keyboard/touch targets. See `docs/v11-seat-hud-review.md`.
+
 - Mobile HUD P0 round (2026-11-14): compact header, one-row touch prompt chip, safe-area insets, landscape and portrait overlap fixes, 44px targets and no horizontal overflow were verified with Playwright mobile emulation and SwiftShader WebGL (repository root served), then reviewed on screenshots. Physical devices, real safe-area insets, context loss and the full browser suites were not run. See `docs/gjh-v11-mobile-redesign-gap-report.md`.

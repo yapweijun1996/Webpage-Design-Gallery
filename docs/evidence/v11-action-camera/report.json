@@ -1,0 +1,14 @@
+[
+  {
+    "reducedMotion": false,
+    "fourSKUOnceOnlyAndCap": "PASS",
+    "focusReturn": "PASS",
+    "completionModalBlurCancellation": "PASS"
+  },
+  {
+    "reducedMotion": true,
+    "fourSKUOnceOnlyAndCap": "PASS",
+    "focusReturn": "PASS",
+    "completionModalBlurCancellation": "PASS"
+  }
+]

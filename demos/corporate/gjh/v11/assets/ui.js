@@ -67,7 +67,7 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
-  let seated=false, seatListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null;
+  let seated=false, seatNotice=null, seatListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   cartToggle.addEventListener('click',()=>{const state=cartState();const next=!state.active;const ok=cartListener?.(next);if(!ok){cartStatus.textContent=state.seated?'Stand up before using the cart.':'Move to an open space, then try again. The cart needs a wide turning clearance.';return;}
     if(next){document.querySelector('#bag-dialog').close();setView(true);scene.focus({preventScroll:true});}
@@ -128,7 +128,7 @@ export function createUI() {
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || guidePaused) return;
-    if(record.action==='seat'){seatListener?.(true);scene.focus({preventScroll:true});return;}
+    if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice='Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce('Seat path blocked. Approach the clear front of the bench.');}scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
       if (!available || !showing3D) return;
       help.open = false; mallMap.open = true;
@@ -193,7 +193,7 @@ export function createUI() {
   });
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
-  inspectButton.addEventListener('click', () => { if(seated){seatListener?.(false);scene.focus({preventScroll:true});}else if (nearby) inspect(nearby); });
+  inspectButton.addEventListener('click', () => { if(seated){seatNotice=null;if(!seatListener?.(false)){seatNotice='Exit blocked. Use the map to leave safely.';nearbyName.textContent=seatNotice;announce('Exit blocked. Use the map to leave safely.');}scene.focus({preventScroll:true});}else if (nearby) inspect(nearby); });
   closeButton.addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => {
     const target = returnFocus;
@@ -256,7 +256,7 @@ export function createUI() {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, nearby: nextNearby, collectionActive = false, isSeated = false }) {
+    update({ zone, x, z, nearby: nextNearby, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null }) {
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
         if (showing3D) {
@@ -274,7 +274,7 @@ export function createUI() {
       }
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
-        nearby = next;
+        nearby = next;seatNotice=null;
         document.body.classList.toggle('is-nearby', Boolean(nearby));
         inspectPrompt.hidden = !nearby;
         nearbyName.textContent = nearby ? records.get(nearby).name : '';
@@ -288,11 +288,12 @@ export function createUI() {
         }
       }
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
-      if(seated){nearbyName.textContent='Courtyard bench · seated';inspectButton.textContent='Stand up';inspectButton.setAttribute('aria-label','Stand up from courtyard bench');}
-      else if(nearby==='courtyard-seat'){nearbyName.textContent='Courtyard bench · simplified seated pose';inspectButton.textContent='Press F / tap Sit';inspectButton.setAttribute('aria-label','Sit on courtyard bench');}
+      if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
+      else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent='Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
       const cart=cartState();if(previousCartMode!==cart.active||previousCartSeated!==seated){cartStatus.textContent=seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';previousCartMode=cart.active;previousCartSeated=seated;}cartControls.hidden=!cart.available;cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';cartToggle.disabled=seated&&!cart.active;
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
-      if(nearby==='courtyard-seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=false;
+      if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
+      if(seatNotice)nearbyName.textContent=seatNotice;
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
     },
     paused() {
@@ -311,6 +312,7 @@ export function createUI() {
       });
     },
     onCart(state,listener){cartState=state;cartListener=listener;},
+    setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {
