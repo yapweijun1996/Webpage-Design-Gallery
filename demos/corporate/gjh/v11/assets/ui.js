@@ -253,7 +253,8 @@ export function createUI() {
         inspectPrompt.hidden = !nearby;
         nearbyName.textContent = nearby ? records.get(nearby).name : '';
         const isMap = nearby && records.get(nearby).action === 'map';
-        inspectButton.textContent = isMap ? 'Press F / tap Map' : 'Press F / tap Inspect';
+        const touchOnly = matchMedia('(pointer: coarse)').matches;
+        inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? 'Tap Inspect' : 'Press F / tap Inspect');
         inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
         if (nearby && showing3D) announce(isMap ? 'Directory kiosk. Decorative screen. Press F or tap Map for the three-store map.' : `${records.get(nearby).name}. Press F or tap Inspect for details.`);
       }
