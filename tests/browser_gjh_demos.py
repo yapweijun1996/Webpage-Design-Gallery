@@ -125,6 +125,9 @@ def run(axe_script=None):
                             page.keyboard.press("Space")
                             page.keyboard.press("Tab")
                             page.keyboard.press("Enter")
+                            # Fragment navigation commits asynchronously after activation in Chromium.
+                            # Await the same destination; keep URL/menu/focus assertions unchanged.
+                            page.wait_for_url("**/#business", timeout=3000)
                             assert page.url.endswith("#business")
                             assert toggle.get_attribute("aria-expanded") == "false"
                             assert page.evaluate("document.activeElement.id") == "business"
@@ -136,6 +139,9 @@ def run(axe_script=None):
                             page.wait_for_function("document.activeElement === document.querySelector('.menu-toggle')")
                         else:
                             page.locator('#navigation a[href="#business"]').click()
+                            # Fragment navigation commits asynchronously after activation in Chromium.
+                            # Await the same destination; keep URL/menu/focus assertions unchanged.
+                            page.wait_for_url("**/#business", timeout=3000)
                             assert page.url.endswith("#business")
                         page.evaluate("window.scrollTo(0, 0)")
                         if width in CAPTURE_WIDTHS:

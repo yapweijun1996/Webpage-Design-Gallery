@@ -1,6 +1,6 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **planned, not implemented**. This file records proposed work; unchecked items are not evidence of completed implementation or verification.
+Status: **partially implemented; remaining phases are not complete**. This file records proposed work; unchecked items are not evidence of completed implementation or verification.
 
 ## Objective and scope
 
@@ -135,3 +135,10 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - [GJH abalone cans, label limitations and verification](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/main/models/gjh-abalone-cans)
 - [Mall Essentials models](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/main/models/mall-essentials)
 - [GJH mall visitor](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/main/models/gjh-mall-visitor)
+
+## Verified progress — 2026-11-14
+
+- Company-first homepage redesign is published (application 1.1.4).
+- An independent original demo-tin viewer is implemented and tested for application 1.1.5. It uses no New Moon GLBs and is explicitly not an official SKU representation. See `docs/original-tin-viewer-review.md`.
+- The four-SKU New Moon source integration remains an unpublished local candidate; public redistribution rights and close-up label review are unresolved. It is not counted as released Phase 1–3 work.
+- Wayfinding/kiosk integration, wider scene improvements, first-visit guidance and the remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.

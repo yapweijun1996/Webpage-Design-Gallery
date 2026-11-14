@@ -1,6 +1,8 @@
 import {createUI} from './assets/ui.js';
+import {setupOriginalTin} from './assets/original-tin.js';
 
 const ui = createUI(), canvas = document.querySelector('#scene');
+setupOriginalTin(ui);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let nearby = null, currentZone = 'atrium';

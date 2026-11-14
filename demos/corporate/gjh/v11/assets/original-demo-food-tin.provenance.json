@@ -1,0 +1,11 @@
+{
+  "asset": "Original demo food tin",
+  "sha256": "4b265f78a711d95a80b730ebeaae3906f42c93fbd28f0b8c6e64c8c003eee0ee",
+  "bytes": 186016,
+  "source_project": "yapweijun1996/Blender-3D-Gallery",
+  "source_path": "models/demo-food-tin/exports/demo-food-tin.glb",
+  "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+  "rights": "Original geometry and concept artwork, authorized for use and public demo deployment in the owner\u2019s projects. No general third-party redistribution license is granted here.",
+  "attribution": "Original DEMO concept label, DejaVu Sans font; retained original-demo-tin-font-license.txt",
+  "limitations": "Illustrative removable lid and assembly animation, not physical pull-tab tearing or fabrication/food-safety verification. Not New Moon packaging or any branded SKU."
+}

@@ -38,6 +38,7 @@ export function createUI() {
   let available = false;
   let showing3D = false;
   let currentZone = 'atrium';
+  let externalPaused = false;
   let nearby = null;
   let returnFocus = null;
   let teleportListener = null;
@@ -178,8 +179,9 @@ export function createUI() {
       }
     },
     paused() {
-      return !showing3D || dialog.open;
+      return externalPaused || !showing3D || dialog.open;
     },
+    setExternalPaused(value) { externalPaused = Boolean(value); },
     inspect,
     onTeleport(listener) {
       teleportListener = listener;

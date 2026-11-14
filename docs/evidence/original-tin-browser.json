@@ -1,0 +1,138 @@
+[
+  {
+    "width": 320,
+    "controls": "PASS",
+    "lifecycle": "PASS",
+    "state": {
+      "status": "loaded",
+      "loading": false,
+      "loaded": true,
+      "error": null,
+      "yaw": -0.28,
+      "pitch": 0.12,
+      "distance": 0.5886621368573556,
+      "zoom": 1.15,
+      "mode": "Closed",
+      "clip": "Closed",
+      "amount": 0,
+      "renderCount": 12,
+      "frames": 12,
+      "generation": 1,
+      "canvas": {
+        "width": 248,
+        "height": 300
+      },
+      "projectedBounds": {
+        "minX": -0.32859858788110197,
+        "maxX": 0.32859858788110197,
+        "minY": -0.6273643621495932,
+        "maxY": 0.07174896562845544
+      },
+      "activeResources": 1,
+      "liveContexts": 1
+    }
+  },
+  {
+    "width": 390,
+    "controls": "PASS",
+    "lifecycle": "PASS",
+    "state": {
+      "status": "loaded",
+      "loading": false,
+      "loaded": true,
+      "error": null,
+      "yaw": -0.28,
+      "pitch": 0.12,
+      "distance": 0.49374673784668277,
+      "zoom": 1.15,
+      "mode": "Closed",
+      "clip": "Closed",
+      "amount": 0,
+      "renderCount": 12,
+      "frames": 12,
+      "generation": 1,
+      "canvas": {
+        "width": 318,
+        "height": 300
+      },
+      "projectedBounds": {
+        "minX": -0.3106965578721525,
+        "maxX": 0.3106965578721525,
+        "minY": -0.7606170089755002,
+        "maxY": 0.08698849811361911
+      },
+      "activeResources": 1,
+      "liveContexts": 1
+    }
+  },
+  {
+    "width": 768,
+    "controls": "PASS",
+    "lifecycle": "PASS",
+    "state": {
+      "status": "loaded",
+      "loading": false,
+      "loaded": true,
+      "error": null,
+      "yaw": -0.28,
+      "pitch": 0.12,
+      "distance": 0.5129382310543863,
+      "zoom": 1.15,
+      "mode": "Closed",
+      "clip": "Closed",
+      "amount": 0,
+      "renderCount": 12,
+      "frames": 12,
+      "generation": 1,
+      "canvas": {
+        "width": 422,
+        "height": 440
+      },
+      "projectedBounds": {
+        "minX": -0.329245985844745,
+        "maxX": 0.329245985844745,
+        "minY": -0.7292962644239852,
+        "maxY": 0.08340647917874625
+      },
+      "activeResources": 1,
+      "liveContexts": 1
+    }
+  },
+  {
+    "width": 1440,
+    "controls": "PASS",
+    "lifecycle": "PASS",
+    "state": {
+      "status": "loaded",
+      "loading": false,
+      "loaded": true,
+      "error": null,
+      "yaw": -0.28,
+      "pitch": 0.12,
+      "distance": 0.49374673784668277,
+      "zoom": 1.15,
+      "mode": "Closed",
+      "clip": "Closed",
+      "amount": 0,
+      "renderCount": 12,
+      "frames": 12,
+      "generation": 1,
+      "canvas": {
+        "width": 575,
+        "height": 440
+      },
+      "projectedBounds": {
+        "minX": -0.25201543407229904,
+        "maxX": 0.25201543407229904,
+        "minY": -0.7606170089755002,
+        "maxY": 0.08698849811361911
+      },
+      "activeResources": 1,
+      "liveContexts": 1
+    }
+  },
+  {
+    "failureRecovery": "PASS",
+    "closeDuringLoad": "PASS"
+  }
+]
