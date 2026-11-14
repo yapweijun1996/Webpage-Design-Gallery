@@ -1,0 +1,123 @@
+{
+  "environment": "Darwin arm64 Chromium 157.0.8103.51 / metal",
+  "limitations": [
+    "Browser touch emulation, not physical-device certification",
+    "Projected plaque bounds do not establish text contrast or readability"
+  ],
+  "results": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "entranceSigns": [
+        {
+          "zone": "newmoon",
+          "visible": true,
+          "left": 285.33476243374764,
+          "right": 456.45467237719816,
+          "top": 331.28323911956187,
+          "bottom": 352.54197778579504
+        },
+        {
+          "zone": "mili",
+          "visible": true,
+          "left": 722.1780544258406,
+          "right": 892.5555378034605,
+          "top": 331.28323920888306,
+          "bottom": 352.54197785291655
+        },
+        {
+          "zone": "gogo",
+          "visible": true,
+          "left": 1157.7901554208931,
+          "right": 1329.4050154057848,
+          "top": 331.2832392982043,
+          "bottom": 352.541977920038
+        }
+      ],
+      "keyboardMapJourneys": [
+        "newmoon",
+        "mili",
+        "gogo"
+      ],
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "entranceSigns": [
+        {
+          "zone": "newmoon",
+          "visible": true,
+          "left": -116.63514493994526,
+          "right": 80.45583214615971,
+          "top": 368.97766399188214,
+          "bottom": 393.46282231425636
+        },
+        {
+          "zone": "mili",
+          "visible": true,
+          "left": 386.5086219143062,
+          "right": 582.7445943330849,
+          "top": 368.97766414535573,
+          "bottom": 393.46282242958546
+        },
+        {
+          "zone": "gogo",
+          "visible": true,
+          "left": 888.2345055360568,
+          "right": 1085.895484039133,
+          "top": 368.9776642988294,
+          "bottom": 393.4628225449148
+        }
+      ],
+      "keyboardMapJourneys": [
+        "newmoon",
+        "mili",
+        "gogo"
+      ],
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "entranceSigns": [
+        {
+          "zone": "newmoon",
+          "visible": true,
+          "left": -143.80456936980747,
+          "right": -10.413621590408274,
+          "top": 332.6231343582759,
+          "bottom": 349.19790747516026
+        },
+        {
+          "zone": "mili",
+          "visible": true,
+          "left": 196.69762866202717,
+          "right": 329.50029994115846,
+          "top": 332.6231344075475,
+          "bottom": 349.1979075121754
+        },
+        {
+          "zone": "gogo",
+          "visible": true,
+          "left": 536.2242680205762,
+          "right": 670.0073995683359,
+          "top": 332.6231344568192,
+          "bottom": 349.19790754919046
+        }
+      ],
+      "keyboardMapJourneys": [
+        "newmoon",
+        "mili",
+        "gogo"
+      ],
+      "pageErrors": []
+    }
+  ]
+}

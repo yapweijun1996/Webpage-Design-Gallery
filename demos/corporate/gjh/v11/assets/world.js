@@ -55,14 +55,14 @@ export async function createWorld(T, R, physics, shadows) {
     return mesh;
   }
   const roomSigns = [];
-  function sign(text, x, y, z, width, height = .4, framed = false) {
+  function sign(text, x, y, z, width, height = .4, framed = false, fontSize = 42) {
     const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 128;
     const context = canvas.getContext('2d');
     if (framed) {
       context.fillStyle = '#17372e'; context.fillRect(0, 0, 1024, 128);
       context.strokeStyle = '#b59b62'; context.lineWidth = 3; context.strokeRect(8, 8, 1008, 112);
     }
-    context.fillStyle = '#e9d6a9'; context.font = '500 42px Georgia'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 512, 64);
+    context.fillStyle = '#e9d6a9'; context.font = `500 ${fontSize}px Georgia`; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 512, 64);
     const texture = new T.CanvasTexture(canvas); texture.colorSpace = T.SRGBColorSpace;
     const mesh = new T.Mesh(plane, new T.MeshBasicMaterial({map: texture, transparent: true, depthWrite: false}));
     mesh.position.set(x, y, z); mesh.scale.set(width, height, 1); scene.add(mesh);
@@ -282,7 +282,7 @@ export async function createWorld(T, R, physics, shadows) {
     box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05); art(logo, x, 4.67, .4, 2.2);
     box('glow', x, 5.36, .36, 2.42, .025, .045);
     box('brass', x, 4.02, .29, 9.3, .025, .04);
-    const label = sign(zone === 'newmoon' ? '01  /  THE PROVISION ROOM' : zone === 'mili' ? '02  /  THE GATHERING ROOM' : '03  /  THE GARDEN ROOM', x, 3.42, .38, 3.9, .32, true);
+    const label = sign(zone === 'newmoon' ? '01  /  NEW MOON' : zone === 'mili' ? '02  /  MILI' : '03  /  GOGO', x, 3.5, .38, 3.9, .48, true, 80);
     roomSigns.push({zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0});
     // Two independently kinematic glass leaves slide clear of the walking capsule.
     const leaves = [];

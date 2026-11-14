@@ -1,0 +1,72 @@
+[
+  {
+    "width": 1440,
+    "drawCalls": 152,
+    "drawCallsByView": {
+      "atrium": 152,
+      "walking": 153,
+      "newmoon-portal": 120,
+      "newmoon": 104,
+      "newmoon-interior": 95,
+      "mili-portal": 140,
+      "mili": 114,
+      "mili-interior": 94,
+      "gogo-portal": 110,
+      "gogo": 89,
+      "gogo-interior": 78,
+      "max": 153
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "keyboardTurningAndFInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 768,
+    "drawCalls": 137,
+    "drawCallsByView": {
+      "atrium": 137,
+      "walking": 134,
+      "newmoon-portal": 99,
+      "newmoon": 96,
+      "newmoon-interior": 90,
+      "mili-portal": 102,
+      "mili": 92,
+      "mili-interior": 75,
+      "gogo-portal": 86,
+      "gogo": 82,
+      "gogo-interior": 74,
+      "max": 137
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "keyboardTurningAndFInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 390,
+    "drawCalls": 121,
+    "drawCallsByView": {
+      "atrium": 121,
+      "walking": 109,
+      "newmoon-portal": 96,
+      "newmoon": 92,
+      "newmoon-interior": 85,
+      "mili-portal": 92,
+      "mili": 80,
+      "mili-interior": 74,
+      "gogo-portal": 82,
+      "gogo": 77,
+      "gogo-interior": 73,
+      "max": 121
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "keyboardTurningAndFInspection": "PASS",
+    "errors": []
+  },
+  {
+    "reducedMotion": "PASS",
+    "hiddenPause": "PASS",
+    "contextLoss": "PASS",
+    "WebGLAndWasmFailure": "PASS",
+    "noJS": "PASS"
+  }
+]

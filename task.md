@@ -67,7 +67,7 @@ Depends on Phase 1; coordinate layouts with Phase 2.
 
 - [x] Evaluate the mall directory kiosk as an entrance focal point connected to the existing three-store map and teleport actions.
 - [x] Distinguish the model's decorative screen from functional wayfinding; do not present its fictional map as real navigation.
-- [ ] Improve sightlines and store-name visibility from the entrance.
+- [x] Improve sightlines and store-name visibility from the entrance.
 - [x] Selectively place existing display shelves, lightboxes or bins where they support the scene.
 - [x] Keep circulation paths clear and avoid overcrowding or hiding existing controls.
 - [x] Check map, help, joystick, Run and inspect prompt for mobile overlaps.
@@ -238,3 +238,17 @@ See `docs/v11-lod-evaluation.md` and its evidence files. Physical devices,
 SwiftShader completion and packaging fidelity remain unverified. This completes
 only the LOD evaluation checkbox; no runtime switching or packaging certification
 is claimed.
+
+
+## Entrance wayfinding — 2026-11-15
+
+Application 1.1.33 replaces three indirect room subtitles with numbered store
+names while retaining the original brand logos, camera, doors, colliders and
+Map destinations. Final plaques preserve their original width and pass existing
+close-interior/HUD bounds after two rejected geometry candidates. Independent
+visual review accepted 1440/768/390 entrance views and the tablet doorway at
+85/100 (subjective). All nine keyboard map journeys, full V11 Metal regression,
+46 Python tests, Gallery, 28 legacy-demo cases and PWA update/offline checks pass.
+See `docs/v11-wayfinding-review.md`. Portrait side stores remain offscreen and
+use the existing Map; physical devices and screen-reader/contrast certification
+are not claimed. This completes the Phase 4 entrance visibility item only.

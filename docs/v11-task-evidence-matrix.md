@@ -31,7 +31,7 @@ Runtime baseline: main `d1d091d513b6188582cb4ac15b8ce99d53d1dfbb`, application *
 | Phase 3 / 6 | PASS | Pause mall movement while a dialog is open and restore focus when it closes. |
 | Phase 4 / 1 | PASS | Evaluate the mall directory kiosk as an entrance focal point connected to the existing three-store map and teleport actions. |
 | Phase 4 / 2 | PASS | Distinguish the model's decorative screen from functional wayfinding; do not present its fictional map as real navigation. |
-| Phase 4 / 3 | DEFER | Improve sightlines and store-name visibility from the entrance. |
+| Phase 4 / 3 | PASS | Improve sightlines and store-name visibility from the entrance. |
 | Phase 4 / 4 | PASS | Selectively place existing display shelves, lightboxes or bins where they support the scene. |
 | Phase 4 / 5 | PASS | Keep circulation paths clear and avoid overcrowding or hiding existing controls. |
 | Phase 4 / 6 | PASS | Check map, help, joystick, Run and inspect prompt for mobile overlaps. |
@@ -117,3 +117,13 @@ five-viewport resource/draw-call measurements and near/distant visual review.
 The implementation decision is to retain LOD1; dynamic switching remains
 unadopted. This changes the evaluation status, not physical-device or packaging
 acceptance. Historical runtime and evidence above retain their original scope.
+
+
+## Entrance wayfinding reconciliation — 2026-11-15
+
+Phase 4 / 3 is complete within the stated browser scope: numbered store-name
+plaques replace indirect room subtitles, and actual 1440/768/390 entrance and
+near-door views were reviewed. Existing moving-camera/HUD regression and all
+three keyboard map destinations pass. See `docs/v11-wayfinding-review.md`.
+The camera and geometry are retained; portrait side stores still require Map.
+Historical decisions above retain their date and scope.
