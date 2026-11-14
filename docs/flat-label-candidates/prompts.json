@@ -1,0 +1,113 @@
+{
+  "method": "Built-in image_gen.imagegen tool, with the SKU front packshot as image reference; no API-key or alternate provider workflow.",
+  "method_note": "The native tool did not disclose a model name.",
+  "attempts_note": "All native generation calls succeeded. An initial retry orchestration failed before a generation call with TypeError: Cannot read properties of undefined (reading 'find'); the retry was resubmitted with the same intended prompt.",
+  "items": [
+    {
+      "sku": "nz-425g",
+      "product_title": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+      "reference_files": [
+        "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+        "assets/companies/gjh/official/new-moon-nz-425g-back.jpg",
+        "assets/companies/gjh/official/new-moon-nz-425g-nutrition.jpg"
+      ],
+      "generation_input": "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+      "output": "new-moon-nz-425g-flat-concept.png",
+      "attempts": [
+        {
+          "prompt": "Use case: product-mockup. Create a genuinely FLAT, straight-on, edge-to-edge rectangular wrap-label artwork for texture review, landscape aspect ratio approximately 2.2:1. The supplied image is the visual brand and SKU reference, not an object to depict. Preserve the recognizable New Moon wordmark and yellow moon-face brand art and the source packaging language. Use pink and lavender upper field with turquoise-blue lower band. Flatten the design; no can, cylinder, perspective, metallic rim, studio, drop shadow, blank margins, or dimensional annotations. Extend unknown side and rear sectors with restrained decorative color continuation and a small but clearly legible strip reading exactly \"UNOFFICIAL DEMO · ESTIMATED WRAP\". Make this exact SKU identity prominent and legible: \"New Moon Premium Wild Caught New Zealand Abalone 425g\". Include no other product claims or factual copy. Do not invent ingredients, nutrition values, barcodes, dates, addresses, certifications, claims, awards, prices or unreadable microtext. This is an unofficial estimated concept, not a certified packaging replica; panel order, wrap spacing and dimensions are unknown.",
+          "native_output": "/Users/yapweijun/.codex/generated_images/01a1db30-287a-74f2-baec-40ed993780e7/exec-a307b85f-9c05-4c27-8e42-7c2f9a3cad23.png",
+          "selected": false
+        },
+        {
+          "prompt": "Use case: product-mockup. Create a genuinely FLAT, straight-on, edge-to-edge rectangular wrap-label artwork for texture review, landscape aspect ratio approximately 2.2:1. The supplied image is the visual brand and SKU reference, not an object to depict. Preserve the recognizable New Moon wordmark and yellow moon-face brand art and the source packaging language. Use pink and lavender upper field with turquoise-blue lower band. Flatten the design; no can, cylinder, perspective, metallic rim, studio, drop shadow, blank margins, or dimensional annotations. Extend unknown side and rear sectors with restrained decorative color continuation and a small but clearly legible strip reading exactly \"UNOFFICIAL DEMO · ESTIMATED WRAP\". Make this exact SKU identity prominent and legible: \"New Moon Premium Wild Caught New Zealand Abalone 425g\". Include no other product claims or factual copy. Do not invent ingredients, nutrition values, barcodes, dates, addresses, certifications, claims, awards, prices or unreadable microtext. This is an unofficial estimated concept, not a certified packaging replica; panel order, wrap spacing and dimensions are unknown. Critical correction: omit ALL round badges, seals, certification marks, award marks and Chinese characters. Do not copy any of them from the photo; use only the New Moon wordmark and moon-face art.",
+          "native_output": "/Users/yapweijun/.codex/generated_images/01a1db30-287a-74f2-baec-40ed993780e7/exec-211faa86-df8f-4e07-b063-40b7f0d73da1.png",
+          "selected": true
+        }
+      ],
+      "dimensions_px": [
+        1860,
+        846
+      ],
+      "sha256": "048e57c905800dfa15829648ccf4dab1f83e8695691e9deae3137a52dd6e0f1a"
+    },
+    {
+      "sku": "au-425g",
+      "product_title": "New Moon Premium Wild Caught Australia Abalone 425g",
+      "reference_files": [
+        "assets/companies/gjh/official/new-moon-au-425g-front.jpg",
+        "assets/companies/gjh/official/new-moon-au-425g-back.jpg",
+        "assets/companies/gjh/official/new-moon-au-425g-nutrition.jpg"
+      ],
+      "generation_input": "assets/companies/gjh/official/new-moon-au-425g-front.jpg",
+      "output": "new-moon-au-425g-flat-concept.png",
+      "attempts": [
+        {
+          "prompt": "Use case: product-mockup. Create a genuinely FLAT, straight-on, edge-to-edge rectangular wrap-label artwork for texture review, landscape aspect ratio approximately 2.2:1. The supplied image is the visual brand and SKU reference, not an object to depict. Preserve the recognizable New Moon wordmark and yellow moon-face brand art and the source packaging language. Use vivid red upper field with silver-white lower band. Flatten the design; no can, cylinder, perspective, metallic rim, studio, drop shadow, blank margins, or dimensional annotations. Extend unknown side and rear sectors with restrained decorative color continuation and a small but clearly legible strip reading exactly \"UNOFFICIAL DEMO · ESTIMATED WRAP\". Make this exact SKU identity prominent and legible: \"New Moon Premium Wild Caught Australia Abalone 425g\". Include no other product claims or factual copy. Do not invent ingredients, nutrition values, barcodes, dates, addresses, certifications, claims, awards, prices or unreadable microtext. This is an unofficial estimated concept, not a certified packaging replica; panel order, wrap spacing and dimensions are unknown.",
+          "native_output": "/Users/yapweijun/.codex/generated_images/01a1db30-287a-74f2-baec-40ed993780e7/exec-c0ff40fd-167a-4348-a7cc-f8b88ba740f0.png",
+          "selected": false
+        },
+        {
+          "prompt": "Use case: product-mockup. Create a genuinely FLAT, straight-on, edge-to-edge rectangular wrap-label artwork for texture review, landscape aspect ratio approximately 2.2:1. The supplied image is the visual brand and SKU reference, not an object to depict. Preserve the recognizable New Moon wordmark and yellow moon-face brand art and the source packaging language. Use vivid red upper field with silver-white lower band. Flatten the design; no can, cylinder, perspective, metallic rim, studio, drop shadow, blank margins, or dimensional annotations. Extend unknown side and rear sectors with restrained decorative color continuation and a small but clearly legible strip reading exactly \"UNOFFICIAL DEMO · ESTIMATED WRAP\". Make this exact SKU identity prominent and legible: \"New Moon Premium Wild Caught Australia Abalone 425g\". Include no other product claims or factual copy. Do not invent ingredients, nutrition values, barcodes, dates, addresses, certifications, claims, awards, prices or unreadable microtext. This is an unofficial estimated concept, not a certified packaging replica; panel order, wrap spacing and dimensions are unknown. Critical correction: omit ALL round badges, seals, certification marks, award marks and Chinese characters. Do not copy any of them from the photo; use only the New Moon wordmark and moon-face art.",
+          "native_output": "/Users/yapweijun/.codex/generated_images/01a1db30-287a-74f2-baec-40ed993780e7/exec-5af315f3-e632-4f73-8f55-25cd60404a02.png",
+          "selected": true
+        }
+      ],
+      "dimensions_px": [
+        1860,
+        846
+      ],
+      "sha256": "eafc06d7fae896df9e7d63cac7459d1bbeac82d2da66790a635181604b67ce17"
+    },
+    {
+      "sku": "sa-425g",
+      "product_title": "New Moon Premium South Africa Abalone (4 – 5pcs) 425g",
+      "reference_files": [
+        "assets/companies/gjh/official/new-moon-sa-425g-front.jpg",
+        "assets/companies/gjh/official/new-moon-sa-425g-back.jpg",
+        "assets/companies/gjh/official/new-moon-sa-425g-nutrition.jpg"
+      ],
+      "generation_input": "assets/companies/gjh/official/new-moon-sa-425g-front.jpg",
+      "output": "new-moon-sa-425g-flat-concept.png",
+      "attempts": [
+        {
+          "prompt": "Use case: product-mockup. Create a genuinely FLAT, straight-on, edge-to-edge rectangular wrap-label artwork for texture review, landscape aspect ratio approximately 2.2:1. The supplied image is the visual brand and SKU reference, not an object to depict. Preserve the recognizable New Moon wordmark and yellow moon-face brand art and the source packaging language. Use warm orange upper field with deep red lower band. Flatten the design; no can, cylinder, perspective, metallic rim, studio, drop shadow, blank margins, or dimensional annotations. Extend unknown side and rear sectors with restrained decorative color continuation and a small but clearly legible strip reading exactly \"UNOFFICIAL DEMO · ESTIMATED WRAP\". Make this exact SKU identity prominent and legible: \"New Moon Premium South Africa Abalone (4 – 5pcs) 425g\". Include no other product claims or factual copy. Do not invent ingredients, nutrition values, barcodes, dates, addresses, certifications, claims, awards, prices or unreadable microtext. This is an unofficial estimated concept, not a certified packaging replica; panel order, wrap spacing and dimensions are unknown.",
+          "native_output": "/Users/yapweijun/.codex/generated_images/01a1db30-287a-74f2-baec-40ed993780e7/exec-a0afc198-196a-4e64-bdcf-4ec032bfa812.png",
+          "selected": false
+        },
+        {
+          "prompt": "Use case: product-mockup. Create a genuinely FLAT, straight-on, edge-to-edge rectangular wrap-label artwork for texture review, landscape aspect ratio approximately 2.2:1. The supplied image is the visual brand and SKU reference, not an object to depict. Preserve the recognizable New Moon wordmark and yellow moon-face brand art and the source packaging language. Use warm orange upper field with deep red lower band. Flatten the design; no can, cylinder, perspective, metallic rim, studio, drop shadow, blank margins, or dimensional annotations. Extend unknown side and rear sectors with restrained decorative color continuation and a small but clearly legible strip reading exactly \"UNOFFICIAL DEMO · ESTIMATED WRAP\". Make this exact SKU identity prominent and legible: \"New Moon Premium South Africa Abalone (4 – 5pcs) 425g\". Include no other product claims or factual copy. Do not invent ingredients, nutrition values, barcodes, dates, addresses, certifications, claims, awards, prices or unreadable microtext. This is an unofficial estimated concept, not a certified packaging replica; panel order, wrap spacing and dimensions are unknown. Critical correction: omit ALL round badges, seals, certification marks, award marks and Chinese characters. Do not copy any of them from the photo; use only the New Moon wordmark and moon-face art.",
+          "native_output": "/Users/yapweijun/.codex/generated_images/01a1db30-287a-74f2-baec-40ed993780e7/exec-5513b558-bca1-4fd0-b93c-c9762323886b.png",
+          "selected": true
+        }
+      ],
+      "dimensions_px": [
+        1860,
+        846
+      ],
+      "sha256": "68f174f8dd18cc358869e0015744cc5856ecf3cdadd7c6180db949c9d2d14324"
+    },
+    {
+      "sku": "mx-454g",
+      "product_title": "New Moon Premium Mexico Abalone 454g",
+      "reference_files": [
+        "assets/companies/gjh/official/new-moon-mx-454g-front.jpg",
+        "assets/companies/gjh/official/new-moon-mx-454g-back.jpg"
+      ],
+      "generation_input": "assets/companies/gjh/official/new-moon-mx-454g-front.jpg",
+      "output": "new-moon-mx-454g-flat-concept.png",
+      "attempts": [
+        {
+          "prompt": "Use case: product-mockup. Create a genuinely FLAT, straight-on, edge-to-edge rectangular wrap-label artwork for texture review, landscape aspect ratio approximately 2.2:1. The supplied image is the visual brand and SKU reference, not an object to depict. Preserve the recognizable New Moon wordmark and yellow moon-face brand art and the source packaging language. Use golden yellow upper field with deep blue lower band. Flatten the design; no can, cylinder, perspective, metallic rim, studio, drop shadow, blank margins, or dimensional annotations. Extend unknown side and rear sectors with restrained decorative color continuation and a small but clearly legible strip reading exactly \"UNOFFICIAL DEMO · ESTIMATED WRAP\". Make this exact SKU identity prominent and legible: \"New Moon Premium Mexico Abalone 454g\". Include no other product claims or factual copy. Do not invent ingredients, nutrition values, barcodes, dates, addresses, certifications, claims, awards, prices or unreadable microtext. This is an unofficial estimated concept, not a certified packaging replica; panel order, wrap spacing and dimensions are unknown.",
+          "native_output": "/Users/yapweijun/.codex/generated_images/01a1db30-287a-74f2-baec-40ed993780e7/exec-f2b80f2f-dab8-475c-ad29-0f441596615f.png",
+          "selected": true
+        }
+      ],
+      "dimensions_px": [
+        1860,
+        845
+      ],
+      "sha256": "65d0a29c0698a7ce0895c219c965568bfa29f26f10c5eccd6937380c37ee9a14"
+    }
+  ]
+}

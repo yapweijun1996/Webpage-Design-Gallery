@@ -37,6 +37,7 @@ Depends on Phase 1. This is the first implementation priority.
 
 - [x] Replace the four simplified cans with the reviewed New Zealand, Australia, South Africa and Mexico models.
 - [ ] Match each model, label, name and product record against existing verified source data.
+- [x] Generate four unofficial flat-label candidate PNGs with Codex CLI from the existing photo/SKU references (owner request, 2026-11-15). Keep estimated wrap/disclosure information and preserve the published GLBs until separately accepted.
 - [x] Evaluate the existing display-shelf model; arrange products for clear near and distant viewing.
 - [x] Provide discoverable inspection cues for F and click/tap.
 - [x] Keep paths, collision boundaries and camera sightlines clear.
@@ -269,3 +270,20 @@ Native popup keyboard option choice is NOT VERIFIED: the same sequence fails in
 an isolated HTML fixture on this host. Actual control selection events and model
 updates pass separately. Physical devices and screen-reader sessions remain open;
 this does not complete the separate final/device acceptance gates.
+
+
+## Codex CLI flat-label candidates — 2026-11-15
+
+The owner requested generated flat labels because complete masters are unavailable.
+Codex CLI 0.167.2 (configured gpt-6.1-terra / xhigh) used native image generation
+to produce four real PNG candidates in `docs/flat-label-candidates/`. Seven native
+calls were used: one targeted badge/copy regeneration each for NZ, AU and SA;
+Mexico passed its first generation. Parent and independent review confirmed the
+four countries/weights, SA 4–5pcs, flat composition, readable concept disclosure
+and absence of invented factual panels. Independent visual score: 88/100
+(subjective). PNG integrity, prompt-record hashes, generation check, 11 Gallery
+unit tests and exclusion from the published site artifact passed. Runtime files,
+GLBs, primary photo-derived labels and application 1.1.34 remain unchanged.
+See the folder README, prompts.json and acceptance.json. These are comparison
+concepts, not original artwork, print masters, seamless UV textures or proof of
+full physical-packaging fidelity; the source-matching item remains open.

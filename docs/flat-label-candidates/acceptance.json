@@ -1,0 +1,30 @@
+{
+  "status": "accepted_as_concept_art_only",
+  "worker": {
+    "runner": "Codex CLI 0.167.2",
+    "model": "gpt-6.1-terra",
+    "reasoningEffort": "xhigh",
+    "generation": "built-in image_gen.imagegen; image model not reported"
+  },
+  "outputsVerified": 4,
+  "sourceReferences": "Existing official packshot library and V11 product records",
+  "visualReview": {
+    "reviewer": "independent read-only agent plus parent manager",
+    "score": 88,
+    "scope": "Flat decorative candidate art; not print-ready masters or accepted GLB textures"
+  },
+  "checks": {
+    "pngDecodeAndHashes": "PASS",
+    "fourSKUIdentityAndWeights": "PASS by direct visual/source comparison",
+    "disclosureAndNoInventedFactualPanels": "PASS by visual review",
+    "galleryGeneration": "PASS",
+    "galleryUnitTests": "11 PASS",
+    "publicationExcludesCandidateImages": "PASS",
+    "runtimeSourceUnchanged": "PASS"
+  },
+  "limitations": [
+    "AI-reconstructed lettering and moon face are not original artwork",
+    "Panel order, true dimensions, rear packaging and seamless wrap tiling are unverified",
+    "Published GLBs and runtime textures are unchanged"
+  ]
+}
