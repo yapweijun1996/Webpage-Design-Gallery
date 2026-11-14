@@ -203,9 +203,14 @@ export function createUI() {
       setView(true);
     },
     fallback(message) {
+      // Move focus only when its current 3D control is about to disappear.
+      // A user already browsing the directory or header must not be interrupted.
+      const active = document.activeElement;
+      const recoverFocus = showing3D && (experience.contains(active) || guide.contains(active) ||
+        dialog.contains(active) || active === viewToggle);
       if (guide.open) guide.close('fallback');
       guidePaused = false; guideReopen.hidden = true;
-      setView(false);
+      setView(false, recoverFocus);
       available = false;
       viewToggle.hidden = true;
       fallbackMessage.textContent = message || 'The 3D mall is unavailable on this device. Explore the complete store directory below.';

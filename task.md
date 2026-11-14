@@ -152,3 +152,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.10 adds the original entrance kiosk with F/touch access to the real three-store map, explicit decorative-screen disclosure, a physical collider and failed-asset fallback. Source rights, hash, dimensions, screenshots and tests are recorded in `docs/v11-kiosk-review.md`. Other fixtures and branded product phases remain pending.
 
 - Application 1.1.11 fixes stuck joystick movement and camera dragging after pointer capture is interrupted. Real browser touch/mouse reproduction and recovery evidence are in `docs/v11-pointer-review.md`; physical-device and remaining branded-model gates remain unverified.
+
+- Application 1.1.12 restores keyboard focus to the accessible directory when graphics loss hides the active 3D control, without interrupting an already-open directory product dialog or unrelated header focus. Twelve real context-loss cases and regression evidence are in `docs/v11-fallback-focus-review.md`; remaining asset and physical-device gates stay open.

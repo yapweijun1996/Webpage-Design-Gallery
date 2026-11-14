@@ -1,0 +1,125 @@
+{
+  "environment": "Linux ARM64 Chromium/SwiftShader, actual WEBGL_lose_context; not physical devices or screen-reader testing",
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "scene",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "guide",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "product",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "map",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "list-product",
+      "focus": "product-close",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "header",
+      "focus": "A",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "scene",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "guide",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "product",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "map",
+      "focus": "list-title",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "list-product",
+      "focus": "product-close",
+      "result": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "header",
+      "focus": "A",
+      "result": "PASS",
+      "errors": []
+    }
+  ]
+}
