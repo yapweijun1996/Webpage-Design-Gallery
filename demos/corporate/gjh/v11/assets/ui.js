@@ -33,30 +33,26 @@ export function createUI() {
     guide.querySelector('[data-guide-touch]').hidden = !touchGuide.matches;
   }
   updateGuideInput(); touchGuide.addEventListener('change', updateGuideInput);
+  let panelPauseListener=null;
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
+  function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);if(paused)panelPauseListener?.();}
   const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
   compactMap.addEventListener('change', () => {
     resetMap();
     headerMap.hidden = !showing3D || !compactMap.matches;
-    headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));
+    headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
   });
   mallMap.addEventListener('toggle', () => {
     if (compactMap.matches && mallMap.open) help.open = false;
-    headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));
+    headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
   });
-  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; });
+  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; updateCompactPanels(); });
   headerMap.addEventListener('click', () => {
     if (!showing3D || guidePaused || dialog.open || bag.open) return;
     help.open = false;
     mallMap.open = !mallMap.open;
     headerMap.setAttribute('aria-expanded', String(mallMap.open));
     if (mallMap.open) mapButtons[0]?.focus({preventScroll: true});
-  });
-  mallMap.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && compactMap.matches && mallMap.open) {
-      mallMap.open = false;
-      mallMap.querySelector('summary').focus();
-    }
   });
   const dialog = document.getElementById('product-dialog');
   const newMoonPreview = setupNewMoonPreview();
@@ -82,6 +78,11 @@ export function createUI() {
   let returnFocus = null;
   let teleportListener = null;
   let viewListener = null;
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Escape'||!showing3D||!compactMap.matches||dialog.open||bag.open||guide.open)return;
+    const panel=help.open?help:mallMap.open?mallMap:null;
+    if(panel){event.preventDefault();event.stopImmediatePropagation();panel.open=false;(panel===mallMap?headerMap:panel.querySelector('summary')).focus({preventScroll:true});}
+  },true);
 
   for (const card of document.querySelectorAll('[data-product]')) {
     records.set(card.dataset.product, {
@@ -297,7 +298,7 @@ export function createUI() {
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
     },
     paused() {
-      return guidePaused || externalPaused || !showing3D || dialog.open || bag.open || (compactMap.matches && mallMap.open);
+      return guidePaused || externalPaused || !showing3D || dialog.open || bag.open || (compactMap.matches && (mallMap.open || help.open));
     },
     offerFirstGuide() { if (!guideSeen) showGuide(); },
     setExternalPaused(value) { externalPaused = Boolean(value); },
@@ -313,6 +314,7 @@ export function createUI() {
     },
     onCart(state,listener){cartState=state;cartListener=listener;},
     setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
+    onPanelPause(listener){panelPauseListener=listener;if(compactMap.matches&&(mallMap.open||help.open))listener();},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {

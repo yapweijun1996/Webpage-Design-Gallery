@@ -114,6 +114,7 @@ async function initialize() {
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats);
   ui.setSeats(world.seats);
   player.setPaused(() => ui.paused());
+  ui.onPanelPause(()=>{player.clearInput();player.setInput(null);player.cancelCollection();manual=false;});
   ui.onCart(()=>({...player.state.character.cart,seated:player.state.seated}),value=>{const ok=player.setCart(value);updateHUD();render();return ok;});
   ui.onCollect(id=>Boolean(!player.state.seated&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;

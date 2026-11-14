@@ -365,3 +365,8 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 }
 /* Portrait seated/cart prompt clears the three-line disclaimer on narrow phones. */
 @media(max-width:650px) and (orientation:portrait){.is-seated .inspect-prompt,.is-pushing .inspect-prompt{bottom:calc(70px + env(safe-area-inset-bottom))}}
+
+/* Compact reading panels suspend scene gestures; desktop overview stays live. */
+.compact-panel-note{display:none}
+.is-panel-open .compact-panel-note{display:block;font-size:var(--gjh-type-header-location);line-height:1.5;margin:0 0 12px}
+.is-panel-open .joystick,.is-panel-open .run-toggle,.is-panel-open .inspect-prompt{visibility:hidden}
