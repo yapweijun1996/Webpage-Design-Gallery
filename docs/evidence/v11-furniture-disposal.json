@@ -1,0 +1,50 @@
+[
+  {
+    "mode": "late",
+    "status": {
+      "status": "fallback",
+      "reason": "timeout",
+      "instances": 8,
+      "primitives": 0
+    },
+    "disposal": {
+      "geometryCount": 5,
+      "materialCount": 5,
+      "disposedGeometries": 5,
+      "disposedMaterials": 5
+    },
+    "walking": "PASS"
+  },
+  {
+    "mode": "invalid",
+    "status": {
+      "status": "fallback",
+      "reason": "invalid",
+      "instances": 8,
+      "primitives": 0
+    },
+    "disposal": {
+      "geometryCount": 5,
+      "materialCount": 5,
+      "disposedGeometries": 5,
+      "disposedMaterials": 5
+    },
+    "walking": "PASS"
+  },
+  {
+    "mode": "normal",
+    "status": {
+      "status": "loaded",
+      "reason": null,
+      "instances": 8,
+      "primitives": 5
+    },
+    "disposal": {
+      "geometryCount": 5,
+      "materialCount": 5,
+      "disposedGeometries": 0,
+      "disposedMaterials": 0
+    },
+    "walking": "PASS"
+  }
+]

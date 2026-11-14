@@ -14,11 +14,22 @@ function validateContainer(buffer) {
       (json.extensionsRequired || []).length || (json.animations || []).length || (json.skins || []).length) throw Error('invalid');
 }
 
+function disposeScene(scene) {
+  const geometries = new Set(), materials = new Set();
+  scene?.traverse(mesh => {
+    if (!mesh.isMesh) return;
+    geometries.add(mesh.geometry);
+    for (const material of (Array.isArray(mesh.material) ? mesh.material : [mesh.material])) materials.add(material);
+  });
+  for (const geometry of geometries) geometry?.dispose();
+  for (const material of materials) material?.dispose();
+}
+
 export async function createFurnishings(T, shadows) {
   const records = {};
   await Promise.all(Object.entries(sources).map(async ([kind, filename]) => {
     const controller = new AbortController();
-    let timer;
+    let timer, abandoned = false;
     const record = records[kind] = {status: 'fallback', reason: null, primitives: [], placements: []};
     try {
       const load = async () => {
@@ -27,19 +38,25 @@ export async function createFurnishings(T, shadows) {
         const buffer = await response.arrayBuffer();
         validateContainer(buffer);
         const gltf = await new GLTFLoader().parseAsync(buffer, '');
-        gltf.scene.updateMatrixWorld(true);
-        const primitives = [];
-        gltf.scene.traverse(mesh => {
-          if (!mesh.isMesh) return;
-          if (mesh.isSkinnedMesh || !mesh.geometry.attributes.position || mesh.morphTargetInfluences?.length ||
-              !mesh.matrixWorld.elements.every(Number.isFinite)) throw Error('invalid');
-          primitives.push({geometry: mesh.geometry, material: mesh.material, matrix: mesh.matrixWorld.clone()});
-        });
-        if (!primitives.length || primitives.length > 16) throw Error('invalid');
-        return primitives;
+        try {
+          if (abandoned) throw Error('timeout');
+          gltf.scene.updateMatrixWorld(true);
+          const primitives = [];
+          gltf.scene.traverse(mesh => {
+            if (!mesh.isMesh) return;
+            if (mesh.isSkinnedMesh || !mesh.geometry.attributes.position || mesh.morphTargetInfluences?.length ||
+                !mesh.matrixWorld.elements.every(Number.isFinite)) throw Error('invalid');
+            primitives.push({geometry: mesh.geometry, material: mesh.material, matrix: mesh.matrixWorld.clone()});
+          });
+          if (!primitives.length || primitives.length > 16) throw Error('invalid');
+          return primitives;
+        } catch (error) {
+          disposeScene(gltf.scene);
+          throw error;
+        }
       };
       record.primitives = await Promise.race([load(), new Promise((_, reject) => {
-        timer = setTimeout(() => { controller.abort(); reject(Error('timeout')); }, deadline);
+        timer = setTimeout(() => { abandoned = true; controller.abort(); reject(Error('timeout')); }, deadline);
       })]);
       record.status = 'loaded';
     } catch (error) {
