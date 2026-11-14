@@ -274,3 +274,31 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
  .joystick.is-floating{left:clamp(max(8px,env(safe-area-inset-left)),var(--stick-left),calc(100% - 76px - max(8px,env(safe-area-inset-right))));top:clamp(8px,var(--stick-top),calc(100% - 76px - max(8px,env(safe-area-inset-bottom))));bottom:auto}
  .joystick.is-floating .joystick-label{display:none}
 }
+
+/* Demo selection is independent of the scene and never represents an order. */
+.bag-open{padding:0 14px;white-space:nowrap;font-size:var(--gjh-type-header-location)}
+.demo-bag{width:min(620px,calc(100vw - 32px));max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);padding:24px;background:var(--paper);color:var(--green);border:1px solid var(--line);overflow:auto}
+.demo-bag::backdrop{background:var(--gjh-color-mall-intro)}
+.bag-top{display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:-24px;padding:16px 0;background:var(--paper);z-index:var(--z-tray)}
+.bag-top h2{margin:0;font-size:var(--gjh-type-dialog-copy-h2)}
+.demo-bag button{padding:0 14px;min-width:44px}
+#bag-items{list-style:none;padding:0;margin:24px 0}
+#bag-items li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:18px 0;border-top:1px solid var(--line)}
+#bag-items img{object-fit:contain;align-self:start}
+#bag-items h3{font-size:var(--gjh-type-header-location);margin:0;overflow-wrap:anywhere}
+.bag-quantity{grid-column:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.bag-quantity span{min-width:24px;text-align:center}
+#product-bag-actions{margin:20px 0}
+#product-add{background:var(--green);color:var(--paper);padding:0 18px}
+#product-bag-status{font-size:var(--gjh-type-header-location);line-height:1.6;margin:10px 0}
+.demo-bag button:focus-visible,body.is-3d #product-add:focus-visible{outline-color:var(--gjh-color-button-focus-visible)}
+@media(max-width:650px){
+ .site-header,.is-3d .site-header{gap:8px}
+ .header-location,.is-3d .header-location{display:none}
+ .bag-open{margin-left:auto;font-size:var(--gjh-type-header-location);padding:0 10px}
+ .is-3d .view-toggle{margin-left:0}
+ .demo-bag{padding:16px}
+ .bag-top{top:-16px}
+ .bag-quantity{grid-column:1 / -1;justify-content:flex-end}
+}
+@media(max-width:360px){.wordmark-caption{display:none}}

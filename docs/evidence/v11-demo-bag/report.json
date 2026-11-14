@@ -1,0 +1,29 @@
+[
+  {
+    "viewport": [
+      320,
+      680
+    ],
+    "fourSKUAddQuantityRemoveClearSession": "PASS",
+    "modalPauseFocus": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      680
+    ],
+    "fourSKUAddQuantityRemoveClearSession": "PASS",
+    "modalPauseFocus": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "fourSKUAddQuantityRemoveClearSession": "PASS",
+    "modalPauseFocus": "PASS"
+  },
+  {
+    "blockedStorageAnd3DFallback": "PASS"
+  }
+]

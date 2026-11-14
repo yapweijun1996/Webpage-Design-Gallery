@@ -1,4 +1,5 @@
 export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 
 export function createUI() {
@@ -46,6 +47,7 @@ export function createUI() {
   });
   const dialog = document.getElementById('product-dialog');
   const newMoonPreview = setupNewMoonPreview();
+  const bag = setupDemoBag();
   const closeButton = document.getElementById('product-close');
   const productTitle = document.getElementById('product-title');
   const productImage = document.getElementById('product-image');
@@ -106,7 +108,7 @@ export function createUI() {
 
   function inspect(id) {
     const record = records.get(id);
-    if (!record || dialog.open || guidePaused) return;
+    if (!record || dialog.open || bag.open || guidePaused) return;
     if (record.action === 'map') {
       if (!available || !showing3D) return;
       help.open = false; mallMap.open = true;
@@ -121,12 +123,13 @@ export function createUI() {
     productKind.textContent = record.kind;
     productDescription.textContent = record.description;
     newMoonPreview.open(id);
+    bag.select(id);
     dialog.showModal();
     closeButton.focus({ preventScroll: true });
   }
 
   function showGuide(event) {
-    if (!available || !showing3D || guide.open || dialog.open || externalPaused || document.hidden) return false;
+    if (!available || !showing3D || guide.open || dialog.open || bag.open || externalPaused || document.hidden) return false;
     guideFromHelp = event?.currentTarget === guideReopen;
     help.open = false; mallMap.open = false;
     guidePaused = true;
@@ -256,7 +259,7 @@ export function createUI() {
       }
     },
     paused() {
-      return guidePaused || externalPaused || !showing3D || dialog.open;
+      return guidePaused || externalPaused || !showing3D || dialog.open || bag.open;
     },
     offerFirstGuide() { if (!guideSeen) showGuide(); },
     setExternalPaused(value) { externalPaused = Boolean(value); },
