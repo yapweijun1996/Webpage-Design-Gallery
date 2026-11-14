@@ -243,3 +243,8 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
  .store-list .brand-store .store-story{padding:var(--space-4)}
  .store-list .original-tin-entry{padding:var(--space-5)}
 }
+
+/* Keep Run reachable beside the joystick while the compact landscape map is open. */
+@media(pointer:coarse) and (max-height:560px) and (orientation:landscape){
+ .mall-map[open] ~ .touch-controls .run-toggle{right:auto;left:156px}
+}

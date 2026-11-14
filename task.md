@@ -144,3 +144,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Wayfinding/kiosk integration, wider scene improvements and the remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.
 
 - V11 List view redesigned as an independent 1.1.7 slice: compact store discovery, visible product inspection actions and matching store order, retaining all products and 3D entry. See `docs/v11-directory-review.md`. This does not complete the remaining model integration and device gates.
+
+- Application 1.1.8 adds a repeatable five-viewport payload/draw-call/viewer-lifecycle budget check and fixes compact-landscape map overlap with Run. Same-page orientation, hit testing and keyboard evidence are in `docs/v11-performance-review.md`. Physical devices, actual notched-screen safe areas and screen readers remain unverified.

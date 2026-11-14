@@ -1,0 +1,77 @@
+[
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "mapOpenRunBounds": {
+      "x": 310,
+      "y": 730,
+      "width": 58,
+      "height": 44
+    },
+    "nonOverlap": "PASS",
+    "keyboardToggle": "PASS",
+    "closedPositionRestored": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "mapOpenRunBounds": {
+      "x": 156,
+      "y": 298,
+      "width": 64,
+      "height": 44
+    },
+    "nonOverlap": "PASS",
+    "keyboardToggle": "PASS",
+    "closedPositionRestored": "PASS"
+  },
+  {
+    "viewport": [
+      667,
+      375
+    ],
+    "mapOpenRunBounds": {
+      "x": 156,
+      "y": 283,
+      "width": 64,
+      "height": 44
+    },
+    "nonOverlap": "PASS",
+    "keyboardToggle": "PASS",
+    "closedPositionRestored": "PASS"
+  },
+  {
+    "viewport": [
+      568,
+      320
+    ],
+    "mapOpenRunBounds": {
+      "x": 156,
+      "y": 228,
+      "width": 58,
+      "height": 44
+    },
+    "nonOverlap": "PASS",
+    "keyboardToggle": "PASS",
+    "closedPositionRestored": "PASS"
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "mapOpenRunBounds": {
+      "x": 310,
+      "y": 730,
+      "width": 58,
+      "height": 44
+    },
+    "nonOverlap": "PASS",
+    "keyboardToggle": "PASS",
+    "closedPositionRestored": "PASS"
+  }
+]
