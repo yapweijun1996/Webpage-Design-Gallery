@@ -37,10 +37,11 @@ function updateHUD() {
   currentZone = p.z < .1 ? (p.x < -5 ? 'newmoon' : p.x > 5 ? 'gogo' : 'mili') : 'atrium';
   nearby = null; let best = Infinity;
   for (const item of world.interactables) {
+    if(item.frontZMax!==undefined && p.z>item.frontZMax)continue;
     const distance = Math.hypot(p.x - item.x, p.z - item.z);
     if (distance < item.radius && distance < best) { nearby = item.id; best = distance; }
   }
-  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active});
+  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated});
 }
 function tick() {
   if (ui.paused()) return;
@@ -80,12 +81,13 @@ function fallback(message) {
   cancelAnimationFrame(frame); frame = 0; player?.clearInput(); ui.fallback(message);
 }
 ui.onTeleport(zone => { if (ready) { manual = false; player.cancelCollection(); player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
-ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.clearInput();player?.cancelCollection();} });
+ui.onSeat(sit=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit():player.stand();updateHUD();render();return ok;});
+ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {if(player?.state.seated)player.stand();player?.clearInput();player?.cancelCollection();} });
 document.addEventListener('keydown', event => {
-  if(event.code==='Escape'&&!ui.paused())player?.cancelCollection();
+  if(event.code==='Escape'&&!ui.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
   if (event.code === 'KeyF' && nearby && !ui.paused() && !event.repeat &&
       !event.altKey && !event.ctrlKey && !event.metaKey &&
-      (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); ui.inspect(nearby); }
+      (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); if(player.state.seated){player.stand();updateHUD();}else ui.inspect(nearby); }
 });
 document.addEventListener('focusin',()=>{if(ui.paused())player?.cancelCollection();});
 document.addEventListener('click', () => { if (ui.paused()) {player?.clearInput();player?.cancelCollection();} });

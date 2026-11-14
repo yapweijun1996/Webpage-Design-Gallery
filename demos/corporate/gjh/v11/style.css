@@ -305,3 +305,6 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 #product-collect{padding:0 18px;margin:8px 0 0 8px}
 .collection-note{font-size:var(--gjh-type-header-location);line-height:1.6;margin:12px 0}
 @media(max-width:650px){#product-collect{display:block;margin:10px 0 0}}
+/* Seated mode has one explicit exit; walking controls would be misleading. */
+.is-seated .joystick,.is-seated .run-toggle{visibility:hidden}
+.is-seated .inspect-prompt{left:50%;transform:translateX(-50%);bottom:max(58px,env(safe-area-inset-bottom));width:260px;max-width:calc(100% - 36px)}

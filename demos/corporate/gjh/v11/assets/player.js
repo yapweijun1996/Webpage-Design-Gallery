@@ -12,6 +12,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   controller.enableAutostep(.2, .28, true); controller.enableSnapToGround(.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
+  let seated = false;
+  const seat = {x:-7.8,z:9.27,y:.015,exitX:-7.8,exitZ:8.3};
   let yaw = 0, pitch = .1, drag = null, stickPointer = null, stickOrigin = null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
@@ -84,6 +86,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) canvas.addEventListener(type, releasePointer);
   function update(dt) {
     if (isPaused()) { clearInput(); return; }
+    if(seated){yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;character.update('idle',dt);return;}
     const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY);
     const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX);
     const running = injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight'));
@@ -126,16 +129,31 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (instant) camera.position.copy(desired); else camera.position.lerp(desired, 1 - Math.exp(-12 * dt));
     safe.copy(camera.position); constrain(safe); camera.position.copy(safe); camera.lookAt(target);
   }
+  function sit() {
+    if(seated)return false;const p=body.translation();
+    if(Math.hypot(p.x-seat.x,p.z-seat.exitZ)>1.25 || p.z>9.0)return false;
+    const hit=physics.intersectionWithShape({x:seat.exitX,y:.91,z:seat.exitZ},{x:0,y:0,z:0,w:1},capsule.shape,undefined,undefined,capsule,body);
+    if(hit)return false;
+    clearInput();injected=null;character.cancelCollection();seated=true;capsule.setEnabled(false);character.setSeated(true);
+    body.setTranslation({x:seat.x,y:seat.y+.875,z:seat.z},true);body.setNextKinematicTranslation({x:seat.x,y:seat.y+.875,z:seat.z});visual.rotation.y=0;yaw=Math.PI+.45;vertical=0;character.update('idle',0);physics.step();updateCamera(0,true);return true;
+  }
+  function stand() {
+    if(!seated)return false;
+    const position={x:seat.exitX,y:.91,z:seat.exitZ};
+    if(physics.intersectionWithShape(position,{x:0,y:0,z:0,w:1},capsule.shape,undefined,undefined,capsule,body))return false;
+    seated=false;character.setSeated(false);clearInput();injected=null;vertical=0;body.setTranslation(position,true);body.setNextKinematicTranslation(position);capsule.setEnabled(true);physics.step();updateCamera(0,true);return true;
+  }
   function teleport(zone) {
     const destinations = {atrium: [-2, 12], newmoon: [-10, 2.4], mili: [0, 2.4], gogo: [10, 2.4]};
     if (!destinations[zone]) return false;
+    seated=false;character.setSeated(false);capsule.setEnabled(true);
     const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }
-  return {body, capsule, camera, update, sync, updateCamera, teleport, clearInput, setBagCount:character.setBagCount, startCollection:character.startCollection, cancelCollection:character.cancelCollection,
+  return {body, capsule, camera, sit, stand, update, sync, updateCamera, teleport, clearInput, setBagCount:character.setBagCount, startCollection:character.startCollection, cancelCollection:character.cancelCollection,
     setPaused: fn => { isPaused = fn; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, seated, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
   };
 }

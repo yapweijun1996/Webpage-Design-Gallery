@@ -1,0 +1,35 @@
+[
+  {
+    "floor": 0.6451590597700676,
+    "visible": true,
+    "pose": {
+      "available": true,
+      "visible": true,
+      "count": 1,
+      "mode": "generic-carry-cue",
+      "pickupAnimation": false
+    }
+  },
+  {
+    "floor": 0.6451590597700676,
+    "visible": true,
+    "pose": {
+      "available": true,
+      "visible": true,
+      "count": 1,
+      "mode": "generic-carry-cue",
+      "pickupAnimation": false
+    }
+  },
+  {
+    "floor": 0.6451590597700676,
+    "visible": true,
+    "pose": {
+      "available": true,
+      "visible": true,
+      "count": 1,
+      "mode": "generic-carry-cue",
+      "pickupAnimation": false
+    }
+  }
+]

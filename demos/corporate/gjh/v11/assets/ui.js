@@ -54,7 +54,8 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
-  const records = new Map([['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
+  let seated=false, seatListener=null;
+  const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   const zones = { atrium: 'The courtyard', newmoon: 'New Moon', mili: 'MILI', gogo: 'GOGO' };
   let available = false;
   let showing3D = false;
@@ -109,6 +110,7 @@ export function createUI() {
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || guidePaused) return;
+    if(record.action==='seat'){seatListener?.(true);scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
       if (!available || !showing3D) return;
       help.open = false; mallMap.open = true;
@@ -168,7 +170,7 @@ export function createUI() {
   });
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
-  inspectButton.addEventListener('click', () => { if (nearby) inspect(nearby); });
+  inspectButton.addEventListener('click', () => { if(seated){seatListener?.(false);scene.focus({preventScroll:true});}else if (nearby) inspect(nearby); });
   closeButton.addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => {
     const target = returnFocus;
@@ -230,7 +232,7 @@ export function createUI() {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, nearby: nextNearby, collectionActive = false }) {
+    update({ zone, x, z, nearby: nextNearby, collectionActive = false, isSeated = false }) {
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
         if (showing3D) {
@@ -257,7 +259,10 @@ export function createUI() {
         inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
         if (nearby && showing3D) announce(isMap ? 'Directory kiosk. Decorative screen. Press F or tap Map for the three-store map.' : `${records.get(nearby).name}. Press F or tap Inspect for details.`);
       }
-      inspectPrompt.hidden = !nearby || collectionActive;
+      seated=isSeated;document.body.classList.toggle('is-seated',seated);
+      if(seated){nearbyName.textContent='Courtyard bench · seated';inspectButton.textContent='Stand up';inspectButton.setAttribute('aria-label','Stand up from courtyard bench');}
+      else if(nearby==='courtyard-seat'){nearbyName.textContent='Courtyard bench · simplified seated pose';inspectButton.textContent='Press F / tap Sit';inspectButton.setAttribute('aria-label','Sit on courtyard bench');}
+      inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
     },
     paused() {
       return guidePaused || externalPaused || !showing3D || dialog.open || bag.open;
@@ -274,6 +279,7 @@ export function createUI() {
         return true;
       });
     },
+    onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {
       teleportListener = listener;
