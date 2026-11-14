@@ -318,3 +318,9 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 .is-pushing .joystick:not(.is-floating){visibility:hidden}
 .is-pushing .inspect-prompt{left:50%;transform:translateX(-50%);bottom:max(58px,env(safe-area-inset-bottom));width:260px;max-width:calc(100% - 36px)}
 @media(max-height:560px) and (orientation:landscape){.is-pushing .inspect-prompt,.is-seated .inspect-prompt{left:18px;transform:none;width:220px}}
+/* A compact seated action bar exposes more of the close-up without shrinking targets. */
+@media(max-width:650px) and (orientation:portrait){
+ .is-seated .inspect-prompt{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;width:calc(100% - 36px);padding:8px 10px;text-align:left}
+ .is-seated #nearby-name{margin:0;line-height:1.4;overflow-wrap:anywhere}
+ .is-seated #inspect{width:auto;min-width:100px;max-width:120px;padding:0 10px}
+}
