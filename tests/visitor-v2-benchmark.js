@@ -1,0 +1,8 @@
+async () => {
+
+const T=await import('./vendor/three.module.min.js'),{createCharacter}=await import('./assets/character.js');
+const characters=await Promise.all(Array.from({length:5},()=>createCharacter(T)));const scene=new T.Scene();scene.background=new T.Color(0x8f9995);scene.add(new T.HemisphereLight(0xffffff,0x555555,3));characters.forEach((c,i)=>{c.visual.position.x=(i-2)*1.1;scene.add(c.visual);});
+const camera=new T.PerspectiveCamera(45,390/844,.1,100);camera.position.set(0,1.5,13);camera.lookAt(0,.8,0);const renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(390,844);renderer.setPixelRatio(1.25);document.body.append(renderer.domElement);const gl=renderer.getContext();
+function sample(){const times=[];for(let i=0;i<24;i++){const start=performance.now();for(const c of characters)c.update('walk',1/60);renderer.render(scene,camera);gl.finish();times.push(performance.now()-start);}times.sort((a,b)=>a-b);return {triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,p50:times[12],p95:times[22]};}
+const high=sample();characters.forEach(c=>c.updateLOD(camera));await new Promise(r=>setTimeout(r,2000));characters.forEach(c=>c.updateLOD(camera));const low=sample();if(!characters.every(c=>c.state.lod.level===1))throw Error('LOD not active');if(low.triangles>=high.triangles*.6)throw Error('LOD triangle budget');return {viewport:[390,844],characters:5,backend:gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL),dpr:1.25,high,low,hardware:navigator.hardwareConcurrency};
+}

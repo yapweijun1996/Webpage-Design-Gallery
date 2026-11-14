@@ -109,18 +109,33 @@ export async function addProducts(T, scene, textures, brass) {
     shelfXs.forEach((x, index) => { const matrix = new T.Matrix4(); matrix.compose(new T.Vector3(x, 0, -9.25), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), Math.PI), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
   }
-  const interactables = [];
+  const interactables = [], stock = new Map();
   canRecords.forEach((record, productIndex) => {
     const sku = cans[productIndex].sku, x = shelfXs[productIndex], placements = [];
     for (const y of shelfTops) for (const dx of [-.44, 0, .44]) placements.push(new T.Vector3(x + dx, y, -9.25));
+    const batches = [];
+    stock.set(`new-moon-${sku}-front`, {record, placements, batches, reserved:false});
     if (record.status === 'loaded') for (const primitive of record.primitives) {
       const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
       placements.forEach((position, index) => { const matrix = new T.Matrix4(); matrix.compose(position, new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
-      mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
+      mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh); batches.push(mesh);
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {createCollectProp(id) {
+  return {reserveProduct(id) {
+    const entry = stock.get(id);
+    if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
+    entry.reserved = true;
+    const index = 4, matrices = entry.batches.map(mesh => { const m = new T.Matrix4(); mesh.getMatrixAt(index,m); return m; });
+    entry.batches.forEach(mesh => { mesh.setMatrixAt(index,new T.Matrix4().makeScale(0,0,0)); mesh.instanceMatrix.needsUpdate=true; });
+    const prop = new T.Group(); prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
+    for (const primitive of entry.record.primitives) {const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);prop.add(mesh);}
+    scene.add(prop); let released=false;
+    return {id, prop, origin:entry.placements[index].clone(), release() {
+      if(released)return; released=true; prop.removeFromParent(); entry.reserved=false;
+      entry.batches.forEach((mesh,i)=>{mesh.setMatrixAt(index,matrices[i]);mesh.instanceMatrix.needsUpdate=true;});
+    }};
+  }, createCollectProp(id) {
     const index=cans.findIndex(item => `new-moon-${item.sku}-front`===id), record=canRecords[index];
     if(!record || record.status!=='loaded') return null;
     const group=new T.Group();group.name='SelectedDemoCan';

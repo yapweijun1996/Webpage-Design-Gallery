@@ -5,7 +5,8 @@ import {setupOriginalTin} from './assets/original-tin.js';
 const ui = createUI(), canvas = document.querySelector('#scene'), modes = createModes();
 setupOriginalTin(ui);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-let ready = false, player, world, physics, renderer, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
+let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
+let productControl=null;
 let nearby = null, currentZone = 'atrium';
 function syncMode(signals = ui.modeSignals()) {
   const mode = deriveMode({...signals, seated: Boolean(player?.state.seated),
@@ -45,13 +46,15 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
-  currentZone = p.z < .1 ? (p.x < -5 ? 'newmoon' : p.x > 5 ? 'gogo' : 'mili') : 'atrium';
+  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : p.z < .1 ? (p.x < -5 ? 'newmoon' : p.x > 5 ? 'gogo' : 'mili') : 'atrium';
   nearby = null; let best = Infinity;
   for (const item of world.interactables) {
+    if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;
     if(item.seat && (p.z-item.seat.z)*item.seat.facing>-.25)continue;
     const distance = Math.hypot(p.x - item.x, p.z - item.z);
     if (distance < item.radius && distance < best) { nearby = item.id; best = distance; }
   }
+  productControl?.update(p,nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
   syncMode();
 }
@@ -59,7 +62,7 @@ function tick() {
   if (ui.paused()) return;
   const p = player.state;
   for (const door of world.doors) {
-    const open = Math.hypot(p.x - door.x, p.z) < 4.8;
+    const open = p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
     door.open = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);
@@ -122,12 +125,27 @@ async function initialize() {
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = quality; renderer.shadowMap.type = T.PCFSoftShadowMap;
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, quality);
+  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
+    const {createElevatorV2} = await import('./assets/elevator-v2.js');
+    elevator = createElevatorV2(T, R, physics, world.scene);
+    world.interactables.push(...elevator.interactables);
+  }
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats);
+  if (elevator) {
+    const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
+    productControl=installPhysicalProductControl(player,world,()=>ui.paused());
+    const {installVisitorV2Controls} = await import('./assets/visitor-v2-controls.js');
+    installVisitorV2Controls(document.querySelector('#controls-copy'), changes => { player.customize(changes); render(); });
+  }
+  if (elevator) ui.setElevator(() => {
+    manual=false; player.setInput(null);
+    const ok=player.useElevator(elevator); updateHUD(); render(); return ok;
+  });
   ui.setSeats(world.seats);
   player.setPaused(() => ui.paused());
   ui.onPanelPause(()=>{player.clearInput();player.setInput(null);player.cancelCollection();manual=false;});
   ui.onCart(()=>({...player.state.character.cart,seated:player.state.seated}),value=>{const ok=player.setCart(value);updateHUD();render();return ok;});
-  ui.onCollect(id=>Boolean(!player.state.seated&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
+  ui.onCollect(id=>Boolean(!player.state.seated&&player.state.character.collection.available!==false&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;
     player.setCart(false);player.clearInput();player.setInput(null);manual=false;
     if(reducedMotion.matches)return true;
@@ -136,7 +154,7 @@ async function initialize() {
   ui.onBagChange(value => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
   function resize() {
     const width = canvas.clientWidth, height = canvas.clientHeight; if (!width || !height) return;
-    renderer.setPixelRatio(Math.min(devicePixelRatio, width < 600 ? 1.5 : 2)); renderer.setSize(width, height, false);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, width < 600 ? (elevator ? 1.25 : 1.5) : 2)); renderer.setSize(width, height, false);
     player.camera.aspect = width / height; player.camera.fov = width < 600 ? 68 : 58; player.camera.updateProjectionMatrix();
     renderer.shadowMap.enabled = quality && width >= 1000; player.updateCamera(0, true); render();
   }

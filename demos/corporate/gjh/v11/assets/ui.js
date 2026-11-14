@@ -12,6 +12,8 @@ export function createUI() {
   const status = document.getElementById('mall-status');
   const fallbackMessage = document.getElementById('fallback-message');
   const playerDot = document.getElementById('player-dot');
+  const floorplan=document.querySelector('.floorplan'),floorplanLabel=floorplan.getAttribute('aria-label'),mapCaption=document.querySelector('.map-caption');
+  const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
   const inspectPrompt = document.getElementById('inspect-prompt');
   const inspectButton = document.getElementById('inspect');
   const nearbyName = document.getElementById('nearby-name');
@@ -77,13 +79,13 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
-  let seated=false, seatNotice=null, seatListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null;
+  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   cartToggle.addEventListener('click',()=>{const state=cartState();const next=!state.active;const ok=cartListener?.(next);if(!ok){cartStatus.textContent=state.seated?'Stand up before using the cart.':'Move to an open space, then try again. The cart needs a wide turning clearance.';return;}
     if(next){document.querySelector('#bag-dialog').close();setView(true);scene.focus({preventScroll:true});}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';});
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
-  const zones = { atrium: 'The courtyard', newmoon: 'New Moon', mili: 'MILI', gogo: 'GOGO' };
+  const zones = { atrium: 'The courtyard', newmoon: 'New Moon', mili: 'MILI', gogo: 'GOGO', upper: 'Upper level' };
   let available = false;
   let showing3D = false;
   let currentZone = 'atrium';
@@ -144,6 +146,7 @@ export function createUI() {
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || guidePaused) return;
+    if(record.action==='elevator'){const ok=elevatorListener?.();announce(ok?'Elevator travelling to the other level.':'Return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
     if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice='Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce('Seat path blocked. Approach the clear front of the bench.');}scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
       if (!available || !showing3D) return;
@@ -280,6 +283,7 @@ export function createUI() {
     update({ zone, x, z, nearby: nextNearby, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null }) {
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
+        const upper=zone==='upper';playerDot.style.display=upper?'none':'';mapCaption.querySelector('.map-key').hidden=upper;floorplan.setAttribute('aria-label',upper?'Ground floor map. Choose a store to return to its entrance.':floorplanLabel);if(mapCaptionText)mapCaptionText.textContent=upper?' Ground floor map ':'You are here';
         if (showing3D) {
           locationName.textContent = zones[zone];
           announce(`Location: ${zones[zone]}.`);
@@ -311,6 +315,7 @@ export function createUI() {
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
       else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?'Tap Sit':'Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
+      else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;inspectButton.textContent='Change level';inspectButton.setAttribute('aria-label','Use elevator to change levels');}
       const cart=cartState();if(previousCartMode!==cart.active||previousCartSeated!==seated){cartStatus.textContent=seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';previousCartMode=cart.active;previousCartSeated=seated;}cartControls.hidden=!cart.available;cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';cartToggle.disabled=seated&&!cart.active;
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
@@ -334,6 +339,7 @@ export function createUI() {
       });
     },
     onCart(state,listener){cartState=state;cartListener=listener;},
+    setElevator(listener){records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
     setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
     onPanelPause(listener){panelPauseListener=listener;if(compactMap.matches&&(mallMap.open||help.open))listener();},
     onSeat(listener){seatListener=listener;},

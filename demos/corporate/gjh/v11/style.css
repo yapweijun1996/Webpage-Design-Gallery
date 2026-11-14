@@ -120,6 +120,10 @@ body.is-3d{overflow:hidden;background:var(--green)}
 .keyboard-help #controls-copy{padding:16px;max-height:calc(100dvh - 350px);overflow:auto}
 .keyboard-help p{font-size:var(--gjh-type-product-inspect);line-height:2;margin-bottom:12px}
 .keyboard-help p:last-child{margin-bottom:0}
+.visitor-v2-controls{border:1px solid var(--gjh-color-keyboard-help);padding:12px;margin:16px 0 0;display:grid;gap:10px;min-width:0}
+.visitor-v2-controls legend{padding:0 6px}.visitor-v2-controls p{line-height:1.5;margin:0}
+.visitor-v2-controls label{display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,1fr);align-items:center;gap:8px}
+.visitor-v2-controls select{min-width:0;min-height:44px;width:100%;font:inherit}
 kbd{font-family:var(--sans);font-size:var(--gjh-type-wordmark-caption);border:1px solid var(--gjh-color-kbd);padding:1px 4px;white-space:nowrap}
 .mall-map{pointer-events:auto;position:absolute;right:36px;bottom:60px;width:254px;background:var(--gjh-color-mall-map);border:1px solid var(--gjh-color-mall-map-alternate);box-shadow:var(--gjh-shadow-mall-map);z-index:var(--gjh-layer-mall-map)}
 .mall-map>summary{display:none;list-style:none;cursor:pointer}
@@ -370,3 +374,9 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 .compact-panel-note{display:none}
 .is-panel-open .compact-panel-note{display:block;font-size:var(--gjh-type-header-location);line-height:1.5;margin:0 0 12px}
 .is-panel-open .joystick,.is-panel-open .run-toggle,.is-panel-open .inspect-prompt{visibility:hidden}
+
+.inspect-prompt.has-physical-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;max-width:360px}
+.inspect-prompt.has-physical-product[hidden]{display:none}
+.has-physical-product #nearby-name,.has-physical-product p{grid-column:1/-1}
+.has-physical-product p{font-size:11px;line-height:1.4;margin:0;white-space:normal}
+.has-physical-product button{width:100%;min-width:0;min-height:44px;white-space:normal}

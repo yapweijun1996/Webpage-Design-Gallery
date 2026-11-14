@@ -21,6 +21,11 @@ export function createLocomotionContinuity() {
 }
 
 export async function createCharacter(T) {
+  // Use the released v2 adapter by default; visitor=v1 retains the original asset.
+  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
+    const {createCharacterV2} = await import('./character-v2.js');
+    return createCharacterV2(T, createLocomotionContinuity);
+  }
   const {GLTFLoader} = await import('../vendor/GLTFLoader.js');
   const model = 'gjh-mall-visitor';
   const asset = `assets/${model}.glb`;

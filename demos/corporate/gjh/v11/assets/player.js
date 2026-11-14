@@ -12,7 +12,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   controller.enableAutostep(.2, .28, true); controller.enableSnapToGround(.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
-  let seated = false, pushing=false;
+  let seated = false, pushing=false, elevatorTravel=null;
   // A conservative full-turn footprint encloses avatar and cart. No sweeping corners.
   const walkingShape=new R.Capsule(.55,.3), cartShape=new R.Cylinder(.85,1.4);
   let seat=null, seatPhase='idle', seatTime=0, seatFrom=null, seatStartAngle=0, seatStartWeight=0;
@@ -99,11 +99,24 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function cancelCollection(){character.cancelCollection();if(actionView?.kind==='collection')restoreActionView();}
   function update(dt) {
     if (isPaused()) { clearInput(); return; }
+    if (elevatorTravel) {
+      const trip = elevatorTravel;
+      trip.elapsed += dt;
+      const t = reduceSeatMotion() ? 1 : Math.min(1, trip.elapsed / 2.5);
+      const eased = t * t * (3 - 2 * t);
+      const height = trip.from + (trip.to - trip.from) * eased;
+      moveSeat({x:trip.x, y:height + .89, z:trip.z});
+      trip.setHeight(height);
+      character.update('idle', dt);
+      if (t === 1) { elevatorTravel=null; capsule.setEnabled(true); vertical=0; }
+      return;
+    }
     updateActionView(dt);
     if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;character.update('idle',dt);return;}
     const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY);
     const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX);
     if(actionView?.kind==='collection'&&Math.hypot(forward,right)>.1)cancelCollection();
+    if(actionView?.kind==='elevator'&&Math.hypot(forward,right)>.1)restoreActionView();
     const running = !pushing && (injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight')));
     const turning = (keys.has('KeyQ') ? 1 : 0) - (keys.has('KeyE') ? 1 : 0);
     yaw += turning * (110 * Math.PI / 180) * dt;
@@ -145,9 +158,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     offset.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(distance);
     desired.copy(target).add(offset); constrain(desired);
     if (instant) camera.position.copy(desired); else camera.position.lerp(desired, 1 - Math.exp(-12 * dt));
-    safe.copy(camera.position); constrain(safe); camera.position.copy(safe); camera.lookAt(target);
+    safe.copy(camera.position); constrain(safe); camera.position.copy(safe); camera.lookAt(target); character.updateLOD?.(camera);
   }
   function setCart(value) {
+    if ((elevatorTravel || character.state.physicalProduct?.phase!=='empty' && character.state.physicalProduct) && value) return false;
     if(!value){pushing=false;character.setCart(false);capsule.setShape(walkingShape);controller.enableAutostep(.2,.28,true);clearInput();injected=null;return true;}
     if(pushing)return true;
     if(seated||!character.state.cart.available)return false;
@@ -170,7 +184,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(t===1){if(seatPhase==='align'){seatPhase='sit';seatTime=0;seatFrom={...body.translation()};seatStartAngle=seat.angle;}else if(seatPhase==='sit'){seatPhase='seated';character.setSeated(true);}else finishStand();}
   }
   function sit(id) {
-    if(seated||pushing)return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
+    if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
     if(Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>1.1||(p.z-candidate.z)*candidate.facing>-.25)return false;
     seat=candidate;const exit={x:seat.exitX,y:.91,z:seat.exitZ},target={x:seat.x,y:seat.y+.875,z:seat.z};
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
@@ -187,16 +201,31 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     character.update('idle',0);physics.step();updateCamera(0,instant||reduceSeatMotion());return true;
   }
   function teleport(zone) {
+    if (elevatorTravel) return false;
     const destinations = {atrium: [-2, 12], newmoon: [-10, 2.4], mili: [0, 2.4], gogo: [10, 2.4]};
     if (!destinations[zone]) return false;
-    setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
+    character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
     const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }
-  return {body, capsule, camera, sit, stand, setCart, update, sync, updateCamera, teleport, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  function useElevator(elevator) {
+    const p=body.translation();
+    if (seated || pushing || elevatorTravel || character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty' || Math.hypot(p.x-elevator.x,p.z-elevator.z)>1.45) return false;
+    const from=p.y-.875 > elevator.upper/2 ? elevator.upper : 0;
+    if (Math.abs(p.y-.875-from)>.35) return false;
+    clearInput(); injected=null; cancelCollection(); vertical=0; capsule.setEnabled(false);
+    beginActionView('elevator', Math.PI / 2);
+    elevatorTravel={x:elevator.x,z:elevator.z,from,to:from ? 0 : elevator.upper,elapsed:0,setHeight:elevator.setHeight};
+    moveSeat({x:elevator.x,y:from+.89,z:elevator.z});
+    return true;
+  }
+  return {body, capsule, camera, sit, stand, setCart, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+    pickProduct: token=>{clearInput();injected=null;return character.pickProduct?.(token);},
+    returnProduct: ()=>character.returnProduct?.(),
+    customize: changes => character.customize?.(changes),
     setPaused: fn => { isPaused = fn; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, seated, cameraFocus:actionView?.kind||null,cameraDistance, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, seated, elevatorTravel: Boolean(elevatorTravel), cameraFocus:actionView?.kind||null,cameraDistance, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
   };
 }

@@ -1,0 +1,9 @@
+{
+  viewport: [ 390, 844 ],
+  characters: 5,
+  backend: 'Chrome SwiftShader',
+  dpr: 1.25,
+  high: { triangles: 59860, calls: 75, p50: 0.7999999523162842, p95: 3.5 },
+  low: { triangles: 26880, calls: 75, p50: 0.5, p95: 1.9000000357627869 },
+  hardware: 10
+}

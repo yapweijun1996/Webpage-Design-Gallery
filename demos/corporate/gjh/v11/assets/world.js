@@ -97,22 +97,24 @@ export async function createWorld(T, R, physics, shadows) {
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
   function bench(x, z, facing = 1) {
-    const seatCollider=collider(x, .3, z, 2.5, .4, .85);
+    const seatScale=new URLSearchParams(location.search).get('visitor') !== 'v1' ? .8 : 1;
+    const seatCollider=collider(x, .3*seatScale, z, 2.5, .4*seatScale, .85);
     const index=seats.length,id=index===0?'courtyard-seat':`bench-seat-${index+1}`;
     const name=z>0?`Courtyard bench ${index+1}`:`${x<5?'MILI':'GOGO'} bench ${index%2+1}`;
     seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2):.45,collider:seatCollider.handle});
-    if (!furnishings.place('bench', x, z, 1, facing)) {
-      box('wood', x, .3, z, 2.5, .4, .85); box('seat', x, .56, z, 2.55, .18, .9);
-      box('seat', x, .94, z + facing * .35, 2.55, .7, .18);
-      box('brass', x, .47, z - facing * .451, 2.52, .035, .025);
-      box('oak', x, 1.285, z + facing * .35, 2.58, .065, .21);
+    const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*seatScale,bz,sx,sy*seatScale,sz);
+    if (!furnishings.place('bench', x, z, seatScale, facing)) {
+      benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, .56, z, 2.55, .18, .9);
+      benchBox('seat', x, .94, z + facing * .35, 2.55, .7, .18);
+      benchBox('brass', x, .47, z - facing * .451, 2.52, .035, .025);
+      benchBox('oak', x, 1.285, z + facing * .35, 2.58, .065, .21);
       for (const dx of [-.42, .42]) {
-        box('wood', x + dx, .653, z, .018, .006, .82);
-        box('wood', x + dx, .96, z + facing * .253, .018, .52, .008);
+        benchBox('wood', x + dx, .653, z, .018, .006, .82);
+        benchBox('wood', x + dx, .96, z + facing * .253, .018, .52, .008);
       }
       for (const dx of [-1.15, 1.15]) {
-        box('brass', x + dx, .68, z, .08, .5, .9);
-        box('oak', x + dx, .955, z, .13, .065, .92);
+        benchBox('brass', x + dx, .68, z, .08, .5, .9);
+        benchBox('oak', x + dx, .955, z, .13, .065, .92);
       }
     }
     shadow(x, z, 3.6, 2);
@@ -150,7 +152,12 @@ export async function createWorld(T, R, physics, shadows) {
   }
   box('green', -15, 3.3, 3.5, .3, 6.6, 29, true); box('green', 15, 3.3, 3.5, .3, 6.6, 29, true);
   box('green', 0, 3.3, 18, 30, 6.6, .3, true);
-  box('ivory', 0, 6.5, 9, 30, .3, 18);
+  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
+    // Leave a real shaft opening for the experimental lift, without changing v1.
+    for (const side of [-1, 1]) box('ivory', side * 8.2, 6.5, 9, 13.6, .3, 18);
+    box('ivory', 0, 6.5, 7.25, 2.8, .3, 14.5);
+    box('ivory', 0, 6.5, 17.75, 2.8, .3, .5);
+  } else box('ivory', 0, 6.5, 9, 30, .3, 18);
   // Skylight replaces the central roof panel visually, with dusk glass and brass ribs.
   box('dark', 0, 6.29, 8.3, 14.6, .06, 13);
   box('glass', 0, 6.25, 8.3, 14.1, .025, 12.6);
@@ -195,7 +202,7 @@ export async function createWorld(T, R, physics, shadows) {
   for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   const doors = [], interactables = [];
-  let createCollectProp = () => null;
+  let createCollectProp = () => null, reserveProduct = () => null;
   let worldProductAssets = Object.freeze({status: 'not-loaded'});
   // Original decorative kiosk beside the entrance, outside the central walking line.
   // The actual wayfinding interaction opens the existing three-store DOM map.
@@ -317,7 +324,7 @@ export async function createWorld(T, R, physics, shadows) {
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
         sign(country, -12.85 + index * 1.9, 2.22, -8.72, 1.35, .16, true);
       }
-      worldProductAssets = productDisplay.assets; createCollectProp = productDisplay.createCollectProp;
+      worldProductAssets = productDisplay.assets; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
       plant(x - 3.6, -2.3);
     } else {
       const cover = `${zone}-brand-cover.jpg`;
@@ -389,5 +396,5 @@ export async function createWorld(T, R, physics, shadows) {
     }
   }
   interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.1,seat})));
-  return {scene, doors, seats, interactables, createCollectProp, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, seats, interactables, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
 }
