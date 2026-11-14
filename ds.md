@@ -301,10 +301,14 @@ Hold Q/E to turn left/right with the camera and visitor; turning alone does not 
 
 ### Editorial discovery presentation (2026-11-14)
 
-The company directory uses an editorial presentation scoped by `main[data-page="companies"]`: warm paper, dark ink, a restrained burnt-orange action accent, system serif display type, and a prominent company preview. Canonical values belong to `design-system/tokens.json`; `assets/tokens.css` is regenerated. Other gallery routes and independent demos retain their existing themes. Search/category source order remains inventory-aware, company cards keep their collection destination, and PWA update consent remains intact.
+All gallery routes share an editorial theme scoped by `body.gallery`: warm paper, dark ink, a restrained burnt-orange action accent, system serif display type, and a prominent company preview. Canonical values belong to `design-system/tokens.json`; `assets/tokens.css` is regenerated. Directory-specific layout remains scoped to `main[data-page="companies"]`. Company collections, details, comparison, offline screens and PWA chrome use the same palette and shared identity. Independent demos retain their existing themes. Search/category source order remains inventory-aware, company cards keep their collection destination, and PWA update consent remains intact.
 
 The advisor [proposal](ui/home-redesign-proposal.md) and [illustration](ui/home-redesign-proposal.png) are design references, not runtime screenshots. Real before/after images and verification scope are recorded in [the local review](ui/README.md).
 
 ### PWA appearance and localization (2026-11-15)
 
 Light/Dark/System and English/Simplified Chinese/Bahasa Melayu are available on gallery routes. Canonical theme values remain in the token registry; locale messages and placeholder patterns live in independent JSON packs. Explicit update consent and integrity checks are retained, with a guard for active comparison selections. See [the acceptance contract](docs/pwa-preferences.md) for offline scope, state ownership, budgets, evidence and unverified platforms.
+
+### Shared gallery palette verification (2026-11-15)
+
+The shared base template emits the `gallery` body class. Six gallery routes use one editorial palette in Light/Dark, including surface, hover, focus, header and footer styles. `tests/browser_gallery_theme.py` checks 36 route/theme/viewport combinations and verifies iframe theme isolation. See [resolved palette evidence](docs/evidence/gallery-theme.json).

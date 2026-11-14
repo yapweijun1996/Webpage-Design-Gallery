@@ -1,0 +1,76 @@
+{
+  "build": {
+    "version": "1.1.30",
+    "build": "768a8105b1732fff"
+  },
+  "checks": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "routes": 6,
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "routes": 6,
+      "status": "PASS"
+    }
+  ],
+  "pageErrors": [],
+  "visual_review": {
+    "score": 90,
+    "hierarchy": 18,
+    "spacing": 17,
+    "typography": 14,
+    "color": 14,
+    "consistency": 14,
+    "responsive": 13,
+    "viewports": [
+      1440,
+      768,
+      390
+    ],
+    "scope": "Independent review of actual company-page screenshots; original layout preserved"
+  },
+  "regression": {
+    "python_unit_tests": {
+      "status": "PASS",
+      "count": 46
+    },
+    "gallery_browser": "PASS",
+    "pwa_browser": "PASS",
+    "gjh_demos_browser": {
+      "status": "PASS",
+      "cases": 28,
+      "no_javascript_journeys": 4,
+      "asset_integrity": "PASS"
+    },
+    "generated_freshness": "PASS",
+    "ssot": "PASS"
+  }
+}

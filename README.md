@@ -65,6 +65,7 @@ python tests/browser_gjh_character.py
 python tests/browser_pwa.py
 python -m unittest discover -s tests -p test_preferences.py -v
 python tests/browser_preferences.py
+python tests/browser_gallery_theme.py
 ```
 
 Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. The Gallery and PWA suites build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.

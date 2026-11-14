@@ -284,27 +284,32 @@ h2 { font-size: var(--font-size-2xl); letter-spacing: -.04em; line-height: 1.4; 
 
 @media (max-width: 650px) { .compare-intro { gap: var(--space-4); padding-bottom: var(--space-4); } .detail-intro { gap: var(--space-5); } }
 
-/* Editorial directory theme is scoped to discovery; demos retain their own identity. */
-body:has(main[data-page="companies"]) {
+/* One editorial theme covers every gallery route; demo documents are independent. */
+body.gallery {
   --page: var(--palette-editorial-paper);
+  --surface: var(--palette-editorial-paper);
   --ink: var(--palette-editorial-ink);
   --muted: var(--palette-editorial-muted);
   --line: var(--palette-editorial-line);
   --accent: var(--palette-editorial-accent);
   --color-page: var(--palette-editorial-paper);
+  --color-surface: var(--palette-editorial-paper);
   --color-text: var(--palette-editorial-ink);
   --color-text-muted: var(--palette-editorial-muted);
   --color-border-subtle: var(--palette-editorial-line);
   --color-action: var(--palette-editorial-accent);
+  --color-action-hover: var(--palette-editorial-accent);
   --color-focus: var(--palette-editorial-accent);
   --color-surface-subtle: var(--palette-editorial-wash);
 }
-body:has(main[data-page="companies"]) .site-header { background: var(--page); }
-body:has(main[data-page="companies"]) .header-inner { min-height: 86px; }
-body:has(main[data-page="companies"]) .identity-symbol { background: transparent; padding-left: 0; }
-body:has(main[data-page="companies"]) .identity-symbol i { border-radius: initial; }
-body:has(main[data-page="companies"]) .site-identity { margin-right: auto; }
-body:has(main[data-page="companies"]) .app-version { color: var(--muted); }
+body.gallery main:not([data-page="companies"]) :is(h1, h2, h3) { font-family: var(--font-editorial-heading); font-weight: 400; }
+body.gallery :is(.design-card, .compare-panel, .company-avatar) { border-radius: var(--radius-sm); }
+body.gallery .site-header { background: var(--page); }
+body.gallery .header-inner { min-height: 86px; }
+body.gallery .identity-symbol { background: transparent; padding-left: 0; }
+body.gallery .identity-symbol i { border-radius: initial; }
+body.gallery .site-identity { margin-right: auto; }
+body.gallery .app-version { color: var(--muted); }
 main[data-page="companies"] .home-intro { padding-block: var(--space-16) var(--space-12); }
 main[data-page="companies"] .intro-copy { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: var(--space-6) var(--space-16); align-items: end; }
 main[data-page="companies"] .intro-copy > .eyebrow { grid-column: 1 / -1; margin: 0; font-weight: 400; }
@@ -332,7 +337,7 @@ main[data-page="companies"] .card-bottom { font-size: var(--font-size-sm); paddi
 main[data-page="companies"] .company-section > .empty-results + .filter-bar { margin-top: var(--space-7); }
 main[data-page="companies"] .filter-bar input, main[data-page="companies"] .filter-bar select { background: transparent; border-color: var(--color-border-control); }
 main[data-page="companies"] .collection-caption { margin-bottom: 0; }
-body:has(main[data-page="companies"]) .footer-brand { font-family: var(--font-editorial-heading); font-size: var(--font-size-2xl); font-weight: 400; }
+body.gallery .footer-brand { font-family: var(--font-editorial-heading); font-size: var(--font-size-2xl); font-weight: 400; }
 @media (max-width: 1000px) {
   main[data-page="companies"] .intro-copy { gap: var(--space-6); grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr); }
   main[data-page="companies"] .company-grid > .company-card:only-child .company-cover { min-height: 0; padding: var(--space-5); display: flex; align-items: center; }
@@ -340,8 +345,8 @@ body:has(main[data-page="companies"]) .footer-brand { font-family: var(--font-ed
   main[data-page="companies"] .company-card h3 { font-size: var(--font-size-3xl); }
 }
 @media (max-width: 650px) {
-  body:has(main[data-page="companies"]) .header-inner { gap: var(--space-2); min-height: 0; }
-  body:has(main[data-page="companies"]) .header-inner nav { gap: var(--space-6); }
+  body.gallery .header-inner { gap: var(--space-2); min-height: 0; }
+  body.gallery .header-inner nav { gap: var(--space-6); }
   main[data-page="companies"]:has(.company-card:only-child) .home-intro { padding-block: var(--space-8); }
   main[data-page="companies"] .intro-copy { display: block; }
   main[data-page="companies"] .intro-copy > .eyebrow { display: flex; margin-bottom: var(--space-5); font-size: var(--font-size-xs); letter-spacing: .08em; }
