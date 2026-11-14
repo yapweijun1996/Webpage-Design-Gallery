@@ -266,3 +266,11 @@ body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-butto
 /* Keep the existing close action reachable after reading long product details. */
 .product-dialog{scroll-padding-top:calc(var(--size-control) + var(--space-8))}
 .product-dialog .dialog-top{position:sticky;top:0;background:var(--paper);z-index:var(--z-tray)}
+
+/* Floating movement feedback is visual only; canvas owns the touch gestures. */
+@media(pointer:coarse){
+ .joystick{width:76px;height:76px;bottom:max(62px,env(safe-area-inset-bottom));left:max(22px,env(safe-area-inset-left))}
+ .joystick-thumb{width:32px;height:32px;left:calc(50% - 16px);top:calc(50% - 16px)}
+ .joystick.is-floating{left:clamp(max(8px,env(safe-area-inset-left)),var(--stick-left),calc(100% - 76px - max(8px,env(safe-area-inset-right))));top:clamp(8px,var(--stick-top),calc(100% - 76px - max(8px,env(safe-area-inset-bottom))));bottom:auto}
+ .joystick.is-floating .joystick-label{display:none}
+}

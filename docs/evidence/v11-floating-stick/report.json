@@ -1,0 +1,24 @@
+[
+  {
+    "viewport": [
+      390,
+      680
+    ],
+    "leftCenterRightOrigins": "PASS",
+    "tapDeadzone": "PASS",
+    "twoTouchRolesAndThirdIgnored": "PASS",
+    "releaseCancelLostCaptureResize": "PASS",
+    "runAndModalIsolation": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "leftCenterRightOrigins": "PASS",
+    "tapDeadzone": "PASS",
+    "twoTouchRolesAndThirdIgnored": "PASS",
+    "releaseCancelLostCaptureResize": "PASS",
+    "runAndModalIsolation": "PASS"
+  }
+]

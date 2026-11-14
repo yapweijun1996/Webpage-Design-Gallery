@@ -29,7 +29,7 @@
         <div class="mall-intro"><p class="eyebrow">A little closer to goodness</p><h1>Everyday, <em>explored.</em></h1><p>Three stores. One open invitation.</p></div>
         <details id="keyboard-help" class="keyboard-help">
           <summary>How to explore</summary>
-          <div id="controls-copy"><p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to walk.<br><kbd>Shift</kbd> to run. <kbd>Q</kbd> / <kbd>E</kbd> to turn left / right. Drag the scene to look around.<br><kbd>F</kbd> to inspect a nearby display.</p><p>On touch screens, use the left joystick to walk, drag the scene on the right to look, and tap Run to change pace.</p><p>Choose any store on the map to go to its entrance. Prefer a page? Choose List view above.</p><button id="guide-reopen" type="button" aria-controls="guide-dialog" hidden>Show quick guide</button></div>
+          <div id="controls-copy"><p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to walk.<br><kbd>Shift</kbd> to run. <kbd>Q</kbd> / <kbd>E</kbd> to turn left / right. Drag the scene to look around.<br><kbd>F</kbd> to inspect a nearby display.</p><p>On touch screens, drag anywhere on the open scene to move. Keep that finger down and drag with a second finger to look around. Lift to stop; tap Run to change pace. Buttons and panels keep their own actions.</p><p>Choose any store on the map to go to its entrance. Prefer a page? Choose List view above.</p><button id="guide-reopen" type="button" aria-controls="guide-dialog" hidden>Show quick guide</button></div>
         </details>
         <div class="inspect-prompt" id="inspect-prompt" hidden><span id="nearby-name"></span><button id="inspect" type="button">Press F / tap Inspect</button></div>
         <details id="mall-map" class="mall-map" open>
@@ -54,7 +54,7 @@
           <p class="map-caption"><span class="map-key" aria-hidden="true"></span>You are here<span class="map-scale">Not to scale</span></p>
           </div>
         </details>
-        <div class="touch-controls"><div id="joystick" class="joystick" role="group" aria-label="Movement joystick. Drag to walk."><span class="joystick-thumb"></span><span class="joystick-label">WALK</span></div><button id="run-toggle" class="run-toggle" type="button" aria-pressed="false">Run</button></div>
+        <div class="touch-controls"><div id="joystick" class="joystick" role="group" aria-label="Floating movement joystick. Drag anywhere on the open scene to walk."><span class="joystick-thumb"></span><span class="joystick-label">MOVE</span></div><button id="run-toggle" class="run-toggle" type="button" aria-pressed="false">Run</button></div>
         <p class="scene-disclaimer">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
       </div>
     </section>
@@ -102,8 +102,8 @@
       <li><strong>Inspect</strong><span>Press F near a display</span></li>
     </ul>
     <ul class="guide-steps" data-guide-touch hidden>
-      <li><strong>Move</strong><span>Use the left joystick</span></li>
-      <li><strong>Look</strong><span>Drag the scene on the right</span></li>
+      <li><strong>Move</strong><span>Drag anywhere on the scene</span></li>
+      <li><strong>Look</strong><span>Hold one finger; drag with a second</span></li>
       <li><strong>Inspect</strong><span>Tap Inspect near a display</span></li>
     </ul>
     <div class="guide-actions"><button id="guide-start" type="button">Start exploring</button><div class="guide-secondary"><button id="guide-map" type="button">Choose a store</button><button id="guide-list" type="button">Browse directory</button></div></div>

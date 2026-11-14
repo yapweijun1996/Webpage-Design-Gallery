@@ -12,15 +12,21 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   controller.enableAutostep(.2, .28, true); controller.enableSnapToGround(.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
-  let yaw = 0, pitch = .1, drag = null, stickPointer = null;
+  let yaw = 0, pitch = .1, drag = null, stickPointer = null, stickOrigin = null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
   const ray = new R.Ray({x: 0, y: 0, z: 0}, {x: 0, y: 0, z: -1});
   const movement = {x: 0, y: 0, z: 0}, next = {x: 0, y: 0, z: 0};
   const joystick = document.querySelector('#joystick'), thumb = joystick.querySelector('.joystick-thumb'), runButton = document.querySelector('#run-toggle');
   let isPaused = () => false;
-  const clearInput = () => { keys.clear(); stickX = stickY = 0; drag = null; stickPointer = null; thumb.style.transform = ''; };
+  const resetStick = () => { stickX = stickY = 0; stickPointer = null; stickOrigin = null; thumb.style.transform = ''; joystick.classList.remove('is-floating'); };
+  const clearInput = () => {
+    const ids = [stickPointer, drag?.id]; keys.clear(); drag = null; resetStick();
+    for (const id of ids) if (id != null && canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id);
+  };
   window.addEventListener('blur', clearInput);
+  window.addEventListener('resize', clearInput);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) clearInput(); });
   document.addEventListener('focusin', event => {
     if (event.target !== canvas && event.target !== document.body) clearInput();
   });
@@ -37,20 +43,31 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   document.addEventListener('keyup', event => keys.delete(event.code));
   runButton.addEventListener('click', () => { runToggle = !runToggle; runButton.setAttribute('aria-pressed', String(runToggle)); runButton.textContent = runToggle ? 'Run: on' : 'Run'; });
   function dragStick(event) {
-    const bounds = joystick.getBoundingClientRect();
-    const x = (event.clientX - bounds.x - bounds.width / 2) / 38, y = (event.clientY - bounds.y - bounds.height / 2) / 38;
-    const length = Math.max(1, Math.hypot(x, y)); stickX = x / length; stickY = -y / length;
-    thumb.style.transform = `translate(${stickX * 26}px, ${-stickY * 26}px)`;
+    if (!stickOrigin) return;
+    const dx = event.clientX - stickOrigin.x, dy = event.clientY - stickOrigin.y;
+    const distance = Math.hypot(dx, dy), strength = Math.min(1, Math.max(0, (distance - 8) / 30));
+    stickX = distance ? dx / distance * strength : 0; stickY = distance ? -dy / distance * strength : 0;
+    thumb.style.transform = `translate(${stickX * 18}px, ${-stickY * 18}px)`;
   }
-  // The joystick is drawn over, but receives touches through, the canvas. This keeps
-  // touch-action:none confined to the canvas and preserves normal page zoom elsewhere.
+  // Touch roles stay fixed for the lifetime of each pointer. The first canvas touch
+  // moves from any origin; a second touch looks. HUD/modal targets never enter here.
   canvas.addEventListener('pointerdown', event => {
-    if (isPaused()) return;
-    canvas.focus({preventScroll: true}); canvas.setPointerCapture(event.pointerId);
-    const bounds = joystick.getBoundingClientRect();
-    if (event.pointerType === 'touch' && bounds.width && event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom) {
-      stickPointer = event.pointerId; dragStick(event);
-    } else if (!drag) drag = {id: event.pointerId, x: event.clientX, y: event.clientY};
+    if (isPaused() || event.button !== 0) return;
+    if (event.pointerType === 'touch') {
+      if (stickPointer !== null && drag) return; // Ignore a third finger.
+      canvas.focus({preventScroll: true});
+      if (stickPointer === null) {
+        stickPointer = event.pointerId; stickOrigin = {x:event.clientX, y:event.clientY};
+        const bounds = canvas.getBoundingClientRect(), size = joystick.getBoundingClientRect().width || 76;
+        joystick.style.setProperty('--stick-left', `${event.clientX - bounds.left - size / 2}px`);
+        joystick.style.setProperty('--stick-top', `${event.clientY - bounds.top - size / 2}px`);
+        joystick.classList.add('is-floating'); dragStick(event);
+      } else drag = {id:event.pointerId, x:event.clientX, y:event.clientY};
+    } else {
+      if (drag) return;
+      canvas.focus({preventScroll: true}); drag = {id:event.pointerId, x:event.clientX, y:event.clientY};
+    }
+    canvas.setPointerCapture(event.pointerId);
   });
   canvas.addEventListener('pointermove', event => {
     if (isPaused()) return;
@@ -59,7 +76,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     yaw -= (event.clientX - drag.x) * .005; pitch = T.MathUtils.clamp(pitch + (event.clientY - drag.y) * .004, -.08, .9); drag.x = event.clientX; drag.y = event.clientY;
   });
   function releasePointer(event) {
-    if (event.pointerId === stickPointer) { stickPointer = null; stickX = stickY = 0; thumb.style.transform = ''; }
+    if (event.pointerId === stickPointer) resetStick();
     if (event.pointerId === drag?.id) drag = null;
   }
   // Capture can be revoked without pointerup/cancel (for example by another UI).
