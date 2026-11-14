@@ -7,7 +7,7 @@ export function createUI() {
   const experience = document.getElementById('experience');
   const storeList = document.getElementById('store-list');
   const viewToggle = document.getElementById('view-toggle');
-  const locationName = document.getElementById('location-name');
+  const headerMap = document.getElementById('header-map');
   const status = document.getElementById('mall-status');
   const fallbackMessage = document.getElementById('fallback-message');
   const playerDot = document.getElementById('player-dot');
@@ -35,10 +35,23 @@ export function createUI() {
   updateGuideInput(); touchGuide.addEventListener('change', updateGuideInput);
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
   const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
-  resetMap();
-  compactMap.addEventListener('change', resetMap);
-  mallMap.addEventListener('toggle', () => { if (compactMap.matches && mallMap.open) help.open = false; });
+  compactMap.addEventListener('change', () => {
+    resetMap();
+    headerMap.hidden = !showing3D || !compactMap.matches;
+    headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));
+  });
+  mallMap.addEventListener('toggle', () => {
+    if (compactMap.matches && mallMap.open) help.open = false;
+    headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));
+  });
   help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; });
+  headerMap.addEventListener('click', () => {
+    if (!showing3D || guidePaused || dialog.open || bag.open) return;
+    help.open = false;
+    mallMap.open = !mallMap.open;
+    headerMap.setAttribute('aria-expanded', String(mallMap.open));
+    if (mallMap.open) mapButtons[0]?.focus({preventScroll: true});
+  });
   mallMap.addEventListener('keydown', event => {
     if (event.key === 'Escape' && compactMap.matches && mallMap.open) {
       mallMap.open = false;
@@ -99,8 +112,9 @@ export function createUI() {
     document.body.classList.toggle('is-3d', next);
     viewToggle.textContent = next ? 'List view' : '3D view';
     viewToggle.setAttribute('aria-label', next ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
-    locationName.textContent = next ? zones[currentZone] : 'The store directory';
     help.open = false;
+    headerMap.hidden = !next || !compactMap.matches;
+    headerMap.setAttribute('aria-expanded', String(next && compactMap.matches && mallMap.open));
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
     announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open How to explore for controls.` : 'Store directory open. All three stores and verified product images are available below.');
     viewListener?.(next);
@@ -164,7 +178,12 @@ export function createUI() {
     if (action === 'dismiss' && guideFromHelp) {
       help.open = true; guideReopen.focus({preventScroll: true});
     } else scene.focus({preventScroll: true});
-    announce('Ready to explore. Open How to explore to review the controls.');
+    const target = nearby ? records.get(nearby) : null;
+    const touch = matchMedia('(pointer: coarse)').matches;
+    const hint = target
+      ? `${target.name}. ${target.action === 'map' ? (touch ? 'Tap Map' : 'press F or tap Map') : (touch ? 'Tap Inspect' : 'press F or tap Inspect')} for details.`
+      : 'Open How to explore to review the controls.';
+    announce(`Ready to explore. ${hint}`);
   });
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
@@ -212,6 +231,7 @@ export function createUI() {
       available = true;
       guideReopen.hidden = false;
       viewToggle.hidden = false;
+      headerMap.hidden = !compactMap.matches;
       fallbackMessage.hidden = true;
       setView(true);
     },
@@ -256,12 +276,15 @@ export function createUI() {
         const touchOnly = matchMedia('(pointer: coarse)').matches;
         inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? 'Tap Inspect' : 'Press F / tap Inspect');
         inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
-        if (nearby && showing3D) announce(isMap ? 'Directory kiosk. Decorative screen. Press F or tap Map for the three-store map.' : `${records.get(nearby).name}. Press F or tap Inspect for details.`);
+        if (nearby && showing3D) {
+          const action = isMap ? (touchOnly ? 'Tap Map' : 'press F or tap Map') : (touchOnly ? 'Tap Inspect' : 'press F or tap Inspect');
+          announce(`${records.get(nearby).name}. ${action} for details.`);
+        }
       }
       inspectPrompt.hidden = !nearby || collectionActive;
     },
     paused() {
-      return guidePaused || externalPaused || !showing3D || dialog.open || bag.open;
+      return guidePaused || externalPaused || !showing3D || dialog.open || bag.open || (compactMap.matches && mallMap.open);
     },
     offerFirstGuide() { if (!guideSeen) showGuide(); },
     setExternalPaused(value) { externalPaused = Boolean(value); },
