@@ -1,0 +1,13 @@
+{
+  "asset": "shopping-cart.glb",
+  "source_repository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
+  "source_commit": "0d407055bd7e5a1ac59aefc7b229a7607cc52624",
+  "source_path": "models/shopping-cart/exports/optimized.glb",
+  "sha256": "ee6f9b89d75c12bc124aad01a0691050878e1477e1ed19988dd7852c4b0ea676",
+  "bytes": 536448,
+  "triangles": 10636,
+  "primitives": 23,
+  "credit": "Yap Wei Jun project / agent-assisted original Blender Python geometry and materials",
+  "rights": "Owner authorized reuse in this public demo. No external artwork; no third-party redistribution licence is granted here.",
+  "limits": "Static source model; runtime fixed arm pose and conservative collision envelope, not IK or wheel physics. Generic parcel indicates a nonempty selection, not exact products. No real order or payment. Physical mobile browsers not certified."
+}

@@ -54,7 +54,11 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
-  let seated=false, seatListener=null;
+  let seated=false, seatListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null;
+  const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
+  cartToggle.addEventListener('click',()=>{const state=cartState();const next=!state.active;const ok=cartListener?.(next);if(!ok){cartStatus.textContent=state.seated?'Stand up before using the cart.':'Move to an open space, then try again. The cart needs a wide turning clearance.';return;}
+    if(next){document.querySelector('#bag-dialog').close();setView(true);scene.focus({preventScroll:true});}
+    cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';});
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   const zones = { atrium: 'The courtyard', newmoon: 'New Moon', mili: 'MILI', gogo: 'GOGO' };
   let available = false;
@@ -262,6 +266,9 @@ export function createUI() {
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
       if(seated){nearbyName.textContent='Courtyard bench · seated';inspectButton.textContent='Stand up';inspectButton.setAttribute('aria-label','Stand up from courtyard bench');}
       else if(nearby==='courtyard-seat'){nearbyName.textContent='Courtyard bench · simplified seated pose';inspectButton.textContent='Press F / tap Sit';inspectButton.setAttribute('aria-label','Sit on courtyard bench');}
+      const cart=cartState();if(previousCartMode!==cart.active||previousCartSeated!==seated){cartStatus.textContent=seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';previousCartMode=cart.active;previousCartSeated=seated;}cartControls.hidden=!cart.available;cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';cartToggle.disabled=seated&&!cart.active;
+      document.body.classList.toggle('is-pushing',Boolean(cart.active));
+      if(nearby==='courtyard-seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=false;
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
     },
     paused() {
@@ -279,6 +286,7 @@ export function createUI() {
         return true;
       });
     },
+    onCart(state,listener){cartState=state;cartListener=listener;},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {

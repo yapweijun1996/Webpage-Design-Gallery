@@ -82,7 +82,7 @@ function fallback(message) {
 }
 ui.onTeleport(zone => { if (ready) { manual = false; player.cancelCollection(); player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
 ui.onSeat(sit=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit():player.stand();updateHUD();render();return ok;});
-ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {if(player?.state.seated)player.stand();player?.clearInput();player?.cancelCollection();} });
+ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand();player?.clearInput();player?.cancelCollection();} });
 document.addEventListener('keydown', event => {
   if(event.code==='Escape'&&!ui.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
   if (event.code === 'KeyF' && nearby && !ui.paused() && !event.repeat &&
@@ -112,9 +112,10 @@ async function initialize() {
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, quality);
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane);
   player.setPaused(() => ui.paused());
+  ui.onCart(()=>({...player.state.character.cart,seated:player.state.seated}),value=>{const ok=player.setCart(value);updateHUD();render();return ok;});
   ui.onCollect(id=>Boolean(world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;
-    player.clearInput();player.setInput(null);manual=false;
+    player.setCart(false);player.clearInput();player.setInput(null);manual=false;
     if(reducedMotion.matches)return true;
     return player.startCollection(world.createCollectProp(id),id);
   });

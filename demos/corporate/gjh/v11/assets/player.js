@@ -12,7 +12,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   controller.enableAutostep(.2, .28, true); controller.enableSnapToGround(.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
-  let seated = false;
+  let seated = false, pushing=false;
+  // A conservative full-turn footprint encloses avatar and cart. No sweeping corners.
+  const walkingShape=new R.Capsule(.55,.3), cartShape=new R.Cylinder(.85,1.4);
   const seat = {x:-7.8,z:9.27,y:.015,exitX:-7.8,exitZ:8.3};
   let yaw = 0, pitch = .1, drag = null, stickPointer = null, stickOrigin = null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
@@ -89,10 +91,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(seated){yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;character.update('idle',dt);return;}
     const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY);
     const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX);
-    const running = injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight'));
+    const running = !pushing && (injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight')));
     const turning = (keys.has('KeyQ') ? 1 : 0) - (keys.has('KeyE') ? 1 : 0);
     yaw += turning * (110 * Math.PI / 180) * dt;
-    const length = Math.max(1, Math.hypot(forward, right)), speed = running ? 5 : 2.65;
+    const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 5 : 2.65;
     const dx = (-Math.sin(yaw) * forward + Math.cos(yaw) * right) / length, dz = (-Math.cos(yaw) * forward - Math.sin(yaw) * right) / length;
     vertical = controller.computedGrounded() ? -.5 : Math.max(-18, vertical - 24 * dt);
     movement.x = dx * speed * dt; movement.y = vertical * dt; movement.z = dz * speed * dt;
@@ -129,8 +131,16 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (instant) camera.position.copy(desired); else camera.position.lerp(desired, 1 - Math.exp(-12 * dt));
     safe.copy(camera.position); constrain(safe); camera.position.copy(safe); camera.lookAt(target);
   }
+  function setCart(value) {
+    if(!value){pushing=false;character.setCart(false);capsule.setShape(walkingShape);controller.enableAutostep(.2,.28,true);clearInput();injected=null;return true;}
+    if(pushing)return true;
+    if(seated||!character.state.cart.available)return false;
+    const p=body.translation();
+    if(physics.intersectionWithShape(p,{x:0,y:0,z:0,w:1},cartShape,undefined,undefined,capsule,body))return false;
+    pushing=true;capsule.setShape(cartShape);controller.disableAutostep();character.setCart(true);clearInput();injected=null;character.update('idle',0);physics.step();return true;
+  }
   function sit() {
-    if(seated)return false;const p=body.translation();
+    if(seated||pushing)return false;const p=body.translation();
     if(Math.hypot(p.x-seat.x,p.z-seat.exitZ)>1.25 || p.z>9.0)return false;
     const hit=physics.intersectionWithShape({x:seat.exitX,y:.91,z:seat.exitZ},{x:0,y:0,z:0,w:1},capsule.shape,undefined,undefined,capsule,body);
     if(hit)return false;
@@ -146,14 +156,14 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function teleport(zone) {
     const destinations = {atrium: [-2, 12], newmoon: [-10, 2.4], mili: [0, 2.4], gogo: [10, 2.4]};
     if (!destinations[zone]) return false;
-    seated=false;character.setSeated(false);capsule.setEnabled(true);
+    setCart(false);seated=false;character.setSeated(false);capsule.setEnabled(true);
     const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }
-  return {body, capsule, camera, sit, stand, update, sync, updateCamera, teleport, clearInput, setBagCount:character.setBagCount, startCollection:character.startCollection, cancelCollection:character.cancelCollection,
+  return {body, capsule, camera, sit, stand, setCart, update, sync, updateCamera, teleport, clearInput, setBagCount:character.setBagCount, startCollection:character.startCollection, cancelCollection:character.cancelCollection,
     setPaused: fn => { isPaused = fn; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, seated, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, seated, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
   };
 }
