@@ -107,6 +107,7 @@ async function initialize() {
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, quality);
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane);
   player.setPaused(() => ui.paused());
+  ui.onBagChange(value => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
   function resize() {
     const width = canvas.clientWidth, height = canvas.clientHeight; if (!width || !height) return;
     renderer.setPixelRatio(Math.min(devicePixelRatio, width < 600 ? 1.5 : 2)); renderer.setSize(width, height, false);

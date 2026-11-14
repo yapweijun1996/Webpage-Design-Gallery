@@ -1,3 +1,4 @@
+import {createCarryBag} from './carry-bag.js';
 /** Authored visitor presentation; locomotion and collision belong to player.js. */
 export function createLocomotionContinuity() {
   // Bridge isolated contact corrections, never movement from rest or released input.
@@ -28,13 +29,14 @@ export async function createCharacter(T) {
     throw new Error('Visitor model must be authored at metre scale with feet at floor zero');
   }
   // The authored face points +Z; the existing controller moves forward along -Z.
-  // No mesh, material, skeletal pose or animation track is modified at runtime.
+  // Source meshes and clips stay unchanged; carrying applies an optional arm presentation pose.
   avatar.rotation.y = Math.PI;
   avatar.traverse(object => {
     if (!object.isMesh) return;
     object.castShadow = true;
     object.receiveShadow = true;
   });
+  const carryBag = createCarryBag(T, avatar);
   const visual = new T.Group();
   visual.add(avatar);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -72,16 +74,19 @@ export async function createCharacter(T) {
       action.setEffectiveWeight(Math.abs(weight - nextWeight) < .001 ? weight : nextWeight);
     }
     actions.idle.paused = reducedMotion.matches;
+    carryBag.restore();
     mixer.update(dt);
+    carryBag.apply();
   }
 
   return {
     visual,
     update,
+    setBagCount: carryBag.setCount,
     get animation() { return animation; },
     get state() {
       return Object.freeze({
-        model, asset, nativeHeight, scale: 1, clips,
+        model, asset, nativeHeight, scale: 1, clips, carrying: carryBag.state,
         weights: Object.freeze(Object.fromEntries(Object.entries(actions).map(([name, action]) => [name, action.getEffectiveWeight()])))
       });
     }

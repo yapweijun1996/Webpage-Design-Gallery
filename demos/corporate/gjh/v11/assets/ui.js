@@ -264,6 +264,7 @@ export function createUI() {
     offerFirstGuide() { if (!guideSeen) showGuide(); },
     setExternalPaused(value) { externalPaused = Boolean(value); },
     inspect,
+    onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {
       teleportListener = listener;
     },

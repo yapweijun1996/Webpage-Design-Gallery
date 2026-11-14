@@ -133,7 +133,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }
-  return {body, capsule, camera, update, sync, updateCamera, teleport, clearInput,
+  return {body, capsule, camera, update, sync, updateCamera, teleport, clearInput, setBagCount:character.setBagCount,
     setPaused: fn => { isPaused = fn; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
     get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }

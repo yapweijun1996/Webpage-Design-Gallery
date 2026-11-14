@@ -1,0 +1,26 @@
+[
+  {
+    "viewport": [
+      390,
+      680
+    ],
+    "stateSyncEmptyAddClear": "PASS",
+    "idleWalkRunCarry": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "stateSyncEmptyAddClear": "PASS",
+    "idleWalkRunCarry": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "stateSyncEmptyAddClear": "PASS",
+    "idleWalkRunCarry": "PASS"
+  }
+]

@@ -48,5 +48,5 @@ export function setupDemoBag() {
   close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>open.focus({preventScroll:true}));
   clear.addEventListener('click',()=>{store.clear();status.textContent='Demo bag cleared.';close.focus({preventScroll:true});});
   add.addEventListener('click',()=>{if(current){store.change(current,1);note.textContent=`Added to demo bag. ${store.snapshot()[current]} of this item. No order created.`;}});
-  return {get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
+  return {subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
 }
