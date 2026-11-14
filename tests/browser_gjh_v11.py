@@ -125,8 +125,14 @@ def keyboard_turning(page):
 
 
 def room_signs(page):
-    """Visible room plaques must clear the mobile HUD, including expanded controls."""
+    """Exploration plaques clear the HUD; compact menus pause the covered scene."""
     if page.viewport_size['width'] != 390:
+        return
+    if page.locator('body').evaluate('el=>el.classList.contains("is-panel-open")'):
+        assert page.evaluate('__mall.mode') == 'menu'
+        frames = state(page)['frames']
+        page.wait_for_timeout(150)
+        assert state(page)['frames'] == frames
         return
     rectangles = page.locator('.site-header,#keyboard-help,#mall-map').evaluate_all(
         'els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}})')
@@ -192,7 +198,8 @@ def run(capture=False):
                             page.screenshot(path=str(review / 'map-390.png'), scale='css')
                             page.keyboard.press('Escape')
                             assert not mall_map.evaluate('el=>el.open')
-                            assert page.locator('#mall-map summary').evaluate('el=>el===document.activeElement')
+                            assert page.locator('#header-map').is_visible()
+                            assert page.locator('#header-map').evaluate('el=>el===document.activeElement')
                         page.screenshot(path=str(review / f'atrium-{width}.png'), scale='css')
                         room_signs(page)
                         page.locator('#mall-map').evaluate('el=>el.open=true')

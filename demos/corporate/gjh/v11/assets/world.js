@@ -41,7 +41,8 @@ export async function createWorld(T, R, physics, shadows) {
   }
   const cylinder = (m, x, y, z, r, h) => solid('cylinder', m, x, y, z, r, h, r);
   const sphere = (m, x, y, z, sx, sy, sz) => solid('sphere', m, x, y, z, sx, sy, sz);
-  const textures = new Map(), loader = new T.TextureLoader();
+  // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
+  const textures = new Map(), loader = new T.TextureLoader().setCrossOrigin(undefined);
   const names = ['new-moon-logo.svg', 'mili-logo.jpg', 'gogo-logo.jpg', 'new-moon-brand-cover.jpg', 'mili-brand-cover.jpg', 'gogo-brand-cover.jpg', ...['nz-425g', 'au-425g', 'sa-425g', 'mx-454g'].map(id => `new-moon-${id}-front.jpg`)];
   await Promise.all(names.map(async name => {
     const texture = await loader.loadAsync(`assets/${name}`); texture.colorSpace = T.SRGBColorSpace; texture.anisotropy = 4; textures.set(name, texture);

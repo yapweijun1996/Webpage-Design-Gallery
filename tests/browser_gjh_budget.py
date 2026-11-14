@@ -34,10 +34,14 @@ def run():
       box=target.bounding_box();assert box['x']>=0 and box['y']>=0 and box['x']+box['width']<=width and box['y']+box['height']<=height,box
       assert target.evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'),'Map target obstructed'
      run=page.locator('#run-toggle')
-     assert run.evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'),'Run obstructed by expanded map'
-     run.click();assert run.get_attribute('aria-pressed')=='true';run.click();assert run.get_attribute('aria-pressed')=='false'
+     # Compact panels pause exploration and intentionally hide movement controls.
+     run.wait_for(state='hidden')
+     assert run.is_hidden(),'Run must be hidden while the compact map is open'
      page.screenshot(path=str(OUT/f'map-{width}x{height}.png'))
      page.locator('#mall-map > summary').click()
+     run.wait_for(state='visible')
+     assert run.evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'),'Run obstructed after closing map'
+     run.click();assert run.get_attribute('aria-pressed')=='true';run.click();assert run.get_attribute('aria-pressed')=='false'
      for selector in ['#keyboard-help > summary','#mall-map > summary','#run-toggle']:
       box=page.locator(selector).bounding_box();assert box and box['width']>=44 and box['height']>=44,(selector,box)
 

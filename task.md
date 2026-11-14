@@ -27,7 +27,7 @@ Depends on Phase 0.
 - [x] Load each shared asset once and reuse geometry and materials for repeated placements.
 - [x] Check scale, floor contact, orientation, lighting and scene placement.
 - [x] Preserve a usable per-asset fallback when loading or validation fails.
-- [ ] Evaluate distant LOD and close-up detail using measured results before adopting runtime switching.
+- [x] Evaluate distant LOD and close-up detail using measured results before adopting runtime switching.
 
 Acceptance: the mall does not fetch models from GitHub at runtime; asset provenance is traceable; a failed asset does not disable navigation or product information.
 
@@ -202,3 +202,18 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 ### Commerce clarification — 2026-11-14
 
 The earlier Phase 7 wording “no prices, stock or cart” is superseded only as regards **demo cart availability**: the session-only Demo bag shipped in 1.1.20 and the optional pushable 3D cart in 1.1.24. See [Demo bag contract](docs/v11-demo-bag-review.md) and [pushable cart contract](docs/v11-cart-review.md). Their release-time limitations remain historical evidence. Neither feature creates a real order, reserves stock, sets prices or processes payment. The external official eShop does not receive this demo bag as a checkout. This clarification does not complete the mode-state-machine or Shelf focus tasks or authorize a new shopping/checkout system.
+
+
+## Phase 1 LOD evaluation — 2026-11-15
+
+Application 1.1.31 retains shared LOD1 without distance switching after measured
+five-viewport budget and rendered front/side/back review. A local image request-mode
+mismatch was fixed: 320px initial resource entries fell from 50 to 44; candidate
+views measured 8,480,992 decoded resource bytes and at most 153 draw calls.
+Generation/SSOT, 46 unit tests, Gallery, 28 legacy-demo cases, full V11 (Metal),
+PWA update/offline and four-SKU/failure integration passed. Existing compact-menu
+Run/focus/plaque test expectations were reconciled with current source contracts.
+See `docs/v11-lod-evaluation.md` and its evidence files. Physical devices,
+SwiftShader completion and packaging fidelity remain unverified. This completes
+only the LOD evaluation checkbox; no runtime switching or packaging certification
+is claimed.

@@ -1,0 +1,1102 @@
+{
+  "environment": "macOS ARM64 Chromium / native ANGLE Metal, reduced motion, local uncompressed HTTP, fresh contexts, service workers blocked",
+  "browser": "157.0.8103.51",
+  "limitations": [
+    "Ready times are observations, not production performance guarantees",
+    "Decoded payload is not compressed wire traffic or GPU memory",
+    "Not physical Android/iOS, Safari or screen-reader coverage"
+  ],
+  "results": [
+    {
+      "viewport": [
+        320,
+        740
+      ],
+      "readyMsObserved": 6587,
+      "coldResourceCount": 44,
+      "coldDecodedBytes": 8480992,
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4640
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 39395
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 9583
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 20140
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 1819
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 5420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 25822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 10670
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-display-shelf.glb",
+          "bytes": 172420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 16083
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4686
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor.glb",
+          "bytes": 369976
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        }
+      ],
+      "drawCalls": {
+        "atrium": 121,
+        "newmoon": 96,
+        "mili": 89,
+        "gogo": 82
+      },
+      "fiveCloseCycles": [
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        }
+      ],
+      "guideAndListRenderPause": "PASS",
+      "externalRequests": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "readyMsObserved": 2908,
+      "coldResourceCount": 44,
+      "coldDecodedBytes": 8480992,
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4640
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 39395
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 9583
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 20140
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 1819
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 5420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 25822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 10670
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-display-shelf.glb",
+          "bytes": 172420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 16083
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4686
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor.glb",
+          "bytes": 369976
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        }
+      ],
+      "drawCalls": {
+        "atrium": 121,
+        "newmoon": 97,
+        "mili": 92,
+        "gogo": 83
+      },
+      "fiveCloseCycles": [
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        }
+      ],
+      "guideAndListRenderPause": "PASS",
+      "externalRequests": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "readyMsObserved": 2916,
+      "coldResourceCount": 44,
+      "coldDecodedBytes": 8480992,
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 39395
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4640
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 9583
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 20140
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 1819
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 5420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 25822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 10670
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-display-shelf.glb",
+          "bytes": 172420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 16083
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4686
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor.glb",
+          "bytes": 369976
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        }
+      ],
+      "drawCalls": {
+        "atrium": 137,
+        "newmoon": 99,
+        "mili": 102,
+        "gogo": 86
+      },
+      "fiveCloseCycles": [
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        }
+      ],
+      "guideAndListRenderPause": "PASS",
+      "externalRequests": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "readyMsObserved": 5390,
+      "coldResourceCount": 44,
+      "coldDecodedBytes": 8480992,
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4640
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 39395
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 9583
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 20140
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 1819
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 5420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 25822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 10670
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-display-shelf.glb",
+          "bytes": 172420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 16083
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4686
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor.glb",
+          "bytes": 369976
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        }
+      ],
+      "drawCalls": {
+        "atrium": 152,
+        "newmoon": 120,
+        "mili": 140,
+        "gogo": 110
+      },
+      "fiveCloseCycles": [
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        }
+      ],
+      "guideAndListRenderPause": "PASS",
+      "externalRequests": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "readyMsObserved": 1017,
+      "coldResourceCount": 44,
+      "coldDecodedBytes": 8480992,
+      "resources": [
+        {
+          "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+          "bytes": 24532
+        },
+        {
+          "path": "/assets/tokens.css",
+          "bytes": 4640
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/style.css",
+          "bytes": 39395
+        },
+        {
+          "path": "/demos/corporate/gjh/shared/interaction.css",
+          "bytes": 4855
+        },
+        {
+          "path": "/assets/gjh-themes.css",
+          "bytes": 28273
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/script.js",
+          "bytes": 9583
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+          "bytes": 143514
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+          "bytes": 219929
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/ui.js",
+          "bytes": 20140
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/modes.js",
+          "bytes": 1819
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+          "bytes": 14012
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+          "bytes": 147632
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+          "bytes": 140822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+          "bytes": 147949
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+          "bytes": 35812
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+          "bytes": 20934
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+          "bytes": 5420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+          "bytes": 10546
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+          "bytes": 691648
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+          "bytes": 4340292
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/world.js",
+          "bytes": 25822
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+          "bytes": 4633
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+          "bytes": 110282
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+          "bytes": 31784
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb",
+          "bytes": 234288
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-areca-planter.glb",
+          "bytes": 119760
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb",
+          "bytes": 178068
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+          "bytes": 12893
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+          "bytes": 4015
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+          "bytes": 2757
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/products.js",
+          "bytes": 10670
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/mall-display-shelf.glb",
+          "bytes": 172420
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+          "bytes": 158528
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+          "bytes": 153464
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+          "bytes": 119196
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+          "bytes": 156540
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/player.js",
+          "bytes": 16083
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/character.js",
+          "bytes": 4686
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+          "bytes": 2205
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+          "bytes": 1289
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+          "bytes": 957
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+          "bytes": 2481
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor.glb",
+          "bytes": 369976
+        },
+        {
+          "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+          "bytes": 536448
+        }
+      ],
+      "drawCalls": {
+        "atrium": 153,
+        "newmoon": 124,
+        "mili": 142,
+        "gogo": 124
+      },
+      "fiveCloseCycles": [
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        },
+        {
+          "activeResources": 0,
+          "liveContexts": 0
+        }
+      ],
+      "guideAndListRenderPause": "PASS",
+      "externalRequests": [],
+      "pageErrors": []
+    }
+  ],
+  "baselineRevision": "47ccc80fbf2676fc557e131fa5efad52af75281e"
+}

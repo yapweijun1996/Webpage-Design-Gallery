@@ -16,7 +16,7 @@ Runtime baseline: main `d1d091d513b6188582cb4ac15b8ce99d53d1dfbb`, application *
 | Phase 1 / 3 | PASS | Load each shared asset once and reuse geometry and materials for repeated placements. |
 | Phase 1 / 4 | PASS | Check scale, floor contact, orientation, lighting and scene placement. |
 | Phase 1 / 5 | PASS | Preserve a usable per-asset fallback when loading or validation fails. |
-| Phase 1 / 6 | DEFER | Evaluate distant LOD and close-up detail using measured results before adopting runtime switching. |
+| Phase 1 / 6 | PASS | Evaluate distant LOD and close-up detail using measured results before adopting runtime switching. |
 | Phase 2 / 1 | PASS | Replace the four simplified cans with the reviewed New Zealand, Australia, South Africa and Mexico models. |
 | Phase 2 / 2 | PARTIAL | Match each model, label, name and product record against existing verified source data. |
 | Phase 2 / 3 | PASS | Evaluate the existing display-shelf model; arrange products for clear near and distant viewing. |
@@ -108,3 +108,12 @@ Evidence source: OMP Playwright mobile emulation with SwiftShader WebGL, reposit
 | Full repository browser suites | NOT RUN | Only the HUD-specific checks above were run in this round. |
 
 | Portrait seated/cart prompt lift (4857d53) | Re-verified 2026-11-14: chip vs disclaimer 0 px² at 390x844, 320x568, 844x390, 667x375 (seated + pushing); header 0; scrollWidth == innerWidth; real screenshots inspected | Not run: physical devices, real safe-area insets, context loss, device FPS |
+
+
+## LOD evaluation reconciliation — 2026-11-15
+
+Phase 1 / 6 is evaluated and complete: see `docs/v11-lod-evaluation.md` for current
+five-viewport resource/draw-call measurements and near/distant visual review.
+The implementation decision is to retain LOD1; dynamic switching remains
+unadopted. This changes the evaluation status, not physical-device or packaging
+acceptance. Historical runtime and evidence above retain their original scope.
