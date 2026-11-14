@@ -1,0 +1,26 @@
+{
+  "files": {
+    "demos/corporate/gjh/v11/script.js": "a250a87a98b5ffab69db2f45441f4da9c403609b9a92a7577fa71b6fff2a327e",
+    "demos/corporate/gjh/v11/assets/ui.js": "5a0c8b98449faa24022bc8618289367262fe1125e27a6a48e5ffdc5ed58273a6",
+    "tests/browser_gjh_mode_review.py": "a83443f8feabd2b7c538067b8bff9737e822081d8d37ec5b33b637555678d0b5",
+    "docs/v11-mode-state-review.md": "17c4b74d009b622d4cbcabac57c66bae305c06e6a1148b75dc44a75370901176",
+    "docs/evidence/v11-mode-review.json": "4812803e25892e204569f7eec217d267b190c3b69e7d70fcd141adbe5ca17b97"
+  },
+  "browser": {
+    "browser": "Google Chrome",
+    "browserVersion": "157.0.8103.51",
+    "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+    "webglBackend": "metal",
+    "serving": "repository source root over local HTTP",
+    "contextLoss": "real WEBGL_lose_context extension"
+  },
+  "focusedGroups": 15,
+  "focusedFailures": [],
+  "browserPageErrors": [],
+  "modeSnapshots": 162,
+  "legacyV1Smoke": {
+    "legacyVisitorV1": "PASS",
+    "illegalCount": 0
+  },
+  "axeScans": 70
+}

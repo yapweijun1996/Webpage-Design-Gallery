@@ -84,9 +84,22 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
-  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null;
+  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
-  cartToggle.addEventListener('click',()=>{const state=cartState();const next=!state.active;const ok=cartListener?.(next);if(!ok){cartStatus.textContent=state.seated?'Stand up before using the cart.':'Move to an open space, then try again. The cart needs a wide turning clearance.';return;}
+  function updateCartControls() {
+    const cart=cartState();
+    const recoverFocus=!cart.available&&bag.open&&cartControls.contains(document.activeElement);
+    cartControls.hidden=!cart.available;
+    cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';
+    cartToggle.disabled=!cart.available||(cart.seated&&!cart.active);
+    if(previousCartAvailable!==cart.available||previousCartMode!==cart.active||previousCartSeated!==cart.seated){
+      cartStatus.textContent=!cart.available?'The 3D cart is unavailable. Your bag selection is unchanged.':cart.seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';
+      previousCartAvailable=cart.available;previousCartMode=cart.active;previousCartSeated=cart.seated;
+    }
+    if(recoverFocus)document.getElementById('bag-close').focus({preventScroll:true});
+    return cart;
+  }
+  cartToggle.addEventListener('click',()=>{const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){cartStatus.textContent=state.seated?'Stand up before using the cart.':'Move to an open space, then try again. The cart needs a wide turning clearance.';return;}
     if(next){setView(true);bag.closeTo(scene);}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';});
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
@@ -284,6 +297,9 @@ export function createUI() {
       guidePaused = false; guideReopen.hidden = true;
       setView(false, recoverFocus);
       available = false;
+      // Directory fallback can leave setView unchanged, so refresh independently
+      // of view/HUD callbacks and recover only disappearing cart-control focus.
+      updateCartControls();
       viewToggle.hidden = true;
       fallbackMessage.textContent = message || 'The 3D mall is unavailable on this device. Explore the complete store directory below.';
       fallbackMessage.hidden = false;
@@ -325,7 +341,7 @@ export function createUI() {
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
       else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?'Tap Sit':'Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
       else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;inspectButton.textContent='Change level';inspectButton.setAttribute('aria-label','Use elevator to change levels');}
-      const cart=cartState();if(previousCartMode!==cart.active||previousCartSeated!==seated){cartStatus.textContent=seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';previousCartMode=cart.active;previousCartSeated=seated;}cartControls.hidden=!cart.available;cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';cartToggle.disabled=seated&&!cart.active;
+      const cart=updateCartControls();
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
       if(seatNotice)nearbyName.textContent=seatNotice;

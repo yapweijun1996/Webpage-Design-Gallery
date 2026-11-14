@@ -151,7 +151,10 @@ async function initialize() {
   });
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
-  ui.onCart(()=>({...player.state.character.cart,seated:player.state.seated}),value=>{const ok=player.setCart(value);updateHUD();render();return ok;});
+  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated}),value=>{
+    if(!ready)return false;
+    const ok=player.setCart(value);updateHUD();render();return ok;
+  });
   ui.onCollect(id=>Boolean(!player.state.seated&&player.state.character.collection.available!==false&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;
     player.setCart(false);player.clearInput();player.setInput(null);manual=false;

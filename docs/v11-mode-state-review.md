@@ -83,7 +83,7 @@ copies also expose `paused`, `modeLayers` and bounded `modeHistory` for verifica
 - Guide's blocking lifetime includes its native close action, so Guide→compact
   Map or Guide→List handoff does not briefly resume Explore.
 
-## Verification and evidence
+## Lifecycle implementation verification (1.1.36)
 
 Application **1.1.36**, build **b375d72196543f6c**, includes the independently
 published M056 shelf change from `574b742`. Review confirmed that the shelf update
@@ -142,12 +142,114 @@ Seated, Cart and compact Map screenshots. Visual preservation scored **85/100**
 responsive 11/15). This is scoped preservation acceptance, not a redesign or a
 physical-device certification.
 
+## Focused mode-state review — 2026-11-15
+
+Application **1.1.37**, build **44d064158404a3a2**, completes this review and the
+bounded Cart fallback repair described below.
+
+The separate Phase 7 mode-state review ran against the source-root application in
+Google Chrome 157.0.8103.51 on Darwin arm64, using native ANGLE Metal. The repeatable
+focused command is:
+
+```sh
+GALLERY_CHROME='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' \
+GALLERY_WEBGL_BACKEND=metal \
+/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_mode_review.py
+```
+
+The original seven narrow scenario groups passed, but did not cover Cart action
+availability after main-context loss. Independent QA then reproduced a P2 defect:
+with Bag open and focus on `cart-toggle`, real graphics loss left Use cart enabled.
+Clicking it deployed the cart, closed Bag and reported success despite `ready=false`.
+The new regression reproduced stale controls on the unchanged runtime with a real
+Add selection (`Bag (1)`); its failing assertion, snapshot and screenshot are
+retained in `/private/tmp/gallery-mode-review-fix/baseline.log` and `baseline/`.
+The independent activation reports are retained there as
+`independent-inactive-before.log` and `independent-active-before.log`.
+
+The bounded runtime repair changes only `script.js` and `assets/ui.js`. The script's Cart
+availability getter combines runtime readiness with the optional model's own
+availability, and its mutation callback independently rejects calls while not
+ready before touching the player. UI uses one Cart-control refresh helper in both
+the ordinary HUD and fallback, including directory fallback where `setView(false)`
+returns early. It hides and disables unavailable Cart controls, removes stale
+success status, and focuses Bag Close only when focus was inside those disappearing
+controls. Quantity and Close focus are preserved. The click handler re-reads
+availability before requesting mutation or closing Bag. Mode, player, Bag, preview
+and renderer owners are unchanged. This is fallback action/focus repair; main
+context restoration and quality tiers remain separate work.
+
+The expanded review passes **15 scenario groups**, with zero illegal transitions
+and browser page errors:
+
+- The original compact Map/Help, Guide handoffs, List cleanup, Cart product
+  inspection and real nonreduced sit pause/resume checks are retained. Resizing
+  compact→wide→compact while Bag covers Map/Help restores the current valid
+  underlay. List finishes in **Menu, paused true, Explore base**, standing with
+  cart stowed.
+- Real main-context loss under inactive and active Cart with `cart-toggle` focus
+  keeps Bag open as Shop over directory Menu, stows Cart, hides/disables its
+  controls, and focuses visible Bag Close. A nonempty real Add selection and its
+  session representation are retained.
+- Loss while directory+Bag are already open covers the early-return path, both
+  with Cart focus and with focus on quantity or Close. Unrelated focus stays put.
+- An explicitly synthetic queued-click probe uses DOM event dispatch to bypass
+  hidden/disabled hit testing after **actual** context loss. It cannot deploy,
+  close Bag, change mode, or report success. No app mode/readiness flags or fake
+  context-loss events are injected.
+- Initial optional `shopping-cart.glb` request failure keeps Cart unavailable
+  and Bag quantity editing usable. A ready directory→Use cart handoff still
+  reaches Cart with scene focus and actual keyboard movement greater than 0.2m;
+  ordinary Bag Close/Escape returns to the visible shared-header `bag-open`.
+- Product details are reachable from the actual 3D scene via nearby SKU and
+  `#inspect`, including Cart→New Moon AU Inspect→Cart. Real context loss from a
+  3D product closes it safely to directory Menu and visible `list-title`. An
+  already-directory product stays Inspect over Menu until normal native close,
+  retaining Close focus and then returning to its visible product button.
+  Bag instead stays Shop over Menu. A hidden experience does not imply that the
+  shared-header Bag button is hidden; no hidden-`bag-open` defect was found.
+
+Tests use real controls and player transitions. Existing `__mall` APIs steer
+movement and advance the real deterministic simulation; they do not manufacture
+mode, posture or renderer state. Native close checks await the actual close event
+plus a frame. Responsive checks await the actual media-query handler result.
+Selected screenshots and raw output are in
+`/private/tmp/gallery-mode-review-fix/screenshots/` and `review-final.log`.
+Machine-readable results and browser/platform provenance are in
+[`docs/evidence/v11-mode-review.json`](evidence/v11-mode-review.json).
+
+Additional candidate checks passed: all 10 Node mode contracts, 162 browser mode
+snapshots plus legacy v1 smoke, full V11 at three viewports and fallback journeys,
+default v2 Bag selection/session/storage regressions, and 70 axe/DOM scans across
+five viewports. Default v2 Cart keyboard movement after handoff measured
+0.68–0.71m. The separate old Cart collision/load regression passed with
+`GALLERY_LEGACY_VISITOR=1`; it proves that v1 contract only. Its host wrapper only
+selects ANGLE Metal and the explicit legacy query. Actual command logs are in
+`/private/tmp/gallery-mode-review-fix/summary.md`. The native select fixture did
+not change its choice, so native popup keyboard selection remains NOT_VERIFIED.
+
+Parent acceptance passed the 15 groups independently on application 1.1.37,
+47 Python tests, generator/SSOT checks, Gallery, 28 legacy cases, four no-JavaScript
+journeys and PWA update/offline/installability. The final runtime/test hashes match
+the worker's full-regression manifest; those runtime checks preceded only the
+release metadata bump. Independent source review has no P0/P1 finding and closes
+the P2. Rendered fallback review scored 86/100: hierarchy 17, spacing 17, typography
+12, colour 14, consistency 14, responsive 12. It confirms unobstructed controls;
+focus assertions confirm the recovered/preserved active element. Mouse-triggered
+frames alone do not establish a keyboard focus ring.
+
+See the [review acceptance receipt](evidence/v11-mode-review/acceptance.json),
+[15 scenario results](evidence/v11-mode-review.json) and before/after images,
+full-runtime snapshots, accessibility report and compressed raw logs in
+`docs/evidence/v11-mode-review/`. Physical devices, Safari, screen readers,
+real safe-area insets and native select popup keyboard choice remain unverified.
+
 Evidence: [acceptance receipt](evidence/v11-modes/acceptance.json),
 [baseline](evidence/v11-modes-baseline.json),
 [162 state observations](evidence/v11-modes-lifecycle.json),
 [accessibility](evidence/v11-modes/accessibility.json), and screenshots/raw log
-archives in `docs/evidence/v11-modes/`. The separate mode-state review checklist
-item remains pending its own task; this release completes the implementation item.
+archives in `docs/evidence/v11-modes/`. The lifecycle implementation evidence remains historical; the focused review
+above completes its separate checklist item with the bounded Cart repair.
 
 ## Limits and rollback
 

@@ -111,7 +111,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] Landscape disclaimer no longer covers Run; seated and cart prompts clear the disclaimer in portrait.
 - [x] HUD buttons at least 44x44 CSS px; no horizontal overflow at 320, 360, 390, 667, 844, 1024, 1280.
 - [x] Explicit mode state machine (Explore, Menu, Inspect, Seated, Cart, Shop) with enter, exit, cleanup, restore.
-- [ ] Mode-state review and focused browser verification: `docs/v11-mode-state-review.md`.
+- [x] Mode-state review and focused browser verification: `docs/v11-mode-state-review.md`.
 - [ ] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
 - [ ] Shelf focus mode (proposal, depends on the mode state machine): one-page scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
 - [ ] Interaction target highlight and distance hint.
@@ -305,3 +305,20 @@ acceptance receipt. This completes the implementation item only; the separate
 mode-state review task, contextual navigation, Shelf, device and packaging gates
 remain open. Physical devices, screen readers and native select popup choice are
 not certified by these laboratory checks.
+
+## Focused mode-state review — 2026-11-15
+
+Application 1.1.37 completes 15 additional scenario groups and fixes the confirmed
+P2 Cart action after main WebGL loss. Cart availability and mutation now require
+runtime readiness; fallback refresh also covers an already-open directory. It
+hides/disables unavailable Cart controls, recovers their focus to Bag Close and
+preserves other focus and nonempty selections. A stale click cannot deploy or
+claim success. Ready Cart use, nested Menu restoration, real sit animation and
+directory/3D product failure contracts pass. Parent verification adds 47 Python
+tests, Gallery, 28 legacy cases, four no-JavaScript journeys and PWA checks; final
+runtime hashes match the worker's full V11, 162 mode snapshots, 70 accessibility
+states, Bag and legacy Cart regression manifest. Independent source/visual review
+closes the P2 with no P0/P1 findings and scores 86/100. See
+`docs/evidence/v11-mode-review/acceptance.json`. This completes only the mode-state
+review item; context restoration/quality tiers and physical-device gates remain
+separate and unverified.

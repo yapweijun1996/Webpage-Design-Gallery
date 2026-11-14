@@ -1,0 +1,270 @@
+{
+  "environment": {
+    "browser": "Google Chrome",
+    "browserVersion": "157.0.8103.51",
+    "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+    "webglBackend": "metal",
+    "serving": "repository source root over local HTTP",
+    "contextLoss": "real WEBGL_lose_context extension"
+  },
+  "scenarios": [
+    {
+      "scenario": "live-inactive: actual main context loss under Bag",
+      "result": "PASS",
+      "afterLoss": {
+        "ready": false,
+        "mode": "shop",
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ],
+        "paused": true,
+        "illegalCount": 0,
+        "pushing": false,
+        "bagOpen": true,
+        "selection": "Bag (1)",
+        "sessionSelection": "{\"new-moon-nz-425g-front\":1}",
+        "focus": "bag-close",
+        "focusVisible": true,
+        "cartHidden": true,
+        "cartDisabled": true,
+        "cartLabel": "Use cart in 3D",
+        "status": "The 3D cart is unavailable. Your bag selection is unchanged."
+      },
+      "queuedClick": "synthetic dispatch; no change",
+      "closeFocus": "visible shared-header bag-open",
+      "pageErrors": []
+    },
+    {
+      "scenario": "live-active: actual main context loss under Bag",
+      "result": "PASS",
+      "afterLoss": {
+        "ready": false,
+        "mode": "shop",
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ],
+        "paused": true,
+        "illegalCount": 0,
+        "pushing": false,
+        "bagOpen": true,
+        "selection": "Bag (1)",
+        "sessionSelection": "{\"new-moon-nz-425g-front\":1}",
+        "focus": "bag-close",
+        "focusVisible": true,
+        "cartHidden": true,
+        "cartDisabled": true,
+        "cartLabel": "Use cart in 3D",
+        "status": "The 3D cart is unavailable. Your bag selection is unchanged."
+      },
+      "queuedClick": "synthetic dispatch; no change",
+      "closeFocus": "visible shared-header bag-open",
+      "pageErrors": []
+    },
+    {
+      "scenario": "directory-cart-focus: actual main context loss under Bag",
+      "result": "PASS",
+      "afterLoss": {
+        "ready": false,
+        "mode": "shop",
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ],
+        "paused": true,
+        "illegalCount": 0,
+        "pushing": false,
+        "bagOpen": true,
+        "selection": "Bag (1)",
+        "sessionSelection": "{\"new-moon-nz-425g-front\":1}",
+        "focus": "bag-close",
+        "focusVisible": true,
+        "cartHidden": true,
+        "cartDisabled": true,
+        "cartLabel": "Use cart in 3D",
+        "status": "The 3D cart is unavailable. Your bag selection is unchanged."
+      },
+      "queuedClick": "synthetic dispatch; no change",
+      "closeFocus": "visible shared-header bag-open",
+      "pageErrors": []
+    },
+    {
+      "scenario": "directory-quantity-focus: actual main context loss under Bag",
+      "result": "PASS",
+      "afterLoss": {
+        "ready": false,
+        "mode": "shop",
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ],
+        "paused": true,
+        "illegalCount": 0,
+        "pushing": false,
+        "bagOpen": true,
+        "selection": "Bag (1)",
+        "sessionSelection": "{\"new-moon-nz-425g-front\":1}",
+        "focus": "new-moon-nz-425g-front-0",
+        "focusVisible": true,
+        "cartHidden": true,
+        "cartDisabled": true,
+        "cartLabel": "Use cart in 3D",
+        "status": "The 3D cart is unavailable. Your bag selection is unchanged."
+      },
+      "queuedClick": "synthetic dispatch; no change",
+      "closeFocus": "visible shared-header bag-open",
+      "pageErrors": []
+    },
+    {
+      "scenario": "directory-close-focus: actual main context loss under Bag",
+      "result": "PASS",
+      "afterLoss": {
+        "ready": false,
+        "mode": "shop",
+        "layers": [
+          "explore",
+          "menu",
+          "shop"
+        ],
+        "paused": true,
+        "illegalCount": 0,
+        "pushing": false,
+        "bagOpen": true,
+        "selection": "Bag (1)",
+        "sessionSelection": "{\"new-moon-nz-425g-front\":1}",
+        "focus": "bag-close",
+        "focusVisible": true,
+        "cartHidden": true,
+        "cartDisabled": true,
+        "cartLabel": "Use cart in 3D",
+        "status": "The 3D cart is unavailable. Your bag selection is unchanged."
+      },
+      "queuedClick": "synthetic dispatch; no change",
+      "closeFocus": "visible shared-header bag-open",
+      "pageErrors": []
+    },
+    {
+      "scenario": "ready directory Use cart and ordinary Close/Escape",
+      "result": "PASS",
+      "activationFocus": "scene",
+      "keyboardMovement": "greater than 0.2m",
+      "selection": "Bag (1)"
+    },
+    {
+      "scenario": "optional shopping-cart.glb failure",
+      "result": "PASS",
+      "blockedRequests": 1,
+      "cartUnavailable": true,
+      "syntheticClick": "no change",
+      "bagQuantityEdit": "Bag (1) \u2192 Bag (2)"
+    },
+    {
+      "scenario": "compact map/help under Bag",
+      "result": "PASS",
+      "evidence": "real controls, retained layers, native close/escape, post-close focus; compact/wide/compact resize under Bag"
+    },
+    {
+      "scenario": "Guide from Help: dismiss, Map and List",
+      "result": "PASS",
+      "mapModeHistoryDelta": [],
+      "listFinalFocus": "list-title",
+      "listModeHistoryDelta": []
+    },
+    {
+      "scenario": "explicit List from Seated and Cart",
+      "result": "PASS",
+      "resultingState": "directory Menu, paused true, Explore base; standing, cart stowed"
+    },
+    {
+      "scenario": "Cart nearby product Inspect plus compact/wide Help and Map",
+      "result": "PASS",
+      "nearbyProduct": "new-moon-au-425g-front",
+      "cartRetained": true,
+      "bagSelectionRetained": "Bag (1)",
+      "cameraAndPostureRetained": true,
+      "compactHelpAndMap": "blocking Menu; close restores Cart",
+      "wideHelp": "nonmodal; real frames continue"
+    },
+    {
+      "scenario": "physical sit animation paused by Bag",
+      "result": "PASS",
+      "phaseBefore": "sit",
+      "weightBefore": 0.00997353958884592,
+      "weightStayedDuringPause": true,
+      "phaseAfterResume": "seated",
+      "cameraFocusAfter": "seat"
+    },
+    {
+      "scenario": "WebGL context loss under directory-product",
+      "result": "PASS",
+      "modeAfterLoss": "inspect",
+      "pausedAfterLoss": true,
+      "layersAfterLoss": [
+        "explore",
+        "menu",
+        "inspect"
+      ],
+      "directoryProducts": 4,
+      "bagSelectionRetained": "Bag (1)",
+      "focusAfterClose": {
+        "tag": "BUTTON",
+        "id": "",
+        "inspectId": "new-moon-nz-425g-front",
+        "hiddenAncestor": false,
+        "experienceHidden": true
+      },
+      "focusAcceptance": "PASS",
+      "contextLoss": "real WEBGL_lose_context extension"
+    },
+    {
+      "scenario": "WebGL context loss under scene-product",
+      "result": "PASS",
+      "modeAfterLoss": "menu",
+      "pausedAfterLoss": true,
+      "layersAfterLoss": [
+        "explore",
+        "menu"
+      ],
+      "directoryProducts": 4,
+      "bagSelectionRetained": "Bag (1)",
+      "focusAfterClose": {
+        "tag": "H1",
+        "id": "list-title",
+        "inspectId": "",
+        "hiddenAncestor": false,
+        "experienceHidden": true
+      },
+      "focusAcceptance": "PASS",
+      "contextLoss": "real WEBGL_lose_context extension"
+    },
+    {
+      "scenario": "WebGL context loss under bag",
+      "result": "PASS",
+      "modeAfterLoss": "shop",
+      "pausedAfterLoss": true,
+      "layersAfterLoss": [
+        "explore",
+        "menu",
+        "shop"
+      ],
+      "directoryProducts": 4,
+      "bagSelectionRetained": "Bag (1)",
+      "focusAfterClose": {
+        "tag": "BUTTON",
+        "id": "bag-open",
+        "inspectId": "",
+        "hiddenAncestor": false,
+        "experienceHidden": true
+      },
+      "focusAcceptance": "PASS",
+      "contextLoss": "real WEBGL_lose_context extension"
+    }
+  ],
+  "failures": [],
+  "browserPageErrors": []
+}

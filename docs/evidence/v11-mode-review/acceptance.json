@@ -1,0 +1,70 @@
+{
+  "application": {
+    "version": "1.1.37",
+    "build": "44d064158404a3a2"
+  },
+  "base": "d72ae31ce9dadfcffa309a73a1d624acc736bbd4",
+  "environment": {
+    "browser": "Google Chrome",
+    "browserVersion": "157.0.8103.51",
+    "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+    "webglBackend": "metal",
+    "serving": "repository source root over local HTTP",
+    "contextLoss": "real WEBGL_lose_context extension"
+  },
+  "runtimeSHA256": {
+    "script.js": "a250a87a98b5ffab69db2f45441f4da9c403609b9a92a7577fa71b6fff2a327e",
+    "assets/ui.js": "5a0c8b98449faa24022bc8618289367262fe1125e27a6a48e5ffdc5ed58273a6",
+    "assets/modes.js": "454803af72f6b523036194fcfd0e07453acd7323cadda11a66c96cc5be98e886"
+  },
+  "finding": {
+    "severity": "P2",
+    "before": "After actual main WebGL loss, enabled Use cart could mutate the hidden player, close Bag and report success",
+    "after": "Readiness gates model availability and mutation; fallback refresh hides/disables Cart and recovers only disappearing-control focus",
+    "regression": "Expected FAIL before source fix, then PASS on the same nonempty-selection case"
+  },
+  "checks": {
+    "parentModeReviewGroups": 15,
+    "parentModeReviewPageErrors": 0,
+    "parentPythonTests": 47,
+    "modeUnitTests": 10,
+    "workerModeBrowserSnapshots": 162,
+    "workerLegacyV1ModeSmoke": "PASS",
+    "workerFullV11ThreeViewports": "PASS",
+    "workerAxeDOMStates": 70,
+    "workerDefaultV2Bag": "PASS",
+    "workerLegacyV1Cart": "PASS",
+    "parentGallery": "PASS",
+    "parentLegacyDemoCases": 28,
+    "parentLegacyDemoNoJS": 4,
+    "parentPWAUpdateOfflineInstallability": "PASS",
+    "generation": "PASS",
+    "SSOT": "PASS"
+  },
+  "provenance": [
+    "Parent independently ran 15 groups and required repository checks after bump to1.1.37",
+    "Worker fullV11/162mode/70axe/Bag/legacyCart checked final runtime before metadata bump; runtime/test hashes match worker manifest",
+    "Legacy browser host wrapper selects ANGLE Metal; assertions unchanged; old Cart suite explicitly selects visitor=v1",
+    "Queued-click regression is explicitly synthetic dispatch after actual WEBGL_lose_context, not fabricated application state"
+  ],
+  "independentReview": {
+    "verdict": "No P0/P1; confirmed P2 closed",
+    "visualScore": 86,
+    "rubric": {
+      "hierarchy": 17,
+      "spacing": 17,
+      "typography": 12,
+      "colour": 14,
+      "consistency": 14,
+      "responsive": 12
+    },
+    "limit": "Rendered frames establish unobstructed controls; recorded assertions establish focus target, not a keyboard focus ring in mouse-triggered frames"
+  },
+  "limits": [
+    "Physical iPhone/Android, Safari and real safe-area insets NOT VERIFIED",
+    "Screen-reader sessions NOT VERIFIED",
+    "Native popup keyboard choice NOT VERIFIED by standalone host fixture",
+    "Main WebGL context restoration, quality tiers, Shelf and remaining feature tasks are separate work"
+  ],
+  "workerManifestScope": "Historical worker handoff before parent release/doc/evidence edits; parent asserts matching runtime and test hashes only."
+}
