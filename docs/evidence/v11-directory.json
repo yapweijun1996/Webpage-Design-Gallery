@@ -1,0 +1,34 @@
+[
+  {
+    "width": 320,
+    "threeDToList": "PASS",
+    "allFourDetailsAndFocus": "PASS",
+    "visibleCTA": "PASS",
+    "order": "PASS",
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "threeDToList": "PASS",
+    "allFourDetailsAndFocus": "PASS",
+    "visibleCTA": "PASS",
+    "order": "PASS",
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "threeDToList": "PASS",
+    "allFourDetailsAndFocus": "PASS",
+    "visibleCTA": "PASS",
+    "order": "PASS",
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "threeDToList": "PASS",
+    "allFourDetailsAndFocus": "PASS",
+    "visibleCTA": "PASS",
+    "order": "PASS",
+    "overflow": false
+  }
+]

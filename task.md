@@ -142,3 +142,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - An independent original demo-tin viewer is implemented and tested for application 1.1.5. It uses no New Moon GLBs and is explicitly not an official SKU representation. See `docs/original-tin-viewer-review.md`.
 - The four-SKU New Moon source integration remains an unpublished local candidate; public redistribution rights and close-up label review are unresolved. It is not counted as released Phase 1–3 work.
 - First-visit guidance is implemented with session memory, keyboard/touch instructions, map and accessible-directory actions. See `docs/first-use-guide-review.md`. Wayfinding/kiosk integration, wider scene improvements and the remaining performance/device acceptance work are still pending. Unchecked items above remain unchecked intentionally.
+
+- V11 List view redesigned as an independent 1.1.7 slice: compact store discovery, visible product inspection actions and matching store order, retaining all products and 3D entry. See `docs/v11-directory-review.md`. This does not complete the remaining model integration and device gates.

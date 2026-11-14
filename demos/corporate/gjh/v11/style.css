@@ -199,3 +199,47 @@ body.is-3d .product-dialog :is(button,a):focus-visible{outline-color:var(--gjh-c
 .quick-guide .guide-footnote{margin:var(--space-4) 0 0;color:var(--muted)}
 body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-button-focus-visible)}
 @media(max-width:360px),(max-height:560px){.quick-guide{padding:var(--space-4)}.quick-guide h2{font-size:var(--font-size-xl)}.guide-steps{gap:var(--space-2);margin:var(--space-4) 0}}
+
+/* Directory-only presentation. The 3D HUD and shared dialog contracts are unchanged. */
+.store-list{padding:var(--space-7) 5vw var(--space-8)}
+.store-list .list-heading{align-items:center;gap:var(--space-6);margin-bottom:var(--space-6)}
+.store-list .list-heading h1{font-size:var(--gjh-type-store-story-h2)}
+.store-list .list-summary{max-width:340px;margin:0;font-size:var(--font-size-sm)}
+.store-list .list-summary strong,.store-list .list-summary span{display:block}
+.store-list .list-summary strong{margin-bottom:var(--space-2);color:var(--green)}
+.store-list .directory-nav{margin-bottom:var(--space-6);flex-wrap:wrap}
+.store-list .directory-nav a{min-height:52px}
+.store-list .store-overview{grid-template-columns:minmax(150px,22%) 1fr;min-height:0}
+.store-list .store-overview>.brand-art{height:auto;padding:var(--space-4)}
+.store-list .store-overview>.brand-art img{max-height:180px;max-width:180px}
+.store-list .store-overview .store-story{padding:var(--space-5) var(--space-6)}
+.store-list .store-story h2{margin-bottom:var(--space-2)}
+.store-list .store-overview .store-story p:not(.eyebrow){max-width:620px;font-size:var(--font-size-sm);line-height:var(--line-height-body)}
+.store-list .product-grid{gap:var(--space-5);margin-top:var(--space-6)}
+.store-list .product-copy{padding-top:var(--space-4)}
+.store-list .product-copy h3{line-height:var(--line-height-body);min-height:76px}
+.store-list .product-inspect{position:static;display:block;width:100%;opacity:1;transform:none;margin:var(--space-3) 0 var(--space-1);min-height:44px;background:var(--paper)}
+.store-list .product-inspect[hidden]{display:none}
+.store-list .brand-stories{margin-top:var(--space-7);gap:var(--space-5)}
+.store-list .brand-store{display:grid;grid-template-columns:120px 1fr;align-items:start}
+.store-list .brand-store>.brand-art{height:160px;aspect-ratio:auto;padding:var(--space-3)}
+.store-list .brand-store .store-story{padding:var(--space-5)}
+.store-list .brand-store .store-story p{font-size:var(--font-size-sm);line-height:var(--line-height-body)}
+.store-list .original-tin-entry{margin:var(--space-7) 0 0;padding:var(--space-6);border:1px solid var(--line)}
+@media(max-width:650px){
+ .store-list{padding:var(--space-5) var(--space-4) var(--space-7)}
+ .store-list .list-heading h1{font-size:var(--gjh-type-store-story-h2-max-width-650px)}
+ .store-list .list-summary{margin-top:var(--space-3);max-width:none}
+ .store-list .directory-nav a{flex:1 1 50%;padding:0 var(--space-2)}
+ .store-list .store-overview{grid-template-columns:90px 1fr}
+ .store-list .store-overview>.brand-art{padding:var(--space-2);height:100%}
+ .store-list .store-overview>.brand-art img{max-width:100%;max-height:120px}
+ .store-list .store-overview .store-story{padding:var(--space-4)}
+ .store-list .store-overview .store-story h2{font-size:var(--font-size-xl)}
+ .store-list .product-grid{gap:var(--space-5) var(--space-3)}
+ .store-list .product-copy h3{min-height:100px}
+ .store-list .brand-store{grid-template-columns:90px 1fr}
+ .store-list .brand-store>.brand-art{height:140px}
+ .store-list .brand-store .store-story{padding:var(--space-4)}
+ .store-list .original-tin-entry{padding:var(--space-5)}
+}
