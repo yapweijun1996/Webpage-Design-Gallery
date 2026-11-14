@@ -1,0 +1,22 @@
+[
+  {
+    "viewport": [
+      390,
+      680
+    ],
+    "approachSitStand": "PASS",
+    "movementLock": "PASS",
+    "modalEscapeListTeleportExit": "PASS",
+    "bagPreserved": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "approachSitStand": "PASS",
+    "movementLock": "PASS",
+    "modalEscapeListTeleportExit": "PASS",
+    "bagPreserved": "PASS"
+  }
+]

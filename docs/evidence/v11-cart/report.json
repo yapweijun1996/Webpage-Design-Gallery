@@ -1,0 +1,38 @@
+[
+  {
+    "viewport": [
+      390,
+      680
+    ],
+    "cartDeployStow": "PASS",
+    "slowerNoSprint": "PASS",
+    "wallClearanceAndBlockedDeploy": "PASS",
+    "bagPreserved": "PASS",
+    "listTeleportStow": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "cartDeployStow": "PASS",
+    "slowerNoSprint": "PASS",
+    "wallClearanceAndBlockedDeploy": "PASS",
+    "bagPreserved": "PASS",
+    "listTeleportStow": "PASS"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "cartDeployStow": "PASS",
+    "slowerNoSprint": "PASS",
+    "wallClearanceAndBlockedDeploy": "PASS",
+    "bagPreserved": "PASS",
+    "listTeleportStow": "PASS"
+  },
+  {
+    "optionalCartLoadFailureKeepsMall": "PASS"
+  }
+]

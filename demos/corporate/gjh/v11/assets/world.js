@@ -189,7 +189,7 @@ export async function createWorld(T, R, physics, shadows) {
   // Three 12cm steps provide a real auto-step path to a quiet seating terrace.
   for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
-  const doors = [], interactables = [];
+  const doors = [], interactables = [{id:'courtyard-seat',x:-7.8,z:8.3,radius:1.25,frontZMax:9.0}];
   let createCollectProp = () => null;
   let worldProductAssets = Object.freeze({status: 'not-loaded'});
   // Original decorative kiosk beside the entrance, outside the central walking line.

@@ -166,3 +166,5 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Application 1.1.15 keeps the existing product Close bar visible while scrolling long details in portrait as well as landscape. Before/after screenshots were reviewed by an independent read-only advisor under KB ask-advisor/UI-auditor guidance; 12 viewport/mode cases verify touch close and unobscured keyboard focus. See `docs/v11-sticky-details-review.md`.
 
 - Application 1.1.16 improves readability of the product-dialog independent-demo disclaimer from 9px to the existing 14px small-text token, without changing its wording or colour. Screenshot-led advisor review and focused four-viewport reflow/close checks are recorded in `docs/v11-disclosure-type-review.md`.
+
+- Application 1.1.24 adds optional pushable demo cart mode with one shared bag state, conservative full-turn collision clearance, reversible stowing and explicitly simplified pushing pose. See `docs/v11-cart-review.md`. This does not complete sitting transitions or all-seat interaction requirements.
