@@ -1,0 +1,49 @@
+{
+  "runtime": {
+    "cart": [
+      0.0018131043141762053,
+      0.0018131043141762053
+    ],
+    "feet": [
+      2.3551386880256624e-16,
+      0
+    ],
+    "shoeFloor": 0.02997801208753431,
+    "physical": {
+      "phase": "empty",
+      "id": null,
+      "active": false,
+      "held": false
+    },
+    "lowTriangles": 6257
+  },
+  "errors": []
+}
+{
+  "reducedMotion": {
+    "cart": [
+      0.0018128066749919256,
+      0.0018128066749916543
+    ],
+    "feet": [
+      2.3551386880256624e-16,
+      0
+    ],
+    "shoeFloor": 0.02997801208753431,
+    "physical": {
+      "phase": "empty",
+      "id": null,
+      "active": false,
+      "held": false
+    },
+    "lowTriangles": 6257
+  }
+}
+Approach {'x': -10.000343322753906, 'z': -7.321506977081299, 'nearby': 'new-moon-au-425g-front', 'guide': False, 'map': False}
+PASS physical pickup and return UI 390x844
+PASS actual seat and stand UI 390x844
+PASS actual cart UI 390x844
+Approach {'x': -10.000343322753906, 'z': -7.321506977081299, 'nearby': 'new-moon-au-425g-front', 'guide': False, 'map': False}
+PASS physical pickup and return UI 1280x800
+PASS actual seat and stand UI 1280x800
+PASS actual cart UI 1280x800

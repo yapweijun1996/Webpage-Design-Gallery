@@ -17,9 +17,11 @@ with sync_playwright() as p:
     reduced=page.evaluate((ROOT/'tests/visitor-v2-runtime.js').read_text())
     print(json.dumps({'reducedMotion':reduced},indent=2))
     assert not errors, errors
+    page.close()
     for width,height in ([] if os.environ.get('GJH_MODULE_ONLY')=='1' else [(390,844),(1280,800)]):
-        page.set_viewport_size({'width':width,'height':height})
-        page.reload()
+        page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce')
+        page.on('pageerror',lambda e:errors.append(str(e)))
+        page.goto(os.environ.get('GJH_V2_URL','http://127.0.0.1:18769/demos/corporate/gjh/v11/?visitor=v2'))
         page.wait_for_function('window.__mall?.ready',timeout=60000)
         start=page.get_by_role('button',name='Start exploring',exact=True)
         if start.is_visible():
@@ -31,6 +33,8 @@ with sync_playwright() as p:
             page.locator('#header-map').click()
         page.locator('#scene').focus()
         page.wait_for_function("document.activeElement.id==='scene'")
+        resumed_at=page.evaluate('__mall.state.frames')
+        page.wait_for_function('(frames)=>__mall.state.frames>frames',arg=resumed_at,timeout=60000)
         page.evaluate("""()=>{__mall.teleport('newmoon');__mall.setInput({forward:1});__mall.step(3900);__mall.setInput({forward:0});}""")
         print('Approach',page.evaluate('({x:__mall.state.x,z:__mall.state.z,nearby:__mall.state.nearby,guide:document.querySelector("#guide-dialog").open,map:document.querySelector("#mall-map").open})'),flush=True)
         page.get_by_role('button',name='Pick up product',exact=True).click()
@@ -65,5 +69,6 @@ with sync_playwright() as p:
         page.locator('#bag-close').click()
         assert not page.evaluate('__mall.state.pushing')
         print(f'PASS actual cart UI {width}x{height}',flush=True)
+        page.close()
     assert not errors, errors
     browser.close()
