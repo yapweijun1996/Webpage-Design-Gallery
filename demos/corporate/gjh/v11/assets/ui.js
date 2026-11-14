@@ -8,6 +8,7 @@ export function createUI() {
   const storeList = document.getElementById('store-list');
   const viewToggle = document.getElementById('view-toggle');
   const headerMap = document.getElementById('header-map');
+  const locationName = document.getElementById('location-name');
   const status = document.getElementById('mall-status');
   const fallbackMessage = document.getElementById('fallback-message');
   const playerDot = document.getElementById('player-dot');
