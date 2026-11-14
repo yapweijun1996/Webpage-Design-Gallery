@@ -1,0 +1,597 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_VERIFICATION_CONTRACT_PARENT_RELEASE_PENDING",
+  "scope": "Only two held_touch_paths post-resume comparison loops, required diagnostic row fields and project documentation; no production edits.",
+  "baseRef": "a88fd1ccb7430e124732373ec40476085c2364f5",
+  "runtimeFingerprint": "232b2e35df8ca4ba2976fe4753152dab50996f38df5fc8a18d26999653de20bc",
+  "runtimeFingerprintEncoding": "SHA-256 of compact JSON of path-sorted sourceHashes, ensure_ascii=False, plus trailing newline",
+  "runtimeSourceHashes": {
+    "demos/corporate/gjh/v11/index.html": "5e71001130d908d5f475f1e523c32988c77bc5aa4f495c0292fd395fbabfe9e0",
+    "demos/corporate/gjh/v11/script.js": "349b8635ac85f345a5dea06985cc374c6e14b151016d97662e860d1f40fede9b",
+    "demos/corporate/gjh/v11/style.css": "53c312c7b92b4215cc1e9d8002435b53d7ff4a50172f7410efe066565c1ce40b",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/ui.js": "e20cf01f5bbe7ac1197a90b02078fa4b522c93f0645fecf4be430b8b2a35082d",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/products.js": "809e414b75ef821c57ba2111884b7ca7b4dc9e7f2e44baa7f44098c716a38742",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/world.js": "12e3658b4b4afef49e6f9fcf723e9fcca5a754f58dfcf2c9d41b99b94a915487",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "0f5f40e6a8bc9a2062c0a5047a4b9d0213c45bbdd837c97074c99a2de0a2cb27",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "ccbee77666249b090bb73faf105ba662b275b43c4ac973597cc71debb59022c9",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "048891652f549fc893e83caf362d1ad03d4a287ab23958232fe83279437fe10b",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "3ca78d7697618bc17a4a7cc0c1d51b4cc3f36284c47cef208edd1a1aec77e1a5",
+    "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/player.js": "17958925972120e2164eb3b031efebe362416e9652527c27bd7ed637dd6aeb9f",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "contract": {
+    "finiteAxes": [
+      "x",
+      "z"
+    ],
+    "absolutePerAxisBoundMetres": 1e-05,
+    "reference": "same original stopped snapshot for both checkpoints; no accumulating tolerance",
+    "checkpoints": [
+      "120ms live resume after stale old-finger move or native cancel",
+      "explicit __mall.step(120) after stale touchEnd or native cancel"
+    ],
+    "exactAngles": [
+      "yaw",
+      "pitch"
+    ],
+    "unchangedChecks": [
+      "retained() and paused isolation",
+      "exact synchronous close player/camera/posture",
+      "trusted positive movement >0.1m before entry",
+      "actual pointer capture/release and joystick/thumb reset",
+      "old-finger move/end and native trusted pointercancel",
+      "every fixture and assertion outside the two comparison loops"
+    ],
+    "oneWalkingFrameAt60HzMetres": 0.04416666666666667,
+    "walkingFrameToBoundRatio": 4416.666666666666
+  },
+  "historicalFailure": {
+    "parentReportedObservation": {
+      "status": "historical Shelf Cart coordinate example, not current stale-touch failure; not reproduced by paired probe",
+      "before": -11.192327499389648,
+      "after": -11.192328453063965,
+      "delta": 9.5367431640625e-07,
+      "float32BitDelta": 1,
+      "source": "Historical coordinate example from earlier Shelf Cart probe, copied in the parent prompt; not the current stale-touch failure."
+    },
+    "retainedFullSuiteLog": {
+      "path": "/private/tmp/gallery-target-guidance-worker/final-regressions/shelf.log",
+      "sha256": "9f8dc7c7ca8f01e8aa482ba653b19ac56c1cbbd6104684f2a90e7216487e6c4f",
+      "status": "historical FAIL; distinct recorded coordinates, not substituted for parent report",
+      "exit": 1,
+      "beforeX": -11.192170143127441,
+      "afterX": -11.192169189453125,
+      "absoluteDeltaMetres": 9.5367431640625e-07,
+      "float32BitDelta": 1
+    },
+    "isolatedStrictRetry": "Historical PASS retained in original feature evidence; retry was not the required-gate fix.",
+    "originalMainFeatureEvidence": {
+      "path": "docs/evidence/v11-target-guidance.json",
+      "sha256": "f69a4b16e0c3195df0973407aa3f0292dc3d2eb3a42ac01e9ca0f758c50d8a58",
+      "byteIdentical": true
+    }
+  },
+  "pairedDiagnostic": {
+    "executionOwner": "parent",
+    "argv": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "/private/tmp/gallery-target-guidance-release/physics-probe.py"
+    ],
+    "reportedExit": 0,
+    "status": "PASS",
+    "metadataCorrection": "Parent corrected the attribution: the eight measured trial rows are unchanged; the historical example and actual current failure have distinct coordinates and sources.",
+    "actualCurrentFailure": {
+      "source": "/private/tmp/gallery-target-guidance-worker/final-regressions/shelf.log",
+      "sourceSHA256": "9f8dc7c7ca8f01e8aa482ba653b19ac56c1cbbd6104684f2a90e7216487e6c4f",
+      "case": "stale-move-end",
+      "axis": "x",
+      "before": -11.192170143127441,
+      "after": -11.192169189453125,
+      "absoluteDeltaMetres": 9.5367431640625e-07,
+      "float32BitDelta": 1
+    },
+    "artifacts": [
+      {
+        "path": "/private/tmp/gallery-target-guidance-release/physics-probe.py",
+        "sha256": "a12036db42a4d863656fa219c8b65482305608137d5b3be1547641da5ed0a1cb"
+      },
+      {
+        "path": "/private/tmp/gallery-target-guidance-release/physics-probe.log",
+        "sha256": "eb24b38a83b79f20047346cc9feb02e0567aaee34f182c5cdca8603be80afb76"
+      },
+      {
+        "path": "/private/tmp/gallery-target-guidance-release/physics-probe-report.json",
+        "sha256": "7505bbf109320f1e3142e242c58c55ce54ae3937cd30b197aaccbfd6b8ef3070"
+      }
+    ],
+    "summary": [
+      {
+        "variant": "pinned-base",
+        "trialCount": 4,
+        "endings": [
+          "idle-control",
+          "stale-move",
+          "idle-control",
+          "stale-move"
+        ],
+        "allExactImmediateRestore": true,
+        "maxAbsLiveDelta": {
+          "x": 0.0,
+          "y": 9.649991989135742e-05,
+          "z": 0.0,
+          "yaw": 0,
+          "pitch": 0.0
+        },
+        "maxAbsForcedIdleStepDelta": {
+          "x": 0.0,
+          "y": 9.649991989135742e-05,
+          "z": 0.0,
+          "yaw": 0,
+          "pitch": 0.0
+        },
+        "framesElapsed": [
+          7,
+          8,
+          7,
+          8
+        ]
+      },
+      {
+        "variant": "candidate",
+        "trialCount": 4,
+        "endings": [
+          "idle-control",
+          "stale-move",
+          "idle-control",
+          "stale-move"
+        ],
+        "allExactImmediateRestore": true,
+        "maxAbsLiveDelta": {
+          "x": 0.0,
+          "y": 9.649991989135742e-05,
+          "z": 0.0,
+          "yaw": 0,
+          "pitch": 0.0
+        },
+        "maxAbsForcedIdleStepDelta": {
+          "x": 0.0,
+          "y": 9.649991989135742e-05,
+          "z": 0.0,
+          "yaw": 0,
+          "pitch": 0.0
+        },
+        "framesElapsed": [
+          7,
+          8,
+          7,
+          8
+        ]
+      }
+    ],
+    "samePhysicsOwners": [
+      {
+        "path": "demos/corporate/gjh/v11/assets/player.js",
+        "sha256": "17958925972120e2164eb3b031efebe362416e9652527c27bd7ed637dd6aeb9f",
+        "identicalToBase": true
+      },
+      {
+        "path": "demos/corporate/gjh/v11/assets/character.js",
+        "sha256": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+        "identicalToBase": true
+      },
+      {
+        "path": "demos/corporate/gjh/v11/assets/visitor-v2-contact.js",
+        "sha256": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+        "identicalToBase": true
+      },
+      {
+        "path": "demos/corporate/gjh/v11/assets/world.js",
+        "sha256": "12e3658b4b4afef49e6f9fcf723e9fcca5a754f58dfcf2c9d41b99b94a915487",
+        "identicalToBase": true
+      }
+    ],
+    "interpretation": "Both revisions have zero horizontal/angular deltas and matching Y grounding; corroborates synchronous/live boundary. Historical X ULP was not reproduced."
+  },
+  "verification": {
+    "browser": "157.0.8103.51",
+    "backend": "metal",
+    "axe": {
+      "path": "/private/tmp/gallery-a11y-tools/package/axe.min.js",
+      "sha256": "880970c081707360e64f34cea25ff91892f5bc95675b0776925b9709dd8a68bb"
+    },
+    "commands": [
+      {
+        "name": "full-shelf",
+        "executionOwner": "this verification task",
+        "argv": [
+          "/private/tmp/gallery-task-qa-venv/bin/python",
+          "tests/browser_gjh_shelf_focus.py",
+          "--axe",
+          "/private/tmp/gallery-a11y-tools/package/axe.min.js",
+          "--output",
+          "/private/tmp/gallery-target-physics-fix/shelf"
+        ],
+        "cwd": "/private/tmp/gallery-task-lod",
+        "env": {
+          "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          "GALLERY_WEBGL_BACKEND": "metal"
+        },
+        "exit": 0,
+        "seconds": 55.28,
+        "log": "/private/tmp/gallery-target-physics-fix/shelf.log",
+        "testSHA256Before": "0ef63f3d9d4b09a8751b04bbed463f9252d1e9887d4a8ef1fab83203c3102b97",
+        "testSHA256After": "0ef63f3d9d4b09a8751b04bbed463f9252d1e9887d4a8ef1fab83203c3102b97"
+      },
+      {
+        "name": "scope-and-source-preservation",
+        "argv": [
+          "/private/tmp/gallery-task-qa-venv/bin/python",
+          "/private/tmp/gallery-target-physics-fix/verify-scope.py"
+        ],
+        "cwd": "/private/tmp/gallery-task-lod",
+        "exit": 0,
+        "log": "/private/tmp/gallery-target-physics-fix/scope-verification.log"
+      },
+      {
+        "name": "diff-check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "cwd": "/private/tmp/gallery-task-lod",
+        "exit": 0
+      }
+    ],
+    "status": "PASS",
+    "failures": [],
+    "viewports": [
+      [
+        320,
+        568
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        768,
+        1024
+      ],
+      [
+        1440,
+        900
+      ],
+      [
+        650,
+        844
+      ],
+      [
+        651,
+        844
+      ],
+      [
+        599,
+        844
+      ],
+      [
+        600,
+        844
+      ],
+      [
+        844,
+        560
+      ],
+      [
+        844,
+        561
+      ]
+    ],
+    "skuCases": 48,
+    "assetFailureScenarios": [
+      "shelf-unavailable",
+      "can-nz-425g-unavailable",
+      "can-au-425g-unavailable",
+      "can-sa-425g-unavailable",
+      "can-mx-454g-unavailable"
+    ],
+    "trustedHeldTouchRows": [
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "trustedHeldTouch": "stale-move-end",
+        "status": "PASS",
+        "movementBeforeEntryMetres": 0.288576602935791,
+        "events": [
+          {
+            "type": "pointerdown",
+            "id": 3,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "gotpointercapture",
+            "id": 3,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "pointermove",
+            "id": 3,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "lostpointercapture",
+            "id": 3,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "pointermove",
+            "id": 3,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "pointerup",
+            "id": 3,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          }
+        ],
+        "exactImmediateRestore": true,
+        "postResume": {
+          "result": "no-residual-control-movement within bound",
+          "absoluteXZBoundMetres": 1e-05,
+          "reference": "same original stopped snapshot",
+          "exactAngles": [
+            "yaw",
+            "pitch"
+          ],
+          "stopped": {
+            "x": -11.148940086364746,
+            "y": -0.01990419626235962,
+            "z": -7.345320701599121,
+            "yaw": 0,
+            "pitch": 0.1,
+            "frames": 375
+          },
+          "afterLive": {
+            "x": -11.148940086364746,
+            "y": -0.01999300718307495,
+            "z": -7.345320701599121,
+            "yaw": 0,
+            "pitch": 0.1,
+            "frames": 383
+          },
+          "afterStep": {
+            "x": -11.148940086364746,
+            "y": -0.019900023937225342,
+            "z": -7.345320701599121,
+            "yaw": 0,
+            "pitch": 0.1,
+            "frames": 385
+          },
+          "deltasFromStopped": {
+            "afterLive": {
+              "x": 0.0,
+              "y": -8.881092071533203e-05,
+              "z": 0.0,
+              "yaw": 0,
+              "pitch": 0.0,
+              "frames": 8
+            },
+            "afterStep": {
+              "x": 0.0,
+              "y": 4.172325134277344e-06,
+              "z": 0.0,
+              "yaw": 0,
+              "pitch": 0.0,
+              "frames": 10
+            }
+          }
+        },
+        "visibleFocus": "Shelf close and restored scene"
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "trustedHeldTouch": "cancel-while-shelf",
+        "status": "PASS",
+        "movementBeforeEntryMetres": 0.288576602935791,
+        "events": [
+          {
+            "type": "pointerdown",
+            "id": 4,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "gotpointercapture",
+            "id": 4,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "pointermove",
+            "id": 4,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "lostpointercapture",
+            "id": 4,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "scene"
+          },
+          {
+            "type": "pointercancel",
+            "id": 4,
+            "trusted": true,
+            "pointerType": "touch",
+            "target": "shelf-target"
+          }
+        ],
+        "exactImmediateRestore": true,
+        "postResume": {
+          "result": "no-residual-control-movement within bound",
+          "absoluteXZBoundMetres": 1e-05,
+          "reference": "same original stopped snapshot",
+          "exactAngles": [
+            "yaw",
+            "pitch"
+          ],
+          "stopped": {
+            "x": -11.148940086364746,
+            "y": -0.01990419626235962,
+            "z": -7.345320701599121,
+            "yaw": 0,
+            "pitch": 0.1,
+            "frames": 399
+          },
+          "afterLive": {
+            "x": -11.148940086364746,
+            "y": -0.01999300718307495,
+            "z": -7.345320701599121,
+            "yaw": 0,
+            "pitch": 0.1,
+            "frames": 407
+          },
+          "afterStep": {
+            "x": -11.148940086364746,
+            "y": -0.019900619983673096,
+            "z": -7.345320701599121,
+            "yaw": 0,
+            "pitch": 0.1,
+            "frames": 408
+          },
+          "deltasFromStopped": {
+            "afterLive": {
+              "x": 0.0,
+              "y": -8.881092071533203e-05,
+              "z": 0.0,
+              "yaw": 0,
+              "pitch": 0.0,
+              "frames": 8
+            },
+            "afterStep": {
+              "x": 0.0,
+              "y": 3.5762786865234375e-06,
+              "z": 0.0,
+              "yaw": 0,
+              "pitch": 0.0,
+              "frames": 9
+            }
+          }
+        },
+        "visibleFocus": "Shelf close and restored scene"
+      }
+    ],
+    "observedMaxAbsoluteDeltasFromOriginalStopped": {
+      "afterLive": {
+        "x": 0.0,
+        "y": 8.881092071533203e-05,
+        "z": 0.0,
+        "yaw": 0,
+        "pitch": 0.0
+      },
+      "afterStep": {
+        "x": 0.0,
+        "y": 4.172325134277344e-06,
+        "z": 0.0,
+        "yaw": 0,
+        "pitch": 0.0
+      }
+    },
+    "rawArtifacts": [
+      {
+        "path": "/private/tmp/gallery-target-physics-fix/shelf/results.json",
+        "sha256": "6705235ed02c3ec3762d2cb440ca4a92f68b9afb7b80f3c506cff4f8770da796"
+      },
+      {
+        "path": "/private/tmp/gallery-target-physics-fix/shelf.log",
+        "sha256": "c3cdce4fe3bfdac740aeef8a96a68462f602c9f74e0a917cf5c7e592309d8fcc"
+      },
+      {
+        "path": "/private/tmp/gallery-target-physics-fix/shelf-command.json",
+        "sha256": "317427eb547cec36092a24bd5f974c227dbd444a674889333ef13002bb2e9d89"
+      }
+    ],
+    "testSHA256": "0ef63f3d9d4b09a8751b04bbed463f9252d1e9887d4a8ef1fab83203c3102b97"
+  },
+  "preservation": {
+    "status": "PASS",
+    "modifiedExistingFiles": [
+      "docs/v11-target-guidance-review.md",
+      "tests/browser_gjh_shelf_focus.py"
+    ],
+    "addedFiles": [
+      "docs/evidence/v11-target-guidance-physics.json",
+      "docs/v11-physics-check-contract.md"
+    ],
+    "initialFileCount": 1022,
+    "unchangedInitialFiles": 1020,
+    "allOtherInitialFilesByteIdentical": true,
+    "outsideHeldTouchPathsByteIdenticalExceptMathImport": true,
+    "heldTouchAssertionsOutsideTwoPostResumeLoopsUnchanged": true,
+    "unchangedHeldTouchAssertCountOutsideLoops": 12,
+    "historicalMainFeatureEvidenceSHA256": "f69a4b16e0c3195df0973407aa3f0292dc3d2eb3a42ac01e9ca0f758c50d8a58",
+    "runtimeSourceCount": 31
+  },
+  "finalSourceAndDocsHashes": {
+    "tests/browser_gjh_shelf_focus.py": "0ef63f3d9d4b09a8751b04bbed463f9252d1e9887d4a8ef1fab83203c3102b97",
+    "docs/v11-physics-check-contract.md": "e90e67489955fdbb4737b9f1470d5d0afe1c14b09175358739ebe5ffedb56034",
+    "docs/v11-target-guidance-review.md": "ad6d52bb04ac89e3264586dad100304f6c9be9ed2941f1ecb14276987ad8e893"
+  },
+  "knowledgeDecision": "Project docs only; no global skill changes.",
+  "limits": [
+    "Physical devices, Safari, screen readers and device FPS remain unverified.",
+    "The paired diagnostic and this full corrected run did not reproduce the historical X Float32 ULP failure; no deterministic-physics certification.",
+    "Paired baseline/current diagnostic was run by parent (reported exit 0); it was inspected and hashed, not rerun here.",
+    "Unchanged target 14-viewport/Node/UI/visual suites were not rerun; all 31 runtime source hashes match their approved evidence.",
+    "Parent owns remaining 47 Python/generator/production-prefix/task/version/generated/Git/release gates; this handoff does not approve release.",
+    "Instruction-module routing files were absent; core rules and current local evidence used."
+  ]
+}

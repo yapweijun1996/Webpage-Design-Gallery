@@ -8,6 +8,7 @@ import functools
 import hashlib
 import http.server
 import json
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -220,17 +221,31 @@ def held_touch_paths(page,context,output):
         immediate=close_shelf(page,'escape');retained(opened,immediate)
         assert page.locator('#scene').evaluate("e=>e===document.activeElement&&e.matches(':focus-visible')")
         stopped=state(page)
+        # Resumed collision/grounding can round Float32 XZ without stale control input.
+        post_resume_xz_bound=1e-5
         if ending=='stale-move-end':touch('touchMove',150,325)
         page.wait_for_timeout(120);after=state(page)
-        for key in ['x','z','yaw','pitch']:assert after[key]==stopped[key],(ending,key,stopped[key],after[key])
+        for key in ['x','z','yaw','pitch']:
+            if key in ['x','z']:
+                assert math.isfinite(stopped[key]) and math.isfinite(after[key]) and abs(after[key]-stopped[key])<=post_resume_xz_bound,(ending,key,stopped[key],after[key],post_resume_xz_bound)
+            else:assert after[key]==stopped[key],(ending,key,stopped[key],after[key])
         if ending=='stale-move-end':touch('touchEnd')
         final=page.evaluate('__mall.step(120)')
-        for key in ['x','z','yaw','pitch']:assert final[key]==stopped[key],(ending,key)
+        for key in ['x','z','yaw','pitch']:
+            if key in ['x','z']:
+                assert math.isfinite(stopped[key]) and math.isfinite(final[key]) and abs(final[key]-stopped[key])<=post_resume_xz_bound,(ending,key,stopped[key],final[key],post_resume_xz_bound)
+            else:assert final[key]==stopped[key],(ending,key)
         events=page.evaluate('__shelfPointerEvents.filter(e=>e.id==='+str(pointer['id'])+')')
         assert any(e['type']=='gotpointercapture' and e['trusted'] for e in events),events
         assert any(e['type']=='lostpointercapture' and e['trusted'] for e in events),events
         if ending=='cancel-while-shelf':assert any(e['type']=='pointercancel' and e['trusted'] for e in events),events
-        rows.append({'trustedHeldTouch':ending,'status':'PASS','movementBeforeEntryMetres':start['z']-moved['z'],'events':events,'exactImmediateRestore':True,'noResidualMovement':True,'visibleFocus':'Shelf close and restored scene'})
+        rows.append({'trustedHeldTouch':ending,'status':'PASS','movementBeforeEntryMetres':start['z']-moved['z'],'events':events,'exactImmediateRestore':True,
+            'postResume':{'result':'no-residual-control-movement within bound','absoluteXZBoundMetres':post_resume_xz_bound,'reference':'same original stopped snapshot','exactAngles':['yaw','pitch'],
+                'stopped':{k:stopped[k] for k in ['x','y','z','yaw','pitch','frames']},
+                'afterLive':{k:after[k] for k in ['x','y','z','yaw','pitch','frames']},
+                'afterStep':{k:final[k] for k in ['x','y','z','yaw','pitch','frames']},
+                'deltasFromStopped':{label:{k:sample[k]-stopped[k] for k in ['x','y','z','yaw','pitch','frames']} for label,sample in [('afterLive',after),('afterStep',final)]}},
+            'visibleFocus':'Shelf close and restored scene'})
     cdp.detach();return rows
 
 

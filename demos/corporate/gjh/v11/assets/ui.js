@@ -18,6 +18,7 @@ export function createUI() {
   const inspectPrompt = document.getElementById('inspect-prompt');
   const inspectButton = document.getElementById('inspect');
   const nearbyName = document.getElementById('nearby-name');
+  const nearbyDistance = document.getElementById('nearby-distance');
   const help = document.getElementById('keyboard-help');
   const mallMap = document.getElementById('mall-map');
   const guide = document.getElementById('guide-dialog');
@@ -335,6 +336,16 @@ export function createUI() {
 
   return {
     modeSignals,
+    clearGuidance() { if (!nearbyDistance.hidden) nearbyDistance.hidden = true; },
+    updateGuidance(item, distance, active) {
+      const record = item && records.get(item.id);
+      const show = active && showing3D && !inspectPrompt.hidden && item?.id === nearby && record && Number.isFinite(distance);
+      if (nearbyDistance.hidden === Boolean(show)) nearbyDistance.hidden = !show;
+      if (!show) return null;
+      const text = `≈${distance.toFixed(1)} m`;
+      if (nearbyDistance.textContent !== text) nearbyDistance.textContent = text;
+      return record.compactName || (record.action === 'map' ? 'Directory kiosk' : record.action === 'elevator' ? `Elevator · ${currentZone === 'upper' ? 'Upper level' : 'Ground floor'}` : record.name);
+    },
     setShelfFocus(controller) {
       shelfFocus = controller;
       bag.subscribe(value => controller.quantities(value));
@@ -415,8 +426,8 @@ export function createUI() {
         if (isShelf) inspectButton.textContent = 'Inspect';
         inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
         if (nearby && showing3D) {
-          const action = isMap ? (touchOnly ? 'Tap Map' : 'press F or tap Map') : (touchOnly ? 'Tap Inspect' : 'press F or tap Inspect');
-          announce(`${records.get(nearby).name}. ${action} for details.`);
+          const name = product.action === 'elevator' ? `Elevator · ${zone === 'upper' ? 'Upper level' : 'Ground floor'}` : product.name;
+          announce(`${name}. Nearby interaction selected.`);
         }
       }
       seated=isSeated;document.body.classList.toggle('is-seated',seated);

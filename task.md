@@ -114,7 +114,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] Mode-state review and focused browser verification: `docs/v11-mode-state-review.md`.
 - [x] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
 - [x] Shelf focus mode: implemented scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
-- [ ] Interaction target highlight and distance hint.
+- [x] Interaction target highlight and distance hint.
 - [ ] WebGL context-loss recovery and low-end quality tiers.
 - [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
 - [ ] Define any future real-commerce scope separately. The existing Demo bag and pushable 3D cart are authorized simulations, with no prices, stock reservation, real orders or payment. The official eShop link is external and does not check out the demo selection. See the commerce clarification below; no real-commerce implementation is approved by this checklist.
@@ -358,3 +358,20 @@ generation/SSOT and two-viewport production-prefix journeys also pass. See
 handling is fixture-backed. Physical devices, Safari, screen readers, device FPS
 and full packaging fidelity remain unverified. This completes Shelf only;
 general target-distance guidance and graphics recovery/tiers remain separate.
+
+### Interaction target guidance acceptance — 1.1.40
+
+Application 1.1.40 adds an approximate horizontal distance from the canonical
+interaction owner, a decorative interaction-point marker, and whole-shelf outlines.
+The cue clears on mode changes, blur, hidden state and fallback. Elevator guidance
+uses the selected floor anchor. Existing action ranges and physics are unchanged.
+
+Acceptance covers 14 viewports, 140 targets, 20 software-inset targets, 13 Node
+tests, 165 mode snapshots, 15 mode-review scenarios, 11 navigation viewports,
+70 axe scans, the corrected full 12-viewport Shelf suite, 47 Python tests and
+Gallery/legacy/PWA checks. Generated artifact prefix checks pass at 390 and 1440px.
+Independent review: 86/100. Two local modules add 8,335 decoded bytes with unchanged
+scene resources; broad draw maximum remains 181. Post-resume held-touch assertions
+use a localized 10-micrometre XZ bound; synchronous restore and angles stay exact.
+See `docs/v11-target-guidance-review.md` and bounded evidence under `docs/evidence/`.
+Physical-device, Safari, screen-reader and complete packaging verification remain open.

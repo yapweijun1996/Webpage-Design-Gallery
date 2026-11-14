@@ -1,0 +1,267 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "prefix": "gallery",
+      "checks": [
+        {
+          "category": "nz-425g",
+          "anchor": {
+            "id": "new-moon-nz-425g-front",
+            "x": -13.63,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.3 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "au-425g",
+          "anchor": {
+            "id": "new-moon-au-425g-front",
+            "x": -11.21,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.2 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "sa-425g",
+          "anchor": {
+            "id": "new-moon-sa-425g-front",
+            "x": -8.79,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.2 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "mx-454g",
+          "anchor": {
+            "id": "new-moon-mx-454g-front",
+            "x": -6.37,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.3 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "kiosk",
+          "anchor": {
+            "id": "mall-directory",
+            "x": -3.3,
+            "y": 0,
+            "z": 9.9,
+            "radius": 2.8
+          },
+          "distance": "\u22482.1 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "bench",
+          "anchor": {
+            "id": "courtyard-seat",
+            "x": -7.8,
+            "y": 0,
+            "z": 8.3,
+            "radius": 1.1
+          },
+          "distance": "\u22480.4 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "mili",
+          "anchor": {
+            "id": "mili",
+            "x": 0,
+            "y": 0,
+            "z": -9,
+            "radius": 2.5
+          },
+          "distance": "\u22481.2 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "gogo",
+          "anchor": {
+            "id": "gogo",
+            "x": 10,
+            "y": 0,
+            "z": -9,
+            "radius": 2.5
+          },
+          "distance": "\u22481.2 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "elevator-ground",
+          "anchor": {
+            "id": "visitor-elevator",
+            "x": 0,
+            "y": 0,
+            "z": 16,
+            "radius": 1.45
+          },
+          "distance": "\u22481.0 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "elevator-upper",
+          "anchor": {
+            "id": "visitor-elevator",
+            "x": 0,
+            "y": 7.2,
+            "z": 16,
+            "radius": 1.45
+          },
+          "distance": "\u22481.0 m",
+          "spatialCueAndControls": "PASS"
+        }
+      ],
+      "illegal": 0,
+      "pageErrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "prefix": "gallery",
+      "checks": [
+        {
+          "category": "nz-425g",
+          "anchor": {
+            "id": "new-moon-nz-425g-front",
+            "x": -13.63,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.3 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "au-425g",
+          "anchor": {
+            "id": "new-moon-au-425g-front",
+            "x": -11.21,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.2 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "sa-425g",
+          "anchor": {
+            "id": "new-moon-sa-425g-front",
+            "x": -8.79,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.2 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "mx-454g",
+          "anchor": {
+            "id": "new-moon-mx-454g-front",
+            "x": -6.37,
+            "y": 0,
+            "z": -8.3,
+            "radius": 1.9
+          },
+          "distance": "\u22481.3 m",
+          "ShelfModeClearsGuidance": "PASS"
+        },
+        {
+          "category": "kiosk",
+          "anchor": {
+            "id": "mall-directory",
+            "x": -3.3,
+            "y": 0,
+            "z": 9.9,
+            "radius": 2.8
+          },
+          "distance": "\u22482.1 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "bench",
+          "anchor": {
+            "id": "courtyard-seat",
+            "x": -7.8,
+            "y": 0,
+            "z": 8.3,
+            "radius": 1.1
+          },
+          "distance": "\u22480.4 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "mili",
+          "anchor": {
+            "id": "mili",
+            "x": 0,
+            "y": 0,
+            "z": -9,
+            "radius": 2.5
+          },
+          "distance": "\u22481.2 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "gogo",
+          "anchor": {
+            "id": "gogo",
+            "x": 10,
+            "y": 0,
+            "z": -9,
+            "radius": 2.5
+          },
+          "distance": "\u22481.2 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "elevator-ground",
+          "anchor": {
+            "id": "visitor-elevator",
+            "x": 0,
+            "y": 0,
+            "z": 16,
+            "radius": 1.45
+          },
+          "distance": "\u22481.0 m",
+          "spatialCueAndControls": "PASS"
+        },
+        {
+          "category": "elevator-upper",
+          "anchor": {
+            "id": "visitor-elevator",
+            "x": 0,
+            "y": 7.2,
+            "z": 16,
+            "radius": 1.45
+          },
+          "distance": "\u22481.0 m",
+          "spatialCueAndControls": "PASS"
+        }
+      ],
+      "illegal": 0,
+      "pageErrors": []
+    }
+  ]
+}

@@ -41,8 +41,10 @@ def targets(page):
 def mobile_hud(page):
     overlaps = page.locator('.site-header,#keyboard-help,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt').evaluate_all('''els => {
       // Closed details retain descendant layout boxes in current Chrome; those
-      // boxes are not painted map content. Keep all open-map overlap assertions.
-      const visible=els.filter(el=>!el.matches('.map-content') || el.closest('details').open)
+      // boxes are not painted map content. Mode-suppressed walking controls also
+      // retain boxes. Check every painted open-map/control rectangle.
+      const visible=els.filter(el=>getComputedStyle(el).visibility!=='hidden' &&
+        (!el.matches('.map-content') || el.closest('details').open))
         .map(el=>({name:el.id || el.className,rect:el.getBoundingClientRect()}))
         .filter(({rect:r})=>r.width && r.height);
       return visible.flatMap((a,i)=>visible.slice(i+1).filter(b=>

@@ -1,0 +1,20 @@
+{
+  "status": "APPROVED",
+  "reviewer": "independent /root/lod_review",
+  "score": 86,
+  "rubric": {
+    "hierarchy": 17,
+    "spacing": 17,
+    "typography": 12,
+    "colour": 14,
+    "consistency": 14,
+    "responsive": 12
+  },
+  "unresolvedP0P1OrFunctionalP2": [],
+  "runtimeFingerprint": "232b2e35df8ca4ba2976fe4753152dab50996f38df5fc8a18d26999653de20bc",
+  "upperElevator320": "Actual arrival point (160,465.07) caption overlaps joystick by approximately 5px horizontally; suppression is correct. Walking restores visible upper-floor cue.",
+  "physicsContract": "Independent approval of localized post-resume XZ <= 1e-5 m; immediate restore and angles remain exact. Runtime unchanged.",
+  "limits": [
+    "Physical devices, Safari, screen readers and device FPS unverified."
+  ]
+}

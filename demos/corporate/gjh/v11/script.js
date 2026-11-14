@@ -4,9 +4,13 @@ import {setupOriginalTin} from './assets/original-tin.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
-let productControl=null, shelfFocus=null;
+let productControl=null, shelfFocus=null, guidance=null;
+// Visibility does not imply focus; only an actual focus event clears blur suppression.
+let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false;
+function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); }
 let nearby = null, currentZone = 'atrium';
 function clearTransientState(event) {
+  hideGuidance();
   player?.clearInput();
   player?.setInput(null);
   // Overlays suspend the collection/action camera. Real interruptions cancel the
@@ -23,6 +27,7 @@ function syncMode(signals = ui.modeSignals()) {
     cartActive: Boolean(player?.state.character?.cart?.active)});
   document.body.dataset.mode = modes.current();
   ui.projectMode(modes.current());
+  if (!['explore', 'cart'].includes(modes.current())) hideGuidance();
 }
 ui.onModeState(syncMode);
 setupOriginalTin(ui);
@@ -31,6 +36,7 @@ const STEP = 1 / 60;
 const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
+  interaction: selectedInteraction ? {id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance} : null,
   camera: player ? {position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect} : null,
   gpu: renderer ? {...renderer.info.memory} : null,
   seats:world?.seats?.map(({id,name,x,z,exitX,exitZ,facing})=>({id,name,x,z,exitX,exitZ,facing}))||[],
@@ -61,13 +67,14 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : p.z < .1 ? (p.x < -5 ? 'newmoon' : p.x > 5 ? 'gogo' : 'mili') : 'atrium';
-  nearby = null; let best = Infinity;
+  nearby = null; selectedInteraction = null; let best = Infinity;
   for (const item of world.interactables) {
     if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;
     if(item.seat && (p.z-item.seat.z)*item.seat.facing>-.25)continue;
     const distance = Math.hypot(p.x - item.x, p.z - item.z);
-    if (distance < item.radius && distance < best) { nearby = item.id; best = distance; }
+    if (distance < item.radius && distance < best) { nearby = item.id; selectedInteraction = item; best = distance; }
   }
+  interactionDistance = best;
   productControl?.update(p,nearby);
   shelfFocus?.setNearby(nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
@@ -90,7 +97,10 @@ function render() {
   if (ready && !document.hidden && (!modes.paused() || modes.current() === 'shelf')) {
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
-    shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused());
+    const guiding = !windowBlurred && ['explore', 'cart'].includes(modes.current()) && !player.state.character.collection.active;
+    const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
+    shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused(), Boolean(label));
+    guidance?.update(selectedInteraction, label, camera, Boolean(label));
     world.updateSigns(camera, canvas);
     if (shelfFocus?.open) player.renderShelf(() => renderer.render(world.scene, camera));
     else renderer.render(world.scene, camera);
@@ -111,6 +121,7 @@ function animate(now) {
 }
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message) {
+  hideGuidance();
   ready = false; window.__sceneFailed = true;
   shelfFocus?.close();
   cancelAnimationFrame(frame); frame = 0; modes.interrupt('fallback'); ui.fallback(message);
@@ -124,11 +135,12 @@ document.addEventListener('keydown', event => {
       !event.altKey && !event.ctrlKey && !event.metaKey &&
       (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); if(player.state.seated){player.stand();updateHUD();}else ui.inspectNearby(nearby); }
 });
-window.addEventListener('blur', () => { shelfFocus?.close(); modes.interrupt('window blur'); });
+window.addEventListener('blur', () => { windowBlurred = true; hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
+window.addEventListener('focus', () => { windowBlurred = false; if (ready) { updateHUD(); render(); } });
 window.addEventListener('resize', () => modes.interrupt('viewport resize'));
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
-  else resume();
+  if (document.hidden) { hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
+  else { if (ready) { updateHUD(); render(); } resume(); }
 });
 canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); fallback('The 3D graphics context was interrupted. All stores and verified products remain available in list view. Reload to retry.'); });
 async function initialize() {
@@ -150,8 +162,12 @@ async function initialize() {
     world.interactables.push(...elevator.interactables);
   }
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats);
+  const {createDOMProjection} = await import('./assets/dom-projection.js');
+  const projection = createDOMProjection(T, canvas);
+  const {createTargetGuidance} = await import('./assets/target-guidance.js');
+  guidance = createTargetGuidance({canvas, projection});
   const {createShelfFocus} = await import('./assets/shelf-focus.js');
-  shelfFocus = createShelfFocus({T, canvas, normalCamera: player.camera, shelves: world.shelves,
+  shelfFocus = createShelfFocus({T, canvas, normalCamera: player.camera, shelves: world.shelves, projection,
     onChange: () => { syncMode(); render(); }, onDetails: ui.inspect, onAdd: ui.addToBag,
     onRestore: resized => { if (resized) player.updateCamera(0, true); }});
   ui.setShelfFocus(shelfFocus);

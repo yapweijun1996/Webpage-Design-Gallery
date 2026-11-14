@@ -1,5 +1,5 @@
 /** Shelf owns presentation only. modes.js owns pause; products.js owns all bounds/assets. */
-export function createShelfFocus({T, canvas, normalCamera, shelves, onChange, onDetails, onAdd, onRestore}) {
+export function createShelfFocus({T, canvas, normalCamera, shelves, projection, onChange, onDetails, onAdd, onRestore}) {
   const dialog = document.querySelector('#shelf-dialog'), stage = dialog.querySelector('.shelf-stage');
   const target = document.querySelector('#shelf-target'), title = document.querySelector('#shelf-title');
   const note = document.querySelector('#shelf-status'), add = document.querySelector('#shelf-add');
@@ -8,27 +8,7 @@ export function createShelfFocus({T, canvas, normalCamera, shelves, onChange, on
   const camera = normalCamera.clone();
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   let session = null, nearby = null, quantity = {}, transition = null;
-  function corners(shelf) {
-    return [shelf.min.x, shelf.max.x].flatMap(x => [shelf.min.y, shelf.max.y].flatMap(y =>
-      [shelf.min.z, shelf.max.z].map(z => new T.Vector3(x, y, z))));
-  }
-  function project(shelf, view) {
-    const rect = canvas.getBoundingClientRect();
-    view.updateMatrixWorld();
-    const points = corners(shelf).map(v => v.project(view));
-    if (points.some(v => v.z < -1 || v.z > 1)) return null;
-    const xs = points.map(v => rect.left + (v.x + 1) * rect.width / 2);
-    const ys = points.map(v => rect.top + (1 - v.y) * rect.height / 2);
-    return {left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys)};
-  }
-  function place(element, bounds, relative) {
-    element.hidden = !bounds;
-    if (!bounds) return;
-    element.style.left = `${bounds.left - relative.left}px`;
-    element.style.top = `${bounds.top - relative.top}px`;
-    element.style.width = `${bounds.right - bounds.left}px`;
-    element.style.height = `${bounds.bottom - bounds.top}px`;
-  }
+  const project = projection.bounds, place = projection.place;
   function updateQuantity() {
     if (!session) return;
     const count = quantity[session.shelf.id] || 0;
@@ -129,11 +109,12 @@ export function createShelfFocus({T, canvas, normalCamera, shelves, onChange, on
       return true;
     },
     close,
+    hideNearby() { projection.visible(outline, false); },
     focus() { if (session) document.querySelector('#shelf-close').focus({preventScroll: true}); },
     resize() { if (session) { session.resized = true; reframe(); } },
     setNearby(id) { nearby = shelves.find(item => item.id === id) || null; },
     quantities(value) { quantity = value; updateQuantity(); },
-    update(view, active) {
+    update(view, active, nearbyActive = active) {
       if (session && active) {
         if (transition) {
           const t = motion.matches ? 1 : Math.min(1, (performance.now() - transition.start) / 240);
@@ -145,7 +126,7 @@ export function createShelfFocus({T, canvas, normalCamera, shelves, onChange, on
         place(target, project(session.shelf, camera), stage.getBoundingClientRect());
       }
       // Outline only a complete, currently visible nearby shelf; never draw a clipped target.
-      const rect = canvas.getBoundingClientRect(), bounds = !session && active && nearby ? project(nearby, view) : null;
+      const rect = canvas.getBoundingClientRect(), bounds = !session && nearbyActive && nearby ? project(nearby, view) : null;
       const visible = bounds && bounds.left >= rect.left + 4 && bounds.right <= rect.right - 4 && bounds.top >= rect.top + 4 && bounds.bottom <= rect.bottom - 4;
       place(outline, visible ? bounds : null, rect);
     },

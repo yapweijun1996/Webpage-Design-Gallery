@@ -1,0 +1,118 @@
+{
+  "task": "Phase 7 interaction target highlight and distance hint",
+  "application": {
+    "version": "1.1.40",
+    "build": "ef8b5d74f9d47986"
+  },
+  "status": "LOCAL_ACCEPTANCE_PASS; remote publication is subsequent",
+  "baseCommit": "a88fd1ccb7430e124732373ec40476085c2364f5",
+  "parentChecks": [
+    {
+      "name": "gallery",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gallery.py"
+      ],
+      "exitCode": 0,
+      "seconds": 30.34
+    },
+    {
+      "name": "legacy",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_demos.py",
+        "--axe-script",
+        "/private/tmp/gallery-a11y-tools/package/axe.min.js"
+      ],
+      "exitCode": 0,
+      "seconds": 40.63
+    },
+    {
+      "name": "pwa",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_pwa.py"
+      ],
+      "exitCode": 0,
+      "seconds": 37.45
+    }
+  ],
+  "pythonTests": {
+    "count": 47,
+    "exitCode": 0
+  },
+  "generator": "PASS",
+  "ssot": "PASS",
+  "productionPrefix": {
+    "status": "PASS",
+    "viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        1440,
+        900
+      ]
+    ],
+    "checksPerViewport": 10,
+    "docsTestsExcluded": true,
+    "newModulesMatchSource": true
+  },
+  "counts": {
+    "guidanceViewports": 14,
+    "guidanceMainTargets": 140,
+    "guidanceInsetTargets": 20,
+    "node": 13,
+    "modeSnapshots": 165,
+    "modeReviewScenarios": 15,
+    "navigationViewports": 11,
+    "axeScans": 70,
+    "shelfViewports": 12
+  },
+  "runtimeSHA256": {
+    "demos/corporate/gjh/v11/index.html": "5e71001130d908d5f475f1e523c32988c77bc5aa4f495c0292fd395fbabfe9e0",
+    "demos/corporate/gjh/v11/script.js": "349b8635ac85f345a5dea06985cc374c6e14b151016d97662e860d1f40fede9b",
+    "demos/corporate/gjh/v11/style.css": "53c312c7b92b4215cc1e9d8002435b53d7ff4a50172f7410efe066565c1ce40b",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/ui.js": "e20cf01f5bbe7ac1197a90b02078fa4b522c93f0645fecf4be430b8b2a35082d",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/products.js": "809e414b75ef821c57ba2111884b7ca7b4dc9e7f2e44baa7f44098c716a38742",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/world.js": "12e3658b4b4afef49e6f9fcf723e9fcca5a754f58dfcf2c9d41b99b94a915487",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "0f5f40e6a8bc9a2062c0a5047a4b9d0213c45bbdd837c97074c99a2de0a2cb27",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "ccbee77666249b090bb73faf105ba662b275b43c4ac973597cc71debb59022c9",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "048891652f549fc893e83caf362d1ad03d4a287ab23958232fe83279437fe10b",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "3ca78d7697618bc17a4a7cc0c1d51b4cc3f36284c47cef208edd1a1aec77e1a5",
+    "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/player.js": "17958925972120e2164eb3b031efebe362416e9652527c27bd7ed637dd6aeb9f",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "focusedEvidence": "v11-target-guidance.json",
+  "correctedPhysicsEvidence": "v11-target-guidance-physics.json",
+  "independentReview": "v11-target-guidance-independent-review.json",
+  "limits": [
+    "Physical devices, Safari, screen readers and device FPS unverified.",
+    "Packaging fidelity and OS document-hidden transition unverified.",
+    "Software inset overrides are not physical safe-area proof.",
+    "Historical 45-resource ceiling is stale against measured pinned baseline of 53; new total 55, decoded increase 8,335 bytes."
+  ]
+}
