@@ -9,7 +9,7 @@ Date: 2026-11-14. Sources: two external design specifications (a mobile-first UI
 4. Every mode (Explore, Menu, Inspect, Seated, Cart, Shop) defines enter, exit, cleanup and restore, so no camera, joystick or input state is left behind.
 
 ## Conflicts to resolve before building the shopping layer
-- The proposed Shop mode, Rewards and Checkout handoff conflict with the current GJH demo rules: no prices, stock or cart; product panels link only to the official eShop home page. Until the owner decides otherwise, "checkout" stays a link to the official eShop.
+- The proposed Shop mode, Rewards and real Checkout handoff remain separate, unresolved scope. The current demo already has a session-only Demo bag (1.1.20) and a pushable 3D cart (1.1.24); neither adds prices, stock reservation, real orders or payment. Product panels retain the external official eShop link, which is not a checkout for the demo bag.
 - Events, Rewards and Profile have no backing features today; showing them would be mock UI and must be labelled as such.
 - The proposed `src/` TypeScript layout does not apply: v11 is vanilla ES modules with no build step.
 
@@ -41,8 +41,12 @@ P1 (12) and P2 (8) items from the specifications stay planned: onboarding, quest
 - NOT run: physical iPhone Safari / Android Chrome, real safe-area insets, WebGL context loss, the full repository browser suites, FPS on real devices.
 
 ## Next
-Implement the explicit mode state machine and the contextual-navigation rule (decision 2) first; defer the shopping layer until the commerce-rule conflict is decided; keep the Diner Dash-style restaurant mini-game as a separate scoped item (`docs/gjh-v11-restaurant-minigame-scope.md`).
+Implement the explicit mode state machine and the contextual-navigation rule (decision 2) first; preserve the existing simulated bag/cart and defer any real-commerce layer until its scope is explicitly decided; keep the Diner Dash-style restaurant mini-game as a separate scoped item (`docs/gjh-v11-restaurant-minigame-scope.md`).
 
 ## Re-verification: portrait seated/cart prompt lift (commit 4857d53)
 
 Verified 2026-11-14 with Playwright + SwiftShader WebGL (repo-root server, scene ready, real screenshots inspected). Prompt chip vs `.scene-disclaimer` intersection is 0 px² in seated and pushing states at 390x844, 320x568, 844x390 and 667x375; chip vs header is 0; `scrollWidth == innerWidth` at 390, 320, 844 and 667. Joystick/Run intersections reported in the raw metrics are on elements the CSS hides (`visibility:hidden`) while seated or pushing, and are not drawn in the screenshots. Not run: physical devices, real safe-area insets, WebGL context loss, device FPS.
+
+## Commerce wording reconciliation — 2026-11-14
+
+The original conflict paragraph said “no prices, stock or cart.” Its no-cart clause was stale relative to the already shipped [1.1.20 Demo bag](v11-demo-bag-review.md) and [1.1.24 pushable demo cart](v11-cart-review.md). The paragraph above now distinguishes those simulations from real commerce. Source checks: [`demo-bag.js`](../demos/corporate/gjh/v11/assets/demo-bag.js) describes a session-only selection store with no network writes; the cart release contract preserves that same selection state and explicitly excludes prices, orders, payments and stock claims. Historical verification records above are unchanged; this correction adds no runtime behavior, test result, mode implementation or commerce authorization.

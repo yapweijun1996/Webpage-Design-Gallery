@@ -116,7 +116,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [ ] Interaction target highlight and distance hint.
 - [ ] WebGL context-loss recovery and low-end quality tiers.
 - [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
-- [ ] Decide the commerce rule: the demo has no prices, stock or cart; "checkout" stays a link to the official eShop unless the owner changes this.
+- [ ] Define any future real-commerce scope separately. The existing Demo bag and pushable 3D cart are authorized simulations, with no prices, stock reservation, real orders or payment. The official eShop link is external and does not check out the demo selection. See the commerce clarification below; no real-commerce implementation is approved by this checklist.
 
 Optional scoped item, not committed: Diner Dash-style 4-table restaurant mini-game, see `docs/gjh-v11-restaurant-minigame-scope.md`.
 
@@ -198,3 +198,7 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 - Mobile HUD P0 round (2026-11-14): compact header, one-row touch prompt chip, safe-area insets, landscape and portrait overlap fixes, 44px targets and no horizontal overflow were verified with Playwright mobile emulation and SwiftShader WebGL (repository root served), then reviewed on screenshots. Physical devices, real safe-area insets, context loss and the full browser suites were not run. See `docs/gjh-v11-mobile-redesign-gap-report.md`.
 
 - Documentation update, 14 November 2026: [GJH multi-brand directory and mall plan](docs/gjh-multibrand-directory.md) separates the 22 requested research candidates, 16 corporate-navigation names and 14 overlapping eShop names. Historical distribution, house-brand statements, unresolved dates and unknown relationships remain distinct. This is a planning/documentation delivery, not additional live stores, ownership certification or artwork-rights approval.
+
+### Commerce clarification — 2026-11-14
+
+The earlier Phase 7 wording “no prices, stock or cart” is superseded only as regards **demo cart availability**: the session-only Demo bag shipped in 1.1.20 and the optional pushable 3D cart in 1.1.24. See [Demo bag contract](docs/v11-demo-bag-review.md) and [pushable cart contract](docs/v11-cart-review.md). Their release-time limitations remain historical evidence. Neither feature creates a real order, reserves stock, sets prices or processes payment. The external official eShop does not receive this demo bag as a checkout. This clarification does not complete the mode-state-machine or Shelf focus tasks or authorize a new shopping/checkout system.

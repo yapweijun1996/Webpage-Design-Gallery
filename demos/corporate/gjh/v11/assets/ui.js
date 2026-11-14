@@ -8,6 +8,7 @@ export function createUI() {
   const storeList = document.getElementById('store-list');
   const viewToggle = document.getElementById('view-toggle');
   const headerMap = document.getElementById('header-map');
+  const locationName = document.getElementById('location-name');
   const status = document.getElementById('mall-status');
   const fallbackMessage = document.getElementById('fallback-message');
   const playerDot = document.getElementById('player-dot');
@@ -309,7 +310,7 @@ export function createUI() {
       }
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
-      else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent='Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
+      else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?'Tap Sit':'Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
       const cart=cartState();if(previousCartMode!==cart.active||previousCartSeated!==seated){cartStatus.textContent=seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';previousCartMode=cart.active;previousCartSeated=seated;}cartControls.hidden=!cart.available;cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';cartToggle.disabled=seated&&!cart.active;
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
