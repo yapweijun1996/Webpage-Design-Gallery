@@ -1,0 +1,37 @@
+{
+  "status": "SOURCE_REVIEW_NO_CONFIRMED_P0_P1_PENDING_FRESH_TRANSPORT_QA",
+  "baselineReviewed": "b1021decfcf472238690939e0cc62de29e098c86",
+  "findings": [
+    {
+      "severity": "P2_PROCESS_CLAIM",
+      "topic": "Compiler pin scope",
+      "detail": "Builder verifies Bun --version1.3.11, not executable/archive SHA. Describe version-pinned compiler and hash-verified committed outputs; do not claim binary-hash-pinned authoring tool without additional evidence."
+    }
+  ],
+  "reviewedSHA256": {
+    "scripts/build_gjh_startup_js.py": "e1068286e39ce5290220f5047c4fcfaf5732166c7ed819805829aef447d94d30",
+    "scripts/build_gjh_startup_pack.py": "5ced2c4b5168d617156018e162dbcfd04982a432bf8060d5875884d9fcfba6ba",
+    "templates/gallery/gjh-v11-startup-asset-pack.js": "5cf48655538deec4f25e279f9e8f6004795eb06ab199c693ce1c1bf4d8a4f303",
+    "data/gjh-startup-bundles.json": "772671ff75a6f34fc770d2eb1d3b148f745f8facd877f43b80196d80ba584558",
+    "data/gjh-startup-assets.json": "116b03b359feaead6aefe953ce24a7fbef1be0581778c967a8e0af622cca643f"
+  },
+  "assessment": [
+    "Packnames constrained to original local GLB basenames; perasset hash/structure validators remain in consumers.",
+    "4secondsharedfetch deadline and structural parsing fallback retain individual requests; percaller abort does not cancel other pack users.",
+    "Release runs in world finally, aborts shared fetch anddrops module-held promise; later callers bypass pack.",
+    "Returned buffers are copied slices; synthetic Response is compatible with current arrayBuffer-only consumers.",
+    "Fourbundle placement/external imports preserve deferred required graphics and asset-relative bases; earlier alternative receipts donotapply."
+  ],
+  "requiredFreshProof": [
+    "Packmissing/timeout/invalidheader/truncated/entryoffset/individualcorruptbytes; finalperconsumerfallbackclassification.",
+    "Abortedwaiter vs survivingwaiter; preabortedcaller; release whilepending/afterloaded; latecall directrequest.",
+    "Actualproducerpack bytes match all19originalassets, no new geometry/artwork.",
+    "Currentcold5viewportbudgets, noWebGL/WASM, nativepreview/themes/deadlines, PWA/noheavycache.",
+    "Actualmanifestsource/output and generatedprefix/publicresponsehashverification."
+  ],
+  "limits": [
+    "Source-only; no browser/GPU execution.",
+    "No final software acceptance until current published transport-specific evidence.",
+    "Do not reuse old160-runtime alternative acceptance."
+  ]
+}

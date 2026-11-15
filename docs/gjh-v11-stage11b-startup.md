@@ -168,3 +168,54 @@ resource total was 10,275,478 bytes and the highest non-cart draw count was
 bytes. The [budget log](evidence/gjh-stage11b-main-merge-20261115/budget.log)
 and [source hashes](evidence/gjh-stage11b-main-merge-20261115/source-sha256.txt)
 record the final combined measurement and runtime.
+
+## Independent main-runtime confirmation
+
+The follow-up preserves the published `b1021decfcf472238690939e0cc62de29e098c86`
+implementation and application 1.1.55 / build `64d329d4457e912a`; no alternative
+bundling pipeline or production code is added. All 162 runtime files remain
+byte-identical. Every one of the 19 packed model slices independently matches
+its original individual GLB and the exact `372295c` Git object.
+
+The [main-runtime receipt](evidence/gjh-startup-main-acceptance.json) records
+fresh Chrome 157/ANGLE Metal checks: 59 Python tests, 48 Node tests, generation,
+SSOT, and nine browser suites covering budget, eight pack fault cases, the three
+actual-bundle theme regressions, generated project-prefix publication, standalone
+and expanded PWA, Gallery, older demos and global PWA. The existing Bun version
+and source/output fingerprints are checked; executable-binary hash pinning is
+not claimed. The independently tested alternative was archived locally and is
+not the source of this runtime's acceptance evidence.
+
+| Viewport | Requests | Decoded bytes | Highest sampled non-cart calls | Compact Map checks |
+| --- | ---: | ---: | ---: | --- |
+| 320 × 740 | 40 | 9,924,394 | 158 | PASS |
+| 390 × 844 | 40 | 9,924,394 | 159 | PASS |
+| 768 × 1024 | 41 | 10,125,620 | 175 | N/A |
+| 1440 × 900 | 42 | 10,275,478 | 197 | N/A |
+| 844 × 390 | 40 | 9,924,394 | 198 | PASS |
+
+All five retain the original 45-request, 10 MiB decoded-resource and 200-call
+non-cart assertions, guide/list pause and 25 modal open/close cycles. The compact
+Map assertions now use the actual Header Map and Close controls, preserving
+bounds, hit testing, Run hiding/return and 44 px targets. Wide entries explicitly
+mark these compact-only checks N/A. This repairs an obsolete selector that
+silently skipped the compact branch; it does not require desktop Map to open
+automatically after Guide Start. The different 768 px request sample is a fresh
+Metal observation, not a promise of identical image scheduling on every backend.
+
+The new eighth pack case holds the actual response while native WebGL is lost
+and restored before initialization finishes. It verifies the returned pack body
+hash, forbids early readiness, waits for actual rendered-frame validation, and
+checks the native return action, active collision capsule, four loaded SKUs and
+one pack request without individual-model fallback. The first draft incorrectly
+used the temporary unavailable flag as a terminal failure; that rejected fixture
+and diagnostic remain recorded. The final assertion waits for positive validated
+readiness or an explicit terminal graphics status. Production recovery code and
+ready flags are not modified.
+
+The matched `372295c` 320 px baseline is 82 requests / 9,885,537 decoded bytes;
+the confirmed current result is 40 / 9,924,394, a 38,857-byte increase. This is
+request reduction, not a payload-size or FPS improvement claim. Physical-device,
+Safari, real safe-area and assistive-technology acceptance and candidate brand
+rights remain separate. Exact committed-head CI/Pages and normal public-response
+verification are the final release gate for this test/documentation follow-up.

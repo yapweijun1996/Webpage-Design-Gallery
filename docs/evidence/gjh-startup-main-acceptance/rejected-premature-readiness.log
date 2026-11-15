@@ -1,0 +1,15 @@
+PASS normal: bounded loading, model integrity and directory
+PASS missing-pack: bounded loading, model integrity and directory
+PASS truncated-pack: bounded loading, model integrity and directory
+PASS corrupt-model: bounded loading, model integrity and directory
+PASS slow-pack: bounded loading, model integrity and directory
+PASS individual-failure: bounded loading, model integrity and directory
+PASS missing-world: bounded loading, model integrity and directory
+Traceback (most recent call last):
+  File "/private/tmp/gallery-published-startup-review/copy/tests/browser_gjh_startup_pack.py", line 123, in <module>
+    run()
+    ~~~^^
+  File "/private/tmp/gallery-published-startup-review/copy/tests/browser_gjh_startup_pack.py", line 91, in run
+    assert page.evaluate('window.__sceneReady === true'), mode
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: native-loss-before-pack

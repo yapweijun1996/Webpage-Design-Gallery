@@ -1,0 +1,48 @@
+{
+  "status": "APPROVE_LOCAL",
+  "runtimeBaseCommit": "b1021decfcf472238690939e0cc62de29e098c86",
+  "application": {
+    "version": "1.1.55",
+    "build": "64d329d4457e912a"
+  },
+  "receiptReviewedSHA256": "b167bbc94d30b18de9c4291ee5930c71e8aa0e1baf232f66f2098647173614ef",
+  "findings": [],
+  "verification": {
+    "currentRuntimeHashesVerified": 162,
+    "rawEvidenceHashesVerified": 26,
+    "screenshotHashesVerified": 3,
+    "packedOriginalGLBsVerifiedAgainstCurrentAnd372Git": 19,
+    "currentBrowserSuites": 9,
+    "packFaultCases": 8,
+    "themeBoundaryCases": 3,
+    "coldRequestCounts": [
+      40,
+      40,
+      41,
+      42,
+      40
+    ],
+    "decodedBytesRange": [
+      9924394,
+      10275478
+    ],
+    "unchangedLimits": {
+      "requests": 45,
+      "decodedBytes": 10485760,
+      "nonCartDrawCalls": 200
+    }
+  },
+  "assessment": [
+    "Actual published Bun/model-pack implementation independently reviewed; local alternative receipts are excluded.",
+    "Two test-only migrations preserve compactMap coverage and native context loss while pack response is held; exact pack response SHA and positive graphics validation retained.",
+    "Temporary sceneFailed flag no longer mistaken for terminal failure; corrected test does not mutate production readiness.",
+    "Nineteen pack slices match original assets and exact372Git bytes; no geometry/artwork replacement.",
+    "Compiler claims correctly limited to version and committed input/output fingerprints, not executable SHA."
+  ],
+  "limits": [
+    "Local software acceptance only. New follow-up commit exactheadCI/Pages/public-response and native-flow verification pending.",
+    "Original non-cart reducedmotion/SWblocked/localHTTP budget; no newFPS/GPUmemory/compression/physicaldevice/AT certification.",
+    "Fourteen candidate brand rights remain unapproved."
+  ],
+  "reviewerExecution": "Read-onlysource/diff/evidencehash/packbyte inspection; no browser/GPU run."
+}
