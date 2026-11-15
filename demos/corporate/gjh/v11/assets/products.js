@@ -108,7 +108,7 @@ function fallbackShelf(T, scene) {
   mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
 }
 
-export async function addProducts(T, scene, textures, brass) {
+export async function addProducts(T, scene, textures, brass,showcase=[]) {
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene);
   else for (const primitive of shelfRecord.primitives) {
@@ -124,8 +124,10 @@ export async function addProducts(T, scene, textures, brass) {
   canRecords.forEach((record, productIndex) => {
     const sku = cans[productIndex].sku, x = shelfXs[productIndex], placements = [];
     for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, productZ));
+    const shelfPlacements=placements.slice();
+    for(const item of showcase.filter(item=>item.id===`new-moon-${sku}-front`))placements.push(new T.Vector3(...item.position));
     const batches = [];
-    stock.set(`new-moon-${sku}-front`, {record, placements, batches, reserved:false});
+    stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, batches, reserved:false});
     if (record.status === 'loaded') for (const primitive of record.primitives) {
       const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
       placements.forEach((position, index) => { const matrix = new T.Matrix4(); matrix.compose(position, new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
@@ -133,7 +135,7 @@ export async function addProducts(T, scene, textures, brass) {
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {shelfPositions:shelfXs, shelves, reserveProduct(id) {
+  return {displayedProducts:showcase.length,shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);
     if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
     entry.reserved = true;
@@ -161,7 +163,7 @@ export async function addProducts(T, scene, textures, brass) {
       const dimensions = Object.freeze((record.size || [canBounds.x, canBounds.y, canBounds.z]).slice());
       return [cans[index].sku, Object.freeze({status: record.status, reason: record.reason, identity: cans[index].sha256, instances: 9, primitives: record.primitives.length, dimensions, actualBounds: dimensions, actualBoundsScale: Object.freeze([dimensions[0] / canBounds.x, dimensions[1] / canBounds.y, dimensions[2] / canBounds.z]), placements, floorY: 0, supportTopY: shelfTops[0], frontAxis: '+Z'})];
     }))),
-    totalInstances: 36,
+    totalInstances: 36,showcaseInstances:showcase.length,
     disclosure: (interiorPilot ? 'Original DSP-001 pilot demo furniture; ' : 'Original M056 demo furniture; ') + 'cans use estimated packaging dimensions. Mexico includes a 121-degree unprinted placeholder sector. Unofficial demo, owner-authorized use; independent artwork rights and packaging fidelity are not verified.',
   })};
 }

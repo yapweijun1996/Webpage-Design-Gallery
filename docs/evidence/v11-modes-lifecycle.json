@@ -619,6 +619,18 @@
         ]
       },
       {
+        "label": "held product Shelf",
+        "mode": "shelf",
+        "snapshot": "shelf",
+        "body": "shelf",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shelf"
+        ]
+      },
+      {
         "label": "held product Inspect",
         "mode": "inspect",
         "snapshot": "inspect",
@@ -950,7 +962,7 @@
       "map": 0,
       "help": 0,
       "breakpoint wide running": 1,
-      "breakpoint wide help running": 1
+      "breakpoint wide help running": 2
     },
     "seats": [
       "courtyard-seat",
@@ -1531,6 +1543,18 @@
         ]
       },
       {
+        "label": "held product Shelf",
+        "mode": "shelf",
+        "snapshot": "shelf",
+        "body": "shelf",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shelf"
+        ]
+      },
+      {
         "label": "held product Inspect",
         "mode": "inspect",
         "snapshot": "inspect",
@@ -1579,7 +1603,7 @@
     ],
     "frames": {
       "guide": 0,
-      "explore": 1,
+      "explore": 3,
       "product 1": 0,
       "product 2": 0,
       "product 3": 0,
@@ -1587,26 +1611,14 @@
       "original viewer": 0,
       "input release resumes live frames": 1,
       "seated Bag": 0,
-      "map": 1,
-      "help": 2
+      "map": 2,
+      "help": 1
     },
     "errors": [],
     "illegalCount": 0,
     "history": [
       {
         "from": "explore",
-        "to": "shop",
-        "reason": "UI/player observation",
-        "kind": "suspend"
-      },
-      {
-        "from": "shop",
-        "to": "explore",
-        "reason": "UI/player observation",
-        "kind": "restore"
-      },
-      {
-        "from": "explore",
         "to": "seated",
         "reason": "UI/player observation",
         "kind": "enter"
@@ -1687,6 +1699,18 @@
         "from": "shop",
         "to": "explore",
         "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "shelf",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shelf",
+        "to": "explore",
+        "reason": "Shelf closed",
         "kind": "restore"
       },
       {
@@ -2159,6 +2183,18 @@
         ]
       },
       {
+        "label": "held product Shelf",
+        "mode": "shelf",
+        "snapshot": "shelf",
+        "body": "shelf",
+        "illegal": 0,
+        "paused": true,
+        "layers": [
+          "explore",
+          "shelf"
+        ]
+      },
+      {
         "label": "held product Inspect",
         "mode": "inspect",
         "snapshot": "inspect",
@@ -2223,18 +2259,6 @@
     "history": [
       {
         "from": "explore",
-        "to": "shop",
-        "reason": "UI/player observation",
-        "kind": "suspend"
-      },
-      {
-        "from": "shop",
-        "to": "explore",
-        "reason": "UI/player observation",
-        "kind": "restore"
-      },
-      {
-        "from": "explore",
         "to": "seated",
         "reason": "UI/player observation",
         "kind": "enter"
@@ -2315,6 +2339,18 @@
         "from": "shop",
         "to": "explore",
         "reason": "UI/player observation",
+        "kind": "restore"
+      },
+      {
+        "from": "explore",
+        "to": "shelf",
+        "reason": "UI/player observation",
+        "kind": "suspend"
+      },
+      {
+        "from": "shelf",
+        "to": "explore",
+        "reason": "Shelf closed",
         "kind": "restore"
       },
       {

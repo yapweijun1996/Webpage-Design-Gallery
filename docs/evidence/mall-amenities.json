@@ -162,7 +162,7 @@
       },
       "displayedProducts": 4
     },
-    "drawCalls": 168,
+    "drawCalls": 173,
     "singleFetch": "PASS",
     "serviceHelpFocusPause": "PASS",
     "signNavigation": "PASS",
@@ -248,7 +248,7 @@
       },
       "displayedProducts": 4
     },
-    "drawCalls": 150,
+    "drawCalls": 158,
     "singleFetch": "PASS",
     "serviceHelpFocusPause": "PASS",
     "signNavigation": "PASS",

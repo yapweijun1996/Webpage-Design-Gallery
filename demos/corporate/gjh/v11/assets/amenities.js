@@ -1,3 +1,4 @@
+import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
 export const AMENITIES = Object.freeze({
@@ -6,6 +7,20 @@ export const AMENITIES = Object.freeze({
   showcase:{file:'mall-glass-showcase.glb',sha:'782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179',root:'ASSET_MallGlassShowcase',bytes:96840,triangles:1712,size:[.75,1.8,.532],clips:['DoorOpenClose'],placements:[[-7,0,2.2,0]]},
 });
 for(const definition of Object.values(AMENITIES)){definition.placements.forEach(Object.freeze);Object.freeze(definition.placements);Object.freeze(definition.size);Object.freeze(definition.clips);Object.freeze(definition);}
+export const SHOWCASE_PRODUCTS=Object.freeze(['nz-425g','au-425g','sa-425g','mx-454g'].map((sku,index)=>Object.freeze({id:`new-moon-${sku}-front`,position:Object.freeze([-7+(index===3?.16:index===0?-.16:0),[.479,.919,1.359,.479][index],2.2])})));
+function opaqueBatch(T,parts,shadows){
+  if(!parts.length)return null;
+  const geometry=mergeGeometries(parts);parts.forEach(part=>part.dispose());geometry.computeBoundingSphere();
+  const material=new T.MeshStandardMaterial({vertexColors:true,side:T.DoubleSide});
+  // These pinned sources have solid PBR colours and no maps. Carry their original
+  // roughness and metalness per vertex instead of spending one draw per material.
+  material.onBeforeCompile=shader=>{
+    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nattribute vec2 obSurface; varying vec2 vObSurface;').replace('#include <begin_vertex>','#include <begin_vertex>\nvObSurface=obSurface;');
+    shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec2 vObSurface;').replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=vObSurface.x;').replace('#include <metalnessmap_fragment>','#include <metalnessmap_fragment>\nmetalnessFactor=vObSurface.y;');
+  };
+  material.customProgramCacheKey=()=> 'mall-opaque-pbr-v1';
+  const mesh=new T.Mesh(geometry,material);mesh.name='Opaque mall amenities';mesh.castShadow=shadows;mesh.receiveShadow=true;return mesh;
+}
 const timeout=8000;
 function dispose(root){
   const geometry=new Set(),materials=new Set();root?.traverse(mesh=>{if(mesh.geometry)geometry.add(mesh.geometry);if(mesh.material)materials.add(mesh.material);});
@@ -74,15 +89,25 @@ function signTexture(T,x,rear){
   context.textAlign='right';context.fillText(`${right.join(' · ')} →`,984,191,944);
   const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;return texture;
 }
-export async function addAmenities(T,scene,collider,createCollectProp,shadows){
+export async function addAmenities(T,scene,collider,createCollectProp,shadows,staticProductCount=null){
   const entries=await Promise.all(Object.entries(AMENITIES).map(async([kind,definition])=>[kind,await load(T,kind,definition)]));
-  const group=new T.Group();group.name='Mall amenities';const state={};
+  const group=new T.Group();group.name='Mall amenities';const state={},opaque=[];
   for(const [kind,record] of entries){
     const definition=AMENITIES[kind];
     for(const primitive of record.primitives){
-      const mesh=new T.InstancedMesh(primitive.geometry,primitive.material,definition.placements.length);
-      definition.placements.forEach(([x,y,z,angle],index)=>mesh.setMatrixAt(index,new T.Matrix4().compose(new T.Vector3(x,y,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(1,1,1))));
-      mesh.name=`Amenity ${kind}`;mesh.castShadow=shadows&&!primitive.material.transparent;mesh.receiveShadow=true;mesh.computeBoundingSphere();group.add(mesh);
+      if(!primitive.material.transparent){
+        definition.placements.forEach(([x,y,z,angle])=>{
+          const matrix=new T.Matrix4().compose(new T.Vector3(x,y,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(1,1,1));
+          const geometry=primitive.geometry.clone().applyMatrix4(matrix),count=geometry.attributes.position.count;
+          const colour=new Float32Array(count*3),surface=new Float32Array(count*2),material=primitive.material;
+          for(let i=0;i<count;i++){colour.set([material.color.r,material.color.g,material.color.b],i*3);surface.set([material.roughness,material.metalness],i*2);}
+          geometry.setAttribute('color',new T.BufferAttribute(colour,3));geometry.setAttribute('obSurface',new T.BufferAttribute(surface,2));opaque.push(geometry);
+        });primitive.geometry.dispose();primitive.material.dispose();
+      }else{
+        const mesh=new T.InstancedMesh(primitive.geometry,primitive.material,definition.placements.length);
+        definition.placements.forEach(([x,y,z,angle],index)=>mesh.setMatrixAt(index,new T.Matrix4().compose(new T.Vector3(x,y,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(1,1,1))));
+        primitive.material.forceSinglePass=true;mesh.name=`Amenity ${kind} glass`;mesh.receiveShadow=true;mesh.computeBoundingSphere();group.add(mesh);
+      }
     }
     if(record.status==='fallback'&&kind!=='signs'){
       const [x,,z]=definition.placements[0],size=kind==='desk'?[2.88,1.05,.961]:[.75,1.8,.532];
@@ -91,16 +116,16 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows){
     }
     state[kind]=Object.freeze({status:record.status,reason:record.reason,identity:definition.sha,instances:definition.placements.length,primitives:record.primitives.length,dimensions:Object.freeze(record.size),placements:definition.placements,doorPose:kind==='showcase'?'closed':null});
   }
+  const opaqueMesh=opaqueBatch(T,opaque,shadows);if(opaqueMesh)group.add(opaqueMesh);
   for(const [x,y,z] of AMENITIES.signs.placements)for(const rear of [false,true]){
     const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),new T.MeshBasicMaterial({map:signTexture(T,x,rear)}));
     plane.position.set(x,y-.7,z+(rear?-.083:.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
   }
   collider(-12.5,.94,5.8,2.88,1.88,.961);collider(-7,.9,2.2,.75,1.8,.532);
-  const ids=['nz-425g','au-425g','sa-425g','mx-454g'];let products=0;
-  ids.forEach((sku,index)=>{
-    const prop=createCollectProp(`new-moon-${sku}-front`);if(!prop)return;
-    prop.position.set(-7+(index===3?.16:index===0?-.16:0),[.479,.919,1.359,.479][index],2.2);prop.name=`Showcase ${sku}`;group.add(prop);products++;
-  });
+  let products=staticProductCount??0;
+  if(staticProductCount===null)for(const item of SHOWCASE_PRODUCTS){
+    const prop=createCollectProp(item.id);if(!prop)continue;prop.position.set(...item.position);group.add(prop);products++;
+  }
   scene.add(group);
   return {state:Object.freeze({...state,displayedProducts:products}),interactables:[
     {id:'service-desk',x:-12.5,z:6.9,radius:2},

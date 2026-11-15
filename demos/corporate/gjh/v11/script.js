@@ -248,7 +248,7 @@ async function initialize() {
     elevator = createElevatorV2(T, R, physics, world.scene);
     world.interactables.push(...elevator.interactables);
   }
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats);
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles);
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');

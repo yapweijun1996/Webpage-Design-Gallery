@@ -1,6 +1,6 @@
 import {createCharacter} from './character.js';
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = []) {
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = []) {
   const character = await createCharacter(T);
   const visual = character.visual;
   scene.add(visual);
@@ -151,7 +151,18 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     direction.copy(point).sub(origin);const length=direction.length();if(length<1e-6)return 0;
     direction.multiplyScalar(1/length);
     const hit=physics.castShape(origin,cameraRotation,direction,cameraBall,.02,length,true,undefined,undefined,capsule,body);
-    return hit?Math.max(0,hit.time_of_impact-.02):length;
+    let clearance=hit?Math.max(0,hit.time_of_impact-.02):length;
+    for(const box of cameraObstacles){
+      let near=0,far=length;
+      for(const axis of ['x','y','z']){
+        const min=box.min[axis]-cameraRadius,max=box.max[axis]+cameraRadius;
+        if(Math.abs(direction[axis])<1e-8){if(origin[axis]<min||origin[axis]>max){far=-1;break;}continue;}
+        const a=(min-origin[axis])/direction[axis],b=(max-origin[axis])/direction[axis];
+        near=Math.max(near,Math.min(a,b));far=Math.min(far,Math.max(a,b));
+      }
+      if(far>=near)clearance=Math.min(clearance,Math.max(0,near-.02));
+    }
+    return clearance;
   }
   function cameraCandidate(lift,out) {
     anchor.copy(target);anchor.y+=lift;out.copy(anchor).add(offset);
