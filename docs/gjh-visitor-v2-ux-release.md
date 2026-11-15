@@ -8,7 +8,13 @@ The onboarding owner now separates `setHUDSuppressed` (presentation only) from `
 
 Local current-source preflight: keyboard five checks and touch seven checks PASS, including real Inspect completion and unobscured held/cart/seated HUD assertions. Normal animations remain enabled. Unit49, generated freshness, SSOT and whitespace checks PASS. See [keyboard](evidence/visitor-v2-ux-release/final-local-desktop.json), [touch](evidence/visitor-v2-ux-release/final-local-touch.json) and [final source hashes](evidence/visitor-v2-ux-release/final-source-hashes.json). The first completion-label fixture used “Done”; it was corrected to the actual existing “Keep exploring” label, retaining exact state and visible-after-walking assertions.
 
-Publication and a fresh **15-check** live release suite for this final correction are pending.
+Final functional release: [`a7f4ef3c71e8f023ce851917fb0498d1599d9d63`](https://github.com/yapweijun1996/Webpage-Design-Gallery/commit/a7f4ef3c71e8f023ce851917fb0498d1599d9d63). [Pages run 43688638355](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/43688638355) completed successfully. All seventeen checked public resources match the final source bytes at exact HTTP200 URLs: [final public hashes](evidence/visitor-v2-ux-release/final-public-runtime.json).
+
+The fresh **15-check final live release suite PASS** exited0 with zero page errors and zero console warnings/errors. It covers normal-motion keyboard and touch pickup/return, wrong-shelf/held restrictions, compressed camera/restoration, actual cart movement/stow, natural seat entry/sit/stand, tutorial presentation/progress, Help touch scroll and small/tablet tools. The hidden-tutorial assertions pass for held/cart/seated states; real Inspect reaches “Keep exploring” and that completed tip is visible after leaving the interaction point. See [final live results](evidence/visitor-v2-ux-release/final-live-real-input.json) and [log](evidence/visitor-v2-ux-release/final-live-real-input.txt).
+
+Final screenshots were inspected: the character, feet and Stand action remain visible without the tutorial overlay. The existing in-app browser tab was refreshed after publication and the loaded final scene observed. All validation uses actual browser key/touch events and normal animation, with read-only runtime oracles; no simulation movement or time-step hooks are called. This validates browser touch handling, not physical phone hardware performance.
+
+![Final public touch seating and visible Stand action](evidence/visitor-v2-ux-release/final-live-touch-bench-seat-5-seated.png)
 
 ![Corrected local touch seating with unobscured Stand](evidence/visitor-v2-ux-release/final-local-touch-bench-seat-5-seated.png)
 

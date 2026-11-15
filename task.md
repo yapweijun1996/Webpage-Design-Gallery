@@ -523,3 +523,5 @@ Visitor v2 UX release follow-up: integrated with upstream e67c2d9, preserving it
 Visitor v2 UX public acceptance: eced12c deployed successfully via Pages run 43687815886. Seventeen public resources matched; thirteen real keyboard/touch release checks passed with normal animations and no page/console errors. See docs/gjh-visitor-v2-ux-release.md.
 
 Visitor v2 visual acceptance follow-up: screenshot review reopened the initial live input pass because onboarding covered the seated action. Separate HUD suppression now preserves tutorial progress; current local keyboard5/touch7 and unit49 pass, with final public15 gate pending in docs/gjh-visitor-v2-ux-release.md.
+
+Final Visitor v2 UX release: a7f4ef3 deployed via successful Pages run43688638355; final public17-resource byte check and fresh15-check normal-motion keyboard/touch E2E PASS, zero page/console errors. Tutorial visual obstruction and progress preservation are covered. Original dirty worktrees were not modified by this release.
