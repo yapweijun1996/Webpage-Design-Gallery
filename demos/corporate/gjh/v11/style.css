@@ -649,3 +649,22 @@ body.is-seated .inspect-prompt{top:var(--space-6);bottom:auto;left:50%;transform
 body.is-seated .mall-intro,body.is-pushing .mall-intro,body:has(#held-product-status:not([hidden])) .mall-intro{display:none}
 body .mall-overlay .interaction-hud .inspect-prompt,body .mall-overlay .interaction-hud .held-product-status{position:static;inset:auto;transform:none;width:100%;max-width:none;margin:0}
 @media(max-height:560px) and (orientation:landscape){.interaction-hud{left:var(--space-4);transform:none;top:74px;width:280px;max-width:45%}}
+
+/* Keep the directory focused on available destinations and real stores. */
+body:not(.is-3d) .context-navigation-global #context-events,
+body:not(.is-3d) .context-navigation-global #context-rewards,
+body:not(.is-3d) .context-navigation-global #context-profile,
+body:not(.is-3d) .context-navigation-global #context-navigation-note{display:none}
+body:not(.is-3d) .context-navigation-global .context-navigation-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:210px}
+.store-filters{display:flex;flex:1 1 auto;min-width:0;align-items:center;flex-wrap:wrap;gap:8px}
+.store-list .directory-nav .directory-demo{flex:0 0 auto;gap:5px;margin-left:auto;border:0;background:transparent;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:650px){
+  .store-list{padding-top:28px}
+  .store-list .list-heading{margin-bottom:22px}
+  .mall-preview{min-height:150px}
+  .store-list .directory-nav{align-items:end}
+  .store-list .directory-nav .directory-demo{margin-left:0}
+}
+/* Keep directory destinations visible beneath the sticky shopping header. */
+#featured-products,#newmoon-title,#mili-title,#gogo-title,#original-demo-tin-title{scroll-margin-top:116px}
+@media(max-width:650px){#featured-products,#newmoon-title,#mili-title,#gogo-title,#original-demo-tin-title{scroll-margin-top:98px}}
