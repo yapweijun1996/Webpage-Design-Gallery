@@ -103,5 +103,71 @@
       "subject": "Evening in the mall",
       "prompt_subject": "tropical indoor mall arcade in warm early evening light, cream stone and subtle green details"
     }
-  ]
+  ],
+  "brand_scenes": [
+    {
+      "file": "concept-newmoon-hotpot.webp",
+      "brand_context": "New Moon",
+      "reference": "new-moon-brand-cover.jpg",
+      "prompt_subject": "Overhead shared hot pot with corn, vegetables, seafood and mushrooms on warm wood.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-newmoon-table.webp",
+      "brand_context": "New Moon",
+      "reference": "new-moon-brand-cover.jpg",
+      "prompt_subject": "Family-style Asian meal and shared soup on a warm dining table.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-newmoon-serving.webp",
+      "brand_context": "New Moon",
+      "reference": "new-moon-brand-cover.jpg",
+      "prompt_subject": "Generic shellfish serving suggestion with mushrooms and greens.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-mili-noodles.webp",
+      "brand_context": "MILI",
+      "reference": "mili-brand-cover.jpg",
+      "prompt_subject": "Noodle bowl with vegetables and egg, with hands holding chopsticks.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-mili-table.webp",
+      "brand_context": "MILI",
+      "reference": "mili-brand-cover.jpg",
+      "prompt_subject": "Noodle meal with egg and vegetables on a light stone table.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-mili-kitchen.webp",
+      "brand_context": "MILI",
+      "reference": "mili-brand-cover.jpg",
+      "prompt_subject": "Preparing a noodle bowl in a bright contemporary kitchen.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-gogo-toast.webp",
+      "brand_context": "GOGO",
+      "reference": "gogo-brand-cover.jpg",
+      "prompt_subject": "Friends raising clear glasses of orange-coloured drink in a garden.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-gogo-pour.webp",
+      "brand_context": "GOGO",
+      "reference": "gogo-brand-cover.jpg",
+      "prompt_subject": "Orange-coloured drink being poured outdoors, with fruit and greenery.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-gogo-garden.webp",
+      "brand_context": "GOGO",
+      "reference": "gogo-brand-cover.jpg",
+      "prompt_subject": "Hands raising orange-coloured drinks at a garden picnic.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    }
+  ],
+  "brand_scene_prompt_template": "Create a high-resolution landscape editorial lifestyle image inspired by the referenced original cover and its food, color and atmosphere. Use natural light and realistic textures. No logo, text, labels, branded packaging, watermark or official product claim. The original logo is rendered separately by the webpage."
 }

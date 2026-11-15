@@ -42,8 +42,23 @@ def run():
                     page.locator('[data-store-filter="mili"]').click()
                     assert page.locator('[data-store]:visible').count() == 1
                     assert page.locator('[data-store="mili"]').is_visible()
+                    page.locator('[data-store="mili"] .brand-inspect').click()
+                    assert page.locator('#product-image').get_attribute('src') == 'assets/mili-brand-cover.jpg'
+                    page.keyboard.press('Escape')
+                    mili_gallery = page.locator('[data-store="mili"] .brand-concepts')
+                    mili_gallery.locator('summary').click()
+                    assert mili_gallery.evaluate('(element) => element.open')
+                    assert mili_gallery.locator('.brand-concept-grid img').count() == 3
+                    mili_gallery.locator('.brand-concept-grid img').first.scroll_into_view_if_needed()
+                    mili_gallery.locator('.brand-concept-grid img').first.evaluate('(image) => image.decode()')
+                    mili_gallery.locator('summary').click()
                     page.locator('#hero-shop').click()
                     assert page.locator('[data-store]:visible').count() == 3
+                    assert page.locator('.brand-concepts').count() == 3
+                    assert page.locator('.brand-concept-grid img').count() == 9
+                    assert page.locator('.product-card .brand-concepts').count() == 0
+                    for brand in ('newmoon', 'mili', 'gogo'):
+                        assert page.locator(f'[data-store="{brand}"] > .brand-concepts').count() == 1
                     page.locator('#product-search').fill('Mexico')
                     assert page.locator('.product-card:visible').count() == 1
                     page.locator('#product-search').fill('no matching product')
