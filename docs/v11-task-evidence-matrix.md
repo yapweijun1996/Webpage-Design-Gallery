@@ -1,5 +1,11 @@
 # V11 task evidence matrix — final incremental reconciliation
 
+Current reconciliation (2026-11-15): application 1.1.41 has completed the bounded
+software keyboard/name/reduced-motion/fallback gate; see
+[final software verification](v11-final-software-verification.md). The older
+1.1.14 table below remains historical. Physical-device/assistive-technology and
+complete packaging acceptance are still incomplete.
+
 Runtime baseline: main `d1d091d513b6188582cb4ac15b8ce99d53d1dfbb`, application **1.1.14**, Pages run **43577660591** succeeded. This update changes documentation and tests only, not runtime behavior.
 
 **PASS** means the stated implementation/Chromium laboratory evidence, not packaging certification or all-device acceptance. **PARTIAL** identifies a real unresolved validation dimension. **DEFER** is an evaluated optional change, not blocked essential work. Historical reports retain their original scope.
@@ -139,3 +145,13 @@ independent review and exact limitations. Physical/device/screen-reader gates
 remain open. Native popup option-key choice is explicitly NOT VERIFIED against
 an independent failing host fixture; selection events are not substituted for
 that missing keyboard proof. Historical evidence above retains its original scope.
+
+## Final software gate reconciliation — 2026-11-15
+
+Current-source hashes, focused graphics/accessibility/integration regressions,
+generated-prefix artifact and actual Pages flows close the software gate only.
+The implementation and release evidence are linked from
+[final software verification](v11-final-software-verification.md). Two checklist
+items remain open: complete packaging matching and physical-device/assistive-
+technology acceptance. Earlier PARTIAL statuses and verification notes above
+retain their historical baseline; no device or packaging result was invented.

@@ -126,7 +126,7 @@ Optional scoped item, not committed: Diner Dash-style 4-table restaurant mini-ga
 - [x] Verify each product model, associated record, preview and existing link, including failed asset loading.
 - [x] Exercise walking, running, Q/E turning, F inspection, map navigation, touch, focus restoration and collision.
 - [x] Review desktop, tablet and mobile layouts for overflow, overlap and unobstructed controls.
-- [ ] Test keyboard operation, accessible names, reduced motion and available fallback modes.
+- [x] Test keyboard operation, accessible names, reduced motion and available fallback modes.
 - [x] Measure loading and rendering against Phase 0; report device, browser and remaining limitations.
 - [x] Run the repository checks in `AGENTS.md` and relevant V11, asset, accessibility and regression checks; fix failures and repeat affected checks.
 - [x] Review the final diff, provenance and credential exposure before committing.
@@ -407,3 +407,19 @@ require a new brief, merchant interface, authoritative data ownership, security
 and operating acceptance, and explicit implementation authorization. No prices,
 stock writes, customer collection or transactions were added. Independent source
 and scope review approved the document. Runtime and application 1.1.41 are unchanged.
+
+## Final software acceptance — 2026-11-15
+
+The bounded keyboard/name/reduced-motion/fallback gate is complete on the
+unchanged application 1.1.41 runtime. [Final verification](docs/v11-final-software-verification.md)
+links matching current-source regression, accessibility, artifact and actual
+Pages evidence. Independent audit approved this scope and all raw-evidence hashes.
+No further visual score or device certification is inferred. Historical failed
+budget/cold-GPU oracles remain explicit.
+
+Exactly two acceptance items remain incomplete: full packaging/source matching
+requires missing masters or package references; physical-device/inset/screen-reader
+acceptance requires actual device sessions. The available ADB runner reports zero
+devices, and no usable iOS runner is available. AI label concepts and more desktop
+emulation cannot close those gaps. Their checkboxes remain open; no all-task
+completion or real-commerce authorization is claimed.

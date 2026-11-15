@@ -1,0 +1,201 @@
+{
+  "task": "Final keyboard/names/reduced-motion/fallback software gate",
+  "status": "CURRENT_SOFTWARE_EVIDENCE_PASS; two external acceptance prerequisites remain",
+  "application": {
+    "version": "1.1.41",
+    "build": "8756a8b3f0c73835"
+  },
+  "runtimeImplementationCommit": "32287f1fe116ad810337bd79ac25c1ac4b0511bc",
+  "documentationBaseCommit": "0eaf2300469eb26fdc2da6cbbfab0d735bba3a69",
+  "runtimeSHA256": {
+    "demos/corporate/gjh/v11/index.html": "747de8088405cde77c4dac622bd427477cd677713294c6e48437dbaaf480e582",
+    "demos/corporate/gjh/v11/script.js": "3494c3c3fb630de7c467b4e0a4b40e526dedd07af92f609bd40a5f4910fb41a8",
+    "demos/corporate/gjh/v11/style.css": "7fe0166ba7690be4cbc06dc1caa1e538bbd38a8b2e2168c945972cc2d277c1de",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/ui.js": "64004c1a672cd0ccf7d89893f532a463a35af180e662455610960e2ed6ffa923",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/products.js": "809e414b75ef821c57ba2111884b7ca7b4dc9e7f2e44baa7f44098c716a38742",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/world.js": "603c0ebb38e83ee2d72e80bc36d88bc168f33c5c53a77994b020f8ac592d3a58",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "0f5f40e6a8bc9a2062c0a5047a4b9d0213c45bbdd837c97074c99a2de0a2cb27",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "ccbee77666249b090bb73faf105ba662b275b43c4ac973597cc71debb59022c9",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "048891652f549fc893e83caf362d1ad03d4a287ab23958232fe83279437fe10b",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "3ca78d7697618bc17a4a7cc0c1d51b4cc3f36284c47cef208edd1a1aec77e1a5",
+    "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/player.js": "91301a959fe95a0939238a8041c4d9c6957e1b24f8240fe7be3faac951041c43",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "focused": {
+    "status": "PASS",
+    "cases": 73,
+    "frames": 100,
+    "sourceAndTestGuards": "PASS",
+    "testSHA256": "3138d39aaf60af9b839528bb37768522e7c894e6bedcc738da5f89a2eddd05fe"
+  },
+  "finalRegressionLedger": {
+    "commands": 12,
+    "passed": 11,
+    "disclosedHistoricalBudgetFailure": 1,
+    "allFrozenSourceHashesMatch": true
+  },
+  "axeStates": 70,
+  "pythonTests": 47,
+  "requiredChecks": [
+    {
+      "name": "gallery",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gallery.py"
+      ],
+      "exitCode": 0,
+      "seconds": 31.11
+    },
+    {
+      "name": "legacy",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_gjh_demos.py",
+        "--axe-script",
+        "/private/tmp/gallery-a11y-tools/package/axe.min.js"
+      ],
+      "exitCode": 0,
+      "seconds": 69.13
+    },
+    {
+      "name": "pwa",
+      "command": [
+        "/private/tmp/gallery-task-qa-venv/bin/python",
+        "/private/tmp/gallery-mode-worker/run_legacy.py",
+        "tests/browser_pwa.py"
+      ],
+      "exitCode": 0,
+      "seconds": 41.68
+    }
+  ],
+  "live": {
+    "hashes": 34,
+    "viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        1440,
+        900
+      ]
+    ],
+    "DPR": 2,
+    "twoNativeRecoveriesEach": true,
+    "Bag4Retained": true,
+    "illegalTransitions": 0,
+    "pageErrors": []
+  },
+  "recentVerifiedPagesRuns": [
+    43656060021,
+    43656610813
+  ],
+  "independentVisualReview": {
+    "score": 86,
+    "receipt": "v11-graphics-recovery-independent-review.json",
+    "sameRuntime": true
+  },
+  "verificationReuse": "Recent complete suites and live flows reused only after exact current runtime/test/log guards; no new behavior or synthetic success injected. Generator/SSOT/doc-link/final-diff checks run in this audit.",
+  "deviceTooling": {
+    "adbAvailable": true,
+    "libimobiledeviceAvailable": false,
+    "devicectlAvailable": false,
+    "interpretation": "Tool availability only; does not assert whether the owner possesses physical devices.",
+    "adbExitCode": 0,
+    "adbDeviceCountsWithoutIdentifiers": {
+      "ready": 0,
+      "unauthorized": 0,
+      "offline": 0,
+      "emulator": 0
+    },
+    "physicalIOSRunnerAvailable": false
+  },
+  "openTasks": [
+    "Complete physical packaging/source match; complete master/reference unavailable.",
+    "Physical iPhoneSafari/AndroidChrome, actual safe areas, screen readers/contrast acceptance; no usable physical session available."
+  ],
+  "disclosedFailedHistoricalOracles": [
+    "Old45request ceiling conflicts with baseline55/current56; retainedFAIL.",
+    "Oldtarget-only exactcoldGPU equality differs with reducedcurrentwideupload; retainedFAIL; functional and currentprofile/epoch proof separate."
+  ],
+  "rawEvidence": [
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/report.json",
+      "sha256": "5076381b09982b5d85af51da816fd2f017c3d9756af621822ffacc7ed9e49d18"
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/commands-all.json",
+      "sha256": "e2d88765350b72e180a1105ac8e65cb09f8f8e928587c959d7ed1299fcc37db7"
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/axe70/report.json",
+      "sha256": "b75345778d945a5d38b30854eca5a296d171808cbb9d3b8e6d98a7b84b9f2143"
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/full-v11-1.log",
+      "sha256": "c75f5c3ab7c6a1138fff8e5d83fe8db3d2e159c6124671c10c643ce9622da6e7"
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-release/live-report.json",
+      "sha256": "7c6b75528a118e761f18c64a7f3abea356acf57bb726d779a998b6cc7e551c53"
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-release/live-attempt1.log",
+      "sha256": "f5188df15d2d07b091c08a06b94f51d4cd004558551fdc31ce27619a5dad39b6"
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-release/results.json",
+      "sha256": "bad29daba46e5f97a32d8bf0ffe36b2cd1536eb8a8bbb18882c8b4c1eca67768"
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-release/unit-all.log",
+      "sha256": "447b635cf7d597251cce36e24684c1388cf9018637b467f5abc25c474f9bd5d4"
+    },
+    {
+      "path": "/private/tmp/gallery-final-verification/device-tooling.json",
+      "sha256": "12bafdbf6b3bea50860cec51cad387d1d566f01d21d8e053137dfdd777ac068f"
+    }
+  ],
+  "limits": [
+    "No all-task, physical-device, Safari, screen-reader, OS-hidden, popup Home/End, FPS, VRAM or packaging certification.",
+    "Probe function must be invoked when injected; first parent live failure retained and corrected full rerun PASS.",
+    "Prior broad tests are evidence for matching unchanged runtime, not newly executed claims."
+  ],
+  "independentFinalAudit": {
+    "status": "APPROVED",
+    "reviewer": "/root/lod_review",
+    "verified": [
+      "32 current runtime hashes and all raw-evidence hashes match.",
+      "Frozen focused9 test guard matches current source.",
+      "Reused proof distinguished from new audit checks.",
+      "Historical45request/exactGPU failures retained; no device/WCAG/all-task claims."
+    ],
+    "remainingChecklistItems": [
+      "Match each model, label, name and product record against existing verified source data.",
+      "Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review."
+    ],
+    "newVisualScore": "NONE; prior unchanged-runtime86 retained"
+  }
+}
