@@ -50,3 +50,13 @@ Verified 2026-11-14 with Playwright + SwiftShader WebGL (repo-root server, scene
 ## Commerce wording reconciliation — 2026-11-14
 
 The original conflict paragraph said “no prices, stock or cart.” Its no-cart clause was stale relative to the already shipped [1.1.20 Demo bag](v11-demo-bag-review.md) and [1.1.24 pushable demo cart](v11-cart-review.md). The paragraph above now distinguishes those simulations from real commerce. Source checks: [`demo-bag.js`](../demos/corporate/gjh/v11/assets/demo-bag.js) describes a session-only selection store with no network writes; the cart release contract preserves that same selection state and explicitly excludes prices, orders, payments and stock claims. Historical verification records above are unchanged; this correction adds no runtime behavior, test result, mode implementation or commerce authorization.
+
+## Future commerce scope decision — 2026-11-15
+
+The scope-definition task now has a separate [future commerce boundary](v11-future-commerce-scope.md).
+V11 remains a discovery demo with its existing quantity-only bag, physical pickup
+and pushable cart. Real merchant handoff or ordering requires a separate brief,
+merchant contract, authoritative data ownership and explicit authorization. This
+defines the boundary and future acceptance inputs; no commerce integration, new
+UI or transaction is implemented or approved. Historical verification above is
+unchanged.

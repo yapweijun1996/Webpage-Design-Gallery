@@ -117,7 +117,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] Interaction target highlight and distance hint.
 - [x] WebGL context-loss recovery and low-end quality tiers.
 - [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
-- [ ] Define any future real-commerce scope separately. The existing Demo bag and pushable 3D cart are authorized simulations, with no prices, stock reservation, real orders or payment. The official eShop link is external and does not check out the demo selection. See the commerce clarification below; no real-commerce implementation is approved by this checklist.
+- [x] Define any future real-commerce scope separately. The existing Demo bag and pushable 3D cart are authorized simulations, with no prices, stock reservation, real orders or payment. The official eShop link is external and does not check out the demo selection. See the commerce clarification below; no real-commerce implementation is approved by this checklist.
 
 Optional scoped item, not committed: Diner Dash-style 4-table restaurant mini-game, see `docs/gjh-v11-restaurant-minigame-scope.md`.
 
@@ -398,3 +398,12 @@ FAIL; neither was weakened. Current pinned-baseline/profile/decoded/draw/epoch
 checks provide separate evidence. See `docs/v11-graphics-recovery-review.md` and
 `docs/evidence/v11-graphics-recovery-acceptance.json`. Device, Safari, screen-reader,
 OS-popup, actual safe-area, FPS and complete packaging gates remain separate.
+
+## Future commerce scope definition — 2026-11-15
+
+Completed the separate [commerce boundary](docs/v11-future-commerce-scope.md).
+The current decision keeps V11 a discovery demo; merchant handoff or real orders
+require a new brief, merchant interface, authoritative data ownership, security
+and operating acceptance, and explicit implementation authorization. No prices,
+stock writes, customer collection or transactions were added. Independent source
+and scope review approved the document. Runtime and application 1.1.41 are unchanged.

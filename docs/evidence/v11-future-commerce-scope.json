@@ -1,0 +1,34 @@
+{
+  "task": "Define future real-commerce scope separately",
+  "status": "DOC_SCOPE_ACCEPTED; no implementation authorization",
+  "baselineCommit": "32287f1fe116ad810337bd79ac25c1ac4b0511bc",
+  "application": {
+    "version": "1.1.41",
+    "build": "8756a8b3f0c73835"
+  },
+  "independentReview": {
+    "status": "APPROVED",
+    "reviewer": "/root/lod_review",
+    "findings": [],
+    "sourceChecks": [
+      "Four local IDs/integer0-9/session memory fallback match.",
+      "Physical reservation, Shelf Add, cart separate from merchant inventory.",
+      "External eShop links transmit no demo selection.",
+      "Future merchant/SKU/servervalidation/duplicate/data/release boundaries explicit."
+    ]
+  },
+  "documentSHA256": {
+    "docs/v11-future-commerce-scope.md": "71e315f39213a91c8bc1f07c4e2c062be58ed7c292d47e29ecb4552049eb158f",
+    "docs/gjh-v11-mobile-redesign-gap-report.md": "86c4a625f3767f63cb8ed146393089ce2a64110376ca5a5f4f69427f5131dbef",
+    "task.md": "d1dcc92dd0383a4f907a70e1d86e7edfc5538f5f3a36f08fe13e455b32e6aa53"
+  },
+  "checks": {
+    "relativeDocumentLinks": "PASS",
+    "runtimeChanges": "NONE",
+    "generator": "PASS"
+  },
+  "limits": [
+    "No merchant API/account contract supplied.",
+    "Physical-device/complete packaging tasks remain open."
+  ]
+}
