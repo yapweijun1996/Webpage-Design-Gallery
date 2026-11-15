@@ -1,10 +1,15 @@
 import {createUI} from './assets/ui.js';
+import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let productControl=null, shelfFocus=null, guidance=null;
+let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
+let graphicsStatus = 'initializing', losses = 0, validations = 0;
+let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
+const quality = createGraphicsQuality(() => resize());
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); }
@@ -38,6 +43,9 @@ const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.curr
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
   interaction: selectedInteraction ? {id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance} : null,
   camera: player ? {position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect} : null,
+  graphics: Object.freeze({status: graphicsStatus, losses, validations, initialized, quality: quality.state,
+    sceneId: world?.scene.uuid || null, cameraId: player?.camera.uuid || null, sceneChildren: world?.scene.children.length || 0,
+    shadows: Boolean(renderer?.shadowMap.enabled), buffer: renderer ? [canvas.width, canvas.height] : null}),
   gpu: renderer ? {...renderer.info.memory} : null,
   seats:world?.seats?.map(({id,name,x,z,exitX,exitZ,facing})=>({id,name,x,z,exitX,exitZ,facing}))||[],
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
@@ -120,9 +128,10 @@ function animate(now) {
   frame = requestAnimationFrame(animate);
 }
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
-function fallback(message) {
+function fallback(message, terminal = true) {
+  if (terminal) { fatal = true; graphicsStatus = 'failed'; }
   hideGuidance();
-  ready = false; window.__sceneFailed = true;
+  ready = false; window.__sceneFailed = true; window.__sceneReady = false;
   shelfFocus?.close();
   cancelAnimationFrame(frame); frame = 0; modes.interrupt('fallback'); ui.fallback(message);
 }
@@ -137,25 +146,89 @@ document.addEventListener('keydown', event => {
 });
 window.addEventListener('blur', () => { windowBlurred = true; hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
 window.addEventListener('focus', () => { windowBlurred = false; if (ready) { updateHUD(); render(); } });
-window.addEventListener('resize', () => modes.interrupt('viewport resize'));
+window.addEventListener('resize', () => { modes.interrupt('viewport resize'); resize(); });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
-  else { if (ready) { updateHUD(); render(); } resume(); }
+  else { if (ready) { updateHUD(); render(); } else validateRestoration(); resume(); }
 });
-canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); fallback('The 3D graphics context was interrupted. All stores and verified products remain available in list view. Reload to retry.'); });
+canvas.addEventListener('webglcontextlost', event => {
+  event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
+  player?.interruptGraphics();
+  if (!fatal) graphicsStatus = 'lost';
+  fallback(fatal ? 'The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D.' : 'The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.', false);
+});
+canvas.addEventListener('webglcontextrestored', () => {
+  contextLost = false;
+  // Our listener predates Three r170's At handler. Its synchronous St rebuild
+  // replaces renderer.info/shadowMap. A microtask can run between native event
+  // listeners, so use a later task, bound to this loss epoch.
+  const epoch = losses;
+  setTimeout(() => { if (epoch !== losses || contextLost) return; restorePending = false; contextWaiter?.(); validateRestoration(); }, 0);
+});
+async function waitForContext(context) {
+  while (contextLost || context.isContextLost()) await new Promise(resolve => { contextWaiter = resolve; });
+  contextWaiter = null;
+}
+function resize() {
+  if (!renderer || !player) return;
+  // The fallback hides the canvas. Keep the restored buffer/camera sized for
+  // the next explicit entry, without showing or focusing the hidden experience.
+  const viewportChanged = viewportWidth !== innerWidth || viewportHeight !== innerHeight;
+  const width = canvas.clientWidth || (viewportChanged ? innerWidth : renderWidth) || innerWidth;
+  const height = canvas.clientHeight || (viewportChanged ? Math.max(1, innerHeight - document.querySelector('.site-header').offsetHeight) : renderHeight) || innerHeight;
+  const resized = width !== renderWidth || height !== renderHeight;
+  viewportWidth = innerWidth; viewportHeight = innerHeight;
+  if (!width || !height) return;
+  const profile = quality.resolve(width);
+  if (!contextLost) {
+    if (resized || renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
+      renderer.setPixelRatio(profile.pixelRatio); renderer.setSize(width, height, false);
+    }
+    renderer.shadowMap.enabled = profile.shadows;
+  }
+  if (resized) {
+    renderWidth = width; renderHeight = height;
+    player.camera.aspect = width / height; player.camera.fov = width < 600 ? 68 : 58; player.camera.updateProjectionMatrix();
+    if (shelfFocus?.open) shelfFocus.resize(); else player.updateCamera(0, true);
+  }
+  render();
+}
+function validateRestoration() {
+  if (!initialized || fatal || contextLost || restorePending || !interrupted || ready || document.hidden) return;
+  graphicsStatus = 'validating';
+  try {
+    quality.recover(); resize();
+    const gl = renderer.getContext();
+    if (gl.isContextLost()) return;
+    player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas);
+    renderer.render(world.scene, player.camera);
+    // A real submitted scene and nonempty framebuffer must precede availability.
+    // No physics tick or UI transition is needed for this offscreen validation.
+    const pixel = new Uint8Array(4);
+    gl.readPixels(Math.floor(gl.drawingBufferWidth / 2), Math.floor(gl.drawingBufferHeight / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+    if (gl.isContextLost()) return;
+    if (gl.getError() !== gl.NO_ERROR || renderer.info.render.calls === 0 || !pixel.slice(0, 3).some(Boolean))
+      throw new Error('Restored scene frame unavailable');
+    validations++; frames++; ready = true; graphicsStatus = 'available';
+    window.__sceneFailed = false; window.__sceneReady = true;
+    ui.restored(); resume();
+  } catch {
+    fallback('The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.');
+  }
+}
 async function initialize() {
   const context = canvas.getContext('webgl2', {antialias: true, alpha: false, powerPreference: 'high-performance'});
   if (!context) { fallback('WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.'); return; }
   const T = await import('./vendor/three.module.min.js');
+  await waitForContext(context);
+  renderer = new T.WebGLRenderer({canvas, context, antialias: true});
+  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
   try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
-  const quality = innerWidth >= 1000 && (navigator.hardwareConcurrency || 2) >= 4 && (navigator.deviceMemory || 4) >= 4;
-  renderer = new T.WebGLRenderer({canvas, context, antialias: true});
-  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
-  renderer.shadowMap.enabled = quality; renderer.shadowMap.type = T.PCFSoftShadowMap;
-  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, quality);
+  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics);
   if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
     const {createElevatorV2} = await import('./assets/elevator-v2.js');
     elevator = createElevatorV2(T, R, physics, world.scene);
@@ -194,15 +267,12 @@ async function initialize() {
     return player.startCollection(world.createCollectProp(id),id);
   });
   ui.onBagChange(value => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
-  function resize() {
-    const width = canvas.clientWidth, height = canvas.clientHeight; if (!width || !height) return;
-    renderer.setPixelRatio(Math.min(devicePixelRatio, width < 600 ? (elevator ? 1.25 : 1.5) : 2)); renderer.setSize(width, height, false);
-    player.camera.aspect = width / height; player.camera.fov = width < 600 ? 68 : 58; player.camera.updateProjectionMatrix();
-    renderer.shadowMap.enabled = quality && width >= 1000;
-    if (shelfFocus.open) shelfFocus.resize(); else player.updateCamera(0, true);
-    render();
-  }
-  ready = true; ui.show3D(); new ResizeObserver(resize).observe(canvas); resize(); player.teleport('atrium'); updateHUD();
+  player.teleport('atrium'); updateHUD();
+  initialized = true;
+  new ResizeObserver(resize).observe(canvas);
+  if (interrupted) { validateRestoration(); return; }
+  resize();
+  ready = true; graphicsStatus = 'available'; ui.show3D(); resize();
   for (let i = 0; i < 5; i++) tick(); render(); window.__sceneReady = true; ui.offerFirstGuide(); resume();
 }
 initialize().catch(() => fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.'));

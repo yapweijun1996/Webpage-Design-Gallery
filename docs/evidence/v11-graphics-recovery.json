@@ -1,0 +1,4442 @@
+{
+  "schemaVersion": 1,
+  "status": "WORKER_SCOPE_VERIFIED_WITH_DISCLOSED_STALE_GATES",
+  "baselineRef": "36d56c49283a4e1a794ba0ec15650aea85bdc615",
+  "branch": "codex/task-graphics-recovery",
+  "headIsUnmodifiedBaseline": true,
+  "applicationAtStart": "1.1.40",
+  "cwd": "/private/tmp/gallery-task-lod",
+  "runtimeFingerprint": "0a79ccf1be2284b177f3fd3b6bfdac54e281c020ad0e7ea3c5663cdc9b815077",
+  "runtimeSHA256": {
+    "demos/corporate/gjh/v11/index.html": "747de8088405cde77c4dac622bd427477cd677713294c6e48437dbaaf480e582",
+    "demos/corporate/gjh/v11/script.js": "3494c3c3fb630de7c467b4e0a4b40e526dedd07af92f609bd40a5f4910fb41a8",
+    "demos/corporate/gjh/v11/style.css": "7fe0166ba7690be4cbc06dc1caa1e538bbd38a8b2e2168c945972cc2d277c1de",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/ui.js": "64004c1a672cd0ccf7d89893f532a463a35af180e662455610960e2ed6ffa923",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/products.js": "809e414b75ef821c57ba2111884b7ca7b4dc9e7f2e44baa7f44098c716a38742",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/world.js": "603c0ebb38e83ee2d72e80bc36d88bc168f33c5c53a77994b020f8ac592d3a58",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "0f5f40e6a8bc9a2062c0a5047a4b9d0213c45bbdd837c97074c99a2de0a2cb27",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "ccbee77666249b090bb73faf105ba662b275b43c4ac973597cc71debb59022c9",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "048891652f549fc893e83caf362d1ad03d4a287ab23958232fe83279437fe10b",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "3ca78d7697618bc17a4a7cc0c1d51b4cc3f36284c47cef208edd1a1aec77e1a5",
+    "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/player.js": "91301a959fe95a0939238a8041c4d9c6957e1b24f8240fe7be3faac951041c43",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "changedSourceSHA256": {
+    "demos/corporate/gjh/v11/script.js": "3494c3c3fb630de7c467b4e0a4b40e526dedd07af92f609bd40a5f4910fb41a8",
+    "demos/corporate/gjh/v11/assets/ui.js": "64004c1a672cd0ccf7d89893f532a463a35af180e662455610960e2ed6ffa923",
+    "demos/corporate/gjh/v11/assets/player.js": "91301a959fe95a0939238a8041c4d9c6957e1b24f8240fe7be3faac951041c43",
+    "demos/corporate/gjh/v11/assets/world.js": "603c0ebb38e83ee2d72e80bc36d88bc168f33c5c53a77994b020f8ac592d3a58",
+    "demos/corporate/gjh/v11/assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+    "demos/corporate/gjh/v11/index.html": "747de8088405cde77c4dac622bd427477cd677713294c6e48437dbaaf480e582",
+    "demos/corporate/gjh/v11/style.css": "7fe0166ba7690be4cbc06dc1caa1e538bbd38a8b2e2168c945972cc2d277c1de",
+    "demos/corporate/gjh/v11/README.md": "8172e63dc5507135c5d172bc15196ef05b747ccf4e6ca483537adc35c3bad79d",
+    "tests/browser_gjh_graphics_recovery.py": "3138d39aaf60af9b839528bb37768522e7c894e6bedcc738da5f89a2eddd05fe",
+    "tests/gjh_graphics_quality.test.mjs": "25f50ea596209571b8b4d3b3fdc2af99b524ca8477e6c221dc1d5b5868c88f84"
+  },
+  "testSHA256": {
+    "tests/browser_gjh_guide_a11y.py": "c00ca3ca1051509d331856c5bfba9d12527486b2c7e667a8db835a0818b3e0da",
+    "tests/visitor-v2-benchmark.js": "5faa8fb1d5ad899815191ab1320226a1ef0ec8f839d767d32a26c6358c6b7c50",
+    "tests/browser_gjh_panel_input.py": "2983eac549bdf32c0c5a12aca5bbb28a1321e98a1a94281fd817763e879eac4e",
+    "tests/browser_gallery_layout.py": "f2f1212f391c201cccc51b9c3c8f9beff5b7f3cdc4d7e3e43834bb76a9819e02",
+    "tests/browser_gjh_collect_angles.py": "8e39b8e95f29512a68ccb5a611b32bb9d2906f0c9d204662095bd6f271f86dca",
+    "tests/browser_gjh_floating_desktop.py": "ab61a04f35bc06fefe0058b673c7d6f5448ef439b75a8676703558366c3fba45",
+    "tests/browser_gjh_carry_bag.py": "468b6e0298167b34d6e888bea8028671c3a0b56fb00cdc94593ee1cbf238400e",
+    "tests/gallery_browser_helpers.py": "defb628360803c1f39c047147b28fb6c8746f63fcaaae269e9ae7c73628dc2bc",
+    "tests/browser_gjh_seat_angles.py": "6df53bbe59dd5cbf0b525efb2913063c97487825159c4b11bcfce0fb88b8d40a",
+    "tests/browser_gjh_list.py": "beb946cb4e6287e816304aac48f2a9291152a29ff4e8459e5b567380e89dd0f6",
+    "tests/browser_gjh_location_hud.py": "6221fd2011c417988c520984945d6b6e1ec3edb74243502e9c40f8f356738f8e",
+    "tests/browser_gjh_m056.py": "90b3f09597e94342c5cbe8560553e62d5f7bd2ada41c29f0037b778a218c7e68",
+    "tests/gjh_graphics_quality.test.mjs": "25f50ea596209571b8b4d3b3fdc2af99b524ca8477e6c221dc1d5b5868c88f84",
+    "tests/browser_gjh_seat.py": "8ea588641c4f8ae83fe6d05efdb89e84801cc22ff2ca5fa868915c5673a49383",
+    "tests/browser_gjh_guide.py": "e1692de0a1f45d6fec49e62bf5434cf7ddacf2442e4a329e71bce8971a81b4c9",
+    "tests/test_design_system.py": "d90679d4a0fe952e70654270495b1949581dade08c293758532d8b5c5dfcca68",
+    "tests/browser_gjh_carry_angles.py": "cf620732f57390df901e5a8e48cbfcefd7eeb1886cd091b0d5de28a88d3008ce",
+    "tests/browser_gjh_cart_angles.py": "f6f11ea9020f4969c2207b5644a185814194aef8f868f4528d720559c8af0776",
+    "tests/test_gjh_character.py": "afa598dbf042937588b9f7208ae718d9a5a347bee40419b82ce8c5f826bb8f7f",
+    "tests/browser_gallery_theme.py": "1ef2945000b37f0c3702e4730c8e5783f55efa07d614bd9ebb32ec42532a0960",
+    "tests/browser_preferences.py": "9edee013e693c607cf0bc69d1188cc4ba95d6dd9d93ba9de45496d290b5a269d",
+    "tests/test_preferences.py": "c381e9eb450d434dd5733aadc340e843b02bdc009e747fb1521d60fb3e8ced83",
+    "tests/browser_gjh_demos.py": "6e16fce0cee0f2a948b6a323734c7ad37803c2811863f1db9a71809f87055415",
+    "tests/browser_gjh_compact_guide.py": "3efbe32200f397d8e640556c1936f9ddef3b02468b5345edbf7e7664367bbe12",
+    "tests/browser_gjh_visitor_v2_benchmark.py": "b8f19fd248bee6f6a0b27d8aeeec51f0849e446fd4733703cbe52da195624268",
+    "tests/gjh_shelf_helpers.py": "f819ddaac70fe5a1fb50e48cd0a9c9dc3cf633ce7f3a50aa36372ae760893041",
+    "tests/browser_gjh_accessibility.py": "2f4e1107c9d9384602ebac393a5ba6499d6b83372e08363b79e0861d7f6f8390",
+    "tests/browser_gjh_cart.py": "77d743b4e64edfaf237af22d781fab8e88149b672eb1dce97ed4cfd78af4c0ec",
+    "tests/browser_gjh_all_seats.py": "4afaf6ad9fafa99a075f61bc996da24619d0ed8c0b58aa8114940da1ffb7e0c8",
+    "tests/browser_gjh_pointer.py": "59b2a16e76c2a7bf5a9e541502a6486855b9eb7921a4929d59b7962eb704449d",
+    "tests/browser_ssot.py": "721ea44e25fad35682e82fdea17438d20fee430dd474577843e7b4469dea964a",
+    "tests/browser_gjh_preview_mode.py": "dfa0c5467f48e3d0c703f11b6f055f8692d243d7911dfa76be72e35d035e5bc4",
+    "tests/browser_gjh_furniture_disposal.py": "e8b8037b7292eae517f2e4e119f855539030e715505df51987705cfb2d9c3479",
+    "tests/browser_pwa_demo_boundary.py": "43e06359b01a945c6016c0427a6aeb5daf6a6bbe02d61d8a6f9aa052f6b9133f",
+    "tests/browser_gjh_kiosk.py": "449bda55fd95754d117ffddcb8e1153893c2618f58a790dabbad6bbfea416414",
+    "tests/browser_gjh_modes.py": "bf2ded76bd86b16b50d3df42a819a312ca4cf30b28034170c56e31ce7cb63b81",
+    "tests/browser_gjh_fallback_focus.py": "63452d970c3403764c8f715e9a2118959c5f176889831ade912a2a44fa179f85",
+    "tests/browser_gjh_graphics_recovery.py": "3138d39aaf60af9b839528bb37768522e7c894e6bedcc738da5f89a2eddd05fe",
+    "tests/browser_gjh_newmoon_assets.py": "bd6ba6068121de82d734f49ca761e13cb6aea7a40ee4f90558c3ab4a4765d685",
+    "tests/browser_gjh_target_guidance.py": "8e2b609aca6a5f9e02d4a65c379c122d90ad83d73b6ca60453fbe08172fad7b2",
+    "tests/browser_gjh_newmoon_detail.py": "c55f6e011b87690fc011c4b3b3e95a02380beb8c79afb87610ce10855f925a05",
+    "tests/browser_pwa.py": "0875cde05702742e5f01117182f9a3dfbf76619aa83997200f19ee4fd6e21b6c",
+    "tests/browser_gjh_context_navigation.py": "9df0c7f5ac9de2ca55cd887cbe955d9a9e8ec0dd17b739f0160e329296959a05",
+    "tests/browser_gjh_original_tin.py": "750ec0ebe14caba035cc1c35162a597a3ef2a55a6c3081baed5e5956d05ae563",
+    "tests/browser_gjh_final_incremental.py": "f77c206e42444ef4c947ca6db5dfd26ae2a25ad313665999824c470ed586c08c",
+    "tests/browser_gjh_context_navigation_insets.py": "75484dc9b3b5612d27a8215409072c7bf81d47d917113a2e90d19c2caac7ac6a",
+    "tests/browser_gjh_visitor_v2.py": "b466689980d53e35e4c889648d5ac8421ac73be4eecc6fb438240d195d431839",
+    "tests/browser_gjh_v10.py": "b72d3d92c9974fe891c5e4d2b25249f53ac21d3e961e9ea4abb96ce5afd58bff",
+    "tests/test_original_tin.py": "60cae3d4f3dd47be34a415d52e9c5935fe60b4331d37895d90c7bd23adb37a28",
+    "tests/browser_gjh_bag.py": "c54b8474d88c9dc588e43b7d9c80b2d51a93bd221d9ea0b81366390e765abd85",
+    "tests/browser_gjh_wayfinding.py": "92693908aa56aebd44d9f5e23e5e499a9d1675255bf8e7f2c60ecbb2a32358b8",
+    "tests/browser_gjh_cart_landscape.py": "f45c77526ae829c1825eff74514a89f34499862a4f02cdde481808ebc7e8f443",
+    "tests/visitor-v2-runtime.js": "e4f5a5c750e2ca4108f030af048d77a98e52635117cd0396f6424689e82cb614",
+    "tests/browser_gjh_furnishings.py": "1e2fae3ffeeccd39cb2cdb903398a83bc412cf147c0726d64bb2d90bbb668264",
+    "tests/browser_gjh_newmoon_review.py": "17a344d317d46d4b25c04b3c6ef052a1cb20b28b84612125a90dad74c21de3b8",
+    "tests/browser_gjh_disclosure_type.py": "9eb8f08c165994a5d066d0404ab940c6b74aa807d7305824f43ab3884c451bf2",
+    "tests/browser_gjh_modes.mjs": "88ff1357e67d4f89f15febd27e32d3283395b78d73509891cab4ac03e52b30ee",
+    "tests/browser_gjh_v11.py": "a3dfc3898cd74262d516db4c57b224e2ef90e866c2a5d1a1442a511f6f3a5d73",
+    "tests/gjh_modes.test.mjs": "2057ebfb5849001d10a2986fcb94f935a46f873c167dca1da836eaf65e40f4b4",
+    "tests/browser_gjh_landscape.py": "72716662d3a527ae1a77427d50029c856a0fa33ba9f0f458992d512251d82366",
+    "tests/test_gjh_furnishings.py": "64d72376cdf69972b1ce8f0fdc52bdfa5eb9c5f6f6ea43e98dc5cd08fb365746",
+    "tests/browser_gjh_mode_review.py": "679bad5542078f433006e940e8fc318d30666f9d1b2a55d0ffdf1b1bfc85d96b",
+    "tests/browser_gjh_budget.py": "c805e739d3285ea3810d2aa8669c568c349abf3d93b9186c53d75602a1f3c084",
+    "tests/browser_gjh_floating_stick.py": "d8dbddb38e29faa9677d24a295242464c9a7855db23cee5ba31b92329349e394",
+    "tests/browser_gallery.py": "153e87ed589925bd3f9ccbe76a749744dbeefb0336f8246c5c0e927644d2f409",
+    "tests/browser_gjh_v9.py": "361fcb85ae6e0406ef835a1b43a723d6a05d14b2e8ab6110d51ef103935da6f4",
+    "tests/browser_gjh_action_camera.py": "073163c4087b960e6f7fc541c0a6cbde3d27ee7df47f77305ea8d44021ba9292",
+    "tests/gjh_contrast.js": "8cd9386ae07fd33e43274fd9347f37ed25b1fe25f4b9d473a39dc38576995496",
+    "tests/browser_gjh_seat_hud.py": "cbd84e4c04137a5a2220f649fcd8b0a8842e2ba85b2d66a8bbe37e4a2a6306f8",
+    "tests/browser_gjh_shelf_focus.py": "0ef63f3d9d4b09a8751b04bbed463f9252d1e9887d4a8ef1fab83203c3102b97",
+    "tests/browser_gjh_collect.py": "d3f44e909a4d55cddbf71b6e115f56e0520b0ae90965ab21ba857a58475dd87d",
+    "tests/test_gjh_newmoon_assets.py": "cc09c1df4434b8989fa80f55f4ffdec8ff203af6bcdefdb276dd8a0e6dea8c7c",
+    "tests/browser_gjh_sticky_details.py": "16e2ee9f90187253b0fc6b98fc13a02f8ad9e2c20aaf300273937e4f71eb6949",
+    "tests/browser_gjh_character.py": "ac6b318818ed71b76ff19b31e49a9fee7228d6459e238c91be4892f7a79ed102",
+    "tests/browser_gjh_seat_label.py": "e66f11c7273816bacd801839c823612c034cc82af22d1a8e4be1b8cd74e06132",
+    "tests/test_gjh_kiosk.py": "26353ac9502489d813b17fb84c57e76435e6de276d24dd4d4311e8a68bea3d6c",
+    "tests/browser_gjh_v8.py": "2c2ca7ab75b75ff6fa02a37e70cc2229b35bf17066255ee0e27f82500176b431",
+    "tests/test_gallery.py": "370e34cd038b83a6f3810a41c624d57fdade1ef207e07e7f0406ae139bd85708"
+  },
+  "focusedTestSHA256Before": "3138d39aaf60af9b839528bb37768522e7c894e6bedcc738da5f89a2eddd05fe",
+  "focusedTestSHA256After": "3138d39aaf60af9b839528bb37768522e7c894e6bedcc738da5f89a2eddd05fe",
+  "environment": {
+    "browser": "157.0.8103.51",
+    "nativeHardwareHintsAndRenderer": {
+      "cores": 10,
+      "memory": 32,
+      "dpr": 2,
+      "vendor": "Google Inc. (Apple)",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)"
+    },
+    "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+    "pythonExecutable": "/private/tmp/gallery-task-qa-venv/bin/python",
+    "chromeExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "webglBackend": "metal",
+    "servedPrefix": "/gallery",
+    "method": "Real extension-driven native context loss/restore; fixtures explicitly separate from physical events"
+  },
+  "commands": [
+    {
+      "name": "node-modes",
+      "command": "node --test tests/gjh_modes.test.mjs",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 0.18,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/gjh_modes.test.mjs": "2057ebfb5849001d10a2986fcb94f935a46f873c167dca1da836eaf65e40f4b4"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/node-modes-1.log",
+      "logSHA256": "0572217afd9b0946289e415dcd416c14be9fcd26ed053a8a9a41fdde88ecde85"
+    },
+    {
+      "name": "modes",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_modes.py --output /private/tmp/gallery-graphics-worker/qa/final/modes --evidence /private/tmp/gallery-graphics-worker/qa/final/modes.json",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 51.58,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/browser_gjh_modes.py": "bf2ded76bd86b16b50d3df42a819a312ca4cf30b28034170c56e31ce7cb63b81"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/modes-1.log",
+      "logSHA256": "6db8c2f6a98b5f92e8420b7b43b6268d36f0e95b0decc55d55865f2a6213c1ea"
+    },
+    {
+      "name": "mode-review",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_mode_review.py --output /private/tmp/gallery-graphics-worker/qa/final/mode-review --evidence /private/tmp/gallery-graphics-worker/qa/final/mode-review.json",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 30.02,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/browser_gjh_mode_review.py": "679bad5542078f433006e940e8fc318d30666f9d1b2a55d0ffdf1b1bfc85d96b"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/mode-review-1.log",
+      "logSHA256": "4e7712ce97a3ebc79d6a58340ab0cf65712c5699ef088f3693b2b65720c926a4"
+    },
+    {
+      "name": "navigation",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_context_navigation.py --output /private/tmp/gallery-graphics-worker/qa/final/navigation --evidence /private/tmp/gallery-graphics-worker/qa/final/navigation.json",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 61.84,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/browser_gjh_context_navigation.py": "9df0c7f5ac9de2ca55cd887cbe955d9a9e8ec0dd17b739f0160e329296959a05"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/navigation-1.log",
+      "logSHA256": "c0293f94d68beacb587697ca1e88b661e261d61c0ac584e7563100a7c3fbb874"
+    },
+    {
+      "name": "insets",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_context_navigation_insets.py --output /private/tmp/gallery-graphics-worker/qa/final/insets",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 17.31,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/browser_gjh_context_navigation_insets.py": "75484dc9b3b5612d27a8215409072c7bf81d47d917113a2e90d19c2caac7ac6a"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/insets-1.log",
+      "logSHA256": "869f4bbf7c23c174249dcb0b628210b6231f218975a4d36b495528bb1f62f883"
+    },
+    {
+      "name": "axe70",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_accessibility.py --axe-script /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/final/axe70",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 27.6,
+      "sourceStable": true,
+      "testHashes": {
+        "/private/tmp/gallery-mode-worker/run_legacy.py": "fe6fe1d4dec67770160b72a54fcd68b285055a5a336b8f6b059e4a569ee9dbff",
+        "tests/browser_gjh_accessibility.py": "2f4e1107c9d9384602ebac393a5ba6499d6b83372e08363b79e0861d7f6f8390"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/axe70-1.log",
+      "logSHA256": "b75345778d945a5d38b30854eca5a296d171808cbb9d3b8e6d98a7b84b9f2143"
+    },
+    {
+      "name": "shelf12",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_shelf_focus.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/final/shelf12 --evidence /private/tmp/gallery-graphics-worker/qa/final/shelf12.json",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 92.09,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/browser_gjh_shelf_focus.py": "0ef63f3d9d4b09a8751b04bbed463f9252d1e9887d4a8ef1fab83203c3102b97"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/shelf12-1.log",
+      "logSHA256": "c3cdce4fe3bfdac740aeef8a96a68462f602c9f74e0a917cf5c7e592309d8fcc"
+    },
+    {
+      "name": "target-guidance",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_target_guidance.py --compare-ref '' --output /private/tmp/gallery-graphics-worker/qa/final/target-guidance",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 88.38,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/browser_gjh_target_guidance.py": "8e2b609aca6a5f9e02d4a65c379c122d90ad83d73b6ca60453fbe08172fad7b2"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/target-guidance-1.log",
+      "logSHA256": "9d87006cfdf740b6f9ceec2aee36d77ca9c3f5711c504cc31fc8df26d16fd34d"
+    },
+    {
+      "name": "budget",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_budget.py",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 1,
+      "status": "FAIL",
+      "elapsedSeconds": 12.5,
+      "sourceStable": true,
+      "testHashes": {
+        "/private/tmp/gallery-mode-worker/run_legacy.py": "fe6fe1d4dec67770160b72a54fcd68b285055a5a336b8f6b059e4a569ee9dbff",
+        "tests/browser_gjh_budget.py": "c805e739d3285ea3810d2aa8669c568c349abf3d93b9186c53d75602a1f3c084"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/budget-1.log",
+      "logSHA256": "1a79b542e8320609376b9994639e638bbdafc68c914b5466536ebc4db36c8d63"
+    },
+    {
+      "name": "full-v11",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_v11.py",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 33.84,
+      "sourceStable": true,
+      "testHashes": {
+        "tests/browser_gjh_v11.py": "a3dfc3898cd74262d516db4c57b224e2ef90e866c2a5d1a1442a511f6f3a5d73"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/full-v11-1.log",
+      "logSHA256": "c75f5c3ab7c6a1138fff8e5d83fe8db3d2e159c6124671c10c643ce9622da6e7"
+    },
+    {
+      "name": "bag",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_bag.py",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 18.66,
+      "sourceStable": true,
+      "testHashes": {
+        "/private/tmp/gallery-mode-worker/run_legacy.py": "fe6fe1d4dec67770160b72a54fcd68b285055a5a336b8f6b059e4a569ee9dbff",
+        "tests/browser_gjh_bag.py": "c54b8474d88c9dc588e43b7d9c80b2d51a93bd221d9ea0b81366390e765abd85"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/bag-1.log",
+      "logSHA256": "d10d88c28ace5caf6c44f2011864783a297a3a7beb9e952a9512d60daae08cac"
+    },
+    {
+      "name": "preview",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_preview_mode.py",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "status": "PASS",
+      "elapsedSeconds": 17.12,
+      "sourceStable": true,
+      "testHashes": {
+        "/private/tmp/gallery-mode-worker/run_legacy.py": "fe6fe1d4dec67770160b72a54fcd68b285055a5a336b8f6b059e4a569ee9dbff",
+        "tests/browser_gjh_preview_mode.py": "dfa0c5467f48e3d0c703f11b6f055f8692d243d7911dfa76be72e35d035e5bc4"
+      },
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/preview-1.log",
+      "logSHA256": "a673815e4c99927657c1a235441842df99bb46ff444edd657789e51fd17f4ac1"
+    },
+    {
+      "name": "graphics-quality-node",
+      "command": "node --test tests/gjh_graphics_quality.test.mjs",
+      "exit": 0,
+      "tests": 3,
+      "log": "/private/tmp/gallery-graphics-worker/qa/final/quality-node.log",
+      "logSHA256": "009356cb3c008e4c5ffc4293629ee81c3d7bef39e79df12f246a8ee0cb17aa65"
+    },
+    {
+      "name": "focused-final",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --root /private/tmp/gallery-task-lod --prefix gallery --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused9",
+      "environment": {
+        "GALLERY_CHROME": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "GALLERY_WEBGL_BACKEND": "metal"
+      },
+      "exit": 0,
+      "cases": 73,
+      "frames": 100,
+      "sourceStable": true,
+      "testStable": true,
+      "log": "/private/tmp/gallery-graphics-worker/qa/focused9.log",
+      "logSHA256": "ace221bc861dd534c6f1cc62454b22bef0729d88a78439f3efdb369f56867b55"
+    }
+  ],
+  "syntaxChecks": [
+    {
+      "command": [
+        "node",
+        "--check",
+        "demos/corporate/gjh/v11/script.js"
+      ],
+      "exit": 0,
+      "output": "",
+      "sourceSHA256": "3494c3c3fb630de7c467b4e0a4b40e526dedd07af92f609bd40a5f4910fb41a8"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "demos/corporate/gjh/v11/assets/ui.js"
+      ],
+      "exit": 0,
+      "output": "",
+      "sourceSHA256": "64004c1a672cd0ccf7d89893f532a463a35af180e662455610960e2ed6ffa923"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "demos/corporate/gjh/v11/assets/player.js"
+      ],
+      "exit": 0,
+      "output": "",
+      "sourceSHA256": "91301a959fe95a0939238a8041c4d9c6957e1b24f8240fe7be3faac951041c43"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "demos/corporate/gjh/v11/assets/world.js"
+      ],
+      "exit": 0,
+      "output": "",
+      "sourceSHA256": "603c0ebb38e83ee2d72e80bc36d88bc168f33c5c53a77994b020f8ac592d3a58"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "demos/corporate/gjh/v11/assets/graphics-quality.js"
+      ],
+      "exit": 0,
+      "output": "",
+      "sourceSHA256": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7"
+    }
+  ],
+  "focusedCaseCounts": {
+    "resources": 4,
+    "native-mode-recovery": 12,
+    "repeated-native-recovery": 2,
+    "native-modal-restore-race": 3,
+    "second-native-loss-invalidates-pending-restore": 1,
+    "initialization-completes-while-native-context-lost": 1,
+    "physical-reservation-survives-native-recovery": 1,
+    "trusted-held-touch-through-native-recovery": 1,
+    "startup-native-loss": 4,
+    "normal-motion-mid-elevator-loss": 2,
+    "hidden-blur-resize-fixture": 1,
+    "failure-fallback": 6,
+    "hardware-storage-fixture": 8,
+    "actual-profile-frames": 1,
+    "manual-preference-survives-reload": 1,
+    "native-browser-DPR-fixture": 6,
+    "layout": 15,
+    "software-insets": 2,
+    "axe-changed-surface": 2
+  },
+  "resources": [
+    {
+      "revision": "baseline",
+      "viewport": [
+        390,
+        844
+      ],
+      "count": 55,
+      "decodedBytes": 8925094,
+      "calls": {
+        "atrium": 145,
+        "newmoon": 111,
+        "mili": 111,
+        "gogo": 73
+      },
+      "gpu": {
+        "geometries": 91,
+        "textures": 23
+      },
+      "currentEpoch": {
+        "Buffer": {
+          "created": 416,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 416
+        },
+        "Texture": {
+          "created": 27,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 27
+        },
+        "Program": {
+          "created": 13,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 13
+        },
+        "Shader": {
+          "created": 26,
+          "deleted": 26,
+          "invalidated": 0,
+          "live": 0
+        },
+        "Framebuffer": {
+          "created": 0,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 0
+        },
+        "Renderbuffer": {
+          "created": 0,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 0
+        },
+        "VertexArray": {
+          "created": 98,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 98
+        }
+      }
+    },
+    {
+      "revision": "candidate",
+      "viewport": [
+        390,
+        844
+      ],
+      "count": 56,
+      "decodedBytes": 8933625,
+      "calls": {
+        "atrium": 145,
+        "newmoon": 111,
+        "mili": 111,
+        "gogo": 73
+      },
+      "gpu": {
+        "geometries": 91,
+        "textures": 23
+      },
+      "currentEpoch": {
+        "Buffer": {
+          "created": 416,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 416
+        },
+        "Texture": {
+          "created": 27,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 27
+        },
+        "Program": {
+          "created": 13,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 13
+        },
+        "Shader": {
+          "created": 26,
+          "deleted": 26,
+          "invalidated": 0,
+          "live": 0
+        },
+        "Framebuffer": {
+          "created": 0,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 0
+        },
+        "Renderbuffer": {
+          "created": 0,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 0
+        },
+        "VertexArray": {
+          "created": 98,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 98
+        }
+      }
+    },
+    {
+      "revision": "baseline",
+      "viewport": [
+        1440,
+        900
+      ],
+      "count": 55,
+      "decodedBytes": 8925094,
+      "calls": {
+        "atrium": 180,
+        "newmoon": 134,
+        "mili": 157,
+        "gogo": 128
+      },
+      "gpu": {
+        "geometries": 95,
+        "textures": 25
+      },
+      "currentEpoch": {
+        "Buffer": {
+          "created": 432,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 432
+        },
+        "Texture": {
+          "created": 29,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 29
+        },
+        "Program": {
+          "created": 18,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 18
+        },
+        "Shader": {
+          "created": 36,
+          "deleted": 36,
+          "invalidated": 0,
+          "live": 0
+        },
+        "Framebuffer": {
+          "created": 1,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 1
+        },
+        "Renderbuffer": {
+          "created": 1,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 1
+        },
+        "VertexArray": {
+          "created": 258,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 258
+        }
+      }
+    },
+    {
+      "revision": "candidate",
+      "viewport": [
+        1440,
+        900
+      ],
+      "count": 56,
+      "decodedBytes": 8933625,
+      "calls": {
+        "atrium": 180,
+        "newmoon": 134,
+        "mili": 157,
+        "gogo": 128
+      },
+      "gpu": {
+        "geometries": 94,
+        "textures": 25
+      },
+      "currentEpoch": {
+        "Buffer": {
+          "created": 428,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 428
+        },
+        "Texture": {
+          "created": 29,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 29
+        },
+        "Program": {
+          "created": 18,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 18
+        },
+        "Shader": {
+          "created": 36,
+          "deleted": 36,
+          "invalidated": 0,
+          "live": 0
+        },
+        "Framebuffer": {
+          "created": 1,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 1
+        },
+        "Renderbuffer": {
+          "created": 1,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 1
+        },
+        "VertexArray": {
+          "created": 257,
+          "deleted": 0,
+          "invalidated": 0,
+          "live": 257
+        }
+      }
+    }
+  ],
+  "resourceDelta": {
+    "count": 1,
+    "decodedBytes": 8531,
+    "baselineDecodedBytes": 8925094,
+    "currentDecodedBytes": 8933625,
+    "decodedBudgetBytes": 10485760,
+    "drawCallBudget": 200,
+    "sampledMaximumDrawCalls": 180,
+    "samplingLimit": "Four zones in paired measurement; full V11 independently checks moving frames. No FPS claim.",
+    "observedMaximumIncludingFullV11Walking": 181
+  },
+  "profileAndStorageMatrix": [
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "capable",
+      "viewport": [
+        390,
+        844
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "balanced",
+          "pixelRatio": 1.25,
+          "shadows": false,
+          "recovered": false
+        },
+        "sceneId": "d125ed2d-b88d-4b7e-b65a-9869cabba405",
+        "cameraId": "998366c0-b5e2-4290-a2d8-1823d0ccc66d",
+        "sceneChildren": 130,
+        "shadows": false,
+        "buffer": [
+          487,
+          965
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": false,
+          "recovered": false
+        },
+        "sceneId": "d125ed2d-b88d-4b7e-b65a-9869cabba405",
+        "cameraId": "998366c0-b5e2-4290-a2d8-1823d0ccc66d",
+        "sceneChildren": 130,
+        "shadows": false,
+        "buffer": [
+          780,
+          1544
+        ]
+      }
+    },
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "capable",
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "505eb648-dee8-429d-be20-52300a4ddd01",
+        "cameraId": "d9107aba-b12d-4a69-8536-db3f2a91c5fd",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "505eb648-dee8-429d-be20-52300a4ddd01",
+        "cameraId": "d9107aba-b12d-4a69-8536-db3f2a91c5fd",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      }
+    },
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "constrained-cores",
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "low",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "sceneId": "a7b3c304-60ab-4451-b487-7cf04d13994b",
+        "cameraId": "3a98139a-52e2-4eee-af34-c679a24faf71",
+        "sceneChildren": 130,
+        "shadows": false,
+        "buffer": [
+          1440,
+          817
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "a7b3c304-60ab-4451-b487-7cf04d13994b",
+        "cameraId": "3a98139a-52e2-4eee-af34-c679a24faf71",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      }
+    },
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "constrained-memory",
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "low",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "sceneId": "8f98935b-3fb2-40f9-b14b-78463647936c",
+        "cameraId": "a8df8994-7383-4201-99db-f9c0765c6b79",
+        "sceneChildren": 130,
+        "shadows": false,
+        "buffer": [
+          1440,
+          817
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "8f98935b-3fb2-40f9-b14b-78463647936c",
+        "cameraId": "a8df8994-7383-4201-99db-f9c0765c6b79",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      }
+    },
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "missing",
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "balanced",
+          "pixelRatio": 2,
+          "shadows": false,
+          "recovered": false
+        },
+        "sceneId": "4fce1928-2f24-4122-8813-8c11d86b40f7",
+        "cameraId": "c2b73466-405c-4c20-a534-b81b75f96a1b",
+        "sceneChildren": 130,
+        "shadows": false,
+        "buffer": [
+          2880,
+          1634
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "4fce1928-2f24-4122-8813-8c11d86b40f7",
+        "cameraId": "c2b73466-405c-4c20-a534-b81b75f96a1b",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      }
+    },
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "invalid-storage",
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "a000c28e-bcef-40d3-9287-899141c9fa1c",
+        "cameraId": "f4d5882c-f358-49c1-9fbb-1b90b363ad34",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "a000c28e-bcef-40d3-9287-899141c9fa1c",
+        "cameraId": "f4d5882c-f358-49c1-9fbb-1b90b363ad34",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      }
+    },
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "stored-low",
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "low",
+          "tier": "low",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "sceneId": "89a47b20-234a-4fa5-8caa-06f87e1d37f0",
+        "cameraId": "6e2242dd-c082-4460-b556-d0cbd70fd40b",
+        "sceneChildren": 130,
+        "shadows": false,
+        "buffer": [
+          1440,
+          817
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "89a47b20-234a-4fa5-8caa-06f87e1d37f0",
+        "cameraId": "6e2242dd-c082-4460-b556-d0cbd70fd40b",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      }
+    },
+    {
+      "case": "hardware-storage-fixture",
+      "fixture": "blocked-storage",
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "86d6cee6-01f6-42b6-ac63-9713cb36165e",
+        "cameraId": "3c70941c-5188-4f7c-9d9a-2441d17ec119",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      },
+      "final": {
+        "status": "available",
+        "losses": 1,
+        "validations": 1,
+        "initialized": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 2,
+          "shadows": true,
+          "recovered": false
+        },
+        "sceneId": "86d6cee6-01f6-42b6-ac63-9713cb36165e",
+        "cameraId": "3c70941c-5188-4f7c-9d9a-2441d17ec119",
+        "sceneChildren": 130,
+        "shadows": true,
+        "buffer": [
+          2880,
+          1634
+        ]
+      }
+    },
+    {
+      "case": "manual-preference-survives-reload",
+      "graphics": {
+        "status": "available",
+        "losses": 0,
+        "validations": 0,
+        "initialized": true,
+        "quality": {
+          "preference": "low",
+          "tier": "low",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "sceneId": "269ef329-a205-4fd1-9f38-3074b57924d8",
+        "cameraId": "2cf160bf-5e58-4766-b412-c3343087f018",
+        "sceneChildren": 130,
+        "shadows": false,
+        "buffer": [
+          390,
+          772
+        ]
+      }
+    },
+    {
+      "case": "native-browser-DPR-fixture",
+      "viewport": [
+        390,
+        844
+      ],
+      "emulatedDPR": 1,
+      "profiles": [
+        {
+          "choice": "low",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "low",
+              "tier": "low",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "ac8721fb-d935-4701-8388-f11cea0b49ef",
+            "cameraId": "fbb27e03-a478-4989-8c3f-4003bcb4d92c",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              390,
+              772
+            ]
+          },
+          "canvas": [
+            390,
+            772,
+            390,
+            772
+          ]
+        },
+        {
+          "choice": "balanced",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "balanced",
+              "tier": "balanced",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "ac8721fb-d935-4701-8388-f11cea0b49ef",
+            "cameraId": "fbb27e03-a478-4989-8c3f-4003bcb4d92c",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              390,
+              772
+            ]
+          },
+          "canvas": [
+            390,
+            772,
+            390,
+            772
+          ]
+        },
+        {
+          "choice": "detailed",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "detailed",
+              "tier": "detailed",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "ac8721fb-d935-4701-8388-f11cea0b49ef",
+            "cameraId": "fbb27e03-a478-4989-8c3f-4003bcb4d92c",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              390,
+              772
+            ]
+          },
+          "canvas": [
+            390,
+            772,
+            390,
+            772
+          ]
+        }
+      ]
+    },
+    {
+      "case": "native-browser-DPR-fixture",
+      "viewport": [
+        390,
+        844
+      ],
+      "emulatedDPR": 1.5,
+      "profiles": [
+        {
+          "choice": "low",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "low",
+              "tier": "low",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "2db217bf-1962-4cb6-a3bf-c0031e1fc058",
+            "cameraId": "bafa742e-ec8d-471d-ad28-e651dbc9b439",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              390,
+              772
+            ]
+          },
+          "canvas": [
+            390,
+            772,
+            390,
+            772
+          ]
+        },
+        {
+          "choice": "balanced",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "balanced",
+              "tier": "balanced",
+              "pixelRatio": 1.25,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "2db217bf-1962-4cb6-a3bf-c0031e1fc058",
+            "cameraId": "bafa742e-ec8d-471d-ad28-e651dbc9b439",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              487,
+              965
+            ]
+          },
+          "canvas": [
+            487,
+            965,
+            390,
+            772
+          ]
+        },
+        {
+          "choice": "detailed",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "detailed",
+              "tier": "detailed",
+              "pixelRatio": 1.5,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "2db217bf-1962-4cb6-a3bf-c0031e1fc058",
+            "cameraId": "bafa742e-ec8d-471d-ad28-e651dbc9b439",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              585,
+              1158
+            ]
+          },
+          "canvas": [
+            585,
+            1158,
+            390,
+            772
+          ]
+        }
+      ]
+    },
+    {
+      "case": "native-browser-DPR-fixture",
+      "viewport": [
+        390,
+        844
+      ],
+      "emulatedDPR": 3,
+      "profiles": [
+        {
+          "choice": "low",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "low",
+              "tier": "low",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "4ab622ac-08ee-4858-b1e5-6bd24bd05b7d",
+            "cameraId": "d56386bd-d834-4549-801c-e9961814f6be",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              390,
+              772
+            ]
+          },
+          "canvas": [
+            390,
+            772,
+            390,
+            772
+          ]
+        },
+        {
+          "choice": "balanced",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "balanced",
+              "tier": "balanced",
+              "pixelRatio": 1.25,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "4ab622ac-08ee-4858-b1e5-6bd24bd05b7d",
+            "cameraId": "d56386bd-d834-4549-801c-e9961814f6be",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              487,
+              965
+            ]
+          },
+          "canvas": [
+            487,
+            965,
+            390,
+            772
+          ]
+        },
+        {
+          "choice": "detailed",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "detailed",
+              "tier": "detailed",
+              "pixelRatio": 2,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "4ab622ac-08ee-4858-b1e5-6bd24bd05b7d",
+            "cameraId": "d56386bd-d834-4549-801c-e9961814f6be",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              780,
+              1544
+            ]
+          },
+          "canvas": [
+            780,
+            1544,
+            390,
+            772
+          ]
+        }
+      ]
+    },
+    {
+      "case": "native-browser-DPR-fixture",
+      "viewport": [
+        1440,
+        900
+      ],
+      "emulatedDPR": 1,
+      "profiles": [
+        {
+          "choice": "low",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "low",
+              "tier": "low",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "2c86c128-0e7e-4dcd-8c55-2c0ac4bff623",
+            "cameraId": "9b2da303-1778-478c-86cb-80928df2fbb0",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              1440,
+              817
+            ]
+          },
+          "canvas": [
+            1440,
+            817,
+            1440,
+            817
+          ]
+        },
+        {
+          "choice": "balanced",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "balanced",
+              "tier": "balanced",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "2c86c128-0e7e-4dcd-8c55-2c0ac4bff623",
+            "cameraId": "9b2da303-1778-478c-86cb-80928df2fbb0",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              1440,
+              817
+            ]
+          },
+          "canvas": [
+            1440,
+            817,
+            1440,
+            817
+          ]
+        },
+        {
+          "choice": "detailed",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "detailed",
+              "tier": "detailed",
+              "pixelRatio": 1,
+              "shadows": true,
+              "recovered": false
+            },
+            "sceneId": "2c86c128-0e7e-4dcd-8c55-2c0ac4bff623",
+            "cameraId": "9b2da303-1778-478c-86cb-80928df2fbb0",
+            "sceneChildren": 130,
+            "shadows": true,
+            "buffer": [
+              1440,
+              817
+            ]
+          },
+          "canvas": [
+            1440,
+            817,
+            1440,
+            817
+          ]
+        }
+      ]
+    },
+    {
+      "case": "native-browser-DPR-fixture",
+      "viewport": [
+        1440,
+        900
+      ],
+      "emulatedDPR": 1.5,
+      "profiles": [
+        {
+          "choice": "low",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "low",
+              "tier": "low",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "cdfcd621-e072-4342-9c79-f1c29ed2f10f",
+            "cameraId": "bf46369f-8c86-417a-b46f-627b1ce4c9be",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              1440,
+              817
+            ]
+          },
+          "canvas": [
+            1440,
+            817,
+            1440,
+            817
+          ]
+        },
+        {
+          "choice": "balanced",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "balanced",
+              "tier": "balanced",
+              "pixelRatio": 1.5,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "cdfcd621-e072-4342-9c79-f1c29ed2f10f",
+            "cameraId": "bf46369f-8c86-417a-b46f-627b1ce4c9be",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              2160,
+              1225
+            ]
+          },
+          "canvas": [
+            2160,
+            1225,
+            1440,
+            817
+          ]
+        },
+        {
+          "choice": "detailed",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "detailed",
+              "tier": "detailed",
+              "pixelRatio": 1.5,
+              "shadows": true,
+              "recovered": false
+            },
+            "sceneId": "cdfcd621-e072-4342-9c79-f1c29ed2f10f",
+            "cameraId": "bf46369f-8c86-417a-b46f-627b1ce4c9be",
+            "sceneChildren": 130,
+            "shadows": true,
+            "buffer": [
+              2160,
+              1225
+            ]
+          },
+          "canvas": [
+            2160,
+            1225,
+            1440,
+            817
+          ]
+        }
+      ]
+    },
+    {
+      "case": "native-browser-DPR-fixture",
+      "viewport": [
+        1440,
+        900
+      ],
+      "emulatedDPR": 3,
+      "profiles": [
+        {
+          "choice": "low",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "low",
+              "tier": "low",
+              "pixelRatio": 1,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "160e66bc-73d2-460b-bbc3-0a69a6c95716",
+            "cameraId": "2a80364d-057b-4c05-94a3-728d2202d104",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              1440,
+              817
+            ]
+          },
+          "canvas": [
+            1440,
+            817,
+            1440,
+            817
+          ]
+        },
+        {
+          "choice": "balanced",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "balanced",
+              "tier": "balanced",
+              "pixelRatio": 2,
+              "shadows": false,
+              "recovered": false
+            },
+            "sceneId": "160e66bc-73d2-460b-bbc3-0a69a6c95716",
+            "cameraId": "2a80364d-057b-4c05-94a3-728d2202d104",
+            "sceneChildren": 130,
+            "shadows": false,
+            "buffer": [
+              2880,
+              1634
+            ]
+          },
+          "canvas": [
+            2880,
+            1634,
+            1440,
+            817
+          ]
+        },
+        {
+          "choice": "detailed",
+          "graphics": {
+            "status": "available",
+            "losses": 0,
+            "validations": 0,
+            "initialized": true,
+            "quality": {
+              "preference": "detailed",
+              "tier": "detailed",
+              "pixelRatio": 2,
+              "shadows": true,
+              "recovered": false
+            },
+            "sceneId": "160e66bc-73d2-460b-bbc3-0a69a6c95716",
+            "cameraId": "2a80364d-057b-4c05-94a3-728d2202d104",
+            "sceneChildren": 130,
+            "shadows": true,
+            "buffer": [
+              2880,
+              1634
+            ]
+          },
+          "canvas": [
+            2880,
+            1634,
+            1440,
+            817
+          ]
+        }
+      ]
+    }
+  ],
+  "actualProfilePixelProof": [
+    {
+      "meanRGBDifferenceLowDetailed": 2.237113748923342,
+      "sameDPRCentralSceneShadowDifference": 3.7232941693892934
+    }
+  ],
+  "repeatedContextEpochs": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "beforeGPU": {
+        "geometries": 91,
+        "textures": 23
+      },
+      "afterGPU": [
+        {
+          "geometries": 91,
+          "textures": 23
+        },
+        {
+          "geometries": 91,
+          "textures": 23
+        },
+        {
+          "geometries": 91,
+          "textures": 23
+        }
+      ],
+      "oneContextRendererSceneCamera": true,
+      "currentEpochLive": [
+        {
+          "Buffer": 416,
+          "Texture": 27,
+          "Program": 13,
+          "Shader": 0,
+          "Framebuffer": 0,
+          "Renderbuffer": 0,
+          "VertexArray": 98
+        },
+        {
+          "Buffer": 416,
+          "Texture": 27,
+          "Program": 13,
+          "Shader": 0,
+          "Framebuffer": 0,
+          "Renderbuffer": 0,
+          "VertexArray": 98
+        },
+        {
+          "Buffer": 416,
+          "Texture": 27,
+          "Program": 13,
+          "Shader": 0,
+          "Framebuffer": 0,
+          "Renderbuffer": 0,
+          "VertexArray": 98
+        }
+      ],
+      "epochsIncludingInvalidation": [
+        {
+          "Buffer": {
+            "created": 416,
+            "deleted": 0,
+            "invalidated": 416,
+            "live": 0
+          },
+          "Texture": {
+            "created": 27,
+            "deleted": 0,
+            "invalidated": 27,
+            "live": 0
+          },
+          "Program": {
+            "created": 13,
+            "deleted": 0,
+            "invalidated": 13,
+            "live": 0
+          },
+          "Shader": {
+            "created": 26,
+            "deleted": 26,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 98,
+            "deleted": 0,
+            "invalidated": 98,
+            "live": 0
+          }
+        },
+        {
+          "Buffer": {
+            "created": 416,
+            "deleted": 0,
+            "invalidated": 416,
+            "live": 0
+          },
+          "Texture": {
+            "created": 27,
+            "deleted": 0,
+            "invalidated": 27,
+            "live": 0
+          },
+          "Program": {
+            "created": 13,
+            "deleted": 0,
+            "invalidated": 13,
+            "live": 0
+          },
+          "Shader": {
+            "created": 26,
+            "deleted": 26,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 98,
+            "deleted": 0,
+            "invalidated": 98,
+            "live": 0
+          }
+        },
+        {
+          "Buffer": {
+            "created": 416,
+            "deleted": 0,
+            "invalidated": 416,
+            "live": 0
+          },
+          "Texture": {
+            "created": 27,
+            "deleted": 0,
+            "invalidated": 27,
+            "live": 0
+          },
+          "Program": {
+            "created": 13,
+            "deleted": 0,
+            "invalidated": 13,
+            "live": 0
+          },
+          "Shader": {
+            "created": 26,
+            "deleted": 26,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 98,
+            "deleted": 0,
+            "invalidated": 98,
+            "live": 0
+          }
+        },
+        {
+          "Buffer": {
+            "created": 416,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 416
+          },
+          "Texture": {
+            "created": 27,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 27
+          },
+          "Program": {
+            "created": 13,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 13
+          },
+          "Shader": {
+            "created": 26,
+            "deleted": 26,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 98,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 98
+          }
+        }
+      ],
+      "pixelComparisons": [
+        {
+          "sku": "nz-425g",
+          "meanRGBDifference": 0.0
+        },
+        {
+          "sku": "au-425g",
+          "meanRGBDifference": 0.0
+        },
+        {
+          "sku": "sa-425g",
+          "meanRGBDifference": 0.0
+        },
+        {
+          "sku": "mx-454g",
+          "meanRGBDifference": 0.0
+        }
+      ]
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "beforeGPU": {
+        "geometries": 94,
+        "textures": 24
+      },
+      "afterGPU": [
+        {
+          "geometries": 94,
+          "textures": 24
+        },
+        {
+          "geometries": 94,
+          "textures": 24
+        },
+        {
+          "geometries": 94,
+          "textures": 24
+        }
+      ],
+      "oneContextRendererSceneCamera": true,
+      "currentEpochLive": [
+        {
+          "Buffer": 428,
+          "Texture": 28,
+          "Program": 14,
+          "Shader": 0,
+          "Framebuffer": 0,
+          "Renderbuffer": 0,
+          "VertexArray": 101
+        },
+        {
+          "Buffer": 428,
+          "Texture": 28,
+          "Program": 14,
+          "Shader": 0,
+          "Framebuffer": 0,
+          "Renderbuffer": 0,
+          "VertexArray": 101
+        },
+        {
+          "Buffer": 428,
+          "Texture": 28,
+          "Program": 14,
+          "Shader": 0,
+          "Framebuffer": 0,
+          "Renderbuffer": 0,
+          "VertexArray": 101
+        }
+      ],
+      "epochsIncludingInvalidation": [
+        {
+          "Buffer": {
+            "created": 428,
+            "deleted": 0,
+            "invalidated": 428,
+            "live": 0
+          },
+          "Texture": {
+            "created": 28,
+            "deleted": 0,
+            "invalidated": 28,
+            "live": 0
+          },
+          "Program": {
+            "created": 14,
+            "deleted": 0,
+            "invalidated": 14,
+            "live": 0
+          },
+          "Shader": {
+            "created": 28,
+            "deleted": 28,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 101,
+            "deleted": 0,
+            "invalidated": 101,
+            "live": 0
+          }
+        },
+        {
+          "Buffer": {
+            "created": 428,
+            "deleted": 0,
+            "invalidated": 428,
+            "live": 0
+          },
+          "Texture": {
+            "created": 28,
+            "deleted": 0,
+            "invalidated": 28,
+            "live": 0
+          },
+          "Program": {
+            "created": 14,
+            "deleted": 0,
+            "invalidated": 14,
+            "live": 0
+          },
+          "Shader": {
+            "created": 28,
+            "deleted": 28,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 101,
+            "deleted": 0,
+            "invalidated": 101,
+            "live": 0
+          }
+        },
+        {
+          "Buffer": {
+            "created": 428,
+            "deleted": 0,
+            "invalidated": 428,
+            "live": 0
+          },
+          "Texture": {
+            "created": 28,
+            "deleted": 0,
+            "invalidated": 28,
+            "live": 0
+          },
+          "Program": {
+            "created": 14,
+            "deleted": 0,
+            "invalidated": 14,
+            "live": 0
+          },
+          "Shader": {
+            "created": 28,
+            "deleted": 28,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 101,
+            "deleted": 0,
+            "invalidated": 101,
+            "live": 0
+          }
+        },
+        {
+          "Buffer": {
+            "created": 428,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 428
+          },
+          "Texture": {
+            "created": 28,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 28
+          },
+          "Program": {
+            "created": 14,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 14
+          },
+          "Shader": {
+            "created": 28,
+            "deleted": 28,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Framebuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "Renderbuffer": {
+            "created": 0,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 0
+          },
+          "VertexArray": {
+            "created": 101,
+            "deleted": 0,
+            "invalidated": 0,
+            "live": 101
+          }
+        }
+      ],
+      "pixelComparisons": [
+        {
+          "sku": "nz-425g",
+          "meanRGBDifference": 0.0
+        },
+        {
+          "sku": "au-425g",
+          "meanRGBDifference": 0.0
+        },
+        {
+          "sku": "sa-425g",
+          "meanRGBDifference": 0.0
+        },
+        {
+          "sku": "mx-454g",
+          "meanRGBDifference": 0.0
+        }
+      ]
+    }
+  ],
+  "recoveryMatrix": [
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "explore",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "shelf",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "inspect",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "shop",
+      "focus": "bag-close"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "cart",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        390,
+        844
+      ],
+      "mode": "seated",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "explore",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "shelf",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "inspect",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "shop",
+      "focus": "bag-close"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "cart",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-mode-recovery",
+      "viewport": [
+        1440,
+        900
+      ],
+      "mode": "seated",
+      "focus": "list-title"
+    },
+    {
+      "case": "native-modal-restore-race",
+      "modal": "bag",
+      "focus": "new-moon-nz-425g-front-0",
+      "sku": "assets/new-moon-nz-425g-front.jpg"
+    },
+    {
+      "case": "native-modal-restore-race",
+      "modal": "product-close",
+      "focus": "new-moon-mx-454g-front",
+      "sku": "assets/new-moon-mx-454g-front.jpg"
+    },
+    {
+      "case": "native-modal-restore-race",
+      "modal": "product-preview",
+      "focus": "product-preview-canvas",
+      "sku": "assets/new-moon-mx-454g-front.jpg"
+    },
+    {
+      "case": "second-native-loss-invalidates-pending-restore"
+    },
+    {
+      "case": "initialization-completes-while-native-context-lost"
+    },
+    {
+      "case": "physical-reservation-survives-native-recovery"
+    },
+    {
+      "case": "startup-native-loss",
+      "viewport": [
+        390,
+        844
+      ],
+      "awaitedAsset": "vendor/three.module.min.js",
+      "initialMapOpen": false
+    },
+    {
+      "case": "startup-native-loss",
+      "viewport": [
+        390,
+        844
+      ],
+      "awaitedAsset": "assets/world.js",
+      "initialMapOpen": false
+    },
+    {
+      "case": "startup-native-loss",
+      "viewport": [
+        390,
+        844
+      ],
+      "awaitedAsset": "assets/gjh-mall-visitor-v2.glb",
+      "initialMapOpen": false
+    },
+    {
+      "case": "startup-native-loss",
+      "viewport": [
+        1440,
+        900
+      ],
+      "awaitedAsset": "assets/world.js",
+      "initialMapOpen": true
+    },
+    {
+      "case": "normal-motion-mid-elevator-loss",
+      "elapsedMs": 650
+    },
+    {
+      "case": "normal-motion-mid-elevator-loss",
+      "elapsedMs": 1800
+    },
+    {
+      "case": "hidden-blur-resize-fixture"
+    },
+    {
+      "case": "failure-fallback",
+      "fixture": "no-webgl"
+    },
+    {
+      "case": "failure-fallback",
+      "fixture": "no-wasm"
+    },
+    {
+      "case": "failure-fallback",
+      "fixture": "asset"
+    },
+    {
+      "case": "failure-fallback",
+      "fixture": "wasm-during-loss"
+    },
+    {
+      "case": "failure-fallback",
+      "fixture": "validation-fault"
+    },
+    {
+      "case": "failure-fallback",
+      "fixture": "unrestored"
+    }
+  ],
+  "heldTouchEvidence": [
+    {
+      "stopped": {
+        "x": -2.0000884532928467,
+        "y": -0.020090162754058838,
+        "z": 11.711400032043457,
+        "yaw": 0,
+        "pitch": 0.1,
+        "frames": 7
+      },
+      "afterLive": {
+        "x": -2.0000879764556885,
+        "y": -0.019905507564544678,
+        "z": 11.711400032043457,
+        "yaw": 0,
+        "pitch": 0.1,
+        "frames": 18
+      },
+      "afterStep": {
+        "x": -2.0000882148742676,
+        "y": -0.019984960556030273,
+        "z": 11.711400032043457,
+        "yaw": 0,
+        "pitch": 0.1,
+        "frames": 20
+      },
+      "perAxisXZBoundMetres": 1e-05,
+      "angles": "exact"
+    }
+  ],
+  "layoutMatrix": [
+    {
+      "case": "layout",
+      "viewport": [
+        320,
+        568
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 177.140625,
+          "width": 188,
+          "height": 44,
+          "top": 177.140625,
+          "right": 223,
+          "bottom": 221.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        390,
+        844
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 177.140625,
+          "width": 258,
+          "height": 44,
+          "top": 177.140625,
+          "right": 293,
+          "bottom": 221.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        667,
+        375
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 158.140625,
+          "width": 535,
+          "height": 44,
+          "top": 158.140625,
+          "right": 570,
+          "bottom": 202.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        844,
+        390
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 166.140625,
+          "width": 712,
+          "height": 44,
+          "top": 166.140625,
+          "right": 747,
+          "bottom": 210.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        768,
+        1024
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 41,
+          "y": 197.140625,
+          "width": 296,
+          "height": 44,
+          "top": 197.140625,
+          "right": 337,
+          "bottom": 241.140625,
+          "left": 41
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        1440,
+        900
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 53,
+          "y": 331.140625,
+          "width": 296,
+          "height": 44,
+          "top": 331.140625,
+          "right": 349,
+          "bottom": 375.140625,
+          "left": 53
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        599,
+        844
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 177.140625,
+          "width": 467,
+          "height": 44,
+          "top": 177.140625,
+          "right": 502,
+          "bottom": 221.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        600,
+        844
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 177.140625,
+          "width": 468,
+          "height": 44,
+          "top": 177.140625,
+          "right": 503,
+          "bottom": 221.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        650,
+        844
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 177.140625,
+          "width": 518,
+          "height": 44,
+          "top": 177.140625,
+          "right": 553,
+          "bottom": 221.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        651,
+        844
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 41,
+          "y": 197.140625,
+          "width": 296,
+          "height": 44,
+          "top": 197.140625,
+          "right": 337,
+          "bottom": 241.140625,
+          "left": 41
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        999,
+        900
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 41,
+          "y": 197.140625,
+          "width": 296,
+          "height": 44,
+          "top": 197.140625,
+          "right": 337,
+          "bottom": 241.140625,
+          "left": 41
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        1000,
+        900
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 53,
+          "y": 331.140625,
+          "width": 296,
+          "height": 44,
+          "top": 331.140625,
+          "right": 349,
+          "bottom": 375.140625,
+          "left": 53
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        1001,
+        900
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 53,
+          "y": 331.140625,
+          "width": 296,
+          "height": 44,
+          "top": 331.140625,
+          "right": 349,
+          "bottom": 375.140625,
+          "left": 53
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        844,
+        560
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 35,
+          "y": 166.140625,
+          "width": 712,
+          "height": 44,
+          "top": 166.140625,
+          "right": 747,
+          "bottom": 210.140625,
+          "left": 35
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "layout",
+      "viewport": [
+        844,
+        561
+      ],
+      "qualityControl": {
+        "rect": {
+          "x": 41,
+          "y": 197.140625,
+          "width": 296,
+          "height": 44,
+          "top": 197.140625,
+          "right": 337,
+          "bottom": 241.140625,
+          "left": 41
+        },
+        "focus": true,
+        "focusVisible": true,
+        "outline": "3px",
+        "overflow": false,
+        "label": "Graphics quality"
+      }
+    },
+    {
+      "case": "software-insets",
+      "profile": "landscape",
+      "insets": {
+        "top": 20,
+        "bottom": 24,
+        "left": 30,
+        "right": 30
+      },
+      "qualityControl": {
+        "x": 65,
+        "y": 157.140625,
+        "width": 475,
+        "height": 44
+      }
+    },
+    {
+      "case": "software-insets",
+      "profile": "portrait",
+      "insets": {
+        "top": 44,
+        "bottom": 34,
+        "left": 0,
+        "right": 0
+      },
+      "qualityControl": {
+        "x": 35,
+        "y": 221.140625,
+        "width": 258,
+        "height": 44
+      }
+    },
+    {
+      "case": "axe-changed-surface",
+      "surface": "help",
+      "violations": []
+    },
+    {
+      "case": "axe-changed-surface",
+      "surface": "recovery",
+      "violations": []
+    }
+  ],
+  "frames": [
+    {
+      "name": "baseline-390-gogo",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/baseline-390-gogo.png",
+      "sha256": "b99c65be91823f8572e28e6093b113ed293b79a349c78da9de266ecfe1472038",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 108849
+    },
+    {
+      "name": "candidate-390-gogo",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/candidate-390-gogo.png",
+      "sha256": "b99c65be91823f8572e28e6093b113ed293b79a349c78da9de266ecfe1472038",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 108849
+    },
+    {
+      "name": "baseline-1440-gogo",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/baseline-1440-gogo.png",
+      "sha256": "0a977a2c65ec46de7baa3530700eee63fcebbfb1c3d7d6054a1e12ac74bd09f3",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 124784
+    },
+    {
+      "name": "candidate-1440-gogo",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/candidate-1440-gogo.png",
+      "sha256": "0a977a2c65ec46de7baa3530700eee63fcebbfb1c3d7d6054a1e12ac74bd09f3",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 124784
+    },
+    {
+      "name": "390-explore-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-explore-restored-directory.png",
+      "sha256": "1bb53528f80f55e8360003017cf6c1cbc72db8e4428f8a9a9b35b00326128162",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 1050
+    },
+    {
+      "name": "390-explore-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-explore-reentered.png",
+      "sha256": "87f816dbff44f2ef3f12dccdb0f61e1fea13e4e98b941386025e2f88f19a3178",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 75122
+    },
+    {
+      "name": "390-shelf-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-shelf-restored-directory.png",
+      "sha256": "1bb53528f80f55e8360003017cf6c1cbc72db8e4428f8a9a9b35b00326128162",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 1050
+    },
+    {
+      "name": "390-shelf-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-shelf-reentered.png",
+      "sha256": "8cdd759a04c6a331be3eae7b9b0ff480b8b3a3f36dd9a802a1b9c81e8c7ad230",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 115598
+    },
+    {
+      "name": "390-inspect-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-inspect-restored-directory.png",
+      "sha256": "1bb53528f80f55e8360003017cf6c1cbc72db8e4428f8a9a9b35b00326128162",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 1050
+    },
+    {
+      "name": "390-inspect-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-inspect-reentered.png",
+      "sha256": "8cdd759a04c6a331be3eae7b9b0ff480b8b3a3f36dd9a802a1b9c81e8c7ad230",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 115598
+    },
+    {
+      "name": "390-shop-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-shop-restored-directory.png",
+      "sha256": "66091132df48ab432af8b8f779fad1d0aadf231c70d5b888ae0a92b7ebc64357",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 4462
+    },
+    {
+      "name": "390-shop-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-shop-reentered.png",
+      "sha256": "d6c64e7b11f535c4dfde8829e1f63de1bdc36a92d28cbafc2b2e350f20e86216",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 75016
+    },
+    {
+      "name": "390-cart-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-cart-restored-directory.png",
+      "sha256": "574facb6c712e65ffb4295c669a30de56a7cfb522575b8b480e9a8c20a02632b",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 1050
+    },
+    {
+      "name": "390-cart-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-cart-reentered.png",
+      "sha256": "a995c1f07b04e66601c5f27bcca377870723f4b4e22ff94b87216aed5a7464e6",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 73649
+    },
+    {
+      "name": "390-seated-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-seated-restored-directory.png",
+      "sha256": "1bb53528f80f55e8360003017cf6c1cbc72db8e4428f8a9a9b35b00326128162",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 1050
+    },
+    {
+      "name": "390-seated-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-seated-reentered.png",
+      "sha256": "a7dc6a0e08ae40e353ec1b62a4b20b73842c645e8a7789800e16c7e6cf4476f4",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 69160
+    },
+    {
+      "name": "1440-explore-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-explore-restored-directory.png",
+      "sha256": "4d14eaa3d4a462c15b57cf779135f0c855da7703880cc6b11bc7ebeed11519fc",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 103917
+    },
+    {
+      "name": "1440-explore-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-explore-reentered.png",
+      "sha256": "38e71fd44816d69af5eed84001e6f4e7356303f47555882d3a518a4e5b4f85ef",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 151714
+    },
+    {
+      "name": "1440-shelf-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-shelf-restored-directory.png",
+      "sha256": "a4c174c8f4a82c4794167d43bb0b2a0d875f5eba1117cbf47c87dd6b69cc5077",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 103917
+    },
+    {
+      "name": "1440-shelf-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-shelf-reentered.png",
+      "sha256": "9ec2c4206b90fd8dc3dea4bd1884d4ce0fb27c4ad497be57a2bcbab4746f72b9",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 254475
+    },
+    {
+      "name": "1440-inspect-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-inspect-restored-directory.png",
+      "sha256": "a4c174c8f4a82c4794167d43bb0b2a0d875f5eba1117cbf47c87dd6b69cc5077",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 103917
+    },
+    {
+      "name": "1440-inspect-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-inspect-reentered.png",
+      "sha256": "9ec2c4206b90fd8dc3dea4bd1884d4ce0fb27c4ad497be57a2bcbab4746f72b9",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 254475
+    },
+    {
+      "name": "1440-shop-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-shop-restored-directory.png",
+      "sha256": "26f848200acafb95a24c5aaa7bc113abf2169b985189f0a1879ef83b57b86b51",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 5122
+    },
+    {
+      "name": "1440-shop-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-shop-reentered.png",
+      "sha256": "3e955e58a8a8590232705d03356143627eb8458533c8e39755937b560918086f",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 151755
+    },
+    {
+      "name": "1440-cart-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-cart-restored-directory.png",
+      "sha256": "ea49d395a8cb01139327e4abfda733171f7146460e58d9473a199353f5ae54c5",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 103917
+    },
+    {
+      "name": "1440-cart-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-cart-reentered.png",
+      "sha256": "628190c403b5267b3e2495a56e92343af3aa1c90a8c962ad57d55b6f939f2664",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 150290
+    },
+    {
+      "name": "1440-seated-restored-directory",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-seated-restored-directory.png",
+      "sha256": "29f30e5cc6e73d1851887dc51cca9bd343bf5696fcb05a3cf9640722b1e174bf",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 103917
+    },
+    {
+      "name": "1440-seated-reentered",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-seated-reentered.png",
+      "sha256": "e7722de0ac8dc98ececc5639c7f5814e84a07e46ddee3f2d34182a5ddfc4b642",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 147681
+    },
+    {
+      "name": "390-nz-425g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-nz-425g-before.png",
+      "sha256": "d396851026b267384e8ea810beb0f6be1b5374bf6d03927b4d256d5e26949898",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 24397
+    },
+    {
+      "name": "390-au-425g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-au-425g-before.png",
+      "sha256": "1d43e9a68f5385a1840146776478b8991632aa42f9593525803e8b2e25cb7d08",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 27158
+    },
+    {
+      "name": "390-sa-425g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-sa-425g-before.png",
+      "sha256": "fc608e593fa80ce380b7aab200e4b07905a8fc1f954e22593d4089a4b8858aa2",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 27957
+    },
+    {
+      "name": "390-mx-454g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-mx-454g-before.png",
+      "sha256": "b9700d9eefddb31dabe1d2ae3b753314dca97625ffad9f8f0801171c87a60996",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 25926
+    },
+    {
+      "name": "390-nz-425g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-nz-425g-after.png",
+      "sha256": "d396851026b267384e8ea810beb0f6be1b5374bf6d03927b4d256d5e26949898",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 24397
+    },
+    {
+      "name": "390-au-425g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-au-425g-after.png",
+      "sha256": "1d43e9a68f5385a1840146776478b8991632aa42f9593525803e8b2e25cb7d08",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 27158
+    },
+    {
+      "name": "390-sa-425g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-sa-425g-after.png",
+      "sha256": "fc608e593fa80ce380b7aab200e4b07905a8fc1f954e22593d4089a4b8858aa2",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 27957
+    },
+    {
+      "name": "390-mx-454g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/390-mx-454g-after.png",
+      "sha256": "b9700d9eefddb31dabe1d2ae3b753314dca97625ffad9f8f0801171c87a60996",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 25926
+    },
+    {
+      "name": "1440-nz-425g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-nz-425g-before.png",
+      "sha256": "477b350ea605e85de18bf90295792f91585fa7f704e596c1f2acd7bf54b3ea12",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 67898
+    },
+    {
+      "name": "1440-au-425g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-au-425g-before.png",
+      "sha256": "2c9b66835e0a3443cf493d8ecb8cfe5928b4be571d286b01fc2505967fe0a2d0",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 93645
+    },
+    {
+      "name": "1440-sa-425g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-sa-425g-before.png",
+      "sha256": "0ba211fb2c761b14e5119adbb2360d3848e121eed71bfdf3c1a9033617c4ef49",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 93387
+    },
+    {
+      "name": "1440-mx-454g-before",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-mx-454g-before.png",
+      "sha256": "3e8c9dff802769986f2222b69fcc687e9efb5f35e3039258017b4f17d806f9b9",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 113255
+    },
+    {
+      "name": "1440-nz-425g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-nz-425g-after.png",
+      "sha256": "477b350ea605e85de18bf90295792f91585fa7f704e596c1f2acd7bf54b3ea12",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 67898
+    },
+    {
+      "name": "1440-au-425g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-au-425g-after.png",
+      "sha256": "2c9b66835e0a3443cf493d8ecb8cfe5928b4be571d286b01fc2505967fe0a2d0",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 93645
+    },
+    {
+      "name": "1440-sa-425g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-sa-425g-after.png",
+      "sha256": "0ba211fb2c761b14e5119adbb2360d3848e121eed71bfdf3c1a9033617c4ef49",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 93387
+    },
+    {
+      "name": "1440-mx-454g-after",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/1440-mx-454g-after.png",
+      "sha256": "3e8c9dff802769986f2222b69fcc687e9efb5f35e3039258017b4f17d806f9b9",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 113255
+    },
+    {
+      "name": "startup-390-three.module.min.js",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/startup-390-three.module.min.js.png",
+      "sha256": "00b654b09846a36bb60ab610e2f23c2b61934480e1bfb9ae7c3ae9c41ea866b0",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 75184
+    },
+    {
+      "name": "startup-390-world.js",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/startup-390-world.js.png",
+      "sha256": "6d5e812aabe79c0f5d012fb7b82806b2f9f8495a2f916eb8221b7893e448eec0",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 74410
+    },
+    {
+      "name": "startup-390-gjh-mall-visitor-v2.glb",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/startup-390-gjh-mall-visitor-v2.glb.png",
+      "sha256": "6d5e812aabe79c0f5d012fb7b82806b2f9f8495a2f916eb8221b7893e448eec0",
+      "size": [
+        780,
+        1544
+      ],
+      "colors": 74410
+    },
+    {
+      "name": "startup-1440-world.js",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/startup-1440-world.js.png",
+      "sha256": "6ee0f2a16ce721e093fd1ee50c570b69e653fef2d74c791d6b1f515338439444",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 153253
+    },
+    {
+      "name": "profile-low-1440",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/profile-low-1440.png",
+      "sha256": "d164f53432d9c0b8e9ebaaf7f592ef7a9fe31f701f37c1468b4efd6427ac009f",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 109330
+    },
+    {
+      "name": "profile-detailed-1440",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/profile-detailed-1440.png",
+      "sha256": "b63b83a34a70c9525a063738e11678509f771abe6aa631fc9cd81ee7f3662153",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 63688
+    },
+    {
+      "name": "profile-low-after-detailed-1440",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/profile-low-after-detailed-1440.png",
+      "sha256": "d164f53432d9c0b8e9ebaaf7f592ef7a9fe31f701f37c1468b4efd6427ac009f",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 109330
+    },
+    {
+      "name": "profile-balanced-1440",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/profile-balanced-1440.png",
+      "sha256": "dd691fe4665590f66dffe19cb1693e19d282e66cdecb25aac73c045d74ecc3b8",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 67167
+    },
+    {
+      "name": "profile-auto-1440",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/profile-auto-1440.png",
+      "sha256": "e16a86321ef729d95d7536869d0bcba94f89a7d4e537aad13ceed18ac4d51c5e",
+      "size": [
+        2880,
+        1634
+      ],
+      "colors": 63655
+    },
+    {
+      "name": "layout-320x568-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-320x568-collapsed.png",
+      "sha256": "38eebe006739bd8d54c59ddc8221d5f202c020b94b0044f9440c5b709acc2df3",
+      "size": [
+        640,
+        1136
+      ],
+      "colors": 45720
+    },
+    {
+      "name": "layout-320x568-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-320x568-quality-focus.png",
+      "sha256": "2ad0928ce73dc7e566fd1db706192742d011126da869a93a3cf774ef6d438ed4",
+      "size": [
+        640,
+        1136
+      ],
+      "colors": 17674
+    },
+    {
+      "name": "layout-320x568-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-320x568-recovery.png",
+      "sha256": "6948d558417caa5e8d60b8b629b3330bdda34cb0444401ad90ab7a6bff682e03",
+      "size": [
+        640,
+        1136
+      ],
+      "colors": 849
+    },
+    {
+      "name": "layout-390x844-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-390x844-collapsed.png",
+      "sha256": "0b45e71595ebf984188bf280cb0807b94aecece4ffdb0be7f3fdb8eb422d3f0a",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 72673
+    },
+    {
+      "name": "layout-390x844-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-390x844-quality-focus.png",
+      "sha256": "70a5ea76d3e1ee159d4a7abbf028bb5fddc4e247fbdf4b417621bc55c252efc2",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 23714
+    },
+    {
+      "name": "layout-390x844-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-390x844-recovery.png",
+      "sha256": "91770878a4cfdf360d13dab773d5c356395ad323e16c805ad2a79ff5958e763b",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 1051
+    },
+    {
+      "name": "layout-667x375-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-667x375-collapsed.png",
+      "sha256": "f4589cf9be3c32122061aeb034278c1ecd88342857c32d5279249a8e69c33aa9",
+      "size": [
+        1334,
+        750
+      ],
+      "colors": 29491
+    },
+    {
+      "name": "layout-667x375-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-667x375-quality-focus.png",
+      "sha256": "6baaafca2f876ebfbd8911453304ca820cebfc38e964462fc248db0e64559042",
+      "size": [
+        1334,
+        750
+      ],
+      "colors": 9189
+    },
+    {
+      "name": "layout-667x375-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-667x375-recovery.png",
+      "sha256": "287cf7ece5facbf076030cfd2ad287bb9a9854359b82ea92d576bf43329a5e21",
+      "size": [
+        1334,
+        750
+      ],
+      "colors": 842
+    },
+    {
+      "name": "layout-844x390-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x390-collapsed.png",
+      "sha256": "52fddb62ce50d07dd84702477fc2fa833330bf6fe67330257f6483a55b993e9b",
+      "size": [
+        1688,
+        780
+      ],
+      "colors": 35574
+    },
+    {
+      "name": "layout-844x390-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x390-quality-focus.png",
+      "sha256": "81ab5dec8fe94d04de18d7c083ad390c4002dbe561ec84cac4d81c9b5350961f",
+      "size": [
+        1688,
+        780
+      ],
+      "colors": 11169
+    },
+    {
+      "name": "layout-844x390-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x390-recovery.png",
+      "sha256": "35ccb92b28c176dbd0dd9a5b163036ef5886cb145da7a32658baff0bdd3bafe8",
+      "size": [
+        1688,
+        780
+      ],
+      "colors": 844
+    },
+    {
+      "name": "layout-768x1024-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-768x1024-collapsed.png",
+      "sha256": "133b5aef5eab2d06bcecc2fc5a446876da74e72bc038df5fb23d2fd350b60745",
+      "size": [
+        1536,
+        2048
+      ],
+      "colors": 79623
+    },
+    {
+      "name": "layout-768x1024-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-768x1024-quality-focus.png",
+      "sha256": "394f491c707501575ccbc81a6a342998eb8987ea2390893b736c5e9e7cb7af8e",
+      "size": [
+        1536,
+        2048
+      ],
+      "colors": 60672
+    },
+    {
+      "name": "layout-768x1024-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-768x1024-recovery.png",
+      "sha256": "4e88fdf48207dac2f89f62a254bc9a645c5f56bd0121d68d49928c6ff1a583c1",
+      "size": [
+        1536,
+        2048
+      ],
+      "colors": 73077
+    },
+    {
+      "name": "layout-1440x900-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1440x900-collapsed.png",
+      "sha256": "40e223d209a3666c4cf5be4e2fbbf710cb896a616e3f2888d0f9ee23cb968ff6",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 85651
+    },
+    {
+      "name": "layout-1440x900-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1440x900-quality-focus.png",
+      "sha256": "2e99086cf423ada8bc34c0b770b6bbc21100fab7704d60eb8f9c71d3b50c869f",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 64040
+    },
+    {
+      "name": "layout-1440x900-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1440x900-recovery.png",
+      "sha256": "d1925a966e36ccce3ac4831b11fa0daa327b04d4ebfe7f0a65635a3214909f53",
+      "size": [
+        2880,
+        1800
+      ],
+      "colors": 103918
+    },
+    {
+      "name": "layout-599x844-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-599x844-collapsed.png",
+      "sha256": "b22c9db74a87141b2a88ff9da51264e04cd09ba28e5a1ef2d2ac1d272d2eacbd",
+      "size": [
+        1198,
+        1688
+      ],
+      "colors": 91753
+    },
+    {
+      "name": "layout-599x844-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-599x844-quality-focus.png",
+      "sha256": "166ac701a4c4606b3bb4aa5d97f94f87e8d89d319d46b1236277b5bb2793cd10",
+      "size": [
+        1198,
+        1688
+      ],
+      "colors": 12142
+    },
+    {
+      "name": "layout-599x844-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-599x844-recovery.png",
+      "sha256": "07fb8b05c929c7e107e0f36f749a74c7ee16dd1a995656981fe1c43bd10d370c",
+      "size": [
+        1198,
+        1688
+      ],
+      "colors": 8147
+    },
+    {
+      "name": "layout-600x844-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-600x844-collapsed.png",
+      "sha256": "c2a569ebec078745235e253659280f39e3381b8afee1b8989bafbe254840cb97",
+      "size": [
+        1200,
+        1688
+      ],
+      "colors": 64384
+    },
+    {
+      "name": "layout-600x844-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-600x844-quality-focus.png",
+      "sha256": "704537fc3a275432692a5823c00db2f0fdb0208ac50bd0e10f9a01ae00c912ae",
+      "size": [
+        1200,
+        1688
+      ],
+      "colors": 7688
+    },
+    {
+      "name": "layout-600x844-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-600x844-recovery.png",
+      "sha256": "d557323f99fe0c16a1db18d5cb40c21ec838e6404db956d0628f978d50f79fe7",
+      "size": [
+        1200,
+        1688
+      ],
+      "colors": 8150
+    },
+    {
+      "name": "layout-650x844-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-650x844-collapsed.png",
+      "sha256": "58706cf673c7d87c909e864f733a66635455c6c364f613f2048710e11d755d0e",
+      "size": [
+        1300,
+        1688
+      ],
+      "colors": 66447
+    },
+    {
+      "name": "layout-650x844-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-650x844-quality-focus.png",
+      "sha256": "3378e3f003344e3dd4739366cc6262f59e42295c95fbec4ad857a71099f85018",
+      "size": [
+        1300,
+        1688
+      ],
+      "colors": 7036
+    },
+    {
+      "name": "layout-650x844-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-650x844-recovery.png",
+      "sha256": "7a0f09ae7f65dfd50271dddb0a6b50410ca00ee1354b97d1213623448210cc3c",
+      "size": [
+        1300,
+        1688
+      ],
+      "colors": 14465
+    },
+    {
+      "name": "layout-651x844-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-651x844-collapsed.png",
+      "sha256": "174f8f016f1a44f08d65c8c0d096010fc6661d9d1e5095fa2e45b45feb0119b4",
+      "size": [
+        1302,
+        1688
+      ],
+      "colors": 65952
+    },
+    {
+      "name": "layout-651x844-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-651x844-quality-focus.png",
+      "sha256": "8b4d4d2d659cddde2a1571fae1bba4e153d86482c1ad1eed4bc81f83d3e43d4e",
+      "size": [
+        1302,
+        1688
+      ],
+      "colors": 41121
+    },
+    {
+      "name": "layout-651x844-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-651x844-recovery.png",
+      "sha256": "7d70d4698db5fdcffafaf92c7aa06dbbf55d3e8637392d2edf92302c0685bb69",
+      "size": [
+        1302,
+        1688
+      ],
+      "colors": 43976
+    },
+    {
+      "name": "layout-999x900-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-999x900-collapsed.png",
+      "sha256": "9ffb9c4f1c4ac7ff4c793c272d10221b6855e790979472dc91637fd69f50bfc6",
+      "size": [
+        1998,
+        1800
+      ],
+      "colors": 94293
+    },
+    {
+      "name": "layout-999x900-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-999x900-quality-focus.png",
+      "sha256": "da3f26ef3e059e5f172a8f625b66e983daf406a3277a62e08567ac01de2fbe56",
+      "size": [
+        1998,
+        1800
+      ],
+      "colors": 56136
+    },
+    {
+      "name": "layout-999x900-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-999x900-recovery.png",
+      "sha256": "69d7f8d1a62f3f5bd2aaf5220ee8032e417a35be6f8eee244ce961a1714d101d",
+      "size": [
+        1998,
+        1800
+      ],
+      "colors": 90726
+    },
+    {
+      "name": "layout-1000x900-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1000x900-collapsed.png",
+      "sha256": "90b9b4e8ea199e35c4e126631359740cdfe340326142576e2cc83a185f15477a",
+      "size": [
+        2000,
+        1800
+      ],
+      "colors": 81403
+    },
+    {
+      "name": "layout-1000x900-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1000x900-quality-focus.png",
+      "sha256": "bd3c5260740a81e000834105962cc574b692004b79868aeabbef8c47b2ab5336",
+      "size": [
+        2000,
+        1800
+      ],
+      "colors": 46751
+    },
+    {
+      "name": "layout-1000x900-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1000x900-recovery.png",
+      "sha256": "7817ff4cd140e63f388ac9f47b963dd0915cd432433d5f92621b4e436414e44c",
+      "size": [
+        2000,
+        1800
+      ],
+      "colors": 89646
+    },
+    {
+      "name": "layout-1001x900-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1001x900-collapsed.png",
+      "sha256": "8ce06853f74a0fa280b735c86dbd92e5005e0594c341bf80e0aedfd5764877c8",
+      "size": [
+        2002,
+        1800
+      ],
+      "colors": 82369
+    },
+    {
+      "name": "layout-1001x900-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1001x900-quality-focus.png",
+      "sha256": "f74d7f98fc54ccbfa8575fb5114cf5dffb46e1a6b54d1bd747c45d2e7ee08352",
+      "size": [
+        2002,
+        1800
+      ],
+      "colors": 47867
+    },
+    {
+      "name": "layout-1001x900-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-1001x900-recovery.png",
+      "sha256": "f605a5ac2f6ace573d2a6b52000dfd7698989765c108548d6dd23bb714217a79",
+      "size": [
+        2002,
+        1800
+      ],
+      "colors": 90930
+    },
+    {
+      "name": "layout-844x560-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x560-collapsed.png",
+      "sha256": "74c4b3cd9fe9616a2f070f8630c63d88c0ed77a1923b3b77f56b308854c0fbfc",
+      "size": [
+        1688,
+        1120
+      ],
+      "colors": 57999
+    },
+    {
+      "name": "layout-844x560-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x560-quality-focus.png",
+      "sha256": "1a763e8866adadbb337c949bcf747341bd7ae7f96a973a51f701180d30cdc44f",
+      "size": [
+        1688,
+        1120
+      ],
+      "colors": 6015
+    },
+    {
+      "name": "layout-844x560-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x560-recovery.png",
+      "sha256": "3980f5dd3b6d390e0c2e85c6fabe5ecd6b7a3555244eea4126cca3b5b07a4857",
+      "size": [
+        1688,
+        1120
+      ],
+      "colors": 882
+    },
+    {
+      "name": "layout-844x561-collapsed",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x561-collapsed.png",
+      "sha256": "91be2014b7e963173dd4cdbbcc5915af5018bc6895e45d51789303d690f73191",
+      "size": [
+        1688,
+        1122
+      ],
+      "colors": 55889
+    },
+    {
+      "name": "layout-844x561-quality-focus",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x561-quality-focus.png",
+      "sha256": "750c3039e6b77bae5769ec79d809e50e0be1394639cb9a6e0304261a397d6c28",
+      "size": [
+        1688,
+        1122
+      ],
+      "colors": 35572
+    },
+    {
+      "name": "layout-844x561-recovery",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/layout-844x561-recovery.png",
+      "sha256": "2b9bc01b7d3c189e5e0b7291df34414674196a5caf9eb3d5851490aee9c3720f",
+      "size": [
+        1688,
+        1122
+      ],
+      "colors": 882
+    },
+    {
+      "name": "inset-landscape",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/inset-landscape.png",
+      "sha256": "cf59a2de44dc6a6cd2de346a6b03b9d0c6f4cd65df295e3b5f983b79bdc20742",
+      "size": [
+        1334,
+        750
+      ],
+      "colors": 11070
+    },
+    {
+      "name": "inset-portrait",
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/inset-portrait.png",
+      "sha256": "db24180bbc9ba952f78cdad0fc0237a08fcd2870c55b65d5b6947af4d384c1ea",
+      "size": [
+        780,
+        1688
+      ],
+      "colors": 19288
+    }
+  ],
+  "rawEvidence": [
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9/report.json",
+      "sha256": "5076381b09982b5d85af51da816fd2f017c3d9756af621822ffacc7ed9e49d18",
+      "bytes": 1295171
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused9.log",
+      "sha256": "ace221bc861dd534c6f1cc62454b22bef0729d88a78439f3efdb369f56867b55",
+      "bytes": 1595
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/commands-all.json",
+      "sha256": "e2d88765350b72e180a1105ac8e65cb09f8f8e928587c959d7ed1299fcc37db7",
+      "bytes": 105208
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/modes.json",
+      "sha256": "36d22d92ba31fe97af682ce35316deb5da930d84a2e4bcf814e2189c691b6522",
+      "bytes": 49722
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/mode-review.json",
+      "sha256": "4812803e25892e204569f7eec217d267b190c3b69e7d70fcd141adbe5ca17b97",
+      "bytes": 8057
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/navigation.json",
+      "sha256": "f78899bac253fe21be749768048d1a6227af0b04e3291b7b10efd27832bd14d5",
+      "bytes": 721878
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/insets/report.json",
+      "sha256": "869f4bbf7c23c174249dcb0b628210b6231f218975a4d36b495528bb1f62f883",
+      "bytes": 81625
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/axe70/report.json",
+      "sha256": "b75345778d945a5d38b30854eca5a296d171808cbb9d3b8e6d98a7b84b9f2143",
+      "bytes": 243711
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/shelf12.json",
+      "sha256": "46ae9a1e1890c51d049646f3b736c15e085e7b208bea504bdeafd16436862d1e",
+      "bytes": 1684512
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/target-guidance/results.json",
+      "sha256": "8df3a7dd6939bb6fec8e4a4fa7b882b8659642789506cea6a3446fb0eda28869",
+      "bytes": 1584096
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/syntax.json",
+      "sha256": "49ee443cda479829dc568bc5c2bc59a544468ee28fa281b53f43eb1ee842d3c6",
+      "bytes": 1165
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/quality-node.log",
+      "sha256": "009356cb3c008e4c5ffc4293629ee81c3d7bef39e79df12f246a8ee0cb17aa65",
+      "bytes": 351
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/paired-gpu.json",
+      "sha256": "246cddf3ea6c115b7199eab211441d1d8ac9c5c5cd68dd69e5ee1ba4b3f48d04",
+      "bytes": 37295
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/paired-gpu.log",
+      "sha256": "b9e572dee2e3858c4cf96600815f5f0c1fc89bdf455aabeeb5799183d21a53ac",
+      "bytes": 22844
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/key-select.log",
+      "sha256": "9df3c52db69736c422a6a6bfbbe16d3492b2751ee066e6bc4d22ec33d62acbda",
+      "bytes": 671
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/key-select-second.log",
+      "sha256": "69ba357c8c26fac84d849c65174364d8f8e05217989818765cf715b98bf6375c",
+      "bytes": 1975
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/smoke-diagnostic.log",
+      "sha256": "e536093ee4dbaaa4853552c5411b12fe4e7a62bbe05558e0d9dacaee026ea775",
+      "bytes": 3839
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/smoke-fixed.log",
+      "sha256": "138cce7cc4ceef4e7d9cf6c85c0584c64df05b5037df3a0bda673351136ae868",
+      "bytes": 1175
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/target-guidance-1.log",
+      "sha256": "7d3e5e2412c3619659620843c005a25a918f459c3c916c7af7d720347150ebbe",
+      "bytes": 1256
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/target-guidance/results.json",
+      "sha256": "d4e0782895d1e4b89f28a775b14d5158ba8adf97f68046c47359dbec0118235c",
+      "bytes": 1648539
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/batch1.log",
+      "sha256": "62c6c1f88bb7b8d2a952c6b6368447fb799128a3afad39b292219f7ae3a7e10d",
+      "bytes": 171
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/parent-review-at-handoff.md",
+      "sha256": "3e36cf014729f47cdfd702674b9cb44eb3e902fb58b71c1a129cf25d3f28e2f6",
+      "bytes": 11820
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/contact-sheet.png",
+      "sha256": "99f2fe4ee7a898f1b681d095d0bdb0f94f54a4b37f747077d8b8385e5166152c",
+      "bytes": 678211
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/node-modes-1.log",
+      "sha256": "0572217afd9b0946289e415dcd416c14be9fcd26ed053a8a9a41fdde88ecde85",
+      "bytes": 1243
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/modes-1.log",
+      "sha256": "6db8c2f6a98b5f92e8420b7b43b6268d36f0e95b0decc55d55865f2a6213c1ea",
+      "bytes": 180
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/mode-review-1.log",
+      "sha256": "4e7712ce97a3ebc79d6a58340ab0cf65712c5699ef088f3693b2b65720c926a4",
+      "bytes": 12677
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/navigation-1.log",
+      "sha256": "c0293f94d68beacb587697ca1e88b661e261d61c0ac584e7563100a7c3fbb874",
+      "bytes": 14416
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/insets-1.log",
+      "sha256": "869f4bbf7c23c174249dcb0b628210b6231f218975a4d36b495528bb1f62f883",
+      "bytes": 81625
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/axe70-1.log",
+      "sha256": "b75345778d945a5d38b30854eca5a296d171808cbb9d3b8e6d98a7b84b9f2143",
+      "bytes": 243711
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/shelf12-1.log",
+      "sha256": "c3cdce4fe3bfdac740aeef8a96a68462f602c9f74e0a917cf5c7e592309d8fcc",
+      "bytes": 158
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/target-guidance-1.log",
+      "sha256": "9d87006cfdf740b6f9ceec2aee36d77ca9c3f5711c504cc31fc8df26d16fd34d",
+      "bytes": 711
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/budget-1.log",
+      "sha256": "1a79b542e8320609376b9994639e638bbdafc68c914b5466536ebc4db36c8d63",
+      "bytes": 688
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/full-v11-1.log",
+      "sha256": "c75f5c3ab7c6a1138fff8e5d83fe8db3d2e159c6124671c10c643ce9622da6e7",
+      "bytes": 1701
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/bag-1.log",
+      "sha256": "d10d88c28ace5caf6c44f2011864783a297a3a7beb9e952a9512d60daae08cac",
+      "bytes": 345
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/preview-1.log",
+      "sha256": "a673815e4c99927657c1a235441842df99bb46ff444edd657789e51fd17f4ac1",
+      "bytes": 864
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused-smoke.log",
+      "sha256": "c8d676023f53727f802d2de1e5d68d4eeeca700b515e82c8003882faeffef9c9",
+      "bytes": 3197
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused-smoke/report.json",
+      "sha256": "6578cfeffd29dc004d8e598f46305f7fe3926cf98a18a71525399b4aa2347a2b",
+      "bytes": 8158
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused-smoke2.log",
+      "sha256": "1d80dd885ad14046210ac92a4452e4702de5bae82b819681189c33e499e6e32b",
+      "bytes": 604
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused-smoke2/report.json",
+      "sha256": "93fb9372bf59ff9fb90196fe16abc690d00f06c14227bf6eb9389b4c0f1547cc",
+      "bytes": 164235
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused1.log",
+      "sha256": "d349edd52e90986e0be8b7740d6b9bbb0d1280bfb7b79a4333b103d6dcf1b73b",
+      "bytes": 1298
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused1/report.json",
+      "sha256": "d20ac534eeb32174534e0a4f43feaea05ccedbf2e13dd28469559d09432defcd",
+      "bytes": 551008
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused2.log",
+      "sha256": "64a378f84bf2457c995d32fe0574a03c105028933f70cc8103457c789bfddd39",
+      "bytes": 733
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused2/report.json",
+      "sha256": "40881eabfc299bf894d10b2d1f328f126c76fbb1738ede435df33cd11efc8d74",
+      "bytes": 812860
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused3.log",
+      "sha256": "b90314a9c33955c52965428bac90ce2be16aeae620cf930e0509e4fb1bb3f808",
+      "bytes": 805
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused3/report.json",
+      "sha256": "314f664509564eb9ab55b33ea1cb9fcddd4d3277bbd76d88d60ea0db7460d459",
+      "bytes": 951890
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused4.log",
+      "sha256": "5ea9f4b4a86849e6100d6b9b39c29baf2434c9047649b00132d9342815896fc9",
+      "bytes": 3062
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused4/report.json",
+      "sha256": "d139b16de97e5dd18c0b4d7093ee41fb63afbfa048a4a5914e79b6227ee2b0dd",
+      "bytes": 974300
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused5.log",
+      "sha256": "a6f7b576491ec6032e2ad5b7cfa29fc6eeabb6dff1b6cc766ff427db02776076",
+      "bytes": 2917
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused5/report.json",
+      "sha256": "226f5896c423e0f12116121a6a0a605f6692570f7b254db5733cfe3454b00392",
+      "bytes": 974354
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused6.log",
+      "sha256": "ca281655c9c601b837ddcf680d6730d946fc321ef853bf4811a55209f78a9dd1",
+      "bytes": 1017
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused6/report.json",
+      "sha256": "181e32b0e10c5ab2fbf99149f8874c71adec0697885cd6e5ee4676d2259b7776",
+      "bytes": 1082102
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused7.log",
+      "sha256": "ec0b3dbdeec88e49bc555649e2ad12cabe32c1bc523bb47520580c55a4687255",
+      "bytes": 1291
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused7/report.json",
+      "sha256": "f04e43bed149c3e559759a46d685fd0a44978f3cbf0d7093b81c3316ec1fad57",
+      "bytes": 1181219
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused8.log",
+      "sha256": "122b7eb8a03f316d616be2f7dfbbd0bdcf3e7fab8f83e7c62af5cf09fd1b5011",
+      "bytes": 1548
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/focused8/report.json",
+      "sha256": "c06a43d7555e1916e18fbf9629bd6eefe2b164d6d2da4674cf303019b83d8a0c",
+      "bytes": 1275198
+    },
+    {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/independent-review.json",
+      "sha256": "9353ab43ccde3667876160dc416bc2886f2ce44d88f51138aefc150c5fee8ae9",
+      "bytes": 6255
+    }
+  ],
+  "historicalFailuresAndCorrections": [
+    {
+      "attempt": "initial smoke / diagnostic",
+      "exit": 1,
+      "cause": "Microtask checkpoint preceded the later Three restore handler; frame validation failed.",
+      "fix": "Next-task restoration barrier, pending flag and loss epoch; real listener/readback order checked.",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-graphics-worker/smoke.py"
+    },
+    {
+      "attempt": "focused-smoke",
+      "exit": 1,
+      "cause": "Harness init-script arrow function was not invoked.",
+      "fix": "Invoke the instrumentation function.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --smoke --output /private/tmp/gallery-graphics-worker/qa/focused-smoke",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused-smoke.log"
+        }
+      ]
+    },
+    {
+      "attempt": "focused-smoke2",
+      "exit": 1,
+      "cause": "Harness omitted close_shelf method argument.",
+      "fix": "Use established native Close helper.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --smoke --output /private/tmp/gallery-graphics-worker/qa/focused-smoke2",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused-smoke2.log"
+        }
+      ]
+    },
+    {
+      "attempt": "focused1",
+      "exit": 1,
+      "cause": "Hidden canvas resize changed the paused camera using full-window height.",
+      "fix": "Retain last valid dimensions; update camera only for actual dimensions.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused1",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused1.log"
+        }
+      ]
+    },
+    {
+      "attempt": "mode-review initial",
+      "exit": -15,
+      "cause": "Expanded loss-time Inspect retention prevented the existing scene Inspect close event.",
+      "fix": "Restore established loss-time scene Inspect auto-close; recovery availability never changes a view.",
+      "rawLimit": "Early parallel runner reused its stdout filename. Immutable batch1.log retains SIGTERM terminal status; do not treat the overwritten stdout or old mutable commands.json as original failure proof.",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_mode_review.py --output /private/tmp/gallery-graphics-worker/qa/mode-review --evidence /private/tmp/gallery-graphics-worker/qa/mode-review.json"
+    },
+    {
+      "attempt": "focused2",
+      "exit": 1,
+      "cause": "GPU oracle compared differently warmed/camera-framed caches.",
+      "fix": "Match all four zones and all four Shelf views in every epoch; keep exact current-epoch/scene/listener counts.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused2",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused2.log"
+        }
+      ]
+    },
+    {
+      "attempt": "focused3",
+      "exit": 1,
+      "cause": "Close-race harness expected the now-hidden product-close control after explicit Close.",
+      "fix": "Require actual original directory SKU trigger identity.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused3",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused3.log"
+        }
+      ]
+    },
+    {
+      "attempt": "focused4 / focused5",
+      "exit": 1,
+      "cause": "Interrupted startup skipped Guide and retained HTML-default open compact Map; entry stayed Menu.",
+      "fix": "One initial call through existing resetMap owner.",
+      "limit": "These diagnostic runs grew during execution; cached traceback line text is not final-source proof.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused4",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused4.log"
+        },
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused5",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused5.log"
+        }
+      ]
+    },
+    {
+      "attempt": "focused6",
+      "exit": 1,
+      "cause": "Harness waited for lazy visitor LOD1 instead of the primary awaited startup GLB.",
+      "fix": "Delay/fail gjh-mall-visitor-v2.glb; retain real startup loss, readiness and reentry assertions.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused6",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused6.log"
+        }
+      ]
+    },
+    {
+      "attempt": "focused7",
+      "exit": 1,
+      "cause": "macOS native select Home/End did not commit a choice.",
+      "fix": "Trusted native typeahead d selects Detailed; Tab/focus remain real. Popup arrow-key choice remains NOT VERIFIED.",
+      "commands": [
+        {
+          "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_graphics_recovery.py --root /private/tmp/gallery-task-lod --prefix gallery --axe /private/tmp/gallery-a11y-tools/package/axe.min.js --output /private/tmp/gallery-graphics-worker/qa/focused7",
+          "exit": 1,
+          "log": "/private/tmp/gallery-graphics-worker/qa/focused7.log"
+        }
+      ]
+    },
+    {
+      "attempt": "contact sheet helper",
+      "exit": 1,
+      "cause": "System python3 lacks PIL.",
+      "fix": "Generate the supplemental contact sheet using the required QA venv (exit 0). No acceptance test used system Python."
+    }
+  ],
+  "currentFailures": [
+    {
+      "gate": "Historical 45-resource budget",
+      "exit": 1,
+      "status": "STALE_ORACLE_RETAINED_FAIL",
+      "baselineResources": 55,
+      "currentResources": 56,
+      "budgetChanged": false,
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python /private/tmp/gallery-mode-worker/run_legacy.py tests/browser_gjh_budget.py"
+    },
+    {
+      "gate": "Historical a88 target-only exact cold GPU equality",
+      "exit": 1,
+      "status": "PREVIOUS_TASK_CONTRACT_RETAINED_FAIL",
+      "wideGPU": {
+        "currentGeometries": 94,
+        "pinnedGeometries": 95,
+        "currentBuffers": 428,
+        "pinnedBuffers": 432,
+        "currentVAOs": 257,
+        "pinnedVAOs": 258
+      },
+      "functionalRegression": "PASS with explicit supported --compare-ref empty; original assertion unchanged",
+      "command": "/private/tmp/gallery-task-qa-venv/bin/python tests/browser_gjh_target_guidance.py --output /private/tmp/gallery-graphics-worker/qa/target-guidance"
+    }
+  ],
+  "unresolvedScopedFunctionalFailures": [],
+  "independentVisualReview": {
+    "score": 86,
+    "outOf": 100,
+    "authority": "Independent receipt received and read; reviewed focused8 test is distinguished from final supplemental focused9 test. Parent owns copying receipt/screenshots into final release artifacts.",
+    "source": {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/parent-review-at-handoff.md",
+      "sha256": "3e36cf014729f47cdfd702674b9cb44eb3e902fb58b71c1a129cf25d3f28e2f6",
+      "bytes": 11820
+    },
+    "reviewedFrames": "focused8 (71 cases/99 frames); focused9 adds wide startup and loaded preview recovery without runtime changes",
+    "status": "APPROVED",
+    "reviewer": "independent /root/lod_review",
+    "rubric": {
+      "hierarchy": 18,
+      "spacing": 17,
+      "typography": 12,
+      "colour": 14,
+      "consistency": 14,
+      "responsive": 11
+    },
+    "receipt": {
+      "path": "/private/tmp/gallery-graphics-worker/qa/final/independent-review.json",
+      "sha256": "9353ab43ccde3667876160dc416bc2886f2ce44d88f51138aefc150c5fee8ae9",
+      "bytes": 6255
+    },
+    "reviewedTestSHA256": "5fd97bf2799593deacfba333c1f18095821620d1216b519f1172576d3c4100d5",
+    "finalFocusedTestSHA256": "3138d39aaf60af9b839528bb37768522e7c894e6bedcc738da5f89a2eddd05fe",
+    "allReviewedRuntimeHashesMatchFinal": true
+  },
+  "limits": [
+    "Native Chrome/ANGLE Metal desktop laboratory; no physical-device, Safari, screen-reader, OS-hidden or FPS certification",
+    "Hardware overrides, hidden-state simulation and readPixels fault injection are labelled fixtures",
+    "GL epochs record invalidated handles separately; counts are not device memory measurements",
+    "Native option-popup arrow/Home/End choice NOT VERIFIED on macOS headless Chrome; trusted typeahead d and real Tab focus verified.",
+    "Automated axe checks cover tested DOM states, not full accessibility or screen-reader certification.",
+    "GPU counts describe measured object epochs, not VRAM bytes or universal leak freedom.",
+    "Parent owns task.md, app/version/generated artifacts, final gallery/generator/SSOT/PWA/release/Git verification. No release performed by worker."
+  ],
+  "references": {
+    "pinnedThree": "demos/corporate/gjh/v11/vendor/three.module.min.js (r170; At calls St synchronously)",
+    "contextSemantics": "https://registry.khronos.org/webgl/specs/latest/1.0/#5.15.3",
+    "referenceStatus": "Khronos editor draft consulted for context semantics. Three docs contextual only; Khronos wiki fetch returned 403 and was not used as evidence."
+  },
+  "evidenceBudgetBytes": 163840,
+  "fullV11DrawMatrix": [
+    {
+      "width": 1440,
+      "views": {
+        "atrium": 180,
+        "walking": 181,
+        "newmoon-portal": 134,
+        "newmoon": 118,
+        "newmoon-interior": 109,
+        "mili-portal": 157,
+        "mili": 128,
+        "mili-interior": 106,
+        "gogo-portal": 128,
+        "gogo": 104,
+        "gogo-interior": 69,
+        "max": 181
+      }
+    },
+    {
+      "width": 768,
+      "views": {
+        "atrium": 162,
+        "walking": 162,
+        "newmoon-portal": 113,
+        "newmoon": 110,
+        "newmoon-interior": 104,
+        "mili-portal": 120,
+        "mili": 106,
+        "mili-interior": 65,
+        "gogo-portal": 76,
+        "gogo": 72,
+        "gogo-interior": 64,
+        "max": 162
+      }
+    },
+    {
+      "width": 390,
+      "views": {
+        "atrium": 145,
+        "walking": 141,
+        "newmoon-portal": 110,
+        "newmoon": 106,
+        "newmoon-interior": 96,
+        "mili-portal": 111,
+        "mili": 74,
+        "mili-interior": 65,
+        "gogo-portal": 72,
+        "gogo": 67,
+        "gogo-interior": 63,
+        "max": 145
+      }
+    }
+  ]
+}

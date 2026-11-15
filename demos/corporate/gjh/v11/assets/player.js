@@ -220,7 +220,18 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     moveSeat({x:elevator.x,y:from+.89,z:elevator.z});
     return true;
   }
-  return {body, capsule, camera, sit, stand, setCart, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  function interruptGraphics() {
+    if (!elevatorTravel) return;
+    const trip = elevatorTravel;
+    // Graphics fallback must not retain a disabled capsule or resume an old trip.
+    const height = body.translation().y - .89;
+    const floor = Math.abs(height - trip.from) <= Math.abs(height - trip.to) ? trip.from : trip.to;
+    elevatorTravel = null; trip.setHeight(floor);
+    moveSeat({x:trip.x, y:floor + .89, z:trip.z});
+    capsule.setEnabled(true); vertical = 0; clearInput(); injected = null;
+    restoreActionView(); sync(); updateCamera(0, true);
+  }
+  return {body, capsule, camera, sit, stand, setCart, interruptGraphics, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     renderShelf(draw) {
       // The visitor can stand directly in front of the selected shelf. Exclude
       // only that presentation during the draw; retain all authored/gameplay state.

@@ -38,9 +38,17 @@ The previous Kenney **Mini Characters 2.0 / character-male-a** asset remains pre
 
 Three.js and its local GLTFLoader/BufferGeometryUtils are pinned to 0.170.0 (MIT). Rapier compat 0.21.0 (Apache-2.0) is one local ES module with embedded WASM. Official image/font receipts are preserved from v10; no official library or older demo was changed. The mobile map control uses an inline SVG icon; the floorplan is an inline SVG data visualization.
 
-Textures are at most 1024px. Repeated architecture and cans use instancing/shared resources. DPR is capped at 2, or 1.5 below 600px. Only capable desktop configurations enable one 1024px soft-shadow map. Rendering and simulation stop while the tab is hidden; modal/list views pause movement and rendering. Reduced motion has no camera bob, sway or idle drift, and cuts doors instantly. UI copy uses opaque or near-opaque green scrims and visible keyboard focus.
+Textures are at most 1024px. Repeated architecture and cans use instancing/shared resources. Graphics quality is owned by `assets/graphics-quality.js`. Auto selects Low when a reported CPU or memory hint is at most 2, Detailed at widths of at least 1000px when both hints are at least 4, and Balanced otherwise (including missing hints). Low caps DPR at 1 and disables real-time shadows. Balanced caps DPR at 1.25 below 600px and 2 otherwise, without real-time shadows. Detailed caps DPR at 2 and enables the existing 1024px main-light shadow map only at widths of at least 1000px. The existing How to explore panel offers Auto / Low / Balanced / Detailed. Valid selections use optional, guarded localStorage; missing or invalid storage uses Auto. Lower quality reduces rendering work, not downloads, product content or simulation. This deterministic policy does not measure or certify FPS. Rendering and simulation stop while the tab is hidden; modal/list views pause movement and rendering. Reduced motion has no camera bob, sway or idle drift, and cuts doors instantly. UI copy uses opaque or near-opaque green scrims and visible keyboard focus.
 
 The generator already publishes direct-child `vendor/` and `assets/` files. The uncompressed vendor payload is approximately 5.19MB; the asset directory measured approximately 1.53MB before adding the original visitor; the original visitor adds 369,976 bytes. Its existing PWA policy excludes live demos from precaching, caching only the mall thumbnail with gallery browsing resources. The embedded WASM and furniture therefore do not inflate offline installation; a locally served complete checkout works without internet, while the gallery's existing offline fallback applies to uncached live demos.
+
+## Interrupted graphics
+
+Native context loss stops frames and transient input through the existing mode/pause owner, closes Shelf, and exposes the complete directory immediately. Scene Inspect retains its established loss-time auto-close; directory Inspect and Bag remain usable. Bag quantities stay separate from physical shelf reservations. A held physical shelf product retains its reservation; an unfinished pickup/return follows the existing transfer cancellation policy. Cart and seating stop. An interrupted elevator settles its rider and cabin on the nearest floor and re-enables the capsule, so an old journey cannot resume.
+
+The same Three r170 renderer handles the native restoration event. Application validation runs in a later task after Three's handler, waits for the single async initialization to finish, renders without stepping physics, and checks the framebuffer and GL error state. Loss epochs reject stale restoration tasks. A hidden document postpones validation until visible. A successful frame makes **Return to 3D mall** and the existing 3D entry actions available, without changing the current directory/dialog view or focus. Recovery selects Low for this page; Help visibly shows Low and can directly select Detailed again. This temporary recovery selection does not overwrite the previously stored preference. Independent initialization or validation failures remain unavailable and offer **Reload page to retry 3D**. There is no initialization retry loop or production `WEBGL_lose_context` call.
+
+`__mall.state.graphics` exposes read-only status, loss/validation counts, scene/camera identity, effective quality, actual shadow enablement and drawing-buffer dimensions for checks. Status availability is distinct from explicit user re-entry. See [graphics recovery evidence](../../../../docs/v11-graphics-recovery-review.md) for exact tested revisions, native Metal results, retained failures and platform limits.
 
 ## Mobile HUD (touch and narrow screens)
 
@@ -64,6 +72,8 @@ export GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chr
 ~/venvs/gallery/bin/python tests/browser_gallery.py
 ~/venvs/gallery/bin/python tests/browser_gjh_demos.py
 ~/venvs/gallery/bin/python tests/browser_gjh_v11.py
+node --test tests/gjh_graphics_quality.test.mjs
+~/venvs/gallery/bin/python tests/browser_gjh_graphics_recovery.py --root . --prefix gallery --output /tmp/gallery-graphics-check
 ~/venvs/gallery/bin/python -m unittest discover -s tests -p test_gjh_character.py -v
 ~/venvs/gallery/bin/python tests/browser_gjh_character.py
 ~/venvs/gallery/bin/python tests/browser_gjh_furnishings.py

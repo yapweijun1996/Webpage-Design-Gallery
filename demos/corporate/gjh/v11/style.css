@@ -483,3 +483,10 @@ body:not(.is-seated) .inspect-prompt:not(.is-shelf-nearby) #inspect{grid-column:
 body.is-3d .is-shelf-nearby button:focus-visible{outline-width:2px;outline-offset:2px}
 /* Seated retains its original Stand layout; guidance is hidden in this mode. */
 .is-seated .nearby-card{display:contents}
+
+/* Graphics settings share the existing Help scroll owner. */
+.graphics-settings{display:grid;gap:var(--space-2);min-width:0;margin-bottom:var(--space-4)}
+.graphics-settings select{width:100%;min-width:44px;min-height:44px;font:inherit;color:var(--green);background:var(--paper)}
+.graphics-recovery{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-bottom:var(--space-6)}
+.graphics-recovery button{min-width:44px;padding:var(--space-2) var(--space-3)}
+.graphics-recovery p{flex-basis:100%;font-size:var(--font-size-sm)}

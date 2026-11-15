@@ -12,6 +12,10 @@ export function createUI() {
   const locationName = document.getElementById('location-name');
   const status = document.getElementById('mall-status');
   const fallbackMessage = document.getElementById('fallback-message');
+  const recovery = document.getElementById('graphics-recovery');
+  const return3D = document.getElementById('graphics-return');
+  document.getElementById('graphics-reload').addEventListener('click', () => location.reload());
+  return3D.addEventListener('click', () => { if (available) setView(true, true); });
   const playerDot = document.getElementById('player-dot');
   const floorplan=document.querySelector('.floorplan'),floorplanLabel=floorplan.getAttribute('aria-label'),mapCaption=document.querySelector('.map-caption');
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
@@ -50,6 +54,7 @@ export function createUI() {
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
   function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);}
   const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
+  resetMap();
   compactMap.addEventListener('change', () => {
     const active = document.activeElement;
     resetMap();
@@ -301,8 +306,8 @@ export function createUI() {
     returnFocus = null;
     if (target instanceof HTMLElement && target.isConnected && !target.closest('[hidden]')) {
       target.focus({ preventScroll: true });
-    } else if (showing3D) {
-      scene.focus({ preventScroll: true });
+    } else {
+      (showing3D ? scene : listTitle).focus({ preventScroll: true });
     }
     notifyMode();
   });
@@ -369,6 +374,16 @@ export function createUI() {
       fallbackMessage.hidden = true;
       setView(true);
     },
+    restored() {
+      available = true;
+      // A validated renderer grants availability, never an automatic view/focus change.
+      guideSeen = true; guideReopen.hidden = false;
+      viewToggle.hidden = false; return3D.hidden = false;
+      updateCartControls();
+      fallbackMessage.textContent = 'The 3D mall is available again in Low quality. Return when you are ready. Movement and temporary actions were stopped. Bag selections are unchanged.';
+      notifyMode();
+      announce(fallbackMessage.textContent);
+    },
     fallback(message) {
       // Move focus only when its current 3D control is about to disappear.
       // A user already browsing the directory or header must not be interrupted.
@@ -384,6 +399,7 @@ export function createUI() {
       updateCartControls();
       notifyMode();
       viewToggle.hidden = true;
+      recovery.hidden = false; return3D.hidden = true;
       fallbackMessage.textContent = message || 'The 3D mall is unavailable on this device. Explore the complete store directory below.';
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);

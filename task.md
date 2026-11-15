@@ -115,7 +115,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] Contextual navigation rule: hide the bottom navigation during exploration, show it in menu or shop mode.
 - [x] Shelf focus mode: implemented scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
 - [x] Interaction target highlight and distance hint.
-- [ ] WebGL context-loss recovery and low-end quality tiers.
+- [x] WebGL context-loss recovery and low-end quality tiers.
 - [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
 - [ ] Define any future real-commerce scope separately. The existing Demo bag and pushable 3D cart are authorized simulations, with no prices, stock reservation, real orders or payment. The official eShop link is external and does not check out the demo selection. See the commerce clarification below; no real-commerce implementation is approved by this checklist.
 
@@ -375,3 +375,26 @@ scene resources; broad draw maximum remains 181. Post-resume held-touch assertio
 use a localized 10-micrometre XZ bound; synchronous restore and angles stay exact.
 See `docs/v11-target-guidance-review.md` and bounded evidence under `docs/evidence/`.
 Physical-device, Safari, screen-reader and complete packaging verification remain open.
+
+## Graphics recovery and quality — 2026-11-15
+
+Application 1.1.41 recovers the existing renderer after native context restoration,
+validates a real frame, and offers explicit re-entry while the directory remains
+available. It preserves Bag quantities and directory modal focus, safely settles
+interrupted elevator travel, and rejects stale restoration/init callbacks. Help
+provides Auto, Low, Balanced and Detailed; recovery visibly chooses Low for the
+page. No scene rebuild, extra physics/input owner, real-commerce or FPS claim.
+
+The frozen focused suite passes 73 cases/100 frames; final modes, navigation,
+insets, axe, Shelf, target functional, V11, Bag and preview regressions pass.
+Parent Gallery/28 legacy cases/four no-JS/PWA checks, all 47 Python tests, SSOT,
+generator and the generated `/gallery/` artifact checks pass (13 cases/35 frames).
+Independent approval: 86/100, no unresolved functional P2/P0/P1. All eight restored
+SKU comparisons have zero mean RGB difference; matched GPU epochs stay stable.
+Resources increase 55 to 56 (+8,531 decoded bytes), with broad maximum 181 draw calls.
+
+The historical 45-request gate and target-only old cold-GPU equality remain visibly
+FAIL; neither was weakened. Current pinned-baseline/profile/decoded/draw/epoch
+checks provide separate evidence. See `docs/v11-graphics-recovery-review.md` and
+`docs/evidence/v11-graphics-recovery-acceptance.json`. Device, Safari, screen-reader,
+OS-popup, actual safe-area, FPS and complete packaging gates remain separate.

@@ -1,8 +1,8 @@
 import {createFurnishings} from './furnishings.js';
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, shadows) {
-  const furnishings = await createFurnishings(T, shadows);
+export async function createWorld(T, R, physics) {
+  const furnishings = await createFurnishings(T, true);
   const seats=[];
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
@@ -368,7 +368,7 @@ export async function createWorld(T, R, physics, shadows) {
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m)); mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); scene.add(mesh);
   }
   scene.add(new T.HemisphereLight(0xe4efe6, 0x6d5b3b, 2.1));
-  const key = new T.DirectionalLight(0xffd5a0, 2.6); key.position.set(-8, 15, 9); key.castShadow = shadows;
+  const key = new T.DirectionalLight(0xffd5a0, 2.6); key.position.set(-8, 15, 9); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
   const fill = new T.DirectionalLight(0xb7d7e8, 1); fill.position.set(4, 8, -5); scene.add(fill);
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
