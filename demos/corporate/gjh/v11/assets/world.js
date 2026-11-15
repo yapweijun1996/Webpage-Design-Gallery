@@ -1,3 +1,4 @@
+import {addAmenities} from './amenities.js';
 import {createFurnishings} from './furnishings.js';
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
@@ -374,6 +375,8 @@ export async function createWorld(T, R, physics) {
       }
     }
   }
+  const amenities=await addAmenities(T,scene,collider,createCollectProp,true);
+  interactables.push(...amenities.interactables);
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m)); mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); scene.add(mesh);
@@ -407,5 +410,5 @@ export async function createWorld(T, R, physics) {
     }
   }
   interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.1,seat})));
-  return {scene, doors, seats, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, seats, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
 }

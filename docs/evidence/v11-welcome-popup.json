@@ -1,0 +1,190 @@
+{
+  "firstUse": [
+    {
+      "viewport": [
+        320,
+        740
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "touch": false,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "storageUnavailable": "PASS",
+      "WASMAndNoJSDirectory": "PASS"
+    }
+  ],
+  "compactLayout": [
+    {
+      "viewport": [
+        320,
+        480
+      ],
+      "dialogBounds": {
+        "x": 17,
+        "y": 16,
+        "width": 286,
+        "height": 448
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        390,
+        680
+      ],
+      "dialogBounds": {
+        "x": 17,
+        "y": 93.765625,
+        "width": 356,
+        "height": 492.453125
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "dialogBounds": {
+        "x": 17,
+        "y": 175.765625,
+        "width": 356,
+        "height": 492.453125
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        430,
+        932
+      ],
+      "dialogBounds": {
+        "x": 17,
+        "y": 219.765625,
+        "width": 396,
+        "height": 492.453125
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "dialogBounds": {
+        "x": 134,
+        "y": 265.765625,
+        "width": 500,
+        "height": 492.453125
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "dialogBounds": {
+        "x": 172,
+        "y": 16,
+        "width": 500,
+        "height": 358
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "dialogBounds": {
+        "x": 470,
+        "y": 203,
+        "width": 500,
+        "height": 494
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    }
+  ],
+  "limitations": [
+    "Local macOS Chrome with SwiftShader; no physical-device, Safari or screen-reader verification."
+  ]
+}

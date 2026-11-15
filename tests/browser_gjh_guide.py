@@ -11,7 +11,7 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
   except (BrokenPipeError,ConnectionResetError):pass
 
 def ready(page,url):
- page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
+ page.goto(url,wait_until='domcontentloaded');page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
 
 def guide(page):page.locator('#guide-dialog').wait_for(state='visible')
 def closed(page):page.wait_for_function('!document.querySelector("#guide-dialog").open')
@@ -26,7 +26,7 @@ def run():
  records=[]
  try:
   with sync_playwright() as p:
-   browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
+   browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=[f'--use-angle={os.environ.get("GALLERY_WEBGL_BACKEND","swiftshader")}', '--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
    for width,height,touch in [(320,740,True),(390,844,True),(768,1024,True),(1440,900,False),(844,390,True)]:
     context=browser.new_context(viewport={'width':width,'height':height},has_touch=touch,reduced_motion='reduce');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     ready(page,url);guide(page)

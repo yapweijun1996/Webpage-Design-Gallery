@@ -1,0 +1,5 @@
+body{margin:0;background:var(--color-page);color:var(--color-text);font:var(--font-size-base)/var(--line-height-body) var(--font-family-body)}
+main{max-width:960px;margin:auto;padding:var(--space-6)}
+main :is(button,select){min-height:var(--size-control);font:inherit;border:1px solid var(--color-border-control);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);background:var(--color-surface);color:var(--color-text);margin:var(--space-1)}
+#sandbox{margin-top:var(--space-6);padding:var(--space-6);border:1px solid var(--color-border-control);border-radius:var(--radius-xl);min-height:300px}
+.ob-hud{bottom:var(--space-4)}
