@@ -282,7 +282,13 @@ close/back restoration and mobile controls are unchanged. A nearby SKU now
 opens the existing 3D can preview automatically; if it cannot load, the
 official packshot remains visible. The focused desktop and 390px touch
 regression is `tests/browser_gjh_direct_inspect.py` with evidence in
-`docs/evidence/v11-direct-inspect/`.
+`docs/evidence/v11-direct-inspect/`. Chrome desktop and 390px touch checks
+pass for all four loaded 3D SKUs, repeat close/reopen and bag preservation.
+49 unit tests, SSOT, gallery, demos and PWA checks pass. The broader modes
+test stops at its courtyard-seat approach assertion on both this change and
+untouched baseline 53e98c2; it is not counted as passing. Actual screenshot
+review and independent advisor review found no blocker for this bounded fix.
+Physical iPhone Safari remains unverified.
 
 
 ## Codex CLI flat-label candidates — 2026-11-15

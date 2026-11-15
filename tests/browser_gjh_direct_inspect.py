@@ -38,7 +38,7 @@ def run():
                     assert page.locator('#product-title').inner_text().startswith('New Moon Premium')
                     page.wait_for_function("__newMoonPreview.state.loaded || __newMoonPreview.state.status === 'error'", timeout=10000)
                     preview = page.evaluate('__newMoonPreview.state')
-                    assert preview['sku'] == sku and (preview['mode'] == '3d' or preview['status'] == 'error'), preview
+                    assert preview['sku'] == sku and preview['mode'] == '3d' and preview['loaded'], preview
                     page.screenshot(path=str(args.output / f'after-direct-product-{sku}-{width}.png'), full_page=True)
                     for _ in range(2):
                         page.locator('#product-close').click(); page.wait_for_function('!document.querySelector("#product-dialog").open')
