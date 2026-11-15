@@ -23,3 +23,5 @@ References: [Rapier shape casts](https://rapier.rs/javascript3d/classes/World.ht
 Validation below records actual completed checks; physical-device and screen-reader sessions are outside these automated scenarios.
 
 Final targeted checks passed: 178 samples per visitor/viewport case, continuous facility loop, bench-front and rear-aisle orbit, independent clearance checks, visible avatar recovery and unchanged 200-call guard. Shared onboarding, actual mall gamepad/input isolation, all three released mode lifecycle cases (81/42/42 snapshots), 11 Gallery unit tests, Gallery browser journeys, 28 legacy demo cases, PWA lifecycle/installability and the SSOT gate passed. Native built-in-browser walking reached the desk, showcase and sign, then demonstrated the rear desk and bench orbit. Physical controllers, Safari and screen-reader sessions remain unverified.
+
+After the final upstream synchronization, all four SKUs passed direct Inspect, repeated close/reopen and Bag checks at 1440×900 and 390×844. The camera clearance/continuous-walking suite passed again against that synchronized source. Release version: 1.1.44.

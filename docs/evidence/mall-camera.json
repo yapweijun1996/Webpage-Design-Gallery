@@ -10,7 +10,7 @@
     "benchOrbitClearance": true,
     "continuousFacilityLoop": true,
     "samples": 178,
-    "minimumCameraDistance": 2.0395139099393123,
+    "minimumCameraDistance": 2.0830421342077967,
     "errors": []
   },
   {
@@ -24,7 +24,7 @@
     "benchOrbitClearance": true,
     "continuousFacilityLoop": true,
     "samples": 178,
-    "minimumCameraDistance": 3.89127310155956,
+    "minimumCameraDistance": 3.9721221037791716,
     "errors": []
   },
   {
@@ -38,7 +38,7 @@
     "benchOrbitClearance": true,
     "continuousFacilityLoop": true,
     "samples": 178,
-    "minimumCameraDistance": 3.8858802127838126,
+    "minimumCameraDistance": 3.9271631050109854,
     "errors": []
   }
 ]
