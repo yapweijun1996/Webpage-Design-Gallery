@@ -12,7 +12,7 @@ Serve the repository with `~/venvs/gallery/bin/python -m http.server 8000`, then
 
 WASD or arrow keys walk freely; Shift runs. Hold Q/E to turn left/right, including while moving; opposite turn keys cancel. Turning alone does not translate the player. Drag the scene to orbit the collision-constrained spring-arm camera. On touch devices, the left joystick walks, right-side dragging turns the camera, and Run toggles pace. Two fingers can walk and turn simultaneously. Only the canvas uses `touch-action:none`; the joystick is a visual overlay whose touches reach the canvas. Page zoom remains enabled. Help is collapsible. At narrow widths the map starts as one 44px icon button; opening it reveals full store labels, choosing a store closes it, and Escape closes it with focus restored. Help and the map do not expand together on mobile. The map's three keyboard-accessible buttons teleport to storefronts, not interiors.
 
-Approach a verified can display or MILI/GOGO brand panel, then press F or tap Inspect. The native modal traps focus, pauses controls, restores focus and closes with Escape. Its only link is the official eShop home page. No prices, inventory, invented products or commerce flow are present. List view contains all three stores and four complete verified packshots, including when JavaScript, WebGL or WebAssembly is unavailable. Opening the HTML as a local file retains that directory; browser module security requires HTTP for 3D.
+Approach a verified can display or MILI/GOGO brand panel, then press F or tap Inspect. The native modal traps focus, pauses controls, restores focus and closes with Escape. Its only link is the official eShop home page. No verified prices or inventory are supplied. The directory labels both as unavailable and links to the official eShop; its session-only demo bag creates no payment, order, or stock reservation. The directory includes all three stores and four official product packshots, including when JavaScript, WebGL or WebAssembly is unavailable. With JavaScript, visitors can filter stores, search and sort the New Moon products, add demo items, and enter or return from the 3D mall without losing the bag. Opening the HTML as a local file retains that directory; browser module security requires HTTP for 3D.
 
 ## World and implementation
 
@@ -72,6 +72,7 @@ export GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chr
 ~/venvs/gallery/bin/python tests/browser_gallery.py
 ~/venvs/gallery/bin/python tests/browser_gjh_demos.py
 ~/venvs/gallery/bin/python tests/browser_gjh_v11.py
+~/venvs/gallery/bin/python tests/browser_gjh_hybrid.py
 node --test tests/gjh_graphics_quality.test.mjs
 ~/venvs/gallery/bin/python tests/browser_gjh_graphics_recovery.py --root . --prefix gallery --output /tmp/gallery-graphics-check
 ~/venvs/gallery/bin/python -m unittest discover -s tests -p test_gjh_character.py -v
@@ -91,3 +92,7 @@ Fourth-pass SwiftShader spawn / sampled maximum draw calls at 1440, 768 and 390 
 The fourth-pass visual review covers atrium, walking, every storefront/entry/interior, all four product panels, both brand panels and the map at 1440×900, 768×1024 and 390×844. Three settled-idle arrival screenshots and the thumbnail are refreshed. Regression coverage checks room-sign HUD clearance along every approach, expanded mobile help/map states, complete desktop/tablet plaque framing, and sampled maximum draw calls.
 
 Independent >=88 visual scores on every shot, physical-phone frame rate, Safari and screen-reader behavior remain unverified. Front-only can labels remain a visual limitation. The historical Kenney rig limitations do not describe the replacement visitor; its revision-3 measurements and fresh full V11 evidence are recorded in the character review, with release and deployment status maintained in that canonical review.
+
+## Hybrid directory imagery
+
+The directory uses 20 original AI-generated, unbranded concept illustrations in its optional concept gallery and one entry preview. They are not photographs of the current 3D scene, real premises, merchandise, or official brand material. Image subjects and generation provenance are listed in `assets/concept-imagery.json`; official New Moon product packshots and existing brand artwork remain separate. The gallery images load lazily and are not part of the gallery shell precache.

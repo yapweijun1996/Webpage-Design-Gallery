@@ -11,6 +11,12 @@ export function createUI() {
   const experience = document.getElementById('experience');
   const storeList = document.getElementById('store-list');
   const viewToggle = document.getElementById('view-toggle');
+  const directoryEnter3D = document.getElementById('directory-enter-3d');
+  const visitNewMoon3D = document.getElementById('visit-newmoon-3d');
+  const directoryLoading = document.getElementById('directory-loading');
+  directoryLoading.hidden = false;
+  let directoryTouched = false;
+  for (const event of ['pointerdown', 'keydown']) storeList.addEventListener(event, () => { directoryTouched = true; }, {once: true});
   const headerMap = document.getElementById('header-map');
   const locationName = document.getElementById('location-name');
   const status = document.getElementById('mall-status');
@@ -207,7 +213,7 @@ export function createUI() {
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle('is-3d', next);
-    viewToggle.textContent = next ? 'List view' : '3D view';
+    viewToggle.textContent = next ? 'Store directory' : 'Enter 3D Mall';
     viewToggle.setAttribute('aria-label', next ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
     help.open = false;
     headerMap.hidden = !next || !compactMap.matches;
@@ -296,6 +302,69 @@ export function createUI() {
   guide.addEventListener('close', notifyMode);
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
+  directoryEnter3D.addEventListener('click', () => setView(true, true));
+  function visitNewMoon() {
+    if (!available) return;
+    setView(true);
+    travelToStore('newmoon');
+  }
+  visitNewMoon3D.addEventListener('click', visitNewMoon);
+  const cardStoreButtons = [...document.querySelectorAll('[data-visit-newmoon]')];
+  for (const button of cardStoreButtons) button.addEventListener('click', visitNewMoon);
+  const storeFilters = [...document.querySelectorAll('[data-store-filter]')];
+  const stores = [...document.querySelectorAll('[data-store]')];
+  const productSearch = document.getElementById('product-search');
+  const productCategory = document.getElementById('product-category');
+  const productSort = document.getElementById('product-sort');
+  const productResults = document.getElementById('product-results');
+  const productGrid = document.querySelector('.product-grid');
+  const cards = [...productGrid.querySelectorAll('.product-card')];
+  let storeFilter = 'all';
+  function updateCatalog() {
+    for (const button of storeFilters) button.setAttribute('aria-pressed', String(button.dataset.storeFilter === storeFilter));
+    for (const store of stores) store.hidden = storeFilter !== 'all' && store.dataset.store !== storeFilter;
+    document.querySelector('.brand-stories').hidden = storeFilter === 'newmoon';
+    const query = productSearch.value.trim().toLocaleLowerCase();
+    const sorted = productSort.value === 'name' ? [...cards].sort((a, b) => a.dataset.productName.localeCompare(b.dataset.productName)) : cards;
+    let count = 0;
+    for (const card of sorted) {
+      card.hidden = !card.dataset.productName.toLocaleLowerCase().includes(query) ||
+        (productCategory.value !== 'all' && card.dataset.category !== productCategory.value);
+      if (!card.hidden) count++;
+      productGrid.append(card);
+    }
+    productResults.hidden = false;
+    productResults.textContent = count ? `${count} New Moon product${count === 1 ? '' : 's'} shown. Check the official eShop for current price and availability.` : 'No products match your search. Try another search term.';
+  }
+  for (const button of storeFilters) button.addEventListener('click', () => { storeFilter = button.dataset.storeFilter; updateCatalog(); });
+  productSearch.addEventListener('input', updateCatalog);
+  productCategory.addEventListener('change', updateCatalog);
+  productSort.addEventListener('change', updateCatalog);
+  for (const link of document.querySelectorAll('.mall-amenities-directory a[href$="-title"]')) {
+    link.addEventListener('click', () => { storeFilter = 'all'; updateCatalog(); });
+  }
+  document.querySelector('.directory-nav').hidden = false;
+  document.querySelector('.catalog-controls').hidden = false;
+  updateCatalog();
+  const addButtons = [...document.querySelectorAll('[data-add]')];
+  for (const button of addButtons) {
+    button.hidden = false;
+    button.addEventListener('click', () => {
+      const id = button.dataset.add;
+      bag.change(id, 1);
+      button.closest('.product-copy').querySelector('.product-feedback').textContent = `Added to demo bag · ${bag.snapshot()[id]} of this item. No order created.`;
+      announce(`${records.get(id).name} added to your demo bag. No order was created.`);
+    });
+  }
+  bag.subscribe(items => {
+    for (const button of addButtons) {
+      const quantity = items[button.dataset.add] || 0;
+      const feedback = button.closest('.product-copy').querySelector('.product-feedback');
+      if (feedback.textContent) feedback.textContent = quantity ? `${quantity} in your demo bag. No order created.` : 'Removed from demo bag.';
+      button.disabled = quantity >= 9;
+      button.textContent = button.disabled ? 'Maximum in bag' : 'Add to demo bag';
+    }
+  });
   inspectButton.addEventListener('click', () => { if(seated){seatNotice=null;if(!seatListener?.(false)){seatNotice='Exit blocked. Use the map to leave safely.';nearbyName.textContent=seatNotice;announce('Exit blocked. Use the map to leave safely.');}scene.focus({preventScroll:true});}else if (nearby) inspectNearby(nearby); });
   closeButton.addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => {
@@ -332,7 +401,7 @@ export function createUI() {
   for(const button of mapButtons)button.addEventListener('click',()=>travelToStore(button.dataset.teleport));
   function navigateStore(zone){
     if(showing3D)travelToStore(zone);
-    else {const title=document.getElementById(`${zone}-title`);title.tabIndex=-1;title.scrollIntoView({block:'start'});title.focus({preventScroll:true});}
+    else {storeFilter='all';updateCatalog();const title=document.getElementById(`${zone}-title`);title.tabIndex=-1;title.scrollIntoView({block:'start'});title.focus({preventScroll:true});}
   }
   function openAmenity(id){
     const storeActions=['newmoon','mili','gogo'].map(zone=>({id:zone,label:{en:`Visit ${zones[zone]}`,'zh-CN':`前往 ${zones[zone]}`},onSelect:()=>navigateStore(zone)}));
@@ -380,14 +449,26 @@ export function createUI() {
     onModeState(listener) { modeListener = listener; },
     show3D() {
       available = true;
+      directoryLoading.hidden = true;
+      directoryEnter3D.hidden = false;
+      visitNewMoon3D.hidden = false;
+      for (const button of cardStoreButtons) button.hidden = false;
       guideReopen.hidden = false;
       viewToggle.hidden = false;
-      headerMap.hidden = !compactMap.matches;
+      headerMap.hidden = !showing3D || !compactMap.matches;
       fallbackMessage.hidden = true;
-      setView(true);
+      if (directoryTouched) {
+        viewToggle.textContent = 'Enter 3D Mall';
+        viewToggle.setAttribute('aria-label', 'Switch to the 3D virtual mall');
+        notifyMode();
+      } else setView(true);
     },
     restored() {
       available = true;
+      directoryLoading.hidden = true;
+      directoryEnter3D.hidden = false;
+      visitNewMoon3D.hidden = false;
+      for (const button of cardStoreButtons) button.hidden = false;
       // A validated renderer grants availability, never an automatic view/focus change.
       guideSeen = true; guideReopen.hidden = false;
       viewToggle.hidden = false; return3D.hidden = false;
@@ -406,6 +487,10 @@ export function createUI() {
       guidePaused = false; guideReopen.hidden = true;
       setView(false, recoverFocus);
       available = false;
+      directoryLoading.hidden = true;
+      directoryEnter3D.hidden = true;
+      visitNewMoon3D.hidden = true;
+      for (const button of cardStoreButtons) button.hidden = true;
       // Directory fallback can leave setView unchanged, so refresh independently
       // of view/HUD callbacks and recover only disappearing cart-control focus.
       updateCartControls();
