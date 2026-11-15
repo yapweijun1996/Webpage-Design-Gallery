@@ -460,7 +460,7 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] D2: author/adapt the reviewed pilot with editable source, GLB, manifest, applicable collision definitions, provenance and actual G01–G12 results or reasoned applicability records.
 - [x] D2: validate export in independent viewers and the actual mall; verify failed/delayed loading, lifecycle cleanup and mobile/desktop visuals.
 - [x] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
-- [ ] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
+- [x] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
 - [ ] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
 - [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
 
@@ -530,6 +530,19 @@ See docs/v11-interior-shell-review.md and docs/evidence/interior-shell-integrati
 Immutable950 evidence remains separate. Physical-device/AT,45requests/10MiB,
 fullM1/200candidates and expanded performance are not certified. Main/CI/Pages
 and actual public flows are the publication gate before D4.
+
+
+D4 supported P1 selection — 2026-11-15: independently accepted reuse of
+DSP-001/PUB-002/PUB-008/PUB-005/LGT-009 with their existing capabilities,
+artifacts and collision/fallback owners. Default M056 is retained; DSP remains
+pilot-only. All12P1 FAC candidates have individual not-selected reasons and
+remain unimplemented; P2 PUB-017 is a retained Map dependency, not a P1 asset.
+Current14pilot E2E checks and all148runtime hashes pass against deployed D3
+e7581e6 (CI/Pages43699502215,28public hashes,fivepublic journeys).
+Selection adds zero runtime resources/IDs;12implemented and188pending remain.
+See docs/v11-interior-p1-review.md and docs/evidence/interior-p1-selection.json.
+D4 selection is complete; FAC production, D5 and physical-device/AT acceptance
+are not implied. Its own main/CI/Pages verification is required before D5.
 
 Visitor v2 UX follow-up — 2026-11-15: camera occlusion, natural bench entry, reachable pickup/return feedback, persistent held guidance, truthful recovery and direct Cart controls are implemented in an isolated local candidate. Real-input and advisor evidence: `docs/gjh-visitor-v2-ux-fixes.md`. Publication and physical-device performance are not claimed.
 
