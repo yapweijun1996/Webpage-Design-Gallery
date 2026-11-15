@@ -14,11 +14,13 @@ export async function createWorld(T, R, physics, expanded = false) {
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   const ceilingObstacles=[];
   function ceilingBox(material,x,y,z,sx,sy,sz,hole=liftLayout.shaft){
-    if(!expandedLift){box(material,x,y,z,sx,sy,sz);return;}
-    for(const r of cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole)){
+    if(!expandedLift){box(material,x,y,z,sx,sy,sz);return [{minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2}];}
+    const panels=cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole);
+    for(const r of panels){
       box(material,(r.minX+r.maxX)/2,y,(r.minZ+r.maxZ)/2,r.maxX-r.minX,sy,r.maxZ-r.minZ);
       ceilingObstacles.push({min:{x:r.minX,y:y-sy/2,z:r.minZ},max:{x:r.maxX,y:y+sy/2,z:r.maxZ}});
     }
+    return panels;
   }
   const seats=[];
   const scene = new T.Scene();
@@ -39,6 +41,24 @@ export async function createWorld(T, R, physics, expanded = false) {
     water: mat(0x4f8c80, {metalness: .48, roughness: .15}),
     glass: mat(0xa0c9be, {transparent: true, opacity: .15, metalness: .2, roughness: .1, depthWrite: false, side: T.DoubleSide})
   };
+  if(expanded){
+    // Optional, local finishes cannot hold walking behind a stalled module.
+    // The module is side-effect free: a late import never invokes its factory.
+    let timer;
+    try{
+      const module=await Promise.race([
+        import('./natural-materials.js'),
+        new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Optional finish timeout')),2000);}),
+      ]);
+      const natural=module.createNaturalSurfaceTextures(T);
+      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xffffff);materials.shellFloor.roughness=.58;}
+      if(natural.wood)for(const name of ['wood','oak','timber','timberAlt'])materials[name].map=natural.wood;
+    }catch{/* Retain usable solid finishes on module/canvas failure. */}
+    finally{clearTimeout(timer);}
+    materials.shellCeiling.color.set(0xf0e8d9);materials.shellCeiling.emissive.set(0xb3a286);materials.shellCeiling.emissiveIntensity=.55;
+    materials.shellWall.color.set(0xc9c4b6);
+    materials.glass.color.set(0xd7e9df);materials.glass.opacity=.19;materials.glass.roughness=.08;materials.glass.metalness=.08;
+  }
   const geometry = {
     box: new T.BoxGeometry(1, 1, 1), cylinder: new T.CylinderGeometry(1, 1, 1, 32), sphere: new T.SphereGeometry(1, 12, 8),
     plane: new T.PlaneGeometry(1, 1), torus: new T.TorusGeometry(1, .045, 8, 64), ring: new T.RingGeometry(.985, 1, 64)
@@ -499,6 +519,16 @@ export async function createWorld(T, R, physics, expanded = false) {
     box('glass',10,2.8,48,12,5.6,.3,true);
     for (const x of [4,10,16]) box('brass',x,2.8,47.8,.08,5.6,.08);
     ceilingBox('shellCeiling',10,8.5,18,70,.25,60,liftLayout.roofOpening);
+    // Recessed strips share the retained roof footprint, including its camera opening.
+    // Reuse existing emissive/pool batches; no new lights or visitor colliders.
+    function warmStrip(x,z,width,depth){
+      const panels=ceilingBox('glow',x,8.34,z,width,.035,depth,liftLayout.roofOpening);
+      for(const r of panels)lightPool((r.minX+r.maxX)/2,.052,(r.minZ+r.maxZ)/2,
+        width>depth?r.maxX-r.minX:4.5,width>depth?4.5:r.maxZ-r.minZ);
+    }
+    for(const x of [-12,32])for(const z of [10,22,34])warmStrip(x,z,.07,6);
+    for(const x of [-5,10,25])warmStrip(x,3,6,.07);
+
     for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
     for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
     // A single instanced label keeps every unoccupied bay visibly provisional.
@@ -522,10 +552,10 @@ export async function createWorld(T, R, physics, expanded = false) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m)); mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); scene.add(mesh);
   }
-  scene.add(new T.HemisphereLight(0xe4efe6, 0x6d5b3b, 2.1));
+  scene.add(new T.HemisphereLight(expanded?0xfff3e2:0xe4efe6, expanded?0x77634b:0x6d5b3b, 2.1));
   const key = new T.DirectionalLight(0xffd5a0, 2.6); key.position.set(-8, 15, 9); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
-  const fill = new T.DirectionalLight(0xb7d7e8, 1); fill.position.set(4, 8, -5); scene.add(fill);
+  const fill = new T.DirectionalLight(expanded ? 0xf4e4ce : 0xb7d7e8, expanded ? .9 : 1); fill.position.set(4, 8, -5); scene.add(fill);
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();
   const signHUD = ['.site-header', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));

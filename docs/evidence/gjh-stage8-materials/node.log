@@ -1,0 +1,39 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (2.371375ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (3.499042ms)
+✔ fourteen planned records derive only from closed slots and cannot imply reviewed tenants (1.039417ms)
+✔ static planned directory matches every canonical field without live catalog actions (4.09875ms)
+✔ Auto separates constrained, missing and capable hardware deterministically (1.502542ms)
+✔ explicit profiles and recovery use bounded DPR with truthful shadow eligibility (1.737792ms)
+✔ storage values are allowlisted (1.378333ms)
+✔ expanded lift uses actual translated plan, continuous threshold and safe courtyard return (1.795792ms)
+✔ upper deck and ceiling panels exactly cover remainder without gaps or overlapping shaft (0.419459ms)
+✔ canonical amenities and four SKU transforms remain outside shaft and circulation (1.226791ms)
+✔ lifecycle exits, cleans, suspends, enters and restores once in order (3.804958ms)
+✔ directory Inspect and Shop return to retained Menu then gameplay base (0.66525ms)
+✔ repeated observations and requests are idempotent without lifecycle effects (0.793292ms)
+✔ commands cannot manufacture gameplay or bypass the retained underlay (0.849333ms)
+✔ invalid observations fail atomically with no lifecycle effects (0.242959ms)
+✔ Inspect cannot be directly replaced by Shop in an observation (0.148959ms)
+✔ actual base changes under Shop are retained without fake Explore lifecycle (0.577458ms)
+✔ interrupt cleans once without enter, exit or restoring retained gameplay (0.216834ms)
+✔ history is bounded and distinguishes restores, rejection and interruptions (0.726292ms)
+✔ Shelf suspends each real base and restores through the same ordered lifecycle (1.230709ms)
+✔ complete boolean observations validate all Shelf combinations atomically (7.226125ms)
+✔ Shelf cannot be stacked with or directly replaced by another overlay (0.82875ms)
+✔ derived mode priority agrees with accepted observation (0.370667ms)
+✔ two shared deterministic256px finishes use sRGB repeat and bounded source pixel storage (6.134666ms)
+✔ canvas failure returns usable flat-finish sentinel without partial texture retention (1.434333ms)
+✔ unexpected canvas allocation failure stays contained (0.135584ms)
+✔ three stable stores share the current scene centers, entrances and ordering (2.256875ms)
+✔ location boundaries and map projection retain the existing visible behavior (0.743583ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (1.395167ms)
+✔ unavailable store cannot produce a travel destination (0.320875ms)
+✔ approved shell portals and aggregate proxies match authoritative live store centers (0.825125ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 192.11825

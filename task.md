@@ -579,7 +579,7 @@ The earlier nine-slice outline is superseded by the more detailed, dependency-aw
 
 ## Expanded 17-store upgrade — 2026-11-15
 
-Status: **stages 0–7 completed, with stages 3–7 implemented in the opt-in expanded preview; materials, themes and integration remain open**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
+Status: **stages 0–8 completed, with stages 3–8 implemented in the opt-in expanded preview; themes, seasonal packs and integration remain open**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
 
 - [x] Inspect existing scene dimensions and repository company/brand research; check GJH corporate and eShop source listings.
 - [x] Produce a labelled, dimensioned 2D ground-floor draft and reconcile area arithmetic, circulation zones, seasonal space and candidate brand evidence.
@@ -595,7 +595,7 @@ Status: **stages 0–7 completed, with stages 3–7 implemented in the opt-in ex
 - [x] **5. Existing stores:** integrated New Moon, MILI and GOGO into the expanded scene with visible glazed storefronts and directory-to-3D links; verified four product details, brand-only content, map, bag, fallbacks and PWA. [Implementation and evidence](docs/gjh-v11-stage5-existing-stores.md).
 - [x] **6. Candidate storefronts:** add truthful placeholders, then populate each store only after its individual brand, content and rights checks.
 - [x] **7. Elevator and facilities:** implement the expanded visitor-only lift and canonical service routing; verify travel, collision, camera, interruptions, v1/v2 and existing interactions. [Acceptance and limits](docs/gjh-v11-stage7-lift.md).
-- [ ] **8. Materials and lighting:** refine natural materials and warm premium lighting; validate actual scenes and compare resource use against the baseline.
+- [x] **8. Materials and lighting:** refine expanded natural materials and warm lighting; verify actual scenes, optional finish fallback/recovery and matched resource budgets. [Acceptance and limits](docs/gjh-v11-stage8-materials-lighting.md).
 - [ ] **9. Theme infrastructure:** build coherent everyday theme and accessible setup with safe state, storage fallback, cancellation and cleanup.
 - [ ] **10. Seasonal packs:** implement Lunar New Year, Christmas and Diwali sets one at a time with tested switch-back, path clearance and failure handling.
 - [ ] **11. Integration:** run applicable generator, unit and browser suites; review actual desktop/mobile journeys, accessibility, performance, fallback and remaining limits.
@@ -641,3 +641,21 @@ expanded1440Detailed cart changes193to182calls. See docs/gjh-v11-stage7-lift.md
 and docs/evidence/gjh-stage7-lift.json. All75binaryassets remain exact; one1,494-byte
 JSmodule is added. Main/CI/Pages/public verification is required beforestage8.
 Physical-device/AT, historicalpayload gates and operatingfacilities remain unverified.
+
+
+Stage8 local acceptance — 2026-11-15: application 1.1.52/build3ac382081b3b16d2
+adds two shared256px procedural stone/wood finishes and warm existing lights in
+expanded only. Instanced strips follow the real roof/camera opening; no collider,
+new light or shadow caster is added. The optional module has a two-second deadline,
+flat fallback, partial-allocation cleanup and no late factory execution. Classic
+requests no optional finish module in focused scenes; upper lift changes one color.
+Current55Python/31Node/gen/SSOT, fiveviewports/fourqualities, sevenfault/isolation
+cases, native texture context restoration and eightcurrentintegrationgroups pass.
+Independent local approval verifies150runtime/37raw/11screenshots and1,920fresh
+adjacent-paired advancing samples: all sampled calls unchanged (classic cart200,
+expanded cart182), expanded+98triangles/+2textures/0geometry objects. Both fresh099
+andcurrent loop medians are33.3ms; older16.7ms samples are not reused for timing.
+See docs/gjh-v11-stage8-materials-lighting.md and docs/evidence/gjh-stage8-materials.json.
+ParentStage7 publication099069d/CI43711374418/37public hashes/fourpublic contexts
+is preserved separately. This stage needs its own main/CI/Pages/public gate before9.
+Physical-device/AT, historicalpayload gates and measuredGPUbytes remain unverified.
