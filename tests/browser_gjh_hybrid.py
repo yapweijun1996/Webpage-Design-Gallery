@@ -42,7 +42,7 @@ def run():
                     page.locator('[data-store-filter="mili"]').click()
                     assert page.locator('[data-store]:visible').count() == 1
                     assert page.locator('[data-store="mili"]').is_visible()
-                    page.locator('[data-store-filter="all"]').click()
+                    page.locator('#hero-shop').click()
                     assert page.locator('[data-store]:visible').count() == 3
                     page.locator('#product-search').fill('Mexico')
                     assert page.locator('.product-card:visible').count() == 1

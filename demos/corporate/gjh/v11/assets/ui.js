@@ -337,6 +337,7 @@ export function createUI() {
     productResults.textContent = count ? `${count} New Moon product${count === 1 ? '' : 's'} shown. Check the official eShop for current price and availability.` : 'No products match your search. Try another search term.';
   }
   for (const button of storeFilters) button.addEventListener('click', () => { storeFilter = button.dataset.storeFilter; updateCatalog(); });
+  document.getElementById('hero-shop').addEventListener('click', () => { storeFilter = 'all'; updateCatalog(); });
   productSearch.addEventListener('input', updateCatalog);
   productCategory.addEventListener('change', updateCatalog);
   productSort.addEventListener('change', updateCatalog);
