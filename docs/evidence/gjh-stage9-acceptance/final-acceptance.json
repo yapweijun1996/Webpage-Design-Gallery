@@ -1,0 +1,26 @@
+{
+  "status": "APPROVE_LOCAL",
+  "application": {
+    "version": "1.1.54",
+    "build": "a0b67bd162653c9b"
+  },
+  "receiptReviewedSHA256": "6301a0a71445e39ca1645bdc6958f9e1112b933c9b92683d6a93dd390125ed5c",
+  "runtimeFilesVerified": 156,
+  "rawArtifactsVerified": 37,
+  "screenshotHashesVerified": 9,
+  "findings": [],
+  "scope": "Stage9 bounded optional-import deadlines, tracked retry-cache ownership, synchronous gamepad-close cancellation and restoration of two Everyday lift colors.",
+  "verification": [
+    "156 current runtime hashes,37 raw evidence hashes and9 screenshot hashes match.",
+    "Three fixed cases and seven current integration groups pass.",
+    "Production changes remain within reviewed boundary."
+  ],
+  "limits": [
+    "42 renderer observations are posed snapshots, not advancing-frame performance/FPS/GPU certification.",
+    "Real Three color/geometry tests use a collider stub, not Rapier or GPU certification.",
+    "Native import transport may complete later; no late factory/commit/resource claim is separately tested.",
+    "Startup request gate remains failed at82 versus45; no threshold relaxed.",
+    "Physical devices, AT and physical gamepad unverified.",
+    "Commit/main/CI/Pages/public validation pending; request-budget task starts only after delivery."
+  ]
+}

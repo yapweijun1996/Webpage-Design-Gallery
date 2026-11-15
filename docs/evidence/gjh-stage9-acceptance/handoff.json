@@ -1,0 +1,81 @@
+{
+  "baselineCommit": "646e0c272cd25a7792befc5635791a4466b72319",
+  "productionSHA256": {
+    "script.js": "12bf931dcae8cec1bde149833019cae79ba1a2df803a85261380f8823578df77",
+    "assets/mall-themes.js": "a60f7aadcdb3de3552e60cffd0a6156a21a318ec578e9f2d10f3e1be37500c54",
+    "assets/ui.js": "e82fc988d49478419ae19c3fb8b730af5ca315df8d533cb42795617b2f1e7b24"
+  },
+  "test": {
+    "path": "tests/browser_gjh_theme_acceptance.py",
+    "sha256": "d9b6c069b601f832e3f11ed1bc9d9b5e38a4b5fc4e22d0f322edf8e357be7276"
+  },
+  "phases": {
+    "initial-stall-and-harness-stop": {
+      "report": "/private/tmp/gallery-expanded-stage9/repro/before/report.json",
+      "reportSHA256": "30cb52c468cdc7398bdb7c01f17a62df6108cd165ea8feee9263777b0c355205",
+      "logSHA256": "ce97206b7ae9d27b65a877ec312be24326cf8657b75b1ca1e720b54013429046",
+      "sourcesUnchanged": true,
+      "rows": 1,
+      "pngs": {
+        "held-module.png": "c3e7e6ae75288b059fbbd8d854635fccfe25fd43ffa07c29ed46f51df8774c9e"
+      },
+      "qaSources": {
+        "qa-script.js": "1091416359c635edeab9387a023abbd693b9f2366201c1e6f13b8732ab0c4b5a"
+      },
+      "result": "Optional-coordinator stall confirmed at2.615s. Second case blocked by returning an unresolvedPromise from Playwright evaluate; owned job explicitly interrupted130. Originalprobe-attempt1.py retained. NOT acceptancepass."
+    },
+    "race-negative": {
+      "report": "/private/tmp/gallery-expanded-stage9/repro/race-before/report.json",
+      "reportSHA256": "43e5305b429c6bd79a15fc42943c44f6cd60a7ebdc329fe474718b9418325e49",
+      "logSHA256": "c8569d478cb1bf644feec2f17ef96fdafa6e6cf2a5cd3f1c64ad6003672d1ede",
+      "sourcesUnchanged": true,
+      "rows": 1,
+      "pngs": {
+        "after-back.png": "e286edea2d6c49c43d5b1533a33b3bd0a97726a58478366cb9e0c71382b73617",
+        "pending-before-back.png": "da5b96fc41575f3f8138d535923a188dcbd1ec401ebaf09109859f32eb2fee9d"
+      },
+      "qaSources": {
+        "qa-script.js": "1091416359c635edeab9387a023abbd693b9f2366201c1e6f13b8732ab0c4b5a"
+      },
+      "result": "Known bug confirmed: dialogclosed=true but selected=true/activeqa-deferred/commitwhileclosed/disposed0. Exit0 means negative reproduction succeeded, NOT acceptancepass."
+    },
+    "saved-pack-negative": {
+      "report": "/private/tmp/gallery-expanded-stage9/repro/seasonal-before/report.json",
+      "reportSHA256": "a347ee502baae1deff599cc6d083ee1e3daa859d87ba03294bd767400e51361f",
+      "logSHA256": "e80824da48cb17d047dfcfa4587ea099fd962a71053da500ba1693cdabaa0ffb",
+      "sourcesUnchanged": true,
+      "rows": 1,
+      "pngs": {
+        "held-seasonal.png": "ca6a6443aaf7ee79ab9482d6908808d2dcbd6229fea587f95814790200b810f8"
+      },
+      "qaSources": {},
+      "result": "Known bug confirmed: readyfalse/pendingChristmas at2.612s, listusable and releaseunblocked initialization. NOT acceptancepass."
+    },
+    "fixed": {
+      "report": "/private/tmp/gallery-expanded-stage9/fixed/report.json",
+      "reportSHA256": "778c3d7241df873aab1b48796b47d4fcad9157c459de610d95fc2034d8511d96",
+      "logSHA256": "3894fd304d3297066d43d30386cdd8bcae37c7de2f5b295410c8f0997e66795e",
+      "sourcesUnchanged": true,
+      "rows": 3,
+      "pngs": {
+        "coordinator-fallback.png": "cc174845eabb23750adeb80e8e5847027d7ed987a2ea8314e9bae814fd7cb83b",
+        "gamepad-cancel.png": "c21a0b023e91974a5b079539be26b9360c88bc024de82712e67957e144afc976",
+        "stored-pack-retry.png": "ec45d56dcf154ad98ad7971ca064fcf5c4c06397df12a803b32007c09a327dd6"
+      },
+      "qaSources": {
+        "qa-late-coordinator.js": "270b199aadeeb479ba64590bc13fb2ef831f8c38ce97a81570b8674f4e1fb24d",
+        "qa-late-pack.js": "22a78c316431d323121025196fb91f8381ff44794248de908121d49d025959d7",
+        "qa-script.js": "50df860717514f5e415dd39590794439996faf3e53a789f879f0709ea8332229"
+      },
+      "result": "AcceptancePASS3/terminal0: coordinator+savedpackdeadline/latefactory0/unchangedresources andactive; same-page retry succeeds; sharedBack cancels beforemicrotask, noCommit/dispose1/focusreturned; unexpectedconsole0."
+    }
+  },
+  "scope": "Three-file reliability/compatibility fix on existing published stages9\u201311; no pack rebuild, geometry/physics/asset/bundle changes.",
+  "limits": [
+    "Synthetic normalized gamepad/private UI bridge and controlled deferred coordinator, not physical input certification.",
+    "Held-module boundary checks are functional timeout evidence, not startup performance/throughput certification."
+  ],
+  "originalDiagnosticProbeSHA256": "d8d49c542f3074b6c1936c97e921b65efc7ad1fd4b76c5117ac3eb6d70049cf1",
+  "correctedDiagnosticProbeSHA256": "2bab7045849de58f5859aa4f030d47a11ba2f9bb39671cbe79a0c9a65a2f6f25",
+  "ownership": "Production frozen; no active childGPU/sourcewrites. Primary ownsapp54/generation/docs/task/finalvalidation/release."
+}

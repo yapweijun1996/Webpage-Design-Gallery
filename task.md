@@ -662,3 +662,19 @@ See docs/gjh-v11-stage8-materials-lighting.md and docs/evidence/gjh-stage8-mater
 ParentStage7 publication099069d/CI43711374418/37public hashes/fourpublic contexts
 is preserved separately. This stage needs its own main/CI/Pages/public gate before9.
 Physical-device/AT, historicalpayload gates and measuredGPUbytes remain unverified.
+
+
+Stage9 merged-release acceptance follow-up — application1.1.54/builda0b67bd162653c9b
+preserves owner-published646e0c2 themes/packs/integration and fixes optional-theme
+startup stalls, saved-pack timeout/retry and shared gamepad-close/prepare ordering.
+Two-second boundaries ignore late factories and clear only their own failed cache;
+Everyday restores the published stage8 lift colors. Three corrected fault cases,
+57Python/45Node/gen/SSOT and sevencurrentintegrationgroups pass. Six realThree
+batch color/geometry invariants use a clearly scoped collider stub, not physical
+Rapier/GPU certification. Forty-two retained posed theme/cart observations include
+parcel cost: expanded entrance Christmas cart193, classic Detailed cart200, exact
+warmedEveryday renderer-resource restoration. Independent local approval passes; this
+follow-up's main/CI/Pages/public verification is required before11b work resumes.
+See docs/gjh-v11-stage9-theme-infrastructure.md and docs/evidence/gjh-stage9-acceptance.json.
+The existing45-request gate remains failed at82; candidate brand permission and
+physical-device/AT limits are not completed by this fix.

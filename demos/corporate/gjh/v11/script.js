@@ -43,6 +43,17 @@ ui.onModeState(syncMode);
 setupOriginalTin(ui);
 syncMode();
 const STEP = 1 / 60;
+// Optional appearance imports cannot block required scene initialization.
+async function loadOptionalThemeModule(loader) {
+  let timer;
+  try {
+    return await Promise.race([
+      Promise.resolve().then(loader),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Optional theme module timed out')), 2000); }),
+    ]);
+  } finally { clearTimeout(timer); }
+}
+
 let previousGamepadInspect=false;
 const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
@@ -258,7 +269,7 @@ async function initialize() {
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded);
   if (expanded) {
     try {
-      const {createMallThemeCoordinator} = await import('./assets/mall-themes.js');
+      const {createMallThemeCoordinator} = await loadOptionalThemeModule(() => import('./assets/mall-themes.js'));
       let storage;
       try { storage=window.localStorage; } catch { storage=null; }
       const packs={
@@ -269,7 +280,11 @@ async function initialize() {
       function loadSeasonalModule(pack){
         if(!pack.promise){
           const query=pack.attempts++ ? `?retry=${pack.attempts}` : '';
-          pack.promise=pack.load(query).catch(error=>{pack.promise=null;throw error;});
+          const tracked=loadOptionalThemeModule(() => pack.load(query)).catch(error=>{
+            if(pack.promise===tracked)pack.promise=null;
+            throw error;
+          });
+          pack.promise=tracked;
         }
         return pack.promise;
       }

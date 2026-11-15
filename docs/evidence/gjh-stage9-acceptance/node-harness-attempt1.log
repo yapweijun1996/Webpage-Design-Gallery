@@ -1,0 +1,76 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (0.858667ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (6.863542ms)
+✔ fourteen planned records derive only from closed slots and cannot imply reviewed tenants (0.571458ms)
+✔ static planned directory matches every canonical field without live catalog actions (1.6555ms)
+✔ Auto separates constrained, missing and capable hardware deterministically (1.666583ms)
+✔ explicit profiles and recovery use bounded DPR with truthful shadow eligibility (1.268334ms)
+✔ storage values are allowlisted (0.105834ms)
+✔ expanded lift uses actual translated plan, continuous threshold and safe courtyard return (4.26125ms)
+✔ upper deck and ceiling panels exactly cover remainder without gaps or overlapping shaft (0.397333ms)
+✔ canonical amenities and four SKU transforms remain outside shaft and circulation (2.210083ms)
+node:internal/modules/esm/resolve:275
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/tmp/gallery-task-lod/demos/corporate/gjh/v11/vendor/three.module.js' imported from /private/tmp/gallery-task-lod/tests/gjh_lift_themes.test.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:860:10)
+    at defaultResolve (node:internal/modules/esm/resolve:984:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:704:25)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)
+    at ModuleJob._link (node:internal/modules/esm/module_job:137:49) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///private/tmp/gallery-task-lod/demos/corporate/gjh/v11/vendor/three.module.js'
+}
+
+Node.js v23.10.0
+✖ tests/gjh_lift_themes.test.mjs (122.583583ms)
+✔ only the reviewed themes are available and invalid stored IDs are safe (1.65225ms)
+✔ Deepavali decorations respect planter and event reservations (0.40675ms)
+✔ Christmas tree and presents stay in the planter while suspended lights clear the event (0.277666ms)
+✔ lunar decorations respect the existing planter footprint and suspended event clearance (0.1285ms)
+✔ blocked storage keeps a working in-memory selection (0.32125ms)
+✔ reapplying the current theme invokes the scene commit without preparing new resources (0.171792ms)
+✔ later selection wins, stale preparation is disposed and no stale commit runs (0.28625ms)
+✔ failure and interruption leave the previous theme active and clean staged resources (0.593125ms)
+✔ a remembered supported theme is prepared before it becomes active (0.528958ms)
+✔ superseding or suspending preparation aborts the old signal (0.47475ms)
+✔ closing a pending selection aborts and disposes its late result (0.266625ms)
+✔ validated visual roles update real scene targets atomically before a future theme is committed (0.336167ms)
+✔ lifecycle exits, cleans, suspends, enters and restores once in order (3.348833ms)
+✔ directory Inspect and Shop return to retained Menu then gameplay base (1.575083ms)
+✔ repeated observations and requests are idempotent without lifecycle effects (0.300084ms)
+✔ commands cannot manufacture gameplay or bypass the retained underlay (0.289375ms)
+✔ invalid observations fail atomically with no lifecycle effects (0.350584ms)
+✔ Inspect cannot be directly replaced by Shop in an observation (0.13375ms)
+✔ actual base changes under Shop are retained without fake Explore lifecycle (0.227583ms)
+✔ interrupt cleans once without enter, exit or restoring retained gameplay (0.131792ms)
+✔ history is bounded and distinguishes restores, rejection and interruptions (0.634875ms)
+✔ Shelf suspends each real base and restores through the same ordered lifecycle (4.34325ms)
+✔ complete boolean observations validate all Shelf combinations atomically (1.970875ms)
+✔ Shelf cannot be stacked with or directly replaced by another overlay (0.504667ms)
+✔ derived mode priority agrees with accepted observation (0.274875ms)
+✔ two shared deterministic256px finishes use sRGB repeat and bounded source pixel storage (4.425208ms)
+✔ canvas failure returns usable flat-finish sentinel without partial texture retention (1.125625ms)
+✔ unexpected canvas allocation failure stays contained (0.121959ms)
+✔ three stable stores share the current scene centers, entrances and ordering (3.490333ms)
+✔ location boundaries and map projection retain the existing visible behavior (0.835042ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (1.9165ms)
+✔ unavailable store cannot produce a travel destination (0.417334ms)
+✔ approved shell portals and aggregate proxies match authoritative live store centers (1.517791ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 43
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 227.62275
+
+✖ failing tests:
+
+test at tests/gjh_lift_themes.test.mjs:1:1
+✖ tests/gjh_lift_themes.test.mjs (122.583583ms)
+  'test failed'
