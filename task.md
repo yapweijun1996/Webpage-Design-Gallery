@@ -601,7 +601,7 @@ Status: **stages 0–5 and 7–10 completed in the opt-in expanded preview; stag
 - [x] **10b. Christmas:** added an evergreen tree, gifts, warm lights and banner with removable decoration, three-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-christmas.md).
 - [x] **10c. Deepavali:** added warm lamps, floral garlands, a flat rangoli-inspired motif and jewel tones with four-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-deepavali.md).
 - [x] **11a. Integration verification:** tested all four themes, existing shopping and navigation, five viewport sizes, graphics/failure recovery, PWA and accessibility; fixed hidden offline help, stale theme preview and landscape Help focus. [Report and evidence](docs/gjh-v11-stage11-integration.md). Browser emulation is not physical-device or screen-reader certification.
-- [x] **11b. Startup performance acceptance:** added checked JavaScript bundles and a validated, recoverable pack of 19 existing models. The unchanged default-layout budget passes at all five simulated viewports: 40–42 requests, at most 10,274,856 decoded bytes and at most 198 non-cart draw calls. The matched 320 × 740 count decreased from 82 to 40; decoded bytes increased from 9,884,761 to 9,923,772. Headroom is tight and physical-device performance remains unverified. See [stage 11b and evidence](docs/gjh-v11-stage11b-startup.md).
+- [x] **11b. Startup performance acceptance:** added checked JavaScript bundles and a validated, recoverable pack of 19 existing models. The unchanged default-layout budget passes at all five simulated viewports: 40–42 requests, at most 10,275,478 decoded bytes and at most 198 non-cart draw calls. The matched 320 × 740 count decreased from 82 to 40; decoded bytes increased from 9,884,761 to 9,924,394. Headroom is tight and physical-device performance remains unverified. See [stage 11b and evidence](docs/gjh-v11-stage11b-startup.md).
 
 Proposed dimensions and a small upper landing are documented; owner review, actual-scene clearance, external service connectivity, store content/rights and any shared operator theme access remain open for their respective slices. Browser-local theme persistence is implemented. A checked planning item is not runtime implementation or acceptance.
 
@@ -662,3 +662,18 @@ See docs/gjh-v11-stage8-materials-lighting.md and docs/evidence/gjh-stage8-mater
 ParentStage7 publication099069d/CI43711374418/37public hashes/fourpublic contexts
 is preserved separately. This stage needs its own main/CI/Pages/public gate before9.
 Physical-device/AT, historicalpayload gates and measuredGPUbytes remain unverified.
+
+
+Stage9 merged-release acceptance follow-up — application1.1.54/builda0b67bd162653c9b
+preserves owner-published646e0c2 themes/packs/integration and fixes optional-theme
+startup stalls, saved-pack timeout/retry and shared gamepad-close/prepare ordering.
+Two-second boundaries ignore late factories and clear only their own failed cache;
+Everyday restores the published stage8 lift colors. Three corrected fault cases,
+57Python/45Node/gen/SSOT and sevencurrentintegrationgroups pass. Six realThree
+batch color/geometry invariants use a clearly scoped collider stub, not physical
+Rapier/GPU certification. Forty-two retained posed theme/cart observations include
+parcel cost: expanded entrance Christmas cart193, classic Detailed cart200, exact
+warmedEveryday renderer-resource restoration. Independent local approval passes; this
+follow-up was published on main before the stage 11b request reduction was integrated.
+See docs/gjh-v11-stage9-theme-infrastructure.md and docs/evidence/gjh-stage9-acceptance.json.
+At this historical point the 45-request gate failed at 82; stage 11b later addressed it. Candidate brand permission and physical-device/AT limits remain open.

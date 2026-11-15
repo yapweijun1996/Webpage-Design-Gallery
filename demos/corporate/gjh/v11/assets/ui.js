@@ -768,7 +768,13 @@ export function createUI(expanded = false) {
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
       notifyMode();
     },
-    handleGamepad(pad) { return onboarding.handleGamepad(pad,themeDialog.open?themeDialog:amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null); },
+    handleGamepad(pad) {
+      const wasThemeOpen=themeDialog.open;
+      const handled=onboarding.handleGamepad(pad,themeDialog.open?themeDialog:amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null);
+      // Native close queues its event; abort before a pending preparation microtask.
+      if(wasThemeOpen&&!themeDialog.open)mallTheme?.cancel();
+      return handled;
+    },
     paused() {
       const signals=modeSignals();
       syncOnboardingSuspension(signals);

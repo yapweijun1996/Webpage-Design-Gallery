@@ -6,7 +6,7 @@ export const EVERYDAY = Object.freeze({
   materials:Object.freeze({floorTextured:0xffffff,floorFlat:0xc9c2ac,ceiling:0xf0e8d9,ceilingGlow:0xb3a286,ceilingGlowIntensity:.55,
     wall:0xc9c4b6,green:0x153c30,ivory:0xe3d6b7,brass:0xb59b62,wood:0x6b4931,oak:0xa28055,timber:0xa48b67,timberAlt:0xa08763,
     glass:0xd7e9df,glassOpacity:.19,glassRoughness:.08,glassMetalness:.08,glow:0xffe7b4,glowEmission:0xffd08a,glowIntensity:1.2,
-    liftStone:0xdfd5c4,liftGreen:0x21483e,liftGate:0x35584d,liftGlassOpacity:.24}),
+    liftStone:0xdfd5c4,liftGreen:0x183a30,liftGate:0xb59b62,liftGlassOpacity:.24}),
   lighting:Object.freeze({sky:0xfff3e2,ground:0x77634b,ambient:2.1,key:0xffd5a0,keyIntensity:2.6,fill:0xf4e4ce,fillIntensity:.9}),
   decorationRefs:Object.freeze([])
 });

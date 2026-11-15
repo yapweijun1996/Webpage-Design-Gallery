@@ -1,0 +1,187 @@
+{
+  "sourceHashes": {
+    "offline.html": "a31e6bc958c808346299726b42215ef69a40cad40c9e711bf18fedecc2b4af4e",
+    "index.html": "a8d0a46beaf628cb570da154efefdea97b6dafd9072d96e5ad812fdbf5be6974",
+    "script.js": "12bf931dcae8cec1bde149833019cae79ba1a2df803a85261380f8823578df77",
+    "pwa-sw.js": "9cd54b20a2d9c94f540d6f16e1b140eba55d8f7565c858bfe3db05638d5cf7f8",
+    "style.css": "3bc31f389ecf294930b4ad9bbd4a1ae65b963b3db199afff5787f2a1c2b0e627",
+    "pwa.js": "ac85463a033edfad395a480d30cfac496ac251722a6a7f683a4b3c55c32ad60e",
+    "style.bundle.css": "77519ec2ea06b2233835422892a0647ed95299ab5845f9dc33d11b7ed3ac1921",
+    "assets/shell.js": "467388367cdfd44333eeebc14080b7c97e5c449df3a15a0c6e40d46aa7e509a6",
+    "assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "assets/visitor-v2-contact.js": "8b187c6df79c017dbbe6287aba072ec412ba0ecdc0af7c1f16972351075f9fa3",
+    "assets/ui.js": "e82fc988d49478419ae19c3fb8b730af5ca315df8d533cb42795617b2f1e7b24",
+    "assets/spatial.js": "7cafcdf06b91dec11675ce25601e42fd30b618a80abfde7ef13024d8fb1d6b25",
+    "assets/atrium-layout.js": "f022a7234e19f0472c742d92f4016ff633ed252952b5a0b8dd60adf4246a5ce8",
+    "assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "assets/natural-materials.js": "3c52b59ce7ed31f38a299cf674827b9c841d6646555a41f0397daaffbdcf1406",
+    "assets/products.js": "20eccdf781f3e02f7b3c69730befa750f020aeeff885a45beea72b299375a455",
+    "assets/elevator-v2.js": "bb27990eec403700eefe678e3207d9a88bba582a26e6871e6c0c390d0cc196b8",
+    "assets/lift-layout.js": "542572943abfe85c459a803f9d55f7eb3bb751384c93b855b594cce07fd5bb4e",
+    "assets/world.js": "a180fd717d1df772743fc40d78595f9a55d6ffc31c6e0ceee4c91284d91b67b1",
+    "assets/visitor-v2-product-ui.js": "f0a714f425cb38e5ff4a941a10764dc730d61ab4b4e046fccf2eae39b8c4eefc",
+    "assets/interior-shell-registry.js": "f73ae9237c5ebc37256fcadcebf057b61d45df0e4e6b38f95102a8562ce47b4c",
+    "assets/shelf-focus.js": "a509bc1ce7d8528912054d7b1f4df07a016de8b6ac384654beb005983997a7a6",
+    "assets/push-cart.js": "1831da1ddff6f334cfda30a7befdb41ae8881e836e2196b5e97a04ab21dd259e",
+    "assets/character-v2.js": "acbf0fc87bb4e5c862636a4904e7f0bf44a9f6cfca88725b3e2925a370eb1a0a",
+    "assets/lunar-new-year.js": "7147b5e94ff5bd6686930e303546732f0c7ab19719a337cc46574c14b0841396",
+    "assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
+    "assets/expanded-layout.js": "76c28be462b5b462a9d3e92230ed74b63d1a5f36c002b67a3d8715587565d59d",
+    "assets/opaque-batch.js": "1494cb01c1f4dd57c4ce0177c059765db001d329cac066b00213969f111291a6",
+    "assets/furnishings.js": "814326aae02f68e513a901957f74b3336c6f9d7f15f0a659156ddc945988e4fc",
+    "assets/static-asset.js": "2cd57880e4af55a09c4539780599c6a0f4176f1ca7336db6168c6e242eba7666",
+    "assets/christmas.js": "5ff9a6cdacc03e4b3697c4dec2308a191d3458ddb55a17734988db56691ccae9",
+    "assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+    "assets/newmoon-detail-preview.js": "5b6a0ebd19b5061882f7ad5eb39bb675e3e537e08221386303bbfbb816143996",
+    "assets/amenities.js": "142c8b37c3ade5d2d290b10f2abd32e98d16dfa86cd7acdd84f8b2c5d585e40a",
+    "assets/target-guidance.js": "e82f048d90587c1be218d0b2a1845f4ee047e574e8fffc693df99f5ab7cbb073",
+    "assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+    "assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "assets/visitor-v2-controls.js": "a3f625f20619d97c1efb7349e1d63077b7255f3ba23b7ee35d05e692ff11d550",
+    "assets/player.js": "a94e4913f63919a20c4d85fe54cdcac710790dd4bc20835943cf9066ef63a9d9",
+    "assets/context-navigation.js": "dea62dd0bb38aea995cbe967671980f779145a938da03c47f163edcd68e4ec68",
+    "assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "assets/character.js": "f9e4c86aa104ccaf6fffa2dd7edff242d539ff49e4ff949c64d49615ef8dfce8",
+    "assets/deepavali.js": "bf2c28c16c445149e2eafd801b46f261de0e8de7920a0c1ef4cc377adfcdf840",
+    "assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "assets/mall-themes.js": "a60f7aadcdb3de3552e60cffd0a6156a21a318ec578e9f2d10f3e1be37500c54",
+    "vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "testSha256": "d9b6c069b601f832e3f11ed1bc9d9b5e38a4b5fc4e22d0f322edf8e357be7276",
+  "checks": [
+    {
+      "case": "coordinator-deadline-late-evaluation",
+      "holdSeconds": 3.2216907090041786,
+      "before": {
+        "ready": true,
+        "theme": null,
+        "resources": {
+          "geometries": 98,
+          "textures": 25
+        },
+        "children": 125,
+        "drawCalls": 153,
+        "illegal": 0
+      },
+      "after": {
+        "ready": true,
+        "theme": null,
+        "resources": {
+          "geometries": 98,
+          "textures": 25
+        },
+        "children": 125,
+        "drawCalls": 153,
+        "illegal": 0
+      },
+      "lateFactoryCalls": 0,
+      "qaModuleSha256": "270b199aadeeb479ba64590bc13fb2ef831f8c38ce97a81570b8674f4e1fb24d",
+      "errors": [],
+      "console": {
+        "fixtureWarnings": 1,
+        "unexpected": [],
+        "count": 1
+      }
+    },
+    {
+      "case": "stored-pack-deadline-late-and-same-page-retry",
+      "before": {
+        "ready": true,
+        "theme": {
+          "active": "everyday",
+          "label": "Everyday",
+          "pending": null,
+          "message": "Theme could not be applied. The current theme is unchanged.",
+          "saved": true,
+          "suspended": false
+        },
+        "resources": {
+          "geometries": 98,
+          "textures": 25
+        },
+        "children": 125,
+        "drawCalls": 153,
+        "illegal": 0
+      },
+      "afterLate": {
+        "ready": true,
+        "theme": {
+          "active": "everyday",
+          "label": "Everyday",
+          "pending": null,
+          "message": "Theme could not be applied. The current theme is unchanged.",
+          "saved": true,
+          "suspended": false
+        },
+        "resources": {
+          "geometries": 98,
+          "textures": 25
+        },
+        "children": 125,
+        "drawCalls": 153,
+        "illegal": 0
+      },
+      "afterRetry": {
+        "ready": true,
+        "theme": {
+          "active": "christmas",
+          "label": "Christmas",
+          "pending": null,
+          "message": "Christmas is active.",
+          "saved": true,
+          "suspended": false
+        },
+        "resources": {
+          "geometries": 104,
+          "textures": 26
+        },
+        "children": 126,
+        "drawCalls": 167,
+        "illegal": 0
+      },
+      "lateFactoryCalls": 0,
+      "retryFactoryCalls": 1,
+      "moduleRequests": [
+        "http://127.0.0.1:54000/demos/corporate/gjh/v11/assets/christmas.js",
+        "http://127.0.0.1:54000/demos/corporate/gjh/v11/assets/christmas.js?retry=2"
+      ],
+      "qaModuleSha256": "22a78c316431d323121025196fb91f8381ff44794248de908121d49d025959d7",
+      "errors": [],
+      "console": {
+        "fixtureWarnings": 1,
+        "unexpected": [],
+        "count": 1
+      }
+    },
+    {
+      "case": "shared-normalized-gamepad-close-before-deferred-resolution",
+      "result": {
+        "handled": true,
+        "closedSynchronously": true,
+        "selected": false,
+        "active": "everyday",
+        "pending": null,
+        "commits": [],
+        "disposed": 1
+      },
+      "focusReturnedTo": "mall-theme-open",
+      "errors": [],
+      "console": {
+        "fixtureWarnings": 1,
+        "unexpected": [],
+        "count": 1
+      }
+    }
+  ],
+  "scope": "Default fixed expectations. Factory counters/deferred synthetic registry/private UI bridge and normalized gamepad are QA-only; no physical-device/performance claim.",
+  "qaBridge": {
+    "sourceSha256": "12bf931dcae8cec1bde149833019cae79ba1a2df803a85261380f8823578df77",
+    "servedSha256": "50df860717514f5e415dd39590794439996faf3e53a789f879f0709ea8332229"
+  },
+  "sourcesUnchanged": true
+}

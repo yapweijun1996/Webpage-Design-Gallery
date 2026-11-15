@@ -1,0 +1,320 @@
+{
+  "commit": "646e0c272cd25a7792befc5635791a4466b72319",
+  "remoteMain": "646e0c272cd25a7792befc5635791a4466b72319",
+  "actions": [
+    {
+      "conclusion": "success",
+      "databaseId": 43715503543,
+      "headSha": "646e0c272cd25a7792befc5635791a4466b72319",
+      "status": "completed",
+      "url": "https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/43715503543"
+    }
+  ],
+  "githubBlobs": [
+    {
+      "path": "task.md",
+      "blobSHA": "5faa309c7cfb217c957c98c1c0470b523584ca8a"
+    },
+    {
+      "path": "docs/evidence/gjh-stage7-lift.json",
+      "blobSHA": "59debc2c69284e6c465da60b3e1e841901cab8ef"
+    },
+    {
+      "path": "docs/evidence/gjh-stage8-materials.json",
+      "blobSHA": "082d01b6edd0b048f8c799c753b16136f74108cb"
+    },
+    {
+      "path": "docs/evidence/interior-shell-integration.json",
+      "blobSHA": "9503e1fa594b63c37922773b6d6269fe99cb9fe5"
+    },
+    {
+      "path": "docs/evidence/interior-p1-selection.json",
+      "blobSHA": "ba08370195e431a55267d710a751911af281bdb0"
+    },
+    {
+      "path": "docs/evidence/interior-detail-policy.json",
+      "blobSHA": "d852a821a596168989b4dc795c3acb18da0d4750"
+    },
+    {
+      "path": "docs/evidence/gjh-stage6-candidates.json",
+      "blobSHA": "ab42a2902ec288e9fd731b06693fe66add7be538"
+    },
+    {
+      "path": "docs/evidence/gjh-stage6-public-check.json",
+      "blobSHA": "a8d85656798c11558364beeab5a0b083f9283ba5"
+    }
+  ],
+  "normalURLPagesResponses": [
+    {
+      "path": "version.json",
+      "status": 200,
+      "sha256": "cad34d84c0ff6507558f2b7dd4f880cd7973a655076c84d9a6eef381f79ae091",
+      "bytes": 57
+    },
+    {
+      "path": "sw.js",
+      "status": 200,
+      "sha256": "aab82704217a5170f71ffc936579133e080ca59149411cfc85fe0f677e4f2bf3",
+      "bytes": 8563
+    },
+    {
+      "path": "demos/corporate/gjh/v11/index.html",
+      "status": 200,
+      "sha256": "a8d0a46beaf628cb570da154efefdea97b6dafd9072d96e5ad812fdbf5be6974",
+      "bytes": 42436
+    },
+    {
+      "path": "demos/corporate/gjh/v11/style.css",
+      "status": 200,
+      "sha256": "3bc31f389ecf294930b4ad9bbd4a1ae65b963b3db199afff5787f2a1c2b0e627",
+      "bytes": 77001
+    },
+    {
+      "path": "demos/corporate/gjh/v11/script.js",
+      "status": 200,
+      "sha256": "f10521249785ccfcdcdd61597df1c148c6897cbacb0c76257d2f89fa506cea1e",
+      "bytes": 23196
+    },
+    {
+      "path": "demos/corporate/gjh/v11/pwa-sw.js",
+      "status": 200,
+      "sha256": "36767bc748ea8f1389dc353920eef3bc2ada2a839185378f5c39540577f15b44",
+      "bytes": 3673
+    },
+    {
+      "path": "demos/corporate/gjh/v11/pwa.js",
+      "status": 200,
+      "sha256": "ac85463a033edfad395a480d30cfac496ac251722a6a7f683a4b3c55c32ad60e",
+      "bytes": 8974
+    },
+    {
+      "path": "demos/corporate/gjh/v11/manifest.webmanifest",
+      "status": 200,
+      "sha256": "1c053d68e6091b82a4a1180555c73f109fff62a9c7014a15f07a1e2b156104ea",
+      "bytes": 592
+    },
+    {
+      "path": "assets/onboarding/onboarding.css",
+      "status": 200,
+      "sha256": "b82b4ace65a530fc03085a93947562d29726cd6384992c2d6ea277fcb306a9a4",
+      "bytes": 10479
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/mall-themes.js",
+      "status": 200,
+      "sha256": "b4775a814a02322a6a01023491cf8e470b0f204718cb66f2cd0b4802abb87c56",
+      "bytes": 7064
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/lunar-new-year.js",
+      "status": 200,
+      "sha256": "7147b5e94ff5bd6686930e303546732f0c7ab19719a337cc46574c14b0841396",
+      "bytes": 6166
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/christmas.js",
+      "status": 200,
+      "sha256": "5ff9a6cdacc03e4b3697c4dec2308a191d3458ddb55a17734988db56691ccae9",
+      "bytes": 6281
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/deepavali.js",
+      "status": 200,
+      "sha256": "bf2c28c16c445149e2eafd801b46f261de0e8de7920a0c1ef4cc377adfcdf840",
+      "bytes": 6609
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/natural-materials.js",
+      "status": 200,
+      "sha256": "3c52b59ce7ed31f38a299cf674827b9c841d6646555a41f0397daaffbdcf1406",
+      "bytes": 2372
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/lift-layout.js",
+      "status": 200,
+      "sha256": "542572943abfe85c459a803f9d55f7eb3bb751384c93b855b594cce07fd5bb4e",
+      "bytes": 1494
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/elevator-v2.js",
+      "status": 200,
+      "sha256": "bb27990eec403700eefe678e3207d9a88bba582a26e6871e6c0c390d0cc196b8",
+      "bytes": 9660
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/world.js",
+      "status": 200,
+      "sha256": "a180fd717d1df772743fc40d78595f9a55d6ffc31c6e0ceee4c91284d91b67b1",
+      "bytes": 40506
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/shell.js",
+      "status": 200,
+      "sha256": "467388367cdfd44333eeebc14080b7c97e5c449df3a15a0c6e40d46aa7e509a6",
+      "bytes": 2941
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/static-asset.js",
+      "status": 200,
+      "sha256": "2cd57880e4af55a09c4539780599c6a0f4176f1ca7336db6168c6e242eba7666",
+      "bytes": 4109
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/opaque-batch.js",
+      "status": 200,
+      "sha256": "1494cb01c1f4dd57c4ce0177c059765db001d329cac066b00213969f111291a6",
+      "bytes": 1395
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/interior-shell-registry.js",
+      "status": 200,
+      "sha256": "f73ae9237c5ebc37256fcadcebf057b61d45df0e4e6b38f95102a8562ce47b4c",
+      "bytes": 13753
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/furnishings.js",
+      "status": 200,
+      "sha256": "814326aae02f68e513a901957f74b3336c6f9d7f15f0a659156ddc945988e4fc",
+      "bytes": 2250
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/amenities.js",
+      "status": 200,
+      "sha256": "142c8b37c3ade5d2d290b10f2abd32e98d16dfa86cd7acdd84f8b2c5d585e40a",
+      "bytes": 10737
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/push-cart.js",
+      "status": 200,
+      "sha256": "1831da1ddff6f334cfda30a7befdb41ae8881e836e2196b5e97a04ab21dd259e",
+      "bytes": 7484
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/spatial.js",
+      "status": 200,
+      "sha256": "7cafcdf06b91dec11675ce25601e42fd30b618a80abfde7ef13024d8fb1d6b25",
+      "bytes": 4329
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/expanded-layout.js",
+      "status": 200,
+      "sha256": "76c28be462b5b462a9d3e92230ed74b63d1a5f36c002b67a3d8715587565d59d",
+      "bytes": 1823
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/atrium-layout.js",
+      "status": 200,
+      "sha256": "f022a7234e19f0472c742d92f4016ff633ed252952b5a0b8dd60adf4246a5ce8",
+      "bytes": 723
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/player.js",
+      "status": 200,
+      "sha256": "a94e4913f63919a20c4d85fe54cdcac710790dd4bc20835943cf9066ef63a9d9",
+      "bytes": 27003
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/ui.js",
+      "status": 200,
+      "sha256": "15360fa501526fded2685991b35fdeb4fffcc5d8a6f2a88e6af5f1b2260d9d75",
+      "bytes": 54015
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/modes.js",
+      "status": 200,
+      "sha256": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+      "bytes": 4855
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/products.js",
+      "status": 200,
+      "sha256": "20eccdf781f3e02f7b3c69730befa750f020aeeff885a45beea72b299375a455",
+      "bytes": 14079
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_ARC_001.glb",
+      "status": 200,
+      "sha256": "e5145b12a4bcca1f3d4badc3e6c0285fbd0a65c07f0ddb9c8f3a636e7b1f7197",
+      "bytes": 8076
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_COR_001.glb",
+      "status": 200,
+      "sha256": "ef48863a88cad561c016abc12d4649b6c85db86a872b3c04802d56667e2295a3",
+      "bytes": 10504
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_CEI_001.glb",
+      "status": 200,
+      "sha256": "5596575c578ba6b18fe87763b245ff428bb0a0ab7c200e36925817fbcf36e40e",
+      "bytes": 11512
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_STF_002.glb",
+      "status": 200,
+      "sha256": "edc1d834199ea409831f6ec203b4450505734dbf20dfee10082d790d846f0b82",
+      "bytes": 10800
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_DSP_001.glb",
+      "status": 200,
+      "sha256": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+      "bytes": 228924
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_PUB_002.glb",
+      "status": 200,
+      "sha256": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+      "bytes": 233176
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_PUB_008.glb",
+      "status": 200,
+      "sha256": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+      "bytes": 119732
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_PUB_005.glb",
+      "status": 200,
+      "sha256": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+      "bytes": 160536
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/GJH_LGT_009.glb",
+      "status": 200,
+      "sha256": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+      "bytes": 22804
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/interior-pilot.json",
+      "status": 200,
+      "sha256": "23001559b4cb93c3eb29881baa81c676697ce8adb5ae37b3b246ea02ae824c17",
+      "bytes": 9282
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/interior-pilot-registry.js",
+      "status": 200,
+      "sha256": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
+      "bytes": 8903
+    },
+    {
+      "path": "demos/corporate/gjh/v11/style.bundle.css",
+      "status": 200,
+      "sha256": "77519ec2ea06b2233835422892a0647ed95299ab5845f9dc33d11b7ed3ac1921",
+      "bytes": 129184
+    },
+    {
+      "path": "demos/corporate/gjh/v11/vendor/rapier.mjs",
+      "status": 200,
+      "sha256": "eacc406a7382e21adb966b93671c2cf72b04fffc251b81ac4c96a1876b651886",
+      "bytes": 230838
+    },
+    {
+      "path": "demos/corporate/gjh/v11/vendor/rapier_bg.wasm",
+      "status": 200,
+      "sha256": "17cfa80eebd8de0291b948496dbffba724b98b489687f8272ca236a7bbf1dd4b",
+      "bytes": 3082103
+    }
+  ],
+  "scope": "Exact main/GitHub blobs, successful head-specific CI/Pages run and normal public URL body hashes. Docs-only releases can retain identical runtime/app/build bytes."
+}

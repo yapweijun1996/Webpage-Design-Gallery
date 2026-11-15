@@ -2285,7 +2285,11 @@ function createUI(expanded = false) {
       notifyMode();
     },
     handleGamepad(pad) {
-      return onboarding.handleGamepad(pad, themeDialog.open ? themeDialog : amenityPanel.dialog.open ? amenityPanel.dialog : dialog.open ? dialog : bag.open ? bagDialog : help.open ? help : compactMap.matches && mallMap.open ? mallMap : !showing3D ? document.body : null);
+      const wasThemeOpen = themeDialog.open;
+      const handled = onboarding.handleGamepad(pad, themeDialog.open ? themeDialog : amenityPanel.dialog.open ? amenityPanel.dialog : dialog.open ? dialog : bag.open ? bagDialog : help.open ? help : compactMap.matches && mallMap.open ? mallMap : !showing3D ? document.body : null);
+      if (wasThemeOpen && !themeDialog.open)
+        mallTheme?.cancel();
+      return handled;
     },
     paused() {
       const signals = modeSignals();
@@ -2588,6 +2592,19 @@ ui.onModeState(syncMode);
 setupOriginalTin(ui);
 syncMode();
 var STEP = 1 / 60;
+async function loadOptionalThemeModule(loader) {
+  let timer;
+  try {
+    return await Promise.race([
+      Promise.resolve().then(loader),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error("Optional theme module timed out")), 2000);
+      })
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 var previousGamepadInspect = false;
 var snapshot = () => Object.freeze({
   ...player?.state || {},
@@ -3005,14 +3022,16 @@ async function initialize() {
       let loadSeasonalModule = function(pack) {
         if (!pack.promise) {
           const query = pack.attempts++ ? `?retry=${pack.attempts}` : "";
-          pack.promise = pack.load(query).catch((error) => {
-            pack.promise = null;
+          const tracked = loadOptionalThemeModule(() => pack.load(query)).catch((error) => {
+            if (pack.promise === tracked)
+              pack.promise = null;
             throw error;
           });
+          pack.promise = tracked;
         }
         return pack.promise;
       };
-      const { createMallThemeCoordinator } = await import("./assets/mall-themes.js");
+      const { createMallThemeCoordinator } = await loadOptionalThemeModule(() => import("./assets/mall-themes.js"));
       let storage;
       try {
         storage = window.localStorage;

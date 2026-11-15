@@ -141,3 +141,30 @@ regeneration with pinned Bun produced byte-identical bundles and manifest.
 [Source hashes](evidence/gjh-stage11b-request-20261115/source-sha256.txt)
 pin the checked runtime and relevant tests. Browser emulation and automated
 accessibility checks do not certify physical devices or screen readers.
+
+## Main-branch integration
+
+The performance work was merged with main commit `372295c`, which added bounded
+optional-theme loading and cancellation before a pending theme can commit. The
+JavaScript bundles were regenerated from both changes, and the application
+version was advanced to 1.1.55 so existing service workers can identify the
+new build. The earlier measurements and source hashes above describe the
+pre-merge snapshot; the [main integration budget](evidence/gjh-stage11b-main-merge-20261115/budget-report.json)
+is the acceptance evidence for the combined runtime.
+
+The combined build passed the [theme timeout, late-result and gamepad-cancel
+cases](evidence/gjh-stage11b-main-merge-20261115/theme.log), [model pack fault
+cases](evidence/gjh-stage11b-main-merge-20261115/asset-failures.log),
+[generated-artifact and PWA checks](evidence/gjh-stage11b-main-merge-20261115/publish-and-pwa.log),
+59 [Python](evidence/gjh-stage11b-main-merge-20261115/unit.log) and 48
+[Node](evidence/gjh-stage11b-main-merge-20261115/node.log) tests. A clean
+Python-only generated build includes the checked-in bundles and model pack.
+The retained theme QA fixture explicitly targets the bundled entry point.
+
+The combined runtime passed the unchanged budget in all five viewports:
+40, 40, 40, 42 and 40 startup requests respectively; the largest decoded
+resource total was 10,275,478 bytes and the highest non-cart draw count was
+198. At 320 × 740 the combined result was 40 requests and 9,924,394 decoded
+bytes. The [budget log](evidence/gjh-stage11b-main-merge-20261115/budget.log)
+and [source hashes](evidence/gjh-stage11b-main-merge-20261115/source-sha256.txt)
+record the final combined measurement and runtime.

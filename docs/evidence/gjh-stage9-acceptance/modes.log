@@ -1,0 +1,4 @@
+PASS lifecycle 390x844: 80 snapshots
+PASS lifecycle 768x1024: 41 snapshots
+PASS lifecycle 1440x900: 41 snapshots
+Evidence: /private/tmp/gallery-expanded-stage9/primary/final-copy/docs/evidence/v11-modes-lifecycle.json
