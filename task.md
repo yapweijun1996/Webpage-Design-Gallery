@@ -1,6 +1,6 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **core mall software and existing-source checks complete; physical-device acceptance and separately scoped interior follow-ups remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
+Status: **core mall software, existing-source checks and the four authorized interior follow-ups complete; physical-device acceptance and separately scoped expanded-mall stages remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
 
 ## Objective and scope
 
@@ -461,7 +461,7 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] D2: validate export in independent viewers and the actual mall; verify failed/delayed loading, lifecycle cleanup and mobile/desktop visuals.
 - [x] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
 - [x] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
-- [ ] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
+- [x] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
 - [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
 
 Completion requires real artifacts and evidence, not a checked inventory row. Supplied dimensions, material/LOD budgets and capability tags remain proposals until individually reviewed. The existing delivered-asset evidence and other task sections retain their own status. The later explicit request authorizes this eight-asset implementation. See [pilot review](docs/gjh-v11-interior-pilot-review.md), [acceptance manifest](models/gjh-interior-pilot/manifest.json) and [14-case E2E evidence](docs/evidence/interior-pilot-e2e.json). The subsequent commit/push request is tracked in [pilot release review](docs/gjh-v11-interior-pilot-release.md). The complete pilot uses `?interior=pilot`; the default keeps later M056 shelves, Shelf focus and graphics recovery. HUD consolidation and remaining candidates remain separate work.
@@ -543,6 +543,23 @@ Selection adds zero runtime resources/IDs;12implemented and188pending remain.
 See docs/v11-interior-p1-review.md and docs/evidence/interior-p1-selection.json.
 D4 selection is complete; FAC production, D5 and physical-device/AT acceptance
 are not implied. Its own main/CI/Pages verification is required before D5.
+
+
+D5 optional detail evaluation — 2026-11-15: independently accepted measured
+policy retains supported P2 directory/plinth identities, existing PBR/product
+label pipelines, small static shell batch and current shared LOD1/lazy previews.
+No new variant/reflection/decoder/streaming/distance-switch is justified by the
+current measured Detailed active-cart200-call state. All148runtime hashes match
+the current source-equivalent480-frame sample (pairedbaseline/current960frames);
+six fresh browser loader cases prove valid3-primitive positive parse and rejection
+of5SHA-valid unsupported variants before parsing or dependent requests.
+Closing55Python/19Node/generator/SSOT pass; prior current14pilot/eightintegration
+checks remain source-pinned, not falsely claimed rerun for D5. See
+docs/v11-interior-detail-policy.md and docs/evidence/interior-detail-policy.json.
+D1/D3/D4 are already separately published (950634f/e7581e6/9c2066f); D4 CI/Pages
+43700288223 and35public hashes pass. This closes the four authorized interior
+follow-ups after D5 publication verification.12implemented/188pending remain;
+physical-device/AT and the separately scoped expanded checklist are unchanged.
 
 Visitor v2 UX follow-up — 2026-11-15: camera occlusion, natural bench entry, reachable pickup/return feedback, persistent held guidance, truthful recovery and direct Cart controls are implemented in an isolated local candidate. Real-input and advisor evidence: `docs/gjh-visitor-v2-ux-fixes.md`. Publication and physical-device performance are not claimed.
 
