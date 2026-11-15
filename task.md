@@ -601,7 +601,7 @@ Status: **stages 0–5 and 7–10 completed in the opt-in expanded preview; stag
 - [x] **10b. Christmas:** added an evergreen tree, gifts, warm lights and banner with removable decoration, three-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-christmas.md).
 - [x] **10c. Deepavali:** added warm lamps, floral garlands, a flat rangoli-inspired motif and jewel tones with four-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-deepavali.md).
 - [x] **11a. Integration verification:** tested all four themes, existing shopping and navigation, five viewport sizes, graphics/failure recovery, PWA and accessibility; fixed hidden offline help, stale theme preview and landscape Help focus. [Report and evidence](docs/gjh-v11-stage11-integration.md). Browser emulation is not physical-device or screen-reader certification.
-- [ ] **11b. Performance acceptance:** split the pinned Rapier binary, combine first-load styles and defer V1-only modules. The merged-build probe drops from 10,915,858 to 9,884,264 decoded bytes and from 89 to 82 requests; the 10 MiB assertion passes, but the existing 45-request assertion still fails. The budget suite consequently cannot certify later gates. The 200-call assertion applies to its non-cart scenario; the previous desktop cart comparison remains a separate observation. Continue optimization without weakening the limits. See [stage 11b](docs/gjh-v11-stage11b-startup.md).
+- [ ] **11b. Performance acceptance:** split the pinned Rapier binary, combine first-load styles and defer V1-only modules. The laboratory probe drops from 10,915,858 to 9,884,761 decoded bytes and from 89 to 82 requests; the 10 MiB assertion passes, but the existing 45-request assertion still fails. The budget suite consequently cannot certify later gates. The 200-call assertion applies to its non-cart scenario; the previous desktop cart comparison remains a separate observation. Continue optimization without weakening the limits. See [stage 11b](docs/gjh-v11-stage11b-startup.md).
 
 Proposed dimensions and a small upper landing are documented; owner review, actual-scene clearance, external service connectivity, store content/rights and any shared operator theme access remain open for their respective slices. Browser-local theme persistence is implemented. A checked planning item is not runtime implementation or acceptance.
 
@@ -644,3 +644,21 @@ expanded1440Detailed cart changes193to182calls. See docs/gjh-v11-stage7-lift.md
 and docs/evidence/gjh-stage7-lift.json. All75binaryassets remain exact; one1,494-byte
 JSmodule is added. Main/CI/Pages/public verification is required beforestage8.
 Physical-device/AT, historicalpayload gates and operatingfacilities remain unverified.
+
+
+Stage8 local acceptance — 2026-11-15: application 1.1.52/build3ac382081b3b16d2
+adds two shared256px procedural stone/wood finishes and warm existing lights in
+expanded only. Instanced strips follow the real roof/camera opening; no collider,
+new light or shadow caster is added. The optional module has a two-second deadline,
+flat fallback, partial-allocation cleanup and no late factory execution. Classic
+requests no optional finish module in focused scenes; upper lift changes one color.
+Current55Python/31Node/gen/SSOT, fiveviewports/fourqualities, sevenfault/isolation
+cases, native texture context restoration and eightcurrentintegrationgroups pass.
+Independent local approval verifies150runtime/37raw/11screenshots and1,920fresh
+adjacent-paired advancing samples: all sampled calls unchanged (classic cart200,
+expanded cart182), expanded+98triangles/+2textures/0geometry objects. Both fresh099
+andcurrent loop medians are33.3ms; older16.7ms samples are not reused for timing.
+See docs/gjh-v11-stage8-materials-lighting.md and docs/evidence/gjh-stage8-materials.json.
+ParentStage7 publication099069d/CI43711374418/37public hashes/fourpublic contexts
+is preserved separately. This stage needs its own main/CI/Pages/public gate before9.
+Physical-device/AT, historicalpayload gates and measuredGPUbytes remain unverified.

@@ -1,0 +1,142 @@
+{
+  "status": "PASS_MATCHED_ADJACENT_SOURCE_AND_ENVIRONMENT",
+  "baseline": "099069d41a77a7fc76f8ce66e6259931fa50ffde",
+  "application": {
+    "version": "1.1.52",
+    "build": "3ac382081b3b16d2"
+  },
+  "rows": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "layout": "classic",
+      "cart": false,
+      "baselineCalls": 159,
+      "currentCalls": 159,
+      "trianglesDelta": 0,
+      "texturesDelta": 0,
+      "baselineMedian": 33.30000000000018,
+      "currentMedian": 33.30000000000018,
+      "baselineP95": 33.400000000000546,
+      "currentP95": 33.400000000000546
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "layout": "classic",
+      "cart": true,
+      "baselineCalls": 162,
+      "currentCalls": 162,
+      "trianglesDelta": 0,
+      "texturesDelta": 0,
+      "baselineMedian": 33.30000000000109,
+      "currentMedian": 33.30000000000109,
+      "baselineP95": 33.399999999999636,
+      "currentP95": 33.400000000001455
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "layout": "classic",
+      "cart": false,
+      "baselineCalls": 197,
+      "currentCalls": 197,
+      "trianglesDelta": 0,
+      "texturesDelta": 0,
+      "baselineMedian": 33.30000000000018,
+      "currentMedian": 33.30000000000018,
+      "baselineP95": 33.400000000000546,
+      "currentP95": 33.40000000000009
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "layout": "classic",
+      "cart": true,
+      "baselineCalls": 200,
+      "currentCalls": 200,
+      "trianglesDelta": 0,
+      "texturesDelta": 0,
+      "baselineMedian": 33.30000000000109,
+      "currentMedian": 33.30000000000109,
+      "baselineP95": 33.400000000000546,
+      "currentP95": 33.400000000001455
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "layout": "expanded",
+      "cart": false,
+      "baselineCalls": 157,
+      "currentCalls": 157,
+      "trianglesDelta": 98,
+      "texturesDelta": 2,
+      "baselineMedian": 33.30000000000018,
+      "currentMedian": 33.30000000000018,
+      "baselineP95": 33.400000000000546,
+      "currentP95": 33.40000000000009
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "layout": "expanded",
+      "cart": true,
+      "baselineCalls": 160,
+      "currentCalls": 160,
+      "trianglesDelta": 98,
+      "texturesDelta": 2,
+      "baselineMedian": 33.30000000000109,
+      "currentMedian": 33.30000000000109,
+      "baselineP95": 33.400000000001455,
+      "currentP95": 33.400000000001455
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "layout": "expanded",
+      "cart": false,
+      "baselineCalls": 179,
+      "currentCalls": 179,
+      "trianglesDelta": 98,
+      "texturesDelta": 2,
+      "baselineMedian": 33.30000000000018,
+      "currentMedian": 33.30000000000018,
+      "baselineP95": 33.400000000000546,
+      "currentP95": 33.400000000000546
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "layout": "expanded",
+      "cart": true,
+      "baselineCalls": 182,
+      "currentCalls": 182,
+      "trianglesDelta": 98,
+      "texturesDelta": 2,
+      "baselineMedian": 33.30000000000109,
+      "currentMedian": 33.30000000000109,
+      "baselineP95": 33.400000000001455,
+      "currentP95": 33.399999999999636
+    }
+  ],
+  "totalAdvancingFrames": 1920,
+  "scope": "Fresh adjacent099control8states andcurrent8states;120advancingframes/state after30warmup. All149servedbaselinefiles exact099; outerharnessapp52/SWblocked. PriorStage7timing16.7ms not reused: currentunchangedclassic also33.3ms, adjacent099also33.3ms. Host/display/compositor cause unproven; no FPS/GPU throughput or speedup claim.",
+  "currentReportSHA256": "37db80a48197c5b5680ca3066508c3cf8cd467b46b7777f4c7fd8c4a1771240f",
+  "baselineReportSHA256": "5f7de1dd7f703ac263301793f23cf6e2dc13c309f855abd9c8f93df6387ddb08"
+}

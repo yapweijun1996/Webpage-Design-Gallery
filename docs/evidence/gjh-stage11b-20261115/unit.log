@@ -57,7 +57,7 @@ test_generated_gallery_copy_is_translatable (test_preferences.PreferencesTests.t
 test_invalid_packs_fail_before_publication (test_preferences.PreferencesTests.test_invalid_packs_fail_before_publication) ... ok
 
 ----------------------------------------------------------------------
-Ran 57 tests in 3.270s
+Ran 57 tests in 3.604s
 
 OK
 Gallery built: 1 companies, 8 designs

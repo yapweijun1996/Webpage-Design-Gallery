@@ -32,6 +32,8 @@ python -m http.server 8000
 
 Open `http://localhost:8000/`. The generated company and demo links work without JavaScript; search, filters, design details and comparison need JavaScript and an HTTP server. Do not edit generated HTML directly.
 
+The same build generates the GJH V11 combined stylesheet and the local Rapier JavaScript/WASM split. Edit the source stylesheets or update the pinned Rapier source, then rerun the generator; `--check` detects stale runtime outputs. See [V11 startup-budget work](docs/gjh-v11-stage11b-startup.md) for measurements and remaining limits.
+
 ## Appearance and language
 
 The gallery header offers **Light / Dark / System** appearance and **English / 简体中文 / Bahasa Melayu**. Choices persist across gallery routes and updates, synchronize across tabs and remain available offline after the shell is saved. Independent demo websites retain their own language and visual identity.
@@ -172,3 +174,5 @@ Expanded preview stage6 adds14neutral planned-space Directory records aligned wi
 The Pages workflow runs the mall state/spatial/static-fallback contracts with the runner's Node runtime: `node --test tests/gjh_*.test.mjs`. These use built-in Node18+ APIs and require no npm packages.
 
 Expanded stage7 provides a visitor-only ground/upper lift and entrance service wayfinding. See [lift verification and limits](docs/gjh-v11-stage7-lift.md). Focused checks use `python tests/browser_gjh_lift.py --evidence /private/tmp/gjh-lift-qa`, `python tests/browser_gjh_lift_map.py --evidence /private/tmp/gjh-lift-map-qa` and `python tests/browser_gjh_lift_interruptions.py --evidence /private/tmp/gjh-lift-interruptions-qa`; the last suite explicitly isolates safety guards with a test-only routed script/body fault. Facilities remain planned, reserves non-public, and physical-device acceptance separate.
+
+Expanded stage8 adds optional shared procedural stone/wood finishes and warmer existing lights, retaining the stage7 roof/camera opening and all-cart200-call gate. See [material verification](docs/gjh-v11-stage8-materials-lighting.md). Run `python tests/browser_gjh_materials.py --evidence /private/tmp/gjh-material-qa --group all` for current viewport/quality, allocation/import failure, late completion and native texture-recovery checks.

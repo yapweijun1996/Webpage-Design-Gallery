@@ -1,7 +1,7 @@
 {
   "browser": "157.0.8103.51",
   "count": 82,
-  "decoded": 9884264,
+  "decoded": 9884761,
   "resources": [
     {
       "path": "/demos/corporate/gjh/v11/vendor/rapier_bg.wasm",
@@ -115,7 +115,7 @@
     },
     {
       "path": "/demos/corporate/gjh/v11/style.bundle.css",
-      "bytes": 129185,
+      "bytes": 129184,
       "type": "link"
     },
     {
@@ -145,7 +145,7 @@
     },
     {
       "path": "/demos/corporate/gjh/v11/assets/world.js",
-      "bytes": 40008,
+      "bytes": 40506,
       "type": "script"
     },
     {

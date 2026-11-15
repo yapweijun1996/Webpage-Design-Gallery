@@ -27,14 +27,18 @@ compressed wire bytes, physical devices, Safari or accessibility technology.
 
 Fresh Chrome 157 contexts on macOS, SwiftShader, reduced motion, 320 × 740,
 service workers blocked and local uncompressed HTTP were sampled when the
-guide had paused the ready default scene. These are the same settings and
-merged implementation before and after the three changes. Resource entries
+guide had paused the ready default scene. The baseline was taken after merging
+main at `099069d`; the final measurement also includes the later upstream
+stage 8 merge at `b6aef2a` and the three startup changes. That upstream merge
+changes expanded-only finish behavior and slightly changes the default scene's
+loaded JavaScript, so the total delta is not attributed solely to the startup
+changes. Resource entries
 exclude the HTML navigation and represent decoded resources rather than GPU
 memory or compressed transfer.
 
 | Ready-stage observation | Before | After | Existing limit |
 | --- | ---: | ---: | ---: |
-| Decoded resources | 10,915,858 bytes | 9,884,264 bytes | 10,485,760 bytes |
+| Decoded resources | 10,915,858 bytes | 9,884,761 bytes | 10,485,760 bytes |
 | Resource requests | 89 | 82 | 45 |
 
 The [before](evidence/gjh-stage11b-20261115/baseline.json) and

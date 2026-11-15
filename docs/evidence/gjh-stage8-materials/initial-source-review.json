@@ -1,0 +1,26 @@
+{
+  "status": "EARLY_SOURCE_REVIEW_NO_CONFIRMED_P0_P1_PENDING_RENDER_AND_FAILURE_QA",
+  "sourceSHA256": {
+    "demos/corporate/gjh/v11/assets/world.js": "3eed36e220698345f832709f6a5181f3c1b0a90bc0e9d4bceee943476fd5f07a",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "abbd805647ed821c367cff481e22563c8ed1e22139fcf76a301597f1ad93f950",
+    "demos/corporate/gjh/v11/assets/natural-materials.js": "3c52b59ce7ed31f38a299cf674827b9c841d6646555a41f0397daaffbdcf1406"
+  },
+  "findings": [],
+  "assessment": [
+    "Optional import only runs for expanded; 2s race prevents module fetch from indefinitely blocking world creation; late import has no factory invocation.",
+    "Factory catches canvas failures and disposes any already-created textures; maps are shared across materials within one world.",
+    "Classic material/light and legacy lift paths retained; expanded lift delta only stone palette.",
+    "Warm strips clip through same roofOpening when expanded lift exists and reuse pooled emissive/static batches without new lights or colliders.",
+    "Procedural prior-art source attribution must retain same-owner provenance; no third-party image rights inferred."
+  ],
+  "remaining": [
+    "Actual current render/material appearance and no overbright/unreadable labels or texture stretching.",
+    "Optional404/stalledmodule/latearrival/canvasfailure actual results; no late texture allocation.",
+    "Current8state advancing-render budget and actual resources; no old205 or sibling results accepted.",
+    "Camera/upper landing/roof strips, v1 continuous roof, and classic source/resource parity."
+  ],
+  "limits": [
+    "Source-only review; no GPU/browser run.",
+    "2canvas textures imply extra GPU resources; actual resource counts and precise cold-module byte/request delta must be reported."
+  ]
+}

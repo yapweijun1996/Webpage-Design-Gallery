@@ -1,0 +1,26 @@
+{
+  "status": "QA_REVIEW_NO_CONFIRMED_P0_P1_PENDING_FINAL_RECEIPT_AND_BROAD_RESULTS",
+  "findings": [],
+  "currentRuntimeFilesVerified": 150,
+  "reports": {
+    "worker/normal/report.json": "c63e34ea9b03495b2bb6e30c07db1df788af8d4d97e93b8988391e9731a4f9cf",
+    "worker/failures/report.json": "ffc649d3765314467e9f6ef99c8a28faaa8d62be4681fad8cc97e290d99cafb2",
+    "primary/comparison.json": "59a7a4dfde23befc05bd8346c650e7d90dcd9a6910f0ad14f6c26008973ec91b",
+    "primary/source-delta.json": "41d88bca7a3e180263d3a63affc35cb699dd1227f9b8c5f57284f14ac1da78ed"
+  },
+  "assessment": [
+    "All150currentruntimehashes match.",
+    "Actual7fault cases cover missingmodule,first/secondcanvasfailure,lateimportwithfactory0,andnativecontextrestorefactory1/textures2/request1;classicv1/v2module0.",
+    "Currentandfreshadjacent0998statepaired1920advancingframe comparison retainsallcallcounts;expanded+98triangles/+2textures,classicexact.",
+    "Old16.7ms timing unusable forcurrent33.3ms comparison;adjacentcontrolalso33.3ms,causeremainsunproven.NoFPS/GPUclaim.",
+    "Personallyviewedbaseline/current390entrypair andcurrent1440upper:lighterfloor/subtlegrid/readablesigns,noclearnewobstruction."
+  ],
+  "remaining": [
+    "Finalpersistedreceipt/hashverificationandeightbroadintegrationterminalresults.",
+    "PublicationCI/publicsourceandkeyjourneys."
+  ],
+  "limits": [
+    "NoGPU/browserexecutionbyreviewer.",
+    "No new fullcontrast/Safari/physicaldevice/ATcertificate."
+  ]
+}

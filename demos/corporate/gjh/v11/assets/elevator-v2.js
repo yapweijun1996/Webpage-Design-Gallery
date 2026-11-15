@@ -46,7 +46,7 @@ function createLegacyElevator(T, R, physics, scene) {
 export function createElevatorV2(T,R,physics,scene,expanded=false) {
   if(!expanded)return createLegacyElevator(T,R,physics,scene);
   const L=liftLayout, floors=[0,L.upper], staticParts=[], cabinParts=[];
-  const palette={stone:new T.Color(0x35584d),rail:new T.Color(0xb59b62),panel:new T.Color(0x183a30)};
+  const palette={stone:new T.Color(0xdfd5c4),rail:new T.Color(0xb59b62),panel:new T.Color(0x183a30)};
   const obstacles=[], gates=[], thresholds=[];let height=0,call=null,generation=0,riding=false;
   function geometry(kind,x,y,z,sx,sy,sz) {
     const g=new T.BoxGeometry(sx,sy,sz).toNonIndexed();g.translate(x,y,z);

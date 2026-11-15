@@ -1,0 +1,80 @@
+{
+  "task": "Expanded8 materials and lighting only",
+  "baselineCommit": "099069d41a77a7fc76f8ce66e6259931fa50ffde",
+  "baselineApplication": {
+    "version": "1.1.51",
+    "build": "68cc981c4eb25add"
+  },
+  "sourceHashes": {
+    "task.md": "b5ce19c5e96b1e77b1012fdbb83806208ab3c217733e33b2f1e385870f8262e8",
+    "docs/gjh-v11-mall-upgrade-master-plan.md": "f89bd22fd09f2c911f45911d788033a1a586f93446820cfbabfd1dcb45bcab99",
+    "docs/references/gjh-mall-modern-premium-concept.png": "a8c5eb14ef5d41d13709d837120e5da122d9447cce339200c2c8935b74fc0d0d",
+    "demos/corporate/gjh/v11/assets/world.js": "705d91ed766ba96c2e9c3989f432a7f217a6dd6801c6d23b631d0b44dc2e76ea",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "690d9d2b4ed6de23e9776b90e7279faac812ec361dbbc2853c335bf7492e3269",
+    "demos/corporate/gjh/v11/assets/lift-layout.js": "542572943abfe85c459a803f9d55f7eb3bb751384c93b855b594cce07fd5bb4e",
+    "demos/corporate/gjh/v11/script.js": "f94e68537a0ca7fd6dee552e0647d9c779c08a36ec226b568c560e79f47f8f0f",
+    "demos/corporate/gjh/v11/assets/player.js": "7425d15a33bc7c86f2b8175ca81ef578205d2310d8a0a44319516115c6b0ff48",
+    "demos/corporate/gjh/v11/assets/amenities.js": "5d86b44978e385219c38d4d8818d28808988ab27a671bad80ee3241c030865e9",
+    "demos/corporate/gjh/v11/assets/opaque-batch.js": "1494cb01c1f4dd57c4ce0177c059765db001d329cac066b00213969f111291a6"
+  },
+  "sameOwnerReadOnlyPriorArt": {
+    "root": "/Users/yapweijun/Documents/GitHub/Webpage-Design-Gallery-stage6",
+    "branch": "codex/gjh-stage6-candidate-stores",
+    "parent": "8768f13",
+    "state": "Uncommitted overlapping later-stage work; do not mutate or copy entire files. Historical measurements not current acceptance.",
+    "hashes": {
+      "demos/corporate/gjh/v11/assets/natural-materials.js": "3c52b59ce7ed31f38a299cf674827b9c841d6646555a41f0397daaffbdcf1406",
+      "demos/corporate/gjh/v11/assets/world.js": "09943c0a0bc5691de9f6bf41faa00bdba24efdb088e9c9857bc9bf0b251235ac",
+      "demos/corporate/gjh/v11/assets/elevator-v2.js": "120662b16669d73d781af39e7e3b36315733a4e842fb941177d441c07da095d1",
+      "tests/browser_gjh_materials.py": "f8d7d37f1ee3484be40f55b01637a01e939e524fe665d394fd8a276d00cb820c",
+      "docs/gjh-v11-stage8-materials-lighting.md": "fc3297dc8cbf8b686a1ff10e16bd6f398e6815268c42652c912aa7d1ac390e52"
+    }
+  },
+  "previousTaskRelease": {
+    "commit": "099069d41a77a7fc76f8ce66e6259931fa50ffde",
+    "remoteMain": "099069d41a77a7fc76f8ce66e6259931fa50ffde",
+    "CI": [
+      {
+        "conclusion": "success",
+        "databaseId": 43711374418,
+        "headSha": "099069d41a77a7fc76f8ce66e6259931fa50ffde",
+        "status": "completed",
+        "url": "https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/43711374418"
+      }
+    ],
+    "normalPagesHashes": 37,
+    "publicContexts": 4,
+    "publicReceivedBodyHashCounts": [
+      74,
+      76,
+      67,
+      80
+    ],
+    "cleanWorktreeObserved": true,
+    "publicationProofSHA256": "204cf53c35f4540cb07c5ca527a48ed163a5d9396c72149c5cbf5eeafbaab009",
+    "publicProofSHA256": "dbc4c5612a43bf08f4bacb02abd71386445913f44f5e8cfdb3dc745320acf91c",
+    "status": "STAGE7_DELIVERED; next eligible stage8; physical acceptance remains open"
+  },
+  "acceptance": {
+    "visual": "Review actual390/1440 entrance/courtyard/store/upper before and after; subtle stone/wood and warm light, keep paths, avatars and verified labels clear.",
+    "materials": "Only expanded optional two256x256 generated textures, shared resources, solid fallback on canvas/missing/delayed import; cleanup partial resources and ignore late completion.",
+    "geometry": "Existing shaft,26x26roof opening, landing, player/amenities/shell/camera/collider owners retained; clip new instanced ceiling strips against actual opening; no new colliders or shadow-casting lights.",
+    "budget": "Compare matched source099 actualrender baseline; all sampled idle/cart<=200; measure actual1920frame basis reuse for unchanged baseline and exactcurrent profiles; report texture/module/triangle costs.",
+    "compatibility": "Original scene/v1 modes, fourSKUs,17slots/14planned/3stores, Bag/cart/seat/guide/Map/PWA retained. No theme owner/picker/seasonal packs in8.",
+    "requiredChecks": "Generator/unit55/Node28/SSOT, focusedmaterial/failure/viewports/nativejourneys, actualchangedbehavior reruns and scopedbasis reuse; independentreview; onecommit/main/CI/Pages/public before9."
+  },
+  "KBReview": {
+    "remoteRetrievalGate": "passed, permission_authority caller_runtime; not an implementation authorization",
+    "applicableKBImplementations": 0,
+    "excluded": "Generic2DUIreferencealignment and unrelatedportfolio/print records do not fit proceduralWebGL materials; not adopted or copied.",
+    "localPriorArt": "Inspected same-owner procedural module/world callsites/tests; candidate to adapt after current validation.",
+    "hostAudit": "COMPANION_UNAVAILABLE, optional per current remoteengineering_schema workflow; no registered hostobservations or verifierrefs invented."
+  },
+  "risks": [
+    "Copied older world would discard our released P0batching/shaft/camera/amenity fixes; use surgical edits.",
+    "Old ceiling strips float over actual roof cutout; clip to canonical current hole.",
+    "Awaited optional dynamic import can stall initialization; bounded race and no latefactory invocation.",
+    "Additional texture memory and transparentlightpooloverdraw must be measured, not assumed free.",
+    "Concurrent otherchat work remains untouched; only isolatedreleaseworktree changes authorizedhere."
+  ]
+}

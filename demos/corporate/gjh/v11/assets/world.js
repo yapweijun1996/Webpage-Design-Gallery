@@ -33,11 +33,13 @@ export async function createWorld(T, R, physics, expanded = false) {
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   const ceilingObstacles=[];
   function ceilingBox(material,x,y,z,sx,sy,sz,hole=liftLayout.shaft){
-    if(!expandedLift){box(material,x,y,z,sx,sy,sz);return;}
-    for(const r of cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole)){
+    if(!expandedLift){box(material,x,y,z,sx,sy,sz);return [{minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2}];}
+    const panels=cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole);
+    for(const r of panels){
       box(material,(r.minX+r.maxX)/2,y,(r.minZ+r.maxZ)/2,r.maxX-r.minX,sy,r.maxZ-r.minZ);
       ceilingObstacles.push({min:{x:r.minX,y:y-sy/2,z:r.minZ},max:{x:r.maxX,y:y+sy/2,z:r.maxZ}});
     }
+    return panels;
   }
   const seats=[];
   const scene = new T.Scene();
@@ -58,16 +60,23 @@ export async function createWorld(T, R, physics, expanded = false) {
     water: mat(0x4f8c80, {metalness: .48, roughness: .15}),
     glass: mat(0xa0c9be, {transparent: true, opacity: .15, metalness: .2, roughness: .1, depthWrite: false, side: T.DoubleSide})
   };
-  if (expanded) {
-    // The expanded finish is optional: a missing module or canvas falls back
-    // to the original solid materials and must not prevent 3D initialization.
-    let natural = null;
-    try { natural = (await import('./natural-materials.js')).createNaturalSurfaceTextures(T); } catch { /* Retain solid finishes. */ }
-    if (natural?.stone) { materials.shellFloor.map = natural.stone; materials.shellFloor.color.set(0xffffff); materials.shellFloor.roughness = .58; }
-    if (natural?.wood) for (const name of ['wood', 'oak', 'timber', 'timberAlt']) materials[name].map = natural.wood;
-    materials.shellCeiling.color.set(0xf0e8d9); materials.shellCeiling.emissive.set(0xb3a286); materials.shellCeiling.emissiveIntensity = .55;
+  if(expanded){
+    // Optional, local finishes cannot hold walking behind a stalled module.
+    // The module is side-effect free: a late import never invokes its factory.
+    let timer;
+    try{
+      const module=await Promise.race([
+        import('./natural-materials.js'),
+        new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Optional finish timeout')),2000);}),
+      ]);
+      const natural=module.createNaturalSurfaceTextures(T);
+      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xffffff);materials.shellFloor.roughness=.58;}
+      if(natural.wood)for(const name of ['wood','oak','timber','timberAlt'])materials[name].map=natural.wood;
+    }catch{/* Retain usable solid finishes on module/canvas failure. */}
+    finally{clearTimeout(timer);}
+    materials.shellCeiling.color.set(0xf0e8d9);materials.shellCeiling.emissive.set(0xb3a286);materials.shellCeiling.emissiveIntensity=.55;
     materials.shellWall.color.set(0xc9c4b6);
-    materials.glass.color.set(0xd7e9df); materials.glass.opacity = .19; materials.glass.roughness = .08; materials.glass.metalness = .08;
+    materials.glass.color.set(0xd7e9df);materials.glass.opacity=.19;materials.glass.roughness=.08;materials.glass.metalness=.08;
   }
   const geometry = {
     box: new T.BoxGeometry(1, 1, 1), cylinder: new T.CylinderGeometry(1, 1, 1, 32), sphere: new T.SphereGeometry(1, 12, 8),
@@ -530,14 +539,17 @@ export async function createWorld(T, R, physics, expanded = false) {
     for (const x of [4,10,16]) box('brass',x,2.8,47.8,.08,5.6,.08);
     // Four roof panels leave the 12 x 12 m upper landing open to the sky.
     ceilingBox('shellCeiling',10,8.5,18,70,.25,60,liftLayout.roofOpening);
-    // A closed reservation, not an operational restroom or staffed facility.
-    // Continuous warm recessed strips follow the circulation axes without
-    // adding fixtures or colliders at visitor height.
-    for (const x of [-12,32]) for (const z of [10,22,34]) {
-      box('glow',x,8.34,z,.07,.035,6);
-      lightPool(x,.052,z,4.5,5.5);
+    // Recessed strips share the retained roof footprint, including its camera opening.
+    // Reuse existing emissive/pool batches; no new lights or visitor colliders.
+    function warmStrip(x,z,width,depth){
+      const panels=ceilingBox('glow',x,8.34,z,width,.035,depth,liftLayout.roofOpening);
+      for(const r of panels)lightPool((r.minX+r.maxX)/2,.052,(r.minZ+r.maxZ)/2,
+        width>depth?r.maxX-r.minX:4.5,width>depth?4.5:r.maxZ-r.minZ);
     }
-    for (const x of [-5,10,25]) { box('glow',x,8.34,3,6,.035,.07); lightPool(x,.052,3,5.5,4.5); }
+    for(const x of [-12,32])for(const z of [10,22,34])warmStrip(x,z,.07,6);
+    for(const x of [-5,10,25])warmStrip(x,3,6,.07);
+
+    // This is a closed reservation, not an operating facility.
     box('ivory',25,1.5,10,6,3,4,true);
     const facility=sign('FUTURE FACILITIES',28.07,2,10,2.5,.35,true,60);facility.rotation.y=Math.PI/2;
     for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
