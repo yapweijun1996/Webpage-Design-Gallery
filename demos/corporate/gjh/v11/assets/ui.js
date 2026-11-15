@@ -259,7 +259,7 @@ export function createUI() {
     notifyMode();
   }
 
-  function inspect(id, autoPreview = false) {
+  function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || guidePaused || amenityPanel.dialog.open) return;
     shelfFocus?.close();
@@ -277,10 +277,9 @@ export function createUI() {
     productImage.alt = record.alt;
     productKind.textContent = record.kind;
     productDescription.textContent = record.description;
-    newMoonPreview.open(id);
     bag.select(id);
     dialog.showModal();
-    if (autoPreview) newMoonPreview.load3D();
+    newMoonPreview.open(id);
     closeButton.focus({ preventScroll: true });
     notifyMode();
   }
@@ -290,7 +289,7 @@ export function createUI() {
     // presentation mode for retained lifecycle/fallback coverage, but it must
     // not be an intermediate click for a nearby SKU: the readable product
     // viewer is the first surface opened from the user's Inspect action.
-    inspect(id, true);
+    inspect(id);
   }
 
   function showGuide(event) {

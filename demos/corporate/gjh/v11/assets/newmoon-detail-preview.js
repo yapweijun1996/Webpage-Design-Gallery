@@ -14,9 +14,7 @@ function dispose(root) {
 export function setupNewMoonPreview() {
   const dialog=document.querySelector('#product-dialog'), host=document.querySelector('#product-preview');
   const image=document.querySelector('#product-image'), status=document.querySelector('#product-preview-status');
-  const loadButton=document.querySelector('#product-preview-load'), imageButton=document.querySelector('#product-preview-image');
-  const threeButton=document.querySelector('#product-preview-3d'), resetButton=document.querySelector('#product-preview-reset');
-  const actions=host.parentElement.querySelector('.product-preview-actions'), controls=host.parentElement.querySelector('.product-preview-controls');
+  const closeButton=document.querySelector('#product-close');
   let canvas=document.querySelector('#product-preview-canvas'), current=null, sku=null, generation=0, mode='image';
   let last={status:'idle',loaded:false,loading:false,reason:null};
   const valid=s=>!!s&&current===s&&!s.disposed&&dialog.open;
@@ -35,16 +33,14 @@ export function setupNewMoonPreview() {
   function setMode(next) {
     mode=next;host.dataset.previewState=next;image.hidden=next!=='image';canvas.hidden=next!=='3d';
     if(current?.loaded) status.textContent=next==='3d'
-      ? 'Unofficial 3D demo. Drag or use the controls to rotate; arrows rotate, +/− zoom, R resets.'
-      : 'Official packshot shown. Choose Show 3D preview to return to the unofficial interactive demo.';
-    imageButton.hidden=next!=='3d';threeButton.hidden=next!=='image'||!current?.loaded;
-    resetButton.hidden=controls.hidden=next!=='3d'||!current?.loaded;
-    loadButton.hidden=!sku||!!current?.loaded;loadButton.disabled=current?.status==='loading';
+      ? 'Unofficial 3D demo. Drag to rotate; scroll or pinch to zoom. Keyboard: arrows, +/−, R to reset.'
+      : 'Official packshot shown.';
   }
   function release(s) {
     if(!s||s.disposed)return;
     s.disposed=true;clearTimeout(s.timer);s.controller.abort();s.observer?.disconnect();
-    if(s.pointerId!==null&&canvas.hasPointerCapture?.(s.pointerId))canvas.releasePointerCapture(s.pointerId);
+    for(const id of s.pointers.keys())if(canvas.hasPointerCapture?.(id))canvas.releasePointerCapture(id);
+    s.pointers.clear();
     dispose(s.model);s.renderer?.dispose();s.renderer?.forceContextLoss();
     s.model=null;s.renderer=null;s.scene=null;s.pivot=null;
   }
@@ -63,22 +59,38 @@ export function setupNewMoonPreview() {
   }
   function reset() {const s=current;if(!s?.loaded)return;s.yaw=0;s.pitch=.12;s.zoom=1.15;resize(s);}
   function orbit(dx,dy=0) {const s=current;if(!s?.loaded)return;s.yaw+=dx;s.pitch=clamp(s.pitch+dy,-1.2,1.2);render(s);}
-  function zoom(delta) {const s=current;if(!s?.loaded)return;s.zoom=clamp(s.zoom+delta,1,2.6);resize(s);}
+  function setZoom(value) {const s=current;if(!s?.loaded)return;s.zoom=clamp(value,.65,2.6);resize(s);}
+  function zoom(delta) {if(current?.loaded)setZoom(current.zoom+delta);}
   function fail(s,reason) {
     if(!valid(s))return;
-    const focusInside=canvas===document.activeElement||controls.contains(document.activeElement)||[resetButton,imageButton,threeButton].includes(document.activeElement);
+    const focusInside=canvas===document.activeElement;
     release(s);current=null;last={status:'error',reason,loaded:false,loading:false};
-    setMode('image');status.textContent='3D preview unavailable. The official packshot and product information remain available. Retry to reload.';
-    if(focusInside)loadButton.focus({preventScroll:true});
+    setMode('image');status.textContent='3D preview unavailable. The official packshot is shown. Close and reopen to retry.';
+    if(focusInside)closeButton.focus({preventScroll:true});
   }
   async function load() {
     if(!sku||current?.status==='loading'||current?.loaded)return;
     const replacement=canvas.cloneNode(false);canvas.replaceWith(replacement);canvas=replacement;
-    const s={sku,generation:++generation,disposed:false,controller:new AbortController(),status:'loading',loaded:false,yaw:0,pitch:.12,zoom:1.15,pointerId:null,renderCount:0};
+    const s={sku,generation:++generation,disposed:false,controller:new AbortController(),status:'loading',loaded:false,yaw:0,pitch:.12,zoom:1.15,pointers:new Map(),renderCount:0};
     current=s;last={status:'loading',reason:null};setMode('image');status.textContent='Loading unofficial 3D demo…';
-    canvas.addEventListener('pointerdown',e=>{if(!s.loaded||e.button!==0)return;e.preventDefault();canvas.focus();s.pointerId=e.pointerId;s.drag={x:e.clientX,y:e.clientY,yaw:s.yaw,pitch:s.pitch};canvas.setPointerCapture(e.pointerId);},{signal:s.controller.signal});
-    canvas.addEventListener('pointermove',e=>{if(s.pointerId!==e.pointerId||!s.drag)return;s.yaw=s.drag.yaw+(e.clientX-s.drag.x)*.01;s.pitch=clamp(s.drag.pitch+(e.clientY-s.drag.y)*.01,-1.2,1.2);render(s);},{signal:s.controller.signal});
-    for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,()=>{s.pointerId=null;s.drag=null;},{signal:s.controller.signal});
+    function beginGesture(){
+      const points=[...s.pointers.values()];s.drag=null;s.pinch=null;
+      if(points.length===1)s.drag={...points[0],yaw:s.yaw,pitch:s.pitch};
+      else if(points.length===2)s.pinch={distance:Math.max(1,Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)),zoom:s.zoom};
+    }
+    canvas.addEventListener('pointerdown',e=>{
+      if(!s.loaded||(e.pointerType==='mouse'&&e.button!==0)||s.pointers.size>=2)return;
+      e.preventDefault();canvas.focus({preventScroll:true});s.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});canvas.setPointerCapture(e.pointerId);beginGesture();
+    },{signal:s.controller.signal});
+    canvas.addEventListener('pointermove',e=>{
+      if(!s.pointers.has(e.pointerId))return;
+      s.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      const points=[...s.pointers.values()];
+      if(points.length===2&&s.pinch){const distance=Math.max(1,Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y));setZoom(s.pinch.zoom*s.pinch.distance/distance);}
+      else if(points.length===1&&s.drag){s.yaw=s.drag.yaw+(points[0].x-s.drag.x)*.01;s.pitch=clamp(s.drag.pitch+(points[0].y-s.drag.y)*.01,-1.2,1.2);render(s);}
+    },{signal:s.controller.signal});
+    for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,e=>{if(s.pointers.delete(e.pointerId))beginGesture();},{signal:s.controller.signal});
+    canvas.addEventListener('wheel',e=>{if(!s.loaded)return;e.preventDefault();const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?canvas.clientHeight:1);setZoom(s.zoom*Math.exp(clamp(delta,-500,500)*.0015));},{passive:false,signal:s.controller.signal});
     canvas.addEventListener('keydown',e=>{
       const keys={ArrowLeft:[-.18,0],ArrowRight:[.18,0],ArrowUp:[0,-.18],ArrowDown:[0,.18]};
       if(keys[e.key])orbit(...keys[e.key]);else if(['+','='].includes(e.key))zoom(-.15);else if(['-','_'].includes(e.key))zoom(.15);else if(e.key.toLowerCase()==='r')reset();else return;e.preventDefault();
@@ -106,19 +118,14 @@ export function setupNewMoonPreview() {
       s.camera=new T.PerspectiveCamera(35,1,.001,10);s.renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});s.renderer.setClearColor(0x000000,0);
       s.scene.add(new T.HemisphereLight(0xffffff,0x777777,2));const light=new T.DirectionalLight(0xffffff,2);light.position.set(-1,2,4);s.scene.add(light);
       s.loaded=true;s.status='loaded';last={status:'loaded',reason:null};setMode('3d');s.observer=new ResizeObserver(()=>resize(s));s.observer.observe(canvas);resize(s);
-      if(document.activeElement===loadButton||document.activeElement===document.body)canvas.focus({preventScroll:true});
     }catch(error){fail(s,error.message||'unavailable');}finally{clearTimeout(s.timer);}
   }
   function open(id) {
     cleanup();sku=/^new-moon-(nz-425g|au-425g|sa-425g|mx-454g)-front$/.exec(id)?.[1]||null;
-    actions.hidden=!sku;status.hidden=!sku;last={status:'idle',reason:null};setMode('image');status.textContent='Official packshot shown by default. The 3D preview is an unofficial demo.';
+    status.hidden=!sku;last={status:'idle',reason:null};setMode('image');
+    if(sku)load();
   }
-  loadButton.addEventListener('click',load);
-  imageButton.addEventListener('click',()=>{setMode('image');threeButton.focus({preventScroll:true});});
-  threeButton.addEventListener('click',()=>{setMode('3d');resize();canvas.focus({preventScroll:true});});
-  resetButton.addEventListener('click',reset);
-  controls.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.previewOrbit)orbit(b.dataset.previewOrbit==='left'?-.25:.25);if(b.dataset.previewZoom)zoom(b.dataset.previewZoom==='in'?-.15:.15);});
   dialog.addEventListener('close',()=>{cleanup();last={status:'closed',reason:null};setMode('image');});
-  document.addEventListener('visibilitychange',()=>{if(current){current.pointerId=null;current.drag=null;if(!document.hidden)render();}});
-  return {open, load3D: load};
+  document.addEventListener('visibilitychange',()=>{if(current){for(const id of current.pointers.keys())if(canvas.hasPointerCapture?.(id))canvas.releasePointerCapture(id);current.pointers.clear();current.drag=null;current.pinch=null;if(!document.hidden)render();}});
+  return {open};
 }

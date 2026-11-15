@@ -250,8 +250,7 @@ body .ob-hud{top:calc(2 * var(--space-16));right:var(--space-6);left:auto;bottom
 
 /* Detail-only preview; preserve the default packshot and independent brand artwork. */
 #product-preview{width:100%;min-width:0}#product-preview-canvas{display:block;width:100%;height:300px;touch-action:none;background:var(--gjh-color-brand-art)}
-#product-preview [hidden],.product-preview-actions[hidden],.product-preview-controls[hidden],.product-preview-actions button[hidden]{display:none}
-.product-preview-actions,.product-preview-controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}.product-preview-actions button,.product-preview-controls button{min-width:44px;min-height:44px;padding:8px 12px;font-size:var(--font-size-sm)}
+#product-preview [hidden]{display:none}
 .product-preview-status{font-size:var(--font-size-sm);line-height:1.6;margin:12px 0}.product-dialog .dialog-image{align-content:start;gap:12px;max-height:none}
 #product-preview-canvas:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 @media(max-width:650px){#product-preview-canvas{height:250px}.product-dialog #product-image{display:block;margin:auto}.product-dialog #product-image[hidden]{display:none}}
