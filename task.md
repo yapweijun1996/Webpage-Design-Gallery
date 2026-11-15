@@ -489,3 +489,8 @@ interior follow-ups retain their own status.
 ## V11 merchandising density — 2026-11-15
 
 1.1.45 preserves native can size, stocks M056 at 17 facings per row (204 total), and retains optional pilot at 11 (132 total). Repeated pickup/return and direct Inspect pass in desktop/390 Chrome. Latest hybrid directory, showcase stock and camera changes are retained. Hybrid CSS literals were moved unchanged into canonical design tokens to restore SSOT; the gate was not relaxed. See docs/v11-newmoon-merchandising-density-review.md.
+
+## V11 welcome modal repair (1.1.46)
+- [x] Remove sticky footer overlap with preference/CTA on short screens.
+- [x] Improve dark action and checkbox text contrast with canonical tokens.
+- [x] Four viewport screenshot/DOM and checkbox, close/reopen/start checks; no physical iPhone claim.
