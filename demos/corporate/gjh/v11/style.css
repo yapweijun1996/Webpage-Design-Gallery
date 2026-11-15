@@ -668,3 +668,26 @@ body:not(.is-3d) .context-navigation-global .context-navigation-actions{grid-tem
 /* Keep directory destinations visible beneath the sticky shopping header. */
 #featured-products,#newmoon-title,#mili-title,#gogo-title,#original-demo-tin-title{scroll-margin-top:116px}
 @media(max-width:650px){#featured-products,#newmoon-title,#mili-title,#gogo-title,#original-demo-tin-title{scroll-margin-top:98px}}
+
+/* Install and update controls belong to the mall, not the Gallery shell. */
+.mall-app-settings{max-width:1440px;margin:auto;padding:0 5vw max(24px,env(safe-area-inset-bottom));color:var(--green)}
+.mall-app-settings summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700}
+.mall-app-settings>div{max-width:680px;padding-bottom:16px;font-size:var(--font-size-sm);line-height:1.6}
+.mall-app-actions{display:flex;flex-wrap:wrap;gap:8px}
+.mall-app-actions button,.mall-update-notice button{min-height:44px;padding:8px 14px;border:1px solid var(--green);background:var(--green);color:var(--paper);font:inherit;font-weight:700}
+.mall-update-notice{position:fixed;z-index:100;top:calc(104px + env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));left:max(16px,env(safe-area-inset-left));max-width:580px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:var(--paper);border:1px solid var(--green);box-shadow:0 6px 24px #0003;font-size:var(--font-size-sm)}
+.mall-update-notice[hidden],.mall-app-actions button[hidden]{display:none}
+.mall-update-notice button{flex:0 0 auto}
+.mall-app-settings :is(summary,button):focus-visible,.mall-update-notice button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@media(max-width:650px){.mall-app-settings{padding-inline:20px}.mall-update-notice{top:calc(86px + env(safe-area-inset-top))}}
+.mall-connection-notice{position:sticky;top:100px;z-index:98;padding:10px max(20px,5vw);background:#fff2d5;color:#382a0b;font-size:var(--font-size-sm);font-weight:700}
+body.is-3d .mall-connection-notice{position:fixed;z-index:99;top:calc(164px + env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));max-width:580px;margin:auto;border:1px solid #8a6c2c}
+@media(max-width:650px){input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),select,textarea{font-size:16px}}
+@media(max-width:650px){body:not(.is-3d) .mall-connection-notice{top:82px}}
+@media(display-mode:standalone){
+  body:not(.is-3d) .site-header{height:calc(100px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+  body:not(.is-3d) .mall-connection-notice{top:calc(100px + env(safe-area-inset-top))}
+  @media(max-width:650px){body:not(.is-3d) .site-header{height:calc(82px + env(safe-area-inset-top))}}
+  @media(max-width:650px){body:not(.is-3d) .mall-connection-notice{top:calc(82px + env(safe-area-inset-top))}}
+}
+body:not(.is-3d):has(#mall-connection-notice:not([hidden])) .mall-update-notice{top:calc(180px + env(safe-area-inset-top))}

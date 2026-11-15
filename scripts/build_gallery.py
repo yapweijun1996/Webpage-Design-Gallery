@@ -170,6 +170,8 @@ def runtime_resources(catalog):
         "data/companies.json", "data/categories.json", "data/styles.json", "manifest.webmanifest",
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png",
     )}
+    resources.update(Path("demos/corporate/gjh/v11") / name for name in
+                     ("manifest.webmanifest", "offline.html", "pwa.js"))
     # Shared 3D UI ships with the demo; keep it out of the gallery shell precache.
     for directory in ("assets/onboarding", "design-system/onboarding"):
         resources.update(path.relative_to(ROOT) for path in (ROOT / directory).rglob("*") if path.is_file())
@@ -246,7 +248,13 @@ def pwa_outputs(pages, catalog, release):
         entries.append({"path": name, "sha256": hashlib.sha256(data).hexdigest()})
     worker = (ROOT / "templates/gallery/sw.js").read_text(encoding="utf-8")
     worker = worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(entries, indent=2))
-    return {"version.json": json.dumps(release, indent=2) + "\n", "sw.js": worker}
+    mall_root = ROOT / "demos/corporate/gjh/v11"
+    mall_paths = ("offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png")
+    mall_entries = [{"path": name, "sha256": hashlib.sha256(source_bytes(mall_root / name)).hexdigest()} for name in mall_paths]
+    mall_worker = (ROOT / "templates/gallery/gjh-v11-sw.js").read_text(encoding="utf-8")
+    mall_worker = mall_worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(mall_entries, indent=2))
+    return {"version.json": json.dumps(release, indent=2) + "\n", "sw.js": worker,
+            "demos/corporate/gjh/v11/pwa-sw.js": mall_worker}
 
 
 def build(output=ROOT, check=False):

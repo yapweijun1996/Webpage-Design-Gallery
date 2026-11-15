@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="An independent virtual mall concept featuring New Moon, MILI and GOGO. Walk the courtyard in 3D or browse the complete accessible store directory.">
   <meta name="theme-color" content="#102d26">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>GJH Virtual Mall — Everyday, explored.</title>
   <link rel="icon" href="data:,">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/mall-icon-192.png">
   <link rel="preload" href="assets/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../../../../assets/tokens.css">
   <link rel="stylesheet" href="../../../../assets/gjh-themes.css">
@@ -14,6 +18,7 @@
   <link rel="stylesheet" href="../../../../assets/onboarding/onboarding.css">
   <link rel="stylesheet" href="../shared/interaction.css">
   <script type="module" src="script.js"></script>
+  <script defer src="pwa.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to mall and store directory</a>
@@ -24,6 +29,8 @@
     <button id="bag-open" class="bag-open" type="button" aria-controls="bag-dialog" hidden>Bag (0)</button>
     <button id="view-toggle" class="view-toggle" type="button" aria-controls="experience store-list" hidden>List view</button>
   </header>
+  <div id="mall-connection-notice" class="mall-connection-notice" role="status" aria-live="polite" hidden>Connection unavailable. Reconnect to browse the mall and its products.</div>
+  <div id="mall-update-notice" class="mall-update-notice" role="status" aria-live="polite" hidden><span id="mall-update-message">An update is ready.</span><button id="mall-apply-update" type="button">Update</button></div>
 
   <div id="context-navigation-global" class="context-navigation-global" hidden></div>
 
@@ -108,6 +115,7 @@
     </section>
   </main>
   <footer class="site-footer"><p class="footer-name">GJH Virtual Mall<span>Everyday, explored.</span></p><p>Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p><a href="https://www.gjheshop.com/">Official GJH eShop</a></footer>
+  <details class="mall-app-settings"><summary>App &amp; offline help</summary><div><p>Install this mall from your browser menu. On iPhone or iPad, open Share and choose Add to Home Screen.</p><p>The mall and products need a connection. Offline, this app shows a reconnect screen. The demo bag stays in this browser tab only.</p><div class="mall-app-actions"><button id="mall-install" type="button" hidden>Install mall</button><button id="mall-check-update" type="button" hidden>Check for updates</button></div><p id="mall-app-status" role="status" aria-live="polite">Checking offline support…</p></div></details>
   <div id="mall-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
   <dialog id="shelf-dialog" class="shelf-dialog" aria-labelledby="shelf-title" aria-describedby="shelf-disclosure">
     <div class="shelf-top"><button id="shelf-back" type="button">Back</button><span>Shelf view</span><button id="shelf-close" type="button">Close</button></div>

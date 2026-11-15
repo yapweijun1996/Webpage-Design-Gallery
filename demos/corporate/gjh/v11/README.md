@@ -104,3 +104,7 @@ Independent >=88 visual scores on every shot, physical-phone frame rate, Safari 
 The directory uses 20 original AI-generated, unbranded concept illustrations in its optional concept gallery and one entry preview. They are not photographs of the current 3D scene, real premises, merchandise, or official brand material. Image subjects and generation provenance are listed in `assets/concept-imagery.json`; official New Moon product packshots and existing brand artwork remain separate. The gallery images load lazily and are not part of the gallery shell precache.
 
 The three store sections also use nine AI-generated lifestyle scenes, three per brand, inspired by the existing official cover images. They are labelled as concepts and use the original official logo assets separately. The MILI and GOGO original covers remain available in their brand artwork viewers, the original New Moon cover remains in the assets, and the four verified product packshots are unchanged. See `assets/concept-imagery.json` for the scene and reference inventory.
+
+## Standalone PWA
+
+V11 has its own scoped manifest and an integrity-checked worker that saves only a reconnect screen and app icons. The directory and 3D mall still require a connection; the demo bag remains session-only. Updates require an explicit action. See [PWA scope, tests and limitations](../../../../docs/gjh-v11-pwa.md).

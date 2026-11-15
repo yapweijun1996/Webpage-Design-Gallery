@@ -27,3 +27,7 @@ For a non-navigation precached-resource request from a same-app `demos/` window 
 - Runtime stale scripts: no service-worker cache of V11 JS; ordinary HTTP caches or already-open documents can still retain loaded code. No evidence here attributes a specific owner incident to those possibilities.
 
 Rollback: revert the release and regenerate Gallery artifacts; no storage schema change. Keep explicit user-controlled update acceptance.
+
+## Later V11 standalone PWA
+
+The original Gallery/V11 boundary above is historical. V11 now registers a narrower-scope worker for its own offline reconnect screen; the actual mall and shared themes remain network-only. See [the current V11 PWA profile](gjh-v11-pwa.md) for scope and verification limitations.

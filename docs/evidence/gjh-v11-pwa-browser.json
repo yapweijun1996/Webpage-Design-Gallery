@@ -1,0 +1,102 @@
+{
+  "standard": "pwa:product-standard",
+  "version": "1.1.0",
+  "profile": "IMMERSIVE_3D",
+  "build_id": "155dab8b95850d80",
+  "commit_sha": "7b27dbeaad243b3a762e6dad8445a4e291bab0d5",
+  "workspace_dirty": true,
+  "browser": "Google Chrome 157.0.8103.51",
+  "os": "macOS",
+  "device": "desktop; mobile viewports emulated",
+  "installed_mode": "browser; OS installation not tested",
+  "runner": "tests/browser_gjh_pwa.py",
+  "timestamp": "2026-11-15T08:11:28.878964+00:00",
+  "artifact_sha256": {
+    "demos/corporate/gjh/v11/index.html": "aade597e781361ccb70bbe6a86b53698f67b493c1cb67634bcaddaf255f68e76",
+    "demos/corporate/gjh/v11/style.css": "102d38ab2c21f9c20f7a2e44cd9ecb1582617aaf7b25df75cd033fd2b5a5cbda",
+    "demos/corporate/gjh/v11/pwa.js": "ac85463a033edfad395a480d30cfac496ac251722a6a7f683a4b3c55c32ad60e",
+    "demos/corporate/gjh/v11/pwa-sw.js": "cabb30661858ccf100520e8923362a59b767927a08399c102924ed6e9119b434",
+    "demos/corporate/gjh/v11/manifest.webmanifest": "1c053d68e6091b82a4a1180555c73f109fff62a9c7014a15f07a1e2b156104ea",
+    "demos/corporate/gjh/v11/offline.html": "a31e6bc958c808346299726b42215ef69a40cad40c9e711bf18fedecc2b4af4e",
+    "tests/browser_gjh_pwa.py": "f6aeade14e63b90d3af6f5c3628a710c27131ad93df07469ef5ac898775ad279"
+  },
+  "gate": "HOLD",
+  "gate_reason": "Physical-device, screen-reader, cross-browser, field-performance and independent release review evidence is incomplete.",
+  "results": [
+    {
+      "test_id": "INS-03",
+      "status": "PASS",
+      "evidence": "Manifest scope, id and start URL inspected in Chrome."
+    },
+    {
+      "test_id": "INS-04",
+      "status": "PASS",
+      "evidence": "192/512 icons declared; generator checks byte hashes and offline budget."
+    },
+    {
+      "test_id": "SW-03",
+      "status": "PASS",
+      "evidence": "Mismatched release identity rejected."
+    },
+    {
+      "test_id": "SW-04",
+      "status": "PASS",
+      "evidence": "Tampered offline resource rejected; active cache retained."
+    },
+    {
+      "test_id": "SW-05",
+      "status": "PASS",
+      "evidence": "Verified update notice shown."
+    },
+    {
+      "test_id": "SW-07",
+      "status": "PASS",
+      "evidence": "Other tab did not automatically reload and showed a reload notice."
+    },
+    {
+      "test_id": "SW-09",
+      "status": "PASS",
+      "evidence": "User-confirmed update performed one reload and retained the demo bag."
+    },
+    {
+      "test_id": "SW-10",
+      "status": "PASS",
+      "evidence": "Offline update was disabled until reconnection."
+    },
+    {
+      "test_id": "OFF-01",
+      "status": "PASS",
+      "evidence": "Offline cold navigation displayed the saved reconnect page."
+    },
+    {
+      "test_id": "OFF-02",
+      "status": "PASS",
+      "evidence": "Actual failed fetch and offline state were exercised."
+    },
+    {
+      "test_id": "REL-06",
+      "status": "NOT_RUN",
+      "evidence": "Physical iOS, Safari, Android, Firefox and Edge were not tested."
+    },
+    {
+      "test_id": "QA-01",
+      "status": "NOT_RUN",
+      "evidence": "No field LCP samples."
+    },
+    {
+      "test_id": "QA-02",
+      "status": "NOT_RUN",
+      "evidence": "No field INP samples."
+    },
+    {
+      "test_id": "QA-03",
+      "status": "NOT_RUN",
+      "evidence": "No field CLS samples."
+    },
+    {
+      "test_id": "A11Y-03",
+      "status": "NOT_RUN",
+      "evidence": "No physical screen-reader or VoiceOver verification."
+    }
+  ]
+}

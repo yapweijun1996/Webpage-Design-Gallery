@@ -1,6 +1,7 @@
 """Contract tests for metadata, safe paths and deterministic gallery generation."""
 
 import copy
+import hashlib
 import importlib.util
 import json
 import re
@@ -106,6 +107,16 @@ class GalleryTests(unittest.TestCase):
             self.assertNotIn("demos/corporate/gjh/shared/navigation.js", cached)
             self.assertNotIn("demos/corporate/gjh/v11/vendor/rapier.mjs", cached)
             self.assertTrue(all(design["thumbnail"] in cached for design in catalog["designs"]))
+            mall = output / "demos/corporate/gjh/v11"
+            mall_worker = (mall / "pwa-sw.js").read_text()
+            mall_entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", mall_worker, re.S).group(1))
+            self.assertEqual({entry["path"] for entry in mall_entries}, {
+                "offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png"})
+            self.assertLessEqual(sum((mall / entry["path"]).stat().st_size for entry in mall_entries), 256 * 1024)
+            for entry in mall_entries:
+                self.assertEqual(hashlib.sha256((mall / entry["path"]).read_bytes()).hexdigest(), entry["sha256"])
+            self.assertTrue((mall / "pwa.js").is_file())
+
 
     def test_nested_pages_use_prefix_safe_sprite_and_company_identity(self):
         pages = gallery.build_pages(gallery.load_catalog())
