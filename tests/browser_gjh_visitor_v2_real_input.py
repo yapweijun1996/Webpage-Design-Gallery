@@ -142,6 +142,7 @@ def product_journey(page, prefix, touch=False):
     wait(page, 'window.__mall.state.character.physicalProduct.phase==="held"')
     assert 'AUSTRALIA' in page.locator('#held-product-status').inner_text().upper()
     assert not state(page)['cameraOccluded']
+    assert page.locator('.ob-hud').is_hidden(), 'Tutorial must yield to the physical-item HUD'
     assert page.evaluate('()=>__visitorQA.some(s=>s.phase==="pickup"&&s.approaching)')
     shot(page, prefix+'-held')
     if touch:
@@ -175,6 +176,18 @@ def product_journey(page, prefix, touch=False):
     assert 'Return Australia' not in page.locator('#cart-status').inner_text()
     getattr(page.locator('#bag-close'),action)()
     check(prefix+' persistent held status / truthful cart refusal / original-shelf return')
+    # A visible scene action hides the tip, but a real Inspect must still count.
+    assert page.locator('.ob-tip h3').inner_text() == 'Inspect'
+    getattr(page.locator('#inspect'),action)()
+    page.locator('#product-dialog').wait_for(state='visible')
+    assert page.locator('.ob-tip [data-ob-action=next]').inner_text() == 'Keep exploring'
+    getattr(page.locator('#product-close'),action)()
+    page.locator('#product-dialog').wait_for(state='hidden')
+    go(page,-11.21,-4.8,touch)
+    assert page.locator('.ob-hud').is_visible()
+    assert page.locator('.ob-tip [data-ob-action=next]').inner_text() == 'Keep exploring'
+    shot(page,prefix+'-tutorial-ready')
+    check(prefix+' real Inspect completes tutorial while scene HUD owns presentation')
 
 
 def camera_journey(page, prefix, touch=False):
@@ -199,6 +212,7 @@ def cart_journey(page, prefix, touch=False):
     action = 'tap' if touch else 'click'
     getattr(page.locator('#scene-cart'), action)()
     wait(page, 'window.__mall.state.pushing')
+    assert page.locator('.ob-hud').is_hidden(), 'Tutorial must yield to Cart controls'
     before = state(page)
     go(page, 4, 2.4, touch)
     assert math.hypot(state(page)['x']-before['x'], state(page)['z']-before['z'])>.5
@@ -233,6 +247,7 @@ def seat_journey(page, seat, prefix, touch=False):
     trace_start=page.evaluate('()=>__visitorQA.length')
     getattr(page.get_by_role('button', name='Sit on '+seat['name'], exact=True), action)()
     wait(page, 'window.__mall.state.seatPhase==="seated"')
+    assert page.locator('.ob-hud').is_hidden(), 'Tutorial must yield to Stand and seated framing'
     assert state(page)['seatId']==seat['id']
     assert page.evaluate('(i)=>__visitorQA.slice(i).some(s=>s.seat==="align"||s.seat==="sit")',trace_start)
     assert page.locator('.mall-intro').is_hidden()

@@ -18,6 +18,7 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
   let showNextTime = true, controlsExpanded = !matchMedia('(max-width: 650px)').matches;
   let modePreference = 'auto', mode = coarse.matches && modes.includes('touch') ? 'touch' : modes[0];
   let visible = false, tutorial = false, tipIndex = 0, previousFocus = null, previousHUDAction = null, settingsOpen = false;
+  let hudSuppressed = false;
   let suspended = false, lastGamepadButtons = [], gamepadDirectionAt = 0;
   const key = `ob:${storageKey}:preferences:v1`;
   try {
@@ -102,7 +103,7 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
   function renderHUD(announce = false) {
     const t = text();
     const focusedAction=hud.contains(document.activeElement)?document.activeElement.dataset.obAction:null;
-    hud.replaceChildren(live); hud.hidden = !visible || suspended || dialog.open || (!tutorial && !showHelpEntry);
+    hud.replaceChildren(live); hud.hidden = !visible || suspended || hudSuppressed || dialog.open || (!tutorial && !showHelpEntry);
     if (tutorial) {
       const tip = element('aside', 'ob-tip'); tip.setAttribute('aria-label', t.controls);
       const header = element('div','ob-tip-header');
@@ -180,6 +181,8 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
     get shouldAutoShow(){return showNextTime;},
     setVisible(value){visible=Boolean(value);if(!visible&&dialog.open)dialog.close('view-change');renderHUD();},
     setSuspended(value){if(suspended===Boolean(value))return;suspended=Boolean(value);renderHUD();},
+    // Scene actions can hide tips while confirmed actions still advance the tutorial.
+    setHUDSuppressed(value){if(hudSuppressed===Boolean(value))return;hudSuppressed=Boolean(value);renderHUD();},
     report(action){if(tutorial&&!suspended&&!dialog.open&&steps[tipIndex]?.id===action){tipIndex++;renderHUD(true);}},
     handleGamepad(pad,navigationRoot=null){
       if(!pad||!modes.includes('gamepad')){lastGamepadButtons=[];return false;}

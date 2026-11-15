@@ -52,6 +52,9 @@ export function createUI() {
     bagOpen: document.getElementById('bag-dialog').open, shelfOpen: Boolean(shelfFocus?.open),
     panelOpen: amenityPanel.dialog.open || !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
   function syncOnboardingSuspension(signals) {
+    // Contextual tips yield to the scene action HUD instead of covering its controls.
+    const actionHUD = showing3D && (!inspectPrompt.hidden || cartState().active || cartState().heldProduct);
+    onboarding.setHUDSuppressed(Boolean(actionHUD));
     onboarding.setSuspended(amenityPanel.dialog.open || signals.productOpen || signals.bagOpen || signals.shelfOpen || !showing3D || help.open || (compactMap.matches && mallMap.open));
   }
   const notifyMode = () => {

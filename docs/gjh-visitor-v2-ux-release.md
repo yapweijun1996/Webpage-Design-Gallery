@@ -1,5 +1,17 @@
 # Visitor v2 UX release verification
 
+## Final visual correction
+
+The initial public input assertions passed, but screenshot review caught an additional real integration defect: the incoming mobile onboarding tip covered the seated character and Stand action. Public visual acceptance was reopened rather than treating input actionability as visible usability.
+
+The onboarding owner now separates `setHUDSuppressed` (presentation only) from `setSuspended` (modal/input eligibility). V11 yields contextual tips while the action HUD, held product or cart owns the scene, retaining tutorial progress. Confirmed Inspect still advances; closing the viewer and walking away restores the completed “Keep exploring” tip. No forced focus migration is added. The advisor re-reviewed this split with no remaining P1/P2 in scope.
+
+Local current-source preflight: keyboard five checks and touch seven checks PASS, including real Inspect completion and unobscured held/cart/seated HUD assertions. Normal animations remain enabled. Unit49, generated freshness, SSOT and whitespace checks PASS. See [keyboard](evidence/visitor-v2-ux-release/final-local-desktop.json), [touch](evidence/visitor-v2-ux-release/final-local-touch.json) and [final source hashes](evidence/visitor-v2-ux-release/final-source-hashes.json). The first completion-label fixture used “Done”; it was corrected to the actual existing “Keep exploring” label, retaining exact state and visible-after-walking assertions.
+
+Publication and a fresh **15-check** live release suite for this final correction are pending.
+
+![Corrected local touch seating with unobscured Stand](evidence/visitor-v2-ux-release/final-local-touch-bench-seat-5-seated.png)
+
 ## Scope and integration
 
 The reviewed visitor camera, physical pickup/return, cart, seating and HUD fixes are integrated with upstream `e67c2d9b3400a4219766dd5fbeaf16f404320efe`. Preserve the incoming sphere-sweep camera, furniture bounds, amenities, native-size dense shelf stock, Help/Map ownership, onboarding and automatic product preview with wheel/pinch zoom. Avatar-only close-camera visibility retains the cart and world.
@@ -17,7 +29,7 @@ All work uses the isolated `codex/visitor-v2-ux-fixes` worktree. No checkout, re
 
 [Source hashes](evidence/visitor-v2-ux-release/source-hashes.json) pin the thirteen changed runtime files. Historical earlier-candidate evidence remains in [the original fix report](gjh-visitor-v2-ux-fixes.md).
 
-## Deployment and public acceptance
+## Initial deployment and input-layer acceptance
 
 Published code commit: [`eced12c91afb270955c50b460f73c1080876355e`](https://github.com/yapweijun1996/Webpage-Design-Gallery/commit/eced12c91afb270955c50b460f73c1080876355e).
 
@@ -38,7 +50,7 @@ The release suite covers all four requested flows with native browser keyboard a
 Physical iPhone/Android/Safari, thermal/FPS measurements and full-mall LOD performance benefit are not certified by browser touch emulation.
 
 
-## Public browser evidence
+## Initial browser evidence (superseded by visual correction)
 
 ![Live keyboard pickup and original-shelf return controls](evidence/visitor-v2-ux-release/live-keyboard-held.png)
 

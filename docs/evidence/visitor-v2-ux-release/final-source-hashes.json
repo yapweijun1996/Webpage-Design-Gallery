@@ -1,0 +1,22 @@
+{
+  "previousDeployment": "5422c3355f1cb897b59dd410a04f007b38080dcf",
+  "resources": {
+    "demos/corporate/gjh/v11/assets/character-v2.js": "acbf0fc87bb4e5c862636a4904e7f0bf44a9f6cfca88725b3e2925a370eb1a0a",
+    "demos/corporate/gjh/v11/assets/character.js": "4b40bff272713fefe1e34299390dc3a290b7d6a9aed382173fb1333a14bc6f3b",
+    "demos/corporate/gjh/v11/assets/player.js": "a3db275ff644cb9db98f68c72f1f9f771659cd1b89399035c0df45d755f6f0a4",
+    "demos/corporate/gjh/v11/assets/products.js": "20eccdf781f3e02f7b3c69730befa750f020aeeff885a45beea72b299375a455",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "a509bc1ce7d8528912054d7b1f4df07a016de8b6ac384654beb005983997a7a6",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "e82f048d90587c1be218d0b2a1845f4ee047e574e8fffc693df99f5ab7cbb073",
+    "demos/corporate/gjh/v11/assets/ui.js": "c84e02bdba72e3997253ce8b9742eded48e84d0ce3f6e0fc6a3be1d4544aa7f8",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "8b187c6df79c017dbbe6287aba072ec412ba0ecdc0af7c1f16972351075f9fa3",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "f0a714f425cb38e5ff4a941a10764dc730d61ab4b4e046fccf2eae39b8c4eefc",
+    "demos/corporate/gjh/v11/assets/world.js": "89a0e0ffbbd04f2c6e96242cebacca04040cd6496ba42ab41b5dd90efa4142b7",
+    "demos/corporate/gjh/v11/index.html": "a239bd894fb22be80b2230c03f549cdd65d424722504e4022f05970231f703af",
+    "demos/corporate/gjh/v11/script.js": "9d9c080cb0acc72b7ec62a81ca331aea4ed126de9066e95ae2dcad8ec5fcaebc",
+    "demos/corporate/gjh/v11/style.css": "2b379146965cfb14ec6906c3f760c90446b48100f45ba55e6327f741e720876b",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "5b6a0ebd19b5061882f7ad5eb39bb675e3e537e08221386303bbfbb816143996",
+    "demos/corporate/gjh/v11/assets/amenities.js": "0b58e42678cba19c6068f9f82b528b88580a39edb1e4e7bcc14b3f9d38b3abfa",
+    "assets/onboarding/onboarding.js": "4783e2ee236f46db83a424b462d52a301a25ba2b623524259ec7e4942e830a51",
+    "version.json": "08f01c39c361a199cd9c2c8ea1c88e3a1faa6540f206dde1eacff3058ea23e64"
+  }
+}
