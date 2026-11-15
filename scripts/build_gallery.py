@@ -15,6 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 DS_SPEC = importlib.util.spec_from_file_location("build_design_system", ROOT / "scripts/build_design_system.py")
 design_system = importlib.util.module_from_spec(DS_SPEC)
 DS_SPEC.loader.exec_module(design_system)
+RAPIER_SPEC = importlib.util.spec_from_file_location("build_rapier", ROOT / "scripts/build_rapier.py")
+rapier = importlib.util.module_from_spec(RAPIER_SPEC)
+RAPIER_SPEC.loader.exec_module(rapier)
+GJH_CSS_SPEC = importlib.util.spec_from_file_location("build_gjh_css", ROOT / "scripts/build_gjh_css.py")
+gjh_css = importlib.util.module_from_spec(GJH_CSS_SPEC)
+GJH_CSS_SPEC.loader.exec_module(gjh_css)
 
 
 def read_json(path):
@@ -171,7 +177,7 @@ def runtime_resources(catalog):
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png",
     )}
     resources.update(Path("demos/corporate/gjh/v11") / name for name in
-                     ("manifest.webmanifest", "offline.html", "pwa.js"))
+                     ("manifest.webmanifest", "offline.html", "pwa.js", "style.bundle.css"))
     # Shared 3D UI ships with the demo; keep it out of the gallery shell precache.
     for directory in ("assets/onboarding", "design-system/onboarding"):
         resources.update(path.relative_to(ROOT) for path in (ROOT / directory).rglob("*") if path.is_file())
@@ -259,6 +265,8 @@ def pwa_outputs(pages, catalog, release):
 
 def build(output=ROOT, check=False):
     validate_locales()
+    rapier.build(check=check)
+    gjh_css.build(check=check)
     design_system.build(ROOT, check=check)
     catalog = load_catalog()
     release = release_info(catalog)

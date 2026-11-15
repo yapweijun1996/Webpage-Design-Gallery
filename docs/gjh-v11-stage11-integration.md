@@ -1,6 +1,6 @@
 # V11 stage 11 — integration and verification
 
-Status: local integration verification for the opt-in expanded mall. Everyday, Lunar New Year, Christmas and Deepavali are available; the original scene remains the default. The existing startup performance budget is still an open failure, and this report does not claim a production release, physical-device certification or authorization for the 14 candidate brands.
+Status: historical local integration verification for the opt-in expanded mall. Everyday, Lunar New Year, Christmas and Deepavali are available; the original scene remains the default. Subsequent [stage 11b work](gjh-v11-stage11b-startup.md) passed the decoded-payload assertion but still fails the request-count assertion. This report does not claim a production release, physical-device certification or authorization for the 14 candidate brands.
 
 ## Integration fixes
 

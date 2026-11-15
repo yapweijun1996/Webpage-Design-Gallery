@@ -1,7 +1,3 @@
-import {createPushCart} from './push-cart.js';
-import {createSeatedPose} from './seated-pose.js';
-import {createCollectionGesture} from './collection-gesture.js';
-import {createCarryBag} from './carry-bag.js';
 /** Authored visitor presentation; locomotion and collision belong to player.js. */
 export function createLocomotionContinuity() {
   // Bridge isolated contact corrections, never movement from rest or released input.
@@ -26,7 +22,12 @@ export async function createCharacter(T) {
     const {createCharacterV2} = await import('./character-v2.js');
     return createCharacterV2(T, createLocomotionContinuity);
   }
-  const {GLTFLoader} = await import('../vendor/GLTFLoader.js');
+  // These presentation modules belong only to the explicitly selected V1
+  // visitor; the default V2 visitor supplies its own controls and animation.
+  const [{GLTFLoader}, {createPushCart}, {createSeatedPose}, {createCollectionGesture}, {createCarryBag}] = await Promise.all([
+    import('../vendor/GLTFLoader.js'), import('./push-cart.js'), import('./seated-pose.js'),
+    import('./collection-gesture.js'), import('./carry-bag.js')
+  ]);
   const model = 'gjh-mall-visitor';
   const asset = `assets/${model}.glb`;
   const gltf = await new GLTFLoader().loadAsync(new URL(`./${model}.glb`, import.meta.url).href);

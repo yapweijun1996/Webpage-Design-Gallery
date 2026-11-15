@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/yapweijun/Documents/GitHub/Webpage-Design-Gallery-stage6/tests/browser_gjh_budget.py", line 60, in <module>
+    if __name__=='__main__':run()
+                            ~~~^^
+  File "/Users/yapweijun/Documents/GitHub/Webpage-Design-Gallery-stage6/tests/browser_gjh_budget.py", line 24, in run
+    assert len(initial)<=45,'Ready-stage resource count exceeds 45'
+           ^^^^^^^^^^^^^^^^
+AssertionError: Ready-stage resource count exceeds 45

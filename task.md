@@ -1,6 +1,6 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **core mall software and existing-source checks complete; physical-device acceptance and separately scoped interior follow-ups remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
+Status: **core mall software, existing-source checks and the four authorized interior follow-ups complete; physical-device acceptance and separately scoped expanded-mall stages remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
 
 ## Objective and scope
 
@@ -459,9 +459,9 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] D2: review the eight-ID pilot: PUB-002, PUB-008, PUB-017, DSP-001, STF-008, LGT-009, PUB-005 and VER-017; preserve their source priorities and correct targets before authoring.
 - [x] D2: author/adapt the reviewed pilot with editable source, GLB, manifest, applicable collision definitions, provenance and actual G01–G12 results or reasoned applicability records.
 - [x] D2: validate export in independent viewers and the actual mall; verify failed/delayed loading, lifecycle cleanup and mobile/desktop visuals.
-- [ ] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
-- [ ] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
-- [ ] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
+- [x] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
+- [x] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
+- [x] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
 - [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
 
 Completion requires real artifacts and evidence, not a checked inventory row. Supplied dimensions, material/LOD budgets and capability tags remain proposals until individually reviewed. The existing delivered-asset evidence and other task sections retain their own status. The later explicit request authorizes this eight-asset implementation. See [pilot review](docs/gjh-v11-interior-pilot-review.md), [acceptance manifest](models/gjh-interior-pilot/manifest.json) and [14-case E2E evidence](docs/evidence/interior-pilot-e2e.json). The subsequent commit/push request is tracked in [pilot release review](docs/gjh-v11-interior-pilot-release.md). The complete pilot uses `?interior=pilot`; the default keeps later M056 shelves, Shelf focus and graphics recovery. HUD consolidation and remaining candidates remain separate work.
@@ -513,8 +513,53 @@ and the documented Directory/image/boundary bridges. Primary independent checks
 add 49 Python tests, six interaction cases and three strict edge cases; generation
 and SSOT pass. Historical mode/Gallery/PWA proofs retain their source boundaries,
 and the unreproduced earlier Hair hit failure remains recorded. Post-push CI,
-Pages and actual public user flows are the release gate before D3. Only D1 is
-checked here; D3/D4/D5 and physical-device acceptance retain separate status.
+Pages and actual public user flows are the release gate before D3. At this D1 checkpoint only D1 was
+checked; subsequent D3/D4/D5 acceptance is recorded separately below.
+
+
+D3 bounded shell acceptance — 2026-11-15: application1.1.49 adds original
+ARC-001/COR-001/CEI-001/STF-002 to classic default/pilot, plus necessary cart
+batching that repairs the inherited220-call failure without relaxing200. Expanded
+retains its existing shell and makes zero four-kit GLB requests. Four editable
+sources,40,892-byte exports and canonical placement/proxy data have independent
+acceptance;12selected IDs are implemented and188candidates remain pending.
+Current55Python/19Node/generator/SSOT and8browser integration groups pass.
+Fourjourneys/4,745actualsteering renders peak200;960distinct advancing renders
+pass; all66collider records match pinned8768 for v1/v2 x default/pilot.
+See docs/v11-interior-shell-review.md and docs/evidence/interior-shell-integration.json.
+Immutable950 evidence remains separate. Physical-device/AT,45requests/10MiB,
+fullM1/200candidates and expanded performance are not certified. Main/CI/Pages
+and actual public flows are the publication gate before D4.
+
+
+D4 supported P1 selection — 2026-11-15: independently accepted reuse of
+DSP-001/PUB-002/PUB-008/PUB-005/LGT-009 with their existing capabilities,
+artifacts and collision/fallback owners. Default M056 is retained; DSP remains
+pilot-only. All12P1 FAC candidates have individual not-selected reasons and
+remain unimplemented; P2 PUB-017 is a retained Map dependency, not a P1 asset.
+Current14pilot E2E checks and all148runtime hashes pass against deployed D3
+e7581e6 (CI/Pages43699502215,28public hashes,fivepublic journeys).
+Selection adds zero runtime resources/IDs;12implemented and188pending remain.
+See docs/v11-interior-p1-review.md and docs/evidence/interior-p1-selection.json.
+D4 selection is complete; FAC production, D5 and physical-device/AT acceptance
+are not implied. Its own main/CI/Pages verification is required before D5.
+
+
+D5 optional detail evaluation — 2026-11-15: independently accepted measured
+policy retains supported P2 directory/plinth identities, existing PBR/product
+label pipelines, small static shell batch and current shared LOD1/lazy previews.
+No new variant/reflection/decoder/streaming/distance-switch is justified by the
+current measured Detailed active-cart200-call state. All148runtime hashes match
+the current source-equivalent480-frame sample (pairedbaseline/current960frames);
+six fresh browser loader cases prove valid3-primitive positive parse and rejection
+of5SHA-valid unsupported variants before parsing or dependent requests.
+Closing55Python/19Node/generator/SSOT pass; prior current14pilot/eightintegration
+checks remain source-pinned, not falsely claimed rerun for D5. See
+docs/v11-interior-detail-policy.md and docs/evidence/interior-detail-policy.json.
+D1/D3/D4 are already separately published (950634f/e7581e6/9c2066f); D4 CI/Pages
+43700288223 and35public hashes pass. This closes the four authorized interior
+follow-ups after D5 publication verification.12implemented/188pending remain;
+physical-device/AT and the separately scoped expanded checklist are unchanged.
 
 Visitor v2 UX follow-up — 2026-11-15: camera occlusion, natural bench entry, reachable pickup/return feedback, persistent held guidance, truthful recovery and direct Cart controls are implemented in an isolated local candidate. Real-input and advisor evidence: `docs/gjh-visitor-v2-ux-fixes.md`. Publication and physical-device performance are not claimed.
 
@@ -534,7 +579,7 @@ The earlier nine-slice outline is superseded by the more detailed, dependency-aw
 
 ## Expanded 17-store upgrade — 2026-11-15
 
-Status: **stages 0–5 and 7–9 completed in the opt-in expanded preview; stage 6 neutral storefront and research slice implemented, with all branded candidates pending**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
+Status: **stages 0–5 and 7–10 completed in the opt-in expanded preview; stage 6 neutral storefront and research slice implemented, with all branded candidates pending; stage 11b remains open**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
 
 - [x] Inspect existing scene dimensions and repository company/brand research; check GJH corporate and eShop source listings.
 - [x] Produce a labelled, dimensioned 2D ground-floor draft and reconcile area arithmetic, circulation zones, seasonal space and candidate brand evidence.
@@ -556,6 +601,46 @@ Status: **stages 0–5 and 7–9 completed in the opt-in expanded preview; stage
 - [x] **10b. Christmas:** added an evergreen tree, gifts, warm lights and banner with removable decoration, three-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-christmas.md).
 - [x] **10c. Deepavali:** added warm lamps, floral garlands, a flat rangoli-inspired motif and jewel tones with four-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-deepavali.md).
 - [x] **11a. Integration verification:** tested all four themes, existing shopping and navigation, five viewport sizes, graphics/failure recovery, PWA and accessibility; fixed hidden offline help, stale theme preview and landscape Help focus. [Report and evidence](docs/gjh-v11-stage11-integration.md). Browser emulation is not physical-device or screen-reader certification.
-- [ ] **11b. Performance acceptance:** the existing 10 MiB ready-stage budget still fails and an independent probe also records more than 45 ready-stage requests; the desktop cart remains above the 200-call non-cart reference. Investigate and optimize without weakening the existing thresholds; the budget suite stops at its first failure.
+- [ ] **11b. Performance acceptance:** split the pinned Rapier binary, combine first-load styles and defer V1-only modules. The merged-build probe drops from 10,915,858 to 9,884,264 decoded bytes and from 89 to 82 requests; the 10 MiB assertion passes, but the existing 45-request assertion still fails. The budget suite consequently cannot certify later gates. The 200-call assertion applies to its non-cart scenario; the previous desktop cart comparison remains a separate observation. Continue optimization without weakening the limits. See [stage 11b](docs/gjh-v11-stage11b-startup.md).
 
 Proposed dimensions and a small upper landing are documented; owner review, actual-scene clearance, external service connectivity, store content/rights and any shared operator theme access remain open for their respective slices. Browser-local theme persistence is implemented. A checked planning item is not runtime implementation or acceptance.
+
+Stage6 neutral-candidate acceptance — 2026-11-15: application1.1.50 adds shared
+planned-space04–17 records,14truthful Directory entries and matching Map states,
+while retaining3open stores/4products. Native staticdetails remains readable
+withoutJS/WebGL/Rapier; closedspaces have no action and all14stale destinations
+are rejected. Existing3D labels say PLANNEDSPACE, not an opening promise.
+Fresh official-navigation observations match14draft names but establish no new
+catalog or asset permission; all runtime candidates remain unassigned/unavailable.
+Independent148source/56raw-hash review,14focusedcontexts,55Python/21Node/gen/SSOT
+and8integrationgroups pass. Paired480actualrenders hold190inactive/193cart calls
+at1440Detailed, unchanged from c652e9f. See docs/gjh-v11-stage6-candidates.md and
+docs/evidence/gjh-stage6-candidates.json. No extra model/request/geometry is added.
+Main/CI/Pages and public DOM/hash verification remain the release gate before7;
+physical-device/AT and later expanded stages are not completed by this slice.
+
+Stage6 public-check follow-up: isolate14unavailable destination calls and exact
+X/Z/frameCounter equality within one JS turn. Three controls exposed cross-RPC
+idle-frame sampling, not a demonstrated teleport mutation. Strict corrected
+14local/fivepublic checks pass; no tolerance or runtime change. Original failure
+and phase evidence remain pinned in docs/evidence/gjh-stage6-public-check.json.
+The test-only repair requires main/CI/public-byte verification before stage7.
+
+
+Stage7 local acceptance — 2026-11-15: application1.1.51/build68cc981c4eb25add
+implements a physical expanded lift cabin, shaft opening, stop gates/thresholds,
+west boarding/exit and safe interrupted-travel recovery. Empty Call requires a
+separate Ride; the upper landing is visitor-only. Canonical anchors align entrance
+Directory/Guest guide and west-court showcase, loaded/fallback proxies and4SKUs.
+Four Map letters add location information without new destinations or live services.
+Current55Python/28Node/gen/SSOT,3expanded lift configurations/5native contextlosses,
+6finalMap contexts,12pause/visibility+2resize observations, loaded/fallback service
+journeys and5normal native keyboard checks pass. Three unsafe-state guards use
+explicit QA-only synchronous body faults, not invented native journey evidence.
+Ten broader groups retain their tested pre-capability-metadata source phase with
+exact geometry/motion bridges. Fourclassic profiles retain all66colliders exactly.
+Independent local approval and1,920actual advancing samples preserveclassic200;
+expanded1440Detailed cart changes193to182calls. See docs/gjh-v11-stage7-lift.md
+and docs/evidence/gjh-stage7-lift.json. All75binaryassets remain exact; one1,494-byte
+JSmodule is added. Main/CI/Pages/public verification is required beforestage8.
+Physical-device/AT, historicalpayload gates and operatingfacilities remain unverified.

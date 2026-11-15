@@ -1,0 +1,23 @@
+{
+  "baseline": "f1e210856a98e29220c8a0ebb38dbc9ab7ca3b50",
+  "baselineCount": 148,
+  "currentCount": 149,
+  "unchanged": 139,
+  "changed": [
+    "demos/corporate/gjh/v11/assets/amenities.js",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js",
+    "demos/corporate/gjh/v11/assets/expanded-layout.js",
+    "demos/corporate/gjh/v11/assets/player.js",
+    "demos/corporate/gjh/v11/assets/ui.js",
+    "demos/corporate/gjh/v11/assets/world.js",
+    "demos/corporate/gjh/v11/index.html",
+    "demos/corporate/gjh/v11/pwa-sw.js",
+    "demos/corporate/gjh/v11/script.js"
+  ],
+  "new": [
+    "demos/corporate/gjh/v11/assets/lift-layout.js"
+  ],
+  "newModuleBytes": 1494,
+  "unchangedBinaryAssetCount": 75,
+  "scope": "One new shared JS module; all existing binary asset bytes unchanged. No claim of zero cold module requests or historical payload-budget pass."
+}

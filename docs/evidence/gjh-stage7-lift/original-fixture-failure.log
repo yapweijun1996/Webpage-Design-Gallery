@@ -1,0 +1,9 @@
+LIFT PASS 390
+Traceback (most recent call last):
+  File "/private/tmp/gallery-task-lod/tests/browser_gjh_lift.py", line 96, in <module>
+    if __name__=='__main__':run()
+                            ~~~^^
+  File "/private/tmp/gallery-task-lod/tests/browser_gjh_lift.py", line 69, in run
+    before=state(page);action(page);s=step(page,650);assert s['elevator']['calling'] and not s['elevatorTravel'];assert math.hypot(s['x']-before['x'],s['z']-before['z'])<.01
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

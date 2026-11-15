@@ -1,0 +1,48 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (2.586583ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (3.200542ms)
+✔ fourteen planned records derive only from closed slots and cannot imply reviewed tenants (0.902791ms)
+✔ static planned directory matches every canonical field without live catalog actions (4.254791ms)
+✔ Auto separates constrained, missing and capable hardware deterministically (5.190709ms)
+✔ explicit profiles and recovery use bounded DPR with truthful shadow eligibility (72.001583ms)
+✔ storage values are allowlisted (0.227583ms)
+✔ expanded lift uses actual translated plan, continuous threshold and safe courtyard return (2.538458ms)
+✔ upper deck and ceiling panels exactly cover remainder without gaps or overlapping shaft (1.882458ms)
+✔ canonical amenities and four SKU transforms remain outside shaft and circulation (1.245667ms)
+✔ only the reviewed themes are available and invalid stored IDs are safe (3.125792ms)
+✔ Deepavali decorations respect planter and event reservations (0.754041ms)
+✔ Christmas tree and presents stay in the planter while suspended lights clear the event (3.30825ms)
+✔ lunar decorations respect the existing planter footprint and suspended event clearance (0.363084ms)
+✔ blocked storage keeps a working in-memory selection (0.684125ms)
+✔ reapplying the current theme invokes the scene commit without preparing new resources (0.616833ms)
+✔ later selection wins, stale preparation is disposed and no stale commit runs (0.703375ms)
+✔ failure and interruption leave the previous theme active and clean staged resources (1.208459ms)
+✔ a remembered supported theme is prepared before it becomes active (0.790125ms)
+✔ superseding or suspending preparation aborts the old signal (1.860666ms)
+✔ closing a pending selection aborts and disposes its late result (1.057542ms)
+✔ validated visual roles update real scene targets atomically before a future theme is committed (1.16675ms)
+✔ lifecycle exits, cleans, suspends, enters and restores once in order (111.605542ms)
+✔ directory Inspect and Shop return to retained Menu then gameplay base (1.161375ms)
+✔ repeated observations and requests are idempotent without lifecycle effects (0.675208ms)
+✔ commands cannot manufacture gameplay or bypass the retained underlay (0.789291ms)
+✔ invalid observations fail atomically with no lifecycle effects (1.04525ms)
+✔ Inspect cannot be directly replaced by Shop in an observation (0.463708ms)
+✔ actual base changes under Shop are retained without fake Explore lifecycle (0.940875ms)
+✔ interrupt cleans once without enter, exit or restoring retained gameplay (0.425167ms)
+✔ history is bounded and distinguishes restores, rejection and interruptions (5.845667ms)
+✔ Shelf suspends each real base and restores through the same ordered lifecycle (2.40925ms)
+✔ complete boolean observations validate all Shelf combinations atomically (2.810084ms)
+✔ Shelf cannot be stacked with or directly replaced by another overlay (1.078292ms)
+✔ derived mode priority agrees with accepted observation (0.366292ms)
+✔ three stable stores share the current scene centers, entrances and ordering (97.578375ms)
+✔ location boundaries and map projection retain the existing visible behavior (7.640416ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (3.840625ms)
+✔ unavailable store cannot produce a travel destination (0.422416ms)
+✔ approved shell portals and aggregate proxies match authoritative live store centers (5.0785ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 958.772166

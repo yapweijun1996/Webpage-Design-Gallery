@@ -1,0 +1,93 @@
+RUN browser_gjh_mall_theme.py
+Browser: 157.0.8103.51
+PASS 320x700: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 390x844: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 768x1024: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 844x390: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 1440x900: discoverable settings, focus, repeated apply, retained bag and resources
+PASS invalid saved theme falls back, is replaced and survives reload
+PASS unavailable local storage retains in-memory theme
+PASS missing theme module preserves 3D and reports unavailable settings
+PASS theme change preserves active cart
+PASS theme change preserves a seated visitor
+PASS theme change preserves a carried physical product
+PASS settings pause and resume an active elevator journey
+PASS graphics loss and restoration retain theme and bag
+PASS Visitor v1 expanded theme settings
+PASS original layout and no-JavaScript directory
+
+RUN browser_gjh_lunar_theme.py
+Browser: 157.0.8103.51
+PASS 320x700: visible lunar scene, local persistence and return to Everyday (pixel difference 9.70)
+PASS 390x844: visible lunar scene, local persistence and return to Everyday (pixel difference 10.03)
+PASS 768x1024: visible lunar scene, local persistence and return to Everyday (pixel difference 9.51)
+PASS 844x390: visible lunar scene, local persistence and return to Everyday (pixel difference 7.74)
+PASS 1440x900: visible lunar scene, local persistence and return to Everyday (pixel difference 8.29)
+PASS repeated switch-back and reapply dispose decorations without resource growth
+PASS missing seasonal module keeps Everyday and succeeds on same-page retry
+PASS unavailable saved seasonal pack falls back and retries on the same page
+PASS failed banner creation rolls back and retries without reload
+PASS cancelled slow preparation never mounts; a later selection succeeds
+PASS graphics loss cancels pending decorations and permits later selection
+PASS native graphics recovery retains lunar decorations and bag, then restores Everyday
+PASS lunar cart loop/event, lift, product detail and bag
+PASS Visitor v1 lunar and Everyday
+
+RUN browser_gjh_christmas_theme.py
+Browser: 157.0.8103.51
+PASS 320x700: visible Christmas scene, local persistence and return to Everyday (pixel difference 6.19)
+PASS 390x844: visible Christmas scene, local persistence and return to Everyday (pixel difference 6.34)
+PASS 768x1024: visible Christmas scene, local persistence and return to Everyday (pixel difference 6.12)
+PASS 844x390: visible Christmas scene, local persistence and return to Everyday (pixel difference 4.80)
+PASS 1440x900: visible Christmas scene, local persistence and return to Everyday (pixel difference 4.94)
+PASS repeated switch-back and reapply dispose decorations without resource growth
+PASS missing seasonal module keeps Everyday and succeeds on same-page retry
+PASS unavailable saved seasonal pack falls back and retries on the same page
+PASS failed banner creation keeps Lunar New Year and retries without reload
+PASS cancelled slow preparation never mounts; a later selection succeeds
+PASS graphics loss cancels pending decorations and permits later selection
+PASS native graphics recovery retains Christmas decorations and bag, then restores Everyday
+PASS Christmas cart loop/event, lift, product detail and bag
+PASS Visitor v1 Christmas and Everyday
+
+RUN browser_gjh_deepavali_theme.py
+Browser: 157.0.8103.51
+PASS 320x700: visible Deepavali scene, local persistence and return to Everyday (pixel difference 6.98)
+PASS 390x844: visible Deepavali scene, local persistence and return to Everyday (pixel difference 7.17)
+PASS 768x1024: visible Deepavali scene, local persistence and return to Everyday (pixel difference 6.97)
+PASS 844x390: visible Deepavali scene, local persistence and return to Everyday (pixel difference 5.47)
+PASS 1440x900: visible Deepavali scene, local persistence and return to Everyday (pixel difference 5.70)
+PASS repeated switch-back and reapply dispose decorations without resource growth
+PASS missing seasonal module keeps Everyday and succeeds on same-page retry
+PASS unavailable saved seasonal pack falls back and retries on the same page
+PASS motif and banner allocation failures keep Christmas and retry without reload
+PASS cancelled slow preparation never mounts; a later selection succeeds
+PASS graphics loss cancels pending decorations and permits later selection
+PASS native graphics recovery retains Deepavali decorations and bag, then restores Everyday
+PASS Deepavali cart loop/event, lift, product detail and bag
+PASS Visitor v1 Deepavali and Everyday
+
+RUN browser_gjh_planned_stores.py
+PASS 320x700: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 390x844: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 768x1024: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 1440x900: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 844x390: numbered map, keyboard directory, closed spaces and open-store controls
+PASS default: truthful directory fallback
+PASS no-js: truthful directory fallback
+PASS physics-failure: truthful directory fallback
+
+RUN browser_gjh_expanded_shell.py
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS reversible layout navigation preserves the tab bag
+PASS 768x1024 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 1440x900 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS expanded directory kiosk opens the live map
+PASS continuous loop: avatar clockwise, cart counterclockwise; end metrics: {'x': 10.00316333770752, 'z': 38.999656677246094, 'y': -0.03135460615158081, 'pushing': True, 'zone': 'atrium', 'drawCalls': 179, 'triangles': 816582, 'camera': {'lift': 0, 'distance': 6.5000000000000036, 'radius': 0.22, 'avatarVisible': True}, 'resources': {'geometries': 104, 'textures': 33}}
+PASS 844x390 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 &visitor=v1: keyboard, map, three real doors, directory and bag
+PASS expanded real WebGL context loss and recovery preserves the bag
+PASS expanded no-js directory fallback
+PASS expanded physics-failure directory fallback

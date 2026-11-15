@@ -1,0 +1,21 @@
+Gallery built: 1 companies, 8 designs
+REAL RENDER baselinef1-classic 390 cart False calls 159 median 16.699999999999818 p95 16.700000000000273 advancing120
+REAL RENDER baselinef1-classic 390 cart True calls 162 median 16.699999999999818 p95 16.700000000000728 advancing120
+REAL RENDER baselinef1-classic 1440 cart False calls 197 median 16.699999999999818 p95 16.700000000000728 advancing120
+REAL RENDER baselinef1-classic 1440 cart True calls 200 median 16.699999999999818 p95 16.700000000000728 advancing120
+Gallery built: 1 companies, 8 designs
+REAL RENDER baselinef1-expanded 390 cart False calls 167 median 16.699999999999818 p95 16.700000000000273 advancing120
+REAL RENDER baselinef1-expanded 390 cart True calls 170 median 16.699999999999818 p95 16.800000000000182 advancing120
+REAL RENDER baselinef1-expanded 1440 cart False calls 190 median 16.699999999999818 p95 16.700000000000728 advancing120
+REAL RENDER baselinef1-expanded 1440 cart True calls 193 median 16.69999999999891 p95 16.700000000000728 advancing120
+Gallery built: 1 companies, 8 designs
+REAL RENDER current-classic 390 cart False calls 159 median 16.699999999999818 p95 16.799999999999727 advancing120
+REAL RENDER current-classic 390 cart True calls 162 median 16.699999999999818 p95 16.700000000000728 advancing120
+REAL RENDER current-classic 1440 cart False calls 197 median 16.699999999999818 p95 16.700000000000273 advancing120
+REAL RENDER current-classic 1440 cart True calls 200 median 16.699999999999818 p95 16.799999999999272 advancing120
+Gallery built: 1 companies, 8 designs
+REAL RENDER current-expanded 390 cart False calls 157 median 16.699999999999818 p95 16.700000000000273 advancing120
+REAL RENDER current-expanded 390 cart True calls 160 median 16.699999999999818 p95 16.700000000000728 advancing120
+REAL RENDER current-expanded 1440 cart False calls 179 median 16.699999999999818 p95 16.700000000000273 advancing120
+REAL RENDER current-expanded 1440 cart True calls 182 median 16.699999999999818 p95 16.700000000000728 advancing120
+ACTUAL RENDER BENCHMARK PASS 16

@@ -6,7 +6,30 @@ import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
-import {expandedLayout, expandedMapPoint} from './expanded-layout.js';
+import {expandedLayout, expandedMapPoint, plannedSpaces} from './expanded-layout.js';
+import {liftLayout} from './lift-layout.js';
+
+const plannedSideLabels = Object.freeze({north: 'North side', west: 'West side', east: 'East side'});
+function setupPlannedDirectory(expanded) {
+  const section = document.getElementById('planned-spaces-directory');
+  const list = document.getElementById('planned-spaces-list');
+  if (!section || !list) return;
+  const fragment = document.createDocumentFragment();
+  for (const space of plannedSpaces) {
+    const item = document.createElement('li'); item.id = space.id;
+    for (const [key, value] of Object.entries({space: space.id, number: space.number, side: space.side,
+      status: space.status, available: String(space.available), ...space.admission})) item.setAttribute(`data-planned-${key}`, value);
+    const heading = document.createElement('h3'); heading.textContent = space.label;
+    const location = document.createElement('p'); location.setAttribute('data-planned-field', 'location');
+    location.textContent = `${plannedSideLabels[space.side]} · Planned · not open`;
+    item.append(heading, location); fragment.append(item);
+  }
+  list.replaceChildren(fragment);
+  const summary = section.querySelector('summary');
+  if (summary) summary.textContent = `Planned spaces in the expanded preview (${plannedSpaces.length})`;
+  // Initialize once; native disclosure choices survive subsequent List/3D toggles.
+  if (expanded) section.open = true;
+}
 
 export function createUI(expanded = false) {
   const scene = document.getElementById('scene');
@@ -33,7 +56,7 @@ export function createUI(expanded = false) {
   const playerDot = document.getElementById('player-dot');
   const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel=expanded ? 'Expanded mall floorplan. New Moon, MILI and GOGO are open at 01 to 03. Spaces 04 to 17 are planned and closed. The lift is west of the courtyard; facilities are planned to the east. The gold dot marks your position.' : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel=expanded ? `Expanded ground-floor preview: ${expandedLayout.slots.length} numbered spaces, including ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute('aria-label',floorplanLabel);
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
   const inspectPrompt = document.getElementById('inspect-prompt');
@@ -188,17 +211,10 @@ export function createUI(expanded = false) {
   layoutLink.href=layoutURL.href;
   layoutLink.textContent=expanded?'Return to the original mall':'Preview the expanded mall';
   document.getElementById('layout-preview-notice').hidden=!expanded;
+  document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces.`;
+  setupPlannedDirectory(expanded);
   if (expanded) {
     document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: 3 open stores and 14 planned spaces. ${new URLSearchParams(location.search).get('visitor') === 'v1' ? 'The lift is available with Visitor v2.' : 'The lift serves the small upper viewing level; stow the cart before travel.'} Facilities remain planned.`;
-    const planned = expandedLayout.slots.filter(bay => !bay.available);
-    const plannedList = document.getElementById('planned-space-list');
-    for (const bay of planned) {
-      const item = document.createElement('li');
-      item.textContent = `S${bay.number} · ${bay.side[0].toUpperCase()}${bay.side.slice(1)} arcade · Planned`;
-      plannedList.append(item);
-    }
-    document.getElementById('planned-space-count').textContent = `${planned.length} closed spaces`;
-    document.getElementById('planned-spaces').hidden = false;
     const ns='http://www.w3.org/2000/svg';
     floorplan.setAttribute('viewBox','0 0 700 600'); floorplan.setAttribute('preserveAspectRatio','xMidYMid meet');
     const background=floorplan.querySelector('.map-courtyard');
@@ -213,15 +229,38 @@ export function createUI(expanded = false) {
       let rect=bay.available ? floorplan.querySelector(`[data-map-store="${spatial.stores[Number(bay.number)-1].id}"]`) : document.createElementNS(ns,'rect');
       rect.setAttribute('class',bay.available?'map-store':'map-store map-planned');
       for(const [key,value] of Object.entries({x:origin.x+2,y:origin.y+2,width:(bay.maxX-bay.minX)*10-4,height:(bay.maxZ-bay.minZ)*10-4,rx:3}))rect.setAttribute(key,value);
-      if(!bay.available) floorplan.insertBefore(rect,playerDot);
+      if(!bay.available) {
+        const space = plannedSpaces.find(item => item.number === bay.number);
+        rect.setAttribute('data-space-id', space.id); rect.setAttribute('data-space-status', space.status);
+        const title = document.createElementNS(ns, 'title');
+        title.textContent = `${space.label}: ${plannedSideLabels[space.side]}; planned, not open.`;
+        rect.append(title); floorplan.insertBefore(rect,playerDot);
+      }
       const label=document.createElementNS(ns,'text');label.setAttribute('class','expanded-map-number');
       label.setAttribute('x',origin.x+(bay.maxX-bay.minX)*5);label.setAttribute('y',origin.y+(bay.maxZ-bay.minZ)*5+6);
       label.setAttribute('text-anchor','middle');label.textContent=bay.number;floorplan.insertBefore(label,playerDot);
     }
-    document.querySelector('.map-scale').textContent=`${planned.length} planned spaces`;
-    const services=document.createElement('p');services.className='map-caption';
-    services.textContent=new URLSearchParams(location.search).get('visitor')==='v1'?'Lift: Visitor v2 only · Facilities: planned':'Lift: west of courtyard · Facilities: planned to the east';
-    mapCaption.after(services);
+    document.querySelector('.map-scale').textContent=`${plannedSpaces.length} planned spaces`;
+  }
+  const mapServices=[];
+  let servicesLegend=null;
+  function addMapService(id,letter,label,point){
+    if(!expanded||mapServices.some(service=>service.id===id))return;
+    const ns='http://www.w3.org/2000/svg',position=expandedMapPoint(point.x,point.z);
+    const group=document.createElementNS(ns,'g');group.dataset.mapService=id;group.setAttribute('pointer-events','none');
+    const title=document.createElementNS(ns,'title');title.textContent=label;group.append(title);
+    const marker=document.createElementNS(ns,'rect');marker.setAttribute('class','map-store');
+    for(const [key,value] of Object.entries({x:position.x-20,y:position.y-20,width:40,height:40,rx:8}))marker.setAttribute(key,value);
+    const text=document.createElementNS(ns,'text');text.setAttribute('x',position.x);text.setAttribute('y',position.y+8);text.setAttribute('text-anchor','middle');
+    text.style.font='var(--gjh-font-expanded-map-number)';text.style.fill='var(--gjh-color-expanded-map-text)';text.textContent=letter;
+    group.append(marker,text);floorplan.insertBefore(group,playerDot);mapServices.push({id,letter,label});
+    if(!servicesLegend){servicesLegend=document.createElement('p');servicesLegend.className='map-caption';servicesLegend.id='map-services-legend';document.querySelector('.map-content').append(servicesLegend);}
+    servicesLegend.textContent=mapServices.map(service=>`${service.letter} ${service.label}`).join(' · ');
+  }
+  if(expanded){
+    addMapService('directory','D','Directory',liftLayout.directory);
+    addMapService('guest-guide','G','Guest guide',liftLayout.desk);
+    addMapService('featured-collection','F','Featured collection',liftLayout.showcase);
   }
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
   // Preserve readable static HTML without JS; synchronize the live map and
@@ -254,7 +293,8 @@ export function createUI(expanded = false) {
     mapButtons[0]?.focus({preventScroll: true});
     mapButtons[0]?.scrollIntoView({block: 'nearest', behavior: 'instant'});
   }
-  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null,previousHeldProduct=null,previousElevatorTravel=false;
+  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null,previousHeldProduct=null,previousElevatorTravel=false,previousCartReason=null;
+  let currentElevatorState=null,currentElevatorUpper=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   const sceneCart=document.querySelector('#scene-cart');
   function updateCartControls() {
@@ -262,20 +302,23 @@ export function createUI(expanded = false) {
     const recoverFocus=!cart.available&&bag.open&&cartControls.contains(document.activeElement);
     cartControls.hidden=!cart.available;
     cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';
-    cartToggle.disabled=!cart.available||(cart.seated&&!cart.active);
+    cartToggle.disabled=!cart.available||(!cart.active&&cart.capability?.disabled===true);
     sceneCart.hidden=!cart.available||!showing3D||(compactMap.matches&&(mallMap.open||help.open));
     sceneCart.textContent=cart.active?'Stow cart':'Cart';
     sceneCart.setAttribute('aria-pressed',String(cart.active));
-    sceneCart.disabled=cartToggle.disabled;
-    if(previousCartAvailable!==cart.available||previousCartMode!==cart.active||previousCartSeated!==cart.seated||previousHeldProduct!==cart.heldProduct||previousElevatorTravel!==cart.elevatorTravel){
-      cartStatus.textContent=!cart.available?'The 3D cart is unavailable. Your bag selection is unchanged.':cart.heldProduct?heldInstruction(cart):cart.elevatorTravel?'Wait for the elevator to stop.':cart.seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';
-      previousCartAvailable=cart.available;previousCartMode=cart.active;previousCartSeated=cart.seated;previousHeldProduct=cart.heldProduct;previousElevatorTravel=cart.elevatorTravel;
+    sceneCart.disabled=!cart.available||(!cart.active&&cart.capability?.sceneDisabled===true);
+    sceneCart.title=cartReason(cart)||'';
+    sceneCart.setAttribute('aria-describedby','cart-status');
+    if(previousCartAvailable!==cart.available||previousCartMode!==cart.active||previousCartSeated!==cart.seated||previousHeldProduct!==cart.heldProduct||previousElevatorTravel!==cart.elevatorTravel||previousCartReason!==cart.capability?.reason){
+      cartStatus.textContent=cartReason(cart)&&!cart.active?cartReason(cart):!cart.available?'The 3D cart is unavailable. Your bag selection is unchanged.':cart.heldProduct?heldInstruction(cart):cart.elevatorTravel?'Wait for the elevator to stop.':cart.seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';
+      previousCartAvailable=cart.available;previousCartMode=cart.active;previousCartSeated=cart.seated;previousHeldProduct=cart.heldProduct;previousElevatorTravel=cart.elevatorTravel;previousCartReason=cart.capability?.reason;
     }
     if(recoverFocus)document.getElementById('bag-close').focus({preventScroll:true});
     return cart;
   }
+  function cartReason(state){return state.capability?.reasonCode==='held-product'?heldInstruction(state):state.capability?.reason;}
   function heldInstruction(state){return `Return ${records.get(state.heldProduct)?.compactName||'the held product'} to its New Moon shelf first.`;}
-  function toggleCart(){const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){const message=state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.';cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
+  function toggleCart(){const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){const message=cartReason(state)|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
     if(next){setView(true);bag.closeTo(scene);}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';
     sceneCart.setAttribute('aria-pressed',String(next));scene.focus({preventScroll:true});
@@ -381,7 +424,7 @@ export function createUI(expanded = false) {
     if (!record || dialog.open || bag.open || guidePaused || amenityPanel.dialog.open) return;
     shelfFocus?.close();
     if(record.action==='amenity'){openAmenity(id);return;}
-    if(record.action==='elevator'){const ok=elevatorListener?.();announce(ok?'Elevator travelling to the other level.':'Return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
+    if(record.action==='elevator'){const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator, return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
     if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce(seatNotice);}scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
       if (openMap()) announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
@@ -659,7 +702,7 @@ export function createUI(expanded = false) {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, yaw, nearby: nextNearby, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null }) {
+    update({ zone, x, z, yaw, nearby: nextNearby, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null,elevatorState=null,elevatorUpper=7.2 }) {
       if (!guidePaused && showing3D && previousTutorialPose) {
         if (Math.hypot(x-previousTutorialPose.x,z-previousTutorialPose.z)>.02) onboarding.report('move');
         if (Math.abs(yaw-previousTutorialPose.yaw)>.01) onboarding.report('look');
@@ -682,6 +725,7 @@ export function createUI(expanded = false) {
         playerDot.setAttribute('cx', String(point.x));
         playerDot.setAttribute('cy', String(point.y));
       }
+      currentElevatorState=elevatorState;currentElevatorUpper=elevatorUpper;
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
         nearby = next;seatNotice=null;
@@ -716,7 +760,7 @@ export function createUI(expanded = false) {
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
       else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?'Tap Sit':'Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
-      else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;inspectButton.textContent='Change level';inspectButton.setAttribute('aria-label','Use elevator to change levels');}
+      else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;const action=elevatorState?(elevatorState.calling?'Calling elevator':elevatorState.docked!==(zone==='upper'?elevatorUpper:0)?'Call elevator':`Ride to ${zone==='upper'?'ground floor':'upper landing'}`):'Change level';inspectButton.textContent=action;inspectButton.setAttribute('aria-label',elevatorState?action:'Use elevator to change levels');}
       const cart=updateCartControls();
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
@@ -744,7 +788,7 @@ export function createUI(expanded = false) {
       });
     },
     onCart(state,listener){cartState=state;cartListener=listener;},
-    setElevator(listener){records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
+    setElevator(listener){addMapService('visitor-lift','L','Visitor lift',liftLayout);records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
     setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },

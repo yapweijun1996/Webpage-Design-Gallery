@@ -1,0 +1,590 @@
+{
+  "schema_version": 1,
+  "scope": "FourP0shellIDs only;8pilot+4shell=12selected implementations,188othercandidatespending. No fullM1/79P0/fourthbrand/D4/D5 acceptance.",
+  "application": {
+    "version": "1.1.49",
+    "build": "34862f97d6fe1c65"
+  },
+  "assets": [
+    {
+      "asset_id": "GJH-ARC-001",
+      "priority": "P0",
+      "source_dimensions_wdh_m": [
+        4,
+        0.2,
+        3.6
+      ],
+      "target_dimensions_wdh_m": [
+        4,
+        0.3,
+        6.6
+      ],
+      "bounds_min": [
+        -2,
+        0,
+        -0.15
+      ],
+      "bounds_max": [
+        2,
+        6.6,
+        0.15
+      ],
+      "collision_proxy": {
+        "owner": "world aggregate Rapier blocks",
+        "visual_export": false,
+        "min": [
+          -2,
+          0,
+          -0.15
+        ],
+        "max": [
+          2,
+          6.6,
+          0.15
+        ]
+      },
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -2,
+          0,
+          0
+        ],
+        "right": [
+          2,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          0.15
+        ],
+        "back": [
+          0,
+          0,
+          -0.15
+        ]
+      },
+      "capabilities": [],
+      "kind": "wall",
+      "version": "1.0.0",
+      "file": "GJH_ARC_001.glb",
+      "sha256": "e5145b12a4bcca1f3d4badc3e6c0285fbd0a65c07f0ddb9c8f3a636e7b1f7197",
+      "bytes": 8076,
+      "dimensions_m": [
+        4,
+        6.6,
+        0.3
+      ],
+      "editable_source": "models/gjh-interior-shell/sources/GJH_ARC_001.blend",
+      "editable_source_sha256": "160629d6b54667303e8e20c7f327b9efb691df96df6834900741903dbef3ea8a",
+      "layout_sha256": "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63",
+      "build_sha256": "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8",
+      "rights": "Original project geometry and texture-free materials; no third-party artwork.",
+      "lod_policy": "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md#GJH-ARC-001",
+      "source_sha256": "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42",
+      "source_priority": "P0",
+      "reuse_decision": "new original geometry",
+      "implementation_status": "accepted_for_classic_runtime",
+      "runtime_compatibility": "Classic default M056 and DSP pilot only; expanded keeps its existing procedural shell and does not load this kit. Strict texture-free static loader limits unchanged.",
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Native root extras/underscore filenames; validator and binary audit."
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Source/reimport observed root identity and applied native component transforms; approved min/max within .001m."
+        },
+        "G03": {
+          "status": "pass",
+          "evidence": "Closed positive-volume solid source components, finite native triangles/unit normals/winding; storefront retains intentional intersecting assembly."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Static texture-free exports have no images, maps or baked lightmaps; no UV0/UV1 claim."
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Independent binary comparison of linear sRGB conversion and source roughness/metalness; exact shared PBR helper."
+        },
+        "G06": {
+          "status": "approved_exception",
+          "reason": "Simple native architectural batch;132/220/220triangles below500far ceiling, frontage176below700. No distanceLOD or D5 acceptance."
+        },
+        "G07": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Current8768:4journeys4745actualsteeringrenders max200;960distinctadvancingframes. Frozen950:16fallbackcombinations. No fieldFPS/45request/10MiB pass."
+        },
+        "G08": {
+          "status": "pass",
+          "evidence": "Editable nonexported proxies/sockets, original66aggregateRapier records exact;3portal walk/cart both directions; roof/cap coverage and wall blocking."
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Passive architecture; existing doors/products retain source OPEN/INSPECT proposals. Native Map/signs/Directory agree on3stores."
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Independent Blender reimport, actual Three.js mall loaded4identities, Khronos0errors/0warnings."
+        },
+        "G11": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Six native viewpoints perasset plus actual390/639/1440app frames and independent review; no new score/device certification."
+        },
+        "G12": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Portable source/binary/validator checks; current runtime/failure/late-disposal/cart/context-recovery and scoped independent required regressions."
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-shell/reports/blender-verification.json",
+        "models/gjh-interior-shell/reports/binary-audit.json",
+        "models/gjh-interior-shell/reports/gltf-validation.json",
+        "docs/evidence/interior-shell-verification.json",
+        "docs/evidence/interior-shell-integration.json"
+      ]
+    },
+    {
+      "asset_id": "GJH-COR-001",
+      "priority": "P0",
+      "source_dimensions_wdh_m": [
+        4,
+        4,
+        0.2
+      ],
+      "target_dimensions_wdh_m": [
+        4,
+        4,
+        0.2
+      ],
+      "bounds_min": [
+        -2,
+        0,
+        -2
+      ],
+      "bounds_max": [
+        2,
+        0.2,
+        2
+      ],
+      "collision_proxy": {
+        "owner": "world aggregate Rapier blocks",
+        "visual_export": false,
+        "min": [
+          -2,
+          0,
+          -2
+        ],
+        "max": [
+          2,
+          0.165,
+          2
+        ]
+      },
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -2,
+          0,
+          0
+        ],
+        "right": [
+          2,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          2
+        ],
+        "back": [
+          0,
+          0,
+          -2
+        ]
+      },
+      "capabilities": [],
+      "kind": "corridor",
+      "version": "1.0.0",
+      "file": "GJH_COR_001.glb",
+      "sha256": "ef48863a88cad561c016abc12d4649b6c85db86a872b3c04802d56667e2295a3",
+      "bytes": 10504,
+      "dimensions_m": [
+        4,
+        0.2,
+        4
+      ],
+      "editable_source": "models/gjh-interior-shell/sources/GJH_COR_001.blend",
+      "editable_source_sha256": "9287236d50da46957c30b5541145bc0a8ab8476b4aec282edc167fd6aa683823",
+      "layout_sha256": "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63",
+      "build_sha256": "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8",
+      "rights": "Original project geometry and texture-free materials; no third-party artwork.",
+      "lod_policy": "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md#GJH-COR-001",
+      "source_sha256": "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42",
+      "source_priority": "P0",
+      "reuse_decision": "new original geometry",
+      "implementation_status": "accepted_for_classic_runtime",
+      "runtime_compatibility": "Classic default M056 and DSP pilot only; expanded keeps its existing procedural shell and does not load this kit. Strict texture-free static loader limits unchanged.",
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Native root extras/underscore filenames; validator and binary audit."
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Source/reimport observed root identity and applied native component transforms; approved min/max within .001m."
+        },
+        "G03": {
+          "status": "pass",
+          "evidence": "Closed positive-volume solid source components, finite native triangles/unit normals/winding; storefront retains intentional intersecting assembly."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Static texture-free exports have no images, maps or baked lightmaps; no UV0/UV1 claim."
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Independent binary comparison of linear sRGB conversion and source roughness/metalness; exact shared PBR helper."
+        },
+        "G06": {
+          "status": "approved_exception",
+          "reason": "Simple native architectural batch;132/220/220triangles below500far ceiling, frontage176below700. No distanceLOD or D5 acceptance."
+        },
+        "G07": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Current8768:4journeys4745actualsteeringrenders max200;960distinctadvancingframes. Frozen950:16fallbackcombinations. No fieldFPS/45request/10MiB pass."
+        },
+        "G08": {
+          "status": "pass",
+          "evidence": "Editable nonexported proxies/sockets, original66aggregateRapier records exact;3portal walk/cart both directions; roof/cap coverage and wall blocking."
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Passive architecture; existing doors/products retain source OPEN/INSPECT proposals. Native Map/signs/Directory agree on3stores."
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Independent Blender reimport, actual Three.js mall loaded4identities, Khronos0errors/0warnings."
+        },
+        "G11": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Six native viewpoints perasset plus actual390/639/1440app frames and independent review; no new score/device certification."
+        },
+        "G12": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Portable source/binary/validator checks; current runtime/failure/late-disposal/cart/context-recovery and scoped independent required regressions."
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-shell/reports/blender-verification.json",
+        "models/gjh-interior-shell/reports/binary-audit.json",
+        "models/gjh-interior-shell/reports/gltf-validation.json",
+        "docs/evidence/interior-shell-verification.json",
+        "docs/evidence/interior-shell-integration.json"
+      ]
+    },
+    {
+      "asset_id": "GJH-CEI-001",
+      "priority": "P0",
+      "source_dimensions_wdh_m": [
+        4,
+        4,
+        0.25
+      ],
+      "target_dimensions_wdh_m": [
+        4,
+        4,
+        0.3
+      ],
+      "bounds_min": [
+        -2,
+        0,
+        -2
+      ],
+      "bounds_max": [
+        2,
+        0.3,
+        2
+      ],
+      "collision_proxy": {
+        "owner": "none; existing ceiling is visual-only",
+        "visual_export": false
+      },
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -2,
+          0,
+          0
+        ],
+        "right": [
+          2,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          2
+        ],
+        "back": [
+          0,
+          0,
+          -2
+        ]
+      },
+      "capabilities": [],
+      "kind": "ceiling",
+      "version": "1.0.0",
+      "file": "GJH_CEI_001.glb",
+      "sha256": "5596575c578ba6b18fe87763b245ff428bb0a0ab7c200e36925817fbcf36e40e",
+      "bytes": 11512,
+      "dimensions_m": [
+        4,
+        0.3,
+        4
+      ],
+      "editable_source": "models/gjh-interior-shell/sources/GJH_CEI_001.blend",
+      "editable_source_sha256": "c603fe16d3e13cf023e13cb69f6cc95e7efad0b18afe7eb4bfd56c9520f635a2",
+      "layout_sha256": "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63",
+      "build_sha256": "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8",
+      "rights": "Original project geometry and texture-free materials; no third-party artwork.",
+      "lod_policy": "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md#GJH-CEI-001",
+      "source_sha256": "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42",
+      "source_priority": "P0",
+      "reuse_decision": "new original geometry",
+      "implementation_status": "accepted_for_classic_runtime",
+      "runtime_compatibility": "Classic default M056 and DSP pilot only; expanded keeps its existing procedural shell and does not load this kit. Strict texture-free static loader limits unchanged.",
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Native root extras/underscore filenames; validator and binary audit."
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Source/reimport observed root identity and applied native component transforms; approved min/max within .001m."
+        },
+        "G03": {
+          "status": "pass",
+          "evidence": "Closed positive-volume solid source components, finite native triangles/unit normals/winding; storefront retains intentional intersecting assembly."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Static texture-free exports have no images, maps or baked lightmaps; no UV0/UV1 claim."
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Independent binary comparison of linear sRGB conversion and source roughness/metalness; exact shared PBR helper."
+        },
+        "G06": {
+          "status": "approved_exception",
+          "reason": "Simple native architectural batch;132/220/220triangles below500far ceiling, frontage176below700. No distanceLOD or D5 acceptance."
+        },
+        "G07": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Current8768:4journeys4745actualsteeringrenders max200;960distinctadvancingframes. Frozen950:16fallbackcombinations. No fieldFPS/45request/10MiB pass."
+        },
+        "G08": {
+          "status": "pass",
+          "evidence": "Editable nonexported proxies/sockets, original66aggregateRapier records exact;3portal walk/cart both directions; roof/cap coverage and wall blocking."
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Passive architecture; existing doors/products retain source OPEN/INSPECT proposals. Native Map/signs/Directory agree on3stores."
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Independent Blender reimport, actual Three.js mall loaded4identities, Khronos0errors/0warnings."
+        },
+        "G11": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Six native viewpoints perasset plus actual390/639/1440app frames and independent review; no new score/device certification."
+        },
+        "G12": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Portable source/binary/validator checks; current runtime/failure/late-disposal/cart/context-recovery and scoped independent required regressions."
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-shell/reports/blender-verification.json",
+        "models/gjh-interior-shell/reports/binary-audit.json",
+        "models/gjh-interior-shell/reports/gltf-validation.json",
+        "docs/evidence/interior-shell-verification.json",
+        "docs/evidence/interior-shell-integration.json"
+      ]
+    },
+    {
+      "asset_id": "GJH-STF-002",
+      "priority": "P0",
+      "source_dimensions_wdh_m": [
+        8,
+        0.5,
+        3.6
+      ],
+      "target_dimensions_wdh_m": [
+        9.8,
+        0.59,
+        5.475
+      ],
+      "bounds_min": [
+        -4.9,
+        0,
+        -0.25
+      ],
+      "bounds_max": [
+        4.9,
+        5.475,
+        0.34
+      ],
+      "collision_proxy": {
+        "owner": "world aggregate Rapier blocks",
+        "visual_export": false,
+        "local_records": [
+          {
+            "component": "Stone pier left"
+          },
+          {
+            "component": "Stone pier right"
+          },
+          {
+            "component": "Dark lintel"
+          }
+        ],
+        "policy": "Three solid cuboids leave the doorway aperture open; visual bounds are not a collision box."
+      },
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -4.9,
+          0,
+          0
+        ],
+        "right": [
+          4.9,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          0.34
+        ],
+        "back": [
+          0,
+          0,
+          -0.25
+        ]
+      },
+      "capabilities": [],
+      "kind": "frontage",
+      "version": "1.0.0",
+      "file": "GJH_STF_002.glb",
+      "sha256": "edc1d834199ea409831f6ec203b4450505734dbf20dfee10082d790d846f0b82",
+      "bytes": 10800,
+      "dimensions_m": [
+        9.8,
+        5.475,
+        0.59
+      ],
+      "editable_source": "models/gjh-interior-shell/sources/GJH_STF_002.blend",
+      "editable_source_sha256": "b8405f87cda83cec9939aeba9e1c7092cf77c1a66208231ebb1df0b03fba97e7",
+      "layout_sha256": "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63",
+      "build_sha256": "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8",
+      "rights": "Original project geometry and texture-free materials; no third-party artwork.",
+      "lod_policy": "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md#GJH-STF-002",
+      "source_sha256": "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42",
+      "source_priority": "P0",
+      "reuse_decision": "new original geometry",
+      "implementation_status": "accepted_for_classic_runtime",
+      "runtime_compatibility": "Classic default M056 and DSP pilot only; expanded keeps its existing procedural shell and does not load this kit. Strict texture-free static loader limits unchanged.",
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Native root extras/underscore filenames; validator and binary audit."
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Source/reimport observed root identity and applied native component transforms; approved min/max within .001m."
+        },
+        "G03": {
+          "status": "pass",
+          "evidence": "Closed positive-volume solid source components, finite native triangles/unit normals/winding; storefront retains intentional intersecting assembly."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Static texture-free exports have no images, maps or baked lightmaps; no UV0/UV1 claim."
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Independent binary comparison of linear sRGB conversion and source roughness/metalness; exact shared PBR helper."
+        },
+        "G06": {
+          "status": "approved_exception",
+          "reason": "Simple native architectural batch;132/220/220triangles below500far ceiling, frontage176below700. No distanceLOD or D5 acceptance."
+        },
+        "G07": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Current8768:4journeys4745actualsteeringrenders max200;960distinctadvancingframes. Frozen950:16fallbackcombinations. No fieldFPS/45request/10MiB pass."
+        },
+        "G08": {
+          "status": "pass",
+          "evidence": "Editable nonexported proxies/sockets, original66aggregateRapier records exact;3portal walk/cart both directions; roof/cap coverage and wall blocking."
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Passive architecture; existing doors/products retain source OPEN/INSPECT proposals. Native Map/signs/Directory agree on3stores."
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Independent Blender reimport, actual Three.js mall loaded4identities, Khronos0errors/0warnings."
+        },
+        "G11": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Six native viewpoints perasset plus actual390/639/1440app frames and independent review; no new score/device certification."
+        },
+        "G12": {
+          "status": "pass_in_tested_scope",
+          "evidence": "Portable source/binary/validator checks; current runtime/failure/late-disposal/cart/context-recovery and scoped independent required regressions."
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-shell/reports/blender-verification.json",
+        "models/gjh-interior-shell/reports/binary-audit.json",
+        "models/gjh-interior-shell/reports/gltf-validation.json",
+        "docs/evidence/interior-shell-verification.json",
+        "docs/evidence/interior-shell-integration.json"
+      ]
+    }
+  ]
+}

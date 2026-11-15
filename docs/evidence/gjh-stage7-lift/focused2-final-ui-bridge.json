@@ -1,0 +1,18 @@
+{
+  "focused2ReportSHA256": "926041191765249a6f0a3659818d06e89b4df0df3a5c09fb7626114878359bc9",
+  "changedSinceFocused2": [
+    "index.html",
+    "pwa-sw.js",
+    "assets/ui.js"
+  ],
+  "physicsExactFiles": [
+    "assets/player.js",
+    "assets/elevator-v2.js",
+    "assets/world.js",
+    "assets/amenities.js",
+    "assets/lift-layout.js",
+    "script.js"
+  ],
+  "verifiedExact": true,
+  "scope": "Focused2 is original physics-phase proof; final UI/map/native ride tested separately; generated pwa-sw changed after final UI generation."
+}

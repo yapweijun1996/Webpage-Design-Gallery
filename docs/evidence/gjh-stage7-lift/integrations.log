@@ -1,0 +1,14 @@
+expanded-shell 0
+store-integration 0
+atrium 0
+candidates 0
+expanded-pwa 0
+mall-pwa 0
+pwa-boundary 0
+gjh-demos 0
+Gallery built: 1 companies, 8 designs
+Traceback (most recent call last):
+  File "/private/tmp/gallery-expanded-stage7/primary/run_integrations.py", line 25, in <module>
+    g.build(Path(temp)/'site');actual=json.loads((Path(temp)/'site/version.json').read_text());expected=json.loads((root/'version.json').read_text());assert actual==expected
+                                                                                                                                                             ^^^^^^^^^^^^^^^^
+AssertionError

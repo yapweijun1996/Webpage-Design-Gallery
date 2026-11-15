@@ -29,9 +29,15 @@ def main():
                                               has_touch=width <= 390, color_scheme="dark", reduced_motion="reduce")
                 page = context.new_page()
                 if args.phase == "before":
-                    for asset in ["assets/onboarding/onboarding.css", "assets/tokens.css", "demos/corporate/gjh/v11/style.css"]:
-                        original = subprocess.check_output(["git", "show", "2f70d69:" + asset], cwd=ROOT)
-                        page.route("**/" + asset, lambda route, request, body=original: route.fulfill(body=body, content_type="text/css"))
+                    # The runtime now requests a generated stylesheet. Serve the
+                    # historical sources in the same order for a real before view.
+                    assets = ["assets/tokens.css", "assets/gjh-themes.css", "demos/corporate/gjh/v11/style.css",
+                              "assets/onboarding/onboarding.tokens.css", "assets/onboarding/onboarding.css",
+                              "demos/corporate/gjh/shared/interaction.css"]
+                    parts = [subprocess.check_output(["git", "show", "2f70d69:" + asset], cwd=ROOT).decode() for asset in assets]
+                    parts[4] = parts[4].replace("@import url('./onboarding.tokens.css');", "", 1)
+                    original = "\n".join(parts)
+                    page.route("**/style.bundle.css", lambda route: route.fulfill(body=original, content_type="text/css"))
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
                 page.goto(f"http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/",

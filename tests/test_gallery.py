@@ -93,7 +93,9 @@ class GalleryTests(unittest.TestCase):
                          "assets/onboarding/action-dialog.js", "assets/onboarding/onboarding.css",
                          "design-system/onboarding/index.html",
                          "demos/corporate/gjh/shared/interaction.css",
-                         "demos/corporate/gjh/shared/navigation.js"):
+                         "demos/corporate/gjh/shared/navigation.js",
+                         "demos/corporate/gjh/v11/style.bundle.css",
+                         "demos/corporate/gjh/v11/vendor/rapier_bg.wasm"):
                 self.assertEqual((output / name).read_bytes(), (ROOT / name).read_bytes())
             self.assertFalse((output / "design-system/tokens.json").exists())
             self.assertFalse((output / "demos/corporate/gjh/research").exists())

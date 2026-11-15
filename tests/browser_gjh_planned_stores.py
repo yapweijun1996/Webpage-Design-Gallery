@@ -28,15 +28,16 @@ def run():
                 open_map(page)
                 labels = page.locator('.expanded-map-number').all_text_contents()
                 assert labels == [f'{i:02d}' for i in range(1,18)], labels
-                assert '04 to 17 are planned and closed' in page.locator('.floorplan').get_attribute('aria-label')
+                assert '14 planned spaces' in page.locator('.floorplan').get_attribute('aria-label')
                 assert page.locator('.map-planned').count() == 14 and page.locator('[data-teleport]').count() == 3
                 if page.locator('#map-close').is_visible(): page.locator('#map-close').click()
                 page.locator('#view-toggle').click()
-                detail = page.locator('#planned-spaces'); assert detail.is_visible()
+                detail = page.locator('#planned-spaces-directory'); assert detail.is_visible()
+                if detail.evaluate('(e)=>e.open'): detail.locator('summary').click()
                 summary=detail.locator('summary'); summary.focus(); page.keyboard.press('Enter')
                 assert detail.evaluate('(e)=>e.open')
                 items=detail.locator('li').all_text_contents()
-                assert len(items)==14 and [x.split(' ')[0] for x in items]==[f'S{i:02d}' for i in range(4,18)], items
+                assert len(items)==14 and [detail.locator('li').nth(i).get_attribute('data-planned-number') for i in range(14)]==[f'{i:02d}' for i in range(4,18)], items
                 assert all('Planned' in x for x in items)
                 assert detail.locator('a,button').count()==0
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -60,8 +61,7 @@ def run():
                 if mode=='physics-failure': page.wait_for_function('window.__sceneFailed',timeout=90000)
                 if mode=='default': page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
                 assert page.locator('[data-store]').count()==3 and page.locator('.product-card').count()==4
-                if mode in ('default','no-js'): assert page.locator('#planned-spaces').is_hidden()
-                else: assert page.locator('#planned-spaces').is_visible() and page.locator('#planned-space-list li').count()==14
+                assert page.locator('#planned-spaces-directory').count()==1 and page.locator('#planned-spaces-list li').count()==14
                 print(f'PASS {mode}: truthful directory fallback',flush=True); context.close()
             browser.close()
     finally: server.shutdown(); server.server_close()

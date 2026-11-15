@@ -110,7 +110,10 @@ def run():
                 print(f'PASS {width}x{height} {visitor or "visitor=v2"}: keyboard, map, three real doors, directory and bag',flush=True)
                 if width==1440:
                     assert page.evaluate('__mall.teleport("entry")')
-                    move(page,-5,42.2,2.65)
+                    directory=page.evaluate("async()=> (await import('./assets/lift-layout.js')).liftLayout.directory")
+                    # Approach the relocated kiosk from the open entrance aisle.
+                    move(page,10,46.2,2.65)
+                    move(page,directory['x'],46.2,2.65)
                     assert page.evaluate('__mall.state.nearby')=='mall-directory'
                     page.locator('#inspect').click()
                     assert page.locator('#mall-map').evaluate('(e)=>e.open')

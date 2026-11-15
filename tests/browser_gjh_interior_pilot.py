@@ -61,8 +61,14 @@ def asset_states(s):return {**s['furnishings'],'shelf':s['productAssets']['shelf
 
 def open_map(page):
     if page.locator('#mall-map').evaluate('(e)=>e.open'):return
-    if page.locator('#header-map').is_visible():page.locator('#header-map').click()
-    else:page.locator('#mall-map summary').click()
+    if page.locator('#guide-dialog').evaluate('(e)=>e.open'):
+        page.locator('#guide-map').click()
+    elif page.locator('#header-map').is_visible():page.locator('#header-map').click()
+    else:
+        if not page.locator('#keyboard-help').evaluate('(e)=>e.open'):
+            page.locator('#keyboard-help > summary').click()
+        page.locator('#guide-reopen').click()
+        page.locator('#guide-map').click()
 
 
 def run():

@@ -24,10 +24,10 @@ def run():
           c=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block')
           c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
           page.goto(url);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert page.evaluate('window.__sceneReady'),errors
-          page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-5.8,10)
+          page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-6.4,10)
           assert state(page)['nearby']=='visitor-elevator',(width,state(page)['nearby'])
           if width in (390,1440):page.screenshot(path=str(OUT/f'ground-{width}.png'))
-          page.locator('#inspect').click();page.evaluate('__mall.setInput({});__mall.step(200)');assert abs(state(page)['y']-7.2)<.1,state(page)['y']
+          page.locator('#inspect').click();page.evaluate('__mall.setInput({});__mall.step(5000)');assert abs(state(page)['y']-7.2)<.1,state(page)['y']
           assert state(page)['zone']=='upper'
           move(page,-7,10);assert abs(state(page)['y']-7.2)<.1
           if width in (390,1440):page.screenshot(path=str(OUT/f'upper-{width}.png'))
@@ -37,11 +37,11 @@ def run():
             move(page,-7,10)
             for x,z in [(-7,5.5),(1,5.5),(1,14.5),(-7,14.5),(-7,10)]:move(page,x,z)
             assert abs(state(page)['y']-7.2)<.1
-          move(page,-5.8,10);assert state(page)['nearby']=='visitor-elevator'
-          page.locator('#inspect').click();page.evaluate('__mall.setInput({});__mall.step(200)');assert abs(state(page)['y'])<.1
+          move(page,-6.4,10);assert state(page)['nearby']=='visitor-elevator'
+          page.locator('#inspect').click();page.evaluate('__mall.setInput({});__mall.step(5000)');assert abs(state(page)['y'])<.1
           move(page,-7.5,10);assert abs(state(page)['y'])<.1
           if width==1440:
-            move(page,-5.8,10);page.locator('#inspect').click();page.evaluate('__mall.setInput({});__mall.step(200)')
+            move(page,-6.4,10);page.locator('#inspect').click();page.evaluate('__mall.setInput({});__mall.step(5000)')
             assert state(page)['zone']=='upper'
             page.locator('[data-teleport="newmoon"]').click();assert abs(state(page)['y'])<.1 and abs(state(page)['x']+10)<.1
           assert not errors,errors
@@ -54,7 +54,7 @@ def run():
         page.evaluate('__mall.teleport("entry")');move(page,25,46);assert state(page)['nearby']=='service-desk',state(page)['nearby']
         page.locator('#inspect').click();assert 'self-service' in page.locator('#amenity-dialog').inner_text();page.keyboard.press('Escape')
         page.wait_for_function('!document.querySelector("#amenity-dialog").open')
-        page.evaluate('__mall.teleport("newmoon")');move(page,4,12);assert state(page)['nearby']=='featured-showcase',state(page)['nearby']
+        page.evaluate('__mall.teleport("newmoon")');move(page,-10,18);move(page,-7,19);assert state(page)['nearby']=='featured-showcase',state(page)['nearby']
         page.locator('#inspect').click();assert page.locator('#amenity-dialog [data-object-action]').count()==4;page.keyboard.press('Escape')
         print('PASS relocated directory, self-service desk and four-product showcase',flush=True);c.close()
         # A cart can approach the lift but cannot be carried between levels.
@@ -72,24 +72,26 @@ def run():
         move(page,(shelf['min']['x']+shelf['max']['x'])/2,-7.4)
         page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1600)')
         assert state(page)['character']['physicalProduct']['phase']=='held'
-        for x,z in [(-10,-7.4),(-10,-2.6),(-10,2.4),(-10,10),(-5.8,10)]:move(page,x,z)
+        for x,z in [(-10,-7.4),(-10,-2.6),(-10,2.4),(-10,10),(-6.4,10)]:move(page,x,z)
         assert state(page)['nearby']=='visitor-elevator';page.locator('#inspect').click()
         assert not state(page)['elevatorTravel'] and 'return held products' in page.locator('#mall-status').inner_text().lower()
         print('PASS held product cannot travel in visitor-only lift',flush=True);c.close()
         c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='no-preference',service_workers='block')
         c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
-        page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-5.8,10)
+        page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-6.4,10)
         page.evaluate("()=>{document.querySelector('#inspect').click();__mall.setInput({});__mall.step(500)}")
         page.locator('#view-toggle').click();before=state(page)['y'];page.evaluate('__mall.step(2000)')
         assert abs(state(page)['y']-before)<.001 and state(page)['elevatorTravel']
         page.locator('#view-toggle').click();page.evaluate('__mall.setInput({});__mall.step(4000)');assert abs(state(page)['y']-7.2)<.1
         print('PASS directory pause and resume during lift travel',flush=True);c.close()
         # Native WebGL loss settles a moving rider at the nearest guarded landing.
-        for elapsed in [650,1800]:
+        # The physical lift first boards horizontally; these times reach the
+        # lower and upper portions of the actual vertical journey.
+        for elapsed in [1100,2400]:
           c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='no-preference',service_workers='block')
           c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
           page.locator('#view-toggle').click();page.locator('[data-add]').first.click();page.locator('#view-toggle').click()
-          page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-5.8,10)
+          page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-6.4,10)
           page.evaluate("()=>{document.querySelector('#inspect').click();__mall.setInput({});}");page.evaluate('ms=>__mall.step(ms)',elapsed)
           trip=state(page);assert trip['elevatorTravel'] and .2<trip['y']<7,trip['y']
           page.evaluate("()=>{window.__liftLoss=document.querySelector('#scene').getContext('webgl2').getExtension('WEBGL_lose_context');if(!__liftLoss)throw Error('No loss extension');__liftLoss.loseContext()}")

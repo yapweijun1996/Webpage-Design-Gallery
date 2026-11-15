@@ -1,0 +1,903 @@
+{
+  "schemaVersion": 1,
+  "task": "D4 supported P1 selection",
+  "status": "accepted_supported_selection",
+  "notRuntimeRegistry": true,
+  "baseline": "e7581e6ff9b3197bcdaecb8c4d795b0213d1ac8a",
+  "application": {
+    "version": "1.1.49",
+    "build": "34862f97d6fe1c65"
+  },
+  "scope": "Select supported existing P1 displays, seating and public furnishings; review FAC eligibility explicitly. Selection completion is not FAC production or a new asset batch.",
+  "sourceInventory": {
+    "path": "docs/references/gjh-interior-200-assets-v1.md",
+    "sha256": "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42"
+  },
+  "acceptedManifestSHA256": "8a3c6929630b8aebe21170d4d7989cc39e3f47e3c707f7641a2faa5c131db1b2",
+  "selected": [
+    {
+      "assetId": "GJH-DSP-001",
+      "sourcePriority": "P1",
+      "kind": "shelf",
+      "role": "display",
+      "decision": "reuse accepted existing artifact; no new asset",
+      "runtimePolicy": "Pilot only; default retains M056 shelves.",
+      "capabilities": [
+        "INSPECT"
+      ],
+      "file": "demos/corporate/gjh/v11/assets/GJH_DSP_001.glb",
+      "sha256": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+      "bytes": 228924,
+      "acceptedManifest": "models/gjh-interior-pilot/manifest.json",
+      "editableSource": "models/gjh-interior-pilot/sources/GJH_DSP_001.blend",
+      "editableSourceSHA256": "c2c87539db3662122fe6c6af402b842afa0912c1a86708e6890eb92155e2adbf",
+      "collision": {
+        "shape": "app-owned shelf boxes",
+        "authority": "assets/products.js collider output consumed by world.js",
+        "anchor": "Existing four per-SKU INSPECT IDs and product-dialog actions"
+      },
+      "fallback": "Existing independent procedural replacement and app-owned collision/action contracts; failed visual cannot remove product information or navigation."
+    },
+    {
+      "assetId": "GJH-PUB-002",
+      "sourcePriority": "P1",
+      "kind": "bench",
+      "role": "seating",
+      "decision": "reuse accepted existing artifact; no new asset",
+      "runtimePolicy": "Existing eight classic benches; app owns SIT/stand, natural facing and collision. Expanded retains its existing placements.",
+      "capabilities": [
+        "SIT"
+      ],
+      "file": "demos/corporate/gjh/v11/assets/GJH_PUB_002.glb",
+      "sha256": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+      "bytes": 233176,
+      "acceptedManifest": "models/gjh-interior-pilot/manifest.json",
+      "editableSource": "models/gjh-interior-pilot/sources/GJH_PUB_002.blend",
+      "editableSourceSHA256": "bfa2f81eb6c6b3c2b772a338b6e60d2a6ccda9d5bf2a1ded97056528f2f41e70",
+      "collision": {
+        "shape": "cuboid",
+        "size_m": [
+          2.5,
+          0.4,
+          0.85
+        ],
+        "local_center_m": [
+          0,
+          0.3,
+          0
+        ],
+        "anchors": "world.js seats: seat z=-0.23*facing, exit z=-1.2*facing; visitor-v2 keeps existing 0.8 height multiplier"
+      },
+      "fallback": "Existing independent procedural replacement and app-owned collision/action contracts; failed visual cannot remove product information or navigation."
+    },
+    {
+      "assetId": "GJH-PUB-008",
+      "sourcePriority": "P1",
+      "kind": "planter",
+      "role": "passive public furnishing",
+      "decision": "reuse accepted existing artifact; no new asset",
+      "runtimePolicy": "Large planters; pot-only collision, no SIT/INSPECT action.",
+      "capabilities": [],
+      "file": "demos/corporate/gjh/v11/assets/GJH_PUB_008.glb",
+      "sha256": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+      "bytes": 119732,
+      "acceptedManifest": "models/gjh-interior-pilot/manifest.json",
+      "editableSource": "models/gjh-interior-pilot/sources/GJH_PUB_008.blend",
+      "editableSourceSHA256": "5ea8b805f01e143a784feda8a7640994929f2efd9be7ffa8ad1202db96422cab",
+      "collision": {
+        "shape": "cuboid",
+        "size_m": [
+          0.85,
+          0.8,
+          0.85
+        ],
+        "local_center_m": [
+          0,
+          0.4,
+          0
+        ],
+        "policy": "Pot-only blocker; foliage is intentionally non-blocking"
+      },
+      "fallback": "Existing independent procedural replacement and app-owned collision/action contracts; failed visual cannot remove product information or navigation."
+    },
+    {
+      "assetId": "GJH-PUB-005",
+      "sourcePriority": "P1",
+      "kind": "coffeeTable",
+      "role": "passive public furnishing",
+      "decision": "reuse accepted existing artifact; no new asset",
+      "runtimePolicy": "Existing coffee tables; app-owned blocking, no SIT/USE action.",
+      "capabilities": [],
+      "file": "demos/corporate/gjh/v11/assets/GJH_PUB_005.glb",
+      "sha256": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+      "bytes": 160536,
+      "acceptedManifest": "models/gjh-interior-pilot/manifest.json",
+      "editableSource": "models/gjh-interior-pilot/sources/GJH_PUB_005.blend",
+      "editableSourceSHA256": "686e19542c51dca4b88eba66bdb41f90ff46f3208bc3802ac1b529e0e401c46b",
+      "collision": {
+        "shape": "cuboid",
+        "size_m": [
+          1.61,
+          0.875,
+          1.61
+        ],
+        "world_centers_m": [
+          [
+            0,
+            0.4375,
+            -5.5
+          ],
+          [
+            10,
+            0.4375,
+            -5.5
+          ]
+        ]
+      },
+      "fallback": "Existing independent procedural replacement and app-owned collision/action contracts; failed visual cannot remove product information or navigation."
+    },
+    {
+      "assetId": "GJH-LGT-009",
+      "sourcePriority": "P1",
+      "kind": "wallLight",
+      "role": "mounted public lighting",
+      "decision": "reuse accepted existing artifact; no new asset",
+      "runtimePolicy": "Existing decorative wall fixtures/light pools; no action or extra light/shadow passes.",
+      "capabilities": [],
+      "file": "demos/corporate/gjh/v11/assets/GJH_LGT_009.glb",
+      "sha256": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+      "bytes": 22804,
+      "acceptedManifest": "models/gjh-interior-pilot/manifest.json",
+      "editableSource": "models/gjh-interior-pilot/sources/GJH_LGT_009.blend",
+      "editableSourceSHA256": "da43d83a1a0b1cb56dea5c34b2d0397056d2cbe07cebdcf444b0595a5e48f612",
+      "collision": {
+        "shape": "none",
+        "policy": "Mounted decorative fixture; existing wall owns blocking"
+      },
+      "fallback": "Existing independent procedural replacement and app-owned collision/action contracts; failed visual cannot remove product information or navigation."
+    }
+  ],
+  "facilityEligibilityReview": [
+    {
+      "assetId": "GJH-FAC-001",
+      "name": "Restroom entrance",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No reviewed room, route or entrance artifact."
+    },
+    {
+      "assetId": "GJH-FAC-002",
+      "name": "Washbasin counter",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No washroom workflow or reviewed artifact."
+    },
+    {
+      "assetId": "GJH-FAC-003",
+      "name": "Stall partition",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No restroom layout or reviewed artifact."
+    },
+    {
+      "assetId": "GJH-FAC-004",
+      "name": "Accessible stall door",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No reviewed restroom door/clearance contract; no physical accessibility claim."
+    },
+    {
+      "assetId": "GJH-FAC-005",
+      "name": "Baby changing table",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No reviewed fixture, placement or supported workflow."
+    },
+    {
+      "assetId": "GJH-FAC-006",
+      "name": "Nursing room sign",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No real destination in this demo; avoid misleading wayfinding."
+    },
+    {
+      "assetId": "GJH-FAC-007",
+      "name": "Lockers",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No storage, ownership or locker workflow/artifact."
+    },
+    {
+      "assetId": "GJH-FAC-011",
+      "name": "Security camera",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No reviewed camera asset or camera/service workflow."
+    },
+    {
+      "assetId": "GJH-FAC-013",
+      "name": "Emergency call button",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No emergency endpoint; do not imply a working call service."
+    },
+    {
+      "assetId": "GJH-FAC-014",
+      "name": "Corner guard",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No approved target, necessary placement or verified artifact; existing boundaries remain."
+    },
+    {
+      "assetId": "GJH-FAC-015",
+      "name": "Cleaning cabinet",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No reviewed fixture or staff workflow."
+    },
+    {
+      "assetId": "GJH-FAC-016",
+      "name": "Service robot dock",
+      "sourcePriority": "P1",
+      "decision": "not selected; remains unimplemented",
+      "reason": "No service robot or docking workflow/artifact."
+    }
+  ],
+  "retainedDependencies": [
+    {
+      "assetId": "GJH-PUB-017",
+      "sourcePriority": "P2",
+      "policy": "Existing directory USE opens canonical Map; retained navigation dependency, not counted as P1."
+    },
+    {
+      "assetId": "GJH-VER-017",
+      "sourcePriority": "P2",
+      "policy": "Existing passive plinth retained; not counted as P1."
+    },
+    {
+      "file": "mall-service-desk.glb",
+      "policy": "Existing ASSET_MallServiceDesk remains its own asset; not renamed as a FAC or P1 candidate."
+    },
+    {
+      "file": "gjh-m056-shelf-lod1.glb",
+      "policy": "Default shelf identity remains its existing M056 contract; not renamed DSP001."
+    }
+  ],
+  "counts": {
+    "selectedExistingP1": 5,
+    "newAcceptedIds": 0,
+    "totalSelectedImplementedIds": 12,
+    "candidatesStillPending": 188,
+    "selectedFAC": 0,
+    "P1FACReviewedNotSelected": 12
+  },
+  "costDecision": {
+    "newRuntimeFiles": 0,
+    "newModelBytes": 0,
+    "newFetches": 0,
+    "additionalDrawCalls": 0,
+    "basis": "All runtime source/asset148 hashes exactly match deployed D3. Its actual defaultDetailed activecart200 ceiling has no measured headroom for additional draws."
+  },
+  "verification": {
+    "baselineCurrentRuntimeSHA256": {
+      "demos/corporate/gjh/v11/offline.html": "a31e6bc958c808346299726b42215ef69a40cad40c9e711bf18fedecc2b4af4e",
+      "demos/corporate/gjh/v11/index.html": "db82d238aa27e1a81357a168a96cd3b1a872f346f041acdd36a59dc557ede667",
+      "demos/corporate/gjh/v11/metadata.json": "b0a6cd7cad3d27dda510dd96ebc7a7267edbf4a73631aff66ce885d3046b0460",
+      "demos/corporate/gjh/v11/README.md": "21394d632774f57026b4dc8080c799b1ba83de7e7315775e99eb54142b3e2317",
+      "demos/corporate/gjh/v11/script.js": "be4ab67875f10784ef5288b717fdb58e9db02060f120cc3bf55399f88b746741",
+      "demos/corporate/gjh/v11/pwa-sw.js": "8e412267c69d1080e5dcdd43f474b499ddc8539fea630cb73049df733f9f2bf9",
+      "demos/corporate/gjh/v11/style.css": "721bf9404ec0b67cc852d52d8363b5ccfa531a633009f8d63e1c2bacf0c24028",
+      "demos/corporate/gjh/v11/manifest.webmanifest": "1c053d68e6091b82a4a1180555c73f109fff62a9c7014a15f07a1e2b156104ea",
+      "demos/corporate/gjh/v11/pwa.js": "ac85463a033edfad395a480d30cfac496ac251722a6a7f683a4b3c55c32ad60e",
+      "demos/corporate/gjh/v11/screenshots/1440.png": "0b8cdca706733c5758726ddd5dd2b66b5f8d22779cdceb0195d3946d82989ca5",
+      "demos/corporate/gjh/v11/screenshots/390.png": "349fe0b8fb97f6c8cd1007c5fbb940a659bbf7ff49c33f292aa7eea5d6a007e0",
+      "demos/corporate/gjh/v11/screenshots/768.png": "513e08021c4a1d163fabec98c16f2699949c25555350f5e80ca82366944bb02a",
+      "demos/corporate/gjh/v11/assets/shell.js": "467388367cdfd44333eeebc14080b7c97e5c449df3a15a0c6e40d46aa7e509a6",
+      "demos/corporate/gjh/v11/assets/mall-glass-showcase.glb": "782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179",
+      "demos/corporate/gjh/v11/assets/concept-mili-kitchen.webp": "9fddfde4a487cdf180c933a8215b96334d4ca1a280b487fd91d3c000f03ce1b3",
+      "demos/corporate/gjh/v11/assets/OFL-Manrope.txt": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b",
+      "demos/corporate/gjh/v11/assets/concept-grocery-basket.webp": "9c15e322177f53f38b5d02e6c6fb68b07a56feac89657aa73ddc813d61c02a1c",
+      "demos/corporate/gjh/v11/assets/sources.json": "dc6e5189e5e53080f6dc8d915118f1f97a1afc5b7debd3daeecc3c16d0b3478e",
+      "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+      "demos/corporate/gjh/v11/assets/cart-source.json": "f4b6afeb65591d7c4f096fc965a182ee7a9197193cb1db75cca6dd42ca8997a5",
+      "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "8b187c6df79c017dbbe6287aba072ec412ba0ecdc0af7c1f16972351075f9fa3",
+      "demos/corporate/gjh/v11/assets/mall-icon-512.png": "51e100ee4f331bbbb34eb1e01fabbef51a7d99bdcc29a2051bd6f8ab38b52f58",
+      "demos/corporate/gjh/v11/assets/shopping-cart.glb": "ee6f9b89d75c12bc124aad01a0691050878e1477e1ed19988dd7852c4b0ea676",
+      "demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.metadata.json": "ce21ea0a2bdd601dee08eb6d126f32f0209d9f63e1acad9a953abeb5e03f1cc3",
+      "demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "demos/corporate/gjh/v11/assets/ui.js": "be85e261a89cf594c9ca7fecdff96fe0a79c52516a6c21b74ee1b040b6890b0d",
+      "demos/corporate/gjh/v11/assets/gjh-areca-planter.glb": "0d1caad269b9838b695924b2b2242277597d304443959394cebeb84a9a675267",
+      "demos/corporate/gjh/v11/assets/spatial.js": "7cafcdf06b91dec11675ce25601e42fd30b618a80abfde7ef13024d8fb1d6b25",
+      "demos/corporate/gjh/v11/assets/concept-newmoon-table.webp": "b49a87b135486397d06e19c59a328db65c68d1fb691d2d35398f725652932534",
+      "demos/corporate/gjh/v11/assets/interior-shell.json": "e6e9ac6ef7b9e3d4929e4c388f0ae16606414c55829dfb3a62626ac52b2be45b",
+      "demos/corporate/gjh/v11/assets/GJH_LGT_009.glb": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+      "demos/corporate/gjh/v11/assets/atrium-layout.js": "f022a7234e19f0472c742d92f4016ff633ed252952b5a0b8dd60adf4246a5ce8",
+      "demos/corporate/gjh/v11/assets/original-demo-tin-font-license.txt": "e81d9dced49fea2a7d576cbea283873de58563c5d488f954deb282843c3ea79c",
+      "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+      "demos/corporate/gjh/v11/assets/concept-imagery.json": "42a31cf0fa0a0ec4aaf8b150cf097df2625ef321d02f23017cf601d1ba3fc48e",
+      "demos/corporate/gjh/v11/assets/concept-storefront-food.webp": "65fd9099bb2a5654638072240477b79f7192998e59897fc3e1fc67cf99c86d98",
+      "demos/corporate/gjh/v11/assets/concept-courtyard.webp": "3ee57c9c23986cc57a252d26b03f55ea57b55798f3a6cd329a8e0bbea5cec927",
+      "demos/corporate/gjh/v11/assets/products.js": "20eccdf781f3e02f7b3c69730befa750f020aeeff885a45beea72b299375a455",
+      "demos/corporate/gjh/v11/assets/concept-gogo-toast.webp": "0e266d3b640cff71f3a5ead16f67edf63cef0168970b76a219ccc06d00611b37",
+      "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+      "demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg": "5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a",
+      "demos/corporate/gjh/v11/assets/interior-pilot.json": "23001559b4cb93c3eb29881baa81c676697ce8adb5ae37b3b246ea02ae824c17",
+      "demos/corporate/gjh/v11/assets/concept-service-desk.webp": "4bc4e0f6a36bae0de5b0adf66efb89033eae3226e72abacc7cef35e5367ae2fe",
+      "demos/corporate/gjh/v11/assets/furnishings-sources.json": "e7e80f0f9a233b99847d3c1fc32d9e421a4db3d964558099edb9d3553b5f7213",
+      "demos/corporate/gjh/v11/assets/gjh-logo.png": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+      "demos/corporate/gjh/v11/assets/manrope-latin.woff2": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+      "demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2-lod1.glb": "f20065ac4bf3656f5762908237c7ceec5ac8648f05d7cd23c495b73ca899f1d6",
+      "demos/corporate/gjh/v11/assets/gjh-m056-shelf-lod1.glb": "949e8278034779c129e3494e614a002d5542108b74e081296acffd8e9d7c6037",
+      "demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+      "demos/corporate/gjh/v11/assets/concept-storefront-lifestyle.webp": "d07e3ac1f96b0f7f0ce57c8974ae5a2806bb20c0ea94f9b0aefb1534ac2b284a",
+      "demos/corporate/gjh/v11/assets/world.js": "5c9d2289f0d3a1c09e620476138fd25a2f36467055c6242fc3846b8dd2d3dedd",
+      "demos/corporate/gjh/v11/assets/concept-gathering.webp": "566c939db6c2cea4368e981b90d1925167ef53d28ce8bd5a56dd6236977b1332",
+      "demos/corporate/gjh/v11/assets/mall-wayfinding-ceiling-sign.glb": "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14",
+      "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "f0a714f425cb38e5ff4a941a10764dc730d61ab4b4e046fccf2eae39b8c4eefc",
+      "demos/corporate/gjh/v11/assets/GJH_PUB_017.glb": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+      "demos/corporate/gjh/v11/assets/mili-brand-cover.jpg": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "demos/corporate/gjh/v11/assets/GJH_PUB_002.glb": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+      "demos/corporate/gjh/v11/assets/concept-gogo-garden.webp": "5d71afef897e601b568a1b90586bcc971502638b29d967a39791a36077afd782",
+      "demos/corporate/gjh/v11/assets/concept-arrival.webp": "55845137f6666a7b0eb5a926d737e47dcd739b14d7e207e39bff6fc2a7de5692",
+      "demos/corporate/gjh/v11/assets/GJH_STF_002.glb": "edc1d834199ea409831f6ec203b4450505734dbf20dfee10082d790d846f0b82",
+      "demos/corporate/gjh/v11/assets/concept-lounge.webp": "157429ef4ff78f3c44dae6729c0afa23e4a5c2d6dd790b9d5b7498424dff0000",
+      "demos/corporate/gjh/v11/assets/interior-shell-registry.js": "f73ae9237c5ebc37256fcadcebf057b61d45df0e4e6b38f95102a8562ce47b4c",
+      "demos/corporate/gjh/v11/assets/shelf-focus.js": "a509bc1ce7d8528912054d7b1f4df07a016de8b6ac384654beb005983997a7a6",
+      "demos/corporate/gjh/v11/assets/gogo-logo.jpg": "51c2d3354c7271e1c92e34f8bf0509b60d055eda4b3e29b44eede70edd373a77",
+      "demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+      "demos/corporate/gjh/v11/assets/concept-evening.webp": "cbfde7d74666ff9f36280655f18d6e0960af85be4845167f299fe9b1223a8d9b",
+      "demos/corporate/gjh/v11/assets/concept-gogo-pour.webp": "c7100229db22daece7ee8b7284ac7fc2465434cddd2ea3aaede4fa8aa73a3dcb",
+      "demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+      "demos/corporate/gjh/v11/assets/thumbnail.webp": "e69acda2cb275e7e99c1414fc43a6349e5fcfb5de38af5da7228899a25fa7090",
+      "demos/corporate/gjh/v11/assets/amenities-sources.json": "bf67e342fde6e29ae69c6a3410881b1ba89358dd489511786de3ffb2eeea1494",
+      "demos/corporate/gjh/v11/assets/original-demo-food-tin.provenance.json": "132661f893f2fd078b756a4e277009fadf2dfb90a5141610d8d2285647d08167",
+      "demos/corporate/gjh/v11/assets/GJH_PUB_005.glb": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+      "demos/corporate/gjh/v11/assets/concept-arcade.webp": "fd2319d3759935d0138590964243c2ed4e0b49b0f6c0de6d3d28f09564786abc",
+      "demos/corporate/gjh/v11/assets/concept-ingredients.webp": "e3e8aa98863935d459e1e6850b6c27081e091fed945e5ca3642280368a171e8c",
+      "demos/corporate/gjh/v11/assets/GJH_COR_001.glb": "ef48863a88cad561c016abc12d4649b6c85db86a872b3c04802d56667e2295a3",
+      "demos/corporate/gjh/v11/assets/GJH_VER_017.glb": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+      "demos/corporate/gjh/v11/assets/push-cart.js": "1831da1ddff6f334cfda30a7befdb41ae8881e836e2196b5e97a04ab21dd259e",
+      "demos/corporate/gjh/v11/assets/character-v2.js": "acbf0fc87bb4e5c862636a4904e7f0bf44a9f6cfca88725b3e2925a370eb1a0a",
+      "demos/corporate/gjh/v11/assets/newmoon-demo-source.json": "3633d7554a35c7261bd53332e5c146cc17077d21bcfe729880dc2c99799d89a5",
+      "demos/corporate/gjh/v11/assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
+      "demos/corporate/gjh/v11/assets/expanded-layout.js": "b24059ac227eee3922a06f0b5cd50e066f9cb334dfcb212bf351827bb3f8dc8c",
+      "demos/corporate/gjh/v11/assets/shopper.glb": "e918b3007882698ee286ab3b92c300f120941b4e95bd634eca0ae22ffb36180f",
+      "demos/corporate/gjh/v11/assets/opaque-batch.js": "1494cb01c1f4dd57c4ce0177c059765db001d329cac066b00213969f111291a6",
+      "demos/corporate/gjh/v11/assets/GJH_PUB_008.glb": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+      "demos/corporate/gjh/v11/assets/mili-logo.jpg": "842f5793ddd4da0c51d2a35d210f273c9c082742f10a1a2465b66f5de454ab9d",
+      "demos/corporate/gjh/v11/assets/GJH_STF_008.glb": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+      "demos/corporate/gjh/v11/assets/concept-mili-noodles.webp": "f63b954d5d0dd9e46a754e7c7809adf67ebe887e0d8de194cf3337508cb613af",
+      "demos/corporate/gjh/v11/assets/furnishings.js": "814326aae02f68e513a901957f74b3336c6f9d7f15f0a659156ddc945988e4fc",
+      "demos/corporate/gjh/v11/assets/shopper-LICENSE.txt": "379715600213eef4104ce85092e8c8d47093d2edcc26f84a4a36e9e840d1979e",
+      "demos/corporate/gjh/v11/assets/static-asset.js": "2cd57880e4af55a09c4539780599c6a0f4176f1ca7336db6168c6e242eba7666",
+      "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+      "demos/corporate/gjh/v11/assets/concept-newmoon-hotpot.webp": "0c29753089ded4a68d9dff2712e10656a9479f766c42ec8d16e4990ba12cffe8",
+      "demos/corporate/gjh/v11/assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+      "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "5b6a0ebd19b5061882f7ad5eb39bb675e3e537e08221386303bbfbb816143996",
+      "demos/corporate/gjh/v11/assets/amenities.js": "750a514f59ddb82f7b087cc61a099d2f6784d0f9b69ca623d0d0e792da559686",
+      "demos/corporate/gjh/v11/assets/target-guidance.js": "e82f048d90587c1be218d0b2a1845f4ee047e574e8fffc693df99f5ab7cbb073",
+      "demos/corporate/gjh/v11/assets/gjh-mall-visitor.glb": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+      "demos/corporate/gjh/v11/assets/concept-hero.webp": "380fc1554e021c8855a7d36224e8dba04902d593e82f5795a0f3becc93c3a000",
+      "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+      "demos/corporate/gjh/v11/assets/concept-newmoon-serving.webp": "108e0bd2f30d4a8e98ad219e7096d94ee8afea47ddbae60a8c363c3a3a4da2e8",
+      "demos/corporate/gjh/v11/assets/mall-icon-192.png": "41579921907be15db18f5588afb11915424440cd7f3b49bff8dad8e2a6070749",
+      "demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg": "68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979",
+      "demos/corporate/gjh/v11/assets/GJH_ARC_001.glb": "e5145b12a4bcca1f3d4badc3e6c0285fbd0a65c07f0ddb9c8f3a636e7b1f7197",
+      "demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2.glb": "35f4c79f1bd97516c25325801b963dba34680ffed5ac0f5ff5ad1b1ae3ad38c9",
+      "demos/corporate/gjh/v11/assets/new-moon-logo.svg": "af9bd8b7edd2ccd793fd66c478c199431fc6f4f853702f10854d3243bbff70f5",
+      "demos/corporate/gjh/v11/assets/concept-discovery.webp": "bffe6e0773fcff7dd0c8b927c5edcbcbc98c2f63518591a624fb22b1e7847ef2",
+      "demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb": "ebf658b6d03602e3ebeaf68e1305ce32788bcbbf3c67a10be65a0ed628836914",
+      "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+      "demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.metadata.json": "2781420bec1e4180c60d960416a5a152946350f00f80eefd454ac11dae18e1a0",
+      "demos/corporate/gjh/v11/assets/m056-source.json": "144a732609d05608b2fbea7cb94e62bb5d47810a0bb79e5ea7ff7849fb55fab5",
+      "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+      "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+      "demos/corporate/gjh/v11/assets/visitor-v2-source.json": "f8bac5c32bd6115a1b75c9c6aa060b6636cd70cef2b38f2422620ecf20cc70c8",
+      "demos/corporate/gjh/v11/assets/original-demo-food-tin.glb": "4b265f78a711d95a80b730ebeaae3906f42c93fbd28f0b8c6e64c8c003eee0ee",
+      "demos/corporate/gjh/v11/assets/player.js": "0400f418a25bcc6a4b9d6b6c348879c5e572f80c7668fdcd5552a01960cf51e3",
+      "demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+      "demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.metadata.json": "fc8c261eb5929a36648086acb2b4e0a0a1281da56e94e163419f937dadd303db",
+      "demos/corporate/gjh/v11/assets/mall-display-shelf.metadata.json": "660edf5a29a318f1eda7e56fa21253a0b6d0ea5b55a8c7087331c4bb040115f1",
+      "demos/corporate/gjh/v11/assets/concept-pantry.webp": "9e9d95b6c982bd542932979372a48d81f03818fe359bdd8b15d78fe5cb672959",
+      "demos/corporate/gjh/v11/assets/kiosk-source.json": "524a50e017c09f8343f7f9998f96f9d367fdbeb6e09b6df6e0847f6aa4c785c6",
+      "demos/corporate/gjh/v11/assets/mall-display-shelf.glb": "9538cc7b954a1510397e4f1dffc47bbed6c99f7460edfb1e55ef4dc28561966d",
+      "demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.metadata.json": "a68434cdde02c07fbd3b1e1903f8df365ba49c3c29fd5f665b14c29e4880c19f",
+      "demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb": "ae13cf00da96d45878d633e8d1d1f6a9bbbf35d0bc89a4a162f055254b3ea442",
+      "demos/corporate/gjh/v11/assets/concept-tea-break.webp": "efb96a2d100a136f5a18c0cb61c91fa67d278333c26f5f8d02afb8893897421a",
+      "demos/corporate/gjh/v11/assets/concept-wayfinding.webp": "fb315e6122132f5e6b2a7c0facd5010a2d06a58f3b1b37f389f1e2d75e005d17",
+      "demos/corporate/gjh/v11/assets/concept-dining.webp": "01b148bf5a7018f703e990de70a01db26171c8cf53bd1afb7e58ee2f289a379f",
+      "demos/corporate/gjh/v11/assets/concept-upper-level.webp": "f2452d248633594da7634a7f454495c44eac40a775587fc3b3463f65835d8cbd",
+      "demos/corporate/gjh/v11/assets/context-navigation.js": "dea62dd0bb38aea995cbe967671980f779145a938da03c47f163edcd68e4ec68",
+      "demos/corporate/gjh/v11/assets/concept-atrium.webp": "932932ae1a0042755749aae77c9991038bfdbc192ccf5c2fb5156fa5eab7e9f0",
+      "demos/corporate/gjh/v11/assets/concept-mili-table.webp": "aef682c072b75dd14ee76969ed95faff82a831561f2b543f7213393a32ea59a0",
+      "demos/corporate/gjh/v11/assets/GJH_CEI_001.glb": "5596575c578ba6b18fe87763b245ff428bb0a0ab7c200e36925817fbcf36e40e",
+      "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+      "demos/corporate/gjh/v11/assets/character.js": "4b40bff272713fefe1e34299390dc3a290b7d6a9aed382173fb1333a14bc6f3b",
+      "demos/corporate/gjh/v11/assets/mall-service-desk.glb": "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0",
+      "demos/corporate/gjh/v11/assets/concept-storefront-wellness.webp": "fa4267cd230800cb4f416f647e86033df90cde3bb160a3c54f0c25468f74c651",
+      "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+      "demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
+      "demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+      "demos/corporate/gjh/v11/assets/character-sources.json": "6bf0f44b82180df117bb9a43f62b207472d076b88c30477fd713715ed5c76b2e",
+      "demos/corporate/gjh/v11/assets/GJH_DSP_001.glb": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+      "demos/corporate/gjh/v11/vendor/three.LICENSE": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454",
+      "demos/corporate/gjh/v11/vendor/rapier.mjs": "02dc6a4e2fffc013bab08fbb44fa68f501d8303615e9afe4c7d89ad4eedda0d0",
+      "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+      "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+      "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7",
+      "demos/corporate/gjh/v11/vendor/rapier.LICENSE": "4c05555705e3efde601fb1252ae48f1d63992af8a8fb8947745b7fa834e8f519"
+    },
+    "exactRuntimeMatch": true,
+    "D3IntegrationEvidence": "docs/evidence/interior-shell-integration.json",
+    "D3Publication": {
+      "commit": "e7581e6ff9b3197bcdaecb8c4d795b0213d1ac8a",
+      "pagesRun": 43699502215,
+      "normalURLHashMatches": 28,
+      "publicJourneys": 5
+    },
+    "P1BinarySourcePriorityAndCapabilityChecks": "PASS5; all12FAC decisions preserve source P1 classification",
+    "currentPilotE2E": {
+      "exitCode": 0,
+      "checks": 14,
+      "normalViewports": [
+        390,
+        639,
+        1440
+      ],
+      "independentFailures": 8,
+      "otherChecks": [
+        "corrupt hash",
+        "late parse disposal",
+        "no WebGL readable directory"
+      ],
+      "sourceGuard": "All148runtime files and test bytes match tested isolated copy; original committed pilot receipts/screenshots untouched."
+    },
+    "currentPilotResults": [
+      {
+        "width": 390,
+        "assetStates": {
+          "bench": {
+            "assetId": "GJH-PUB-002",
+            "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+            "dimensions": [
+              2.58,
+              1.3175,
+              0.922
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 8,
+            "primitives": 5
+          },
+          "planter": {
+            "assetId": "GJH-PUB-008",
+            "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+            "dimensions": [
+              1.230091,
+              2.347567,
+              1.191551
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 11,
+            "primitives": 6
+          },
+          "kiosk": {
+            "assetId": "GJH-PUB-017",
+            "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+            "dimensions": [
+              0.96,
+              2.05,
+              0.68
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 1,
+            "primitives": 7
+          },
+          "storeSign": {
+            "assetId": "GJH-STF-008",
+            "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+            "dimensions": [
+              2.52,
+              1.21,
+              0.213
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 3,
+            "primitives": 3
+          },
+          "wallLight": {
+            "assetId": "GJH-LGT-009",
+            "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+            "dimensions": [
+              0.32,
+              1,
+              0.255
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 14,
+            "primitives": 3
+          },
+          "coffeeTable": {
+            "assetId": "GJH-PUB-005",
+            "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+            "dimensions": [
+              1.61,
+              0.875,
+              1.61
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 2,
+            "primitives": 2
+          },
+          "plinth": {
+            "assetId": "GJH-VER-017",
+            "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+            "dimensions": [
+              4.5,
+              0.6525,
+              4.5
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 1,
+            "primitives": 4
+          },
+          "shelf": {
+            "model": "GJH-DSP-001",
+            "assetId": "GJH-DSP-001",
+            "lod": 1,
+            "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+            "frontAxis": "+Z",
+            "status": "loaded",
+            "reason": null,
+            "instances": 4,
+            "primitives": 5,
+            "dimensions": [
+              1.5200000405311584,
+              1.9600000381469727,
+              0.5799999833106995
+            ]
+          }
+        },
+        "oneFetchPerAsset": "PASS",
+        "kioskCollisionAndMap": "PASS",
+        "portalsAndFourProducts": "PASS",
+        "cartRouteBothDirections": "PASS",
+        "seatsTested": 2,
+        "viewSwitchResourcesStable": "PASS",
+        "initialDrawCalls": 69,
+        "finalResources": {
+          "geometries": 88,
+          "textures": 23
+        },
+        "errors": []
+      },
+      {
+        "width": 639,
+        "assetStates": {
+          "bench": {
+            "assetId": "GJH-PUB-002",
+            "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+            "dimensions": [
+              2.58,
+              1.3175,
+              0.922
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 8,
+            "primitives": 5
+          },
+          "planter": {
+            "assetId": "GJH-PUB-008",
+            "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+            "dimensions": [
+              1.230091,
+              2.347567,
+              1.191551
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 11,
+            "primitives": 6
+          },
+          "kiosk": {
+            "assetId": "GJH-PUB-017",
+            "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+            "dimensions": [
+              0.96,
+              2.05,
+              0.68
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 1,
+            "primitives": 7
+          },
+          "storeSign": {
+            "assetId": "GJH-STF-008",
+            "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+            "dimensions": [
+              2.52,
+              1.21,
+              0.213
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 3,
+            "primitives": 3
+          },
+          "wallLight": {
+            "assetId": "GJH-LGT-009",
+            "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+            "dimensions": [
+              0.32,
+              1,
+              0.255
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 14,
+            "primitives": 3
+          },
+          "coffeeTable": {
+            "assetId": "GJH-PUB-005",
+            "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+            "dimensions": [
+              1.61,
+              0.875,
+              1.61
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 2,
+            "primitives": 2
+          },
+          "plinth": {
+            "assetId": "GJH-VER-017",
+            "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+            "dimensions": [
+              4.5,
+              0.6525,
+              4.5
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 1,
+            "primitives": 4
+          },
+          "shelf": {
+            "model": "GJH-DSP-001",
+            "assetId": "GJH-DSP-001",
+            "lod": 1,
+            "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+            "frontAxis": "+Z",
+            "status": "loaded",
+            "reason": null,
+            "instances": 4,
+            "primitives": 5,
+            "dimensions": [
+              1.5200000405311584,
+              1.9600000381469727,
+              0.5799999833106995
+            ]
+          }
+        },
+        "oneFetchPerAsset": "PASS",
+        "kioskCollisionAndMap": "PASS",
+        "portalsAndFourProducts": "PASS",
+        "cartRouteBothDirections": "PASS",
+        "seatsTested": 2,
+        "viewSwitchResourcesStable": "PASS",
+        "initialDrawCalls": 78,
+        "finalResources": {
+          "geometries": 90,
+          "textures": 24
+        },
+        "errors": []
+      },
+      {
+        "width": 1440,
+        "assetStates": {
+          "bench": {
+            "assetId": "GJH-PUB-002",
+            "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+            "dimensions": [
+              2.58,
+              1.3175,
+              0.922
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 8,
+            "primitives": 5
+          },
+          "planter": {
+            "assetId": "GJH-PUB-008",
+            "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+            "dimensions": [
+              1.230091,
+              2.347567,
+              1.191551
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 11,
+            "primitives": 6
+          },
+          "kiosk": {
+            "assetId": "GJH-PUB-017",
+            "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+            "dimensions": [
+              0.96,
+              2.05,
+              0.68
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 1,
+            "primitives": 7
+          },
+          "storeSign": {
+            "assetId": "GJH-STF-008",
+            "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+            "dimensions": [
+              2.52,
+              1.21,
+              0.213
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 3,
+            "primitives": 3
+          },
+          "wallLight": {
+            "assetId": "GJH-LGT-009",
+            "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+            "dimensions": [
+              0.32,
+              1,
+              0.255
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 14,
+            "primitives": 3
+          },
+          "coffeeTable": {
+            "assetId": "GJH-PUB-005",
+            "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+            "dimensions": [
+              1.61,
+              0.875,
+              1.61
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 2,
+            "primitives": 2
+          },
+          "plinth": {
+            "assetId": "GJH-VER-017",
+            "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+            "dimensions": [
+              4.5,
+              0.6525,
+              4.5
+            ],
+            "status": "loaded",
+            "reason": null,
+            "instances": 1,
+            "primitives": 4
+          },
+          "shelf": {
+            "model": "GJH-DSP-001",
+            "assetId": "GJH-DSP-001",
+            "lod": 1,
+            "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+            "frontAxis": "+Z",
+            "status": "loaded",
+            "reason": null,
+            "instances": 4,
+            "primitives": 5,
+            "dimensions": [
+              1.5200000405311584,
+              1.9600000381469727,
+              0.5799999833106995
+            ]
+          }
+        },
+        "oneFetchPerAsset": "PASS",
+        "kioskCollisionAndMap": "PASS",
+        "portalsAndFourProducts": "PASS",
+        "cartRouteBothDirections": "PASS",
+        "seatsTested": 8,
+        "viewSwitchResourcesStable": "PASS",
+        "initialDrawCalls": 83,
+        "finalResources": {
+          "geometries": 94,
+          "textures": 27
+        },
+        "errors": []
+      },
+      {
+        "missing": "GJH-PUB-002",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "missing": "GJH-PUB-008",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "missing": "GJH-PUB-017",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "missing": "GJH-DSP-001",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "missing": "GJH-STF-008",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "missing": "GJH-LGT-009",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "missing": "GJH-PUB-005",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "missing": "GJH-VER-017",
+        "independentFallbackAndDirectory": "PASS"
+      },
+      {
+        "corruptHashRejected": "PASS"
+      },
+      {
+        "lateParseDisposed": "PASS",
+        "geometryDisposals": 2
+      },
+      {
+        "noWebGLDirectory": "PASS"
+      }
+    ]
+  },
+  "limitations": [
+    "This selects compatible existing artifacts; no new P1/FAC model, utility service, physical accessibility or all81P1 acceptance.",
+    "Generic source SIT/INSPECT labels for passive items remain rejected by their prior reviewed capability contract.",
+    "Product SKU/label data, quantity-only Demo bag, physical pickup/return, cart and seat/fallback owners are unchanged.",
+    "Device/AT,45requests/10MiB,CPU-GC and expanded performance remain outside this selection acceptance."
+  ],
+  "rawEvidence": [
+    {
+      "path": "/private/tmp/gallery-interior-d4/pilot-e2e.json",
+      "sha256": "27aabcccfe7fea1c241b38c99b39d58541ad3344329b9c21e961a50410101112",
+      "bytes": 11420
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d4/pilot-e2e.log",
+      "sha256": "86ba613a933ca59f9317e3d7614419b07f4369f27a38f303c9cde1be23a71939",
+      "bytes": 325
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d4/build_selection.py",
+      "sha256": "e47f7ba95c09e8a7c36a09d14d5603dc2025e4311d8a128cd7bc1c8c49317b17",
+      "bytes": 6698
+    },
+    {
+      "path": "/private/tmp/gallery-task-lod/tests/browser_gjh_interior_pilot.py",
+      "sha256": "fcd7108ca0d13956e1d33148a9759cbe519b073ac37c63096bb97a0e23db3ba6",
+      "bytes": 13980
+    }
+  ],
+  "independentReview": "APPROVE: five P1 sources/GLBs,12FAC exclusions,148runtime and4raw hashes plus14current E2E checks independently verified; publication gate remains."
+}

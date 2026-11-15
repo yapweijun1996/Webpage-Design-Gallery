@@ -44,9 +44,9 @@ setupOriginalTin(ui);
 syncMode();
 const STEP = 1 / 60;
 let previousGamepadInspect=false;
-const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null,
+const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
-  amenities: world?.amenities || null,
+  elevator:elevator?.state||null, amenities: world?.amenities || null,
   theme: mallTheme?.state() || null,
   themeDecorations: world?.scene.children.filter(item=>item.userData.mallThemeDecoration).map(item=>item.userData.mallThemeDecoration) || [],
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
@@ -95,10 +95,10 @@ function updateHUD() {
   interactionDistance = best;
   productControl?.update(p,nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
+  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
 }
 function tick() {
-  if (modes.paused()) return;
+  if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   for (const door of world.doors) {
     const open = p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
@@ -109,7 +109,7 @@ function tick() {
       leaf.body.setNextKinematicTranslation({x, y: 1.8, z: .05});
     }
   }
-  player.update(STEP); physics.step(); player.sync(); player.updateCamera(STEP); updateHUD();
+  elevator?.update?.(STEP,player.state); player.update(STEP); physics.step(); player.sync(); player.updateCamera(STEP); updateHUD();
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
@@ -179,7 +179,7 @@ document.addEventListener('visibilitychange', () => {
 canvas.addEventListener('webglcontextlost', event => {
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
   mallTheme?.suspend();
-  player?.interruptGraphics();
+  player?.interruptGraphics(); elevator?.interrupt?.();
   if (!fatal) graphicsStatus = 'lost';
   fallback(fatal ? 'The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D.' : 'The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.', false);
 });
@@ -305,6 +305,7 @@ async function initialize() {
     elevator = createElevatorV2(T, R, physics, world.scene, expanded);
     if(mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {mallTheme.destroy();mallTheme=null;ui.configureMallTheme(null);}
     world.interactables.push(...elevator.interactables);
+    world.cameraObstacles.push(...(elevator.cameraObstacles||[]));
   }
   if(mallTheme && !contextLost && !interrupted) await mallTheme.restore();
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded);
@@ -329,7 +330,7 @@ async function initialize() {
   });
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
-  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel}),value=>{
+  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel,capability:player.cartCapability()}),value=>{
     if(!ready)return false;
     const ok=player.setCart(value);updateHUD();render();return ok;
   });

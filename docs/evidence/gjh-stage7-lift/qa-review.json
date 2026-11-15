@@ -1,0 +1,34 @@
+{
+  "status": "QA_REVIEW_NO_CONFIRMED_P0_P1_PENDING_UNCONTENDED_BUDGET",
+  "findings": [],
+  "reviewedEvidence": {
+    "addon": "worker/addon/report.json",
+    "map": "worker/map-final/report.json",
+    "realInput": "primary/real-input/real-input-desktop.json",
+    "integration": "primary/integration-summary.json"
+  },
+  "checks": {
+    "addonCurrentSourceHashMatch": true,
+    "mapCurrentSourceHashMatch": true,
+    "addonSourceGuard": true,
+    "classicColliderFourCasesExact": true,
+    "realInput": 5,
+    "frozenPhaseIntegrationExitZero": 10
+  },
+  "scope": [
+    "Addon SHA is for unmodified production sources; QA-only exposure and body faults establish isolated refusal guards only, not normal reachability.",
+    "Native Australia feedback, actual amenity/fallback and four-SKU routes provide separate user-journey coverage.",
+    "Ten integrations remain pre-cart-metadata phase, bridged by exact motion source and fresh UI/capability checks.",
+    "Map current source guard checked; no new browser execution by reviewer."
+  ],
+  "remaining": [
+    "Actual uncontended advancing-render performance/budget and frozen final receipt.",
+    "Public release verification after local final acceptance."
+  ],
+  "sourceSHA256": {
+    "assets/player.js": "7425d15a33bc7c86f2b8175ca81ef578205d2310d8a0a44319516115c6b0ff48",
+    "assets/ui.js": "a5530253fbd63298107d112faf35361bf416a2839e7612262fa307c66aa19b5f",
+    "assets/elevator-v2.js": "690d9d2b4ed6de23e9776b90e7279faac812ec361dbbc2853c335bf7492e3269",
+    "assets/world.js": "705d91ed766ba96c2e9c3989f432a7f217a6dd6801c6d23b631d0b44dc2e76ea"
+  }
+}

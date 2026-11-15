@@ -1,9 +1,8 @@
-import {expandedLayout} from './expanded-layout.js';
-
+import {liftLayout,cutRectangle} from './lift-layout.js';
+import {opaqueBatch} from './opaque-batch.js';
 // Experimental two-level test space. The static slabs own collision; during
 // travel the player controller owns the kinematic rider and calls setHeight.
-export function createElevatorV2(T, R, physics, scene, expanded = false) {
-  if (expanded) return createExpandedElevator(T, R, physics, scene);
+function createLegacyElevator(T, R, physics, scene) {
   const x = 0, z = 16, upper = 7.2;
   const slabMaterial = new T.MeshStandardMaterial({color: 0x35584d, roughness: .8});
   const railMaterial = new T.MeshStandardMaterial({color: 0xb59b62, metalness: .55, roughness: .35});
@@ -44,67 +43,92 @@ export function createElevatorV2(T, R, physics, scene, expanded = false) {
   };
 }
 
-function createExpandedElevator(T, R, physics, scene) {
-  const {x,z,upper}=expandedLayout.lift;
-  const stone=new T.MeshStandardMaterial({color:0xdfd5c4,roughness:.64});
-  const green=new T.MeshStandardMaterial({color:0x21483e,roughness:.55});
-  const brass=new T.MeshStandardMaterial({color:0xb59b62,metalness:.55,roughness:.35});
-  const glass=new T.MeshStandardMaterial({color:0xd7e9df,transparent:true,opacity:.24,metalness:.08,roughness:.08,depthWrite:false,side:T.DoubleSide});
-  const geometry=new T.BoxGeometry(1,1,1), batches=new Map(), matrix=new T.Matrix4();
-  function box(material,px,py,pz,sx,sy,sz,collision=false){
-    if(!batches.has(material))batches.set(material,[]);
-    matrix.makeScale(sx,sy,sz);matrix.setPosition(px,py,pz);batches.get(material).push(matrix.clone());
-    if(collision)physics.createCollider(R.ColliderDesc.cuboid(sx/2,sy/2,sz/2).setTranslation(px,py,pz));
+export function createElevatorV2(T,R,physics,scene,expanded=false) {
+  if(!expanded)return createLegacyElevator(T,R,physics,scene);
+  const L=liftLayout, floors=[0,L.upper], staticParts=[], cabinParts=[];
+  const palette={stone:new T.Color(0x35584d),rail:new T.Color(0xb59b62),panel:new T.Color(0x183a30)};
+  const obstacles=[], gates=[], thresholds=[];let height=0,call=null,generation=0,riding=false;
+  function geometry(kind,x,y,z,sx,sy,sz) {
+    const g=new T.BoxGeometry(sx,sy,sz).toNonIndexed();g.translate(x,y,z);
+    const n=g.attributes.position.count,c=palette[kind],colors=new Float32Array(n*3),surface=new Float32Array(n*2);
+    for(let i=0;i<n;i++){colors.set([c.r,c.g,c.b],i*3);surface.set(kind==='rail'?[.35,.55]:[.8,0],i*2);}
+    g.setAttribute('color',new T.BufferAttribute(colors,3));g.setAttribute('obSurface',new T.BufferAttribute(surface,2));return g;
   }
-  // Four panels surround the genuine 4 x 4 m shaft void; the movable
-  // platform and landing barriers own collision while the cabin is present.
-  for(const dx of [-4,4])box(stone,x+dx,upper-.2,z,4,.4,12,true);
-  for(const dz of [-4,4])box(stone,x,upper-.2,z+dz,4,.4,4,true);
-  for(const dx of [-6,6])box(glass,x+dx,upper+.58,z,.14,1.16,12,true);
-  for(const dz of [-6,6])box(glass,x,upper+.58,z+dz,12,1.16,.14,true);
-  for(const dx of [-6,6])box(brass,x+dx,upper+1.2,z,.12,.1,12);
-  for(const dz of [-6,6])box(brass,x,upper+1.2,z+dz,12,.1,.12);
-  // The doorway is on the west side at both levels. Other shaft walls are solid.
-  for(const y of [0,upper]){
-    box(glass,x+2,y+1.5,z,.12,3,4,true);
-    for(const dz of [-2,2])box(glass,x,y+1.5,z+dz,4,3,.12,true);
-    for(const dz of [-1.5,1.5])box(glass,x-2,y+1.5,z+dz,.12,3,1,true);
-    for(const dz of [-1,1])box(brass,x-2,y+1.5,z+dz,.1,3,.1);
-    box(brass,x-2,y+3,z,.1,.1,2);
+  function collider(x,y,z,sx,sy,sz) {return physics.createCollider(R.ColliderDesc.cuboid(sx/2,sy/2,sz/2).setTranslation(x,y,z));}
+  function fixed(kind,x,y,z,sx,sy,sz) {
+    staticParts.push(geometry(kind,x,y,z,sx,sy,sz));collider(x,y,z,sx,sy,sz);
+    obstacles.push({min:{x:x-sx/2,y:y-sy/2,z:z-sz/2},max:{x:x+sx/2,y:y+sy/2,z:z+sz/2}});
   }
-  for(const [material,transforms] of batches){
-    const mesh=new T.InstancedMesh(geometry,material,transforms.length);
-    transforms.forEach((transform,i)=>mesh.setMatrixAt(i,transform));mesh.computeBoundingSphere();mesh.receiveShadow=true;scene.add(mesh);
+  const shaft=L.shaft,slab=L.slab,t=L.threshold;
+  const sx=shaft.maxX-shaft.minX,sz=shaft.maxZ-shaft.minZ;
+  const slabX=(slab.minX+slab.maxX)/2,slabZ=(slab.minZ+slab.maxZ)/2;
+  const shaftX=(shaft.minX+shaft.maxX)/2,shaftZ=(shaft.minZ+shaft.maxZ)/2;
+  const doorwayZ=(t.minZ+t.maxZ)/2,doorwayDepth=t.maxZ-t.minZ;
+  const guardHeight=1.1,wallThickness=.1;
+  for(const r of cutRectangle(slab,shaft))fixed('stone',(r.minX+r.maxX)/2,L.upper-.2,(r.minZ+r.maxZ)/2,r.maxX-r.minX,.4,r.maxZ-r.minZ);
+  // Low guards enclose the landing and both shaft entrances without a tall opaque tower.
+  for(const x of [slab.minX,slab.maxX])fixed('panel',x,L.upper+guardHeight/2,slabZ,.12,guardHeight,slab.maxZ-slab.minZ);
+  for(const z of [slab.minZ,slab.maxZ])fixed('panel',slabX,L.upper+guardHeight/2,z,slab.maxX-slab.minX,guardHeight,.12);
+  for(const floor of floors){
+    fixed('rail',shaft.maxX,floor+guardHeight/2,shaftZ,wallThickness,guardHeight,sz);
+    for(const z of [shaft.minZ,shaft.maxZ])fixed('rail',shaftX,floor+guardHeight/2,z,sx,guardHeight,wallThickness);
+    for(const [minZ,maxZ] of [[shaft.minZ,t.minZ],[t.maxZ,shaft.maxZ]])fixed('rail',shaft.minX,floor+guardHeight/2,(minZ+maxZ)/2,wallThickness,guardHeight,maxZ-minZ);
+    const gateShape=[shaft.minX,floor+guardHeight/2,doorwayZ,wallThickness,guardHeight,doorwayDepth];
+    const gateMesh=opaqueBatch(T,[geometry('rail',...gateShape)],false);gateMesh.name=`Lift gate ${floor}`;scene.add(gateMesh);
+    gates.push({floor,mesh:gateMesh,collider:collider(...gateShape)});
+    const thresholdShape=[(t.minX+t.maxX)/2,floor-.04,doorwayZ,t.maxX-t.minX,.08,doorwayDepth];
+    const thresholdMesh=opaqueBatch(T,[geometry('stone',...thresholdShape)],false);thresholdMesh.name=`Lift threshold ${floor}`;scene.add(thresholdMesh);
+    thresholds.push({floor,mesh:thresholdMesh,collider:collider(...thresholdShape)});
   }
-  const cabin=new T.Group();cabin.position.set(x,0,z);scene.add(cabin);
-  for(const [material,px,py,pz,sx,sy,sz] of [[stone,0,.04,0,3.98,.08,3.98],[green,1.88,1.25,0,.12,2.5,3.8],[brass,1.8,2.52,0,.12,.08,3.8]]){
-    const mesh=new T.Mesh(geometry,material);mesh.position.set(px,py,pz);mesh.scale.set(sx,sy,sz);cabin.add(mesh);
-  }
-  const gateMaterial=new T.MeshStandardMaterial({color:0x35584d,roughness:.55});
-  const gates=[0,upper].map(y=>{
-    const mesh=new T.Mesh(geometry,gateMaterial);mesh.position.set(x-2,y+1.1,z);mesh.scale.set(.14,2.2,2);scene.add(mesh);
-    const collider=physics.createCollider(R.ColliderDesc.cuboid(.07,1.1,1).setTranslation(x-2,y+1.1,z));
-    return {mesh,collider,y};
-  });
-  const floor=physics.createCollider(R.ColliderDesc.cuboid(1.99,.1,1.99).setTranslation(x,upper-.1,z));
-  function setHeight(y){
-    cabin.position.y=y;
-    for(const gate of gates){const closed=Math.abs(y-gate.y)>.025;gate.mesh.visible=closed;gate.collider.setEnabled(closed);}
-    floor.setEnabled(Math.abs(y-upper)<=.025);
-  }
+  const fixedMesh=opaqueBatch(T,staticParts,false);fixedMesh.name='Expanded lift landing and guards';scene.add(fixedMesh);
+  const cw=L.cabin.width,cd=L.cabin.depth;
+  const cabinBoxes=[{kind:'stone',x:0,y:-.04,z:0,size:[cw,.08,cd]},
+    {kind:'panel',x:cw/2-wallThickness/2,y:1.1,z:0,size:[wallThickness,2.2,cd]},
+    ...[-1,1].map(side=>({kind:'rail',x:0,y:guardHeight/2,z:side*(cd/2-wallThickness/2),size:[cw,guardHeight,wallThickness]}))];
+  for(const part of cabinBoxes)cabinParts.push(geometry(part.kind,part.x,part.y,part.z,...part.size));
+  const cabin=opaqueBatch(T,cabinParts,false);cabin.name='Expanded physical lift cabin';cabin.position.set(L.x,0,L.z);scene.add(cabin);
+  // The merged lift geometry uses vertex colours so its different surfaces
+  // share a draw call. Remember their original roles for reversible themes.
+  const themeMeshes=[fixedMesh,cabin,...gates.map(g=>g.mesh),...thresholds.map(t=>t.mesh)];
+  const originalColours=themeMeshes.map(mesh=>mesh.geometry.getAttribute('color').array.slice());
   function applyMallTheme(theme){
     const m=theme?.materials;
-    if(!m || ['liftStone','liftGreen','liftGate','brass','glass'].some(k=>!Number.isInteger(m[k])||m[k]<0||m[k]>0xffffff) ||
-      ['liftGlassOpacity','glassRoughness','glassMetalness'].some(k=>!Number.isFinite(m[k])||m[k]<0||m[k]>1)) return false;
-    stone.color.set(m.liftStone);green.color.set(m.liftGreen);gateMaterial.color.set(m.liftGate);brass.color.set(m.brass);
-    glass.color.set(m.glass);glass.opacity=m.liftGlassOpacity;glass.roughness=m.glassRoughness;glass.metalness=m.glassMetalness;
+    if(!m || ['liftStone','liftGreen','liftGate','brass'].some(k=>!Number.isInteger(m[k])||m[k]<0||m[k]>0xffffff))return false;
+    const roles={stone:new T.Color(m.liftStone),rail:new T.Color(m.brass),panel:new T.Color(m.liftGreen)},gateColour=new T.Color(m.liftGate);
+    themeMeshes.forEach((mesh,index)=>{
+      const attribute=mesh.geometry.getAttribute('color'),original=originalColours[index];
+      for(let i=0;i<attribute.count;i++){
+        const j=i*3,role=Object.keys(palette).find(key=>Math.abs(original[j]-palette[key].r)<1e-6&&Math.abs(original[j+1]-palette[key].g)<1e-6&&Math.abs(original[j+2]-palette[key].b)<1e-6);
+        if(!role)continue;
+        const colour=index>=2&&index<2+gates.length?gateColour:roles[role];
+        attribute.setXYZ(i,colour.r,colour.g,colour.b);
+      }
+      attribute.needsUpdate=true;
+    });
     return true;
   }
-  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;
-  const ctx=canvas.getContext('2d');ctx.fillStyle='#17372e';ctx.fillRect(0,0,512,128);ctx.fillStyle='#f5e8cb';ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.fillText('LIFT  ·  LEVELS 1 / 2',256,80);
-  const material=new T.MeshBasicMaterial({map:new T.CanvasTexture(canvas),side:T.DoubleSide});
-  for(const y of [0,upper]){const sign=new T.Mesh(new T.PlaneGeometry(2.8,.5),material);sign.position.set(x-2.08,y+3.35,z);sign.rotation.y=-Math.PI/2;scene.add(sign);}
-  setHeight(0);
-  return {x,z,upper,useRadius:3.2,setHeight,prepare:setHeight,applyMallTheme,
-    interactables:[0,upper].flatMap(y=>[{id:'visitor-elevator',x:x-2.8,z,y,radius:1.25},{id:'visitor-elevator',x,z,y,radius:1.3}])};
+  const cabinColliders=cabinBoxes.map(w=>({...w,collider:collider(L.x+w.x,w.y,L.z+w.z,...w.size)}));
+  function sync(){
+    cabin.position.y=height;
+    for(const w of cabinColliders)w.collider.setTranslation({x:L.x+w.x,y:height+w.y,z:L.z+w.z});
+    for(const gate of gates){const open=!call&&(!riding||riding==='boarding')&&Math.abs(height-gate.floor)<.001;gate.mesh.visible=!open;gate.collider.setEnabled(!open);}
+    for(const threshold of thresholds){const docked=!call&&(!riding||riding==='boarding')&&Math.abs(height-threshold.floor)<.001;threshold.mesh.visible=docked;threshold.collider.setEnabled(docked);}
+  }
+  function settle(){generation++;call=null;riding=false;height=height<L.upper/2?0:L.upper;sync();}
+  sync();
+  return {
+    ...L, expanded:true,cameraObstacles:obstacles,applyMallTheme,
+    interactables:floors.map(y=>({id:'visitor-elevator',x:L.exit.x,z:L.exit.z,y,radius:L.radius})),
+    setHeight(y){height=y;sync();},
+    setRiding(value){riding=value;sync();},
+    call(floor){if(call||riding)return false;generation++;if(Math.abs(height-floor)<.001)return true;call={from:height,to:floor,elapsed:0,generation};sync();return true;},
+    update(dt,player){
+      if(!call)return;
+      if(Math.hypot(player.x-L.exit.x,player.z-L.exit.z)>L.radius+.4||Math.abs(player.y-call.to)>.4){settle();return;}
+      call.elapsed+=dt;const t=matchMedia('(prefers-reduced-motion: reduce)').matches?1:Math.min(1,call.elapsed/2.5);
+      height=call.from+(call.to-call.from)*t*t*(3-2*t);if(t===1)call=null;sync();
+    },
+    interrupt:settle,
+    get state(){return {height,calling:Boolean(call),riding,generation,docked:!call&&!riding?(Math.abs(height)<.001?0:Math.abs(height-L.upper)<.001?L.upper:null):null,gates:gates.map(g=>({floor:g.floor,closed:g.mesh.visible})),thresholds:thresholds.map(t=>({floor:t.floor,enabled:t.mesh.visible}))};},
+  };
 }

@@ -1,0 +1,17 @@
+{
+  "previousPhase": {
+    "version": "1.1.51",
+    "build": "7dbea71144503618"
+  },
+  "currentPhase": {
+    "version": "1.1.51",
+    "build": "68cc981c4eb25add"
+  },
+  "changedRuntimePaths": [
+    "demos/corporate/gjh/v11/pwa-sw.js",
+    "demos/corporate/gjh/v11/assets/ui.js",
+    "demos/corporate/gjh/v11/assets/player.js"
+  ],
+  "playerByteExactOutsideCartCapability": true,
+  "scope": "Final player change adds capability reason/disabled metadata only; all motion, boarding/travel/exit, collision, camera and lifecycle source byte-exact. UI restores native rejection feedback and specific SKU text. Final current UI/interruption tests are separate."
+}

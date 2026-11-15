@@ -1,0 +1,52 @@
+{
+  "baseline": "f1e210856a98e29220c8a0ebb38dbc9ab7ca3b50",
+  "application": {
+    "version": "1.1.50",
+    "build": "d9350cd4e95ea19e"
+  },
+  "sourceSHA256": {
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/player.js": "0400f418a25bcc6a4b9d6b6c348879c5e572f80c7668fdcd5552a01960cf51e3",
+    "demos/corporate/gjh/v11/assets/world.js": "0fae9574ca8d609641e151da26d61d06526d159f34bb84db0897b23169591069",
+    "demos/corporate/gjh/v11/assets/amenities.js": "750a514f59ddb82f7b087cc61a099d2f6784d0f9b69ca623d0d0e792da559686",
+    "demos/corporate/gjh/v11/assets/ui.js": "a030d9424cb0d81d32728130e4e7437263333825370208a766f9408882348008",
+    "demos/corporate/gjh/v11/assets/expanded-layout.js": "c6fd7d3c4630cb9a6034dc9f858bdfe5499e720caaa68cc4e027eac08c768e33",
+    "demos/corporate/gjh/v11/assets/atrium-layout.js": "f022a7234e19f0472c742d92f4016ff633ed252952b5a0b8dd60adf4246a5ce8",
+    "demos/corporate/gjh/v11/assets/products.js": "20eccdf781f3e02f7b3c69730befa750f020aeeff885a45beea72b299375a455",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/script.js": "be4ab67875f10784ef5288b717fdb58e9db02060f120cc3bf55399f88b746741",
+    "demos/corporate/gjh/v11/index.html": "37323203e80c12f1335c9b1b015b112ab3dd6396eae139e86f681936507db724",
+    "docs/references/gjh-mall-spatial-plan.json": "294c23a47da8327f9c479e742f6041fd1640ed283ed55553a8a7dd3d96791bc1"
+  },
+  "requirements": [
+    "Canonicalexpandedshaft/lobby/upperlanding/physicalcabin/thresholds+stop-gates",
+    "Explicitcallwithoutmovementorautoboard,2ndRideonlydocked;cancel/generationguards",
+    "Westboarding/ride/safeexit, realvoid/perimeter/collision/camera3Dclearance",
+    "Canonicaldesk/directory/showcaserender/fallback/physics/interactions/fourSKUs all agree",
+    "CartgroundonlypolicyprojectedfromPlayerowner, existingseat/held/distance/reentryguards",
+    "Modepauseandrealcontextlossincall/board/bothridehalves/exit settleenabledcapsulesafely",
+    "Classicgeometry/playerflows200budget preserved;v1groundonly",
+    "Nativekeyboard/touchandbothfloorwalking;no forcedupperteleport substitutes",
+    "ExpandedDetailed<=200/inheritedsameprofilecomparison withadvancingframes",
+    "No fakeWC/staffedservice/publicservicecorridor/wholeupperretailfloor"
+  ],
+  "KBReuseReview": {
+    "task": "virtualelevator/facilities",
+    "retrieval": "ReturnedgenericreferenceUIalignmentandHTTPreadycheck, neithercompatiblewithvirtualkinematic/controllercontract; not adopted. Currentrepoexistingmodes/player arepriorart."
+  },
+  "previousTaskRelease": {
+    "stage": 6,
+    "implementationCommit": "c6a73a6e22be1e9a20229c88b85c1a64f9dc9ccf",
+    "testRepairCommit": "f1e210856a98e29220c8a0ebb38dbc9ab7ca3b50",
+    "CI": 43705076759,
+    "normalPagesHashMatches": 35,
+    "publicContexts": 5,
+    "sourceBodyHashesPerCase": [
+      6,
+      6,
+      6,
+      6,
+      2
+    ]
+  }
+}
