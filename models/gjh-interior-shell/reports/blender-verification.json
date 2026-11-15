@@ -1,0 +1,504 @@
+{
+  "blenderVersion": "5.1.2",
+  "source": [
+    {
+      "asset_id": "GJH-ARC-001",
+      "sha256": "160629d6b54667303e8e20c7f327b9efb691df96df6834900741903dbef3ea8a",
+      "unitScaleAndTransforms": "PASS",
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "solidComponents": [
+        {
+          "name": "Wall panel",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Dark plinth",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Brass datum",
+          "closedManifold": true,
+          "positiveVolume": true
+        }
+      ],
+      "proxyCount": 1,
+      "socketCount": 5
+    },
+    {
+      "asset_id": "GJH-COR-001",
+      "sha256": "9287236d50da46957c30b5541145bc0a8ab8476b4aec282edc167fd6aa683823",
+      "unitScaleAndTransforms": "PASS",
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "solidComponents": [
+        {
+          "name": "Structural visual base",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Stone tile -1 -1",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Stone tile -1 1",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Stone tile 1 -1",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Stone tile 1 1",
+          "closedManifold": true,
+          "positiveVolume": true
+        }
+      ],
+      "proxyCount": 1,
+      "socketCount": 5
+    },
+    {
+      "asset_id": "GJH-CEI-001",
+      "sha256": "c603fe16d3e13cf023e13cb69f6cc95e7efad0b18afe7eb4bfd56c9520f635a2",
+      "unitScaleAndTransforms": "PASS",
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "solidComponents": [
+        {
+          "name": "Ivory ceiling panel",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Brass edge long",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Brass edge long.001",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Brass edge short",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Brass edge short.001",
+          "closedManifold": true,
+          "positiveVolume": true
+        }
+      ],
+      "proxyCount": 0,
+      "socketCount": 5
+    },
+    {
+      "asset_id": "GJH-STF-002",
+      "sha256": "b8405f87cda83cec9939aeba9e1c7092cf77c1a66208231ebb1df0b03fba97e7",
+      "unitScaleAndTransforms": "PASS",
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "solidComponents": [
+        {
+          "name": "Stone pier left",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Stone pier right",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Dark lintel",
+          "closedManifold": true,
+          "positiveVolume": true
+        },
+        {
+          "name": "Brass lintel datum",
+          "closedManifold": true,
+          "positiveVolume": true
+        }
+      ],
+      "proxyCount": 3,
+      "socketCount": 5
+    }
+  ],
+  "reimport": [
+    {
+      "asset_id": "GJH-ARC-001",
+      "gltf_min": [
+        -2.0,
+        0.0,
+        -0.15000000596046448
+      ],
+      "gltf_max": [
+        2.0,
+        6.599999904632568,
+        0.15000000596046448
+      ],
+      "openingCentrePivot": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "front": "Blender -Y / glTF +Z",
+      "boundsAndNativeScale": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "bottom",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-COR-001",
+      "gltf_min": [
+        -2.0,
+        0.0,
+        -2.0
+      ],
+      "gltf_max": [
+        2.0,
+        0.20000000298023224,
+        2.0
+      ],
+      "openingCentrePivot": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "front": "Blender -Y / glTF +Z",
+      "boundsAndNativeScale": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "bottom",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-CEI-001",
+      "gltf_min": [
+        -2.0,
+        0.0,
+        -2.0
+      ],
+      "gltf_max": [
+        2.0,
+        0.30000001192092896,
+        2.0
+      ],
+      "openingCentrePivot": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "front": "Blender -Y / glTF +Z",
+      "boundsAndNativeScale": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "bottom",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-STF-002",
+      "gltf_min": [
+        -4.900000095367432,
+        0.0,
+        -0.25
+      ],
+      "gltf_max": [
+        4.899999618530273,
+        5.474999904632568,
+        0.3400000035762787
+      ],
+      "openingCentrePivot": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "observedRoot": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "front": "Blender -Y / glTF +Z",
+      "boundsAndNativeScale": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "bottom",
+        "three-quarter"
+      ]
+    }
+  ]
+}

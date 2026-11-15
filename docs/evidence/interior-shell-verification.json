@@ -1,0 +1,1129 @@
+{
+  "schema_version": 1,
+  "scope": "D3 only: four original P0 IDs, actual default/pilot three-store shell and necessary cart draw-budget repair. Primary acceptance/checkbox/release not performed by worker.",
+  "baseline": "950634fea4de1362b76ec93868034cc016a13eaf",
+  "application": {
+    "version": "1.1.48",
+    "build": "8082fab6091a0cd9"
+  },
+  "runtimeSHA256": {
+    "demos/corporate/gjh/v11/script.js": "5f0554a7a54f752f3cc3543daa502dcc4a48a54234885f791b5164d7c3fe36a7",
+    "demos/corporate/gjh/v11/assets/world.js": "52b9d72ce77fe6cb4355bc553e6cb72524403e41c14546e2164401c3e063ce29",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "814326aae02f68e513a901957f74b3336c6f9d7f15f0a659156ddc945988e4fc",
+    "demos/corporate/gjh/v11/assets/amenities.js": "8edd9973be075c508d447d50fd865a20d4827d7c1b3fecdf33e82905316457d7",
+    "demos/corporate/gjh/v11/assets/static-asset.js": "2cd57880e4af55a09c4539780599c6a0f4176f1ca7336db6168c6e242eba7666",
+    "demos/corporate/gjh/v11/assets/opaque-batch.js": "1494cb01c1f4dd57c4ce0177c059765db001d329cac066b00213969f111291a6",
+    "demos/corporate/gjh/v11/assets/shell.js": "467388367cdfd44333eeebc14080b7c97e5c449df3a15a0c6e40d46aa7e509a6",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "1831da1ddff6f334cfda30a7befdb41ae8881e836e2196b5e97a04ab21dd259e",
+    "demos/corporate/gjh/v11/assets/interior-shell-registry.js": "f73ae9237c5ebc37256fcadcebf057b61d45df0e4e6b38f95102a8562ce47b4c",
+    "demos/corporate/gjh/v11/assets/interior-shell.json": "e6e9ac6ef7b9e3d4929e4c388f0ae16606414c55829dfb3a62626ac52b2be45b",
+    "demos/corporate/gjh/v11/assets/GJH_ARC_001.glb": "e5145b12a4bcca1f3d4badc3e6c0285fbd0a65c07f0ddb9c8f3a636e7b1f7197",
+    "demos/corporate/gjh/v11/assets/GJH_COR_001.glb": "ef48863a88cad561c016abc12d4649b6c85db86a872b3c04802d56667e2295a3",
+    "demos/corporate/gjh/v11/assets/GJH_CEI_001.glb": "5596575c578ba6b18fe87763b245ff428bb0a0ab7c200e36925817fbcf36e40e",
+    "demos/corporate/gjh/v11/assets/GJH_STF_002.glb": "edc1d834199ea409831f6ec203b4450505734dbf20dfee10082d790d846f0b82"
+  },
+  "protectedSourceSHA256": {
+    "demos/corporate/gjh/v11/assets/player.js": "c3f64bf34059ebdeb96f5a16168ca7a321e08a06d41b6305963161ca14614448",
+    "demos/corporate/gjh/v11/assets/products.js": "a034b4afad29445423f5b9fd5af9a2f50549ef036a22105e5ccad389b60247f0",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3",
+    "assets/onboarding/onboarding.js": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+    "assets/onboarding/onboarding.css": "b82b4ace65a530fc03085a93947562d29726cd6384992c2d6ea277fcb306a9a4"
+  },
+  "testSourceBoundary": "Current diagnostic-only follow-up labels rAF polls and adds distinctRenderedFrames metadata; archived exact test sources bind older functional reports. No runtime code changed.",
+  "authoringAndTestSHA256": {
+    "models/gjh-interior-shell/build.py": "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8",
+    "models/gjh-interior-shell/layout.json": "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63",
+    "models/gjh-interior-shell/verify_blender.py": "571dcac70a2216c9f6201fc32230aa703ebad19af0411b78751a785cc981e088",
+    "models/gjh-interior-shell/verify_binary.py": "d22bf6537888e2a9c3366729d1a75681cba76373f68d67c1074d5ffd7a8493fc",
+    "models/gjh-interior-shell/validate.mjs": "97c605eb87723c9cbd08f3d96e93aad114452f9b61818ef90a88cb99055dbf36",
+    "tests/test_gjh_interior_shell.py": "6ae2d4fd339a3a26f288a8d7d89e00de322027060baa9cd8a0c440a01e1ff53b",
+    "tests/browser_gjh_interior_shell.py": "c4ed52b6bd0baca0a0f03074b17b8eb260855cc53dbf9814903967f7c7dfde7b",
+    "tests/browser_gjh_interior_shell_journeys.py": "3d97e35ff773a4c2e49de0030263c3e75f9e1bbd778d71834e35aebc9b439844"
+  },
+  "artifactSHA256": {
+    "models/gjh-interior-shell/sources/GJH_CEI_001.blend": "c603fe16d3e13cf023e13cb69f6cc95e7efad0b18afe7eb4bfd56c9520f635a2",
+    "models/gjh-interior-shell/sources/GJH_ARC_001.blend": "160629d6b54667303e8e20c7f327b9efb691df96df6834900741903dbef3ea8a",
+    "models/gjh-interior-shell/sources/GJH_STF_002.blend": "b8405f87cda83cec9939aeba9e1c7092cf77c1a66208231ebb1df0b03fba97e7",
+    "models/gjh-interior-shell/sources/GJH_COR_001.blend": "9287236d50da46957c30b5541145bc0a8ab8476b4aec282edc167fd6aa683823",
+    "models/gjh-interior-shell/reports/binary-audit.json": "7b0463494e484c80b1248cfa5f221f0831efc605b006e01ab7a943c9165dfa33",
+    "models/gjh-interior-shell/reports/blender-verification.json": "b4f3eefa1c577a88e9e5a3ee003e9acf9c8a9671810f8ed8790d44f771ffe580",
+    "models/gjh-interior-shell/reports/gltf-validation.json": "7e65108afdaae66dfeb715d6f83df24e4e92948429f3a71e6406cf7ebe049509"
+  },
+  "commandResults": [
+    {
+      "name": "Blender4sources/reimport/24views",
+      "exitCode": 0
+    },
+    {
+      "name": "Khronos4exports+portablebinaryaudit",
+      "exitCode": 0
+    },
+    {
+      "name": "6assetcontracts",
+      "exitCode": 0
+    },
+    {
+      "name": "PreCartNormal6profiles+48posedviews+rAFpolling+walk/cart",
+      "exitCode": 0
+    },
+    {
+      "name": "Final16availabilitycombinations128posedviews",
+      "exitCode": 0
+    },
+    {
+      "name": "Final4corrupt+all4lateparse/per-IDdisposal",
+      "exitCode": 0
+    },
+    {
+      "name": "Final4native/checkeddrive4752observations",
+      "exitCode": 0
+    },
+    {
+      "name": "FinalexplicitDetailedcart197/20060rAF",
+      "exitCode": 0
+    },
+    {
+      "name": "ActualAutorender8states960distinctadvancingframes",
+      "exitCode": 0
+    },
+    {
+      "name": "cart-render-after2",
+      "exitCode": 0,
+      "seconds": 12.59,
+      "log": "/private/tmp/gallery-interior-d3/primary/cart-render-after2.log"
+    },
+    {
+      "name": "furniture-loaded",
+      "exitCode": 0,
+      "seconds": 14.6,
+      "log": "/private/tmp/gallery-interior-d3/primary/furniture-loaded.log"
+    },
+    {
+      "name": "furniture-missing",
+      "exitCode": 0,
+      "seconds": 19.96,
+      "log": "/private/tmp/gallery-interior-d3/primary/furniture-missing.log"
+    },
+    {
+      "name": "furniture-deadline",
+      "exitCode": 0,
+      "seconds": 29.74,
+      "log": "/private/tmp/gallery-interior-d3/primary/furniture-deadline.log"
+    },
+    {
+      "name": "amenities",
+      "exitCode": 0,
+      "seconds": 28.82,
+      "log": "/private/tmp/gallery-interior-d3/primary/amenities.log"
+    },
+    {
+      "name": "seats-lift-walls",
+      "exitCode": 0,
+      "seconds": 77.25,
+      "log": "/private/tmp/gallery-interior-d3/primary/seats-lift-walls.log"
+    },
+    {
+      "name": "gallery",
+      "exitCode": 0,
+      "seconds": 28.78,
+      "log": "/private/tmp/gallery-interior-d3/primary/gallery.log"
+    },
+    {
+      "name": "gjh-demos",
+      "exitCode": 0,
+      "seconds": 42.68,
+      "log": "/private/tmp/gallery-interior-d3/primary/gjh-demos.log"
+    },
+    {
+      "name": "pwa",
+      "exitCode": 0,
+      "seconds": 37.89,
+      "log": "/private/tmp/gallery-interior-d3/primary/pwa.log"
+    },
+    {
+      "name": "gallery",
+      "exitCode": 0
+    },
+    {
+      "name": "pwa",
+      "exitCode": 0
+    }
+  ],
+  "metrics": {
+    "actualRenderLoop": [
+      {
+        "phase": "baseline950",
+        "viewport": [
+          390,
+          844
+        ],
+        "cartActive": false,
+        "quality": {
+          "preference": "auto",
+          "tier": "balanced",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": false,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999955,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          39,
+          158
+        ],
+        "maxCalls": 158,
+        "maxTriangles": 821750,
+        "resourcesFinal": {
+          "geometries": 104,
+          "textures": 19
+        },
+        "distinctSampleCount": 120
+      },
+      {
+        "phase": "baseline950",
+        "viewport": [
+          390,
+          844
+        ],
+        "cartActive": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "balanced",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": false,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          198,
+          317
+        ],
+        "maxCalls": 182,
+        "maxTriangles": 832398,
+        "resourcesFinal": {
+          "geometries": 128,
+          "textures": 19
+        },
+        "distinctSampleCount": 120
+      },
+      {
+        "phase": "baseline950",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "cartActive": false,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 1,
+          "shadows": true,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": true,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000273,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          39,
+          158
+        ],
+        "maxCalls": 196,
+        "maxTriangles": 824762,
+        "resourcesFinal": {
+          "geometries": 113,
+          "textures": 29
+        },
+        "distinctSampleCount": 120
+      },
+      {
+        "phase": "baseline950",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "cartActive": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 1,
+          "shadows": true,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": true,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          201,
+          320
+        ],
+        "maxCalls": 220,
+        "maxTriangles": 835410,
+        "resourcesFinal": {
+          "geometries": 137,
+          "textures": 29
+        },
+        "distinctSampleCount": 120
+      },
+      {
+        "phase": "current",
+        "viewport": [
+          390,
+          844
+        ],
+        "cartActive": false,
+        "quality": {
+          "preference": "auto",
+          "tier": "balanced",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": false,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000273,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          42,
+          161
+        ],
+        "maxCalls": 159,
+        "maxTriangles": 831506,
+        "resourcesFinal": {
+          "geometries": 105,
+          "textures": 19
+        },
+        "distinctSampleCount": 120
+      },
+      {
+        "phase": "current",
+        "viewport": [
+          390,
+          844
+        ],
+        "cartActive": true,
+        "quality": {
+          "preference": "auto",
+          "tier": "balanced",
+          "pixelRatio": 1,
+          "shadows": false,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": false,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          202,
+          321
+        ],
+        "maxCalls": 162,
+        "maxTriangles": 842154,
+        "resourcesFinal": {
+          "geometries": 108,
+          "textures": 19
+        },
+        "distinctSampleCount": 120
+      },
+      {
+        "phase": "current",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "cartActive": false,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 1,
+          "shadows": true,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": true,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999727,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          41,
+          160
+        ],
+        "maxCalls": 197,
+        "maxTriangles": 834518,
+        "resourcesFinal": {
+          "geometries": 114,
+          "textures": 29
+        },
+        "distinctSampleCount": 120
+      },
+      {
+        "phase": "current",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "cartActive": true,
+        "quality": {
+          "preference": "detailed",
+          "tier": "detailed",
+          "pixelRatio": 1,
+          "shadows": true,
+          "recovered": false
+        },
+        "hardware": {
+          "cores": 10,
+          "memory": 32,
+          "dpr": 1
+        },
+        "shadows": true,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728,
+        "minRenderAdvance": 1,
+        "renderCounterRange": [
+          204,
+          323
+        ],
+        "maxCalls": 200,
+        "maxTriangles": 845166,
+        "resourcesFinal": {
+          "geometries": 117,
+          "textures": 29
+        },
+        "distinctSampleCount": 120
+      }
+    ],
+    "normalPhaseComparison": [
+      {
+        "profile": "default",
+        "viewport": [
+          390,
+          844
+        ],
+        "baselineFixedSnapshotMaxCalls": 158,
+        "preCartPosedMaxCalls": 159,
+        "baselineMaxTriangles": 821750,
+        "preCartPosedMaxTriangles": 831506,
+        "baselineDecodedBytes": 10976864,
+        "baselineRequestCount": 77,
+        "afterExtendedJourneyDecodedBytes": 11185250,
+        "afterExtendedJourneyRequestCount": 86,
+        "scope": "Clean pre-cart posed snapshot phase. rAF polls repeat a manually rendered state, not GPU frames. Final cart changes only push-cart.js. Extended journey lazily loads existing brand images."
+      },
+      {
+        "profile": "default",
+        "viewport": [
+          639,
+          826
+        ],
+        "baselineFixedSnapshotMaxCalls": 176,
+        "preCartPosedMaxCalls": 177,
+        "baselineMaxTriangles": 824622,
+        "preCartPosedMaxTriangles": 834378,
+        "baselineDecodedBytes": 10775638,
+        "baselineRequestCount": 76,
+        "afterExtendedJourneyDecodedBytes": 11185250,
+        "afterExtendedJourneyRequestCount": 86,
+        "scope": "Clean pre-cart posed snapshot phase. rAF polls repeat a manually rendered state, not GPU frames. Final cart changes only push-cart.js. Extended journey lazily loads existing brand images."
+      },
+      {
+        "profile": "default",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "baselineFixedSnapshotMaxCalls": 196,
+        "preCartPosedMaxCalls": 197,
+        "baselineMaxTriangles": 824762,
+        "preCartPosedMaxTriangles": 834518,
+        "baselineDecodedBytes": 11126722,
+        "baselineRequestCount": 78,
+        "afterExtendedJourneyDecodedBytes": 11185250,
+        "afterExtendedJourneyRequestCount": 86,
+        "scope": "Clean pre-cart posed snapshot phase. rAF polls repeat a manually rendered state, not GPU frames. Final cart changes only push-cart.js. Extended journey lazily loads existing brand images."
+      },
+      {
+        "profile": "pilot",
+        "viewport": [
+          390,
+          844
+        ],
+        "baselineFixedSnapshotMaxCalls": 134,
+        "preCartPosedMaxCalls": 135,
+        "baselineMaxTriangles": 612902,
+        "preCartPosedMaxTriangles": 622658,
+        "baselineDecodedBytes": 10867552,
+        "baselineRequestCount": 77,
+        "afterExtendedJourneyDecodedBytes": 11075938,
+        "afterExtendedJourneyRequestCount": 86,
+        "scope": "Clean pre-cart posed snapshot phase. rAF polls repeat a manually rendered state, not GPU frames. Final cart changes only push-cart.js. Extended journey lazily loads existing brand images."
+      },
+      {
+        "profile": "pilot",
+        "viewport": [
+          639,
+          826
+        ],
+        "baselineFixedSnapshotMaxCalls": 152,
+        "preCartPosedMaxCalls": 153,
+        "baselineMaxTriangles": 615774,
+        "preCartPosedMaxTriangles": 625530,
+        "baselineDecodedBytes": 10666326,
+        "baselineRequestCount": 76,
+        "afterExtendedJourneyDecodedBytes": 11075938,
+        "afterExtendedJourneyRequestCount": 86,
+        "scope": "Clean pre-cart posed snapshot phase. rAF polls repeat a manually rendered state, not GPU frames. Final cart changes only push-cart.js. Extended journey lazily loads existing brand images."
+      },
+      {
+        "profile": "pilot",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "baselineFixedSnapshotMaxCalls": 172,
+        "preCartPosedMaxCalls": 173,
+        "baselineMaxTriangles": 615914,
+        "preCartPosedMaxTriangles": 625670,
+        "baselineDecodedBytes": 11017410,
+        "baselineRequestCount": 78,
+        "afterExtendedJourneyDecodedBytes": 11075938,
+        "afterExtendedJourneyRequestCount": 86,
+        "scope": "Clean pre-cart posed snapshot phase. rAF polls repeat a manually rendered state, not GPU frames. Final cart changes only push-cart.js. Extended journey lazily loads existing brand images."
+      }
+    ],
+    "finalCheckedDrive": [
+      {
+        "profile": "default",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "maxCalls": 200,
+        "observations": 1183,
+        "nativeTouch": null,
+        "wallBlock": {
+          "x": -14.525003433227539,
+          "requestedMs": 600000,
+          "controllerMaximumFixedSubsteps": 600
+        }
+      },
+      {
+        "profile": "default",
+        "viewport": [
+          390,
+          844
+        ],
+        "maxCalls": 169,
+        "observations": 1190,
+        "nativeTouch": "PASS",
+        "wallBlock": {
+          "x": -14.525003433227539,
+          "requestedMs": 600000,
+          "controllerMaximumFixedSubsteps": 600
+        }
+      },
+      {
+        "profile": "default",
+        "viewport": [
+          639,
+          826
+        ],
+        "maxCalls": 180,
+        "observations": 1190,
+        "nativeTouch": "PASS",
+        "wallBlock": {
+          "x": -14.525003433227539,
+          "requestedMs": 600000,
+          "controllerMaximumFixedSubsteps": 600
+        }
+      },
+      {
+        "profile": "pilot",
+        "viewport": [
+          1440,
+          1000
+        ],
+        "maxCalls": 176,
+        "observations": 1189,
+        "nativeTouch": null,
+        "wallBlock": {
+          "x": -14.525003433227539,
+          "requestedMs": 600000,
+          "controllerMaximumFixedSubsteps": 600
+        }
+      }
+    ],
+    "GLBBytes": 40892,
+    "newNetworkPaths": [
+      "shell.js",
+      "interior-shell-registry.js",
+      "opaque-batch.js",
+      "static-asset.js",
+      "GJH_ARC_001.glb",
+      "GJH_COR_001.glb",
+      "GJH_CEI_001.glb",
+      "GJH_STF_002.glb"
+    ],
+    "newPathDecodedBytes": 63090,
+    "modifiedExistingNetworkByteDelta": 717,
+    "finalAlignedNetworkByteDelta": 63807,
+    "newRequestCount": 8,
+    "cartSnapshots": {
+      "baseline950": {
+        "inactive": 196,
+        "active": 220
+      },
+      "initialD3Repeated": {
+        "inactive": 197,
+        "active": 221
+      },
+      "final": {
+        "inactive": 197,
+        "active": 200
+      }
+    },
+    "all16FinalCombinationsMaxCalls": 197
+  },
+  "representativeFrames": [
+    {
+      "file": "docs/screenshots/interior-shell/arrival-return-390.png",
+      "source": "/private/tmp/gallery-interior-d3/normal3/default-390-arrival.png",
+      "sha256": "dd75fd713f4aebdf057ccf2612aefa5673cfa14dc1b7bd0aaba9e9810639fd8d",
+      "scope": "Pre-cart shell phase; arrival RETURN after continuous walk"
+    },
+    {
+      "file": "docs/screenshots/interior-shell/corridor-639.png",
+      "source": "/private/tmp/gallery-interior-d3/normal3/default-639-corridor.png",
+      "sha256": "b1d20d80c1e75e118f4e658ae51d4d9f0f3705f399191b9a74ec91f504834a4b",
+      "scope": "Pre-cart shell phase; fixed corridor view"
+    },
+    {
+      "file": "docs/screenshots/interior-shell/newmoon-frontage-1440.png",
+      "source": "/private/tmp/gallery-interior-d3/normal3/default-1440-newmoon-approach.png",
+      "sha256": "4d6ede59bac0c59294a5e0a48e5883101730712be5e4d19291cd177182e26cfc",
+      "scope": "Pre-cart shell phase; New Moon approach"
+    },
+    {
+      "file": "docs/screenshots/interior-shell/mili-frontage-1440.png",
+      "source": "/private/tmp/gallery-interior-d3/normal3/default-1440-mili-approach.png",
+      "sha256": "ea503e306f8900a6fbef303d77c7743e9b450cd1e5c33aea5e234e4aab817717",
+      "scope": "Pre-cart shell phase; MILI approach"
+    },
+    {
+      "file": "docs/screenshots/interior-shell/gogo-frontage-1440.png",
+      "source": "/private/tmp/gallery-interior-d3/normal3/default-1440-gogo-approach.png",
+      "sha256": "c474b6056dc98297d18f0ff383444e31eeee1fc769d1252ff110cc5a5ca9cbd8",
+      "scope": "Pre-cart shell phase; GOGO approach"
+    },
+    {
+      "file": "docs/screenshots/interior-shell/pilot-newmoon-interior-1440.png",
+      "source": "/private/tmp/gallery-interior-d3/normal3/pilot-1440-newmoon-interior.png",
+      "sha256": "5cba54b57aa1c26c50732c626ee934d373414d44e166744f2145401c8c26c1d7",
+      "scope": "Pre-cart shell phase; DSPpilot native stock retained"
+    },
+    {
+      "file": "docs/screenshots/interior-shell/shell-six-views.png",
+      "source": "/private/tmp/gallery-interior-d3/primary/six-view-contact-sheet.png",
+      "sha256": "3d065fc2ab61cb74fb163578c60ffa4632debe4056733c9cd31d1b2a30942ec1",
+      "scope": "All24 independent Blender reimport views; unchanged GLB bytes"
+    },
+    {
+      "file": "docs/screenshots/interior-shell/cart-restored-v2.png",
+      "source": "/private/tmp/gallery-interior-d3/primary/cart-context-restore/cart-restored-v2.png",
+      "sha256": "3b4f62afe1c52cd94c6a9376157c4b814afc84c63b23adb569966511c0bca81e",
+      "scope": "Finalcart2 actualapp after WebGL contextrestore; Detailedshadow cart200"
+    }
+  ],
+  "rawEvidence": [
+    {
+      "path": "/private/tmp/gallery-interior-d3/proposal.md",
+      "sha256": "d6a7c6f8d395b3887199de1150e8436992d094887b393db2dd824e11ee6bb9a7",
+      "bytes": 8835
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/baseline.py",
+      "sha256": "6bf6ce8921f2e42e4de79391d08b151fab53e25463ad740f6292187e2b2f2e11",
+      "bytes": 3755
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/baseline.json",
+      "sha256": "251f73e564e6cdb845f0526c80b0ed16573c7b5a274c8673f9cdedff51312a8f",
+      "bytes": 95119
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/baseline.log",
+      "sha256": "11eeb5d785c294678d1cb8bd0f0c5ffc431a85810834cf9d47baeccfc791aa93",
+      "bytes": 583
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/baseline-detailed.py",
+      "sha256": "4413322919fe538ba60a6f69f117fdb70d4d756df1335fa8588635f684dbbf32",
+      "bytes": 2889
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/baseline-detailed.json",
+      "sha256": "d8b811296b2f982ff6fc55f94b12163e44a6b662c5de3ad20eacca120a869c57",
+      "bytes": 17511
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/baseline-detailed.log",
+      "sha256": "2ec4f98a49fe981fe6f5971e8222d832fab9ea6889bcd9e97fb3cc0b26af6850",
+      "bytes": 111
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/normal1.log",
+      "sha256": "6e1d8a9ef6981cb5626b8e4a769acdf9ec837317a5ebf4b388ea464189da1b10",
+      "bytes": 20711
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/normal1/report.json",
+      "sha256": "872a63a1eb0d5dcb679429335748cea0416f8c61764196288174edf55278c2d1",
+      "bytes": 16954
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/normal2.log",
+      "sha256": "8ab174e5ffe47b27d66d21b5e5f4e6eda77c76d94c7ab7b80e46f64e99245a57",
+      "bytes": 22201
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/normal2/report.json",
+      "sha256": "712f771b7e5a433467b161bf6debe9d4331af04e2804fc0d5110d3dc4f87ca8a",
+      "bytes": 16954
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/normal3.log",
+      "sha256": "1ad19c92ce7f516c8b8984604532de5a068e8d2cb94c34fc13484283d6e28a13",
+      "bytes": 199
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/normal3/report.json",
+      "sha256": "f5e9e97d02a5544387aba32936d19baefbf3a261a86c6cdbcf0e34d1e34b9f4c",
+      "bytes": 1695316
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/normal3/test-source.py",
+      "sha256": "20d2c16cbef8c65e8bd221acb3c6c1c3f34093ba5f6464d842df2d33b95ee032",
+      "bytes": 11955
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/combinations1/test-source.py",
+      "sha256": "c0421fdcd7aa5babff01374268238e6390fde21d9e5085f273ac95fcb46971c0",
+      "bytes": 11962
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/combinations1.log",
+      "sha256": "c767e632e9d997d0e418452dae3efadc48eb8d1611bf4b7b29e8a6b853f97a9c",
+      "bytes": 828
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/combinations1/report.json",
+      "sha256": "a386ca12b52dab67737098c01ec236af8e2e3cd6459498df520586c85f5f2fda",
+      "bytes": 1165163
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/failures1.log",
+      "sha256": "b93b78bf5cdacd0f92c65eddb60741899da45da79197b413ebe8b1cc76f2eb1b",
+      "bytes": 59
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/failures1/report.json",
+      "sha256": "94bc591c35911010d95209c76b7f29a8f7ba365af0e6b3da8ad076f60ffc36b3",
+      "bytes": 18159
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/journeys1.log",
+      "sha256": "9ac59fae8476009ecc18f2af0035fb49b7c6f83065e795bbc9c0d0cea37254a7",
+      "bytes": 2764
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/journeys1/report.json",
+      "sha256": "09c56feb05a8eb3c3a7e6eb15983a38bbb9182600e6417627d904e5bf3f8fffb",
+      "bytes": 16981
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/journeys2.log",
+      "sha256": "559b16de56c7122533f552a5c3561fc6cd13bbb087f4ebe0028e8a293c5a136f",
+      "bytes": 2256
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/journeys2/report.json",
+      "sha256": "252c9f1081e749b0c0ef14503a72d948b303dfc4c060749275ed00e4828c21fd",
+      "bytes": 16981
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/journeys3.log",
+      "sha256": "c163bab4c3a93e5549ef7ae41f6fcec697c081e148f7381612b2a6b5841adc57",
+      "bytes": 168
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/journeys3/report.json",
+      "sha256": "67887b3c9745aa8cd0bf285b346d2e5fef9f34a82a4e55f3f31b2eda05b419c6",
+      "bytes": 848751
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-probe.py",
+      "sha256": "fab2c309c6d84deda996e3b1a431ca703d5fc51ee4f9e6d894e3af40c036ae9c",
+      "bytes": 2343
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-current.log",
+      "sha256": "81c4b420340bdfadebdf98399d87e2512c6a01999c7e9c0b2dde95dea12e9cc9",
+      "bytes": 1411
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-baseline.py",
+      "sha256": "26e4bca1a0992a09371ae1241484cb4ef947eb2d79ba5affae3fc0785068461f",
+      "bytes": 2361
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-baseline.json",
+      "sha256": "a6cbd0245a87077eeb17a03ca154a5d354d300e99dbee078cccab74a50110fc6",
+      "bytes": 12969
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-baseline.log",
+      "sha256": "7add63ebee3aa9cdc1fcdf43ecc35fb5f5360d96617f2c93ea4f4f2b94825c20",
+      "bytes": 1414
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-before-fix-repeat.py",
+      "sha256": "694c2ae86417a99639fb8bb2796eb392961cdf2f9b8f15e3435caebbecb96c4c",
+      "bytes": 2372
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-before-fix-repeat.json",
+      "sha256": "606fbe32dd4916f282537ff98a0e7c6c29d6c3595f2fc95d9b67391a4163b244",
+      "bytes": 12969
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-before-fix-repeat.log",
+      "sha256": "ed2f055c9167f6ede80ce8b56313a506b61c3ab2c2a05695c07abd3f3cb73418",
+      "bytes": 1423
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-before-fix-source-hashes.json",
+      "sha256": "99a84595638f53197f27ed9422c91c29bf0f72ea404afa3e923970865028dc70",
+      "bytes": 16441
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-after2.json",
+      "sha256": "e96fbc79206814a39b496a3061974f54f3bdd5c6f211477129019bc7c3767e54",
+      "bytes": 12969
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-budget-after2.log",
+      "sha256": "c27a50d3443aeb74cc900cf1977b81348ea068f27ec9e8ce788e33c5589ffd10",
+      "bytes": 241
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/cart-wheel-binary.json",
+      "sha256": "36b0c838e329f6bd673ff590fc920067af7b7e1bffab2b67cca73629c663de1f",
+      "bytes": 6059
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/freeze-cart2.json",
+      "sha256": "8cd5929f5f0561379ff70d22d9c73c78a24beeba45f2c816e5c6229a6d10e61c",
+      "bytes": 17318
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/build3.log",
+      "sha256": "3134276da2d3a77d191ce3ac4850c497a9f075425c103ef32fe4a6e3566525a6",
+      "bytes": 1731
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/blender-verification.log",
+      "sha256": "d26476be8eedd47583e5e673d8396805a47caf258c89be2ce558fe0462711aca",
+      "bytes": 4834
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/blender-root-supplement.log",
+      "sha256": "a64b99a3fc6dcb78b0946bc6d64f282c7fc7205b38c56787a27a8a8119bbe310",
+      "bytes": 1790
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/validator.log",
+      "sha256": "1ea071bf4e2ee2704a5a1b6aa29675427356cacb8cceef43d964f14f66a5abb7",
+      "bytes": 841
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/binary-portable.log",
+      "sha256": "76759da144e94fc150c1165dbd697d0f78c26aab70478448d98ad464aac4ba43",
+      "bytes": 136
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/unit-final.log",
+      "sha256": "ee93aa5999165a5d480bdbdec833747b3b70e48e9aed80ba256bdc67e3930f97",
+      "bytes": 890
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/actual-render/report.json",
+      "sha256": "bb737d2f396709b28552132146f2221a8013d9a6810e2db9ad8e0fe81ff84897",
+      "bytes": 290124
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/actual-render.log",
+      "sha256": "211162bae10a8bd649563942ebdb64c2cabb3cb21a966a336e196937f047a4cd",
+      "bytes": 979
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/actual_render_benchmark.py",
+      "sha256": "1ee91c0f599a23407fa0a75337b4e0ef977dd85a4443ba349f750e37d20460ca",
+      "bytes": 5043
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/furniture-existing-summary.json",
+      "sha256": "bd13a1cdab6852411d7dfa4ed6599747dcc264c4f373d4f893ba4fb4b7054790",
+      "bytes": 34022
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/baseline-source.json",
+      "sha256": "4363c3dd7dbbc7a04660ad1c61824679c88933557df6f4d6e00d175e7be91cbe",
+      "bytes": 1217
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/binary-audit.json",
+      "sha256": "7b0463494e484c80b1248cfa5f221f0831efc605b006e01ab7a943c9165dfa33",
+      "bytes": 1459
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/binary-audit.log",
+      "sha256": "76759da144e94fc150c1165dbd697d0f78c26aab70478448d98ad464aac4ba43",
+      "bytes": 136
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/colliders-baseline.json",
+      "sha256": "6889327e5b75af46928f1d364765590cc079b46116dfb3046fcc1cf6f77e962f",
+      "bytes": 107971
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/colliders-baseline.log",
+      "sha256": "a58896a7c0ebee11f6be8600103fd1ed1a20d9cde0a4229f313d6ee87e6637e5",
+      "bytes": 190
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/colliders-after.json",
+      "sha256": "02905145807fde4777041ffa059e7993d5a2d6431e2b63767e14d7cfef4b24d7",
+      "bytes": 107968
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/colliders-after.log",
+      "sha256": "2eed3e7317be026e7006dbc210a37c4246388596684591f1c6999ccf5f292945",
+      "bytes": 243
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/layout-coverage.json",
+      "sha256": "4c909ee503bb3f912ec9180948e2b436959129b9298b5a55fcffb79d8defda6f",
+      "bytes": 889
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/helper-extraction.json",
+      "sha256": "b8ea38540cab43d63727625fd9eb0484da62299604d332a06046dd25e170fd47",
+      "bytes": 219
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/preserved-source-hashes.json",
+      "sha256": "f1bb73eb6e3860bee3efee2d3365f8cb7d0895b0944128bcce549eb544ba9695",
+      "bytes": 758
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/regression-results.json",
+      "sha256": "14cf868fcabe85b9cedbba32327ef4b5621894cbdff45082688c21b4af15c5ce",
+      "bytes": 1353
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-wheel-identity.json",
+      "sha256": "d6ef3ccda84b07a67226853dba2881cec7e36ff3acc10905d88ee76d9ca9bb75",
+      "bytes": 3550
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-render-after2/report.json",
+      "sha256": "d2482eeb3bdc1d51aaa58f6b207361092da1086c8635e9b25348cea069589fe5",
+      "bytes": 12877
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-render-after2.log",
+      "sha256": "7ae9eef9946e6b6be434955dfd1ef7ae9653b692645b72f3a73fb77c7b3148a8",
+      "bytes": 183
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-guard-faults.log",
+      "sha256": "28e70e7ad859ec8f9520619e57feb0937729a6f88b0d6be9c2674e6815a5ce48",
+      "bytes": 5020
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-guard-faults-attempt2/report.json",
+      "sha256": "4ab49a278a55e38456d5fd9621cde23b8c7d279ba3a2aec6331964bf690a6474",
+      "bytes": 1006
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-guard-faults-attempt2.log",
+      "sha256": "278f6b90bb4f1292bc50b1c003ce5c28f2c108449abd7fefdfb617ec8c5da96e",
+      "bytes": 85
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-context-restore/report.json",
+      "sha256": "319b666e41a95de521c96fac3ce2f3a80cc2e9ccfcc2d0aaad4495e24f87fb27",
+      "bytes": 89429
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/cart-context-restore.log",
+      "sha256": "d45f70e11e6fe2090cad7c90671b0401a4dfe8448944dad73a05ea5d205f76f6",
+      "bytes": 66
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/d1-smoke/report.json",
+      "sha256": "8c44b9a640fff26a32a9d18dd942b8e986a16cd56c0b39b8e4ee3e1ae4442db5",
+      "bytes": 2714
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/d1-smoke.log",
+      "sha256": "3b7d6d0d1d77f665c0a9af2d56cc97a3206d5bc0b0c3e14b3d341a7a4a45b56f",
+      "bytes": 31
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/furniture-deadline/report.json",
+      "sha256": "815fe0747d8742998d2f9b93c95cb136b9d54b244baa28b4456a0e5945fefa49",
+      "bytes": 6179
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/furniture-deadline.log",
+      "sha256": "854bf730e5f556932d2f902874344b8f5a49261357862011b9183ab3828321ab",
+      "bytes": 69
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/furniture-loaded.log",
+      "sha256": "98320419f9d8e06a2d6377a1855baf538e38c12a0f01dfe7b129143b687fd007",
+      "bytes": 6236
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/furniture-missing.log",
+      "sha256": "d28721af3387fc93b1188a64049dd2138b7a23b70781ae28c3980fb027ff5953",
+      "bytes": 14355
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/amenities.log",
+      "sha256": "5b92602219dea5950fd7b274026a7a629fa083900d9026696804729c3db9334e",
+      "bytes": 6383
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/seats-lift-walls/report.json",
+      "sha256": "38df0313500eeb0a7dbfcb20d582c05e7afdfbb4e0fc23aabb6fe2768e90d15e",
+      "bytes": 3602
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/seats-lift-walls.log",
+      "sha256": "244f279f850cc7f6a465eb5ca095609157397d20d50caa3adf61a94a3faba142",
+      "bytes": 92
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/unit-final.log",
+      "sha256": "fe4921847c93b33c403b0e261f0cf88db69717dde7a54005d57ff37a4b793ae1",
+      "bytes": 7499
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/modes-unit.log",
+      "sha256": "240d2ffbb13fff096e9cc867c2a20bcbeda5d1fd742278189d0bda5890278c55",
+      "bytes": 1242
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/generator-final.log",
+      "sha256": "ae608a2177c18c79babd885a57208269f8082c82bad19ee056ce678fd257c314",
+      "bytes": 40
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/ssot-final.log",
+      "sha256": "58429edd3604bbc527ccbe25aa1f0c440fe51504c7f9600a17ef6ce466e16347",
+      "bytes": 88
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/gallery.log",
+      "sha256": "63741fc2303635ac37bc782a5ef5ac19e78a08515189e2b8833de7d8e982859c",
+      "bytes": 1154
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/gjh-demos.log",
+      "sha256": "93afeb07dbd15941f1614ba1d07731682c4a314f88652aab78dd1baad9289635",
+      "bytes": 2230
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/pwa.log",
+      "sha256": "b9cca945e878c71f7a62ef71d573af3d9964e6909eaf2ade3f21a7fcce6370af",
+      "bytes": 1204
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/clean-artifact-bridge.json",
+      "sha256": "75dda2d86386a25c3b17651f7d48c1e82dc50f2e5177bfd9349b19343bc29629",
+      "bytes": 202
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/isolated-capture-cleanup.json",
+      "sha256": "a385d3f5d8e204f3781375d82bd7ae00c1a43b66acf45a5c231e321d595e1830",
+      "bytes": 1462
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/final-required-results.json",
+      "sha256": "36623c4febb233d075642ebc3648007176779033c1dcf5e48d6bd5e5b1fadd68",
+      "bytes": 99
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/final-required-gallery.log",
+      "sha256": "63741fc2303635ac37bc782a5ef5ac19e78a08515189e2b8833de7d8e982859c",
+      "bytes": 1154
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d3/primary/final-required-pwa.log",
+      "sha256": "0a4065cd0170c35937cc17930c7814c3b7d6006638718c4de43651a021737366",
+      "bytes": 1204
+    }
+  ],
+  "limitations": [
+    "Budget covers actual recorded fixed views, steering and native states; no global all-camera/FPS certification.",
+    "Pre-cart normal48views and combination128views are posed snapshots followed by repeated rAF polling, not5760/3840GPUframes. Actual960advancingrenders are a separate clean benchmark; no GPU-timer/throughput/FPS claim.",
+    "Historical45-request oracle remainsFAIL; no10MiB pass.",
+    "Unreviewed replacement-cart prototypes retain original topology/functionality and have no200-call certification.",
+    "Cart callback retains a bounded prototype-object Map; GPU disposal/plateaus verified, CPU prototype GC not established.",
+    "Original221JSON overwritten accidentally; original terminal/log retained and hash-reconstructed repeat221 explicitly labelled.",
+    "Physical phones/Safari/screen readers/hardwarecontroller/packagingmaster/buildingcompliance not verified.",
+    "No fourthbrand/full79P0/all200/D4/D5 acceptance or workercommit/push/tick."
+  ]
+}

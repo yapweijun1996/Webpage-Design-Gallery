@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spatial, createSpatialRegistry, courtyardArrival, storeAt, storeCenterX, mapPoint, mapStoreRect} from '../demos/corporate/gjh/v11/assets/spatial.js';
 
+import {SHELL_LAYOUT} from '../demos/corporate/gjh/v11/assets/interior-shell-registry.js';
+
 const fixture = () => structuredClone(spatial.stores);
 
 test('three stable stores share the current scene centers, entrances and ordering', () => {
@@ -48,4 +50,17 @@ test('unavailable store cannot produce a travel destination', () => {
   assert.equal(candidate.get('mili').available,false);
   assert.equal(candidate.arrival('mili'),null);
   assert.deepEqual(candidate.arrival('gogo'),{x:10,z:2.4});
+});
+
+// The exported kit is approved for this live fixture; spatial changes require a new layout review.
+test('approved shell portals and aggregate proxies match authoritative live store centers', () => {
+  const frame = SHELL_LAYOUT.assets.frontage;
+  assert.deepEqual(frame.placements, spatial.stores.map(store => [storeCenterX(store),0,0,0]));
+  const pieces = frame.components.filter(part => ['Stone pier left','Stone pier right','Dark lintel'].includes(part.name));
+  const expected = spatial.stores.flatMap(store => pieces.map(part => ({
+    position: [storeCenterX(store)+part.position[0],part.position[1],part.position[2]], size: part.size
+  })));
+  const actual = SHELL_LAYOUT.aggregate_colliders.filter(part => part.name.startsWith('portal-'))
+    .map(({position,size}) => ({position,size}));
+  assert.deepEqual(actual,expected);
 });

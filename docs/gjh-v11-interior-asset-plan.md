@@ -1,6 +1,6 @@
 # GJH V11 interior asset plan
 
-Updated: 15 November 2026 (Asia/Singapore). Status: **eight-asset pilot implemented, integrated and locally verified; remaining 192 candidates pending**.
+Updated: 15 November 2026 (Asia/Singapore). Status: **twelve selected IDs implemented and locally verified: the original eight-ID pilot plus four-ID P0 shell;188 candidates remain pending**.
 
 ## Source and ownership
 
@@ -24,7 +24,7 @@ Count verification found 200 distinct IDs, each category numbered 001–020 with
 | VER | Vertical circulation and atrium | 5 | 11 | 4 | 20 |
 | **Total** | | **79** | **81** | **40** | **200** |
 
-These are source classifications, not a commitment to build every P0 before improving the current scene. The documentation intake itself accepted no models. The subsequent explicit pilot request authorizes the eight mappings in the [pilot review](gjh-v11-interior-pilot-review.md); other candidates retain proposed status. Existing delivered assets retain their own evidence and history.
+These are source classifications, not a commitment to build every P0 before improving the current scene. The documentation intake itself accepted no models. The subsequent explicit pilot request authorized the eight mappings in the [pilot review](gjh-v11-interior-pilot-review.md). That authorization is historical; the later15November2026 request authorizes autonomous completion of the four remaining interior tasks, with bounded per-task selection and evidence. The four-ID [D3 shell review](v11-interior-shell-review.md) records the next selected batch; other candidates retain proposed status. Existing delivered assets retain their own evidence and history.
 
 ## Reconcile before production
 
@@ -34,7 +34,7 @@ These are source classifications, not a commitment to build every P0 before impr
 | Identity | Hyphenated IDs; underscore filenames; root `extras.asset_id` | Preserve stable IDs. For example, ID `GJH-ARC-001` maps to `GJH_ARC_001.blend` / `.glb`. A future manifest must resolve identity; existing filenames must not be silently renamed or claimed as accepted candidates. |
 | Dimensions | Proposed per-row bounding boxes; G02 tolerance ±1% | Approve a per-asset target before applying the tolerance. Repeated category dimensions need review: ARC-008/011/018, CEI-015/016, STF-008/016, PUB-005 and VER-008 are examples. Do not model a skirting board, detector or button panel at a generic wall/room size. Wide COR-003 also needs differentiation from COR-002. |
 | Interactions | Category-wide `SIT`, `INSPECT`, `USE`, `PICKUP`, `TRAVEL` labels | Treat these as candidates only. Review tables, planters, partitions and fixtures individually; PUB-005/006 and PUB-007–011 do not automatically become seats. Passive decor defaults to no action unless a concrete journey is specified. Keep geometry separate from UI prompts, gameplay state and physics. |
-| Materials | M01–M10, texture atlases, 1K/2K images and KTX2 | Current `assets/furnishings.js` rejects images, external buffers, required extensions, animation and skins, and accepts at most 16 mesh primitives. Use a compatible static, texture-free pilot or separately design decoder/resource verification, lifecycle and fallback changes before textured assets. No loader checks are relaxed by documentation. |
+| Materials | M01–M10, texture atlases, 1K/2K images and KTX2 | Current shared `assets/static-asset.js`, consumed by furnishings and shell, rejects images, external buffers, required extensions, animation and skins, and accepts at most 16 mesh primitives. Use a compatible static, texture-free pilot or separately design decoder/resource verification, lifecycle and fallback changes before textured assets. No loader checks are relaxed by documentation. |
 | LOD | Three variants and proposed distance bands | Current furniture does not implement automatic distance switching. Audit existing reuse first; adopt LOD only after scene measurements. The supplied screen-space/distance thresholds and triangle ceilings remain targets. Confirm how the architectural ceiling maps to ARC/COR/CEI. Record simple-asset or instance-only exemptions rather than manufacturing three unnecessary copies. |
 | Collision | Separate or non-renderable proxies and navigation metadata | Current physics uses app-owned colliders; it does not automatically consume imported collision GLBs. Keep collision/socket nodes out of visual exports until an importer explicitly supports them. Maintain one collision authority and validate camera, cart, doors and seat exits against visible geometry. |
 | Stores and facilities | M1 mentions four storefronts; M2 adds facilities/vertical transport | Current mall planning retains three branded stores. A four-module test fixture is not a fourth live brand. Restrooms, safety props and transport labels describe visual/capability candidates, not operating services or physical-safety compliance. Existing locally developed elevator behavior requires its own evidence; this import does not certify or replace it. |
@@ -60,9 +60,9 @@ Each sample needs a proposed target, source/reuse decision and open issues. Do n
 ## Delivery phases
 
 1. **D0 — Documentation intake (complete).** Preserve the source, verify IDs/counts, identify contract gaps and link the advisor review. The original imported backlog is unchanged.
-2. **D1 — Pilot spatial/contract baseline (complete for asset scope).** Reuse mappings, reviewed dimensions, ground origins, collision ownership and static materials are recorded. Kiosk/cart/seat routes and mobile/desktop framing pass. Broader HUD/map/help consolidation remains pending outside this asset pilot.
+2. **D1 — Pilot spatial/contract baseline (complete for asset scope).** Reuse mappings, reviewed dimensions, ground origins, collision ownership and static materials are recorded. Kiosk/cart/seat routes and mobile/desktop framing pass. The subsequent application1.1.47 [D1 HUD ownership review](v11-interior-hud-review.md) completes Help/Map consolidation outside that asset pilot.
 3. **D2 — Eight-ID pilot (complete for local concept acceptance).** Editable sources, compatible static GLBs, registry, provenance, app-owned collision definitions and G01–G12 applicability/evidence are delivered. See the [pilot review](gjh-v11-interior-pilot-review.md). Reassess repetition before scaling up.
-4. **D3 — Navigable shell (pending).** Select the necessary P0 module families and demonstrate one traversable corridor, entrance, storefront modules, accessible wayfinding and collision. Reconcile the source M1 four-storefront fixture with the existing three-store runtime; do not expand brands implicitly.
+4. **D3 — Navigable shell (bounded classic acceptance complete).** Four original P0 families ARC-001/COR-001/CEI-001/STF-002 replace matching default/pilot shell regions with editable sources, native exports and G01–G12 proof. Actual corridor/three-portal walk/cart, wayfinding, collision and all16fallback combinations pass. The necessary cart draw batching repairs the inherited220-call failure while retaining200ceiling, wheels, materials and physics. This bounded D3 is not the full79P0/M1 milestone; no fourth live brand is added. See the [shell review](v11-interior-shell-review.md).
 5. **D4 — Retail and furnishings (pending).** Select supported P1 displays, seating and facilities. Keep product content verified, define interactive state/fallback behavior and preserve all current journeys.
 6. **D5 — Optional polish (pending).** Evaluate selected P2 variants, lighting, streaming and measured LOD only where justified. Revisit scope instead of treating 200 completions as a release prerequisite.
 
@@ -83,3 +83,7 @@ Validated the imported file checksum, 200 unique stable IDs, ten complete 001–
 ## Subsequent implementation
 
 The owner explicitly requested the eight-asset pilot after documentation intake. [Pilot verification](gjh-v11-interior-pilot-review.md) records Blender authoring/reimport, validator, real-runtime E2E, failure/lifecycle tests, captures and performance observations. The historical intake statement above describes that earlier step only. The later commit/push request is reconciled in [release review](gjh-v11-interior-pilot-release.md); the original intake and implementation evidence remains historical.
+
+## Four-ID shell follow-up
+
+The later owner authorization covers autonomous completion of the four remaining interior tasks, superseding earlier eight-only scope statements for current work. The selected D3 adds four unique P0 IDs to the eight-ID pilot;188 candidates remain pending. Approved existing-world dimensions, canonical component/placement/proxy ownership, real artifacts and scoped evidence are in the [shell acceptance manifest](../models/gjh-interior-shell/manifest.json). Source inventory rows, priorities and SHA remain unchanged. D4/D5 retain their own pending status. Current application1.1.49 integration and independent acceptance are recorded separately from the immutable950 phase; main/CI/Pages publication remains the release gate. The opt-in expanded layout retains its own shell and bypasses these four GLBs.

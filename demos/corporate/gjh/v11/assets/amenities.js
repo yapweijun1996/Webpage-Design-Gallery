@@ -1,4 +1,4 @@
-import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {opaqueBatch} from './opaque-batch.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
 export const AMENITIES = Object.freeze({
@@ -8,19 +8,7 @@ export const AMENITIES = Object.freeze({
 });
 for(const definition of Object.values(AMENITIES)){definition.placements.forEach(Object.freeze);Object.freeze(definition.placements);Object.freeze(definition.size);Object.freeze(definition.clips);Object.freeze(definition);}
 export const SHOWCASE_PRODUCTS=Object.freeze(['nz-425g','au-425g','sa-425g','mx-454g'].map((sku,index)=>Object.freeze({id:`new-moon-${sku}-front`,position:Object.freeze([-7+(index===3?.16:index===0?-.16:0),[.479,.919,1.359,.479][index],2.2])})));
-function opaqueBatch(T,parts,shadows){
-  if(!parts.length)return null;
-  const geometry=mergeGeometries(parts);parts.forEach(part=>part.dispose());geometry.computeBoundingSphere();
-  const material=new T.MeshStandardMaterial({vertexColors:true,side:T.DoubleSide});
-  // These pinned sources have solid PBR colours and no maps. Carry their original
-  // roughness and metalness per vertex instead of spending one draw per material.
-  material.onBeforeCompile=shader=>{
-    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nattribute vec2 obSurface; varying vec2 vObSurface;').replace('#include <begin_vertex>','#include <begin_vertex>\nvObSurface=obSurface;');
-    shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec2 vObSurface;').replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=vObSurface.x;').replace('#include <metalnessmap_fragment>','#include <metalnessmap_fragment>\nmetalnessFactor=vObSurface.y;');
-  };
-  material.customProgramCacheKey=()=> 'mall-opaque-pbr-v1';
-  const mesh=new T.Mesh(geometry,material);mesh.name='Opaque mall amenities';mesh.castShadow=shadows;mesh.receiveShadow=true;return mesh;
-}
+
 const timeout=8000;
 function dispose(root){
   const geometry=new Set(),materials=new Set();root?.traverse(mesh=>{if(mesh.geometry)geometry.add(mesh.geometry);if(mesh.material)materials.add(mesh.material);});

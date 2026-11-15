@@ -1,12 +1,15 @@
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createFurnishings} from './furnishings.js';
+import {createShell} from './shell.js';
+import {SHELL_LAYOUT} from './interior-shell-registry.js';
 import {spatial, storeCenterX} from './spatial.js';
 import {expandedLayout} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, expanded = false) {
-  const furnishings = await createFurnishings(T, true);
+  const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
+  let shellState = null;
   const seats=[];
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
@@ -136,9 +139,14 @@ export async function createWorld(T, R, physics, expanded = false) {
   if (expanded) {
     box('dark', 10, -.22, 18, 70, .4, 60, true);
     box('shellFloor', 10, -.035, 18, 70, .04, 60);
-  } else box('dark', 0, -.22, 3.5, 30.4, .4, 29.4, true);
+  } else {
+    // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
+    for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
+    const foundation = SHELL_LAYOUT.foundation_visual;
+    box(foundation.material, ...foundation.position, ...foundation.size);
+  }
   if (!expanded) {
-  for (let x = -14; x <= 14; x += 2) for (let z = 1; z <= 17; z += 2) box((x + z) % 4 === 1 ? 'jade' : 'jadeAlt', x, -.005, z, 1.99, .04, 1.99);
+  for (const [x, y, z] of SHELL_LAYOUT.retained_tiles) box((x + z) % 4 === 1 ? 'jade' : 'jadeAlt', x, y, z, 1.99, .04, 1.99);
   for (const x of [-14.6, -5, 5, 14.6]) box('brass', x, .022, 9, .025, .012, 17.8);
   for (const z of [.6, 4, 11.5, 17.3]) box('brass', 0, .023, z, 29.3, .012, .025);
   // A shallow stone-and-brass promenade gives the arrival view a designed foreground.
@@ -162,10 +170,10 @@ export async function createWorld(T, R, physics, expanded = false) {
   }
   }
   if (!expanded) {
-    box('green', -15, 3.3, 3.5, .3, 6.6, 29, true); box('green', 15, 3.3, 3.5, .3, 6.6, 29, true);
-    box('green', 0, 3.3, 18, 30, 6.6, .3, true);
-  }
-  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
+    const roof = new URLSearchParams(location.search).get('visitor') !== 'v1' ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
+    for (const component of [...SHELL_LAYOUT.caps, ...roof]) box(component.material, ...component.position, ...component.size);
+    shellState = shell.finish(scene, solid);
+  } else if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
     // Leave a real shaft opening for the experimental lift, without changing v1.
     for (const side of [-1, 1]) box('ivory', side * 8.2, 6.5, 9, 13.6, .3, 18);
     box('ivory', 0, 6.5, 7.25, 2.8, .3, 14.5);
@@ -301,7 +309,6 @@ export async function createWorld(T, R, physics, expanded = false) {
         }
         box('brass', x + side * 3.55, 2.58, .12, 2.3, .035, .12);
       } else {
-        box('courtStone', x + side * 3.55, 2.6, 0, 2.4, 5.2, .35, true);
         // Keep the original facade and collision in the reversible legacy view.
         for (const face of [-1, 1]) {
           box('glass', x + side * 3.6, 2.08, face * .23, 2.12, 3.5, .055);
@@ -315,7 +322,9 @@ export async function createWorld(T, R, physics, expanded = false) {
       box('glow', x + side * 3.6, 3.67, .28, 2.12, .035, .04);
       lightPool(x + side * 3.6, .053, 1.15, 3.4, 3.7);
     }
-    box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
+    if (expanded) {
+      box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
+    }
     box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
     // Layered skirting and cornices add depth without moving the walls or artwork.
     for (const side of [-1, 1]) {
@@ -534,5 +543,5 @@ export async function createWorld(T, R, physics, expanded = false) {
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
   const cameraObstacles=seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}}));
-  return {scene, doors, seats, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
 }

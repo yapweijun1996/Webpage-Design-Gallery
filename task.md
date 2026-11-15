@@ -459,7 +459,7 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] D2: review the eight-ID pilot: PUB-002, PUB-008, PUB-017, DSP-001, STF-008, LGT-009, PUB-005 and VER-017; preserve their source priorities and correct targets before authoring.
 - [x] D2: author/adapt the reviewed pilot with editable source, GLB, manifest, applicable collision definitions, provenance and actual G01–G12 results or reasoned applicability records.
 - [x] D2: validate export in independent viewers and the actual mall; verify failed/delayed loading, lifecycle cleanup and mobile/desktop visuals.
-- [ ] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
+- [x] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
 - [ ] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
 - [ ] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
 - [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
@@ -513,8 +513,23 @@ and the documented Directory/image/boundary bridges. Primary independent checks
 add 49 Python tests, six interaction cases and three strict edge cases; generation
 and SSOT pass. Historical mode/Gallery/PWA proofs retain their source boundaries,
 and the unreproduced earlier Hair hit failure remains recorded. Post-push CI,
-Pages and actual public user flows are the release gate before D3. Only D1 is
-checked here; D3/D4/D5 and physical-device acceptance retain separate status.
+Pages and actual public user flows are the release gate before D3. At this D1 checkpoint only D1 was
+checked; subsequent D3/D4/D5 acceptance is recorded separately below.
+
+
+D3 bounded shell acceptance — 2026-11-15: application1.1.49 adds original
+ARC-001/COR-001/CEI-001/STF-002 to classic default/pilot, plus necessary cart
+batching that repairs the inherited220-call failure without relaxing200. Expanded
+retains its existing shell and makes zero four-kit GLB requests. Four editable
+sources,40,892-byte exports and canonical placement/proxy data have independent
+acceptance;12selected IDs are implemented and188candidates remain pending.
+Current55Python/19Node/generator/SSOT and8browser integration groups pass.
+Fourjourneys/4,745actualsteering renders peak200;960distinct advancing renders
+pass; all66collider records match pinned8768 for v1/v2 x default/pilot.
+See docs/v11-interior-shell-review.md and docs/evidence/interior-shell-integration.json.
+Immutable950 evidence remains separate. Physical-device/AT,45requests/10MiB,
+fullM1/200candidates and expanded performance are not certified. Main/CI/Pages
+and actual public flows are the publication gate before D4.
 
 Visitor v2 UX follow-up — 2026-11-15: camera occlusion, natural bench entry, reachable pickup/return feedback, persistent held guidance, truthful recovery and direct Cart controls are implemented in an isolated local candidate. Real-input and advisor evidence: `docs/gjh-visitor-v2-ux-fixes.md`. Publication and physical-device performance are not claimed.
 
