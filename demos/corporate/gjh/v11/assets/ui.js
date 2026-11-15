@@ -6,14 +6,15 @@ import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
+import {expandedLayout, expandedMapPoint} from './expanded-layout.js';
 
-export function createUI() {
+export function createUI(expanded = false) {
   const scene = document.getElementById('scene');
   const experience = document.getElementById('experience');
   const storeList = document.getElementById('store-list');
   const viewToggle = document.getElementById('view-toggle');
   const directoryEnter3D = document.getElementById('directory-enter-3d');
-  const visitNewMoon3D = document.getElementById('visit-newmoon-3d');
+  const storeVisitButtons = [...document.querySelectorAll('[data-visit-store]')];
   const directoryLoading = document.getElementById('directory-loading');
   directoryLoading.hidden = false;
   let directoryTouched = false;
@@ -29,7 +30,7 @@ export function createUI() {
   const playerDot = document.getElementById('player-dot');
   const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel=`Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel=expanded ? 'Expanded ground-floor preview: 17 numbered spaces, including three open stores and 14 planned spaces. The gold dot marks your position.' : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute('aria-label',floorplanLabel);
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
   const inspectPrompt = document.getElementById('inspect-prompt');
@@ -178,6 +179,34 @@ export function createUI() {
   const productImage = document.getElementById('product-image');
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
+  const layoutLink=document.getElementById('layout-preview-link');
+  const layoutURL=new URL(location.href);
+  if(expanded) layoutURL.searchParams.delete('layout'); else layoutURL.searchParams.set('layout','expanded');
+  layoutLink.href=layoutURL.href;
+  layoutLink.textContent=expanded?'Return to the original mall':'Preview the expanded mall';
+  document.getElementById('layout-preview-notice').hidden=!expanded;
+  if (expanded) {
+    const ns='http://www.w3.org/2000/svg';
+    floorplan.setAttribute('viewBox','0 0 700 600'); floorplan.setAttribute('preserveAspectRatio','xMidYMid meet');
+    const background=floorplan.querySelector('.map-courtyard');
+    for(const [key,value] of Object.entries({x:1,y:1,width:698,height:598,rx:0}))background.setAttribute(key,value);
+    floorplan.querySelector('.map-walkway').setAttribute('d','M130 150H570V510H130Z');
+    floorplan.querySelector('.map-label:not(.map-entry)').setAttribute('y','320');
+    floorplan.querySelector('.map-label:not(.map-entry)').setAttribute('x','350');
+    floorplan.querySelector('.map-entry').setAttribute('x','350');floorplan.querySelector('.map-entry').setAttribute('y','575');
+    playerDot.setAttribute('r','10');
+    for(const bay of expandedLayout.slots){
+      const origin=expandedMapPoint(bay.minX,bay.minZ);
+      let rect=bay.available ? floorplan.querySelector(`[data-map-store="${spatial.stores[Number(bay.number)-1].id}"]`) : document.createElementNS(ns,'rect');
+      rect.setAttribute('class',bay.available?'map-store':'map-store map-planned');
+      for(const [key,value] of Object.entries({x:origin.x+2,y:origin.y+2,width:(bay.maxX-bay.minX)*10-4,height:(bay.maxZ-bay.minZ)*10-4,rx:3}))rect.setAttribute(key,value);
+      if(!bay.available) floorplan.insertBefore(rect,playerDot);
+      const label=document.createElementNS(ns,'text');label.setAttribute('class','expanded-map-number');
+      label.setAttribute('x',origin.x+(bay.maxX-bay.minX)*5);label.setAttribute('y',origin.y+(bay.maxZ-bay.minZ)*5+6);
+      label.setAttribute('text-anchor','middle');label.textContent=bay.number;floorplan.insertBefore(label,playerDot);
+    }
+    document.querySelector('.map-scale').textContent='14 planned spaces';
+  }
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
   // Preserve readable static HTML without JS; synchronize the live map and
   // directory from the same validated records used by the 3D world.
@@ -189,7 +218,7 @@ export function createUI() {
     const title=document.getElementById(store.contentRef);
     if (!mapButton || !mapRect || !article || !filter || !title || !article.contains(title)) throw new Error(`Missing store content for ${store.id}`);
     const rect=mapStoreRect(store);
-    for (const key of ['x','y','width','height']) mapRect.setAttribute(key,String(rect[key]));
+    if (!expanded) for (const key of ['x','y','width','height']) mapRect.setAttribute(key,String(rect[key]));
     mapButton.style.left=`${rect.x / mapView.width * 100}%`;
     mapButton.style.width=`${rect.width / mapView.width * 100}%`;
     mapButton.querySelector('span').textContent=store.number;
@@ -370,14 +399,14 @@ export function createUI() {
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
   directoryEnter3D.addEventListener('click', () => setView(true, true));
-  function visitNewMoon() {
-    if (!available) return;
+  function visitStore(id) {
+    if (!available || !spatial.get(id)?.available) return;
     setView(true);
-    travelToStore('newmoon');
+    travelToStore(id);
   }
-  visitNewMoon3D.addEventListener('click', visitNewMoon);
+  for (const button of storeVisitButtons) button.addEventListener('click', () => visitStore(button.dataset.visitStore));
   const cardStoreButtons = [...document.querySelectorAll('[data-visit-newmoon]')];
-  for (const button of cardStoreButtons) button.addEventListener('click', visitNewMoon);
+  for (const button of cardStoreButtons) button.addEventListener('click', () => visitStore('newmoon'));
   const storeFilters = [...document.querySelectorAll('[data-store-filter]')];
   const stores = [...document.querySelectorAll('[data-store]')];
   const productSearch = document.getElementById('product-search');
@@ -521,7 +550,7 @@ export function createUI() {
       available = true;
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
-      visitNewMoon3D.hidden = false;
+      for (const button of storeVisitButtons) button.hidden = false;
       for (const button of cardStoreButtons) button.hidden = false;
       guideReopen.hidden = false;
       viewToggle.hidden = false;
@@ -536,7 +565,7 @@ export function createUI() {
       available = true;
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
-      visitNewMoon3D.hidden = false;
+      for (const button of storeVisitButtons) button.hidden = false;
       for (const button of cardStoreButtons) button.hidden = false;
       // A validated renderer grants availability, never an automatic view/focus change.
       guideSeen = true; guideReopen.hidden = false;
@@ -558,7 +587,7 @@ export function createUI() {
       available = false;
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = true;
-      visitNewMoon3D.hidden = true;
+      for (const button of storeVisitButtons) button.hidden = true;
       for (const button of cardStoreButtons) button.hidden = true;
       // Directory fallback can leave setView unchanged, so refresh independently
       // of view/HUD callbacks and recover only disappearing cart-control focus.
@@ -589,7 +618,7 @@ export function createUI() {
         }
       }
       if (Number.isFinite(x) && Number.isFinite(z)) {
-        const point=mapPoint(x,z);
+        const point=expanded ? expandedMapPoint(x,z) : mapPoint(x,z);
         playerDot.setAttribute('cx', String(point.x));
         playerDot.setAttribute('cy', String(point.y));
       }

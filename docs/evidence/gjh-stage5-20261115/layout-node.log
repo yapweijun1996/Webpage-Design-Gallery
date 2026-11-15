@@ -1,0 +1,14 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (1.0325ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (2.166833ms)
+✔ three stable stores share the current scene centers, entrances and ordering (1.5385ms)
+✔ location boundaries and map projection retain the existing visible behavior (0.439208ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (1.491583ms)
+✔ unavailable store cannot produce a travel destination (0.125291ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90.187667

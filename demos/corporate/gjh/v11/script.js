@@ -4,6 +4,8 @@ import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
+const expanded = new URLSearchParams(location.search).get('layout') === 'expanded';
+document.body.classList.toggle('is-expanded', expanded);
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
@@ -28,7 +30,7 @@ function clearTransientState(event) {
 }
 const modes = createModes({onCleanup: clearTransientState,
   onEnter(mode) { document.body.dataset.mode = mode; }});
-const ui = createUI(), canvas = document.querySelector('#scene');
+const ui = createUI(expanded), canvas = document.querySelector('#scene');
 function syncMode(signals = ui.modeSignals()) {
   if (modes.current() === 'shelf' && !signals.shelfOpen) modes.request(modes.layers().at(-2), 'Shelf closed');
   modes.observe({...signals, seated: Boolean(player?.state.seated),
@@ -80,7 +82,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
-  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z)?.id || 'atrium';
+  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z, expanded)?.id || 'atrium';
   nearby = null; selectedInteraction = null; let best = Infinity;
   for (const item of world.interactables) {
     if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;
@@ -249,13 +251,13 @@ async function initialize() {
   try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
-  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics);
+  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded);
   if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
     const {createElevatorV2} = await import('./assets/elevator-v2.js');
     elevator = createElevatorV2(T, R, physics, world.scene);
     world.interactables.push(...elevator.interactables);
   }
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles);
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded);
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
@@ -288,7 +290,7 @@ async function initialize() {
     return player.startCollection(world.createCollectProp(id),id);
   });
   ui.onBagChange(value => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
-  player.teleport('atrium'); updateHUD();
+  player.teleport(expanded ? 'entry' : 'atrium'); updateHUD();
   initialized = true;
   new ResizeObserver(resize).observe(canvas);
   if (interrupted) { validateRestoration(); return; }

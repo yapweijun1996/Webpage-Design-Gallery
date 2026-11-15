@@ -89,11 +89,12 @@ function signTexture(T,x,rear){
   context.textAlign='right';context.fillText(`${right.join(' · ')} →`,984,191,944);
   const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;return texture;
 }
-export async function addAmenities(T,scene,collider,createCollectProp,shadows,staticProductCount=null){
+export async function addAmenities(T,scene,collider,createCollectProp,shadows,staticProductCount=null,expanded=false){
   const entries=await Promise.all(Object.entries(AMENITIES).map(async([kind,definition])=>[kind,await load(T,kind,definition)]));
   const group=new T.Group();group.name='Mall amenities';const state={},opaque=[];
   for(const [kind,record] of entries){
-    const definition=AMENITIES[kind];
+    const original=AMENITIES[kind];
+    const definition=expanded && kind==='desk' ? {...original, placements:[[0,0,9,Math.PI]]} : expanded && kind==='showcase' ? {...original, placements:[[-7,0,7,0]]} : original;
     for(const primitive of record.primitives){
       if(!primitive.material.transparent){
         definition.placements.forEach(([x,y,z,angle])=>{
@@ -121,16 +122,17 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
     const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),new T.MeshBasicMaterial({map:signTexture(T,x,rear)}));
     plane.position.set(x,y-.7,z+(rear?-.083:.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
   }
-  collider(-12.5,.94,5.8,2.88,1.88,.961);collider(-7,.9,2.2,.75,1.8,.532);
+  if(expanded){collider(0,.94,9,2.88,1.88,.961);collider(-7,.9,7,.75,1.8,.532);}
+  else {collider(-12.5,.94,5.8,2.88,1.88,.961);collider(-7,.9,2.2,.75,1.8,.532);}
   let products=staticProductCount??0;
   if(staticProductCount===null)for(const item of SHOWCASE_PRODUCTS){
     const prop=createCollectProp(item.id);if(!prop)continue;prop.position.set(...item.position);group.add(prop);products++;
   }
   scene.add(group);
   return {state:Object.freeze({...state,displayedProducts:products}),interactables:[
-    {id:'service-desk',x:-12.5,z:6.9,radius:2},
+    {id:'service-desk',x:expanded?0:-12.5,z:expanded?10.1:6.9,radius:2},
     {id:'wayfinding-west',x:-4.2,z:6,radius:1.7},
     {id:'wayfinding-east',x:6,z:6,radius:1.7},
-    {id:'featured-showcase',x:-7,z:3.1,radius:1.3},
+    {id:'featured-showcase',x:-7,z:expanded?7.9:3.1,radius:1.3},
   ]};
 }

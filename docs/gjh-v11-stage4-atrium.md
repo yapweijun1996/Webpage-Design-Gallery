@@ -1,0 +1,40 @@
+# GJH V11 stage 4: atrium, planting and seating
+
+Date: 15 November 2026 (Asia/Singapore)
+
+Status: **implemented and tested in the opt-in expanded ground-floor preview**. Open the [local preview](http://127.0.0.1:8766/demos/corporate/gjh/v11/?layout=expanded) while the development server is running, or choose **Preview the expanded mall** in the directory. The original three-store scene remains the default. Stage 4 builds on, rather than replaces, the [stage 3 shell](gjh-v11-stage3-expanded-shell.md). The subsequent [stage 5](gjh-v11-stage5-existing-stores.md) integrates the three existing storefronts.
+
+## Design and positions
+
+The expanded preview now has a low, rectangular planted stone bed; two lounge groups with light stone floor insets, paired existing sofa assets, a small side table, low planters and subtle overhead lighting; and a clear, unoccupied space reserved for later seasonal installations. Existing dark courtyard tiles and ornamental inlays are removed in this preview. The old upright ring, water feature and their collider remain absent from the preview. Seating and planting are simplified real-time 3D assets, not a photorealistic or construction-ready interior.
+
+[atrium-layout.js](../demos/corporate/gjh/v11/assets/atrium-layout.js) records the object centres and reserved event block in stage 3 world coordinates. The garden is 8 × 3 m and 0.48 m high, inside the stage 1 planting reservation. The west and east lounges occupy the corresponding stage 1 6 × 8 m reservations. Each has two separately interactive sofas; their interaction IDs remain `courtyard-seat` and `bench-seat-2`–`bench-seat-4`, with descriptive west/east lounge labels. The four existing in-store benches retain their positions and IDs. The stage 1 event reservation `(x=3…17, z=24…32)` remains free of these furnishings. No seasonal content or theme switching is implemented in this slice.
+
+The bed and planter containers have colliders matching their visible solid bases; foliage is decorative. Each compact round table has a conservative square collider around its visible top. Sofa seat-pan colliders and additional camera bounds retain the existing sit/stand implementation. Floor insets and lights are visual only. The validated, locally supplied sofa GLB and existing procedural fallback are reused; garden, greenery, insets and side tables are procedural geometry using shared materials and instancing, without new network assets. The existing V2 lift remains provisional in its old location pending stage 7.
+
+## Functional and visual verification
+
+[The geometry test](../tests/gjh_atrium_layout.test.mjs) checks that the garden and solid lounge furniture fit the stage 1 reservations, do not overlap one another or the event block, and stay outside the nominal 6 m ring. This is planning geometry, not a proof of every possible turning path or physical accessibility standard.
+
+[The atrium browser test](../tests/browser_gjh_atrium.py) uses real Chrome and the live Rapier controller at 320 × 700, 390 × 844, 768 × 1024, 1440 × 900 and 844 × 390, with V1 also tested at 390 × 844. It approaches each of the four lounge seats, sits, checks camera/avatar visibility and preserved bag contents, verifies the cart is unavailable while seated, and stands at the correct exit anchor. It checks that a cart cannot be deployed too close to furniture. A separate asset-failure case aborts the optional sofa GLB and verifies approach, sit and stand using its fallback. At desktop size, the test drives a cart through the reserved event area and into the visible garden edge, where collision stops it. [Test log](evidence/gjh-stage4-20261115/atrium-browser.log).
+
+The [expanded-shell regression](evidence/gjh-stage4-20261115/expanded-regression.log) walks the complete ring clockwise and pushes a cart counterclockwise without teleporting between waypoints, separately exercises keyboard and trusted emulated touch input, and tests the existing three stores, map, directory, bag, kiosk, layout switching, context-loss recovery and no-JavaScript/failed-physics fallbacks. Movement along the whole loop and to seats uses bounded deterministic simulation steps with the real collision controller; the keyboard and touch input checks are separate. These tests verify the specified centerline and exercised branches, not the entire six-metre width. The focused atrium test recorded no page or console errors in normal sessions; separate [390 px and 1440 px console checks](evidence/gjh-stage4-20261115/console-check.log) recorded no warnings or errors.
+
+Actual runtime screenshots, not concept images: [desktop atrium](evidence/gjh-stage4-20261115/screens/after-atrium-1440.png), [desktop lounge](evidence/gjh-stage4-20261115/screens/lounge-1440.png), [mobile lounge](evidence/gjh-stage4-20261115/screens/lounge-390.png), [tablet lounge](evidence/gjh-stage4-20261115/screens/lounge-768.png), [mobile seated](evidence/gjh-stage4-20261115/screens/seated-390.png), [320 px seated](evidence/gjh-stage4-20261115/screens/seated-320.png), [landscape seated](evidence/gjh-stage4-20261115/screens/seated-844.png), and [cart at garden](evidence/gjh-stage4-20261115/screens/garden-cart-1440.png). The [stage 3 before](evidence/gjh-stage4-20261115/screens/before-atrium-1440.png) and [stage 4 after](evidence/gjh-stage4-20261115/screens/after-atrium-1440.png) were captured at the same expanded-scene pose and viewport from separate source snapshots. Selected [stage 3](evidence/gjh-stage4-20261115/stage3-source-sha256.txt) and [stage 4](evidence/gjh-stage4-20261115/stage4-source-sha256.txt) source hashes identify the compared code.
+
+The repository-required [generator](evidence/gjh-stage4-20261115/generator-check.log), [gallery unit](evidence/gjh-stage4-20261115/gallery-unit.log), [gallery browser](evidence/gjh-stage4-20261115/gallery-browser.log), [GJH demo browser](evidence/gjh-stage4-20261115/demos-browser.log) and [PWA](evidence/gjh-stage4-20261115/pwa-browser.log) checks passed in an isolated copy, along with the existing [spatial](evidence/gjh-stage4-20261115/spatial-browser.log), [mode](evidence/gjh-stage4-20261115/modes-browser.log) and [original-seat](evidence/gjh-stage4-20261115/original-seats-browser.log) regressions. The seat regression initially could not write screenshots because its isolated output parent was missing; it passed after that directory was created. The demo suite's printed zero axe violations are not an axe audit because no axe bundle was supplied.
+
+## Performance observations
+
+[Performance procedure](../tests/browser_gjh_expanded_performance.py) and [raw measurements](evidence/gjh-stage4-20261115/performance.log): local HTTP, Chrome 157 / ANGLE Metal, Apple M4, DPR 2, Auto quality and the same original courtyard arrival/direction as the stage 3 comparison. Values are one local sample per profile, with other host activity uncontrolled. `requestAnimationFrame` intervals measure browser scheduling, not GPU frame time or device FPS.
+
+| Viewport, expanded | Stage 3 idle / cart draws | Stage 4 idle / cart draws | Stage 3 idle triangles | Stage 4 idle triangles |
+| --- | ---: | ---: | ---: | ---: |
+| 390 × 844 | 149 / 172 | 151 / 174 | 789,086 | 804,574 |
+| 1440 × 900 | 185 / 208 | 184 / 207 | 790,092 | 805,574 |
+
+The stage 4 1440 px loop sample recorded 214 draws while pushing a cart. This exceeds the existing 200-call non-cart laboratory reference, as did the stage 3 cart, and remains a later optimisation concern; the threshold was not changed. The sample does not establish a worst-case budget for all positions or real devices.
+
+## Remaining limits
+
+No physical phone, tablet, gamepad, Safari, screen reader or field-performance testing was performed. The event reservation is kept clear but future decorations, theme replacement and their collision/lifecycle rules remain unimplemented. Storefront refinement, the physical lift/upper landing, materials and the rest of the upgrade remain later stages. The original scene is unchanged apart from the prior stage 3 preview link; the revised atrium is not the default or a published release.

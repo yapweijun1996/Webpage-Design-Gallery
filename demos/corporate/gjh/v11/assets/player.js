@@ -1,7 +1,8 @@
 import {createCharacter} from './character.js';
 import {spatial, courtyardArrival} from './spatial.js';
+import {expandedLayout} from './expanded-layout.js';
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = []) {
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
   const character = await createCharacter(T);
   const visual = character.visual;
   scene.add(visual);
@@ -253,7 +254,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function teleport(zone) {
     if (elevatorTravel) return false;
-    const destination = zone === 'atrium' ? courtyardArrival : spatial.arrival(zone);
+    const destination = zone === 'atrium' ? courtyardArrival : expanded && zone === 'entry' ? expandedLayout.entrance : spatial.arrival(zone);
     if (!destination) return false;
     productApproach=null;productHome=null;character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
     const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();

@@ -18,6 +18,8 @@ test('three stable stores share the current scene centers, entrances and orderin
 test('location boundaries and map projection retain the existing visible behavior', () => {
   for(const [x,z,expected] of [[-5.01,0,'newmoon'],[-5,0,'mili'],[5,0,'mili'],[5.01,0,'gogo'],[0,.1,null],[0,NaN,null]])
     assert.equal(storeAt(x,z)?.id || null,expected);
+  for(const [x,z,expected] of [[-15,-10.5,'newmoon'],[-15.01,-1,null],[15,-1,'gogo'],[15.01,-1,null],[0,-10.51,null],[0,0,'mili']])
+    assert.equal(storeAt(x,z,true)?.id || null,expected);
   assert.deepEqual(mapPoint(-100,100),{x:0,y:290});
   assert.deepEqual(spatial.stores.map(s=>mapStoreRect(s).x),[14,114,214]);
   for (const store of spatial.stores) {

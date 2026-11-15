@@ -1,0 +1,21 @@
+// Stage 1 coordinates translated to preserve the three existing shop interiors.
+// Plan origin is south-west; world X = plan X - 25, world Z = 48 - plan Y.
+const slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
+  number: String(number).padStart(2, '0'), side, minX, maxX, minZ, maxZ,
+  available: number <= 3
+});
+export const expandedLayout = Object.freeze({
+  bounds: Object.freeze({minX:-25, maxX:45, minZ:-12, maxZ:48}),
+  entrance: Object.freeze({x:10, z:45}),
+  slots: Object.freeze([
+    ...Array.from({length:5}, (_, i) => slot(i+1, 'north', -15+i*10, -5+i*10, -12, 0)),
+    ...Array.from({length:6}, (_, i) => slot(i+6, 'west', -25, -15, i*8, (i+1)*8)),
+    ...Array.from({length:6}, (_, i) => slot(i+12, 'east', 35, 45, i*8, (i+1)*8))
+  ]),
+  loop: Object.freeze([Object.freeze({x:-12,z:3}),Object.freeze({x:32,z:3}),
+    Object.freeze({x:32,z:39}),Object.freeze({x:-12,z:39})])
+});
+export const expandedMapPoint = (x,z) => ({
+  x: Math.max(0, Math.min(700, (x + 25) * 10)),
+  y: Math.max(0, Math.min(600, (z + 12) * 10))
+});
