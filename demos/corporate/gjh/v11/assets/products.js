@@ -16,7 +16,9 @@ const canBounds = Object.freeze({x: .0775, y: .12399169057607651, z: .0775});
 const shelfBounds = Object.freeze(interiorPilot ? {x: 1.52, y: 1.96, z: .58} : {x: 2.4, y: 2.4, z: .55});
 const shelfXs = Object.freeze(interiorPilot ? [-12.85, -10.95, -9.05, -7.15] : [-13.63, -11.21, -8.79, -6.37]);
 const shelfTops = Object.freeze(interiorPilot ? [.6825, 1.1925, 1.7025] : [.451, .991, 1.531]);
-const productOffsets = interiorPilot ? [-.44, 0, .44] : [-.55, 0, .55];
+const facingCount = interiorPilot ? 11 : 17;
+const productOffsets = Object.freeze(Array.from({length: facingCount}, (_, i) => (i - (facingCount - 1) / 2) * .10));
+const reserveIndex = facingCount + Math.floor(facingCount / 2);
 const productZ = interiorPilot ? -9.25 : -9.23;
 const shelfRotation = interiorPilot ? Math.PI : 0;
 const deadline = 8000;
@@ -139,7 +141,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[]) {
     const entry = stock.get(id);
     if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
     entry.reserved = true;
-    const index = 4, matrices = entry.batches.map(mesh => { const m = new T.Matrix4(); mesh.getMatrixAt(index,m); return m; });
+    const index = reserveIndex, matrices = entry.batches.map(mesh => { const m = new T.Matrix4(); mesh.getMatrixAt(index,m); return m; });
     entry.batches.forEach(mesh => { mesh.setMatrixAt(index,new T.Matrix4().makeScale(0,0,0)); mesh.instanceMatrix.needsUpdate=true; });
     const prop = new T.Group(); prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
     for (const primitive of entry.record.primitives) {const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);prop.add(mesh);}
@@ -161,9 +163,9 @@ export async function addProducts(T, scene, textures, brass,showcase=[]) {
       const x = shelfXs[index];
       const placements = Object.freeze(shelfTops.flatMap(y => productOffsets.map(dx => Object.freeze({x: x + dx, y, z: productZ}))));
       const dimensions = Object.freeze((record.size || [canBounds.x, canBounds.y, canBounds.z]).slice());
-      return [cans[index].sku, Object.freeze({status: record.status, reason: record.reason, identity: cans[index].sha256, instances: 9, primitives: record.primitives.length, dimensions, actualBounds: dimensions, actualBoundsScale: Object.freeze([dimensions[0] / canBounds.x, dimensions[1] / canBounds.y, dimensions[2] / canBounds.z]), placements, floorY: 0, supportTopY: shelfTops[0], frontAxis: '+Z'})];
+      return [cans[index].sku, Object.freeze({status: record.status, reason: record.reason, identity: cans[index].sha256, instances: shelfTops.length * facingCount, frontFacings: facingCount, reserveIndex, primitives: record.primitives.length, dimensions, actualBounds: dimensions, actualBoundsScale: Object.freeze([dimensions[0] / canBounds.x, dimensions[1] / canBounds.y, dimensions[2] / canBounds.z]), placements, floorY: 0, supportTopY: shelfTops[0], frontAxis: '+Z'})];
     }))),
-    totalInstances: 36,showcaseInstances:showcase.length,
+    totalInstances: cans.length * shelfTops.length * facingCount,showcaseInstances:showcase.length,
     disclosure: (interiorPilot ? 'Original DSP-001 pilot demo furniture; ' : 'Original M056 demo furniture; ') + 'cans use estimated packaging dimensions. Mexico includes a 121-degree unprinted placeholder sector. Unofficial demo, owner-authorized use; independent artwork rights and packaging fidelity are not verified.',
   })};
 }

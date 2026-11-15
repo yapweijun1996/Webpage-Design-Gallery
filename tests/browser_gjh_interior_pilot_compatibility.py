@@ -26,7 +26,7 @@ def run():
                     url=f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'+('?interior=pilot' if pilot else '')
                     ready(page,url);assets=state(page)['productAssets']
                     expected='GJH-DSP-001' if pilot else 'GJH-M056';assert assets['shelf']['model']==expected and assets['shelf']['status']=='loaded',assets
-                    assert assets['totalInstances']==36
+                    assert assets['totalInstances']==36 and assets['frontFacings']==18
                     assert requests.count('GJH_DSP_001.glb')==(1 if pilot else 0),requests
                     assert requests.count('gjh-m056-shelf-lod1.glb')==(0 if pilot else 1),requests
                     results=[]
