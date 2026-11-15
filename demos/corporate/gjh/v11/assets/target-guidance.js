@@ -23,7 +23,7 @@ export function createTargetGuidance({canvas, projection}) {
       const box = {left: point.x - size.width / 2 - 2, right: point.x + size.width / 2 + 2, top: point.y - size.height - 2, bottom: point.y + 7};
       const inside = box.left >= rect.left + 4 && box.right <= rect.right - 4 && box.top >= rect.top + 4 && box.bottom <= rect.bottom - 4;
       // Native controls and disclosures keep their full hit areas and focus rings.
-      const overlap = [...document.querySelectorAll('.site-header, .inspect-prompt, .keyboard-help, .mall-map, .joystick, .run-toggle, .scene-disclaimer')]
+      const overlap = [...document.querySelectorAll('.site-header, .inspect-prompt, .keyboard-help, .mall-map, .joystick, .run-toggle, .scene-disclaimer, .scene-tools, .held-product-status')]
         .filter(e => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
         .some(e => {
           const r = e.getBoundingClientRect();

@@ -1,0 +1,97 @@
+START 1280 800 keyboard
+READY
+WALK -11.21 1
+WALK -11.21 -6.8
+WALK -11.21 -7.55
+PASS keyboard normal-motion pickup / side view
+WALK -11.21 -4.8
+WALK -13.2 -4.8
+WALK -13.2 -7.55
+WALK -11.21 -7.55
+PASS keyboard persistent held status / truthful cart refusal / original-shelf return
+WALK -10 17
+WALK -14 17
+WALK -14 11
+PASS keyboard compressed camera / avatar restoration
+WALK 4 2.4
+PASS keyboard direct cart entry / real movement / direct stow
+START 1280 800 keyboard
+READY
+WALK -4 2.4
+WALK -4 8.3
+WALK -7.8 8.3
+PASS keyboard normal sit/stand Courtyard bench 1
+WALK 4 2.4
+WALK 4 8.3
+WALK 7.8 8.3
+PASS keyboard normal sit/stand Courtyard bench 2
+WALK -4 2.4
+WALK -4 14.2
+WALK -7.8 14.2
+PASS keyboard normal sit/stand Courtyard bench 3
+WALK 4 2.4
+WALK 4 14.2
+WALK 7.8 14.2
+PASS keyboard normal sit/stand Courtyard bench 4
+WALK 0 -1.2
+WALK -3 -1.2
+WALK -3 -5.05
+PASS keyboard normal sit/stand MILI bench 1
+WALK 0 -1.2
+WALK 3 -1.2
+WALK 3 -5.05
+PASS keyboard normal sit/stand MILI bench 2
+WALK 10 -1.2
+WALK 7 -1.2
+WALK 7 -5.05
+PASS keyboard normal sit/stand GOGO bench 1
+WALK 10 -1.2
+WALK 13 -1.2
+WALK 13 -5.05
+PASS keyboard normal sit/stand GOGO bench 2
+START 768 1024 keyboard
+READY
+WALK 0 -1.2
+WALK -3 -1.2
+WALK -3 -5.05
+PASS tablet normal sit/stand MILI bench 1
+START 1280 800 keyboard
+READY
+WALK -11.21 1
+WALK -11.21 -7.55
+WALK -11.21 2.4
+WALK 0 2.4
+WALK 0 -1.2
+WALK -3 -1.2
+WALK -3 -4.9
+PASS held item seat refusal identifies original product
+WALK -3 -1.2
+WALK 0 -1.2
+WALK 0 2.4
+WALK -11.21 2.4
+WALK -11.21 -7.55
+PASS reduced-motion safe instant approach / pickup / return
+START 390 844 touch
+READY
+WALK -11.21 1
+WALK -11.21 -6.8
+WALK -11.21 -7.55
+PASS touch normal-motion pickup / side view
+WALK -11.21 -4.8
+WALK -13.2 -4.8
+WALK -13.2 -7.55
+WALK -11.21 -7.55
+PASS touch persistent held status / truthful cart refusal / original-shelf return
+WALK 4 2.4
+PASS touch direct cart entry / real movement / direct stow
+WALK 0 -1.2
+WALK -3 -1.2
+WALK -3 -5.05
+PASS touch normal sit/stand MILI bench 1
+PASS touch Help scroll / close / no horizontal overflow
+START 320 568 touch
+READY
+PASS scene tools fit 320
+START 768 1024 touch
+READY
+PASS scene tools fit 768

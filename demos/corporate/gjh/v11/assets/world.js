@@ -101,7 +101,7 @@ export async function createWorld(T, R, physics) {
     const seatCollider=collider(x, .3*seatScale, z, 2.5, .4*seatScale, .85);
     const index=seats.length,id=index===0?'courtyard-seat':`bench-seat-${index+1}`;
     const name=z>0?`Courtyard bench ${index+1}`:`${x<5?'MILI':'GOGO'} bench ${index%2+1}`;
-    seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2):.45,collider:seatCollider.handle});
+    seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2)*facing:.45,collider:seatCollider.handle});
     const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*seatScale,bz,sx,sy*seatScale,sz);
     if (!furnishings.place('bench', x, z, seatScale, facing)) {
       benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, .56, z, 2.55, .18, .9);
@@ -341,7 +341,8 @@ export async function createWorld(T, R, physics) {
       box('oak', x, .92, -10.09, 4, .075, .28);
       box('glow', x, 4.77, -10.16, 3.7, .025, .07);
       interactables.push({id: zone, x, z: -9, radius: 2.5});
-      bench(x - 3, -6.8); bench(x + 3, -6.8);
+      // Store seating faces the natural route from the entrance, not the rear wall.
+      bench(x - 3, -6.8, -1); bench(x + 3, -6.8, -1);
       if (!furnishings.place('coffeeTable', x, -5.5)) {
         cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
         cylinder('brass', x, .853, -5.5, .805, .025);
@@ -406,6 +407,6 @@ export async function createWorld(T, R, physics) {
       mesh.visible = !overlaps;
     }
   }
-  interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.1,seat})));
+  interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.65,seat})));
   return {scene, doors, seats, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
 }

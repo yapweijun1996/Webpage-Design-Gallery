@@ -17,7 +17,8 @@ const shelfBounds = Object.freeze(interiorPilot ? {x: 1.52, y: 1.96, z: .58} : {
 const shelfXs = Object.freeze(interiorPilot ? [-12.85, -10.95, -9.05, -7.15] : [-13.63, -11.21, -8.79, -6.37]);
 const shelfTops = Object.freeze(interiorPilot ? [.6825, 1.1925, 1.7025] : [.451, .991, 1.531]);
 const productOffsets = interiorPilot ? [-.44, 0, .44] : [-.55, 0, .55];
-const productZ = interiorPilot ? -9.25 : -9.23;
+// V2 stock sits at the front of the shelf so the short humanoid arm can reach it.
+const productZ = new URLSearchParams(location.search).get('visitor')==='v1' ? (interiorPilot ? -9.25 : -9.23) : -9.03;
 const shelfRotation = interiorPilot ? Math.PI : 0;
 const deadline = 8000;
 
@@ -119,6 +120,7 @@ export async function addProducts(T, scene, textures, brass) {
   const interactables = [], stock = new Map();
   // The same bounds own collision, focus framing and the projected whole-shelf target.
   const shelves = shelfXs.map((x, index) => Object.freeze({id: `new-moon-${cans[index].sku}-front`,
+    pickup: Object.freeze({x:x+.21,z:-9.25+shelfBounds.z/2+.34,radius:1.65}),
     min: Object.freeze({x: x - shelfBounds.x / 2, y: 0, z: -9.25 - shelfBounds.z / 2}),
     max: Object.freeze({x: x + shelfBounds.x / 2, y: shelfBounds.y, z: -9.25 + shelfBounds.z / 2})}));
   canRecords.forEach((record, productIndex) => {
@@ -142,7 +144,7 @@ export async function addProducts(T, scene, textures, brass) {
     const prop = new T.Group(); prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
     for (const primitive of entry.record.primitives) {const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);prop.add(mesh);}
     scene.add(prop); let released=false;
-    return {id, prop, origin:entry.placements[index].clone(), release() {
+    return {id, prop, approach:shelves.find(s=>s.id===id).pickup, origin:entry.placements[index].clone(), release() {
       if(released)return; released=true; prop.removeFromParent(); entry.reserved=false;
       entry.batches.forEach((mesh,i)=>{mesh.setMatrixAt(index,matrices[i]);mesh.instanceMatrix.needsUpdate=true;});
     }};

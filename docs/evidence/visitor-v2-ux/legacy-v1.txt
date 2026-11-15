@@ -1,0 +1,9 @@
+START 1280 800 keyboard
+READY
+WALK 0 -1.2
+WALK -3 -1.2
+WALK -3 -5.05
+PASS legacy normal sit/stand MILI bench 1
+WALK 4 2.4
+PASS legacy direct cart entry / real movement / direct stow
+PASS explicit v1 character / camera / seated / cart regression

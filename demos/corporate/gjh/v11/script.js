@@ -20,7 +20,8 @@ function clearTransientState(event) {
   player?.setInput(null);
   // Overlays suspend the collection/action camera. Real interruptions cancel the
   // transient demo gesture; physical shelf products remain owned by the player.
-  if (event.kind === 'interrupt') player?.cancelCollection();
+  const interaction=player?.state;
+  if (event.kind === 'interrupt' && (!interaction?.character.physicalProduct?.held || interaction.productApproaching)) player?.cancelCollection();
   manual = false; accumulator = 0; last = performance.now();
 }
 const modes = createModes({onCleanup: clearTransientState,
@@ -86,7 +87,7 @@ function updateHUD() {
   interactionDistance = best;
   productControl?.update(p,nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
+  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
 }
 function tick() {
   if (modes.paused()) return;
@@ -257,7 +258,7 @@ async function initialize() {
   });
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
-  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated}),value=>{
+  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel}),value=>{
     if(!ready)return false;
     const ok=player.setCart(value);updateHUD();render();return ok;
   });

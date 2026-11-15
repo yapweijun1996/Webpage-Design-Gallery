@@ -92,6 +92,7 @@ export async function createCharacter(T) {
 
   return {
     visual,
+    setCameraOccluded(value){avatar.visible=!value;},
     update,
     setBagCount(value){carryBag.setCount(value);cart.setCount(value);},
     setCart(value){collection.cancel();const ok=cart.set(value);carryBag.setHidden(ok&&value);return ok;},

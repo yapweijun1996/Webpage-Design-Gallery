@@ -1,0 +1,19 @@
+{
+  "baseCommit": "53e98c25814ca454477a29b5506122e27e666fad",
+  "branch": "codex/visitor-v2-ux-fixes",
+  "files": {
+    "demos/corporate/gjh/v11/assets/character-v2.js": "acbf0fc87bb4e5c862636a4904e7f0bf44a9f6cfca88725b3e2925a370eb1a0a",
+    "demos/corporate/gjh/v11/assets/character.js": "4b40bff272713fefe1e34299390dc3a290b7d6a9aed382173fb1333a14bc6f3b",
+    "demos/corporate/gjh/v11/assets/player.js": "bd0d2d28d62aa064f9e9cd65895444fedf82a0ede67bba65a0b2e0f2f3ad385e",
+    "demos/corporate/gjh/v11/assets/products.js": "882bba4f4e6bb1de7bd5a4cc57200f84535e1afcdeefc88390b1af5c68697d69",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "a509bc1ce7d8528912054d7b1f4df07a016de8b6ac384654beb005983997a7a6",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "e82f048d90587c1be218d0b2a1845f4ee047e574e8fffc693df99f5ab7cbb073",
+    "demos/corporate/gjh/v11/assets/ui.js": "fba7775410b3d3ac638ce1ed5f18255c1f223ffa769062cd1198b4cf809f6359",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "8b187c6df79c017dbbe6287aba072ec412ba0ecdc0af7c1f16972351075f9fa3",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "f0a714f425cb38e5ff4a941a10764dc730d61ab4b4e046fccf2eae39b8c4eefc",
+    "demos/corporate/gjh/v11/assets/world.js": "eeed255c8ce2ae17280a5e19d5f7e788c0e38803c766d47ef36533f7ebbea705",
+    "demos/corporate/gjh/v11/index.html": "e39204c42f4f3ec0d20f725da375cf8253a580d211d5967e75292328c4c27c95",
+    "demos/corporate/gjh/v11/script.js": "33403e4b913fb4a7c457787ae3ca85cab5b4c1b539e29a7a7e2b2d535d25773a",
+    "demos/corporate/gjh/v11/style.css": "08a2096500c7ddc37aaae99f006abf04232c292852458abbbb7ef640db19cc54"
+  }
+}

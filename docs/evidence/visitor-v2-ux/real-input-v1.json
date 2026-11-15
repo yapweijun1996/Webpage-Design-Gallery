@@ -1,0 +1,22 @@
+{
+  "status": "pass",
+  "results": [
+    {
+      "check": "legacy normal sit/stand MILI bench 1",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "legacy direct cart entry / real movement / direct stow",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "explicit v1 character / camera / seated / cart regression",
+      "result": "pass",
+      "detail": null
+    }
+  ],
+  "pageErrors": [],
+  "consoleMessages": []
+}

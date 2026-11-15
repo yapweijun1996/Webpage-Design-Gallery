@@ -35,13 +35,25 @@ def run():
                         assert abs(record['supportTopY']-(.6825 if pilot else .451))<1e-8
                         approach(page,sku);before=state(page);open_shelf(page)
                         layout=geometry(page);page.screenshot(path=str(captures/f'{expected}-{sku}-focus-{width}.png'))
-                        close_shelf(page,'close');assert_mode(page,'explore')
-                        assert abs(state(page)['x']-before['x'])<1e-8 and abs(state(page)['z']-before['z'])<1e-8
+                        restored=close_shelf(page,'close');assert_mode(page,'explore')
+                        # Preserve the exact close-event invariant; resumed grounding
+                        # has the same Float32 bound as the shared Shelf review.
+                        assert abs(restored['x']-before['x'])<1e-8 and abs(restored['z']-before['z'])<1e-8,(expected,sku,width,before,restored)
+                        resumed=state(page)
+                        assert abs(resumed['x']-restored['x'])<=1e-5 and abs(resumed['z']-restored['z'])<=1e-5,(expected,sku,width,restored,resumed)
+                        # Inspect deliberately works farther away than physical pickup.
+                        # Retain the exact focus/restore fixture above, then approach the
+                        # reachable stock range for this separate deterministic check.
+                        if page.get_by_role('button',name='Pick up product',exact=True).is_disabled():
+                            page.evaluate('__mall.setInput({forward:1});__mall.step(500);__mall.setInput({forward:0});__mall.step(20)')
+                        assert state(page)['nearby']==f'new-moon-{sku}-front'
+                        assert page.get_by_role('button',name='Pick up product',exact=True).is_enabled()
                         for _ in range(2):
                             page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1000)')
                             assert state(page)['character']['physicalProduct']['phase']=='held'
                             page.get_by_role('button',name='Return to shelf',exact=True).click();page.evaluate('__mall.step(1000)')
                             assert state(page)['character']['physicalProduct']['phase']=='empty',state(page)['character']['physicalProduct']
+                        print('SKU PASS',expected,sku,width,flush=True)
                         results.append({'sku':sku,'focusFramingAndClose':'PASS','repeatedPickupReturn':'PASS','layout':layout})
                     assert not errors,errors
                     assert state(page)['illegalCount']==0

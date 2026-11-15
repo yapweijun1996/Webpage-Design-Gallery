@@ -18,7 +18,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let seat=null, seatPhase='idle', seatTime=0, seatFrom=null, seatStartAngle=0, seatStartWeight=0;
   const reduceSeatMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
   let yaw = 0, pitch = .1, drag = null, stickPointer = null, stickOrigin = null;
-  let actionView=null,cameraDistance=null;
+  let actionView=null,cameraDistance=null,cameraOccluded=false,productApproach=null,productHome=null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
   const ray = new R.Ray({x: 0, y: 0, z: 0}, {x: 0, y: 0, z: -1});
@@ -96,7 +96,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function restoreActionView(){if(!actionView)return;yaw=actionView.previous.yaw;pitch=actionView.previous.pitch;actionView=null;}
   function updateActionView(dt){if(!actionView||actionView.settled)return;if(keys.has('KeyQ')||keys.has('KeyE')){actionView.settled=true;return;}actionView.elapsed+=dt;const t=Math.min(1,actionView.elapsed/.35),e=t*t*(3-2*t),v=actionView;const delta=Math.atan2(Math.sin(v.targetYaw-v.fromYaw),Math.cos(v.targetYaw-v.fromYaw));yaw=v.fromYaw+delta*e;pitch=v.fromPitch+(.1-v.fromPitch)*e;if(t===1)v.settled=true;}
   function startCollection(prop,id){if(seated||!character.startCollection(prop,id))return false;beginActionView('collection',visual.rotation.y+Math.PI+.55);return true;}
-  function cancelCollection(){character.cancelCollection();if(actionView?.kind==='collection')restoreActionView();}
+  function cancelCollection(){productApproach=null;character.cancelCollection();if(['collection','product'].includes(actionView?.kind))restoreActionView();}
   function update(dt) {
     if (isPaused()) { clearInput(); return; }
     if (elevatorTravel) {
@@ -113,8 +113,20 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     updateActionView(dt);
     if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;character.update('idle',dt);return;}
+    if(productApproach){
+      const a=productApproach,t=Math.min(1,(a.elapsed+=dt)/.45),e=t*t*(3-2*t);
+      moveSeat({x:a.from.x+(a.to.x-a.from.x)*e,y:.91,z:a.from.z+(a.to.z-a.from.z)*e});
+      visual.rotation.y=0;character.update('walk',dt);
+      if(t===1){productApproach=null;if(a.returning)character.returnProduct();}
+      return;
+    }
+    // A transfer owns the hands and position until the item reaches its destination.
+    if(character.state.physicalProduct?.active){character.update('idle',dt);return;}
     const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY);
     const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX);
+    if(actionView?.kind==='product'){
+      if(Math.hypot(forward,right)>.1||character.state.physicalProduct.phase==='empty')restoreActionView();
+    }
     if(actionView?.kind==='collection'&&Math.hypot(forward,right)>.1)cancelCollection();
     if(actionView?.kind==='elevator'&&Math.hypot(forward,right)>.1)restoreActionView();
     const running = !pushing && (injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight')));
@@ -151,14 +163,21 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (hit) point.copy(target).addScaledVector(direction, Math.max(.18, hit.timeOfImpact - .32));
   }
   function updateCamera(dt, instant = false) {
-    sync(); target.copy(visual.position); target.y += 1.24;
+    sync(); target.copy(visual.position); target.y += 1.24-.34*(character.state.seatWeight||0);
     const normalDistance=canvas.clientWidth<600?5.5:6.5,requestedDistance=actionView?3:normalDistance;
     cameraDistance=instant||reduceSeatMotion()?requestedDistance:T.MathUtils.lerp(cameraDistance??normalDistance,requestedDistance,1-Math.exp(-6*dt));
     const distance=cameraDistance;
     offset.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(distance);
     desired.copy(target).add(offset); constrain(desired);
     if (instant) camera.position.copy(desired); else camera.position.lerp(desired, 1 - Math.exp(-12 * dt));
-    safe.copy(camera.position); constrain(safe); camera.position.copy(safe); camera.lookAt(target); character.updateLOD?.(camera);
+    safe.copy(camera.position); constrain(safe); camera.position.copy(safe); camera.lookAt(target);
+    // A compressed spring arm uses a clear close view, never the avatar interior.
+    // Hide only the avatar; the world/cart remain visible. Hysteresis avoids flicker.
+    const clearance=camera.position.distanceTo(target);
+    cameraOccluded=clearance<(cameraOccluded?1.45:1.15);
+    character.setCameraOccluded(cameraOccluded);
+    canvas.dataset.cameraView=cameraOccluded?'close':'third-person';
+    character.updateLOD?.(camera);
   }
   function setCart(value) {
     if ((elevatorTravel || character.state.physicalProduct?.phase!=='empty' && character.state.physicalProduct) && value) return false;
@@ -185,7 +204,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function sit(id) {
     if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
-    if(Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>1.1||(p.z-candidate.z)*candidate.facing>-.25)return false;
+    if(Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>1.65||(p.z-candidate.z)*candidate.facing>-.25)return false;
     seat=candidate;const exit={x:seat.exitX,y:.91,z:seat.exitZ},target={x:seat.x,y:seat.y+.875,z:seat.z};
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
     clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=visual.rotation.y;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI+seat.cameraOffset);vertical=0;
@@ -204,7 +223,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (elevatorTravel) return false;
     const destinations = {atrium: [-2, 12], newmoon: [-10, 2.4], mili: [0, 2.4], gogo: [10, 2.4]};
     if (!destinations[zone]) return false;
-    character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
+    productApproach=null;productHome=null;character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
     const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
@@ -239,11 +258,19 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       visual.visible = contact.visible = false;
       try { draw(); } finally { visual.visible = visible; contact.visible = contactVisible; }
     },
-    pickProduct: token=>{clearInput();injected=null;return character.pickProduct?.(token);},
-    returnProduct: ()=>character.returnProduct?.(),
+    pickProduct: token=>{
+      const from=body.translation(),home=token?.approach;
+      if(!home||Math.hypot(from.x-home.x,from.z-home.z)>home.radius||!clearPath(from,{x:home.x,y:.91,z:home.z}))return false;
+      const reduced=reduceSeatMotion(),ok=character.pickProduct({...token,approachDelay:reduced?0:.45});
+      if(ok){productHome=home;if(reduced){moveSeat({x:home.x,y:.91,z:home.z});visual.rotation.y=0;sync();character.update('idle',0);}else productApproach={from:{...from},to:home,elapsed:0};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);}return ok;
+    },
+    returnProduct: ()=>{
+      const from=body.translation();if(!productHome||character.state.physicalProduct?.phase!=='held'||productApproach||Math.hypot(from.x-productHome.x,from.z-productHome.z)>productHome.radius||!clearPath(from,{x:productHome.x,y:.91,z:productHome.z}))return false;
+      if(reduceSeatMotion()){moveSeat({x:productHome.x,y:.91,z:productHome.z});visual.rotation.y=0;sync();character.returnProduct();character.update('idle',0);}else productApproach={from:{...from},to:productHome,elapsed:0,returning:true};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);return true;
+    },
     customize: changes => character.customize?.(changes),
     setPaused: fn => { isPaused = fn; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, seated, elevatorTravel: Boolean(elevatorTravel), cameraFocus:actionView?.kind||null,cameraDistance, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), cameraFocus:actionView?.kind||null,cameraDistance, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
   };
 }
