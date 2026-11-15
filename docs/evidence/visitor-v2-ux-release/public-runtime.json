@@ -1,0 +1,143 @@
+{
+  "status": "PASS",
+  "sourceCommit": "eced12c91afb270955c50b460f73c1080876355e",
+  "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/",
+  "resources": [
+    {
+      "path": "demos/corporate/gjh/v11/assets/character-v2.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "acbf0fc87bb4e5c862636a4904e7f0bf44a9f6cfca88725b3e2925a370eb1a0a",
+      "observed": "acbf0fc87bb4e5c862636a4904e7f0bf44a9f6cfca88725b3e2925a370eb1a0a",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/character.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "4b40bff272713fefe1e34299390dc3a290b7d6a9aed382173fb1333a14bc6f3b",
+      "observed": "4b40bff272713fefe1e34299390dc3a290b7d6a9aed382173fb1333a14bc6f3b",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/player.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "a3db275ff644cb9db98f68c72f1f9f771659cd1b89399035c0df45d755f6f0a4",
+      "observed": "a3db275ff644cb9db98f68c72f1f9f771659cd1b89399035c0df45d755f6f0a4",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/products.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "20eccdf781f3e02f7b3c69730befa750f020aeeff885a45beea72b299375a455",
+      "observed": "20eccdf781f3e02f7b3c69730befa750f020aeeff885a45beea72b299375a455",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/shelf-focus.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "a509bc1ce7d8528912054d7b1f4df07a016de8b6ac384654beb005983997a7a6",
+      "observed": "a509bc1ce7d8528912054d7b1f4df07a016de8b6ac384654beb005983997a7a6",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/target-guidance.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "e82f048d90587c1be218d0b2a1845f4ee047e574e8fffc693df99f5ab7cbb073",
+      "observed": "e82f048d90587c1be218d0b2a1845f4ee047e574e8fffc693df99f5ab7cbb073",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/ui.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "f4f49bacfe012e221191e092feb91975efd047956eebfb7aab9966681da0277b",
+      "observed": "f4f49bacfe012e221191e092feb91975efd047956eebfb7aab9966681da0277b",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/visitor-v2-contact.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "8b187c6df79c017dbbe6287aba072ec412ba0ecdc0af7c1f16972351075f9fa3",
+      "observed": "8b187c6df79c017dbbe6287aba072ec412ba0ecdc0af7c1f16972351075f9fa3",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "f0a714f425cb38e5ff4a941a10764dc730d61ab4b4e046fccf2eae39b8c4eefc",
+      "observed": "f0a714f425cb38e5ff4a941a10764dc730d61ab4b4e046fccf2eae39b8c4eefc",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/world.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "89a0e0ffbbd04f2c6e96242cebacca04040cd6496ba42ab41b5dd90efa4142b7",
+      "observed": "89a0e0ffbbd04f2c6e96242cebacca04040cd6496ba42ab41b5dd90efa4142b7",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/index.html",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "a239bd894fb22be80b2230c03f549cdd65d424722504e4022f05970231f703af",
+      "observed": "a239bd894fb22be80b2230c03f549cdd65d424722504e4022f05970231f703af",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/script.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "9d9c080cb0acc72b7ec62a81ca331aea4ed126de9066e95ae2dcad8ec5fcaebc",
+      "observed": "9d9c080cb0acc72b7ec62a81ca331aea4ed126de9066e95ae2dcad8ec5fcaebc",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/style.css",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "2b379146965cfb14ec6906c3f760c90446b48100f45ba55e6327f741e720876b",
+      "observed": "2b379146965cfb14ec6906c3f760c90446b48100f45ba55e6327f741e720876b",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "5b6a0ebd19b5061882f7ad5eb39bb675e3e537e08221386303bbfbb816143996",
+      "observed": "5b6a0ebd19b5061882f7ad5eb39bb675e3e537e08221386303bbfbb816143996",
+      "match": true
+    },
+    {
+      "path": "demos/corporate/gjh/v11/assets/amenities.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "0b58e42678cba19c6068f9f82b528b88580a39edb1e4e7bcc14b3f9d38b3abfa",
+      "observed": "0b58e42678cba19c6068f9f82b528b88580a39edb1e4e7bcc14b3f9d38b3abfa",
+      "match": true
+    },
+    {
+      "path": "assets/onboarding/onboarding.js",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+      "observed": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+      "match": true
+    },
+    {
+      "path": "version.json",
+      "status": 200,
+      "canonicalURL": true,
+      "expected": "8eaa56f32e7535771142ff5fc9291b21a05caeda28aae9fa46c705a0f0a169ab",
+      "observed": "8eaa56f32e7535771142ff5fc9291b21a05caeda28aae9fa46c705a0f0a169ab",
+      "match": true
+    }
+  ]
+}

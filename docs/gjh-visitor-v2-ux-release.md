@@ -19,7 +19,15 @@ All work uses the isolated `codex/visitor-v2-ux-fixes` worktree. No checkout, re
 
 ## Deployment and public acceptance
 
-Pending the authorized push, GitHub Pages completion, public runtime-byte comparison and fresh live browser journeys. Run the live release suite with:
+Published code commit: [`eced12c91afb270955c50b460f73c1080876355e`](https://github.com/yapweijun1996/Webpage-Design-Gallery/commit/eced12c91afb270955c50b460f73c1080876355e).
+
+[GitHub Pages run 43687815886](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/43687815886) completed successfully, including SSOT, unit tests, freshness and deployment. The public URL is [GJH Virtual Mall](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/).
+
+Seventeen public resources (the thirteen changed runtime files, preserved preview/amenity/onboarding modules and version metadata) returned HTTP 200 at the exact requested URLs and matched the committed bytes. See [public byte verification](evidence/visitor-v2-ux-release/public-runtime.json).
+
+The fresh public release suite exited successfully: **13/13 checks PASS, zero page errors and zero console warnings/errors**. Both keyboard and touch exercised normal-motion physical pickup, wrong-shelf/held refusal and original-shelf return; near-wall safe view and restoration; direct cart entry, actual movement and stow; natural bench entry, sit and stand. Touch also exercised Help scrolling and landscape held presentation; 320/768 tool layouts passed. See [live results](evidence/visitor-v2-ux-release/live-real-input.json) and [log](evidence/visitor-v2-ux-release/live-real-input.txt).
+
+The existing in-app browser tab was switched from the local candidate to the public site, the quick guide was started and the loaded scene/Cart controls were observed. The tab is retained for user testing. The following exact command produced the public acceptance:
 
 ```sh
 GJH_V2_URL=https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/ GJH_REAL_SUITE=release GJH_REAL_OUTPUT=/tmp/gjh-v2-release-live python tests/browser_gjh_visitor_v2_real_input.py
@@ -28,3 +36,10 @@ GJH_V2_URL=https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporat
 The release suite covers all four requested flows with native browser keyboard and CDP touch input, normal animation, read-only state/RAF observations and 320/768 layout checks. It never invokes teleport, setInput or step hooks; map buttons remain normal user actions.
 
 Physical iPhone/Android/Safari, thermal/FPS measurements and full-mall LOD performance benefit are not certified by browser touch emulation.
+
+
+## Public browser evidence
+
+![Live keyboard pickup and original-shelf return controls](evidence/visitor-v2-ux-release/live-keyboard-held.png)
+
+![Live touch sitting with a clear Stand action](evidence/visitor-v2-ux-release/live-touch-bench-seat-5-seated.png)
