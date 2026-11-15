@@ -1,0 +1,4570 @@
+{
+  "environment": "Darwin arm64 Chrome 157.0.8103.51 / metal",
+  "root": "/private/tmp/gjh-11b-final4",
+  "prefix": "",
+  "sourceSHA256": {
+    "assets/context-navigation.js": "dea62dd0bb38aea995cbe967671980f779145a938da03c47f163edcd68e4ec68",
+    "assets/ui.js": "15360fa501526fded2685991b35fdeb4fffcc5d8a6f2a88e6af5f1b2260d9d75",
+    "script.js": "f10521249785ccfcdcdd61597df1c148c6897cbacb0c76257d2f89fa506cea1e",
+    "script.bundle.js": "f0e645350719e82f2276c98557c08573180a35b326f9e1b1ed55941c16565dd6",
+    "style.css": "3bc31f389ecf294930b4ad9bbd4a1ae65b963b3db199afff5787f2a1c2b0e627",
+    "index.html": "bd6f5154e02bef3ad207ac2d5c7c8b7b36221dfe641a4ce82fe44680dde7e85e",
+    "assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89"
+  },
+  "servedSHA256": {
+    "assets/context-navigation.js": "dea62dd0bb38aea995cbe967671980f779145a938da03c47f163edcd68e4ec68",
+    "assets/ui.js": "15360fa501526fded2685991b35fdeb4fffcc5d8a6f2a88e6af5f1b2260d9d75",
+    "script.js": "f10521249785ccfcdcdd61597df1c148c6897cbacb0c76257d2f89fa506cea1e",
+    "script.bundle.js": "f0e645350719e82f2276c98557c08573180a35b326f9e1b1ed55941c16565dd6",
+    "style.css": "3bc31f389ecf294930b4ad9bbd4a1ae65b963b3db199afff5787f2a1c2b0e627",
+    "index.html": "bd6f5154e02bef3ad207ac2d5c7c8b7b36221dfe641a4ce82fe44680dde7e85e",
+    "assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89"
+  },
+  "payload": {
+    "assets/context-navigation.js": {
+      "baselineBytes": 0,
+      "bytes": 5934,
+      "deltaBytes": 5934,
+      "baselineGzipBytes": 0,
+      "gzipBytes": 1951
+    },
+    "assets/ui.js": {
+      "baselineBytes": 22583,
+      "bytes": 54015,
+      "deltaBytes": 31432,
+      "baselineGzipBytes": 6323,
+      "gzipBytes": 15132
+    },
+    "script.js": {
+      "baselineBytes": 11108,
+      "bytes": 23196,
+      "deltaBytes": 12088,
+      "baselineGzipBytes": 4016,
+      "gzipBytes": 7483
+    },
+    "script.bundle.js": {
+      "baselineBytes": 0,
+      "bytes": 136158,
+      "deltaBytes": 136158,
+      "baselineGzipBytes": 0,
+      "gzipBytes": 36050
+    },
+    "style.css": {
+      "baselineBytes": 40516,
+      "bytes": 77001,
+      "deltaBytes": 36485,
+      "baselineGzipBytes": 8266,
+      "gzipBytes": 14472
+    },
+    "index.html": {
+      "baselineBytes": 21875,
+      "bytes": 42443,
+      "deltaBytes": 20568,
+      "baselineGzipBytes": 5837,
+      "gzipBytes": 9318
+    },
+    "assets/demo-bag.js": {
+      "baselineBytes": 6030,
+      "bytes": 6076,
+      "deltaBytes": 46,
+      "baselineGzipBytes": 2248,
+      "gzipBytes": 2260
+    }
+  },
+  "newComponentRequests": 0,
+  "componentDelivery": "startup JavaScript bundle",
+  "newGLBTextureFontGPUObjects": 0,
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "states": [
+        {
+          "label": "guide",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-guide",
+          "hidden": false,
+          "rect": {
+            "x": 37,
+            "y": 658.625,
+            "width": 316,
+            "height": 148.375,
+            "bottom": 807,
+            "right": 353
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 46,
+                "y": 667.625,
+                "width": 96.65625,
+                "height": 44,
+                "bottom": 711.625,
+                "right": 142.65625
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 146.65625,
+                "y": 667.625,
+                "width": 96.671875,
+                "height": 44,
+                "bottom": 711.625,
+                "right": 243.328125
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(32, 38, 53)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 15.107165779822386,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 247.328125,
+                "y": 667.625,
+                "width": 96.65625,
+                "height": 44,
+                "bottom": 711.625,
+                "right": 343.984375
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 46,
+                "y": 715.625,
+                "width": 96.65625,
+                "height": 44,
+                "bottom": 759.625,
+                "right": 142.65625
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 146.65625,
+                "y": 715.625,
+                "width": 96.671875,
+                "height": 44,
+                "bottom": 759.625,
+                "right": 243.328125
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": "guide-dialog",
+          "focus": "guide-title",
+          "disclosure": {
+            "x": 178,
+            "y": 785.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 836,
+            "right": 378
+          }
+        },
+        {
+          "label": "explore",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "scene",
+          "disclosure": {
+            "x": 178,
+            "y": 785.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 836,
+            "right": 378
+          }
+        },
+        {
+          "label": "map",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": false,
+          "rect": {
+            "x": 8,
+            "y": 758.8125,
+            "width": 374,
+            "height": 85.1875,
+            "bottom": 844,
+            "right": 382
+          },
+          "reserve": 86,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 17,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 85
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 89,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 157
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 161,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 229
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 233,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 301
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 305,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 373
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": null,
+          "focus": "",
+          "disclosure": {
+            "x": 178,
+            "y": 699.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 750,
+            "right": 378
+          }
+        },
+        {
+          "label": "map-bag",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "shop",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-bag",
+          "hidden": false,
+          "rect": {
+            "x": 18,
+            "y": 600.234375,
+            "width": 354,
+            "height": 85.1875,
+            "bottom": 685.421875,
+            "right": 372
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 27,
+                "y": 609.234375,
+                "width": 64,
+                "height": 44,
+                "bottom": 653.234375,
+                "right": 91
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 95,
+                "y": 609.234375,
+                "width": 64,
+                "height": 44,
+                "bottom": 653.234375,
+                "right": 159
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 163,
+                "y": 609.234375,
+                "width": 64,
+                "height": 44,
+                "bottom": 653.234375,
+                "right": 227
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 231,
+                "y": 609.234375,
+                "width": 64,
+                "height": 44,
+                "bottom": 653.234375,
+                "right": 295
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 299,
+                "y": 609.234375,
+                "width": 64,
+                "height": 44,
+                "bottom": 653.234375,
+                "right": 363
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": "bag-dialog",
+          "focus": "bag-close",
+          "disclosure": {
+            "x": 178,
+            "y": 785.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 836,
+            "right": 378
+          }
+        },
+        {
+          "label": "map-after-bag",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": false,
+          "rect": {
+            "x": 8,
+            "y": 758.8125,
+            "width": 374,
+            "height": 85.1875,
+            "bottom": 844,
+            "right": 382
+          },
+          "reserve": 86,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 17,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 85
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 89,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 157
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 161,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 229
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 233,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 301
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 305,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 373
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": null,
+          "focus": "bag-open",
+          "disclosure": {
+            "x": 178,
+            "y": 699.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 750,
+            "right": 378
+          }
+        },
+        {
+          "label": "map-home",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "scene",
+          "disclosure": {
+            "x": 178,
+            "y": 785.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 836,
+            "right": 378
+          }
+        },
+        {
+          "label": "map-home-touch",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "scene",
+          "disclosure": {
+            "x": 178,
+            "y": 785.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 836,
+            "right": 378
+          }
+        },
+        {
+          "label": "help",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": false,
+          "rect": {
+            "x": 8,
+            "y": 758.8125,
+            "width": 374,
+            "height": 85.1875,
+            "bottom": 844,
+            "right": 382
+          },
+          "reserve": 86,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 17,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 85
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 89,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 157
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 161,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 229
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 233,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 301
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 305,
+                "y": 767.8125,
+                "width": 68,
+                "height": 44,
+                "bottom": 811.8125,
+                "right": 373
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": null,
+          "focus": "",
+          "disclosure": {
+            "x": 178,
+            "y": 699.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 750,
+            "right": 378
+          }
+        },
+        {
+          "label": "reopened-guide",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-guide",
+          "hidden": false,
+          "rect": {
+            "x": 37,
+            "y": 658.625,
+            "width": 316,
+            "height": 148.375,
+            "bottom": 807,
+            "right": 353
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 46,
+                "y": 667.625,
+                "width": 96.65625,
+                "height": 44,
+                "bottom": 711.625,
+                "right": 142.65625
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 146.65625,
+                "y": 667.625,
+                "width": 96.671875,
+                "height": 44,
+                "bottom": 711.625,
+                "right": 243.328125
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(32, 38, 53)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 15.107165779822386,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 247.328125,
+                "y": 667.625,
+                "width": 96.65625,
+                "height": 44,
+                "bottom": 711.625,
+                "right": 343.984375
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 46,
+                "y": 715.625,
+                "width": 96.65625,
+                "height": 44,
+                "bottom": 759.625,
+                "right": 142.65625
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 146.65625,
+                "y": 715.625,
+                "width": 96.671875,
+                "height": 44,
+                "bottom": 759.625,
+                "right": 243.328125
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": "guide-dialog",
+          "focus": "guide-title",
+          "disclosure": {
+            "x": 178,
+            "y": 785.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 836,
+            "right": 378
+          }
+        },
+        {
+          "label": "directory",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": false,
+          "rect": {
+            "x": 20,
+            "y": 82,
+            "width": 350,
+            "height": 61,
+            "bottom": 143,
+            "right": 370
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 20,
+                "y": 90,
+                "width": 101,
+                "height": 44,
+                "bottom": 134,
+                "right": 121
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 129,
+                "y": 90,
+                "width": 101,
+                "height": 44,
+                "bottom": 134,
+                "right": 230
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "list-title",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "directory-inspect",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "inspect",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": "product-dialog",
+          "focus": "product-close",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "original-tin",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "inspect",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": "original-tin-dialog",
+          "focus": "original-tin-close",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "populated-bag",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "shop",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-bag",
+          "hidden": false,
+          "rect": {
+            "x": 18,
+            "y": 741.8125,
+            "width": 354,
+            "height": 85.1875,
+            "bottom": 827,
+            "right": 372
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 27,
+                "y": 750.8125,
+                "width": 60.796875,
+                "height": 44,
+                "bottom": 794.8125,
+                "right": 87.796875
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 95.796875,
+                "y": 750.8125,
+                "width": 60.796875,
+                "height": 44,
+                "bottom": 794.8125,
+                "right": 156.59375
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 164.59375,
+                "y": 750.8125,
+                "width": 60.796875,
+                "height": 44,
+                "bottom": 794.8125,
+                "right": 225.390625
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 233.390625,
+                "y": 750.8125,
+                "width": 60.796875,
+                "height": 44,
+                "bottom": 794.8125,
+                "right": 294.1875
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 302.1875,
+                "y": 750.8125,
+                "width": 60.796875,
+                "height": 44,
+                "bottom": 794.8125,
+                "right": 362.984375
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": "bag-dialog",
+          "focus": "bag-close",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "directory-home",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "scene",
+          "disclosure": {
+            "x": 178,
+            "y": 785.109375,
+            "width": 200,
+            "height": 50.890625,
+            "bottom": 836,
+            "right": 378
+          }
+        }
+      ],
+      "focusPaths": {
+        "guide": [
+          "",
+          "",
+          "",
+          "guide-start",
+          "guide-list",
+          "guide-map",
+          "guide-show-next",
+          "context-home",
+          "context-shops",
+          "",
+          "guide-close",
+          ""
+        ],
+        "bag": [
+          "cart-toggle",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "bag-clear",
+          "context-home",
+          "context-shops",
+          "cart-toggle",
+          "",
+          ""
+        ]
+      },
+      "focusOutline": {
+        "color": "rgb(173, 105, 27)",
+        "background": "rgb(255, 255, 255)",
+        "style": "solid",
+        "width": 3,
+        "ratio": 4.362907643865348
+      },
+      "bagHeaderMeasurements": [
+        {
+          "position": 0,
+          "shell": {
+            "x": 18,
+            "y": 17,
+            "width": 354,
+            "height": 724.8125
+          },
+          "header": {
+            "x": 34,
+            "y": 17,
+            "width": 322,
+            "height": 92
+          },
+          "title": {
+            "x": 34,
+            "y": 54.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 288.96875,
+            "y": 49,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 18,
+            "y": 741.8125,
+            "width": 354,
+            "height": 85.1875
+          }
+        },
+        {
+          "position": 0.5,
+          "shell": {
+            "x": 18,
+            "y": 17,
+            "width": 354,
+            "height": 724.8125
+          },
+          "header": {
+            "x": 34,
+            "y": 17,
+            "width": 322,
+            "height": 92
+          },
+          "title": {
+            "x": 34,
+            "y": 54.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 288.96875,
+            "y": 49,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 18,
+            "y": 741.8125,
+            "width": 354,
+            "height": 85.1875
+          }
+        },
+        {
+          "position": 1,
+          "shell": {
+            "x": 18,
+            "y": 17,
+            "width": 354,
+            "height": 724.8125
+          },
+          "header": {
+            "x": 34,
+            "y": 17,
+            "width": 322,
+            "height": 92
+          },
+          "title": {
+            "x": 34,
+            "y": 54.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 288.96875,
+            "y": 49,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 18,
+            "y": 741.8125,
+            "width": 354,
+            "height": 85.1875
+          }
+        }
+      ],
+      "pageErrors": [],
+      "componentRequests": 0,
+      "startupBundleRequests": 1
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "states": [
+        {
+          "label": "guide",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-guide",
+          "hidden": false,
+          "rect": {
+            "x": 465,
+            "y": 746.1875,
+            "width": 510,
+            "height": 81.1875,
+            "bottom": 827.375,
+            "right": 975
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 474,
+                "y": 755.1875,
+                "width": 95.1875,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 569.1875
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 573.1875,
+                "y": 755.1875,
+                "width": 95.203125,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 668.390625
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(32, 38, 53)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 15.107165779822386,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 672.390625,
+                "y": 755.1875,
+                "width": 95.203125,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 767.59375
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 771.59375,
+                "y": 755.1875,
+                "width": 95.203125,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 866.796875
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 870.796875,
+                "y": 755.1875,
+                "width": 95.1875,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 965.984375
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": "guide-dialog",
+          "focus": "guide-title",
+          "disclosure": {
+            "x": 36,
+            "y": 857.203125,
+            "width": 334.53125,
+            "height": 22.796875,
+            "bottom": 880,
+            "right": 370.53125
+          }
+        },
+        {
+          "label": "explore",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "scene",
+          "disclosure": {
+            "x": 36,
+            "y": 857.203125,
+            "width": 334.53125,
+            "height": 22.796875,
+            "bottom": 880,
+            "right": 370.53125
+          }
+        },
+        {
+          "label": "wide-map-live",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "scene",
+          "disclosure": {
+            "x": 36,
+            "y": 857.203125,
+            "width": 334.53125,
+            "height": 22.796875,
+            "bottom": 880,
+            "right": 370.53125
+          }
+        },
+        {
+          "label": "help",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "",
+          "disclosure": {
+            "x": 36,
+            "y": 857.203125,
+            "width": 334.53125,
+            "height": 22.796875,
+            "bottom": 880,
+            "right": 370.53125
+          }
+        },
+        {
+          "label": "reopened-guide",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-guide",
+          "hidden": false,
+          "rect": {
+            "x": 465,
+            "y": 746.1875,
+            "width": 510,
+            "height": 81.1875,
+            "bottom": 827.375,
+            "right": 975
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 474,
+                "y": 755.1875,
+                "width": 95.1875,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 569.1875
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 573.1875,
+                "y": 755.1875,
+                "width": 95.203125,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 668.390625
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(32, 38, 53)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 15.107165779822386,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 672.390625,
+                "y": 755.1875,
+                "width": 95.203125,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 767.59375
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 771.59375,
+                "y": 755.1875,
+                "width": 95.203125,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 866.796875
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 870.796875,
+                "y": 755.1875,
+                "width": 95.1875,
+                "height": 44,
+                "bottom": 799.1875,
+                "right": 965.984375
+              },
+              "background": "rgb(255, 255, 255)",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(98, 108, 122)",
+                "lowBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "highBackground": [
+                  255,
+                  255,
+                  255
+                ],
+                "minimumRatio": 5.322671714183507,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": "guide-dialog",
+          "focus": "guide-title",
+          "disclosure": {
+            "x": 36,
+            "y": 857.203125,
+            "width": 334.53125,
+            "height": 22.796875,
+            "bottom": 880,
+            "right": 370.53125
+          }
+        },
+        {
+          "label": "directory",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "menu",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": false,
+          "rect": {
+            "x": 72,
+            "y": 100,
+            "width": 1296,
+            "height": 61,
+            "bottom": 161,
+            "right": 1368
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 72,
+                "y": 108,
+                "width": 101,
+                "height": 44,
+                "bottom": 152,
+                "right": 173
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 181,
+                "y": 108,
+                "width": 101,
+                "height": 44,
+                "bottom": 152,
+                "right": 282
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "list-title",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "directory-inspect",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "inspect",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": "product-dialog",
+          "focus": "product-close",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "original-tin",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "inspect",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": "original-tin-dialog",
+          "focus": "original-tin-close",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "populated-bag",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "shop",
+          "paused": true,
+          "illegal": 0,
+          "host": "context-navigation-bag",
+          "hidden": false,
+          "rect": {
+            "x": 411,
+            "y": 797.8125,
+            "width": 618,
+            "height": 85.1875,
+            "bottom": 883,
+            "right": 1029
+          },
+          "reserve": 0,
+          "destination": "context-shops",
+          "current": [
+            {
+              "id": "context-shops",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": true,
+              "rect": {
+                "x": 420,
+                "y": 806.8125,
+                "width": 113.59375,
+                "height": 44,
+                "bottom": 850.8125,
+                "right": 533.59375
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "foreground": "rgb(16, 45, 38)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-shops",
+              "visible": true,
+              "rect": {
+                "x": 541.59375,
+                "y": 806.8125,
+                "width": 113.59375,
+                "height": 44,
+                "bottom": 850.8125,
+                "right": 655.1875
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "foreground": "rgb(255, 252, 245)",
+                "lowBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "highBackground": [
+                  16,
+                  45,
+                  38
+                ],
+                "minimumRatio": 14.378451183709585,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-events",
+              "visible": true,
+              "rect": {
+                "x": 663.1875,
+                "y": 806.8125,
+                "width": 113.609375,
+                "height": 44,
+                "bottom": 850.8125,
+                "right": 776.796875
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-rewards",
+              "visible": true,
+              "rect": {
+                "x": 784.796875,
+                "y": 806.8125,
+                "width": 113.59375,
+                "height": 44,
+                "bottom": 850.8125,
+                "right": 898.390625
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            },
+            {
+              "id": "context-profile",
+              "visible": true,
+              "rect": {
+                "x": 906.390625,
+                "y": 806.8125,
+                "width": 113.59375,
+                "height": 44,
+                "bottom": 850.8125,
+                "right": 1019.984375
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              },
+              "hit": true
+            }
+          ],
+          "notes": [
+            {
+              "text": "Events, Rewards and Profile are unavailable in this demo.",
+              "contrast": {
+                "foreground": "rgb(93, 105, 94)",
+                "lowBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "highBackground": [
+                  255,
+                  252,
+                  245
+                ],
+                "minimumRatio": 5.618532860656267,
+                "requiredRatio": 4.5
+              }
+            }
+          ],
+          "overflow": false,
+          "modal": "bag-dialog",
+          "focus": "bag-close",
+          "disclosure": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          }
+        },
+        {
+          "label": "directory-home",
+          "count": 1,
+          "landmarks": 1,
+          "mode": "explore",
+          "paused": false,
+          "illegal": 0,
+          "host": "context-navigation-global",
+          "hidden": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0
+          },
+          "reserve": 0,
+          "destination": "context-home",
+          "current": [
+            {
+              "id": "context-home",
+              "value": "page"
+            }
+          ],
+          "labels": [
+            "Home",
+            "Shops",
+            "Events",
+            "Rewards",
+            "Profile"
+          ],
+          "disabled": [
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "controls": [
+            {
+              "id": "context-home",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(16, 45, 38)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-shops",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgb(255, 252, 245)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-events",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-rewards",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            },
+            {
+              "id": "context-profile",
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "background": "rgba(0, 0, 0, 0)",
+              "contrast": {
+                "hidden": true
+              },
+              "hit": false
+            }
+          ],
+          "notes": [],
+          "overflow": false,
+          "modal": null,
+          "focus": "scene",
+          "disclosure": {
+            "x": 36,
+            "y": 857.203125,
+            "width": 334.53125,
+            "height": 22.796875,
+            "bottom": 880,
+            "right": 370.53125
+          }
+        }
+      ],
+      "focusPaths": {
+        "guide": [
+          "",
+          "",
+          "",
+          "guide-start",
+          "guide-list",
+          "guide-map",
+          "guide-show-next",
+          "context-home",
+          "context-shops",
+          "",
+          "guide-close",
+          ""
+        ],
+        "bag": [
+          "cart-toggle",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "bag-clear",
+          "context-home",
+          "context-shops",
+          "cart-toggle",
+          "",
+          ""
+        ]
+      },
+      "focusOutline": {
+        "color": "rgb(173, 105, 27)",
+        "background": "rgb(255, 255, 255)",
+        "style": "solid",
+        "width": 3,
+        "ratio": 4.362907643865348
+      },
+      "bagHeaderMeasurements": [
+        {
+          "position": 0,
+          "shell": {
+            "x": 411,
+            "y": 17,
+            "width": 618,
+            "height": 780.8125
+          },
+          "header": {
+            "x": 435,
+            "y": 17,
+            "width": 570,
+            "height": 100
+          },
+          "title": {
+            "x": 435,
+            "y": 62.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 937.96875,
+            "y": 57,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 411,
+            "y": 797.8125,
+            "width": 618,
+            "height": 85.1875
+          }
+        },
+        {
+          "position": 0.5,
+          "shell": {
+            "x": 411,
+            "y": 17,
+            "width": 618,
+            "height": 780.8125
+          },
+          "header": {
+            "x": 435,
+            "y": 17,
+            "width": 570,
+            "height": 100
+          },
+          "title": {
+            "x": 435,
+            "y": 62.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 937.96875,
+            "y": 57,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 411,
+            "y": 797.8125,
+            "width": 618,
+            "height": 85.1875
+          }
+        },
+        {
+          "position": 1,
+          "shell": {
+            "x": 411,
+            "y": 17,
+            "width": 618,
+            "height": 780.8125
+          },
+          "header": {
+            "x": 435,
+            "y": 17,
+            "width": 570,
+            "height": 100
+          },
+          "title": {
+            "x": 435,
+            "y": 62.5,
+            "width": 186.53125,
+            "height": 33
+          },
+          "close": {
+            "x": 937.96875,
+            "y": 57,
+            "width": 67.03125,
+            "height": 44
+          },
+          "footer": {
+            "x": 411,
+            "y": 797.8125,
+            "width": 618,
+            "height": 85.1875
+          }
+        }
+      ],
+      "pageErrors": [],
+      "componentRequests": 0,
+      "startupBundleRequests": 1
+    }
+  ],
+  "failures": [],
+  "limits": [
+    "Browser emulation; no physical device, real safe-area inset or screen-reader session",
+    "Parent owns independent visual taste acceptance and release/generator checks"
+  ]
+}

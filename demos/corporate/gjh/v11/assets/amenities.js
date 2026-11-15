@@ -1,6 +1,7 @@
 import {liftLayout,showcaseProducts} from './lift-layout.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {fetchStartupAsset} from './startup-asset-pack.js';
 import {expandedLayout} from './expanded-layout.js';
 
 export const AMENITIES = Object.freeze({
@@ -20,7 +21,7 @@ async function load(T,kind,definition){
   const controller=new AbortController();let timer,expired=false,root=null;
   try{
     const task=async()=>{
-      const response=await fetch(new URL(definition.file,import.meta.url),{signal:controller.signal});
+      const response=await fetchStartupAsset(new URL(definition.file,import.meta.url),{signal:controller.signal});
       if(!response.ok)throw Error('unavailable');const data=await response.arrayBuffer();
       if(data.byteLength!==definition.bytes)throw Error('invalid-size');
       const digest=await crypto.subtle.digest('SHA-256',data);

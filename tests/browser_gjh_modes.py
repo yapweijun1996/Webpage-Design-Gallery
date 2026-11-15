@@ -83,7 +83,8 @@ def run():
     baseline = {}
     if args.baseline:
         for name in ['script.js', 'assets/modes.js', 'assets/ui.js']:
-            baseline['/' + RUNTIME + name] = subprocess.check_output(['git', 'show', args.baseline_ref + ':' + RUNTIME + name], cwd=ROOT)
+            served_name = 'script.bundle.js' if name == 'script.js' else name
+            baseline['/' + RUNTIME + served_name] = subprocess.check_output(['git', 'show', args.baseline_ref + ':' + RUNTIME + name], cwd=ROOT)
 
     class Handler(Quiet):
         def do_GET(self):

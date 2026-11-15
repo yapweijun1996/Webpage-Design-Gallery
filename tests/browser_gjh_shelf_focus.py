@@ -17,6 +17,7 @@ import threading
 
 from playwright.sync_api import sync_playwright
 from browser_gjh_guide import ROOT, Quiet, state
+from gjh_startup_test_helpers import use_individual_assets
 from browser_gjh_mode_review import close_event_before_action, finish_close, lose_context
 from browser_gjh_modes import close_bag, activate_cart
 
@@ -560,6 +561,7 @@ def failure_paths(browser,url,output):
         context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,
             reduced_motion='reduce',service_workers='block')
         page=context.new_page();errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
+        use_individual_assets(page)
         page.route(pattern,lambda route:route.abort())
         ready(page,url);sku='nz-425g' if label.startswith('shelf') else label.removeprefix('can-').removesuffix('-unavailable')
         id=approach(page,sku);assets=state(page)['productAssets']

@@ -199,9 +199,9 @@ def run():
                         destination:document.querySelector('#experience').hidden?'context-shops':'context-home',
                         current:buttons.filter(e=>e.hasAttribute('aria-current')).map(e=>({id:e.id,value:e.getAttribute('aria-current')})),
                         labels:buttons.map(e=>e.textContent), disabled:buttons.map(e=>e.disabled),
-                        controls:buttons.map(e=>({id:e.id,rect:rect(e),background:getComputedStyle(e).backgroundColor,contrast:gjhContrast(e),
+                        controls:buttons.map(e=>({id:e.id,visible:!!e.getClientRects().length,rect:rect(e),background:getComputedStyle(e).backgroundColor,contrast:gjhContrast(e),
                           hit:e.contains(document.elementFromPoint(e.getBoundingClientRect().x+e.clientWidth/2,e.getBoundingClientRect().y+e.clientHeight/2))})),
-                        notes:[...nav.querySelectorAll('p:not([hidden])')].map(e=>({text:e.textContent,contrast:gjhContrast(e)})),
+                        notes:[...nav.querySelectorAll('p:not([hidden])')].filter(e=>e.getClientRects().length).map(e=>({text:e.textContent,contrast:gjhContrast(e)})),
                         overflow:document.documentElement.scrollWidth>innerWidth,
                         modal:document.querySelector('dialog[open]')?.id,
                         focus:document.activeElement.id,
@@ -217,16 +217,20 @@ def run():
                         assert result['controls'][0]['background'] != result['controls'][1]['background'],result
                         assert result['rect']['y'] >= 0 and result['rect']['bottom'] <= height + 1, result
                         assert result['rect']['right'] <= width + 1, result
-                        for control in result['controls']:
+                        visible_controls = [control for control in result['controls'] if control['visible']]
+                        assert len(visible_controls) >= 2
+                        for control in visible_controls:
                             assert control['rect']['width'] >= 44 and control['rect']['height'] >= 44 and control['hit'], (label, control)
                             assert control['contrast']['minimumRatio'] >= 4.5, (label, control)
-                        assert max(c['rect']['width'] for c in result['controls']) - min(c['rect']['width'] for c in result['controls']) < 1
+                        assert max(c['rect']['width'] for c in visible_controls) - min(c['rect']['width'] for c in visible_controls) < 1
                         for note in result['notes']:
                             assert note['contrast']['minimumRatio'] >= 4.5, (label, note)
                         if host == 'context-navigation-global':
-                            assert result['reserve'] >= result['rect']['height']
                             if page.locator('#experience').is_visible():
+                                assert result['reserve'] >= result['rect']['height']
                                 assert result['disclosure']['bottom'] <= result['rect']['y'], result
+                            else:
+                                assert page.locator('#context-navigation-global').evaluate('e => getComputedStyle(e).position') == 'relative'
                         else:
                             assert result['reserve'] == 0, result
                             assert page.locator(f'#{result["modal"]} #context-navigation').count() == 1
@@ -245,14 +249,15 @@ def run():
                 assert page.evaluate('document.activeElement.id') == 'context-shops'
                 row['focusOutline'] = outline()
                 page.keyboard.press('Tab')
+                assert page.locator('#guide-dialog .ob-settings-toggle').evaluate('e => e === document.activeElement')
+                page.keyboard.press('Tab')
                 assert page.evaluate('document.activeElement.id') == 'guide-close'
-                page.locator('#guide-list').focus()
-                page.keyboard.press('PageDown')
-                page.wait_for_function('''() => document.querySelector('.guide-footnote').getBoundingClientRect().bottom <=
-                  document.querySelector('.guide-scroll').getBoundingClientRect().bottom + 1''')
-                footnote = page.locator('.guide-footnote').bounding_box()
-                content = page.locator('.guide-scroll').bounding_box()
-                assert footnote['y'] + footnote['height'] <= content['y'] + content['height'] + 1, (footnote, content)
+                # The shared onboarding guide now owns its own scrolling and
+                # preference control instead of the retired guide footnote.
+                page.locator('#guide-show-next').focus()
+                preference = page.locator('#guide-show-next').bounding_box()
+                content = page.locator('#guide-dialog').bounding_box()
+                assert preference['y'] >= content['y'] and preference['y'] + preference['height'] <= content['y'] + content['height'] + 1, (preference, content)
                 before = state(page)
                 native_action(page, '#guide-dialog', lambda: page.locator('#context-home').click())
                 page.wait_for_function('document.activeElement.id === "scene"')
@@ -308,8 +313,7 @@ def run():
                 assert page.locator('#original-tin-open').evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}')
                 page.locator('.site-footer a').focus()
                 footer_link = page.locator('.site-footer a').bounding_box()
-                nav_box = page.locator('#context-navigation').bounding_box()
-                assert footer_link['y'] + footer_link['height'] <= nav_box['y'], (footer_link, nav_box)
+                assert page.locator('.site-footer a').first.evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}'), footer_link
                 page.screenshot(path=str(args.output / f'directory-bottom-{width}x{height}.png'))
                 page.locator('#context-shops').click()
                 heading = page.locator('#list-title').bounding_box()
@@ -362,9 +366,10 @@ def run():
                 assert page.evaluate('__navMutations') == 0
                 page.evaluate('__navObserver.disconnect();delete window.__navObserver;delete window.__navMutations')
                 nav_requests = [r for r in requests if r.endswith('/context-navigation.js')]
-                assert len(nav_requests) == 1, nav_requests
+                bundle_requests = [r for r in requests if r.endswith('/script.bundle.js')]
+                assert not nav_requests and len(bundle_requests) == 1, (nav_requests, bundle_requests)
                 assert not errors, errors
-                row.update({'pageErrors': errors, 'componentRequests': len(nav_requests)})
+                row.update({'pageErrors': errors, 'componentRequests': len(nav_requests), 'startupBundleRequests': len(bundle_requests)})
                 rows.append(row)
                 context.close()
 
@@ -488,11 +493,11 @@ def run():
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
-        sources = ['assets/context-navigation.js', 'assets/ui.js', 'script.js', 'style.css', 'index.html', 'assets/demo-bag.js']
+        sources = ['assets/context-navigation.js', 'assets/ui.js', 'script.js', 'script.bundle.js', 'style.css', 'index.html', 'assets/demo-bag.js']
         overhead = {}
         for name in sources:
             data = (ROOT / RUNTIME / name).read_bytes()
-            old = b'' if name == 'assets/context-navigation.js' else subprocess.check_output(['git', 'show', '6a1f31c:' + RUNTIME + name], cwd=ROOT)
+            old = b'' if name in ('assets/context-navigation.js', 'script.bundle.js') else subprocess.check_output(['git', 'show', '6a1f31c:' + RUNTIME + name], cwd=ROOT)
             overhead[name] = {'baselineBytes': len(old), 'bytes': len(data), 'deltaBytes': len(data)-len(old),
                 'baselineGzipBytes': len(gzip.compress(old)) if old else 0, 'gzipBytes': len(gzip.compress(data))}
         served_hashes = {name: hashlib.sha256((args.root / RUNTIME / name).read_bytes()).hexdigest() for name in sources}
@@ -500,7 +505,7 @@ def run():
         assert served_hashes == source_hashes, 'Served artifact does not match the reviewed source'
         report = {'environment': f'{platform.system()} {platform.machine()} Chrome {locals().get("version", "unknown")} / {backend}',
             'root': str(args.root), 'prefix': prefix, 'sourceSHA256': source_hashes, 'servedSHA256': served_hashes,
-            'payload': overhead, 'newComponentRequests': 1, 'newGLBTextureFontGPUObjects': 0,
+            'payload': overhead, 'newComponentRequests': 0, 'componentDelivery': 'startup JavaScript bundle', 'newGLBTextureFontGPUObjects': 0,
             'results': rows, 'failures': failures,
             'limits': ['Browser emulation; no physical device, real safe-area inset or screen-reader session',
                 'Parent owns independent visual taste acceptance and release/generator checks']}

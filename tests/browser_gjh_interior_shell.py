@@ -6,6 +6,7 @@ it exercises actual Rapier movement, not fabricated positional state.
 import argparse,functools,hashlib,http.server,itertools,json,statistics,tempfile,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from gjh_startup_test_helpers import use_individual_assets
 from browser_gjh_interior_pilot import ROOT,Handler,gallery,boot,state,drive,walk_to
 ASSETS=ROOT/'demos/corporate/gjh/v11/assets'
 DEFS=json.loads((ASSETS/'interior-shell.json').read_text())['assets']
@@ -92,6 +93,7 @@ def run():
      if opts.group in ('combinations','all'):
       for combination in itertools.product((False,True),repeat=4):
        context=browser.new_context(viewport={'width':1440,'height':1000},reduced_motion='reduce',service_workers='block');context.add_init_script("localStorage.setItem('gjh-v11-graphics-quality-v1','detailed')")
+       use_individual_assets(context)
        for item,failed in zip(DEFS,combination):
         if failed:context.route('**/'+item['file'],lambda route:route.fulfill(status=404,body='D3 unavailable fixture'))
        page,errors,_=boot(context,url);s=state(page);assert s['graphics']['shadows'] and s['graphics']['quality']['tier']=='detailed'
@@ -100,7 +102,7 @@ def run():
        directory(page);assert not errors and state(page)['illegalCount']==0;row['errors']=errors;report['checks'].append(row);save();print('COMBINATION PASS',combination,max(v['sampledMaxCalls'] for v in row['views']),flush=True);context.close()
      if opts.group in ('failures','all'):
       for item in DEFS:
-       context=browser.new_context(viewport={'width':639,'height':826},reduced_motion='reduce',service_workers='block');context.route('**/'+item['file'],lambda route:route.fulfill(status=200,body='Invalid hash GLB fixture'))
+       context=browser.new_context(viewport={'width':639,'height':826},reduced_motion='reduce',service_workers='block');use_individual_assets(context);context.route('**/'+item['file'],lambda route:route.fulfill(status=200,body='Invalid hash GLB fixture'))
        page,errors,_=boot(context,url);assert state(page)['shell'][item['kind']]['reason']=='invalid';directory(page);assert not errors;report['checks'].append({'group':'corrupt','asset_id':item['asset_id'],'hashRejectionAndDirectory':'PASS'});save();context.close()
       context=browser.new_context(viewport={'width':1440,'height':1000},reduced_motion='reduce',service_workers='block');loader=(ROOT/'demos/corporate/gjh/v11/vendor/GLTFLoader.js').read_text();ids=[r['asset_id'] for r in DEFS]
       loader+='\nconst shellIDs='+json.dumps(ids)+';const shellParse=GLTFLoader.prototype.parseAsync;GLTFLoader.prototype.parseAsync=async function(...args){const g=await shellParse.apply(this,args);const id=shellIDs.find(id=>g.scene.getObjectByName(id));if(id){window.__shellLate ||= {};const geometries=new Set(),materials=new Set();g.scene.traverse(o=>{if(o.isMesh){geometries.add(o.geometry);for(const m of (Array.isArray(o.material)?o.material:[o.material]))materials.add(m)}});const row=window.__shellLate[id]={expectedGeometry:geometries.size,expectedMaterial:materials.size,geometry:0,material:0};geometries.forEach(o=>o.addEventListener("dispose",()=>row.geometry++));materials.forEach(o=>o.addEventListener("dispose",()=>row.material++));await new Promise(r=>setTimeout(r,8500));}return g;};\n'

@@ -6,6 +6,7 @@ import {spatial, storeCenterX} from './spatial.js';
 import {expandedLayout} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
+import {releaseStartupAssetPack} from './startup-asset-pack.js';
 
 export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill}) {
   if (!expanded || !theme?.materials || !theme?.lighting) return false;
@@ -28,6 +29,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, expanded = false) {
+  try {
   const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
@@ -616,4 +618,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   // also cover the authored back and arms without blocking sit/stand routes.
   const cameraObstacles=ceilingObstacles.concat(seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
   return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  } finally {
+    releaseStartupAssetPack();
+  }
 }

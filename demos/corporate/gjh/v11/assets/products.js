@@ -1,4 +1,5 @@
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {fetchStartupAsset} from './startup-asset-pack.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 
 // Replaceable candidate configuration; this is not a claim that future generic cans are this SKU set.
@@ -57,7 +58,7 @@ async function loadAsset(T, definition, kind) {
   const controller = new AbortController(); let timer; let expired = false; let parsed = null;
   try {
     const operation = async () => {
-    const response = await fetch(new URL(definition.file, import.meta.url), {signal: controller.signal});
+    const response = await fetchStartupAsset(new URL(definition.file, import.meta.url), {signal: controller.signal});
     if (!response.ok) throw Error('unavailable');
     const buffer = await response.arrayBuffer();
     if (await sha256(buffer) !== definition.sha256) throw Error('hash-mismatch');

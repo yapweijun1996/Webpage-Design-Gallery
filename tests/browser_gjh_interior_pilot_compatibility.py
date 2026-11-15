@@ -1,4 +1,9 @@
-"""Keep released M056/Shelf focus journeys and all-eight pilot selection compatible."""
+"""Exercise retained shelf lifecycle with M056 and the eight-asset pilot.
+
+Live Inspect opens product details directly. A test-only entry point restores
+the former shelf action to exercise the retained component; the live journey
+is covered by browser_gjh_store_integration.py.
+"""
 import functools
 import http.server
 import json
@@ -8,6 +13,18 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 from browser_gjh_interior_pilot import ROOT, Handler, state
 from browser_gjh_shelf_focus import ready, approach, open_shelf, close_shelf, geometry, assert_mode
+
+
+def enable_retained_shelf_fixture(route):
+    response = route.fetch()
+    source = response.text()
+    marker = 'function inspectNearby(id) {'
+    assert source.count(marker) == 1
+    fixture = '''function inspectNearby(id) {
+    const record = records.get(id);
+    if (showing3D && id === nearby && record?.image && !record.action && !dialog.open && !bag.open && !guidePaused &&
+        !modeSignals().panelOpen && shelfFocus?.openShelf(id, record)) return;'''
+    route.fulfill(response=response, body=source.replace(marker, fixture, 1))
 
 
 def run():
@@ -20,6 +37,7 @@ def run():
             for pilot in (False,True):
                 for width,height in ((390,844),(1440,900)):
                     c=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block')
+                    c.route('**/script.bundle.js', enable_retained_shelf_fixture)
                     page=c.new_page();errors=[];requests=[]
                     page.on('pageerror',lambda e:errors.append(str(e)))
                     page.on('request',lambda r:requests.append(r.url.split('/')[-1]))
@@ -28,7 +46,8 @@ def run():
                     expected='GJH-DSP-001' if pilot else 'GJH-M056';assert assets['shelf']['model']==expected and assets['shelf']['status']=='loaded',assets
                     assert assets['totalInstances']==(132 if pilot else 204)
                     assert requests.count('GJH_DSP_001.glb')==(1 if pilot else 0),requests
-                    assert requests.count('gjh-m056-shelf-lod1.glb')==(0 if pilot else 1),requests
+                    assert requests.count('gjh-m056-shelf-lod1.glb')==0,requests
+                    assert requests.count('startup-assets.pack')==1,requests
                     results=[]
                     for sku,record in assets['cans'].items():
                         assert record['status']=='loaded' and record['instances']==(33 if pilot else 51),record
@@ -57,7 +76,7 @@ def run():
                         results.append({'sku':sku,'focusFramingAndClose':'PASS','repeatedPickupReturn':'PASS','layout':layout})
                     assert not errors,errors
                     assert state(page)['illegalCount']==0
-                    rows.append({'model':expected,'width':width,'cases':results,'oneSelectedShelfFetch':'PASS','pageErrors':errors})
+                    rows.append({'model':expected,'width':width,'cases':results,'selectedShelfTransfer':'individual pilot model' if pilot else 'validated startup pack','shelfEntry':'retained component fixture','pageErrors':errors})
                     c.close();print('SHELF COMPATIBILITY PASS',expected,width,flush=True)
             browser.close()
     finally:server.shutdown();server.server_close()

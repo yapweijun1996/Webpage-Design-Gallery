@@ -353,11 +353,11 @@ def run():
                 row('second-native-loss-invalidates-pending-restore',metrics=metrics(page));c.close()
                 # Completion while the actual context remains lost cannot publish ready.
                 c,page=context(browser);pending=[]
-                page.route('**/assets/world.js',lambda r:pending.append(r));page.goto(url,wait_until='domcontentloaded')
+                page.route('**/assets/world.bundle.js',lambda r:pending.append(r));page.goto(url,wait_until='domcontentloaded')
                 for _ in range(150):
                     if pending:break
                     page.wait_for_timeout(20)
-                assert pending;loss(page);pending.pop().continue_();page.unroute('**/assets/world.js')
+                assert pending;loss(page);pending.pop().continue_();page.unroute('**/assets/world.bundle.js')
                 page.wait_for_function('__mall.state.graphics.initialized',timeout=60000)
                 assert not page.evaluate('__mall.ready') and page.locator('#graphics-return').is_hidden()
                 restore(page);enter(page);freeze(page)
@@ -395,7 +395,7 @@ def run():
                 row('trusted-held-touch-through-native-recovery',stopped=stopped,afterLive=after_live,afterStep=after_step,
                     perAxisXZBoundMetres=1e-5,angles='exact');c.close()
                 # Delayed source responses exercise real initialization awaits, not synthetic ready state.
-                for asset,width,height in [('vendor/three.module.min.js',390,844),('assets/world.js',390,844),('assets/gjh-mall-visitor-v2.glb',390,844),('assets/world.js',1440,900)]:
+                for asset,width,height in [('vendor/three.module.min.js',390,844),('assets/world.bundle.js',390,844),('assets/gjh-mall-visitor-v2.glb',390,844),('assets/world.bundle.js',1440,900)]:
                     c,page=context(browser,width,height);pending=[]
                     page.route('**/'+asset,lambda route:pending.append(route));page.goto(url,wait_until='domcontentloaded')
                     page.wait_for_function('window.__mall !== undefined')

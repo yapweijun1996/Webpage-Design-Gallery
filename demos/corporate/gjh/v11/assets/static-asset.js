@@ -1,5 +1,6 @@
 // One strict loader for texture-free static GLBs; callers own placement and fallback.
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {fetchStartupAsset} from './startup-asset-pack.js';
 
 const deadline = 8000;
 
@@ -31,7 +32,7 @@ export async function loadStaticAsset(T, definition, baseURL) {
     const record = {status: 'fallback', reason: null, primitives: []};
     try {
       const load = async () => {
-        const response = await fetch(new URL(definition.file, baseURL), {signal: controller.signal});
+        const response = await fetchStartupAsset(new URL(definition.file, baseURL), {signal: controller.signal});
         if (!response.ok) throw Error('unavailable');
         const buffer = await response.arrayBuffer();
         const hash = await crypto.subtle.digest('SHA-256', buffer);

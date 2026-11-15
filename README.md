@@ -32,7 +32,7 @@ python -m http.server 8000
 
 Open `http://localhost:8000/`. The generated company and demo links work without JavaScript; search, filters, design details and comparison need JavaScript and an HTTP server. Do not edit generated HTML directly.
 
-The same build generates the GJH V11 combined stylesheet and the local Rapier JavaScript/WASM split. Edit the source stylesheets or update the pinned Rapier source, then rerun the generator; `--check` detects stale runtime outputs. See [V11 startup-budget work](docs/gjh-v11-stage11b-startup.md) for measurements and remaining limits.
+The same build generates the GJH V11 combined stylesheet, startup model pack and local Rapier JavaScript/WASM split. It also verifies the checked-in JavaScript bundles against their source hashes; clean builds and `--check` need only Python. When a bundled source module changes, regeneration additionally requires the standalone Bun 1.3.11 compiler on `PATH` (no npm packages or network downloads). Edit source modules, stylesheets or the pinned Rapier source rather than generated files, then rerun the generator. See [V11 startup-budget work](docs/gjh-v11-stage11b-startup.md) for measurements and remaining limits.
 
 ## Appearance and language
 

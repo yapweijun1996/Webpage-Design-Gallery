@@ -3,6 +3,7 @@ import collections,functools,http.server,json,os,threading,hashlib
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from browser_gjh_v11 import QuietHandler,drive,state
+from gjh_startup_test_helpers import use_individual_assets
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT.parent/'evidence/mall-amenities'
 FILES={'desk':'mall-service-desk.glb','signs':'mall-wayfinding-ceiling-sign.glb','showcase':'mall-glass-showcase.glb'}
@@ -38,13 +39,14 @@ def run():
    for width,height in [(1440,900),(768,1024),(390,844)]:
     c=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce');page=c.new_page();errors=[];counts=collections.Counter()
     page.on('pageerror',lambda error:errors.append(str(error)))
-    page.on('request',lambda request:counts.update([Path(request.url.split('?')[0]).name]) if request.url.split('?')[0].endswith('.glb') else None)
+    page.on('request',lambda request:counts.update([Path(request.url.split('?')[0]).name]))
     ready(page,url);s=state(page)
     if width==390:
      assert page.locator('.ob-help:visible').count()==0
      assert page.locator('#keyboard-help>summary').is_visible()
     assert s['amenities']['displayedProducts']==4,s['amenities']
-    for kind,file in FILES.items():assert s['amenities'][kind]['status']=='loaded' and counts[file]==1,s['amenities']
+    assert counts['startup-assets.pack']==1,counts
+    for kind,file in FILES.items():assert s['amenities'][kind]['status']=='loaded' and counts[file]==0,s['amenities']
     assert s['amenities']['signs']['instances']==2
     assert s['amenities']['showcase']['doorPose']=='closed'
     assert s['drawCalls']<=200,s['drawCalls']
@@ -105,7 +107,7 @@ def run():
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     results.append({'viewport':[width,height],'theme':theme,'locale':locale,'shortPanelScrollStickyCloseReopen':'PASS','focusRestore':'PASS'});c.close()
    for kind,file in FILES.items():
-    c=browser.new_context(viewport={'width':390,'height':844},has_touch=True);page=c.new_page();page.route(f'**/{file}',lambda route:route.abort())
+    c=browser.new_context(viewport={'width':390,'height':844},has_touch=True);page=c.new_page();use_individual_assets(page);page.route(f'**/{file}',lambda route:route.abort())
     ready(page,url);s=state(page)
     if width==390:
      assert page.locator('.ob-help:visible').count()==0
@@ -114,7 +116,7 @@ def run():
     assert all(s['amenities'][other]['status']=='loaded' for other in FILES if other!=kind)
     approach(page,kind);assert page.locator('#amenity-dialog').is_visible()
     results.append({'missing':kind,'independentFallback':'PASS','interactionStillAvailable':'PASS'});c.close()
-   c=browser.new_context();page=c.new_page();data=bytearray((ROOT/'demos/corporate/gjh/v11/assets'/FILES['desk']).read_bytes());data[-1]^=1
+   c=browser.new_context();page=c.new_page();use_individual_assets(page);data=bytearray((ROOT/'demos/corporate/gjh/v11/assets'/FILES['desk']).read_bytes());data[-1]^=1
    page.route(f'**/{FILES["desk"]}',lambda route:route.fulfill(status=200,body=bytes(data),content_type='model/gltf-binary'))
    ready(page,url);assert state(page)['amenities']['desk']['reason']=='hash-mismatch';results.append({'corruptedDeskHashRejected':'PASS'});c.close()
    browser.close()

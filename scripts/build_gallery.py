@@ -21,6 +21,12 @@ RAPIER_SPEC.loader.exec_module(rapier)
 GJH_CSS_SPEC = importlib.util.spec_from_file_location("build_gjh_css", ROOT / "scripts/build_gjh_css.py")
 gjh_css = importlib.util.module_from_spec(GJH_CSS_SPEC)
 GJH_CSS_SPEC.loader.exec_module(gjh_css)
+GJH_PACK_SPEC = importlib.util.spec_from_file_location("build_gjh_startup_pack", ROOT / "scripts/build_gjh_startup_pack.py")
+gjh_pack = importlib.util.module_from_spec(GJH_PACK_SPEC)
+GJH_PACK_SPEC.loader.exec_module(gjh_pack)
+GJH_JS_SPEC = importlib.util.spec_from_file_location("build_gjh_startup_js", ROOT / "scripts/build_gjh_startup_js.py")
+gjh_js = importlib.util.module_from_spec(GJH_JS_SPEC)
+GJH_JS_SPEC.loader.exec_module(gjh_js)
 
 
 def read_json(path):
@@ -177,7 +183,7 @@ def runtime_resources(catalog):
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png",
     )}
     resources.update(Path("demos/corporate/gjh/v11") / name for name in
-                     ("manifest.webmanifest", "offline.html", "pwa.js", "style.bundle.css"))
+                     ("manifest.webmanifest", "offline.html", "pwa.js", "style.bundle.css", "script.bundle.js"))
     # Shared 3D UI ships with the demo; keep it out of the gallery shell precache.
     for directory in ("assets/onboarding", "design-system/onboarding"):
         resources.update(path.relative_to(ROOT) for path in (ROOT / directory).rglob("*") if path.is_file())
@@ -267,6 +273,8 @@ def build(output=ROOT, check=False):
     validate_locales()
     rapier.build(check=check)
     gjh_css.build(check=check)
+    gjh_pack.build(check=check)
+    gjh_js.build(check=check)
     design_system.build(ROOT, check=check)
     catalog = load_catalog()
     release = release_info(catalog)

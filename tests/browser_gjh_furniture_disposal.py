@@ -9,7 +9,9 @@ def run(baseline=None):
    b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader']);
    for mode in ['late','invalid','normal']:
     context=b.new_context(viewport={'width':390,'height':844},reduced_motion='reduce');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    if baseline:page.route('**/assets/furnishings.js',lambda route:route.fulfill(path=str(baseline),content_type='text/javascript'))
+    if baseline:
+     page.route('**/assets/world.bundle.js',lambda route:route.fulfill(path=str(ROOT/'demos/corporate/gjh/v11/assets/world.js'),content_type='text/javascript'))
+     page.route('**/assets/furnishings.js',lambda route:route.fulfill(path=str(baseline),content_type='text/javascript'))
     suffix='''
 const originalParseAsync = GLTFLoader.prototype.parseAsync;
 GLTFLoader.prototype.parseAsync = async function(...args) {

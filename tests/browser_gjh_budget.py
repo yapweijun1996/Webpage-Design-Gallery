@@ -1,5 +1,5 @@
 """Reproducible laboratory payload, rendering and modal-lifecycle audit for V11."""
-import functools,http.server,json,os,threading,time
+import functools,http.server,json,os,platform,threading,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT.parent/'evidence'/'v11-budget'
@@ -15,6 +15,7 @@ def run():
   with sync_playwright() as p:
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
    for width,height in [(320,740),(390,844),(768,1024),(1440,900),(844,390)]:
+    print(f'Checking budget at {width}x{height}',flush=True)
     context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block');page=context.new_page();external=[];errors=[]
     page.on('request',lambda r:external.append(r.url) if r.url.startswith('http') and not r.url.startswith(base+'/') else None);page.on('pageerror',lambda e:errors.append(str(e)))
     start=time.monotonic();page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-dialog').wait_for(state='visible');ready_ms=round((time.monotonic()-start)*1000)
@@ -55,6 +56,6 @@ def run():
     results.append({'viewport':[width,height],'readyMsObserved':ready_ms,'coldResourceCount':len(initial),'coldDecodedBytes':sum(r['bytes'] for r in initial),'resources':initial,'drawCalls':calls,'fiveCloseCycles':cycles,'guideAndListRenderPause':'PASS','externalRequests':external,'pageErrors':errors});context.close()
    version=browser.version;browser.close()
  finally:server.shutdown()
- report={'environment':'Linux ARM64 Chromium/SwiftShader, reduced motion, local uncompressed HTTP, fresh contexts, service workers blocked','browser':version,'limitations':['Ready times are observations, not production performance guarantees','Decoded payload is not compressed wire traffic or GPU memory','Not physical Android/iOS, Safari or screen-reader coverage'],'results':results}
+ report={'environment':f'{platform.system()} {platform.machine()} Chromium/SwiftShader, reduced motion, local uncompressed HTTP, fresh contexts, service workers blocked','browser':version,'limitations':['Ready times are observations, not production performance guarantees','Decoded payload is not compressed wire traffic or GPU memory','Not physical Android/iOS, Safari or screen-reader coverage'],'results':results}
  (OUT/'report.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))
 if __name__=='__main__':run()

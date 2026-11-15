@@ -1,10 +1,10 @@
 # V11 stage 11b — startup budget work
 
-Status: **in progress**. The 10 MiB decoded-resource assertion now passes in the
-measured default-layout laboratory profile; the existing 45-request assertion
-still fails, so the budget suite stops before its subsequent checks. The limits
-have not been raised or removed. Measurements do not certify production speed,
-compressed wire bytes, physical devices, Safari or accessibility technology.
+Status: **local startup-budget acceptance passed** in the existing default-layout
+laboratory profile. All five measured viewports meet the unchanged 45-request,
+10 MiB decoded-resource and 200 non-cart draw-call limits. Measurements do not
+certify production speed, compressed wire bytes, physical devices, Safari or
+accessibility technology. See the current request-reduction results below.
 
 ## Changes
 
@@ -62,3 +62,82 @@ source snapshots that were tested at the time, not this later merge.
 ## Verification
 
 The final [published-artifact and PWA checks](evidence/gjh-stage11b-20261115/publish-and-pwa.log) open both layouts from a generated project-prefix deployment, exercise V1/V2 and a blocked WASM request, and verify offline fallback, bag retention, update identity and hash rejection. The final [expanded accessibility run](evidence/gjh-stage11b-20261115/accessibility.log) covers all four themes and five viewports. [Material checks](evidence/gjh-stage11b-20261115/materials.log) cover the later upstream merge, five viewports, four graphics-quality settings, missing/late modules, canvas failures and graphics restoration. The broader [theme and shell journeys](evidence/gjh-stage11b-20261115/themes-and-shell.log) and [five-viewport lift suite](evidence/gjh-stage11b-20261115/lift.log) ran before the later stage 8 merge; that merge's material suite also rechecks lift travel and its failure paths. The [Python tests](evidence/gjh-stage11b-20261115/unit.log), [Node tests](evidence/gjh-stage11b-20261115/node.log), generator and SSOT checks passed. [Source hashes](evidence/gjh-stage11b-20261115/source-sha256.txt) pin the final runtime and relevant tests.
+
+## Request reduction and current acceptance
+
+The startup entry and its world, visitor and optional character boundaries are
+now delivered as four reproducible local JavaScript bundles. Optional and
+failure-sensitive modules remain independently loaded. The checked-in bundle
+manifest records source and output hashes: ordinary clean builds still need
+only Python; regenerating changed JavaScript requires the pinned standalone
+Bun 1.3.11 compiler, with no npm installation or network dependency.
+
+Nineteen original startup models are also delivered in a single local pack.
+Each extracted model still receives its original size, identity, geometry and
+SHA-256 checks. A missing, malformed, truncated or slow pack falls back to the
+individual original files; a four-second pack timeout starts that fallback and
+the existing overall model deadlines remain in force. Individual caller
+cancellation remains isolated, and the shared raw pack is released after world
+startup. The individual files remain available for fallback and existing
+consumers.
+
+The unchanged budget test measured a fresh Chrome 157 context on macOS arm64
+using SwiftShader, reduced motion, local uncompressed HTTP and blocked service
+workers. It excludes the HTML navigation and measures decoded resources, not
+compressed transfer or GPU memory. The previous 320 × 740 result was 82
+requests and 9,884,761 decoded bytes; the comparable current result is 40
+requests and 9,923,772 bytes. Request count improves by 42 while decoded bytes
+increase by 39,011.
+
+| Viewport | Requests | Decoded bytes | Non-cart draw calls |
+| --- | ---: | ---: | ---: |
+| 320 × 740 | 40 | 9,923,772 | 158 |
+| 390 × 844 | 40 | 9,923,772 | 159 |
+| 768 × 1024 | 40 | 9,923,772 | 175 |
+| 1440 × 900 | 42 | 10,274,856 | 197 |
+| 844 × 390 | 40 | 9,923,772 | 198 |
+| Limit | 45 | 10,485,760 | 200 |
+
+The tightest observed headroom is three requests, 210,904 decoded bytes and two
+non-cart draw calls; each comes from the worst case for that metric, not
+necessarily the same viewport. Future changes should rerun the unchanged gate.
+The earlier failed request check remains historical evidence of the earlier
+implementation, not the result of this acceptance run. The current
+[budget report](evidence/gjh-stage11b-request-20261115/budget-report.json) and
+[log](evidence/gjh-stage11b-request-20261115/budget.log) include all five
+viewports and the subsequent interaction checks.
+
+A separate expanded-preview observation at network idle measured 42 startup
+requests at 390 × 844 and 44 at 1440 × 900, using the Everyday theme and a
+Metal backend. Loading all four themes subsequently increased cumulative
+requests to 46 and 48 respectively; those later on-demand theme requests are
+not startup requests. The [expanded theme observations](evidence/gjh-stage11b-request-20261115/expanded-theme-performance.json)
+also record theme and cart draw calls; they are not the default-layout budget
+gate or a field performance benchmark.
+
+## Current regression checks
+
+The real browser [store integration](evidence/gjh-stage11b-request-20261115/store-integration.log)
+checks all three stores, four SKU details, bag, physical pickup and return,
+plus V1/V2, fallback and five viewports. The expanded [lift](evidence/gjh-stage11b-request-20261115/lift.log)
+and four-theme switching and recovery checks pass. The earlier shelf
+compatibility test assumed Inspect opened an intermediate shelf view; the
+current product contract opens details directly. Its retained-component
+[fixture](evidence/gjh-stage11b-request-20261115/shelf-compatibility.log)
+explicitly restores the old entry only within that test, while the store
+integration test verifies the actual user action. The [navigation smoke test](evidence/gjh-stage11b-request-20261115/navigation-smoke.json) passes at phone and desktop widths after updating stale guide-focus and in-flow directory assumptions; it verifies visible targets, contrast, keyboard focus and bag state.
+
+[Pack fault tests](evidence/gjh-stage11b-request-20261115/asset-failures.log)
+cover absent, truncated, slow and individually corrupted resources, as well as
+individual-file and world-module failure. The final
+[accessibility run](evidence/gjh-stage11b-request-20261115/accessibility.log)
+covers five expanded viewports and 55 axe states. The [generated deployment and
+PWA checks](evidence/gjh-stage11b-request-20261115/publish-and-pwa.log) pass for
+both layouts, offline reconnection and bag retention. The
+[Python](evidence/gjh-stage11b-request-20261115/unit.log)
+and [Node](evidence/gjh-stage11b-request-20261115/node.log) suites, the
+generator, SSOT and clean Python-only build checks pass. Independent
+regeneration with pinned Bun produced byte-identical bundles and manifest.
+[Source hashes](evidence/gjh-stage11b-request-20261115/source-sha256.txt)
+pin the checked runtime and relevant tests. Browser emulation and automated
+accessibility checks do not certify physical devices or screen readers.

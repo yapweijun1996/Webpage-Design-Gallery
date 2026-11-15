@@ -2,6 +2,7 @@
 from browser_gjh_guide import *
 from browser_gjh_all_seats import move
 import argparse
+from gjh_startup_test_helpers import use_individual_assets
 ap=argparse.ArgumentParser();ap.add_argument('--url');args=ap.parse_args();out=ROOT.parent/'evidence/m056';out.mkdir(exist_ok=True)
 s=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT)));threading.Thread(target=s.serve_forever,daemon=True).start()
 try:
@@ -22,6 +23,6 @@ try:
     page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1000)');assert state(page)['character']['physicalProduct']['phase']=='held';page.get_by_role('button',name='Return to shelf',exact=True).click();page.evaluate('__mall.step(1000)')
    page.screenshot(path=str(out/f'after-close-{w}.png'));page.evaluate('__mall.setInput({forward:1});__mall.step(1500);__mall.setInput({forward:0});__mall.step(20)');assert state(page)['z']>-8.7,state(page)['z'];assert not errors,errors;rows.append({'width':w,'shelf':'PASS','fourSKURepeatedPickupReturn':'PASS','nativePlacement':'PASS','collision':'PASS','drawCalls':draw,'pageErrors':errors});page.close()
   if not args.url:
-   page=b.new_page();page.route('**/gjh-m056-shelf-lod1.glb',lambda route:route.abort());ready(page,f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');assert state(page)['productAssets']['shelf']['status']=='fallback';assert all(x['status']=='loaded' for x in state(page)['productAssets']['cans'].values());rows.append({'shelfFailureFallback':'PASS'});page.close()
+   page=b.new_page();use_individual_assets(page);page.route('**/gjh-m056-shelf-lod1.glb',lambda route:route.abort());ready(page,f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');assert state(page)['productAssets']['shelf']['status']=='fallback';assert all(x['status']=='loaded' for x in state(page)['productAssets']['cans'].values());rows.append({'shelfFailureFallback':'PASS'});page.close()
   b.close();print(json.dumps(rows));(out/('live-results.json' if args.url else 'results.json')).write_text(json.dumps(rows,indent=2))
 finally:s.shutdown()

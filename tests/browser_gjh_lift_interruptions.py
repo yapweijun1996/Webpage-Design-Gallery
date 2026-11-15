@@ -8,6 +8,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 from browser_gjh_lift import ROOT,Quiet,hashes,save,state,step,walk,lobby,dock,action
 from browser_gjh_interior_pilot import open_map
+from gjh_startup_test_helpers import use_individual_assets
 
 def write_source(path,text):
  if path.is_symlink() or path.exists() and not path.is_file():raise ValueError('Invalid QA source destination')
@@ -64,13 +65,14 @@ def run():
    for fallback in [False,True]:
     c=browser.new_context(viewport={'width':390,'height':844},has_touch=True,reduced_motion='no-preference',service_workers='block');c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
     if fallback:
+     use_individual_assets(c)
      for name in ['mall-service-desk.glb','mall-glass-showcase.glb']:c.route('**/'+name,lambda route:route.abort())
     def expose(route):
      response=route.fetch();source=response.text();needle='player.setPaused(() => modes.paused());';assert source.count(needle)==1
      served=source.replace(needle,needle+"Object.defineProperty(window,'__stage7QA',{value:{player,elevator,physics,world}});")
      report['qaExposure']={'sourceSha256':hashlib.sha256(source.encode()).hexdigest(),'servedSha256':hashlib.sha256(served.encode()).hexdigest(),'insertion':'Object.defineProperty(window, __stage7QA, actual private references); only after setPaused'}
      write_source(out/'qa-script.js',served);route.fulfill(response=response,body=served)
-    c.route('**/v11/script.js',expose);page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
+    c.route('**/v11/script.bundle.js',expose);page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
     row={'fallback':fallback,'errors':errors};report['checks'].append(row)
     s=state(page)
     for kind,point in [('desk',(25,45)),('showcase',(-7,18))]:

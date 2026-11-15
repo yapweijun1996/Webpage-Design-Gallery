@@ -5,6 +5,7 @@ import http.server
 import os
 import threading
 from pathlib import Path
+from gjh_startup_test_helpers import use_individual_assets
 from playwright.sync_api import sync_playwright
 from browser_gjh_expanded_shell import Quiet, move, position
 
@@ -79,7 +80,7 @@ def run():
             # Missing optional furniture still yields a usable seat and collider.
             context=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
             context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
-            page=context.new_page();page.route('**/GJH_PUB_002.glb',lambda route:route.abort())
+            page=context.new_page();use_individual_assets(page);page.route('**/GJH_PUB_002.glb',lambda route:route.abort())
             page.goto(base);page.wait_for_function('window.__sceneReady',timeout=90000)
             assert page.evaluate('__mall.state.furnishings.bench.status')=='fallback'
             seat=state(page)['seats'][0]

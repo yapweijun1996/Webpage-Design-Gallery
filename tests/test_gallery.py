@@ -95,6 +95,12 @@ class GalleryTests(unittest.TestCase):
                          "demos/corporate/gjh/shared/interaction.css",
                          "demos/corporate/gjh/shared/navigation.js",
                          "demos/corporate/gjh/v11/style.bundle.css",
+                         "demos/corporate/gjh/v11/script.bundle.js",
+                         "demos/corporate/gjh/v11/assets/world.bundle.js",
+                         "demos/corporate/gjh/v11/assets/player.bundle.js",
+                         "demos/corporate/gjh/v11/assets/character-v2.bundle.js",
+                         "demos/corporate/gjh/v11/assets/startup-asset-pack.js",
+                         "demos/corporate/gjh/v11/assets/startup-assets.pack",
                          "demos/corporate/gjh/v11/vendor/rapier_bg.wasm"):
                 self.assertEqual((output / name).read_bytes(), (ROOT / name).read_bytes())
             self.assertFalse((output / "design-system/tokens.json").exists())

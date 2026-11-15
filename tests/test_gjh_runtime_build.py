@@ -1,6 +1,8 @@
 """Contracts for reproducible V11 startup assets."""
 
 import importlib.util
+import json
+import struct
 import tempfile
 import unittest
 from pathlib import Path
@@ -17,6 +19,35 @@ def load(name):
 
 
 class RuntimeBuildTests(unittest.TestCase):
+    def test_startup_pack_contains_the_original_models(self):
+        build = load('build_gjh_startup_pack')
+        build.build(check=True)
+        data = build.PACK.read_bytes()
+        self.assertEqual(data[:8], b'GJHPACK1')
+        header_length = struct.unpack_from('<I', data, 8)[0]
+        entries = json.loads(data[12:12 + header_length])
+        names = json.loads(build.MANIFEST.read_text())
+        self.assertEqual(list(entries), names)
+        for name, (offset, length) in entries.items():
+            self.assertEqual(data[12 + header_length + offset:12 + header_length + offset + length],
+                             (build.ASSETS / name).read_bytes(), name)
+
+    def test_clean_prebuilt_javascript_needs_no_bun(self):
+        build = load('build_gjh_startup_js')
+        self.assertTrue(build.current())
+        with patch.object(build.shutil, 'which', side_effect=AssertionError('Bun should not be needed')):
+            build.build()
+            build.build(check=True)
+        original_digest = build.digest
+        entry = (build.ROOT / build.JOBS[0]['entry']).resolve()
+        with patch.object(build, 'digest', side_effect=lambda path: '0' * 64 if path.resolve() == entry else original_digest(path)):
+            self.assertFalse(build.current())
+            with self.assertRaisesRegex(ValueError, 'Regenerate'):
+                build.build(check=True)
+        with patch.object(build, 'current', return_value=False), patch.object(build.shutil, 'which', return_value=None):
+            with self.assertRaisesRegex(ValueError, 'standalone Bun'):
+                build.build()
+
     def test_rapier_outputs_are_pinned_and_runtime_check_detects_changes(self):
         build = load('build_rapier')
         generated = build.outputs()
