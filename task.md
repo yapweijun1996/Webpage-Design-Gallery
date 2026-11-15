@@ -1,6 +1,6 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **core demo implemented and laboratory-verified; physical-device and packaging acceptance remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
+Status: **core mall software and existing-source checks complete; physical-device acceptance and separately scoped interior follow-ups remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
 
 ## Objective and scope
 
@@ -36,7 +36,7 @@ Acceptance: the mall does not fetch models from GitHub at runtime; asset provena
 Depends on Phase 1. This is the first implementation priority.
 
 - [x] Replace the four simplified cans with the reviewed New Zealand, Australia, South Africa and Mexico models.
-- [ ] Match each model, label, name and product record against existing verified source data.
+- [x] Match each model, label, name and product record against existing verified source data.
 - [x] Generate four unofficial flat-label candidate PNGs with Codex CLI from the existing photo/SKU references (owner request, 2026-11-15). Keep estimated wrap/disclosure information and preserve the published GLBs until separately accepted.
 - [x] Evaluate the existing display-shelf model; arrange products for clear near and distant viewing.
 - [x] Provide discoverable inspection cues for F and click/tap.
@@ -465,3 +465,23 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
 
 Completion requires real artifacts and evidence, not a checked inventory row. Supplied dimensions, material/LOD budgets and capability tags remain proposals until individually reviewed. The existing delivered-asset evidence and other task sections retain their own status. The later explicit request authorizes this eight-asset implementation. See [pilot review](docs/gjh-v11-interior-pilot-review.md), [acceptance manifest](models/gjh-interior-pilot/manifest.json) and [14-case E2E evidence](docs/evidence/interior-pilot-e2e.json). The subsequent commit/push request is tracked in [pilot release review](docs/gjh-v11-interior-pilot-release.md). The complete pilot uses `?interior=pilot`; the default keeps later M056 shelves, Shelf focus and graphics recovery. HUD consolidation and remaining candidates remain separate work.
+
+## Existing-source product consistency — 2026-11-15
+
+Completed the original Phase 2 [source-consistency acceptance](docs/v11-product-source-consistency-review.md).
+Fresh requests verify four official product pages, eleven unchanged original
+images and four live packshots. Actual deployed GLBs and embedded JPEGs exactly
+match pinned upstream photo-derived exports/textures; twelve rendered panel views
+and twelve live direct-Inspect/detail/preview flows pass source-consistency review after
+synchronizing the concurrent interior pilot. No
+known cross-SKU panel, factual contradiction or invented mark was found.
+
+Earlier audit notes required physical print masters for this checkbox. Independent
+contract review confirmed that this exceeded the explicit task, which permits
+estimated panel placement and Mexico's disclosed 121-degree blank sector. Those
+notes are superseded for this checklist item; no claim of full physical-wrap,
+measured dimensions, current official edition or microtext certification follows.
+The four AI comparison images remain separate and undeployed. The concurrent application 1.1.43
+and its pilot assets are preserved; this audit changes documentation only. The physical-device/screen-reader task is now
+the only unchecked item in the original mall acceptance scope; the newly added
+interior follow-ups retain their own status.

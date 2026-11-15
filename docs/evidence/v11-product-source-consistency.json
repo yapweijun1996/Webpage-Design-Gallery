@@ -1,0 +1,1520 @@
+{
+  "task": "Phase 2 existing-source model/label/name/record consistency",
+  "status": "PASS_WITH_EXPLICIT_ESTIMATED_PACKAGING_LIMITS",
+  "baselineCommit": "7bc288b50fdf51999e6294d9293a443a62e37f9a",
+  "application": {
+    "version": "1.1.43",
+    "build": "7724ef5bf021cb5f"
+  },
+  "contract": "task.md Phase 2 explicitly permits estimated panel order/spacing and disclosed Mexico 121-degree blank; no physical print-master certification required.",
+  "freshOfficialSources": {
+    "retrievedAtUTC": "2026-11-15T03:59:35.716803+00:00",
+    "baselineCommit": "ba6d8d055e1ca7b9ec48ce6d55706c8c6338ee82",
+    "pages": [
+      {
+        "url": "https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/",
+        "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/",
+        "status": 200,
+        "sha256": "f05d9a06e09c5d4c6d2d4122743553afa257d4590e9be3c2e7f14df19456a898",
+        "bytes": 329256,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "title": "New Moon Premium Mexico Abalone 454g",
+        "demoRecordId": "new-moon-mx-454g-front",
+        "titleMatchesDemo": true,
+        "referencedSourceImages": [
+          "new-moon-mx-454g-front",
+          "new-moon-mx-454g-back"
+        ],
+        "catalogueDimensionsText": "7.5 \u00d7 7.5 \u00d7 12 cm",
+        "candidateMasterLinksOnProductPage": []
+      },
+      {
+        "url": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
+        "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/",
+        "status": 200,
+        "sha256": "6d05e3bd3d619313e49377e8236d2060b4535af95a472409161868089637ce24",
+        "bytes": 332763,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "title": "New Moon Premium South Africa Abalone (4 \u2013 5pcs) 425g",
+        "demoRecordId": "new-moon-sa-425g-front",
+        "titleMatchesDemo": true,
+        "referencedSourceImages": [
+          "new-moon-sa-425g-front",
+          "new-moon-sa-425g-back",
+          "new-moon-sa-425g-nutrition"
+        ],
+        "catalogueDimensionsText": "7.5 \u00d7 7.5 \u00d7 12 cm",
+        "candidateMasterLinksOnProductPage": []
+      },
+      {
+        "url": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/",
+        "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/",
+        "status": 200,
+        "sha256": "ce8880bcbe1f4b56b7d1ab14f18cc56b53f784e8ff1d6f3738f9cfc502455fa1",
+        "bytes": 332530,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "title": "New Moon Premium Wild Caught Australia Abalone 425g",
+        "demoRecordId": "new-moon-au-425g-front",
+        "titleMatchesDemo": true,
+        "referencedSourceImages": [
+          "new-moon-au-425g-front",
+          "new-moon-au-425g-back",
+          "new-moon-au-425g-nutrition"
+        ],
+        "catalogueDimensionsText": "7.5 \u00d7 7.5 \u00d7 12 cm",
+        "candidateMasterLinksOnProductPage": []
+      },
+      {
+        "url": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/",
+        "finalUrl": "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/",
+        "status": 200,
+        "sha256": "3238c9adbbf7569024283a693eb43b90895aeefb96543530acd2405bccf33e70",
+        "bytes": 336233,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "title": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+        "demoRecordId": "new-moon-nz-425g-front",
+        "titleMatchesDemo": true,
+        "referencedSourceImages": [
+          "new-moon-nz-425g-front",
+          "new-moon-nz-425g-back",
+          "new-moon-nz-425g-nutrition"
+        ],
+        "catalogueDimensionsText": "7.5 \u00d7 7.5 \u00d7 12 cm",
+        "candidateMasterLinksOnProductPage": []
+      }
+    ],
+    "images": [
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg",
+        "status": 200,
+        "sha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+        "bytes": 143514,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-nz-425g-front",
+        "localPath": "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Back.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Back.jpg",
+        "status": 200,
+        "sha256": "8cbdbeb68255d9f4b5d04a97326b8332dac653de502221d88585e981aeffc0ac",
+        "bytes": 162743,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-nz-425g-back",
+        "localPath": "assets/companies/gjh/official/new-moon-nz-425g-back.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-NIP.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-NIP.jpg",
+        "status": 200,
+        "sha256": "ce52927629cdf060c9a4adecd265efb0d0f9e2e8b98ab937ab216731af718cf1",
+        "bytes": 143569,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-nz-425g-nutrition",
+        "localPath": "assets/companies/gjh/official/new-moon-nz-425g-nutrition.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Front.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Front.jpg",
+        "status": 200,
+        "sha256": "5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a",
+        "bytes": 147632,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-au-425g-front",
+        "localPath": "assets/companies/gjh/official/new-moon-au-425g-front.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Back.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Back.jpg",
+        "status": 200,
+        "sha256": "37d7de5e7ef591ac7b3b64e4ddad53f355f7dd28a4a4305a55e1eed9f6b98ebd",
+        "bytes": 144297,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-au-425g-back",
+        "localPath": "assets/companies/gjh/official/new-moon-au-425g-back.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-NIP.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-NIP.jpg",
+        "status": 200,
+        "sha256": "86a69d1972b86bb80b7955c88540c917064ae89b454f5f6364f56d134bd910e4",
+        "bytes": 148711,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-au-425g-nutrition",
+        "localPath": "assets/companies/gjh/official/new-moon-au-425g-nutrition.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Front-1.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Front-1.jpg",
+        "status": 200,
+        "sha256": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
+        "bytes": 140822,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-sa-425g-front",
+        "localPath": "assets/companies/gjh/official/new-moon-sa-425g-front.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Back-1.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-Back-1.jpg",
+        "status": 200,
+        "sha256": "aae438ba58182074055c682c33c18dab839344345d1e0b89359614d86d0a0dd8",
+        "bytes": 159710,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-sa-425g-back",
+        "localPath": "assets/companies/gjh/official/new-moon-sa-425g-back.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-NIP-1.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-%E2%80%93-5pcs-425g-NIP-1.jpg",
+        "status": 200,
+        "sha256": "34b196ed941a276a470342f7e80d9b82860ff32ec9f59156758284476acb2af5",
+        "bytes": 136508,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-sa-425g-nutrition",
+        "localPath": "assets/companies/gjh/official/new-moon-sa-425g-nutrition.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Front.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Front.jpg",
+        "status": 200,
+        "sha256": "68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979",
+        "bytes": 147949,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-mx-454g-front",
+        "localPath": "assets/companies/gjh/official/new-moon-mx-454g-front.jpg",
+        "matchesRecordedOriginal": true
+      },
+      {
+        "url": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Back.jpg",
+        "finalUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Back.jpg",
+        "status": 200,
+        "sha256": "c5d408f1e39d1673ea19159828f0583c587a52ec5b7cf509e52a6d6fcb012413",
+        "bytes": 116998,
+        "attempts": [
+          {
+            "attempt": 1,
+            "result": "PASS"
+          }
+        ],
+        "assetId": "new-moon-mx-454g-back",
+        "localPath": "assets/companies/gjh/official/new-moon-mx-454g-back.jpg",
+        "matchesRecordedOriginal": true
+      }
+    ],
+    "models": [
+      {
+        "file": "new-moon-can-nz-425g-lod1.glb",
+        "sha256": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+        "bytes": 158528,
+        "matchesPinnedSource": true
+      },
+      {
+        "file": "new-moon-can-au-425g-lod1.glb",
+        "sha256": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+        "bytes": 153464,
+        "matchesPinnedSource": true
+      },
+      {
+        "file": "new-moon-can-sa-425g-lod1.glb",
+        "sha256": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+        "bytes": 156540,
+        "matchesPinnedSource": true
+      },
+      {
+        "file": "new-moon-can-mx-454g-lod1.glb",
+        "sha256": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+        "bytes": 119196,
+        "matchesPinnedSource": true
+      }
+    ],
+    "limits": [
+      "Source provenance refresh, not a full label master, current physical edition or physical device certificate.",
+      "Official listing dimensions are catalogue fields, not measured can engineering dimensions.",
+      "No prices, stock counts, ingredients or customer data are imported into the demo."
+    ],
+    "result": "PASS_SOURCE_PROVENANCE_REFRESH_ONLY",
+    "completeWrapVerified": false,
+    "physicalDeviceVerified": false
+  },
+  "deployedAssetAndLabelChain": {
+    "status": "PASS",
+    "rows": [
+      {
+        "sku": "nz-425g",
+        "product": {
+          "brand": "New Moon (GJH house brand)",
+          "origin": "New Zealand",
+          "pack_size": "425g",
+          "type_zh": "\u65b0\u897f\u5170\u9c8d\u9c7c\u7f50\u5934",
+          "source_images": {
+            "new-moon-nz-425g-front.jpg": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+            "new-moon-nz-425g-back.jpg": "8cbdbeb68255d9f4b5d04a97326b8332dac653de502221d88585e981aeffc0ac",
+            "new-moon-nz-425g-nutrition.jpg": "ce52927629cdf060c9a4adecd265efb0d0f9e2e8b98ab937ab216731af718cf1"
+          }
+        },
+        "labelLayout": {
+          "method": "Each packshot is treated as a cylinder panel (angle = asin of the normalised column). Seam positions and panel spacing are chosen to minimise colour and artwork mismatch at the seams, constrained to close the circle.",
+          "panels_degrees_from_front": {
+            "front": {
+              "centre": 0,
+              "usable_from": -72,
+              "usable_to": 69
+            },
+            "nutrition": {
+              "centre": 117,
+              "usable_from": -48,
+              "usable_to": 49
+            },
+            "back": {
+              "centre": 226,
+              "usable_from": -60,
+              "usable_to": 62
+            }
+          },
+          "order_around_can": [
+            "front",
+            "nutrition",
+            "back"
+          ],
+          "status": "Panel order and spacing are estimates, not verified against a physical can or a die-line.",
+          "unprinted_gap_degrees": 0,
+          "gap_note": "No gap: the three official panels cover the full circumference.",
+          "flat_badge_fix": {
+            "item": "Wild Caught badge on the front panel",
+            "finding": "In the official packshot this badge was pasted on flat (not foreshortened by the cylinder), unlike the printed halal and ASME logos which measure 1.00 to 1.04 once unrolled. Unrolling it as if foreshortened made it about 1.41 times too wide when viewed face-on.",
+            "fix": "Columns inside the badge's rows are remapped so its arc width equals its height. Only sampling positions change; no pixel is redrawn. The angle freed is absorbed in the plain background to its left, and the front panel ends just after the badge.",
+            "face_on_width_over_height": {
+              "before_computed": 1.41,
+              "before_rendered": null,
+              "after_rendered_approx": 0.98
+            },
+            "source_box_px": [
+              554.4,
+              584.4,
+              653.6,
+              656.6
+            ],
+            "note": "Rendered values come from orthographic face-on renders of the GLB; the Australia figures use a colour mask, the others a visual pixel check."
+          }
+        },
+        "nominalDimensionsMetres": [
+          0.07750000059604645,
+          0.12399169057607651,
+          0.07750000059604645
+        ],
+        "glbSHA256": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+        "deployedGLBMatchesLocal": true,
+        "embeddedImageName": "gjh-can-new-zealand-abalone-label-lod1",
+        "embeddedImageSHA256": "6c2be660288006c6d1d1981bc86247c42767edb93589277139211a38a4d235bd",
+        "embeddedBytesMatchPinnedPhotoTexture": true,
+        "upstreamTexturePath": "models/gjh-abalone-cans/textures/lod1/gjh-can-new-zealand-abalone-label-lod1.jpg",
+        "upstreamTextureRevision": "1abda0ff96a4b787877a32ff8915555873a0b686",
+        "embeddedPath": "/private/tmp/gallery-source-revalidation/nz-425g-embedded.jpg",
+        "metadataSHA256": "ce21ea0a2bdd601dee08eb6d126f32f0209d9f63e1acad9a953abeb5e03f1cc3",
+        "knownAIComparisonExcluded": true,
+        "upstreamGLBPath": "models/gjh-abalone-cans/exports/lod1/gjh-can-new-zealand-abalone-lod1.glb",
+        "deployedGLBMatchesPinnedUpstream": true,
+        "livePackshot": {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg?source-audit=1.1.41",
+          "sha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+          "matchesCurrentOfficialOriginal": true
+        }
+      },
+      {
+        "sku": "au-425g",
+        "product": {
+          "brand": "New Moon (GJH house brand)",
+          "origin": "Australia",
+          "pack_size": "425g",
+          "type_zh": "\u6fb3\u6d32\u9c8d\u9c7c\u7f50\u5934",
+          "source_images": {
+            "new-moon-au-425g-front.jpg": "5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a",
+            "new-moon-au-425g-back.jpg": "37d7de5e7ef591ac7b3b64e4ddad53f355f7dd28a4a4305a55e1eed9f6b98ebd",
+            "new-moon-au-425g-nutrition.jpg": "86a69d1972b86bb80b7955c88540c917064ae89b454f5f6364f56d134bd910e4"
+          }
+        },
+        "labelLayout": {
+          "method": "Each packshot is treated as a cylinder panel (angle = asin of the normalised column). Seam positions and panel spacing are chosen to minimise colour and artwork mismatch at the seams, constrained to close the circle.",
+          "panels_degrees_from_front": {
+            "front": {
+              "centre": 0,
+              "usable_from": -69,
+              "usable_to": 71
+            },
+            "nutrition": {
+              "centre": 116,
+              "usable_from": -45,
+              "usable_to": 50
+            },
+            "back": {
+              "centre": 228,
+              "usable_from": -62,
+              "usable_to": 63
+            }
+          },
+          "order_around_can": [
+            "front",
+            "nutrition",
+            "back"
+          ],
+          "status": "Panel order and spacing are estimates, not verified against a physical can or a die-line.",
+          "unprinted_gap_degrees": 0,
+          "gap_note": "No gap: the three official panels cover the full circumference.",
+          "flat_badge_fix": {
+            "item": "Wild Caught badge on the front panel",
+            "finding": "In the official packshot this badge was pasted on flat (not foreshortened by the cylinder), unlike the printed halal and ASME logos which measure 1.00 to 1.04 once unrolled. Unrolling it as if foreshortened made it about 1.60 times too wide when viewed face-on.",
+            "fix": "Columns inside the badge's rows are remapped so its arc width equals its height. Only sampling positions change; no pixel is redrawn. The angle freed is absorbed in the plain background to its left, and the front panel ends just after the badge.",
+            "face_on_width_over_height": {
+              "before_computed": 1.6,
+              "before_rendered": 1.5,
+              "after_rendered_approx": 0.99
+            },
+            "source_box_px": [
+              570.5,
+              600.5,
+              667,
+              670
+            ],
+            "note": "Rendered values come from orthographic face-on renders of the GLB; the Australia figures use a colour mask, the others a visual pixel check."
+          }
+        },
+        "nominalDimensionsMetres": [
+          0.07750000059604645,
+          0.12399169057607651,
+          0.07750000059604645
+        ],
+        "glbSHA256": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+        "deployedGLBMatchesLocal": true,
+        "embeddedImageName": "gjh-can-australia-abalone-label-lod1",
+        "embeddedImageSHA256": "3d1fbe2635b118b29771f68ba380950a7679ad1bb95090f8f0d65bac9d386982",
+        "embeddedBytesMatchPinnedPhotoTexture": true,
+        "upstreamTexturePath": "models/gjh-abalone-cans/textures/lod1/gjh-can-australia-abalone-label-lod1.jpg",
+        "upstreamTextureRevision": "1abda0ff96a4b787877a32ff8915555873a0b686",
+        "embeddedPath": "/private/tmp/gallery-source-revalidation/au-425g-embedded.jpg",
+        "metadataSHA256": "2781420bec1e4180c60d960416a5a152946350f00f80eefd454ac11dae18e1a0",
+        "knownAIComparisonExcluded": true,
+        "upstreamGLBPath": "models/gjh-abalone-cans/exports/lod1/gjh-can-australia-abalone-lod1.glb",
+        "deployedGLBMatchesPinnedUpstream": true,
+        "livePackshot": {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg?source-audit=1.1.41",
+          "sha256": "5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a",
+          "matchesCurrentOfficialOriginal": true
+        }
+      },
+      {
+        "sku": "sa-425g",
+        "product": {
+          "brand": "New Moon (GJH house brand)",
+          "origin": "South Africa",
+          "pack_size": "425g",
+          "type_zh": "\u5357\u975e\u9c8d\u9c7c\u7f50\u5934",
+          "source_images": {
+            "new-moon-sa-425g-front.jpg": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
+            "new-moon-sa-425g-back.jpg": "aae438ba58182074055c682c33c18dab839344345d1e0b89359614d86d0a0dd8",
+            "new-moon-sa-425g-nutrition.jpg": "34b196ed941a276a470342f7e80d9b82860ff32ec9f59156758284476acb2af5"
+          }
+        },
+        "labelLayout": {
+          "method": "Each packshot is treated as a cylinder panel (angle = asin of the normalised column). Seam positions and panel spacing are chosen to minimise colour and artwork mismatch at the seams, constrained to close the circle.",
+          "panels_degrees_from_front": {
+            "front": {
+              "centre": 0,
+              "usable_from": -72,
+              "usable_to": 72
+            },
+            "nutrition": {
+              "centre": 120,
+              "usable_from": -48,
+              "usable_to": 48
+            },
+            "back": {
+              "centre": 223,
+              "usable_from": -55,
+              "usable_to": 65
+            }
+          },
+          "order_around_can": [
+            "front",
+            "nutrition",
+            "back"
+          ],
+          "status": "Panel order and spacing are estimates, not verified against a physical can or a die-line.",
+          "unprinted_gap_degrees": 0,
+          "gap_note": "No gap: the three official panels cover the full circumference.",
+          "flat_badge_fix": null,
+          "flat_badge_note": "The red 4~5 whole-abalone seal measures about 1.1 (printed, foreshortened like the halal logos) and was left unchanged."
+        },
+        "nominalDimensionsMetres": [
+          0.07750000059604645,
+          0.12399169057607651,
+          0.07750000059604645
+        ],
+        "glbSHA256": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+        "deployedGLBMatchesLocal": true,
+        "embeddedImageName": "gjh-can-south-africa-abalone-label-lod1",
+        "embeddedImageSHA256": "f188281a56d2d9c0ce1a0eb87160093a846b0764b6c6505301b328a30b32d767",
+        "embeddedBytesMatchPinnedPhotoTexture": true,
+        "upstreamTexturePath": "models/gjh-abalone-cans/textures/lod1/gjh-can-south-africa-abalone-label-lod1.jpg",
+        "upstreamTextureRevision": "1abda0ff96a4b787877a32ff8915555873a0b686",
+        "embeddedPath": "/private/tmp/gallery-source-revalidation/sa-425g-embedded.jpg",
+        "metadataSHA256": "fc8c261eb5929a36648086acb2b4e0a0a1281da56e94e163419f937dadd303db",
+        "knownAIComparisonExcluded": true,
+        "upstreamGLBPath": "models/gjh-abalone-cans/exports/lod1/gjh-can-south-africa-abalone-lod1.glb",
+        "deployedGLBMatchesPinnedUpstream": true,
+        "livePackshot": {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg?source-audit=1.1.41",
+          "sha256": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
+          "matchesCurrentOfficialOriginal": true
+        }
+      },
+      {
+        "sku": "mx-454g",
+        "product": {
+          "brand": "New Moon (GJH house brand)",
+          "origin": "Mexico",
+          "pack_size": "454g",
+          "type_zh": "\u58a8\u897f\u54e5\u9c8d\u9c7c\u7f50\u5934",
+          "source_images": {
+            "new-moon-mx-454g-front.jpg": "68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979",
+            "new-moon-mx-454g-back.jpg": "c5d408f1e39d1673ea19159828f0583c587a52ec5b7cf509e52a6d6fcb012413"
+          }
+        },
+        "labelLayout": {
+          "method": "Each packshot is treated as a cylinder panel (angle = asin of the normalised column). Seam positions and panel spacing are chosen to minimise colour and artwork mismatch at the seams, constrained to close the circle.",
+          "panels_degrees_from_front": {
+            "front": {
+              "centre": 0,
+              "usable_from": -65,
+              "usable_to": 72
+            },
+            "back": {
+              "centre": 120,
+              "usable_from": -48,
+              "usable_to": 54
+            }
+          },
+          "order_around_can": [
+            "front",
+            "back"
+          ],
+          "status": "Panel order and spacing are estimates, not verified against a physical can or a die-line.",
+          "unprinted_gap_degrees": 121,
+          "gap_note": "No official image exists for this sector. It is an unprinted placeholder using two flat base colours; no artwork, text or marks were invented.",
+          "flat_badge_fix": {
+            "item": "Wild Caught badge on the front panel",
+            "finding": "In the official packshot this badge was pasted on flat (not foreshortened by the cylinder), unlike the printed halal and ASME logos which measure 1.00 to 1.04 once unrolled. Unrolling it as if foreshortened made it about 1.74 times too wide when viewed face-on.",
+            "fix": "Columns inside the badge's rows are remapped so its arc width equals its height. Only sampling positions change; no pixel is redrawn. The angle freed is absorbed in the plain background to its left, and the front panel ends just after the badge.",
+            "face_on_width_over_height": {
+              "before_computed": 1.74,
+              "before_rendered": null,
+              "after_rendered_approx": 0.97
+            },
+            "source_box_px": [
+              568,
+              598,
+              670,
+              673
+            ],
+            "note": "Rendered values come from orthographic face-on renders of the GLB; the Australia figures use a colour mask, the others a visual pixel check."
+          }
+        },
+        "nominalDimensionsMetres": [
+          0.07750000059604645,
+          0.12399169057607651,
+          0.07750000059604645
+        ],
+        "glbSHA256": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+        "deployedGLBMatchesLocal": true,
+        "embeddedImageName": "gjh-can-mexico-abalone-label-lod1",
+        "embeddedImageSHA256": "133b93f4b26636ab09772b84bcbc2550139c011209318f153dbedae8ead8f1ff",
+        "embeddedBytesMatchPinnedPhotoTexture": true,
+        "upstreamTexturePath": "models/gjh-abalone-cans/textures/lod1/gjh-can-mexico-abalone-label-lod1.jpg",
+        "upstreamTextureRevision": "1abda0ff96a4b787877a32ff8915555873a0b686",
+        "embeddedPath": "/private/tmp/gallery-source-revalidation/mx-454g-embedded.jpg",
+        "metadataSHA256": "a68434cdde02c07fbd3b1e1903f8df365ba49c3c29fd5f665b14c29e4880c19f",
+        "knownAIComparisonExcluded": true,
+        "upstreamGLBPath": "models/gjh-abalone-cans/exports/lod1/gjh-can-mexico-abalone-lod1.glb",
+        "deployedGLBMatchesPinnedUpstream": true,
+        "livePackshot": {
+          "url": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg?source-audit=1.1.41",
+          "sha256": "68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979",
+          "matchesCurrentOfficialOriginal": true
+        }
+      }
+    ]
+  },
+  "actualRenderedAndLiveProof": {
+    "status": "PASS",
+    "application": {
+      "version": "1.1.43",
+      "build": "7724ef5bf021cb5f"
+    },
+    "runtimeSHA256": {
+      "demos/corporate/gjh/v11/index.html": "747de8088405cde77c4dac622bd427477cd677713294c6e48437dbaaf480e582",
+      "demos/corporate/gjh/v11/script.js": "3a09dea9a2068791ea8557190166c55ab5dc2ecbe7bd6ebfc889a650c99e1152",
+      "demos/corporate/gjh/v11/style.css": "7fe0166ba7690be4cbc06dc1caa1e538bbd38a8b2e2168c945972cc2d277c1de",
+      "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+      "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+      "demos/corporate/gjh/v11/assets/ui.js": "5ced7941acb476cc1489f87a8c28ec1f07ed0d9cc1da4ab15d0f8eda25778d18",
+      "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+      "demos/corporate/gjh/v11/assets/products.js": "4bf42c5646b0426d45e34d691c4e8ca4d18f6a879aab63c081aabd7e4e1b8a57",
+      "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+      "demos/corporate/gjh/v11/assets/world.js": "483a151a043da2b58cf9e81509e65c12161105d89fdd84cff8b8817ef43ff9b7",
+      "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+      "demos/corporate/gjh/v11/assets/shelf-focus.js": "0f5f40e6a8bc9a2062c0a5047a4b9d0213c45bbdd837c97074c99a2de0a2cb27",
+      "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+      "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+      "demos/corporate/gjh/v11/assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
+      "demos/corporate/gjh/v11/assets/furnishings.js": "00fb76e2104ca15df5c5b5c626e484f4cc692d0aeb15bffc5925de828656edac",
+      "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+      "demos/corporate/gjh/v11/assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+      "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "f6fa27682ffbc4dec604ec42fa168294a67119775d0472568b8f06e7845b7d4d",
+      "demos/corporate/gjh/v11/assets/target-guidance.js": "3ca78d7697618bc17a4a7cc0c1d51b4cc3f36284c47cef208edd1a1aec77e1a5",
+      "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+      "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+      "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+      "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+      "demos/corporate/gjh/v11/assets/player.js": "91301a959fe95a0939238a8041c4d9c6957e1b24f8240fe7be3faac951041c43",
+      "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+      "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+      "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+      "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+      "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+      "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+      "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+      "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+    },
+    "runtimeHashStable": true,
+    "testSHA256": "13591968b8deabdcc9d1d0028054749a3113775f414395393519238e6b763703",
+    "testHashStable": true,
+    "results": [
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label New Zealand Abalone LOD1",
+          "texture": "gjh-can-new-zealand-abalone-label-lod1"
+        },
+        "sku": "nz-425g",
+        "panel": "front",
+        "metadataCentreDegrees": 0,
+        "mappedUV": 0.5,
+        "rotationRadians": -0.0,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-nz-425g-front.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label New Zealand Abalone LOD1",
+          "texture": "gjh-can-new-zealand-abalone-label-lod1"
+        },
+        "sku": "nz-425g",
+        "panel": "nutrition",
+        "metadataCentreDegrees": 117,
+        "mappedUV": 0.8333333134651184,
+        "rotationRadians": -2.0943951328669805,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-nz-425g-nutrition.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label New Zealand Abalone LOD1",
+          "texture": "gjh-can-new-zealand-abalone-label-lod1"
+        },
+        "sku": "nz-425g",
+        "panel": "back",
+        "metadataCentreDegrees": 226,
+        "mappedUV": 0.1388888955116272,
+        "rotationRadians": 2.2689280241868097,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-nz-425g-back.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label Australia Abalone LOD1",
+          "texture": "gjh-can-australia-abalone-label-lod1"
+        },
+        "sku": "au-425g",
+        "panel": "front",
+        "metadataCentreDegrees": 0,
+        "mappedUV": 0.5,
+        "rotationRadians": -0.0,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-au-425g-front.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label Australia Abalone LOD1",
+          "texture": "gjh-can-australia-abalone-label-lod1"
+        },
+        "sku": "au-425g",
+        "panel": "nutrition",
+        "metadataCentreDegrees": 116,
+        "mappedUV": 0.8333333134651184,
+        "rotationRadians": -2.0943951328669805,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-au-425g-nutrition.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label Australia Abalone LOD1",
+          "texture": "gjh-can-australia-abalone-label-lod1"
+        },
+        "sku": "au-425g",
+        "panel": "back",
+        "metadataCentreDegrees": 228,
+        "mappedUV": 0.1388888955116272,
+        "rotationRadians": 2.2689280241868097,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-au-425g-back.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label South Africa Abalone LOD1",
+          "texture": "gjh-can-south-africa-abalone-label-lod1"
+        },
+        "sku": "sa-425g",
+        "panel": "front",
+        "metadataCentreDegrees": 0,
+        "mappedUV": 0.5,
+        "rotationRadians": -0.0,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-sa-425g-front.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label South Africa Abalone LOD1",
+          "texture": "gjh-can-south-africa-abalone-label-lod1"
+        },
+        "sku": "sa-425g",
+        "panel": "nutrition",
+        "metadataCentreDegrees": 120,
+        "mappedUV": 0.8333333134651184,
+        "rotationRadians": -2.0943951328669805,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-sa-425g-nutrition.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label South Africa Abalone LOD1",
+          "texture": "gjh-can-south-africa-abalone-label-lod1"
+        },
+        "sku": "sa-425g",
+        "panel": "back",
+        "metadataCentreDegrees": 223,
+        "mappedUV": 0.1111111119389534,
+        "rotationRadians": 2.4434609561978804,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-sa-425g-back.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label Mexico Abalone LOD1",
+          "texture": "gjh-can-mexico-abalone-label-lod1"
+        },
+        "sku": "mx-454g",
+        "panel": "front",
+        "metadataCentreDegrees": 0,
+        "mappedUV": 0.5,
+        "rotationRadians": -0.0,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-mx-454g-front.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "loaded": {
+          "hash": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+          "bounds": [
+            0.07750000059604645,
+            0.12399169057607651,
+            0.07750000059604645
+          ],
+          "imageSize": [
+            640,
+            312
+          ],
+          "material": "Label Mexico Abalone LOD1",
+          "texture": "gjh-can-mexico-abalone-label-lod1"
+        },
+        "sku": "mx-454g",
+        "panel": "back",
+        "metadataCentreDegrees": 120,
+        "mappedUV": 0.8333333134651184,
+        "rotationRadians": -2.0943951328669805,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-mx-454g-back.png"
+      },
+      {
+        "kind": "exactGLBPanel",
+        "sku": "mx-454g",
+        "panel": "disclosed-blank-sector",
+        "metadataCentreDegrees": 234.5,
+        "mappedUV": 0.1388888955116272,
+        "rotationRadians": 2.2689280241868097,
+        "drawCalls": 3,
+        "glError": 0,
+        "frame": "/private/tmp/gallery-source-revalidation/studio-mx-454g-blank-sector.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "nz-425g",
+        "title": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+        "packshotId": "new-moon-nz-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-nz-425g-390.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "au-425g",
+        "title": "New Moon Premium Wild Caught Australia Abalone 425g",
+        "packshotId": "new-moon-au-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-au-425g-390.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "sa-425g",
+        "title": "New Moon Premium South Africa Abalone (4 \u2013 5pcs) 425g",
+        "packshotId": "new-moon-sa-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-sa-425g-390.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "mx-454g",
+        "title": "New Moon Premium Mexico Abalone 454g",
+        "packshotId": "new-moon-mx-454g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition. The Mexico 3D can includes a 121-degree unprinted placeholder sector.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-mx-454g-390.png"
+      },
+      {
+        "kind": "liveDisclosures",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": false,
+        "illegalCount": 0,
+        "pageErrors": []
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          1440,
+          900
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "nz-425g",
+        "title": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+        "packshotId": "new-moon-nz-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-nz-425g-1440.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          1440,
+          900
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "au-425g",
+        "title": "New Moon Premium Wild Caught Australia Abalone 425g",
+        "packshotId": "new-moon-au-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-au-425g-1440.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          1440,
+          900
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "sa-425g",
+        "title": "New Moon Premium South Africa Abalone (4 \u2013 5pcs) 425g",
+        "packshotId": "new-moon-sa-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-sa-425g-1440.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          1440,
+          900
+        ],
+        "pilot": false,
+        "shelfModel": "GJH-M056",
+        "sku": "mx-454g",
+        "title": "New Moon Premium Mexico Abalone 454g",
+        "packshotId": "new-moon-mx-454g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition. The Mexico 3D can includes a 121-degree unprinted placeholder sector.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-mx-454g-1440.png"
+      },
+      {
+        "kind": "liveDisclosures",
+        "viewport": [
+          1440,
+          900
+        ],
+        "pilot": false,
+        "illegalCount": 0,
+        "pageErrors": []
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": true,
+        "shelfModel": "GJH-DSP-001",
+        "sku": "nz-425g",
+        "title": "New Moon Premium Wild Caught New Zealand Abalone 425g",
+        "packshotId": "new-moon-nz-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-nz-425g-390-pilot.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": true,
+        "shelfModel": "GJH-DSP-001",
+        "sku": "au-425g",
+        "title": "New Moon Premium Wild Caught Australia Abalone 425g",
+        "packshotId": "new-moon-au-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-au-425g-390-pilot.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": true,
+        "shelfModel": "GJH-DSP-001",
+        "sku": "sa-425g",
+        "title": "New Moon Premium South Africa Abalone (4 \u2013 5pcs) 425g",
+        "packshotId": "new-moon-sa-425g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-sa-425g-390-pilot.png"
+      },
+      {
+        "kind": "liveDirectInspectPreview",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": true,
+        "shelfModel": "GJH-DSP-001",
+        "sku": "mx-454g",
+        "title": "New Moon Premium Mexico Abalone 454g",
+        "packshotId": "new-moon-mx-454g-front",
+        "description": "Official product imagery shown here. The mall\u2019s 3D can is an unofficial photo-derived demo with estimated dimensions and label layout, not a verified packaging replica or brand-approved edition. The Mexico 3D can includes a 121-degree unprinted placeholder sector.",
+        "directInspectDefault3D": true,
+        "officialImageAlternativeVerified": true,
+        "loadedPreview": true,
+        "closeCleanup": true,
+        "frame": "/private/tmp/gallery-source-revalidation/live-mx-454g-390-pilot.png"
+      },
+      {
+        "kind": "liveDisclosures",
+        "viewport": [
+          390,
+          844
+        ],
+        "pilot": true,
+        "illegalCount": 0,
+        "pageErrors": []
+      }
+    ],
+    "frames": [
+      {
+        "name": "studio-nz-425g-front",
+        "path": "/private/tmp/gallery-source-revalidation/studio-nz-425g-front.png",
+        "sha256": "3b16189ac06ba905d0baef0f240dfa5ec717c9ece936e167b58d0b11994f9591"
+      },
+      {
+        "name": "studio-nz-425g-nutrition",
+        "path": "/private/tmp/gallery-source-revalidation/studio-nz-425g-nutrition.png",
+        "sha256": "2718158d90c374cd27874a83e3c7779f639fd11887f4bf815b9f13b0ea288893"
+      },
+      {
+        "name": "studio-nz-425g-back",
+        "path": "/private/tmp/gallery-source-revalidation/studio-nz-425g-back.png",
+        "sha256": "c8c7cf2e7cdff01f0beee2b4cd08ccf09a28e09407fcf95158c4b5dd22330f09"
+      },
+      {
+        "name": "studio-au-425g-front",
+        "path": "/private/tmp/gallery-source-revalidation/studio-au-425g-front.png",
+        "sha256": "0fac12fc9225cd303369648808c19d4ed7cbd5dc9ef85e966077f026d9c93cb2"
+      },
+      {
+        "name": "studio-au-425g-nutrition",
+        "path": "/private/tmp/gallery-source-revalidation/studio-au-425g-nutrition.png",
+        "sha256": "17565251348c3dc45a89de6feb77cfca6373c4c8d0a1793f435ac856b16093f6"
+      },
+      {
+        "name": "studio-au-425g-back",
+        "path": "/private/tmp/gallery-source-revalidation/studio-au-425g-back.png",
+        "sha256": "0bc5d569c6cb0cc13ba2893e54cbecfaaaae68630bd1d3ba09ffea21642fe90d"
+      },
+      {
+        "name": "studio-sa-425g-front",
+        "path": "/private/tmp/gallery-source-revalidation/studio-sa-425g-front.png",
+        "sha256": "02f067adef57028b408d1005fe4b6b0748e0b8d113a52f2912055a4cce5bf7a4"
+      },
+      {
+        "name": "studio-sa-425g-nutrition",
+        "path": "/private/tmp/gallery-source-revalidation/studio-sa-425g-nutrition.png",
+        "sha256": "b30ca7d58faee46d657a8744f1459822e8d5318959f053ca6e5ae5818e8b453a"
+      },
+      {
+        "name": "studio-sa-425g-back",
+        "path": "/private/tmp/gallery-source-revalidation/studio-sa-425g-back.png",
+        "sha256": "07f4a178e947ad332be5239c64fe2663d4780433f0917ddf866ec3aa84d553e7"
+      },
+      {
+        "name": "studio-mx-454g-front",
+        "path": "/private/tmp/gallery-source-revalidation/studio-mx-454g-front.png",
+        "sha256": "1cfe7b857ad9f76a6a5904ccce2ce5f6a3f7d96c35fa39e023e11c75de85fec5"
+      },
+      {
+        "name": "studio-mx-454g-back",
+        "path": "/private/tmp/gallery-source-revalidation/studio-mx-454g-back.png",
+        "sha256": "27a89baf01e7cd36ccc1469f08aae4fac3cbc174f0b7344eab00ab8219a56660"
+      },
+      {
+        "name": "studio-mx-454g-blank-sector",
+        "path": "/private/tmp/gallery-source-revalidation/studio-mx-454g-blank-sector.png",
+        "sha256": "b1decdfbbe85e93e63a90388ae93a1ac8e6fe4367f9a4dd6082202d6d9ebeef8"
+      },
+      {
+        "name": "live-nz-425g-390",
+        "path": "/private/tmp/gallery-source-revalidation/live-nz-425g-390.png",
+        "sha256": "e748352779d98b9975eab62556a40b3d7bd77de824235b081e8da6cf73e03a64"
+      },
+      {
+        "name": "live-au-425g-390",
+        "path": "/private/tmp/gallery-source-revalidation/live-au-425g-390.png",
+        "sha256": "db402df2a217b99ddd3a103849274ac9b8b82d01c22afff11d5c5aa9daaaf2d0"
+      },
+      {
+        "name": "live-sa-425g-390",
+        "path": "/private/tmp/gallery-source-revalidation/live-sa-425g-390.png",
+        "sha256": "e7b2637b83db724ae15974059bdfddd2efeeed33492ac7d18c6c87bdbb9bf3ec"
+      },
+      {
+        "name": "live-mx-454g-390",
+        "path": "/private/tmp/gallery-source-revalidation/live-mx-454g-390.png",
+        "sha256": "2b6963428b29baea2a7878abfb32e7e7b061ffd38d91362520fceb97083e6c38"
+      },
+      {
+        "name": "live-nz-425g-1440",
+        "path": "/private/tmp/gallery-source-revalidation/live-nz-425g-1440.png",
+        "sha256": "4883441ab04f1367a308bb74f6f28a5fdfa313ef9c08f8777b32bf9f6ca5a7e7"
+      },
+      {
+        "name": "live-au-425g-1440",
+        "path": "/private/tmp/gallery-source-revalidation/live-au-425g-1440.png",
+        "sha256": "db20925bd600024eddf43f7fcd04883980e1126daa8f328493e7f6ee951cca5f"
+      },
+      {
+        "name": "live-sa-425g-1440",
+        "path": "/private/tmp/gallery-source-revalidation/live-sa-425g-1440.png",
+        "sha256": "6a722286f9209a1e352fff697235cbbc878e623519d373045a25539701b67ee0"
+      },
+      {
+        "name": "live-mx-454g-1440",
+        "path": "/private/tmp/gallery-source-revalidation/live-mx-454g-1440.png",
+        "sha256": "71917e77ae9c561d42bc56294779ea1387cc55e5318278e4b770416a6795429f"
+      },
+      {
+        "name": "live-nz-425g-390-pilot",
+        "path": "/private/tmp/gallery-source-revalidation/live-nz-425g-390-pilot.png",
+        "sha256": "81b1a481e09f398fe053d7450b46aebb61e63a1ee18357c816da57e22a34d218"
+      },
+      {
+        "name": "live-au-425g-390-pilot",
+        "path": "/private/tmp/gallery-source-revalidation/live-au-425g-390-pilot.png",
+        "sha256": "0b2b808bbac6ecf892fb2cb51f212625a2334afac2c5826a7e53fa6fa4a64abc"
+      },
+      {
+        "name": "live-sa-425g-390-pilot",
+        "path": "/private/tmp/gallery-source-revalidation/live-sa-425g-390-pilot.png",
+        "sha256": "7a4098c427943765b2bace59fde2e382d2634521958e4a3e4467ffbf9d56496e"
+      },
+      {
+        "name": "live-mx-454g-390-pilot",
+        "path": "/private/tmp/gallery-source-revalidation/live-mx-454g-390-pilot.png",
+        "sha256": "7bd7808cf9a64e6af40d0bcd7ddc2a9c28776fa56d1e50011a8f901fb60812c6"
+      }
+    ],
+    "limitations": [
+      "Studio uses exact GLB materials with neutral QA lighting, not a physical can.",
+      "Soft source microtext is not certified legible or numerically transcribed."
+    ]
+  },
+  "independentReview": {
+    "status": "APPROVED",
+    "reviewer": "/root/lod_review",
+    "actualVisualComparison": "11 official photographs against11 corresponding rendered GLB panels, Mexico blank and live Mexico390/SouthAfrica1440 details.",
+    "findings": [],
+    "checkedFacts": [
+      "Four colourways/origins/productartwork match.",
+      "South Africa 4-5pcs andMexico net454g / drained255g matchsource.",
+      "Eight live Shelf/detail/preview cases correctSKU/title/image/cleanup/disclosures/legal0/errors0.",
+      "No known factual mismatch/cross-SKU panel/invented mark; AI comparisons excluded."
+    ],
+    "limits": [
+      "Soft microtext not individually certified.",
+      "Catalogue fields not physical measurement.",
+      "No new visual score orruntime change."
+    ],
+    "initialProofScope": "Initial11official-photo/rendered-panel comparisons and8livecases approved. Exact model/photo identities are unchanged. Latest12direct-Inspect cases onapp1.1.43 are separate supplemental proof.",
+    "latestSupplement": {
+      "status": "APPROVED",
+      "application": "1.1.43 / build7724ef5bf021cb5f",
+      "runtimeFilesIndependentlyHashed": 33,
+      "diagnosticSHA256": "13591968b8deabdcc9d1d0028054749a3113775f414395393519238e6b763703",
+      "liveCases": 12,
+      "frames": 24,
+      "result": "Default M056 and pilot DSP-001 direct Inspect, media alternatives, matching records/previews, cleanup and disclosures accepted; zero illegal transitions/errors. Concurrent work preserved. No physical or assistive-technology certification."
+    }
+  },
+  "interpretationCorrection": "Earlier audits made physical masters mandatory for this source-consistency checkbox. Independent review found that stricter condition exceeded the explicit Phase 2 contract. Actual existing-source proof now completes the original task; physical fidelity limitations remain.",
+  "rawEvidence": [
+    {
+      "path": "/private/tmp/gallery-source-revalidation/report.json",
+      "sha256": "80e45e457d6dfe1b85d1bdc362cdc0933e0584141b1328dc1029d16e3e2f5b2b"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/refresh.py",
+      "sha256": "29c440bf1b3c273a30e91dfe4ff484da24bf9f3594029c7e48a1fc33cd7e7af8"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/refresh.log",
+      "sha256": "cb9ffa279d5f71f7983bfa4e4fc9cd7e244f6c8fa8b5a70d0c6ed3c6edcdacbe"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/label-chain.json",
+      "sha256": "6148035abc7c4eec31c02cc627852d3bfe6613da6966d8828c41baca1aacc821"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/label-chain.py",
+      "sha256": "eadb936fe6e0245e5179299e7b6d9cf4575708b2f060bfd38ea6faa5c71c2cf2"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/label-chain.log",
+      "sha256": "db19f0a8909626e3333664d2f1b6c109459e84acbdb730df7476861c7a103818"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/render-live-report.json",
+      "sha256": "1927f93e04c0a0e2336a4e9f0ed1daf50d39ca13d4e2954efd152c96516d71b7"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/render-and-live.py",
+      "sha256": "13591968b8deabdcc9d1d0028054749a3113775f414395393519238e6b763703"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/render-live.log",
+      "sha256": "2adbf14cf85e813cb47dc6cb343365475d903cbeee072f6979be00a99b7089c1"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/studio.html",
+      "sha256": "942eac7c218aca4e367a442a4abea737f09488749f8e34699eaad8eeba3f2a81"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/app42-source-hashes.json",
+      "sha256": "bd5a1e10f38c4f2134d1a4349614f1b5e1c5d0a64df1ba94350f44254d3ac445"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/unit-current.log",
+      "sha256": "bd754c48716a989ef5f80082972ffcb89ebe58d26b2f61c7161a057a43fa3091"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/app43-source-hashes.json",
+      "sha256": "957951fb06dea2a5bc2b500230ad29930b103482c68285cb8008b252e77bef97"
+    },
+    {
+      "path": "/private/tmp/gallery-source-revalidation/unit-current-app43.log",
+      "sha256": "d6c18aa668f77517b6767bbd053b6248d83207c8446f9490ce2b2f7fefd174f5"
+    }
+  ],
+  "copiedFrames": [
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/studio-nz-425g-front.png",
+      "sha256": "3b16189ac06ba905d0baef0f240dfa5ec717c9ece936e167b58d0b11994f9591"
+    },
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/studio-au-425g-front.png",
+      "sha256": "0fac12fc9225cd303369648808c19d4ed7cbd5dc9ef85e966077f026d9c93cb2"
+    },
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/studio-sa-425g-front.png",
+      "sha256": "02f067adef57028b408d1005fe4b6b0748e0b8d113a52f2912055a4cce5bf7a4"
+    },
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/studio-sa-425g-nutrition.png",
+      "sha256": "b30ca7d58faee46d657a8744f1459822e8d5318959f053ca6e5ae5818e8b453a"
+    },
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/studio-mx-454g-front.png",
+      "sha256": "1cfe7b857ad9f76a6a5904ccce2ce5f6a3f7d96c35fa39e023e11c75de85fec5"
+    },
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/studio-mx-454g-back.png",
+      "sha256": "27a89baf01e7cd36ccc1469f08aae4fac3cbc174f0b7344eab00ab8219a56660"
+    },
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/studio-mx-454g-blank-sector.png",
+      "sha256": "b1decdfbbe85e93e63a90388ae93a1ac8e6fe4367f9a4dd6082202d6d9ebeef8"
+    },
+    {
+      "path": "docs/screenshots/v11-product-source-consistency/live-mx-454g-390.png",
+      "sha256": "2b6963428b29baea2a7878abfb32e7e7b061ffd38d91362520fceb97083e6c38"
+    }
+  ],
+  "remainingChecklistScope": "One original-mall physical-device/assistive-technology acceptance task remains. Four newly added interior follow-up/planning items retain their separate status and are not claimed complete.",
+  "runtimeChanged": false,
+  "initialAuditBaseCommit": "ba6d8d055e1ca7b9ec48ce6d55706c8c6338ee82",
+  "runtimeSHA256AtAcceptance": {
+    "demos/corporate/gjh/v11/index.html": "747de8088405cde77c4dac622bd427477cd677713294c6e48437dbaaf480e582",
+    "demos/corporate/gjh/v11/script.js": "3a09dea9a2068791ea8557190166c55ab5dc2ecbe7bd6ebfc889a650c99e1152",
+    "demos/corporate/gjh/v11/style.css": "7fe0166ba7690be4cbc06dc1caa1e538bbd38a8b2e2168c945972cc2d277c1de",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/ui.js": "5ced7941acb476cc1489f87a8c28ec1f07ed0d9cc1da4ab15d0f8eda25778d18",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/products.js": "4bf42c5646b0426d45e34d691c4e8ca4d18f6a879aab63c081aabd7e4e1b8a57",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/world.js": "483a151a043da2b58cf9e81509e65c12161105d89fdd84cff8b8817ef43ff9b7",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "0f5f40e6a8bc9a2062c0a5047a4b9d0213c45bbdd837c97074c99a2de0a2cb27",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "00fb76e2104ca15df5c5b5c626e484f4cc692d0aeb15bffc5925de828656edac",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "f6fa27682ffbc4dec604ec42fa168294a67119775d0472568b8f06e7845b7d4d",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "3ca78d7697618bc17a4a7cc0c1d51b4cc3f36284c47cef208edd1a1aec77e1a5",
+    "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/player.js": "91301a959fe95a0939238a8041c4d9c6957e1b24f8240fe7be3faac951041c43",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "upstreamSynchronization": {
+    "retainedCommits": [
+      "53e98c25814ca454477a29b5506122e27e666fad",
+      "33cf963",
+      "8f47fb0",
+      "7bc288b50fdf51999e6294d9293a443a62e37f9a"
+    ],
+    "policy": "Preserved concurrent interior pilot, direct-Inspect change, thumbnail repair and separate backlog; reapplied only owned docs.",
+    "repeatedProof": "12 current direct-Inspect/media cases:8defaultM056 and4explicitpilotDSP001;12exactmodelpanelrenders; both runtime and test hashes stable.",
+    "currentRemoteSourceHashes": {
+      "application": {
+        "version": "1.1.43",
+        "build": "7724ef5bf021cb5f"
+      },
+      "hashes": {
+        "version.json": "ce356f469b0ae2f306f0f26ddb92e71c6918629a36baac3f1dfdc1ade37a129d",
+        "sw.js": "a47f97354e71f42af51097a28b4e5b166d644f65c10a3bb895b314637b0f2ab5",
+        "demos/corporate/gjh/v11/index.html": "747de8088405cde77c4dac622bd427477cd677713294c6e48437dbaaf480e582",
+        "demos/corporate/gjh/v11/script.js": "3a09dea9a2068791ea8557190166c55ab5dc2ecbe7bd6ebfc889a650c99e1152",
+        "demos/corporate/gjh/v11/assets/products.js": "4bf42c5646b0426d45e34d691c4e8ca4d18f6a879aab63c081aabd7e4e1b8a57",
+        "demos/corporate/gjh/v11/assets/world.js": "483a151a043da2b58cf9e81509e65c12161105d89fdd84cff8b8817ef43ff9b7",
+        "demos/corporate/gjh/v11/assets/furnishings.js": "00fb76e2104ca15df5c5b5c626e484f4cc692d0aeb15bffc5925de828656edac",
+        "demos/corporate/gjh/v11/assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
+        "demos/corporate/gjh/v11/assets/ui.js": "5ced7941acb476cc1489f87a8c28ec1f07ed0d9cc1da4ab15d0f8eda25778d18",
+        "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "f6fa27682ffbc4dec604ec42fa168294a67119775d0472568b8f06e7845b7d4d"
+      }
+    },
+    "pythonTests": 49,
+    "generator": "PASS",
+    "runtimeChangedByThisTask": false
+  }
+}
