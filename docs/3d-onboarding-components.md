@@ -73,6 +73,25 @@ Auto input follows initial pointer capability, actual scene touch/keyboard input
 
 V11 standard gamepad adapter: left stick moves, right stick changes camera, A inspects a nearby display, left-stick press runs, Menu opens Help. D-pad/stick navigates visible focusable panel controls; A activates, B dismisses a native dialog. Selects can cycle choices. Other applications call `handleGamepad(pad, navigationRoot)` with their own active directory/panel and poll only in their existing application loop. Unknown non-standard controller mappings are not silently guessed. Disconnect resets the input on the next host frame. Native OS controller behavior and physical controllers still require device validation.
 
+## Embedded Help ownership
+
+`showHelpEntry` defaults to `true`; standalone integrations retain the component's
+idle Help entry. A host with an existing permanent Help panel may set it to
+`false` and provide `onHelp`. Tutorial Help, the H/? shortcut and controller Menu
+then call the same guarded host callback. `openWelcome()` remains the explicit
+welcome/replay API and retains its settings, preferences and tutorial progress.
+V11 uses its existing Help disclosure and a nested “Show quick guide” action;
+it no longer relies on CSS to suppress a second idle control.
+
+Native dialogs retain built-in controller B dismissal. For a non-dialog
+`navigationRoot`, optional `onBack(root)` lets its host close the owning panel
+and restore its visible trigger. V11 supplies this for Help and the compact Map;
+this does not introduce another input loop or gameplay pause owner. Defaults
+remain unchanged for the standalone sandbox profiles. The host-supplied footer is appended after the welcome preferences. V11 retains
+its upstream normal-flow footer, safe-area padding and three-column mobile
+navigation; welcome content keeps its native dialog scroll owner. D1 adds no
+footer wrapper or shared layout override.
+
 ## Accessibility and performance
 
 Welcome uses a native named/described dialog, semantic heading/list/key elements, visible focus outlines and 44/48px targets. Each icon-only button has a localized name. Settings use visible labels. Tip progress has a labeled native progress element and polite announcements only at transitions. `lang` changes on the components; this does not translate unrelated host content. Reduced Motion disables component transitions and animations. The UI owns no frame loop, interval, WebGL resources or blur layer. System-theme and pointer changes use events; the host supplies gamepad snapshots. This reduces integration work but is not a measured frame-rate guarantee.

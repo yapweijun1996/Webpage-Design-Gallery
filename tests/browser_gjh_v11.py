@@ -32,7 +32,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 def targets(page):
     small = page.locator('a,button,summary,[tabindex="0"]').evaluate_all('''els => els.filter(el => {
       const r=el.getBoundingClientRect(), s=getComputedStyle(el);
-      return r.width && r.height && s.visibility!=='hidden' && (r.width<43.9 || r.height<43.9);
+      return el.checkVisibility() && r.width && r.height && s.visibility!=='hidden' && (r.width<43.9 || r.height<43.9);
     }).map(el=>({text:el.textContent.trim(),width:el.clientWidth,height:el.clientHeight}))''')
     assert not small, small
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -189,7 +189,7 @@ def run(capture=False):
                             mobile_hud(page)
                             assert not mall_map.evaluate('el=>el.open')
                             page.locator('#keyboard-help summary').click()
-                            page.locator('#mall-map summary').click()
+                            page.locator('#header-map').click()
                             page.wait_for_function('!document.querySelector("#keyboard-help").open')
                             assert mall_map.evaluate('el=>el.open')
                             targets(page)
@@ -205,7 +205,7 @@ def run(capture=False):
                             page.keyboard.press('Escape')
                             assert not mall_map.evaluate('el=>el.open')
                             assert page.locator('#header-map').is_visible()
-                            assert page.locator('#mall-map summary').evaluate('el=>el===document.activeElement')
+                            assert page.locator('#header-map').evaluate('el=>el===document.activeElement')
                         page.screenshot(path=str(review / f'atrium-{width}.png'), scale='css')
                         room_signs(page)
                         page.locator('#mall-map').evaluate('el=>el.open=true')
@@ -257,7 +257,7 @@ def run(capture=False):
                         assert state(page)['animation']=='idle'
                         for zone in ('newmoon', 'mili', 'gogo'):
                             if width == 390:
-                                page.locator('#mall-map summary').click()
+                                page.locator('#header-map').click()
                             page.locator(f'[data-teleport="{zone}"]').click()
                             if width == 390:
                                 assert not page.locator('#mall-map').evaluate('el=>el.open')

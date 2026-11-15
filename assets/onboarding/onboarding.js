@@ -6,7 +6,7 @@ import {messages} from './locales.js';
 export function createOnboarding({id = 'onboarding', appName, copy, steps, scene,
   modes = ['keyboard', 'touch'], actions = ['map', 'list'], theme = 'system', locale = 'en',
   canOpen = () => true, onAction = () => {}, onOpen = () => {}, onClose = () => {}, storageKey = id,
-  parent = document.body, footer = null} = {}) {
+  parent = document.body, footer = null, showHelpEntry = true, onHelp = null, onBack = null} = {}) {
   if (!appName || !scene || !steps?.length) throw new Error('Onboarding requires appName, scene and steps.');
   if (!/^[a-zA-Z0-9_-]+$/.test(id) || document.getElementById(`${id}-dialog`)) throw new Error('Onboarding requires a unique valid id.');
   if (!modes.length || modes.some(mode => !['keyboard','touch','gamepad'].includes(mode))) throw new Error('Unsupported onboarding input mode.');
@@ -102,7 +102,7 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
   function renderHUD(announce = false) {
     const t = text();
     const focusedAction=hud.contains(document.activeElement)?document.activeElement.dataset.obAction:null;
-    hud.replaceChildren(live); hud.hidden = !visible || suspended || dialog.open;
+    hud.replaceChildren(live); hud.hidden = !visible || suspended || dialog.open || (!tutorial && !showHelpEntry);
     if (tutorial) {
       const tip = element('aside', 'ob-tip'); tip.setAttribute('aria-label', t.controls);
       const header = element('div','ob-tip-header');
@@ -116,16 +116,22 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
         tip.append(illustration,list); }
       else tip.append(element('p','ob-tip-copy',t.readyCopy));
       const controls=element('div','ob-tip-actions');
-      const help=button(t.help,'ob-text-button',() => openWelcome());help.dataset.obAction='help';
+      const help=button(t.help,'ob-text-button',requestHelp);help.dataset.obAction='help';
       if(tipIndex>0){const back=button(t.back,'ob-text-button',()=>{tipIndex--;renderHUD(true);});back.dataset.obAction='back';controls.append(back);}
       const next=button(done?t.done:t.next,'ob-primary',() => {if(done)stopTutorial();else {tipIndex++;renderHUD(true);}});next.dataset.obAction='next';
       controls.append(help,next); tip.append(controls);
 
       hud.append(tip);
       if(announce)live.textContent=done?t.ready:`${t.tip(tipIndex+1,steps.length)}: ${steps[tipIndex].label[locale]}`;
-    } else {const entry=helpButton(`${t.help} · ?`,() => openWelcome());entry.dataset.obAction='help';hud.append(entry);}
+    } else if (showHelpEntry) {const entry=helpButton(`${t.help} · ?`,requestHelp);entry.dataset.obAction='help';hud.append(entry);}
     applyTheme();
     if(focusedAction&&!hud.hidden)(hud.querySelector(`[data-ob-action="${focusedAction}"]`)||hud.querySelector('[data-ob-action=next]'))?.focus({preventScroll:true});
+  }
+  // Embedded experiences may provide one permanent help owner. All help entry
+  // paths use it; welcome/tutorial state remains owned by this component.
+  function requestHelp() {
+    if (!visible || dialog.open || !canOpen()) return false;
+    return onHelp ? onHelp() : openWelcome();
   }
   function stopTutorial() { tutorial=false; renderHUD(); scene.focus({preventScroll:true}); }
   function openWelcome() {
@@ -161,7 +167,7 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
     const target=event.target;
     if(!visible||event.ctrlKey||event.metaKey||event.altKey||target.closest('input,select,textarea,[contenteditable="true"]'))return;
     if(event.key==='Escape'&&hud.contains(target)){event.preventDefault();stopTutorial();return;}
-    if((event.key==='?'||event.key.toLowerCase()==='h')&&(target===scene||target===document.body)){event.preventDefault();openWelcome();}
+    if((event.key==='?'||event.key.toLowerCase()==='h')&&(target===scene||target===document.body)){event.preventDefault();requestHelp();}
     if(target===scene||target===document.body)setInputMode('keyboard',{automatic:true});
   },{signal});
   dark.addEventListener('change',applyTheme,{signal});
@@ -195,7 +201,8 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
         select.dispatchEvent(new Event('change',{bubbles:true}));
       } else if(navigation&&rising(0)&&document.activeElement.matches('button,input[type=checkbox],a[href],summary'))document.activeElement.click();
       if(navigation instanceof HTMLDialogElement&&rising(1))navigation.close('dismiss');
-      if(!dialog.open&&rising(9))openWelcome();
+      else if(navigation&&rising(1))onBack?.(navigation);
+      if(!dialog.open&&rising(9))requestHelp();
       lastGamepadButtons=pad.buttons.map(value=>value.pressed);return consumed;
     },
     destroy(){const wasOpen=dialog.open;controller.abort();if(wasOpen){dialog.close('destroy');onClose('destroy');}dialog.remove();hud.remove();},

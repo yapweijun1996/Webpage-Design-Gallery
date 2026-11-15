@@ -488,8 +488,18 @@ body.is-3d .is-shelf-nearby button:focus-visible{outline-width:2px;outline-offse
 
 .mall-amenities-directory a{display:inline-flex;align-items:center;min-width:var(--size-control);min-height:var(--size-control);padding-inline:var(--space-2)}
 
-/* The existing Help disclosure owns the mall's persistent re-entry control. */
-body.is-3d .ob-hud .ob-help{display:none}
+/* Help and Map each have one permanent entry; contextual actions reuse them. */
+.mall-map>summary{display:none}
+.map-close{display:none;min-width:44px;min-height:44px;padding:0 var(--space-2)}
+@media(max-width:650px),(max-height:560px) and (orientation:landscape){
+ .is-3d .header-map{display:block;min-width:48px;padding:0 var(--space-2)}
+ .mall-map>summary{display:none}
+ .mall-map:not([open]){pointer-events:none}
+ .map-close{display:block;flex:0 0 auto}
+ .map-heading{gap:var(--space-2);flex-wrap:wrap}
+ .map-heading>span{flex:1}
+ .mall-map .map-content{margin-top:calc(var(--size-control) + var(--space-3))}
+}
 
 .ob-dialog>.context-navigation-footer{position:relative;bottom:auto;background:var(--ob-surface);margin-top:var(--ob-space-4);padding-bottom:env(safe-area-inset-bottom)}
 
@@ -615,3 +625,6 @@ body:not(.is-3d) .site-header{position:sticky;top:0}
 .ob-dialog[data-ob-theme] .context-navigation-actions button[aria-current="page"]{background:var(--ob-action);color:var(--ob-on-action)}
 .ob-dialog[data-ob-theme] .context-navigation-actions button:disabled,.ob-dialog[data-ob-theme] .context-navigation p{color:var(--ob-muted)}
 @media(max-width:650px){.ob-dialog .context-navigation-actions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Brand illustrations keep readable copy and complete actions at tablet widths. */
+@media(max-width:800px){.store-list .brand-stories{grid-template-columns:1fr}}

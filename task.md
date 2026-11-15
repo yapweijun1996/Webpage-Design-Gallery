@@ -453,7 +453,7 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] Document dimension/interaction anomalies, current texture-free loader limits, collision ownership, proposed LOD behavior and the four-storefront fixture versus three-store runtime distinction.
 - [x] Define documentation, baseline, pilot, shell, retail and optional-polish phases without marking future production as complete.
 - [x] D1: reproduce and resolve the pilot kiosk/cart bottleneck; verify camera framing and bidirectional cart clearance at 390/639/1440px.
-- [ ] D1 follow-up outside asset scope: consolidate HUD/map/help ownership.
+- [x] D1 follow-up outside asset scope: consolidate HUD/map/help ownership.
 - [x] D1: audit existing bench, planter, kiosk, shelf and architectural primitives; record explicit reuse/adapt/new decisions and candidate-ID mappings.
 - [x] D1: approve per-asset dimensions, coordinate conversion, snap/interaction anchors, collision authority, material compatibility and measured scene-wide budgets.
 - [x] D2: review the eight-ID pilot: PUB-002, PUB-008, PUB-017, DSP-001, STF-008, LGT-009, PUB-005 and VER-017; preserve their source priorities and correct targets before authoring.
@@ -494,3 +494,24 @@ interior follow-ups retain their own status.
 - [x] Remove sticky footer overlap with preference/CTA on short screens.
 - [x] Improve dark action and checkbox text contrast with canonical tokens.
 - [x] Four viewport screenshot/DOM and checkbox, close/reopen/start checks; no physical iPhone claim.
+
+## Interior D1 Help and Map ownership — 2026-11-15
+
+Application 1.1.47 completes the [D1 ownership review](docs/v11-interior-hud-review.md).
+One permanent Help owner handles tutorial, H/? and controller Menu; one compact
+header Map entry serves the kiosk and quick guide. Close/Escape/controller Back
+restore the surviving focus target. Graphics, appearance, guide preferences,
+current native welcome flow, three-column mobile navigation and dark-theme fixes
+are retained. Compact Stores labels preserve the full accessible directory name.
+The latest brand imagery is preserved; its confirmed 667px Directory overflow is
+fixed with a scoped responsive column rule. No model, product, collider or mode
+engine changed.
+
+Current-source checks pass 13 HUD groups/50 frames, 70 DOM accessibility states,
+four dark welcome sizes, 14 native Guide Tab targets, shared component defaults,
+and the documented Directory/image/boundary bridges. Primary independent checks
+add 49 Python tests, six interaction cases and three strict edge cases; generation
+and SSOT pass. Historical mode/Gallery/PWA proofs retain their source boundaries,
+and the unreproduced earlier Hair hit failure remains recorded. Post-push CI,
+Pages and actual public user flows are the release gate before D3. Only D1 is
+checked here; D3/D4/D5 and physical-device acceptance retain separate status.

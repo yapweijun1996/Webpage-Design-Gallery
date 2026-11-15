@@ -394,9 +394,9 @@ def run():
                 held = state(page)['character']['physicalProduct']
                 assert held['phase'] == 'held'
                 page.locator('#inspect').click()
-                capture('held product Shelf', 'shelf', True)
-                shelf_details(page)
-                capture('held product Inspect', 'inspect', True)
+                # Nearby Inspect now opens the product directly; Shelf has its
+                # own dedicated lifecycle suite and is not an intermediate mode.
+                capture('held product direct Inspect', 'inspect', True)
                 page.locator('#product-close').click()
                 capture('held product Inspect close', 'explore', False)
                 page.locator('#bag-open').click()

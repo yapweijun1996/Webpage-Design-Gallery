@@ -37,7 +37,7 @@ export function createUI() {
   let guideFromHUD=false;
   const guideFooter=document.createElement('div');guideFooter.id='context-navigation-guide';guideFooter.className='context-navigation-footer';
   const onboarding = createOnboarding({...createExperienceProfile('mall'), id:'guide', storageKey:'gjh-v11', scene, footer:guideFooter,
-    modes:['keyboard','touch','gamepad'], canOpen:()=>available&&showing3D&&!dialog.open&&!bag.open&&!amenityPanel.dialog.open&&!externalPaused, onOpen:()=>{guidePaused=true;guideFromHelp=document.activeElement===guideReopen;guideFromHUD=Boolean(document.activeElement.closest('.ob-hud'));notifyMode();} });
+    modes:['keyboard','touch','gamepad'], showHelpEntry:false, onHelp:openHelp, onBack:closeGamepadPanel, canOpen:()=>available&&showing3D&&!dialog.open&&!bag.open&&!amenityPanel.dialog.open&&!externalPaused, onOpen:()=>{guidePaused=true;guideFromHelp=document.activeElement===guideReopen;guideFromHUD=Boolean(document.activeElement.closest('.ob-hud'));notifyMode();} });
   const guide = onboarding.dialog;
   const amenityPanel=createActionDialog({id:'amenity-dialog',scene,getPreferences:()=>onboarding.preferences,onOpen:()=>notifyMode(),onClose:()=>notifyMode()});
   let previousTutorialPose = null;
@@ -51,20 +51,61 @@ export function createUI() {
   const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open || externalPaused || document.getElementById('original-tin-dialog').open,
     bagOpen: document.getElementById('bag-dialog').open, shelfOpen: Boolean(shelfFocus?.open),
     panelOpen: amenityPanel.dialog.open || !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
+  function syncOnboardingSuspension(signals) {
+    onboarding.setSuspended(amenityPanel.dialog.open || signals.productOpen || signals.bagOpen || signals.shelfOpen || !showing3D || help.open || (compactMap.matches && mallMap.open));
+  }
   const notifyMode = () => {
     const signals = modeSignals();
+    syncOnboardingSuspension(signals);
     if (signals.shelfOpen && (signals.productOpen || signals.bagOpen || signals.panelOpen)) shelfFocus.close({focus: false});
     modeListener?.(modeSignals());
   };
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
   function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);}
   let mapReturnFocus=headerMap;
-  mallMap.querySelector('summary').addEventListener('click',()=>{if(!mallMap.open)mapReturnFocus=mallMap.querySelector('summary');});
+  // Header, kiosk and quick guide share this map owner. The map's own
+  // summary is not a second permanent entry on compact screens.
+  function canUsePanels() {
+    return available && showing3D && !guidePaused && !guide.open && !dialog.open && !bag.open && !amenityPanel.dialog.open && !externalPaused && !document.hidden;
+  }
+  function openMap() {
+    if (!canUsePanels()) return false;
+    shelfFocus?.close({focus: false});
+    help.open = false; mapReturnFocus = headerMap;
+    mallMap.open = true; headerMap.setAttribute('aria-expanded', String(compactMap.matches)); updateCompactPanels(); focusMap();
+    return true;
+  }
+  function closeMap() {
+    if (!compactMap.matches || !canUsePanels()) return;
+    mallMap.open = false; headerMap.setAttribute('aria-expanded', 'false'); updateCompactPanels(); notifyMode();
+    (compactMap.matches ? headerMap : scene).focus({preventScroll: true});
+  }
+  function openHelp() {
+    if (!canUsePanels()) return false;
+    shelfFocus?.close({focus: false});
+    if (compactMap.matches) mallMap.open = false;
+    help.open = true; updateCompactPanels(); notifyMode();
+    help.querySelector('summary').focus({preventScroll: true});
+    return true;
+  }
+  function closeGamepadPanel(panel) {
+    if (panel === mallMap) closeMap();
+    else if (panel === help && canUsePanels()) {
+      help.open = false; updateCompactPanels(); notifyMode();
+      help.querySelector('summary').focus({preventScroll: true});
+    }
+  }
+  help.querySelector('summary').addEventListener('click', event => { if (!canUsePanels()) event.preventDefault(); });
+  document.getElementById('map-close').addEventListener('click', closeMap);
+  function updateViewToggle() {
+    viewToggle.textContent = showing3D ? (compactMap.matches ? 'Stores' : 'Store directory') : 'Enter 3D Mall';
+    viewToggle.setAttribute('aria-label', showing3D ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
+  }
   const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
   resetMap();
   compactMap.addEventListener('change', () => {
     const active = document.activeElement;
-    resetMap();
+    resetMap(); updateViewToggle();
     headerMap.hidden = !showing3D || !compactMap.matches;
     headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
     // A details element may stay open across this breakpoint. Publish regardless
@@ -81,15 +122,10 @@ export function createUI() {
     headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
     notifyMode();
   });
-  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; updateCompactPanels(); notifyMode(); });
+  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; headerMap.setAttribute('aria-expanded', 'false'); updateCompactPanels(); notifyMode(); });
   headerMap.addEventListener('click', () => {
-    if (!showing3D || guidePaused || dialog.open || bag.open) return;
-    help.open = false;
-    mapReturnFocus=headerMap;
-    mallMap.open = !mallMap.open;
-    headerMap.setAttribute('aria-expanded', String(mallMap.open));
-    if (mallMap.open) focusMap();
-    notifyMode();
+    if (headerMap.hidden || !canUsePanels()) return;
+    if (mallMap.open) closeMap(); else openMap();
   });
   const dialog = document.getElementById('product-dialog');
   const newMoonPreview = setupNewMoonPreview();
@@ -213,13 +249,12 @@ export function createUI() {
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle('is-3d', next);
-    viewToggle.textContent = next ? 'Store directory' : 'Enter 3D Mall';
-    viewToggle.setAttribute('aria-label', next ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
+    updateViewToggle();
     help.open = false;
     headerMap.hidden = !next || !compactMap.matches;
     headerMap.setAttribute('aria-expanded', String(next && compactMap.matches && mallMap.open));
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
-    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open How to explore for controls.` : 'Store directory open. All three stores and verified product images are available below.');
+    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : 'Store directory open. All three stores and verified product images are available below.');
     viewListener?.(next);
     notifyMode();
   }
@@ -232,10 +267,7 @@ export function createUI() {
     if(record.action==='elevator'){const ok=elevatorListener?.();announce(ok?'Elevator travelling to the other level.':'Return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
     if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice='Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce('Seat path blocked. Approach the clear front of the bench.');}scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
-      if (!available || !showing3D) return;
-      help.open = false; mallMap.open = true;
-      focusMap();
-      announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
+      if (openMap()) announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
       return;
     }
     returnFocus = document.activeElement;
@@ -262,14 +294,11 @@ export function createUI() {
   }
 
   function showGuide(event) {
-    if (!available || !showing3D || guide.open || dialog.open || bag.open || externalPaused || document.hidden) return false;
+    if (!available || !showing3D || guide.open || dialog.open || bag.open || amenityPanel.dialog.open || externalPaused || document.hidden) return false;
     shelfFocus?.close({focus: false});
     guideFromHelp = event?.currentTarget === guideReopen;
     help.open = false; mallMap.open = false;
-    guidePaused = true;
-    onboarding.openWelcome();
-    notifyMode();
-    return true;
+    return onboarding.openWelcome();
   }
   guideReopen.addEventListener('click', showGuide);
   guide.addEventListener('close', () => {
@@ -281,9 +310,7 @@ export function createUI() {
     if (!available || !showing3D) return;
     if (action === 'list') { setView(false, true); focusDirectory(); return; }
     if (action === 'map') {
-      help.open = false; mallMap.open = true;
-      focusMap();
-      announce('Choose a store on the map. Your location has not changed.');
+      if (openMap()) announce('Choose a store on the map. Your location has not changed.');
       return;
     }
     if (action === 'dismiss' && guideFromHelp) {
@@ -293,7 +320,7 @@ export function createUI() {
     const touch = matchMedia('(pointer: coarse)').matches;
     const hint = target
       ? `${target.name}. ${target.action === 'map' ? (touch ? 'Tap Map' : 'press F or tap Map') : (touch ? 'Tap Inspect' : 'press F or tap Inspect')} for details.`
-      : 'Open How to explore to review the controls.';
+      : 'Open Help to review the controls.';
     announce(`Ready to explore. ${hint}`);
   });
 
@@ -459,8 +486,7 @@ export function createUI() {
       headerMap.hidden = !showing3D || !compactMap.matches;
       fallbackMessage.hidden = true;
       if (directoryTouched) {
-        viewToggle.textContent = 'Enter 3D Mall';
-        viewToggle.setAttribute('aria-label', 'Switch to the 3D virtual mall');
+        updateViewToggle();
         notifyMode();
       } else setView(true);
     },
@@ -566,10 +592,10 @@ export function createUI() {
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
       notifyMode();
     },
-    handleGamepad(pad) { return onboarding.handleGamepad(pad,amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:compactMap.matches&&help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null); },
+    handleGamepad(pad) { return onboarding.handleGamepad(pad,amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null); },
     paused() {
       const signals=modeSignals();
-      onboarding.setSuspended(amenityPanel.dialog.open||signals.productOpen||signals.bagOpen||signals.shelfOpen||!showing3D||(compactMap.matches&&(help.open||mallMap.open)));
+      syncOnboardingSuspension(signals);
       return signals.panelOpen||signals.productOpen||signals.bagOpen||signals.shelfOpen;
     },
     offerFirstGuide() { if (!guideSeen && onboarding.shouldAutoShow) showGuide(); },
