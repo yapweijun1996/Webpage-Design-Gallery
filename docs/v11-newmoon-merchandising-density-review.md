@@ -1,5 +1,5 @@
-# New Moon merchandising density — 1.1.44
+# New Moon merchandising density — 1.1.45
 
 Native-size cans now use 17 front facings per M056 shelf level, 51 per cabinet and 204 total. The narrower optional pilot uses 11 per level, 132 total. Single row, 100mm centre spacing, shared geometry/materials and InstancedMesh preserve draw-call batching. Can source bounds remain 77.5mm diameter and 123.99mm height; these remain estimated packaging dimensions, not measured physical product certification. M056 is unchanged at 2.4m width/height. The reservation index is derived from row length and picks the middle can on the middle shelf.
 
-Runtime evidence pending. Independent pre-implementation advisor recommended 17 facings, single row, and no artificial scaling.
+Chromium desktop 1440 and touch-emulated 390 checks passed: all four 3D previews, exact source GLB bounds, 204 placements without overlap, repeated pickup/return, bag, collision and shelf-failure fallback. Observed draw calls: 110 mobile / 116 desktop. No physical-device FPS claim. Actual before/after screenshots and independent advisor review accepted the improved density; wide-view products remain small, with direct Inspect providing readable closeup. Independent pre-implementation advisor recommended 17 facings, single row, and no artificial scaling.

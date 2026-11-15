@@ -485,3 +485,7 @@ The four AI comparison images remain separate and undeployed. The concurrent app
 and its pilot assets are preserved; this audit changes documentation only. The physical-device/screen-reader task is now
 the only unchecked item in the original mall acceptance scope; the newly added
 interior follow-ups retain their own status.
+
+## V11 merchandising density — 2026-11-15
+
+1.1.45 preserves native can size, stocks M056 at 17 facings per row (204 total), and retains optional pilot at 11 (132 total). Repeated pickup/return and direct Inspect pass in desktop/390 Chrome. Latest hybrid directory, showcase stock and camera changes are retained. Hybrid CSS literals were moved unchanged into canonical design tokens to restore SSOT; the gate was not relaxed. See docs/v11-newmoon-merchandising-density-review.md.
