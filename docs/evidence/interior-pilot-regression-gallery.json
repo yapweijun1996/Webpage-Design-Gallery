@@ -1,0 +1,52 @@
+[
+  {
+    "width": 1440,
+    "companyFlow": "PASS",
+    "filters": "PASS",
+    "compare": "PASS",
+    "deviceWidths": "PASS",
+    "syncScroll": "PASS",
+    "images": "PASS",
+    "consoleErrors": []
+  },
+  {
+    "width": 768,
+    "companyFlow": "PASS",
+    "filters": "PASS",
+    "compare": "PASS",
+    "deviceWidths": "PASS",
+    "syncScroll": "PASS",
+    "images": "PASS",
+    "consoleErrors": []
+  },
+  {
+    "width": 390,
+    "companyFlow": "PASS",
+    "filters": "PASS",
+    "compare": "PASS",
+    "deviceWidths": "PASS",
+    "syncScroll": "PASS",
+    "images": "PASS",
+    "consoleErrors": []
+  },
+  {
+    "width": 375,
+    "companyFlow": "PASS",
+    "filters": "PASS",
+    "compare": "PASS",
+    "deviceWidths": "PASS",
+    "syncScroll": "PASS",
+    "images": "PASS",
+    "consoleErrors": []
+  },
+  {
+    "syntheticCompanies": 120,
+    "syntheticDesigns": 1200,
+    "paginationAndSearch": "PASS",
+    "limitation": "Synthetic catalog interaction check; not a real 100-company content or field-performance claim"
+  },
+  {
+    "noJavaScriptBrowseAndOpenDemo": "PASS",
+    "invalidCompareAndDetail": "PASS"
+  }
+]

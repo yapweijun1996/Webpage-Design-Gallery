@@ -423,3 +423,26 @@ acceptance requires actual device sessions. The available ADB runner reports zer
 devices, and no usable iOS runner is available. AI label concepts and more desktop
 emulation cannot close those gaps. Their checkboxes remain open; no all-task
 completion or real-commerce authorization is claimed.
+
+## Interior 200-asset backlog — eight-asset pilot, 2026-11-15
+
+Status: **eight-asset pilot implemented, integrated and locally accepted with documented G01–G12 applicability; remaining 192 candidates pending**. The owner-provided backlog contains 200 unique candidate IDs across ten categories (20 each): P0 79, P1 81 and P2 40. These counts describe proposed assets, not completed Blender files or accepted runtime models.
+
+Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references/gjh-interior-200-assets-v1.md). Project contract reconciliation, source checksum, eight-ID pilot and G01–G12 acceptance requirements: [interior asset plan](docs/gjh-v11-interior-asset-plan.md). Spatial and visual rationale: [ten-advisor review](docs/gjh-v11-interior-10-advisors.md).
+
+- [x] Read and preserve the supplied source; verify its SHA-256, 200 unique IDs, category sequences and priority totals.
+- [x] Document dimension/interaction anomalies, current texture-free loader limits, collision ownership, proposed LOD behavior and the four-storefront fixture versus three-store runtime distinction.
+- [x] Define documentation, baseline, pilot, shell, retail and optional-polish phases without marking future production as complete.
+- [x] D1: reproduce and resolve the pilot kiosk/cart bottleneck; verify camera framing and bidirectional cart clearance at 390/639/1440px.
+- [ ] D1 follow-up outside asset scope: consolidate HUD/map/help ownership.
+- [x] D1: audit existing bench, planter, kiosk, shelf and architectural primitives; record explicit reuse/adapt/new decisions and candidate-ID mappings.
+- [x] D1: approve per-asset dimensions, coordinate conversion, snap/interaction anchors, collision authority, material compatibility and measured scene-wide budgets.
+- [x] D2: review the eight-ID pilot: PUB-002, PUB-008, PUB-017, DSP-001, STF-008, LGT-009, PUB-005 and VER-017; preserve their source priorities and correct targets before authoring.
+- [x] D2: author/adapt the reviewed pilot with editable source, GLB, manifest, applicable collision definitions, provenance and actual G01–G12 results or reasoned applicability records.
+- [x] D2: validate export in independent viewers and the actual mall; verify failed/delayed loading, lifecycle cleanup and mobile/desktop visuals.
+- [ ] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
+- [ ] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
+- [ ] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
+- [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
+
+Completion requires real artifacts and evidence, not a checked inventory row. Supplied dimensions, material/LOD budgets and capability tags remain proposals until individually reviewed. The existing delivered-asset evidence and other task sections retain their own status. The later explicit request authorizes this eight-asset implementation. See [pilot review](docs/gjh-v11-interior-pilot-review.md), [acceptance manifest](models/gjh-interior-pilot/manifest.json) and [14-case E2E evidence](docs/evidence/interior-pilot-e2e.json). The subsequent commit/push request is tracked in [pilot release review](docs/gjh-v11-interior-pilot-release.md). The complete pilot uses `?interior=pilot`; the default keeps later M056 shelves, Shelf focus and graphics recovery. HUD consolidation and remaining candidates remain separate work.

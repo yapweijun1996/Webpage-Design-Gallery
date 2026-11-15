@@ -1,0 +1,133 @@
+{
+  "release": {
+    "version": "1.1.42",
+    "build": "4be6ba1c9ca1006e"
+  },
+  "base": "ba6d8d0",
+  "runtime": "Chrome 157 / ANGLE Metal",
+  "pilotRoute": "demos/corporate/gjh/v11/index.html?interior=pilot",
+  "defaultShelf": "GJH-M056",
+  "pilotShelf": "GJH-DSP-001",
+  "sourceHashes": {
+    "demos/corporate/gjh/v11/assets/GJH_DSP_001.glb": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+    "demos/corporate/gjh/v11/assets/GJH_LGT_009.glb": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+    "demos/corporate/gjh/v11/assets/GJH_PUB_002.glb": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+    "demos/corporate/gjh/v11/assets/GJH_PUB_005.glb": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+    "demos/corporate/gjh/v11/assets/GJH_PUB_008.glb": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+    "demos/corporate/gjh/v11/assets/GJH_PUB_017.glb": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+    "demos/corporate/gjh/v11/assets/GJH_STF_008.glb": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+    "demos/corporate/gjh/v11/assets/GJH_VER_017.glb": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+    "demos/corporate/gjh/v11/assets/carry-bag.js": "bc6dbd9f3f5bf1af9b202ef1b850bc6f6b0c36286c3361cf22c42c8ca3126e6f",
+    "demos/corporate/gjh/v11/assets/character-v2.js": "e1cc288f51f0bd1989ac822628c8d908201c70d6a7ddc4ca034232ac59238d33",
+    "demos/corporate/gjh/v11/assets/character.js": "4289a7d4b0d7ba1823605b5577474bcc013b6a2fe7af7dac24f2b98b0256d201",
+    "demos/corporate/gjh/v11/assets/collection-gesture.js": "9222b740babb81d1bb1e47276949723dce89f1e2fd2e1ddd1990d4b8d6a8a336",
+    "demos/corporate/gjh/v11/assets/context-navigation.js": "2de69da6603f12a4c91054ce1ecd6d884a8bc8beedce16e868ba3b8b5c010bcf",
+    "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
+    "demos/corporate/gjh/v11/assets/dom-projection.js": "862d84b234b9b830c97b2eca6f104fc488aab041f4685646778cb953b8b2ec28",
+    "demos/corporate/gjh/v11/assets/elevator-v2.js": "34125aaa69ff80e57bb5d97f25dfe0ae9822742618ff2466c2b2f3e383e5131f",
+    "demos/corporate/gjh/v11/assets/furnishings.js": "00fb76e2104ca15df5c5b5c626e484f4cc692d0aeb15bffc5925de828656edac",
+    "demos/corporate/gjh/v11/assets/gjh-areca-planter.glb": "0d1caad269b9838b695924b2b2242277597d304443959394cebeb84a9a675267",
+    "demos/corporate/gjh/v11/assets/gjh-lounge-bench.glb": "ae13cf00da96d45878d633e8d1d1f6a9bbbf35d0bc89a4a162f055254b3ea442",
+    "demos/corporate/gjh/v11/assets/gjh-m056-shelf-lod1.glb": "949e8278034779c129e3494e614a002d5542108b74e081296acffd8e9d7c6037",
+    "demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2-lod1.glb": "f20065ac4bf3656f5762908237c7ceec5ac8648f05d7cd23c495b73ca899f1d6",
+    "demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2.glb": "35f4c79f1bd97516c25325801b963dba34680ffed5ac0f5ff5ad1b1ae3ad38c9",
+    "demos/corporate/gjh/v11/assets/gjh-mall-visitor.glb": "43d08b67f4450b6aac478cfca4ca664044662cd79021ed15d55ef5612e312be2",
+    "demos/corporate/gjh/v11/assets/graphics-quality.js": "0e63f05f55a18afc71e5f5beb4bf8f261b2965c27f2b5bd605ee8c872a71edc7",
+    "demos/corporate/gjh/v11/assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
+    "demos/corporate/gjh/v11/assets/mall-directory-kiosk.glb": "ebf658b6d03602e3ebeaf68e1305ce32788bcbbf3c67a10be65a0ed628836914",
+    "demos/corporate/gjh/v11/assets/mall-display-shelf.glb": "9538cc7b954a1510397e4f1dffc47bbed6c99f7460edfb1e55ef4dc28561966d",
+    "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
+    "demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+    "demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+    "demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+    "demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+    "demos/corporate/gjh/v11/assets/newmoon-detail-preview.js": "048891652f549fc893e83caf362d1ad03d4a287ab23958232fe83279437fe10b",
+    "demos/corporate/gjh/v11/assets/original-demo-food-tin.glb": "4b265f78a711d95a80b730ebeaae3906f42c93fbd28f0b8c6e64c8c003eee0ee",
+    "demos/corporate/gjh/v11/assets/original-tin.js": "0ffbe8d6e6e9e0c3259c747f61dc8fa4dc7467dd2e3993ad466043fec199c182",
+    "demos/corporate/gjh/v11/assets/player.js": "91301a959fe95a0939238a8041c4d9c6957e1b24f8240fe7be3faac951041c43",
+    "demos/corporate/gjh/v11/assets/products.js": "4bf42c5646b0426d45e34d691c4e8ca4d18f6a879aab63c081aabd7e4e1b8a57",
+    "demos/corporate/gjh/v11/assets/push-cart.js": "077783f5217dd2efd24e92177bf43cdda62e17a0a11fea4c6d2f2062d6f2ad1c",
+    "demos/corporate/gjh/v11/assets/seated-pose.js": "a0f3f7480a0c2ebf95eec50cf8456b1464150386fddc77fd96e17ae1bd278400",
+    "demos/corporate/gjh/v11/assets/shelf-focus.js": "0f5f40e6a8bc9a2062c0a5047a4b9d0213c45bbdd837c97074c99a2de0a2cb27",
+    "demos/corporate/gjh/v11/assets/shopper.glb": "e918b3007882698ee286ab3b92c300f120941b4e95bd634eca0ae22ffb36180f",
+    "demos/corporate/gjh/v11/assets/shopping-cart.glb": "ee6f9b89d75c12bc124aad01a0691050878e1477e1ed19988dd7852c4b0ea676",
+    "demos/corporate/gjh/v11/assets/target-guidance.js": "3ca78d7697618bc17a4a7cc0c1d51b4cc3f36284c47cef208edd1a1aec77e1a5",
+    "demos/corporate/gjh/v11/assets/ui.js": "64004c1a672cd0ccf7d89893f532a463a35af180e662455610960e2ed6ffa923",
+    "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "ef9e13c977ba85caa666ea85f6f526b780678e05d538e05715691b3e1f64004d",
+    "demos/corporate/gjh/v11/assets/visitor-v2-controls.js": "c30f7c70462108926d14a222de13ef5510e1e9c5070b92fda3a111f074bbfe5f",
+    "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+    "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
+    "demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js": "5205a962cec85ebeb562dc0bbba1f6c693e65530d2950ef28b3675cff63ff9ab",
+    "demos/corporate/gjh/v11/assets/world.js": "483a151a043da2b58cf9e81509e65c12161105d89fdd84cff8b8817ef43ff9b7",
+    "demos/corporate/gjh/v11/index.html": "747de8088405cde77c4dac622bd427477cd677713294c6e48437dbaaf480e582",
+    "demos/corporate/gjh/v11/script.js": "3a09dea9a2068791ea8557190166c55ab5dc2ecbe7bd6ebfc889a650c99e1152",
+    "demos/corporate/gjh/v11/style.css": "7fe0166ba7690be4cbc06dc1caa1e538bbd38a8b2e2168c945972cc2d277c1de",
+    "demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js": "b9ea77ef3aacbf82d386c33311067e6ea4a3aac4190b32e001bdd11d063fb6ae",
+    "demos/corporate/gjh/v11/vendor/GLTFLoader.js": "d6b517ee599c974f9b3648b11621dc23d41de24adcac3c826b3985a9313f6b84",
+    "demos/corporate/gjh/v11/vendor/three.module.min.js": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+  },
+  "checks": [
+    {
+      "command": "python3 -m unittest discover -s tests -p test_*.py -v",
+      "result": "PASS: 49 tests"
+    },
+    {
+      "command": "node --test tests/gjh_graphics_quality.test.mjs tests/gjh_modes.test.mjs",
+      "result": "PASS: 16 tests"
+    },
+    {
+      "command": "python tests/browser_gjh_interior_pilot.py",
+      "result": "PASS: 14 cases, 390/639/1440px"
+    },
+    {
+      "command": "python tests/browser_gjh_interior_pilot_compatibility.py",
+      "result": "PASS: both shelf configurations at 390/1440px; all four SKUs; 32 pickup/return cycles"
+    },
+    {
+      "command": "python tests/browser_gjh_interior_pilot_performance.py",
+      "result": "PASS: three fixed views; 127/148/166 calls"
+    },
+    {
+      "command": "python tests/browser_gjh_v11.py",
+      "result": "PASS: default route walking/doors/keyboard/context-loss/fallback regression"
+    },
+    {
+      "command": "python tests/browser_gjh_graphics_recovery.py --smoke",
+      "result": "PASS: 13 cases / 35 frames"
+    },
+    {
+      "command": "python tests/browser_gallery.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python tests/browser_gjh_demos.py",
+      "result": "PASS: 28 browser cases, four no-JavaScript flows"
+    },
+    {
+      "command": "python tests/browser_pwa.py",
+      "result": "PASS"
+    },
+    {
+      "command": "node models/gjh-interior-pilot/validate.mjs PATH_TO_VALIDATOR",
+      "result": "PASS: eight assets, zero errors/warnings"
+    },
+    {
+      "command": "python3 scripts/check_ssot.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 scripts/build_gallery.py --check",
+      "result": "PASS"
+    },
+    {
+      "command": "python tests/browser_gjh_furnishings.py",
+      "result": "PASS: 17 normal/missing/aborted cases"
+    }
+  ],
+  "limits": [
+    "Historical local-runtime evidence is retained separately",
+    "Physical devices, Safari, screen readers and field FPS are not certified",
+    "Graphics recovery is a focused smoke regression, not a repeat of every earlier source-bound scenario",
+    "Other 192 candidates and HUD consolidation remain pending"
+  ]
+}

@@ -1,4 +1,5 @@
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 
 // Replaceable candidate configuration; this is not a claim that future generic cans are this SKU set.
 export const NEW_MOON_CANS = Object.freeze([
@@ -8,11 +9,16 @@ export const NEW_MOON_CANS = Object.freeze([
   {sku: 'mx-454g', file: 'new-moon-can-mx-454g-lod1.glb', sha256: '52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb'},
 ]);
 const cans = NEW_MOON_CANS;
-const shelf = Object.freeze({file: 'gjh-m056-shelf-lod1.glb', sha256: '949e8278034779c129e3494e614a002d5542108b74e081296acffd8e9d7c6037'});
+// Retain the released M056 shelf by default; select all eight pilot assets explicitly.
+const interiorPilot = new URLSearchParams(location.search).get('interior') === 'pilot';
+const shelf = interiorPilot ? INTERIOR_PILOT.shelf : Object.freeze({file: 'gjh-m056-shelf-lod1.glb', sha256: '949e8278034779c129e3494e614a002d5542108b74e081296acffd8e9d7c6037'});
 const canBounds = Object.freeze({x: .0775, y: .12399169057607651, z: .0775});
-const shelfBounds = Object.freeze({x: 2.4, y: 2.4, z: .55});
-const shelfXs = Object.freeze([-13.63, -11.21, -8.79, -6.37]);
-const shelfTops = Object.freeze([.451, .991, 1.531]);
+const shelfBounds = Object.freeze(interiorPilot ? {x: 1.52, y: 1.96, z: .58} : {x: 2.4, y: 2.4, z: .55});
+const shelfXs = Object.freeze(interiorPilot ? [-12.85, -10.95, -9.05, -7.15] : [-13.63, -11.21, -8.79, -6.37]);
+const shelfTops = Object.freeze(interiorPilot ? [.6825, 1.1925, 1.7025] : [.451, .991, 1.531]);
+const productOffsets = interiorPilot ? [-.44, 0, .44] : [-.55, 0, .55];
+const productZ = interiorPilot ? -9.25 : -9.23;
+const shelfRotation = interiorPilot ? Math.PI : 0;
 const deadline = 8000;
 
 async function sha256(buffer) {
@@ -56,6 +62,7 @@ async function loadAsset(T, definition, kind) {
     const gltf = await new GLTFLoader().parseAsync(buffer, '');
     parsed = gltf.scene;
     if (expired) { disposeAsset(parsed); parsed = null; throw Error('timeout'); }
+    if (definition.asset_id && gltf.scene.getObjectByName(definition.asset_id)?.userData.asset_id !== definition.asset_id) throw Error('invalid-identity');
     gltf.scene.updateMatrixWorld(true);
     const box = new T.Box3().setFromObject(gltf.scene), size = box.getSize(new T.Vector3());
     const expected = kind === 'shelf' ? shelfBounds : canBounds;
@@ -95,9 +102,9 @@ function fallbackCan(T, scene, textures, brass, sku, placements) {
 }
 
 function fallbackShelf(T, scene) {
-  const mesh = new T.InstancedMesh(new T.BoxGeometry(2.32, .04, .5), new T.MeshStandardMaterial({color: 0x6b4931}), 12);
+  const mesh = new T.InstancedMesh(new T.BoxGeometry(shelfBounds.x - .08, .04, shelfBounds.z - .05), new T.MeshStandardMaterial({color: 0x6b4931}), 12);
   const matrix = new T.Matrix4(); let index = 0;
-  for (const x of shelfXs) for (const y of shelfTops.map(top => top - .02)) { matrix.compose(new T.Vector3(x, y, -9.23), new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index++, matrix); }
+  for (const x of shelfXs) for (const y of shelfTops.map(top => top - .02)) { matrix.compose(new T.Vector3(x, y, productZ), new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index++, matrix); }
   mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
 }
 
@@ -106,7 +113,7 @@ export async function addProducts(T, scene, textures, brass) {
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene);
   else for (const primitive of shelfRecord.primitives) {
     const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, shelfXs.length);
-    shelfXs.forEach((x, index) => { const matrix = new T.Matrix4(); matrix.compose(new T.Vector3(x, 0, -9.25), new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
+    shelfXs.forEach((x, index) => { const matrix = new T.Matrix4(); matrix.compose(new T.Vector3(x, 0, -9.25), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), shelfRotation), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
   }
   const interactables = [], stock = new Map();
@@ -116,7 +123,7 @@ export async function addProducts(T, scene, textures, brass) {
     max: Object.freeze({x: x + shelfBounds.x / 2, y: shelfBounds.y, z: -9.25 + shelfBounds.z / 2})}));
   canRecords.forEach((record, productIndex) => {
     const sku = cans[productIndex].sku, x = shelfXs[productIndex], placements = [];
-    for (const y of shelfTops) for (const dx of [-.55, 0, .55]) placements.push(new T.Vector3(x + dx, y, -9.23));
+    for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, productZ));
     const batches = [];
     stock.set(`new-moon-${sku}-front`, {record, placements, batches, reserved:false});
     if (record.status === 'loaded') for (const primitive of record.primitives) {
@@ -147,14 +154,14 @@ export async function addProducts(T, scene, textures, brass) {
     // Geometry/materials are shared with the shelf: never dispose on gesture completion.
     return group;
   }, interactables, colliders: shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})), assets: Object.freeze({
-    shelf: Object.freeze({model:'GJH-M056', lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4, primitives: shelfRecord.primitives.length, dimensions: shelfRecord.size}),
+    shelf: Object.freeze({model:interiorPilot ? shelf.asset_id : 'GJH-M056', assetId:interiorPilot ? shelf.asset_id : null, lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4, primitives: shelfRecord.primitives.length, dimensions: shelfRecord.size}),
     cans: Object.freeze(Object.fromEntries(canRecords.map((record, index) => {
       const x = shelfXs[index];
-      const placements = Object.freeze(shelfTops.flatMap(y => [-.55, 0, .55].map(dx => Object.freeze({x: x + dx, y, z: -9.23}))));
+      const placements = Object.freeze(shelfTops.flatMap(y => productOffsets.map(dx => Object.freeze({x: x + dx, y, z: productZ}))));
       const dimensions = Object.freeze((record.size || [canBounds.x, canBounds.y, canBounds.z]).slice());
       return [cans[index].sku, Object.freeze({status: record.status, reason: record.reason, identity: cans[index].sha256, instances: 9, primitives: record.primitives.length, dimensions, actualBounds: dimensions, actualBoundsScale: Object.freeze([dimensions[0] / canBounds.x, dimensions[1] / canBounds.y, dimensions[2] / canBounds.z]), placements, floorY: 0, supportTopY: shelfTops[0], frontAxis: '+Z'})];
     }))),
     totalInstances: 36,
-    disclosure: 'Original M056 demo furniture; cans use estimated packaging dimensions. Mexico includes a 121-degree unprinted placeholder sector. Unofficial demo, owner-authorized use; independent artwork rights and packaging fidelity are not verified.',
+    disclosure: (interiorPilot ? 'Original DSP-001 pilot demo furniture; ' : 'Original M056 demo furniture; ') + 'cans use estimated packaging dimensions. Mexico includes a 121-degree unprinted placeholder sector. Unofficial demo, owner-authorized use; independent artwork rights and packaging fidelity are not verified.',
   })};
 }

@@ -131,3 +131,11 @@ Application **1.1.2** replaces the legacy shopper rendering with an original, lo
 Application **1.1.3** adds held Q/E left/right turning in V11, including while walking or running. F inspects nearby displays. [Keyboard verification](docs/gjh-keyboard-review.md) records real-key tests, focus guards and browser limitations. On macOS, `GALLERY_WEBGL_BACKEND=metal python tests/browser_gjh_v11.py` runs the same V11 checks through native ANGLE Metal.
 
 PWA demo/shared-theme boundary and same-tab Demo bag update evidence: [V11 PWA boundary review](docs/v11-pwa-boundary-review.md).
+
+## GJH V11 interior pilot
+
+Open [the complete eight-asset pilot](demos/corporate/gjh/v11/index.html?interior=pilot). The released default route retains M056 shelves, Shelf focus, Visitor v2 and graphics recovery; the query selects DSP-001 shelves with their own native bounds, product supports and collision. The other seven pilot assets are shared by both routes.
+
+The [eight-asset pilot](docs/gjh-v11-interior-pilot-review.md) integrates reusable benches, planters, a relocated directory, shelves, sign frames, wall lights, coffee tables and an atrium plinth. Editable Blender sources, reproducible commands and per-asset acceptance records live in [models/gjh-interior-pilot](models/gjh-interior-pilot/README.md); authoring files are excluded from the Pages artifact.
+
+Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. Run `python tests/browser_gjh_interior_pilot_compatibility.py` for both shelf choices and all four repeated pickup/return journeys. See [release reconciliation and results](docs/gjh-v11-interior-pilot-release.md). These complement the existing Gallery/GJH/PWA suites. Physical-device performance and the remaining 192 asset candidates are pending.

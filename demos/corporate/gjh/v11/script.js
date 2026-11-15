@@ -49,7 +49,8 @@ const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.curr
   gpu: renderer ? {...renderer.info.memory} : null,
   seats:world?.seats?.map(({id,name,x,z,exitX,exitZ,facing})=>({id,name,x,z,exitX,exitZ,facing}))||[],
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
-  drawCalls: renderer?.info.render.calls || 0, frames, reducedMotion: reducedMotion.matches,
+  drawCalls: renderer?.info.render.calls || 0, renderTriangles: renderer?.info.render.triangles || 0,
+  rendererResources: Object.freeze({geometries: renderer?.info.memory.geometries || 0, textures: renderer?.info.memory.textures || 0}), frames, reducedMotion: reducedMotion.matches,
   roomSigns: Object.freeze((world?.roomSigns || []).map(({zone, mesh, left, right, top, bottom}) => Object.freeze({zone, visible: mesh.visible, left, right, top, bottom}))),
   pixelRatio: renderer?.getPixelRatio() || 1, hidden: document.hidden});
 Object.defineProperty(window, '__mall', {value: Object.freeze({

@@ -1,0 +1,2002 @@
+{
+  "release": {
+    "version": "1.1.30",
+    "build": "0cd8a632fa3b3029"
+  },
+  "browser": "157.0.8103.51",
+  "case": "all",
+  "environment": "Local Chrome/metal; physical mobile performance not measured",
+  "offlineModelsExcluded": "PASS",
+  "results": [
+    {
+      "width": 1440,
+      "failure": null,
+      "failedModel": null,
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 192,
+        "newmoon": 152,
+        "mili": 158,
+        "gogo": 120
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "N/A",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 768,
+      "failure": null,
+      "failedModel": null,
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 168,
+        "newmoon": 124,
+        "mili": 114,
+        "gogo": 93
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "N/A",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": null,
+      "failedModel": null,
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 150,
+        "newmoon": 103,
+        "mili": 103,
+        "gogo": 90
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "N/A",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "bench",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 8,
+          "primitives": 0
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 100,
+        "mili": 100,
+        "gogo": 87
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "planter",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 11,
+          "primitives": 0
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 145,
+        "newmoon": 99,
+        "mili": 98,
+        "gogo": 85
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "kiosk",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 1,
+          "primitives": 0
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 103,
+        "mili": 103,
+        "gogo": 90
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "storeSign",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 3,
+          "primitives": 0
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 100,
+        "mili": 100,
+        "gogo": 87
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "wallLight",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 14,
+          "primitives": 0
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 100,
+        "mili": 100,
+        "gogo": 87
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "coffeeTable",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 2,
+          "primitives": 0
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 149,
+        "newmoon": 103,
+        "mili": 102,
+        "gogo": 89
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "missing",
+      "failedModel": "plinth",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 1,
+          "primitives": 0
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 148,
+        "newmoon": 103,
+        "mili": 102,
+        "gogo": 90
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "bench",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 8,
+          "primitives": 0
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 100,
+        "mili": 100,
+        "gogo": 87
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "planter",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 11,
+          "primitives": 0
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 145,
+        "newmoon": 99,
+        "mili": 98,
+        "gogo": 85
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "kiosk",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 1,
+          "primitives": 0
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 103,
+        "mili": 103,
+        "gogo": 90
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "storeSign",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 3,
+          "primitives": 0
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 100,
+        "mili": 100,
+        "gogo": 87
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "wallLight",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 14,
+          "primitives": 0
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 147,
+        "newmoon": 100,
+        "mili": 100,
+        "gogo": 87
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "coffeeTable",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 2,
+          "primitives": 0
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 149,
+        "newmoon": 103,
+        "mili": 102,
+        "gogo": 89
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "failure": "aborted",
+      "failedModel": "plinth",
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "fallback",
+          "reason": "unavailable",
+          "instances": 1,
+          "primitives": 0
+        }
+      },
+      "modelRequests": {
+        "GJH_PUB_002.glb": 1,
+        "GJH_PUB_008.glb": 1,
+        "GJH_PUB_017.glb": 1,
+        "GJH_STF_008.glb": 1,
+        "GJH_LGT_009.glb": 1,
+        "GJH_PUB_005.glb": 1,
+        "GJH_VER_017.glb": 1
+      },
+      "drawCallsByView": {
+        "atrium": 148,
+        "newmoon": 103,
+        "mili": 102,
+        "gogo": 90
+      },
+      "listNavigation": "PASS",
+      "readyAfterFallback": "PASS",
+      "pageErrors": [],
+      "externalRequests": []
+    }
+  ],
+  "metadataCorrection": "Original runner environment label was hardcoded SwiftShader; actual invocation used GALLERY_WEBGL_BACKEND=metal."
+}

@@ -1,0 +1,134 @@
+{
+  "validator": "Khronos glTF Validator",
+  "assets": [
+    {
+      "asset_id": "GJH-PUB-002",
+      "pass": true,
+      "triangles": 5640,
+      "triangle_ceiling": 6000,
+      "primitives": 5,
+      "bytes": 233176,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    {
+      "asset_id": "GJH-PUB-008",
+      "pass": true,
+      "triangles": 5160,
+      "triangle_ceiling": 6000,
+      "primitives": 6,
+      "bytes": 119732,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    {
+      "asset_id": "GJH-PUB-017",
+      "pass": true,
+      "triangles": 4866,
+      "triangle_ceiling": 6000,
+      "primitives": 7,
+      "bytes": 181376,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    {
+      "asset_id": "GJH-DSP-001",
+      "pass": true,
+      "triangles": 5712,
+      "triangle_ceiling": 6000,
+      "primitives": 5,
+      "bytes": 228924,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    {
+      "asset_id": "GJH-STF-008",
+      "pass": true,
+      "triangles": 540,
+      "triangle_ceiling": 8000,
+      "primitives": 3,
+      "bytes": 21912,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    {
+      "asset_id": "GJH-LGT-009",
+      "pass": true,
+      "triangles": 540,
+      "triangle_ceiling": 2000,
+      "primitives": 3,
+      "bytes": 22804,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    {
+      "asset_id": "GJH-PUB-005",
+      "pass": true,
+      "triangles": 4272,
+      "triangle_ceiling": 6000,
+      "primitives": 2,
+      "bytes": 160536,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    {
+      "asset_id": "GJH-VER-017",
+      "pass": true,
+      "triangles": 3820,
+      "triangle_ceiling": 12000,
+      "primitives": 4,
+      "bytes": 129236,
+      "validator": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    }
+  ],
+  "totalBytes": 1097696
+}

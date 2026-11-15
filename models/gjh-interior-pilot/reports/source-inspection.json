@@ -1,0 +1,1195 @@
+{
+  "blender_version": "5.1.2",
+  "assets": [
+    {
+      "asset_id": "GJH-PUB-002",
+      "source_sha256": "bfa2f81eb6c6b3c2b772a338b6e60d2a6ccda9d5bf2a1ded97056528f2f41e70",
+      "objects": 30,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    },
+    {
+      "asset_id": "GJH-PUB-008",
+      "source_sha256": "5ea8b805f01e143a784feda8a7640994929f2efd9be7ffa8ad1202db96422cab",
+      "objects": 213,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [
+        {
+          "object": "Arching palm stem 1",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 10",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 11",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 2",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 3",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 4",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 5",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 6",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 7",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 8",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Arching palm stem 9",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Brass foot ring",
+          "type": "MESH",
+          "boundary_edges": 96
+        },
+        {
+          "object": "Brass rim",
+          "type": "MESH",
+          "boundary_edges": 96
+        },
+        {
+          "object": "Fluted ceramic vessel",
+          "type": "MESH",
+          "boundary_edges": 192
+        },
+        {
+          "object": "Palm leaflet 0-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 0-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 1-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 10-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 2-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 3-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 4-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 5-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 6-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 7-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 8-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-0--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-0-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-1--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-1-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-2--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-2-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-3--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-3-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-4--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-4-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-5--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-5-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-6--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-6-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-7--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-7-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-8--1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Palm leaflet 9-8-1",
+          "type": "MESH",
+          "boundary_edges": 4
+        },
+        {
+          "object": "Visible soil",
+          "type": "MESH",
+          "boundary_edges": 96
+        }
+      ],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    },
+    {
+      "asset_id": "GJH-PUB-017",
+      "source_sha256": "c635fd43c76b7f1b258f10954d41e55ecdfc43f91decd7afb127b2ae769daa5d",
+      "objects": 21,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [
+        {
+          "object": "Label - 01",
+          "type": "FONT",
+          "boundary_edges": 80
+        },
+        {
+          "object": "Label - DIRECTORY",
+          "type": "FONT",
+          "boundary_edges": 516
+        },
+        {
+          "object": "Label - LEVEL 01",
+          "type": "FONT",
+          "boundary_edges": 252
+        },
+        {
+          "object": "Label - YOU ARE HERE",
+          "type": "FONT",
+          "boundary_edges": 600
+        },
+        {
+          "object": "Store 01 index",
+          "type": "FONT",
+          "boundary_edges": 100
+        },
+        {
+          "object": "Store 02 index",
+          "type": "FONT",
+          "boundary_edges": 185
+        },
+        {
+          "object": "Store 03 index",
+          "type": "FONT",
+          "boundary_edges": 243
+        }
+      ],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    },
+    {
+      "asset_id": "GJH-DSP-001",
+      "source_sha256": "c2c87539db3662122fe6c6af402b842afa0912c1a86708e6890eb92155e2adbf",
+      "objects": 31,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [
+        {
+          "object": "Label - COLLECTION",
+          "type": "FONT",
+          "boundary_edges": 456
+        },
+        {
+          "object": "Rear diagonal left",
+          "type": "CURVE",
+          "boundary_edges": 12
+        },
+        {
+          "object": "Rear diagonal right",
+          "type": "CURVE",
+          "boundary_edges": 12
+        }
+      ],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    },
+    {
+      "asset_id": "GJH-STF-008",
+      "source_sha256": "76db8a4fdeb40be072ac6c5ce0216856597a670303d8627d9cdfc4eade7ff916",
+      "objects": 5,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    },
+    {
+      "asset_id": "GJH-LGT-009",
+      "source_sha256": "da43d83a1a0b1cb56dea5c34b2d0397056d2cbe07cebdcf444b0595a5e48f612",
+      "objects": 5,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    },
+    {
+      "asset_id": "GJH-PUB-005",
+      "source_sha256": "686e19542c51dca4b88eba66bdb41f90ff46f3208bc3802ac1b529e0e401c46b",
+      "objects": 12,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    },
+    {
+      "asset_id": "GJH-VER-017",
+      "source_sha256": "731cc2e2c981aa63ffc4ab21c2568878cf96d5d43b8bfd35f160077fcbc3bae9",
+      "objects": 5,
+      "unitsAndScale": "PASS",
+      "finiteNondegenerateGeometry": "PASS",
+      "open_surfaces": [],
+      "open_surface_policy": "Intentional original foliage sheets, curve stem ends and text faces; inspect names and five-view renders. New solid models require closed components."
+    }
+  ]
+}

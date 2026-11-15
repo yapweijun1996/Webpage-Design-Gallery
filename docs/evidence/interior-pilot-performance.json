@@ -1,0 +1,173 @@
+{
+  "scope": "Headless Chrome ANGLE Metal, fixed startup view, 120 rAF intervals; no baseline timing or physical-device FPS comparison.",
+  "results": [
+    {
+      "width": 390,
+      "drawCalls": 150,
+      "renderTriangles": 284242,
+      "rendererResources": {
+        "geometries": 85,
+        "textures": 16
+      },
+      "frameIntervalMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000273,
+        "samples": 120
+      },
+      "pilotResources": [
+        {
+          "name": "GJH_PUB_002.glb",
+          "decodedBytes": 233176,
+          "transferBytes": 233476
+        },
+        {
+          "name": "GJH_PUB_008.glb",
+          "decodedBytes": 119732,
+          "transferBytes": 120032
+        },
+        {
+          "name": "GJH_PUB_017.glb",
+          "decodedBytes": 181376,
+          "transferBytes": 181676
+        },
+        {
+          "name": "GJH_STF_008.glb",
+          "decodedBytes": 21912,
+          "transferBytes": 22212
+        },
+        {
+          "name": "GJH_LGT_009.glb",
+          "decodedBytes": 22804,
+          "transferBytes": 23104
+        },
+        {
+          "name": "GJH_PUB_005.glb",
+          "decodedBytes": 160536,
+          "transferBytes": 160836
+        },
+        {
+          "name": "GJH_VER_017.glb",
+          "decodedBytes": 129236,
+          "transferBytes": 129536
+        },
+        {
+          "name": "GJH_DSP_001.glb",
+          "decodedBytes": 228924,
+          "transferBytes": 229224
+        }
+      ]
+    },
+    {
+      "width": 639,
+      "drawCalls": 170,
+      "renderTriangles": 314508,
+      "rendererResources": {
+        "geometries": 89,
+        "textures": 20
+      },
+      "frameIntervalMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000273,
+        "samples": 120
+      },
+      "pilotResources": [
+        {
+          "name": "GJH_PUB_002.glb",
+          "decodedBytes": 233176,
+          "transferBytes": 233476
+        },
+        {
+          "name": "GJH_PUB_008.glb",
+          "decodedBytes": 119732,
+          "transferBytes": 120032
+        },
+        {
+          "name": "GJH_STF_008.glb",
+          "decodedBytes": 21912,
+          "transferBytes": 22212
+        },
+        {
+          "name": "GJH_PUB_017.glb",
+          "decodedBytes": 181376,
+          "transferBytes": 181676
+        },
+        {
+          "name": "GJH_LGT_009.glb",
+          "decodedBytes": 22804,
+          "transferBytes": 23104
+        },
+        {
+          "name": "GJH_PUB_005.glb",
+          "decodedBytes": 160536,
+          "transferBytes": 160836
+        },
+        {
+          "name": "GJH_VER_017.glb",
+          "decodedBytes": 129236,
+          "transferBytes": 129536
+        },
+        {
+          "name": "GJH_DSP_001.glb",
+          "decodedBytes": 228924,
+          "transferBytes": 229224
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "drawCalls": 191,
+      "renderTriangles": 321620,
+      "rendererResources": {
+        "geometries": 96,
+        "textures": 25
+      },
+      "frameIntervalMs": {
+        "median": 16.699999999999818,
+        "p95": 16.700000000000273,
+        "samples": 120
+      },
+      "pilotResources": [
+        {
+          "name": "GJH_PUB_002.glb",
+          "decodedBytes": 233176,
+          "transferBytes": 233476
+        },
+        {
+          "name": "GJH_PUB_008.glb",
+          "decodedBytes": 119732,
+          "transferBytes": 120032
+        },
+        {
+          "name": "GJH_PUB_017.glb",
+          "decodedBytes": 181376,
+          "transferBytes": 181676
+        },
+        {
+          "name": "GJH_STF_008.glb",
+          "decodedBytes": 21912,
+          "transferBytes": 22212
+        },
+        {
+          "name": "GJH_LGT_009.glb",
+          "decodedBytes": 22804,
+          "transferBytes": 23104
+        },
+        {
+          "name": "GJH_PUB_005.glb",
+          "decodedBytes": 160536,
+          "transferBytes": 160836
+        },
+        {
+          "name": "GJH_VER_017.glb",
+          "decodedBytes": 129236,
+          "transferBytes": 129536
+        },
+        {
+          "name": "GJH_DSP_001.glb",
+          "decodedBytes": 228924,
+          "transferBytes": 229224
+        }
+      ]
+    }
+  ]
+}

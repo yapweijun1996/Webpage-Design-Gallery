@@ -1,0 +1,1294 @@
+[
+  {
+    "width": 639,
+    "state": {
+      "x": -1.9999998807907104,
+      "y": -0.02001100778579712,
+      "z": 12.000000953674316,
+      "seated": false,
+      "elevatorTravel": false,
+      "cameraFocus": null,
+      "cameraDistance": 6.5,
+      "seatPhase": "idle",
+      "seatId": null,
+      "seatName": null,
+      "pushing": false,
+      "animation": "idle",
+      "yaw": 0,
+      "facing": 0,
+      "pitch": 0.1,
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "cart": {
+          "available": true,
+          "active": false,
+          "count": 0,
+          "mode": "simplified-push",
+          "wheelPhysics": false,
+          "ik": false
+        },
+        "seated": false,
+        "seatWeight": 0,
+        "carrying": {
+          "available": true,
+          "visible": false,
+          "count": 0,
+          "mode": "generic-carry-cue",
+          "pickupAnimation": false
+        },
+        "collection": {
+          "active": false,
+          "sku": null,
+          "elapsed": 0,
+          "simplified": true,
+          "ik": false
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "zone": "atrium",
+      "nearby": null,
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "productAssets": {
+        "shelf": {
+          "assetId": "GJH-DSP-001",
+          "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+          "status": "loaded",
+          "reason": null,
+          "instances": 4,
+          "primitives": 5,
+          "dimensions": [
+            1.5200000405311584,
+            1.9600000381469727,
+            0.5799999833106995
+          ]
+        },
+        "cans": {
+          "nz-425g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -13.29,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -12.85,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -12.41,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -13.29,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -12.85,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -12.41,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -13.29,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -12.85,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -12.41,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          },
+          "au-425g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -11.389999999999999,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -10.95,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -10.51,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -11.389999999999999,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -10.95,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -10.51,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -11.389999999999999,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -10.95,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -10.51,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          },
+          "sa-425g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -9.49,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -9.05,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -8.610000000000001,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -9.49,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -9.05,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -8.610000000000001,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -9.49,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -9.05,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -8.610000000000001,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          },
+          "mx-454g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -7.590000000000001,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -7.15,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -6.71,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -7.590000000000001,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -7.15,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -6.71,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -7.590000000000001,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -7.15,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -6.71,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          }
+        },
+        "totalInstances": 36,
+        "disclosure": "Shelf panels and can dimensions are estimated from reviewed GLBs; Mexico includes a 121-degree unprinted placeholder sector. Unofficial demo, owner-authorized use; independent artwork rights and packaging fidelity are not verified."
+      },
+      "amenities": {
+        "desk": {
+          "status": "loaded",
+          "reason": null,
+          "identity": "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0",
+          "instances": 1,
+          "primitives": 5,
+          "dimensions": [
+            2.880000114440918,
+            1.8700000047683716,
+            0.960999995470047
+          ],
+          "placements": [
+            [
+              -12.5,
+              0,
+              5.8,
+              3.141592653589793
+            ]
+          ],
+          "doorPose": null
+        },
+        "signs": {
+          "status": "loaded",
+          "reason": null,
+          "identity": "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14",
+          "instances": 2,
+          "primitives": 3,
+          "dimensions": [
+            2.0999999046325684,
+            0.9400000125169754,
+            0.16200014208513558
+          ],
+          "placements": [
+            [
+              -4.2,
+              6.1,
+              6,
+              0
+            ],
+            [
+              6,
+              6.1,
+              6,
+              0
+            ]
+          ],
+          "doorPose": null
+        },
+        "showcase": {
+          "status": "loaded",
+          "reason": null,
+          "identity": "782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179",
+          "instances": 1,
+          "primitives": 5,
+          "dimensions": [
+            0.75,
+            1.8000000286847353,
+            0.5320000126450939
+          ],
+          "placements": [
+            [
+              -7,
+              0,
+              2.2,
+              0
+            ]
+          ],
+          "doorPose": "closed"
+        },
+        "displayedProducts": 4
+      },
+      "seats": [
+        {
+          "id": "courtyard-seat",
+          "name": "Courtyard bench 1",
+          "x": -7.8,
+          "z": 9.27,
+          "exitX": -7.8,
+          "exitZ": 8.3,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-2",
+          "name": "Courtyard bench 2",
+          "x": 7.8,
+          "z": 9.27,
+          "exitX": 7.8,
+          "exitZ": 8.3,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-3",
+          "name": "Courtyard bench 3",
+          "x": -7.8,
+          "z": 13.23,
+          "exitX": -7.8,
+          "exitZ": 14.2,
+          "facing": -1
+        },
+        {
+          "id": "bench-seat-4",
+          "name": "Courtyard bench 4",
+          "x": 7.8,
+          "z": 13.23,
+          "exitX": 7.8,
+          "exitZ": 14.2,
+          "facing": -1
+        },
+        {
+          "id": "bench-seat-5",
+          "name": "MILI bench 1",
+          "x": -3,
+          "z": -7.03,
+          "exitX": -3,
+          "exitZ": -8,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-6",
+          "name": "MILI bench 2",
+          "x": 3,
+          "z": -7.03,
+          "exitX": 3,
+          "exitZ": -8,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-7",
+          "name": "GOGO bench 1",
+          "x": 7,
+          "z": -7.03,
+          "exitX": 7,
+          "exitZ": -8,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-8",
+          "name": "GOGO bench 2",
+          "x": 13,
+          "z": -7.03,
+          "exitX": 13,
+          "exitZ": -8,
+          "facing": 1
+        }
+      ],
+      "doors": {
+        "newmoon": 0,
+        "mili": 0,
+        "gogo": 0
+      },
+      "drawCalls": 169,
+      "frames": 169,
+      "reducedMotion": true,
+      "roomSigns": [
+        {
+          "zone": "newmoon",
+          "visible": true,
+          "left": -90.83447046643353,
+          "right": 70.47122473546591,
+          "top": 313.32597441206656,
+          "bottom": 326.70511735375413
+        },
+        {
+          "zone": "mili",
+          "visible": true,
+          "left": 321.5580822944789,
+          "right": 482.39658895208396,
+          "top": 313.32597457726257,
+          "bottom": 326.7051174891518
+        },
+        {
+          "zone": "gogo",
+          "visible": true,
+          "left": 733.1758801110083,
+          "right": 894.7930324005742,
+          "top": 313.3259747424586,
+          "bottom": 326.7051176245494
+        }
+      ],
+      "pixelRatio": 1,
+      "hidden": false,
+      "paused": false
+    },
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "state": {
+      "x": -1.9999998807907104,
+      "y": -0.02001100778579712,
+      "z": 12.000000953674316,
+      "seated": false,
+      "elevatorTravel": false,
+      "cameraFocus": null,
+      "cameraDistance": 6.5,
+      "seatPhase": "idle",
+      "seatId": null,
+      "seatName": null,
+      "pushing": false,
+      "animation": "idle",
+      "yaw": 0,
+      "facing": 0,
+      "pitch": 0.1,
+      "character": {
+        "model": "gjh-mall-visitor",
+        "asset": "assets/gjh-mall-visitor.glb",
+        "nativeHeight": 1.719999952978403,
+        "scale": 1,
+        "clips": {
+          "idle": "idle",
+          "walk": "walk",
+          "run": "sprint"
+        },
+        "cart": {
+          "available": true,
+          "active": false,
+          "count": 0,
+          "mode": "simplified-push",
+          "wheelPhysics": false,
+          "ik": false
+        },
+        "seated": false,
+        "seatWeight": 0,
+        "carrying": {
+          "available": true,
+          "visible": false,
+          "count": 0,
+          "mode": "generic-carry-cue",
+          "pickupAnimation": false
+        },
+        "collection": {
+          "active": false,
+          "sku": null,
+          "elapsed": 0,
+          "simplified": true,
+          "ik": false
+        },
+        "weights": {
+          "idle": 1,
+          "walk": 0,
+          "run": 0
+        }
+      },
+      "zone": "atrium",
+      "nearby": null,
+      "furnishings": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        }
+      },
+      "productAssets": {
+        "shelf": {
+          "assetId": "GJH-DSP-001",
+          "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+          "status": "loaded",
+          "reason": null,
+          "instances": 4,
+          "primitives": 5,
+          "dimensions": [
+            1.5200000405311584,
+            1.9600000381469727,
+            0.5799999833106995
+          ]
+        },
+        "cans": {
+          "nz-425g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -13.29,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -12.85,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -12.41,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -13.29,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -12.85,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -12.41,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -13.29,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -12.85,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -12.41,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          },
+          "au-425g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -11.389999999999999,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -10.95,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -10.51,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -11.389999999999999,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -10.95,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -10.51,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -11.389999999999999,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -10.95,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -10.51,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          },
+          "sa-425g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -9.49,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -9.05,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -8.610000000000001,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -9.49,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -9.05,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -8.610000000000001,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -9.49,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -9.05,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -8.610000000000001,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          },
+          "mx-454g": {
+            "status": "loaded",
+            "reason": null,
+            "identity": "52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb",
+            "instances": 9,
+            "primitives": 3,
+            "dimensions": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBounds": [
+              0.07750000059604645,
+              0.12399169057607651,
+              0.07750000059604645
+            ],
+            "actualBoundsScale": [
+              1.000000007690922,
+              1,
+              1.000000007690922
+            ],
+            "placements": [
+              {
+                "x": -7.590000000000001,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -7.15,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -6.71,
+                "y": 0.6825,
+                "z": -9.25
+              },
+              {
+                "x": -7.590000000000001,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -7.15,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -6.71,
+                "y": 1.1925,
+                "z": -9.25
+              },
+              {
+                "x": -7.590000000000001,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -7.15,
+                "y": 1.7025,
+                "z": -9.25
+              },
+              {
+                "x": -6.71,
+                "y": 1.7025,
+                "z": -9.25
+              }
+            ],
+            "floorY": 0,
+            "supportTopY": 0.6825,
+            "frontAxis": "+Z"
+          }
+        },
+        "totalInstances": 36,
+        "disclosure": "Shelf panels and can dimensions are estimated from reviewed GLBs; Mexico includes a 121-degree unprinted placeholder sector. Unofficial demo, owner-authorized use; independent artwork rights and packaging fidelity are not verified."
+      },
+      "amenities": {
+        "desk": {
+          "status": "loaded",
+          "reason": null,
+          "identity": "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0",
+          "instances": 1,
+          "primitives": 5,
+          "dimensions": [
+            2.880000114440918,
+            1.8700000047683716,
+            0.960999995470047
+          ],
+          "placements": [
+            [
+              -12.5,
+              0,
+              5.8,
+              3.141592653589793
+            ]
+          ],
+          "doorPose": null
+        },
+        "signs": {
+          "status": "loaded",
+          "reason": null,
+          "identity": "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14",
+          "instances": 2,
+          "primitives": 3,
+          "dimensions": [
+            2.0999999046325684,
+            0.9400000125169754,
+            0.16200014208513558
+          ],
+          "placements": [
+            [
+              -4.2,
+              6.1,
+              6,
+              0
+            ],
+            [
+              6,
+              6.1,
+              6,
+              0
+            ]
+          ],
+          "doorPose": null
+        },
+        "showcase": {
+          "status": "loaded",
+          "reason": null,
+          "identity": "782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179",
+          "instances": 1,
+          "primitives": 5,
+          "dimensions": [
+            0.75,
+            1.8000000286847353,
+            0.5320000126450939
+          ],
+          "placements": [
+            [
+              -7,
+              0,
+              2.2,
+              0
+            ]
+          ],
+          "doorPose": "closed"
+        },
+        "displayedProducts": 4
+      },
+      "seats": [
+        {
+          "id": "courtyard-seat",
+          "name": "Courtyard bench 1",
+          "x": -7.8,
+          "z": 9.27,
+          "exitX": -7.8,
+          "exitZ": 8.3,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-2",
+          "name": "Courtyard bench 2",
+          "x": 7.8,
+          "z": 9.27,
+          "exitX": 7.8,
+          "exitZ": 8.3,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-3",
+          "name": "Courtyard bench 3",
+          "x": -7.8,
+          "z": 13.23,
+          "exitX": -7.8,
+          "exitZ": 14.2,
+          "facing": -1
+        },
+        {
+          "id": "bench-seat-4",
+          "name": "Courtyard bench 4",
+          "x": 7.8,
+          "z": 13.23,
+          "exitX": 7.8,
+          "exitZ": 14.2,
+          "facing": -1
+        },
+        {
+          "id": "bench-seat-5",
+          "name": "MILI bench 1",
+          "x": -3,
+          "z": -7.03,
+          "exitX": -3,
+          "exitZ": -8,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-6",
+          "name": "MILI bench 2",
+          "x": 3,
+          "z": -7.03,
+          "exitX": 3,
+          "exitZ": -8,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-7",
+          "name": "GOGO bench 1",
+          "x": 7,
+          "z": -7.03,
+          "exitX": 7,
+          "exitZ": -8,
+          "facing": 1
+        },
+        {
+          "id": "bench-seat-8",
+          "name": "GOGO bench 2",
+          "x": 13,
+          "z": -7.03,
+          "exitX": 13,
+          "exitZ": -8,
+          "facing": 1
+        }
+      ],
+      "doors": {
+        "newmoon": 0,
+        "mili": 0,
+        "gogo": 0
+      },
+      "drawCalls": 191,
+      "frames": 26,
+      "reducedMotion": true,
+      "roomSigns": [
+        {
+          "zone": "newmoon",
+          "visible": true,
+          "left": 232.59493597697875,
+          "right": 424.1976853342315,
+          "top": 369.6527441553575,
+          "bottom": 385.5448090232226
+        },
+        {
+          "zone": "mili",
+          "visible": true,
+          "left": 722.4446392023132,
+          "right": 913.4924508710424,
+          "top": 369.65274435156783,
+          "bottom": 385.54480918404033
+        },
+        {
+          "zone": "gogo",
+          "visible": true,
+          "left": 1211.3740700381916,
+          "right": 1403.3467755480222,
+          "top": 369.6527445477783,
+          "bottom": 385.54480934485804
+        }
+      ],
+      "pixelRatio": 1,
+      "hidden": false,
+      "paused": false
+    },
+    "errors": []
+  }
+]

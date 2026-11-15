@@ -1,12 +1,13 @@
 // Optional, self-contained furniture. Each source primitive is instanced across placements.
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 
-const sources = Object.freeze({bench: 'gjh-lounge-bench.glb', planter: 'gjh-areca-planter.glb', kiosk: 'mall-directory-kiosk.glb'});
+const sources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf')));
 const deadline = 8000;
 
 function validateContainer(buffer) {
   const view = new DataView(buffer);
-  if (view.byteLength < 20 || view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2 ||
+  if (view.byteLength < 20 || view.getUint32(8, true) !== view.byteLength || view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2 ||
       view.getUint32(12, true) + 20 > view.byteLength || view.getUint32(16, true) !== 0x4e4f534a) throw Error('invalid');
   const json = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer, 20, view.getUint32(12, true))));
   // Keep optional furnishings offline and independent of texture or decoder requests.
@@ -27,20 +28,26 @@ function disposeScene(scene) {
 
 export async function createFurnishings(T, shadows) {
   const records = {};
-  await Promise.all(Object.entries(sources).map(async ([kind, filename]) => {
+  await Promise.all(Object.entries(sources).map(async ([kind, definition]) => {
     const controller = new AbortController();
     let timer, abandoned = false;
     const record = records[kind] = {status: 'fallback', reason: null, primitives: [], placements: []};
     try {
       const load = async () => {
-        const response = await fetch(new URL(filename, import.meta.url), {signal: controller.signal});
+        const response = await fetch(new URL(definition.file, import.meta.url), {signal: controller.signal});
         if (!response.ok) throw Error('unavailable');
         const buffer = await response.arrayBuffer();
+        const hash = await crypto.subtle.digest('SHA-256', buffer);
+        if ([...new Uint8Array(hash)].map(value => value.toString(16).padStart(2, '0')).join('') !== definition.sha256) throw Error('invalid');
         validateContainer(buffer);
         const gltf = await new GLTFLoader().parseAsync(buffer, '');
         try {
           if (abandoned) throw Error('timeout');
+          const root = gltf.scene.getObjectByName(definition.asset_id);
+          if (root?.userData.asset_id !== definition.asset_id) throw Error('invalid');
           gltf.scene.updateMatrixWorld(true);
+          const size = new T.Box3().setFromObject(gltf.scene).getSize(new T.Vector3());
+          if ([size.x, size.y, size.z].some((value, i) => Math.abs(value - definition.dimensions_m[i]) > .001)) throw Error('invalid');
           const primitives = [];
           gltf.scene.traverse(mesh => {
             if (!mesh.isMesh) return;
@@ -64,10 +71,10 @@ export async function createFurnishings(T, shadows) {
     } finally { clearTimeout(timer); }
   }));
   return {
-    place(kind, x, z, height = 1, facing = 1) {
+    place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null) {
       const record = records[kind];
-      const transform = new T.Matrix4().compose(new T.Vector3(x, 0, z),
-        new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), facing < 0 ? Math.PI : 0),
+      const transform = new T.Matrix4().compose(new T.Vector3(x, baseY, z),
+        new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), yaw ?? (facing < 0 ? Math.PI : 0)),
         new T.Vector3(1, height, 1));
       record.placements.push(transform);
       return record.status === 'loaded';
@@ -81,10 +88,11 @@ export async function createFurnishings(T, shadows) {
           const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, record.placements.length);
           mesh.name = `${kind} primitive`;
           record.placements.forEach((placement, index) => mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(placement, primitive.matrix)));
-          mesh.castShadow = shadows; mesh.receiveShadow = true;
+          // Mounted trim uses existing light pools without adding shadow passes.
+          mesh.castShadow = shadows && !['wallLight', 'storeSign'].includes(kind); mesh.receiveShadow = true;
           mesh.computeBoundingSphere(); group.add(mesh);
         }
-        state[kind] = Object.freeze({status: record.status, reason: record.reason,
+        state[kind] = Object.freeze({assetId: sources[kind].asset_id, identity: sources[kind].sha256, dimensions: sources[kind].dimensions_m, status: record.status, reason: record.reason,
           instances: record.placements.length, primitives: record.primitives.length});
       }
       scene.add(group);

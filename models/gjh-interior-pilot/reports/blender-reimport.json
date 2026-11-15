@@ -1,0 +1,157 @@
+{
+  "blender_version": "5.1.2",
+  "assets": [
+    {
+      "asset_id": "GJH-PUB-002",
+      "bounds_wdh_m": [
+        2.5799999237060547,
+        0.921999990940094,
+        1.3174998760223389
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 10068,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-PUB-008",
+      "bounds_wdh_m": [
+        1.2300910949707031,
+        1.1915507316589355,
+        2.347566843032837
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 1404,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-PUB-017",
+      "bounds_wdh_m": [
+        0.9599999785423279,
+        0.6800000071525574,
+        2.049999952316284
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 6886,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-DSP-001",
+      "bounds_wdh_m": [
+        1.5199999809265137,
+        0.5799999833106995,
+        1.9600000381469727
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 9632,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-STF-008",
+      "bounds_wdh_m": [
+        2.5199999809265137,
+        0.21299999952316284,
+        1.2100000381469727
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 802,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-LGT-009",
+      "bounds_wdh_m": [
+        0.3199999928474426,
+        0.2549999952316284,
+        1.0
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 854,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-PUB-005",
+      "bounds_wdh_m": [
+        1.6100000143051147,
+        1.6100000143051147,
+        0.875
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 6610,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    },
+    {
+      "asset_id": "GJH-VER-017",
+      "bounds_wdh_m": [
+        4.5,
+        4.5,
+        0.6524999737739563
+      ],
+      "floor_min_m": 0.0,
+      "boundary_edges": 4836,
+      "mesh_objects": 1,
+      "reimport": "PASS",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "top",
+        "three-quarter"
+      ]
+    }
+  ]
+}

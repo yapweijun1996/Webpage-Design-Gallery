@@ -173,7 +173,9 @@ export async function createWorld(T, R, physics) {
     lightPool(x, .053, 1.1, 2.6, 3.1);
   }
   for (const x of [-14.7, 14.7]) for (const z of [4, 10, 16]) {
-    box('brass', x, 2.6, z, .2, 1.1, .4); box('glow', x + (x < 0 ? .13 : -.13), 2.65, z, .12, .8, .3);
+    if (!furnishings.place('wallLight', x, z, 1, 1, 2.1, x < 0 ? Math.PI / 2 : -Math.PI / 2)) {
+      box('brass', x, 2.6, z, .2, 1.1, .4); box('glow', x + (x < 0 ? .13 : -.13), 2.65, z, .12, .8, .3);
+    }
     lightPool(x < 0 ? -14.82 : 14.82, 2.5, z, 2.2, 2.9, x < 0 ? Math.PI / 2 : -Math.PI / 2, 0);
     lightPool(x < 0 ? -14 : 14, .054, z, 2.8, 3.8);
   }
@@ -181,13 +183,14 @@ export async function createWorld(T, R, physics) {
   plant(-5.7, 4); plant(5.7, 4); plant(-12.9, 15.8, 1.3); plant(12.9, 15.8, 1.3);
   bench(-7.8, 9.5); bench(7.8, 9.5); bench(-7.8, 13, -1); bench(7.8, 13, -1);
   // Low water court, not a wall blocking the whole concourse.
-  cylinder('brass', 0, .12, 7.5, 2.25, .22); cylinder('ivory', 0, .38, 7.5, 2.04, .48);
-  cylinder('wood', 0, .245, 7.5, 2.075, .045); cylinder('brass', 0, .58, 7.5, 2.055, .045);
-  cylinder('water', 0, .63, 7.5, 1.88, .045);
+  if (!furnishings.place('plinth', 0, 7.5)) {
+    cylinder('brass', 0, .12, 7.5, 2.25, .22); cylinder('ivory', 0, .38, 7.5, 2.04, .48);
+    cylinder('wood', 0, .245, 7.5, 2.075, .045); cylinder('brass', 0, .58, 7.5, 2.055, .045);
+    cylinder('water', 0, .63, 7.5, 1.88, .045);
+  }
   cylinder('brass', 0, .69, 7.5, .36, .08); cylinder('ivory', 0, .83, 7.5, .23, .24);
   cylinder('brass', 0, 1.01, 7.5, .065, .26);
   solid('torus', 'brass', 0, 1.84, 7.5, .78, .9, 1);
-  solid('torus', 'brass', .08, 1.84, 7.51, .62, .76, .55, -.18);
   solid('torus', 'brass', 0, .65, 7.5, 1.965, 1.965, .6, 0, -Math.PI / 2);
   for (const radius of [.9, 1.48]) solid('ring', 'brass', 0, .657, 7.5, radius, radius, 1, 0, -Math.PI / 2);
   lightPool(0, .662, 7.5, 3.8, 3.8);
@@ -206,14 +209,14 @@ export async function createWorld(T, R, physics) {
   let worldProductAssets = Object.freeze({status: 'not-loaded'}), shelves = [];
   // Original decorative kiosk beside the entrance, outside the central walking line.
   // The actual wayfinding interaction opens the existing three-store DOM map.
-  if (!furnishings.place('kiosk', -3.3, 9.9, 1, -1)) {
-    box('jade', -3.3, 1.22, 9.9, .94, 1.6, .22);
-    box('brass', -3.3, .08, 9.9, .96, .16, .68);
-    box('dark', -3.3, 1.3, 10.03, .78, 1.25, .035);
+  if (!furnishings.place('kiosk', -5.3, 10.4, 1, -1)) {
+    box('jade', -5.3, 1.22, 10.4, .94, 1.6, .22);
+    box('brass', -5.3, .08, 10.4, .96, .16, .68);
+    box('dark', -5.3, 1.3, 10.53, .78, 1.25, .035);
   }
-  collider(-3.3, 1.025, 9.9, .96, 2.05, .68);
-  shadow(-3.3, 9.9, 1.2, .9);
-  interactables.push({id: 'mall-directory', x: -3.3, z: 9.9, radius: 2.8});
+  collider(-5.3, 1.025, 10.4, .96, 2.05, .68);
+  shadow(-5.3, 10.4, 1.2, .9);
+  interactables.push({id: 'mall-directory', x: -5.3, z: 10.4, radius: 2.8});
   const stores = {newmoon: -10, mili: 0, gogo: 10};
   for (const [zone, x] of Object.entries(stores)) {
     const wall = zone === 'mili' ? 'cream' : 'green';
@@ -252,8 +255,10 @@ export async function createWorld(T, R, physics) {
           box('oak', x + side * 4.635, 2.85 + edge * 1.275, z, .045, .045, 2.3);
         }
         if (z !== -5.2) {
-          box('brass', x + side * 4.57, 3.02, z, .09, .94, .25);
-          box('glow', x + side * 4.49, 3.02, z, .075, .67, .16);
+          if (!furnishings.place('wallLight', x + side * 4.57, z, 1, 1, 2.52, -side * Math.PI / 2)) {
+            box('brass', x + side * 4.57, 3.02, z, .09, .94, .25);
+            box('glow', x + side * 4.49, 3.02, z, .075, .67, .16);
+          }
           lightPool(x + side * 4.585, 3.18, z, 2.1, 2.8, -side * Math.PI / 2, 0);
         }
       }
@@ -286,7 +291,10 @@ export async function createWorld(T, R, physics) {
     }
     box('brass', x, .03, .25, 4.7, .025, .7);
     const logo = zone === 'newmoon' ? 'new-moon-logo.svg' : `${zone}-logo.jpg`;
-    box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05); art(logo, x, 4.67, .4, 2.2);
+    if (!furnishings.place('storeSign', x, .28, 1, 1, 4.065)) {
+      box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05);
+    }
+    art(logo, x, 4.67, .4, 2.2);
     box('glow', x, 5.36, .36, 2.42, .025, .045);
     box('brass', x, 4.02, .29, 9.3, .025, .04);
     const label = sign(zone === 'newmoon' ? '01  /  NEW MOON' : zone === 'mili' ? '02  /  MILI' : '03  /  GOGO', x, 3.5, .38, 3.9, .48, true, 80);
@@ -334,8 +342,11 @@ export async function createWorld(T, R, physics) {
       box('glow', x, 4.77, -10.16, 3.7, .025, .07);
       interactables.push({id: zone, x, z: -9, radius: 2.5});
       bench(x - 3, -6.8); bench(x + 3, -6.8);
-      cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1); collider(x, .4, -5.5, 1.5, .8, 1.5);
-      cylinder('brass', x, .853, -5.5, .805, .025);
+      if (!furnishings.place('coffeeTable', x, -5.5)) {
+        cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
+        cylinder('brass', x, .853, -5.5, .805, .025);
+      }
+      collider(x, .4375, -5.5, 1.61, .875, 1.61);
       cylinder('pot', x, .99, -5.5, .115, .24);
       sphere('foliage', x, 1.2, -5.5, .2, .23, .18);
       plant(x - 3.8, -8.8, 1.15); plant(x + 3.8, -8.8, 1.15); plant(x + 3.8, -2.5);

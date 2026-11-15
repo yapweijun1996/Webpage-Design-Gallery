@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-15",
+  "python_browser_runtime": "/tmp/gjh-popup-qa-venv/bin/python",
+  "browser": "Chrome 157.0.8103.51",
+  "webgl": "ANGLE Metal",
+  "regression_isolation": "Gallery, demo, PWA and broad V11 suites ran against a disposable copy of the current working tree; captures there did not replace unrelated working-tree screenshots.",
+  "checks": [
+    {
+      "command": "python3 scripts/build_gallery.py --check",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p test_gallery.py -v",
+      "result": "PASS: 11 tests"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p test_gjh_*.py -v",
+      "result": "PASS: 10 tests including 2 pilot tests"
+    },
+    {
+      "command": "python tests/browser_gallery.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python tests/browser_gjh_demos.py",
+      "result": "PASS: 28 browser cases and four no-JavaScript journeys"
+    },
+    {
+      "command": "python tests/browser_pwa.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python tests/browser_gjh_v11.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python tests/browser_gjh_furnishings.py",
+      "result": "PASS: 17 cases, three normal and seven missing/seven aborted"
+    },
+    {
+      "command": "python tests/browser_gjh_interior_pilot.py",
+      "result": "PASS: 14 cases"
+    },
+    {
+      "command": "python tests/browser_gjh_interior_pilot_performance.py",
+      "result": "PASS: three viewports"
+    },
+    {
+      "command": "Blender build.py / inspect_sources.py / verify_render.py",
+      "result": "PASS: eight assets; 40 renders"
+    },
+    {
+      "command": "node models/gjh-interior-pilot/validate.mjs PATH_TO_VALIDATOR",
+      "result": "PASS: eight assets; zero errors/warnings"
+    }
+  ],
+  "limits": [
+    "No physical-device/Safari/screen-reader certification",
+    "No pre-change frame-time measurement",
+    "Broader HUD consolidation and remaining 192 asset candidates pending"
+  ]
+}

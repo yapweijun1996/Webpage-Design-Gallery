@@ -17,7 +17,8 @@ from playwright.sync_api import sync_playwright
 from browser_gjh_v11 import ARGS, QuietHandler, state, targets
 
 ROOT = Path(__file__).resolve().parents[1]
-MODELS = {"bench": "gjh-lounge-bench.glb", "planter": "gjh-areca-planter.glb", "kiosk": "mall-directory-kiosk.glb"}
+MODELS = {row["kind"]: row["file"] for row in json.loads(
+    (ROOT / "demos/corporate/gjh/v11/assets/interior-pilot.json").read_text())["assets"] if row["kind"] != "shelf"}
 VIEWPORTS = ((1440, 900), (768, 1024), (390, 844))
 
 
@@ -54,6 +55,9 @@ def verify_case(browser, url, base, viewport, screenshots, failed_model=None, fa
         page.locator("#guide-dialog").wait_for(state="visible")
         page.locator("#guide-start").click()
         page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+        if page.locator(".ob-ui").count():
+            page.locator('[data-ob-action="skip"]').wait_for(state="visible")
+            page.locator('[data-ob-action="skip"]').click()
         page.evaluate("__mall.setInput({}); __mall.step(17)")
         initial = state(page)
         furnishings = initial["furnishings"]
@@ -62,7 +66,7 @@ def verify_case(browser, url, base, viewport, screenshots, failed_model=None, fa
         for key, model in MODELS.items():
             expected = "fallback" if key == failed_model else "loaded"
             assert furnishings[key]["status"] == expected, furnishings
-            assert (furnishings[key]["instances"] == 1 if key == "kiosk" else furnishings[key]["instances"] > 1), furnishings
+            assert (furnishings[key]["instances"] == 1 if key in ("kiosk", "plinth") else furnishings[key]["instances"] > 1), furnishings
             if expected == "loaded":
                 assert furnishings[key]["primitives"] > 0, furnishings
                 assert furnishings[key]["reason"] is None, furnishings
@@ -147,7 +151,7 @@ def run(case):
                             "release": release,
                             "browser": browser.version,
                             "case": case,
-                            "environment": "Local Chrome/SwiftShader; physical mobile performance not measured",
+                            "environment": "Local Chrome/" + os.environ.get("GALLERY_WEBGL_BACKEND", "swiftshader") + "; physical mobile performance not measured",
                             "offlineModelsExcluded": "PASS",
                             "results": results,
                         }, indent=2) + "\n")

@@ -1,0 +1,423 @@
+{
+  "runtime": "Headless Chrome / ANGLE metal",
+  "checks": [
+    {
+      "width": 390,
+      "assetStates": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        },
+        "shelf": {
+          "model": "GJH-DSP-001",
+          "assetId": "GJH-DSP-001",
+          "lod": 1,
+          "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+          "frontAxis": "+Z",
+          "status": "loaded",
+          "reason": null,
+          "instances": 4,
+          "primitives": 5,
+          "dimensions": [
+            1.5200000405311584,
+            1.9600000381469727,
+            0.5799999833106995
+          ]
+        }
+      },
+      "oneFetchPerAsset": "PASS",
+      "kioskCollisionAndMap": "PASS",
+      "portalsAndFourProducts": "PASS",
+      "cartRouteBothDirections": "PASS",
+      "seatsTested": 2,
+      "viewSwitchResourcesStable": "PASS",
+      "initialDrawCalls": 69,
+      "finalResources": {
+        "geometries": 105,
+        "textures": 22
+      },
+      "errors": []
+    },
+    {
+      "width": 639,
+      "assetStates": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        },
+        "shelf": {
+          "model": "GJH-DSP-001",
+          "assetId": "GJH-DSP-001",
+          "lod": 1,
+          "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+          "frontAxis": "+Z",
+          "status": "loaded",
+          "reason": null,
+          "instances": 4,
+          "primitives": 5,
+          "dimensions": [
+            1.5200000405311584,
+            1.9600000381469727,
+            0.5799999833106995
+          ]
+        }
+      },
+      "oneFetchPerAsset": "PASS",
+      "kioskCollisionAndMap": "PASS",
+      "portalsAndFourProducts": "PASS",
+      "cartRouteBothDirections": "PASS",
+      "seatsTested": 2,
+      "viewSwitchResourcesStable": "PASS",
+      "initialDrawCalls": 78,
+      "finalResources": {
+        "geometries": 108,
+        "textures": 22
+      },
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "assetStates": {
+        "bench": {
+          "assetId": "GJH-PUB-002",
+          "identity": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+          "dimensions": [
+            2.58,
+            1.3175,
+            0.922
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 8,
+          "primitives": 5
+        },
+        "planter": {
+          "assetId": "GJH-PUB-008",
+          "identity": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+          "dimensions": [
+            1.230091,
+            2.347567,
+            1.191551
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 11,
+          "primitives": 6
+        },
+        "kiosk": {
+          "assetId": "GJH-PUB-017",
+          "identity": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+          "dimensions": [
+            0.96,
+            2.05,
+            0.68
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 7
+        },
+        "storeSign": {
+          "assetId": "GJH-STF-008",
+          "identity": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+          "dimensions": [
+            2.52,
+            1.21,
+            0.213
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 3,
+          "primitives": 3
+        },
+        "wallLight": {
+          "assetId": "GJH-LGT-009",
+          "identity": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+          "dimensions": [
+            0.32,
+            1,
+            0.255
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 14,
+          "primitives": 3
+        },
+        "coffeeTable": {
+          "assetId": "GJH-PUB-005",
+          "identity": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+          "dimensions": [
+            1.61,
+            0.875,
+            1.61
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 2,
+          "primitives": 2
+        },
+        "plinth": {
+          "assetId": "GJH-VER-017",
+          "identity": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+          "dimensions": [
+            4.5,
+            0.6525,
+            4.5
+          ],
+          "status": "loaded",
+          "reason": null,
+          "instances": 1,
+          "primitives": 4
+        },
+        "shelf": {
+          "model": "GJH-DSP-001",
+          "assetId": "GJH-DSP-001",
+          "lod": 1,
+          "identity": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+          "frontAxis": "+Z",
+          "status": "loaded",
+          "reason": null,
+          "instances": 4,
+          "primitives": 5,
+          "dimensions": [
+            1.5200000405311584,
+            1.9600000381469727,
+            0.5799999833106995
+          ]
+        }
+      },
+      "oneFetchPerAsset": "PASS",
+      "kioskCollisionAndMap": "PASS",
+      "portalsAndFourProducts": "PASS",
+      "cartRouteBothDirections": "PASS",
+      "seatsTested": 8,
+      "viewSwitchResourcesStable": "PASS",
+      "initialDrawCalls": 83,
+      "finalResources": {
+        "geometries": 108,
+        "textures": 23
+      },
+      "errors": []
+    },
+    {
+      "missing": "GJH-PUB-002",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "missing": "GJH-PUB-008",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "missing": "GJH-PUB-017",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "missing": "GJH-DSP-001",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "missing": "GJH-STF-008",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "missing": "GJH-LGT-009",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "missing": "GJH-PUB-005",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "missing": "GJH-VER-017",
+      "independentFallbackAndDirectory": "PASS"
+    },
+    {
+      "corruptHashRejected": "PASS"
+    },
+    {
+      "lateParseDisposed": "PASS",
+      "geometryDisposals": 2
+    },
+    {
+      "noWebGLDirectory": "PASS"
+    }
+  ],
+  "limitations": [
+    "No physical-phone, Safari, screen-reader, packaging-fidelity or field-performance certification."
+  ],
+  "browserVersion": "157.0.8103.51"
+}

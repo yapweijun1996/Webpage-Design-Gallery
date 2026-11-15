@@ -1,0 +1,863 @@
+{
+  "scope": "Eight-ID V11 concept pilot only; remaining 192 candidates pending",
+  "assets": [
+    {
+      "asset_id": "GJH-PUB-002",
+      "kind": "bench",
+      "version": "1.0.0",
+      "file": "GJH_PUB_002.glb",
+      "sha256": "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+      "bytes": 233176,
+      "dimensions_m": [
+        2.58,
+        1.3175,
+        0.922
+      ],
+      "authoring_dimensions_wdh_m": [
+        2.58,
+        0.922,
+        1.3175
+      ],
+      "reuse_decision": "reuse",
+      "source": "gjh-mall-furniture/sources/gjh-lounge-bench.blend",
+      "source_sha256": "925f75d253188eed591a48f20b1daa0329abb492799ab9ba91b61a4c57bf6ee0",
+      "capabilities": [
+        "SIT"
+      ],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_PUB_002.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P1",
+      "source_dimensions_wdh": "1.5\u00d70.7\u00d70.9",
+      "reviewed_dimensions_wdh_m": [
+        2.58,
+        0.922,
+        1.3175
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "bfa2f81eb6c6b3c2b772a338b6e60d2a6ccda9d5bf2a1ded97056528f2f41e70",
+      "collision": {
+        "shape": "cuboid",
+        "size_m": [
+          2.5,
+          0.4,
+          0.85
+        ],
+        "local_center_m": [
+          0,
+          0.3,
+          0
+        ],
+        "anchors": "world.js seats: seat z=-0.23*facing, exit z=-1.2*facing; visitor-v2 keeps existing 0.8 height multiplier"
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    },
+    {
+      "asset_id": "GJH-PUB-008",
+      "kind": "planter",
+      "version": "1.0.0",
+      "file": "GJH_PUB_008.glb",
+      "sha256": "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+      "bytes": 119732,
+      "dimensions_m": [
+        1.230091,
+        2.347567,
+        1.191551
+      ],
+      "authoring_dimensions_wdh_m": [
+        1.230091,
+        1.191551,
+        2.347567
+      ],
+      "reuse_decision": "reuse",
+      "source": "gjh-mall-furniture/sources/gjh-areca-planter.blend",
+      "source_sha256": "79522ae07850e010abcbda93aff1e0c9d1afe22b4311d982673abb04e4805b2a",
+      "capabilities": [],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_PUB_008.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P1",
+      "source_dimensions_wdh": "1.5\u00d70.7\u00d70.9",
+      "reviewed_dimensions_wdh_m": [
+        1.230091,
+        1.191551,
+        2.347567
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "5ea8b805f01e143a784feda8a7640994929f2efd9be7ffa8ad1202db96422cab",
+      "collision": {
+        "shape": "cuboid",
+        "size_m": [
+          0.85,
+          0.8,
+          0.85
+        ],
+        "local_center_m": [
+          0,
+          0.4,
+          0
+        ],
+        "policy": "Pot-only blocker; foliage is intentionally non-blocking"
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    },
+    {
+      "asset_id": "GJH-PUB-017",
+      "kind": "kiosk",
+      "version": "1.0.0",
+      "file": "GJH_PUB_017.glb",
+      "sha256": "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+      "bytes": 181376,
+      "dimensions_m": [
+        0.96,
+        2.05,
+        0.68
+      ],
+      "authoring_dimensions_wdh_m": [
+        0.96,
+        0.68,
+        2.05
+      ],
+      "reuse_decision": "adapt",
+      "source": "mall-essentials/sources/mall-directory-kiosk.blend",
+      "source_sha256": "b7a0e9ebb766e12b51d3115823f6dbd7b431312b475c35452d3b9338b699df0e",
+      "capabilities": [
+        "USE"
+      ],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_PUB_017.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P2",
+      "source_dimensions_wdh": "1.5\u00d70.7\u00d70.9",
+      "reviewed_dimensions_wdh_m": [
+        0.96,
+        0.68,
+        2.05
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "c635fd43c76b7f1b258f10954d41e55ecdfc43f91decd7afb127b2ae769daa5d",
+      "collision": {
+        "shape": "cuboid",
+        "size_m": [
+          0.96,
+          2.05,
+          0.68
+        ],
+        "world_center_m": [
+          -5.3,
+          1.025,
+          10.4
+        ],
+        "anchor": "mall-directory USE opens accessible three-store map"
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    },
+    {
+      "asset_id": "GJH-DSP-001",
+      "kind": "shelf",
+      "version": "1.0.0",
+      "file": "GJH_DSP_001.glb",
+      "sha256": "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+      "bytes": 228924,
+      "dimensions_m": [
+        1.52,
+        1.96,
+        0.58
+      ],
+      "authoring_dimensions_wdh_m": [
+        1.52,
+        0.58,
+        1.96
+      ],
+      "reuse_decision": "reuse",
+      "source": "mall-essentials/sources/mall-display-shelf.blend",
+      "source_sha256": "18ae5c2311b81356b529af04724fa627efd6b2eee2597ec10c58f7f828dacbea",
+      "capabilities": [
+        "INSPECT"
+      ],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_DSP_001.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P1",
+      "source_dimensions_wdh": "1.2\u00d70.6\u00d71.8",
+      "reviewed_dimensions_wdh_m": [
+        1.52,
+        0.58,
+        1.96
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "c2c87539db3662122fe6c6af402b842afa0912c1a86708e6890eb92155e2adbf",
+      "collision": {
+        "shape": "app-owned shelf boxes",
+        "authority": "assets/products.js collider output consumed by world.js",
+        "anchor": "Existing four per-SKU INSPECT IDs and product-dialog actions"
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    },
+    {
+      "asset_id": "GJH-STF-008",
+      "kind": "storeSign",
+      "version": "1.0.0",
+      "file": "GJH_STF_008.glb",
+      "sha256": "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+      "bytes": 21912,
+      "dimensions_m": [
+        2.52,
+        1.21,
+        0.213
+      ],
+      "authoring_dimensions_wdh_m": [
+        2.52,
+        0.213,
+        1.21
+      ],
+      "reuse_decision": "new",
+      "source": "Original geometry in models/gjh-interior-pilot/build.py",
+      "source_sha256": "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+      "capabilities": [],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_STF_008.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P0",
+      "source_dimensions_wdh": "4\u00d70.5\u00d73.6",
+      "reviewed_dimensions_wdh_m": [
+        2.52,
+        0.213,
+        1.21
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "76db8a4fdeb40be072ac6c5ce0216856597a670303d8627d9cdfc4eade7ff916",
+      "collision": {
+        "shape": "none",
+        "policy": "Mounted decorative panel; existing wall owns blocking"
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    },
+    {
+      "asset_id": "GJH-LGT-009",
+      "kind": "wallLight",
+      "version": "1.0.0",
+      "file": "GJH_LGT_009.glb",
+      "sha256": "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+      "bytes": 22804,
+      "dimensions_m": [
+        0.32,
+        1.0,
+        0.255
+      ],
+      "authoring_dimensions_wdh_m": [
+        0.32,
+        0.255,
+        1.0
+      ],
+      "reuse_decision": "new",
+      "source": "Original geometry in models/gjh-interior-pilot/build.py",
+      "source_sha256": "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+      "capabilities": [],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_LGT_009.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P1",
+      "source_dimensions_wdh": "0.4\u00d70.4\u00d70.25",
+      "reviewed_dimensions_wdh_m": [
+        0.32,
+        0.255,
+        1.0
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "da43d83a1a0b1cb56dea5c34b2d0397056d2cbe07cebdcf444b0595a5e48f612",
+      "collision": {
+        "shape": "none",
+        "policy": "Mounted decorative fixture; existing wall owns blocking"
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    },
+    {
+      "asset_id": "GJH-PUB-005",
+      "kind": "coffeeTable",
+      "version": "1.0.0",
+      "file": "GJH_PUB_005.glb",
+      "sha256": "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+      "bytes": 160536,
+      "dimensions_m": [
+        1.61,
+        0.875,
+        1.61
+      ],
+      "authoring_dimensions_wdh_m": [
+        1.61,
+        1.61,
+        0.875
+      ],
+      "reuse_decision": "new",
+      "source": "Original geometry in models/gjh-interior-pilot/build.py",
+      "source_sha256": "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+      "capabilities": [],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_PUB_005.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P1",
+      "source_dimensions_wdh": "1.5\u00d70.7\u00d70.9",
+      "reviewed_dimensions_wdh_m": [
+        1.61,
+        1.61,
+        0.875
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "686e19542c51dca4b88eba66bdb41f90ff46f3208bc3802ac1b529e0e401c46b",
+      "collision": {
+        "shape": "cuboid",
+        "size_m": [
+          1.61,
+          0.875,
+          1.61
+        ],
+        "world_centers_m": [
+          [
+            0,
+            0.4375,
+            -5.5
+          ],
+          [
+            10,
+            0.4375,
+            -5.5
+          ]
+        ]
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    },
+    {
+      "asset_id": "GJH-VER-017",
+      "kind": "plinth",
+      "version": "1.0.0",
+      "file": "GJH_VER_017.glb",
+      "sha256": "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+      "bytes": 129236,
+      "dimensions_m": [
+        4.5,
+        0.6525,
+        4.5
+      ],
+      "authoring_dimensions_wdh_m": [
+        4.5,
+        4.5,
+        0.6525
+      ],
+      "reuse_decision": "new",
+      "source": "Original geometry in models/gjh-interior-pilot/build.py",
+      "source_sha256": "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+      "capabilities": [],
+      "editable_source": "models/gjh-interior-pilot/sources/GJH_VER_017.blend",
+      "lod_policy": "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+      "uv_policy": "No textures or baking; UV0/UV1 not required.",
+      "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+      "rights": "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures.",
+      "source_ref": "docs/references/gjh-interior-200-assets-v1.md",
+      "source_priority": "P2",
+      "source_dimensions_wdh": "3\u00d71.5\u00d73.5",
+      "reviewed_dimensions_wdh_m": [
+        4.5,
+        4.5,
+        0.6525
+      ],
+      "implementation_status": "accepted_for_V11_concept_pilot",
+      "editable_source_sha256": "731cc2e2c981aa63ffc4ab21c2568878cf96d5d43b8bfd35f160077fcbc3bae9",
+      "collision": {
+        "shape": "cylinder",
+        "radius_m": 2.25,
+        "half_height_m": 0.6,
+        "world_center_m": [
+          0,
+          0.5,
+          7.5
+        ],
+        "policy": "Conservative retained app-owned blocker; no walkable or travel surface"
+      },
+      "gate_results": {
+        "G01": {
+          "status": "pass",
+          "evidence": "Runtime receipts, root extras.asset_id, SHA checks, stable filenames and version 1.0.0"
+        },
+        "G02": {
+          "status": "pass",
+          "evidence": "Blender reimport and binary bounds; reviewed target = dimensions_m; tolerance <=0.001m; ground-centred, unit transforms"
+        },
+        "G03": {
+          "status": "pass_with_intentional_open_surfaces",
+          "evidence": "Source inspection finite/positive/nondegenerate; closed new solids; original foliage sheets, curve ends and text faces intentionally open. Five-view review finds no visible inverted surfaces or z-fighting."
+        },
+        "G04": {
+          "status": "not_applicable",
+          "reason": "Texture-free materials; no baked or tiled images and no lightmap workflow"
+        },
+        "G05": {
+          "status": "pass",
+          "evidence": "Khronos validator zero errors/warnings; native glTF PBR scalar values, no external resources"
+        },
+        "G06": {
+          "status": "documented_exemption",
+          "reason": "Single static mesh set, instanced per material; low triangle counts; no automatic LOD or transition claim"
+        },
+        "G07": {
+          "status": "pass",
+          "evidence": "reports/gltf-validation.json category budgets, 1097696 bytes total; startup and room views <=200 draw calls in local Chrome"
+        },
+        "G08": {
+          "status": "pass_with_app_owned_proxies",
+          "evidence": "collision field; world.js/products.js own Rapier blockers. Physics-driven kiosk/cart/door/seat journeys; no separate collision import or walkable navmesh"
+        },
+        "G09": {
+          "status": "pass",
+          "evidence": "Only bench SIT, kiosk USE, shelf INSPECT. Passive fixtures have no action; existing app prompts and IDs retained"
+        },
+        "G10": {
+          "status": "pass",
+          "evidence": "Blender 5.1.2 independent reimport and Three.js actual mall; Khronos validator"
+        },
+        "G11": {
+          "status": "pass_for_current_fixed_lighting",
+          "evidence": "40 five-view renders and contact sheet; mall captures 390/639/1440. Fixed dusk scene has no day/night or UI theme switching to test."
+        },
+        "G12": {
+          "status": "pass",
+          "evidence": "Export, source inspection, binary unit checks, validator, 14 pilot E2E cases, independent 404/corrupt/late-parse disposal/no-WebGL, repeated view resource stability"
+        }
+      },
+      "evidence_paths": [
+        "models/gjh-interior-pilot/reports/source-inspection.json",
+        "models/gjh-interior-pilot/reports/blender-reimport.json",
+        "models/gjh-interior-pilot/reports/gltf-validation.json",
+        "docs/evidence/interior-pilot-e2e.json",
+        "docs/evidence/interior-pilot-performance.json",
+        "models/gjh-interior-pilot/previews/contact-sheet.jpg"
+      ]
+    }
+  ],
+  "release_integration": {
+    "route": "demos/corporate/gjh/v11/index.html?interior=pilot",
+    "default_shelf_retained": "GJH-M056",
+    "review": "docs/gjh-v11-interior-pilot-release.md",
+    "evidence": "docs/evidence/interior-pilot-release-verification.json"
+  }
+}
