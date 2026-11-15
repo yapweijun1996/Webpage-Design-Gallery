@@ -1,0 +1,124 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "check": "keyboard normal-motion pickup / side view",
+      "result": "pass",
+      "detail": "product"
+    },
+    {
+      "check": "keyboard persistent held status / truthful cart refusal / original-shelf return",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard compressed camera / avatar restoration",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard direct cart entry / real movement / direct stow",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand Courtyard bench 1",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand Courtyard bench 2",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand Courtyard bench 3",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand Courtyard bench 4",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand MILI bench 1",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand MILI bench 2",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand GOGO bench 1",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "keyboard normal sit/stand GOGO bench 2",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "tablet normal sit/stand MILI bench 1",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "held item seat refusal identifies original product",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "reduced-motion safe instant approach / pickup / return",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "touch normal-motion pickup / side view",
+      "result": "pass",
+      "detail": "product"
+    },
+    {
+      "check": "touch persistent held status / truthful cart refusal / original-shelf return",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "touch compressed camera / avatar restoration",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "touch direct cart entry / real movement / direct stow",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "touch normal sit/stand MILI bench 1",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "touch Help scroll / close / no horizontal overflow",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "scene tools fit 320",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "scene tools fit 768",
+      "result": "pass",
+      "detail": null
+    }
+  ],
+  "normalMotion": true,
+  "count": 23,
+  "sourceManifest": "source-hashes.json",
+  "note": "First integrated run passed desktop and all eight benches plus tablet, then stopped at an obsolete route blocked by released showcase. Corrected fixture routes use the authored front aisle; restrictions, touch and layout reruns pass. No gameplay collision or assertion was relaxed."
+}

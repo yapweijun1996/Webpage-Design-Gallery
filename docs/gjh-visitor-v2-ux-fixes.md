@@ -2,6 +2,8 @@
 
 Date: 2026-11-15 (Asia/Singapore).
 
+For the subsequent authorized integration and deployment, see [release verification](gjh-visitor-v2-ux-release.md).
+
 ## Result and scope
 
 Local candidate on `codex/visitor-v2-ux-fixes`, based on `53e98c25814ca454477a29b5506122e27e666fad`. The user's original working tree, staging area and unrelated edits were not overwritten. Changes and evidence are in this separate worktree. This request did not commit, push or deploy the candidate.

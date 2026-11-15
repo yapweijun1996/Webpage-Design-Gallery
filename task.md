@@ -517,3 +517,5 @@ Pages and actual public user flows are the release gate before D3. Only D1 is
 checked here; D3/D4/D5 and physical-device acceptance retain separate status.
 
 Visitor v2 UX follow-up — 2026-11-15: camera occlusion, natural bench entry, reachable pickup/return feedback, persistent held guidance, truthful recovery and direct Cart controls are implemented in an isolated local candidate. Real-input and advisor evidence: `docs/gjh-visitor-v2-ux-fixes.md`. Publication and physical-device performance are not claimed.
+
+Visitor v2 UX release follow-up: integrated with upstream e67c2d9, preserving its amenities, camera sweep, merchandising and automatic preview. Pre-deployment regression and real-input gates pass; public acceptance is recorded in docs/gjh-visitor-v2-ux-release.md.

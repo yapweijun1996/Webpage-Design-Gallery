@@ -1,0 +1,20 @@
+{
+  "status": "pass",
+  "url": "http://127.0.0.1:18773/demos/corporate/gjh/v11/",
+  "input": "browser keyboard and CDP touch; read-only simulation telemetry",
+  "motion": "normal, with a separate reduced-motion case",
+  "results": [
+    {
+      "check": "scene tools fit 320",
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "check": "scene tools fit 768",
+      "result": "pass",
+      "detail": null
+    }
+  ],
+  "pageErrors": [],
+  "consoleMessages": []
+}

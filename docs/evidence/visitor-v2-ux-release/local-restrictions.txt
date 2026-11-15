@@ -1,0 +1,16 @@
+START 1280 800 keyboard
+READY
+WALK -11.21 1
+WALK -11.21 -7.55
+WALK -11.21 1.35
+WALK 0 1.35
+WALK 0 -1.2
+WALK -3 -1.2
+WALK -3 -4.9
+PASS held item seat refusal identifies original product
+WALK -3 -1.2
+WALK 0 -1.2
+WALK 0 1.35
+WALK -11.21 1.35
+WALK -11.21 -7.55
+PASS reduced-motion safe instant approach / pickup / return

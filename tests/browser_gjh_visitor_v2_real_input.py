@@ -177,6 +177,23 @@ def product_journey(page, prefix, touch=False):
     check(prefix+' persistent held status / truthful cart refusal / original-shelf return')
 
 
+def camera_journey(page, prefix, touch=False):
+    # Real movement reaches an enclosed wall; no gameplay state is injected.
+    store(page, 'New Moon', touch)
+    go(page, -10, 17, touch, tolerance=.45)
+    page.wait_for_timeout(300)
+    s=state(page)
+    distance=math.dist(s['camera']['position'],[s['x'],s['y']+1.24,s['z']])
+    assert distance>=1.15 or s['cameraOccluded']
+    shot(page,prefix+'-camera-compressed')
+    # Walk around the terrace's 36cm side rather than through the step collider.
+    go(page,-14,17,touch)
+    go(page,-14,11,touch)
+    wait(page, '!window.__mall.state.cameraOccluded')
+    shot(page,prefix+'-camera-restored')
+    check(prefix+' compressed camera / avatar restoration')
+
+
 def cart_journey(page, prefix, touch=False):
     store(page, 'MILI', touch)
     action = 'tap' if touch else 'click'
@@ -227,25 +244,18 @@ def seat_journey(page, seat, prefix, touch=False):
 
 with sync_playwright() as p:
     browser=p.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),args=(['--use-angle=swiftshader','--enable-unsafe-swiftshader'] if os.environ.get('GJH_SOFTWARE_RENDERING')=='1' else []))
+    page=None
     try:
-        if SUITE in ['all','desktop']:
+        if SUITE in ['all','desktop','release']:
             context,page=start(browser,1280,800)
             product_journey(page,'keyboard')
-            # Reproduce spring-arm compression using actual movement to the back wall.
-            store(page,'New Moon')
-            go(page,-10,17,tolerance=.45)
-            page.wait_for_timeout(300)
-            s=state(page)
-            distance=math.dist(s['camera']['position'],[s['x'],s['y']+1.24,s['z']])
-            assert distance>=1.15 or s['cameraOccluded']
-            shot(page,'keyboard-camera-compressed')
-            # The terrace has a 36cm vertical side; walk around it, not through it.
-            go(page,-14,17)
-            go(page,-14,11)
-            wait(page, '!window.__mall.state.cameraOccluded')
-            shot(page,'keyboard-camera-restored')
-            check('keyboard compressed camera / avatar restoration')
+            camera_journey(page,'keyboard')
             cart_journey(page,'keyboard')
+            context.close()
+        if SUITE=='release':
+            context,page=start(browser,1280,800)
+            seat=next(s for s in state(page)['seats'] if s['name']=='MILI bench 1')
+            seat_journey(page,seat,'keyboard')
             context.close()
         if SUITE in ['all','seats']:
             context,page=start(browser,1280,800)
@@ -268,8 +278,9 @@ with sync_playwright() as p:
             go(page,-11.21,-7.55)
             page.get_by_role('button',name='Pick up product',exact=True).click()
             wait(page,'window.__mall.state.character.physicalProduct.phase==="held"')
-            go(page,-11.21,2.4)
-            go(page,0,2.4)
+            # The authored front aisle clears the showcase, columns and planters.
+            go(page,-11.21,1.35,tolerance=.10)
+            go(page,0,1.35,tolerance=.10)
             go(page,0,-1.2)
             go(page,-3,-1.2)
             go(page,-3,-4.9)
@@ -280,8 +291,8 @@ with sync_playwright() as p:
             check('held item seat refusal identifies original product')
             go(page,-3,-1.2)
             go(page,0,-1.2)
-            go(page,0,2.4)
-            go(page,-11.21,2.4)
+            go(page,0,1.35,tolerance=.10)
+            go(page,-11.21,1.35,tolerance=.10)
             go(page,-11.21,-7.55)
             page.get_by_role('button',name='Return to shelf',exact=True).click()
             wait(page,'window.__mall.state.character.physicalProduct.phase==="empty"')
@@ -294,9 +305,10 @@ with sync_playwright() as p:
             assert not state(page)['productApproaching']
             check('reduced-motion safe instant approach / pickup / return')
             context.close()
-        if SUITE in ['all','touch']:
+        if SUITE in ['all','touch','release']:
             context,page=start(browser,390,844,True)
             product_journey(page,'touch',True)
+            camera_journey(page,'touch',True)
             cart_journey(page,'touch',True)
             seat=next(s for s in state(page)['seats'] if s['name']=='MILI bench 1')
             seat_journey(page,seat,'touch',True)
@@ -328,7 +340,7 @@ with sync_playwright() as p:
             cart_journey(page,'legacy')
             check('explicit v1 character / camera / seated / cart regression')
             context.close()
-        if SUITE in ['all','layout']:
+        if SUITE in ['all','layout','release']:
             for width,height in [(320,568),(768,1024)]:
                 context,page=start(browser,width,height,True)
                 assert page.evaluate('()=>document.documentElement.scrollWidth<=innerWidth')
@@ -342,9 +354,10 @@ with sync_playwright() as p:
         outcome="pass"
     except Exception:
         outcome="fail"
-        shot(page,'failure-'+SUITE)
-        s=state(page)
-        print('FAILURE STATE', {key:s.get(key) for key in ['x','z','mode','nearby','cameraFocus','cameraOccluded','productApproaching']},s.get('character',{}).get('physicalProduct'),flush=True)
+        if page is not None:
+            shot(page,'failure-'+SUITE)
+            s=state(page)
+            print('FAILURE STATE', {key:s.get(key) for key in ['x','z','mode','nearby','cameraFocus','cameraOccluded','productApproaching']},s.get('character',{}).get('physicalProduct'),flush=True)
         raise
     finally:
         browser.close()
