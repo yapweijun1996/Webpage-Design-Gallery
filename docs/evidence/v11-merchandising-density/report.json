@@ -1,0 +1,24 @@
+[
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "directInspect": "PASS",
+    "fourSkus": "PASS",
+    "repeatCloseReopen": "PASS",
+    "bag": "PASS",
+    "pageErrors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "directInspect": "PASS",
+    "fourSkus": "PASS",
+    "repeatCloseReopen": "PASS",
+    "bag": "PASS",
+    "pageErrors": []
+  }
+]

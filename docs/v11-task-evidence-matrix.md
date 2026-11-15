@@ -1,5 +1,12 @@
 # V11 task evidence matrix — final incremental reconciliation
 
+Latest follow-up: [existing-source consistency](v11-product-source-consistency-review.md)
+is complete under the original estimated-packaging contract. Only physical-device
+and assistive-technology acceptance remains unchecked in the original mall scope;
+the later interior follow-ups retain their separate status. Earlier packaging PARTIAL
+rows and two-item conclusions below are historical and do not impose a new
+print-master requirement on the completed source-consistency task.
+
 Current reconciliation (2026-11-15): application 1.1.41 has completed the bounded
 software keyboard/name/reduced-motion/fallback gate; see
 [final software verification](v11-final-software-verification.md). The older

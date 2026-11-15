@@ -54,6 +54,7 @@ export function createContextNavigation({globalHost, directory, onHome, onShops,
           nav.parentElement !== globalHost || globalHost.hidden || directory.hidden ||
           !directory.contains(target) || nav.contains(target) ||
           document.querySelector('dialog[open]') || !target.getClientRects().length) return;
+      if (getComputedStyle(globalHost).position !== 'fixed') return;
       const rect = target.getBoundingClientRect(), footer = globalHost.getBoundingClientRect();
       const rootStyle = getComputedStyle(document.documentElement);
       const safeTop = parseFloat(rootStyle.scrollPaddingTop) || 0;
@@ -66,7 +67,7 @@ export function createContextNavigation({globalHost, directory, onHome, onShops,
   document.addEventListener('focusin', revealCurrentFocus);
   window.addEventListener('resize', revealCurrentFocus);
   function measure() {
-    const height = visible && nav.parentElement === globalHost ? Math.ceil(globalHost.getBoundingClientRect().height) : 0;
+    const height = visible && nav.parentElement === globalHost && getComputedStyle(globalHost).position === 'fixed' ? Math.ceil(globalHost.getBoundingClientRect().height) : 0;
     if (height === reservedHeight) return;
     reservedHeight = height;
     document.documentElement.style.setProperty('--context-navigation-height', `${height}px`);

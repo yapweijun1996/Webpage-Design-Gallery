@@ -26,9 +26,12 @@ RUNTIME = 'demos/corporate/gjh/v11/'
 def approach_seat(page):
     page.evaluate('''() => {
       __mall.teleport('atrium');
-      __mall.setInput({right:-1}); __mall.step(1400);
-      __mall.setInput({forward:1}); __mall.step(1400);
-      __mall.setInput({right:-1}); __mall.step(750);
+      // Approach the bench's clear front around the current kiosk and outer aisle.
+      __mall.setInput({forward:1}); __mall.step(400);
+      __mall.setInput({right:-1}); __mall.step(3950);
+      __mall.setInput({forward:1}); __mall.step(1500);
+      __mall.setInput({right:1}); __mall.step(1750);
+      __mall.setInput({forward:-1}); __mall.step(500);
       __mall.setInput({forward:0}); __mall.step(20);
     }''')
     assert state(page)['nearby'] == 'courtyard-seat'
@@ -290,7 +293,7 @@ def run():
                 page.locator('#inspect').click()
                 page.evaluate('__mall.step(100)')
                 assert not state(page)['seated']
-                page.evaluate('__mall.teleport("atrium"); __mall.setInput(null)')
+                page.evaluate('__mall.teleport("atrium"); __mall.setInput({right:-1}); __mall.step(500); __mall.setInput(null)')
                 # The actual nearby kiosk action opens a persistent desktop map.
                 assert state(page)['nearby'] == 'mall-directory'
                 page.locator('#inspect').click()
@@ -391,9 +394,9 @@ def run():
                 held = state(page)['character']['physicalProduct']
                 assert held['phase'] == 'held'
                 page.locator('#inspect').click()
-                capture('held product Shelf', 'shelf', True)
-                shelf_details(page)
-                capture('held product Inspect', 'inspect', True)
+                # Nearby Inspect now opens the product directly; Shelf has its
+                # own dedicated lifecycle suite and is not an intermediate mode.
+                capture('held product direct Inspect', 'inspect', True)
                 page.locator('#product-close').click()
                 capture('held product Inspect close', 'explore', False)
                 page.locator('#bag-open').click()
@@ -417,8 +420,11 @@ def run():
                         if index < 4:
                             page.evaluate('__mall.teleport("atrium")')
                             if seat['facing'] == 1:
-                                move(page, -5.7 if seat['x'] < 0 else 5.7, 12)
-                                move(page, -5.7 if seat['x'] < 0 else 5.7, seat['exitZ'])
+                                if seat['x'] < 0:
+                                    approach_seat(page)
+                                else:
+                                    move(page, 10.5, 12)
+                                    move(page, 10.5, seat['exitZ'])
                             else:
                                 move(page, -2, seat['exitZ'])
                         else:

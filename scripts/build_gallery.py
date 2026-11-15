@@ -170,6 +170,9 @@ def runtime_resources(catalog):
         "data/companies.json", "data/categories.json", "data/styles.json", "manifest.webmanifest",
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png",
     )}
+    # Shared 3D UI ships with the demo; keep it out of the gallery shell precache.
+    for directory in ("assets/onboarding", "design-system/onboarding"):
+        resources.update(path.relative_to(ROOT) for path in (ROOT / directory).rglob("*") if path.is_file())
     for company in catalog["companies"]:
         shared = ROOT / company["demoDirectory"] / "shared"
         if shared.is_dir():
@@ -235,7 +238,7 @@ def build_pages(catalog, release=None):
 
 
 def pwa_outputs(pages, catalog, release):
-    paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if not p.as_posix().startswith("demos/")}
+    paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if not p.as_posix().startswith(("demos/", "assets/onboarding/", "design-system/onboarding/"))}
     paths.update(design["thumbnail"] for design in catalog["designs"])
     entries = []
     for name in sorted(paths):

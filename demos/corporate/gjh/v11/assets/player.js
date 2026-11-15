@@ -1,6 +1,6 @@
 import {createCharacter} from './character.js';
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = []) {
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = []) {
   const character = await createCharacter(T);
   const visual = character.visual;
   scene.add(visual);
@@ -21,7 +21,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let actionView=null,cameraDistance=null,cameraOccluded=false,productApproach=null,productHome=null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
-  const ray = new R.Ray({x: 0, y: 0, z: 0}, {x: 0, y: 0, z: -1});
+  const cameraBall=new R.Ball(.22),cameraRotation={x:0,y:0,z:0,w:1};
+  const anchor=new T.Vector3(),probe=new T.Vector3();
+  let cameraLift=0,cameraClearance=0,cameraRadius=.22;
   const movement = {x: 0, y: 0, z: 0}, next = {x: 0, y: 0, z: 0};
   const joystick = document.querySelector('#joystick'), thumb = joystick.querySelector('.joystick-thumb'), runButton = document.querySelector('#run-toggle');
   let isPaused = () => false;
@@ -97,6 +99,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function updateActionView(dt){if(!actionView||actionView.settled)return;if(keys.has('KeyQ')||keys.has('KeyE')){actionView.settled=true;return;}actionView.elapsed+=dt;const t=Math.min(1,actionView.elapsed/.35),e=t*t*(3-2*t),v=actionView;const delta=Math.atan2(Math.sin(v.targetYaw-v.fromYaw),Math.cos(v.targetYaw-v.fromYaw));yaw=v.fromYaw+delta*e;pitch=v.fromPitch+(.1-v.fromPitch)*e;if(t===1)v.settled=true;}
   function startCollection(prop,id){if(seated||!character.startCollection(prop,id))return false;beginActionView('collection',visual.rotation.y+Math.PI+.55);return true;}
   function cancelCollection(){productApproach=null;character.cancelCollection();if(['collection','product'].includes(actionView?.kind))restoreActionView();}
+  let gamepad = null;
   function update(dt) {
     if (isPaused()) { clearInput(); return; }
     if (elevatorTravel) {
@@ -112,6 +115,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       return;
     }
     updateActionView(dt);
+    if(gamepad){yaw-=gamepad.lookX*1.9*dt;pitch=T.MathUtils.clamp(pitch+gamepad.lookY*1.4*dt,-.08,.9);}
     if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;character.update('idle',dt);return;}
     if(productApproach){
       const a=productApproach,t=Math.min(1,(a.elapsed+=dt)/.45),e=t*t*(3-2*t);
@@ -122,8 +126,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     // A transfer owns the hands and position until the item reaches its destination.
     if(character.state.physicalProduct?.active){character.update('idle',dt);return;}
-    const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY);
-    const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX);
+    const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY + (gamepad?.forward||0));
+    const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX + (gamepad?.right||0));
     if(actionView?.kind==='product'){
       if(Math.hypot(forward,right)>.1||character.state.physicalProduct.phase==='empty')restoreActionView();
     }
@@ -155,26 +159,53 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     contact.position.set(p.x, Math.max(.05, p.y - .83), p.z);
     contact.rotation.z = visual.rotation.y;
   }
-  function constrain(point) {
-    direction.copy(point).sub(target); const distance = direction.length(); if (!distance) return;
-    direction.multiplyScalar(1 / distance);
-    Object.assign(ray.origin, target); Object.assign(ray.dir, direction);
-    const hit = physics.castRay(ray, distance + .32, true, undefined, undefined, capsule, body);
-    if (hit) point.copy(target).addScaledVector(direction, Math.max(.18, hit.timeOfImpact - .32));
+  function sweepCamera(origin,point) {
+    direction.copy(point).sub(origin);const length=direction.length();if(length<1e-6)return 0;
+    direction.multiplyScalar(1/length);
+    const hit=physics.castShape(origin,cameraRotation,direction,cameraBall,.02,length,true,undefined,undefined,capsule,body);
+    let clearance=hit?Math.max(0,hit.time_of_impact-.02):length;
+    for(const box of cameraObstacles){
+      let near=0,far=length;
+      for(const axis of ['x','y','z']){
+        const min=box.min[axis]-cameraRadius,max=box.max[axis]+cameraRadius;
+        if(Math.abs(direction[axis])<1e-8){if(origin[axis]<min||origin[axis]>max){far=-1;break;}continue;}
+        const a=(min-origin[axis])/direction[axis],b=(max-origin[axis])/direction[axis];
+        near=Math.max(near,Math.min(a,b));far=Math.min(far,Math.max(a,b));
+      }
+      if(far>=near)clearance=Math.min(clearance,Math.max(0,near-.02));
+    }
+    return clearance;
+  }
+  function cameraCandidate(lift,out) {
+    anchor.copy(target);anchor.y+=lift;out.copy(anchor).add(offset);
+    const length=sweepCamera(anchor,out);out.copy(anchor).addScaledVector(direction,length);return length;
   }
   function updateCamera(dt, instant = false) {
-    sync(); target.copy(visual.position); target.y += 1.24-.34*(character.state.seatWeight||0);
+    sync();target.copy(visual.position);target.y+=1.24-.34*(character.state.seatWeight||0);
     const normalDistance=canvas.clientWidth<600?5.5:6.5,requestedDistance=actionView?3:normalDistance;
-    cameraDistance=instant||reduceSeatMotion()?requestedDistance:T.MathUtils.lerp(cameraDistance??normalDistance,requestedDistance,1-Math.exp(-6*dt));
-    const distance=cameraDistance;
-    offset.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(distance);
-    desired.copy(target).add(offset); constrain(desired);
-    if (instant) camera.position.copy(desired); else camera.position.lerp(desired, 1 - Math.exp(-12 * dt));
-    safe.copy(camera.position); constrain(safe); camera.position.copy(safe); camera.lookAt(target);
-    // A compressed spring arm uses a clear close view, never the avatar interior.
-    // Hide only the avatar; the world/cart remain visible. Hysteresis avoids flicker.
-    const clearance=camera.position.distanceTo(target);
-    cameraOccluded=clearance<(cameraOccluded?1.45:1.15);
+    const immediate=instant||reduceSeatMotion();
+    cameraDistance=immediate?requestedDistance:T.MathUtils.lerp(cameraDistance??normalDistance,requestedDistance,1-Math.exp(-6*dt));
+    // Enclose the near-plane corners, including wide landscape viewports.
+    cameraRadius=Math.max(.22,camera.near*Math.tan(camera.fov*Math.PI/360)*Math.hypot(1,camera.aspect)+.08);
+    cameraBall.radius=cameraRadius;
+    offset.set(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)).multiplyScalar(cameraDistance);
+    let lift=0,length=cameraCandidate(0,desired);
+    // Prefer the requested bearing; lift above furniture rather than entering the visitor.
+    if(length<(cameraLift?2.4:2))for(const height of [1.1,2.2]){
+      const available=cameraCandidate(height,probe);
+      if(available>length+.25){lift=height;length=available;desired.copy(probe);}
+      if(length>=2.4)break;
+    }
+    cameraLift=lift;anchor.copy(target);anchor.y+=lift;
+    safe.copy(camera.position).lerp(desired,immediate?1:1-Math.exp(-12*dt));
+    const allowed=sweepCamera(anchor,safe);safe.copy(anchor).addScaledVector(direction,allowed);
+    // A newly blocked interpolation must contract immediately to a known clear candidate.
+    if(allowed<.9&&length>=2)safe.copy(desired);
+    camera.position.copy(safe);camera.lookAt(target);
+    cameraClearance=camera.position.distanceTo(target);
+    // In a genuinely enclosed corner no third-person view fits. Hide only the local
+    // presentation until clearance returns; never change collision or gameplay ownership.
+    cameraOccluded=cameraClearance<(cameraOccluded?1.45:1.15);
     character.setCameraOccluded(cameraOccluded);
     canvas.dataset.cameraView=cameraOccluded?'close':'third-person';
     character.updateLOD?.(camera);
@@ -270,7 +301,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     },
     customize: changes => character.customize?.(changes),
     setPaused: fn => { isPaused = fn; },
+    setGamepadInput: input => { gamepad = input; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), cameraFocus:actionView?.kind||null,cameraDistance, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
   };
 }

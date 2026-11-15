@@ -1,0 +1,173 @@
+{
+  "description": "AI-generated conceptual images for the GJH Virtual Mall independent demo. Images are illustrations, not real locations, product imagery, or official brand assets.",
+  "generator": "OpenAI image generation built-in tool",
+  "shared_prompt": "Realistic premium tropical mall or lifestyle visual, warm cream stone, forest green, timber and greenery; no logos, readable text, or branded products.",
+  "images": [
+    {
+      "file": "concept-hero.webp",
+      "subject": "The imagined mall",
+      "prompt_subject": "a welcoming contemporary tropical indoor shopping arcade, airy glass roof, cream stone, forest-green metal, timber and lush planters, eye-level view"
+    },
+    {
+      "file": "concept-arrival.webp",
+      "subject": "Arrival",
+      "prompt_subject": "grand tropical mall entrance beneath an airy glass canopy, landscaped planters and welcoming stone pathway"
+    },
+    {
+      "file": "concept-atrium.webp",
+      "subject": "The atrium",
+      "prompt_subject": "sunlit double-height mall atrium with sculptural staircase and lush indoor trees"
+    },
+    {
+      "file": "concept-arcade.webp",
+      "subject": "The arcade",
+      "prompt_subject": "elegant indoor shopping arcade with cream stone floor, warm timber storefronts and green framing"
+    },
+    {
+      "file": "concept-courtyard.webp",
+      "subject": "Garden courtyard",
+      "prompt_subject": "quiet garden courtyard inside a contemporary tropical mall, benches and filtered daylight"
+    },
+    {
+      "file": "concept-upper-level.webp",
+      "subject": "Upper level",
+      "prompt_subject": "upper floor balcony overlooking a bright green and cream indoor mall"
+    },
+    {
+      "file": "concept-wayfinding.webp",
+      "subject": "Wayfinding",
+      "prompt_subject": "minimal wayfinding kiosk in a refined tropical mall atrium, blank screen without writing"
+    },
+    {
+      "file": "concept-service-desk.webp",
+      "subject": "Guest services",
+      "prompt_subject": "welcoming guest services counter in a bright cream and forest-green shopping mall, no signage"
+    },
+    {
+      "file": "concept-lounge.webp",
+      "subject": "A place to pause",
+      "prompt_subject": "quiet lounge with timber benches and indoor plants in a sunlit shopping mall"
+    },
+    {
+      "file": "concept-storefront-food.webp",
+      "subject": "Food and pantry",
+      "prompt_subject": "elegant unbranded gourmet pantry storefront within a tropical shopping arcade"
+    },
+    {
+      "file": "concept-storefront-lifestyle.webp",
+      "subject": "Lifestyle",
+      "prompt_subject": "elegant unbranded lifestyle storefront within a tropical shopping arcade"
+    },
+    {
+      "file": "concept-storefront-wellness.webp",
+      "subject": "Wellness",
+      "prompt_subject": "elegant unbranded wellness storefront within a tropical shopping arcade"
+    },
+    {
+      "file": "concept-pantry.webp",
+      "subject": "Pantry inspiration",
+      "prompt_subject": "warm contemporary pantry interior with neat unbranded jars and natural ingredients, no packaging text"
+    },
+    {
+      "file": "concept-dining.webp",
+      "subject": "At the table",
+      "prompt_subject": "beautifully set dining table with a simple seafood meal and warm natural light, no packaging"
+    },
+    {
+      "file": "concept-ingredients.webp",
+      "subject": "Fresh ingredients",
+      "prompt_subject": "overhead still life of premium seafood and fresh herbs on cream stone, no packaging"
+    },
+    {
+      "file": "concept-gathering.webp",
+      "subject": "Gathering together",
+      "prompt_subject": "hands setting a shared table for a family meal in a softly lit modern home, no logos"
+    },
+    {
+      "file": "concept-tea-break.webp",
+      "subject": "A quiet tea break",
+      "prompt_subject": "tea and simple snacks in a bright modern home, warm neutral ceramics and greenery"
+    },
+    {
+      "file": "concept-grocery-basket.webp",
+      "subject": "Everyday essentials",
+      "prompt_subject": "reusable canvas shopping bag with fresh vegetables and unbranded pantry ingredients"
+    },
+    {
+      "file": "concept-discovery.webp",
+      "subject": "Finding your way",
+      "prompt_subject": "close view of a mall directory and indoor garden, blank display and no lettering"
+    },
+    {
+      "file": "concept-evening.webp",
+      "subject": "Evening in the mall",
+      "prompt_subject": "tropical indoor mall arcade in warm early evening light, cream stone and subtle green details"
+    }
+  ],
+  "brand_scenes": [
+    {
+      "file": "concept-newmoon-hotpot.webp",
+      "brand_context": "New Moon",
+      "reference": "new-moon-brand-cover.jpg",
+      "prompt_subject": "Overhead shared hot pot with corn, vegetables, seafood and mushrooms on warm wood.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-newmoon-table.webp",
+      "brand_context": "New Moon",
+      "reference": "new-moon-brand-cover.jpg",
+      "prompt_subject": "Family-style Asian meal and shared soup on a warm dining table.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-newmoon-serving.webp",
+      "brand_context": "New Moon",
+      "reference": "new-moon-brand-cover.jpg",
+      "prompt_subject": "Generic shellfish serving suggestion with mushrooms and greens.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-mili-noodles.webp",
+      "brand_context": "MILI",
+      "reference": "mili-brand-cover.jpg",
+      "prompt_subject": "Noodle bowl with vegetables and egg, with hands holding chopsticks.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-mili-table.webp",
+      "brand_context": "MILI",
+      "reference": "mili-brand-cover.jpg",
+      "prompt_subject": "Noodle meal with egg and vegetables on a light stone table.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-mili-kitchen.webp",
+      "brand_context": "MILI",
+      "reference": "mili-brand-cover.jpg",
+      "prompt_subject": "Preparing a noodle bowl in a bright contemporary kitchen.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-gogo-toast.webp",
+      "brand_context": "GOGO",
+      "reference": "gogo-brand-cover.jpg",
+      "prompt_subject": "Friends raising clear glasses of orange-coloured drink in a garden.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-gogo-pour.webp",
+      "brand_context": "GOGO",
+      "reference": "gogo-brand-cover.jpg",
+      "prompt_subject": "Orange-coloured drink being poured outdoors, with fruit and greenery.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    },
+    {
+      "file": "concept-gogo-garden.webp",
+      "brand_context": "GOGO",
+      "reference": "gogo-brand-cover.jpg",
+      "prompt_subject": "Hands raising orange-coloured drinks at a garden picnic.",
+      "disclosure": "AI-generated concept imagery; no official packaging or product claim."
+    }
+  ],
+  "brand_scene_prompt_template": "Create a high-resolution landscape editorial lifestyle image inspired by the referenced original cover and its food, color and atmosphere. Use natural light and realistic textures. No logo, text, labels, branded packaging, watermark or official product claim. The original logo is rendered separately by the webpage."
+}

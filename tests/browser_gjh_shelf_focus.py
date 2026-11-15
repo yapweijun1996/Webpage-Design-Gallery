@@ -339,7 +339,7 @@ def run():
                     open_shelf(page,['keyboard','touch' if w<1000 else 'pointer','pointer','keyboard'][i])
                     opened=state(page); retained(before,opened)
                     assert opened['shelf']['id']==id
-                    assert opened['productAssets']['totalInstances']==36
+                    assert opened['productAssets']['totalInstances']==204
                     page.evaluate('__mall.setInput({forward:1,yaw:2});__mall.step(1000)')
                     retained(opened,state(page))
                     frame=state(page)['frames'];page.wait_for_timeout(100)

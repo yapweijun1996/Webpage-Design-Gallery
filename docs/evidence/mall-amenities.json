@@ -1,0 +1,298 @@
+[
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "assets": {
+      "desk": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0",
+        "instances": 1,
+        "primitives": 5,
+        "dimensions": [
+          2.880000114440918,
+          1.8700000047683716,
+          0.960999995470047
+        ],
+        "placements": [
+          [
+            -12.5,
+            0,
+            5.8,
+            3.141592653589793
+          ]
+        ],
+        "doorPose": null
+      },
+      "signs": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14",
+        "instances": 2,
+        "primitives": 3,
+        "dimensions": [
+          2.0999999046325684,
+          0.9400000125169754,
+          0.16200014208513558
+        ],
+        "placements": [
+          [
+            -4.2,
+            6.1,
+            6,
+            0
+          ],
+          [
+            6,
+            6.1,
+            6,
+            0
+          ]
+        ],
+        "doorPose": null
+      },
+      "showcase": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179",
+        "instances": 1,
+        "primitives": 5,
+        "dimensions": [
+          0.75,
+          1.8000000286847353,
+          0.5320000126450939
+        ],
+        "placements": [
+          [
+            -7,
+            0,
+            2.2,
+            0
+          ]
+        ],
+        "doorPose": "closed"
+      },
+      "displayedProducts": 4
+    },
+    "drawCalls": 192,
+    "singleFetch": "PASS",
+    "serviceHelpFocusPause": "PASS",
+    "signNavigation": "PASS",
+    "showcaseProductBag": "PASS",
+    "collisions": "PASS",
+    "directoryActions": "PASS",
+    "errors": []
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "assets": {
+      "desk": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0",
+        "instances": 1,
+        "primitives": 5,
+        "dimensions": [
+          2.880000114440918,
+          1.8700000047683716,
+          0.960999995470047
+        ],
+        "placements": [
+          [
+            -12.5,
+            0,
+            5.8,
+            3.141592653589793
+          ]
+        ],
+        "doorPose": null
+      },
+      "signs": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14",
+        "instances": 2,
+        "primitives": 3,
+        "dimensions": [
+          2.0999999046325684,
+          0.9400000125169754,
+          0.16200014208513558
+        ],
+        "placements": [
+          [
+            -4.2,
+            6.1,
+            6,
+            0
+          ],
+          [
+            6,
+            6.1,
+            6,
+            0
+          ]
+        ],
+        "doorPose": null
+      },
+      "showcase": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179",
+        "instances": 1,
+        "primitives": 5,
+        "dimensions": [
+          0.75,
+          1.8000000286847353,
+          0.5320000126450939
+        ],
+        "placements": [
+          [
+            -7,
+            0,
+            2.2,
+            0
+          ]
+        ],
+        "doorPose": "closed"
+      },
+      "displayedProducts": 4
+    },
+    "drawCalls": 173,
+    "singleFetch": "PASS",
+    "serviceHelpFocusPause": "PASS",
+    "signNavigation": "PASS",
+    "showcaseProductBag": "PASS",
+    "collisions": "PASS",
+    "directoryActions": "PASS",
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "assets": {
+      "desk": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0",
+        "instances": 1,
+        "primitives": 5,
+        "dimensions": [
+          2.880000114440918,
+          1.8700000047683716,
+          0.960999995470047
+        ],
+        "placements": [
+          [
+            -12.5,
+            0,
+            5.8,
+            3.141592653589793
+          ]
+        ],
+        "doorPose": null
+      },
+      "signs": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14",
+        "instances": 2,
+        "primitives": 3,
+        "dimensions": [
+          2.0999999046325684,
+          0.9400000125169754,
+          0.16200014208513558
+        ],
+        "placements": [
+          [
+            -4.2,
+            6.1,
+            6,
+            0
+          ],
+          [
+            6,
+            6.1,
+            6,
+            0
+          ]
+        ],
+        "doorPose": null
+      },
+      "showcase": {
+        "status": "loaded",
+        "reason": null,
+        "identity": "782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179",
+        "instances": 1,
+        "primitives": 5,
+        "dimensions": [
+          0.75,
+          1.8000000286847353,
+          0.5320000126450939
+        ],
+        "placements": [
+          [
+            -7,
+            0,
+            2.2,
+            0
+          ]
+        ],
+        "doorPose": "closed"
+      },
+      "displayedProducts": 4
+    },
+    "drawCalls": 158,
+    "singleFetch": "PASS",
+    "serviceHelpFocusPause": "PASS",
+    "signNavigation": "PASS",
+    "showcaseProductBag": "PASS",
+    "collisions": "PASS",
+    "directoryActions": "PASS",
+    "errors": []
+  },
+  {
+    "viewport": [
+      320,
+      480
+    ],
+    "theme": "light",
+    "locale": "en",
+    "shortPanelScrollStickyCloseReopen": "PASS",
+    "focusRestore": "PASS"
+  },
+  {
+    "viewport": [
+      844,
+      390
+    ],
+    "theme": "dark",
+    "locale": "zh-CN",
+    "shortPanelScrollStickyCloseReopen": "PASS",
+    "focusRestore": "PASS"
+  },
+  {
+    "missing": "desk",
+    "independentFallback": "PASS",
+    "interactionStillAvailable": "PASS"
+  },
+  {
+    "missing": "signs",
+    "independentFallback": "PASS",
+    "interactionStillAvailable": "PASS"
+  },
+  {
+    "missing": "showcase",
+    "independentFallback": "PASS",
+    "interactionStillAvailable": "PASS"
+  },
+  {
+    "corruptedDeskHashRejected": "PASS"
+  }
+]

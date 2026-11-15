@@ -1,0 +1,290 @@
+[
+  {
+    "label": "desktop",
+    "phase": "before",
+    "dom": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "dialog": {
+        "x": 440,
+        "y": 47.625,
+        "width": 560,
+        "height": 804.75,
+        "top": 47.625,
+        "bottom": 852.375
+      },
+      "dialogScroll": [
+        0,
+        803,
+        803
+      ],
+      "checkbox": {
+        "x": 465,
+        "y": 698.1875,
+        "width": 20,
+        "height": 20,
+        "top": 698.1875,
+        "bottom": 718.1875
+      },
+      "preference": {
+        "x": 465,
+        "y": 686.1875,
+        "width": 510,
+        "height": 44,
+        "top": 686.1875,
+        "bottom": 730.1875
+      },
+      "start": {
+        "x": 465,
+        "y": 578.1875,
+        "width": 251,
+        "height": 48,
+        "top": 578.1875,
+        "bottom": 626.1875
+      },
+      "close": {
+        "x": 931,
+        "y": 64.625,
+        "width": 44,
+        "height": 44,
+        "top": 64.625,
+        "bottom": 108.625
+      },
+      "nav": {
+        "x": 465,
+        "y": 746.1875,
+        "width": 510,
+        "height": 81.1875,
+        "top": 746.1875,
+        "bottom": 827.375
+      },
+      "navParent": "context-navigation-guide",
+      "dialogBackground": "rgb(17, 19, 21)",
+      "text": "rgb(244, 245, 246)",
+      "muted": "rgb(185, 192, 199)",
+      "preferenceColor": "rgb(185, 192, 199)",
+      "scrollPaddingBottom": "64px",
+      "zIndex": "1000",
+      "checkboxReachable": true
+    },
+    "pageErrors": []
+  },
+  {
+    "label": "mobile-390x664",
+    "phase": "before",
+    "dom": {
+      "viewport": [
+        390,
+        664
+      ],
+      "dialog": {
+        "x": 16,
+        "y": 16,
+        "width": 358,
+        "height": 632,
+        "top": 16,
+        "bottom": 648
+      },
+      "dialogScroll": [
+        0,
+        697,
+        630
+      ],
+      "checkbox": {
+        "x": 37,
+        "y": 526.9375,
+        "width": 20,
+        "height": 20,
+        "top": 526.9375,
+        "bottom": 546.9375
+      },
+      "preference": {
+        "x": 37,
+        "y": 514.9375,
+        "width": 316,
+        "height": 44,
+        "top": 514.9375,
+        "bottom": 558.9375
+      },
+      "start": {
+        "x": 37,
+        "y": 354.9375,
+        "width": 316,
+        "height": 48,
+        "top": 354.9375,
+        "bottom": 402.9375
+      },
+      "close": {
+        "x": 309,
+        "y": 33,
+        "width": 44,
+        "height": 44,
+        "top": 33,
+        "bottom": 77
+      },
+      "nav": {
+        "x": 37,
+        "y": 531.84375,
+        "width": 316,
+        "height": 119.15625,
+        "top": 531.84375,
+        "bottom": 651
+      },
+      "navParent": "context-navigation-guide",
+      "dialogBackground": "rgb(17, 19, 21)",
+      "text": "rgb(244, 245, 246)",
+      "muted": "rgb(185, 192, 199)",
+      "preferenceColor": "rgb(185, 192, 199)",
+      "scrollPaddingBottom": "64px",
+      "zIndex": "1000",
+      "checkboxReachable": true
+    },
+    "pageErrors": []
+  },
+  {
+    "label": "mobile-320x568",
+    "phase": "before",
+    "dom": {
+      "viewport": [
+        320,
+        568
+      ],
+      "dialog": {
+        "x": 16,
+        "y": 16,
+        "width": 288,
+        "height": 536,
+        "top": 16,
+        "bottom": 552
+      },
+      "dialogScroll": [
+        0,
+        769,
+        534
+      ],
+      "checkbox": {
+        "x": 37,
+        "y": 554.53125,
+        "width": 20,
+        "height": 20,
+        "top": 554.53125,
+        "bottom": 574.53125
+      },
+      "preference": {
+        "x": 37,
+        "y": 542.53125,
+        "width": 246,
+        "height": 44,
+        "top": 542.53125,
+        "bottom": 586.53125
+      },
+      "start": {
+        "x": 37,
+        "y": 382.53125,
+        "width": 246,
+        "height": 48,
+        "top": 382.53125,
+        "bottom": 430.53125
+      },
+      "close": {
+        "x": 239,
+        "y": 33,
+        "width": 44,
+        "height": 44,
+        "top": 33,
+        "bottom": 77
+      },
+      "nav": {
+        "x": 37,
+        "y": 391.0625,
+        "width": 246,
+        "height": 163.9375,
+        "top": 391.0625,
+        "bottom": 555
+      },
+      "navParent": "context-navigation-guide",
+      "dialogBackground": "rgb(17, 19, 21)",
+      "text": "rgb(244, 245, 246)",
+      "muted": "rgb(185, 192, 199)",
+      "preferenceColor": "rgb(185, 192, 199)",
+      "scrollPaddingBottom": "64px",
+      "zIndex": "1000",
+      "checkboxReachable": false
+    },
+    "pageErrors": []
+  },
+  {
+    "label": "landscape-844x390",
+    "phase": "before",
+    "dom": {
+      "viewport": [
+        844,
+        390
+      ],
+      "dialog": {
+        "x": 142,
+        "y": 16,
+        "width": 560,
+        "height": 358,
+        "top": 16,
+        "bottom": 374
+      },
+      "dialogScroll": [
+        0,
+        803,
+        356
+      ],
+      "checkbox": {
+        "x": 167,
+        "y": 666.5625,
+        "width": 20,
+        "height": 20,
+        "top": 666.5625,
+        "bottom": 686.5625
+      },
+      "preference": {
+        "x": 167,
+        "y": 654.5625,
+        "width": 510,
+        "height": 44,
+        "top": 654.5625,
+        "bottom": 698.5625
+      },
+      "start": {
+        "x": 167,
+        "y": 546.5625,
+        "width": 251,
+        "height": 48,
+        "top": 546.5625,
+        "bottom": 594.5625
+      },
+      "close": {
+        "x": 633,
+        "y": 33,
+        "width": 44,
+        "height": 44,
+        "top": 33,
+        "bottom": 77
+      },
+      "nav": {
+        "x": 167,
+        "y": 291.8125,
+        "width": 510,
+        "height": 81.1875,
+        "top": 291.8125,
+        "bottom": 373
+      },
+      "navParent": "context-navigation-guide",
+      "dialogBackground": "rgb(17, 19, 21)",
+      "text": "rgb(244, 245, 246)",
+      "muted": "rgb(185, 192, 199)",
+      "preferenceColor": "rgb(185, 192, 199)",
+      "scrollPaddingBottom": "64px",
+      "zIndex": "1000",
+      "checkboxReachable": false
+    },
+    "pageErrors": []
+  }
+]

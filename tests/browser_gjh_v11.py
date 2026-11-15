@@ -32,7 +32,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 def targets(page):
     small = page.locator('a,button,summary,[tabindex="0"]').evaluate_all('''els => els.filter(el => {
       const r=el.getBoundingClientRect(), s=getComputedStyle(el);
-      return r.width && r.height && s.visibility!=='hidden' && (r.width<43.9 || r.height<43.9);
+      return el.checkVisibility() && r.width && r.height && s.visibility!=='hidden' && (r.width<43.9 || r.height<43.9);
     }).map(el=>({text:el.textContent.trim(),width:el.clientWidth,height:el.clientHeight}))''')
     assert not small, small
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -86,7 +86,7 @@ def drive(page, ms, **inputs):
 
 def keyboard_turning(page):
     """Actual held keys turn camera/avatar without manufacturing translation."""
-    page.evaluate('__mall.teleport("atrium"); __mall.setInput(null)')
+    page.evaluate('__mall.teleport("atrium"); __mall.setInput(null); __mall.step(0)')
     page.locator('#scene').focus()
     before = state(page)
     page.keyboard.down('q')
@@ -161,7 +161,7 @@ def run(capture=False):
         server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         base = f'http://127.0.0.1:{server.server_port}'
-        url = base + '/gallery/demos/corporate/gjh/v11/'
+        url = base + '/gallery/demos/corporate/gjh/v11/?visitor=v1'
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
@@ -189,7 +189,7 @@ def run(capture=False):
                             mobile_hud(page)
                             assert not mall_map.evaluate('el=>el.open')
                             page.locator('#keyboard-help summary').click()
-                            page.locator('#mall-map summary').click()
+                            page.locator('#header-map').click()
                             page.wait_for_function('!document.querySelector("#keyboard-help").open')
                             assert mall_map.evaluate('el=>el.open')
                             targets(page)
@@ -257,7 +257,7 @@ def run(capture=False):
                         assert state(page)['animation']=='idle'
                         for zone in ('newmoon', 'mili', 'gogo'):
                             if width == 390:
-                                page.locator('#mall-map summary').click()
+                                page.locator('#header-map').click()
                             page.locator(f'[data-teleport="{zone}"]').click()
                             if width == 390:
                                 assert not page.locator('#mall-map').evaluate('el=>el.open')

@@ -7,7 +7,7 @@ def run():
  server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT)));threading.Thread(target=server.serve_forever,daemon=True).start();url=args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/';results=[]
  try:
   with sync_playwright() as p:
-   b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
+   b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=[f'--use-angle={os.environ.get("GALLERY_WEBGL_BACKEND","swiftshader")}', '--enable-unsafe-swiftshader'])
    for w,h in ([(390,680)] if args.live else [(320,480),(390,680),(390,844),(430,932),(768,1024),(844,390),(1440,900)]):
     page=b.new_page(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion='reduce');ready(page,url);guide(page)
     d=page.locator('#guide-dialog');box=d.bounding_box();assert box['x']>=15 and box['y']>=15 and box['x']+box['width']<=w-15 and box['y']+box['height']<=h-15

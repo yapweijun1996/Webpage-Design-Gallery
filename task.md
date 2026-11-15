@@ -1,6 +1,6 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **core demo implemented and laboratory-verified; physical-device and packaging acceptance remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
+Status: **core mall software and existing-source checks complete; physical-device acceptance and separately scoped interior follow-ups remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
 
 ## Objective and scope
 
@@ -36,7 +36,7 @@ Acceptance: the mall does not fetch models from GitHub at runtime; asset provena
 Depends on Phase 1. This is the first implementation priority.
 
 - [x] Replace the four simplified cans with the reviewed New Zealand, Australia, South Africa and Mexico models.
-- [ ] Match each model, label, name and product record against existing verified source data.
+- [x] Match each model, label, name and product record against existing verified source data.
 - [x] Generate four unofficial flat-label candidate PNGs with Codex CLI from the existing photo/SKU references (owner request, 2026-11-15). Keep estimated wrap/disclosure information and preserve the published GLBs until separately accepted.
 - [x] Evaluate the existing display-shelf model; arrange products for clear near and distant viewing.
 - [x] Provide discoverable inspection cues for F and click/tap.
@@ -271,6 +271,25 @@ an isolated HTML fixture on this host. Actual control selection events and model
 updates pass separately. Physical devices and screen-reader sessions remain open;
 this does not complete the separate final/device acceptance gates.
 
+## V11 direct product Inspect — 2026-11-15
+
+The nearby New Moon product Inspect action now opens the existing readable
+product-detail viewer immediately. It no longer requires the full Shelf view
+and a second “Inspect details” activation. The Shelf controller and layered
+mode implementation remain available for retained lifecycle and fallback
+coverage; product identity, four SKU mappings, bag state, held-product state,
+close/back restoration and mobile controls are unchanged. A nearby SKU now
+opens the existing 3D can preview automatically; if it cannot load, the
+official packshot remains visible. The focused desktop and 390px touch
+regression is `tests/browser_gjh_direct_inspect.py` with evidence in
+`docs/evidence/v11-direct-inspect/`. Chrome desktop and 390px touch checks
+pass for all four loaded 3D SKUs, repeat close/reopen and bag preservation.
+49 unit tests, SSOT, gallery, demos and PWA checks pass. The broader modes
+test stops at its courtyard-seat approach assertion on both this change and
+untouched baseline 53e98c2; it is not counted as passing. Actual screenshot
+review and independent advisor review found no blocker for this bounded fix.
+Physical iPhone Safari remains unverified.
+
 
 ## Codex CLI flat-label candidates — 2026-11-15
 
@@ -434,7 +453,7 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] Document dimension/interaction anomalies, current texture-free loader limits, collision ownership, proposed LOD behavior and the four-storefront fixture versus three-store runtime distinction.
 - [x] Define documentation, baseline, pilot, shell, retail and optional-polish phases without marking future production as complete.
 - [x] D1: reproduce and resolve the pilot kiosk/cart bottleneck; verify camera framing and bidirectional cart clearance at 390/639/1440px.
-- [ ] D1 follow-up outside asset scope: consolidate HUD/map/help ownership.
+- [x] D1 follow-up outside asset scope: consolidate HUD/map/help ownership.
 - [x] D1: audit existing bench, planter, kiosk, shelf and architectural primitives; record explicit reuse/adapt/new decisions and candidate-ID mappings.
 - [x] D1: approve per-asset dimensions, coordinate conversion, snap/interaction anchors, collision authority, material compatibility and measured scene-wide budgets.
 - [x] D2: review the eight-ID pilot: PUB-002, PUB-008, PUB-017, DSP-001, STF-008, LGT-009, PUB-005 and VER-017; preserve their source priorities and correct targets before authoring.
@@ -446,5 +465,55 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
 
 Completion requires real artifacts and evidence, not a checked inventory row. Supplied dimensions, material/LOD budgets and capability tags remain proposals until individually reviewed. The existing delivered-asset evidence and other task sections retain their own status. The later explicit request authorizes this eight-asset implementation. See [pilot review](docs/gjh-v11-interior-pilot-review.md), [acceptance manifest](models/gjh-interior-pilot/manifest.json) and [14-case E2E evidence](docs/evidence/interior-pilot-e2e.json). The subsequent commit/push request is tracked in [pilot release review](docs/gjh-v11-interior-pilot-release.md). The complete pilot uses `?interior=pilot`; the default keeps later M056 shelves, Shelf focus and graphics recovery. HUD consolidation and remaining candidates remain separate work.
+
+## Existing-source product consistency — 2026-11-15
+
+Completed the original Phase 2 [source-consistency acceptance](docs/v11-product-source-consistency-review.md).
+Fresh requests verify four official product pages, eleven unchanged original
+images and four live packshots. Actual deployed GLBs and embedded JPEGs exactly
+match pinned upstream photo-derived exports/textures; twelve rendered panel views
+and twelve live direct-Inspect/detail/preview flows pass source-consistency review after
+synchronizing the concurrent interior pilot. No
+known cross-SKU panel, factual contradiction or invented mark was found.
+
+Earlier audit notes required physical print masters for this checkbox. Independent
+contract review confirmed that this exceeded the explicit task, which permits
+estimated panel placement and Mexico's disclosed 121-degree blank sector. Those
+notes are superseded for this checklist item; no claim of full physical-wrap,
+measured dimensions, current official edition or microtext certification follows.
+The four AI comparison images remain separate and undeployed. The concurrent application 1.1.43
+and its pilot assets are preserved; this audit changes documentation only. The physical-device/screen-reader task is now
+the only unchecked item in the original mall acceptance scope; the newly added
+interior follow-ups retain their own status.
+
+## V11 merchandising density — 2026-11-15
+
+1.1.45 preserves native can size, stocks M056 at 17 facings per row (204 total), and retains optional pilot at 11 (132 total). Repeated pickup/return and direct Inspect pass in desktop/390 Chrome. Latest hybrid directory, showcase stock and camera changes are retained. Hybrid CSS literals were moved unchanged into canonical design tokens to restore SSOT; the gate was not relaxed. See docs/v11-newmoon-merchandising-density-review.md.
+
+## V11 welcome modal repair (1.1.46)
+- [x] Remove sticky footer overlap with preference/CTA on short screens.
+- [x] Improve dark action and checkbox text contrast with canonical tokens.
+- [x] Four viewport screenshot/DOM and checkbox, close/reopen/start checks; no physical iPhone claim.
+
+## Interior D1 Help and Map ownership — 2026-11-15
+
+Application 1.1.47 completes the [D1 ownership review](docs/v11-interior-hud-review.md).
+One permanent Help owner handles tutorial, H/? and controller Menu; one compact
+header Map entry serves the kiosk and quick guide. Close/Escape/controller Back
+restore the surviving focus target. Graphics, appearance, guide preferences,
+current native welcome flow, three-column mobile navigation and dark-theme fixes
+are retained. Compact Stores labels preserve the full accessible directory name.
+The latest brand imagery is preserved; its confirmed 667px Directory overflow is
+fixed with a scoped responsive column rule. No model, product, collider or mode
+engine changed.
+
+Current-source checks pass 13 HUD groups/50 frames, 70 DOM accessibility states,
+four dark welcome sizes, 14 native Guide Tab targets, shared component defaults,
+and the documented Directory/image/boundary bridges. Primary independent checks
+add 49 Python tests, six interaction cases and three strict edge cases; generation
+and SSOT pass. Historical mode/Gallery/PWA proofs retain their source boundaries,
+and the unreproduced earlier Hair hit failure remains recorded. Post-push CI,
+Pages and actual public user flows are the release gate before D3. Only D1 is
+checked here; D3/D4/D5 and physical-device acceptance retain separate status.
 
 Visitor v2 UX follow-up — 2026-11-15: camera occlusion, natural bench entry, reachable pickup/return feedback, persistent held guidance, truthful recovery and direct Cart controls are implemented in an isolated local candidate. Real-input and advisor evidence: `docs/gjh-visitor-v2-ux-fixes.md`. Publication and physical-device performance are not claimed.

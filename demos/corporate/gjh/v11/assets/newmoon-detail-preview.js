@@ -120,5 +120,5 @@ export function setupNewMoonPreview() {
   controls.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.previewOrbit)orbit(b.dataset.previewOrbit==='left'?-.25:.25);if(b.dataset.previewZoom)zoom(b.dataset.previewZoom==='in'?-.15:.15);});
   dialog.addEventListener('close',()=>{cleanup();last={status:'closed',reason:null};setMode('image');});
   document.addEventListener('visibilitychange',()=>{if(current){current.pointerId=null;current.drag=null;if(!document.hidden)render();}});
-  return {open};
+  return {open, load3D: load};
 }

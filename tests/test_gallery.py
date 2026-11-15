@@ -89,6 +89,8 @@ class GalleryTests(unittest.TestCase):
             output = Path(directory)
             gallery.build(output)
             for name in ("assets/tokens.css", "assets/icons.svg",
+                         "assets/onboarding/action-dialog.js", "assets/onboarding/onboarding.css",
+                         "design-system/onboarding/index.html",
                          "demos/corporate/gjh/shared/interaction.css",
                          "demos/corporate/gjh/shared/navigation.js"):
                 self.assertEqual((output / name).read_bytes(), (ROOT / name).read_bytes())
@@ -99,6 +101,8 @@ class GalleryTests(unittest.TestCase):
             cached = {entry["path"] for entry in entries}
             self.assertIn("assets/tokens.css", cached)
             self.assertIn("assets/icons.svg", cached)
+            self.assertNotIn("assets/onboarding/action-dialog.js", cached)
+            self.assertNotIn("design-system/onboarding/index.html", cached)
             self.assertNotIn("demos/corporate/gjh/shared/navigation.js", cached)
             self.assertNotIn("demos/corporate/gjh/v11/vendor/rapier.mjs", cached)
             self.assertTrue(all(design["thumbnail"] in cached for design in catalog["designs"]))
