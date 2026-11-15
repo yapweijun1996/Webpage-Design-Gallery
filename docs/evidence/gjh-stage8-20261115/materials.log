@@ -1,0 +1,9 @@
+Browser: 157.0.8103.51
+Traceback (most recent call last):
+  File "/private/tmp/gjh-stage8-qa-20261115/checkout/tests/browser_gjh_materials.py", line 61, in <module>
+    if __name__=='__main__':run()
+                            ~~~^^
+  File "/private/tmp/gjh-stage8-qa-20261115/checkout/tests/browser_gjh_materials.py", line 39, in run
+    assert not console,console
+           ^^^^^^^^^^^
+AssertionError: ['warning: Service Worker registration blocked by Playwright']

@@ -1,0 +1,95 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (1.317584ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (3.307791ms)
+✔ only the reviewed themes are available and invalid stored IDs are safe (2.3415ms)
+✔ Deepavali decorations respect planter and event reservations (0.773958ms)
+✔ Christmas tree and presents stay in the planter while suspended lights clear the event (0.841791ms)
+✔ lunar decorations respect the existing planter footprint and suspended event clearance (0.335541ms)
+✔ blocked storage keeps a working in-memory selection (0.229958ms)
+✔ reapplying the current theme invokes the scene commit without preparing new resources (0.335041ms)
+✔ later selection wins, stale preparation is disposed and no stale commit runs (0.638542ms)
+✔ failure and interruption leave the previous theme active and clean staged resources (0.929667ms)
+✔ a remembered supported theme is prepared before it becomes active (0.841375ms)
+✔ superseding or suspending preparation aborts the old signal (0.737625ms)
+✔ closing a pending selection aborts and disposes its late result (0.390625ms)
+✔ validated visual roles update real scene targets atomically before a future theme is committed (0.49575ms)
+✔ three stable stores share the current scene centers, entrances and ordering (1.92675ms)
+✔ location boundaries and map projection retain the existing visible behavior (1.602583ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (2.280125ms)
+✔ unavailable store cannot produce a travel destination (0.225958ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 208.394334
+Browser: 157.0.8103.51
+PASS 320x700: visible Deepavali scene, local persistence and return to Everyday (pixel difference 6.85)
+PASS 390x844: visible Deepavali scene, local persistence and return to Everyday (pixel difference 7.05)
+PASS 768x1024: visible Deepavali scene, local persistence and return to Everyday (pixel difference 6.76)
+PASS 844x390: visible Deepavali scene, local persistence and return to Everyday (pixel difference 5.32)
+PASS 1440x900: visible Deepavali scene, local persistence and return to Everyday (pixel difference 5.68)
+PASS repeated switch-back and reapply dispose decorations without resource growth
+PASS missing seasonal module keeps Everyday and succeeds on same-page retry
+PASS unavailable saved seasonal pack falls back and retries on the same page
+PASS motif and banner allocation failures keep Christmas and retry without reload
+PASS cancelled slow preparation never mounts; a later selection succeeds
+PASS graphics loss cancels pending decorations and permits later selection
+PASS native graphics recovery retains Deepavali decorations and bag, then restores Everyday
+PASS Deepavali cart loop/event, lift, product detail and bag
+PASS Visitor v1 Deepavali and Everyday
+Browser: 157.0.8103.51
+PASS 320x700: visible Christmas scene, local persistence and return to Everyday (pixel difference 6.35)
+PASS 390x844: visible Christmas scene, local persistence and return to Everyday (pixel difference 6.47)
+PASS 768x1024: visible Christmas scene, local persistence and return to Everyday (pixel difference 6.28)
+PASS 844x390: visible Christmas scene, local persistence and return to Everyday (pixel difference 4.84)
+PASS 1440x900: visible Christmas scene, local persistence and return to Everyday (pixel difference 5.18)
+PASS repeated switch-back and reapply dispose decorations without resource growth
+PASS missing seasonal module keeps Everyday and succeeds on same-page retry
+PASS unavailable saved seasonal pack falls back and retries on the same page
+PASS failed banner creation keeps Lunar New Year and retries without reload
+PASS cancelled slow preparation never mounts; a later selection succeeds
+PASS graphics loss cancels pending decorations and permits later selection
+PASS native graphics recovery retains Christmas decorations and bag, then restores Everyday
+PASS Christmas cart loop/event, lift, product detail and bag
+PASS Visitor v1 Christmas and Everyday
+Browser: 157.0.8103.51
+PASS 320x700: visible lunar scene, local persistence and return to Everyday (pixel difference 10.45)
+PASS 390x844: visible lunar scene, local persistence and return to Everyday (pixel difference 10.79)
+PASS 768x1024: visible lunar scene, local persistence and return to Everyday (pixel difference 10.15)
+PASS 844x390: visible lunar scene, local persistence and return to Everyday (pixel difference 7.93)
+PASS 1440x900: visible lunar scene, local persistence and return to Everyday (pixel difference 8.82)
+PASS repeated switch-back and reapply dispose decorations without resource growth
+PASS missing seasonal module keeps Everyday and succeeds on same-page retry
+PASS unavailable saved seasonal pack falls back and retries on the same page
+PASS failed banner creation rolls back and retries without reload
+PASS cancelled slow preparation never mounts; a later selection succeeds
+PASS graphics loss cancels pending decorations and permits later selection
+PASS native graphics recovery retains lunar decorations and bag, then restores Everyday
+PASS lunar cart loop/event, lift, product detail and bag
+PASS Visitor v1 lunar and Everyday
+Browser: 157.0.8103.51
+PASS 320x700: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 390x844: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 768x1024: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 844x390: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 1440x900: discoverable settings, focus, repeated apply, retained bag and resources
+PASS invalid saved theme falls back, is replaced and survives reload
+PASS unavailable local storage retains in-memory theme
+PASS missing theme module preserves 3D and reports unavailable settings
+PASS settings preserve active cart
+PASS settings preserve a seated visitor
+PASS settings preserve a carried physical product
+PASS settings pause and resume an active elevator journey
+PASS graphics loss and restoration retain theme and bag
+PASS Visitor v1 expanded theme settings
+PASS original layout and no-JavaScript directory
+Browser: 157.0.8103.51
+{"viewport": [320, 700], "readySeconds": 0.934, "points": {"entry": {"x": 10.000001907348633, "y": -0.019905924797058105, "z": 45, "draw": 159, "triangles": 806076, "resources": {"geometries": 98, "textures": 25}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "store": {"x": -10.000000953674316, "y": -0.019918739795684814, "z": 2.4000000953674316, "draw": 122, "triangles": 778764, "resources": {"geometries": 98, "textures": 30}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "courtyard": {"x": 9.999999046325684, "y": -0.019904673099517822, "z": 36, "draw": 153, "triangles": 806034, "resources": {"geometries": 98, "textures": 30}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}}, "network": {"requests": 82, "encoded": 10847099, "decoded": 10847099}, "pageErrors": [], "consoleWarningsOrErrors": [], "serviceWorkerBlockedByFixture": 1}
+{"viewport": [390, 844], "readySeconds": 0.862, "points": {"entry": {"x": 10.000001907348633, "y": -0.019905924797058105, "z": 45, "draw": 159, "triangles": 806076, "resources": {"geometries": 98, "textures": 25}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "store": {"x": -10.000000953674316, "y": -0.019918739795684814, "z": 2.4000000953674316, "draw": 122, "triangles": 778764, "resources": {"geometries": 98, "textures": 30}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "courtyard": {"x": 9.999999046325684, "y": -0.019904673099517822, "z": 36, "draw": 153, "triangles": 806034, "resources": {"geometries": 98, "textures": 30}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}}, "network": {"requests": 83, "encoded": 11048325, "decoded": 11048325}, "pageErrors": [], "consoleWarningsOrErrors": [], "serviceWorkerBlockedByFixture": 1}
+{"viewport": [768, 1024], "readySeconds": 0.997, "points": {"entry": {"x": 10.000001907348633, "y": -0.019905924797058105, "z": 45, "draw": 178, "triangles": 806194, "resources": {"geometries": 100, "textures": 32}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 2, "shadows": false, "recovered": false}}, "store": {"x": -10.000000953674316, "y": -0.019918739795684814, "z": 2.4000000953674316, "draw": 123, "triangles": 778766, "resources": {"geometries": 100, "textures": 32}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 2, "shadows": false, "recovered": false}}, "courtyard": {"x": 9.999999046325684, "y": -0.019904673099517822, "z": 36, "draw": 173, "triangles": 806184, "resources": {"geometries": 100, "textures": 32}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 2, "shadows": false, "recovered": false}}}, "network": {"requests": 83, "encoded": 11048325, "decoded": 11048325}, "pageErrors": [], "consoleWarningsOrErrors": [], "serviceWorkerBlockedByFixture": 1}
+{"viewport": [844, 390], "readySeconds": 1.416, "points": {"entry": {"x": 10.000001907348633, "y": -0.019905924797058105, "z": 45, "draw": 182, "triangles": 806202, "resources": {"geometries": 100, "textures": 32}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 2, "shadows": false, "recovered": false}}, "store": {"x": -10.000000953674316, "y": -0.019918739795684814, "z": 2.4000000953674316, "draw": 148, "triangles": 787522, "resources": {"geometries": 100, "textures": 32}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 2, "shadows": false, "recovered": false}}, "courtyard": {"x": 9.999999046325684, "y": -0.019904673099517822, "z": 36, "draw": 182, "triangles": 806202, "resources": {"geometries": 100, "textures": 32}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 2, "shadows": false, "recovered": false}}}, "network": {"requests": 82, "encoded": 10847099, "decoded": 10847099}, "pageErrors": [], "consoleWarningsOrErrors": [], "serviceWorkerBlockedByFixture": 1}
+{"viewport": [1440, 900], "readySeconds": 1.158, "points": {"entry": {"x": 10.000001907348633, "y": -0.019905924797058105, "z": 45, "draw": 182, "triangles": 806202, "resources": {"geometries": 100, "textures": 33}, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "store": {"x": -10.000000953674316, "y": -0.019918739795684814, "z": 2.4000000953674316, "draw": 144, "triangles": 787504, "resources": {"geometries": 100, "textures": 33}, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "courtyard": {"x": 9.999999046325684, "y": -0.019904673099517822, "z": 36, "draw": 182, "triangles": 806202, "resources": {"geometries": 100, "textures": 33}, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}}, "network": {"requests": 84, "encoded": 11198183, "decoded": 11198183}, "pageErrors": [], "consoleWarningsOrErrors": [], "serviceWorkerBlockedByFixture": 1}
+PASS simulated procedural texture creation failure retains scene and directory
+PASS missing optional texture module retains scene and directory

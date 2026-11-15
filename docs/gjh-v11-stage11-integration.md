@@ -1,0 +1,37 @@
+# V11 stage 11 — integration and verification
+
+Status: local integration verification for the opt-in expanded mall. Everyday, Lunar New Year, Christmas and Deepavali are available; the original scene remains the default. The existing startup performance budget is still an open failure, and this report does not claim a production release, physical-device certification or authorization for the 14 candidate brands.
+
+## Integration fixes
+
+- In 3D mode, **App & offline help** was still present behind the fixed scene and could be reached by assistive technology or keyboard even though it was obscured and had insufficient contrast against the 3D page background. It is now hidden with the other directory-only content during 3D; it remains keyboard-accessible in the directory and graphics fallback. The [original failing scan](evidence/gjh-stage11-20261115/accessibility-before-fix.log) and the final scans record both states.
+- Theme settings reported a successful change while the paused background still showed the previous theme until the dialog closed. A committed change now renders one frame after the outgoing decoration stage is released. The dialog still pauses movement and continuous animation. [Mobile settings](evidence/gjh-stage11-20261115/theme-dialog-390.png) and [landscape settings](evidence/gjh-stage11-20261115/theme-dialog-844.png) show the active theme behind the dialog.
+- On a 667 × 375 landscape viewport, the Help panel could scroll a focused appearance select behind its header during a native selection. Focused appearance controls are now kept in their own scrollport on focus and change, including a deferred recheck after native scrolling; later manual scrolling remains available. Compare [before](evidence/gjh-stage11-20261115/help-before-667.png) and [after](evidence/gjh-stage11-20261115/help-focus-667.png), and see the [five-viewport focused test](evidence/gjh-stage11-20261115/help-focus.log).
+
+An earlier accessibility fixture also attempted to activate a disabled physical-product button from outside the real shelf reach. Enter instead reopened the already-focused bag button. The [diagnostic trace](evidence/gjh-stage11-20261115/pickup-route-diagnosis.log) identified the actual state. The test now walks to the selected shelf with the real collision controller and asserts that the control is enabled and focused before using Enter; it does not bypass the reach condition.
+
+## Coverage and evidence
+
+- [Expanded accessibility](evidence/gjh-stage11-20261115/accessibility-final.log): 55 axe-core 4.10.3 scans across 320 × 700, 390 × 844, 768 × 1024, 844 × 390 and 1440 × 900. For each viewport it scans the scene and theme dialog for all four themes, plus the expanded map, directory and product dialog. It also checks focus, Escape return, dialog bounds, 44 px theme controls, hit testing, conservative DOM contrast and absence of horizontal overflow. Theme changes must render a frame and remain paused afterward.
+- [Original-scene accessibility report](evidence/gjh-stage11-20261115/default-accessibility-report.json): 70 axe scans at five viewports, real keyboard focus and dialog journeys, 44 px targets, conservative DOM contrast, shop, bag, actual shelf pickup/return and elevator. The independently tested host native popup did not respond to the keyboard fixture; native option selection therefore remains **not verified**, although programmatic selection and the surrounding keyboard focus journey were checked.
+- [Theme and mode regressions](evidence/gjh-stage11-20261115/themes-and-modes.log): all four themes, repeated changes and disposal, storage and module errors, cancelled work, real WebGL loss/restoration, retained bag and actual changes while pushing a cart, seated, carrying a product and travelling in the lift. The [expanded integration log](evidence/gjh-stage11-20261115/expanded-integration.log) also exercises the loop, cart, three stores, four SKUs, 14 truthful planned spaces, seats, lift, directory and PWA fallback.
+- [Repository and gallery checks](evidence/gjh-stage11-20261115/repository-and-gallery.log) include the generator checks, Python units, gallery, 28 older demo browser cases with the pinned axe bundle and gallery PWA. [Affected checks after the Help focus fix](evidence/gjh-stage11-20261115/affected-regression.log) rerun generation, design/SSOT, units, theme settings and mode lifecycle; [PWA and matched performance](evidence/gjh-stage11-20261115/pwa-and-performance.log) were rerun against the final app source. The wider theme and expanded integration suites ran immediately before the final Help-control-only change; the affected Help, accessibility, mode and PWA paths were rerun afterward.
+
+Tests used Chrome 157, local HTTP, macOS/Metal for most 3D runs, reduced motion and emulated device widths; test screenshots and app-writing suites used isolated copies. The verified [source hashes](evidence/gjh-stage11-20261115/source-sha256.txt) identify the final implementation. Simulated failures and viewport emulation do not establish physical iOS/Android, Safari, native screen-reader, real touch hardware, field performance or regulatory compliance. DOM contrast checks do not certify 3D lettering, imagery or every composited canvas pixel.
+
+## Matched performance observations
+
+[Four-theme measurements](evidence/gjh-stage11-20261115/theme-performance.json) use the same courtyard position, Chrome/Metal, DPR 2, reduced motion, auto quality and stowed/active cart. Values are draw calls (idle / cart):
+
+| Theme | 390 × 844 balanced | 1440 × 900 detailed |
+| --- | --- | --- |
+| Everyday | 153 / 176 | 182 / 205 |
+| Lunar New Year | 164 / 187 | 193 / 216 |
+| Christmas | 167 / 190 | 196 / 219 |
+| Deepavali | 161 / 184 | 190 / 213 |
+
+Returning to Everyday restores the measured idle draw and texture counts; cart geometry remains cached. The desktop cart observations exceed the 200-call reference even in Everyday; the existing budget test's 200-call assertion is defined for its non-cart scenario, so these observations are not represented as a separate failed gate. Local `requestAnimationFrame` observations are not physical-device frame-rate or thermal guarantees.
+
+The [budget test](evidence/gjh-stage11-20261115/budget.log) stops at its existing 10 MiB decoded ready-stage assertion, so it cannot certify subsequent gates. An independent [same-profile probe](evidence/gjh-stage11-20261115/budget-probe.log) records 10,839,033 decoded bytes (about 10.34 MiB) and 80 requests at 320 × 740 using SwiftShader; the test's respective limits are 10 MiB and 45 requests. The request count is a separate probe observation, not a later assertion reached by the stopped suite. An earlier parallel run [timed out](evidence/gjh-stage11-20261115/budget-overloaded-timeout.log) under host load and is retained separately; the quieter rerun reached the actual failing assertion. This long-standing startup issue, and the desktop cart cost, remain open optimization work. Do not raise or remove the existing limits to label integration as passing.
+
+The [ready-stage resource breakdown](evidence/gjh-stage11-20261115/budget-breakdown.json) identifies the largest decoded resources as Rapier (4,340,292 bytes), Three.js (691,648 bytes), the wayfinding sign model (676,028 bytes), the visitor model (577,004 bytes) and the cart model (536,448 bytes). These measurements identify candidates for investigation, not a verified optimization or an assumption that any particular resource can safely be omitted.

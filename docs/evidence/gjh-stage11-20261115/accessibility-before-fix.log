@@ -1,0 +1,56 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (1.208666ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (2.755792ms)
+✔ Auto separates constrained, missing and capable hardware deterministically (1.868083ms)
+✔ explicit profiles and recovery use bounded DPR with truthful shadow eligibility (1.337042ms)
+✔ storage values are allowlisted (0.174291ms)
+✔ only the reviewed themes are available and invalid stored IDs are safe (2.622916ms)
+✔ Deepavali decorations respect planter and event reservations (1.202666ms)
+✔ Christmas tree and presents stay in the planter while suspended lights clear the event (0.314917ms)
+✔ lunar decorations respect the existing planter footprint and suspended event clearance (0.164417ms)
+✔ blocked storage keeps a working in-memory selection (0.2275ms)
+✔ reapplying the current theme invokes the scene commit without preparing new resources (0.346041ms)
+✔ later selection wins, stale preparation is disposed and no stale commit runs (0.5685ms)
+✔ failure and interruption leave the previous theme active and clean staged resources (1.698167ms)
+✔ a remembered supported theme is prepared before it becomes active (1.051084ms)
+✔ superseding or suspending preparation aborts the old signal (0.724416ms)
+✔ closing a pending selection aborts and disposes its late result (0.351ms)
+✔ validated visual roles update real scene targets atomically before a future theme is committed (0.4855ms)
+✔ lifecycle exits, cleans, suspends, enters and restores once in order (4.0915ms)
+✔ directory Inspect and Shop return to retained Menu then gameplay base (0.750083ms)
+✔ repeated observations and requests are idempotent without lifecycle effects (0.525791ms)
+✔ commands cannot manufacture gameplay or bypass the retained underlay (0.549292ms)
+✔ invalid observations fail atomically with no lifecycle effects (0.257125ms)
+✔ Inspect cannot be directly replaced by Shop in an observation (0.221625ms)
+✔ actual base changes under Shop are retained without fake Explore lifecycle (0.467709ms)
+✔ interrupt cleans once without enter, exit or restoring retained gameplay (0.239375ms)
+✔ history is bounded and distinguishes restores, rejection and interruptions (3.302917ms)
+✔ Shelf suspends each real base and restores through the same ordered lifecycle (3.062958ms)
+✔ complete boolean observations validate all Shelf combinations atomically (4.262667ms)
+✔ Shelf cannot be stacked with or directly replaced by another overlay (0.974667ms)
+✔ derived mode priority agrees with accepted observation (0.31025ms)
+✔ three stable stores share the current scene centers, entrances and ordering (1.649167ms)
+✔ location boundaries and map projection retain the existing visible behavior (0.642958ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (3.150667ms)
+✔ unavailable store cannot produce a travel destination (0.155166ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 260.50225
+Browser: 157.0.8103.51
+{"viewport": [320, 700], "state": "theme-dialog-everyday", "violations": [], "unresolved": [], "contrast": []}
+{"viewport": [320, 700], "state": "scene-everyday", "violations": [], "unresolved": [], "contrast": [{"target": [".joystick-label"], "foreground": "rgb(255, 252, 245)", "lowBackground": [11.8272, 34.496, 28.5824], "highBackground": [15.499200000000002, 38.168000000000006, 32.254400000000004], "minimumRatio": 15.506374038263239, "requiredRatio": 4.5}, {"target": ["#run-toggle"], "foreground": "rgb(255, 252, 245)", "lowBackground": [11.28, 32.9, 27.259999999999998], "highBackground": [26.580000000000013, 48.20000000000001, 42.56000000000001], "minimumRatio": 13.610790356601223, "requiredRatio": 4.5}, {"target": [".scene-disclaimer"], "foreground": "rgb(236, 233, 220)", "lowBackground": [11.52, 33.6, 27.84], "highBackground": [21.72000000000001, 43.80000000000001, 38.040000000000006], "minimumRatio": 12.161926735037031, "requiredRatio": 4.5}, {"target": [".mall-app-settings > summary"], "foreground": "rgb(16, 45, 38)", "lowBackground": [16, 45, 38], "highBackground": [16, 45, 38], "minimumRatio": 1, "requiredRatio": 4.5}]}
+Traceback (most recent call last):
+  File "/private/tmp/gjh-stage11-qa-20261115/checkout/tests/browser_gjh_stage11_accessibility.py", line 52, in <module>
+    if __name__=='__main__':run()
+                            ~~~^^
+  File "/private/tmp/gjh-stage11-qa-20261115/checkout/tests/browser_gjh_stage11_accessibility.py", line 43, in run
+    scan('scene-'+theme)
+    ~~~~^^^^^^^^^^^^^^^^
+  File "/private/tmp/gjh-stage11-qa-20261115/checkout/tests/browser_gjh_stage11_accessibility.py", line 29, in scan
+    for item in result['contrast']:assert item.get('hidden') or (not item.get('unresolved') and item['minimumRatio']>=item['requiredRatio']),(label,item)
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('scene-everyday', {'target': ['.mall-app-settings > summary'], 'foreground': 'rgb(16, 45, 38)', 'lowBackground': [16, 45, 38], 'highBackground': [16, 45, 38], 'minimumRatio': 1, 'requiredRatio': 4.5})

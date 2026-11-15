@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/private/tmp/gjh-stage11-release-20261115/checkout/tests/browser_gjh_accessibility.py", line 325, in <module>
+    run()
+    ~~~^^
+  File "/private/tmp/gjh-stage11-release-20261115/checkout/tests/browser_gjh_accessibility.py", line 275, in run
+    assert page.evaluate('__mall.state.character.physicalProduct.phase') == 'held'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

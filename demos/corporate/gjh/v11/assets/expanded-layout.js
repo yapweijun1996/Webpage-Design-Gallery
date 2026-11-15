@@ -7,6 +7,11 @@ const slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
 export const expandedLayout = Object.freeze({
   bounds: Object.freeze({minX:-25, maxX:45, minZ:-12, maxZ:48}),
   entrance: Object.freeze({x:10, z:45}),
+  courtyardArrival: Object.freeze({x:10, z:36}),
+  lift: Object.freeze({x:-3, z:10, upper:7.2}),
+  directory: Object.freeze({x:-5, z:44}),
+  serviceDesk: Object.freeze({x:25, z:44}),
+  showcase: Object.freeze({x:4, z:11}),
   slots: Object.freeze([
     ...Array.from({length:5}, (_, i) => slot(i+1, 'north', -15+i*10, -5+i*10, -12, 0)),
     ...Array.from({length:6}, (_, i) => slot(i+6, 'west', -25, -15, i*8, (i+1)*8)),

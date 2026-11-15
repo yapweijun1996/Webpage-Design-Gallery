@@ -1,0 +1,5 @@
+PASS 320x568: change reveals focused control; later manual scroll remains available
+PASS 390x844: change reveals focused control; later manual scroll remains available
+PASS 667x375: change reveals focused control; later manual scroll remains available
+PASS 844x390: change reveals focused control; later manual scroll remains available
+PASS 1440x900: change reveals focused control; later manual scroll remains available

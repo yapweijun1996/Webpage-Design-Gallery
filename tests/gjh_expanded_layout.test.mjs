@@ -14,6 +14,8 @@ test('seventeen runtime shells match the stage 1 plan under one rigid translatio
     assert.equal(slot.available,i<3);
   }
   assert.deepEqual(expandedLayout.bounds,{minX:-25,maxX:45,minZ:-12,maxZ:48});
+  assert.deepEqual(expandedLayout.lift,{x:-3,z:10,upper:7.2});
+  assert.ok(Math.hypot(expandedLayout.courtyardArrival.x-expandedLayout.lift.x,expandedLayout.courtyardArrival.z-expandedLayout.lift.z)>5);
   for(const [i,store] of spatial.stores.entries()){
     const slot=expandedLayout.slots[i];
     assert.equal(store.number,slot.number);

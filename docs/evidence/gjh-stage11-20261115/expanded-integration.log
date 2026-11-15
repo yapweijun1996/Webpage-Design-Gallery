@@ -1,0 +1,71 @@
+Gallery built: 1 companies, 8 designs
+PASS: scoped installation, parent coexistence, manifest, offline fallback, bag retention, identity/hash rejection, explicit update and one reload
+PASS 320x700: approach, bidirectional lift and both exits
+PASS 390x844: approach, bidirectional lift and both exits
+PASS 768x1024: approach, bidirectional lift and both exits
+PASS 844x390: approach, bidirectional lift and both exits
+PASS 1440x900: approach, bidirectional lift and both exits
+PASS relocated directory, self-service desk and four-product showcase
+PASS cart cannot travel in visitor-only lift
+PASS held product cannot travel in visitor-only lift
+PASS directory pause and resume during lift travel
+PASS graphics interruption at 650ms: safe floor 0, movement and bag
+PASS graphics interruption at 1800ms: safe floor 7.2, movement and bag
+PASS Visitor v1 retains ground-floor stores and explains lift availability
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: directory destinations, physical doors
+METRIC 390 newmoon inside: 114 draws, 778708 triangles
+METRIC 390 mili inside: 93 draws, 793500 triangles
+METRIC 390 gogo inside: 92 draws, 792192 triangles
+PASS 390 V2 physical pickup and return preserves the four-item bag
+PASS 390x844 visitor=v2: directory destinations, physical doors, four SKU and brand details, retained bag
+PASS 768x1024 visitor=v2: directory destinations, physical doors
+PASS 844x390 visitor=v2: directory destinations, physical doors
+METRIC 1440 newmoon inside: 128 draws, 787326 triangles
+METRIC 1440 mili inside: 141 draws, 804886 triangles
+METRIC 1440 gogo inside: 131 draws, 803116 triangles
+PASS 1440 V2 physical pickup and return preserves the four-item bag
+PASS 1440x900 visitor=v2: directory destinations, physical doors, four SKU and brand details, retained bag
+PASS 390x844 &visitor=v1: directory destinations, physical doors
+PASS original scene visitor=v2: all three directory destinations
+PASS original scene ?visitor=v1: all three directory destinations
+PASS no-js: readable directory and no misleading 3D action
+PASS physics-failure: readable directory and no misleading 3D action
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 390x844 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 768x1024 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 1440x900 visitor=v2: four seats, camera, safe standing and retained bag
+PASS event-area cart traversal and visible garden collision: 18.92508316040039
+PASS 844x390 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 390x844 &visitor=v1: four seats, camera, safe standing and retained bag
+PASS fallback seat asset: approach, sit and stand
+PASS 320x700: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 390x844: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 768x1024: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 1440x900: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 844x390: numbered map, keyboard directory, closed spaces and open-store controls
+PASS default: truthful directory fallback
+PASS no-js: truthful directory fallback
+PASS physics-failure: truthful directory fallback
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS reversible layout navigation preserves the tab bag
+PASS 768x1024 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 1440x900 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS expanded directory kiosk opens the live map
+PASS continuous loop: avatar clockwise, cart counterclockwise; end metrics: {'x': 10.033228874206543, 'z': 38.99943161010742, 'y': -0.03033679723739624, 'pushing': True, 'zone': 'atrium', 'drawCalls': 206, 'triangles': 816850, 'camera': {'lift': 0, 'distance': 6.5000000000000036, 'radius': 0.22, 'avatarVisible': True}, 'resources': {'geometries': 124, 'textures': 34}}
+PASS 844x390 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 &visitor=v1: keyboard, map, three real doors, directory and bag
+PASS expanded real WebGL context loss and recovery preserves the bag
+PASS expanded no-js directory fallback
+PASS expanded physics-failure directory fallback
+PASS expanded query: scoped offline reconnect and preserved tab bag
+Browser: 157.0.8103.51
+{"viewport": [390, 844], "layout": "default", "idle": {"draw": 158, "triangles": 821750, "resources": {"geometries": 104, "textures": 19}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "cart": {"active": true, "draw": 181, "triangles": 832386, "resources": {"geometries": 127, "textures": 19}}, "rafMedianMs": 16.7, "rafP95Ms": 16.7}
+{"viewport": [390, 844], "layout": "expanded", "idle": {"draw": 153, "triangles": 806034, "resources": {"geometries": 98, "textures": 25}, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "cart": {"active": true, "draw": 176, "triangles": 816670, "resources": {"geometries": 121, "textures": 25}}, "rafMedianMs": 16.7, "rafP95Ms": 16.8}
+{"viewport": [1440, 900], "layout": "default", "idle": {"draw": 196, "triangles": 824762, "resources": {"geometries": 113, "textures": 29}, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "cart": {"active": true, "draw": 219, "triangles": 835398, "resources": {"geometries": 136, "textures": 29}}, "rafMedianMs": 16.7, "rafP95Ms": 16.7}
+{"viewport": [1440, 900], "layout": "expanded", "idle": {"draw": 182, "triangles": 806202, "resources": {"geometries": 100, "textures": 33}, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "cart": {"active": true, "draw": 205, "triangles": 816838, "resources": {"geometries": 123, "textures": 33}}, "rafMedianMs": 16.7, "rafP95Ms": 16.8}
+{"viewport": [390, 844], "browser": "157.0.8103.51", "backend": "metal", "startupAfterNetworkIdle": {"requests": 83, "decodedBytes": 11048920}, "themes": {"everyday": {"idle": {"draw": 153, "triangles": 806034, "resources": {"geometries": 98, "textures": 25}, "x": 9.999995231628418, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "cart": {"draw": 176, "triangles": 816670, "resources": {"geometries": 121, "textures": 25}, "x": 9.999995231628418, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}}, "lunar-new-year": {"idle": {"draw": 164, "triangles": 848756, "resources": {"geometries": 125, "textures": 26}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "cart": {"draw": 187, "triangles": 859392, "resources": {"geometries": 125, "textures": 26}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}}, "christmas": {"idle": {"draw": 167, "triangles": 870748, "resources": {"geometries": 127, "textures": 26}, "x": 9.999993324279785, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "cart": {"draw": 190, "triangles": 881384, "resources": {"geometries": 127, "textures": 26}, "x": 9.999993324279785, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}}, "deepavali": {"idle": {"draw": 161, "triangles": 832216, "resources": {"geometries": 126, "textures": 27}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "cart": {"draw": 184, "triangles": 842852, "resources": {"geometries": 126, "textures": 27}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}}}, "restoredEveryday": {"draw": 153, "triangles": 806034, "resources": {"geometries": 121, "textures": 25}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "balanced", "pixelRatio": 1.25, "shadows": false, "recovered": false}}, "afterAllThemes": {"requests": 86, "decodedBytes": 11067976}}
+{"viewport": [1440, 900], "browser": "157.0.8103.51", "backend": "metal", "startupAfterNetworkIdle": {"requests": 84, "decodedBytes": 11198778}, "themes": {"everyday": {"idle": {"draw": 182, "triangles": 806202, "resources": {"geometries": 100, "textures": 33}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "cart": {"draw": 205, "triangles": 816838, "resources": {"geometries": 123, "textures": 33}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}}, "lunar-new-year": {"idle": {"draw": 193, "triangles": 848924, "resources": {"geometries": 127, "textures": 34}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "cart": {"draw": 216, "triangles": 859560, "resources": {"geometries": 127, "textures": 34}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}}, "christmas": {"idle": {"draw": 196, "triangles": 870916, "resources": {"geometries": 129, "textures": 34}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "cart": {"draw": 219, "triangles": 881552, "resources": {"geometries": 129, "textures": 34}, "x": 9.999994277954102, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}}, "deepavali": {"idle": {"draw": 190, "triangles": 832384, "resources": {"geometries": 128, "textures": 35}, "x": 9.999993324279785, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "cart": {"draw": 213, "triangles": 843020, "resources": {"geometries": 128, "textures": 35}, "x": 9.999993324279785, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}}}, "restoredEveryday": {"draw": 182, "triangles": 806202, "resources": {"geometries": 123, "textures": 33}, "x": 9.999993324279785, "z": 36, "quality": {"preference": "auto", "tier": "detailed", "pixelRatio": 2, "shadows": true, "recovered": false}}, "afterAllThemes": {"requests": 87, "decodedBytes": 11217834}}

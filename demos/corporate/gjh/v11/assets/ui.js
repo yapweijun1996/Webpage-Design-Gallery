@@ -25,12 +25,15 @@ export function createUI(expanded = false) {
   const fallbackMessage = document.getElementById('fallback-message');
   const recovery = document.getElementById('graphics-recovery');
   const return3D = document.getElementById('graphics-return');
+  const themeDialog=document.getElementById('mall-theme-dialog'),themeSelect=document.getElementById('mall-theme-select'),themeApply=document.getElementById('mall-theme-apply'),themeStatus=document.getElementById('mall-theme-status');
+  const themeOpen=document.getElementById('mall-theme-open'),directoryThemeOpen=document.getElementById('directory-theme-open');
+  let mallTheme=null,themeOpener=null;
   document.getElementById('graphics-reload').addEventListener('click', () => location.reload());
   return3D.addEventListener('click', () => { if (available) setView(true, true); });
   const playerDot = document.getElementById('player-dot');
   const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel=expanded ? 'Expanded ground-floor preview: 17 numbered spaces, including three open stores and 14 planned spaces. The gold dot marks your position.' : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel=expanded ? 'Expanded mall floorplan. New Moon, MILI and GOGO are open at 01 to 03. Spaces 04 to 17 are planned and closed. The lift is west of the courtyard; facilities are planned to the east. The gold dot marks your position.' : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute('aria-label',floorplanLabel);
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
   const inspectPrompt = document.getElementById('inspect-prompt');
@@ -42,7 +45,7 @@ export function createUI(expanded = false) {
   let guideFromHUD=false;
   const guideFooter=document.createElement('div');guideFooter.id='context-navigation-guide';guideFooter.className='context-navigation-footer';
   const onboarding = createOnboarding({...createExperienceProfile('mall'), id:'guide', storageKey:'gjh-v11', scene, footer:guideFooter,
-    modes:['keyboard','touch','gamepad'], showHelpEntry:false, onHelp:openHelp, onBack:closeGamepadPanel, canOpen:()=>available&&showing3D&&!dialog.open&&!bag.open&&!amenityPanel.dialog.open&&!externalPaused, onOpen:()=>{guidePaused=true;guideFromHelp=document.activeElement===guideReopen;guideFromHUD=Boolean(document.activeElement.closest('.ob-hud'));notifyMode();} });
+    modes:['keyboard','touch','gamepad'], showHelpEntry:false, onHelp:openHelp, onBack:closeGamepadPanel, canOpen:()=>available&&showing3D&&!dialog.open&&!bag.open&&!amenityPanel.dialog.open&&!themeDialog.open&&!externalPaused, onOpen:()=>{guidePaused=true;guideFromHelp=document.activeElement===guideReopen;guideFromHUD=Boolean(document.activeElement.closest('.ob-hud'));notifyMode();} });
   const guide = onboarding.dialog;
   const amenityPanel=createActionDialog({id:'amenity-dialog',scene,getPreferences:()=>onboarding.preferences,onOpen:()=>notifyMode(),onClose:()=>notifyMode()});
   let previousTutorialPose = null;
@@ -55,12 +58,12 @@ export function createUI(expanded = false) {
   let modeListener = null, shelfFocus = null;
   const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open || externalPaused || document.getElementById('original-tin-dialog').open,
     bagOpen: document.getElementById('bag-dialog').open, shelfOpen: Boolean(shelfFocus?.open),
-    panelOpen: amenityPanel.dialog.open || !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
+    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
   function syncOnboardingSuspension(signals) {
     // Contextual tips yield to the scene action HUD instead of covering its controls.
     const actionHUD = showing3D && (!inspectPrompt.hidden || cartState().active || cartState().heldProduct);
     onboarding.setHUDSuppressed(Boolean(actionHUD));
-    onboarding.setSuspended(amenityPanel.dialog.open || signals.productOpen || signals.bagOpen || signals.shelfOpen || !showing3D || help.open || (compactMap.matches && mallMap.open));
+    onboarding.setSuspended(themeDialog.open || amenityPanel.dialog.open || signals.productOpen || signals.bagOpen || signals.shelfOpen || !showing3D || help.open || (compactMap.matches && mallMap.open));
   }
   const notifyMode = () => {
     const signals = modeSignals();
@@ -74,7 +77,7 @@ export function createUI(expanded = false) {
   // Header, kiosk and quick guide share this map owner. The map's own
   // summary is not a second permanent entry on compact screens.
   function canUsePanels() {
-    return available && showing3D && !guidePaused && !guide.open && !dialog.open && !bag.open && !amenityPanel.dialog.open && !externalPaused && !document.hidden;
+    return available && showing3D && !guidePaused && !guide.open && !dialog.open && !bag.open && !amenityPanel.dialog.open && !themeDialog.open && !externalPaused && !document.hidden;
   }
   function openMap() {
     if (!canUsePanels()) return false;
@@ -170,7 +173,7 @@ export function createUI(expanded = false) {
     window.scrollTo({top: 0, behavior: 'instant'});
     if (moveFocus) listTitle.focus({preventScroll: true});
   }
-  const modePanels = [amenityPanel.dialog, dialog, bagDialog, help, guide, mallMap, document.getElementById('original-tin-dialog')];
+  const modePanels = [themeDialog, amenityPanel.dialog, dialog, bagDialog, help, guide, mallMap, document.getElementById('original-tin-dialog')];
   const modeObserver = new MutationObserver(notifyMode);
   for (const panel of modePanels) modeObserver.observe(panel, {attributes: true, attributeFilter: ['open']});
   for (const panel of [dialog, bagDialog]) panel.addEventListener('close', notifyMode);
@@ -186,6 +189,16 @@ export function createUI(expanded = false) {
   layoutLink.textContent=expanded?'Return to the original mall':'Preview the expanded mall';
   document.getElementById('layout-preview-notice').hidden=!expanded;
   if (expanded) {
+    document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: 3 open stores and 14 planned spaces. ${new URLSearchParams(location.search).get('visitor') === 'v1' ? 'The lift is available with Visitor v2.' : 'The lift serves the small upper viewing level; stow the cart before travel.'} Facilities remain planned.`;
+    const planned = expandedLayout.slots.filter(bay => !bay.available);
+    const plannedList = document.getElementById('planned-space-list');
+    for (const bay of planned) {
+      const item = document.createElement('li');
+      item.textContent = `S${bay.number} · ${bay.side[0].toUpperCase()}${bay.side.slice(1)} arcade · Planned`;
+      plannedList.append(item);
+    }
+    document.getElementById('planned-space-count').textContent = `${planned.length} closed spaces`;
+    document.getElementById('planned-spaces').hidden = false;
     const ns='http://www.w3.org/2000/svg';
     floorplan.setAttribute('viewBox','0 0 700 600'); floorplan.setAttribute('preserveAspectRatio','xMidYMid meet');
     const background=floorplan.querySelector('.map-courtyard');
@@ -205,7 +218,10 @@ export function createUI(expanded = false) {
       label.setAttribute('x',origin.x+(bay.maxX-bay.minX)*5);label.setAttribute('y',origin.y+(bay.maxZ-bay.minZ)*5+6);
       label.setAttribute('text-anchor','middle');label.textContent=bay.number;floorplan.insertBefore(label,playerDot);
     }
-    document.querySelector('.map-scale').textContent='14 planned spaces';
+    document.querySelector('.map-scale').textContent=`${planned.length} planned spaces`;
+    const services=document.createElement('p');services.className='map-caption';
+    services.textContent=new URLSearchParams(location.search).get('visitor')==='v1'?'Lift: Visitor v2 only · Facilities: planned':'Lift: west of courtyard · Facilities: planned to the east';
+    mapCaption.after(services);
   }
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
   // Preserve readable static HTML without JS; synchronize the live map and
@@ -306,11 +322,42 @@ export function createUI(expanded = false) {
     if (status.textContent !== message) status.textContent = message;
   }
 
+  function updateMallTheme(state=mallTheme?.state()) {
+    if (!expanded) return;
+    if (state && [...themeSelect.options].some(option=>option.value===state.active)) themeSelect.value=state.active;
+    themeApply.disabled=!mallTheme || !available || Boolean(state?.suspended || state?.pending);
+    themeSelect.disabled=!mallTheme || !available || Boolean(state?.suspended || state?.pending);
+    themeStatus.textContent=!mallTheme?'Theme settings are unavailable. The everyday appearance remains.':!available?'Theme settings are unavailable while 3D is not ready.':state?.message || `${state?.label || 'Everyday'} is active.`;
+  }
+  function openMallTheme(event) {
+    if (themeDialog.open || document.querySelector('dialog[open]') || (showing3D && !canUsePanels())) return;
+    themeOpener=event.currentTarget;shelfFocus?.close({focus:false});
+    themeDialog.showModal();updateMallTheme();notifyMode();document.getElementById('mall-theme-title').focus({preventScroll:true});
+  }
+  for(const button of [themeOpen,directoryThemeOpen]) button.addEventListener('click',openMallTheme);
+  document.getElementById('mall-theme-close').addEventListener('click',()=>{mallTheme?.cancel();themeDialog.close();});
+  themeDialog.addEventListener('cancel',()=>mallTheme?.cancel());
+  themeDialog.addEventListener('keydown',event=>{
+    if(event.key!=='Tab')return;
+    const controls=[...themeDialog.querySelectorAll('button:not(:disabled),select:not(:disabled)')].filter(node=>node.getClientRects().length);
+    if(!controls.length)return;
+    const first=controls[0],last=controls.at(-1);
+    if(event.shiftKey && document.activeElement===first){event.preventDefault();last.focus();}
+    else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}
+  });
+  themeDialog.addEventListener('close',()=>{
+    mallTheme?.cancel();notifyMode();
+    if(themeOpener?.isConnected && themeOpener.getClientRects().length && (available || themeOpener===directoryThemeOpen)) themeOpener.focus({preventScroll:true});
+    themeOpener=null;
+  });
+  themeApply.addEventListener('click',()=>{if(mallTheme && available) void mallTheme.select(themeSelect.value);});
+
   function setView(show, moveFocus = false) {
     const next = show && available;
     if (next === showing3D) return;
     shelfFocus?.close({focus: false});
     if (dialog.open) dialog.close();
+    if (themeDialog.open) {mallTheme?.cancel();themeDialog.close('view-change');}
     amenityPanel.close('view-change');
     if (guide.open) guide.close('view-change');
     showing3D = next;
@@ -546,8 +593,18 @@ export function createUI(expanded = false) {
           guide.open ? document.getElementById('context-navigation-guide') : undefined});
     },
     onModeState(listener) { modeListener = listener; },
+    configureMallTheme(coordinator) {
+      if(!expanded)return;
+      mallTheme=coordinator;themeSelect.replaceChildren();
+      for(const option of coordinator?.options() || [{id:'everyday',label:'Everyday'}]) {
+        const node=document.createElement('option');node.value=option.id;node.textContent=option.label;themeSelect.append(node);
+      }
+      themeOpen.hidden=false;directoryThemeOpen.hidden=false;updateMallTheme();
+    },
+    updateMallTheme,
     show3D() {
       available = true;
+      updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
       for (const button of storeVisitButtons) button.hidden = false;
@@ -563,6 +620,7 @@ export function createUI(expanded = false) {
     },
     restored() {
       available = true;
+      updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
       for (const button of storeVisitButtons) button.hidden = false;
@@ -579,12 +637,14 @@ export function createUI(expanded = false) {
       // Move focus only when its current 3D control is about to disappear.
       // A user already browsing the directory or header must not be interrupted.
       const active = document.activeElement;
-      const recoverFocus = showing3D && (experience.contains(active) || guide.contains(active) ||
+      const recoverFocus = showing3D && (experience.contains(active) || guide.contains(active) || themeDialog.contains(active) ||
         dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle);
       if (guide.open) guide.close('fallback');
+      if (themeDialog.open) themeDialog.close('fallback');
       guidePaused = false; guideReopen.hidden = true;
       setView(false, recoverFocus);
       available = false;
+      updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = true;
       for (const button of storeVisitButtons) button.hidden = true;
@@ -664,7 +724,7 @@ export function createUI(expanded = false) {
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
       notifyMode();
     },
-    handleGamepad(pad) { return onboarding.handleGamepad(pad,amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null); },
+    handleGamepad(pad) { return onboarding.handleGamepad(pad,themeDialog.open?themeDialog:amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null); },
     paused() {
       const signals=modeSignals();
       syncOnboardingSuspension(signals);

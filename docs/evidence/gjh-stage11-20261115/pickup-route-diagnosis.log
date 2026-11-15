@@ -1,0 +1,13 @@
+BEFORE_FOCUS {'focus': '<button id="bag-open" class="bag-open" type="button" aria-controls="bag-dialog" aria-label="Open demo bag, 12 items">Bag (12)</button>', 'dialogs': [], 'mode': 'explore', 'nearby': 'new-moon-au-425g-front', 'paused': False}
+AFTER_FOCUS {'focus': '<button id="bag-open" class="bag-open" type="button" aria-controls="bag-dialog" aria-label="Open demo bag, 12 items">Bag (12)</button>', 'dialogs': [], 'mode': 'explore', 'nearby': 'new-moon-au-425g-front', 'paused': False}
+AFTER_ENTER {'focus': '<button id="bag-close" type="button">Close</button>', 'dialogs': ['bag-dialog'], 'mode': 'shop', 'nearby': 'new-moon-au-425g-front', 'paused': True}
+PICKUP_AFTER_1000 {'x': -10.000343322753906, 'z': -7.321506977081299, 'nearby': 'new-moon-au-425g-front', 'paused': True, 'mode': 'shop', 'physical': {'phase': 'empty', 'id': None, 'active': False, 'held': False}, 'approaching': False}
+PICKUP_AFTER_2000 {'x': -10.000343322753906, 'z': -7.321506977081299, 'nearby': 'new-moon-au-425g-front', 'paused': True, 'mode': 'shop', 'physical': {'phase': 'empty', 'id': None, 'active': False, 'held': False}, 'approaching': False}
+Traceback (most recent call last):
+  File "/private/tmp/gjh-stage11-release-20261115/checkout/tests/debug_stage11_a11y.py", line 332, in <module>
+    run()
+    ~~~^^
+  File "/private/tmp/gjh-stage11-release-20261115/checkout/tests/debug_stage11_a11y.py", line 282, in run
+    assert page.evaluate('__mall.state.character.physicalProduct.phase') == 'held'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

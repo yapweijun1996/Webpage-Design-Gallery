@@ -1,0 +1,8 @@
+PASS 320x700: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 390x844: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 768x1024: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 1440x900: numbered map, keyboard directory, closed spaces and open-store controls
+PASS 844x390: numbered map, keyboard directory, closed spaces and open-store controls
+PASS default: truthful directory fallback
+PASS no-js: truthful directory fallback
+PASS physics-failure: truthful directory fallback

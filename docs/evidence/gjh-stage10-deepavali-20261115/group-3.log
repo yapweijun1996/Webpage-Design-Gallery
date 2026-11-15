@@ -1,0 +1,54 @@
+PASS 320x700: approach, bidirectional lift and both exits
+PASS 390x844: approach, bidirectional lift and both exits
+PASS 768x1024: approach, bidirectional lift and both exits
+PASS 844x390: approach, bidirectional lift and both exits
+PASS 1440x900: approach, bidirectional lift and both exits
+PASS relocated directory, self-service desk and four-product showcase
+PASS cart cannot travel in visitor-only lift
+PASS held product cannot travel in visitor-only lift
+PASS directory pause and resume during lift travel
+PASS graphics interruption at 650ms: safe floor 0, movement and bag
+PASS graphics interruption at 1800ms: safe floor 7.2, movement and bag
+PASS Visitor v1 retains ground-floor stores and explains lift availability
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: directory destinations, physical doors
+METRIC 390 newmoon inside: 114 draws, 778708 triangles
+METRIC 390 mili inside: 93 draws, 793500 triangles
+METRIC 390 gogo inside: 92 draws, 792192 triangles
+PASS 390 V2 physical pickup and return preserves the four-item bag
+PASS 390x844 visitor=v2: directory destinations, physical doors, four SKU and brand details, retained bag
+PASS 768x1024 visitor=v2: directory destinations, physical doors
+PASS 844x390 visitor=v2: directory destinations, physical doors
+METRIC 1440 newmoon inside: 128 draws, 787326 triangles
+METRIC 1440 mili inside: 141 draws, 804886 triangles
+METRIC 1440 gogo inside: 131 draws, 803116 triangles
+PASS 1440 V2 physical pickup and return preserves the four-item bag
+PASS 1440x900 visitor=v2: directory destinations, physical doors, four SKU and brand details, retained bag
+PASS 390x844 &visitor=v1: directory destinations, physical doors
+PASS original scene visitor=v2: all three directory destinations
+PASS original scene ?visitor=v1: all three directory destinations
+PASS no-js: readable directory and no misleading 3D action
+PASS physics-failure: readable directory and no misleading 3D action
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 390x844 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 768x1024 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 1440x900 visitor=v2: four seats, camera, safe standing and retained bag
+PASS event-area cart traversal and visible garden collision: 18.925085067749023
+PASS 844x390 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 390x844 &visitor=v1: four seats, camera, safe standing and retained bag
+PASS fallback seat asset: approach, sit and stand
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS reversible layout navigation preserves the tab bag
+PASS 768x1024 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 1440x900 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS expanded directory kiosk opens the live map
+PASS continuous loop: avatar clockwise, cart counterclockwise; end metrics: {'x': 10.01037311553955, 'z': 38.99956512451172, 'y': -0.031926751136779785, 'pushing': True, 'zone': 'atrium', 'drawCalls': 206, 'triangles': 816850, 'camera': {'lift': 0, 'distance': 6.5000000000000036, 'radius': 0.22, 'avatarVisible': True}, 'resources': {'geometries': 124, 'textures': 34}}
+PASS 844x390 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 &visitor=v1: keyboard, map, three real doors, directory and bag
+PASS expanded real WebGL context loss and recovery preserves the bag
+PASS expanded no-js directory fallback
+PASS expanded physics-failure directory fallback
+PASS expanded query: scoped offline reconnect and preserved tab bag

@@ -1,0 +1,120 @@
+Gallery checked: 1 companies, 8 designs
+Design system checked
+SSOT PASS: generated artifacts current; 0/1211 legacy declarations remain (no new debt)
+test_all_version_themes_are_isolated_and_complete (test_design_system.DesignSystemTests.test_all_version_themes_are_isolated_and_complete) ... ok
+test_brand_primitive_must_live_in_registry (test_design_system.DesignSystemTests.test_brand_primitive_must_live_in_registry) ... ok
+test_comma_selector_cannot_hide_duplicate_ownership (test_design_system.DesignSystemTests.test_comma_selector_cannot_hide_duplicate_ownership) ... ok
+test_custom_primitive_cannot_bypass_registry (test_design_system.DesignSystemTests.test_custom_primitive_cannot_bypass_registry) ... ok
+test_demo_filename_cannot_impersonate_generated_tokens (test_design_system.DesignSystemTests.test_demo_filename_cannot_impersonate_generated_tokens) ... ok
+test_duplicate_component_ownership_is_rejected (test_design_system.DesignSystemTests.test_duplicate_component_ownership_is_rejected) ... ok
+test_font_shorthand_cannot_hide_literal (test_design_system.DesignSystemTests.test_font_shorthand_cannot_hide_literal) ... ok
+test_generation_is_deterministic_and_compatible (test_design_system.DesignSystemTests.test_generation_is_deterministic_and_compatible) ... ok
+test_low_contrast_semantic_pair_is_rejected (test_design_system.DesignSystemTests.test_low_contrast_semantic_pair_is_rejected) ... ok
+test_migrated_legacy_debt_cannot_return (test_design_system.DesignSystemTests.test_migrated_legacy_debt_cannot_return) ... ok
+test_missing_and_circular_references_are_rejected (test_design_system.DesignSystemTests.test_missing_and_circular_references_are_rejected) ... ok
+test_named_and_modern_color_literals_are_rejected (test_design_system.DesignSystemTests.test_named_and_modern_color_literals_are_rejected) ... ok
+test_new_hardcoded_color_is_rejected (test_design_system.DesignSystemTests.test_new_hardcoded_color_is_rejected) ... ok
+test_registry_versions_must_match (test_design_system.DesignSystemTests.test_registry_versions_must_match) ... ok
+test_removing_legacy_debt_is_allowed (test_design_system.DesignSystemTests.test_removing_legacy_debt_is_allowed) ... ok
+test_same_count_color_substitution_is_rejected (test_design_system.DesignSystemTests.test_same_count_color_substitution_is_rejected) ... ok
+test_stale_generated_artifact_is_rejected (test_design_system.DesignSystemTests.test_stale_generated_artifact_is_rejected) ... ok
+test_stale_theme_artifact_is_rejected (test_design_system.DesignSystemTests.test_stale_theme_artifact_is_rejected) ... ok
+test_unapproved_icon_is_rejected (test_design_system.DesignSystemTests.test_unapproved_icon_is_rejected) ... ok
+test_unregistered_gallery_breakpoint_is_rejected (test_design_system.DesignSystemTests.test_unregistered_gallery_breakpoint_is_rejected) ... ok
+test_variable_fallback_cannot_hide_literal (test_design_system.DesignSystemTests.test_variable_fallback_cannot_hide_literal) ... ok
+test_directory_order_matches_inventory_and_company_route_title (test_gallery.GalleryTests.test_directory_order_matches_inventory_and_company_route_title) ... ok
+test_duplicate_stable_ids_are_rejected (test_gallery.GalleryTests.test_duplicate_stable_ids_are_rejected) ... ok
+test_generation_is_deterministic (test_gallery.GalleryTests.test_generation_is_deterministic) ... ok
+test_home_only_links_to_company_collections (test_gallery.GalleryTests.test_home_only_links_to_company_collections) ... ok
+test_metadata_text_is_escaped (test_gallery.GalleryTests.test_metadata_text_is_escaped) ... ok
+test_missing_assets_stop_build (test_gallery.GalleryTests.test_missing_assets_stop_build) ... ok
+test_nested_pages_use_prefix_safe_sprite_and_company_identity (test_gallery.GalleryTests.test_nested_pages_use_prefix_safe_sprite_and_company_identity) ... ok
+test_paths_cannot_escape_repository (test_gallery.GalleryTests.test_paths_cannot_escape_repository) ... ok
+test_published_shared_resources_and_precache_boundary (test_gallery.GalleryTests.test_published_shared_resources_and_precache_boundary) ... ok
+test_real_company_contains_all_versions (test_gallery.GalleryTests.test_real_company_contains_all_versions) ... ok
+test_v8_metadata_exposes_immersive_concept_contract (test_gallery.GalleryTests.test_v8_metadata_exposes_immersive_concept_contract) ... ok
+test_clips_have_finite_looping_articulation_without_root_travel (test_gjh_character.CharacterAssetTests.test_clips_have_finite_looping_articulation_without_root_travel) ... ok
+test_embedded_geometry_materials_and_native_scale (test_gjh_character.CharacterAssetTests.test_embedded_geometry_materials_and_native_scale) ... ok
+test_pinned_source_receipt (test_gjh_character.CharacterAssetTests.test_pinned_source_receipt) ... ok
+test_models_match_original_source_receipts_and_physical_bounds (test_gjh_furnishings.FurnishingAssetTests.test_models_match_original_source_receipts_and_physical_bounds) ... ok
+test_eight_native_scale_exports_match_their_editable_sources_and_receipts (test_gjh_interior_pilot.InteriorPilotTests.test_eight_native_scale_exports_match_their_editable_sources_and_receipts) ... ok
+test_passive_props_do_not_gain_fabricated_interactions (test_gjh_interior_pilot.InteriorPilotTests.test_passive_props_do_not_gain_fabricated_interactions) ... ok
+test_original_source_and_scale (test_gjh_kiosk.KioskTests.test_original_source_and_scale) ... ok
+test_m056_native_support_and_can_origins (test_gjh_newmoon_assets.NewMoonIntegrationTests.test_m056_native_support_and_can_origins) ... ok
+test_reviewed_glb_hashes_and_flat_asset_names (test_gjh_newmoon_assets.NewMoonIntegrationTests.test_reviewed_glb_hashes_and_flat_asset_names) ... ok
+test_source_contract_preserves_native_scale_and_fallbacks (test_gjh_newmoon_assets.NewMoonIntegrationTests.test_source_contract_preserves_native_scale_and_fallbacks) ... ok
+test_world_removes_legacy_rack_and_exposes_frozen_snapshot (test_gjh_newmoon_assets.NewMoonIntegrationTests.test_world_removes_legacy_rack_and_exposes_frozen_snapshot) ... ok
+test_no_brand_substitution (test_original_tin.OriginalTinTests.test_no_brand_substitution) ... ok
+test_real_original_asset_hash (test_original_tin.OriginalTinTests.test_real_original_asset_hash) ... ok
+test_runtime_integrity_and_lifecycle_contract (test_original_tin.OriginalTinTests.test_runtime_integrity_and_lifecycle_contract) ... ok
+test_current_packs_are_complete (test_preferences.PreferencesTests.test_current_packs_are_complete) ... ok
+test_generated_gallery_copy_is_translatable (test_preferences.PreferencesTests.test_generated_gallery_copy_is_translatable) ... ok
+test_invalid_packs_fail_before_publication (test_preferences.PreferencesTests.test_invalid_packs_fail_before_publication) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 9.036s
+
+OK
+Gallery built: 1 companies, 8 designs
+✔ planting and furniture remain inside their reservations and clear of the loop and event (2.944875ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (20.25175ms)
+✔ Auto separates constrained, missing and capable hardware deterministically (8.679917ms)
+✔ explicit profiles and recovery use bounded DPR with truthful shadow eligibility (7.344584ms)
+✔ storage values are allowlisted (0.526792ms)
+✔ only the reviewed themes are available and invalid stored IDs are safe (4.840917ms)
+✔ Deepavali decorations respect planter and event reservations (1.521ms)
+✔ Christmas tree and presents stay in the planter while suspended lights clear the event (1.125958ms)
+✔ lunar decorations respect the existing planter footprint and suspended event clearance (0.411875ms)
+✔ blocked storage keeps a working in-memory selection (0.382125ms)
+✔ reapplying the current theme invokes the scene commit without preparing new resources (0.33375ms)
+✔ later selection wins, stale preparation is disposed and no stale commit runs (0.611917ms)
+✔ failure and interruption leave the previous theme active and clean staged resources (1.202167ms)
+✔ a remembered supported theme is prepared before it becomes active (0.844125ms)
+✔ superseding or suspending preparation aborts the old signal (1.683375ms)
+✔ closing a pending selection aborts and disposes its late result (1.848458ms)
+✔ validated visual roles update real scene targets atomically before a future theme is committed (9.963583ms)
+✔ lifecycle exits, cleans, suspends, enters and restores once in order (6.327916ms)
+✔ directory Inspect and Shop return to retained Menu then gameplay base (1.788167ms)
+✔ repeated observations and requests are idempotent without lifecycle effects (0.708417ms)
+✔ commands cannot manufacture gameplay or bypass the retained underlay (3.48375ms)
+✔ invalid observations fail atomically with no lifecycle effects (0.803959ms)
+✔ Inspect cannot be directly replaced by Shop in an observation (0.623125ms)
+✔ actual base changes under Shop are retained without fake Explore lifecycle (0.553208ms)
+✔ interrupt cleans once without enter, exit or restoring retained gameplay (0.293792ms)
+✔ history is bounded and distinguishes restores, rejection and interruptions (1.42975ms)
+✔ Shelf suspends each real base and restores through the same ordered lifecycle (2.586916ms)
+✔ complete boolean observations validate all Shelf combinations atomically (6.153708ms)
+✔ Shelf cannot be stacked with or directly replaced by another overlay (0.370833ms)
+✔ derived mode priority agrees with accepted observation (0.14325ms)
+✔ three stable stores share the current scene centers, entrances and ordering (6.360959ms)
+✔ location boundaries and map projection retain the existing visible behavior (1.31275ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (4.432833ms)
+✔ unavailable store cannot produce a travel destination (1.392667ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 562.412416
+Browser: 157.0.8103.51
+PASS 320x700: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 390x844: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 768x1024: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 844x390: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 1440x900: discoverable settings, focus, repeated apply, retained bag and resources
+PASS invalid saved theme falls back, is replaced and survives reload
+PASS unavailable local storage retains in-memory theme
+PASS missing theme module preserves 3D and reports unavailable settings
+PASS theme change preserves active cart
+PASS theme change preserves a seated visitor
+PASS theme change preserves a carried physical product
+PASS settings pause and resume an active elevator journey
+PASS graphics loss and restoration retain theme and bag
+PASS Visitor v1 expanded theme settings
+PASS original layout and no-JavaScript directory
+PASS lifecycle 390x844: 80 snapshots
+PASS lifecycle 768x1024: 41 snapshots
+PASS lifecycle 1440x900: 41 snapshots
+Evidence: /private/tmp/gjh-stage11-complete-20261115/checkout/docs/evidence/v11-modes-lifecycle.json

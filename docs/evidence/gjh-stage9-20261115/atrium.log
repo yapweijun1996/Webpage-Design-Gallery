@@ -1,0 +1,9 @@
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 390x844 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 768x1024 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 1440x900 visitor=v2: four seats, camera, safe standing and retained bag
+PASS event-area cart traversal and visible garden collision: 18.92507553100586
+PASS 844x390 visitor=v2: four seats, camera, safe standing and retained bag
+PASS 390x844 &visitor=v1: four seats, camera, safe standing and retained bag
+PASS fallback seat asset: approach, sit and stand

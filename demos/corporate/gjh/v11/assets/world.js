@@ -4,6 +4,25 @@ import {spatial, storeCenterX} from './spatial.js';
 import {expandedLayout} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 
+export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill}) {
+  if (!expanded || !theme?.materials || !theme?.lighting) return false;
+  const m=theme.materials,l=theme.lighting;
+  const colors=['floorTextured','floorFlat','ceiling','ceilingGlow','wall','green','ivory','brass','wood','oak','timber','timberAlt','glass','glow','glowEmission'];
+  const lightColors=['sky','ground','key','fill'];
+  const scalars=['ceilingGlowIntensity','glassOpacity','glassRoughness','glassMetalness','glowIntensity'];
+  if(colors.some(k=>!Number.isInteger(m[k])||m[k]<0||m[k]>0xffffff)||lightColors.some(k=>!Number.isInteger(l[k])||l[k]<0||l[k]>0xffffff)||
+     scalars.some(k=>!Number.isFinite(m[k])||m[k]<0||m[k]>3)||['ambient','keyIntensity','fillIntensity'].some(k=>!Number.isFinite(l[k])||l[k]<0||l[k]>5)||
+     ['glassOpacity','glassRoughness','glassMetalness'].some(k=>m[k]>1)) return false;
+  materials.shellFloor.color.set(materials.shellFloor.map?m.floorTextured:m.floorFlat);
+  materials.shellCeiling.color.set(m.ceiling);materials.shellCeiling.emissive.set(m.ceilingGlow);materials.shellCeiling.emissiveIntensity=m.ceilingGlowIntensity;
+  materials.shellWall.color.set(m.wall);
+  for(const role of ['green','ivory','brass','wood','oak','timber','timberAlt']) materials[role].color.set(m[role]);
+  materials.glass.color.set(m.glass);materials.glass.opacity=m.glassOpacity;materials.glass.roughness=m.glassRoughness;materials.glass.metalness=m.glassMetalness;
+  materials.glow.color.set(m.glow);materials.glow.emissive.set(m.glowEmission);materials.glow.emissiveIntensity=m.glowIntensity;
+  ambient.color.set(l.sky);ambient.groundColor.set(l.ground);ambient.intensity=l.ambient;key.color.set(l.key);key.intensity=l.keyIntensity;fill.color.set(l.fill);fill.intensity=l.fillIntensity;
+  return true;
+}
+
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, expanded = false) {
   const furnishings = await createFurnishings(T, true);
@@ -26,6 +45,17 @@ export async function createWorld(T, R, physics, expanded = false) {
     water: mat(0x4f8c80, {metalness: .48, roughness: .15}),
     glass: mat(0xa0c9be, {transparent: true, opacity: .15, metalness: .2, roughness: .1, depthWrite: false, side: T.DoubleSide})
   };
+  if (expanded) {
+    // The expanded finish is optional: a missing module or canvas falls back
+    // to the original solid materials and must not prevent 3D initialization.
+    let natural = null;
+    try { natural = (await import('./natural-materials.js')).createNaturalSurfaceTextures(T); } catch { /* Retain solid finishes. */ }
+    if (natural?.stone) { materials.shellFloor.map = natural.stone; materials.shellFloor.color.set(0xffffff); materials.shellFloor.roughness = .58; }
+    if (natural?.wood) for (const name of ['wood', 'oak', 'timber', 'timberAlt']) materials[name].map = natural.wood;
+    materials.shellCeiling.color.set(0xf0e8d9); materials.shellCeiling.emissive.set(0xb3a286); materials.shellCeiling.emissiveIntensity = .55;
+    materials.shellWall.color.set(0xc9c4b6);
+    materials.glass.color.set(0xd7e9df); materials.glass.opacity = .19; materials.glass.roughness = .08; materials.glass.metalness = .08;
+  }
   const geometry = {
     box: new T.BoxGeometry(1, 1, 1), cylinder: new T.CylinderGeometry(1, 1, 1, 32), sphere: new T.SphereGeometry(1, 12, 8),
     plane: new T.PlaneGeometry(1, 1), torus: new T.TorusGeometry(1, .045, 8, 64), ring: new T.RingGeometry(.985, 1, 64)
@@ -165,12 +195,15 @@ export async function createWorld(T, R, physics, expanded = false) {
     box('green', -15, 3.3, 3.5, .3, 6.6, 29, true); box('green', 15, 3.3, 3.5, .3, 6.6, 29, true);
     box('green', 0, 3.3, 18, 30, 6.6, .3, true);
   }
-  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
+  if (expanded) {
+    // The expanded roof has its own upper landing; do not overlay the old roof.
+  } else if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
     // Leave a real shaft opening for the experimental lift, without changing v1.
     for (const side of [-1, 1]) box('ivory', side * 8.2, 6.5, 9, 13.6, .3, 18);
     box('ivory', 0, 6.5, 7.25, 2.8, .3, 14.5);
     box('ivory', 0, 6.5, 17.75, 2.8, .3, .5);
   } else box('ivory', 0, 6.5, 9, 30, .3, 18);
+  if (!expanded) {
   // Skylight replaces the central roof panel visually, with dusk glass and brass ribs.
   box('dark', 0, 6.29, 8.3, 14.6, .06, 13);
   box('glass', 0, 6.25, 8.3, 14.1, .025, 12.6);
@@ -179,6 +212,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   // Dusk-lit ceiling inset: no texture or runtime environment download.
   const skylight = new T.Mesh(new T.PlaneGeometry(14, 12.5), new T.ShaderMaterial({side: T.DoubleSide, vertexShader: 'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec2 v;void main(){gl_FragColor=vec4(mix(vec3(.13,.24,.28),vec3(.78,.52,.29),pow(1.-v.y,3.)),1.);}'}));
   skylight.rotation.x = Math.PI / 2; skylight.position.set(0, 6.23, 8.3); scene.add(skylight);
+  }
   if (!expanded) for (const x of [-14.5, -5, 5, 14.5]) {
     box('dark', x, 2.9, .4, .65, 5.8, .9, true); box('brass', x, .18, .4, .85, .18, 1.1); box('brass', x, 5.5, .4, .85, .12, 1.1);
     for (const dx of [-.19, 0, .19]) box('brass', x + dx, 2.9, .865, .018, 4.85, .025);
@@ -273,15 +307,16 @@ export async function createWorld(T, R, physics, expanded = false) {
   // The actual wayfinding interaction opens the existing three-store DOM map.
   // The old kiosk artwork depicts the old three-room floorplan. Use a neutral
   // screen in the expanded shell; its existing interaction opens the live map.
-  if (expanded || !furnishings.place('kiosk', -5.3, 10.4, 1, -1)) {
-    box('jade', -5.3, 1.22, 10.4, .94, 1.6, .22);
-    box('brass', -5.3, .08, 10.4, .96, .16, .68);
-    box('dark', -5.3, 1.3, 10.53, .78, 1.25, .035);
-    if (expanded) sign('DIRECTORY', -5.3, 1.55, 10.56, .7, .16, false, 90);
+  const kiosk=expanded?expandedLayout.directory:{x:-5.3,z:10.4};
+  if (expanded || !furnishings.place('kiosk', kiosk.x, kiosk.z, 1, -1)) {
+    box('jade', kiosk.x, 1.22, kiosk.z, .94, 1.6, .22);
+    box('brass', kiosk.x, .08, kiosk.z, .96, .16, .68);
+    box('dark', kiosk.x, 1.3, kiosk.z+.13, .78, 1.25, .035);
+    if (expanded) sign('DIRECTORY', kiosk.x, 1.55, kiosk.z+.16, .7, .16, false, 90);
   }
-  collider(-5.3, 1.025, 10.4, .96, 2.05, .68);
-  shadow(-5.3, 10.4, 1.2, .9);
-  interactables.push({id: 'mall-directory', x: -5.3, z: 10.4, radius: 2.8});
+  collider(kiosk.x, 1.025, kiosk.z, .96, 2.05, .68);
+  shadow(kiosk.x, kiosk.z, 1.2, .9);
+  interactables.push({id: 'mall-directory', x:kiosk.x, z:kiosk.z, radius: 2.8});
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
     const wall = zone === 'mili' ? 'cream' : 'green';
@@ -403,7 +438,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
-      const showcaseProducts = expanded ? SHOWCASE_PRODUCTS.map(item => ({...item, position:[item.position[0], item.position[1], item.position[2] + 4.8]})) : SHOWCASE_PRODUCTS;
+      const showcaseProducts = expanded ? SHOWCASE_PRODUCTS.map(item => ({...item, position:[item.position[0]+expandedLayout.showcase.x+7, item.position[1], item.position[2]+expandedLayout.showcase.z-2.2]})) : SHOWCASE_PRODUCTS;
       const productDisplay = await addProducts(T, scene, textures, materials.brass,showcaseProducts);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -462,12 +497,16 @@ export async function createWorld(T, R, physics, expanded = false) {
         box('shellWall', x, 2.6, 0, 9.9, 5.2, .25, true);
         box('glass', x, 2.2, .15, 8.9, 3.7, .06);
         box('brass', x, 4.35, .2, 9.1, .06, .06);
+        for (const offset of [-3, 0, 3]) box('brass', x+offset, 2.25, .2, .055, 3.9, .055);
+        box('ivory', x, .3, .2, 9.1, .45, .1);
         for (const edge of [bay.minX,bay.maxX]) box('ivory', edge, 2.8, -6, .2, 5.6, 12, true);
       } else {
         const front=bay.side === 'west' ? bay.maxX : bay.minX;
         box('shellWall', front, 2.6, z, .25, 5.2, 7.9, true);
         box('glass', front+(bay.side === 'west' ? .15 : -.15), 2.2, z, .06, 3.7, 7);
         box('brass', front+(bay.side === 'west' ? .2 : -.2), 4.35, z, .06, .06, 7.2);
+        for (const offset of [-2.35, 0, 2.35]) box('brass', front+(bay.side === 'west' ? .2 : -.2), 2.25, z+offset, .055, 3.9, .055);
+        box('ivory', front+(bay.side === 'west' ? .2 : -.2), .3, z, .1, .45, 7.2);
         for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
       }
     }
@@ -477,22 +516,40 @@ export async function createWorld(T, R, physics, expanded = false) {
     for (const x of [-10.5,30.5]) box('ivory',x,3.3,48,29,6.6,.3,true);
     box('glass',10,2.8,48,12,5.6,.3,true);
     for (const x of [4,10,16]) box('brass',x,2.8,47.8,.08,5.6,.08);
-    box('shellCeiling',10,8.5,18,70,.25,60);
+    // Four roof panels leave the 12 x 12 m upper landing open to the sky.
+    box('shellCeiling',-17,8.5,18,16,.25,60);box('shellCeiling',24,8.5,18,42,.25,60);
+    box('shellCeiling',-3,8.5,-4,12,.25,16);box('shellCeiling',-3,8.5,32,12,.25,32);
+    // A closed reservation, not an operational restroom or staffed facility.
+    // Continuous warm recessed strips follow the circulation axes without
+    // adding fixtures or colliders at visitor height.
+    for (const x of [-12,32]) for (const z of [10,22,34]) {
+      box('glow',x,8.34,z,.07,.035,6);
+      lightPool(x,.052,z,4.5,5.5);
+    }
+    for (const x of [-5,10,25]) { box('glow',x,8.34,3,6,.035,.07); lightPool(x,.052,3,5.5,4.5); }
+    box('ivory',25,1.5,10,6,3,4,true);
+    const facility=sign('FUTURE FACILITIES',28.07,2,10,2.5,.35,true,60);facility.rotation.y=Math.PI/2;
     for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
     for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
-    // A single instanced label keeps every unoccupied bay visibly provisional.
-    const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=128;
-    const ctx=canvas.getContext('2d'); ctx.fillStyle='#17372e';ctx.fillRect(0,0,512,128);
-    ctx.fillStyle='#f5e8cb';ctx.font='bold 48px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('COMING SOON',256,64);
+    // A single atlas and mesh keep the fourteen numbered signs to one draw call.
+    const planned=expandedLayout.slots.filter(item=>!item.available);
+    const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=128*planned.length;
+    const ctx=canvas.getContext('2d'); ctx.fillStyle='#17372e';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#f5e8cb';ctx.font='bold 40px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    planned.forEach((bay,i)=>ctx.fillText(`S${bay.number}  ·  PLANNED SPACE`,256,128*i+64));
     const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
-    const labels=new T.InstancedMesh(plane,new T.MeshBasicMaterial({map:texture}),14);
-    expandedLayout.slots.filter(item=>!item.available).forEach((bay,i)=>{
-      const x=bay.side==='north'?(bay.minX+bay.maxX)/2:bay.side==='west'?-14.8:34.8;
-      const z=bay.side==='north'?.21:(bay.minZ+bay.maxZ)/2;
+    const positions=[], uvs=[], indices=[];
+    planned.forEach((bay,i)=>{
+      const x=bay.side==='north'?(bay.minX+bay.maxX)/2:bay.side==='west'?-14.73:34.73;
+      const z=bay.side==='north'?.27:(bay.minZ+bay.maxZ)/2;
       const angle=bay.side==='west'?Math.PI/2:bay.side==='east'?-Math.PI/2:0;
-      matrix.compose(new T.Vector3(x,3.2,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(3.2,.8,1));
-      labels.setMatrixAt(i,matrix);
-    }); labels.computeBoundingSphere();scene.add(labels);
+      for (const [dx,dy] of [[-1.9,-.4],[1.9,-.4],[1.9,.4],[-1.9,.4]]) positions.push(x+dx*Math.cos(angle),3.2+dy,z-dx*Math.sin(angle));
+      const bottom=(planned.length-i-1)/planned.length, top=(planned.length-i)/planned.length;
+      uvs.push(0,bottom,1,bottom,1,top,0,top);
+      const n=i*4;indices.push(n,n+1,n+2,n,n+2,n+3);
+    });
+    const signGeometry=new T.BufferGeometry();signGeometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));signGeometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));signGeometry.setIndex(indices);signGeometry.computeBoundingSphere();
+    scene.add(new T.Mesh(signGeometry,new T.MeshBasicMaterial({map:texture})));
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);
@@ -500,10 +557,11 @@ export async function createWorld(T, R, physics, expanded = false) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m)); mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); scene.add(mesh);
   }
-  scene.add(new T.HemisphereLight(0xe4efe6, 0x6d5b3b, 2.1));
+  const ambient = new T.HemisphereLight(expanded ? 0xfff3e2 : 0xe4efe6, expanded ? 0x77634b : 0x6d5b3b, 2.1);scene.add(ambient);
   const key = new T.DirectionalLight(0xffd5a0, 2.6); key.position.set(-8, 15, 9); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
-  const fill = new T.DirectionalLight(0xb7d7e8, 1); fill.position.set(4, 8, -5); scene.add(fill);
+  const fill = new T.DirectionalLight(expanded ? 0xf4e4ce : 0xb7d7e8, expanded ? .9 : 1); fill.position.set(4, 8, -5); scene.add(fill);
+  const applyMallTheme = theme => applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();
   const signHUD = ['.site-header', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));
@@ -534,5 +592,5 @@ export async function createWorld(T, R, physics, expanded = false) {
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
   const cameraObstacles=seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}}));
-  return {scene, doors, seats, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, seats, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
 }

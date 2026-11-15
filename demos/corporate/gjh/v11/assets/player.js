@@ -254,7 +254,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function teleport(zone) {
     if (elevatorTravel) return false;
-    const destination = zone === 'atrium' ? courtyardArrival : expanded && zone === 'entry' ? expandedLayout.entrance : spatial.arrival(zone);
+    const destination = zone === 'atrium' ? (expanded ? expandedLayout.courtyardArrival : courtyardArrival) : expanded && zone === 'entry' ? expandedLayout.entrance : spatial.arrival(zone);
     if (!destination) return false;
     productApproach=null;productHome=null;character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
     const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
@@ -263,9 +263,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function useElevator(elevator) {
     const p=body.translation();
-    if (seated || pushing || elevatorTravel || character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty' || Math.hypot(p.x-elevator.x,p.z-elevator.z)>1.45) return false;
+    if (seated || pushing || elevatorTravel || character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty' || Math.hypot(p.x-elevator.x,p.z-elevator.z)>(elevator.useRadius ?? 1.45)) return false;
     const from=p.y-.875 > elevator.upper/2 ? elevator.upper : 0;
     if (Math.abs(p.y-.875-from)>.35) return false;
+    elevator.prepare?.(from);
     clearInput(); injected=null; cancelCollection(); vertical=0; capsule.setEnabled(false);
     beginActionView('elevator', Math.PI / 2);
     elevatorTravel={x:elevator.x,z:elevator.z,from,to:from ? 0 : elevator.upper,elapsed:0,setHeight:elevator.setHeight};

@@ -1,5 +1,16 @@
 // The existing help panel owns focus, scrolling and mobile pause behavior.
 export function installVisitorV2Controls(parent, apply) {
+  function revealFocused(select) {
+    if (document.activeElement !== select || !parent.getClientRects().length) return;
+    const bounds = select.getBoundingClientRect(), viewport = parent.getBoundingClientRect(), margin = 4;
+    if (bounds.top < viewport.top + margin) parent.scrollTop -= viewport.top + margin - bounds.top;
+    else if (bounds.bottom > viewport.bottom - margin) parent.scrollTop += bounds.bottom - viewport.bottom + margin;
+  }
+  function retainVisibleFocus(select) {
+    revealFocused(select);
+    // Native select menus can finish their own scroll after the change event.
+    requestAnimationFrame(() => revealFocused(select));
+  }
   const fieldset = document.createElement('fieldset');
   fieldset.className = 'visitor-v2-controls';
   const legend = document.createElement('legend'); legend.textContent = 'Visitor appearance · Preview'; fieldset.append(legend);
@@ -17,7 +28,11 @@ export function installVisitorV2Controls(parent, apply) {
     const label = document.createElement('label'), text = document.createElement('span'), select = document.createElement('select');
     text.textContent = title; select.name = key;
     for (const [value, name] of choices) select.add(new Option(name, value));
-    select.addEventListener('change', () => apply({[key]: ['glasses','backpack','watch'].includes(key) ? select.value === 'true' : select.value}));
+    select.addEventListener('focus', () => retainVisibleFocus(select));
+    select.addEventListener('change', () => {
+      apply({[key]: ['glasses','backpack','watch'].includes(key) ? select.value === 'true' : select.value});
+      retainVisibleFocus(select);
+    });
     label.append(text, select); fieldset.append(label);
   }
   parent.append(fieldset);

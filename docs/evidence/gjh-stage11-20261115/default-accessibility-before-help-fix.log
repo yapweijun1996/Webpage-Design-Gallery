@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/private/tmp/gjh-stage11-release-20261115/checkout/tests/browser_gjh_accessibility.py", line 332, in <module>
+    run()
+    ~~~^^
+  File "/private/tmp/gjh-stage11-release-20261115/checkout/tests/browser_gjh_accessibility.py", line 180, in run
+    assert hair_hit['hit'], hair_hit
+           ~~~~~~~~^^^^^^^
+AssertionError: {'viewport': [667, 375], 'rect': {'x': 187, 'y': 97.78125, 'width': 131, 'height': 44, 'top': 97.78125, 'right': 318, 'bottom': 141.78125, 'left': 187}, 'hit': False, 'occluder': '<summary>Help</summary>', 'scrollport': {'x': 19, 'y': 124, 'width': 328, 'height': 113, 'top': 124, 'right': 347, 'bottom': 237, 'left': 19}, 'scrollTop': 923, 'active': 'hair'}

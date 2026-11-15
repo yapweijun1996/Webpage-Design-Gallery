@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/private/tmp/gjh-stage7-final-qa/checkout/tests/browser_gjh_budget.py", line 60, in <module>
+    if __name__=='__main__':run()
+                            ~~~^^
+  File "/private/tmp/gjh-stage7-final-qa/checkout/tests/browser_gjh_budget.py", line 23, in run
+    assert sum(r['bytes'] for r in initial)<=10*1024*1024,'Ready-stage decoded payload exceeds 10 MiB laboratory budget'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Ready-stage decoded payload exceeds 10 MiB laboratory budget

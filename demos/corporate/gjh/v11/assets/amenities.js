@@ -1,5 +1,6 @@
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {expandedLayout} from './expanded-layout.js';
 
 export const AMENITIES = Object.freeze({
   desk:{file:'mall-service-desk.glb',sha:'228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0',root:'ASSET_MallServiceDesk',bytes:245748,triangles:8024,size:[2.88,1.87,.961],clips:[],placements:[[-12.5,0,5.8,Math.PI]]},
@@ -94,7 +95,7 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
   const group=new T.Group();group.name='Mall amenities';const state={},opaque=[];
   for(const [kind,record] of entries){
     const original=AMENITIES[kind];
-    const definition=expanded && kind==='desk' ? {...original, placements:[[0,0,9,Math.PI]]} : expanded && kind==='showcase' ? {...original, placements:[[-7,0,7,0]]} : original;
+    const definition=expanded && kind==='desk' ? {...original, placements:[[expandedLayout.serviceDesk.x,0,expandedLayout.serviceDesk.z,Math.PI]]} : expanded && kind==='showcase' ? {...original, placements:[[expandedLayout.showcase.x,0,expandedLayout.showcase.z,0]]} : original;
     for(const primitive of record.primitives){
       if(!primitive.material.transparent){
         definition.placements.forEach(([x,y,z,angle])=>{
@@ -122,7 +123,7 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
     const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),new T.MeshBasicMaterial({map:signTexture(T,x,rear)}));
     plane.position.set(x,y-.7,z+(rear?-.083:.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
   }
-  if(expanded){collider(0,.94,9,2.88,1.88,.961);collider(-7,.9,7,.75,1.8,.532);}
+  if(expanded){collider(expandedLayout.serviceDesk.x,.94,expandedLayout.serviceDesk.z,2.88,1.88,.961);collider(expandedLayout.showcase.x,.9,expandedLayout.showcase.z,.75,1.8,.532);}
   else {collider(-12.5,.94,5.8,2.88,1.88,.961);collider(-7,.9,2.2,.75,1.8,.532);}
   let products=staticProductCount??0;
   if(staticProductCount===null)for(const item of SHOWCASE_PRODUCTS){
@@ -130,9 +131,9 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
   }
   scene.add(group);
   return {state:Object.freeze({...state,displayedProducts:products}),interactables:[
-    {id:'service-desk',x:expanded?0:-12.5,z:expanded?10.1:6.9,radius:2},
+    {id:'service-desk',x:expanded?expandedLayout.serviceDesk.x:-12.5,z:expanded?expandedLayout.serviceDesk.z+1.1:6.9,radius:2},
     {id:'wayfinding-west',x:-4.2,z:6,radius:1.7},
     {id:'wayfinding-east',x:6,z:6,radius:1.7},
-    {id:'featured-showcase',x:-7,z:expanded?7.9:3.1,radius:1.3},
+    {id:'featured-showcase',x:expanded?expandedLayout.showcase.x:-7,z:expanded?expandedLayout.showcase.z+.9:3.1,radius:1.3},
   ]};
 }

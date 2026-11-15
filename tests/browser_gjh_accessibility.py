@@ -12,6 +12,7 @@ import threading
 from playwright.sync_api import sync_playwright
 
 from browser_gjh_budget import ROOT, Quiet
+from browser_gjh_expanded_shell import move
 
 AXE_SHA256 = '880970c081707360e64f34cea25ff91892f5bc95675b0776925b9709dd8a68bb'
 
@@ -172,6 +173,8 @@ def run():
                 assert page.evaluate('__mall.state.character.customization.hair') == 'short'
                 hair.select_option('swept')
                 assert hair.input_value() == 'swept'
+                # Native select scrolling can settle after its change event.
+                page.wait_for_function('''() => {const e=document.querySelector('select[name="hair"]'),p=document.querySelector('#controls-copy'),r=e.getBoundingClientRect(),v=p.getBoundingClientRect();return e===document.activeElement&&r.top>=v.top&&r.bottom<=v.bottom&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}''', timeout=3000)
                 hair_hit = hair.evaluate('''e=>{const r=e.getBoundingClientRect(),o=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),p=document.querySelector('#controls-copy');return {viewport:[innerWidth,innerHeight],rect:r.toJSON(),hit:e.contains(o),occluder:o?.outerHTML.slice(0,600),scrollport:p.getBoundingClientRect().toJSON(),scrollTop:p.scrollTop,active:document.activeElement.name}}''')
                 if not hair_hit['hit']:
                     (args.output / f'hair-hit-failure-{width}.json').write_text(json.dumps(hair_hit, indent=2) + '\n')
@@ -265,18 +268,24 @@ def run():
                 page.locator('#bag-close').click()
                 page.wait_for_function('document.activeElement.id === "bag-open"')
                 # Exercise the default Visitor v2 controls through actual shelf actions.
-                page.evaluate('''() => {__mall.teleport('newmoon'); __mall.setInput({forward:1});
-                  __mall.step(3900); __mall.setInput({forward:0});}''')
+                assert page.evaluate('__mall.teleport("newmoon")')
+                move(page, -10, -2.6, 2.65)
+                move(page, -10, -7.4, 2.65)
+                shelf = page.evaluate("__mall.state.shelves.find(s => s.id === 'new-moon-nz-425g-front')")
+                move(page, (shelf['min']['x'] + shelf['max']['x']) / 2, -7.4, 2.65)
+                assert page.evaluate('__mall.state.nearby') == 'new-moon-nz-425g-front'
                 scan('shelf')
                 pickup = page.get_by_role('button', name='Pick up product', exact=True)
+                assert pickup.is_enabled(), 'The visitor must be within reach of the shelf'
                 pickup.focus()
+                assert pickup.evaluate('e => e === document.activeElement')
                 page.keyboard.press('Enter')
-                page.evaluate('__mall.step(1000)')
+                page.evaluate('__mall.step(1600)')
                 assert page.evaluate('__mall.state.character.physicalProduct.phase') == 'held'
                 scan('held-product')
                 page.get_by_role('button', name='Return to shelf', exact=True).focus()
                 page.keyboard.press('Enter')
-                page.evaluate('__mall.step(1000)')
+                page.evaluate('__mall.step(1600)')
                 assert page.evaluate('__mall.state.character.physicalProduct.phase') == 'empty'
                 page.evaluate('''() => {__mall.teleport('atrium'); __mall.setInput({right:1});
                   __mall.step(750); __mall.setInput({forward:-1}); __mall.step(1500);
