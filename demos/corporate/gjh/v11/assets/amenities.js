@@ -1,3 +1,4 @@
+import {liftLayout,showcaseProducts} from './lift-layout.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
@@ -82,7 +83,7 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
   const group=new T.Group();group.name='Mall amenities';const state={},opaque=[];
   for(const [kind,record] of entries){
     const original=AMENITIES[kind];
-    const definition=expanded && kind==='desk' ? {...original, placements:[[0,0,9,Math.PI]]} : expanded && kind==='showcase' ? {...original, placements:[[-7,0,7,0]]} : original;
+    const definition=expanded && kind==='desk' ? {...original, placements:[[liftLayout.desk.x,0,liftLayout.desk.z,Math.PI]]} : expanded && kind==='showcase' ? {...original, placements:[[liftLayout.showcase.x,0,liftLayout.showcase.z,0]]} : original;
     for(const primitive of record.primitives){
       if(!primitive.material.transparent){
         definition.placements.forEach(([x,y,z,angle])=>{
@@ -110,17 +111,17 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
     const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),new T.MeshBasicMaterial({map:signTexture(T,x,rear)}));
     plane.position.set(x,y-.7,z+(rear?-.083:.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
   }
-  if(expanded){collider(0,.94,9,2.88,1.88,.961);collider(-7,.9,7,.75,1.8,.532);}
+  if(expanded){collider(liftLayout.desk.x,.94,liftLayout.desk.z,2.88,1.88,.961);collider(liftLayout.showcase.x,.9,liftLayout.showcase.z,.75,1.8,.532);}
   else {collider(-12.5,.94,5.8,2.88,1.88,.961);collider(-7,.9,2.2,.75,1.8,.532);}
   let products=staticProductCount??0;
-  if(staticProductCount===null)for(const item of SHOWCASE_PRODUCTS){
+  if(staticProductCount===null)for(const item of showcaseProducts(SHOWCASE_PRODUCTS,expanded)){
     const prop=createCollectProp(item.id);if(!prop)continue;prop.position.set(...item.position);group.add(prop);products++;
   }
   scene.add(group);
   return {state:Object.freeze({...state,displayedProducts:products}),interactables:[
-    {id:'service-desk',x:expanded?0:-12.5,z:expanded?10.1:6.9,radius:2},
+    {id:'service-desk',x:expanded?liftLayout.desk.x:-12.5,z:expanded?liftLayout.desk.z+1.1:6.9,radius:2},
     {id:'wayfinding-west',x:-4.2,z:6,radius:1.7},
     {id:'wayfinding-east',x:6,z:6,radius:1.7},
-    {id:'featured-showcase',x:-7,z:expanded?7.9:3.1,radius:1.3},
+    {id:'featured-showcase',x:expanded?liftLayout.showcase.x:-7,z:expanded?liftLayout.showcase.z+.9:3.1,radius:1.3},
   ]};
 }

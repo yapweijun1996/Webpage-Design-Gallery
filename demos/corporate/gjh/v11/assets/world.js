@@ -5,11 +5,21 @@ import {SHELL_LAYOUT} from './interior-shell-registry.js';
 import {spatial, storeCenterX} from './spatial.js';
 import {expandedLayout} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
+import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, expanded = false) {
   const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
   let shellState = null;
+  const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
+  const ceilingObstacles=[];
+  function ceilingBox(material,x,y,z,sx,sy,sz,hole=liftLayout.shaft){
+    if(!expandedLift){box(material,x,y,z,sx,sy,sz);return;}
+    for(const r of cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole)){
+      box(material,(r.minX+r.maxX)/2,y,(r.minZ+r.maxZ)/2,r.maxX-r.minX,sy,r.maxZ-r.minZ);
+      ceilingObstacles.push({min:{x:r.minX,y:y-sy/2,z:r.minZ},max:{x:r.maxX,y:y+sy/2,z:r.maxZ}});
+    }
+  }
   const seats=[];
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
@@ -173,20 +183,21 @@ export async function createWorld(T, R, physics, expanded = false) {
     const roof = new URLSearchParams(location.search).get('visitor') !== 'v1' ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
     for (const component of [...SHELL_LAYOUT.caps, ...roof]) box(component.material, ...component.position, ...component.size);
     shellState = shell.finish(scene, solid);
-  } else if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
-    // Leave a real shaft opening for the experimental lift, without changing v1.
-    for (const side of [-1, 1]) box('ivory', side * 8.2, 6.5, 9, 13.6, .3, 18);
-    box('ivory', 0, 6.5, 7.25, 2.8, .3, 14.5);
-    box('ivory', 0, 6.5, 17.75, 2.8, .3, .5);
-  } else box('ivory', 0, 6.5, 9, 30, .3, 18);
+  } else ceilingBox('ivory',0,6.5,9,30,.3,18);
   // Skylight replaces the central roof panel visually, with dusk glass and brass ribs.
-  box('dark', 0, 6.29, 8.3, 14.6, .06, 13);
-  box('glass', 0, 6.25, 8.3, 14.1, .025, 12.6);
-  for (let x = -7; x <= 7; x += 2) box('brass', x, 6.18, 8.3, .045, .08, 12.7);
-  for (const z of [2, 5.1, 8.3, 11.5, 14.6]) box('brass', 0, 6.15, z, 14.1, .08, .045);
+  ceilingBox('dark', 0, 6.29, 8.3, 14.6, .06, 13);
+  ceilingBox('glass', 0, 6.25, 8.3, 14.1, .025, 12.6);
+  for (let x = -7; x <= 7; x += 2) ceilingBox('brass', x, 6.18, 8.3, .045, .08, 12.7);
+  for (const z of [2, 5.1, 8.3, 11.5, 14.6]) ceilingBox('brass', 0, 6.15, z, 14.1, .08, .045);
   // Dusk-lit ceiling inset: no texture or runtime environment download.
-  const skylight = new T.Mesh(new T.PlaneGeometry(14, 12.5), new T.ShaderMaterial({side: T.DoubleSide, vertexShader: 'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec2 v;void main(){gl_FragColor=vec4(mix(vec3(.13,.24,.28),vec3(.78,.52,.29),pow(1.-v.y,3.)),1.);}'}));
-  skylight.rotation.x = Math.PI / 2; skylight.position.set(0, 6.23, 8.3); scene.add(skylight);
+  const skylightPanels=expandedLift?cutRectangle({minX:-7,maxX:7,minZ:2.05,maxZ:14.55},liftLayout.shaft):[{minX:-7,maxX:7,minZ:2.05,maxZ:14.55}];
+  const skyMaterial=new T.ShaderMaterial({side:T.DoubleSide,vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec2 v;void main(){gl_FragColor=vec4(mix(vec3(.13,.24,.28),vec3(.78,.52,.29),pow(1.-v.y,3.)),1.);}'});
+  for(const r of skylightPanels){
+    const g=new T.PlaneGeometry(r.maxX-r.minX,r.maxZ-r.minZ);
+    // Preserve the original continuous sky gradient across split panels.
+    if(expandedLift){const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setY(i,(r.minZ-2.05+uv.getY(i)*(r.maxZ-r.minZ))/12.5);}
+    const skylight=new T.Mesh(g,skyMaterial);skylight.rotation.x=Math.PI/2;skylight.position.set((r.minX+r.maxX)/2,6.23,(r.minZ+r.maxZ)/2);scene.add(skylight);
+  }
   if (!expanded) for (const x of [-14.5, -5, 5, 14.5]) {
     box('dark', x, 2.9, .4, .65, 5.8, .9, true); box('brass', x, .18, .4, .85, .18, 1.1); box('brass', x, 5.5, .4, .85, .12, 1.1);
     for (const dx of [-.19, 0, .19]) box('brass', x + dx, 2.9, .865, .018, 4.85, .025);
@@ -281,15 +292,16 @@ export async function createWorld(T, R, physics, expanded = false) {
   // The actual wayfinding interaction opens the existing three-store DOM map.
   // The old kiosk artwork depicts the old three-room floorplan. Use a neutral
   // screen in the expanded shell; its existing interaction opens the live map.
-  if (expanded || !furnishings.place('kiosk', -5.3, 10.4, 1, -1)) {
-    box('jade', -5.3, 1.22, 10.4, .94, 1.6, .22);
-    box('brass', -5.3, .08, 10.4, .96, .16, .68);
-    box('dark', -5.3, 1.3, 10.53, .78, 1.25, .035);
-    if (expanded) sign('DIRECTORY', -5.3, 1.55, 10.56, .7, .16, false, 90);
+  const directory=expanded?liftLayout.directory:{x:-5.3,z:10.4};
+  if (expanded || !furnishings.place('kiosk', directory.x, directory.z, 1, -1)) {
+    box('jade',directory.x,1.22,directory.z,.94,1.6,.22);
+    box('brass',directory.x,.08,directory.z,.96,.16,.68);
+    box('dark',directory.x,1.3,directory.z+.13,.78,1.25,.035);
+    if(expanded)sign('DIRECTORY',directory.x,1.55,directory.z+.16,.7,.16,false,90);
   }
-  collider(-5.3, 1.025, 10.4, .96, 2.05, .68);
-  shadow(-5.3, 10.4, 1.2, .9);
-  interactables.push({id: 'mall-directory', x: -5.3, z: 10.4, radius: 2.8});
+  collider(directory.x,1.025,directory.z,.96,2.05,.68);
+  shadow(directory.x,directory.z,1.2,.9);
+  interactables.push({id:'mall-directory',...directory,radius:2.8});
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
     const wall = zone === 'mili' ? 'cream' : 'green';
@@ -412,8 +424,8 @@ export async function createWorld(T, R, physics, expanded = false) {
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
-      const showcaseProducts = expanded ? SHOWCASE_PRODUCTS.map(item => ({...item, position:[item.position[0], item.position[1], item.position[2] + 4.8]})) : SHOWCASE_PRODUCTS;
-      const productDisplay = await addProducts(T, scene, textures, materials.brass,showcaseProducts);
+      const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
+      const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
@@ -486,7 +498,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     for (const x of [-10.5,30.5]) box('ivory',x,3.3,48,29,6.6,.3,true);
     box('glass',10,2.8,48,12,5.6,.3,true);
     for (const x of [4,10,16]) box('brass',x,2.8,47.8,.08,5.6,.08);
-    box('shellCeiling',10,8.5,18,70,.25,60);
+    ceilingBox('shellCeiling',10,8.5,18,70,.25,60,liftLayout.roofOpening);
     for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
     for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
     // A single instanced label keeps every unoccupied bay visibly provisional.
@@ -543,6 +555,6 @@ export async function createWorld(T, R, physics, expanded = false) {
   const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
-  const cameraObstacles=seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}}));
+  const cameraObstacles=ceilingObstacles.concat(seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
   return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
 }

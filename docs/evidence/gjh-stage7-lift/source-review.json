@@ -1,0 +1,37 @@
+{
+  "status": "SOURCE_REVIEW_NO_CONFIRMED_P0_P1_PENDING_FINAL_QA",
+  "baseline": "f1e210856a98e29220c8a0ebb38dbc9ab7ca3b50",
+  "reviewedSHA256": {
+    "assets/lift-layout.js": "542572943abfe85c459a803f9d55f7eb3bb751384c93b855b594cce07fd5bb4e",
+    "assets/elevator-v2.js": "690d9d2b4ed6de23e9776b90e7279faac812ec361dbbc2853c335bf7492e3269",
+    "assets/player.js": "574f3be6bbac835bb438dd8dc346c9da179f7c6ef97405b91e71c5ee7cecd930",
+    "assets/amenities.js": "5d86b44978e385219c38d4d8818d28808988ab27a671bad80ee3241c030865e9",
+    "assets/world.js": "705d91ed766ba96c2e9c3989f432a7f217a6dd6801c6d23b631d0b44dc2e76ea",
+    "assets/ui.js": "aa32e306ad4612845e75828f21e3946ba9f36e481bd0f53406c771e5c9dc7299",
+    "script.js": "f94e68537a0ca7fd6dee552e0647d9c779c08a36ec226b568c560e79f47f8f0f"
+  },
+  "findings": [],
+  "architecture": [
+    "Shared lift layout drives shaft/stops/landing and moved amenities; existing player owns rider phases.",
+    "Classic lift branches to retained legacy implementation; v1 has no expanded lift.",
+    "Absent/moving cabin closes landing gates and removes threshold; docked boarding/exit uses real cabin/threshold floor.",
+    "Unknown destination rejection and held/seat/cart/distance guards remain before boarding; upper cart capability has explicit UI reason.",
+    "Context loss settles player to safe lobby and separately settles empty-call cabin; paused tick preserves motion ownership.",
+    "Product showcase positions use the same transformation for batched products and fallback collect props.",
+    "No new network/brand/service endpoints; facilities remain explicitly planned/not operating."
+  ],
+  "evidenceRead": [
+    "worker/focused2/report.json: sourcesUnchanged=true, posed/manual-step correctness evidence only; not performance."
+  ],
+  "remaining": [
+    "Final UI/map source-phase evidence and hashes.",
+    "Native full-size/short viewport wayfinding and service legend obstruction/focus.",
+    "Actual advancing-frame performance and current broader regressions.",
+    "Actual empty-call after Map departure, gate/cabin drop prevention, both ride halves and context recovery at all phases.",
+    "Classic200 isolation and current material/resource counts."
+  ],
+  "limits": [
+    "No browser/GPU run by reviewer in this pass.",
+    "No physical-device, safety/building, operating-service or assistive-technology certification."
+  ]
+}

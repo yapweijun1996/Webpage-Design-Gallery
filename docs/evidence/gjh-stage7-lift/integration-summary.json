@@ -1,0 +1,58 @@
+{
+  "version": {
+    "version": "1.1.51",
+    "build": "7dbea71144503618"
+  },
+  "groups": [
+    {
+      "name": "expanded-shell",
+      "exitCode": 0
+    },
+    {
+      "name": "store-integration",
+      "exitCode": 0
+    },
+    {
+      "name": "atrium",
+      "exitCode": 0
+    },
+    {
+      "name": "candidates",
+      "exitCode": 0
+    },
+    {
+      "name": "expanded-pwa",
+      "exitCode": 0
+    },
+    {
+      "name": "mall-pwa",
+      "exitCode": 0
+    },
+    {
+      "name": "pwa-boundary",
+      "exitCode": 0
+    },
+    {
+      "name": "gjh-demos",
+      "exitCode": 0
+    },
+    {
+      "name": "gallery",
+      "exitCode": 0
+    },
+    {
+      "name": "pwa",
+      "exitCode": 0
+    }
+  ],
+  "scope": "Frozen pre-cart-metadata phase; later final UI/capability tests and exact motion/source bridge are separate. No relabelling as final build.",
+  "fixtureCorrection": {
+    "failure": "Prefix artifact compared frozen phase build against subsequently regenerated live checkout",
+    "fix": "Compare generated artifact with frozen copy version; retain eight successful groups, rerun only prefix and two remaining checks",
+    "prefix": {
+      "version": "1.1.51",
+      "build": "7dbea71144503618"
+    }
+  },
+  "finalCompatibilityBridge": "cart-compatibility-source-bridge.json"
+}

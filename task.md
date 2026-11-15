@@ -579,7 +579,7 @@ The earlier nine-slice outline is superseded by the more detailed, dependency-aw
 
 ## Expanded 17-store upgrade — 2026-11-15
 
-Status: **stages 0–6 completed, with stages 3–6 implemented in the opt-in expanded preview; later interior stages remain open**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
+Status: **stages 0–7 completed, with stages 3–7 implemented in the opt-in expanded preview; materials, themes and integration remain open**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
 
 - [x] Inspect existing scene dimensions and repository company/brand research; check GJH corporate and eShop source listings.
 - [x] Produce a labelled, dimensioned 2D ground-floor draft and reconcile area arithmetic, circulation zones, seasonal space and candidate brand evidence.
@@ -594,7 +594,7 @@ Status: **stages 0–6 completed, with stages 3–6 implemented in the opt-in ex
 - [x] **4. Atrium and seating:** added a low planted bed, two lounge groups and a clear seasonal reservation to the expanded preview; verified four seat interactions, fallback, cart/loop collision, camera and screen sizes. [Implementation, visual evidence and limits](docs/gjh-v11-stage4-atrium.md).
 - [x] **5. Existing stores:** integrated New Moon, MILI and GOGO into the expanded scene with visible glazed storefronts and directory-to-3D links; verified four product details, brand-only content, map, bag, fallbacks and PWA. [Implementation and evidence](docs/gjh-v11-stage5-existing-stores.md).
 - [x] **6. Candidate storefronts:** add truthful placeholders, then populate each store only after its individual brand, content and rights checks.
-- [ ] **7. Elevator and facilities:** resolve two-floor lift and service routing; test travel, landing, interruption, v1/v2 and existing interaction state.
+- [x] **7. Elevator and facilities:** implement the expanded visitor-only lift and canonical service routing; verify travel, collision, camera, interruptions, v1/v2 and existing interactions. [Acceptance and limits](docs/gjh-v11-stage7-lift.md).
 - [ ] **8. Materials and lighting:** refine natural materials and warm premium lighting; validate actual scenes and compare resource use against the baseline.
 - [ ] **9. Theme infrastructure:** build coherent everyday theme and accessible setup with safe state, storage fallback, cancellation and cleanup.
 - [ ] **10. Seasonal packs:** implement Lunar New Year, Christmas and Diwali sets one at a time with tested switch-back, path clearance and failure handling.
@@ -622,3 +622,22 @@ idle-frame sampling, not a demonstrated teleport mutation. Strict corrected
 14local/fivepublic checks pass; no tolerance or runtime change. Original failure
 and phase evidence remain pinned in docs/evidence/gjh-stage6-public-check.json.
 The test-only repair requires main/CI/public-byte verification before stage7.
+
+
+Stage7 local acceptance — 2026-11-15: application1.1.51/build68cc981c4eb25add
+implements a physical expanded lift cabin, shaft opening, stop gates/thresholds,
+west boarding/exit and safe interrupted-travel recovery. Empty Call requires a
+separate Ride; the upper landing is visitor-only. Canonical anchors align entrance
+Directory/Guest guide and west-court showcase, loaded/fallback proxies and4SKUs.
+Four Map letters add location information without new destinations or live services.
+Current55Python/28Node/gen/SSOT,3expanded lift configurations/5native contextlosses,
+6finalMap contexts,12pause/visibility+2resize observations, loaded/fallback service
+journeys and5normal native keyboard checks pass. Three unsafe-state guards use
+explicit QA-only synchronous body faults, not invented native journey evidence.
+Ten broader groups retain their tested pre-capability-metadata source phase with
+exact geometry/motion bridges. Fourclassic profiles retain all66colliders exactly.
+Independent local approval and1,920actual advancing samples preserveclassic200;
+expanded1440Detailed cart changes193to182calls. See docs/gjh-v11-stage7-lift.md
+and docs/evidence/gjh-stage7-lift.json. All75binaryassets remain exact; one1,494-byte
+JSmodule is added. Main/CI/Pages/public verification is required beforestage8.
+Physical-device/AT, historicalpayload gates and operatingfacilities remain unverified.

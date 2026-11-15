@@ -1,0 +1,20 @@
+{
+  "status": "SOURCE_DELTA_APPROVED_PENDING_ACTUAL_NATIVE_AND_UPPER_QA",
+  "scope": "Cart capability metadata and host disabled/refusal feedback only; prior motion/geometry review retained.",
+  "sourceSHA256": {
+    "assets/player.js": "7425d15a33bc7c86f2b8175ca81ef578205d2310d8a0a44319516115c6b0ff48",
+    "assets/ui.js": "a5530253fbd63298107d112faf35361bf416a2839e7612262fa307c66aa19b5f"
+  },
+  "findings": [],
+  "assessment": [
+    "allowed remains authoritative setCart mutation guard; UI availability still retains ready/model guard.",
+    "Upper landing disables both deployment affordances with visitor-only reason.",
+    "Held/travel affordances remain actionable to produce refusal feedback without allowing cart deployment.",
+    "Held-product message reuses existing SKU-specific instruction; seated Bag remains disabled and scene path retains refusal.",
+    "Stow bypasses deployment restrictions, preserving ordinary existing close/focus behavior."
+  ],
+  "limits": [
+    "Source-only review. Actual Australia held-state and upper/native interactions pending.",
+    "No performance inference; no GPU/browser run."
+  ]
+}
