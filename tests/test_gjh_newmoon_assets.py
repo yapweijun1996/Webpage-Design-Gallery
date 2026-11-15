@@ -28,10 +28,9 @@ class NewMoonIntegrationTests(unittest.TestCase):
     def test_source_contract_preserves_native_scale_and_fallbacks(self):
         source = (ASSETS / "products.js").read_text()
         self.assertIn("const shelfTops = Object.freeze(interiorPilot ? [.6825, 1.1925, 1.7025] : [.451, .991, 1.531])", source)
-        self.assertIn("totalInstances: 36", source)
-        self.assertIn("const frontFacings = 18", source)
+        self.assertIn("totalInstances: cans.length * shelfTops.length * facingCount", source)
+        self.assertIn("const facingCount = interiorPilot ? 11 : 17", source)
         self.assertIn("reserveIndex", source)
-        self.assertIn("depthRows: 1", source)
         self.assertIn("crypto.subtle.digest('SHA-256'", source)
         for token in ("hash-mismatch", "unsupported-external-resource", "invalid-dimensions", "timeout"):
             self.assertIn(token, source)

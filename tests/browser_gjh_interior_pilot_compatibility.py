@@ -26,12 +26,12 @@ def run():
                     url=f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'+('?interior=pilot' if pilot else '')
                     ready(page,url);assets=state(page)['productAssets']
                     expected='GJH-DSP-001' if pilot else 'GJH-M056';assert assets['shelf']['model']==expected and assets['shelf']['status']=='loaded',assets
-                    assert assets['totalInstances']==36 and assets['frontFacings']==18
+                    assert assets['totalInstances']==(132 if pilot else 204)
                     assert requests.count('GJH_DSP_001.glb')==(1 if pilot else 0),requests
                     assert requests.count('gjh-m056-shelf-lod1.glb')==(0 if pilot else 1),requests
                     results=[]
                     for sku,record in assets['cans'].items():
-                        assert record['status']=='loaded' and record['instances']==9,record
+                        assert record['status']=='loaded' and record['instances']==(33 if pilot else 51),record
                         assert abs(record['supportTopY']-(.6825 if pilot else .451))<1e-8
                         approach(page,sku);before=state(page);open_shelf(page)
                         layout=geometry(page);page.screenshot(path=str(captures/f'{expected}-{sku}-focus-{width}.png'))
