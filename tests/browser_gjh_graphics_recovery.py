@@ -310,7 +310,6 @@ def run():
                     else:
                         page.locator('.product-card [data-inspect]').nth(3).click()
                         if modal=='product-preview':
-                            page.locator('#product-preview-load').click()
                             page.wait_for_function('__newMoonPreview.state.loaded',timeout=60000)
                             page.locator('#product-preview-canvas').focus()
                     focus=page.evaluate('document.activeElement.id || document.activeElement.dataset.bagFocus')

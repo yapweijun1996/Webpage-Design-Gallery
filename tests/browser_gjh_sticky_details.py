@@ -8,13 +8,13 @@ def run():
  url=args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'
  try:
   with sync_playwright() as p:
-   browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
+   browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'--enable-unsafe-swiftshader'])
    for w,h in ([(390,844)] if args.live else [(320,740),(390,844),(430,932),(768,1024),(844,390),(1440,900)]):
     page=browser.new_page(viewport={'width':w,'height':h},has_touch=True,reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.goto(url);page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-list').click();page.locator('#store-list').wait_for(state='visible')
     for preview in [False,True]:
      opener=page.locator('[data-inspect="new-moon-mx-454g-front"]');opener.click()
-     if preview:page.locator('#product-preview-load').click();page.wait_for_function('__newMoonPreview.state.loaded')
+     if preview:page.wait_for_function('__newMoonPreview.state.loaded')
      page.locator('#product-shop').scroll_into_view_if_needed()
      close=page.locator('#product-close');geometry=close.evaluate('e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,width:r.width,height:r.height,hit:e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}}')
      assert geometry['top']>=0 and geometry['bottom']<=h and geometry['width']>=44 and geometry['height']>=44 and geometry['hit'],geometry
