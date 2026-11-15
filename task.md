@@ -615,3 +615,10 @@ at1440Detailed, unchanged from c652e9f. See docs/gjh-v11-stage6-candidates.md an
 docs/evidence/gjh-stage6-candidates.json. No extra model/request/geometry is added.
 Main/CI/Pages and public DOM/hash verification remain the release gate before7;
 physical-device/AT and later expanded stages are not completed by this slice.
+
+Stage6 public-check follow-up: isolate14unavailable destination calls and exact
+X/Z/frameCounter equality within one JS turn. Three controls exposed cross-RPC
+idle-frame sampling, not a demonstrated teleport mutation. Strict corrected
+14local/fivepublic checks pass; no tolerance or runtime change. Original failure
+and phase evidence remain pinned in docs/evidence/gjh-stage6-public-check.json.
+The test-only repair requires main/CI/public-byte verification before stage7.

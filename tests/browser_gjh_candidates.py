@@ -50,13 +50,14 @@ def run():
        for space in expected:
         rect=page.locator(f'.map-planned[data-space-id="{space["id"]}"]');assert rect.get_attribute('data-space-status')==space['status'];assert rect.locator('title').text_content()==f'{space["label"]}: {space["side"].capitalize()} side; planned, not open.';assert rect.get_attribute('tabindex') is None
       else:assert page.locator('.map-planned').count()==0
-      position=page.evaluate('()=>({x:__mall.state.x,z:__mall.state.z})')
-      for space in expected:assert page.evaluate('id=>__mall.teleport(id)',space['id']) is False
-      assert page.evaluate('()=>({x:__mall.state.x,z:__mall.state.z})')==position
+      # One JS turn isolates command side effects from unrelated autorender ticks.
+      rejection=page.evaluate('''ids=>{const pose=()=>({x:__mall.state.x,z:__mall.state.z,frames:__mall.state.frames});const before=pose();const results=ids.map(id=>__mall.teleport(id));return {before,results,after:pose()}}''',[space['id'] for space in expected])
+      assert len(rejection['results'])==14 and all(value is False for value in rejection['results'])
+      assert rejection['before']==rejection['after'],rejection
       page.locator('#view-toggle').click();assert page.locator('#store-list').is_visible();summary=section.locator('summary');summary.scroll_into_view_if_needed();summary.focus();page.keyboard.press('Enter');assert section.evaluate('e=>e.open')==(not expanded)
       page.keyboard.press('Enter');assert section.evaluate('e=>e.open')==expanded
       if not expanded:summary.click()
-      row={'width':width,'height':height,'expanded':expanded,'darkPreference':dark,'cards':check_cards(page,expected),'candidateTeleportsRejected':14}
+      row={'width':width,'height':height,'expanded':expanded,'darkPreference':dark,'cards':check_cards(page,expected),'candidateTeleportsRejected':14,'exactRejectionSnapshot':rejection}
       box=summary.bounding_box();assert box['height']>=44 and box['width']>=44
       assert summary.evaluate('(e)=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}')
       name=f'{width}-{"expanded" if expanded else "classic"}-{"dark-preference" if dark else "light"}';page.screenshot(path=str(out/f'{name}.png'));section.screenshot(path=str(out/f'{name}-section.png'))
