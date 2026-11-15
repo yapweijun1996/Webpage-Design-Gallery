@@ -271,6 +271,19 @@ an isolated HTML fixture on this host. Actual control selection events and model
 updates pass separately. Physical devices and screen-reader sessions remain open;
 this does not complete the separate final/device acceptance gates.
 
+## V11 direct product Inspect — 2026-11-15
+
+The nearby New Moon product Inspect action now opens the existing readable
+product-detail viewer immediately. It no longer requires the full Shelf view
+and a second “Inspect details” activation. The Shelf controller and layered
+mode implementation remain available for retained lifecycle and fallback
+coverage; product identity, four SKU mappings, bag state, held-product state,
+close/back restoration and mobile controls are unchanged. A nearby SKU now
+opens the existing 3D can preview automatically; if it cannot load, the
+official packshot remains visible. The focused desktop and 390px touch
+regression is `tests/browser_gjh_direct_inspect.py` with evidence in
+`docs/evidence/v11-direct-inspect/`.
+
 
 ## Codex CLI flat-label candidates — 2026-11-15
 

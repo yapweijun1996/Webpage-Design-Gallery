@@ -213,7 +213,7 @@ export function createUI() {
     notifyMode();
   }
 
-  function inspect(id) {
+  function inspect(id, autoPreview = false) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || guidePaused) return;
     shelfFocus?.close();
@@ -235,15 +235,17 @@ export function createUI() {
     newMoonPreview.open(id);
     bag.select(id);
     dialog.showModal();
+    if (autoPreview) newMoonPreview.load3D();
     closeButton.focus({ preventScroll: true });
     notifyMode();
   }
 
   function inspectNearby(id) {
-    const record = records.get(id);
-    if (showing3D && id === nearby && record?.image && !record.action && !dialog.open && !bag.open && !guidePaused &&
-        !modeSignals().panelOpen && shelfFocus?.openShelf(id, record)) return;
-    inspect(id);
+    // Product Inspect is the detail action. The shelf remains an owned
+    // presentation mode for retained lifecycle/fallback coverage, but it must
+    // not be an intermediate click for a nearby SKU: the readable product
+    // viewer is the first surface opened from the user's Inspect action.
+    inspect(id, true);
   }
 
   function showGuide(event) {
