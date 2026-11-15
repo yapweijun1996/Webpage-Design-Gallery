@@ -190,24 +190,13 @@ body.is-3d .product-dialog :is(button,a):focus-visible{outline-color:var(--gjh-c
 .original-tin-dialog :is(button,input,canvas):focus-visible{outline:3px solid var(--green);outline-offset:3px}.original-tin-stage{min-width:0}.original-tin-dialog{overflow:auto}.original-tin-note{overflow-wrap:anywhere}
 @media(max-width:650px){#original-tin-canvas{height:300px}.original-tin-top h2{font-size:var(--gjh-type-dialog-copy-h2-max-width-650px)}}
 
-/* First-use help shares the existing mall palette and type system. */
-.quick-guide{width:min(560px,calc(100% - 2 * max(16px,env(safe-area-inset-left),env(safe-area-inset-right))));max-height:calc(100vh - 32px);max-height:calc(100dvh - 2 * max(16px,env(safe-area-inset-top),env(safe-area-inset-bottom)));padding:0 var(--space-5) var(--space-5);overflow:auto;overscroll-behavior:contain;scroll-padding-top:var(--size-control);border:1px solid var(--line);background:var(--paper);color:var(--green);box-shadow:var(--gjh-shadow-product-dialog)}
-.quick-guide::backdrop{background:var(--gjh-color-product-dialog-backdrop)}
-.guide-header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);position:sticky;top:0;background:var(--paper);z-index:var(--z-tray);padding:var(--space-2) 0}
-.guide-header .eyebrow{margin:0}.guide-header button{flex-shrink:0}
-.quick-guide h2{font-size:var(--font-size-xl);margin:var(--space-2) 0}
-#guide-title:focus{outline:none}
-.quick-guide>p:not(.eyebrow){font-size:var(--font-size-sm);line-height:var(--line-height-body)}
-.guide-steps{display:grid;gap:var(--space-2);list-style:none;padding:0;margin:var(--space-4) 0;font-size:var(--font-size-sm)}
-.guide-steps li{display:grid;grid-template-columns:5em 1fr;gap:var(--space-2)}
-.guide-actions{display:grid;gap:var(--space-2)}
-.guide-secondary{display:flex;flex-wrap:wrap;gap:var(--space-2)}
-.guide-secondary button{flex:1;border-color:transparent;text-decoration:underline;text-underline-offset:var(--space-1)}
-.quick-guide button,#guide-reopen{min-width:44px;min-height:44px;padding:var(--space-2) var(--space-3);font-size:var(--font-size-sm)}
-#guide-start{background:var(--green);color:var(--paper)}
-.quick-guide .guide-footnote{margin:var(--space-3) 0 0;color:var(--muted)}
-body.is-3d .quick-guide button:focus-visible{outline-color:var(--gjh-color-button-focus-visible)}
-@media(max-width:360px),(max-height:560px){.quick-guide{padding:0 var(--space-4) var(--space-4)}.guide-secondary{gap:0}.guide-secondary button{padding-inline:var(--space-1)}}
+/* Shared onboarding owns component styling; only the mall brand is adapted here. */
+body .ob-ui{--ob-font:var(--sans);--ob-action:var(--green);--ob-on-action:var(--paper)}
+body.is-3d .ob-ui button:focus-visible{outline-color:var(--ob-focus)}
+body:has(.ob-tip) .mall-intro{display:none}
+body .ob-hud{top:calc(2 * var(--space-16));right:var(--space-6);left:auto;bottom:auto;transform:none}
+@media(max-width:650px){body .ob-hud{left:50%;right:auto;transform:translateX(-50%)}}
+@media(max-height:560px) and (orientation:landscape){body .ob-hud{top:var(--space-20);right:calc(var(--space-16) + var(--space-3));left:auto;transform:none}body .ob-tip{max-height:calc(100dvh - 2.5 * var(--space-20));overflow:auto;pointer-events:auto;overscroll-behavior:contain}.ob-tip-header{position:sticky;top:0;background:var(--ob-surface)}}
 
 /* Directory-only presentation. The 3D HUD and shared dialog contracts are unchanged. */
 .store-list{padding:var(--space-7) 5vw var(--space-8)}
@@ -490,3 +479,15 @@ body.is-3d .is-shelf-nearby button:focus-visible{outline-width:2px;outline-offse
 .graphics-recovery{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-bottom:var(--space-6)}
 .graphics-recovery button{min-width:44px;padding:var(--space-2) var(--space-3)}
 .graphics-recovery p{flex-basis:100%;font-size:var(--font-size-sm)}
+
+.mall-amenities-directory{margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--line)}
+.mall-amenities-directory h2{font-size:var(--font-size-xl)}
+.amenities-actions{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-block:var(--space-4)}
+.amenities-actions button{padding:var(--space-2) var(--space-4)}
+
+.mall-amenities-directory a{display:inline-flex;align-items:center;min-width:var(--size-control);min-height:var(--size-control);padding-inline:var(--space-2)}
+
+/* The existing Help disclosure owns the mall's persistent re-entry control. */
+body.is-3d .ob-hud .ob-help{display:none}
+
+.ob-dialog>.context-navigation-footer{position:sticky;bottom:calc(-1 * var(--ob-space-6));background:var(--ob-surface);margin-top:var(--ob-space-4)}

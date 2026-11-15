@@ -1,0 +1,42 @@
+/* Component aliases only. Canonical values live in design-system/tokens.json. */
+.ob-ui {
+  --ob-radius: var(--radius-xl);
+  --ob-space-1: var(--space-1);
+  --ob-space-2: var(--space-2);
+  --ob-space-3: var(--space-3);
+  --ob-space-4: var(--space-4);
+  --ob-space-6: var(--space-6);
+  --ob-padding-mobile: var(--space-5);
+  --ob-control-min: var(--size-control);
+  --ob-primary-min: var(--space-12);
+  --ob-modal-max: var(--layout-onboarding-modal);
+  --ob-duration-fast: var(--duration-fast);
+  --ob-duration-normal: var(--duration-normal);
+  --ob-z-dialog: var(--z-onboarding-dialog);
+  --ob-font: var(--font-family-body);
+  --ob-font-key: var(--font-family-code);
+  --ob-title-size: var(--font-size-2xl);
+  --ob-body-size: var(--font-size-base);
+  --ob-caption-size: var(--font-size-xs);
+  --ob-surface: var(--color-surface);
+  --ob-text: var(--color-text);
+  --ob-muted: var(--color-text-muted);
+  --ob-border: var(--color-border-control);
+  --ob-subtle: var(--color-page);
+  --ob-action: var(--color-action);
+  --ob-on-action: var(--color-on-action);
+  --ob-focus: var(--color-focus);
+  --ob-scrim: var(--color-overlay);
+  --ob-shadow: var(--shadow-dialog);
+}
+.ob-ui[data-ob-theme="dark"] {
+  color-scheme: dark;
+  --ob-scrim: var(--color-3d-dark-overlay);
+  --ob-surface: var(--color-3d-dark-surface);
+  --ob-text: var(--color-3d-dark-text);
+  --ob-muted: var(--color-3d-dark-muted);
+  --ob-border: var(--color-3d-dark-border);
+  --ob-subtle: var(--color-3d-dark-subtle);
+  --ob-focus: var(--color-3d-dark-focus);
+}
+.ob-ui[data-ob-theme="light"] { color-scheme: light; }

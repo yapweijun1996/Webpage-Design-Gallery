@@ -1,0 +1,44 @@
+[
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "visitor": "v1",
+    "reducedMotion": false,
+    "deskRearClearance": true,
+    "benchOrbitClearance": true,
+    "continuousFacilityLoop": true,
+    "samples": 178,
+    "minimumCameraDistance": 3.891225080490112,
+    "errors": []
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "visitor": "v2",
+    "reducedMotion": false,
+    "deskRearClearance": true,
+    "benchOrbitClearance": true,
+    "continuousFacilityLoop": true,
+    "samples": 178,
+    "minimumCameraDistance": 3.8907497460663993,
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "visitor": "v2",
+    "reducedMotion": true,
+    "deskRearClearance": true,
+    "benchOrbitClearance": true,
+    "continuousFacilityLoop": true,
+    "samples": 178,
+    "minimumCameraDistance": 3.931045989990234,
+    "errors": []
+  }
+]

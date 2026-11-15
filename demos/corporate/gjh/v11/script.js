@@ -1,3 +1,4 @@
+import {readStandardGamepad,gamepadMotion} from '../../../../assets/onboarding/gamepad.js';
 import {createUI} from './assets/ui.js';
 import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
@@ -38,8 +39,10 @@ ui.onModeState(syncMode);
 setupOriginalTin(ui);
 syncMode();
 const STEP = 1 / 60;
+let previousGamepadInspect=false;
 const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
+  amenities: world?.amenities || null,
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
   interaction: selectedInteraction ? {id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance} : null,
   camera: player ? {position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect} : null,
@@ -86,7 +89,7 @@ function updateHUD() {
   interactionDistance = best;
   productControl?.update(p,nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({zone: currentZone, x: p.x, z: p.z, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
+  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
 }
 function tick() {
   if (modes.paused()) return;
@@ -120,6 +123,16 @@ function render() {
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;
+  const pad=readStandardGamepad();
+  const consumed=ui.handleGamepad(pad);
+  const inspectPressed=Boolean(pad?.buttons[0]?.pressed);
+  const focused=document.activeElement===canvas||document.activeElement===document.body;
+  if(!manual)player.setGamepadInput(!consumed&&!ui.paused()&&focused?gamepadMotion(pad):null);
+  if(inspectPressed&&!previousGamepadInspect&&!consumed&&!ui.paused()&&focused&&nearby){
+    player.clearInput();
+    if(player.state.seated){player.stand();updateHUD();}else ui.inspect(nearby);
+  }
+  previousGamepadInspect=inspectPressed;
   const elapsed = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now;
   if (!manual && !modes.paused()) {
     accumulator += elapsed;

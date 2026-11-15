@@ -139,3 +139,17 @@ Open [the complete eight-asset pilot](demos/corporate/gjh/v11/index.html?interio
 The [eight-asset pilot](docs/gjh-v11-interior-pilot-review.md) integrates reusable benches, planters, a relocated directory, shelves, sign frames, wall lights, coffee tables and an atrium plinth. Editable Blender sources, reproducible commands and per-asset acceptance records live in [models/gjh-interior-pilot](models/gjh-interior-pilot/README.md); authoring files are excluded from the Pages artifact.
 
 Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. Run `python tests/browser_gjh_interior_pilot_compatibility.py` for both shelf choices and all four repeated pickup/return journeys. See [release reconciliation and results](docs/gjh-v11-interior-pilot-release.md). These complement the existing Gallery/GJH/PWA suites. Physical-device performance and the remaining 192 asset candidates are pending.
+
+## Shared 3D onboarding UI
+
+The framework-neutral [onboarding component library](docs/3d-onboarding-components.md) provides themed/localized welcome dialogs, keyboard keys, input-specific controls, nonblocking tips, Help and progress. V11 uses the shared implementation and a standard gamepad adapter. Preview all six application profiles at `/design-system/onboarding/` when serving this repository locally. Other profiles are integration sandboxes, not finished 3D apps.
+
+Run `python tests/browser_onboarding.py` and `python tests/browser_gjh_onboarding.py` with `GALLERY_CHROME` set to the local Chrome executable for focused component and actual-mall integration checks.
+
+V11 includes a service desk, ceiling wayfinding signs and a glass product showcase using the shared scene-object action dialog. See [amenity sources and interaction verification](docs/gjh-amenities-review.md). Run `python tests/browser_gjh_amenities.py` with `GALLERY_CHROME` set to Chrome; use `GALLERY_WEBGL_BACKEND=metal` on macOS for native rendering.
+
+## GJH V11 interior pilot
+
+The [eight-asset pilot](docs/gjh-v11-interior-pilot-review.md) integrates reusable benches, planters, a relocated directory, shelves, sign frames, wall lights, coffee tables and an atrium plinth. Editable Blender sources, reproducible commands and per-asset acceptance records live in [models/gjh-interior-pilot](models/gjh-interior-pilot/README.md); authoring files are excluded from the Pages artifact.
+
+Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. These complement the existing Gallery/GJH/PWA suites. Physical-device performance and the remaining 192 asset candidates are pending.

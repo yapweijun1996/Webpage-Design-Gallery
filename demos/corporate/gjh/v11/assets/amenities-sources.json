@@ -1,0 +1,26 @@
+{
+  "source_repository": "https://github.com/yapweijun1996/Blender-3D-Gallery",
+  "source_commit": "9cc4c87b49ac7b5030b36944d80ccf8ddf09f7b1",
+  "authorization": "Original assets; owner-project reuse explicitly authorized. Public redistribution terms unspecified.",
+  "adaptations": "Original GLB bytes preserved. Ceiling text/icons/arrows replaced at runtime with actual three-store directions; showcase door remains closed.",
+  "assets": [
+    {
+      "file": "mall-service-desk.glb",
+      "source": "models/mall-service-desk/exports/mall-service-desk.glb",
+      "sha256": "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0",
+      "bytes": 245748
+    },
+    {
+      "file": "mall-wayfinding-ceiling-sign.glb",
+      "source": "models/mall-wayfinding-ceiling-sign/exports/optimized.glb",
+      "sha256": "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14",
+      "bytes": 676028
+    },
+    {
+      "file": "mall-glass-showcase.glb",
+      "source": "models/mall-glass-showcase/exports/optimized.glb",
+      "sha256": "782d911730aaa428d684df9695a2be159802ace7ad8be353dadb8d85efcd2179",
+      "bytes": 96840
+    }
+  ]
+}

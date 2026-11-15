@@ -1,0 +1,285 @@
+{
+  "components": [
+    {
+      "viewport": [
+        320,
+        480
+      ],
+      "touch": true,
+      "layout": "PASS",
+      "focusEscapeTab": "PASS",
+      "themeLocaleInput": "PASS",
+      "nonblockingProgress": "PASS",
+      "gamepadPanels": "PASS",
+      "fiveOtherProfiles": "PASS",
+      "noUIFrameLoop": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "touch": true,
+      "layout": "PASS",
+      "focusEscapeTab": "PASS",
+      "themeLocaleInput": "PASS",
+      "nonblockingProgress": "PASS",
+      "gamepadPanels": "PASS",
+      "fiveOtherProfiles": "PASS",
+      "noUIFrameLoop": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        829,
+        826
+      ],
+      "touch": false,
+      "layout": "PASS",
+      "focusEscapeTab": "PASS",
+      "themeLocaleInput": "PASS",
+      "nonblockingProgress": "PASS",
+      "gamepadPanels": "PASS",
+      "fiveOtherProfiles": "PASS",
+      "noUIFrameLoop": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "touch": false,
+      "layout": "PASS",
+      "focusEscapeTab": "PASS",
+      "themeLocaleInput": "PASS",
+      "nonblockingProgress": "PASS",
+      "gamepadPanels": "PASS",
+      "fiveOtherProfiles": "PASS",
+      "noUIFrameLoop": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "touch": true,
+      "layout": "PASS",
+      "focusEscapeTab": "PASS",
+      "themeLocaleInput": "PASS",
+      "nonblockingProgress": "PASS",
+      "gamepadPanels": "PASS",
+      "fiveOtherProfiles": "PASS",
+      "noUIFrameLoop": "PASS",
+      "errors": []
+    }
+  ],
+  "mallAdapter": {
+    "gamepadMovementCameraInspect": "PASS",
+    "modalInputIsolation": "PASS",
+    "nonblockingRealActionProgress": "PASS",
+    "menuBackAndDisconnect": "PASS",
+    "autoWelcomePreferenceAndManualReplay": "PASS",
+    "pageErrors": [],
+    "limitation": "Synthetic standard-controller snapshots through the actual application frame loop; physical controller not tested."
+  },
+  "guide": [
+    {
+      "viewport": [
+        320,
+        740
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "touch": false,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "touch": true,
+      "firstUse": "PASS",
+      "pause": "PASS",
+      "mapDirectoryFocus": "PASS",
+      "reopenEscape": "PASS",
+      "sessionMemory": "PASS",
+      "errors": []
+    },
+    {
+      "storageUnavailable": "PASS",
+      "WASMAndNoJSDirectory": "PASS"
+    }
+  ],
+  "compactLayout": [
+    {
+      "viewport": [
+        320,
+        480
+      ],
+      "dialogBounds": {
+        "x": 16,
+        "y": 16,
+        "width": 288,
+        "height": 448
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        390,
+        680
+      ],
+      "dialogBounds": {
+        "x": 16,
+        "y": 100.0625,
+        "width": 358,
+        "height": 563.9375
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "dialogBounds": {
+        "x": 16,
+        "y": 264.0625,
+        "width": 358,
+        "height": 563.9375
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        430,
+        932
+      ],
+      "dialogBounds": {
+        "x": 16,
+        "y": 370.4375,
+        "width": 398,
+        "height": 545.5625
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "dialogBounds": {
+        "x": 104,
+        "y": 167.828125,
+        "width": 560,
+        "height": 688.34375
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "dialogBounds": {
+        "x": 142,
+        "y": 16,
+        "width": 560,
+        "height": 358
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "dialogBounds": {
+        "x": 440,
+        "y": 96.21875,
+        "width": 560,
+        "height": 707.5625
+      },
+      "backgroundTouchIsolation": "PASS",
+      "closeEscapeReopenFocus": "PASS",
+      "height320Reflow": "PASS",
+      "keyboardFocusRing": "PASS"
+    }
+  ],
+  "advisor": {
+    "references": [
+      "GJH Virtual Mall Onboarding UI.png",
+      "GJH Virtual Mall Welcome Atrium.png"
+    ],
+    "decision": "No blocking remaining visual or usability finding in the reviewed screenshots.",
+    "rightStickSuggestion": "Implemented highlighted left/right stick diagrams after review."
+  },
+  "limitations": [
+    "Synthetic gamepad snapshots, not physical controller validation.",
+    "Physical touch devices, Safari and screen-reader sessions not run."
+  ]
+}
