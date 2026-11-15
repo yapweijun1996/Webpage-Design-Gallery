@@ -6,7 +6,29 @@ import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
-import {expandedLayout, expandedMapPoint} from './expanded-layout.js';
+import {expandedLayout, expandedMapPoint, plannedSpaces} from './expanded-layout.js';
+
+const plannedSideLabels = Object.freeze({north: 'North side', west: 'West side', east: 'East side'});
+function setupPlannedDirectory(expanded) {
+  const section = document.getElementById('planned-spaces-directory');
+  const list = document.getElementById('planned-spaces-list');
+  if (!section || !list) return;
+  const fragment = document.createDocumentFragment();
+  for (const space of plannedSpaces) {
+    const item = document.createElement('li'); item.id = space.id;
+    for (const [key, value] of Object.entries({space: space.id, number: space.number, side: space.side,
+      status: space.status, available: String(space.available), ...space.admission})) item.setAttribute(`data-planned-${key}`, value);
+    const heading = document.createElement('h3'); heading.textContent = space.label;
+    const location = document.createElement('p'); location.setAttribute('data-planned-field', 'location');
+    location.textContent = `${plannedSideLabels[space.side]} · Planned · not open`;
+    item.append(heading, location); fragment.append(item);
+  }
+  list.replaceChildren(fragment);
+  const summary = section.querySelector('summary');
+  if (summary) summary.textContent = `Planned spaces in the expanded preview (${plannedSpaces.length})`;
+  // Initialize once; native disclosure choices survive subsequent List/3D toggles.
+  if (expanded) section.open = true;
+}
 
 export function createUI(expanded = false) {
   const scene = document.getElementById('scene');
@@ -30,7 +52,7 @@ export function createUI(expanded = false) {
   const playerDot = document.getElementById('player-dot');
   const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel=expanded ? 'Expanded ground-floor preview: 17 numbered spaces, including three open stores and 14 planned spaces. The gold dot marks your position.' : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel=expanded ? `Expanded ground-floor preview: ${expandedLayout.slots.length} numbered spaces, including ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute('aria-label',floorplanLabel);
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
   const inspectPrompt = document.getElementById('inspect-prompt');
@@ -185,6 +207,8 @@ export function createUI(expanded = false) {
   layoutLink.href=layoutURL.href;
   layoutLink.textContent=expanded?'Return to the original mall':'Preview the expanded mall';
   document.getElementById('layout-preview-notice').hidden=!expanded;
+  document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces.`;
+  setupPlannedDirectory(expanded);
   if (expanded) {
     const ns='http://www.w3.org/2000/svg';
     floorplan.setAttribute('viewBox','0 0 700 600'); floorplan.setAttribute('preserveAspectRatio','xMidYMid meet');
@@ -200,12 +224,18 @@ export function createUI(expanded = false) {
       let rect=bay.available ? floorplan.querySelector(`[data-map-store="${spatial.stores[Number(bay.number)-1].id}"]`) : document.createElementNS(ns,'rect');
       rect.setAttribute('class',bay.available?'map-store':'map-store map-planned');
       for(const [key,value] of Object.entries({x:origin.x+2,y:origin.y+2,width:(bay.maxX-bay.minX)*10-4,height:(bay.maxZ-bay.minZ)*10-4,rx:3}))rect.setAttribute(key,value);
-      if(!bay.available) floorplan.insertBefore(rect,playerDot);
+      if(!bay.available) {
+        const space = plannedSpaces.find(item => item.number === bay.number);
+        rect.setAttribute('data-space-id', space.id); rect.setAttribute('data-space-status', space.status);
+        const title = document.createElementNS(ns, 'title');
+        title.textContent = `${space.label}: ${plannedSideLabels[space.side]}; planned, not open.`;
+        rect.append(title); floorplan.insertBefore(rect,playerDot);
+      }
       const label=document.createElementNS(ns,'text');label.setAttribute('class','expanded-map-number');
       label.setAttribute('x',origin.x+(bay.maxX-bay.minX)*5);label.setAttribute('y',origin.y+(bay.maxZ-bay.minZ)*5+6);
       label.setAttribute('text-anchor','middle');label.textContent=bay.number;floorplan.insertBefore(label,playerDot);
     }
-    document.querySelector('.map-scale').textContent='14 planned spaces';
+    document.querySelector('.map-scale').textContent=`${plannedSpaces.length} planned spaces`;
   }
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
   // Preserve readable static HTML without JS; synchronize the live map and

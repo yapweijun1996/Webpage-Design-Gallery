@@ -166,3 +166,7 @@ The [eight-asset pilot](docs/gjh-v11-interior-pilot-review.md) integrates reusab
 Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. These complement the existing Gallery/GJH/PWA suites. Physical-device performance remains pending. The original eight-asset pilot is historical; the separate four-ID D3 follow-up above has its own acceptance evidence.
 
 Visitor v2 camera, pickup, seated framing and direct Cart UX fixes use `python tests/browser_gjh_visitor_v2_real_input.py` for normal-motion browser keyboard/touch journeys. See [scoped verification and limits](docs/gjh-visitor-v2-ux-fixes.md).
+
+Expanded preview stage6 adds14neutral planned-space Directory records aligned with the Map and closed3D bays, preserving the three current stores and four products. No new branded catalog or licensed assets are implied. See [candidate-space verification](docs/gjh-v11-stage6-candidates.md); run `python tests/browser_gjh_candidates.py --evidence /private/tmp/gjh-candidate-qa` for native disclosure, unavailable travel and noJS/WebGL/Rapier fallback checks.
+
+The Pages workflow runs the mall state/spatial/static-fallback contracts with the runner's Node runtime: `node --test tests/gjh_modes.test.mjs tests/gjh_spatial.test.mjs tests/gjh_expanded_layout.test.mjs`. These use built-in Node18+ APIs and require no npm packages.

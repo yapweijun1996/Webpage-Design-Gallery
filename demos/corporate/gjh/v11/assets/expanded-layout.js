@@ -15,6 +15,13 @@ export const expandedLayout = Object.freeze({
   loop: Object.freeze([Object.freeze({x:-12,z:3}),Object.freeze({x:32,z:3}),
     Object.freeze({x:32,z:39}),Object.freeze({x:-12,z:39})])
 });
+// Neutral directory metadata shares the closed slot numbers and availability.
+export const plannedSpaces = Object.freeze(expandedLayout.slots.filter(slot => !slot.available).map(slot => Object.freeze({
+  id: `planned-space-${slot.number}`, number: slot.number, label: `Planned space ${slot.number}`,
+  side: slot.side, status: 'planned', available: false,
+  admission: Object.freeze({brand: 'unassigned', content: 'missing', rights: 'not-reviewed'})
+})));
+
 export const expandedMapPoint = (x,z) => ({
   x: Math.max(0, Math.min(700, (x + 25) * 10)),
   y: Math.max(0, Math.min(600, (z + 12) * 10))

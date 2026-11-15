@@ -492,10 +492,11 @@ export async function createWorld(T, R, physics, expanded = false) {
     // A single instanced label keeps every unoccupied bay visibly provisional.
     const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=128;
     const ctx=canvas.getContext('2d'); ctx.fillStyle='#17372e';ctx.fillRect(0,0,512,128);
-    ctx.fillStyle='#f5e8cb';ctx.font='bold 48px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('COMING SOON',256,64);
+    ctx.fillStyle='#f5e8cb';ctx.font='bold 48px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('PLANNED SPACE',256,64);
     const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
-    const labels=new T.InstancedMesh(plane,new T.MeshBasicMaterial({map:texture}),14);
-    expandedLayout.slots.filter(item=>!item.available).forEach((bay,i)=>{
+    const plannedBays=expandedLayout.slots.filter(item=>!item.available);
+    const labels=new T.InstancedMesh(plane,new T.MeshBasicMaterial({map:texture}),plannedBays.length);
+    plannedBays.forEach((bay,i)=>{
       const x=bay.side==='north'?(bay.minX+bay.maxX)/2:bay.side==='west'?-14.8:34.8;
       const z=bay.side==='north'?.21:(bay.minZ+bay.maxZ)/2;
       const angle=bay.side==='west'?Math.PI/2:bay.side==='east'?-Math.PI/2:0;

@@ -579,7 +579,7 @@ The earlier nine-slice outline is superseded by the more detailed, dependency-aw
 
 ## Expanded 17-store upgrade — 2026-11-15
 
-Status: **stages 0–5 completed, with stages 3–5 implemented in the opt-in expanded preview; later interior stages remain open**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
+Status: **stages 0–6 completed, with stages 3–6 implemented in the opt-in expanded preview; later interior stages remain open**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
 
 - [x] Inspect existing scene dimensions and repository company/brand research; check GJH corporate and eShop source listings.
 - [x] Produce a labelled, dimensioned 2D ground-floor draft and reconcile area arithmetic, circulation zones, seasonal space and candidate brand evidence.
@@ -593,7 +593,7 @@ Status: **stages 0–5 completed, with stages 3–5 implemented in the opt-in ex
 - [x] **3. Expanded shell:** built an opt-in, reversible 70 × 60 m ground-floor preview with 17 numbered slots (three open, 14 closed), and tested the loop, cart, map, existing stores, bag, recovery and screen sizes. [Implementation, screenshots and limits](docs/gjh-v11-stage3-expanded-shell.md).
 - [x] **4. Atrium and seating:** added a low planted bed, two lounge groups and a clear seasonal reservation to the expanded preview; verified four seat interactions, fallback, cart/loop collision, camera and screen sizes. [Implementation, visual evidence and limits](docs/gjh-v11-stage4-atrium.md).
 - [x] **5. Existing stores:** integrated New Moon, MILI and GOGO into the expanded scene with visible glazed storefronts and directory-to-3D links; verified four product details, brand-only content, map, bag, fallbacks and PWA. [Implementation and evidence](docs/gjh-v11-stage5-existing-stores.md).
-- [ ] **6. Candidate storefronts:** add truthful placeholders, then populate each store only after its individual brand, content and rights checks.
+- [x] **6. Candidate storefronts:** add truthful placeholders, then populate each store only after its individual brand, content and rights checks.
 - [ ] **7. Elevator and facilities:** resolve two-floor lift and service routing; test travel, landing, interruption, v1/v2 and existing interaction state.
 - [ ] **8. Materials and lighting:** refine natural materials and warm premium lighting; validate actual scenes and compare resource use against the baseline.
 - [ ] **9. Theme infrastructure:** build coherent everyday theme and accessible setup with safe state, storage fallback, cancellation and cleanup.
@@ -601,3 +601,17 @@ Status: **stages 0–5 completed, with stages 3–5 implemented in the opt-in ex
 - [ ] **11. Integration:** run applicable generator, unit and browser suites; review actual desktop/mobile journeys, accessibility, performance, fallback and remaining limits.
 
 Proposed dimensions and a small upper landing are documented; owner review, actual-scene clearance, external service connectivity, store content/rights, theme persistence and access remain open for their respective slices. A checked planning item is not runtime implementation or acceptance.
+
+Stage6 neutral-candidate acceptance — 2026-11-15: application1.1.50 adds shared
+planned-space04–17 records,14truthful Directory entries and matching Map states,
+while retaining3open stores/4products. Native staticdetails remains readable
+withoutJS/WebGL/Rapier; closedspaces have no action and all14stale destinations
+are rejected. Existing3D labels say PLANNEDSPACE, not an opening promise.
+Fresh official-navigation observations match14draft names but establish no new
+catalog or asset permission; all runtime candidates remain unassigned/unavailable.
+Independent148source/56raw-hash review,14focusedcontexts,55Python/21Node/gen/SSOT
+and8integrationgroups pass. Paired480actualrenders hold190inactive/193cart calls
+at1440Detailed, unchanged from c652e9f. See docs/gjh-v11-stage6-candidates.md and
+docs/evidence/gjh-stage6-candidates.json. No extra model/request/geometry is added.
+Main/CI/Pages and public DOM/hash verification remain the release gate before7;
+physical-device/AT and later expanded stages are not completed by this slice.

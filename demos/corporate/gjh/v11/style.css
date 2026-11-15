@@ -702,3 +702,14 @@ body:not(.is-3d):has(#mall-connection-notice:not([hidden])) .mall-update-notice{
 .is-expanded .map-label{font-size:var(--font-size-xl)}
 .layout-preview{margin:1rem 0;font-size:var(--gjh-type-layout-preview)}
 .layout-preview a{display:inline-flex;align-items:center;min-height:var(--size-control);text-decoration:underline;text-underline-offset:.2em}
+
+/* Planned spaces remain informational and outside the live store/product catalog. */
+.planned-spaces-directory{margin:var(--space-7) 0;padding:var(--space-4);border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper)}
+.planned-spaces-directory>summary{min-height:var(--size-control);padding:var(--space-2) 0;cursor:pointer;font-weight:700}
+.planned-spaces-directory>p{color:var(--muted);margin:var(--space-3) 0}
+.planned-spaces-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4);list-style:none;padding:0;margin:var(--space-4) 0 0}
+.planned-spaces-list>li{min-width:0;border-top:1px solid var(--line);padding-top:var(--space-4);overflow-wrap:anywhere}
+.planned-spaces-list h3{font-size:var(--font-size-base);margin:0 0 var(--space-2)}
+.planned-spaces-list p{font-size:var(--font-size-sm);color:var(--muted);margin:0 0 var(--space-3)}
+@media(max-width:1000px){.planned-spaces-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.planned-spaces-list{grid-template-columns:minmax(0,1fr)}}
