@@ -1,8 +1,8 @@
 Traceback (most recent call last):
-  File "/private/tmp/gjh-11b-final/tests/browser_gjh_budget.py", line 60, in <module>
+  File "/private/tmp/gjh-11b-merged/tests/browser_gjh_budget.py", line 60, in <module>
     if __name__=='__main__':run()
                             ~~~^^
-  File "/private/tmp/gjh-11b-final/tests/browser_gjh_budget.py", line 24, in run
+  File "/private/tmp/gjh-11b-merged/tests/browser_gjh_budget.py", line 24, in run
     assert len(initial)<=45,'Ready-stage resource count exceeds 45'
            ^^^^^^^^^^^^^^^^
 AssertionError: Ready-stage resource count exceeds 45

@@ -58,3 +58,7 @@ duplicate planned-space directory was removed in favor of the shared, static
 and JavaScript-capable directory on main. The expanded courtyard map arrival
 uses the existing main-branch safe point. Historical stage reports describe the
 source snapshots that were tested at the time, not this later merge.
+
+## Verification
+
+The final [published-artifact and PWA checks](evidence/gjh-stage11b-20261115/publish-and-pwa.log) open both layouts from a generated project-prefix deployment, exercise V1/V2 and a blocked WASM request, and verify offline fallback, bag retention, update identity and hash rejection. The final [expanded accessibility run](evidence/gjh-stage11b-20261115/accessibility.log) covers all four themes and five viewports. [Material checks](evidence/gjh-stage11b-20261115/materials.log) cover the later upstream merge, five viewports, four graphics-quality settings, missing/late modules, canvas failures and graphics restoration. The broader [theme and shell journeys](evidence/gjh-stage11b-20261115/themes-and-shell.log) and [five-viewport lift suite](evidence/gjh-stage11b-20261115/lift.log) ran before the later stage 8 merge; that merge's material suite also rechecks lift travel and its failure paths. The [Python tests](evidence/gjh-stage11b-20261115/unit.log), [Node tests](evidence/gjh-stage11b-20261115/node.log), generator and SSOT checks passed. [Source hashes](evidence/gjh-stage11b-20261115/source-sha256.txt) pin the final runtime and relevant tests.
