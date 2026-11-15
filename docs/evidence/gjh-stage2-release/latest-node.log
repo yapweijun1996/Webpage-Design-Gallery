@@ -1,0 +1,25 @@
+✔ lifecycle exits, cleans, suspends, enters and restores once in order (1.77075ms)
+✔ directory Inspect and Shop return to retained Menu then gameplay base (0.548625ms)
+✔ repeated observations and requests are idempotent without lifecycle effects (0.355166ms)
+✔ commands cannot manufacture gameplay or bypass the retained underlay (0.351042ms)
+✔ invalid observations fail atomically with no lifecycle effects (0.167041ms)
+✔ Inspect cannot be directly replaced by Shop in an observation (0.126ms)
+✔ actual base changes under Shop are retained without fake Explore lifecycle (0.264625ms)
+✔ interrupt cleans once without enter, exit or restoring retained gameplay (0.141708ms)
+✔ history is bounded and distinguishes restores, rejection and interruptions (0.500792ms)
+✔ Shelf suspends each real base and restores through the same ordered lifecycle (0.671416ms)
+✔ complete boolean observations validate all Shelf combinations atomically (1.738041ms)
+✔ Shelf cannot be stacked with or directly replaced by another overlay (0.896625ms)
+✔ derived mode priority agrees with accepted observation (0.134792ms)
+✔ three stable stores share the current scene centers, entrances and ordering (1.488ms)
+✔ location boundaries and map projection retain the existing visible behavior (0.338375ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (1.58775ms)
+✔ unavailable store cannot produce a travel destination (0.117834ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 83.361417

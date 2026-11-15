@@ -5,6 +5,7 @@ export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
+import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
 
 export function createUI() {
   const scene = document.getElementById('scene');
@@ -26,7 +27,10 @@ export function createUI() {
   document.getElementById('graphics-reload').addEventListener('click', () => location.reload());
   return3D.addEventListener('click', () => { if (available) setView(true, true); });
   const playerDot = document.getElementById('player-dot');
-  const floorplan=document.querySelector('.floorplan'),floorplanLabel=floorplan.getAttribute('aria-label'),mapCaption=document.querySelector('.map-caption');
+  const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
+  const [west, centre, east] = spatial.stores;
+  const floorplanLabel=`Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  floorplan.setAttribute('aria-label',floorplanLabel);
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
   const inspectPrompt = document.getElementById('inspect-prompt');
   const inspectButton = document.getElementById('inspect');
@@ -175,6 +179,30 @@ export function createUI() {
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
+  // Preserve readable static HTML without JS; synchronize the live map and
+  // directory from the same validated records used by the 3D world.
+  for (const store of spatial.stores) {
+    const mapButton=mapButtons.find(button=>button.dataset.teleport===store.id);
+    const mapRect=floorplan.querySelector(`[data-map-store="${store.id}"]`);
+    const article=storeList.querySelector(`[data-store="${store.id}"]`);
+    const filter=storeList.querySelector(`[data-store-filter="${store.id}"]`);
+    const title=document.getElementById(store.contentRef);
+    if (!mapButton || !mapRect || !article || !filter || !title || !article.contains(title)) throw new Error(`Missing store content for ${store.id}`);
+    const rect=mapStoreRect(store);
+    for (const key of ['x','y','width','height']) mapRect.setAttribute(key,String(rect[key]));
+    mapButton.style.left=`${rect.x / mapView.width * 100}%`;
+    mapButton.style.width=`${rect.width / mapView.width * 100}%`;
+    mapButton.querySelector('span').textContent=store.number;
+    mapButton.lastChild.textContent=store.label;
+    mapButton.setAttribute('aria-label',`Go to the ${store.label} storefront`);
+    mapButton.disabled=!store.available;
+    filter.lastChild.textContent=` ${store.label}`;
+    title.textContent=store.label;
+    article.querySelector('.store-story > .eyebrow').textContent=`${store.number} / The ${store.label} store`;
+    if (article.dataset.brand) article.dataset.brandName=store.label;
+  }
+  storeList.querySelector('[data-store-filter="all"]').textContent=`All stores (${spatial.stores.length})`;
+  storeList.querySelector('.list-summary strong').textContent=`${spatial.stores.length} stores`;
   function focusMap() {
     // Publish the footer reservation before revealing the focused destination.
     notifyMode();
@@ -210,7 +238,7 @@ export function createUI() {
   cartToggle.addEventListener('click',toggleCart);sceneCart.addEventListener('click',toggleCart);
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
-  const zones = { atrium: 'The courtyard', newmoon: 'New Moon', mili: 'MILI', gogo: 'GOGO', upper: 'Upper level' };
+  const zones = { atrium: 'The courtyard', ...Object.fromEntries(spatial.stores.map(store=>[store.id,store.label])), upper: 'Upper level' };
   let available = false;
   let showing3D = false;
   let currentZone = 'atrium';
@@ -258,6 +286,7 @@ export function createUI() {
     if (guide.open) guide.close('view-change');
     showing3D = next;
     onboarding.setVisible(next);
+    locationName.textContent = next ? zones[currentZone] : 'The store directory';
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle('is-3d', next);
@@ -433,9 +462,11 @@ export function createUI() {
     button.addEventListener('click', () => inspect(button.dataset.inspect));
   }
   function travelToStore(zone){
-    if(!showing3D||dialog.open||guidePaused)return;
+    const store=spatial.get(zone);
+    if(!showing3D||dialog.open||guidePaused||!store?.available)return;
+    if(!teleportListener?.(zone)){announce('Store travel is unavailable right now. Please try again.');return;}
     help.open=false;if(compactMap.matches)mallMap.open=false;
-    teleportListener?.(zone);announce(`At the ${zones[zone]} storefront.`);scene.focus({preventScroll:true});
+    announce(`At the ${store.label} storefront.`);scene.focus({preventScroll:true});
   }
   for(const button of mapButtons)button.addEventListener('click',()=>travelToStore(button.dataset.teleport));
   function navigateStore(zone){
@@ -443,7 +474,7 @@ export function createUI() {
     else {storeFilter='all';updateCatalog();const title=document.getElementById(`${zone}-title`);title.tabIndex=-1;title.scrollIntoView({block:'start'});title.focus({preventScroll:true});}
   }
   function openAmenity(id){
-    const storeActions=['newmoon','mili','gogo'].map(zone=>({id:zone,label:{en:`Visit ${zones[zone]}`,'zh-CN':`前往 ${zones[zone]}`},onSelect:()=>navigateStore(zone)}));
+    const storeActions=spatial.stores.filter(store=>store.available).map(store=>({id:store.id,label:{en:`Visit ${store.label}`,'zh-CN':`前往 ${store.label}`},onSelect:()=>navigateStore(store.id)}));
     const directory={id:'directory',label:{en:'Browse store directory','zh-CN':'浏览店铺目录'},onSelect:()=>setView(false,true)};
     if(id==='featured-showcase'){
       amenityPanel.open({title:{en:'New Moon featured collection','zh-CN':'New Moon 精选产品'},description:{en:'Choose a product to view its official image and details. The display door stays closed; the 3D cans are unofficial visual demonstrations.','zh-CN':'选择产品查看官方图片与详情。展柜门保持关闭，3D 罐身为非官方视觉示意。'},actions:[...document.querySelectorAll('[data-product]')].map(card=>{
@@ -558,8 +589,9 @@ export function createUI() {
         }
       }
       if (Number.isFinite(x) && Number.isFinite(z)) {
-        playerDot.setAttribute('cx', String((Math.max(-15, Math.min(15, x)) + 15) * 10));
-        playerDot.setAttribute('cy', String((Math.max(-11, Math.min(18, z)) + 11) * 10));
+        const point=mapPoint(x,z);
+        playerDot.setAttribute('cx', String(point.x));
+        playerDot.setAttribute('cy', String(point.y));
       }
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {

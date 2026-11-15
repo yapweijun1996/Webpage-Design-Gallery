@@ -114,7 +114,7 @@ body.is-3d{overflow:hidden;background:var(--green)}
 .mall-intro h1{font-size:var(--gjh-type-mall-intro-h1);letter-spacing:-.025em;margin-bottom:6px}
 .mall-intro>p:last-child{font-size:var(--gjh-type-product-inspect);color:var(--gjh-color-mall-intro-p-last-child);margin:0}
 .keyboard-help{pointer-events:auto;position:absolute;left:36px;bottom:60px;max-width:330px;background:var(--gjh-color-is-3d-site-header);font-size:var(--gjh-type-header-location);border:1px solid var(--gjh-color-keyboard-help);z-index:var(--gjh-layer-keyboard-help)}
-.keyboard-help summary{min-height:44px;display:flex;align-items:center;padding:0 16px;list-style:none;cursor:pointer;font-size:var(--gjh-type-product-inspect);letter-spacing:.04em}
+.keyboard-help summary{min-width:44px;min-height:44px;display:flex;align-items:center;padding:0 16px;list-style:none;cursor:pointer;font-size:var(--gjh-type-product-inspect);letter-spacing:.04em}
 .keyboard-help summary::-webkit-details-marker{display:none}
 .keyboard-help[open] summary{border-bottom:1px solid var(--gjh-color-keyboard-help)}
 .keyboard-help #controls-copy{padding:16px;max-height:calc(100dvh - 350px);overflow:auto}

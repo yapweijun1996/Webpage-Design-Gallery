@@ -1,5 +1,6 @@
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createFurnishings} from './furnishings.js';
+import {spatial, storeCenterX} from './spatial.js';
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics) {
@@ -218,8 +219,8 @@ export async function createWorld(T, R, physics) {
   collider(-5.3, 1.025, 10.4, .96, 2.05, .68);
   shadow(-5.3, 10.4, 1.2, .9);
   interactables.push({id: 'mall-directory', x: -5.3, z: 10.4, radius: 2.8});
-  const stores = {newmoon: -10, mili: 0, gogo: 10};
-  for (const [zone, x] of Object.entries(stores)) {
+  for (const store of spatial.stores) {
+    const zone = store.id, x = storeCenterX(store);
     const wall = zone === 'mili' ? 'cream' : 'green';
     for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     box(wall, x, 2.85, -10.5, 10, 5.7, .25, true);
@@ -298,7 +299,7 @@ export async function createWorld(T, R, physics) {
     art(logo, x, 4.67, .4, 2.2);
     box('glow', x, 5.36, .36, 2.42, .025, .045);
     box('brass', x, 4.02, .29, 9.3, .025, .04);
-    const label = sign(zone === 'newmoon' ? '01  /  NEW MOON' : zone === 'mili' ? '02  /  MILI' : '03  /  GOGO', x, 3.5, .38, 3.9, .48, true, 80);
+    const label = sign(`${store.number}  /  ${store.label.toUpperCase()}`, x, 3.5, .38, 3.9, .48, true, 80);
     roomSigns.push({zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0});
     // Two independently kinematic glass leaves slide clear of the walking capsule.
     const leaves = [];

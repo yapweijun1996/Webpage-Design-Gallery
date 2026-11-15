@@ -1,4 +1,5 @@
 import {createCharacter} from './character.js';
+import {spatial, courtyardArrival} from './spatial.js';
 
 export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = []) {
   const character = await createCharacter(T);
@@ -252,10 +253,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function teleport(zone) {
     if (elevatorTravel) return false;
-    const destinations = {atrium: [-2, 12], newmoon: [-10, 2.4], mili: [0, 2.4], gogo: [10, 2.4]};
-    if (!destinations[zone]) return false;
+    const destination = zone === 'atrium' ? courtyardArrival : spatial.arrival(zone);
+    if (!destination) return false;
     productApproach=null;productHome=null;character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
-    const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
+    const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }

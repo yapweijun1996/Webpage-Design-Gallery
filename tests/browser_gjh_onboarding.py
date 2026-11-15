@@ -1,5 +1,6 @@
 """Actual mall integration: nonblocking progress and standard gamepad adapter."""
 from browser_gjh_guide import *
+from browser_gjh_all_seats import move
 
 def run():
  OUT.mkdir(parents=True,exist_ok=True)
@@ -21,12 +22,21 @@ def run():
    page.screenshot(path=str(OUT/'tutorial-look-desktop.png'))
    page.evaluate('padState.axes[2]=.8');page.wait_for_function('Math.abs(__mall.state.yaw)>.12');page.evaluate('padState.axes[2]=0')
    page.wait_for_function('document.querySelector(".ob-tip h3").textContent==="Inspect"')
-   # Use the existing deterministic fixture path to arrange proximity, then a real host frame/button edge.
-   page.evaluate('''() => {__mall.teleport("mili");for(const [input,ms] of [[{},400],[{forward:1},1500],[{right:-1},450],[{forward:1},2300],[{right:1},500]]){__mall.setInput(input);__mall.step(ms);}__mall.setInput(null);}''')
+   # Let the real frame loop consume the neutral stick before manual stepping;
+   # otherwise its last sampled look input continues turning during the fixture.
+   page.evaluate('''async () => {await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame)}''')
+   page.evaluate('__mall.teleport("mili")')
+   # Arrange proximity by walking around the table with the normal collider.
+   move(page,1.4,-3.5);move(page,1.4,-7.8);move(page,0,-7.8)
+   page.evaluate('__mall.setInput(null)')
    page.wait_for_function('__mall.state.nearby==="mili"');page.evaluate('padState.buttons[0].pressed=true')
    page.locator('#product-dialog').wait_for(state='visible');page.evaluate('padState.buttons[0].pressed=false')
    page.locator('#product-close').click();page.wait_for_function('!document.querySelector("#product-dialog").open')
    page.wait_for_function('document.querySelector(".ob-tip h3").textContent==="You’re ready!"')
+   # The current scene suppresses tutorial tips while an interaction prompt owns
+   # the HUD. Walk clear so the real completion control is visible again.
+   move(page,1.4,-7.8);move(page,1.4,-3.5);page.evaluate('__mall.setInput(null)')
+   page.wait_for_function('!__mall.state.nearby')
    page.get_by_role('button',name='Keep exploring',exact=True).click()
    page.evaluate('padState.buttons[9].pressed=true');page.wait_for_function('document.querySelector("#keyboard-help").open');page.evaluate('padState.buttons[9].pressed=false')
    page.wait_for_timeout(50)

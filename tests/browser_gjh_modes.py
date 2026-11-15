@@ -388,7 +388,11 @@ def run():
                     shot('breakpoint-restored')
 
                 # Physical shelf ownership survives ordinary product/Bag overlays.
-                page.evaluate("__mall.teleport('newmoon'); __mall.setInput({forward:1}); __mall.step(3900); __mall.setInput({forward:0})")
+                page.evaluate("__mall.teleport('newmoon')")
+                # Current physical pickup has a narrower shelf reach. Walk to
+                # the authored Australia shelf approach with collisions active.
+                move(page, -11.21, 1)
+                move(page, -11.21, -7.55)
                 page.get_by_role('button', name='Pick up product', exact=True).click()
                 page.evaluate('__mall.step(1000)')
                 held = state(page)['character']['physicalProduct']

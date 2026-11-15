@@ -32,9 +32,15 @@ def run():
     ready(page,url);guide(page)
     assert page.locator('#guide-dialog :focus').count()==1
     page.keyboard.press('Shift+Tab');assert page.evaluate('document.activeElement.id')=='context-shops'
+    page.keyboard.press('Tab');assert page.evaluate('document.activeElement.matches("#guide-dialog .ob-settings-toggle")')
     page.keyboard.press('Tab');assert page.evaluate('document.activeElement.id')=='guide-close'
-    assert page.locator('[data-guide-touch]').is_visible()==touch
-    assert page.locator('[data-guide-desktop]').is_visible()!=touch
+    # Small-screen guidance starts collapsed; expand the actual controls before
+    # checking which input instructions are visible.
+    if page.locator('#guide-controls').is_hidden():page.locator('#guide-dialog .ob-controls-toggle').click()
+    controls=page.locator('#guide-controls');assert controls.is_visible()
+    assert controls.get_attribute('data-input-mode')==('touch' if touch else 'keyboard')
+    if touch:assert 'Drag to move' in controls.inner_text()
+    else:assert controls.locator('kbd').first.inner_text()=='W'
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     small=page.locator('#guide-dialog button').evaluate_all('els=>els.filter(e=>{let r=e.getBoundingClientRect();return r.width<44||r.height<44}).map(e=>e.id)');assert not small,small
     before=state(page);page.keyboard.press('w');page.evaluate('__mall.setInput({forward:1});__mall.step(500)');after=state(page);assert (before['x'],before['z'])==(after['x'],after['z'])

@@ -1,0 +1,4 @@
+PASS lifecycle 390x844: 81 snapshots
+PASS lifecycle 768x1024: 42 snapshots
+PASS lifecycle 1440x900: 42 snapshots
+Evidence: /tmp/gjh-stage0-fixes-2SN9ZAyE/current-modes.json

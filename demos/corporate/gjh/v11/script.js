@@ -3,6 +3,7 @@ import {createUI} from './assets/ui.js';
 import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
+import {spatial, storeAt} from './assets/spatial.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
@@ -79,7 +80,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
-  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : p.z < .1 ? (p.x < -5 ? 'newmoon' : p.x > 5 ? 'gogo' : 'mili') : 'atrium';
+  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z)?.id || 'atrium';
   nearby = null; selectedInteraction = null; let best = Infinity;
   for (const item of world.interactables) {
     if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;
@@ -150,7 +151,12 @@ function fallback(message, terminal = true) {
   shelfFocus?.close();
   cancelAnimationFrame(frame); frame = 0; modes.interrupt('fallback'); ui.fallback(message);
 }
-ui.onTeleport(zone => { if (ready) { manual = false; player.cancelCollection(); player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
+ui.onTeleport(zone => {
+  if (!ready || player.state.elevatorTravel || !spatial.arrival(zone)) return false;
+  manual = false; player.cancelCollection(); player.setInput(null);
+  if (!player.teleport(zone)) return false;
+  updateHUD(); render(); canvas.focus({preventScroll: true}); return true;
+});
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit(id):player.stand();updateHUD();render();return ok;});
 ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
 document.addEventListener('keydown', event => {

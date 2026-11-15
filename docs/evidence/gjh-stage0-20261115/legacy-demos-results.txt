@@ -1,0 +1,31 @@
+Gallery built: 1 companies, 8 designs
+v1 / 1440px: layout, navigation, images, keyboard PASS; axe violations 0
+v1 / 1024px: layout, navigation, images, keyboard PASS; axe violations 0
+v1 / 768px: layout, navigation, images, keyboard PASS; axe violations 0
+v1 / 430px: layout, navigation, images, keyboard PASS; axe violations 0
+v1 / 390px: layout, navigation, images, keyboard PASS; axe violations 0
+v1 / 375px: layout, navigation, images, keyboard PASS; axe violations 0
+v1 / 320px: layout, navigation, images, keyboard PASS; axe violations 0
+v5 / 1440px: layout, navigation, images, keyboard PASS; axe violations 0
+v5 / 1024px: layout, navigation, images, keyboard PASS; axe violations 0
+v5 / 768px: layout, navigation, images, keyboard PASS; axe violations 0
+v5 / 430px: layout, navigation, images, keyboard PASS; axe violations 0
+v5 / 390px: layout, navigation, images, keyboard PASS; axe violations 0
+v5 / 375px: layout, navigation, images, keyboard PASS; axe violations 0
+v5 / 320px: layout, navigation, images, keyboard PASS; axe violations 0
+v6 / 1440px: layout, navigation, images, keyboard PASS; axe violations 0
+v6 / 1024px: layout, navigation, images, keyboard PASS; axe violations 0
+v6 / 768px: layout, navigation, images, keyboard PASS; axe violations 0
+v6 / 430px: layout, navigation, images, keyboard PASS; axe violations 0
+v6 / 390px: layout, navigation, images, keyboard PASS; axe violations 0
+v6 / 375px: layout, navigation, images, keyboard PASS; axe violations 0
+v6 / 320px: layout, navigation, images, keyboard PASS; axe violations 0
+v7 / 1440px: layout, navigation, images, keyboard PASS; axe violations 0
+v7 / 1024px: layout, navigation, images, keyboard PASS; axe violations 0
+v7 / 768px: layout, navigation, images, keyboard PASS; axe violations 0
+v7 / 430px: layout, navigation, images, keyboard PASS; axe violations 0
+v7 / 390px: layout, navigation, images, keyboard PASS; axe violations 0
+v7 / 375px: layout, navigation, images, keyboard PASS; axe violations 0
+v7 / 320px: layout, navigation, images, keyboard PASS; axe violations 0
+PASS: 28 browser cases; four no-JavaScript journeys; source asset integrity.
+Gallery must be rebuilt after screenshot capture so design-detail dimensions stay current.

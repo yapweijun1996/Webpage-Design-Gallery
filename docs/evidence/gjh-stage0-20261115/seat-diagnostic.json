@@ -1,0 +1,26 @@
+{
+  "originalRoute": {
+    "x": -7.4686279296875,
+    "z": 11.06512451171875,
+    "nearby": "mall-directory",
+    "seated": false,
+    "interaction": {
+      "id": "mall-directory",
+      "x": -5.3,
+      "y": 0,
+      "z": 10.4,
+      "radius": 2.8,
+      "distance": 2.268333686543891
+    }
+  },
+  "originalExpected": "courtyard-seat",
+  "alternateRoute": {
+    "x": -7.567070484161377,
+    "z": 8.364954948425293,
+    "nearby": "courtyard-seat",
+    "seated": false
+  },
+  "errors": [],
+  "alternateSeated": true,
+  "alternateStood": true
+}

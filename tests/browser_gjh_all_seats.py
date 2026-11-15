@@ -10,22 +10,36 @@ def move(page,x,z):
  else:raise AssertionError(('route obstructed',x,z,state(page)))
  page.evaluate('__mall.setInput({forward:0});__mall.step(20)')
 
+def approach_published_seat(page, index, seat):
+ """Walk around furniture to the authored exit point with collisions enabled."""
+ if index < 4:
+  page.evaluate('__mall.teleport("atrium")')
+  if seat['facing'] == 1:
+   # The kiosk obstructs the old x=-5.7 route; pass between it and the plinth.
+   aisle = -3 if seat['x'] < 0 else 3
+   move(page, aisle, 12)
+   move(page, aisle, seat['exitZ'])
+  else:
+   move(page, -2, seat['exitZ'])
+ else:
+  center = 0 if index < 6 else 10
+  page.evaluate('zone=>__mall.teleport(zone)', 'mili' if index < 6 else 'gogo')
+  x = center + (-1.4 if seat['x'] < center else 1.4)
+  move(page, x, 2.4)
+  move(page, x, seat['exitZ'])
+ move(page, seat['exitX'], seat['exitZ'])
+
 def run():
  ap=argparse.ArgumentParser();ap.add_argument('--url');ap.add_argument('--capture-only',action='store_true');ap.add_argument('--stores-only',action='store_true');ap.add_argument('--indices');ap.add_argument('--width',type=int,default=390);args=ap.parse_args();out=ROOT.parent/'evidence/v11-all-seats';out=out/'landscape' if args.width==844 else out;out.mkdir(exist_ok=True);s=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT)));threading.Thread(target=s.serve_forever,daemon=True).start();rows=[]
  try:
   with sync_playwright() as p:
-   b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader']);page=b.new_page(viewport={'width':args.width,'height':390 if args.width==844 else 680},has_touch=True,reduced_motion='no-preference');ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-list').click();closed(page);page.locator('.product-card [data-inspect]').first.click();page.locator('#product-add').click();page.locator('#product-close').click();page.locator('#view-toggle').click();seats=state(page)['seats'];assert len(seats)==8 and len({s['id'] for s in seats})==8
+   b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=[f'--use-angle={os.environ.get("GALLERY_WEBGL_BACKEND","swiftshader")}','--enable-unsafe-swiftshader']);page=b.new_page(viewport={'width':args.width,'height':390 if args.width==844 else 680},has_touch=True,reduced_motion='no-preference');ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-list').click();closed(page);page.locator('.product-card [data-inspect]').first.click();page.locator('#product-add').click();page.locator('#product-close').click();page.locator('#view-toggle').click();seats=state(page)['seats'];assert len(seats)==8 and len({s['id'] for s in seats})==8
    for i,seat in enumerate(seats):
     if args.indices and i not in [int(n) for n in args.indices.split(',')]:continue
     if args.stores_only and i<4:continue
     if args.capture_only and i not in [0,2]:continue
-    if i<4:
-     page.evaluate('__mall.teleport("atrium")')
-     if seat['facing']==1:move(page,-5.7 if seat['x']<0 else 5.7,12);move(page,-5.7 if seat['x']<0 else 5.7,seat['exitZ'])
-     else:move(page,-2,seat['exitZ'])
-    else:
-     center=0 if i<6 else 10;page.evaluate('zone=>__mall.teleport(zone)','mili' if i<6 else 'gogo');move(page,center+(-1.4 if seat['x']<center else 1.4),2.4);move(page,center+(-1.4 if seat['x']<center else 1.4),seat['exitZ'])
-    move(page,seat['exitX'],seat['exitZ']);assert state(page)['nearby']==seat['id'],state(page);page.evaluate('__mall.setInput({forward:0,yaw:.3,pitch:.2});__mall.step(20)');viewBefore=state(page);page.locator('#inspect').click();page.evaluate('__mall.setInput({forward:0});__mall.step(350)');assert state(page)['seatPhase']=='sit',state(page)
+    approach_published_seat(page,i,seat)
+    assert state(page)['nearby']==seat['id'],state(page);page.evaluate('__mall.setInput({forward:0,yaw:.3,pitch:.2});__mall.step(20)');viewBefore=state(page);page.locator('#inspect').click();page.evaluate('__mall.setInput({forward:0});__mall.step(350)');assert state(page)['seatPhase']=='sit',state(page)
     if args.capture_only:
      page.screenshot(path=str(out/f'phase-{i+1}-0.png'))
      for sample in range(1,4):

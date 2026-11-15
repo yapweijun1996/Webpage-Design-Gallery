@@ -1,0 +1,4 @@
+import json
+from playwright.sync_api import sync_playwright
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args=['--use-angle=metal','--enable-unsafe-swiftshader']);c=b.new_context(viewport={'width':320,'height':568},has_touch=True,service_workers='block');page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto('http://127.0.0.1:8771/demos/corporate/gjh/v11/');page.wait_for_function('window.__mall?.ready&&window.__sceneReady',timeout=90000);page.locator('#guide-start').click();page.locator('[data-ob-action=skip]').click();page.locator('#view-toggle').click();print(json.dumps({'viewport':[320,568],'directoryVisible':page.locator('#store-list').is_visible(),'sceneHidden':not page.locator('#experience').is_visible(),'errors':errors}));c.close();b.close()

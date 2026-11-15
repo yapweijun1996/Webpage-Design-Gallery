@@ -1,0 +1,12 @@
+Gallery built: 1 companies, 8 designs
+Traceback (most recent call last):
+  File "/private/tmp/gjh-origin-control/tests/browser_gjh_v11.py", line 383, in <module>
+    run(parser.parse_args().capture)
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/gjh-origin-control/tests/browser_gjh_v11.py", line 186, in run
+    targets(page)
+    ~~~~~~~^^^^^^
+  File "/private/tmp/gjh-origin-control/tests/browser_gjh_v11.py", line 37, in targets
+    assert not small, small
+           ^^^^^^^^^
+AssertionError: [{'text': 'Help', 'width': 36, 'height': 44}]
