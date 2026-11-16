@@ -42,21 +42,23 @@ export async function addShopSignAtlas(T, layout, scene) {
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;
   const positions = [], uvs = [], indices = [];
-  layout.slots.forEach((bay, index) => {
+  layout.slots.forEach(bay => {
+    if (bay.available) return;
+    const index = Number(bay.number) - 1;
     const x = bay.side === 'north' ? (bay.minX + bay.maxX) / 2 : bay.side === 'west' ? bay.maxX + .27 : bay.minX - .27;
     const z = bay.side === 'north' ? .26 : (bay.minZ + bay.maxZ) / 2;
     // Keep the atlas face toward the approach; DoubleSide alone would mirror the
     // lettering when a visitor sees the back of a reversed quad.
     const angle = bay.side === 'north' ? 0 : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2;
-    const widthOnWall = bay.side === 'north' ? 4.6 : 4;
-    const height = .9, cos = Math.cos(angle), sin = Math.sin(angle);
+    const widthOnWall = bay.side === 'north' ? 8.6 : 6.8;
+    const height = 1.18, cos = Math.cos(angle), sin = Math.sin(angle);
     for (const [dx, dy] of [[-widthOnWall / 2, -height / 2], [widthOnWall / 2, -height / 2],
       [widthOnWall / 2, height / 2], [-widthOnWall / 2, height / 2]]) {
-      positions.push(x + dx * cos, 3.5 + dy, z - dx * sin);
+      positions.push(x + dx * cos, 4.75 + dy, z - dx * sin);
     }
     const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
     uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
-    const vertex = index * 4;
+    const vertex = positions.length / 3 - 4;
     indices.push(vertex, vertex + 1, vertex + 2, vertex, vertex + 2, vertex + 3);
   });
   const geometry = new T.BufferGeometry();
@@ -64,7 +66,7 @@ export async function addShopSignAtlas(T, layout, scene) {
   geometry.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
   geometry.setIndex(indices); geometry.computeBoundingSphere();
   const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({map: texture, side: T.DoubleSide}));
-  mesh.name = 'Seventeen branded shop signs';
+  mesh.name = 'Expanded branded shop signs';
   scene.add(mesh);
   return mesh;
 }

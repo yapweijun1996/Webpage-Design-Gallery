@@ -1030,23 +1030,26 @@ async function addShopSignAtlas(T, layout, scene) {
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;
   const positions = [], uvs = [], indices = [];
-  layout.slots.forEach((bay, index) => {
+  layout.slots.forEach((bay) => {
+    if (bay.available)
+      return;
+    const index = Number(bay.number) - 1;
     const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX + 0.27 : bay.minX - 0.27;
     const z = bay.side === "north" ? 0.26 : (bay.minZ + bay.maxZ) / 2;
     const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
-    const widthOnWall = bay.side === "north" ? 4.6 : 4;
-    const height = 0.9, cos = Math.cos(angle), sin = Math.sin(angle);
+    const widthOnWall = bay.side === "north" ? 8.6 : 6.8;
+    const height = 1.18, cos = Math.cos(angle), sin = Math.sin(angle);
     for (const [dx, dy] of [
       [-widthOnWall / 2, -height / 2],
       [widthOnWall / 2, -height / 2],
       [widthOnWall / 2, height / 2],
       [-widthOnWall / 2, height / 2]
     ]) {
-      positions.push(x + dx * cos, 3.5 + dy, z - dx * sin);
+      positions.push(x + dx * cos, 4.75 + dy, z - dx * sin);
     }
     const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
     uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
-    const vertex = index * 4;
+    const vertex = positions.length / 3 - 4;
     indices.push(vertex, vertex + 1, vertex + 2, vertex, vertex + 2, vertex + 3);
   });
   const geometry = new T.BufferGeometry;
@@ -1055,9 +1058,74 @@ async function addShopSignAtlas(T, layout, scene) {
   geometry.setIndex(indices);
   geometry.computeBoundingSphere();
   const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide }));
-  mesh.name = "Seventeen branded shop signs";
+  mesh.name = "Expanded branded shop signs";
   scene.add(mesh);
   return mesh;
+}
+
+// demos/corporate/gjh/v11/assets/expanded-storefronts.js
+function addExpandedStorefronts(T, layout, scene) {
+  const geometry = new T.BoxGeometry(1, 1, 1);
+  const batches = {
+    frame: { material: new T.MeshStandardMaterial({ color: 1457200, roughness: 0.66 }), matrices: [] },
+    brass: { material: new T.MeshStandardMaterial({ color: 12163676, metalness: 0.65, roughness: 0.38 }), matrices: [] },
+    glass: { material: new T.MeshStandardMaterial({
+      color: 12179920,
+      metalness: 0.05,
+      roughness: 0.18,
+      transparent: true,
+      opacity: 0.23,
+      depthWrite: false
+    }), matrices: [] }
+  };
+  const transform = new T.Object3D;
+  for (const bay of layout.slots) {
+    if (bay.available)
+      continue;
+    const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX : bay.minX;
+    const z = bay.side === "north" ? bay.maxZ : (bay.minZ + bay.maxZ) / 2;
+    const width = (bay.side === "north" ? bay.maxX - bay.minX : bay.maxZ - bay.minZ) - 0.6;
+    const box = (kind, along, y, depth, w, h, d) => {
+      transform.position.set(x + along * cos + depth * sin, y, z - along * sin + depth * cos);
+      transform.rotation.set(0, angle, 0);
+      transform.scale.set(w, h, d);
+      transform.updateMatrix();
+      batches[kind].matrices.push(transform.matrix.clone());
+    };
+    const windowWidth = (width - 2.7) / 2;
+    const windowCenter = 1.3 + windowWidth / 2;
+    box("frame", 0, 4.75, 0, width, 1.5, 0.36);
+    box("brass", 0, 4.02, 0.21, width, 0.055, 0.08);
+    box("brass", 0, 5.48, 0.21, width, 0.055, 0.08);
+    for (const side of [-1, 1]) {
+      box("glass", side * windowCenter, 2.17, 0, windowWidth, 3.35, 0.06);
+      box("frame", side * windowCenter, 0.25, 0.07, windowWidth, 0.5, 0.22);
+      box("brass", side * windowCenter, 0.51, 0.2, windowWidth, 0.045, 0.05);
+      box("frame", side * (width / 2 - 0.07), 2.02, 0.08, 0.14, 4.04, 0.24);
+      box("frame", side * 1.3, 2.02, 0.08, 0.12, 4.04, 0.24);
+      box("brass", side * windowCenter, 2.4, 0.12, windowWidth, 0.035, 0.05);
+      box("glass", side * 0.64, 1.97, 0.025, 1.2, 3.86, 0.06);
+      box("frame", side * 0.64, 0.12, 0.09, 1.2, 0.24, 0.18);
+      box("frame", side * 0.04, 2, 0.1, 0.08, 4, 0.18);
+      box("brass", side * 0.18, 1.16, 0.21, 0.045, 0.55, 0.06);
+    }
+    box("frame", 0, 4, 0.08, width, 0.16, 0.24);
+  }
+  const meshes = [];
+  for (const [kind, batch] of Object.entries(batches)) {
+    if (!batch.matrices.length)
+      continue;
+    const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
+    batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
+    mesh.name = `Expanded storefront ${kind}`;
+    mesh.receiveShadow = kind !== "glass";
+    mesh.computeBoundingSphere();
+    scene.add(mesh);
+    meshes.push(mesh);
+  }
+  return meshes;
 }
 
 // demos/corporate/gjh/v11/assets/world.js
@@ -1853,22 +1921,12 @@ async function createWorld(T, R, physics, expanded = false) {
         const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2;
         box("ivory", x, 0.018, z, bay.maxX - bay.minX - 0.12, 0.025, bay.maxZ - bay.minZ - 0.12);
         if (bay.side === "north") {
-          box("shellWall", x, 2.6, 0, 9.9, 5.2, 0.25, true);
-          box("glass", x, 2.2, 0.15, 8.9, 3.7, 0.06);
-          box("brass", x, 4.35, 0.2, 9.1, 0.06, 0.06);
-          for (const offset of [-3, 0, 3])
-            box("brass", x + offset, 2.25, 0.2, 0.055, 3.9, 0.055);
-          box("ivory", x, 0.3, 0.2, 9.1, 0.45, 0.1);
+          collider(x, 2.6, 0, 9.9, 5.2, 0.25);
           for (const edge of [bay.minX, bay.maxX])
             box("ivory", edge, 2.8, -6, 0.2, 5.6, 12, true);
         } else {
           const front = bay.side === "west" ? bay.maxX : bay.minX;
-          box("shellWall", front, 2.6, z, 0.25, 5.2, 7.9, true);
-          box("glass", front + (bay.side === "west" ? 0.15 : -0.15), 2.2, z, 0.06, 3.7, 7);
-          box("brass", front + (bay.side === "west" ? 0.2 : -0.2), 4.35, z, 0.06, 0.06, 7.2);
-          for (const offset of [-2.35, 0, 2.35])
-            box("brass", front + (bay.side === "west" ? 0.2 : -0.2), 2.25, z + offset, 0.055, 3.9, 0.055);
-          box("ivory", front + (bay.side === "west" ? 0.2 : -0.2), 0.3, z, 0.1, 0.45, 7.2);
+          collider(front, 2.6, z, 0.25, 5.2, 7.9);
           for (const edge of [bay.minZ, bay.maxZ])
             box("ivory", x, 2.8, edge, 10, 5.6, 0.2, true);
         }
@@ -1961,6 +2019,7 @@ async function createWorld(T, R, physics, expanded = false) {
         deckRailings.place("post", x, z);
       railingState = deckRailings?.finish(scene) || null;
       activeDeck = false;
+      addExpandedStorefronts(T, expandedLayout, scene);
       await addShopSignAtlas(T, expandedLayout, scene);
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);

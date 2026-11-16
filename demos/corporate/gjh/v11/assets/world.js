@@ -7,6 +7,7 @@ import {spatial, storeCenterX} from './spatial.js';
 import {expandedLayout} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 import {addShopSignAtlas} from './shop-signs.js';
+import {addExpandedStorefronts} from './expanded-storefronts.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 
@@ -590,24 +591,16 @@ export async function createWorld(T, R, physics, expanded = false) {
     activeShopSlot=null;
     }
   if (expanded) {
-    // Closed neutral bays are physical shells, not claims that tenants are open.
+    // Planned bays remain physically closed; their glazing reveals the displays.
     for (const bay of expandedLayout.slots.filter(item => !item.available)) {
       const x=(bay.minX+bay.maxX)/2, z=(bay.minZ+bay.maxZ)/2;
       box('ivory', x, .018, z, bay.maxX-bay.minX-.12, .025, bay.maxZ-bay.minZ-.12);
       if (bay.side === 'north') {
-        box('shellWall', x, 2.6, 0, 9.9, 5.2, .25, true);
-        box('glass', x, 2.2, .15, 8.9, 3.7, .06);
-        box('brass', x, 4.35, .2, 9.1, .06, .06);
-        for (const offset of [-3, 0, 3]) box('brass', x+offset, 2.25, .2, .055, 3.9, .055);
-        box('ivory', x, .3, .2, 9.1, .45, .1);
+        collider(x, 2.6, 0, 9.9, 5.2, .25);
         for (const edge of [bay.minX,bay.maxX]) box('ivory', edge, 2.8, -6, .2, 5.6, 12, true);
       } else {
         const front=bay.side === 'west' ? bay.maxX : bay.minX;
-        box('shellWall', front, 2.6, z, .25, 5.2, 7.9, true);
-        box('glass', front+(bay.side === 'west' ? .15 : -.15), 2.2, z, .06, 3.7, 7);
-        box('brass', front+(bay.side === 'west' ? .2 : -.2), 4.35, z, .06, .06, 7.2);
-        for (const offset of [-2.35, 0, 2.35]) box('brass', front+(bay.side === 'west' ? .2 : -.2), 2.25, z+offset, .055, 3.9, .055);
-        box('ivory', front+(bay.side === 'west' ? .2 : -.2), .3, z, .1, .45, 7.2);
+        collider(front, 2.6, z, .25, 5.2, 7.9);
         for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
       }
       const lot=Number(bay.number);activeShopSlot=lot;
@@ -697,6 +690,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     for(const [x,z] of [[-9,4],[3,4],[-9,16],[3,16]])deckRailings.place('post',x,z);
     railingState=deckRailings?.finish(scene)||null;
     activeDeck=false;
+    addExpandedStorefronts(T,expandedLayout,scene);
     await addShopSignAtlas(T,expandedLayout,scene);
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
