@@ -1128,6 +1128,142 @@ function addExpandedStorefronts(T, layout, scene) {
   return meshes;
 }
 
+// demos/corporate/gjh/v11/assets/expanded-interiors.js
+import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+async function createExpandedInteriors(T, expandedLayout2, scene) {
+  const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
+  const loader = new T.TextureLoader().setCrossOrigin(undefined);
+  const textures = await Promise.all(slots.map((slot2) => loader.loadAsync(new URL(`./brand-kit/S${slot2.number}-hero.webp`, import.meta.url).href)));
+  const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.78, emissive: 3155995, emissiveIntensity: 0.22 });
+  const posterGeometry = new T.PlaneGeometry(3.2, 2.4);
+  const shops = [];
+  const ivory = 15656145, green = 5402203, gold = 13018731, wood = 9135946;
+  const accents = {
+    4: 7887464,
+    5: 9518901,
+    6: 6715527,
+    7: 10242359,
+    8: 4684460,
+    9: 2707324,
+    10: 4689030,
+    11: 8666691,
+    12: 7313040,
+    13: 3356731,
+    14: 6705273,
+    15: 2696997,
+    16: 4954515,
+    17: 6449514
+  };
+  slots.forEach((slot2, index) => {
+    const number = Number(slot2.number), side = slot2.side;
+    const width = side === "north" ? slot2.maxX - slot2.minX : slot2.maxZ - slot2.minZ;
+    const depth = side === "north" ? slot2.maxZ - slot2.minZ : slot2.maxX - slot2.minX;
+    const group = new T.Group;
+    group.name = `S${slot2.number} interior`;
+    group.position.set((slot2.minX + slot2.maxX) / 2, 0, (slot2.minZ + slot2.maxZ) / 2);
+    group.rotation.y = side === "west" ? Math.PI / 2 : side === "east" ? -Math.PI / 2 : 0;
+    const back = -depth / 2 + 0.18, front = depth / 2;
+    const parts = [];
+    function add(geometry, x, y, z, color) {
+      geometry.translate(x, y, z);
+      const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
+      for (let i = 0;i < colors.length; i += 3) {
+        colors[i] = c.r;
+        colors[i + 1] = c.g;
+        colors[i + 2] = c.b;
+      }
+      geometry.setAttribute("color", new T.BufferAttribute(colors, 3));
+      parts.push(geometry);
+    }
+    function box(x, y, z, w, h, d, color) {
+      add(new T.BoxGeometry(w, h, d), x, y, z, color);
+    }
+    function cylinder(x, y, z, r, h, color) {
+      add(new T.CylinderGeometry(r, r, h, 12), x, y, z, color);
+    }
+    box(0, 2.45, back - 0.08, width - 0.35, 4.9, 0.16, ivory);
+    box(0, 0.035, 0, width - 0.35, 0.07, depth - 0.4, 14075559);
+    box(0, 2.65, back + 0.08, 3.5, 2.7, 0.12, gold);
+    box(0, 4.26, back + 0.16, 3.8, 0.1, 0.16, 16770471);
+    box(0, 0.17, back + 0.14, width - 0.45, 0.25, 0.18, green);
+    for (const sign of [-1, 1]) {
+      const x = sign * (width / 2 - 1.05);
+      box(x, 1.3, back + 0.48, 1.45, 2.6, 0.72, wood);
+      box(x, 1.35, back + 0.86, 1.25, 2.25, 0.06, green);
+      for (const y of [0.55, 1.12, 1.69, 2.26]) {
+        box(x, y, back + 0.99, 1.35, 0.09, 0.36, gold);
+        for (let i = -1;i <= 1; i++) {
+          const px = x + i * 0.34;
+          if ([7, 8, 9, 10, 11, 12].includes(number)) {
+            cylinder(px, y + 0.18, back + 1, 0.12, 0.27, number === 8 ? 13346668 : ivory);
+            cylinder(px, y + 0.33, back + 1, 0.125, 0.035, accents[number]);
+          } else {
+            box(px, y + 0.21, back + 1, 0.25, 0.34, 0.15, ivory);
+            box(px, y + 0.23, back + 1.09, 0.17, 0.13, 0.025, accents[number]);
+          }
+        }
+      }
+    }
+    const heroZ = front - 1.75;
+    box(0, 0.47, heroZ, 2.1, 0.9, 1.05, green);
+    box(0, 0.95, heroZ, 2.25, 0.08, 1.2, gold);
+    const accent = accents[number];
+    if ([7, 8, 9, 10, 11, 12].includes(number)) {
+      cylinder(0, 1.5, heroZ, 0.37, 1.05, number === 8 ? 14071672 : ivory);
+      cylinder(0, 2.04, heroZ, 0.38, 0.09, accent);
+      box(0, 1.53, heroZ + 0.375, 0.56, 0.38, 0.025, accent);
+    } else if (number === 14) {
+      box(0, 1.64, heroZ, 1.65, 0.95, 0.12, 2107693);
+      box(0, 1.64, heroZ + 0.07, 1.48, 0.78, 0.025, 5271160);
+      box(0, 1.1, heroZ, 0.12, 0.19, 0.2, 3422266);
+    } else if (number === 15) {
+      box(0, 1.38, heroZ, 1.85, 0.74, 0.65, 2630946);
+      box(0, 1.78, heroZ + 0.18, 1.72, 0.07, 0.37, ivory);
+      for (let i = -6;i <= 6; i++)
+        box(i * 0.125, 1.83, heroZ + 0.09, 0.045, 0.05, 0.17, 2500134);
+    } else if (number === 13) {
+      box(0, 1.42, heroZ, 0.16, 0.83, 0.18, accent);
+      box(0, 1.84, heroZ, 0.85, 0.12, 0.18, accent);
+      box(-0.39, 1.58, heroZ, 0.12, 0.46, 0.2, accent);
+      box(0.39, 1.58, heroZ, 0.12, 0.46, 0.2, accent);
+    } else if (number === 17) {
+      box(0, 1.12, heroZ, 0.8, 0.24, 0.6, accent);
+      box(0, 1.59, heroZ, 0.35, 0.83, 0.19, ivory);
+      box(0, 1.73, heroZ + 0.11, 0.22, 0.2, 0.025, accent);
+      for (let i = -1;i <= 1; i++)
+        for (let j = 0;j < 3; j++)
+          box(i * 0.07, 1.52 - j * 0.08, heroZ + 0.11, 0.035, 0.035, 0.02, accent);
+    } else if (number === 16) {
+      cylinder(0, 1.5, heroZ, 0.35, 0.19, ivory);
+      cylinder(0, 1.61, heroZ, 0.16, 0.035, accent);
+    } else {
+      box(0, 1.57, heroZ, 0.73, 1.18, 0.35, ivory);
+      box(0, 1.59, heroZ + 0.19, 0.56, 0.46, 0.03, accent);
+      box(0, 2.19, heroZ, 0.73, 0.07, 0.36, gold);
+    }
+    const merged = mergeGeometries2(parts);
+    parts.forEach((part) => part.dispose());
+    const furniture = new T.Mesh(merged, material);
+    furniture.name = `S${slot2.number} furnishings`;
+    group.add(furniture);
+    const texture = textures[index];
+    texture.colorSpace = T.SRGBColorSpace;
+    const poster = new T.Mesh(posterGeometry, new T.MeshBasicMaterial({ map: texture }));
+    poster.name = `S${slot2.number} hero image`;
+    poster.position.set(0, 2.65, back + 0.151);
+    group.add(poster);
+    group.visible = false;
+    scene.add(group);
+    shops.push({ group, x: group.position.x, z: group.position.z });
+  });
+  return { update(visitor) {
+    for (const shop of shops) {
+      const dx = visitor.x - shop.x, dz = visitor.z - shop.z;
+      shop.group.visible = Math.abs(visitor.y) < 5 && dx * dx + dz * dz < 17 * 17;
+    }
+  } };
+}
+
 // demos/corporate/gjh/v11/assets/world.js
 import { releaseStartupAssetPack } from "./startup-asset-pack.js";
 function applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill }) {
@@ -2021,6 +2157,8 @@ async function createWorld(T, R, physics, expanded = false) {
       activeDeck = false;
       addExpandedStorefronts(T, expandedLayout, scene);
       await addShopSignAtlas(T, expandedLayout, scene);
+      const interiors = await createExpandedInteriors(T, expandedLayout, scene);
+      shopLodUpdates.push(interiors.update);
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
     interactables.push(...amenities.interactables);

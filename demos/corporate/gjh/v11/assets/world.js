@@ -8,6 +8,7 @@ import {expandedLayout} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 import {addShopSignAtlas} from './shop-signs.js';
 import {addExpandedStorefronts} from './expanded-storefronts.js';
+import {createExpandedInteriors} from './expanded-interiors.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 
@@ -692,6 +693,8 @@ export async function createWorld(T, R, physics, expanded = false) {
     activeDeck=false;
     addExpandedStorefronts(T,expandedLayout,scene);
     await addShopSignAtlas(T,expandedLayout,scene);
+    const interiors=await createExpandedInteriors(T,expandedLayout,scene);
+    shopLodUpdates.push(interiors.update);
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);
