@@ -85,7 +85,14 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
   const group=new T.Group();group.name='Mall amenities';const state={},opaque=[];
   for(const [kind,record] of entries){
     const original=AMENITIES[kind];
-    const definition=expanded && kind==='desk' ? {...original, placements:[[liftLayout.desk.x,0,liftLayout.desk.z,Math.PI]]} : expanded && kind==='showcase' ? {...original, placements:[[liftLayout.showcase.x,0,liftLayout.showcase.z,0]]} : original;
+    const displaySlots=expanded&&kind==='showcase'?expandedLayout.slots.filter(bay=>bay.number===4||bay.number===5||bay.number===12||bay.number===13||bay.number>=16).map(bay=>{
+      const x=bay.side==='north'?(bay.minX+bay.maxX)/2:bay.side==='west'?bay.maxX-1.4:bay.minX+1.4;
+      const z=bay.side==='north'?-1.55:(bay.minZ+bay.maxZ)/2;
+      const angle=bay.side==='north'?Math.PI:bay.side==='west'?Math.PI/2:-Math.PI/2;
+      return [x,0,z,angle];
+    }):[];
+    const definition=expanded&&kind==='desk'?{...original,placements:[[liftLayout.desk.x,0,liftLayout.desk.z,Math.PI]]}:
+      expanded&&kind==='showcase'?{...original,placements:[[liftLayout.showcase.x,0,liftLayout.showcase.z,0],...displaySlots]}:original;
     for(const primitive of record.primitives){
       if(!primitive.material.transparent){
         definition.placements.forEach(([x,y,z,angle])=>{
@@ -102,9 +109,11 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
       }
     }
     if(record.status==='fallback'&&kind!=='signs'){
-      const [x,,z]=definition.placements[0],size=kind==='desk'?[2.88,1.05,.961]:[.75,1.8,.532];
-      const mesh=new T.Mesh(new T.BoxGeometry(...size),new T.MeshStandardMaterial({color:0x21483e,roughness:.7,transparent:kind==='showcase',opacity:kind==='showcase'?.22:1}));
-      mesh.position.set(x,size[1]/2,z);mesh.name=`Amenity ${kind} fallback`;group.add(mesh);
+      const size=kind==='desk'?[2.88,1.05,.961]:[.75,1.8,.532];
+      const mesh=new T.InstancedMesh(new T.BoxGeometry(...size),new T.MeshStandardMaterial({color:0x21483e,roughness:.7,transparent:kind==='showcase',opacity:kind==='showcase'?.22:1}),definition.placements.length);
+      definition.placements.forEach(([x,,z,angle],index)=>mesh.setMatrixAt(index,new T.Matrix4().compose(new T.Vector3(x,size[1]/2,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(1,1,1))));
+      if(kind==='showcase')mesh.material.forceSinglePass=true;
+      mesh.name=`Amenity ${kind} fallback`;group.add(mesh);
     }
     state[kind]=Object.freeze({status:record.status,reason:record.reason,identity:definition.sha,instances:definition.placements.length,primitives:record.primitives.length,dimensions:Object.freeze(record.size),placements:definition.placements,doorPose:kind==='showcase'?'closed':null});
   }

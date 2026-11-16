@@ -120,6 +120,37 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
   }
   const cylinder = (m, x, y, z, r, h) => solid('cylinder', m, x, y, z, r, h, r);
+  function addHealthElectronicsHero(bay) {
+    const {x,z,rotation}=slotShelfPosition(bay);
+    const frontX=x+Math.sin(rotation)*.38,frontZ=z+Math.cos(rotation)*.38;
+    const orientedBox=(material,px,py,pz,sx,sy,sz)=>solid('box',material,px,py,pz,sx,sy,sz,rotation);
+    if(bay.number===4||bay.number===12) {
+      box('cream',frontX,.92,frontZ,.13,.18,.035);
+      box('ivory',frontX,.92,frontZ+.021,.105,.145,.006);
+    } else if(bay.number===5) {
+      for(let index=0;index<3;index++)box('ivory',frontX+(index-1)*.15,.78,frontZ,.11,.2,.07);
+    } else if(bay.number===13) {
+      sphere('ivory',frontX-.09,.93,frontZ,.065,.055,.055);sphere('ivory',frontX+.09,.93,frontZ,.065,.055,.055);
+      solid('torus','dark',frontX,.96,frontZ-.08,.12,.12,.45,0,Math.PI/2);
+    } else if(bay.number===14) {
+      orientedBox('dark',frontX,1.35,frontZ,.951,.535,.035);
+      orientedBox('brass',frontX,.72,frontZ,.05,.78,.05);orientedBox('oak',frontX,.18,frontZ,.62,.08,.3);
+    } else if(bay.number===15) {
+      orientedBox('dark',frontX,.55,frontZ,1.25,.16,.42);
+      orientedBox('cream',frontX,.645,frontZ,1.17,.025,.33);
+      for(let key=0;key<12;key++){
+        const offset=(key-5.5)*.095,px=frontX+offset*Math.cos(rotation),pz=frontZ-offset*Math.sin(rotation);
+        orientedBox('ivory',px,.665,pz,.075,.018,.2);
+      }
+    } else if(bay.number===16) {
+      cylinder('ivory',frontX,.93,frontZ,.055,.025);
+      solid('torus','brass',frontX,.95,frontZ,.034,.034,.7);
+    } else if(bay.number===17) {
+      box('ivory',frontX,.72,frontZ,.2,.08,.12);
+      cylinder('dark',frontX,.91,frontZ,.025,.34);
+      sphere('ivory',frontX,.74,frontZ,.045,.055,.05);
+    }
+  }
   const sphere = (m, x, y, z, sx, sy, sz) => solid('sphere', m, x, y, z, sx, sy, sz);
   // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
   const textures = new Map(), loader = new T.TextureLoader().setCrossOrigin(undefined);
@@ -573,6 +604,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
       }
       if(bay.number>=6&&bay.number<=11)addFoodHero(bay);
+      else if(bay.number===4||bay.number===5||bay.number>=12)addHealthElectronicsHero(bay);
     }
     // The closed glass entrance provides a visible boundary to the ground floor.
     for (const x of [-25,45]) box('ivory',x,3.3,18,.3,6.6,60,true);

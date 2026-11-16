@@ -273,7 +273,13 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   const state = {}, opaque = [];
   for (const [kind, record] of entries) {
     const original = AMENITIES[kind];
-    const definition = expanded && kind === "desk" ? { ...original, placements: [[liftLayout.desk.x, 0, liftLayout.desk.z, Math.PI]] } : expanded && kind === "showcase" ? { ...original, placements: [[liftLayout.showcase.x, 0, liftLayout.showcase.z, 0]] } : original;
+    const displaySlots = expanded && kind === "showcase" ? expandedLayout.slots.filter((bay) => bay.number === 4 || bay.number === 5 || bay.number === 12 || bay.number === 13 || bay.number >= 16).map((bay) => {
+      const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX - 1.4 : bay.minX + 1.4;
+      const z = bay.side === "north" ? -1.55 : (bay.minZ + bay.maxZ) / 2;
+      const angle = bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
+      return [x, 0, z, angle];
+    }) : [];
+    const definition = expanded && kind === "desk" ? { ...original, placements: [[liftLayout.desk.x, 0, liftLayout.desk.z, Math.PI]] } : expanded && kind === "showcase" ? { ...original, placements: [[liftLayout.showcase.x, 0, liftLayout.showcase.z, 0], ...displaySlots] } : original;
     for (const primitive of record.primitives) {
       if (!primitive.material.transparent) {
         definition.placements.forEach(([x, y, z, angle]) => {
@@ -301,9 +307,11 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
       }
     }
     if (record.status === "fallback" && kind !== "signs") {
-      const [x, , z] = definition.placements[0], size = kind === "desk" ? [2.88, 1.05, 0.961] : [0.75, 1.8, 0.532];
-      const mesh = new T.Mesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial({ color: 2181182, roughness: 0.7, transparent: kind === "showcase", opacity: kind === "showcase" ? 0.22 : 1 }));
-      mesh.position.set(x, size[1] / 2, z);
+      const size = kind === "desk" ? [2.88, 1.05, 0.961] : [0.75, 1.8, 0.532];
+      const mesh = new T.InstancedMesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial({ color: 2181182, roughness: 0.7, transparent: kind === "showcase", opacity: kind === "showcase" ? 0.22 : 1 }), definition.placements.length);
+      definition.placements.forEach(([x, , z, angle], index) => mesh.setMatrixAt(index, new T.Matrix4().compose(new T.Vector3(x, size[1] / 2, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1))));
+      if (kind === "showcase")
+        mesh.material.forceSinglePass = true;
       mesh.name = `Amenity ${kind} fallback`;
       group.add(mesh);
     }
@@ -891,7 +899,7 @@ function loadImage(url) {
   });
 }
 async function addShopSignAtlas(T, layout, scene) {
-  const width = 768, rowHeight = 128;
+  const width = 768, rowHeight = 56;
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = rowHeight * SLOT_COUNT;
@@ -904,17 +912,21 @@ async function addShopSignAtlas(T, layout, scene) {
     context.strokeStyle = "#b59b62";
     context.lineWidth = 4;
     context.strokeRect(4, y + 4, width - 8, rowHeight - 8);
+    if (index === 0) {
+      context.fillStyle = "#b53a32";
+      context.fillRect(8, y + rowHeight - 5, width - 16, 2);
+    }
     const logo = logos[index];
     if (logo) {
-      const scale = Math.min(210 / logo.width, 92 / logo.height);
+      const scale = Math.min(190 / logo.width, 42 / logo.height);
       const logoWidth = logo.width * scale, logoHeight = logo.height * scale;
-      context.drawImage(logo, 18 + (210 - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
+      context.drawImage(logo, 16 + (190 - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
     }
     context.fillStyle = "#f5e8cb";
-    context.font = "bold 34px Arial";
+    context.font = "bold 22px Arial";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(name, 491, y + 64, 500);
+    context.fillText(name, 484, y + 28, 520);
   });
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;
@@ -1027,6 +1039,39 @@ async function createWorld(T, R, physics, expanded = false) {
           cylinder("timber", x, 0.66, z, 0.052, 0.14);
           cylinder("brass", x, 0.733, z, 0.053, 0.014);
         }
+      }
+    }, addHealthElectronicsHero = function(bay) {
+      const { x, z, rotation } = slotShelfPosition(bay);
+      const frontX = x + Math.sin(rotation) * 0.38, frontZ = z + Math.cos(rotation) * 0.38;
+      const orientedBox = (material, px, py, pz, sx, sy, sz) => solid("box", material, px, py, pz, sx, sy, sz, rotation);
+      if (bay.number === 4 || bay.number === 12) {
+        box("cream", frontX, 0.92, frontZ, 0.13, 0.18, 0.035);
+        box("ivory", frontX, 0.92, frontZ + 0.021, 0.105, 0.145, 0.006);
+      } else if (bay.number === 5) {
+        for (let index = 0;index < 3; index++)
+          box("ivory", frontX + (index - 1) * 0.15, 0.78, frontZ, 0.11, 0.2, 0.07);
+      } else if (bay.number === 13) {
+        sphere("ivory", frontX - 0.09, 0.93, frontZ, 0.065, 0.055, 0.055);
+        sphere("ivory", frontX + 0.09, 0.93, frontZ, 0.065, 0.055, 0.055);
+        solid("torus", "dark", frontX, 0.96, frontZ - 0.08, 0.12, 0.12, 0.45, 0, Math.PI / 2);
+      } else if (bay.number === 14) {
+        orientedBox("dark", frontX, 1.35, frontZ, 0.951, 0.535, 0.035);
+        orientedBox("brass", frontX, 0.72, frontZ, 0.05, 0.78, 0.05);
+        orientedBox("oak", frontX, 0.18, frontZ, 0.62, 0.08, 0.3);
+      } else if (bay.number === 15) {
+        orientedBox("dark", frontX, 0.55, frontZ, 1.25, 0.16, 0.42);
+        orientedBox("cream", frontX, 0.645, frontZ, 1.17, 0.025, 0.33);
+        for (let key2 = 0;key2 < 12; key2++) {
+          const offset = (key2 - 5.5) * 0.095, px = frontX + offset * Math.cos(rotation), pz = frontZ - offset * Math.sin(rotation);
+          orientedBox("ivory", px, 0.665, pz, 0.075, 0.018, 0.2);
+        }
+      } else if (bay.number === 16) {
+        cylinder("ivory", frontX, 0.93, frontZ, 0.055, 0.025);
+        solid("torus", "brass", frontX, 0.95, frontZ, 0.034, 0.034, 0.7);
+      } else if (bay.number === 17) {
+        box("ivory", frontX, 0.72, frontZ, 0.2, 0.08, 0.12);
+        cylinder("dark", frontX, 0.91, frontZ, 0.025, 0.34);
+        sphere("ivory", frontX, 0.74, frontZ, 0.045, 0.055, 0.05);
       }
     }, art = function(name, x, y, z, width, ry = 0) {
       const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
@@ -1685,6 +1730,8 @@ async function createWorld(T, R, physics, expanded = false) {
         }
         if (bay.number >= 6 && bay.number <= 11)
           addFoodHero(bay);
+        else if (bay.number === 4 || bay.number === 5 || bay.number >= 12)
+          addHealthElectronicsHero(bay);
       }
       for (const x of [-25, 45])
         box("ivory", x, 3.3, 18, 0.3, 6.6, 60, true);

@@ -18,7 +18,7 @@ function loadImage(url) {
 }
 
 export async function addShopSignAtlas(T, layout, scene) {
-  const width = 768, rowHeight = 128;
+  const width = 768, rowHeight = 56;
   const canvas = document.createElement('canvas');
   canvas.width = width; canvas.height = rowHeight * SLOT_COUNT;
   const context = canvas.getContext('2d');
@@ -27,15 +27,16 @@ export async function addShopSignAtlas(T, layout, scene) {
     const y = index * rowHeight;
     context.fillStyle = '#17372e'; context.fillRect(0, y, width, rowHeight);
     context.strokeStyle = '#b59b62'; context.lineWidth = 4; context.strokeRect(4, y + 4, width - 8, rowHeight - 8);
+    if(index===0){context.fillStyle='#b53a32';context.fillRect(8,y+rowHeight-5,width-16,2);}
     const logo = logos[index];
     if (logo) {
-      const scale = Math.min(210 / logo.width, 92 / logo.height);
+      const scale = Math.min(190 / logo.width, 42 / logo.height);
       const logoWidth = logo.width * scale, logoHeight = logo.height * scale;
-      context.drawImage(logo, 18 + (210 - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
+      context.drawImage(logo, 16 + (190 - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
     }
-    context.fillStyle = '#f5e8cb'; context.font = 'bold 34px Arial';
+    context.fillStyle = '#f5e8cb'; context.font = 'bold 22px Arial';
     context.textAlign = 'center'; context.textBaseline = 'middle';
-    context.fillText(name, 491, y + 64, 500);
+    context.fillText(name, 484, y + 28, 520);
   });
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;
