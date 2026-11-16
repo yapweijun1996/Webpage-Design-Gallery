@@ -105,58 +105,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     solid('box', m, x, y, z, sx, sy, sz);
     if (collision) collider(x, y, z, sx, sy, sz);
   }
-  const slotShelfPosition = bay => ({
-    x: bay.side === 'north' ? (bay.minX + bay.maxX) / 2 : bay.side === 'west' ? bay.maxX - 1.4 : bay.minX + 1.4,
-    z: bay.side === 'north' ? -1.55 : (bay.minZ + bay.maxZ) / 2,
-    rotation: bay.side === 'north' ? Math.PI : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2,
-    slot: Number(bay.number)
-  });
-  function addFoodHero(bay) {
-    const number=Number(bay.number),shelf=slotShelfPosition(bay), frontX=shelf.x+Math.sin(shelf.rotation)*.42, frontZ=shelf.z+Math.cos(shelf.rotation)*.42;
-    if(number===6) {
-      box('cream',frontX,.72,frontZ,.14,.22,.06); box('oak',frontX,.72,frontZ+.025,.115,.17,.008);
-    } else if(number===8) {
-      cylinder('oak',frontX,.67,frontZ,.055,.14); cylinder('cream',frontX,.745,frontZ,.057,.025);
-    } else {
-      const count=number===11?4:1;
-      for(let index=0;index<count;index++){
-        const offset=(index-(count-1)/2)*.2, x=frontX+offset*Math.cos(shelf.rotation),z=frontZ-offset*Math.sin(shelf.rotation);
-        cylinder('timber',x,.66,z,.052,.14);cylinder('brass',x,.733,z,.053,.014);
-      }
-    }
-  }
   const cylinder = (m, x, y, z, r, h) => solid('cylinder', m, x, y, z, r, h, r);
-  function addHealthElectronicsHero(bay) {
-    const number=Number(bay.number),{x,z,rotation}=slotShelfPosition(bay);
-    const frontX=x+Math.sin(rotation)*.38,frontZ=z+Math.cos(rotation)*.38;
-    const orientedBox=(material,px,py,pz,sx,sy,sz)=>solid('box',material,px,py,pz,sx,sy,sz,rotation);
-    if(number===4||number===12) {
-      box('cream',frontX,.92,frontZ,.13,.18,.035);
-      box('ivory',frontX,.92,frontZ+.021,.105,.145,.006);
-    } else if(number===5) {
-      for(let index=0;index<3;index++)box('ivory',frontX+(index-1)*.15,.78,frontZ,.11,.2,.07);
-    } else if(number===13) {
-      sphere('ivory',frontX-.09,.93,frontZ,.065,.055,.055);sphere('ivory',frontX+.09,.93,frontZ,.065,.055,.055);
-      solid('torus','dark',frontX,.96,frontZ-.08,.12,.12,.45,0,Math.PI/2);
-    } else if(number===14) {
-      orientedBox('dark',frontX,1.35,frontZ,.951,.535,.035);
-      orientedBox('brass',frontX,.72,frontZ,.05,.78,.05);orientedBox('oak',frontX,.18,frontZ,.62,.08,.3);
-    } else if(number===15) {
-      orientedBox('dark',frontX,.55,frontZ,1.25,.16,.42);
-      orientedBox('cream',frontX,.645,frontZ,1.17,.025,.33);
-      for(let key=0;key<12;key++){
-        const offset=(key-5.5)*.095,px=frontX+offset*Math.cos(rotation),pz=frontZ-offset*Math.sin(rotation);
-        orientedBox('ivory',px,.665,pz,.075,.018,.2);
-      }
-    } else if(number===16) {
-      cylinder('ivory',frontX,.93,frontZ,.055,.025);
-      solid('torus','brass',frontX,.95,frontZ,.034,.034,.7);
-    } else if(number===17) {
-      box('ivory',frontX,.72,frontZ,.2,.08,.12);
-      cylinder('dark',frontX,.91,frontZ,.025,.34);
-      sphere('ivory',frontX,.74,frontZ,.045,.055,.05);
-    }
-  }
   const sphere = (m, x, y, z, sx, sy, sz) => solid('sphere', m, x, y, z, sx, sy, sz);
   // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
   const textures = new Map(), loader = new T.TextureLoader().setCrossOrigin(undefined);
@@ -532,8 +481,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
       const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
-      const foodShelves=expanded?expandedLayout.slots.filter(bay=>bay.number>=6&&bay.number<=11).map(slotShelfPosition):[];
-      const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,foodShelves,expanded?[-10,0,-1.25]:null);
+      const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],expanded?[-10,0,-1.25]:null);
       shopLodUpdates.push(productDisplay.updateShopLods);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -604,10 +552,6 @@ export async function createWorld(T, R, physics, expanded = false) {
         collider(front, 2.6, z, .25, 5.2, 7.9);
         for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
       }
-      const lot=Number(bay.number);activeShopSlot=lot;
-      if(lot>=6&&lot<=11)addFoodHero(bay);
-      else if(lot===4||lot===5||lot>=12)addHealthElectronicsHero(bay);
-      activeShopSlot=null;
     }
     // The closed glass entrance provides a visible boundary to the ground floor.
     for (const x of [-25,45]) box('ivory',x,3.3,18,.3,6.6,60,true);

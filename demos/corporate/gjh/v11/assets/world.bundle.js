@@ -273,13 +273,7 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   const state = {}, opaque = [], opaqueBySlot = new Map, shopLodMeshes = [], shopLodInstances = [], hiddenShopLodMatrix = new T.Matrix4().makeScale(0, 0, 0), shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
   for (const [kind, record] of entries) {
     const original = AMENITIES[kind];
-    const displaySlots = expanded && kind === "showcase" ? expandedLayout.slots.filter((bay) => [4, 5, 12, 13].includes(Number(bay.number)) || Number(bay.number) >= 16).map((bay) => {
-      const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX - 1.4 : bay.minX + 1.4;
-      const z = bay.side === "north" ? -1.55 : (bay.minZ + bay.maxZ) / 2;
-      const angle = bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
-      return [x, 0, z, angle, Number(bay.number)];
-    }) : [];
-    const definition = expanded && kind === "desk" ? { ...original, placements: [[liftLayout.desk.x, 0, liftLayout.desk.z, Math.PI]] } : expanded && kind === "showcase" ? { ...original, placements: [[liftLayout.showcase.x, 0, liftLayout.showcase.z, 0], ...displaySlots] } : original;
+    const definition = expanded && kind === "desk" ? { ...original, placements: [[liftLayout.desk.x, 0, liftLayout.desk.z, Math.PI]] } : expanded && kind === "showcase" ? { ...original, placements: [[liftLayout.showcase.x, 0, liftLayout.showcase.z, 0]] } : original;
     for (const primitive of record.primitives) {
       if (!primitive.material.transparent) {
         definition.placements.forEach(([x, y, z, angle, slot2]) => {
@@ -1327,55 +1321,6 @@ async function createWorld(T, R, physics, expanded = false) {
       solid("box", m, x, y, z, sx, sy, sz);
       if (collision)
         collider(x, y, z, sx, sy, sz);
-    }, addFoodHero = function(bay) {
-      const number = Number(bay.number), shelf = slotShelfPosition(bay), frontX = shelf.x + Math.sin(shelf.rotation) * 0.42, frontZ = shelf.z + Math.cos(shelf.rotation) * 0.42;
-      if (number === 6) {
-        box("cream", frontX, 0.72, frontZ, 0.14, 0.22, 0.06);
-        box("oak", frontX, 0.72, frontZ + 0.025, 0.115, 0.17, 0.008);
-      } else if (number === 8) {
-        cylinder("oak", frontX, 0.67, frontZ, 0.055, 0.14);
-        cylinder("cream", frontX, 0.745, frontZ, 0.057, 0.025);
-      } else {
-        const count = number === 11 ? 4 : 1;
-        for (let index = 0;index < count; index++) {
-          const offset = (index - (count - 1) / 2) * 0.2, x = frontX + offset * Math.cos(shelf.rotation), z = frontZ - offset * Math.sin(shelf.rotation);
-          cylinder("timber", x, 0.66, z, 0.052, 0.14);
-          cylinder("brass", x, 0.733, z, 0.053, 0.014);
-        }
-      }
-    }, addHealthElectronicsHero = function(bay) {
-      const number = Number(bay.number), { x, z, rotation } = slotShelfPosition(bay);
-      const frontX = x + Math.sin(rotation) * 0.38, frontZ = z + Math.cos(rotation) * 0.38;
-      const orientedBox = (material, px, py, pz, sx, sy, sz) => solid("box", material, px, py, pz, sx, sy, sz, rotation);
-      if (number === 4 || number === 12) {
-        box("cream", frontX, 0.92, frontZ, 0.13, 0.18, 0.035);
-        box("ivory", frontX, 0.92, frontZ + 0.021, 0.105, 0.145, 0.006);
-      } else if (number === 5) {
-        for (let index = 0;index < 3; index++)
-          box("ivory", frontX + (index - 1) * 0.15, 0.78, frontZ, 0.11, 0.2, 0.07);
-      } else if (number === 13) {
-        sphere("ivory", frontX - 0.09, 0.93, frontZ, 0.065, 0.055, 0.055);
-        sphere("ivory", frontX + 0.09, 0.93, frontZ, 0.065, 0.055, 0.055);
-        solid("torus", "dark", frontX, 0.96, frontZ - 0.08, 0.12, 0.12, 0.45, 0, Math.PI / 2);
-      } else if (number === 14) {
-        orientedBox("dark", frontX, 1.35, frontZ, 0.951, 0.535, 0.035);
-        orientedBox("brass", frontX, 0.72, frontZ, 0.05, 0.78, 0.05);
-        orientedBox("oak", frontX, 0.18, frontZ, 0.62, 0.08, 0.3);
-      } else if (number === 15) {
-        orientedBox("dark", frontX, 0.55, frontZ, 1.25, 0.16, 0.42);
-        orientedBox("cream", frontX, 0.645, frontZ, 1.17, 0.025, 0.33);
-        for (let key2 = 0;key2 < 12; key2++) {
-          const offset = (key2 - 5.5) * 0.095, px = frontX + offset * Math.cos(rotation), pz = frontZ - offset * Math.sin(rotation);
-          orientedBox("ivory", px, 0.665, pz, 0.075, 0.018, 0.2);
-        }
-      } else if (number === 16) {
-        cylinder("ivory", frontX, 0.93, frontZ, 0.055, 0.025);
-        solid("torus", "brass", frontX, 0.95, frontZ, 0.034, 0.034, 0.7);
-      } else if (number === 17) {
-        box("ivory", frontX, 0.72, frontZ, 0.2, 0.08, 0.12);
-        cylinder("dark", frontX, 0.91, frontZ, 0.025, 0.34);
-        sphere("ivory", frontX, 0.74, frontZ, 0.045, 0.055, 0.05);
-      }
     }, art = function(name, x, y, z, width, ry = 0) {
       const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
       const mesh = new T.Mesh(plane, mat(16777215, { map: texture, emissiveMap: texture, emissive: 16777215, emissiveIntensity: 0.2 }));
@@ -1606,12 +1551,6 @@ async function createWorld(T, R, physics, expanded = false) {
       }
       return mesh;
     };
-    const slotShelfPosition = (bay) => ({
-      x: bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX - 1.4 : bay.minX + 1.4,
-      z: bay.side === "north" ? -1.55 : (bay.minZ + bay.maxZ) / 2,
-      rotation: bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2,
-      slot: Number(bay.number)
-    });
     const cylinder = (m, x, y, z, r, h) => solid("cylinder", m, x, y, z, r, h, r);
     const sphere = (m, x, y, z, sx, sy, sz) => solid("sphere", m, x, y, z, sx, sy, sz);
     const textures = new Map, loader = new T.TextureLoader().setCrossOrigin(undefined);
@@ -1971,8 +1910,7 @@ async function createWorld(T, R, physics, expanded = false) {
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
-        const foodShelves = expanded ? expandedLayout.slots.filter((bay) => bay.number >= 6 && bay.number <= 11).map(slotShelfPosition) : [];
-        const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, foodShelves, expanded ? [-10, 0, -1.25] : null);
+        const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
         shopLodUpdates.push(productDisplay.updateShopLods);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
@@ -2066,13 +2004,6 @@ async function createWorld(T, R, physics, expanded = false) {
           for (const edge of [bay.minZ, bay.maxZ])
             box("ivory", x, 2.8, edge, 10, 5.6, 0.2, true);
         }
-        const lot = Number(bay.number);
-        activeShopSlot = lot;
-        if (lot >= 6 && lot <= 11)
-          addFoodHero(bay);
-        else if (lot === 4 || lot === 5 || lot >= 12)
-          addHealthElectronicsHero(bay);
-        activeShopSlot = null;
       }
       for (const x of [-25, 45])
         box("ivory", x, 3.3, 18, 0.3, 6.6, 60, true);

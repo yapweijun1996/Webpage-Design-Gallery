@@ -85,14 +85,8 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
   const group=new T.Group();group.name='Mall amenities';const state={},opaque=[],opaqueBySlot=new Map(),shopLodMeshes=[],shopLodInstances=[],hiddenShopLodMatrix=new T.Matrix4().makeScale(0,0,0),shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
   for(const [kind,record] of entries){
     const original=AMENITIES[kind];
-    const displaySlots=expanded&&kind==='showcase'?expandedLayout.slots.filter(bay=>[4,5,12,13].includes(Number(bay.number))||Number(bay.number)>=16).map(bay=>{
-      const x=bay.side==='north'?(bay.minX+bay.maxX)/2:bay.side==='west'?bay.maxX-1.4:bay.minX+1.4;
-      const z=bay.side==='north'?-1.55:(bay.minZ+bay.maxZ)/2;
-      const angle=bay.side==='north'?Math.PI:bay.side==='west'?Math.PI/2:-Math.PI/2;
-      return [x,0,z,angle,Number(bay.number)];
-    }):[];
     const definition=expanded&&kind==='desk'?{...original,placements:[[liftLayout.desk.x,0,liftLayout.desk.z,Math.PI]]}:
-      expanded&&kind==='showcase'?{...original,placements:[[liftLayout.showcase.x,0,liftLayout.showcase.z,0],...displaySlots]}:original;
+      expanded&&kind==='showcase'?{...original,placements:[[liftLayout.showcase.x,0,liftLayout.showcase.z,0]]}:original;
     for(const primitive of record.primitives){
       if(!primitive.material.transparent){
         definition.placements.forEach(([x,y,z,angle,slot])=>{
