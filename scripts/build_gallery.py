@@ -180,7 +180,7 @@ def runtime_resources(catalog):
         "assets/tokens.css", "assets/gjh-themes.css", "assets/icons.svg", "assets/gallery.css", "assets/pwa.css", "src/gallery.js", "src/pwa.js", "src/preferences-boot.js", "src/preferences.js",
         "locales/en.json", "locales/zh-Hans.json", "locales/ms.json",
         "data/companies.json", "data/categories.json", "data/styles.json", "manifest.webmanifest",
-        "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png",
+        "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png", "assets/icons/gallery-maskable-512.png",
     )}
     resources.update(Path("demos/corporate/gjh/v11") / name for name in
                      ("manifest.webmanifest", "offline.html", "pwa.js", "style.bundle.css", "script.bundle.js"))
