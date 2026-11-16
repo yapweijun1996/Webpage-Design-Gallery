@@ -25,7 +25,7 @@ function wrap(context, text, x, y, maxWidth, lineHeight, maxLines) {
   if (lines < maxLines && line) context.fillText(line, x, y + lines * lineHeight, maxWidth);
 }
 
-export async function addBrandWallAtlas(T, scene) {
+export async function addBrandWallAtlas(T, scene, deckY) {
   const kitResponse = await fetch(new URL('./brand-kit/brand-kit.json', import.meta.url));
   if (!kitResponse.ok) throw new Error('Brand-kit metadata unavailable');
   const kit = await kitResponse.json();
@@ -71,7 +71,7 @@ export async function addBrandWallAtlas(T, scene) {
     uvs.push(left,bottom,right,bottom,right,top,left,top);
     const vertex = index * 4; indices.push(vertex,vertex+1,vertex+2,vertex,vertex+2,vertex+3);
     const id = `brand-plaque-${entry.slot}`;
-    interactables.push({id,x:x+(row-2)*.13,z:6.1+column*.08,radius:1.35});
+    interactables.push({id,x:x+(row-2)*.13,y:deckY,z:6.1+column*.08,radius:1.35});
     records[id] = {name:entry.brand,brand:entry.brand,tagline:entry.tagline,story:entry.story,
       image:`assets/brands/${entry.slot}-${LOGO_FILES[index]}.webp`, action:'brand-story',
       kind:'Brand plaque · independent virtual mall concept',alt:`${entry.brand} logo`};

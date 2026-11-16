@@ -1247,12 +1247,13 @@ async function createWorld(T, R, physics, expanded = false) {
     }, updateShopLods = function(visitor) {
       if (!expanded)
         return;
+      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = deckVisible ? 15.5 : 18;
       for (const mesh of shopLodMeshes) {
         const bay = shopBays.get(mesh.userData.shopSlot);
         if (!bay)
           continue;
         const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2;
-        mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.z - z) < 18;
+        mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.z - z) < shopDistance;
         mesh.visible = mesh.userData.shopLodNear;
       }
       if (!deckLodMeshes) {
@@ -1262,7 +1263,6 @@ async function createWorld(T, R, physics, expanded = false) {
             deckLodMeshes.push(mesh);
         });
       }
-      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3;
       for (const mesh of deckLodMeshes)
         mesh.visible = deckVisible;
       for (const update of shopLodUpdates)
@@ -1271,7 +1271,7 @@ async function createWorld(T, R, physics, expanded = false) {
       if (!expanded)
         return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
       if (!brandWallPromise)
-        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene)).then((result) => {
+        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper)).then((result) => {
           interactables.push(...result.interactables);
           return result;
         });
