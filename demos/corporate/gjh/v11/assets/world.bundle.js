@@ -485,6 +485,47 @@ async function loadStaticAsset(T, definition, baseURL) {
   return record;
 }
 
+// demos/corporate/gjh/v11/assets/deck-railings.js
+var sources = Object.freeze({
+  bay1m: Object.freeze({ asset_id: "ASSET_MallGlass1m", file: "mall-glass-railing-1m.glb", sha256: "556cfc03f38a0cb0c21a125a318c5dc251976e18598f3d15f3e0979dc2dfd49d", dimensions_m: [1.1599999964237213, 1.1209999322891235, 0.1599999964237213], bounds_min: [-0.5799999982118607, 0, -0.07999999821186066], bounds_max: [0.5799999982118607, 1.1209999322891235, 0.07999999821186066] }),
+  bay: Object.freeze({ asset_id: "ASSET_MallGlass2m", file: "mall-glass-railing-2m.glb", sha256: "037b734e7285961e93a75184f7aab28f4a20498fbac5639ed2cd0fab0958c6c5", dimensions_m: [2.1599999964237213, 1.1209999322891235, 0.1599999964237213], bounds_min: [-1.0799999982118607, 0, -0.07999999821186066], bounds_max: [1.0799999982118607, 1.1209999322891235, 0.07999999821186066] }),
+  post: Object.freeze({ asset_id: "ASSET_MallGlassPost", file: "mall-glass-railing-post.glb", sha256: "4104d29b95e1e8b82c1e4db8a4e00437aaf60e01c7e8e0b503fcd7c17586dd69", dimensions_m: [0.1599999964237213, 1.1200000047683716, 0.1599999964237213], bounds_min: [-0.07999999821186066, 0, -0.07999999821186066], bounds_max: [0.07999999821186066, 1.1200000047683716, 0.07999999821186066] })
+});
+async function createDeckRailings(T) {
+  const records = {};
+  await Promise.all(Object.entries(sources).map(async ([kind, definition]) => records[kind] = await loadStaticAsset(T, definition, import.meta.url)));
+  const placements = { bay1m: [], bay: [], post: [] };
+  return {
+    place(kind, x, z, yaw = 0) {
+      if (!records[kind]?.status || records[kind].status !== "loaded")
+        return false;
+      placements[kind].push({ x, z, yaw });
+      return true;
+    },
+    finish(scene) {
+      for (const [kind, record] of Object.entries(records))
+        for (const primitive of record.primitives) {
+          const instances = placements[kind];
+          if (!instances.length)
+            continue;
+          const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, instances.length);
+          const position = new T.Vector3, rotation = new T.Quaternion, scale = new T.Vector3(1, 1, 1), matrix = new T.Matrix4;
+          instances.forEach(({ x, z, yaw }, index) => {
+            position.set(x, 7.2, z);
+            rotation.setFromAxisAngle(new T.Vector3(0, 1, 0), yaw);
+            matrix.compose(position, rotation, scale).multiply(primitive.matrix);
+            mesh.setMatrixAt(index, matrix);
+          });
+          mesh.castShadow = mesh.receiveShadow = true;
+          mesh.computeBoundingSphere();
+          mesh.userData.deckLod = true;
+          scene.add(mesh);
+        }
+      return Object.freeze(Object.fromEntries(Object.entries(records).map(([kind, record]) => [kind, Object.freeze({ status: record.status, reason: record.reason, instances: placements[kind].length, primitives: record.primitives.length })])));
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/interior-pilot-registry.js
 var INTERIOR_PILOT = Object.freeze({
   bench: {
@@ -712,10 +753,10 @@ var INTERIOR_PILOT = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/furnishings.js
-var sources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")));
+var sources2 = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")));
 async function createFurnishings(T, shadows) {
   const records = {};
-  await Promise.all(Object.entries(sources).map(async ([kind, definition]) => {
+  await Promise.all(Object.entries(sources2).map(async ([kind, definition]) => {
     const record = records[kind] = { status: "fallback", reason: null, primitives: [], placements: [] };
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
   }));
@@ -755,9 +796,9 @@ async function createFurnishings(T, shadows) {
           }
         }
         state[kind] = Object.freeze({
-          assetId: sources[kind].asset_id,
-          identity: sources[kind].sha256,
-          dimensions: sources[kind].dimensions_m,
+          assetId: sources2[kind].asset_id,
+          identity: sources2[kind].sha256,
+          dimensions: sources2[kind].dimensions_m,
           status: record.status,
           reason: record.reason,
           instances: record.placements.length,
@@ -1247,7 +1288,7 @@ async function createWorld(T, R, physics, expanded = false) {
     }, updateShopLods = function(visitor) {
       if (!expanded)
         return;
-      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = deckVisible ? 15.5 : 18;
+      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 15.5;
       for (const mesh of shopLodMeshes) {
         const bay = shopBays.get(mesh.userData.shopSlot);
         if (!bay)
@@ -1277,7 +1318,7 @@ async function createWorld(T, R, physics, expanded = false) {
         });
       return brandWallPromise;
     };
-    const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
+    const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
     let shellState = null;
     const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
     const ceilingObstacles = [];
@@ -1352,7 +1393,7 @@ async function createWorld(T, R, physics, expanded = false) {
     };
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
-    let activeShopSlot = null, activeDeck = false;
+    let activeShopSlot = null, activeDeck = false, railingState = null;
     const tagShopLod = (mesh) => {
       if (expanded && activeShopSlot !== null) {
         mesh.userData.shopSlot = activeShopSlot;
@@ -1871,7 +1912,15 @@ async function createWorld(T, R, physics, expanded = false) {
         }
       });
       activeDeck = true;
-      box("green", -3, liftLayout.upper + 2.1, 4.85, 9.4, 4.2, 0.16, true);
+      box("green", -3, liftLayout.upper + 2.1, 14.48, 9.4, 4.2, 0.16, true);
+      box("brass", -3, liftLayout.upper + 4.12, 14.36, 9.55, 0.055, 0.045);
+      box("brass", -3, liftLayout.upper + 0.08, 14.36, 9.55, 0.055, 0.045);
+      for (const x of [-7.72, 1.72]) {
+        box("brass", x, liftLayout.upper + 2.1, 14.36, 0.055, 4.05, 0.045);
+        box("glow", x + (x < 0 ? 0.04 : -0.04), liftLayout.upper + 2.1, 14.32, 0.035, 3.7, 0.025);
+      }
+      box("glow", -3, liftLayout.upper + 4.02, 14.32, 8.9, 0.035, 0.025);
+      lightPool(-3, liftLayout.upper + 0.035, 13.35, 8.8, 2.8);
       activeDeck = false;
       activeDeck = true;
       const deckBench = (x, z, facing) => {
@@ -1883,17 +1932,33 @@ async function createWorld(T, R, physics, expanded = false) {
         }
         collider(x, liftLayout.upper + 0.26, z, 2.3, 0.5, 0.76);
       };
-      deckBench(-7, 12.5, 1);
-      deckBench(0.8, 12.5, 1);
-      for (const x of [-8.1, 2.1]) {
-        if (!furnishings.place("planter", x, 14.7, 0.68, 1, liftLayout.upper, null, -1)) {
-          box("pot", x, liftLayout.upper + 0.24, 14.7, 0.68, 0.48, 0.68, true);
-          box("wood", x, liftLayout.upper + 0.49, 14.7, 0.58, 0.025, 0.58);
+      deckBench(-6.1, 8.8, 1);
+      deckBench(0.1, 8.8, 1);
+      deckBench(-3, 11.7, 1);
+      for (const [x, z] of [[-8.1, 12.8], [2.1, 12.8], [-8.1, 9.2], [2.1, 9.2]]) {
+        if (!furnishings.place("planter", x, z, 0.68, 1, liftLayout.upper, null, -1)) {
+          box("pot", x, liftLayout.upper + 0.24, z, 0.68, 0.48, 0.68, true);
+          box("wood", x, liftLayout.upper + 0.49, z, 0.58, 0.025, 0.58);
           for (let i = 0;i < 4; i++)
-            solid("sphere", i % 2 ? "leaf" : "foliage", x + (i % 2 ? -0.14 : 0.14), liftLayout.upper + 0.78, 14.7 + (i < 2 ? -0.14 : 0.14), 0.19, 0.36, 0.19);
+            solid("sphere", i % 2 ? "leaf" : "foliage", x + (i % 2 ? -0.14 : 0.14), liftLayout.upper + 0.78, z + (i < 2 ? -0.14 : 0.14), 0.19, 0.36, 0.19);
         }
-        collider(x, liftLayout.upper + 0.25, 14.7, 0.68, 0.5, 0.68);
+        collider(x, liftLayout.upper + 0.25, z, 0.68, 0.5, 0.68);
       }
+      for (const x of [-8, -6, -4, -2])
+        deckRailings.place("bay", x, 16);
+      for (const x of [-0.5, 0.5, 1.5, 2.5])
+        deckRailings.place("bay1m", x, 16);
+      for (const z of [5, 7, 9, 11]) {
+        deckRailings.place("bay", -9, z, Math.PI / 2);
+        deckRailings.place("bay", 3, z, Math.PI / 2);
+      }
+      for (const z of [12.5, 13.5, 14.5, 15.5]) {
+        deckRailings.place("bay1m", -9, z, Math.PI / 2);
+        deckRailings.place("bay1m", 3, z, Math.PI / 2);
+      }
+      for (const [x, z] of [[-9, 4], [3, 4], [-9, 16], [3, 16]])
+        deckRailings.place("post", x, z);
+      railingState = deckRailings?.finish(scene) || null;
       activeDeck = false;
       await addShopSignAtlas(T, expandedLayout, scene);
     }
@@ -1934,7 +1999,7 @@ async function createWorld(T, R, physics, expanded = false) {
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(seats.map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;
-    return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
+    return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings: railingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {
     releaseStartupAssetPack();
   }

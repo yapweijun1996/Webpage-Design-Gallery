@@ -2,7 +2,9 @@
 export function createTargetGuidance({canvas, projection}) {
   const marker = document.querySelector('#interaction-point');
   const name = marker.querySelector('span');
+  const action = marker.querySelector('small');
   let size = null;
+  const touchOnly = matchMedia('(pointer: coarse)');
   function hide() { projection.visible(marker, false); }
   return {
     hide,
@@ -11,8 +13,10 @@ export function createTargetGuidance({canvas, projection}) {
       if (!active || !item || item.id.startsWith('new-moon-')) { hide(); return; }
       const point = projection.point({x: item.x, y: item.y ?? 0, z: item.z}, camera);
       if (!point) { hide(); return; }
-      if (name.textContent !== label || !size) {
+      const actionLabel = touchOnly.matches ? 'Tap' : 'Press F';
+      if (name.textContent !== label || action.textContent !== actionLabel || !size) {
         name.textContent = label;
+        action.textContent = actionLabel;
         projection.visible(marker, true);
         size = {width: marker.offsetWidth, height: marker.offsetHeight};
       }

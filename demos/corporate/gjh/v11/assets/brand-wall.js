@@ -62,7 +62,7 @@ export async function addBrandWallAtlas(T, scene, deckY) {
   const positions = [], uvs = [], indices = [], interactables = [], records = {};
   entries.forEach((entry, index) => {
     const column = index % COLUMNS, row = Math.floor(index / COLUMNS);
-    const x = -6.25 + column * 2.15, y = 10.7 - row * .78, z = 4.69;
+    const x = -6.25 + column * 2.15, y = 10.7 - row * .78, z = 14.38;
     const width = 2, height = .72;
     positions.push(x-width/2,y-height/2,z, x+width/2,y-height/2,z,
       x+width/2,y+height/2,z, x-width/2,y+height/2,z);
@@ -71,7 +71,7 @@ export async function addBrandWallAtlas(T, scene, deckY) {
     uvs.push(left,bottom,right,bottom,right,top,left,top);
     const vertex = index * 4; indices.push(vertex,vertex+1,vertex+2,vertex,vertex+2,vertex+3);
     const id = `brand-plaque-${entry.slot}`;
-    interactables.push({id,x:x+(row-2)*.13,y:deckY,z:6.1+column*.08,radius:1.35});
+    interactables.push({id,x:x+(row-2)*.13,y:deckY,z:13.45+column*.08,radius:1.35});
     records[id] = {name:entry.brand,brand:entry.brand,tagline:entry.tagline,story:entry.story,
       image:`assets/brands/${entry.slot}-${LOGO_FILES[index]}.webp`, action:'brand-story',
       kind:'Brand plaque · independent virtual mall concept',alt:`${entry.brand} logo`};

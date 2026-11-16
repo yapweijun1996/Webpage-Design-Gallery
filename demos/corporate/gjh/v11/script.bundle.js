@@ -2113,7 +2113,7 @@ function createUI(expanded = false) {
       const text2 = `≈${distance.toFixed(1)} m`;
       if (nearbyDistance.textContent !== text2)
         nearbyDistance.textContent = text2;
-      return record.compactName || (record.action === "map" ? "Directory kiosk" : record.action === "elevator" ? `Elevator · ${currentZone === "upper" ? "Upper level" : "Ground floor"}` : record.name);
+      return record.action === "brand-story" ? record.brand : record.compactName || (record.action === "map" ? "Directory kiosk" : record.action === "elevator" ? `Elevator · ${currentZone === "upper" ? "Upper level" : "Ground floor"}` : record.name);
     },
     setShelfFocus(controller) {
       shelfFocus = controller;

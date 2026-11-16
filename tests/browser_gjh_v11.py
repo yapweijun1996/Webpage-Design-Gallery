@@ -111,7 +111,7 @@ def upper_deck_gallery(page):
     upper = state(page)
     assert upper['brandPlaqueCount'] == 17, upper
     assert upper['drawCalls'] <= 190, upper['drawCalls']
-    walk_to(page, -6.51, 6.1)
+    walk_to(page, -6.51, 13.45)
     assert state(page)['nearby'] == 'brand-plaque-S01', state(page)
     story = page.locator('.brand-story-nearby')
     assert story.is_visible() and 'New Zealand' in story.inner_text(), story.inner_text()

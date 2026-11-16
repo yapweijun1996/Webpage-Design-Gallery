@@ -1,4 +1,5 @@
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
+import {createDeckRailings} from './deck-railings.js';
 import {createFurnishings} from './furnishings.js';
 import {createShell} from './shell.js';
 import {SHELL_LAYOUT} from './interior-shell-registry.js';
@@ -31,7 +32,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, expanded = false) {
   try {
-  const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
+  const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   const ceilingObstacles=[];
@@ -87,7 +88,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   };
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
-  let activeShopSlot=null,activeDeck=false;
+  let activeShopSlot=null,activeDeck=false,railingState=null;
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ') {
     const key = `${type}:${material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}${activeDeck?':deck':''}`;
@@ -649,16 +650,24 @@ export async function createWorld(T, R, physics, expanded = false) {
         box(finish,front,4.35,z,.06,.06,7.2);
       }
     });
-    // One neutral backdrop anchors the upper gallery. Its plaque atlas loads
+    // One neutral, framed backdrop anchors the upper gallery. Its plaque atlas loads
     // only when a visitor reaches this floor.
     activeDeck=true;
-    box('green',-3,liftLayout.upper+2.1,4.85,9.4,4.2,.16,true);
+    box('green',-3,liftLayout.upper+2.1,14.48,9.4,4.2,.16,true);
+    box('brass',-3,liftLayout.upper+4.12,14.36,9.55,.055,.045);
+    box('brass',-3,liftLayout.upper+.08,14.36,9.55,.055,.045);
+    for(const x of [-7.72,1.72]){
+      box('brass',x,liftLayout.upper+2.1,14.36,.055,4.05,.045);
+      box('glow',x+(x<0?.04:-.04),liftLayout.upper+2.1,14.32,.035,3.7,.025);
+    }
+    box('glow',-3,liftLayout.upper+4.02,14.32,8.9,.035,.025);
+    lightPool(-3,liftLayout.upper+.035,13.35,8.8,2.8);
     activeDeck=false;
-    // Small upper gallery seating; the validated bench/planter assets are
-    // reused when available, with batched local geometry as the fallback.
+    // Warm timber seating and areca planters form a central lounge without
+    // narrowing the approach to the plaque wall or the lift.
     activeDeck=true;
     const deckBench=(x,z,facing)=>{
-      if(!furnishings.place('bench',x,z,.8,facing,liftLayout.upper, null, -1)){
+      if(!furnishings.place('bench',x,z,.8,facing,liftLayout.upper,null,-1)){
         box('wood',x,liftLayout.upper+.24,z,2.3,.32,.72);
         box('seat',x,liftLayout.upper+.49,z,2.34,.18,.76);
         box('seat',x,liftLayout.upper+.82,z+facing*.28,2.34,.54,.16);
@@ -666,15 +675,27 @@ export async function createWorld(T, R, physics, expanded = false) {
       }
       collider(x,liftLayout.upper+.26,z,2.3,.5,.76);
     };
-    deckBench(-7,12.5,1);deckBench(.8,12.5,1);
-    for(const x of [-8.1,2.1]){
-      if(!furnishings.place('planter',x,14.7,.68,1,liftLayout.upper,null,-1)){
-        box('pot',x,liftLayout.upper+.24,14.7,.68,.48,.68,true);
-        box('wood',x,liftLayout.upper+.49,14.7,.58,.025,.58);
-        for(let i=0;i<4;i++)solid('sphere',i%2?'leaf':'foliage',x+(i%2?-.14:.14),liftLayout.upper+.78,14.7+(i<2?-.14:.14),.19,.36,.19);
+    deckBench(-6.1,8.8,1);deckBench(.1,8.8,1);deckBench(-3,11.7,1);
+    for(const [x,z] of [[-8.1,12.8],[2.1,12.8],[-8.1,9.2],[2.1,9.2]]){
+      if(!furnishings.place('planter',x,z,.68,1,liftLayout.upper,null,-1)){
+        box('pot',x,liftLayout.upper+.24,z,.68,.48,.68,true);
+        box('wood',x,liftLayout.upper+.49,z,.58,.025,.58);
+        for(let i=0;i<4;i++)solid('sphere',i%2?'leaf':'foliage',x+(i%2?-.14:.14),liftLayout.upper+.78,z+(i<2?-.14:.14),.19,.36,.19);
       }
-      collider(x,liftLayout.upper+.25,14.7,.68,.5,.68);
+      collider(x,liftLayout.upper+.25,z,.68,.5,.68);
     }
+    for(const x of [-8,-6,-4,-2])deckRailings.place('bay',x,16);
+    for(const x of [-.5,.5,1.5,2.5])deckRailings.place('bay1m',x,16);
+    for(const z of [5,7,9,11]){
+      deckRailings.place('bay',-9,z,Math.PI/2);
+      deckRailings.place('bay',3,z,Math.PI/2);
+    }
+    for(const z of [12.5,13.5,14.5,15.5]){
+      deckRailings.place('bay1m',-9,z,Math.PI/2);
+      deckRailings.place('bay1m',3,z,Math.PI/2);
+    }
+    for(const [x,z] of [[-9,4],[3,4],[-9,16],[3,16]])deckRailings.place('post',x,z);
+    railingState=deckRailings?.finish(scene)||null;
     activeDeck=false;
     await addShopSignAtlas(T,expandedLayout,scene);
   }
@@ -719,7 +740,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   let deckLodMeshes=null;
   function updateShopLods(visitor) {
     if(!expanded)return;
-    const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=deckVisible?15.5:18;
+    const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=15.5;
     for(const mesh of shopLodMeshes){
       const bay=shopBays.get(mesh.userData.shopSlot);
       if(!bay)continue;
@@ -746,7 +767,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     });
     return brandWallPromise;
   }
-  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings:railingState, productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

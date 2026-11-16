@@ -637,7 +637,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       if (!show) return null;
       const text = `≈${distance.toFixed(1)} m`;
       if (nearbyDistance.textContent !== text) nearbyDistance.textContent = text;
-      return record.compactName || (record.action === 'map' ? 'Directory kiosk' : record.action === 'elevator' ? `Elevator · ${currentZone === 'upper' ? 'Upper level' : 'Ground floor'}` : record.name);
+      return record.action === 'brand-story' ? record.brand : record.compactName || (record.action === 'map' ? 'Directory kiosk' : record.action === 'elevator' ? `Elevator · ${currentZone === 'upper' ? 'Upper level' : 'Ground floor'}` : record.name);
     },
     setShelfFocus(controller) {
       shelfFocus = controller;
