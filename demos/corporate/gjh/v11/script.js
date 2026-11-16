@@ -4,12 +4,14 @@ import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
+import {expandedLayout} from './assets/expanded-layout.js';
+import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 const expanded = new URLSearchParams(location.search).get('layout') !== 'classic';
 document.body.classList.toggle('is-expanded', expanded);
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
-let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false;
+let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
@@ -137,9 +139,11 @@ function render(force = false) {
     shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
     world.updateShopLods(player.state);
+    atmosphere?.update(player.state);
     world.updateSigns(camera, canvas);
-    if (shelfFocus?.open) player.renderShelf(() => renderer.render(world.scene, camera));
-    else renderer.render(world.scene, camera);
+    const draw=()=>atmosphere.render(camera, expanded && Math.abs(player.state.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000);
+    if (shelfFocus?.open) player.renderShelf(draw);
+    else draw();
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
   }
@@ -244,7 +248,10 @@ function validateRestoration() {
     quality.recover(); resize();
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
+    try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
+    atmosphere?.applyTheme(mallTheme?.definition());
+    atmosphere?.update(player.state);
     player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
@@ -274,6 +281,8 @@ async function initialize() {
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded);
+  atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds));
+  try { if (!contextLost && !context.isContextLost()) atmosphere.restoreEnvironment(); } catch { /* Keep the mall usable without reflections. */ }
   if (expanded) {
     try {
       const {createMallThemeCoordinator} = await loadOptionalThemeModule(() => import('./assets/mall-themes.js'));
@@ -314,10 +323,11 @@ async function initialize() {
         if(signal.aborted)throw new Error('Theme preparation cancelled');
         return pack[definition.prepare](T,world.scene,theme,{signal});
       },commit(next,previous,stage){
-        try { if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');stage?.mount?.();render(); }
-        catch(error) { world.applyMallTheme(previous);elevator?.applyMallTheme?.(previous);throw error; }
+        try { if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');atmosphere.applyTheme(next);stage?.mount?.();render(); }
+        catch(error) { world.applyMallTheme(previous);elevator?.applyMallTheme?.(previous);atmosphere.applyTheme(previous);throw error; }
       }});
       if(!world.applyMallTheme(mallTheme.definition())) throw new Error('Invalid initial theme');
+      atmosphere.applyTheme(mallTheme.definition());
       if(contextLost || interrupted) mallTheme.suspend();
     } catch { mallTheme?.destroy();mallTheme=null; }
     ui.configureMallTheme(mallTheme);

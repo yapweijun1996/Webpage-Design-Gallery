@@ -50,7 +50,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   const seats=[];
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
-  scene.fog = new T.Fog(0x53625a, expanded ? 65 : 32, expanded ? 125 : 85);
+  scene.fog = new T.Fog(0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
   const mat = (color, extra = {}) => new T.MeshStandardMaterial({color, roughness: .72, ...extra});
   const materials = {
     jade: mat(0x21483e, {roughness: .24, metalness: .22}), jadeAlt: mat(0x244c42, {roughness: .28, metalness: .18}),
@@ -624,7 +624,8 @@ export async function createWorld(T, R, physics, expanded = false) {
     railingState=deckRailings?.finish(scene)||null;
     activeDeck=false;
     addExpandedStorefronts(T,expandedLayout,scene);
-    await addShopSignAtlas(T,expandedLayout,scene);
+    const shopSigns=await addShopSignAtlas(T,expandedLayout,scene);
+    shopSigns.layers.enable(1);
     const interiors=await createExpandedInteriors(T,expandedLayout,scene);
     shopLodUpdates.push(interiors.update);
   }
@@ -633,13 +634,15 @@ export async function createWorld(T, R, physics, expanded = false) {
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
-    mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); mesh.userData.shopSlot=batch.shopSlot;mesh.userData.deckLod=batch.deckLod;scene.add(mesh);
+    mesh.castShadow = false; mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); mesh.userData.shopSlot=batch.shopSlot;mesh.userData.deckLod=batch.deckLod;
+    if(batch.material===materials.glow)mesh.layers.enable(1);
+    scene.add(mesh);
     if(batch.shopSlot!==null)shopLodMeshes.push(mesh);
   }
-  const ambient = new T.HemisphereLight(expanded ? 0xfff3e2 : 0xe4efe6, expanded ? 0x77634b : 0x6d5b3b, 2.1);scene.add(ambient);
-  const key = new T.DirectionalLight(0xffd5a0, 2.6); key.position.set(-8, 15, 9); key.castShadow = true;
+  const ambient = new T.HemisphereLight(expanded ? 0xfff3e2 : 0xffeee0, expanded ? 0x77634b : 0x6d5b3b, 1.05);scene.add(ambient);
+  const key = new T.DirectionalLight(0xffd5a0, 2.1); key.position.set(-8, 15, 9); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
-  const fill = new T.DirectionalLight(expanded ? 0xf4e4ce : 0xb7d7e8, expanded ? .9 : 1); fill.position.set(4, 8, -5); scene.add(fill);
+  const fill = new T.DirectionalLight(expanded ? 0xf4e4ce : 0xe9d8c2, .45); fill.position.set(4, 8, -5); scene.add(fill);
   const applyMallTheme = theme => applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();
@@ -668,7 +671,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   let deckLodMeshes=null;
   function updateShopLods(visitor) {
     if(!expanded)return;
-    const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=15.5;
+    const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
     for(const mesh of shopLodMeshes){
       const bay=shopBays.get(mesh.userData.shopSlot);
       if(!bay)continue;

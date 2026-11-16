@@ -1097,8 +1097,8 @@ var displayFiles = {
 };
 function displayPlacements(number, heroZ, back) {
   if (number === 14)
-    return [[-2.6, 0.07, heroZ], [2.6, 0.07, heroZ], [-2.6, 0.07, back + 0.253]];
-  return [[2.6, number === 13 || number === 17 ? 0.99 : 0.07, heroZ]];
+    return [[-1.05, 0.07, heroZ], [1.05, 0.07, heroZ], [-2.6, 0.07, back + 0.253]];
+  return [[number === 4 || number === 5 ? 1.5 : 1.05, number === 13 || number === 17 ? 0.99 : 0.07, heroZ]];
 }
 async function createExpandedInteriors(T, expandedLayout2, scene) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
@@ -1193,7 +1193,7 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     }
     const structureParts = parts;
     parts = [];
-    heroOffset = 2.6;
+    heroOffset = number === 13 || number === 17 ? 1.05 : 2.6;
     const heroZ = front - (displayFiles[number] ? 0.75 : 1.75);
     if (number === 13 || number === 17) {
       parts = structureParts;
@@ -1466,7 +1466,7 @@ async function createWorld(T, R, physics, expanded = false) {
     }, updateShopLods = function(visitor) {
       if (!expanded)
         return;
-      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 15.5;
+      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
         const bay = shopBays.get(mesh.userData.shopSlot);
         if (!bay)
@@ -1503,7 +1503,7 @@ async function createWorld(T, R, physics, expanded = false) {
     const seats = [];
     const scene = new T.Scene;
     scene.background = new T.Color(1650226);
-    scene.fog = new T.Fog(5464666, expanded ? 65 : 32, expanded ? 125 : 85);
+    scene.fog = new T.Fog(12037532, expanded ? 75 : 40, expanded ? 155 : 100);
     const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
     const materials = {
       jade: mat(2181182, { roughness: 0.24, metalness: 0.22 }),
@@ -2104,7 +2104,8 @@ async function createWorld(T, R, physics, expanded = false) {
       railingState = deckRailings?.finish(scene) || null;
       activeDeck = false;
       addExpandedStorefronts(T, expandedLayout, scene);
-      await addShopSignAtlas(T, expandedLayout, scene);
+      const shopSigns = await addShopSignAtlas(T, expandedLayout, scene);
+      shopSigns.layers.enable(1);
       const interiors = await createExpandedInteriors(T, expandedLayout, scene);
       shopLodUpdates.push(interiors.update);
     }
@@ -2113,17 +2114,20 @@ async function createWorld(T, R, physics, expanded = false) {
     for (const batch of batches.values()) {
       const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
-      mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool;
+      mesh.castShadow = false;
+      mesh.receiveShadow = batch.material !== materials.lightPool;
       mesh.computeBoundingSphere();
       mesh.userData.shopSlot = batch.shopSlot;
       mesh.userData.deckLod = batch.deckLod;
+      if (batch.material === materials.glow)
+        mesh.layers.enable(1);
       scene.add(mesh);
       if (batch.shopSlot !== null)
         shopLodMeshes.push(mesh);
     }
-    const ambient = new T.HemisphereLight(expanded ? 16774114 : 15003622, expanded ? 7824203 : 7166779, 2.1);
+    const ambient = new T.HemisphereLight(expanded ? 16774114 : 16772832, expanded ? 7824203 : 7166779, 1.05);
     scene.add(ambient);
-    const key = new T.DirectionalLight(16766368, 2.6);
+    const key = new T.DirectionalLight(16766368, 2.1);
     key.position.set(-8, 15, 9);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
@@ -2131,7 +2135,7 @@ async function createWorld(T, R, physics, expanded = false) {
     key.shadow.normalBias = 0.05;
     key.shadow.bias = -0.0004;
     scene.add(key);
-    const fill = new T.DirectionalLight(expanded ? 16049358 : 12048360, expanded ? 0.9 : 1);
+    const fill = new T.DirectionalLight(expanded ? 16049358 : 15325378, 0.45);
     fill.position.set(4, 8, -5);
     scene.add(fill);
     const applyMallTheme = (theme) => applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill });
