@@ -161,7 +161,7 @@ def run(capture=False):
         server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         base = f'http://127.0.0.1:{server.server_port}'
-        url = base + '/gallery/demos/corporate/gjh/v11/'
+        url = base + '/gallery/demos/corporate/gjh/v11/?visitor=v1'
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
@@ -205,7 +205,7 @@ def run(capture=False):
                             page.keyboard.press('Escape')
                             assert not mall_map.evaluate('el=>el.open')
                             assert page.locator('#header-map').is_visible()
-                            assert page.locator('#header-map').evaluate('el=>el===document.activeElement')
+                            assert page.locator('#mall-map summary').evaluate('el=>el===document.activeElement')
                         page.screenshot(path=str(review / f'atrium-{width}.png'), scale='css')
                         room_signs(page)
                         page.locator('#mall-map').evaluate('el=>el.open=true')

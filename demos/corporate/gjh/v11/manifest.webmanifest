@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "GJH Virtual Mall",
+  "short_name": "GJH Mall",
+  "description": "An independent virtual mall concept with a store directory and 3D exploration.",
+  "lang": "en",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ed",
+  "theme_color": "#0d3026",
+  "prefer_related_applications": false,
+  "icons": [
+    {"src": "assets/mall-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "assets/mall-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

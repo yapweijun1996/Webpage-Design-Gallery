@@ -1,0 +1,17 @@
+test_directory_order_matches_inventory_and_company_route_title (test_gallery.GalleryTests.test_directory_order_matches_inventory_and_company_route_title) ... ok
+test_duplicate_stable_ids_are_rejected (test_gallery.GalleryTests.test_duplicate_stable_ids_are_rejected) ... ok
+test_generation_is_deterministic (test_gallery.GalleryTests.test_generation_is_deterministic) ... ok
+test_home_only_links_to_company_collections (test_gallery.GalleryTests.test_home_only_links_to_company_collections) ... ok
+test_metadata_text_is_escaped (test_gallery.GalleryTests.test_metadata_text_is_escaped) ... ok
+test_missing_assets_stop_build (test_gallery.GalleryTests.test_missing_assets_stop_build) ... ok
+test_nested_pages_use_prefix_safe_sprite_and_company_identity (test_gallery.GalleryTests.test_nested_pages_use_prefix_safe_sprite_and_company_identity) ... ok
+test_paths_cannot_escape_repository (test_gallery.GalleryTests.test_paths_cannot_escape_repository) ... ok
+test_published_shared_resources_and_precache_boundary (test_gallery.GalleryTests.test_published_shared_resources_and_precache_boundary) ... ok
+test_real_company_contains_all_versions (test_gallery.GalleryTests.test_real_company_contains_all_versions) ... ok
+test_v8_metadata_exposes_immersive_concept_contract (test_gallery.GalleryTests.test_v8_metadata_exposes_immersive_concept_contract) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 6.503s
+
+OK
+Gallery built: 1 companies, 8 designs

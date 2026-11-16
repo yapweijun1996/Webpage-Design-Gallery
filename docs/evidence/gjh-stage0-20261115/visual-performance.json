@@ -1,0 +1,420 @@
+{
+  "browserVersion": "157.0.8103.51",
+  "backendRequested": "ANGLE Metal",
+  "dpr": 2,
+  "serviceWorkers": "blocked",
+  "source": "isolated snapshot served over localhost",
+  "notes": "rAF is an interval sample, not device FPS or frame-time; readyObservedMs includes polling after DOMContentLoaded",
+  "rows": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "readyObservedMs": 7632.4,
+      "metrics": {
+        "drawCalls": 196,
+        "triangles": 313370,
+        "resources": {
+          "geometries": 113,
+          "textures": 29
+        },
+        "graphics": {
+          "status": "available",
+          "losses": 0,
+          "validations": 0,
+          "initialized": true,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          },
+          "sceneId": "2ec54250-f64c-4b17-a707-772036078a8b",
+          "cameraId": "9c4ff215-743c-427b-aea4-38784b28b3c2",
+          "sceneChildren": 128,
+          "shadows": true,
+          "buffer": [
+            2880,
+            1634
+          ]
+        },
+        "frames": 140,
+        "raf": {
+          "n": 120,
+          "medianMs": 16.69999999999891,
+          "p95Ms": 16.700000000000728
+        },
+        "renderBackend": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+        "entries": 75,
+        "transferBytes": 10541911,
+        "decodedBytes": 10519411,
+        "overflow": false,
+        "viewport": [
+          1440,
+          900
+        ],
+        "dpr": 2
+      },
+      "stores": {
+        "newmoon": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": -10,
+          "z": 2.4000000953674316,
+          "drawCalls": 143
+        },
+        "mili": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 0,
+          "z": 2.4000000953674316,
+          "drawCalls": 168
+        },
+        "gogo": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 10,
+          "z": 2.4000000953674316,
+          "drawCalls": 142
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "failedRequests": [],
+      "directory": {
+        "visible": true,
+        "products": 4
+      }
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "readyObservedMs": 1869.7,
+      "metrics": {
+        "drawCalls": 174,
+        "triangles": 312238,
+        "resources": {
+          "geometries": 106,
+          "textures": 24
+        },
+        "graphics": {
+          "status": "available",
+          "losses": 0,
+          "validations": 0,
+          "initialized": true,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 2,
+            "shadows": false,
+            "recovered": false
+          },
+          "sceneId": "346ec893-dd9d-4e4f-a905-cdc24df52960",
+          "cameraId": "e8347a73-71f3-406a-877f-758bcde3c779",
+          "sceneChildren": 128,
+          "shadows": false,
+          "buffer": [
+            1536,
+            1882
+          ]
+        },
+        "frames": 231,
+        "raf": {
+          "n": 120,
+          "medianMs": 16.699999999999818,
+          "p95Ms": 16.700000000000728
+        },
+        "renderBackend": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+        "entries": 75,
+        "transferBytes": 10541911,
+        "decodedBytes": 10519411,
+        "overflow": false,
+        "viewport": [
+          768,
+          1024
+        ],
+        "dpr": 2
+      },
+      "stores": {
+        "newmoon": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": -10,
+          "z": 2.4000000953674316,
+          "drawCalls": 121
+        },
+        "mili": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 0,
+          "z": 2.4000000953674316,
+          "drawCalls": 136
+        },
+        "gogo": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 10,
+          "z": 2.4000000953674316,
+          "drawCalls": 84
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "failedRequests": [],
+      "directory": {
+        "visible": true,
+        "products": 4
+      }
+    },
+    {
+      "viewport": [
+        639,
+        826
+      ],
+      "readyObservedMs": 1493.3,
+      "metrics": {
+        "drawCalls": 176,
+        "triangles": 313230,
+        "resources": {
+          "geometries": 108,
+          "textures": 24
+        },
+        "graphics": {
+          "status": "available",
+          "losses": 0,
+          "validations": 0,
+          "initialized": true,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 2,
+            "shadows": false,
+            "recovered": false
+          },
+          "sceneId": "e6155941-add6-47c8-9c17-ab949715e664",
+          "cameraId": "58370394-749c-448b-b902-6ba496ea32d6",
+          "sceneChildren": 128,
+          "shadows": false,
+          "buffer": [
+            1278,
+            1508
+          ]
+        },
+        "frames": 137,
+        "raf": {
+          "n": 120,
+          "medianMs": 16.699999999999818,
+          "p95Ms": 16.799999999999727
+        },
+        "renderBackend": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+        "entries": 75,
+        "transferBytes": 10541911,
+        "decodedBytes": 10519411,
+        "overflow": false,
+        "viewport": [
+          639,
+          826
+        ],
+        "dpr": 2
+      },
+      "stores": {
+        "newmoon": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": -10.000000953674316,
+          "z": 2.3999996185302734,
+          "drawCalls": 121
+        },
+        "mili": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 0,
+          "z": 2.4000000953674316,
+          "drawCalls": 137
+        },
+        "gogo": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 10,
+          "z": 2.4000000953674316,
+          "drawCalls": 84
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "failedRequests": [],
+      "directory": {
+        "visible": true,
+        "products": 4
+      }
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "readyObservedMs": 1408.2,
+      "metrics": {
+        "drawCalls": 158,
+        "triangles": 310358,
+        "resources": {
+          "geometries": 104,
+          "textures": 19
+        },
+        "graphics": {
+          "status": "available",
+          "losses": 0,
+          "validations": 0,
+          "initialized": true,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          },
+          "sceneId": "6fee211b-902e-4d07-85f3-5ca441116bd5",
+          "cameraId": "436c5aa0-5722-4839-a573-7db6eea676a9",
+          "sceneChildren": 128,
+          "shadows": false,
+          "buffer": [
+            487,
+            965
+          ]
+        },
+        "frames": 130,
+        "raf": {
+          "n": 120,
+          "medianMs": 16.699999999999818,
+          "p95Ms": 16.700000000000273
+        },
+        "renderBackend": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+        "entries": 75,
+        "transferBytes": 10541911,
+        "decodedBytes": 10519411,
+        "overflow": false,
+        "viewport": [
+          390,
+          844
+        ],
+        "dpr": 2
+      },
+      "stores": {
+        "newmoon": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": -10.000000953674316,
+          "z": 2.3999996185302734,
+          "drawCalls": 117
+        },
+        "mili": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 0,
+          "z": 2.4000000953674316,
+          "drawCalls": 129
+        },
+        "gogo": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 10,
+          "z": 2.4000000953674316,
+          "drawCalls": 80
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "failedRequests": [],
+      "directory": {
+        "visible": true,
+        "products": 4
+      }
+    },
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "readyObservedMs": 1216.7,
+      "metrics": {
+        "drawCalls": 172,
+        "triangles": 311714,
+        "resources": {
+          "geometries": 106,
+          "textures": 24
+        },
+        "graphics": {
+          "status": "available",
+          "losses": 0,
+          "validations": 0,
+          "initialized": true,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          },
+          "sceneId": "4f99f086-1701-4c6b-914a-d01c3ccb065d",
+          "cameraId": "57cb131b-b1c4-419d-abcf-5b4e004d6bd6",
+          "sceneChildren": 128,
+          "shadows": false,
+          "buffer": [
+            400,
+            620
+          ]
+        },
+        "frames": 131,
+        "raf": {
+          "n": 120,
+          "medianMs": 16.699999999999818,
+          "p95Ms": 16.799999999999727
+        },
+        "renderBackend": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+        "entries": 75,
+        "transferBytes": 10541911,
+        "decodedBytes": 10519411,
+        "overflow": false,
+        "viewport": [
+          320,
+          568
+        ],
+        "dpr": 2
+      },
+      "stores": {
+        "newmoon": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": -10,
+          "z": 2.4000000953674316,
+          "drawCalls": 119
+        },
+        "mili": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 0,
+          "z": 2.4000000953674316,
+          "drawCalls": 134
+        },
+        "gogo": {
+          "teleportReturn": true,
+          "actualZone": "atrium",
+          "x": 10,
+          "z": 2.4000000953674316,
+          "drawCalls": 81
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "failedRequests": [],
+      "directory": {
+        "visible": true,
+        "products": 4
+      }
+    }
+  ]
+}

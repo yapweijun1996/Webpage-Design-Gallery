@@ -12,7 +12,13 @@ Serve the repository with `~/venvs/gallery/bin/python -m http.server 8000`, then
 
 WASD or arrow keys walk freely; Shift runs. Hold Q/E to turn left/right, including while moving; opposite turn keys cancel. Turning alone does not translate the player. Drag the scene to orbit the collision-constrained spring-arm camera. On touch devices, the left joystick walks, right-side dragging turns the camera, and Run toggles pace. Two fingers can walk and turn simultaneously. Only the canvas uses `touch-action:none`; the joystick is a visual overlay whose touches reach the canvas. Page zoom remains enabled. Help is collapsible. At narrow widths the map starts as one 44px icon button; opening it reveals full store labels, choosing a store closes it, and Escape closes it with focus restored. Help and the map do not expand together on mobile. The map's three keyboard-accessible buttons teleport to storefronts, not interiors.
 
-Approach a verified can display or MILI/GOGO brand panel, then press F or tap Inspect. The native modal traps focus, pauses controls, restores focus and closes with Escape. Its only link is the official eShop home page. No prices, inventory, invented products or commerce flow are present. List view contains all three stores and four complete verified packshots, including when JavaScript, WebGL or WebAssembly is unavailable. Opening the HTML as a local file retains that directory; browser module security requires HTTP for 3D.
+Approach a verified can display or MILI/GOGO brand panel, then press F or tap Inspect. The native modal traps focus, pauses controls, restores focus and closes with Escape. Its only link is the official eShop home page. No verified prices or inventory are supplied. The directory labels both as unavailable and links to the official eShop; its session-only demo bag creates no payment, order, or stock reservation. The directory includes all three stores and four official product packshots, including when JavaScript, WebGL or WebAssembly is unavailable. With JavaScript, visitors can filter stores, search and sort the New Moon products, add demo items, and enter or return from the 3D mall without losing the bag. Opening the HTML as a local file retains that directory; browser module security requires HTTP for 3D.
+
+New Moon product details automatically open an unofficial interactive 3D preview. Drag to rotate, use the mouse wheel or a two-finger pinch to zoom, and use arrow keys, +/− and R for keyboard rotation, zoom and reset. If loading or WebGL fails, the official packshot remains visible; close and reopen the detail to retry. MILI and GOGO retain their official artwork viewers.
+
+## Shared current-store spatial data
+
+The existing three storefronts use [assets/spatial.js](assets/spatial.js) for stable IDs, numbers, labels, nominal bounds and arrival anchors. The world, player, map and live directory consume these records; static directory HTML remains available without JavaScript. The records describe the current scene, not the proposed 17-store expansion. See the [stage 2 spatial pilot](../../../../docs/gjh-v11-stage2-spatial-pilot.md) for contracts, fallback behavior, evidence and remaining work.
 
 ## World and implementation
 
@@ -72,6 +78,8 @@ export GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chr
 ~/venvs/gallery/bin/python tests/browser_gallery.py
 ~/venvs/gallery/bin/python tests/browser_gjh_demos.py
 ~/venvs/gallery/bin/python tests/browser_gjh_v11.py
+~/venvs/gallery/bin/python tests/browser_gjh_hybrid.py
+~/venvs/gallery/bin/python tests/browser_gjh_startup_retry.py
 node --test tests/gjh_graphics_quality.test.mjs
 ~/venvs/gallery/bin/python tests/browser_gjh_graphics_recovery.py --root . --prefix gallery --output /tmp/gallery-graphics-check
 ~/venvs/gallery/bin/python -m unittest discover -s tests -p test_gjh_character.py -v
@@ -82,6 +90,8 @@ node --test tests/gjh_graphics_quality.test.mjs
 
 The mall browser check uses SwiftShader by default. Set `GALLERY_WEBGL_BACKEND=metal` on macOS to exercise native ANGLE Metal at the same viewport sizes and DPR. It tests the published artifact, actual keyboard walking and Q/E turning, deterministic walk/run/idle transitions, outer-wall collision/no tunnelling, storefront teleports and doors, F/Escape inspection, modal focus/pause, camera drag, two-finger touch, run toggle, list switching, target sizes/overflow, reduced motion, hidden-tab pause, context loss, WebGL/WASM failures and no-JavaScript browsing. The mobile map regression covers collapsed startup, mutually exclusive help, label bounds, Escape focus restoration and closing after store selection. `--capture` refreshes only v11 previews; regenerate the gallery afterward. Physical-phone frame rate, Safari and screen-reader behavior remain unverified.
 
+Essential scene textures retry twice after a failed request, without navigating away. If all attempts fail, initialization reports the asset name in the console and retains the accessible directory. The startup retry browser check covers both temporary and persistent failures.
+
 The third-pass visual review covered atrium, walking, every store and every inspection panel at all three widths, followed by a contact-shadow refinement and fresh reviewed spawn screenshots/thumbnail. The 390px map, 100px joystick and 58px Run control remain separated from the header. Browser regression coverage now also checks mobile HUD intersections and the 200-draw-call budget in every store and while walking.
 
 Historical fourth-pass commands (before the original visitor replacement) each ran once and exited 0: gallery build, `--check`, eight unit tests, `browser_gallery.py`, `browser_gjh_demos.py` (28 cases), and `browser_gjh_v11.py`. The two screenshot-writing legacy/gallery runners used an isolated temporary copy to avoid unrelated file changes. No PWA code changed or PWA check was requested for this pass.
@@ -91,3 +101,13 @@ Fourth-pass SwiftShader spawn / sampled maximum draw calls at 1440, 768 and 390 
 The fourth-pass visual review covers atrium, walking, every storefront/entry/interior, all four product panels, both brand panels and the map at 1440×900, 768×1024 and 390×844. Three settled-idle arrival screenshots and the thumbnail are refreshed. Regression coverage checks room-sign HUD clearance along every approach, expanded mobile help/map states, complete desktop/tablet plaque framing, and sampled maximum draw calls.
 
 Independent >=88 visual scores on every shot, physical-phone frame rate, Safari and screen-reader behavior remain unverified. Front-only can labels remain a visual limitation. The historical Kenney rig limitations do not describe the replacement visitor; its revision-3 measurements and fresh full V11 evidence are recorded in the character review, with release and deployment status maintained in that canonical review.
+
+## Hybrid directory imagery
+
+The directory uses 20 original AI-generated, unbranded concept illustrations in its optional concept gallery and one entry preview. They are not photographs of the current 3D scene, real premises, merchandise, or official brand material. Image subjects and generation provenance are listed in `assets/concept-imagery.json`; official New Moon product packshots and existing brand artwork remain separate. The gallery images load lazily and are not part of the gallery shell precache.
+
+The three store sections also use nine AI-generated lifestyle scenes, three per brand, inspired by the existing official cover images. They are labelled as concepts and use the original official logo assets separately. The MILI and GOGO original covers remain available in their brand artwork viewers, the original New Moon cover remains in the assets, and the four verified product packshots are unchanged. See `assets/concept-imagery.json` for the scene and reference inventory.
+
+## Standalone PWA
+
+V11 has its own scoped manifest and an integrity-checked worker that saves only a reconnect screen and app icons. The directory and 3D mall still require a connection; the demo bag remains session-only. Updates require an explicit action. See [PWA scope, tests and limitations](../../../../docs/gjh-v11-pwa.md).

@@ -1,37 +1,106 @@
-"""Mode guidance follows the visible preview without replacing load/error messages."""
-from browser_gjh_budget import ROOT,Quiet,functools,http,threading,sync_playwright,os,json
+"""Verify automatic preview loading, failures, cancellation and focus recovery."""
 import argparse
+import functools
+import http.server
+import json
+import os
+import threading
+from pathlib import Path
+
+from playwright.sync_api import sync_playwright
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class Quiet(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
 
 def run():
- ap=argparse.ArgumentParser();ap.add_argument('--url');ap.add_argument('--live',action='store_true');args=ap.parse_args()
- out=ROOT.parent/'evidence/v11-preview-mode';out.mkdir(exist_ok=True)
- server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT)));threading.Thread(target=server.serve_forever,daemon=True).start();results=[]
- try:
-  with sync_playwright() as p:
-   b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
-   for w,h in ([(390,844)] if args.live else [(390,844),(1440,900)]):
-    page=b.new_page(viewport={'width':w,'height':h});page.goto(args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-list').click()
-    for sku in ['nz-425g','au-425g','sa-425g','mx-454g']:
-     page.locator(f'[data-inspect="new-moon-{sku}-front"]').click();status=page.locator('#product-preview-status')
-     assert status.inner_text()=='Official packshot shown by default. The 3D preview is an unofficial demo.'
-     page.locator('#product-preview-load').click();page.wait_for_function('__newMoonPreview.state.loaded')
-     for repeat in range(2):
-      assert status.inner_text().startswith('Unofficial 3D demo. Drag') and page.locator('#product-preview-canvas').is_visible()
-      page.locator('#product-preview-image').click();assert status.inner_text()=='Official packshot shown. Choose Show 3D preview to return to the unofficial interactive demo.'
-      assert page.locator('#product-image').is_visible() and page.locator('#product-preview-canvas').is_hidden()
-      assert page.evaluate('document.activeElement.id==="product-preview-3d"')
-      if sku=='mx-454g' and repeat==0:
-       page.evaluate('document.querySelector("#product-dialog").scrollTop=0');page.screenshot(path=str(out/f'{"live-" if args.live else "after-"}{w}.png'))
-      page.locator('#product-preview-3d').click();assert page.evaluate('document.activeElement.id==="product-preview-canvas"')
-     page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#product-dialog").open && __newMoonPreview.state.activeResources===0')
-     results.append({'viewport':[w,h],'sku':sku,'modeRoundtrips':2,'guidanceAndFocus':'PASS'})
-    if not args.live:
-     pending=[];pattern='**/new-moon-can-nz-425g-lod1.glb';page.route(pattern,lambda r:pending.append(r));page.locator('[data-inspect="new-moon-nz-425g-front"]').click();page.locator('#product-preview-load').click();page.wait_for_function('__newMoonPreview.state.loading');page.wait_for_timeout(200)
-     assert status.inner_text()=='Loading unofficial 3D demo…';assert pending;pending.pop().fulfill(status=404,body='missing');page.wait_for_function('__newMoonPreview.state.status==="error"')
-     assert 'unavailable' in status.inner_text() and 'Retry' in status.inner_text();assert page.locator('#product-image').is_visible();page.unroute(pattern)
-     page.locator('#product-preview-load').click();page.wait_for_function('__newMoonPreview.state.loaded');assert status.inner_text().startswith('Unofficial 3D demo. Drag');page.keyboard.press('Escape');results.append({'viewport':[w,h],'loadingFailureRetry':'PASS'})
-    page.close()
-   b.close()
- finally:server.shutdown()
- (out/('live-report.json' if args.live else 'report.json')).write_text(json.dumps(results,indent=2));print(json.dumps(results))
-if __name__=='__main__':run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url')
+    parser.add_argument('--live', action='store_true')
+    args = parser.parse_args()
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=str(ROOT)))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    url = args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'
+    results = []
+    try:
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=[
+                '--use-angle=' + os.environ.get('GALLERY_WEBGL_BACKEND', 'swiftshader'), '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            for width, height in ([(390, 844)] if args.live else [(390, 844), (1440, 900)]):
+                page = browser.new_page(viewport={'width': width, 'height': height}, reduced_motion='reduce')
+                page.goto(url)
+                page.wait_for_function('__mall.ready && __sceneReady', timeout=60000)
+                page.locator('#guide-list').click()
+                for sku in ['nz-425g', 'au-425g', 'sa-425g', 'mx-454g']:
+                    page.locator(f'[data-inspect="new-moon-{sku}-front"]').click()
+                    page.wait_for_function('__newMoonPreview.state.loaded', timeout=30000)
+                    assert page.locator('#product-preview-canvas').is_visible()
+                    assert 'scroll or pinch to zoom' in page.locator('#product-preview-status').inner_text()
+                    assert page.evaluate('document.activeElement.id') == 'product-close'
+                    page.keyboard.press('Tab')
+                    assert page.evaluate('document.activeElement.id') == 'product-preview-canvas'
+                    page.keyboard.press('Escape')
+                    page.wait_for_function('!document.querySelector("#product-dialog").open && __newMoonPreview.state.activeResources === 0')
+                    results.append({'viewport': [width, height], 'sku': sku, 'automaticPreviewAndFocus': 'PASS'})
+                if not args.live:
+                    pattern = '**/new-moon-can-nz-425g-lod1.glb'
+                    pending = []
+                    page.route(pattern, lambda route: pending.append(route))
+                    page.locator('[data-inspect="new-moon-nz-425g-front"]').click()
+                    page.wait_for_function('__newMoonPreview.state.loading')
+                    page.wait_for_timeout(200)
+                    assert pending and 'Loading' in page.locator('#product-preview-status').inner_text()
+                    page.keyboard.press('Escape')
+                    page.wait_for_function('!document.querySelector("#product-dialog").open')
+                    page.unroute(pattern)
+                    page.locator('[data-inspect="new-moon-au-425g-front"]').click()
+                    page.wait_for_function('__newMoonPreview.state.loaded', timeout=30000)
+                    try:
+                        pending[0].fulfill(status=200, body=(ROOT / 'demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb').read_bytes())
+                    except Exception:
+                        pass  # The browser may already have cancelled the old request.
+                    page.wait_for_timeout(300)
+                    assert page.evaluate('__newMoonPreview.state.sku') == 'au-425g'
+                    assert page.evaluate('__newMoonPreview.state.loaded')
+                    page.keyboard.press('Escape')
+                    page.locator('[data-inspect="new-moon-mx-454g-front"]').click()
+                    page.wait_for_function('__newMoonPreview.state.loaded', timeout=30000)
+                    page.set_viewport_size({'width': 844, 'height': 390})
+                    page.wait_for_timeout(300)
+                    bounds = page.evaluate('__newMoonPreview.state.projectedBounds')
+                    assert -1 < bounds['minX'] < bounds['maxX'] < 1 and -1 < bounds['minY'] < bounds['maxY'] < 1
+                    page.keyboard.press('Escape')
+                    results.append({'viewport': [width, height], 'lateRequestAndResize': 'PASS'})
+                    if width == 390:
+                        page.evaluate("""async () => {
+                          const {GLTFLoader} = await import('./vendor/GLTFLoader.js');
+                          const original = GLTFLoader.prototype.parseAsync;
+                          window.lateDisposals = 0;
+                          GLTFLoader.prototype.parseAsync = async function (...args) {
+                            const result = await original.apply(this, args);
+                            result.scene.traverse(object => object.geometry?.addEventListener('dispose', () => window.lateDisposals++));
+                            await new Promise(resolve => setTimeout(resolve, 8500));
+                            return result;
+                          };
+                        }""")
+                        page.locator('[data-inspect="new-moon-nz-425g-front"]').click()
+                        page.wait_for_function('__newMoonPreview.state.reason === "load-deadline"', timeout=12000)
+                        page.wait_for_function('window.lateDisposals > 0', timeout=5000)
+                        assert page.locator('#product-image').is_visible()
+                        assert page.evaluate('__newMoonPreview.state.activeResources') == 0
+                        page.keyboard.press('Escape')
+                        results.append({'lateParseDisposed': 'PASS'})
+                page.close()
+            browser.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+    print(json.dumps(results, indent=2))
+
+
+if __name__ == '__main__':
+    run()

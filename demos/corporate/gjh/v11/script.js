@@ -3,6 +3,7 @@ import {createUI} from './assets/ui.js';
 import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
+import {spatial, storeAt} from './assets/spatial.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
@@ -78,7 +79,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
-  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : p.z < .1 ? (p.x < -5 ? 'newmoon' : p.x > 5 ? 'gogo' : 'mili') : 'atrium';
+  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z)?.id || 'atrium';
   nearby = null; selectedInteraction = null; let best = Infinity;
   for (const item of world.interactables) {
     if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;
@@ -149,7 +150,12 @@ function fallback(message, terminal = true) {
   shelfFocus?.close();
   cancelAnimationFrame(frame); frame = 0; modes.interrupt('fallback'); ui.fallback(message);
 }
-ui.onTeleport(zone => { if (ready) { manual = false; player.cancelCollection(); player.setInput(null); player.teleport(zone); updateHUD(); render(); canvas.focus({preventScroll: true}); } });
+ui.onTeleport(zone => {
+  if (!ready || player.state.elevatorTravel || !spatial.arrival(zone)) return false;
+  manual = false; player.cancelCollection(); player.setInput(null);
+  if (!player.teleport(zone)) return false;
+  updateHUD(); render(); canvas.focus({preventScroll: true}); return true;
+});
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit(id):player.stand();updateHUD();render();return ok;});
 ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
 document.addEventListener('keydown', event => {
@@ -248,7 +254,7 @@ async function initialize() {
     elevator = createElevatorV2(T, R, physics, world.scene);
     world.interactables.push(...elevator.interactables);
   }
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats);
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles);
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
@@ -289,4 +295,7 @@ async function initialize() {
   ready = true; graphicsStatus = 'available'; ui.show3D(); resize();
   for (let i = 0; i < 5; i++) tick(); render(); window.__sceneReady = true; ui.offerFirstGuide(); resume();
 }
-initialize().catch(() => fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.'));
+initialize().catch(error => {
+  console.error('3D mall initialization failed:', error);
+  fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
+});

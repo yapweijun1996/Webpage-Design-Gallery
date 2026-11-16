@@ -1,6 +1,7 @@
 import {createCharacter} from './character.js';
+import {spatial, courtyardArrival} from './spatial.js';
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = []) {
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = []) {
   const character = await createCharacter(T);
   const visual = character.visual;
   scene.add(visual);
@@ -151,7 +152,18 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     direction.copy(point).sub(origin);const length=direction.length();if(length<1e-6)return 0;
     direction.multiplyScalar(1/length);
     const hit=physics.castShape(origin,cameraRotation,direction,cameraBall,.02,length,true,undefined,undefined,capsule,body);
-    return hit?Math.max(0,hit.time_of_impact-.02):length;
+    let clearance=hit?Math.max(0,hit.time_of_impact-.02):length;
+    for(const box of cameraObstacles){
+      let near=0,far=length;
+      for(const axis of ['x','y','z']){
+        const min=box.min[axis]-cameraRadius,max=box.max[axis]+cameraRadius;
+        if(Math.abs(direction[axis])<1e-8){if(origin[axis]<min||origin[axis]>max){far=-1;break;}continue;}
+        const a=(min-origin[axis])/direction[axis],b=(max-origin[axis])/direction[axis];
+        near=Math.max(near,Math.min(a,b));far=Math.min(far,Math.max(a,b));
+      }
+      if(far>=near)clearance=Math.min(clearance,Math.max(0,near-.02));
+    }
+    return clearance;
   }
   function cameraCandidate(lift,out) {
     anchor.copy(target);anchor.y+=lift;out.copy(anchor).add(offset);
@@ -227,10 +239,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function teleport(zone) {
     if (elevatorTravel) return false;
-    const destinations = {atrium: [-2, 12], newmoon: [-10, 2.4], mili: [0, 2.4], gogo: [10, 2.4]};
-    if (!destinations[zone]) return false;
+    const destination = zone === 'atrium' ? courtyardArrival : spatial.arrival(zone);
+    if (!destination) return false;
     character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
-    const [x, z] = destinations[zone]; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
+    const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }

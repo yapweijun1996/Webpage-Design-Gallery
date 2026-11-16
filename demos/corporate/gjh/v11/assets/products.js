@@ -108,7 +108,7 @@ function fallbackShelf(T, scene) {
   mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
 }
 
-export async function addProducts(T, scene, textures, brass) {
+export async function addProducts(T, scene, textures, brass,showcase=[]) {
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene);
   else for (const primitive of shelfRecord.primitives) {
@@ -124,6 +124,7 @@ export async function addProducts(T, scene, textures, brass) {
   canRecords.forEach((record, productIndex) => {
     const sku = cans[productIndex].sku, x = shelfXs[productIndex], placements = [];
     for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, productZ));
+    for(const item of showcase.filter(item=>item.id===`new-moon-${sku}-front`))placements.push(new T.Vector3(...item.position));
     const batches = [];
     stock.set(`new-moon-${sku}-front`, {record, placements, batches, reserved:false});
     if (record.status === 'loaded') for (const primitive of record.primitives) {
@@ -133,7 +134,7 @@ export async function addProducts(T, scene, textures, brass) {
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {shelfPositions:shelfXs, shelves, reserveProduct(id) {
+  return {displayedProducts:showcase.length,shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);
     if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
     entry.reserved = true;

@@ -26,8 +26,8 @@ def run():
      page.locator('[data-inspect="new-moon-mx-454g-front"]').click()
      if n==0:
       res=page.evaluate("async()=>await axe.run(document.querySelector('#product-dialog'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")
-      assert not res['violations'],res['violations'];a11y.append({'mode':'image','violations':[],'incomplete':[r['id'] for r in res['incomplete']]})
-     page.locator('#product-preview-load').click();page.wait_for_function('__newMoonPreview.state.loaded')
+      assert not res['violations'],res['violations'];a11y.append({'mode':'opening','violations':[],'incomplete':[r['id'] for r in res['incomplete']]})
+     page.wait_for_function('__newMoonPreview.state.loaded')
      before=page.evaluate('__mall.state.frames');page.wait_for_timeout(150);assert page.evaluate('__mall.state.frames')==before
      if n==0:
       res=page.evaluate("async()=>await axe.run(document.querySelector('#product-dialog'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")

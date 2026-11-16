@@ -1,0 +1,5 @@
+PASS 1440x900 default V2: map, physical doors, directory and details
+PASS 390x844 default V2: map, physical doors, directory and details
+PASS 390x844 ?visitor=v1: map, physical doors, directory and details
+PASS no-js directory fallback
+PASS physics-failure directory fallback

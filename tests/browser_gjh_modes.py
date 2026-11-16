@@ -17,7 +17,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 from gjh_shelf_helpers import shelf_details
 
-from browser_gjh_all_seats import move
+from browser_gjh_all_seats import approach_published_seat
 from browser_gjh_guide import Quiet, ROOT, state
 
 RUNTIME = 'demos/corporate/gjh/v11/'
@@ -26,9 +26,12 @@ RUNTIME = 'demos/corporate/gjh/v11/'
 def approach_seat(page):
     page.evaluate('''() => {
       __mall.teleport('atrium');
-      __mall.setInput({right:-1}); __mall.step(1400);
-      __mall.setInput({forward:1}); __mall.step(1400);
-      __mall.setInput({right:-1}); __mall.step(750);
+      // Approach the bench's clear front around the current kiosk and outer aisle.
+      __mall.setInput({forward:1}); __mall.step(400);
+      __mall.setInput({right:-1}); __mall.step(3950);
+      __mall.setInput({forward:1}); __mall.step(1500);
+      __mall.setInput({right:1}); __mall.step(1750);
+      __mall.setInput({forward:-1}); __mall.step(500);
       __mall.setInput({forward:0}); __mall.step(20);
     }''')
     assert state(page)['nearby'] == 'courtyard-seat'
@@ -290,7 +293,7 @@ def run():
                 page.locator('#inspect').click()
                 page.evaluate('__mall.step(100)')
                 assert not state(page)['seated']
-                page.evaluate('__mall.teleport("atrium"); __mall.setInput(null)')
+                page.evaluate('__mall.teleport("atrium"); __mall.setInput({right:-1}); __mall.step(500); __mall.setInput(null)')
                 # The actual nearby kiosk action opens a persistent desktop map.
                 assert state(page)['nearby'] == 'mall-directory'
                 page.locator('#inspect').click()
@@ -414,20 +417,7 @@ def run():
                     assert len(seats) == 8
                     row['seats'] = []
                     for index, seat in enumerate(seats):
-                        if index < 4:
-                            page.evaluate('__mall.teleport("atrium")')
-                            if seat['facing'] == 1:
-                                move(page, -5.7 if seat['x'] < 0 else 5.7, 12)
-                                move(page, -5.7 if seat['x'] < 0 else 5.7, seat['exitZ'])
-                            else:
-                                move(page, -2, seat['exitZ'])
-                        else:
-                            center = 0 if index < 6 else 10
-                            page.evaluate('zone => __mall.teleport(zone)', 'mili' if index < 6 else 'gogo')
-                            x = center + (-1.4 if seat['x'] < center else 1.4)
-                            move(page, x, 2.4)
-                            move(page, x, seat['exitZ'])
-                        move(page, seat['exitX'], seat['exitZ'])
+                        approach_published_seat(page, index, seat)
                         assert state(page)['nearby'] == seat['id']
                         page.locator('#inspect').click()
                         page.evaluate('__mall.step(40)')

@@ -1,0 +1,714 @@
+{
+  "title": "GJH V11 stage 1 spatial refinement",
+  "units": "metres",
+  "origin": "south-west",
+  "coordinates": "x east, y north; worldX=x-35; worldZ=30-y",
+  "scope": "fictional virtual mall conceptual layout; no physical compliance or brand rights implied",
+  "shell": [
+    0,
+    0,
+    70,
+    60
+  ],
+  "stores": [
+    {
+      "id": "S01",
+      "candidate": "New Moon",
+      "side": "north",
+      "bounds": [
+        10,
+        48,
+        20,
+        60
+      ],
+      "door": [
+        12.5,
+        48,
+        17.5,
+        48
+      ],
+      "arrival": [
+        15,
+        46.3
+      ],
+      "inside": [
+        15,
+        49.7
+      ],
+      "state": "existing-demo"
+    },
+    {
+      "id": "S02",
+      "candidate": "MILI",
+      "side": "north",
+      "bounds": [
+        20,
+        48,
+        30,
+        60
+      ],
+      "door": [
+        22.5,
+        48,
+        27.5,
+        48
+      ],
+      "arrival": [
+        25,
+        46.3
+      ],
+      "inside": [
+        25,
+        49.7
+      ],
+      "state": "existing-demo"
+    },
+    {
+      "id": "S03",
+      "candidate": "GOGO",
+      "side": "north",
+      "bounds": [
+        30,
+        48,
+        40,
+        60
+      ],
+      "door": [
+        32.5,
+        48,
+        37.5,
+        48
+      ],
+      "arrival": [
+        35,
+        46.3
+      ],
+      "inside": [
+        35,
+        49.7
+      ],
+      "state": "existing-demo"
+    },
+    {
+      "id": "S04",
+      "candidate": "Borsch Med",
+      "side": "north",
+      "bounds": [
+        40,
+        48,
+        50,
+        60
+      ],
+      "door": [
+        42.5,
+        48,
+        47.5,
+        48
+      ],
+      "arrival": [
+        45,
+        46.3
+      ],
+      "inside": [
+        45,
+        49.7
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S05",
+      "candidate": "Pien Tze Huang",
+      "side": "north",
+      "bounds": [
+        50,
+        48,
+        60,
+        60
+      ],
+      "door": [
+        52.5,
+        48,
+        57.5,
+        48
+      ],
+      "arrival": [
+        55,
+        46.3
+      ],
+      "inside": [
+        55,
+        49.7
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S06",
+      "candidate": "Flying Wheel",
+      "side": "west",
+      "bounds": [
+        0,
+        40,
+        10,
+        48
+      ],
+      "door": [
+        10,
+        42,
+        10,
+        46
+      ],
+      "arrival": [
+        11.7,
+        44
+      ],
+      "inside": [
+        8.3,
+        44
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S07",
+      "candidate": "Gu Long",
+      "side": "west",
+      "bounds": [
+        0,
+        32,
+        10,
+        40
+      ],
+      "door": [
+        10,
+        34,
+        10,
+        38
+      ],
+      "arrival": [
+        11.7,
+        36
+      ],
+      "inside": [
+        8.3,
+        36
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S08",
+      "candidate": "Skippy",
+      "side": "west",
+      "bounds": [
+        0,
+        24,
+        10,
+        32
+      ],
+      "door": [
+        10,
+        26,
+        10,
+        30
+      ],
+      "arrival": [
+        11.7,
+        28
+      ],
+      "inside": [
+        8.3,
+        28
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S09",
+      "candidate": "SPAM",
+      "side": "west",
+      "bounds": [
+        0,
+        16,
+        10,
+        24
+      ],
+      "door": [
+        10,
+        18,
+        10,
+        22
+      ],
+      "arrival": [
+        11.7,
+        20
+      ],
+      "inside": [
+        8.3,
+        20
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S10",
+      "candidate": "California Mexico",
+      "side": "west",
+      "bounds": [
+        0,
+        8,
+        10,
+        16
+      ],
+      "door": [
+        10,
+        10,
+        10,
+        14
+      ],
+      "arrival": [
+        11.7,
+        12
+      ],
+      "inside": [
+        8.3,
+        12
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S11",
+      "candidate": "Hormel",
+      "side": "west",
+      "bounds": [
+        0,
+        0,
+        10,
+        8
+      ],
+      "door": [
+        10,
+        2,
+        10,
+        6
+      ],
+      "arrival": [
+        11.7,
+        4
+      ],
+      "inside": [
+        8.3,
+        4
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S12",
+      "candidate": "Zeria",
+      "side": "east",
+      "bounds": [
+        60,
+        40,
+        70,
+        48
+      ],
+      "door": [
+        60,
+        42,
+        60,
+        46
+      ],
+      "arrival": [
+        58.3,
+        44
+      ],
+      "inside": [
+        61.7,
+        44
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S13",
+      "candidate": "Sony",
+      "side": "east",
+      "bounds": [
+        60,
+        32,
+        70,
+        40
+      ],
+      "door": [
+        60,
+        34,
+        60,
+        38
+      ],
+      "arrival": [
+        58.3,
+        36
+      ],
+      "inside": [
+        61.7,
+        36
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S14",
+      "candidate": "LG",
+      "side": "east",
+      "bounds": [
+        60,
+        24,
+        70,
+        32
+      ],
+      "door": [
+        60,
+        26,
+        60,
+        30
+      ],
+      "arrival": [
+        58.3,
+        28
+      ],
+      "inside": [
+        61.7,
+        28
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S15",
+      "candidate": "Casio",
+      "side": "east",
+      "bounds": [
+        60,
+        16,
+        70,
+        24
+      ],
+      "door": [
+        60,
+        18,
+        60,
+        22
+      ],
+      "arrival": [
+        58.3,
+        20
+      ],
+      "inside": [
+        61.7,
+        20
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S16",
+      "candidate": "GP",
+      "side": "east",
+      "bounds": [
+        60,
+        8,
+        70,
+        16
+      ],
+      "door": [
+        60,
+        10,
+        60,
+        14
+      ],
+      "arrival": [
+        58.3,
+        12
+      ],
+      "inside": [
+        61.7,
+        12
+      ],
+      "state": "candidate"
+    },
+    {
+      "id": "S17",
+      "candidate": "Gigaset",
+      "side": "east",
+      "bounds": [
+        60,
+        0,
+        70,
+        8
+      ],
+      "door": [
+        60,
+        2,
+        60,
+        6
+      ],
+      "arrival": [
+        58.3,
+        4
+      ],
+      "inside": [
+        61.7,
+        4
+      ],
+      "state": "candidate"
+    }
+  ],
+  "reserves": [
+    {
+      "id": "R1",
+      "bounds": [
+        0,
+        48,
+        10,
+        60
+      ],
+      "externalDoor": [
+        3,
+        60,
+        7,
+        60
+      ]
+    },
+    {
+      "id": "R2",
+      "bounds": [
+        60,
+        48,
+        70,
+        60
+      ],
+      "externalDoor": [
+        63,
+        60,
+        67,
+        60
+      ]
+    }
+  ],
+  "entry": {
+    "opening": [
+      29,
+      0,
+      41,
+      0
+    ],
+    "approach": [
+      32,
+      0,
+      38,
+      12
+    ]
+  },
+  "ring": {
+    "west": [
+      10,
+      6,
+      16,
+      48
+    ],
+    "east": [
+      54,
+      6,
+      60,
+      48
+    ],
+    "north": [
+      10,
+      42,
+      60,
+      48
+    ],
+    "south": [
+      10,
+      6,
+      60,
+      12
+    ],
+    "centerline": [
+      [
+        13,
+        9
+      ],
+      [
+        57,
+        9
+      ],
+      [
+        57,
+        45
+      ],
+      [
+        13,
+        45
+      ],
+      [
+        13,
+        9
+      ]
+    ],
+    "width": 6
+  },
+  "zones": [
+    {
+      "id": "LIFT",
+      "name": "Lift + ground lobby",
+      "bounds": [
+        16,
+        34,
+        24,
+        42
+      ],
+      "purpose": "Lift shaft and waiting / approach space",
+      "color": "#d0e4dc"
+    },
+    {
+      "id": "WC",
+      "name": "Facilities",
+      "bounds": [
+        46,
+        34,
+        54,
+        42
+      ],
+      "purpose": "Future facilities; connection from east aisle",
+      "color": "#dce8e7",
+      "door": [
+        54,
+        36.5,
+        54,
+        39.5
+      ]
+    },
+    {
+      "id": "LW",
+      "name": "West lounge",
+      "bounds": [
+        18,
+        20,
+        24,
+        28
+      ],
+      "purpose": "Seating and rest",
+      "color": "#e4e8d8"
+    },
+    {
+      "id": "LE",
+      "name": "East lounge",
+      "bounds": [
+        46,
+        20,
+        52,
+        28
+      ],
+      "purpose": "Seating and rest",
+      "color": "#e4e8d8"
+    },
+    {
+      "id": "P",
+      "name": "Low planting",
+      "bounds": [
+        30,
+        30,
+        40,
+        34
+      ],
+      "purpose": "Low planting; preserve views",
+      "color": "#d6e7d3"
+    },
+    {
+      "id": "E",
+      "name": "Seasonal / event",
+      "bounds": [
+        28,
+        16,
+        42,
+        24
+      ],
+      "purpose": "Removable seasonal installations",
+      "color": "#f6e9cc"
+    },
+    {
+      "id": "D",
+      "name": "Directory",
+      "bounds": [
+        18,
+        1,
+        22,
+        5
+      ],
+      "purpose": "Map and wayfinding kiosk; public approach from north",
+      "color": "#e9e7db"
+    },
+    {
+      "id": "G",
+      "name": "Guest service",
+      "bounds": [
+        48,
+        1,
+        52,
+        5
+      ],
+      "purpose": "Guest information and assistance; public approach from north",
+      "color": "#e9e7db"
+    }
+  ],
+  "lift": {
+    "shaft": [
+      20,
+      36,
+      24,
+      40
+    ],
+    "cabinEnvelope": [
+      20.4,
+      36.4,
+      23.6,
+      39.6
+    ],
+    "door": [
+      20,
+      37,
+      20,
+      39
+    ],
+    "groundLobby": [
+      16,
+      34,
+      20,
+      42
+    ],
+    "upperLobby": [
+      16,
+      34,
+      20,
+      42
+    ],
+    "upperPlatform": [
+      16,
+      32,
+      28,
+      44
+    ],
+    "upperHeight": 7.2,
+    "cartPolicy": "Current V2 rejects lift while pushing a cart; upper lift journey is visitor-only until separately designed and tested.",
+    "cabinDoor": [
+      20.4,
+      37,
+      20.4,
+      39
+    ],
+    "thresholdBridge": [
+      20,
+      37,
+      20.4,
+      39
+    ]
+  },
+  "planningEnvelopes": {
+    "walkingColliderRadius": 0.3,
+    "cartColliderRadius": 1.4,
+    "extraMargin": 0.25,
+    "note": "Existing runtime collider radii, plus a proposed planning margin; not real-world accessibility or building standards."
+  }
+}

@@ -169,7 +169,6 @@ def run():
                 trigger.click()
                 scan('product')
                 tab_dialog(page, '#product-dialog')
-                page.locator('#product-preview-load').click()
                 page.wait_for_function('__newMoonPreview.state.loaded', timeout=60000)
                 scan('preview')
                 tab_dialog(page, '#product-dialog')

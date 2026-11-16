@@ -10,6 +10,7 @@ OUT=ROOT/'docs/screenshots/mall-camera'
 def distance(s):
  return math.dist(s['camera']['position'],[s['x'],s['y']+1.24,s['z']])
 def assert_clear(s,variant):
+ assert s['drawCalls']<=200,s['drawCalls']
  p=s['camera']['position'];r=s['cameraObstruction']['radius']-.025
  boxes=[(-12.5,.94,5.8,2.88,1.88,.961),(-7,.9,2.2,.75,1.8,.532)]
  scale=1 if variant=='v1' else .8
@@ -36,11 +37,13 @@ def run(baseline=False):
      source=current[:a]+old[start:end]+current[b:];source=source.replace('  function constrain(point) {',"  const ray=new R.Ray({x:0,y:0,z:0},{x:0,y:0,z:-1});\n  function constrain(point) {")
      page.route('**/assets/player.js',lambda route:route.fulfill(status=200,body=source,content_type='text/javascript'))
     ready(page,f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?visitor={variant}')
+    if not baseline:assert state(page)['drawCalls']<=200,state(page)['drawCalls']
     page.evaluate('__mall.teleport("newmoon");__mall.setInput({})');drive(page,800,right=-1);drive(page,1000,forward=-1);s=drive(page,800)
     page.screenshot(path=str(OUT/f'{"before" if baseline else "after"}-desk-rear-{width}-{variant}.png'))
     if baseline:
      assert distance(s)<.9,distance(s);results.append({'baselineDeskHeadClippingReproduced':True,'distance':distance(s)});ctx.close();continue
     assert_clear(s,variant);assert s['cameraObstruction']['lift']>0
+    assert s['drawCalls']<=200,s['drawCalls']
     page.evaluate('__mall.teleport("atrium");__mall.setInput({})');drive(page,2200,right=-1)
     for yaw in [0,.6,1.2,math.pi]:
      s=drive(page,400,yaw=yaw,pitch=-.08);assert_clear(s,variant)

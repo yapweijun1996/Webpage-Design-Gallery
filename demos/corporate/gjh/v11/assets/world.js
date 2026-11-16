@@ -1,5 +1,6 @@
-import {addAmenities} from './amenities.js';
+import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createFurnishings} from './furnishings.js';
+import {spatial, storeCenterX} from './spatial.js';
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics) {
@@ -46,7 +47,19 @@ export async function createWorld(T, R, physics) {
   const textures = new Map(), loader = new T.TextureLoader().setCrossOrigin(undefined);
   const names = ['new-moon-logo.svg', 'mili-logo.jpg', 'gogo-logo.jpg', 'new-moon-brand-cover.jpg', 'mili-brand-cover.jpg', 'gogo-brand-cover.jpg', ...['nz-425g', 'au-425g', 'sa-425g', 'mx-454g'].map(id => `new-moon-${id}-front.jpg`)];
   await Promise.all(names.map(async name => {
-    const texture = await loader.loadAsync(`assets/${name}`); texture.colorSpace = T.SRGBColorSpace; texture.anisotropy = 4; textures.set(name, texture);
+    let texture;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const url = new URL(`assets/${name}`, location.href);
+        if (attempt) url.searchParams.set('retry', String(attempt));
+        texture = await loader.loadAsync(url.href);
+        break;
+      } catch (error) {
+        if (attempt === 2) throw new Error(`Mall texture failed to load: ${name}`, {cause: error});
+        await new Promise(resolve => setTimeout(resolve, attempt ? 800 : 200));
+      }
+    }
+    texture.colorSpace = T.SRGBColorSpace; texture.anisotropy = 4; textures.set(name, texture);
   }));
   const plane = geometry.plane;
   function art(name, x, y, z, width, ry = 0) {
@@ -206,7 +219,7 @@ export async function createWorld(T, R, physics) {
   for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
   box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   const doors = [], interactables = [];
-  let createCollectProp = () => null, reserveProduct = () => null;
+  let createCollectProp = () => null, reserveProduct = () => null, staticProductCount=0;
   let worldProductAssets = Object.freeze({status: 'not-loaded'}), shelves = [];
   // Original decorative kiosk beside the entrance, outside the central walking line.
   // The actual wayfinding interaction opens the existing three-store DOM map.
@@ -218,8 +231,8 @@ export async function createWorld(T, R, physics) {
   collider(-5.3, 1.025, 10.4, .96, 2.05, .68);
   shadow(-5.3, 10.4, 1.2, .9);
   interactables.push({id: 'mall-directory', x: -5.3, z: 10.4, radius: 2.8});
-  const stores = {newmoon: -10, mili: 0, gogo: 10};
-  for (const [zone, x] of Object.entries(stores)) {
+  for (const store of spatial.stores) {
+    const zone = store.id, x = storeCenterX(store);
     const wall = zone === 'mili' ? 'cream' : 'green';
     for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     box(wall, x, 2.85, -10.5, 10, 5.7, .25, true);
@@ -298,7 +311,7 @@ export async function createWorld(T, R, physics) {
     art(logo, x, 4.67, .4, 2.2);
     box('glow', x, 5.36, .36, 2.42, .025, .045);
     box('brass', x, 4.02, .29, 9.3, .025, .04);
-    const label = sign(zone === 'newmoon' ? '01  /  NEW MOON' : zone === 'mili' ? '02  /  MILI' : '03  /  GOGO', x, 3.5, .38, 3.9, .48, true, 80);
+    const label = sign(`${store.number}  /  ${store.label.toUpperCase()}`, x, 3.5, .38, 3.9, .48, true, 80);
     roomSigns.push({zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0});
     // Two independently kinematic glass leaves slide clear of the walking capsule.
     const leaves = [];
@@ -327,13 +340,13 @@ export async function createWorld(T, R, physics) {
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
-      const productDisplay = await addProducts(T, scene, textures, materials.brass);
+      const productDisplay = await addProducts(T, scene, textures, materials.brass,SHOWCASE_PRODUCTS);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
         sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true);
       }
-      worldProductAssets = productDisplay.assets; shelves = productDisplay.shelves; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
+      staticProductCount=productDisplay.displayedProducts;worldProductAssets = productDisplay.assets; shelves = productDisplay.shelves; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
       plant(x - 3.6, -2.3);
     } else {
       const cover = `${zone}-brand-cover.jpg`;
@@ -375,7 +388,7 @@ export async function createWorld(T, R, physics) {
       }
     }
   }
-  const amenities=await addAmenities(T,scene,collider,createCollectProp,true);
+  const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount);
   interactables.push(...amenities.interactables);
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
@@ -410,5 +423,10 @@ export async function createWorld(T, R, physics) {
     }
   }
   interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.1,seat})));
-  return {scene, doors, seats, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishings.finish(scene), productAssets: Object.freeze(worldProductAssets)};
+  const furnishingState=furnishings.finish(scene);
+  const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
+  // The seating collider intentionally covers only the seat pan. Camera bounds
+  // also cover the authored back and arms without blocking sit/stand routes.
+  const cameraObstacles=seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}}));
+  return {scene, doors, seats, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
 }

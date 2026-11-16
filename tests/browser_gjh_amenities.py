@@ -31,7 +31,7 @@ def run():
   data=(ROOT/'demos/corporate/gjh/v11/assets'/record['file']).read_bytes()
   assert hashlib.sha256(data).hexdigest()==record['sha256'] and len(data)==record['bytes']
  server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(QuietHandler,directory=str(ROOT)));threading.Thread(target=server.serve_forever,daemon=True).start()
- url=f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/index.html';results=[]
+ url=f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/index.html?visitor=v1';results=[]
  try:
   with sync_playwright() as p:
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=[f'--use-angle={os.environ.get("GALLERY_WEBGL_BACKEND","swiftshader")}','--enable-unsafe-swiftshader'])
