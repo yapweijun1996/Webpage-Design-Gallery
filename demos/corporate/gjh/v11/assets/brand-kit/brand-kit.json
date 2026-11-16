@@ -1,0 +1,345 @@
+{
+  "S01": {
+    "slot": "S01",
+    "brand": "New Moon",
+    "category": "Canned seafood",
+    "hero_product": "Premium Wild Caught New Zealand Abalone 425g",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "Seafood, simply presented",
+    "story": "The GJH eShop lists New Moon Premium Wild Caught New Zealand Abalone at 425 g and names New Zealand as its country of origin. Its ingredient list names abalone, water, salt and sugar. This plaque keeps the focus on the product category, while the original illustration stays separate from the real retail packaging.",
+    "palette": [
+      {"name": "deep sea blue", "hex": "#18364A"},
+      {"name": "muted brass", "hex": "#B59A68"},
+      {"name": "pearl cream", "hex": "#F2EFE8"}
+    ],
+    "shop_theme": "Dark timber shelving, brushed brass trim and soft pearl lighting.",
+    "sources": [
+      "https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/",
+      "https://www.gjh.com.sg/newmoon-history/"
+    ],
+    "unverified": false
+  },
+  "S02": {
+    "slot": "S02",
+    "brand": "MILI",
+    "category": "Sauces and condiments",
+    "hero_product": "Vegetarian Oyster Sauce 510g",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "A bottle for the pantry",
+    "story": "MILI’s official brand page describes six broad product categories, including sauces. The GJH eShop lists Vegetarian Oyster Sauce at 510 g and names mushroom extract in its ingredient list. The product listing marks it vegetarian-friendly. This quiet pantry stop uses an original bottle illustration rather than a copy of the real pack.",
+    "palette": [
+      {"name": "moss green", "hex": "#49634B"},
+      {"name": "oyster cream", "hex": "#F1E9D7"},
+      {"name": "warm charcoal", "hex": "#353734"}
+    ],
+    "shop_theme": "Warm wood, matte green panels and cream ceramic details.",
+    "sources": [
+      "https://www.gjheshop.com/product/mili-vegetarian-oyster-sauce-510g/",
+      "https://www.gjh.com.sg/mili/"
+    ],
+    "unverified": false
+  },
+  "S03": {
+    "slot": "S03",
+    "brand": "GOGO",
+    "category": "Drinks and ice cream",
+    "hero_product": "canned drinks and potong ice cream",
+    "evidence_level": "CORPORATE_CATEGORY_ONLY",
+    "tagline": "Drinks and frozen treats",
+    "story": "GJH’s GOGO page describes two broad categories: drinks and ice-cream, and mentions canned drinks and potong ice-cream. No individual drink flavour or ice-cream wrapper is verified for this bay. The illustration therefore pairs a plain can with a generic ice treat and keeps the story at category level.",
+    "palette": [
+      {"name": "citrus orange", "hex": "#E7863B"},
+      {"name": "lagoon teal", "hex": "#2E7C7A"},
+      {"name": "coconut white", "hex": "#F5F0E5"}
+    ],
+    "shop_theme": "Bright tiled surfaces, rounded display forms and a cool counter glow.",
+    "sources": [
+      "https://gjh.com.sg/gogo/",
+      "https://www.gjh.com.sg/about-us/"
+    ],
+    "unverified": true
+  },
+  "S04": {
+    "slot": "S04",
+    "brand": "Borsch Med",
+    "category": "Repellent patches",
+    "hero_product": "Mosquito Repellent Patch 18 patches",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "Repellent patches, neatly shown",
+    "story": "The GJH eShop lists Borsch Med Mosquito Repellent Patch in an 18-patch pack and names citronella oil in its ingredient information. The listing gives directions for placing a patch on clothing or a nearby surface. The plaque stays with the product format and makes no claims about protection or health benefits.",
+    "palette": [
+      {"name": "forest sage", "hex": "#63745D"},
+      {"name": "soft plum", "hex": "#6B4A55"},
+      {"name": "warm ivory", "hex": "#F3EBDD"}
+    ],
+    "shop_theme": "Calm sage shelving, plum accents and a softly lit personal-care counter.",
+    "sources": [
+      "https://www.gjheshop.com/product/bundle-of-2-borsch-med-mosquito-repellent-patch-18-patches/",
+      "https://www.gjh.com.sg/borsch-med/"
+    ],
+    "unverified": false
+  },
+  "S05": {
+    "slot": "S05",
+    "brand": "Pien Tze Huang",
+    "category": "Traditional medicine (generic display)",
+    "hero_product": "(not verified as GJH product)",
+    "evidence_level": "NOT_VERIFIED",
+    "tagline": "A traditional medicine category",
+    "story": "The official Pien Tze Huang site lists a medicine by that name and describes one troche per box. The supplied evidence does not verify it as a GJH item. This bay therefore uses a generic traditional medicine category illustration, without asserting a GJH relationship or copying a retail package.",
+    "palette": [
+      {"name": "cinnabar red", "hex": "#9E3F35"},
+      {"name": "ink brown", "hex": "#352C28"},
+      {"name": "parchment", "hex": "#E9DDBF"}
+    ],
+    "shop_theme": "Parchment-toned shelving, dark timber and restrained red accents.",
+    "sources": [
+      "https://www.pzhchina.com/gscp/info_169.aspx",
+      "https://www.gjheshop.com/product/zhang-zhou-pien-tze-huang-10-pcs/"
+    ],
+    "unverified": true
+  },
+  "S06": {
+    "slot": "S06",
+    "brand": "Flying Wheel",
+    "category": "Noodles",
+    "hero_product": "Air-Dried Singapore Ban Mee Noodles 70g",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "Noodles, simply air-dried",
+    "story": "The GJH eShop lists Flying Wheel All-Natural Air-Dried Singapore Ban Mee Noodles at 70 g. Its ingredient list names wheat flour, water and sea salt, and the listing marks it vegetarian-friendly. This pantry story centres on the noodle form; the original illustration avoids reproducing a retail wrapper.",
+    "palette": [
+      {"name": "wheat gold", "hex": "#C6A66C"},
+      {"name": "slate blue", "hex": "#536777"},
+      {"name": "rice paper", "hex": "#F0E9D9"}
+    ],
+    "shop_theme": "Light timber shelves, woven textures and a slate-blue sign band.",
+    "sources": [
+      "https://www.gjheshop.com/product/bundle-of-6-flying-wheel-all-natural-air-dried-singapore-ban-mee-noodles-70g/",
+      "https://www.gjh.com.sg/flying-wheel/"
+    ],
+    "unverified": false
+  },
+  "S07": {
+    "slot": "S07",
+    "brand": "Gu Long",
+    "category": "Canned food",
+    "hero_product": "Pork Leg Mushroom 397g cans",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "Pork and mushrooms, together",
+    "story": "GJH eShop lists GuLong Pork Leg Mushroom at 397 g, with pork leg, mushrooms and Chinese chestnut named in the ingredients. GJH’s brand page describes a range that includes stewed pork, pork luncheon meat, seafood, fruit and vegetables. This plaque keeps the focus on one listed canned-food combination.",
+    "palette": [
+      {"name": "brick red", "hex": "#9C4937"},
+      {"name": "jade green", "hex": "#4F6E5A"},
+      {"name": "rice cream", "hex": "#EFE4D0"}
+    ],
+    "shop_theme": "Deep timber, jade-green shelf edges and warm red signage.",
+    "sources": [
+      "https://www.gjheshop.com/product/gulong-pork-leg-mushroom-24x397g/",
+      "https://gjh.com.sg/gu-long/"
+    ],
+    "unverified": false
+  },
+  "S08": {
+    "slot": "S08",
+    "brand": "Skippy",
+    "category": "Peanut butter",
+    "hero_product": "500g Creamy Peanut Butter",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "Smooth peanut butter, simply",
+    "story": "The GJH eShop lists SKIPPY Creamy Peanut Butter at 500 g and names roasted peanuts, sugar, peanut oil, vegetable oil and salt in the ingredient information. SKIPPY’s official site also identifies a Creamy Peanut Butter product. This simple jar study gives the spread a place in the everyday pantry.",
+    "palette": [
+      {"name": "classic navy", "hex": "#1D3A64"},
+      {"name": "sky blue", "hex": "#70A9D4"},
+      {"name": "peanut cream", "hex": "#E8D1A3"}
+    ],
+    "shop_theme": "Blue enamel shelving, pale timber and a warm cream counter.",
+    "sources": [
+      "https://www.gjheshop.com/product/skippy-500g-creamy-peanut-butter/",
+      "https://skippy.com.ph/recipes/skippy-peanut-butter/skippy-smooth-peanut-butter"
+    ],
+    "unverified": false
+  },
+  "S09": {
+    "slot": "S09",
+    "brand": "SPAM",
+    "category": "Luncheon meat",
+    "hero_product": "Classic Luncheon Meat 340g",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "A tin for the pantry",
+    "story": "The GJH eShop lists SPAM Classic Luncheon Meat at 340 g and gives pork with ham, water, salt, modified potato starch, sugar and sodium nitrite in its ingredient information. SPAM’s official product page identifies Classic as one variety. The original can illustration does not copy SPAM packaging.",
+    "palette": [
+      {"name": "deep navy", "hex": "#173B68"},
+      {"name": "tin gold", "hex": "#E4B63F"},
+      {"name": "soft white", "hex": "#F3F0E7"}
+    ],
+    "shop_theme": "Navy sign panels, pale metal trim and a warm yellow light strip.",
+    "sources": [
+      "https://www.gjheshop.com/product/spam-classic-luncheon-meat-340g/",
+      "https://www.spam.com/varieties/spam-classic"
+    ],
+    "unverified": false
+  },
+  "S10": {
+    "slot": "S10",
+    "brand": "California Mexico",
+    "category": "Canned abalone",
+    "hero_product": "Red California Mexico Abalone 454g",
+    "evidence_level": "BRAND_LISTING_VERIFIED",
+    "tagline": "Abalone, simply presented",
+    "story": "GJH eShop’s abalone category lists RED CALIFORNIA MEXICO ABALONE at 454 g. GJH’s corporate site also names California Mexico Products among its distributed brands. No ingredient or origin details for the specific red listing were verified, so this plaque stays with the listing name and a generic abalone illustration.",
+    "palette": [
+      {"name": "sea teal", "hex": "#2C7776"},
+      {"name": "coral red", "hex": "#C65B46"},
+      {"name": "shell white", "hex": "#F0EAE0"}
+    ],
+    "shop_theme": "Cool teal shelving, red sign accents and pearl-toned display surfaces.",
+    "sources": [
+      "https://www.gjheshop.com/product-category/abalone/",
+      "https://gjh.com.sg/about-us/"
+    ],
+    "unverified": false
+  },
+  "S11": {
+    "slot": "S11",
+    "brand": "Hormel",
+    "category": "Canned food (generic display)",
+    "hero_product": "(no product found; use generic canned-food shelf)",
+    "evidence_level": "NOT_VERIFIED",
+    "tagline": "Canned food, simply shown",
+    "story": "The supplied product check found no specific Hormel item for this bay. GJH’s corporate site has a Hormel brand page, but this brief does not verify a product, pack size, recipe or origin. The story therefore stays with a generic canned-food shelf and makes no product-specific statement.",
+    "palette": [
+      {"name": "berry red", "hex": "#843E43"},
+      {"name": "stone grey", "hex": "#767976"},
+      {"name": "cream paper", "hex": "#EEE7D9"}
+    ],
+    "shop_theme": "Neutral pantry shelving with berry-red signage and simple metal details.",
+    "sources": [
+      "https://www.gjh.com.sg/hormel/",
+      "https://www.hormel.com/faqs/"
+    ],
+    "unverified": true
+  },
+  "S12": {
+    "slot": "S12",
+    "brand": "Zeria",
+    "category": "Tablets and supplements",
+    "hero_product": "Chondro Support 150 Tablets",
+    "evidence_level": "BRAND_LISTING_VERIFIED",
+    "tagline": "A considered tablet display",
+    "story": "The GJH eShop’s Joint Health listing includes Zeria Chondro Support 150 Tablets, and Zeria’s official product catalogue also lists Chondro Support. These sources verify the product name and listed format for this plaque. It avoids benefit claims and uses a generic tablet-box illustration rather than copying retail packaging.",
+    "palette": [
+      {"name": "indigo slate", "hex": "#3C4A66"},
+      {"name": "quiet teal", "hex": "#6F9690"},
+      {"name": "cool white", "hex": "#F1F3F1"}
+    ],
+    "shop_theme": "Cool white shelving, indigo panels and muted teal accents.",
+    "sources": [
+      "https://www.gjheshop.com/product-category/joint-health/",
+      "https://www.zeria.co.jp/english/product/otc/"
+    ],
+    "unverified": false
+  },
+  "S13": {
+    "slot": "S13",
+    "brand": "Sony",
+    "category": "Audio and in-ear headphones",
+    "hero_product": "MDR-E9LP In-Ear Headphone White",
+    "evidence_level": "BRAND_LISTING_VERIFIED",
+    "tagline": "Audio in a small form",
+    "story": "Sony’s official product page identifies the MDR-E9LP as white wired in-ear headphones. GJH’s brand directory lists Sony among its brands. The verified product details used here are the model, colour and category; this original illustration uses a neutral earbud silhouette without a Sony mark or copied product photograph.",
+    "palette": [
+      {"name": "charcoal", "hex": "#292B2D"},
+      {"name": "cool silver", "hex": "#BFC3C5"},
+      {"name": "paper white", "hex": "#F5F5F2"}
+    ],
+    "shop_theme": "Charcoal slatted panels, brushed silver trim and soft acoustic lighting.",
+    "sources": [
+      "https://electronics.sony.com/audio/headphones/in-ear/p/mdre9lp-whi?sku=mdre9lp-blk",
+      "https://www.gjheshop.com/shop/",
+      "https://www.gjh.com.sg/sony/"
+    ],
+    "unverified": false
+  },
+  "S14": {
+    "slot": "S14",
+    "brand": "LG",
+    "category": "Home entertainment and televisions",
+    "hero_product": "UHD UR75 43 inch 4K Smart TV",
+    "evidence_level": "BRAND_LISTING_VERIFIED",
+    "tagline": "A screen for shared viewing",
+    "story": "LG’s official page describes the UR75 as a 43-inch 4K Smart UHD TV. GJH’s brand directory lists LG, while the supplied brief gives the selected product name. This plaque sticks to screen size, resolution and category; the illustration is a clean television silhouette without a copied screen scene or product photo.",
+    "palette": [
+      {"name": "deep violet", "hex": "#5B3F7A"},
+      {"name": "soft silver", "hex": "#BEC1C2"},
+      {"name": "gallery white", "hex": "#F5F3EF"}
+    ],
+    "shop_theme": "Smooth white walls, silver display rails and violet sign panels.",
+    "sources": [
+      "https://www.lg.com/uk/tvs-soundbars/4k-uhd-tvs/43ur75006lk/",
+      "https://www.gjheshop.com/shop/",
+      "https://gjh.com.sg/lg/"
+    ],
+    "unverified": false
+  },
+  "S15": {
+    "slot": "S15",
+    "brand": "Casio",
+    "category": "Musical instruments and digital pianos",
+    "hero_product": "Celviano Grand Hybrid GP-510 Piano",
+    "evidence_level": "BRAND_LISTING_VERIFIED",
+    "tagline": "Keys and sound, side by side",
+    "story": "Casio’s official CELVIANO pages identify GP-510BP as part of the Grand Hybrid line and describe it as a digital piano. GJH’s brand directory lists Casio. This counter introduces the piano through its broad silhouette and keyboard, without copying a promotional photograph or reproducing a retail finish in detail.",
+    "palette": [
+      {"name": "piano black", "hex": "#202123"},
+      {"name": "walnut brown", "hex": "#76543D"},
+      {"name": "ivory key", "hex": "#F1EDE2"}
+    ],
+    "shop_theme": "Dark walnut display floor, black panels and warm gallery spotlights.",
+    "sources": [
+      "https://www.casio.com/europe/electronic-musical-instruments/product.GP-510BP/",
+      "https://www.casio.com/intl/electronic-musical-instruments/celviano-grand-hybrid/",
+      "https://www.gjheshop.com/shop/"
+    ],
+    "unverified": false
+  },
+  "S16": {
+    "slot": "S16",
+    "brand": "GP",
+    "category": "Trackers and batteries",
+    "hero_product": "eTag Smart Locator Tracker White",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "A small locator in white",
+    "story": "The GJH eShop lists the white GP eTag Smart Locator Tracker and describes a built-in lanyard hole and buzzer. GP’s own product page also identifies eTag as a smart tracker. This small-object display focuses on the round body and loop opening, using original shapes without reproducing the retail pack.",
+    "palette": [
+      {"name": "clean white", "hex": "#F4F5F2"},
+      {"name": "signal teal", "hex": "#3D8C8A"},
+      {"name": "battery lime", "hex": "#B7C94A"}
+    ],
+    "shop_theme": "White modular shelving, teal edging and a restrained lime marker.",
+    "sources": [
+      "https://www.gjheshop.com/product/gp-etag-smart-locator-tracker-anti-lost-finder-tracker-gps-tracking-device-works-with-ios-only/",
+      "https://hk.gpbatteries.com/products/gp-etag-smart-tracker?variant=44614415876277"
+    ],
+    "unverified": false
+  },
+  "S17": {
+    "slot": "S17",
+    "brand": "Gigaset",
+    "category": "Telecommunications and cordless phones",
+    "hero_product": "A270 Single Cordless Phone",
+    "evidence_level": "DETAIL_PAGE_VERIFIED",
+    "tagline": "A handset with a home base",
+    "story": "Gigaset’s official A270 page identifies a cordless phone model with a white colour option and describes versions with or without an answering machine. GJH’s brand directory lists Gigaset. This display stays with the handset-and-base category and simple controls rather than copied product photography.",
+    "palette": [
+      {"name": "graphite", "hex": "#4A4D50"},
+      {"name": "satin silver", "hex": "#B8BBBD"},
+      {"name": "soft white", "hex": "#F5F4EF"}
+    ],
+    "shop_theme": "Graphite sign band, satin silver details and white display plinths.",
+    "sources": [
+      "https://www.gigaset.com/hq_en/gigaset-a270/",
+      "https://www.gjheshop.com/shop/"
+    ],
+    "unverified": false
+  }
+}
