@@ -1,13 +1,13 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **authorized software work complete, including the four interior follow-ups and expanded-mall software/performance acceptance**. By owner decision on 2026-11-16, physical-device acceptance and branded activation of the 14 candidate storefronts are deferred, non-blocking follow-ups. The 14 storefronts remain closed neutral placeholders. Completed software is not blocked by these deferred items. Checked items retain their documented evidence and environment limits; no unperformed device test or brand authorization is represented as passed.
+Status: **previous authorized software work and the requested 17-lot visual-concept delivery are complete**. The 2026-11-16 owner decision still defers physical-device acceptance and real/operational brand activation. This task authorizes the limited visual use of supplied brand names and logos on concept storefronts; it does not verify tenancy, current brand relationships, merchandise, claims, or general artwork rights. No unperformed device acceptance or real-world authorization is represented as passed.
 
 ## Deferred follow-ups — non-blocking
 
 Owner decision, 2026-11-16: defer the following work outside the completed software scope. These items do not block software completion or the existing release.
 
 - **Physical-device and accessibility acceptance — deferred, not performed:** physical iPhone Safari / Android Chrome, real safe-area insets, screen-reader sessions and the remaining device-specific contrast review. Existing browser and automated accessibility evidence keeps its original scope. Reopen as a separate acceptance task when the required devices and testing access are available.
-- **Candidate brand authorization and activation — deferred, not granted:** keep all 14 candidate storefronts as numbered, closed neutral placeholders in the scene, map and directory. Do not assign brand identities, add brand-specific assets or enable store actions as part of this completion. Reopen branded activation separately only after current relationship, content and rights are verified for each candidate.
+- **Real brand authorization and activation — deferred, not established:** the earlier neutral placeholders remain unavailable for store actions. This new task authorizes only supplied-name/logo concept signage and evidence-bounded display silhouettes; do not claim current relationships, tenancy, distribution, stock, medical benefits, or general third-party artwork rights. Reopen actual activation only after current relationship, content and rights are verified for each candidate.
 
 ## Objective and scope
 
@@ -17,11 +17,11 @@ Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/B
 
 The expanded 17-lot storefront design is tracked in [the shop-lot design matrix](docs/gjh-v11-shop-lot-design.md). The owner-authorized concept direction uses the supplied logo and brand name on each sign, glazed storefronts with visible non-walkable displays, accurate hero-product scale where evidence supports it, and generic stand-ins where products/models are unverified. This design work does not establish tenancy, distribution, product availability, brand authorization or medical benefits.
 
-- [ ] Stage 2 — Build one 17-sign texture atlas with logo/text fallback and add category storefront variants.
-- [ ] Stage 3 — Implement S01–S03 and S06–S11 with validated shelf/showcase models and evidence-bounded hero stand-ins.
-- [ ] Stage 4 — Implement S04–S05 and S12–S17 with existing displays or simple generated geometry; record missing matching models.
-- [ ] Stage 5 — Measure browser draw calls/startup and apply facade-plus-sign distant LOD to stay within 200 calls.
-- [ ] Stage 6 — Update README, check off completed stages, regenerate generated outputs, and run requested checks.
+- [x] Stage 2 — Build one 17-sign texture atlas with logo/text fallback and add category storefront variants.
+- [x] Stage 3 — Implement S01–S03 and S06–S11 with validated shelf/showcase models and evidence-bounded hero stand-ins.
+- [x] Stage 4 — Implement S04–S05 and S12–S17 with existing displays or simple generated geometry; record missing matching models.
+- [x] Stage 5 — Measure browser draw calls/startup and apply facade-plus-sign distant LOD to stay within 200 calls.
+- [x] Stage 6 — Update README, check off completed stages, regenerate generated outputs, and run requested checks.
 
 The mall already has three stores, the green-polo visitor, benches, planters, walking and turning controls, inspection dialogs and a list view. Its four canned products now use owner-authorized conceptual GLBs with photo-derived labels; product-detail dialogs retain default packshots and offer an opt-in unofficial 3D preview in application 1.1.14. Confirm these observations against current source and the deployed site before making changes.
 
