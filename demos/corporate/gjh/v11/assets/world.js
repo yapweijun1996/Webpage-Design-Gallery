@@ -87,11 +87,11 @@ export async function createWorld(T, R, physics, expanded = false) {
   };
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
-  let activeShopSlot=null;
+  let activeShopSlot=null,activeDeck=false;
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ') {
-    const key = `${type}:${material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}`;
-    if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: materials[material], transforms: [],shopSlot:activeShopSlot});
+    const key = `${type}:${material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}${activeDeck?':deck':''}`;
+    if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: materials[material], transforms: [],shopSlot:activeShopSlot,deckLod:activeDeck});
     position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, 0, order); quaternion.setFromEuler(euler);
     matrix.compose(position, quaternion, scale); batches.get(key).transforms.push(matrix.clone());
   }
@@ -649,6 +649,28 @@ export async function createWorld(T, R, physics, expanded = false) {
         box(finish,front,4.35,z,.06,.06,7.2);
       }
     });
+    // Small upper gallery seating; the validated bench/planter assets are
+    // reused when available, with batched local geometry as the fallback.
+    activeDeck=true;
+    const deckBench=(x,z,facing)=>{
+      if(!furnishings.place('bench',x,z,.8,facing,liftLayout.upper, null, -1)){
+        box('wood',x,liftLayout.upper+.24,z,2.3,.32,.72);
+        box('seat',x,liftLayout.upper+.49,z,2.34,.18,.76);
+        box('seat',x,liftLayout.upper+.82,z+facing*.28,2.34,.54,.16);
+        box('brass',x,liftLayout.upper+.44,z-facing*.38,2.32,.025,.025);
+      }
+      collider(x,liftLayout.upper+.26,z,2.3,.5,.76);
+    };
+    deckBench(-7,12.5,1);deckBench(.8,12.5,1);
+    for(const x of [-8.1,2.1]){
+      if(!furnishings.place('planter',x,14.7,.68,1,liftLayout.upper,null,-1)){
+        box('pot',x,liftLayout.upper+.24,14.7,.68,.48,.68,true);
+        box('wood',x,liftLayout.upper+.49,14.7,.58,.025,.58);
+        for(let i=0;i<4;i++)solid('sphere',i%2?'leaf':'foliage',x+(i%2?-.14:.14),liftLayout.upper+.78,14.7+(i<2?-.14:.14),.19,.36,.19);
+      }
+      collider(x,liftLayout.upper+.25,14.7,.68,.5,.68);
+    }
+    activeDeck=false;
     await addShopSignAtlas(T,expandedLayout,scene);
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
@@ -657,7 +679,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
-    mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); mesh.userData.shopSlot=batch.shopSlot; scene.add(mesh);
+    mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); mesh.userData.shopSlot=batch.shopSlot;mesh.userData.deckLod=batch.deckLod;scene.add(mesh);
     if(batch.shopSlot!==null)shopLodMeshes.push(mesh);
   }
   const ambient = new T.HemisphereLight(expanded ? 0xfff3e2 : 0xe4efe6, expanded ? 0x77634b : 0x6d5b3b, 2.1);scene.add(ambient);
@@ -689,6 +711,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       mesh.visible = !overlaps && (mesh.userData.shopSlot===undefined || mesh.userData.shopLodNear);
     }
   }
+  let deckLodMeshes=null;
   function updateShopLods(visitor) {
     if(!expanded)return;
     for(const mesh of shopLodMeshes){
@@ -698,6 +721,9 @@ export async function createWorld(T, R, physics, expanded = false) {
       mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.z-z)<18;
       mesh.visible=mesh.userData.shopLodNear;
     }
+    if(!deckLodMeshes){deckLodMeshes=[];scene.traverse(mesh=>{if(mesh.userData.deckLod)deckLodMeshes.push(mesh);});}
+    const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3;
+    for(const mesh of deckLodMeshes)mesh.visible=deckVisible;
     for(const update of shopLodUpdates)update(visitor);
   }
   interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.65,seat})));

@@ -37,7 +37,8 @@ export async function createFurnishings(T, shadows) {
             // Mounted trim uses existing light pools without adding shadow passes.
             mesh.castShadow = shadows && !['wallLight', 'storeSign'].includes(kind); mesh.receiveShadow = true;
             mesh.computeBoundingSphere();
-            if(shopSlot!==null){mesh.userData.shopSlot=shopSlot;onShopLodMesh(mesh);}
+            if(shopSlot===-1)mesh.userData.deckLod=true;
+            else if(shopSlot!==null){mesh.userData.shopSlot=shopSlot;onShopLodMesh(mesh);}
             group.add(mesh);
           }
         }

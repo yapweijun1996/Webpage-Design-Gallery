@@ -745,7 +745,9 @@ async function createFurnishings(T, shadows) {
             mesh.castShadow = shadows && !["wallLight", "storeSign"].includes(kind);
             mesh.receiveShadow = true;
             mesh.computeBoundingSphere();
-            if (shopSlot !== null) {
+            if (shopSlot === -1)
+              mesh.userData.deckLod = true;
+            else if (shopSlot !== null) {
               mesh.userData.shopSlot = shopSlot;
               onShopLodMesh(mesh);
             }
@@ -1064,9 +1066,9 @@ async function createWorld(T, R, physics, expanded = false) {
       }
       return panels;
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ") {
-      const key2 = `${type}:${material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}`;
+      const key2 = `${type}:${material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
       if (!batches.has(key2))
-        batches.set(key2, { geometry: geometry[type], material: materials[material], transforms: [], shopSlot: activeShopSlot });
+        batches.set(key2, { geometry: geometry[type], material: materials[material], transforms: [], shopSlot: activeShopSlot, deckLod: activeDeck });
       position.set(x, y, z);
       scale.set(sx, sy, sz);
       euler.set(rx, ry, 0, order);
@@ -1253,6 +1255,16 @@ async function createWorld(T, R, physics, expanded = false) {
         mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.z - z) < 18;
         mesh.visible = mesh.userData.shopLodNear;
       }
+      if (!deckLodMeshes) {
+        deckLodMeshes = [];
+        scene.traverse((mesh) => {
+          if (mesh.userData.deckLod)
+            deckLodMeshes.push(mesh);
+        });
+      }
+      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3;
+      for (const mesh of deckLodMeshes)
+        mesh.visible = deckVisible;
       for (const update of shopLodUpdates)
         update(visitor);
     };
@@ -1331,7 +1343,7 @@ async function createWorld(T, R, physics, expanded = false) {
     };
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
-    let activeShopSlot = null;
+    let activeShopSlot = null, activeDeck = false;
     const tagShopLod = (mesh) => {
       if (expanded && activeShopSlot !== null) {
         mesh.userData.shopSlot = activeShopSlot;
@@ -1849,6 +1861,28 @@ async function createWorld(T, R, physics, expanded = false) {
           box(finish, front, 4.35, z, 0.06, 0.06, 7.2);
         }
       });
+      activeDeck = true;
+      const deckBench = (x, z, facing) => {
+        if (!furnishings.place("bench", x, z, 0.8, facing, liftLayout.upper, null, -1)) {
+          box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
+          box("seat", x, liftLayout.upper + 0.49, z, 2.34, 0.18, 0.76);
+          box("seat", x, liftLayout.upper + 0.82, z + facing * 0.28, 2.34, 0.54, 0.16);
+          box("brass", x, liftLayout.upper + 0.44, z - facing * 0.38, 2.32, 0.025, 0.025);
+        }
+        collider(x, liftLayout.upper + 0.26, z, 2.3, 0.5, 0.76);
+      };
+      deckBench(-7, 12.5, 1);
+      deckBench(0.8, 12.5, 1);
+      for (const x of [-8.1, 2.1]) {
+        if (!furnishings.place("planter", x, 14.7, 0.68, 1, liftLayout.upper, null, -1)) {
+          box("pot", x, liftLayout.upper + 0.24, 14.7, 0.68, 0.48, 0.68, true);
+          box("wood", x, liftLayout.upper + 0.49, 14.7, 0.58, 0.025, 0.58);
+          for (let i = 0;i < 4; i++)
+            solid("sphere", i % 2 ? "leaf" : "foliage", x + (i % 2 ? -0.14 : 0.14), liftLayout.upper + 0.78, 14.7 + (i < 2 ? -0.14 : 0.14), 0.19, 0.36, 0.19);
+        }
+        collider(x, liftLayout.upper + 0.25, 14.7, 0.68, 0.5, 0.68);
+      }
+      activeDeck = false;
       await addShopSignAtlas(T, expandedLayout, scene);
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
@@ -1860,6 +1894,7 @@ async function createWorld(T, R, physics, expanded = false) {
       mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool;
       mesh.computeBoundingSphere();
       mesh.userData.shopSlot = batch.shopSlot;
+      mesh.userData.deckLod = batch.deckLod;
       scene.add(mesh);
       if (batch.shopSlot !== null)
         shopLodMeshes.push(mesh);
@@ -1881,6 +1916,7 @@ async function createWorld(T, R, physics, expanded = false) {
     sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);
     const signPoint = new T.Vector3;
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
+    let deckLodMeshes = null;
     interactables.push(...seats.map((seat) => ({ id: seat.id, x: seat.exitX, z: seat.exitZ, radius: 1.65, seat })));
     const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh));
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;

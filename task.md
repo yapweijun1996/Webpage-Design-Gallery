@@ -22,7 +22,7 @@ The expanded 17-lot storefront design is tracked in [the shop-lot design matrix]
 Design and implementation are tracked in [the upper-deck brand-wall brief](docs/gjh-v11-upper-deck-brand-wall.md). Add a 12 × 12 m viewing deck at +7.2 m with an atrium glass railing, a few benches and planters, and one gallery wall of 17 small brand plaques. Reuse validated local furniture/railing assets only. Build plaque art as one atlas; keep the expanded default and deck views at <=190 draw calls without changing startup cost. The independent-concept footer stays; no prices or medical claims. Keep S03, S05 and S11 neutral. Correct only expanded-layout “three stores” copy; classic retains its three-store wording.
 
 - [x] Stage 1 — Add the design brief and this checklist.
-- [ ] Stage 2 — Build the upper deck, railing, benches and planters.
+- [x] Stage 2 — Build the upper deck, railing, benches and planters.
 - [ ] Stage 3 — Build the 17-plaque atlas and accessible nearby/tap story interaction.
 - [ ] Stage 4 — Fix expanded-layout copy, extend `tests/browser_gjh_v11.py`, update README, regenerate outputs, and verify both views <=190 draw calls.
 

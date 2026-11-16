@@ -1,5 +1,6 @@
 import {liftLayout,cutRectangle} from './lift-layout.js';
 import {opaqueBatch} from './opaque-batch.js';
+import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 // Experimental two-level test space. The static slabs own collision; during
 // travel the player controller owns the kinematic rider and calls setHeight.
 function createLegacyElevator(T, R, physics, scene) {
@@ -45,7 +46,7 @@ function createLegacyElevator(T, R, physics, scene) {
 
 export function createElevatorV2(T,R,physics,scene,expanded=false) {
   if(!expanded)return createLegacyElevator(T,R,physics,scene);
-  const L=liftLayout, floors=[0,L.upper], staticParts=[], cabinParts=[];
+  const L=liftLayout, floors=[0,L.upper], staticParts=[], cabinParts=[],deckGlassParts=[];
   const palette={stone:new T.Color(0xdfd5c4),rail:new T.Color(0xb59b62),panel:new T.Color(0x183a30)};
   const obstacles=[], gates=[], thresholds=[];let height=0,call=null,generation=0,riding=false;
   function geometry(kind,x,y,z,sx,sy,sz) {
@@ -59,6 +60,7 @@ export function createElevatorV2(T,R,physics,scene,expanded=false) {
     staticParts.push(geometry(kind,x,y,z,sx,sy,sz));collider(x,y,z,sx,sy,sz);
     obstacles.push({min:{x:x-sx/2,y:y-sy/2,z:z-sz/2},max:{x:x+sx/2,y:y+sy/2,z:z+sz/2}});
   }
+
   const shaft=L.shaft,slab=L.slab,t=L.threshold;
   const sx=shaft.maxX-shaft.minX,sz=shaft.maxZ-shaft.minZ;
   const slabX=(slab.minX+slab.maxX)/2,slabZ=(slab.minZ+slab.maxZ)/2;
@@ -67,8 +69,26 @@ export function createElevatorV2(T,R,physics,scene,expanded=false) {
   const guardHeight=1.1,wallThickness=.1;
   for(const r of cutRectangle(slab,shaft))fixed('stone',(r.minX+r.maxX)/2,L.upper-.2,(r.minZ+r.maxZ)/2,r.maxX-r.minX,.4,r.maxZ-r.minZ);
   // Low guards enclose the landing and both shaft entrances without a tall opaque tower.
-  for(const x of [slab.minX,slab.maxX])fixed('panel',x,L.upper+guardHeight/2,slabZ,.12,guardHeight,slab.maxZ-slab.minZ);
-  for(const z of [slab.minZ,slab.maxZ])fixed('panel',slabX,L.upper+guardHeight/2,z,slab.maxX-slab.minX,guardHeight,.12);
+  // Perimeter guards are glass visually and remain solid to the visitor.
+  function deckGuard(x,y,z,sx,sy,sz) {
+    collider(x,y,z,sx,sy,sz);
+    obstacles.push({min:{x:x-sx/2,y:y-sy/2,z:z-sz/2},max:{x:x+sx/2,y:y+sy/2,z:z+sz/2}});
+    const pane=new T.BoxGeometry(sx,sy,sz);pane.translate(x,y,z);deckGlassParts.push(pane);
+  }
+  for(const x of [slab.minX,slab.maxX]){
+    const length=slab.maxZ-slab.minZ;deckGuard(x,L.upper+.53,slabZ,.1,1.06,length);
+    fixed('rail',x,L.upper+1.08,slabZ,.12,.08,length);
+    fixed('rail',x,L.upper+.04,slabZ,.12,.08,length);
+    for(const z of [slab.minZ+1.5,slabZ,slab.maxZ-1.5])fixed('rail',x,L.upper+.55,z,.1,1.1,.1);
+  }
+  for(const z of [slab.minZ,slab.maxZ]){
+    const length=slab.maxX-slab.minX;deckGuard(slabX,L.upper+.53,z,length,1.06,.1);
+    fixed('rail',slabX,L.upper+1.08,z,length,.08,.12);
+    fixed('rail',slabX,L.upper+.04,z,length,.08,.12);
+    for(const x of [slab.minX+1.5,slabX,slab.maxX-1.5])fixed('rail',x,L.upper+.55,z,.1,1.1,.1);
+  }
+  const deckGlass=new T.Mesh(mergeGeometries(deckGlassParts),new T.MeshStandardMaterial({color:0xc9e2d9,transparent:true,opacity:.22,roughness:.12,metalness:.08,depthWrite:false,side:T.DoubleSide}));
+  deckGlass.name='Upper deck glass balustrade';deckGlass.userData.deckLod=true;scene.add(deckGlass);
   for(const floor of floors){
     fixed('rail',shaft.maxX,floor+guardHeight/2,shaftZ,wallThickness,guardHeight,sz);
     for(const z of [shaft.minZ,shaft.maxZ])fixed('rail',shaftX,floor+guardHeight/2,z,sx,guardHeight,wallThickness);
