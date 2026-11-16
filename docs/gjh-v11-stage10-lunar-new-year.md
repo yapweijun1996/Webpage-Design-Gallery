@@ -1,6 +1,6 @@
 # V11 stage 10a — Lunar New Year
 
-Status: implemented locally in the opt-in expanded mall preview. [Christmas](gjh-v11-stage10-christmas.md) and [Deepavali](gjh-v11-stage10-deepavali.md) were added subsequently. The original three-store layout remains the default; the expanded preview is selected with `?layout=expanded`.
+Status: implemented locally in the expanded mall, now the default. [Christmas](gjh-v11-stage10-christmas.md) and [Deepavali](gjh-v11-stage10-deepavali.md) were added subsequently. Choose **Classic 3-store view** or `?layout=classic` for the original layout.
 
 ## Experience and spatial placement
 

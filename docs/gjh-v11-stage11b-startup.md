@@ -1,10 +1,6 @@
 # V11 stage 11b — startup budget work
 
-Status: **local startup-budget acceptance passed** in the existing default-layout
-laboratory profile. All five measured viewports meet the unchanged 45-request,
-10 MiB decoded-resource and 200 non-cart draw-call limits. Measurements do not
-certify production speed, compressed wire bytes, physical devices, Safari or
-accessibility technology. See the current request-reduction results below.
+Status: **historical local startup-budget acceptance passed** in the then-default classic layout, now available only with `?layout=classic`. The expanded mall became the default on 2026-11-16; the request, decoded-resource and draw-call limits are unchanged. The measurements below describe the tested snapshot and do not certify production speed, compressed wire bytes, physical devices, Safari or accessibility technology. Current-default measurements belong to the owner-decision acceptance record, not this historical report.
 
 ## Changes
 

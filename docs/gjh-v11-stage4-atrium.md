@@ -2,7 +2,7 @@
 
 Date: 15 November 2026 (Asia/Singapore)
 
-Status: **implemented and tested in the opt-in expanded ground-floor preview**. Open the [local preview](http://127.0.0.1:8766/demos/corporate/gjh/v11/?layout=expanded) while the development server is running, or choose **Preview the expanded mall** in the directory. The original three-store scene remains the default. Stage 4 builds on, rather than replaces, the [stage 3 shell](gjh-v11-stage3-expanded-shell.md). The subsequent [stage 5](gjh-v11-stage5-existing-stores.md) integrates the three existing storefronts.
+Status: **implemented in the expanded ground-floor layout, now the default**. This report's original verification covered the then-opt-in preview. Open the [local expanded layout](http://127.0.0.1:8766/demos/corporate/gjh/v11/?layout=expanded) while the development server is running. Choose **Classic 3-store view** or append `?layout=classic` for the original scene. Stage 4 builds on, rather than replaces, the [stage 3 shell](gjh-v11-stage3-expanded-shell.md). The subsequent [stage 5](gjh-v11-stage5-existing-stores.md) integrates the three existing storefronts.
 
 ## Design and positions
 
@@ -37,4 +37,4 @@ The stage 4 1440 px loop sample recorded 214 draws while pushing a cart. This ex
 
 ## Remaining limits
 
-No physical phone, tablet, gamepad, Safari, screen reader or field-performance testing was performed. The event reservation is kept clear but future decorations, theme replacement and their collision/lifecycle rules remain unimplemented. Storefront refinement, the physical lift/upper landing, materials and the rest of the upgrade remain later stages. The original scene is unchanged apart from the prior stage 3 preview link; the revised atrium is not the default or a published release.
+No physical phone, tablet, gamepad, Safari, screen reader or field-performance testing was performed. The event reservation is kept clear but future decorations, theme replacement and their collision/lifecycle rules remain unimplemented. Storefront refinement, the physical lift/upper landing and materials were later implemented; the expanded layout is now the default. The original scene is unchanged and remains available with `?layout=classic`.

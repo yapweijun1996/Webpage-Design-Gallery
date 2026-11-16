@@ -1,4 +1,4 @@
-"""Matched local default/expanded observations; not a device or GPU timing benchmark."""
+"""Matched local classic/expanded observations; not a device or GPU timing benchmark."""
 import functools
 import http.server
 import json
@@ -22,7 +22,7 @@ def run():
                 '--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
             print('Browser:',browser.version,flush=True)
             for w,h in [(390,844),(1440,900)]:
-                for query in ['', '?layout=expanded']:
+                for query in ['?layout=classic', '']:
                     context=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=2,
                         has_touch=w<1000,reduced_motion='reduce',service_workers='block')
                     context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
@@ -34,7 +34,7 @@ def run():
                     intervals.sort();page.locator('#scene-cart').click();page.evaluate('__mall.setInput({forward:0});__mall.step(20)')
                     cart=page.evaluate('''()=>{let s=__mall.state;return {active:s.pushing,draw:s.drawCalls,triangles:s.renderTriangles,resources:s.rendererResources}}''')
                     assert cart['active'],cart
-                    print(json.dumps({'viewport':[w,h],'layout':'expanded' if query else 'default','idle':idle,
+                    print(json.dumps({'viewport':[w,h],'layout':'expanded' if not query else 'classic','idle':idle,
                         'cart':cart,'rafMedianMs':round(intervals[60],2),'rafP95Ms':round(intervals[113],2)}),flush=True)
                     context.close()
             browser.close()

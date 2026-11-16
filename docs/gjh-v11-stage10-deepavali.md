@@ -1,6 +1,6 @@
 # V11 stage 10c — Deepavali
 
-Status: implemented locally in the opt-in expanded mall preview. Visitors can select Everyday, Lunar New Year, Christmas or Deepavali; the original three-store scene remains the default. Use `?layout=expanded` to enter the preview.
+Status: implemented locally in the expanded mall, now the default. Visitors can select Everyday, Lunar New Year, Christmas or Deepavali. Choose **Classic 3-store view** or `?layout=classic` for the original three-store scene.
 
 ## Design and placement
 

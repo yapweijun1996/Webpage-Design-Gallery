@@ -586,7 +586,13 @@ The earlier nine-slice outline is superseded by the more detailed, dependency-aw
 
 ## Expanded 17-store upgrade — 2026-11-15
 
-Status: **stages 0–5 and 7–10 completed in the opt-in expanded preview; stage 6 neutral storefront and research scope complete, with branded activation owner-deferred; stage 11b startup-budget acceptance passed and release verified**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
+Status: **stages 0–5 and 7–10 completed; stage 6 neutral storefront and research scope complete, with branded activation owner-deferred; stage 11b startup-budget acceptance passed and release verified**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The expanded default runtime has three open stores and 14 closed neutral slots; `?layout=classic` selects the original three-store layout. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
+
+Owner decision — 2026-11-16: the expanded 17-slot mall is now the default;
+`?layout=classic` opts into the original three-store scene and
+`?layout=expanded` remains an alias. Three stores are open; 14 spaces remain
+closed neutral placeholders. This changes route selection only, not tenant
+authorization or the separate brand-activation decision.
 
 - [x] Inspect existing scene dimensions and repository company/brand research; check GJH corporate and eShop source listings.
 - [x] Produce a labelled, dimensioned 2D ground-floor draft and reconcile area arithmetic, circulation zones, seasonal space and candidate brand evidence.

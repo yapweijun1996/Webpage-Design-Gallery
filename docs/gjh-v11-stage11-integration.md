@@ -1,6 +1,6 @@
 # V11 stage 11 — integration and verification
 
-Status: historical local integration verification for the opt-in expanded mall. Everyday, Lunar New Year, Christmas and Deepavali are available; the original scene remains the default. Subsequent [stage 11b work](gjh-v11-stage11b-startup.md) passed the decoded-payload assertion but still fails the request-count assertion. This report does not claim a production release, physical-device certification or authorization for the 14 candidate brands.
+Status: historical local integration verification for the expanded mall. The original scene was the default during that report; the expanded mall is now the default and `?layout=classic` selects the original. Everyday, Lunar New Year, Christmas and Deepavali are available. Subsequent [stage 11b work](gjh-v11-stage11b-startup.md) passed the decoded-payload assertion but still fails the request-count assertion. This report does not claim a production release, physical-device certification or authorization for the 14 candidate brands.
 
 ## Integration fixes
 

@@ -84,8 +84,8 @@ def run():
     assert len([u for u in requests if u.endswith('/natural-materials.js')])==1
     page.screenshot(path=str(out/'context-restored.png'));assert not errors
     r['checks'].append({'failure':'context-restore','before':before,'after':after,'factoryCalls':1,'createdTextures':2,'materialModuleRequests':1,'console':console_result(console,'context-restore')});save(out/'report.json',r);print('MATERIAL CONTEXT RESTORE PASS',flush=True);c.close()
-    for query in ['', '?visitor=v1']:
-     c,page,errors,requests,_,console=boot(b,url+query,390,844);assert not any(u.endswith('/natural-materials.js') for u in requests);assert not errors;r['checks'].append({'classic':query or 'v2','optionalModuleRequests':0,'resources':state(page)['rendererResources'],'console':console_result(console)});save(out/'report.json',r);print('CLASSIC NO FINISH MODULE PASS',query or 'v2',flush=True);c.close()
+    for query in ['?layout=classic', '?layout=classic&visitor=v1']:
+     c,page,errors,requests,_,console=boot(b,url+query,390,844);assert not any(u.endswith('/natural-materials.js') for u in requests);assert not errors;r['checks'].append({'classic':query,'optionalModuleRequests':0,'resources':state(page)['rendererResources'],'console':console_result(console)});save(out/'report.json',r);print('CLASSIC NO FINISH MODULE PASS',query,flush=True);c.close()
    b.close()
  finally:
   r['sourcesUnchanged']=hashes()==r['sourceHashes'];save(out/'report.json',r);server.shutdown();server.server_close()

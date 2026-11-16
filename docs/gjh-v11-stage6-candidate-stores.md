@@ -31,7 +31,7 @@ No owner or rights-holder was contacted in this task. For each proposed activati
 
 - S04–S17 remain sealed, neutral, non-interactive physical storefronts. Their glazed fronts gain framing and low stone bases; one shared texture atlas renders the matching S-number and “PLANNED SPACE” on each frontage. No candidate names are displayed as tenants.
 - The expanded directory exposes a keyboard-operable list of all 14 numbered spaces and their arcade, generated from the same `expandedLayout.slots` used by the shell and map. It offers no unavailable actions. The map describes the planned numbers accessibly and preserves only the three existing destinations.
-- The original layout remains the default. The JavaScript-disabled directory retains the three existing stores and four products; the expanded directory can show the planned list if the 3D engine fails after the UI initializes. Brand names in this research record are proposals, not public tenant assignments.
+The JavaScript-disabled directory retains the three existing stores and four products. The expanded mall is now the default; `?layout=classic` explicitly selects the original three-store scene. Brand names in this research record are proposals, not public tenant assignments.
 
 ## Verification and limitations
 

@@ -34,7 +34,7 @@ def run():
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=['--use-angle=metal'])
-                for query in ('', '?layout=expanded'):
+                for query in ('?layout=classic', ''):
                     context = browser.new_context(viewport={'width':390, 'height':844}, reduced_motion='reduce', service_workers='block')
                     context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
                     page = context.new_page()

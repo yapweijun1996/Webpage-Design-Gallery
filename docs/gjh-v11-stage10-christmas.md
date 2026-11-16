@@ -1,6 +1,6 @@
 # V11 stage 10b — Christmas
 
-Status: implemented locally in the opt-in expanded mall preview. [Deepavali](gjh-v11-stage10-deepavali.md) was added after this Christmas slice. The original three-store layout stays the default; use `?layout=expanded` for the expanded mall and its theme controls.
+Status: implemented locally in the expanded mall, now the default. [Deepavali](gjh-v11-stage10-deepavali.md) was added after this Christmas slice. Choose **Classic 3-store view** or `?layout=classic` for the original three-store layout; the expanded mall and its theme controls are available without a layout query.
 
 ## Visitor experience and placement
 

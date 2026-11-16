@@ -4,7 +4,7 @@ import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
-const expanded = new URLSearchParams(location.search).get('layout') === 'expanded';
+const expanded = new URLSearchParams(location.search).get('layout') !== 'classic';
 document.body.classList.toggle('is-expanded', expanded);
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');

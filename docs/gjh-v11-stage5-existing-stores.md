@@ -2,7 +2,7 @@
 
 Date: 15 November 2026 (Asia/Singapore)
 
-Status: **implemented in the opt-in expanded ground-floor preview**. The existing three-store scene remains the default; select **Preview the expanded mall** in the directory or append `?layout=expanded`. This slice incorporates the [stage 3 shell](gjh-v11-stage3-expanded-shell.md) and [stage 4 atrium](gjh-v11-stage4-atrium.md), and retains the standalone V11 PWA added to upstream main after stage 2. Application version is 1.1.48; its build ID and both workers are generated from current sources.
+Status: **implemented in the expanded ground-floor layout, now the default**. The original three-store scene is available with `?layout=classic`; `?layout=expanded` selects the default layout explicitly. This slice incorporates the [stage 3 shell](gjh-v11-stage3-expanded-shell.md) and [stage 4 atrium](gjh-v11-stage4-atrium.md), and retains the standalone V11 PWA added to upstream main after stage 2. Application version is 1.1.48; its build ID and both workers are generated from current sources.
 
 ## Storefront and navigation
 

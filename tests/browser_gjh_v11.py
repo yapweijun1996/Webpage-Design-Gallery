@@ -8,6 +8,7 @@ import os
 import tempfile
 import threading
 from pathlib import Path
+import time
 
 from PIL import Image
 from playwright.sync_api import sync_playwright
@@ -155,17 +156,35 @@ def run(capture=False):
     gallery = importlib.util.module_from_spec(spec); spec.loader.exec_module(gallery)
     review = Path(tempfile.mkdtemp(prefix='gjh-v11-review-'))
     evidence = []
+    layout_evidence = []
     with tempfile.TemporaryDirectory(prefix='gjh-v11-artifact-') as temp:
         output = Path(temp) / 'gallery'; gallery.build(output)
         handler = functools.partial(QuietHandler, directory=temp)
         server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         base = f'http://127.0.0.1:{server.server_port}'
-        url = base + '/gallery/demos/corporate/gjh/v11/?visitor=v1'
+        url = base + '/gallery/demos/corporate/gjh/v11/?layout=classic&visitor=v1'
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
                 try:
+                    for query, expected in (('', True), ('?layout=classic', False)):
+                        context = browser.new_context(reduced_motion='reduce')
+                        page = context.new_page()
+                        started = time.monotonic()
+                        page.goto(base + '/gallery/demos/corporate/gjh/v11/' + query)
+                        page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
+                        ready_ms = round((time.monotonic() - started) * 1000)
+                        assert page.evaluate('window.__sceneReady === true'), page.locator('#fallback-message').inner_text()
+                        assert page.evaluate('document.body.classList.contains("is-expanded")') is expected, query
+                        initial = state(page)
+                        assert initial['drawCalls'] <= 200, initial
+                        if expected:
+                            assert abs(initial['x'] - 10) < .1 and abs(initial['z'] - 45) < .1
+                        else:
+                            assert page.locator('[data-space-id]').count() == 0
+                        layout_evidence.append({'query':query or '(no query)','expanded':expected,'readyMsObserved':ready_ms,'drawCalls':initial['drawCalls']})
+                        context.close()
                     for width, height in ((1440, 900), (768, 1024), (390, 844)):
                         context = browser.new_context(viewport={'width': width, 'height': height}, device_scale_factor=2, has_touch=width<1000)
                         page = context.new_page(); errors = []; external = []
@@ -366,7 +385,7 @@ def run(capture=False):
                         assert page.locator('#mili-title').is_visible() and page.locator('#gogo-title').is_visible()
                         if failure=='wasm': assert 'WebAssembly' in page.locator('#fallback-message').inner_text()
                         targets(page); context.close()
-                    evidence.append({'reducedMotion':'PASS','hiddenPause':'PASS','contextLoss':'PASS','WebGLAndWasmFailure':'PASS','noJS':'PASS','review':str(review)})
+                    evidence.append({'layoutRoutes':layout_evidence,'reducedMotion':'PASS','hiddenPause':'PASS','contextLoss':'PASS','WebGLAndWasmFailure':'PASS','noJS':'PASS','review':str(review)})
                 finally:
                     browser.close()
         finally:

@@ -207,9 +207,9 @@ export function createUI(expanded = false) {
   const productKind = document.getElementById('product-kind');
   const layoutLink=document.getElementById('layout-preview-link');
   const layoutURL=new URL(location.href);
-  if(expanded) layoutURL.searchParams.delete('layout'); else layoutURL.searchParams.set('layout','expanded');
-  layoutLink.href=layoutURL.href;
-  layoutLink.textContent=expanded?'Return to the original mall':'Preview the expanded mall';
+  if(expanded) layoutURL.searchParams.set('layout','classic'); else layoutURL.searchParams.delete('layout');
+layoutLink.href=layoutURL.href;
+layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded mall';
   document.getElementById('layout-preview-notice').hidden=!expanded;
   document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces.`;
   setupPlannedDirectory(expanded);

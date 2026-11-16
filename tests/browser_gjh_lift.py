@@ -88,9 +88,9 @@ def run():
       row['contextLosses'].append({'elapsed':elapsed,'before':trip,'settled':s})
       page.evaluate('__liftLoss.restoreContext()');page.wait_for_function('__mall.ready',timeout=60000);page.locator('#graphics-return').click();step(page);lobby(page)
     assert not errors and state(page)['illegalCount']==0;save(out/'report.json',report);print('LIFT PASS',w,flush=True);c.close()
-   for query in ['?visitor=v1','?layout=expanded&visitor=v1','']:
+   for query in ['?layout=classic&visitor=v1','?layout=expanded&visitor=v1','?layout=classic']:
     c=b.new_context(reduced_motion='reduce',service_workers='block');c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'+query);page.wait_for_function('window.__sceneReady===true',timeout=90000)
-    assert state(page)['elevator'] is None;assert page.locator('[data-store]').count()==3 and page.locator('[data-product]').count()==4;report['checks'].append({'query':query or 'classic-v2','unchangedClassicOrGroundOnly':'PASS'});c.close()
+    assert state(page)['elevator'] is None;assert page.locator('[data-store]').count()==3 and page.locator('[data-product]').count()==4;report['checks'].append({'query':query,'unchangedClassicOrGroundOnly':'PASS'});c.close()
    b.close()
  finally:
   report['sourcesUnchanged']=hashes()==report['sourceHashes'];save(out/'report.json',report);server.shutdown();server.server_close()

@@ -2,7 +2,7 @@
 
 Date: 15 November 2026 (Asia/Singapore)
 
-Status: **implemented as an opt-in, reversible ground-floor preview**. This report preserves its stage 3 snapshot; the subsequent [stage 4 atrium](gjh-v11-stage4-atrium.md) replaces the provisional seating and adds planting in the preview. The original three-store scene remains the default. In its directory, choose **Preview the expanded mall**, or open `demos/corporate/gjh/v11/?layout=expanded`; the preview directory links back to the original scene. Switching layouts navigates to a new page and preserves the current tab's demo bag when session storage is available. Neither layout is a real merchant, ordering system or building specification.
+Status: **implemented as a reversible ground-floor layout**. This report preserves its stage 3 snapshot, when it was an opt-in preview; it is now the default. The subsequent [stage 4 atrium](gjh-v11-stage4-atrium.md) replaces the provisional seating and adds planting. Choose **Classic 3-store view** or open `demos/corporate/gjh/v11/?layout=classic` for the original scene. Switching layouts navigates to a new page and preserves the demo bag when session storage is available.
 
 ## Geometry and scope
 

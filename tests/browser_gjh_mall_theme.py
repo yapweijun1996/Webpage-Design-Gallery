@@ -102,10 +102,10 @@ def run():
    c,p,errors=fresh(browser);p.goto(url+'&visitor=v1');p.wait_for_function('window.__sceneReady',timeout=90000)
    open_theme(p);apply(p);close(p,'mall-theme-open');assert p.evaluate('__mall.state.theme.active==="everyday"') and not errors
    print('PASS Visitor v1 expanded theme settings',flush=True);c.close()
-   # The original default layout and no-JS fallback do not expose a false theme control.
+   # The expanded default exposes its theme settings; the static fallback keeps the control hidden.
    c,p,errors=fresh(browser);p.goto(url.replace('?layout=expanded',''));p.wait_for_function('window.__sceneReady',timeout=90000)
-   assert p.locator('#mall-theme-open').is_hidden() and p.locator('#directory-theme-open').is_hidden();c.close()
-   c=browser.new_context(java_script_enabled=False,service_workers='block');p=c.new_page();p.goto(url);assert p.locator('#directory-theme-open').is_hidden() and p.locator('[data-store]').count()==3;c.close()
-   print('PASS original layout and no-JavaScript directory',flush=True);browser.close()
+   assert p.locator('#mall-theme-open').is_visible() and p.locator('#directory-theme-open').is_visible();assert p.locator('[data-space-id]').count()==14;c.close()
+   c=browser.new_context(java_script_enabled=False,service_workers='block');p=c.new_page();p.goto(url.replace('?layout=expanded',''));assert p.locator('#directory-theme-open').is_hidden() and p.locator('[data-store]').count()==3;c.close()
+   print('PASS expanded default and no-JavaScript directory',flush=True);browser.close()
  finally:server.shutdown();server.server_close()
 if __name__=='__main__':run()
