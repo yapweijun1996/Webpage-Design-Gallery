@@ -105,19 +105,29 @@ function fallbackCan(T, scene, textures, brass, sku, placements) {
   body.castShadow = body.receiveShadow = label.castShadow = label.receiveShadow = true; scene.add(body, label);
 }
 
-function fallbackShelf(T, scene) {
-  const mesh = new T.InstancedMesh(new T.BoxGeometry(shelfBounds.x - .08, .04, shelfBounds.z - .05), new T.MeshStandardMaterial({color: 0x6b4931}), 12);
+function fallbackShelf(T, scene, displayShelves = []) {
+  const instances=12+displayShelves.length*12;
+  const mesh = new T.InstancedMesh(new T.BoxGeometry(shelfBounds.x - .08, .04, shelfBounds.z - .05), new T.MeshStandardMaterial({color: 0x6b4931}), instances);
   const matrix = new T.Matrix4(); let index = 0;
   for (const x of shelfXs) for (const y of shelfTops.map(top => top - .02)) { matrix.compose(new T.Vector3(x, y, productZ), new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index++, matrix); }
+  for(const shelf of displayShelves)for(const y of shelfTops.map(top=>top-.02))for(let part=0;part<4;part++){
+    const localX=(part-1.5)*(shelfBounds.x-.08)/4, c=Math.cos(shelf.rotation),s=Math.sin(shelf.rotation);
+    matrix.compose(new T.Vector3(shelf.x+localX*c,y,shelf.z-localX*s),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),shelf.rotation),new T.Vector3(1,1,1));mesh.setMatrixAt(index++,matrix);
+  }
   mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
 }
 
-export async function addProducts(T, scene, textures, brass,showcase=[]) {
+
+export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null) {
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
-  if (shelfRecord.status === 'fallback') fallbackShelf(T, scene);
+  if (shelfRecord.status === 'fallback') fallbackShelf(T, scene, displayShelves);
   else for (const primitive of shelfRecord.primitives) {
-    const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, shelfXs.length);
+    const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, shelfXs.length+displayShelves.length);
     shelfXs.forEach((x, index) => { const matrix = new T.Matrix4(); matrix.compose(new T.Vector3(x, 0, -9.25), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), shelfRotation), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
+    displayShelves.forEach((placement,index)=>{
+      const matrix=new T.Matrix4().compose(new T.Vector3(placement.x,0,placement.z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),placement.rotation),new T.Vector3(1,1,1));
+      mesh.setMatrixAt(shelfXs.length+index,new T.Matrix4().multiplyMatrices(matrix,primitive.matrix));
+    });
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
   }
   const interactables = [], stock = new Map();
@@ -131,6 +141,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[]) {
     for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, productZ));
     const shelfPlacements=placements.slice();
     for(const item of showcase.filter(item=>item.id===`new-moon-${sku}-front`))placements.push(new T.Vector3(...item.position));
+    if(heroCan && sku==='nz-425g')placements.push(new T.Vector3(...heroCan));
     const batches = [];
     stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, batches, reserved:false});
     if (record.status === 'loaded') for (const primitive of record.primitives) {
@@ -161,7 +172,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[]) {
     // Geometry/materials are shared with the shelf: never dispose on gesture completion.
     return group;
   }, interactables, colliders: shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})), assets: Object.freeze({
-    shelf: Object.freeze({model:interiorPilot ? shelf.asset_id : 'GJH-M056', assetId:interiorPilot ? shelf.asset_id : null, lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4, primitives: shelfRecord.primitives.length, dimensions: shelfRecord.size}),
+    shelf: Object.freeze({model:interiorPilot ? shelf.asset_id : 'GJH-M056', assetId:interiorPilot ? shelf.asset_id : null, lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4+displayShelves.length, primitives: shelfRecord.primitives.length, dimensions: shelfRecord.size}),
     cans: Object.freeze(Object.fromEntries(canRecords.map((record, index) => {
       const x = shelfXs[index];
       const placements = Object.freeze(shelfTops.flatMap(y => productOffsets.map(dx => Object.freeze({x: x + dx, y, z: productZ}))));

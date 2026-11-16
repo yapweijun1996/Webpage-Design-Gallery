@@ -100,6 +100,25 @@ export async function createWorld(T, R, physics, expanded = false) {
     solid('box', m, x, y, z, sx, sy, sz);
     if (collision) collider(x, y, z, sx, sy, sz);
   }
+  const slotShelfPosition = bay => ({
+    x: bay.side === 'north' ? (bay.minX + bay.maxX) / 2 : bay.side === 'west' ? bay.maxX - 1.4 : bay.minX + 1.4,
+    z: bay.side === 'north' ? -1.55 : (bay.minZ + bay.maxZ) / 2,
+    rotation: bay.side === 'north' ? Math.PI : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2
+  });
+  function addFoodHero(bay) {
+    const shelf=slotShelfPosition(bay), frontX=shelf.x+Math.sin(shelf.rotation)*.42, frontZ=shelf.z+Math.cos(shelf.rotation)*.42;
+    if(bay.number===6) {
+      box('cream',frontX,.72,frontZ,.14,.22,.06); box('oak',frontX,.72,frontZ+.025,.115,.17,.008);
+    } else if(bay.number===8) {
+      cylinder('oak',frontX,.67,frontZ,.055,.14); cylinder('cream',frontX,.745,frontZ,.057,.025);
+    } else {
+      const count=bay.number===11?4:1;
+      for(let index=0;index<count;index++){
+        const offset=(index-(count-1)/2)*.2, x=frontX+offset*Math.cos(shelf.rotation),z=frontZ-offset*Math.sin(shelf.rotation);
+        cylinder('timber',x,.66,z,.052,.14);cylinder('brass',x,.733,z,.053,.014);
+      }
+    }
+  }
   const cylinder = (m, x, y, z, r, h) => solid('cylinder', m, x, y, z, r, h, r);
   const sphere = (m, x, y, z, sx, sy, sz) => solid('sphere', m, x, y, z, sx, sy, sz);
   // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
@@ -475,7 +494,8 @@ export async function createWorld(T, R, physics, expanded = false) {
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
       const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
-      const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts);
+      const foodShelves=expanded?expandedLayout.slots.filter(bay=>bay.number>=6&&bay.number<=11).map(slotShelfPosition):[];
+      const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,foodShelves,expanded?[-10,0,-1.25]:null);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
@@ -522,8 +542,15 @@ export async function createWorld(T, R, physics, expanded = false) {
           for (const dx of [-.8, .8]) box('oak', x + side * 3.32 + dx, 1.965, -10.25, .045, 1.6, .075);
         }
       }
+      if(zone==='mili') {
+        // Generic pack forms avoid inventing package artwork or exact dimensions.
+        cylinder('green',x,.25,-1.35,.075,.34);cylinder('oak',x,.45,-1.35,.038,.09);cylinder('brass',x,.505,-1.35,.04,.025);
+      } else if(zone==='gogo') {
+        cylinder('cream',x-.11,.07,-1.35,.034,.14);cylinder('brass',x-.11,.144,-1.35,.035,.012);
+        box('ivory',x+.12,.08,-1.35,.055,.16,.045);box('oak',x+.12,.08,-1.325,.035,.11,.006);
+      }
     }
-  }
+    }
   if (expanded) {
     // Closed neutral bays are physical shells, not claims that tenants are open.
     for (const bay of expandedLayout.slots.filter(item => !item.available)) {
@@ -545,6 +572,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         box('ivory', front+(bay.side === 'west' ? .2 : -.2), .3, z, .1, .45, 7.2);
         for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
       }
+      if(bay.number>=6&&bay.number<=11)addFoodHero(bay);
     }
     // The closed glass entrance provides a visible boundary to the ground floor.
     for (const x of [-25,45]) box('ivory',x,3.3,18,.3,6.6,60,true);

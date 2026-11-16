@@ -1012,6 +1012,22 @@ async function createWorld(T, R, physics, expanded = false) {
       solid("box", m, x, y, z, sx, sy, sz);
       if (collision)
         collider(x, y, z, sx, sy, sz);
+    }, addFoodHero = function(bay) {
+      const shelf = slotShelfPosition(bay), frontX = shelf.x + Math.sin(shelf.rotation) * 0.42, frontZ = shelf.z + Math.cos(shelf.rotation) * 0.42;
+      if (bay.number === 6) {
+        box("cream", frontX, 0.72, frontZ, 0.14, 0.22, 0.06);
+        box("oak", frontX, 0.72, frontZ + 0.025, 0.115, 0.17, 0.008);
+      } else if (bay.number === 8) {
+        cylinder("oak", frontX, 0.67, frontZ, 0.055, 0.14);
+        cylinder("cream", frontX, 0.745, frontZ, 0.057, 0.025);
+      } else {
+        const count = bay.number === 11 ? 4 : 1;
+        for (let index = 0;index < count; index++) {
+          const offset = (index - (count - 1) / 2) * 0.2, x = frontX + offset * Math.cos(shelf.rotation), z = frontZ - offset * Math.sin(shelf.rotation);
+          cylinder("timber", x, 0.66, z, 0.052, 0.14);
+          cylinder("brass", x, 0.733, z, 0.053, 0.014);
+        }
+      }
     }, art = function(name, x, y, z, width, ry = 0) {
       const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
       const mesh = new T.Mesh(plane, mat(16777215, { map: texture, emissiveMap: texture, emissive: 16777215, emissiveIntensity: 0.2 }));
@@ -1201,6 +1217,11 @@ async function createWorld(T, R, physics, expanded = false) {
     };
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const position = new T.Vector3, scale = new T.Vector3;
+    const slotShelfPosition = (bay) => ({
+      x: bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX - 1.4 : bay.minX + 1.4,
+      z: bay.side === "north" ? -1.55 : (bay.minZ + bay.maxZ) / 2,
+      rotation: bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2
+    });
     const cylinder = (m, x, y, z, r, h) => solid("cylinder", m, x, y, z, r, h, r);
     const sphere = (m, x, y, z, sx, sy, sz) => solid("sphere", m, x, y, z, sx, sy, sz);
     const textures = new Map, loader = new T.TextureLoader().setCrossOrigin(undefined);
@@ -1559,7 +1580,8 @@ async function createWorld(T, R, physics, expanded = false) {
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
-        const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts);
+        const foodShelves = expanded ? expandedLayout.slots.filter((bay) => bay.number >= 6 && bay.number <= 11).map(slotShelfPosition) : [];
+        const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, foodShelves, expanded ? [-10, 0, -1.25] : null);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
           collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -1620,6 +1642,16 @@ async function createWorld(T, R, physics, expanded = false) {
               box("oak", x + side * 3.32 + dx, 1.965, -10.25, 0.045, 1.6, 0.075);
           }
         }
+        if (zone === "mili") {
+          cylinder("green", x, 0.25, -1.35, 0.075, 0.34);
+          cylinder("oak", x, 0.45, -1.35, 0.038, 0.09);
+          cylinder("brass", x, 0.505, -1.35, 0.04, 0.025);
+        } else if (zone === "gogo") {
+          cylinder("cream", x - 0.11, 0.07, -1.35, 0.034, 0.14);
+          cylinder("brass", x - 0.11, 0.144, -1.35, 0.035, 0.012);
+          box("ivory", x + 0.12, 0.08, -1.35, 0.055, 0.16, 0.045);
+          box("oak", x + 0.12, 0.08, -1.325, 0.035, 0.11, 0.006);
+        }
       }
     }
     if (expanded) {
@@ -1651,6 +1683,8 @@ async function createWorld(T, R, physics, expanded = false) {
           for (const edge of [bay.minZ, bay.maxZ])
             box("ivory", x, 2.8, edge, 10, 5.6, 0.2, true);
         }
+        if (bay.number >= 6 && bay.number <= 11)
+          addFoodHero(bay);
       }
       for (const x of [-25, 45])
         box("ivory", x, 3.3, 18, 0.3, 6.6, 60, true);
