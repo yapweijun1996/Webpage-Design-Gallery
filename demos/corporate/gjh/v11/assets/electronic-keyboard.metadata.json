@@ -1,0 +1,105 @@
+{
+  "id": "electronic-keyboard",
+  "name": "Electronic Keyboard (61 Keys)",
+  "summary": "Original 61-key electronic keyboard on an X-frame stand with an open music rest.",
+  "description": "Brand-neutral digital keyboard for store S15, with notched white keys, raised black keys, blank display, abstract controls and speaker ribs. Static visual asset.",
+  "category": "Equipment",
+  "tags": [
+    "electronic keyboard",
+    "digital piano",
+    "61 keys",
+    "music",
+    "S15",
+    "P1",
+    "mall",
+    "editable",
+    "metres"
+  ],
+  "status": "draft",
+  "store": "S15",
+  "priority": "P1",
+  "created": "2026-11-16",
+  "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+  "blender_version": "5.2.3 LTS",
+  "creation_method": "Original deterministic Blender Python geometry and shared procedural materials; no external assets or text.",
+  "generator": "generate.py",
+  "paths": {
+    "glb": "exports/optimized.glb",
+    "source": "sources/electronic-keyboard.blend",
+    "preview": "previews/hero.webp",
+    "additional_previews": [
+      "previews/front.png",
+      "previews/side.png",
+      "previews/3q.png"
+    ]
+  },
+  "display": {
+    "previewRotationY": 0,
+    "previewCameraDirection": [
+      1,
+      0.85,
+      1.6
+    ],
+    "studioEnvironment": true,
+    "environmentIntensity": 0.6,
+    "units": "metres",
+    "up_axis": "Blender +Z / glTF +Y",
+    "front_axis": "Blender -Y / glTF +Z",
+    "origin": "Floor centre of the complete stand footprint"
+  },
+  "measurements": {
+    "glb_bytes": 542680,
+    "triangles": 15928,
+    "vertices": 18496,
+    "meshes": 3,
+    "primitives": 3,
+    "materials": 3,
+    "textures": 0,
+    "animations": 0,
+    "dimensions_m": [
+      1.0000000074505806,
+      1.0268539786338806,
+      0.46000003814697266
+    ],
+    "bounds_m": {
+      "min": [
+        -0.5000000074505806,
+        0,
+        -0.23000001907348633
+      ],
+      "max": [
+        0.5,
+        1.0268539786338806,
+        0.23000001907348633
+      ]
+    },
+    "key_count": 61,
+    "white_keys": 36,
+    "black_keys": 25,
+    "white_key_top_m": 0.781,
+    "black_key_top_m": 0.799,
+    "sha256": "11e45604c15b9d3375075b97dc97ab49a4eaa5b8025f2ab558ff651bda6b7b08"
+  },
+  "accuracy_notes": "Measured exported envelope includes stand feet and music rest; the keyboard chassis is approximately 1.0 by 0.4 m. C2-C7 inclusive with five groups of two and three black keys. Static geometry: no sound, key actuation or stand-folding behavior. Physical devices and complete S15 mall integration have not been tested.",
+  "attribution": [
+    {
+      "credit": "Original procedural geometry and materials; no external models, fonts, textures or logos."
+    }
+  ],
+  "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+  "quality_gate": {
+    "overall": "NEEDS REVIEW",
+    "local": "PASS",
+    "physical_android": "NOT TESTED",
+    "physical_ios": "NOT TESTED",
+    "webkit": "NOT TESTED",
+    "budget": {
+      "triangles": 19999,
+      "bytes": 1572863,
+      "mesh_primitives": 3,
+      "materials": 3
+    },
+    "evidence": "../reports/assets.json",
+    "checks_evidence": "../reports/checks.json"
+  }
+}

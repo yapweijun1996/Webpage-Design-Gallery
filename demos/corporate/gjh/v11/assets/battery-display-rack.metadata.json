@@ -1,0 +1,119 @@
+{
+  "id": "battery-display-rack",
+  "name": "Battery Display Rack",
+  "summary": "Unbranded retail pegboard with AA, AAA and button-cell blister packs, a blank header and two lower storage bins.",
+  "description": "Original static procedural rack for store S16, priority P1. Four rows of generic coloured cards carry simple cylindrical cells in shallow transparent blister bubbles. Actual through-holes, metal peg hooks, blank label fields and two open lower compartments.",
+  "category": "Retail",
+  "tags": [
+    "battery",
+    "AA",
+    "AAA",
+    "button-cells",
+    "blister-packs",
+    "pegboard",
+    "hook-rack",
+    "retail-display",
+    "unbranded",
+    "original",
+    "procedural",
+    "metres",
+    "S16",
+    "P1"
+  ],
+  "status": "draft",
+  "created": "2026-11-16",
+  "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+  "blender_version": "5.2.3 LTS",
+  "creation_method": "Original deterministic Blender Python geometry and three shared materials with vertex colours; no external models, images, textures, fonts or brands.",
+  "generator": "generate.py",
+  "paths": {
+    "glb": "exports/optimized.glb",
+    "source": "sources/battery-display-rack.blend",
+    "preview": "previews/hero.webp",
+    "additional_previews": [
+      "previews/front.webp",
+      "previews/side.webp",
+      "previews/3q.webp"
+    ]
+  },
+  "display": {
+    "previewRotationY": 0,
+    "units": "metres",
+    "up_axis": "Blender +Z / glTF +Y",
+    "front_axis": "Blender -Y / glTF +Z",
+    "origin": "Floor centre of base footprint",
+    "studioEnvironment": true,
+    "environmentIntensity": 0.6,
+    "previewCameraDirection": [
+      1.5,
+      0.85,
+      3
+    ]
+  },
+  "accuracy_notes": "Static illustrative retail fixture with generic coloured cards, blank header and blank label fields. No logos, brand text or real product packaging. No sales, electrical, storage-load or engineering certification. Physical Android/iOS, WebKit and complete mall performance NOT TESTED.",
+  "attribution": [
+    {
+      "credit": "Original procedural geometry, vertex colours and three shared materials. No external assets."
+    }
+  ],
+  "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+  "quality_gate": {
+    "overall": "NEEDS REVIEW",
+    "geometry": "PASS",
+    "source_editability": "PASS",
+    "physical_android": "NOT TESTED",
+    "physical_ios": "NOT TESTED",
+    "webkit": "NOT TESTED",
+    "budget": {
+      "triangles": 25000,
+      "bytes": 1572864,
+      "materials": 3,
+      "mesh_primitives": 3
+    },
+    "evidence": [
+      "reports/assets.json",
+      "reports/khronos.json",
+      "reports/sources.json",
+      "reports/reproducibility.json",
+      "reports/browser.json",
+      "reports/acceptance.json"
+    ]
+  },
+  "dimensions": {
+    "units": "metres",
+    "axis_order": "glTF X,Y,Z (width,height,depth)",
+    "size": [
+      1,
+      2,
+      0.5
+    ],
+    "bounds": {
+      "min": [
+        -0.5,
+        0,
+        -0.25
+      ],
+      "max": [
+        0.5,
+        2,
+        0.25
+      ]
+    }
+  },
+  "statistics": {
+    "glb_bytes": 1000488,
+    "triangles": 20580,
+    "vertices": 24594,
+    "meshes": 3,
+    "primitives": 3,
+    "materials": 3,
+    "images": 0,
+    "animations": 0,
+    "sha256": "fbdaf7bb26b1594074706f927f58881696cb0354970dbcb175ec3556e899e22f",
+    "zero_area_triangles": 0,
+    "editable_mesh_parts": 296,
+    "pack_count": 20,
+    "cell_count": 72,
+    "pegboard_through_holes": 192
+  }
+}

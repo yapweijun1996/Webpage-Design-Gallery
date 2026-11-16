@@ -1,0 +1,116 @@
+{
+  "id": "tv-demo-table",
+  "name": "TV Demo Table",
+  "summary": "Unbranded three-screen retail experience table with a lower shelf and blank sign card.",
+  "description": "Original 2 x 1 m retail table with a 0.8 m worktop, three small blank 16:9 screens on riser stands, recessed graphite edge strip, lower shelf and covered rear cable route. Static visual asset for stores S13 and S14.",
+  "category": "Equipment",
+  "tags": [
+    "tv",
+    "television",
+    "demo-table",
+    "retail",
+    "experience",
+    "lower-shelf",
+    "blank-sign",
+    "unbranded",
+    "original",
+    "procedural",
+    "metres",
+    "S13",
+    "S14"
+  ],
+  "status": "draft",
+  "created": "2026-11-16",
+  "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+  "blender_version": "5.2.3 LTS",
+  "creation_method": "Original deterministic Blender Python; no external models, images, textures, fonts or brands.",
+  "generator": "generate.py",
+  "paths": {
+    "glb": "exports/optimized.glb",
+    "source": "sources/tv-demo-table.blend",
+    "preview": "previews/hero.webp",
+    "additional_previews": [
+      "previews/front.webp",
+      "previews/side.webp",
+      "previews/3q.webp",
+      "previews/rear.webp"
+    ]
+  },
+  "display": {
+    "previewRotationY": 0,
+    "units": "metres",
+    "up_axis": "Blender +Z / glTF +Y",
+    "front_axis": "Blender -Y / glTF +Z",
+    "origin": "Floor centre of table footprint",
+    "studioEnvironment": true,
+    "environmentIntensity": 0.6,
+    "previewCameraDirection": [
+      1.5,
+      0.8,
+      3
+    ]
+  },
+  "dimensions": {
+    "units": "metres",
+    "axis_order": "glTF X,Y,Z (width,height,depth)",
+    "size": [
+      2,
+      1.3650000095367432,
+      1
+    ],
+    "bounds": {
+      "min": [
+        -1,
+        0,
+        -0.5
+      ],
+      "max": [
+        1,
+        1.3650000095367432,
+        0.5
+      ]
+    },
+    "tabletop_height": 0.800000011920929,
+    "shelf_top_height": 0.25200000405311584
+  },
+  "statistics": {
+    "glb_bytes": 245228,
+    "triangles": 6696,
+    "vertices": 8419,
+    "meshes": 3,
+    "primitives": 3,
+    "materials": 3,
+    "images": 0,
+    "animations": 0,
+    "sha256": "af96aaa8cd60dcbc61557b27ea67c468084749a049a580ed960ce3cc3e05dfaf",
+    "editable_source_parts": 62,
+    "screen_count": 3
+  },
+  "accuracy_notes": "Static illustrative asset with opaque blank screens and an empty sign card; no video or electrical functionality. No full-mall performance, physical load/stability or device certification. Physical Android/iOS and WebKit NOT TESTED.",
+  "attribution": [
+    {
+      "credit": "Original procedural geometry and three shared materials. No external assets."
+    }
+  ],
+  "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+  "quality_gate": {
+    "overall": "NEEDS REVIEW",
+    "geometry": "PASS",
+    "physical_android": "NOT TESTED",
+    "physical_ios": "NOT TESTED",
+    "webkit": "NOT TESTED",
+    "budget": {
+      "triangles": 20000,
+      "bytes": 1572864,
+      "materials": 3,
+      "mesh_primitives": 3
+    },
+    "evidence": [
+      "reports/assets.json",
+      "reports/khronos.json",
+      "reports/sources.json",
+      "reports/acceptance.json"
+    ],
+    "source_editability": "PASS"
+  }
+}

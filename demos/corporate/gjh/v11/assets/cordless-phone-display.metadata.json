@@ -1,0 +1,114 @@
+{
+  "id": "cordless-phone-display",
+  "name": "Cordless Phone Display",
+  "summary": "Unbranded cordless landline handset on a charging base, with a small retail plinth and blank price-card holder.",
+  "description": "Original static retail display for store S17: rear-leaning handset with twelve geometric number keys, navigation control, small blank sage LCD, earpiece slots, microphone details and antenna stub; charging cradle with page button, indicator and rear socket details; low plinth and empty price-card holder.",
+  "category": "Equipment",
+  "tags": [
+    "cordless-phone",
+    "landline",
+    "handset",
+    "charging-base",
+    "retail-display",
+    "blank-price-card",
+    "unbranded",
+    "original",
+    "procedural",
+    "metres",
+    "S17",
+    "P1"
+  ],
+  "status": "draft",
+  "created": "2026-11-16",
+  "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+  "blender_version": "5.2.3 LTS",
+  "creation_method": "Original deterministic Blender Python; no external models, images, textures, fonts or brands.",
+  "generator": "generate.py",
+  "paths": {
+    "glb": "exports/optimized.glb",
+    "source": "sources/cordless-phone-display.blend",
+    "preview": "previews/hero.webp",
+    "additional_previews": [
+      "previews/front.webp",
+      "previews/side.webp",
+      "previews/3q.webp"
+    ]
+  },
+  "display": {
+    "previewRotationY": 0,
+    "units": "metres",
+    "up_axis": "Blender +Z / glTF +Y",
+    "front_axis": "Blender -Y / glTF +Z",
+    "origin": "Floor centre of plinth footprint",
+    "studioEnvironment": true,
+    "environmentIntensity": 0.6,
+    "previewCameraDirection": [
+      1.5,
+      0.85,
+      3
+    ]
+  },
+  "accuracy_notes": "Static illustrative visual prop; no telephone, wireless, charging or price functionality. Screen and price card are blank. Physical Android/iOS, WebKit and complete mall performance NOT TESTED.",
+  "attribution": [
+    {
+      "credit": "Original procedural geometry and three shared materials. No external assets."
+    }
+  ],
+  "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+  "quality_gate": {
+    "overall": "NEEDS REVIEW",
+    "geometry": "PASS",
+    "source_editability": "PASS",
+    "physical_android": "NOT TESTED",
+    "physical_ios": "NOT TESTED",
+    "webkit": "NOT TESTED",
+    "budget": {
+      "triangles": 20000,
+      "bytes": 1572864,
+      "materials": 3,
+      "mesh_primitives": 3
+    },
+    "evidence": [
+      "reports/assets.json",
+      "reports/khronos.json",
+      "reports/sources.json",
+      "reports/browser.json",
+      "reports/acceptance.json"
+    ]
+  },
+  "dimensions": {
+    "units": "metres",
+    "axis_order": "glTF X,Y,Z (width,height,depth)",
+    "size": [
+      0.30000001192092896,
+      0.29072919487953186,
+      0.2199999988079071
+    ],
+    "bounds": {
+      "min": [
+        -0.15000000596046448,
+        0,
+        -0.10999999940395355
+      ],
+      "max": [
+        0.15000000596046448,
+        0.29072919487953186,
+        0.10999999940395355
+      ]
+    },
+    "plinth_top_height": 0.04800000041723251
+  },
+  "statistics": {
+    "glb_bytes": 418380,
+    "triangles": 11104,
+    "vertices": 14530,
+    "meshes": 3,
+    "primitives": 3,
+    "materials": 3,
+    "images": 0,
+    "animations": 0,
+    "sha256": "0cd8067b90198cade4116e945de98af1e5bcd4f1a7c149844dd40c4be31e2c9d",
+    "editable_source_parts": 104,
+    "keypad_key_count": 12
+  }
+}

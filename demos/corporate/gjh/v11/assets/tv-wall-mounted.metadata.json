@@ -1,0 +1,121 @@
+{
+  "id": "tv-wall-mounted",
+  "name": "Wall-Mounted TV",
+  "summary": "Unbranded 55-inch-class wall TV with a soft neutral standby screen.",
+  "description": "Original slim landscape television with rear ventilation and a separately named fixed VESA bracket. Blank subtly emissive screen with no UI, text or logos. Static visual asset for stores S13 and S14.",
+  "category": "Equipment",
+  "tags": [
+    "tv",
+    "television",
+    "wall-mounted",
+    "VESA",
+    "standby",
+    "retail",
+    "unbranded",
+    "original",
+    "procedural",
+    "metres",
+    "S13",
+    "S14"
+  ],
+  "status": "draft",
+  "created": "2026-11-16",
+  "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+  "blender_version": "5.2.3 LTS",
+  "creation_method": "Original deterministic Blender Python; no external models, images, fonts, textures or brands.",
+  "generator": "generate.py",
+  "paths": {
+    "glb": "exports/optimized.glb",
+    "source": "sources/tv-wall-mounted.blend",
+    "preview": "previews/hero.webp",
+    "additional_previews": [
+      "previews/front.webp",
+      "previews/side.webp",
+      "previews/3q.webp",
+      "previews/rear.webp"
+    ]
+  },
+  "display": {
+    "previewRotationY": 0,
+    "units": "metres",
+    "up_axis": "Blender +Z / glTF +Y",
+    "front_axis": "Blender -Y / glTF +Z",
+    "origin": "Floor centre below full TV and bracket envelope",
+    "studioEnvironment": true,
+    "environmentIntensity": 0.6,
+    "previewCameraDirection": [
+      1.5,
+      0.45,
+      3
+    ]
+  },
+  "dimensions": {
+    "units": "metres",
+    "axis_order": "width, height, depth (glTF X,Y,Z)",
+    "size": [
+      1.2300000190734863,
+      0.7200000286102295,
+      0.1459999978542328
+    ],
+    "bounds": {
+      "min": [
+        -0.6150000095367432,
+        1.1100000143051147,
+        -0.07299999799579382
+      ],
+      "max": [
+        0.6150000095367432,
+        1.8300000429153442,
+        0.07299999985843897
+      ]
+    },
+    "panel_size": [
+      1.2300000190734863,
+      0.7200000286102295,
+      0.08550000190734863
+    ],
+    "active_screen_diagonal_inches": 53.93436424495571
+  },
+  "statistics": {
+    "glb_bytes": 481228,
+    "triangles": 11092,
+    "vertices": 17130,
+    "meshes": 3,
+    "primitives": 3,
+    "materials": 3,
+    "images": 0,
+    "animations": 0,
+    "sha256": "1124f947f7cfebd5546282cb27195100bbbde969fb7b3606cee33d2d1839755b"
+  },
+  "accuracy_notes": "Static illustrative wall TV; no video or electrical functionality, installation or load certification. Panel construction adapted from the original tv-floor-stand generator; no advertising-screen source reused. Floor datum leaves the panel elevated. Active blank screen diagonal is measured at 53.93 inches; 55-inch class describes the approximate housing size. Physical Android/iOS, WebKit and full mall performance NOT TESTED.",
+  "attribution": [
+    {
+      "credit": "Original procedural geometry and shared materials. No external assets."
+    }
+  ],
+  "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+  "quality_gate": {
+    "overall": "NEEDS REVIEW",
+    "geometry": "PASS",
+    "source_editability": "PASS",
+    "physical_android": "NOT TESTED",
+    "physical_ios": "NOT TESTED",
+    "webkit": "NOT TESTED",
+    "budget": {
+      "triangles": 20000,
+      "bytes": 1572864,
+      "materials": 3,
+      "mesh_primitives": 3
+    },
+    "evidence": [
+      "reports/assets.json",
+      "reports/khronos.json",
+      "reports/sources.json",
+      "reports/acceptance.json",
+      "reports/browser.json",
+      "reports/reproducibility.json",
+      "reports/visual-review.json",
+      "reports/reconciliation.json"
+    ]
+  }
+}

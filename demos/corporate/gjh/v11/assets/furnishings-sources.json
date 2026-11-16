@@ -37,6 +37,17 @@
       "transform": "glTF Y-up, metres, floor-centred origin; bench back +Z. Existing placement height/facing transforms apply."
     }
   ],
+  "store_display_assets": [
+    { "file": "pharmacy-counter.glb", "source": "models/pharmacy-counter/exports/optimized.glb", "metadata": "pharmacy-counter.metadata.json", "license": "pharmacy-counter-LICENSE.txt", "bytes": 260664, "sha256": "e8cdaf35ecdd025a97d4e34a0c3da5d33ec3d0eb3aa4c787ff8980d8b3bbab5b" },
+    { "file": "speaker-soundbar.glb", "source": "models/speaker-soundbar/exports/optimized.glb", "metadata": "speaker-soundbar.metadata.json", "license": "speaker-soundbar-LICENSE.txt", "bytes": 872436, "sha256": "ee3e3a048b2b8f473c7a72a09708f84b3590abdc0a5414e8c3a90db339fa67dd" },
+    { "file": "tv-floor-stand.glb", "source": "models/tv-floor-stand/exports/optimized.glb", "metadata": "tv-floor-stand.metadata.json", "license": "tv-floor-stand-LICENSE.txt", "bytes": 516580, "sha256": "4f4c47a60eefc49cb0a9725a1a8572408560febc298ebe35d0274d3c4b0670e0" },
+    { "file": "tv-demo-table.glb", "source": "models/tv-demo-table/exports/optimized.glb", "metadata": "tv-demo-table.metadata.json", "license": "tv-demo-table-LICENSE.txt", "bytes": 245228, "sha256": "af96aaa8cd60dcbc61557b27ea67c468084749a049a580ed960ce3cc3e05dfaf" },
+    { "file": "tv-wall-mounted.glb", "source": "models/tv-wall-mounted/exports/optimized.glb", "metadata": "tv-wall-mounted.metadata.json", "license": "tv-wall-mounted-LICENSE.txt", "bytes": 481228, "sha256": "1124f947f7cfebd5546282cb27195100bbbde969fb7b3606cee33d2d1839755b" },
+    { "file": "electronic-keyboard.glb", "source": "models/electronic-keyboard/exports/optimized.glb", "metadata": "electronic-keyboard.metadata.json", "license": "electronic-keyboard-LICENSE.txt", "bytes": 542680, "sha256": "11e45604c15b9d3375075b97dc97ab49a4eaa5b8025f2ab558ff651bda6b7b08" },
+    { "file": "battery-display-rack.glb", "source": "models/battery-display-rack/exports/optimized.glb", "metadata": "battery-display-rack.metadata.json", "license": "battery-display-rack-LICENSE.txt", "bytes": 1000488, "sha256": "fbdaf7bb26b1594074706f927f58881696cb0354970dbcb175ec3556e899e22f" },
+    { "file": "cordless-phone-display.glb", "source": "models/cordless-phone-display/exports/optimized.glb", "metadata": "cordless-phone-display.metadata.json", "license": "cordless-phone-display-LICENSE.txt", "bytes": 418380, "sha256": "0cd8067b90198cade4116e945de98af1e5bcd4f1a7c149844dd40c4be31e2c9d" }
+  ],
+  "store_display_source_note": "Local Blender-3D-Gallery exports retrieved 2026-11-16; source_commit and upstream_status above apply only to gjh-mall-furniture. Public redistribution terms are unspecified; see each asset's license.",
   "source_pr": "https://github.com/yapweijun1996/Blender-3D-Gallery/pull/4",
   "upstream_merge_commit": "8b21a337f522c12ce4eb1627b4ca7ee2aa0b8fa1"
 }

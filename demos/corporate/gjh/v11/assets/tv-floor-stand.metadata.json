@@ -1,0 +1,114 @@
+{
+  "id": "tv-floor-stand",
+  "name": "Floor-Stand TV",
+  "summary": "Unbranded landscape TV on a retail floor stand.",
+  "description": "Original blank television panel with a satin metal column, low weighted-base form, floor pads, rear mounting rails, ventilation and a covered rear cable route. Static visual prop for stores S13 and S14.",
+  "category": "Equipment",
+  "tags": [
+    "tv",
+    "television",
+    "floor-stand",
+    "retail",
+    "unbranded",
+    "original",
+    "procedural",
+    "metres",
+    "S13",
+    "S14"
+  ],
+  "status": "draft",
+  "created": "2026-11-16",
+  "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+  "blender_version": "5.2.3 LTS",
+  "creation_method": "Original deterministic Blender Python; no external models, images, fonts, textures or brands.",
+  "generator": "generate.py",
+  "paths": {
+    "glb": "exports/optimized.glb",
+    "source": "sources/tv-floor-stand.blend",
+    "preview": "previews/hero.webp",
+    "additional_previews": [
+      "previews/front.webp",
+      "previews/side.webp",
+      "previews/3q.webp",
+      "previews/rear.webp"
+    ]
+  },
+  "display": {
+    "previewRotationY": 0,
+    "units": "metres",
+    "up_axis": "Blender +Z / glTF +Y",
+    "front_axis": "Blender -Y / glTF +Z",
+    "origin": "Floor centre of base footprint",
+    "studioEnvironment": true,
+    "environmentIntensity": 0.6,
+    "previewCameraDirection": [
+      1.5,
+      0.7,
+      3
+    ]
+  },
+  "dimensions": {
+    "units": "metres",
+    "axis_order": "glTF X,Y,Z (width,height,depth)",
+    "size": [
+      1.2300000190734863,
+      1.8300000429153442,
+      0.5199999809265137
+    ],
+    "bounds": {
+      "min": [
+        -0.6150000095367432,
+        0,
+        -0.25999999046325684
+      ],
+      "max": [
+        0.6150000095367432,
+        1.8300000429153442,
+        0.25999999046325684
+      ]
+    },
+    "panel_size": [
+      1.2300000190734863,
+      0.7200000286102295,
+      0.08550000190734863
+    ]
+  },
+  "statistics": {
+    "glb_bytes": 516580,
+    "triangles": 11844,
+    "vertices": 18345,
+    "meshes": 6,
+    "primitives": 6,
+    "materials": 3,
+    "images": 0,
+    "animations": 0,
+    "sha256": "4f4c47a60eefc49cb0a9725a1a8572408560febc298ebe35d0274d3c4b0670e0"
+  },
+  "accuracy_notes": "Static illustrative visual asset with an opaque blank screen; no video or electrical functionality and no structural, load, mass or stability certification. tv-wall-mounted was NOT FOUND in this checkout: original panel construction follows the requested envelope; panel-source reuse and visual matching could not be verified. Physical Android/iOS and WebKit NOT TESTED.",
+  "attribution": [
+    {
+      "credit": "Original procedural geometry and shared materials. No external assets."
+    }
+  ],
+  "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.",
+  "quality_gate": {
+    "overall": "NEEDS REVIEW",
+    "geometry": "PASS",
+    "source_editability": "PASS",
+    "physical_android": "NOT TESTED",
+    "physical_ios": "NOT TESTED",
+    "webkit": "NOT TESTED",
+    "budget": {
+      "triangles": 20000,
+      "bytes": 1572864,
+      "materials": 3,
+      "mesh_primitives": 6
+    },
+    "evidence": [
+      "reports/assets.json",
+      "reports/khronos.json",
+      "reports/sources.json",
+      "reports/acceptance.json"
+    ]
+  }
+}
