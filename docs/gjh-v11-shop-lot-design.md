@@ -44,4 +44,4 @@ The 390 px shopcheck views expose a visibility limitation: the physically scaled
 
 ## Stage 5 performance evidence
 
-On macOS Chrome ANGLE Metal, `tests/browser_gjh_v11.py` measured the default expanded route ready in 1,567 ms with 136 draw calls; the classic route was 955 ms with 200. The default expanded scene is below the 200-call budget. The regression also verifies expanded store doors stay shut near MILI, while classic door behavior, walking, inspection, touch, reduced motion, context loss, failure fallback and no-JS browsing pass. Timings are a single local run, not a device-performance guarantee.
+On macOS Chrome ANGLE Metal, `tests/browser_gjh_v11.py` measured 139 draw calls in the default expanded view and a maximum of 200 in its sampled states. Walking, collision, doors, inspection, upper-deck access, reduced motion, context loss, failure fallback and no-JS browsing passed. These are single-run measurements, not a device-performance guarantee.
