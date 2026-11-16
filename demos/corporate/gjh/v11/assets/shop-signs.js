@@ -54,7 +54,7 @@ export async function addShopSignAtlas(T, layout, scene) {
     const height = 1.18, cos = Math.cos(angle), sin = Math.sin(angle);
     for (const [dx, dy] of [[-widthOnWall / 2, -height / 2], [widthOnWall / 2, -height / 2],
       [widthOnWall / 2, height / 2], [-widthOnWall / 2, height / 2]]) {
-      positions.push(x + dx * cos, 4.75 + dy, z - dx * sin);
+      positions.push(x + dx * cos, 4.35 + dy, z - dx * sin);
     }
     const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
     uvs.push(0, bottom, 1, bottom, 1, top, 0, top);

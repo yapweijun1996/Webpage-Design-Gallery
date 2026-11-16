@@ -576,18 +576,6 @@ export async function createWorld(T, R, physics, expanded = false) {
     const facility=sign('FUTURE FACILITIES',28.07,2,10,2.5,.35,true,60);facility.rotation.y=Math.PI/2;
     for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
     for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
-    // Category finish bands distinguish food, wellness and electronics without
-    // implying branded products or changing the closed, non-interactive bays.
-    const planned=expandedLayout.slots.filter(bay=>!bay.available);
-    const categoryFinish = bay => bay.number <= 3 || (bay.number >= 6 && bay.number <= 11) ? 'oak' : bay.number <= 5 ? 'ivory' : 'green';
-    planned.forEach(bay=>{
-      const x=(bay.minX+bay.maxX)/2, z=(bay.minZ+bay.maxZ)/2, finish=categoryFinish(bay);
-      if(bay.side==='north') box(finish,x,4.35,.24,9.1,.06,.06);
-      else {
-        const front=bay.side==='west'?bay.maxX+.2:bay.minX-.2;
-        box(finish,front,4.35,z,.06,.06,7.2);
-      }
-    });
     // One neutral, framed backdrop anchors the upper gallery. Its plaque atlas loads
     // only when a visitor reaches this floor.
     activeDeck=true;
@@ -642,7 +630,6 @@ export async function createWorld(T, R, physics, expanded = false) {
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);
-  shopLodUpdates.push(amenities.updateShopLods);
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));

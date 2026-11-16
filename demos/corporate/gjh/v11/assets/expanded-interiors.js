@@ -7,7 +7,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
   const loader = new T.TextureLoader().setCrossOrigin(undefined);
   const textures = await Promise.all(slots.map(slot => loader.loadAsync(new URL(`./brand-kit/S${slot.number}-hero.webp`, import.meta.url).href)));
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.78, emissive:0x30281b, emissiveIntensity:.22});
-  const posterGeometry = new T.PlaneGeometry(3.2, 2.4);
+  const posterGeometry = new T.PlaneGeometry(4, 2.7);
   const shops = [];
   const ivory = 0xeee4d1, green = 0x526e5b, gold = 0xc6a66b, wood = 0x8b674a;
   const accents = {4:0x785a68, 5:0x913f35, 6:0x667887, 7:0x9c4937, 8:0x477aac,
@@ -24,8 +24,9 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     group.rotation.y = side === 'west' ? Math.PI/2 : side === 'east' ? -Math.PI/2 : 0;
     const back = -depth/2 + .18, front = depth/2;
     const parts = [];
+    let heroOffset = 0;
     function add(geometry, x, y, z, color) {
-      geometry.translate(x, y, z);
+      geometry.translate(x + heroOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i=0; i<colors.length; i+=3) { colors[i]=c.r; colors[i+1]=c.g; colors[i+2]=c.b; }
       geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
@@ -36,34 +37,42 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     // Architectural backdrop, floor and a warm illuminated picture surround.
     box(0,2.45,back-.08,width-.35,4.9,.16,ivory);
     box(0,.035,0,width-.35,.07,depth-.4,0xd6c6a7);
-    box(0,2.65,back+.08,3.5,2.7,.12,gold);
-    box(0,4.26,back+.16,3.8,.1,.16,0xffe5a7);
+    box(0,2.9,back+.08,4.3,3,.12,gold);
+    box(0,4.45,back+.16,4.5,.1,.16,0xffe5a7);
+    for (const x of [-2,2]) box(x,4.7,0,.1,.08,depth-1,0xffe5a7);
     box(0,.17,back+.14,width-.45,.25,.18,green);
-    // Twin back cabinets leave the central hero image unobstructed.
+    // Bring category displays forward so their contents read from the arcade.
+    const shelf = back + 2.9;
     for (const sign of [-1,1]) {
       const x = sign*(width/2-1.05);
-      box(x,1.3,back+.48,1.45,2.6,.72,wood);
-      box(x,1.35,back+.86,1.25,2.25,.06,green);
-      for (const y of [.55,1.12,1.69,2.26]) {
-        box(x,y,back+.99,1.35,.09,.36,gold);
+      box(x,1.3,shelf,1.65,2.6,.72,wood);
+      box(x,1.35,shelf+.38,1.45,2.25,.06,green);
+      if (number >= 13) {
+        box(x,1.36,shelf+.43,1.25,.85,.06,0x23343b);
+        box(x,1.36,shelf+.47,1.08,.68,.03,accents[number]);
+        box(x,.72,shelf+.75,1.5,.12,1.05,gold);
+        box(x,.36,shelf+.75,1.3,.72,.8,wood);
+      } else for (const y of [.55,1.12,1.69,2.26]) {
+        box(x,y,shelf+.51,1.5,.09,.36,gold);
         for (let i=-1;i<=1;i++) {
-          const px=x+i*.34;
-          if ([7,8,9,10,11,12].includes(number)) {
-            cylinder(px,y+.18,back+1,.12,.27,number===8?0xcba76c:ivory);
-            cylinder(px,y+.33,back+1,.125,.035,accents[number]);
+          const px=x+i*.4;
+          if (number >= 7 && number <= 11) {
+            cylinder(px,y+.18,shelf+.52,.15,.27,number===8?0xcba76c:ivory);
+            cylinder(px,y+.33,shelf+.52,.155,.035,accents[number]);
           } else {
-            box(px,y+.21,back+1,.25,.34,.15,ivory);
-            box(px,y+.23,back+1.09,.17,.13,.025,accents[number]);
+            box(px,y+.21,shelf+.52,.3,.34,.15,ivory);
+            box(px,y+.23,shelf+.61,.22,.13,.025,accents[number]);
           }
         }
       }
     }
+    heroOffset = 2.6;
     // Front pedestal and a large category silhouette, intentionally unlabelled.
     const heroZ = front-1.75;
     box(0,.47,heroZ,2.1,.9,1.05,green);
     box(0,.95,heroZ,2.25,.08,1.2,gold);
     const accent = accents[number];
-    if ([7,8,9,10,11,12].includes(number)) {
+    if (number >= 7 && number <= 11) {
       cylinder(0,1.5,heroZ,.37,1.05,number===8?0xd6b778:ivory);
       cylinder(0,2.04,heroZ,.38,.09,accent);
       box(0,1.53,heroZ+.375,.56,.38,.025,accent);
@@ -102,7 +111,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     texture.colorSpace = T.SRGBColorSpace;
     const poster = new T.Mesh(posterGeometry, new T.MeshBasicMaterial({map:texture}));
     poster.name = `S${slot.number} hero image`;
-    poster.position.set(0,2.65,back+.151);
+    poster.position.set(0,2.9,back+.151);
     group.add(poster);
     group.visible = false;
     scene.add(group);

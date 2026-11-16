@@ -2,7 +2,6 @@ import {liftLayout,showcaseProducts} from './lift-layout.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {fetchStartupAsset} from './startup-asset-pack.js';
-import {expandedLayout} from './expanded-layout.js';
 
 export const AMENITIES = Object.freeze({
   desk:{file:'mall-service-desk.glb',sha:'228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0',root:'ASSET_MallServiceDesk',bytes:245748,triangles:8024,size:[2.88,1.87,.961],clips:[],placements:[[-12.5,0,5.8,Math.PI]]},
@@ -82,28 +81,26 @@ function signTexture(T,x,rear){
 }
 export async function addAmenities(T,scene,collider,createCollectProp,shadows,staticProductCount=null,expanded=false){
   const entries=await Promise.all(Object.entries(AMENITIES).map(async([kind,definition])=>[kind,await load(T,kind,definition)]));
-  const group=new T.Group();group.name='Mall amenities';const state={},opaque=[],opaqueBySlot=new Map(),shopLodMeshes=[],shopLodInstances=[],hiddenShopLodMatrix=new T.Matrix4().makeScale(0,0,0),shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
+  const group=new T.Group();group.name='Mall amenities';const state={},opaque=[];
   for(const [kind,record] of entries){
     const original=AMENITIES[kind];
     const definition=expanded&&kind==='desk'?{...original,placements:[[liftLayout.desk.x,0,liftLayout.desk.z,Math.PI]]}:
       expanded&&kind==='showcase'?{...original,placements:[[liftLayout.showcase.x,0,liftLayout.showcase.z,0]]}:original;
     for(const primitive of record.primitives){
       if(!primitive.material.transparent){
-        definition.placements.forEach(([x,y,z,angle,slot])=>{
+        definition.placements.forEach(([x,y,z,angle])=>{
           const matrix=new T.Matrix4().compose(new T.Vector3(x,y,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(1,1,1));
           const geometry=primitive.geometry.clone().applyMatrix4(matrix),count=geometry.attributes.position.count;
           const colour=new Float32Array(count*3),surface=new Float32Array(count*2),material=primitive.material;
           for(let i=0;i<count;i++){colour.set([material.color.r,material.color.g,material.color.b],i*3);surface.set([material.roughness,material.metalness],i*2);}
           geometry.setAttribute('color',new T.BufferAttribute(colour,3));geometry.setAttribute('obSurface',new T.BufferAttribute(surface,2));
-          if(slot===undefined)opaque.push(geometry);
-          else {if(!opaqueBySlot.has(slot))opaqueBySlot.set(slot,[]);opaqueBySlot.get(slot).push(geometry);}
+          opaque.push(geometry);
         });primitive.geometry.dispose();primitive.material.dispose();
       }else{
         const mesh=new T.InstancedMesh(primitive.geometry,primitive.material,definition.placements.length);
-        definition.placements.forEach(([x,y,z,angle,slot],index)=>{
+        definition.placements.forEach(([x,y,z,angle],index)=>{
           const matrix=new T.Matrix4().compose(new T.Vector3(x,y,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(1,1,1));
           mesh.setMatrixAt(index,matrix);
-          if(slot!==undefined)shopLodInstances.push({mesh,index,slot,x,z,matrix:matrix.clone(),visible:null});
         });
         primitive.material.forceSinglePass=true;mesh.name=`Amenity ${kind} glass`;mesh.receiveShadow=true;mesh.computeBoundingSphere();group.add(mesh);
       }
@@ -111,10 +108,9 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
     if(record.status==='fallback'&&kind!=='signs'){
       const size=kind==='desk'?[2.88,1.05,.961]:[.75,1.8,.532];
       const mesh=new T.InstancedMesh(new T.BoxGeometry(...size),new T.MeshStandardMaterial({color:0x21483e,roughness:.7,transparent:kind==='showcase',opacity:kind==='showcase'?.22:1}),definition.placements.length);
-      definition.placements.forEach(([x,,z,angle,slot],index)=>{
+      definition.placements.forEach(([x,,z,angle],index)=>{
         const matrix=new T.Matrix4().compose(new T.Vector3(x,size[1]/2,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),angle),new T.Vector3(1,1,1));
         mesh.setMatrixAt(index,matrix);
-        if(slot!==undefined)shopLodInstances.push({mesh,index,slot,x,z,matrix:matrix.clone(),visible:null});
       });
       if(kind==='showcase')mesh.material.forceSinglePass=true;
       mesh.name=`Amenity ${kind} fallback`;group.add(mesh);
@@ -122,9 +118,6 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
     state[kind]=Object.freeze({status:record.status,reason:record.reason,identity:definition.sha,instances:definition.placements.length,primitives:record.primitives.length,dimensions:Object.freeze(record.size),placements:definition.placements,doorPose:kind==='showcase'?'closed':null});
   }
   const opaqueMesh=opaqueBatch(T,opaque,shadows);if(opaqueMesh)group.add(opaqueMesh);
-  for(const [slot,parts] of opaqueBySlot){
-    const mesh=opaqueBatch(T,parts,shadows);if(mesh){mesh.userData.shopSlot=slot;group.add(mesh);shopLodMeshes.push(mesh);}
-  }
   for(const [x,y,z] of AMENITIES.signs.placements)for(const rear of [false,true]){
     const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),new T.MeshBasicMaterial({map:signTexture(T,x,rear)}));
     plane.position.set(x,y-.7,z+(rear?-.083:.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
@@ -135,23 +128,8 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
   if(staticProductCount===null)for(const item of showcaseProducts(SHOWCASE_PRODUCTS,expanded)){
     const prop=createCollectProp(item.id);if(!prop)continue;prop.position.set(...item.position);group.add(prop);products++;
   }
-  function updateShopLods(visitor){
-    if(!expanded)return;
-    
-    for(const mesh of shopLodMeshes){
-      const slot=mesh.userData.shopSlot,bay=shopBays.get(slot);
-      if(!bay)continue;
-      const x=(bay.minX+bay.maxX)/2,z=(bay.minZ+bay.maxZ)/2;
-      mesh.visible=Math.hypot(visitor.x-x,visitor.z-z)<18;
-    }
-    for(const item of shopLodInstances){
-      const visible=Math.hypot(visitor.x-item.x,visitor.z-item.z)<18;
-      if(item.visible===visible)continue;
-      item.visible=visible;item.mesh.setMatrixAt(item.index,visible?item.matrix:hiddenShopLodMatrix);item.mesh.instanceMatrix.needsUpdate=true;
-    }
-  }
   scene.add(group);
-  return {state:Object.freeze({...state,displayedProducts:products}),updateShopLods,interactables:[
+  return {state:Object.freeze({...state,displayedProducts:products}),interactables:[
     {id:'service-desk',x:expanded?liftLayout.desk.x:-12.5,z:expanded?liftLayout.desk.z+1.1:6.9,radius:2},
     {id:'wayfinding-west',x:-4.2,z:6,radius:1.7},
     {id:'wayfinding-east',x:6,z:6,radius:1.7},

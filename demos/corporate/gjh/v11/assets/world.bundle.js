@@ -82,49 +82,6 @@ metalnessFactor=vObSurface.y;`);
 // demos/corporate/gjh/v11/assets/amenities.js
 import { GLTFLoader } from "../vendor/GLTFLoader.js";
 import { fetchStartupAsset } from "./startup-asset-pack.js";
-
-// demos/corporate/gjh/v11/assets/expanded-layout.js
-var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
-  number: String(number).padStart(2, "0"),
-  side,
-  minX,
-  maxX,
-  minZ,
-  maxZ,
-  available: number <= 3
-});
-var expandedLayout = Object.freeze({
-  bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
-  entrance: Object.freeze({ x: 10, z: 45 }),
-  courtyardArrival: Object.freeze({ x: 10, z: 12 }),
-  lift: Object.freeze({ x: liftLayout.x, z: liftLayout.z, upper: liftLayout.upper }),
-  directory: liftLayout.directory,
-  serviceDesk: liftLayout.desk,
-  showcase: liftLayout.showcase,
-  atrium: Object.freeze({ x: 10, z: 12 }),
-  slots: Object.freeze([
-    ...Array.from({ length: 5 }, (_, i) => slot(i + 1, "north", -15 + i * 10, -5 + i * 10, -12, 0)),
-    ...Array.from({ length: 6 }, (_, i) => slot(i + 6, "west", -25, -15, i * 8, (i + 1) * 8)),
-    ...Array.from({ length: 6 }, (_, i) => slot(i + 12, "east", 35, 45, i * 8, (i + 1) * 8))
-  ]),
-  loop: Object.freeze([
-    Object.freeze({ x: -12, z: 3 }),
-    Object.freeze({ x: 32, z: 3 }),
-    Object.freeze({ x: 32, z: 39 }),
-    Object.freeze({ x: -12, z: 39 })
-  ])
-});
-var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
-  id: `planned-space-${slot2.number}`,
-  number: slot2.number,
-  label: `Planned space ${slot2.number}`,
-  side: slot2.side,
-  status: "planned",
-  available: false,
-  admission: Object.freeze({ brand: "unassigned", content: "missing", rights: "not-reviewed" })
-})));
-
-// demos/corporate/gjh/v11/assets/amenities.js
 var AMENITIES = Object.freeze({
   desk: { file: "mall-service-desk.glb", sha: "228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0", root: "ASSET_MallServiceDesk", bytes: 245748, triangles: 8024, size: [2.88, 1.87, 0.961], clips: [], placements: [[-12.5, 0, 5.8, Math.PI]] },
   signs: { file: "mall-wayfinding-ceiling-sign.glb", sha: "dd0db4a794d01dfb25b6cc6f494e7285e9fe42de7a70673a596e848563dc0c14", root: "ASSET_MallWayfindingCeilingSign", bytes: 676028, triangles: 11524, size: [2.1, 0.94, 0.162], clips: [], placements: [[-4.2, 6.1, 6, 0], [6, 6.1, 6, 0]] },
@@ -270,13 +227,13 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   const entries = await Promise.all(Object.entries(AMENITIES).map(async ([kind, definition]) => [kind, await load(T, kind, definition)]));
   const group = new T.Group;
   group.name = "Mall amenities";
-  const state = {}, opaque = [], opaqueBySlot = new Map, shopLodMeshes = [], shopLodInstances = [], hiddenShopLodMatrix = new T.Matrix4().makeScale(0, 0, 0), shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
+  const state = {}, opaque = [];
   for (const [kind, record] of entries) {
     const original = AMENITIES[kind];
     const definition = expanded && kind === "desk" ? { ...original, placements: [[liftLayout.desk.x, 0, liftLayout.desk.z, Math.PI]] } : expanded && kind === "showcase" ? { ...original, placements: [[liftLayout.showcase.x, 0, liftLayout.showcase.z, 0]] } : original;
     for (const primitive of record.primitives) {
       if (!primitive.material.transparent) {
-        definition.placements.forEach(([x, y, z, angle, slot2]) => {
+        definition.placements.forEach(([x, y, z, angle]) => {
           const matrix = new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
           const geometry = primitive.geometry.clone().applyMatrix4(matrix), count = geometry.attributes.position.count;
           const colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
@@ -286,23 +243,15 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
           }
           geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
           geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
-          if (slot2 === undefined)
-            opaque.push(geometry);
-          else {
-            if (!opaqueBySlot.has(slot2))
-              opaqueBySlot.set(slot2, []);
-            opaqueBySlot.get(slot2).push(geometry);
-          }
+          opaque.push(geometry);
         });
         primitive.geometry.dispose();
         primitive.material.dispose();
       } else {
         const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, definition.placements.length);
-        definition.placements.forEach(([x, y, z, angle, slot2], index) => {
+        definition.placements.forEach(([x, y, z, angle], index) => {
           const matrix = new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
           mesh.setMatrixAt(index, matrix);
-          if (slot2 !== undefined)
-            shopLodInstances.push({ mesh, index, slot: slot2, x, z, matrix: matrix.clone(), visible: null });
         });
         primitive.material.forceSinglePass = true;
         mesh.name = `Amenity ${kind} glass`;
@@ -314,11 +263,9 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
     if (record.status === "fallback" && kind !== "signs") {
       const size = kind === "desk" ? [2.88, 1.05, 0.961] : [0.75, 1.8, 0.532];
       const mesh = new T.InstancedMesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial({ color: 2181182, roughness: 0.7, transparent: kind === "showcase", opacity: kind === "showcase" ? 0.22 : 1 }), definition.placements.length);
-      definition.placements.forEach(([x, , z, angle, slot2], index) => {
+      definition.placements.forEach(([x, , z, angle], index) => {
         const matrix = new T.Matrix4().compose(new T.Vector3(x, size[1] / 2, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
         mesh.setMatrixAt(index, matrix);
-        if (slot2 !== undefined)
-          shopLodInstances.push({ mesh, index, slot: slot2, x, z, matrix: matrix.clone(), visible: null });
       });
       if (kind === "showcase")
         mesh.material.forceSinglePass = true;
@@ -330,14 +277,6 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   const opaqueMesh = opaqueBatch(T, opaque, shadows);
   if (opaqueMesh)
     group.add(opaqueMesh);
-  for (const [slot2, parts] of opaqueBySlot) {
-    const mesh = opaqueBatch(T, parts, shadows);
-    if (mesh) {
-      mesh.userData.shopSlot = slot2;
-      group.add(mesh);
-      shopLodMeshes.push(mesh);
-    }
-  }
   for (const [x, y, z] of AMENITIES.signs.placements)
     for (const rear of [false, true]) {
       const plane = new T.Mesh(new T.PlaneGeometry(2.04, 0.44), new T.MeshBasicMaterial({ map: signTexture(T, x, rear) }));
@@ -363,27 +302,8 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
       group.add(prop);
       products++;
     }
-  function updateShopLods(visitor) {
-    if (!expanded)
-      return;
-    for (const mesh of shopLodMeshes) {
-      const slot2 = mesh.userData.shopSlot, bay = shopBays.get(slot2);
-      if (!bay)
-        continue;
-      const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2;
-      mesh.visible = Math.hypot(visitor.x - x, visitor.z - z) < 18;
-    }
-    for (const item of shopLodInstances) {
-      const visible = Math.hypot(visitor.x - item.x, visitor.z - item.z) < 18;
-      if (item.visible === visible)
-        continue;
-      item.visible = visible;
-      item.mesh.setMatrixAt(item.index, visible ? item.matrix : hiddenShopLodMatrix);
-      item.mesh.instanceMatrix.needsUpdate = true;
-    }
-  }
   scene.add(group);
-  return { state: Object.freeze({ ...state, displayedProducts: products }), updateShopLods, interactables: [
+  return { state: Object.freeze({ ...state, displayedProducts: products }), interactables: [
     { id: "service-desk", x: expanded ? liftLayout.desk.x : -12.5, z: expanded ? liftLayout.desk.z + 1.1 : 6.9, radius: 2 },
     { id: "wayfinding-west", x: -4.2, z: 6, radius: 1.7 },
     { id: "wayfinding-east", x: 6, z: 6, radius: 1.7 },
@@ -945,6 +865,47 @@ function storeCenterX(store) {
   return (store.bounds.minX + store.bounds.maxX) / 2;
 }
 
+// demos/corporate/gjh/v11/assets/expanded-layout.js
+var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
+  number: String(number).padStart(2, "0"),
+  side,
+  minX,
+  maxX,
+  minZ,
+  maxZ,
+  available: number <= 3
+});
+var expandedLayout = Object.freeze({
+  bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
+  entrance: Object.freeze({ x: 10, z: 45 }),
+  courtyardArrival: Object.freeze({ x: 10, z: 12 }),
+  lift: Object.freeze({ x: liftLayout.x, z: liftLayout.z, upper: liftLayout.upper }),
+  directory: liftLayout.directory,
+  serviceDesk: liftLayout.desk,
+  showcase: liftLayout.showcase,
+  atrium: Object.freeze({ x: 10, z: 12 }),
+  slots: Object.freeze([
+    ...Array.from({ length: 5 }, (_, i) => slot(i + 1, "north", -15 + i * 10, -5 + i * 10, -12, 0)),
+    ...Array.from({ length: 6 }, (_, i) => slot(i + 6, "west", -25, -15, i * 8, (i + 1) * 8)),
+    ...Array.from({ length: 6 }, (_, i) => slot(i + 12, "east", 35, 45, i * 8, (i + 1) * 8))
+  ]),
+  loop: Object.freeze([
+    Object.freeze({ x: -12, z: 3 }),
+    Object.freeze({ x: 32, z: 3 }),
+    Object.freeze({ x: 32, z: 39 }),
+    Object.freeze({ x: -12, z: 39 })
+  ])
+});
+var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
+  id: `planned-space-${slot2.number}`,
+  number: slot2.number,
+  label: `Planned space ${slot2.number}`,
+  side: slot2.side,
+  status: "planned",
+  available: false,
+  admission: Object.freeze({ brand: "unassigned", content: "missing", rights: "not-reviewed" })
+})));
+
 // demos/corporate/gjh/v11/assets/atrium-layout.js
 var point = (x, z) => Object.freeze({ x, z });
 var lounge = (id, x) => Object.freeze({
@@ -1039,7 +1000,7 @@ async function addShopSignAtlas(T, layout, scene) {
       [widthOnWall / 2, height / 2],
       [-widthOnWall / 2, height / 2]
     ]) {
-      positions.push(x + dx * cos, 4.75 + dy, z - dx * sin);
+      positions.push(x + dx * cos, 4.35 + dy, z - dx * sin);
     }
     const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
     uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
@@ -1129,7 +1090,7 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
   const loader = new T.TextureLoader().setCrossOrigin(undefined);
   const textures = await Promise.all(slots.map((slot2) => loader.loadAsync(new URL(`./brand-kit/S${slot2.number}-hero.webp`, import.meta.url).href)));
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.78, emissive: 3155995, emissiveIntensity: 0.22 });
-  const posterGeometry = new T.PlaneGeometry(3.2, 2.4);
+  const posterGeometry = new T.PlaneGeometry(4, 2.7);
   const shops = [];
   const ivory = 15656145, green = 5402203, gold = 13018731, wood = 9135946;
   const accents = {
@@ -1158,8 +1119,9 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     group.rotation.y = side === "west" ? Math.PI / 2 : side === "east" ? -Math.PI / 2 : 0;
     const back = -depth / 2 + 0.18, front = depth / 2;
     const parts = [];
+    let heroOffset = 0;
     function add(geometry, x, y, z, color) {
-      geometry.translate(x, y, z);
+      geometry.translate(x + heroOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i = 0;i < colors.length; i += 3) {
         colors[i] = c.r;
@@ -1177,32 +1139,42 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     }
     box(0, 2.45, back - 0.08, width - 0.35, 4.9, 0.16, ivory);
     box(0, 0.035, 0, width - 0.35, 0.07, depth - 0.4, 14075559);
-    box(0, 2.65, back + 0.08, 3.5, 2.7, 0.12, gold);
-    box(0, 4.26, back + 0.16, 3.8, 0.1, 0.16, 16770471);
+    box(0, 2.9, back + 0.08, 4.3, 3, 0.12, gold);
+    box(0, 4.45, back + 0.16, 4.5, 0.1, 0.16, 16770471);
+    for (const x of [-2, 2])
+      box(x, 4.7, 0, 0.1, 0.08, depth - 1, 16770471);
     box(0, 0.17, back + 0.14, width - 0.45, 0.25, 0.18, green);
+    const shelf = back + 2.9;
     for (const sign of [-1, 1]) {
       const x = sign * (width / 2 - 1.05);
-      box(x, 1.3, back + 0.48, 1.45, 2.6, 0.72, wood);
-      box(x, 1.35, back + 0.86, 1.25, 2.25, 0.06, green);
-      for (const y of [0.55, 1.12, 1.69, 2.26]) {
-        box(x, y, back + 0.99, 1.35, 0.09, 0.36, gold);
-        for (let i = -1;i <= 1; i++) {
-          const px = x + i * 0.34;
-          if ([7, 8, 9, 10, 11, 12].includes(number)) {
-            cylinder(px, y + 0.18, back + 1, 0.12, 0.27, number === 8 ? 13346668 : ivory);
-            cylinder(px, y + 0.33, back + 1, 0.125, 0.035, accents[number]);
-          } else {
-            box(px, y + 0.21, back + 1, 0.25, 0.34, 0.15, ivory);
-            box(px, y + 0.23, back + 1.09, 0.17, 0.13, 0.025, accents[number]);
+      box(x, 1.3, shelf, 1.65, 2.6, 0.72, wood);
+      box(x, 1.35, shelf + 0.38, 1.45, 2.25, 0.06, green);
+      if (number >= 13) {
+        box(x, 1.36, shelf + 0.43, 1.25, 0.85, 0.06, 2307131);
+        box(x, 1.36, shelf + 0.47, 1.08, 0.68, 0.03, accents[number]);
+        box(x, 0.72, shelf + 0.75, 1.5, 0.12, 1.05, gold);
+        box(x, 0.36, shelf + 0.75, 1.3, 0.72, 0.8, wood);
+      } else
+        for (const y of [0.55, 1.12, 1.69, 2.26]) {
+          box(x, y, shelf + 0.51, 1.5, 0.09, 0.36, gold);
+          for (let i = -1;i <= 1; i++) {
+            const px = x + i * 0.4;
+            if (number >= 7 && number <= 11) {
+              cylinder(px, y + 0.18, shelf + 0.52, 0.15, 0.27, number === 8 ? 13346668 : ivory);
+              cylinder(px, y + 0.33, shelf + 0.52, 0.155, 0.035, accents[number]);
+            } else {
+              box(px, y + 0.21, shelf + 0.52, 0.3, 0.34, 0.15, ivory);
+              box(px, y + 0.23, shelf + 0.61, 0.22, 0.13, 0.025, accents[number]);
+            }
           }
         }
-      }
     }
+    heroOffset = 2.6;
     const heroZ = front - 1.75;
     box(0, 0.47, heroZ, 2.1, 0.9, 1.05, green);
     box(0, 0.95, heroZ, 2.25, 0.08, 1.2, gold);
     const accent = accents[number];
-    if ([7, 8, 9, 10, 11, 12].includes(number)) {
+    if (number >= 7 && number <= 11) {
       cylinder(0, 1.5, heroZ, 0.37, 1.05, number === 8 ? 14071672 : ivory);
       cylinder(0, 2.04, heroZ, 0.38, 0.09, accent);
       box(0, 1.53, heroZ + 0.375, 0.56, 0.38, 0.025, accent);
@@ -1244,7 +1216,7 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     texture.colorSpace = T.SRGBColorSpace;
     const poster = new T.Mesh(posterGeometry, new T.MeshBasicMaterial({ map: texture }));
     poster.name = `S${slot2.number} hero image`;
-    poster.position.set(0, 2.65, back + 0.151);
+    poster.position.set(0, 2.9, back + 0.151);
     group.add(poster);
     group.visible = false;
     scene.add(group);
@@ -2026,17 +1998,6 @@ async function createWorld(T, R, physics, expanded = false) {
         box("brass", x, 0.024, 21, 0.035, 0.008, 36);
       for (const z of [3, 39])
         box("brass", 10, 0.024, z, 44, 0.008, 0.035);
-      const planned = expandedLayout.slots.filter((bay) => !bay.available);
-      const categoryFinish = (bay) => bay.number <= 3 || bay.number >= 6 && bay.number <= 11 ? "oak" : bay.number <= 5 ? "ivory" : "green";
-      planned.forEach((bay) => {
-        const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2, finish = categoryFinish(bay);
-        if (bay.side === "north")
-          box(finish, x, 4.35, 0.24, 9.1, 0.06, 0.06);
-        else {
-          const front = bay.side === "west" ? bay.maxX + 0.2 : bay.minX - 0.2;
-          box(finish, front, 4.35, z, 0.06, 0.06, 7.2);
-        }
-      });
       activeDeck = true;
       box("green", -3, liftLayout.upper + 2.1, 14.48, 9.4, 4.2, 0.16, true);
       box("brass", -3, liftLayout.upper + 4.12, 14.36, 9.55, 0.055, 0.045);
@@ -2093,7 +2054,6 @@ async function createWorld(T, R, physics, expanded = false) {
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
     interactables.push(...amenities.interactables);
-    shopLodUpdates.push(amenities.updateShopLods);
     for (const batch of batches.values()) {
       const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
