@@ -23,7 +23,7 @@ Design and implementation are tracked in [the upper-deck brand-wall brief](docs/
 
 - [x] Stage 1 — Add the design brief and this checklist.
 - [x] Stage 2 — Build the upper deck, railing, benches and planters.
-- [ ] Stage 3 — Build the 17-plaque atlas and accessible nearby/tap story interaction.
+- [x] Stage 3 — Build the 17-plaque atlas and accessible nearby/tap story interaction.
 - [ ] Stage 4 — Fix expanded-layout copy, extend `tests/browser_gjh_v11.py`, update README, regenerate outputs, and verify both views <=190 draw calls.
 
 

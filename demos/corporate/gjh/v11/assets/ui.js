@@ -63,6 +63,8 @@ export function createUI(expanded = false) {
   const inspectButton = document.getElementById('inspect');
   const nearbyName = document.getElementById('nearby-name');
   const nearbyDistance = document.getElementById('nearby-distance');
+  const nearbyStory=document.createElement('p');nearbyStory.className='brand-story-nearby';nearbyStory.hidden=true;nearbyStory.setAttribute('role','status');nearbyStory.setAttribute('aria-live','polite');
+  inspectPrompt.append(nearbyStory);
   const help = document.getElementById('keyboard-help');
   const mallMap = document.getElementById('mall-map');
   let guideFromHUD=false;
@@ -430,7 +432,15 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       if (openMap()) announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
       return;
     }
-    returnFocus = document.activeElement;
+    if(record.action==='brand-story'){
+      returnFocus=document.activeElement;
+      onboarding.report('inspect');
+      productTitle.textContent=`${record.brand} · ${record.tagline}`;
+      productImage.src=record.image;productImage.alt=record.alt;
+      productKind.textContent=record.kind;productDescription.textContent=record.story;
+      dialog.showModal();closeButton.focus({preventScroll:true});notifyMode();
+      return;
+    }
     onboarding.report('inspect');
     productTitle.textContent = record.name;
     productImage.src = record.image;
@@ -737,7 +747,11 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         inspectPrompt.classList.toggle('is-shelf-nearby', isShelf);
         image.hidden = !isShelf;
         if (isShelf) image.src = product.image;
-        nearbyName.textContent = isShelf ? product.compactName : product?.name || '';
+        nearbyName.textContent = isShelf ? product.compactName : product?.action==='brand-story'?`${product.brand} · ${product.tagline}`:product?.name || '';
+        const isBrandStory=product?.action==='brand-story';
+        nearbyStory.textContent=isBrandStory?product.story:'';
+        nearbyStory.hidden=!isBrandStory;
+        inspectPrompt.classList.toggle('has-brand-story',isBrandStory);
         const identity = inspectPrompt.querySelector('.nearby-card');
         if (isShelf) { identity.setAttribute('role', 'group'); identity.setAttribute('aria-label', product.name); }
         else { identity.removeAttribute('role'); identity.removeAttribute('aria-label'); }
@@ -747,7 +761,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         const touchOnly = matchMedia('(pointer: coarse)').matches;
         inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? 'Tap Inspect' : 'Press F / tap Inspect');
         if (isShelf) inspectButton.textContent = 'Inspect';
-        inspectButton.setAttribute('aria-label', isMap ? 'Open the three-store map from the directory kiosk' : nearby ? `Inspect ${records.get(nearby).name}` : 'Inspect nearby display');
+        if(isBrandStory)inspectButton.textContent=touchOnly?'Tap story':'Press F / tap story';
+        inspectButton.setAttribute('aria-label',isBrandStory?`Read the ${record.brand} brand story`:isMap?'Open the three-store map from the directory kiosk':nearby?`Inspect ${records.get(nearby).name}`:'Inspect nearby display');
         if(amenityAction){
           inspectButton.textContent=touchGuide.matches?amenityAction:`Press F / ${amenityAction.toLowerCase()}`;
           inspectButton.setAttribute('aria-label',`${amenityAction}: ${record.name}`);
@@ -796,6 +811,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     onCart(state,listener){cartState=state;cartListener=listener;},
     setElevator(listener){addMapService('visitor-lift','L','Visitor lift',liftLayout);records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
     setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
+    setBrandStories(stories){for(const [id,record] of Object.entries(stories))records.set(id,record);},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },
     onTeleport(listener) {

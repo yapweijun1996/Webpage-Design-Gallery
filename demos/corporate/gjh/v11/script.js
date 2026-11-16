@@ -9,7 +9,7 @@ document.body.classList.toggle('is-expanded', expanded);
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
-let productControl=null, shelfFocus=null, guidance=null, mallTheme=null;
+let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
@@ -61,6 +61,7 @@ const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.curr
   theme: mallTheme?.state() || null,
   themeDecorations: world?.scene.children.filter(item=>item.userData.mallThemeDecoration).map(item=>item.userData.mallThemeDecoration) || [],
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
+  brandPlaqueCount: world?.scene.getObjectByName('Seventeen brand wall plaques')?.geometry.index?.count / 6 || 0,
   interaction: selectedInteraction ? {id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance} : null,
   camera: player ? {position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect} : null,
   graphics: Object.freeze({status: graphicsStatus, losses, validations, initialized, quality: quality.state,
@@ -96,6 +97,11 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z, expanded)?.id || 'atrium';
+  if(expanded&&currentZone==='upper'&&!brandWallStarted){
+    brandWallStarted=true;
+    world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();render();})
+      .catch(error=>console.error('Upper deck brand wall could not load:',error));
+  }
   nearby = null; selectedInteraction = null; let best = Infinity;
   for (const item of world.interactables) {
     if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;

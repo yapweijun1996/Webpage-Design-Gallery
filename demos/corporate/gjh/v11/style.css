@@ -726,3 +726,9 @@ body:not(.is-3d):has(#mall-connection-notice:not([hidden])) .mall-update-notice{
 .planned-spaces-list p{font-size:var(--font-size-sm);color:var(--muted);margin:0 0 var(--space-3)}
 @media(max-width:1000px){.planned-spaces-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.planned-spaces-list{grid-template-columns:minmax(0,1fr)}}
+.brand-story-nearby{grid-column:1/-1;margin:0;max-width:48ch;font-size:var(--gjh-type-product-copy-eyebrow);line-height:1.45;text-align:left}
+.brand-story-nearby[hidden]{display:none}
+.inspect-prompt.has-brand-story{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;text-align:left}
+.inspect-prompt.has-brand-story #nearby-name{grid-column:1/-1;margin:0}
+.inspect-prompt.has-brand-story #inspect{grid-column:2;grid-row:2}
+.inspect-prompt[hidden]{display:none}

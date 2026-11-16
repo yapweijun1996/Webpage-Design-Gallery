@@ -1,3 +1,4 @@
+import {addBrandWallAtlas} from './brand-wall.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createFurnishings} from './furnishings.js';
 import {createShell} from './shell.js';
@@ -649,6 +650,11 @@ export async function createWorld(T, R, physics, expanded = false) {
         box(finish,front,4.35,z,.06,.06,7.2);
       }
     });
+    // One neutral backdrop anchors the upper gallery. Its plaque atlas loads
+    // only when a visitor reaches this floor.
+    activeDeck=true;
+    box('green',-3,liftLayout.upper+2.1,4.85,9.4,4.2,.16,true);
+    activeDeck=false;
     // Small upper gallery seating; the validated bench/planter assets are
     // reused when available, with batched local geometry as the fallback.
     activeDeck=true;
@@ -732,7 +738,16 @@ export async function createWorld(T, R, physics, expanded = false) {
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
   const cameraObstacles=ceilingObstacles.concat(seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
-  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  let brandWallPromise=null;
+  function ensureBrandWall(){
+    if(!expanded)return Promise.reject(new Error('Brand wall is only available in the expanded mall'));
+    if(!brandWallPromise)brandWallPromise=addBrandWallAtlas(T,scene).then(result=>{
+      interactables.push(...result.interactables);
+      return result;
+    });
+    return brandWallPromise;
+  }
+  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

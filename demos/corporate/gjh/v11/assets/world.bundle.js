@@ -7,6 +7,112 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/brand-wall.js
+var SLOT_COUNT = 17;
+var COLUMNS = 4;
+var LOGO_FILES = Object.freeze(["new-moon", "mili", "gogo", "borsch-med", "pien-tze-huang", "flying-wheel", "gu-long", "skippy", "spam", "california-mexico", "hormel", "zeria", "sony", "lg", "casio", "gp", "gigaset"]);
+function image(url) {
+  return new Promise((resolve) => {
+    const item = new Image;
+    item.onload = () => resolve(item);
+    item.onerror = () => resolve(null);
+    item.src = url;
+  });
+}
+function wrap(context, text, x, y, maxWidth, lineHeight, maxLines) {
+  const words = text.split(/\s+/);
+  let line = "", lines = 0;
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (context.measureText(next).width > maxWidth && line) {
+      context.fillText(line, x, y + lines++ * lineHeight, maxWidth);
+      line = word;
+      if (lines === maxLines - 1)
+        break;
+    } else
+      line = next;
+  }
+  if (lines < maxLines && line)
+    context.fillText(line, x, y + lines * lineHeight, maxWidth);
+}
+async function addBrandWallAtlas(T, scene) {
+  const kitResponse = await fetch(new URL("./brand-kit/brand-kit.json", import.meta.url));
+  if (!kitResponse.ok)
+    throw new Error("Brand-kit metadata unavailable");
+  const kit = await kitResponse.json();
+  const entries = Array.from({ length: SLOT_COUNT }, (_, index) => kit[`S${String(index + 1).padStart(2, "0")}`]);
+  if (entries.some((entry, index) => !entry || entry.slot !== `S${String(index + 1).padStart(2, "0")}` || typeof entry.brand !== "string" || typeof entry.tagline !== "string" || typeof entry.story !== "string")) {
+    throw new Error("Brand-kit plaque records are incomplete");
+  }
+  const logos = await Promise.all(entries.map((entry, index) => image(new URL(`./brands/${entry.slot}-${LOGO_FILES[index]}.webp`, import.meta.url).href)));
+  const cellWidth = 256, cellHeight = 224;
+  const canvas = document.createElement("canvas");
+  canvas.width = cellWidth * COLUMNS;
+  canvas.height = cellHeight * Math.ceil(SLOT_COUNT / COLUMNS);
+  const context = canvas.getContext("2d");
+  entries.forEach((entry, index) => {
+    const x = index % COLUMNS * cellWidth, y = Math.floor(index / COLUMNS) * cellHeight;
+    context.fillStyle = "#f4efdf";
+    context.fillRect(x, y, cellWidth, cellHeight);
+    context.fillStyle = "#174638";
+    context.fillRect(x + 7, y + 7, cellWidth - 14, cellHeight - 14);
+    context.strokeStyle = "#d0ae65";
+    context.lineWidth = 3;
+    context.strokeRect(x + 11, y + 11, cellWidth - 22, cellHeight - 22);
+    const logo = logos[index];
+    if (logo) {
+      const scale = Math.min(212 / logo.width, 112 / logo.height);
+      const width = logo.width * scale, height = logo.height * scale;
+      context.drawImage(logo, x + (cellWidth - width) / 2, y + 20 + (112 - height) / 2, width, height);
+    } else {
+      context.fillStyle = "#f4efdf";
+      context.font = "bold 30px Arial";
+      context.textAlign = "center";
+      context.fillText(entry.brand, x + cellWidth / 2, y + 82, 220);
+    }
+    context.fillStyle = "#f4efdf";
+    context.font = "bold 17px Arial";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    wrap(context, entry.tagline, x + cellWidth / 2, y + 166, 218, 19, 2);
+  });
+  const texture = new T.CanvasTexture(canvas);
+  texture.colorSpace = T.SRGBColorSpace;
+  const positions = [], uvs = [], indices = [], interactables = [], records = {};
+  entries.forEach((entry, index) => {
+    const column = index % COLUMNS, row = Math.floor(index / COLUMNS);
+    const x = -6.25 + column * 2.15, y = 10.7 - row * 0.78, z = 4.69;
+    const width = 2, height = 0.72;
+    positions.push(x - width / 2, y - height / 2, z, x + width / 2, y - height / 2, z, x + width / 2, y + height / 2, z, x - width / 2, y + height / 2, z);
+    const left = column / COLUMNS, right = (column + 1) / COLUMNS;
+    const top = 1 - row / Math.ceil(SLOT_COUNT / COLUMNS), bottom = 1 - (row + 1) / Math.ceil(SLOT_COUNT / COLUMNS);
+    uvs.push(left, bottom, right, bottom, right, top, left, top);
+    const vertex = index * 4;
+    indices.push(vertex, vertex + 1, vertex + 2, vertex, vertex + 2, vertex + 3);
+    const id = `brand-plaque-${entry.slot}`;
+    interactables.push({ id, x: x + (row - 2) * 0.13, z: 6.1 + column * 0.08, radius: 1.35 });
+    records[id] = {
+      name: entry.brand,
+      brand: entry.brand,
+      tagline: entry.tagline,
+      story: entry.story,
+      image: `assets/brands/${entry.slot}-${LOGO_FILES[index]}.webp`,
+      action: "brand-story",
+      kind: "Brand plaque · independent virtual mall concept",
+      alt: `${entry.brand} logo`
+    };
+  });
+  const geometry = new T.BufferGeometry;
+  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+  geometry.setIndex(indices);
+  geometry.computeBoundingSphere();
+  const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide }));
+  mesh.name = "Seventeen brand wall plaques";
+  mesh.userData.deckLod = true;
+  scene.add(mesh);
+  return { mesh, interactables, records };
+}
+
 // demos/corporate/gjh/v11/assets/lift-layout.js
 var freeze = (value) => {
   if (value && typeof value === "object") {
@@ -946,20 +1052,20 @@ var SHOPS = Object.freeze([
   ["GP", "S16-gp.webp"],
   ["Gigaset", "S17-gigaset.webp"]
 ]);
-var SLOT_COUNT = 17;
+var SLOT_COUNT2 = 17;
 function loadImage(url) {
   return new Promise((resolve) => {
-    const image = new Image;
-    image.onload = () => resolve(image);
-    image.onerror = () => resolve(null);
-    image.src = url;
+    const image2 = new Image;
+    image2.onload = () => resolve(image2);
+    image2.onerror = () => resolve(null);
+    image2.src = url;
   });
 }
 async function addShopSignAtlas(T, layout, scene) {
   const width = 768, rowHeight = 56;
   const canvas = document.createElement("canvas");
   canvas.width = width;
-  canvas.height = rowHeight * SLOT_COUNT;
+  canvas.height = rowHeight * SLOT_COUNT2;
   const context = canvas.getContext("2d");
   const logos = await Promise.all(SHOPS.map(([, file]) => loadImage(new URL(`./brands/${file}`, import.meta.url).href)));
   SHOPS.forEach(([name], index) => {
@@ -1002,7 +1108,7 @@ async function addShopSignAtlas(T, layout, scene) {
     ]) {
       positions.push(x + dx * cos, 3.5 + dy, z - dx * sin);
     }
-    const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
+    const bottom = 1 - (index + 1) / SLOT_COUNT2, top = 1 - index / SLOT_COUNT2;
     uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
     const vertex = index * 4;
     indices.push(vertex, vertex + 1, vertex + 2, vertex, vertex + 2, vertex + 3);
@@ -1267,6 +1373,15 @@ async function createWorld(T, R, physics, expanded = false) {
         mesh.visible = deckVisible;
       for (const update of shopLodUpdates)
         update(visitor);
+    }, ensureBrandWall = function() {
+      if (!expanded)
+        return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
+      if (!brandWallPromise)
+        brandWallPromise = addBrandWallAtlas(T, scene).then((result) => {
+          interactables.push(...result.interactables);
+          return result;
+        });
+      return brandWallPromise;
     };
     const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
     let shellState = null;
@@ -1862,6 +1977,9 @@ async function createWorld(T, R, physics, expanded = false) {
         }
       });
       activeDeck = true;
+      box("green", -3, liftLayout.upper + 2.1, 4.85, 9.4, 4.2, 0.16, true);
+      activeDeck = false;
+      activeDeck = true;
       const deckBench = (x, z, facing) => {
         if (!furnishings.place("bench", x, z, 0.8, facing, liftLayout.upper, null, -1)) {
           box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
@@ -1921,7 +2039,8 @@ async function createWorld(T, R, physics, expanded = false) {
     const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh));
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(seats.map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
-    return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
+    let brandWallPromise = null;
+    return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {
     releaseStartupAssetPack();
   }

@@ -1281,6 +1281,12 @@ function createUI(expanded = false) {
   const inspectButton = document.getElementById("inspect");
   const nearbyName = document.getElementById("nearby-name");
   const nearbyDistance = document.getElementById("nearby-distance");
+  const nearbyStory = document.createElement("p");
+  nearbyStory.className = "brand-story-nearby";
+  nearbyStory.hidden = true;
+  nearbyStory.setAttribute("role", "status");
+  nearbyStory.setAttribute("aria-live", "polite");
+  inspectPrompt.append(nearbyStory);
   const help = document.getElementById("keyboard-help");
   const mallMap = document.getElementById("mall-map");
   let guideFromHUD = false;
@@ -1838,7 +1844,19 @@ function createUI(expanded = false) {
         announce("The kiosk screen is decorative. Use this three-store map to choose an entrance.");
       return;
     }
-    returnFocus = document.activeElement;
+    if (record.action === "brand-story") {
+      returnFocus = document.activeElement;
+      onboarding.report("inspect");
+      productTitle.textContent = `${record.brand} · ${record.tagline}`;
+      productImage.src = record.image;
+      productImage.alt = record.alt;
+      productKind.textContent = record.kind;
+      productDescription.textContent = record.story;
+      dialog.showModal();
+      closeButton.focus({ preventScroll: true });
+      notifyMode();
+      return;
+    }
     onboarding.report("inspect");
     productTitle.textContent = record.name;
     productImage.src = record.image;
@@ -2230,7 +2248,11 @@ function createUI(expanded = false) {
         image.hidden = !isShelf;
         if (isShelf)
           image.src = product.image;
-        nearbyName.textContent = isShelf ? product.compactName : product?.name || "";
+        nearbyName.textContent = isShelf ? product.compactName : product?.action === "brand-story" ? `${product.brand} · ${product.tagline}` : product?.name || "";
+        const isBrandStory = product?.action === "brand-story";
+        nearbyStory.textContent = isBrandStory ? product.story : "";
+        nearbyStory.hidden = !isBrandStory;
+        inspectPrompt.classList.toggle("has-brand-story", isBrandStory);
         const identity = inspectPrompt.querySelector(".nearby-card");
         if (isShelf) {
           identity.setAttribute("role", "group");
@@ -2246,7 +2268,9 @@ function createUI(expanded = false) {
         inspectButton.textContent = isMap ? touchOnly ? "Tap to open map" : "Press F / tap Map" : touchOnly ? "Tap Inspect" : "Press F / tap Inspect";
         if (isShelf)
           inspectButton.textContent = "Inspect";
-        inspectButton.setAttribute("aria-label", isMap ? "Open the three-store map from the directory kiosk" : nearby ? `Inspect ${records.get(nearby).name}` : "Inspect nearby display");
+        if (isBrandStory)
+          inspectButton.textContent = touchOnly ? "Tap story" : "Press F / tap story";
+        inspectButton.setAttribute("aria-label", isBrandStory ? `Read the ${record.brand} brand story` : isMap ? "Open the three-store map from the directory kiosk" : nearby ? `Inspect ${records.get(nearby).name}` : "Inspect nearby display");
         if (amenityAction) {
           inspectButton.textContent = touchGuide.matches ? amenityAction : `Press F / ${amenityAction.toLowerCase()}`;
           inspectButton.setAttribute("aria-label", `${amenityAction}: ${record.name}`);
@@ -2332,6 +2356,10 @@ function createUI(expanded = false) {
     setSeats(seats) {
       for (const seat of seats)
         records.set(seat.id, { name: seat.name, action: "seat" });
+    },
+    setBrandStories(stories) {
+      for (const [id, record] of Object.entries(stories))
+        records.set(id, record);
     },
     onSeat(listener) {
       seatListener = listener;
@@ -2532,6 +2560,7 @@ var productControl = null;
 var shelfFocus = null;
 var guidance = null;
 var mallTheme = null;
+var brandWallStarted = false;
 var initialized = false;
 var fatal = false;
 var contextLost = false;
@@ -2624,6 +2653,7 @@ var snapshot = () => Object.freeze({
   productAssets: world?.productAssets || null,
   shelves: world?.shelves || [],
   shelf: shelfFocus?.state || null,
+  brandPlaqueCount: world?.scene.getObjectByName("Seventeen brand wall plaques")?.geometry.index?.count / 6 || 0,
   interaction: selectedInteraction ? { id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance } : null,
   camera: player ? { position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect } : null,
   graphics: Object.freeze({
@@ -2692,6 +2722,14 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : storeAt(p.x, p.z, expanded)?.id || "atrium";
+  if (expanded && currentZone === "upper" && !brandWallStarted) {
+    brandWallStarted = true;
+    world.ensureBrandWall().then(({ records }) => {
+      ui.setBrandStories(records);
+      updateHUD();
+      render();
+    }).catch((error) => console.error("Upper deck brand wall could not load:", error));
+  }
   nearby = null;
   selectedInteraction = null;
   let best = Infinity;
