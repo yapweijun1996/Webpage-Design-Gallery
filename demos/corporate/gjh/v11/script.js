@@ -112,7 +112,7 @@ function tick() {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   for (const door of world.doors) {
-    const open = p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
+    const open = !expanded && p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
     door.open = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);
@@ -130,6 +130,7 @@ function render(force = false) {
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
+    world.updateShopLods(player.state);
     world.updateSigns(camera, canvas);
     if (shelfFocus?.open) player.renderShelf(() => renderer.render(world.scene, camera));
     else renderer.render(world.scene, camera);

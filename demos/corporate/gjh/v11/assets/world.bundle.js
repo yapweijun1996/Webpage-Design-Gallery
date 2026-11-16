@@ -270,19 +270,19 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   const entries = await Promise.all(Object.entries(AMENITIES).map(async ([kind, definition]) => [kind, await load(T, kind, definition)]));
   const group = new T.Group;
   group.name = "Mall amenities";
-  const state = {}, opaque = [];
+  const state = {}, opaque = [], opaqueBySlot = new Map, shopLodMeshes = [], shopLodInstances = [], hiddenShopLodMatrix = new T.Matrix4().makeScale(0, 0, 0), shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
   for (const [kind, record] of entries) {
     const original = AMENITIES[kind];
-    const displaySlots = expanded && kind === "showcase" ? expandedLayout.slots.filter((bay) => bay.number === 4 || bay.number === 5 || bay.number === 12 || bay.number === 13 || bay.number >= 16).map((bay) => {
+    const displaySlots = expanded && kind === "showcase" ? expandedLayout.slots.filter((bay) => [4, 5, 12, 13].includes(Number(bay.number)) || Number(bay.number) >= 16).map((bay) => {
       const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX - 1.4 : bay.minX + 1.4;
       const z = bay.side === "north" ? -1.55 : (bay.minZ + bay.maxZ) / 2;
       const angle = bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
-      return [x, 0, z, angle];
+      return [x, 0, z, angle, Number(bay.number)];
     }) : [];
     const definition = expanded && kind === "desk" ? { ...original, placements: [[liftLayout.desk.x, 0, liftLayout.desk.z, Math.PI]] } : expanded && kind === "showcase" ? { ...original, placements: [[liftLayout.showcase.x, 0, liftLayout.showcase.z, 0], ...displaySlots] } : original;
     for (const primitive of record.primitives) {
       if (!primitive.material.transparent) {
-        definition.placements.forEach(([x, y, z, angle]) => {
+        definition.placements.forEach(([x, y, z, angle, slot2]) => {
           const matrix = new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
           const geometry = primitive.geometry.clone().applyMatrix4(matrix), count = geometry.attributes.position.count;
           const colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
@@ -292,13 +292,24 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
           }
           geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
           geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
-          opaque.push(geometry);
+          if (slot2 === undefined)
+            opaque.push(geometry);
+          else {
+            if (!opaqueBySlot.has(slot2))
+              opaqueBySlot.set(slot2, []);
+            opaqueBySlot.get(slot2).push(geometry);
+          }
         });
         primitive.geometry.dispose();
         primitive.material.dispose();
       } else {
         const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, definition.placements.length);
-        definition.placements.forEach(([x, y, z, angle], index) => mesh.setMatrixAt(index, new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1))));
+        definition.placements.forEach(([x, y, z, angle, slot2], index) => {
+          const matrix = new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
+          mesh.setMatrixAt(index, matrix);
+          if (slot2 !== undefined)
+            shopLodInstances.push({ mesh, index, slot: slot2, x, z, matrix: matrix.clone(), visible: null });
+        });
         primitive.material.forceSinglePass = true;
         mesh.name = `Amenity ${kind} glass`;
         mesh.receiveShadow = true;
@@ -309,7 +320,12 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
     if (record.status === "fallback" && kind !== "signs") {
       const size = kind === "desk" ? [2.88, 1.05, 0.961] : [0.75, 1.8, 0.532];
       const mesh = new T.InstancedMesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial({ color: 2181182, roughness: 0.7, transparent: kind === "showcase", opacity: kind === "showcase" ? 0.22 : 1 }), definition.placements.length);
-      definition.placements.forEach(([x, , z, angle], index) => mesh.setMatrixAt(index, new T.Matrix4().compose(new T.Vector3(x, size[1] / 2, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1))));
+      definition.placements.forEach(([x, , z, angle, slot2], index) => {
+        const matrix = new T.Matrix4().compose(new T.Vector3(x, size[1] / 2, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
+        mesh.setMatrixAt(index, matrix);
+        if (slot2 !== undefined)
+          shopLodInstances.push({ mesh, index, slot: slot2, x, z, matrix: matrix.clone(), visible: null });
+      });
       if (kind === "showcase")
         mesh.material.forceSinglePass = true;
       mesh.name = `Amenity ${kind} fallback`;
@@ -320,6 +336,14 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   const opaqueMesh = opaqueBatch(T, opaque, shadows);
   if (opaqueMesh)
     group.add(opaqueMesh);
+  for (const [slot2, parts] of opaqueBySlot) {
+    const mesh = opaqueBatch(T, parts, shadows);
+    if (mesh) {
+      mesh.userData.shopSlot = slot2;
+      group.add(mesh);
+      shopLodMeshes.push(mesh);
+    }
+  }
   for (const [x, y, z] of AMENITIES.signs.placements)
     for (const rear of [false, true]) {
       const plane = new T.Mesh(new T.PlaneGeometry(2.04, 0.44), new T.MeshBasicMaterial({ map: signTexture(T, x, rear) }));
@@ -345,8 +369,27 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
       group.add(prop);
       products++;
     }
+  function updateShopLods(visitor) {
+    if (!expanded)
+      return;
+    for (const mesh of shopLodMeshes) {
+      const slot2 = mesh.userData.shopSlot, bay = shopBays.get(slot2);
+      if (!bay)
+        continue;
+      const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2;
+      mesh.visible = Math.hypot(visitor.x - x, visitor.z - z) < 18;
+    }
+    for (const item of shopLodInstances) {
+      const visible = Math.hypot(visitor.x - item.x, visitor.z - item.z) < 18;
+      if (item.visible === visible)
+        continue;
+      item.visible = visible;
+      item.mesh.setMatrixAt(item.index, visible ? item.matrix : hiddenShopLodMatrix);
+      item.mesh.instanceMatrix.needsUpdate = true;
+    }
+  }
   scene.add(group);
-  return { state: Object.freeze({ ...state, displayedProducts: products }), interactables: [
+  return { state: Object.freeze({ ...state, displayedProducts: products }), updateShopLods, interactables: [
     { id: "service-desk", x: expanded ? liftLayout.desk.x : -12.5, z: expanded ? liftLayout.desk.z + 1.1 : 6.9, radius: 2 },
     { id: "wayfinding-west", x: -4.2, z: 6, radius: 1.7 },
     { id: "wayfinding-east", x: 6, z: 6, radius: 1.7 },
@@ -677,25 +720,37 @@ async function createFurnishings(T, shadows) {
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
   }));
   return {
-    place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null) {
+    place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
       const record = records[kind];
       const transform = new T.Matrix4().compose(new T.Vector3(x, baseY, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), yaw ?? (facing < 0 ? Math.PI : 0)), new T.Vector3(1, height, 1));
-      record.placements.push(transform);
+      record.placements.push({ transform, shopSlot });
       return record.status === "loaded";
     },
-    finish(scene) {
+    finish(scene, onShopLodMesh = () => {}) {
       const group = new T.Group;
       group.name = "Blender furnishings";
       const state = {};
       for (const [kind, record] of Object.entries(records)) {
+        const placementsBySlot = new Map;
+        for (const placement of record.placements) {
+          if (!placementsBySlot.has(placement.shopSlot))
+            placementsBySlot.set(placement.shopSlot, []);
+          placementsBySlot.get(placement.shopSlot).push(placement);
+        }
         for (const primitive of record.primitives) {
-          const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, record.placements.length);
-          mesh.name = `${kind} primitive`;
-          record.placements.forEach((placement, index) => mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(placement, primitive.matrix)));
-          mesh.castShadow = shadows && !["wallLight", "storeSign"].includes(kind);
-          mesh.receiveShadow = true;
-          mesh.computeBoundingSphere();
-          group.add(mesh);
+          for (const [shopSlot, placements] of placementsBySlot) {
+            const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
+            mesh.name = `${kind} primitive`;
+            placements.forEach((placement, index) => mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(placement.transform, primitive.matrix)));
+            mesh.castShadow = shadows && !["wallLight", "storeSign"].includes(kind);
+            mesh.receiveShadow = true;
+            mesh.computeBoundingSphere();
+            if (shopSlot !== null) {
+              mesh.userData.shopSlot = shopSlot;
+              onShopLodMesh(mesh);
+            }
+            group.add(mesh);
+          }
         }
         state[kind] = Object.freeze({
           assetId: sources[kind].asset_id,
@@ -1009,9 +1064,9 @@ async function createWorld(T, R, physics, expanded = false) {
       }
       return panels;
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ") {
-      const key2 = `${type}:${material}`;
+      const key2 = `${type}:${material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}`;
       if (!batches.has(key2))
-        batches.set(key2, { geometry: geometry[type], material: materials[material], transforms: [] });
+        batches.set(key2, { geometry: geometry[type], material: materials[material], transforms: [], shopSlot: activeShopSlot });
       position.set(x, y, z);
       scale.set(sx, sy, sz);
       euler.set(rx, ry, 0, order);
@@ -1025,15 +1080,15 @@ async function createWorld(T, R, physics, expanded = false) {
       if (collision)
         collider(x, y, z, sx, sy, sz);
     }, addFoodHero = function(bay) {
-      const shelf = slotShelfPosition(bay), frontX = shelf.x + Math.sin(shelf.rotation) * 0.42, frontZ = shelf.z + Math.cos(shelf.rotation) * 0.42;
-      if (bay.number === 6) {
+      const number = Number(bay.number), shelf = slotShelfPosition(bay), frontX = shelf.x + Math.sin(shelf.rotation) * 0.42, frontZ = shelf.z + Math.cos(shelf.rotation) * 0.42;
+      if (number === 6) {
         box("cream", frontX, 0.72, frontZ, 0.14, 0.22, 0.06);
         box("oak", frontX, 0.72, frontZ + 0.025, 0.115, 0.17, 0.008);
-      } else if (bay.number === 8) {
+      } else if (number === 8) {
         cylinder("oak", frontX, 0.67, frontZ, 0.055, 0.14);
         cylinder("cream", frontX, 0.745, frontZ, 0.057, 0.025);
       } else {
-        const count = bay.number === 11 ? 4 : 1;
+        const count = number === 11 ? 4 : 1;
         for (let index = 0;index < count; index++) {
           const offset = (index - (count - 1) / 2) * 0.2, x = frontX + offset * Math.cos(shelf.rotation), z = frontZ - offset * Math.sin(shelf.rotation);
           cylinder("timber", x, 0.66, z, 0.052, 0.14);
@@ -1041,34 +1096,34 @@ async function createWorld(T, R, physics, expanded = false) {
         }
       }
     }, addHealthElectronicsHero = function(bay) {
-      const { x, z, rotation } = slotShelfPosition(bay);
+      const number = Number(bay.number), { x, z, rotation } = slotShelfPosition(bay);
       const frontX = x + Math.sin(rotation) * 0.38, frontZ = z + Math.cos(rotation) * 0.38;
       const orientedBox = (material, px, py, pz, sx, sy, sz) => solid("box", material, px, py, pz, sx, sy, sz, rotation);
-      if (bay.number === 4 || bay.number === 12) {
+      if (number === 4 || number === 12) {
         box("cream", frontX, 0.92, frontZ, 0.13, 0.18, 0.035);
         box("ivory", frontX, 0.92, frontZ + 0.021, 0.105, 0.145, 0.006);
-      } else if (bay.number === 5) {
+      } else if (number === 5) {
         for (let index = 0;index < 3; index++)
           box("ivory", frontX + (index - 1) * 0.15, 0.78, frontZ, 0.11, 0.2, 0.07);
-      } else if (bay.number === 13) {
+      } else if (number === 13) {
         sphere("ivory", frontX - 0.09, 0.93, frontZ, 0.065, 0.055, 0.055);
         sphere("ivory", frontX + 0.09, 0.93, frontZ, 0.065, 0.055, 0.055);
         solid("torus", "dark", frontX, 0.96, frontZ - 0.08, 0.12, 0.12, 0.45, 0, Math.PI / 2);
-      } else if (bay.number === 14) {
+      } else if (number === 14) {
         orientedBox("dark", frontX, 1.35, frontZ, 0.951, 0.535, 0.035);
         orientedBox("brass", frontX, 0.72, frontZ, 0.05, 0.78, 0.05);
         orientedBox("oak", frontX, 0.18, frontZ, 0.62, 0.08, 0.3);
-      } else if (bay.number === 15) {
+      } else if (number === 15) {
         orientedBox("dark", frontX, 0.55, frontZ, 1.25, 0.16, 0.42);
         orientedBox("cream", frontX, 0.645, frontZ, 1.17, 0.025, 0.33);
         for (let key2 = 0;key2 < 12; key2++) {
           const offset = (key2 - 5.5) * 0.095, px = frontX + offset * Math.cos(rotation), pz = frontZ - offset * Math.sin(rotation);
           orientedBox("ivory", px, 0.665, pz, 0.075, 0.018, 0.2);
         }
-      } else if (bay.number === 16) {
+      } else if (number === 16) {
         cylinder("ivory", frontX, 0.93, frontZ, 0.055, 0.025);
         solid("torus", "brass", frontX, 0.95, frontZ, 0.034, 0.034, 0.7);
-      } else if (bay.number === 17) {
+      } else if (number === 17) {
         box("ivory", frontX, 0.72, frontZ, 0.2, 0.08, 0.12);
         cylinder("dark", frontX, 0.91, frontZ, 0.025, 0.34);
         sphere("ivory", frontX, 0.74, frontZ, 0.045, 0.055, 0.05);
@@ -1080,7 +1135,7 @@ async function createWorld(T, R, physics, expanded = false) {
       mesh.rotation.y = ry;
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
-      return mesh;
+      return tagShopLod(mesh);
     }, sign = function(text, x, y, z, width, height = 0.4, framed = false, fontSize = 42) {
       const canvas = document.createElement("canvas");
       canvas.width = 1024;
@@ -1104,17 +1159,18 @@ async function createWorld(T, R, physics, expanded = false) {
       mesh.position.set(x, y, z);
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
-      return mesh;
+      return tagShopLod(mesh);
     }, shadow = function(x, z, w, d) {
       const mesh = new T.Mesh(plane, contact);
       mesh.rotation.x = -Math.PI / 2;
       mesh.position.set(x, 0.018, z);
       mesh.scale.set(w, d, 1);
       scene.add(mesh);
+      tagShopLod(mesh);
     }, lightPool = function(x, y, z, width, height, ry = 0, rx = -Math.PI / 2) {
       solid("plane", "lightPool", x, y, z, width, height, 1, ry, rx);
     }, plant = function(x, z, tall = 1) {
-      if (!furnishings.place("planter", x, z, tall)) {
+      if (!furnishings.place("planter", x, z, tall, 1, 0, null, activeShopSlot)) {
         cylinder("pot", x, 0.32, z, 0.42, 0.64);
         cylinder("brass", x, 0.64, z, 0.43, 0.045);
         cylinder("brass", x, 0.055, z, 0.4, 0.075);
@@ -1138,7 +1194,7 @@ async function createWorld(T, R, physics, expanded = false) {
       const name = label || (z > 0 ? `Courtyard bench ${index + 1}` : `${x < 5 ? "MILI" : "GOGO"} bench ${index % 2 + 1}`);
       seats.push({ id, name, x, z: z - 0.23 * facing, y: 0.015, exitX: x, exitZ: z - 1.2 * facing, facing, angle: facing === 1 ? 0 : Math.PI, cameraOffset: z < 0 ? (index % 2 === 0 ? -Math.PI / 2 : Math.PI / 2) * facing : 0.45, collider: seatCollider.handle });
       const benchBox = (m, bx, by, bz, sx, sy, sz) => box(m, bx, by * seatScale2, bz, sx, sy * seatScale2, sz);
-      if (!furnishings.place("bench", x, z, seatScale2, facing)) {
+      if (!furnishings.place("bench", x, z, seatScale2, facing, 0, null, activeShopSlot)) {
         benchBox("wood", x, 0.3, z, 2.5, 0.4, 0.85);
         benchBox("seat", x, 0.56, z, 2.55, 0.18, 0.9);
         benchBox("seat", x, 0.94, z + facing * 0.35, 2.55, 0.7, 0.18);
@@ -1184,8 +1240,21 @@ async function createWorld(T, R, physics, expanded = false) {
             if (label.left < rect.right + 8 && label.right > rect.left - 8 && label.top < rect.bottom + 8 && label.bottom > rect.top - 8)
               overlaps = true;
           }
-        mesh.visible = !overlaps;
+        mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
+    }, updateShopLods = function(visitor) {
+      if (!expanded)
+        return;
+      for (const mesh of shopLodMeshes) {
+        const bay = shopBays.get(mesh.userData.shopSlot);
+        if (!bay)
+          continue;
+        const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2;
+        mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.z - z) < 18;
+        mesh.visible = mesh.userData.shopLodNear;
+      }
+      for (const update of shopLodUpdates)
+        update(visitor);
     };
     const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
     let shellState = null;
@@ -1261,11 +1330,20 @@ async function createWorld(T, R, physics, expanded = false) {
       ring: new T.RingGeometry(0.985, 1, 64)
     };
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
-    const position = new T.Vector3, scale = new T.Vector3;
+    const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
+    let activeShopSlot = null;
+    const tagShopLod = (mesh) => {
+      if (expanded && activeShopSlot !== null) {
+        mesh.userData.shopSlot = activeShopSlot;
+        shopLodMeshes.push(mesh);
+      }
+      return mesh;
+    };
     const slotShelfPosition = (bay) => ({
       x: bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX - 1.4 : bay.minX + 1.4,
       z: bay.side === "north" ? -1.55 : (bay.minZ + bay.maxZ) / 2,
-      rotation: bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2
+      rotation: bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2,
+      slot: Number(bay.number)
     });
     const cylinder = (m, x, y, z, r, h) => solid("cylinder", m, x, y, z, r, h, r);
     const sphere = (m, x, y, z, sx, sy, sz) => solid("sphere", m, x, y, z, sx, sy, sz);
@@ -1520,6 +1598,7 @@ async function createWorld(T, R, physics, expanded = false) {
         box("dark", x, 4.7, 0, 9.7, 1.55, 0.5, true);
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
       }
+      activeShopSlot = expanded ? Number(store.number) : null;
       box("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4);
       for (const side of [-1, 1]) {
         box("oak", x + side * 4.665, 0.13, -5.25, 0.055, 0.2, 10.15);
@@ -1535,7 +1614,7 @@ async function createWorld(T, R, physics, expanded = false) {
               box("oak", x + side * 4.635, 2.85 + edge * 1.275, z, 0.045, 0.045, 2.3);
             }
             if (z !== -5.2) {
-              if (!furnishings.place("wallLight", x + side * 4.57, z, 1, 1, 2.52, -side * Math.PI / 2)) {
+              if (!furnishings.place("wallLight", x + side * 4.57, z, 1, 1, 2.52, -side * Math.PI / 2, activeShopSlot)) {
                 box("brass", x + side * 4.57, 3.02, z, 0.09, 0.94, 0.25);
                 box("glow", x + side * 4.49, 3.02, z, 0.075, 0.67, 0.16);
               }
@@ -1571,7 +1650,7 @@ async function createWorld(T, R, physics, expanded = false) {
         }
       box("brass", x, 0.03, 0.25, 4.7, 0.025, 0.7);
       const logo = zone === "newmoon" ? "new-moon-logo.svg" : `${zone}-logo.jpg`;
-      if (!furnishings.place("storeSign", x, 0.28, 1, 1, 4.065)) {
+      if (!furnishings.place("storeSign", x, 0.28, 1, 1, 4.065, null, activeShopSlot)) {
         box("brass", x, 4.67, 0.3, 2.52, 1.21, 0.09);
         box("cream", x, 4.67, 0.36, 2.42, 1.11, 0.05);
       }
@@ -1627,6 +1706,7 @@ async function createWorld(T, R, physics, expanded = false) {
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
         const foodShelves = expanded ? expandedLayout.slots.filter((bay) => bay.number >= 6 && bay.number <= 11).map(slotShelfPosition) : [];
         const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, foodShelves, expanded ? [-10, 0, -1.25] : null);
+        shopLodUpdates.push(productDisplay.updateShopLods);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
           collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -1649,7 +1729,7 @@ async function createWorld(T, R, physics, expanded = false) {
         interactables.push({ id: zone, x, z: -9, radius: 2.5 });
         bench(x - 3, -6.8, -1);
         bench(x + 3, -6.8, -1);
-        if (!furnishings.place("coffeeTable", x, -5.5)) {
+        if (!furnishings.place("coffeeTable", x, -5.5, 1, 1, 0, null, activeShopSlot)) {
           cylinder("brass", x, 0.4, -5.5, 0.08, 0.75);
           cylinder("oak", x, 0.8, -5.5, 0.8, 0.1);
           cylinder("brass", x, 0.853, -5.5, 0.805, 0.025);
@@ -1698,6 +1778,7 @@ async function createWorld(T, R, physics, expanded = false) {
           box("oak", x + 0.12, 0.08, -1.325, 0.035, 0.11, 0.006);
         }
       }
+      activeShopSlot = null;
     }
     if (expanded) {
       let warmStrip = function(x, z, width, depth) {
@@ -1728,10 +1809,13 @@ async function createWorld(T, R, physics, expanded = false) {
           for (const edge of [bay.minZ, bay.maxZ])
             box("ivory", x, 2.8, edge, 10, 5.6, 0.2, true);
         }
-        if (bay.number >= 6 && bay.number <= 11)
+        const lot = Number(bay.number);
+        activeShopSlot = lot;
+        if (lot >= 6 && lot <= 11)
           addFoodHero(bay);
-        else if (bay.number === 4 || bay.number === 5 || bay.number >= 12)
+        else if (lot === 4 || lot === 5 || lot >= 12)
           addHealthElectronicsHero(bay);
+        activeShopSlot = null;
       }
       for (const x of [-25, 45])
         box("ivory", x, 3.3, 18, 0.3, 6.6, 60, true);
@@ -1754,6 +1838,7 @@ async function createWorld(T, R, physics, expanded = false) {
         box("brass", x, 0.024, 21, 0.035, 0.008, 36);
       for (const z of [3, 39])
         box("brass", 10, 0.024, z, 44, 0.008, 0.035);
+      const planned = expandedLayout.slots.filter((bay) => !bay.available);
       const categoryFinish = (bay) => bay.number <= 3 || bay.number >= 6 && bay.number <= 11 ? "oak" : bay.number <= 5 ? "ivory" : "green";
       planned.forEach((bay) => {
         const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2, finish = categoryFinish(bay);
@@ -1768,12 +1853,16 @@ async function createWorld(T, R, physics, expanded = false) {
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
     interactables.push(...amenities.interactables);
+    shopLodUpdates.push(amenities.updateShopLods);
     for (const batch of batches.values()) {
       const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
       mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool;
       mesh.computeBoundingSphere();
+      mesh.userData.shopSlot = batch.shopSlot;
       scene.add(mesh);
+      if (batch.shopSlot !== null)
+        shopLodMeshes.push(mesh);
     }
     const ambient = new T.HemisphereLight(expanded ? 16774114 : 15003622, expanded ? 7824203 : 7166779, 2.1);
     scene.add(ambient);
@@ -1793,10 +1882,10 @@ async function createWorld(T, R, physics, expanded = false) {
     const signPoint = new T.Vector3;
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
     interactables.push(...seats.map((seat) => ({ id: seat.id, x: seat.exitX, z: seat.exitZ, radius: 1.65, seat })));
-    const furnishingState = furnishings.finish(scene);
+    const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh));
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(seats.map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
-    return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
+    return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {
     releaseStartupAssetPack();
   }

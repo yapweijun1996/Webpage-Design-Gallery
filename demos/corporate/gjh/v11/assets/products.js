@@ -119,16 +119,31 @@ function fallbackShelf(T, scene, displayShelves = []) {
 
 
 export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null) {
+  const shopLodInstances=[],hiddenShopLodMatrix=new T.Matrix4().makeScale(0,0,0);
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene, displayShelves);
   else for (const primitive of shelfRecord.primitives) {
     const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, shelfXs.length+displayShelves.length);
-    shelfXs.forEach((x, index) => { const matrix = new T.Matrix4(); matrix.compose(new T.Vector3(x, 0, -9.25), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), shelfRotation), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
+    shelfXs.forEach((x, index) => { const matrix = new T.Matrix4(); matrix.compose(new T.Vector3(x, 0, -9.25), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), shelfRotation), new T.Vector3(1, 1, 1)); const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix);mesh.setMatrixAt(index,instance);shopLodInstances.push({mesh,index,matrix:instance,x,z:-9.25,visible:null}); });
     displayShelves.forEach((placement,index)=>{
       const matrix=new T.Matrix4().compose(new T.Vector3(placement.x,0,placement.z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),placement.rotation),new T.Vector3(1,1,1));
-      mesh.setMatrixAt(shelfXs.length+index,new T.Matrix4().multiplyMatrices(matrix,primitive.matrix));
+      const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix),instanceIndex=shelfXs.length+index;
+      mesh.setMatrixAt(instanceIndex,instance);
+      shopLodInstances.push({mesh,index:instanceIndex,matrix:instance,x:placement.x,z:placement.z,visible:null});
     });
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
+  }
+  function updateShopLods(visitor) {
+    for(const item of shopLodInstances){
+      const visible=Math.hypot(visitor.x-item.x,visitor.z-item.z)<18;
+      if(item.visible===visible)continue;
+      item.visible=visible;
+      meshSet(item.mesh,item.index,item.matrix,visible);
+    }
+  }
+  function meshSet(mesh,index,matrix,visible){
+    mesh.setMatrixAt(index,visible?matrix:hiddenShopLodMatrix);
+    mesh.instanceMatrix.needsUpdate=true;
   }
   const interactables = [], stock = new Map();
   // The same bounds own collision, focus framing and the projected whole-shelf target.
@@ -146,12 +161,16 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, batches, reserved:false});
     if (record.status === 'loaded') for (const primitive of record.primitives) {
       const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
-      placements.forEach((position, index) => { const matrix = new T.Matrix4(); matrix.compose(position, new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(matrix, primitive.matrix)); });
+      placements.forEach((position, index) => {
+        const matrix = new T.Matrix4(); matrix.compose(position, new T.Quaternion(), new T.Vector3(1, 1, 1));
+        const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix);mesh.setMatrixAt(index,instance);
+        if(index<shelfPlacements.length||heroCan&&sku==='nz-425g'&&index===placements.length-1)shopLodInstances.push({mesh,index,matrix:instance,x:position.x,z:position.z,visible:null});
+      });
       mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh); batches.push(mesh);
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {displayedProducts:showcase.length,shelfPositions:shelfXs, shelves, reserveProduct(id) {
+  return {displayedProducts:showcase.length,updateShopLods,shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);
     if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
     entry.reserved = true;

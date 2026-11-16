@@ -181,6 +181,8 @@ def run(capture=False):
                         assert initial['drawCalls'] <= 200, initial
                         if expected:
                             assert abs(initial['x'] - 10) < .1 and abs(initial['z'] - 45) < .1
+                            page.evaluate('__mall.teleport("mili");__mall.setInput({});__mall.step(1000)')
+                            assert state(page)['doors']['mili']==0 and state(page)['z']>0, state(page)
                         else:
                             assert page.locator('[data-space-id]').count() == 0
                         layout_evidence.append({'query':query or '(no query)','expanded':expected,'readyMsObserved':ready_ms,'drawCalls':initial['drawCalls']})

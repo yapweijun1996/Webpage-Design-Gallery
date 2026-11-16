@@ -86,10 +86,12 @@ export async function createWorld(T, R, physics, expanded = false) {
     plane: new T.PlaneGeometry(1, 1), torus: new T.TorusGeometry(1, .045, 8, 64), ring: new T.RingGeometry(.985, 1, 64)
   };
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
-  const position = new T.Vector3(), scale = new T.Vector3();
+  const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
+  let activeShopSlot=null;
+  const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ') {
-    const key = `${type}:${material}`;
-    if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: materials[material], transforms: []});
+    const key = `${type}:${material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}`;
+    if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: materials[material], transforms: [],shopSlot:activeShopSlot});
     position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, 0, order); quaternion.setFromEuler(euler);
     matrix.compose(position, quaternion, scale); batches.get(key).transforms.push(matrix.clone());
   }
@@ -103,16 +105,17 @@ export async function createWorld(T, R, physics, expanded = false) {
   const slotShelfPosition = bay => ({
     x: bay.side === 'north' ? (bay.minX + bay.maxX) / 2 : bay.side === 'west' ? bay.maxX - 1.4 : bay.minX + 1.4,
     z: bay.side === 'north' ? -1.55 : (bay.minZ + bay.maxZ) / 2,
-    rotation: bay.side === 'north' ? Math.PI : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2
+    rotation: bay.side === 'north' ? Math.PI : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2,
+    slot: Number(bay.number)
   });
   function addFoodHero(bay) {
-    const shelf=slotShelfPosition(bay), frontX=shelf.x+Math.sin(shelf.rotation)*.42, frontZ=shelf.z+Math.cos(shelf.rotation)*.42;
-    if(bay.number===6) {
+    const number=Number(bay.number),shelf=slotShelfPosition(bay), frontX=shelf.x+Math.sin(shelf.rotation)*.42, frontZ=shelf.z+Math.cos(shelf.rotation)*.42;
+    if(number===6) {
       box('cream',frontX,.72,frontZ,.14,.22,.06); box('oak',frontX,.72,frontZ+.025,.115,.17,.008);
-    } else if(bay.number===8) {
+    } else if(number===8) {
       cylinder('oak',frontX,.67,frontZ,.055,.14); cylinder('cream',frontX,.745,frontZ,.057,.025);
     } else {
-      const count=bay.number===11?4:1;
+      const count=number===11?4:1;
       for(let index=0;index<count;index++){
         const offset=(index-(count-1)/2)*.2, x=frontX+offset*Math.cos(shelf.rotation),z=frontZ-offset*Math.sin(shelf.rotation);
         cylinder('timber',x,.66,z,.052,.14);cylinder('brass',x,.733,z,.053,.014);
@@ -121,31 +124,31 @@ export async function createWorld(T, R, physics, expanded = false) {
   }
   const cylinder = (m, x, y, z, r, h) => solid('cylinder', m, x, y, z, r, h, r);
   function addHealthElectronicsHero(bay) {
-    const {x,z,rotation}=slotShelfPosition(bay);
+    const number=Number(bay.number),{x,z,rotation}=slotShelfPosition(bay);
     const frontX=x+Math.sin(rotation)*.38,frontZ=z+Math.cos(rotation)*.38;
     const orientedBox=(material,px,py,pz,sx,sy,sz)=>solid('box',material,px,py,pz,sx,sy,sz,rotation);
-    if(bay.number===4||bay.number===12) {
+    if(number===4||number===12) {
       box('cream',frontX,.92,frontZ,.13,.18,.035);
       box('ivory',frontX,.92,frontZ+.021,.105,.145,.006);
-    } else if(bay.number===5) {
+    } else if(number===5) {
       for(let index=0;index<3;index++)box('ivory',frontX+(index-1)*.15,.78,frontZ,.11,.2,.07);
-    } else if(bay.number===13) {
+    } else if(number===13) {
       sphere('ivory',frontX-.09,.93,frontZ,.065,.055,.055);sphere('ivory',frontX+.09,.93,frontZ,.065,.055,.055);
       solid('torus','dark',frontX,.96,frontZ-.08,.12,.12,.45,0,Math.PI/2);
-    } else if(bay.number===14) {
+    } else if(number===14) {
       orientedBox('dark',frontX,1.35,frontZ,.951,.535,.035);
       orientedBox('brass',frontX,.72,frontZ,.05,.78,.05);orientedBox('oak',frontX,.18,frontZ,.62,.08,.3);
-    } else if(bay.number===15) {
+    } else if(number===15) {
       orientedBox('dark',frontX,.55,frontZ,1.25,.16,.42);
       orientedBox('cream',frontX,.645,frontZ,1.17,.025,.33);
       for(let key=0;key<12;key++){
         const offset=(key-5.5)*.095,px=frontX+offset*Math.cos(rotation),pz=frontZ-offset*Math.sin(rotation);
         orientedBox('ivory',px,.665,pz,.075,.018,.2);
       }
-    } else if(bay.number===16) {
+    } else if(number===16) {
       cylinder('ivory',frontX,.93,frontZ,.055,.025);
       solid('torus','brass',frontX,.95,frontZ,.034,.034,.7);
-    } else if(bay.number===17) {
+    } else if(number===17) {
       box('ivory',frontX,.72,frontZ,.2,.08,.12);
       cylinder('dark',frontX,.91,frontZ,.025,.34);
       sphere('ivory',frontX,.74,frontZ,.045,.055,.05);
@@ -175,7 +178,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
     const mesh = new T.Mesh(plane, mat(0xffffff, {map: texture, emissiveMap: texture, emissive: 0xffffff, emissiveIntensity: .2}));
     mesh.position.set(x, y, z); mesh.rotation.y = ry; mesh.scale.set(width, height, 1); scene.add(mesh);
-    return mesh;
+    return tagShopLod(mesh);
   }
   const roomSigns = [];
   function sign(text, x, y, z, width, height = .4, framed = false, fontSize = 42) {
@@ -189,13 +192,13 @@ export async function createWorld(T, R, physics, expanded = false) {
     const texture = new T.CanvasTexture(canvas); texture.colorSpace = T.SRGBColorSpace;
     const mesh = new T.Mesh(plane, new T.MeshBasicMaterial({map: texture, transparent: true, depthWrite: false}));
     mesh.position.set(x, y, z); mesh.scale.set(width, height, 1); scene.add(mesh);
-    return mesh;
+    return tagShopLod(mesh);
   }
   const shadowCanvas = document.createElement('canvas'); shadowCanvas.width = shadowCanvas.height = 64;
   const shadowContext = shadowCanvas.getContext('2d'), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
   gradient.addColorStop(0, 'rgba(4,18,12,.58)'); gradient.addColorStop(.35, 'rgba(4,18,12,.34)'); gradient.addColorStop(1, 'rgba(4,18,12,0)'); shadowContext.fillStyle = gradient; shadowContext.fillRect(0, 0, 64, 64);
   const contact = new T.MeshBasicMaterial({map: new T.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false});
-  function shadow(x, z, w, d) { const mesh = new T.Mesh(plane, contact); mesh.rotation.x = -Math.PI / 2; mesh.position.set(x, .018, z); mesh.scale.set(w, d, 1); scene.add(mesh); }
+  function shadow(x, z, w, d) { const mesh = new T.Mesh(plane, contact); mesh.rotation.x = -Math.PI / 2; mesh.position.set(x, .018, z); mesh.scale.set(w, d, 1); scene.add(mesh); tagShopLod(mesh); }
   // One soft light texture and one instance batch serve every floor and wall wash.
   const poolCanvas = document.createElement('canvas'); poolCanvas.width = poolCanvas.height = 64;
   const poolContext = poolCanvas.getContext('2d'), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -207,7 +210,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     solid('plane', 'lightPool', x, y, z, width, height, 1, ry, rx);
   }
   function plant(x, z, tall = 1) {
-    if (!furnishings.place('planter', x, z, tall)) {
+    if (!furnishings.place('planter', x, z, tall, 1, 0, null, activeShopSlot)) {
       cylinder('pot', x, .32, z, .42, .64); cylinder('brass', x, .64, z, .43, .045);
       cylinder('brass', x, .055, z, .4, .075); cylinder('wood', x, .656, z, .37, .016);
       for (let i = 0; i < 8; i++) {
@@ -226,7 +229,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     const name=label || (z>0?`Courtyard bench ${index+1}`:`${x<5?'MILI':'GOGO'} bench ${index%2+1}`);
     seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2)*facing:.45,collider:seatCollider.handle});
     const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*seatScale,bz,sx,sy*seatScale,sz);
-    if (!furnishings.place('bench', x, z, seatScale, facing)) {
+    if (!furnishings.place('bench', x, z, seatScale, facing, 0, null, activeShopSlot)) {
       benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, .56, z, 2.55, .18, .9);
       benchBox('seat', x, .94, z + facing * .35, 2.55, .7, .18);
       benchBox('brass', x, .47, z - facing * .451, 2.52, .035, .025);
@@ -437,6 +440,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     if (expanded) {
       box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
     }
+    activeShopSlot=expanded?Number(store.number):null;
     box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
     // Layered skirting and cornices add depth without moving the walls or artwork.
     for (const side of [-1, 1]) {
@@ -453,7 +457,7 @@ export async function createWorld(T, R, physics, expanded = false) {
           box('oak', x + side * 4.635, 2.85 + edge * 1.275, z, .045, .045, 2.3);
         }
         if (z !== -5.2) {
-          if (!furnishings.place('wallLight', x + side * 4.57, z, 1, 1, 2.52, -side * Math.PI / 2)) {
+          if (!furnishings.place('wallLight', x + side * 4.57, z, 1, 1, 2.52, -side * Math.PI / 2, activeShopSlot)) {
             box('brass', x + side * 4.57, 3.02, z, .09, .94, .25);
             box('glow', x + side * 4.49, 3.02, z, .075, .67, .16);
           }
@@ -489,7 +493,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
     box('brass', x, .03, .25, 4.7, .025, .7);
     const logo = zone === 'newmoon' ? 'new-moon-logo.svg' : `${zone}-logo.jpg`;
-    if (!furnishings.place('storeSign', x, .28, 1, 1, 4.065)) {
+    if (!furnishings.place('storeSign', x, .28, 1, 1, 4.065, null, activeShopSlot)) {
       box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05);
     }
     art(logo, x, 4.67, .4, 2.2);
@@ -527,6 +531,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
       const foodShelves=expanded?expandedLayout.slots.filter(bay=>bay.number>=6&&bay.number<=11).map(slotShelfPosition):[];
       const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,foodShelves,expanded?[-10,0,-1.25]:null);
+      shopLodUpdates.push(productDisplay.updateShopLods);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
@@ -543,7 +548,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       interactables.push({id: zone, x, z: -9, radius: 2.5});
       // Store seating faces the natural route from the entrance, not the rear wall.
       bench(x - 3, -6.8, -1); bench(x + 3, -6.8, -1);
-      if (!furnishings.place('coffeeTable', x, -5.5)) {
+      if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
         cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
         cylinder('brass', x, .853, -5.5, .805, .025);
       }
@@ -581,6 +586,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         box('ivory',x+.12,.08,-1.35,.055,.16,.045);box('oak',x+.12,.08,-1.325,.035,.11,.006);
       }
     }
+    activeShopSlot=null;
     }
   if (expanded) {
     // Closed neutral bays are physical shells, not claims that tenants are open.
@@ -603,8 +609,10 @@ export async function createWorld(T, R, physics, expanded = false) {
         box('ivory', front+(bay.side === 'west' ? .2 : -.2), .3, z, .1, .45, 7.2);
         for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
       }
-      if(bay.number>=6&&bay.number<=11)addFoodHero(bay);
-      else if(bay.number===4||bay.number===5||bay.number>=12)addHealthElectronicsHero(bay);
+      const lot=Number(bay.number);activeShopSlot=lot;
+      if(lot>=6&&lot<=11)addFoodHero(bay);
+      else if(lot===4||lot===5||lot>=12)addHealthElectronicsHero(bay);
+      activeShopSlot=null;
     }
     // The closed glass entrance provides a visible boundary to the ground floor.
     for (const x of [-25,45]) box('ivory',x,3.3,18,.3,6.6,60,true);
@@ -631,6 +639,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
     // Category finish bands distinguish food, wellness and electronics without
     // implying branded products or changing the closed, non-interactive bays.
+    const planned=expandedLayout.slots.filter(bay=>!bay.available);
     const categoryFinish = bay => bay.number <= 3 || (bay.number >= 6 && bay.number <= 11) ? 'oak' : bay.number <= 5 ? 'ivory' : 'green';
     planned.forEach(bay=>{
       const x=(bay.minX+bay.maxX)/2, z=(bay.minZ+bay.maxZ)/2, finish=categoryFinish(bay);
@@ -644,9 +653,12 @@ export async function createWorld(T, R, physics, expanded = false) {
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);
+  shopLodUpdates.push(amenities.updateShopLods);
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
-    batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m)); mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); scene.add(mesh);
+    batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
+    mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); mesh.userData.shopSlot=batch.shopSlot; scene.add(mesh);
+    if(batch.shopSlot!==null)shopLodMeshes.push(mesh);
   }
   const ambient = new T.HemisphereLight(expanded ? 0xfff3e2 : 0xe4efe6, expanded ? 0x77634b : 0x6d5b3b, 2.1);scene.add(ambient);
   const key = new T.DirectionalLight(0xffd5a0, 2.6); key.position.set(-8, 15, 9); key.castShadow = true;
@@ -674,16 +686,27 @@ export async function createWorld(T, R, physics, expanded = false) {
         if (label.left < rect.right + 8 && label.right > rect.left - 8 &&
             label.top < rect.bottom + 8 && label.bottom > rect.top - 8) overlaps = true;
       }
-      mesh.visible = !overlaps;
+      mesh.visible = !overlaps && (mesh.userData.shopSlot===undefined || mesh.userData.shopLodNear);
     }
   }
+  function updateShopLods(visitor) {
+    if(!expanded)return;
+    for(const mesh of shopLodMeshes){
+      const bay=shopBays.get(mesh.userData.shopSlot);
+      if(!bay)continue;
+      const x=(bay.minX+bay.maxX)/2,z=(bay.minZ+bay.maxZ)/2;
+      mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.z-z)<18;
+      mesh.visible=mesh.userData.shopLodNear;
+    }
+    for(const update of shopLodUpdates)update(visitor);
+  }
   interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.65,seat})));
-  const furnishingState=furnishings.finish(scene);
+  const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh));
   const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
   const cameraObstacles=ceilingObstacles.concat(seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
-  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }
