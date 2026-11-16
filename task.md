@@ -13,6 +13,16 @@ Owner decision, 2026-11-16: defer the following work outside the completed softw
 
 Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/Blender-3D-Gallery) to improve product discovery, navigation and presentation in the existing GJH V11 mall. Prioritize the New Moon product experience, then wayfinding and selective scene improvements. Preserve existing URLs, content, business behavior, controls, accessibility fallbacks and the mall's visual direction.
 
+## Shop lot design — GJH V11 expanded layout
+
+The expanded 17-lot storefront design is tracked in [the shop-lot design matrix](docs/gjh-v11-shop-lot-design.md). The owner-authorized concept direction uses the supplied logo and brand name on each sign, glazed storefronts with visible non-walkable displays, accurate hero-product scale where evidence supports it, and generic stand-ins where products/models are unverified. This design work does not establish tenancy, distribution, product availability, brand authorization or medical benefits.
+
+- [ ] Stage 2 — Build one 17-sign texture atlas with logo/text fallback and add category storefront variants.
+- [ ] Stage 3 — Implement S01–S03 and S06–S11 with validated shelf/showcase models and evidence-bounded hero stand-ins.
+- [ ] Stage 4 — Implement S04–S05 and S12–S17 with existing displays or simple generated geometry; record missing matching models.
+- [ ] Stage 5 — Measure browser draw calls/startup and apply facade-plus-sign distant LOD to stay within 200 calls.
+- [ ] Stage 6 — Update README, check off completed stages, regenerate generated outputs, and run requested checks.
+
 The mall already has three stores, the green-polo visitor, benches, planters, walking and turning controls, inspection dialogs and a list view. Its four canned products now use owner-authorized conceptual GLBs with photo-derived labels; product-detail dialogs retain default packshots and offer an opt-in unofficial 3D preview in application 1.1.14. Confirm these observations against current source and the deployed site before making changes.
 
 ## Phase 0 — Audit and baseline
