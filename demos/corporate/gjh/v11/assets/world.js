@@ -5,6 +5,7 @@ import {SHELL_LAYOUT} from './interior-shell-registry.js';
 import {spatial, storeCenterX} from './spatial.js';
 import {expandedLayout} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
+import {addShopSignAtlas} from './shop-signs.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 
@@ -568,25 +569,18 @@ export async function createWorld(T, R, physics, expanded = false) {
     const facility=sign('FUTURE FACILITIES',28.07,2,10,2.5,.35,true,60);facility.rotation.y=Math.PI/2;
     for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
     for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
-    // A single atlas and mesh keep the fourteen numbered signs to one draw call.
-    const planned=expandedLayout.slots.filter(item=>!item.available);
-    const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=128*planned.length;
-    const ctx=canvas.getContext('2d'); ctx.fillStyle='#17372e';ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle='#f5e8cb';ctx.font='bold 40px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
-    planned.forEach((bay,i)=>ctx.fillText(`S${bay.number}  ·  PLANNED SPACE`,256,128*i+64));
-    const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
-    const positions=[], uvs=[], indices=[];
-    planned.forEach((bay,i)=>{
-      const x=bay.side==='north'?(bay.minX+bay.maxX)/2:bay.side==='west'?-14.73:34.73;
-      const z=bay.side==='north'?.27:(bay.minZ+bay.maxZ)/2;
-      const angle=bay.side==='west'?Math.PI/2:bay.side==='east'?-Math.PI/2:0;
-      for (const [dx,dy] of [[-1.9,-.4],[1.9,-.4],[1.9,.4],[-1.9,.4]]) positions.push(x+dx*Math.cos(angle),3.2+dy,z-dx*Math.sin(angle));
-      const bottom=(planned.length-i-1)/planned.length, top=(planned.length-i)/planned.length;
-      uvs.push(0,bottom,1,bottom,1,top,0,top);
-      const n=i*4;indices.push(n,n+1,n+2,n,n+2,n+3);
+    // Category finish bands distinguish food, wellness and electronics without
+    // implying branded products or changing the closed, non-interactive bays.
+    const categoryFinish = bay => bay.number <= 3 || (bay.number >= 6 && bay.number <= 11) ? 'oak' : bay.number <= 5 ? 'ivory' : 'green';
+    planned.forEach(bay=>{
+      const x=(bay.minX+bay.maxX)/2, z=(bay.minZ+bay.maxZ)/2, finish=categoryFinish(bay);
+      if(bay.side==='north') box(finish,x,4.35,.24,9.1,.06,.06);
+      else {
+        const front=bay.side==='west'?bay.maxX+.2:bay.minX-.2;
+        box(finish,front,4.35,z,.06,.06,7.2);
+      }
     });
-    const signGeometry=new T.BufferGeometry();signGeometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));signGeometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));signGeometry.setIndex(indices);signGeometry.computeBoundingSphere();
-    scene.add(new T.Mesh(signGeometry,new T.MeshBasicMaterial({map:texture})));
+    await addShopSignAtlas(T,expandedLayout,scene);
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);

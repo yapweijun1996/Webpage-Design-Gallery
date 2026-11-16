@@ -861,6 +861,94 @@ var atriumLayout = Object.freeze({
   event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
 });
 
+// demos/corporate/gjh/v11/assets/shop-signs.js
+var SHOPS = Object.freeze([
+  ["New Moon", "S01-new-moon.webp"],
+  ["MILI", "S02-mili.webp"],
+  ["GOGO", "S03-gogo.webp"],
+  ["Borsch Med", "S04-borsch-med.webp"],
+  ["Pien Tze Huang", "S05-pien-tze-huang.webp"],
+  ["Flying Wheel", "S06-flying-wheel.webp"],
+  ["Gu Long", "S07-gu-long.webp"],
+  ["Skippy", "S08-skippy.webp"],
+  ["SPAM", "S09-spam.webp"],
+  ["California Mexico", "S10-california-mexico.webp"],
+  ["Hormel", "S11-hormel.webp"],
+  ["Zeria", "S12-zeria.webp"],
+  ["Sony", "S13-sony.webp"],
+  ["LG", "S14-lg.webp"],
+  ["Casio", "S15-casio.webp"],
+  ["GP", "S16-gp.webp"],
+  ["Gigaset", "S17-gigaset.webp"]
+]);
+var SLOT_COUNT = 17;
+function loadImage(url) {
+  return new Promise((resolve) => {
+    const image = new Image;
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null);
+    image.src = url;
+  });
+}
+async function addShopSignAtlas(T, layout, scene) {
+  const width = 768, rowHeight = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = rowHeight * SLOT_COUNT;
+  const context = canvas.getContext("2d");
+  const logos = await Promise.all(SHOPS.map(([, file]) => loadImage(new URL(`./brands/${file}`, import.meta.url).href)));
+  SHOPS.forEach(([name], index) => {
+    const y = index * rowHeight;
+    context.fillStyle = "#17372e";
+    context.fillRect(0, y, width, rowHeight);
+    context.strokeStyle = "#b59b62";
+    context.lineWidth = 4;
+    context.strokeRect(4, y + 4, width - 8, rowHeight - 8);
+    const logo = logos[index];
+    if (logo) {
+      const scale = Math.min(210 / logo.width, 92 / logo.height);
+      const logoWidth = logo.width * scale, logoHeight = logo.height * scale;
+      context.drawImage(logo, 18 + (210 - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
+    }
+    context.fillStyle = "#f5e8cb";
+    context.font = "bold 34px Arial";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(name, 491, y + 64, 500);
+  });
+  const texture = new T.CanvasTexture(canvas);
+  texture.colorSpace = T.SRGBColorSpace;
+  const positions = [], uvs = [], indices = [];
+  layout.slots.forEach((bay, index) => {
+    const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX + 0.27 : bay.minX - 0.27;
+    const z = bay.side === "north" ? 0.26 : (bay.minZ + bay.maxZ) / 2;
+    const angle = bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
+    const widthOnWall = bay.side === "north" ? 4 : 3.4;
+    const height = 0.72, cos = Math.cos(angle), sin = Math.sin(angle);
+    for (const [dx, dy] of [
+      [-widthOnWall / 2, -height / 2],
+      [widthOnWall / 2, -height / 2],
+      [widthOnWall / 2, height / 2],
+      [-widthOnWall / 2, height / 2]
+    ]) {
+      positions.push(x + dx * cos, 3.5 + dy, z - dx * sin);
+    }
+    const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
+    uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
+    const vertex = index * 4;
+    indices.push(vertex, vertex + 1, vertex + 2, vertex, vertex + 2, vertex + 3);
+  });
+  const geometry = new T.BufferGeometry;
+  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeBoundingSphere();
+  const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide }));
+  mesh.name = "Seventeen branded shop signs";
+  scene.add(mesh);
+  return mesh;
+}
+
 // demos/corporate/gjh/v11/assets/world.js
 import { releaseStartupAssetPack } from "./startup-asset-pack.js";
 function applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill }) {
@@ -1585,38 +1673,17 @@ async function createWorld(T, R, physics, expanded = false) {
         box("brass", x, 0.024, 21, 0.035, 0.008, 36);
       for (const z of [3, 39])
         box("brass", 10, 0.024, z, 44, 0.008, 0.035);
-      const planned = expandedLayout.slots.filter((item) => !item.available);
-      const canvas = document.createElement("canvas");
-      canvas.width = 512;
-      canvas.height = 128 * planned.length;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#17372e";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#f5e8cb";
-      ctx.font = "bold 40px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      planned.forEach((bay, i) => ctx.fillText(`S${bay.number}  ·  PLANNED SPACE`, 256, 128 * i + 64));
-      const texture = new T.CanvasTexture(canvas);
-      texture.colorSpace = T.SRGBColorSpace;
-      const positions = [], uvs = [], indices = [];
-      planned.forEach((bay, i) => {
-        const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? -14.73 : 34.73;
-        const z = bay.side === "north" ? 0.27 : (bay.minZ + bay.maxZ) / 2;
-        const angle = bay.side === "west" ? Math.PI / 2 : bay.side === "east" ? -Math.PI / 2 : 0;
-        for (const [dx, dy] of [[-1.9, -0.4], [1.9, -0.4], [1.9, 0.4], [-1.9, 0.4]])
-          positions.push(x + dx * Math.cos(angle), 3.2 + dy, z - dx * Math.sin(angle));
-        const bottom = (planned.length - i - 1) / planned.length, top = (planned.length - i) / planned.length;
-        uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
-        const n = i * 4;
-        indices.push(n, n + 1, n + 2, n, n + 2, n + 3);
+      const categoryFinish = (bay) => bay.number <= 3 || bay.number >= 6 && bay.number <= 11 ? "oak" : bay.number <= 5 ? "ivory" : "green";
+      planned.forEach((bay) => {
+        const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2, finish = categoryFinish(bay);
+        if (bay.side === "north")
+          box(finish, x, 4.35, 0.24, 9.1, 0.06, 0.06);
+        else {
+          const front = bay.side === "west" ? bay.maxX + 0.2 : bay.minX - 0.2;
+          box(finish, front, 4.35, z, 0.06, 0.06, 7.2);
+        }
       });
-      const signGeometry = new T.BufferGeometry;
-      signGeometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
-      signGeometry.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
-      signGeometry.setIndex(indices);
-      signGeometry.computeBoundingSphere();
-      scene.add(new T.Mesh(signGeometry, new T.MeshBasicMaterial({ map: texture })));
+      await addShopSignAtlas(T, expandedLayout, scene);
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
     interactables.push(...amenities.interactables);
