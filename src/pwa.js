@@ -1,3 +1,6 @@
+document.addEventListener('gesturestart', (event) => event.preventDefault(), { passive: false });
+document.addEventListener('gesturechange', (event) => event.preventDefault(), { passive: false });
+
 const root = new URL('../', import.meta.url);
 const current = {
   version: document.querySelector('meta[name="app-version"]').content,

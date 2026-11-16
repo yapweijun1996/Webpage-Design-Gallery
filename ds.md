@@ -10,7 +10,8 @@ The gallery helps people choose a company, explore its design directions, inspec
 
 The shared system governs the gallery shell, directory, company collection, detail, comparison and PWA utility surfaces, plus explicitly scoped GJH interaction primitives and theme registries. Independently authored demos retain their own visual identities, typography, colors, motion and layout. Gallery rules must not silently restyle content inside demo iframes. Existing demo URLs and company-first navigation remain stable.
 
-Define a rule once, implement it in one owned source, and reuse it across applicable surfaces. Reuse means shared semantics and behavior, not merely copying matching colors. Preserve semantic HTML, keyboard operation, browser zoom, progressive enhancement and explicit update consent.
+Define a rule once, implement it in one owned source, and reuse it across applicable surfaces. Reuse means shared semantics and behavior, not merely copying matching colors. Preserve semantic HTML, keyboard operation, progressive enhancement and explicit update consent. **RECOMMENDATION (2026-11-16, owner PWA standard):** the gallery shell is a mobile PWA and locks page zoom at scale 1; preserve the exact locked viewport and suppress iOS gesture zoom.
+Accessibility requirement: this locked-zoom decision does not relax responsive access. Gallery layout must reflow at 320px, text must remain readable, and inputs must use at least 16px text. These are requirements, not evidence of completed testing.
 
 ## 2. Evidence and interpretation
 
@@ -41,7 +42,7 @@ Priority describes remediation order, not measured conversion impact. There is n
 
 | ID / priority | Evidence and issue | Target resolution | Acceptance |
 |---|---|---|---|
-| UI-01 / P1 | **SOURCE_CONFIRMED:** [base template](templates/gallery/base.html) sets `maximum-scale=1, user-scalable=no`; [gallery JS](src/gallery.js) suppresses `gesturestart`. [PWA tests](tests/browser_pwa.py) assert the restrictive viewport string. | Allow browser zoom; remove gallery gesture suppression and replace the old test expectation together. Preserve `viewport-fit=cover`. | A01 |
+| UI-01 / P1 | **SOURCE_CONFIRMED:** [base template](templates/gallery/base.html) sets `maximum-scale=1, user-scalable=no`; [PWA JS](src/pwa.js) suppresses iOS gesture zoom. **RECOMMENDATION (2026-11-16, owner PWA standard):** this gallery shell is a mobile PWA and must lock zoom. | Keep `width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover` and suppress iOS gesture zoom. Maintain readable text, inputs of at least 16px, and reflow at 320px. | A01 |
 | UI-02 / P1 | **OBSERVED:** header ends near y=138, hero near y=565, first card starts near y=836; its title/action are below the supplied image. **SOURCE_CONFIRMED:** intro, heading and filter spacing accumulate before the card. | Compress the introductory stack and reveal an identifiable company choice earlier. | A02 |
 | UI-03 / P1 | **SOURCE_CONFIRMED:** [gallery CSS](assets/gallery.css) and later-loaded [PWA CSS](assets/pwa.css) both own header spacing, container gutters and form sizing. PWA CSS adds another release row at 1100px. | Consolidate shared foundations and layout ownership; PWA styles consume them. | A03 |
 | UI-04 / P2 | **OBSERVED:** inventory repeats in badge, section summary and result status. A wide search/category/sort row precedes one company. | Use explicit inventory-size states and reduce redundant visible counts; retain an accessible live result announcement. | A04 |
@@ -202,7 +203,7 @@ DS specification version and application version/build are different identifiers
 
 For each implementation change: identify affected rule IDs; inspect current source and evidence; define migration and compatibility; edit the authoritative source; rebuild outputs when applicable; run relevant checks; review the actual flow; record adoption status and limitations. Do not mark a rule adopted until its acceptance evidence exists. Deprecations should retain documented aliases through a stated migration window; remove them only in the declared breaking release.
 
-Proposed adoption phases: (1) zoom and ownership correction, (2) entry hierarchy and sparse-catalog behavior, (3) selection/navigation state improvements, (4) semantic tokens and enforcement, (5) shared packaging only when another real adopter needs it. These phases are planning guidance, not authorization for runtime changes or release.
+Proposed adoption phases: (1) mobile PWA zoom-lock and ownership correction (owner standard, 2026-11-16), (2) entry hierarchy and sparse-catalog behavior, (3) selection/navigation state improvements, (4) semantic tokens and enforcement, (5) shared packaging only when another real adopter needs it. These phases are planning guidance, not authorization for unrelated runtime changes or release.
 
 ### Implemented static gate and remaining limits
 
@@ -211,7 +212,7 @@ Proposed adoption phases: (1) zoom and ownership correction, (2) entry hierarchy
 1. Parse the canonical token source; reject missing references, duplicate canonical definitions and incompatible declared versions.
 2. Detect forbidden generated-file-only changes by comparing a fresh generator output.
 3. Enforce explicit shared-style ownership and scoped exceptions; do not blanket-ban all CSS literals or demo themes.
-4. Check prohibited zoom restrictions and required semantic component hooks.
+4. Enforce the required mobile-PWA zoom lock and semantic component hooks.
 5. Validate icon source references and required provenance without assuming a particular external icon library.
 6. Report rule ID, source location and actionable fix. Keep visual/browser criteria in browser review rather than pretending static checks prove them.
 
@@ -225,7 +226,7 @@ All entries below are **TEST_CANDIDATE**, except the limited baseline checks rec
 
 | ID | Reproduction and expected result |
 |---|---|
-| A01 | Remove restrictive viewport/gesture logic and update old PWA assertions. Exercise browser zoom/text enlargement at 200%, 320px reflow, and physical touch pinch where available. No essential action or text is lost; no page-level horizontal overflow. Record untested devices explicitly. |
+| A01 | Confirm the exact locked viewport and suppression of iOS `gesturestart`/pinch gestures. Check 320px reflow, readable text, and input text sizes of at least 16px; no essential action or text is lost and no page-level horizontal overflow occurs. Physical touch behavior remains unverified unless tested on a device. |
 | A02 | Capture entry at 1440 × 900 and supplied-image-like desktop dimensions. A company title and collection action appear without scrolling at 1440 × 900. Header/main/footer rails align. Review mobile separately without forcing a desktop fold target. |
 | A03 | Inspect source ownership: shared tokens/layout/controls have one owner; PWA consumes rather than independently redefines them. Rebuild is deterministic; independent demos remain untouched. |
 | A04 | Use temporary fixtures for 0, 1, 2, 12, 13 and 120 companies. Check accurate counts, useful controls, empty recovery and page boundaries. Never publish fixture records. Measure load/filter behavior separately before making performance claims. |
@@ -238,7 +239,7 @@ All entries below are **TEST_CANDIDATE**, except the limited baseline checks rec
 | A11 | Verify 375, 390, 768, 1024, 1440 and 1920px plus both sides of each affected breakpoint; no document-level horizontal overflow. Test safe-area behavior where a supporting device is available. |
 | A12 | Disable JavaScript, then exercise cached browsing offline and unavailable demo/full-screenshot paths. Static browsing survives and availability messages accurately describe the limitation. |
 
-For runtime adoption, run the applicable commands in [README](README.md#verification), including gallery/PWA checks and affected demo checks. The old restrictive-viewport assertions were replaced with zoom-permitting viewport and unsuppressed-gesture checks. Functional passes alone do not close visual issue IDs.
+For runtime adoption, run the applicable commands in [README](README.md#verification), including gallery/PWA checks and affected demo checks. UI-01 follows the owner's mobile-PWA zoom-lock standard; verify the locked viewport and gesture suppression without claiming unrun accessibility or physical-device checks. Functional passes alone do not close visual issue IDs.
 
 ## 12. Verification and adoption record
 
@@ -254,7 +255,7 @@ Verification for application 1.1.0 / DS 1.0.0:
 - [Release browser evidence](docs/evidence/ssot-browser.json) includes follow-up layout checks after loading-space reservation. A prior six-case targeted run measured detail CLS of 0 at all three widths and comparison CLS at most 0.000521; the final file records its own observed values. [Navigation follow-up](docs/evidence/ssot-browser-targeted.json) covers the prepaint disclosure correction. Neither establishes field performance.
 - [V9 interaction evidence](docs/evidence/gjh-v9-browser.json) additionally covers 320px, keyboard room navigation, product dialogs, deep links and no-JavaScript behavior. [GJH interaction review](docs/gjh-ssot-review.md) records the independent-demo verification scope.
 - Viewport screenshots were actually reviewed, including entry, company, detail, comparison and offline layouts. The initial unreadable small desktop previews and narrow tablet company intro prompted source corrections. The detail scroll region now has an accessible name, keyboard focus and a visible focus outline. Async detail/comparison workspaces reserve layout space while catalog data loads; no-JavaScript recovery precedes those workspaces.
-- Physical iOS/Safari/Android, native OS installation dialogs, screen-reader sessions and physical pinch-zoom remain **not verified**. Automated axe results are not a blanket WCAG conformance claim.
+- Physical iOS/Safari/Android, native OS installation dialogs, screen-reader sessions and physical pinch-zoom behavior remain **not verified**. Automated axe results are not a blanket WCAG conformance claim.
 - Recorded LCP/CLS values are local laboratory observations with controlled viewport/reduced-motion settings. They do not establish field Core Web Vitals, INP, real-device graphics performance or production conversion effects.
 
 See [release review](docs/ssot-release-review.md) for the final delivery evidence and remaining limitations. Browser test assets run against locally generated files; deployment status must be verified separately.
@@ -263,7 +264,7 @@ See [release review](docs/ssot-release-review.md) for the final delivery evidenc
 
 | Issues | Delivered source changes | Verification / remaining scope |
 |---|---|---|
-| UI-01 | Gallery viewport allows zoom; gesture suppression removed | Source and browser viewport/gesture checks pass; physical pinch and assistive-technology sessions remain unverified |
+| UI-01 | Gallery shell uses the owner-standard locked viewport and suppresses iOS gesture zoom; 320px reflow, readable text and inputs >= 16px remain requirements | Gallery source and browser_pwa.py viewport/gesture checks pass; 320px reflow/readability/input-size and physical pinch remain unverified |
 | UI-02, UI-04, UI-05 | Compact intro/header, shared normal rail, horizontal singleton card on larger screens, copy-first compact mobile card, hidden ineffective singleton sort, reduced duplicate summary; tablet company intro uses explicit grid | Reviewed screenshots and viewport checks; category remains because it supports meaningful filtering and empty-state recovery |
 | UI-03, UI-10 | Generated token/icon/theme registries; one shared gallery component owner; scoped PWA CSS; broad mobile anchor override removed | Static gate passes with zero measured raw-style debt; intentional layout/scene dimensions remain |
 | UI-06, UI-07, UI-11 | Secondary build diagnostics, compact release controls, category control instead of misleading navigation, reachable mobile secondary navigation, inert instructional aside removed | Gallery and PWA browser suites pass; no native OS installation claim |

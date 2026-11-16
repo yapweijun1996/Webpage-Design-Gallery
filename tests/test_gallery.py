@@ -15,6 +15,8 @@ gallery = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gallery)
 
 
+LOCKED_VIEWPORT = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+
 class GalleryTests(unittest.TestCase):
     def test_real_company_contains_all_versions(self):
         catalog = gallery.load_catalog()
@@ -84,12 +86,25 @@ class GalleryTests(unittest.TestCase):
         self.assertNotIn('<script>alert("test")</script>', page)
         self.assertIn("&lt;script&gt;", page)
 
+    def test_generated_shell_pages_use_locked_viewport_and_maskable_icon_is_separate(self):
+        pages = gallery.build_pages(gallery.load_catalog())
+        for name, page in pages.items():
+            if name.endswith(".html"):
+                self.assertIn(f'<meta name="viewport" content="{LOCKED_VIEWPORT}">', page, name)
+
+        manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
+        icons = manifest["icons"]
+        self.assertIn({"src": "assets/icons/gallery-maskable-512.png", "sizes": "512x512",
+                       "type": "image/png", "purpose": "maskable"}, icons)
+        self.assertFalse(any("any maskable" in icon["purpose"] for icon in icons))
+        self.assertEqual(sum(icon["purpose"] == "maskable" for icon in icons), 1)
+
     def test_published_shared_resources_and_precache_boundary(self):
         catalog = gallery.load_catalog()
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
             gallery.build(output)
-            for name in ("assets/tokens.css", "assets/icons.svg",
+            for name in ("assets/tokens.css", "assets/icons.svg", "assets/icons/gallery-maskable-512.png",
                          "assets/onboarding/action-dialog.js", "assets/onboarding/onboarding.css",
                          "design-system/onboarding/index.html",
                          "demos/corporate/gjh/shared/interaction.css",
@@ -109,7 +124,7 @@ class GalleryTests(unittest.TestCase):
             entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", worker, re.S).group(1))
             cached = {entry["path"] for entry in entries}
             self.assertIn("assets/tokens.css", cached)
-            self.assertIn("assets/icons.svg", cached)
+            self.assertIn("assets/icons/gallery-maskable-512.png", cached)
             self.assertNotIn("assets/onboarding/action-dialog.js", cached)
             self.assertNotIn("design-system/onboarding/index.html", cached)
             self.assertNotIn("demos/corporate/gjh/shared/navigation.js", cached)
