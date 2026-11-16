@@ -263,7 +263,7 @@ function validateRestoration() {
 }
 async function initialize() {
   const context = canvas.getContext('webgl2', {antialias: true, alpha: false, powerPreference: 'high-performance'});
-  if (!context) { fallback('WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.'); return; }
+  if (!context) { fallback(expanded?'WebGL is unavailable. The 17-store mall plan and verified products remain in the accessible directory below.':'WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.'); return; }
   const T = await import('./vendor/three.module.min.js');
   await waitForContext(context);
   renderer = new T.WebGLRenderer({canvas, context, antialias: true});

@@ -35,6 +35,14 @@ export function createUI(expanded = false) {
   const scene = document.getElementById('scene');
   const experience = document.getElementById('experience');
   const storeList = document.getElementById('store-list');
+  const introText=document.querySelector('.mall-intro>p:last-child');
+  if(introText)introText.textContent=expanded?'17 stores. One open invitation.':'Three stores. One open invitation.';
+  const listSummary=document.querySelector('.list-summary');
+  if(listSummary){
+    const labels=listSummary.querySelectorAll('strong'),separators=listSummary.querySelectorAll('span');
+    if(expanded){labels[1].textContent='3 open stores';}
+    else{labels[1].textContent='4 products';labels[2].hidden=true;separators[0].textContent=' / ';separators[1].hidden=true;}
+  }
   const viewToggle = document.getElementById('view-toggle');
   const directoryEnter3D = document.getElementById('directory-enter-3d');
   const storeVisitButtons = [...document.querySelectorAll('[data-visit-store]')];
@@ -287,8 +295,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     article.querySelector('.store-story > .eyebrow').textContent=`${store.number} / The ${store.label} store`;
     if (article.dataset.brand) article.dataset.brandName=store.label;
   }
-  storeList.querySelector('[data-store-filter="all"]').textContent=`All stores (${spatial.stores.length})`;
-  storeList.querySelector('.list-summary strong').textContent=`${spatial.stores.length} stores`;
+  storeList.querySelector('[data-store-filter="all"]').textContent=expanded?'All open stores (3)':`All stores (${spatial.stores.length})`;
+  storeList.querySelector('.list-summary strong').textContent=expanded?'17-store plan':`${spatial.stores.length} stores`;
   function focusMap() {
     // Publish the footer reservation before revealing the focused destination.
     notifyMode();
@@ -416,7 +424,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     headerMap.hidden = !next || !compactMap.matches;
     headerMap.setAttribute('aria-expanded', String(next && compactMap.matches && mallMap.open));
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
-    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : 'Store directory open. All three stores and verified product images are available below.');
+    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded?'Store directory open. The 17-store mall plan includes three open stores and verified product images.':'Store directory open. All three stores and verified product images are available below.');
     viewListener?.(next);
     notifyMode();
   }
@@ -429,7 +437,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     if(record.action==='elevator'){const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator, return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
     if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce(seatNotice);}scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
-      if (openMap()) announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
+      if (openMap()) announce(expanded?'The directory kiosk shows the expanded mall map.':'The kiosk screen is decorative. Use this three-store map to choose an entrance.');
       return;
     }
     if(record.action==='brand-story'){
@@ -762,7 +770,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? 'Tap Inspect' : 'Press F / tap Inspect');
         if (isShelf) inspectButton.textContent = 'Inspect';
         if(isBrandStory)inspectButton.textContent=touchOnly?'Tap story':'Press F / tap story';
-        inspectButton.setAttribute('aria-label',isBrandStory?`Read the ${record.brand} brand story`:isMap?'Open the three-store map from the directory kiosk':nearby?`Inspect ${records.get(nearby).name}`:'Inspect nearby display');
+        inspectButton.setAttribute('aria-label',isBrandStory?`Read the ${record.brand} brand story`:isMap?expanded?'Open the expanded mall map from the directory kiosk':'Open the three-store map from the directory kiosk':nearby?`Inspect ${records.get(nearby).name}`:'Inspect nearby display');
         if(amenityAction){
           inspectButton.textContent=touchGuide.matches?amenityAction:`Press F / ${amenityAction.toLowerCase()}`;
           inspectButton.setAttribute('aria-label',`${amenityAction}: ${record.name}`);

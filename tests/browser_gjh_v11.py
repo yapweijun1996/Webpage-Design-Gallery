@@ -9,6 +9,7 @@ import tempfile
 import threading
 from pathlib import Path
 import time
+import math
 
 from PIL import Image
 from playwright.sync_api import sync_playwright
@@ -83,6 +84,43 @@ def drive(page, ms, **inputs):
       } finally { gl.deleteSync(sync); }
       return state;
     }''', [inputs, ms])
+
+def walk_to(page, x, z):
+    for _ in range(160):
+        current = state(page)
+        dx, dz = x - current['x'], z - current['z']
+        distance = math.hypot(dx, dz)
+        if distance < .07:
+            drive(page, 17)
+            return
+        duration = max(17, min(450, distance / 2.65 * 1000))
+        drive(page, duration, forward=-dz / distance, right=dx / distance, yaw=0)
+    raise AssertionError(('Unreached upper-deck waypoint', x, z, state(page)))
+
+
+def upper_deck_gallery(page):
+    assert page.evaluate('__mall.teleport("atrium")')
+    for point in ((10, 5.5), (-6.4, 5.5), (-6.4, 10)):
+        walk_to(page, *point)
+    assert state(page)['nearby'] == 'visitor-elevator', state(page)
+    page.locator('#inspect').click()
+    drive(page, 4500)
+    upper = state(page)
+    assert abs(upper['y'] - 7.2) < .1 and not upper['elevatorTravel'], upper
+    page.wait_for_function('window.__mall.state.brandPlaqueCount === 17', timeout=10000)
+    upper = state(page)
+    assert upper['brandPlaqueCount'] == 17, upper
+    assert upper['drawCalls'] <= 190, upper['drawCalls']
+    walk_to(page, -6.51, 6.1)
+    assert state(page)['nearby'] == 'brand-plaque-S01', state(page)
+    story = page.locator('.brand-story-nearby')
+    assert story.is_visible() and 'New Zealand' in story.inner_text(), story.inner_text()
+    page.locator('#inspect').click()
+    assert page.locator('#product-dialog').is_visible()
+    assert page.locator('#product-description').inner_text() == story.inner_text()
+    page.keyboard.press('Escape')
+    assert not page.locator('#product-dialog').is_visible()
+    return upper
 
 
 def keyboard_turning(page):
@@ -178,7 +216,7 @@ def run(capture=False):
                         assert page.evaluate('window.__sceneReady === true'), page.locator('#fallback-message').inner_text()
                         assert page.evaluate('document.body.classList.contains("is-expanded")') is expected, query
                         initial = state(page)
-                        assert initial['drawCalls'] <= 200, initial
+                        assert initial['drawCalls'] <= (190 if expected else 200), initial
                         if expected:
                             assert abs(initial['x'] - 10) < .1 and abs(initial['z'] - 45) < .1
                             page.evaluate('__mall.teleport("mili");__mall.setInput({});__mall.step(1000)')
@@ -200,7 +238,7 @@ def run(capture=False):
                         page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
                         # Drain the initial frame before capturing a frozen scene.
                         drive(page, 0)
-                        initial = state(page); assert initial['drawCalls'] <= 200, initial
+                        initial = state(page); assert initial['drawCalls'] <= 200, initial['drawCalls']
                         draw_calls = {'atrium': initial['drawCalls']}
                         max_draw_calls = initial['drawCalls']
                         assert initial['pixelRatio'] <= (1.5 if width<600 else 2)
@@ -358,8 +396,31 @@ def run(capture=False):
                         assert not external, external
                         draw_calls['max'] = max(max_draw_calls, *draw_calls.values())
                         assert max(draw_calls.values()) <= 200, draw_calls
-                        evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'keyboardTurningAndFInspection':'PASS', 'errors':errors})
-                        context.close()
+                        evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'keyboardTurningAndFInspection':'PASS','errors':errors})
+                    # Exercise the default expanded floor separately from classic-layout
+                    # regression flows so the deck route always exists.
+                    context=browser.new_context(viewport={'width':1440,'height':900})
+                    page=context.new_page(); brand_wall_errors=[]
+                    page.on('pageerror',lambda error:brand_wall_errors.append(str(error)))
+                    page.on('console',lambda message:brand_wall_errors.append(message.text) if message.type=='error' else None)
+                    page.goto(base+'/gallery/demos/corporate/gjh/v11/')
+                    page.wait_for_function('window.__mall?.ready && window.__sceneReady')
+                    page.locator('#guide-dialog').wait_for(state='visible')
+                    page.locator('#guide-start').click()
+                    page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                    drive(page,0)
+                    expanded_default_draw_calls=state(page)['drawCalls']
+                    assert expanded_default_draw_calls<=190,expanded_default_draw_calls
+                    try:brand_wall_evidence=upper_deck_gallery(page)
+                    except Exception as error:
+                        current=state(page)
+                        raise AssertionError({'zone':current['zone'],'y':current['y'],'nearby':current['nearby'],
+                          'drawCalls':current['drawCalls'],'brandPlaqueCount':current['brandPlaqueCount'],
+                          'elevator':current['elevator'],'brandWallErrors':brand_wall_errors}) from error
+                    assert state(page)['brandPlaqueCount']==17
+                    assert state(page)['drawCalls']<=190
+                    context.close()
+                    evidence.append({'expandedDefaultDrawCalls':expanded_default_draw_calls,'upperDeckBrandWall':brand_wall_evidence})
                     context = browser.new_context(reduced_motion='reduce')
                     page = context.new_page(); page.goto(url); page.wait_for_function('window.__mall?.ready')
                     # Complete the genuine first-use flow before existing walking/asset assertions.

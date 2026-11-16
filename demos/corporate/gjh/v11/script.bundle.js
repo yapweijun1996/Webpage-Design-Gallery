@@ -1247,6 +1247,21 @@ function createUI(expanded = false) {
   const scene = document.getElementById("scene");
   const experience = document.getElementById("experience");
   const storeList = document.getElementById("store-list");
+  const introText = document.querySelector(".mall-intro>p:last-child");
+  if (introText)
+    introText.textContent = expanded ? "17 stores. One open invitation." : "Three stores. One open invitation.";
+  const listSummary = document.querySelector(".list-summary");
+  if (listSummary) {
+    const labels = listSummary.querySelectorAll("strong"), separators = listSummary.querySelectorAll("span");
+    if (expanded) {
+      labels[1].textContent = "3 open stores";
+    } else {
+      labels[1].textContent = "4 products";
+      labels[2].hidden = true;
+      separators[0].textContent = " / ";
+      separators[1].hidden = true;
+    }
+  }
   const viewToggle = document.getElementById("view-toggle");
   const directoryEnter3D = document.getElementById("directory-enter-3d");
   const storeVisitButtons = [...document.querySelectorAll("[data-visit-store]")];
@@ -1616,8 +1631,8 @@ function createUI(expanded = false) {
     if (article.dataset.brand)
       article.dataset.brandName = store.label;
   }
-  storeList.querySelector('[data-store-filter="all"]').textContent = `All stores (${spatial.stores.length})`;
-  storeList.querySelector(".list-summary strong").textContent = `${spatial.stores.length} stores`;
+  storeList.querySelector('[data-store-filter="all"]').textContent = expanded ? "All open stores (3)" : `All stores (${spatial.stores.length})`;
+  storeList.querySelector(".list-summary strong").textContent = expanded ? "17-store plan" : `${spatial.stores.length} stores`;
   function focusMap() {
     notifyMode();
     mapButtons[0]?.focus({ preventScroll: true });
@@ -1808,7 +1823,7 @@ function createUI(expanded = false) {
     headerMap.setAttribute("aria-expanded", String(next && compactMap.matches && mallMap.open));
     if (moveFocus)
       (next ? scene : document.getElementById("list-title")).focus({ preventScroll: true });
-    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : "Store directory open. All three stores and verified product images are available below.");
+    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded ? "Store directory open. The 17-store mall plan includes three open stores and verified product images." : "Store directory open. All three stores and verified product images are available below.");
     viewListener?.(next);
     notifyMode();
   }
@@ -1841,7 +1856,7 @@ function createUI(expanded = false) {
     }
     if (record.action === "map") {
       if (openMap())
-        announce("The kiosk screen is decorative. Use this three-store map to choose an entrance.");
+        announce(expanded ? "The directory kiosk shows the expanded mall map." : "The kiosk screen is decorative. Use this three-store map to choose an entrance.");
       return;
     }
     if (record.action === "brand-story") {
@@ -2270,7 +2285,7 @@ function createUI(expanded = false) {
           inspectButton.textContent = "Inspect";
         if (isBrandStory)
           inspectButton.textContent = touchOnly ? "Tap story" : "Press F / tap story";
-        inspectButton.setAttribute("aria-label", isBrandStory ? `Read the ${record.brand} brand story` : isMap ? "Open the three-store map from the directory kiosk" : nearby ? `Inspect ${records.get(nearby).name}` : "Inspect nearby display");
+        inspectButton.setAttribute("aria-label", isBrandStory ? `Read the ${record.brand} brand story` : isMap ? expanded ? "Open the expanded mall map from the directory kiosk" : "Open the three-store map from the directory kiosk" : nearby ? `Inspect ${records.get(nearby).name}` : "Inspect nearby display");
         if (amenityAction) {
           inspectButton.textContent = touchGuide.matches ? amenityAction : `Press F / ${amenityAction.toLowerCase()}`;
           inspectButton.setAttribute("aria-label", `${amenityAction}: ${record.name}`);
@@ -3034,7 +3049,7 @@ function validateRestoration() {
 async function initialize() {
   const context = canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "high-performance" });
   if (!context) {
-    fallback("WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.");
+    fallback(expanded ? "WebGL is unavailable. The 17-store mall plan and verified products remain in the accessible directory below." : "WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.");
     return;
   }
   const T = await import("./vendor/three.module.min.js");
