@@ -997,7 +997,7 @@ function loadImage(url) {
   });
 }
 async function addShopSignAtlas(T, layout, scene) {
-  const width = 768, rowHeight = 56;
+  const width = 1536, rowHeight = 112;
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = rowHeight * SLOT_COUNT;
@@ -1005,26 +1005,27 @@ async function addShopSignAtlas(T, layout, scene) {
   const logos = await Promise.all(SHOPS.map(([, file]) => loadImage(new URL(`./brands/${file}`, import.meta.url).href)));
   SHOPS.forEach(([name], index) => {
     const y = index * rowHeight;
-    context.fillStyle = "#17372e";
+    context.fillStyle = "#102e26";
     context.fillRect(0, y, width, rowHeight);
-    context.strokeStyle = "#b59b62";
-    context.lineWidth = 4;
-    context.strokeRect(4, y + 4, width - 8, rowHeight - 8);
+    context.strokeStyle = "#d0b36e";
+    context.lineWidth = 8;
+    context.strokeRect(8, y + 8, width - 16, rowHeight - 16);
     if (index === 0) {
       context.fillStyle = "#b53a32";
-      context.fillRect(8, y + rowHeight - 5, width - 16, 2);
+      context.fillRect(16, y + rowHeight - 10, width - 32, 4);
     }
     const logo = logos[index];
     if (logo) {
-      const scale = Math.min(190 / logo.width, 42 / logo.height);
+      const maxLogoWidth = 380, maxLogoHeight = 80;
+      const scale = Math.min(maxLogoWidth / logo.width, maxLogoHeight / logo.height);
       const logoWidth = logo.width * scale, logoHeight = logo.height * scale;
-      context.drawImage(logo, 16 + (190 - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
+      context.drawImage(logo, 32 + (maxLogoWidth - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
     }
-    context.fillStyle = "#f5e8cb";
-    context.font = "bold 22px Arial";
+    context.fillStyle = "#fff4dd";
+    context.font = "bold 44px Arial";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(name, 484, y + 28, 520);
+    context.fillText(name, 980, y + rowHeight / 2, 960);
   });
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;
@@ -1032,9 +1033,9 @@ async function addShopSignAtlas(T, layout, scene) {
   layout.slots.forEach((bay, index) => {
     const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX + 0.27 : bay.minX - 0.27;
     const z = bay.side === "north" ? 0.26 : (bay.minZ + bay.maxZ) / 2;
-    const angle = bay.side === "north" ? Math.PI : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
-    const widthOnWall = bay.side === "north" ? 4 : 3.4;
-    const height = 0.72, cos = Math.cos(angle), sin = Math.sin(angle);
+    const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
+    const widthOnWall = bay.side === "north" ? 4.6 : 4;
+    const height = 0.9, cos = Math.cos(angle), sin = Math.sin(angle);
     for (const [dx, dy] of [
       [-widthOnWall / 2, -height / 2],
       [widthOnWall / 2, -height / 2],

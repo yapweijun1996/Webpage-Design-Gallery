@@ -28,7 +28,7 @@
     "demos/corporate/gjh/v11/assets/player.js": "a94e4913f63919a20c4d85fe54cdcac710790dd4bc20835943cf9066ef63a9d9",
     "demos/corporate/gjh/v11/assets/push-cart.js": "1831da1ddff6f334cfda30a7befdb41ae8881e836e2196b5e97a04ab21dd259e",
     "demos/corporate/gjh/v11/assets/shell.js": "467388367cdfd44333eeebc14080b7c97e5c449df3a15a0c6e40d46aa7e509a6",
-    "demos/corporate/gjh/v11/assets/shop-signs.js": "37b995e09758bcd2189859a92e465c132d5ace66ebeca36eec822e43b9647ad5",
+    "demos/corporate/gjh/v11/assets/shop-signs.js": "b073038fb5f2e2f33c38ff873d047c3bba040d28c55a0d2df02b4fc3883ee02c",
     "demos/corporate/gjh/v11/assets/spatial.js": "7cafcdf06b91dec11675ce25601e42fd30b618a80abfde7ef13024d8fb1d6b25",
     "demos/corporate/gjh/v11/assets/static-asset.js": "357efd03b5f363ad643b19078f26fd13f40b4a0bbacafad023d680b7f02b3981",
     "demos/corporate/gjh/v11/assets/ui.js": "c591b957787c495a29a6b261e66fa5b308f0d7f83f636079a3fdf1ef6a8d5ff2",
@@ -40,7 +40,7 @@
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "e530069f63692dbabc128e79d637fe71e497403af665a002d60960758d11ff66",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "60bdb9230f40c6c72cbc06723e245fa83bd2c17c10daef75aef8b897c6d35782",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "3f38b8fbc20b43e9a767b2d10bd02c120de150bf78318a5115afc96b88b48485",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "29706129172bc24fae0e7db1ff53345086abec1f7a627042c4b8d40ce685f6df",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "8013dcd5065b22aaf771057400d90f5ea163a3eeafd01799a224b5c80a750ad5"
   }
