@@ -1097,8 +1097,8 @@ var displayFiles = {
 };
 function displayPlacements(number, heroZ, back) {
   if (number === 14)
-    return [[0.8, 0.07, heroZ], [3, 0.07, heroZ - 0.2], [-2.6, 0.07, back + 0.253]];
-  return [[number === 13 || number === 15 || number === 17 ? 1.35 : 2.6, number === 13 || number === 17 ? 0.99 : 0.07, heroZ]];
+    return [[-2.6, 0.07, heroZ], [2.6, 0.07, heroZ], [-2.6, 0.07, back + 0.253]];
+  return [[2.6, number === 13 || number === 17 ? 0.99 : 0.07, heroZ]];
 }
 async function createExpandedInteriors(T, expandedLayout2, scene) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
@@ -1193,8 +1193,8 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     }
     const structureParts = parts;
     parts = [];
-    heroOffset = number === 13 || number === 15 || number === 17 ? 1.35 : 2.6;
-    const heroZ = front - 1.75;
+    heroOffset = 2.6;
+    const heroZ = front - (displayFiles[number] ? 0.75 : 1.75);
     if (number === 13 || number === 17) {
       parts = structureParts;
       box(0, 0.47, heroZ, 2.1, 0.9, 1.05, green);

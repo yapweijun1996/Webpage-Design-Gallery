@@ -40,7 +40,7 @@ The New Moon can variants remain the only verified slot-matched product GLBs; th
 
 **NOT FOUND:** an ice-cream cart or upright piano in the upstream model checkout. The watch-display-case has no matching watch shop, and aquarium-tank and koi-fish have no matching aquarium shop. The round-event-platform, arched-gateway-sign and skylight-roof-module have no matching product display in the supplied shop allocation; they are not used.
 
-The 390 px shopcheck views expose a visibility limitation: the physically scaled phone is very small, and storefront mullions partially obscure the keyboard, soundbar and television displays. Desktop views show the models more clearly. The sampled shop views peaked at 89 draw calls.
+The new displays sit nearer the glazing, offset from the central visitor. They retain their exported metre scale; the phone remains a small, physically sized tabletop object.
 
 ## Stage 5 performance evidence
 
