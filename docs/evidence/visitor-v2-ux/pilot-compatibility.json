@@ -1,0 +1,5249 @@
+{
+  "result": "PASS",
+  "rows": [
+    {
+      "model": "GJH-M056",
+      "width": 390,
+      "cases": [
+        {
+          "sku": "nz-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 475.65625,
+              "top": 140,
+              "right": 378,
+              "bottom": 615.65625,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 627.65625,
+              "width": 366,
+              "height": 204.34375,
+              "top": 627.65625,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 644.65625,
+              "width": 332,
+              "height": 44.78125,
+              "top": 644.65625,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 210.828125,
+                  "width": 334,
+                  "height": 334,
+                  "top": 210.828125,
+                  "right": 362,
+                  "bottom": 544.828125,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 644.65625,
+                  "width": 332,
+                  "height": 44.78125,
+                  "top": 644.65625,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 645.65625,
+                    "width": 304.5625,
+                    "height": 19,
+                    "top": 645.65625,
+                    "right": 333.5625,
+                    "bottom": 664.65625,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 90.9375,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 119.9375,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 27.999999999999986,
+              "top": 210.8281249999999,
+              "right": 362,
+              "bottom": 544.828125
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "au-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 475.65625,
+              "top": 140,
+              "right": 378,
+              "bottom": 615.65625,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 627.65625,
+              "width": 366,
+              "height": 204.34375,
+              "top": 627.65625,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 644.65625,
+              "width": 332,
+              "height": 44.78125,
+              "top": 644.65625,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 210.828125,
+                  "width": 334,
+                  "height": 334,
+                  "top": 210.828125,
+                  "right": 362,
+                  "bottom": 544.828125,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 644.65625,
+                  "width": 332,
+                  "height": 44.78125,
+                  "top": 644.65625,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 645.65625,
+                    "width": 278.578125,
+                    "height": 19,
+                    "top": 645.65625,
+                    "right": 307.578125,
+                    "bottom": 664.65625,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 90.9375,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 119.9375,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 27.999999999999986,
+              "top": 210.8281249999999,
+              "right": 362,
+              "bottom": 544.828125
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "sa-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 475.65625,
+              "top": 140,
+              "right": 378,
+              "bottom": 615.65625,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 627.65625,
+              "width": 366,
+              "height": 204.34375,
+              "top": 627.65625,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 644.65625,
+              "width": 332,
+              "height": 44.78125,
+              "top": 644.65625,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 210.828125,
+                  "width": 334,
+                  "height": 334,
+                  "top": 210.828125,
+                  "right": 362,
+                  "bottom": 544.828125,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 644.65625,
+                  "width": 332,
+                  "height": 44.78125,
+                  "top": 644.65625,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 645.65625,
+                    "width": 302.09375,
+                    "height": 19,
+                    "top": 645.65625,
+                    "right": 331.09375,
+                    "bottom": 664.65625,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 74.3125,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 103.3125,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 28.000000000000007,
+              "top": 210.8281249999999,
+              "right": 362.0000000000001,
+              "bottom": 544.828125
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "mx-454g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 498.046875,
+              "top": 140,
+              "right": 378,
+              "bottom": 638.046875,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 650.046875,
+              "width": 366,
+              "height": 181.953125,
+              "top": 650.046875,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 667.046875,
+              "width": 332,
+              "height": 22.390625,
+              "top": 667.046875,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 222.015625,
+                  "width": 334,
+                  "height": 334,
+                  "top": 222.015625,
+                  "right": 362,
+                  "bottom": 556.015625,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 667.046875,
+                  "width": 332,
+                  "height": 22.390625,
+                  "top": 667.046875,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 275.75,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 304.75,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 27.999999999999964,
+              "top": 222.0234375,
+              "right": 362,
+              "bottom": 556.0234375
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        }
+      ],
+      "oneSelectedShelfFetch": "PASS",
+      "pageErrors": []
+    },
+    {
+      "model": "GJH-M056",
+      "width": 1440,
+      "cases": [
+        {
+          "sku": "nz-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 454.875,
+                  "y": 167,
+                  "width": 530.21875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 985.09375,
+                  "bottom": 697.21875,
+                  "left": 454.875
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 398.296875,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 825.296875,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 454.8828125000001,
+              "top": 167.00000000000003,
+              "right": 985.1171874999999,
+              "bottom": 697.234375
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "au-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 454.875,
+                  "y": 167,
+                  "width": 530.21875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 985.09375,
+                  "bottom": 697.21875,
+                  "left": 454.875
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 372.3125,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 799.3125,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 454.8828125000001,
+              "top": 167.00000000000003,
+              "right": 985.1171874999999,
+              "bottom": 697.234375
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "sa-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 454.875,
+                  "y": 167,
+                  "width": 530.21875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 985.09375,
+                  "bottom": 697.21875,
+                  "left": 454.875
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 379.1875,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 806.1875,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 454.8828125000001,
+              "top": 167.00000000000003,
+              "right": 985.1171875000001,
+              "bottom": 697.234375
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "mx-454g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 454.875,
+                  "y": 167,
+                  "width": 530.21875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 985.09375,
+                  "bottom": 697.21875,
+                  "left": 454.875
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 275.75,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 702.75,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 454.88281249999994,
+              "top": 167.00000000000003,
+              "right": 985.1171875000001,
+              "bottom": 697.234375
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        }
+      ],
+      "oneSelectedShelfFetch": "PASS",
+      "pageErrors": []
+    },
+    {
+      "model": "GJH-DSP-001",
+      "width": 390,
+      "cases": [
+        {
+          "sku": "nz-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 475.65625,
+              "top": 140,
+              "right": 378,
+              "bottom": 615.65625,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 627.65625,
+              "width": 366,
+              "height": 204.34375,
+              "top": 627.65625,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 644.65625,
+              "width": 332,
+              "height": 44.78125,
+              "top": 644.65625,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 162.484375,
+                  "width": 334,
+                  "height": 430.671875,
+                  "top": 162.484375,
+                  "right": 362,
+                  "bottom": 593.15625,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 644.65625,
+                  "width": 332,
+                  "height": 44.78125,
+                  "top": 644.65625,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 645.65625,
+                    "width": 304.5625,
+                    "height": 19,
+                    "top": 645.65625,
+                    "right": 333.5625,
+                    "bottom": 664.65625,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 90.9375,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 119.9375,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 28.000000000000007,
+              "top": 162.48601973684208,
+              "right": 362,
+              "bottom": 593.170230263158
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "au-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 475.65625,
+              "top": 140,
+              "right": 378,
+              "bottom": 615.65625,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 627.65625,
+              "width": 366,
+              "height": 204.34375,
+              "top": 627.65625,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 644.65625,
+              "width": 332,
+              "height": 44.78125,
+              "top": 644.65625,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 162.484375,
+                  "width": 334,
+                  "height": 430.671875,
+                  "top": 162.484375,
+                  "right": 362,
+                  "bottom": 593.15625,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 644.65625,
+                  "width": 332,
+                  "height": 44.78125,
+                  "top": 644.65625,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 645.65625,
+                    "width": 278.578125,
+                    "height": 19,
+                    "top": 645.65625,
+                    "right": 307.578125,
+                    "bottom": 664.65625,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 90.9375,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 119.9375,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 28.000000000000007,
+              "top": 162.48601973684208,
+              "right": 362,
+              "bottom": 593.170230263158
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "sa-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 475.65625,
+              "top": 140,
+              "right": 378,
+              "bottom": 615.65625,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 627.65625,
+              "width": 366,
+              "height": 204.34375,
+              "top": 627.65625,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 644.65625,
+              "width": 332,
+              "height": 44.78125,
+              "top": 644.65625,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 162.484375,
+                  "width": 334,
+                  "height": 430.671875,
+                  "top": 162.484375,
+                  "right": 362,
+                  "bottom": 593.15625,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 644.65625,
+                  "width": 332,
+                  "height": 44.78125,
+                  "top": 644.65625,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 645.65625,
+                    "width": 302.09375,
+                    "height": 19,
+                    "top": 645.65625,
+                    "right": 331.09375,
+                    "bottom": 664.65625,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 74.3125,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 103.3125,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 28.000000000000007,
+              "top": 162.48601973684208,
+              "right": 362,
+              "bottom": 593.170230263158
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "mx-454g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 140,
+              "width": 366,
+              "height": 498.046875,
+              "top": 140,
+              "right": 378,
+              "bottom": 638.046875,
+              "left": 12
+            },
+            "sheet": {
+              "x": 12,
+              "y": 650.046875,
+              "width": 366,
+              "height": 181.953125,
+              "top": 650.046875,
+              "right": 378,
+              "bottom": 832,
+              "left": 12
+            },
+            "title": {
+              "x": 29,
+              "y": 667.046875,
+              "width": 332,
+              "height": 22.390625,
+              "top": 667.046875,
+              "right": 361,
+              "bottom": 689.4375,
+              "left": 29
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 390,
+              "height": 72,
+              "top": 0,
+              "right": 390,
+              "bottom": 72,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 29,
+              "y": 697.4375,
+              "width": 332,
+              "height": 38.375,
+              "top": 697.4375,
+              "right": 361,
+              "bottom": 735.8125,
+              "left": 29
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 76,
+                  "bottom": 128,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 96.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 59.53125,
+                    "bottom": 115.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 314,
+                  "y": 84,
+                  "width": 64,
+                  "height": 44,
+                  "top": 84,
+                  "right": 378,
+                  "bottom": 128,
+                  "left": 314
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 327.484375,
+                    "y": 96.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 96.453125,
+                    "right": 364.515625,
+                    "bottom": 115.453125,
+                    "left": 327.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 28,
+                  "y": 173.671875,
+                  "width": 334,
+                  "height": 430.671875,
+                  "top": 173.671875,
+                  "right": 362,
+                  "bottom": 604.34375,
+                  "left": 28
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 29,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 191,
+                  "bottom": 787.8125,
+                  "left": 29
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 62.328125,
+                    "y": 755.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 157.65625,
+                    "bottom": 774.609375,
+                    "left": 62.328125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 199,
+                  "y": 743.8125,
+                  "width": 162,
+                  "height": 44,
+                  "top": 743.8125,
+                  "right": 361,
+                  "bottom": 787.8125,
+                  "left": 199
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 225.890625,
+                    "y": 755.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 755.609375,
+                    "right": 334.09375,
+                    "bottom": 774.609375,
+                    "left": 225.890625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 29,
+                  "y": 667.046875,
+                  "width": 332,
+                  "height": 22.390625,
+                  "top": 667.046875,
+                  "right": 361,
+                  "bottom": 689.4375,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 668.046875,
+                    "width": 275.75,
+                    "height": 19,
+                    "top": 668.046875,
+                    "right": 304.75,
+                    "bottom": 687.046875,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 29,
+                  "y": 697.4375,
+                  "width": 332,
+                  "height": 38.375,
+                  "top": 697.4375,
+                  "right": 361,
+                  "bottom": 735.8125,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 698.4375,
+                    "width": 293.453125,
+                    "height": 17,
+                    "top": 698.4375,
+                    "right": 322.453125,
+                    "bottom": 715.4375,
+                    "left": 29
+                  },
+                  {
+                    "x": 29,
+                    "y": 717.625,
+                    "width": 177.875,
+                    "height": 17,
+                    "top": 717.625,
+                    "right": 206.875,
+                    "bottom": 734.625,
+                    "left": 29
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 29,
+                  "y": 795.8125,
+                  "width": 332,
+                  "height": 19.1875,
+                  "top": 795.8125,
+                  "right": 361,
+                  "bottom": 815,
+                  "left": 29
+                },
+                "labels": [
+                  {
+                    "x": 29,
+                    "y": 796.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 796.8125,
+                    "right": 296.265625,
+                    "bottom": 813.8125,
+                    "left": 29
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 28.000000000000007,
+              "top": 173.68133223684208,
+              "right": 362,
+              "bottom": 604.3655427631579
+            },
+            "overflow": false,
+            "viewport": [
+              390,
+              844
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 72,
+              "width": 390,
+              "height": 772,
+              "top": 72,
+              "right": 390,
+              "bottom": 844,
+              "left": 0
+            }
+          }
+        }
+      ],
+      "oneSelectedShelfFetch": "PASS",
+      "pageErrors": []
+    },
+    {
+      "model": "GJH-DSP-001",
+      "width": 1440,
+      "cases": [
+        {
+          "sku": "nz-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 514.390625,
+                  "y": 167,
+                  "width": 411.1875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 925.578125,
+                  "bottom": 697.21875,
+                  "left": 514.390625
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 398.296875,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 825.296875,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 514.3989158163266,
+              "top": 167.0000000000001,
+              "right": 925.6010841836733,
+              "bottom": 697.2343749999999
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "au-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 514.390625,
+                  "y": 167,
+                  "width": 411.1875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 925.578125,
+                  "bottom": 697.21875,
+                  "left": 514.390625
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 372.3125,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 799.3125,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 514.3989158163266,
+              "top": 167.0000000000001,
+              "right": 925.6010841836733,
+              "bottom": 697.2343749999999
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "sa-425g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 514.390625,
+                  "y": 167,
+                  "width": 411.1875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 925.578125,
+                  "bottom": 697.21875,
+                  "left": 514.390625
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 379.1875,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 806.1875,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 514.3989158163266,
+              "top": 167.0000000000001,
+              "right": 925.6010841836733,
+              "bottom": 697.2343749999999
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        },
+        {
+          "sku": "mx-454g",
+          "focusFramingAndClose": "PASS",
+          "repeatedPickupReturn": "PASS",
+          "layout": {
+            "stage": {
+              "x": 12,
+              "y": 151,
+              "width": 1416,
+              "height": 562.234375,
+              "top": 151,
+              "right": 1428,
+              "bottom": 713.234375,
+              "left": 12
+            },
+            "sheet": {
+              "x": 410,
+              "y": 725.234375,
+              "width": 620,
+              "height": 162.765625,
+              "top": 725.234375,
+              "right": 1030,
+              "bottom": 888,
+              "left": 410
+            },
+            "title": {
+              "x": 427,
+              "y": 742.234375,
+              "width": 586,
+              "height": 22.390625,
+              "top": 742.234375,
+              "right": 1013,
+              "bottom": 764.625,
+              "left": 427
+            },
+            "header": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 83,
+              "top": 0,
+              "right": 1440,
+              "bottom": 83,
+              "left": 0
+            },
+            "disclosure": {
+              "x": 427,
+              "y": 772.625,
+              "width": 586,
+              "height": 19.1875,
+              "top": 772.625,
+              "right": 1013,
+              "bottom": 791.8125,
+              "left": 427
+            },
+            "controls": [
+              {
+                "id": "shelf-back",
+                "rect": {
+                  "x": 12,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 76,
+                  "bottom": 139,
+                  "left": 12
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 28.46875,
+                    "y": 107.453125,
+                    "width": 31.0625,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 59.53125,
+                    "bottom": 126.453125,
+                    "left": 28.46875
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back",
+                  "shelf-back"
+                ]
+              },
+              {
+                "id": "shelf-close",
+                "rect": {
+                  "x": 1364,
+                  "y": 95,
+                  "width": 64,
+                  "height": 44,
+                  "top": 95,
+                  "right": 1428,
+                  "bottom": 139,
+                  "left": 1364
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 1377.484375,
+                    "y": 107.453125,
+                    "width": 37.03125,
+                    "height": 19,
+                    "top": 107.453125,
+                    "right": 1414.515625,
+                    "bottom": 126.453125,
+                    "left": 1377.484375
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close",
+                  "shelf-close"
+                ]
+              },
+              {
+                "id": "shelf-target",
+                "rect": {
+                  "x": 514.390625,
+                  "y": 167,
+                  "width": 411.1875,
+                  "height": 530.21875,
+                  "top": 167,
+                  "right": 925.578125,
+                  "bottom": 697.21875,
+                  "left": 514.390625
+                },
+                "ring": 7,
+                "labels": [],
+                "hit": true,
+                "hitElements": [
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target",
+                  "shelf-target"
+                ]
+              },
+              {
+                "id": "shelf-details",
+                "rect": {
+                  "x": 427,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 716,
+                  "bottom": 843.8125,
+                  "left": 427
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 523.828125,
+                    "y": 811.609375,
+                    "width": 95.328125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 619.15625,
+                    "bottom": 830.609375,
+                    "left": 523.828125
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details",
+                  "shelf-details"
+                ]
+              },
+              {
+                "id": "shelf-add",
+                "rect": {
+                  "x": 724,
+                  "y": 799.8125,
+                  "width": 289,
+                  "height": 44,
+                  "top": 799.8125,
+                  "right": 1013,
+                  "bottom": 843.8125,
+                  "left": 724
+                },
+                "ring": 3,
+                "labels": [
+                  {
+                    "x": 814.390625,
+                    "y": 811.609375,
+                    "width": 108.203125,
+                    "height": 19,
+                    "top": 811.609375,
+                    "right": 922.59375,
+                    "bottom": 830.609375,
+                    "left": 814.390625
+                  }
+                ],
+                "hit": true,
+                "hitElements": [
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add",
+                  "shelf-add"
+                ]
+              }
+            ],
+            "text": [
+              {
+                "id": "shelf-title",
+                "rect": {
+                  "x": 427,
+                  "y": 742.234375,
+                  "width": 586,
+                  "height": 22.390625,
+                  "top": 742.234375,
+                  "right": 1013,
+                  "bottom": 764.625,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 743.234375,
+                    "width": 275.75,
+                    "height": 19,
+                    "top": 743.234375,
+                    "right": 702.75,
+                    "bottom": 762.234375,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-disclosure",
+                "rect": {
+                  "x": 427,
+                  "y": 772.625,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 772.625,
+                  "right": 1013,
+                  "bottom": 791.8125,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 773.625,
+                    "width": 473.71875,
+                    "height": 17,
+                    "top": 773.625,
+                    "right": 900.71875,
+                    "bottom": 790.625,
+                    "left": 427
+                  }
+                ]
+              },
+              {
+                "id": "shelf-status",
+                "rect": {
+                  "x": 427,
+                  "y": 851.8125,
+                  "width": 586,
+                  "height": 19.1875,
+                  "top": 851.8125,
+                  "right": 1013,
+                  "bottom": 871,
+                  "left": 427
+                },
+                "labels": [
+                  {
+                    "x": 427,
+                    "y": 852.8125,
+                    "width": 267.265625,
+                    "height": 17,
+                    "top": 852.8125,
+                    "right": 694.265625,
+                    "bottom": 869.8125,
+                    "left": 427
+                  }
+                ]
+              }
+            ],
+            "focus": "shelf-close",
+            "projected": {
+              "left": 514.3989158163266,
+              "top": 167.0000000000001,
+              "right": 925.6010841836733,
+              "bottom": 697.2343749999999
+            },
+            "overflow": false,
+            "viewport": [
+              1440,
+              900
+            ],
+            "dialog": {
+              "x": 0,
+              "y": 83,
+              "width": 1440,
+              "height": 817,
+              "top": 83,
+              "right": 1440,
+              "bottom": 900,
+              "left": 0
+            }
+          }
+        }
+      ],
+      "oneSelectedShelfFetch": "PASS",
+      "pageErrors": []
+    }
+  ]
+}

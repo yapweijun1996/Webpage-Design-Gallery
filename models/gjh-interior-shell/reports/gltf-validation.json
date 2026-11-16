@@ -1,0 +1,49 @@
+{
+  "validatorVersion": "2.0.0-dev.3.10",
+  "assets": [
+    {
+      "asset_id": "GJH-ARC-001",
+      "file": "GJH_ARC_001.glb",
+      "sha256": "e5145b12a4bcca1f3d4badc3e6c0285fbd0a65c07f0ddb9c8f3a636e7b1f7197",
+      "bytes": 8076,
+      "triangles": 132,
+      "primitives": 3,
+      "errors": 0,
+      "warnings": 0,
+      "info": 0
+    },
+    {
+      "asset_id": "GJH-COR-001",
+      "file": "GJH_COR_001.glb",
+      "sha256": "ef48863a88cad561c016abc12d4649b6c85db86a872b3c04802d56667e2295a3",
+      "bytes": 10504,
+      "triangles": 220,
+      "primitives": 2,
+      "errors": 0,
+      "warnings": 0,
+      "info": 0
+    },
+    {
+      "asset_id": "GJH-CEI-001",
+      "file": "GJH_CEI_001.glb",
+      "sha256": "5596575c578ba6b18fe87763b245ff428bb0a0ab7c200e36925817fbcf36e40e",
+      "bytes": 11512,
+      "triangles": 220,
+      "primitives": 2,
+      "errors": 0,
+      "warnings": 0,
+      "info": 0
+    },
+    {
+      "asset_id": "GJH-STF-002",
+      "file": "GJH_STF_002.glb",
+      "sha256": "edc1d834199ea409831f6ec203b4450505734dbf20dfee10082d790d846f0b82",
+      "bytes": 10800,
+      "triangles": 176,
+      "primitives": 3,
+      "errors": 0,
+      "warnings": 0,
+      "info": 0
+    }
+  ]
+}

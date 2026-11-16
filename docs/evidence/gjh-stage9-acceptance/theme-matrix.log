@@ -1,0 +1,16 @@
+Browser: 157.0.8103.51
+PASS 320x700: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 390x844: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 768x1024: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 844x390: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 1440x900: discoverable settings, focus, repeated apply, retained bag and resources
+PASS invalid saved theme falls back, is replaced and survives reload
+PASS unavailable local storage retains in-memory theme
+PASS missing theme module preserves 3D and reports unavailable settings
+PASS theme change preserves active cart
+PASS theme change preserves a seated visitor
+PASS theme change preserves a carried physical product
+PASS settings pause and resume an active elevator journey
+PASS graphics loss and restoration retain theme and bag
+PASS Visitor v1 expanded theme settings
+PASS original layout and no-JavaScript directory

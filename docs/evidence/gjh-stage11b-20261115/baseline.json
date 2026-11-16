@@ -1,0 +1,452 @@
+{
+  "browser": "157.0.8103.51",
+  "count": 89,
+  "decoded": 10915858,
+  "resources": [
+    {
+      "path": "/demos/corporate/gjh/v11/vendor/rapier.mjs",
+      "bytes": 4340292,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/vendor/three.module.min.js",
+      "bytes": 691648,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/mall-wayfinding-ceiling-sign.glb",
+      "bytes": 676028,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/gjh-mall-visitor-v2.glb",
+      "bytes": 577004,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/shopping-cart.glb",
+      "bytes": 536448,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/gjh-m056-shelf-lod1.glb",
+      "bytes": 338236,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/concept-newmoon-hotpot.webp",
+      "bytes": 246808,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/mall-service-desk.glb",
+      "bytes": 245748,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_PUB_002.glb",
+      "bytes": 233176,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-brand-cover.jpg",
+      "bytes": 219929,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_PUB_017.glb",
+      "bytes": 181376,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_PUB_005.glb",
+      "bytes": 160536,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-can-nz-425g-lod1.glb",
+      "bytes": 158528,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-can-sa-425g-lod1.glb",
+      "bytes": 156540,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-can-au-425g-lod1.glb",
+      "bytes": 153464,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-mx-454g-front.jpg",
+      "bytes": 147949,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+      "bytes": 147632,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/concept-hero.webp",
+      "bytes": 144324,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-nz-425g-front.jpg",
+      "bytes": 143514,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-sa-425g-front.jpg",
+      "bytes": 140822,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_VER_017.glb",
+      "bytes": 129236,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_PUB_008.glb",
+      "bytes": 119732,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-can-mx-454g-lod1.glb",
+      "bytes": 119196,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/vendor/GLTFLoader.js",
+      "bytes": 110282,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/mall-glass-showcase.glb",
+      "bytes": 96840,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/style.css",
+      "bytes": 77001,
+      "type": "link"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/ui.js",
+      "bytes": 54015,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/world.js",
+      "bytes": 40008,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg",
+      "bytes": 35812,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js",
+      "bytes": 31784,
+      "type": "script"
+    },
+    {
+      "path": "/assets/gjh-themes.css",
+      "bytes": 28826,
+      "type": "link"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/player.js",
+      "bytes": 27003,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/manrope-latin.woff2",
+      "bytes": 24532,
+      "type": "link"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/script.js",
+      "bytes": 23196,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_LGT_009.glb",
+      "bytes": 22804,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_STF_008.glb",
+      "bytes": 21912,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg",
+      "bytes": 20934,
+      "type": "img"
+    },
+    {
+      "path": "/assets/onboarding/onboarding.js",
+      "bytes": 16060,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/products.js",
+      "bytes": 14079,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/original-tin.js",
+      "bytes": 14012,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/interior-shell-registry.js",
+      "bytes": 13753,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+      "bytes": 12893,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_CEI_001.glb",
+      "bytes": 11512,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_STF_002.glb",
+      "bytes": 10800,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/amenities.js",
+      "bytes": 10737,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_COR_001.glb",
+      "bytes": 10504,
+      "type": "fetch"
+    },
+    {
+      "path": "/assets/onboarding/onboarding.css",
+      "bytes": 10479,
+      "type": "link"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/newmoon-detail-preview.js",
+      "bytes": 10215,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/elevator-v2.js",
+      "bytes": 9660,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/pwa.js",
+      "bytes": 8974,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/interior-pilot-registry.js",
+      "bytes": 8903,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/shelf-focus.js",
+      "bytes": 8352,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/GJH_ARC_001.glb",
+      "bytes": 8076,
+      "type": "fetch"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/push-cart.js",
+      "bytes": 7484,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/character-v2.js",
+      "bytes": 6480,
+      "type": "script"
+    },
+    {
+      "path": "/assets/tokens.css",
+      "bytes": 6131,
+      "type": "link"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/demo-bag.js",
+      "bytes": 6076,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/context-navigation.js",
+      "bytes": 5934,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/character.js",
+      "bytes": 5026,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/shared/interaction.css",
+      "bytes": 4855,
+      "type": "link"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/modes.js",
+      "bytes": 4855,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/visitor-v2-contact.js",
+      "bytes": 4726,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/spatial.js",
+      "bytes": 4329,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/static-asset.js",
+      "bytes": 4109,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/mili-logo.jpg",
+      "bytes": 4015,
+      "type": "img"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js",
+      "bytes": 3485,
+      "type": "script"
+    },
+    {
+      "path": "/assets/onboarding/action-dialog.js",
+      "bytes": 3264,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/shell.js",
+      "bytes": 2941,
+      "type": "script"
+    },
+    {
+      "path": "/assets/onboarding/profiles.js",
+      "bytes": 2840,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/gogo-logo.jpg",
+      "bytes": 2757,
+      "type": "img"
+    },
+    {
+      "path": "/assets/onboarding/components.js",
+      "bytes": 2749,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/visitor-v2-customization.js",
+      "bytes": 2640,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/target-guidance.js",
+      "bytes": 2615,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/carry-bag.js",
+      "bytes": 2481,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/graphics-quality.js",
+      "bytes": 2474,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/visitor-v2-controls.js",
+      "bytes": 2340,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/furnishings.js",
+      "bytes": 2250,
+      "type": "script"
+    },
+    {
+      "path": "/assets/onboarding/locales.js",
+      "bytes": 1931,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/expanded-layout.js",
+      "bytes": 1823,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/dom-projection.js",
+      "bytes": 1739,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/visitor-v2-lod.js",
+      "bytes": 1697,
+      "type": "script"
+    },
+    {
+      "path": "/assets/onboarding/icons.js",
+      "bytes": 1675,
+      "type": "script"
+    },
+    {
+      "path": "/assets/onboarding/onboarding.tokens.css",
+      "bytes": 1578,
+      "type": "css"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/lift-layout.js",
+      "bytes": 1494,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/opaque-batch.js",
+      "bytes": 1395,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/collection-gesture.js",
+      "bytes": 1289,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/seated-pose.js",
+      "bytes": 957,
+      "type": "script"
+    },
+    {
+      "path": "/demos/corporate/gjh/v11/assets/atrium-layout.js",
+      "bytes": 723,
+      "type": "script"
+    },
+    {
+      "path": "/assets/onboarding/gamepad.js",
+      "bytes": 577,
+      "type": "script"
+    }
+  ]
+}

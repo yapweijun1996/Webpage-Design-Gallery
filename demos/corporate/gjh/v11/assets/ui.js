@@ -6,14 +6,38 @@ import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
+import {expandedLayout, expandedMapPoint, plannedSpaces} from './expanded-layout.js';
+import {liftLayout} from './lift-layout.js';
 
-export function createUI() {
+const plannedSideLabels = Object.freeze({north: 'North side', west: 'West side', east: 'East side'});
+function setupPlannedDirectory(expanded) {
+  const section = document.getElementById('planned-spaces-directory');
+  const list = document.getElementById('planned-spaces-list');
+  if (!section || !list) return;
+  const fragment = document.createDocumentFragment();
+  for (const space of plannedSpaces) {
+    const item = document.createElement('li'); item.id = space.id;
+    for (const [key, value] of Object.entries({space: space.id, number: space.number, side: space.side,
+      status: space.status, available: String(space.available), ...space.admission})) item.setAttribute(`data-planned-${key}`, value);
+    const heading = document.createElement('h3'); heading.textContent = space.label;
+    const location = document.createElement('p'); location.setAttribute('data-planned-field', 'location');
+    location.textContent = `${plannedSideLabels[space.side]} · Planned · not open`;
+    item.append(heading, location); fragment.append(item);
+  }
+  list.replaceChildren(fragment);
+  const summary = section.querySelector('summary');
+  if (summary) summary.textContent = `Planned spaces in the expanded preview (${plannedSpaces.length})`;
+  // Initialize once; native disclosure choices survive subsequent List/3D toggles.
+  if (expanded) section.open = true;
+}
+
+export function createUI(expanded = false) {
   const scene = document.getElementById('scene');
   const experience = document.getElementById('experience');
   const storeList = document.getElementById('store-list');
   const viewToggle = document.getElementById('view-toggle');
   const directoryEnter3D = document.getElementById('directory-enter-3d');
-  const visitNewMoon3D = document.getElementById('visit-newmoon-3d');
+  const storeVisitButtons = [...document.querySelectorAll('[data-visit-store]')];
   const directoryLoading = document.getElementById('directory-loading');
   directoryLoading.hidden = false;
   let directoryTouched = false;
@@ -24,12 +48,15 @@ export function createUI() {
   const fallbackMessage = document.getElementById('fallback-message');
   const recovery = document.getElementById('graphics-recovery');
   const return3D = document.getElementById('graphics-return');
+  const themeDialog=document.getElementById('mall-theme-dialog'),themeSelect=document.getElementById('mall-theme-select'),themeApply=document.getElementById('mall-theme-apply'),themeStatus=document.getElementById('mall-theme-status');
+  const themeOpen=document.getElementById('mall-theme-open'),directoryThemeOpen=document.getElementById('directory-theme-open');
+  let mallTheme=null,themeOpener=null;
   document.getElementById('graphics-reload').addEventListener('click', () => location.reload());
   return3D.addEventListener('click', () => { if (available) setView(true, true); });
   const playerDot = document.getElementById('player-dot');
   const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel=`Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel=expanded ? `Expanded ground-floor preview: ${expandedLayout.slots.length} numbered spaces, including ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute('aria-label',floorplanLabel);
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
   const inspectPrompt = document.getElementById('inspect-prompt');
@@ -41,7 +68,7 @@ export function createUI() {
   let guideFromHUD=false;
   const guideFooter=document.createElement('div');guideFooter.id='context-navigation-guide';guideFooter.className='context-navigation-footer';
   const onboarding = createOnboarding({...createExperienceProfile('mall'), id:'guide', storageKey:'gjh-v11', scene, footer:guideFooter,
-    modes:['keyboard','touch','gamepad'], canOpen:()=>available&&showing3D&&!dialog.open&&!bag.open&&!amenityPanel.dialog.open&&!externalPaused, onOpen:()=>{guidePaused=true;guideFromHelp=document.activeElement===guideReopen;guideFromHUD=Boolean(document.activeElement.closest('.ob-hud'));notifyMode();} });
+    modes:['keyboard','touch','gamepad'], showHelpEntry:false, onHelp:openHelp, onBack:closeGamepadPanel, canOpen:()=>available&&showing3D&&!dialog.open&&!bag.open&&!amenityPanel.dialog.open&&!themeDialog.open&&!externalPaused, onOpen:()=>{guidePaused=true;guideFromHelp=document.activeElement===guideReopen;guideFromHUD=Boolean(document.activeElement.closest('.ob-hud'));notifyMode();} });
   const guide = onboarding.dialog;
   const amenityPanel=createActionDialog({id:'amenity-dialog',scene,getPreferences:()=>onboarding.preferences,onOpen:()=>notifyMode(),onClose:()=>notifyMode()});
   let previousTutorialPose = null;
@@ -54,21 +81,65 @@ export function createUI() {
   let modeListener = null, shelfFocus = null;
   const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open || externalPaused || document.getElementById('original-tin-dialog').open,
     bagOpen: document.getElementById('bag-dialog').open, shelfOpen: Boolean(shelfFocus?.open),
-    panelOpen: amenityPanel.dialog.open || !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
+    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || guidePaused || guide.open || (compactMap.matches && (help.open || mallMap.open))});
+  function syncOnboardingSuspension(signals) {
+    // Contextual tips yield to the scene action HUD instead of covering its controls.
+    const actionHUD = showing3D && (!inspectPrompt.hidden || cartState().active || cartState().heldProduct);
+    onboarding.setHUDSuppressed(Boolean(actionHUD));
+    onboarding.setSuspended(themeDialog.open || amenityPanel.dialog.open || signals.productOpen || signals.bagOpen || signals.shelfOpen || !showing3D || help.open || (compactMap.matches && mallMap.open));
+  }
   const notifyMode = () => {
     const signals = modeSignals();
+    syncOnboardingSuspension(signals);
     if (signals.shelfOpen && (signals.productOpen || signals.bagOpen || signals.panelOpen)) shelfFocus.close({focus: false});
     modeListener?.(modeSignals());
   };
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
   function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);}
   let mapReturnFocus=headerMap;
-  mallMap.querySelector('summary').addEventListener('click',()=>{if(!mallMap.open)mapReturnFocus=mallMap.querySelector('summary');});
+  // Header, kiosk and quick guide share this map owner. The map's own
+  // summary is not a second permanent entry on compact screens.
+  function canUsePanels() {
+    return available && showing3D && !guidePaused && !guide.open && !dialog.open && !bag.open && !amenityPanel.dialog.open && !themeDialog.open && !externalPaused && !document.hidden;
+  }
+  function openMap() {
+    if (!canUsePanels()) return false;
+    shelfFocus?.close({focus: false});
+    help.open = false; mapReturnFocus = headerMap;
+    mallMap.open = true; headerMap.setAttribute('aria-expanded', String(compactMap.matches)); updateCompactPanels(); focusMap();
+    return true;
+  }
+  function closeMap() {
+    if (!compactMap.matches || !canUsePanels()) return;
+    mallMap.open = false; headerMap.setAttribute('aria-expanded', 'false'); updateCompactPanels(); notifyMode();
+    (compactMap.matches ? headerMap : scene).focus({preventScroll: true});
+  }
+  function openHelp() {
+    if (!canUsePanels()) return false;
+    shelfFocus?.close({focus: false});
+    if (compactMap.matches) mallMap.open = false;
+    help.open = true; updateCompactPanels(); notifyMode();
+    help.querySelector('summary').focus({preventScroll: true});
+    return true;
+  }
+  function closeGamepadPanel(panel) {
+    if (panel === mallMap) closeMap();
+    else if (panel === help && canUsePanels()) {
+      help.open = false; updateCompactPanels(); notifyMode();
+      help.querySelector('summary').focus({preventScroll: true});
+    }
+  }
+  help.querySelector('summary').addEventListener('click', event => { if (!canUsePanels()) event.preventDefault(); });
+  document.getElementById('map-close').addEventListener('click', closeMap);
+  function updateViewToggle() {
+    viewToggle.textContent = showing3D ? (compactMap.matches ? 'Stores' : 'Store directory') : 'Enter 3D Mall';
+    viewToggle.setAttribute('aria-label', showing3D ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
+  }
   const resetMap = () => { mallMap.open = !guide.open && !compactMap.matches; };
   resetMap();
   compactMap.addEventListener('change', () => {
     const active = document.activeElement;
-    resetMap();
+    resetMap(); updateViewToggle();
     headerMap.hidden = !showing3D || !compactMap.matches;
     headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
     // A details element may stay open across this breakpoint. Publish regardless
@@ -85,15 +156,10 @@ export function createUI() {
     headerMap.setAttribute('aria-expanded', String(compactMap.matches && mallMap.open));updateCompactPanels();
     notifyMode();
   });
-  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; updateCompactPanels(); notifyMode(); });
+  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; headerMap.setAttribute('aria-expanded', 'false'); updateCompactPanels(); notifyMode(); });
   headerMap.addEventListener('click', () => {
-    if (!showing3D || guidePaused || dialog.open || bag.open) return;
-    help.open = false;
-    mapReturnFocus=headerMap;
-    mallMap.open = !mallMap.open;
-    headerMap.setAttribute('aria-expanded', String(mallMap.open));
-    if (mallMap.open) focusMap();
-    notifyMode();
+    if (headerMap.hidden || !canUsePanels()) return;
+    if (mallMap.open) closeMap(); else openMap();
   });
   const dialog = document.getElementById('product-dialog');
   const newMoonPreview = setupNewMoonPreview();
@@ -130,7 +196,7 @@ export function createUI() {
     window.scrollTo({top: 0, behavior: 'instant'});
     if (moveFocus) listTitle.focus({preventScroll: true});
   }
-  const modePanels = [amenityPanel.dialog, dialog, bagDialog, help, guide, mallMap, document.getElementById('original-tin-dialog')];
+  const modePanels = [themeDialog, amenityPanel.dialog, dialog, bagDialog, help, guide, mallMap, document.getElementById('original-tin-dialog')];
   const modeObserver = new MutationObserver(notifyMode);
   for (const panel of modePanels) modeObserver.observe(panel, {attributes: true, attributeFilter: ['open']});
   for (const panel of [dialog, bagDialog]) panel.addEventListener('close', notifyMode);
@@ -139,6 +205,63 @@ export function createUI() {
   const productImage = document.getElementById('product-image');
   const productDescription = document.getElementById('product-description');
   const productKind = document.getElementById('product-kind');
+  const layoutLink=document.getElementById('layout-preview-link');
+  const layoutURL=new URL(location.href);
+  if(expanded) layoutURL.searchParams.delete('layout'); else layoutURL.searchParams.set('layout','expanded');
+  layoutLink.href=layoutURL.href;
+  layoutLink.textContent=expanded?'Return to the original mall':'Preview the expanded mall';
+  document.getElementById('layout-preview-notice').hidden=!expanded;
+  document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces.`;
+  setupPlannedDirectory(expanded);
+  if (expanded) {
+    document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: 3 open stores and 14 planned spaces. ${new URLSearchParams(location.search).get('visitor') === 'v1' ? 'The lift is available with Visitor v2.' : 'The lift serves the small upper viewing level; stow the cart before travel.'} Facilities remain planned.`;
+    const ns='http://www.w3.org/2000/svg';
+    floorplan.setAttribute('viewBox','0 0 700 600'); floorplan.setAttribute('preserveAspectRatio','xMidYMid meet');
+    const background=floorplan.querySelector('.map-courtyard');
+    for(const [key,value] of Object.entries({x:1,y:1,width:698,height:598,rx:0}))background.setAttribute(key,value);
+    floorplan.querySelector('.map-walkway').setAttribute('d','M130 150H570V510H130Z');
+    floorplan.querySelector('.map-label:not(.map-entry)').setAttribute('y','320');
+    floorplan.querySelector('.map-label:not(.map-entry)').setAttribute('x','350');
+    floorplan.querySelector('.map-entry').setAttribute('x','350');floorplan.querySelector('.map-entry').setAttribute('y','575');
+    playerDot.setAttribute('r','10');
+    for(const bay of expandedLayout.slots){
+      const origin=expandedMapPoint(bay.minX,bay.minZ);
+      let rect=bay.available ? floorplan.querySelector(`[data-map-store="${spatial.stores[Number(bay.number)-1].id}"]`) : document.createElementNS(ns,'rect');
+      rect.setAttribute('class',bay.available?'map-store':'map-store map-planned');
+      for(const [key,value] of Object.entries({x:origin.x+2,y:origin.y+2,width:(bay.maxX-bay.minX)*10-4,height:(bay.maxZ-bay.minZ)*10-4,rx:3}))rect.setAttribute(key,value);
+      if(!bay.available) {
+        const space = plannedSpaces.find(item => item.number === bay.number);
+        rect.setAttribute('data-space-id', space.id); rect.setAttribute('data-space-status', space.status);
+        const title = document.createElementNS(ns, 'title');
+        title.textContent = `${space.label}: ${plannedSideLabels[space.side]}; planned, not open.`;
+        rect.append(title); floorplan.insertBefore(rect,playerDot);
+      }
+      const label=document.createElementNS(ns,'text');label.setAttribute('class','expanded-map-number');
+      label.setAttribute('x',origin.x+(bay.maxX-bay.minX)*5);label.setAttribute('y',origin.y+(bay.maxZ-bay.minZ)*5+6);
+      label.setAttribute('text-anchor','middle');label.textContent=bay.number;floorplan.insertBefore(label,playerDot);
+    }
+    document.querySelector('.map-scale').textContent=`${plannedSpaces.length} planned spaces`;
+  }
+  const mapServices=[];
+  let servicesLegend=null;
+  function addMapService(id,letter,label,point){
+    if(!expanded||mapServices.some(service=>service.id===id))return;
+    const ns='http://www.w3.org/2000/svg',position=expandedMapPoint(point.x,point.z);
+    const group=document.createElementNS(ns,'g');group.dataset.mapService=id;group.setAttribute('pointer-events','none');
+    const title=document.createElementNS(ns,'title');title.textContent=label;group.append(title);
+    const marker=document.createElementNS(ns,'rect');marker.setAttribute('class','map-store');
+    for(const [key,value] of Object.entries({x:position.x-20,y:position.y-20,width:40,height:40,rx:8}))marker.setAttribute(key,value);
+    const text=document.createElementNS(ns,'text');text.setAttribute('x',position.x);text.setAttribute('y',position.y+8);text.setAttribute('text-anchor','middle');
+    text.style.font='var(--gjh-font-expanded-map-number)';text.style.fill='var(--gjh-color-expanded-map-text)';text.textContent=letter;
+    group.append(marker,text);floorplan.insertBefore(group,playerDot);mapServices.push({id,letter,label});
+    if(!servicesLegend){servicesLegend=document.createElement('p');servicesLegend.className='map-caption';servicesLegend.id='map-services-legend';document.querySelector('.map-content').append(servicesLegend);}
+    servicesLegend.textContent=mapServices.map(service=>`${service.letter} ${service.label}`).join(' · ');
+  }
+  if(expanded){
+    addMapService('directory','D','Directory',liftLayout.directory);
+    addMapService('guest-guide','G','Guest guide',liftLayout.desk);
+    addMapService('featured-collection','F','Featured collection',liftLayout.showcase);
+  }
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
   // Preserve readable static HTML without JS; synchronize the live map and
   // directory from the same validated records used by the 3D world.
@@ -150,7 +273,7 @@ export function createUI() {
     const title=document.getElementById(store.contentRef);
     if (!mapButton || !mapRect || !article || !filter || !title || !article.contains(title)) throw new Error(`Missing store content for ${store.id}`);
     const rect=mapStoreRect(store);
-    for (const key of ['x','y','width','height']) mapRect.setAttribute(key,String(rect[key]));
+    if (!expanded) for (const key of ['x','y','width','height']) mapRect.setAttribute(key,String(rect[key]));
     mapButton.style.left=`${rect.x / mapView.width * 100}%`;
     mapButton.style.width=`${rect.width / mapView.width * 100}%`;
     mapButton.querySelector('span').textContent=store.number;
@@ -170,24 +293,37 @@ export function createUI() {
     mapButtons[0]?.focus({preventScroll: true});
     mapButtons[0]?.scrollIntoView({block: 'nearest', behavior: 'instant'});
   }
-  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null;
+  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null,previousHeldProduct=null,previousElevatorTravel=false,previousCartReason=null;
+  let currentElevatorState=null,currentElevatorUpper=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
+  const sceneCart=document.querySelector('#scene-cart');
   function updateCartControls() {
     const cart=cartState();
     const recoverFocus=!cart.available&&bag.open&&cartControls.contains(document.activeElement);
     cartControls.hidden=!cart.available;
     cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';
-    cartToggle.disabled=!cart.available||(cart.seated&&!cart.active);
-    if(previousCartAvailable!==cart.available||previousCartMode!==cart.active||previousCartSeated!==cart.seated){
-      cartStatus.textContent=!cart.available?'The 3D cart is unavailable. Your bag selection is unchanged.':cart.seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';
-      previousCartAvailable=cart.available;previousCartMode=cart.active;previousCartSeated=cart.seated;
+    cartToggle.disabled=!cart.available||(!cart.active&&cart.capability?.disabled===true);
+    sceneCart.hidden=!cart.available||!showing3D||(compactMap.matches&&(mallMap.open||help.open));
+    sceneCart.textContent=cart.active?'Stow cart':'Cart';
+    sceneCart.setAttribute('aria-pressed',String(cart.active));
+    sceneCart.disabled=!cart.available||(!cart.active&&cart.capability?.sceneDisabled===true);
+    sceneCart.title=cartReason(cart)||'';
+    sceneCart.setAttribute('aria-describedby','cart-status');
+    if(previousCartAvailable!==cart.available||previousCartMode!==cart.active||previousCartSeated!==cart.seated||previousHeldProduct!==cart.heldProduct||previousElevatorTravel!==cart.elevatorTravel||previousCartReason!==cart.capability?.reason){
+      cartStatus.textContent=cartReason(cart)&&!cart.active?cartReason(cart):!cart.available?'The 3D cart is unavailable. Your bag selection is unchanged.':cart.heldProduct?heldInstruction(cart):cart.elevatorTravel?'Wait for the elevator to stop.':cart.seated?'Stand up before using the cart.':cart.active?'Cart active. Slower walking with a wide turning clearance; stow before sitting.':'Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.';
+      previousCartAvailable=cart.available;previousCartMode=cart.active;previousCartSeated=cart.seated;previousHeldProduct=cart.heldProduct;previousElevatorTravel=cart.elevatorTravel;previousCartReason=cart.capability?.reason;
     }
     if(recoverFocus)document.getElementById('bag-close').focus({preventScroll:true});
     return cart;
   }
-  cartToggle.addEventListener('click',()=>{const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){cartStatus.textContent=state.seated?'Stand up before using the cart.':'Move to an open space, then try again. The cart needs a wide turning clearance.';return;}
+  function cartReason(state){return state.capability?.reasonCode==='held-product'?heldInstruction(state):state.capability?.reason;}
+  function heldInstruction(state){return `Return ${records.get(state.heldProduct)?.compactName||'the held product'} to its New Moon shelf first.`;}
+  function toggleCart(){const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){const message=cartReason(state)|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
     if(next){setView(true);bag.closeTo(scene);}
-    cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';});
+    cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';
+    sceneCart.setAttribute('aria-pressed',String(next));scene.focus({preventScroll:true});
+  }
+  cartToggle.addEventListener('click',toggleCart);sceneCart.addEventListener('click',toggleCart);
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
   const zones = { atrium: 'The courtyard', ...Object.fromEntries(spatial.stores.map(store=>[store.id,store.label])), upper: 'Upper level' };
@@ -229,11 +365,42 @@ export function createUI() {
     if (status.textContent !== message) status.textContent = message;
   }
 
+  function updateMallTheme(state=mallTheme?.state()) {
+    if (!expanded) return;
+    if (state && [...themeSelect.options].some(option=>option.value===state.active)) themeSelect.value=state.active;
+    themeApply.disabled=!mallTheme || !available || Boolean(state?.suspended || state?.pending);
+    themeSelect.disabled=!mallTheme || !available || Boolean(state?.suspended || state?.pending);
+    themeStatus.textContent=!mallTheme?'Theme settings are unavailable. The everyday appearance remains.':!available?'Theme settings are unavailable while 3D is not ready.':state?.message || `${state?.label || 'Everyday'} is active.`;
+  }
+  function openMallTheme(event) {
+    if (themeDialog.open || document.querySelector('dialog[open]') || (showing3D && !canUsePanels())) return;
+    themeOpener=event.currentTarget;shelfFocus?.close({focus:false});
+    themeDialog.showModal();updateMallTheme();notifyMode();document.getElementById('mall-theme-title').focus({preventScroll:true});
+  }
+  for(const button of [themeOpen,directoryThemeOpen]) button.addEventListener('click',openMallTheme);
+  document.getElementById('mall-theme-close').addEventListener('click',()=>{mallTheme?.cancel();themeDialog.close();});
+  themeDialog.addEventListener('cancel',()=>mallTheme?.cancel());
+  themeDialog.addEventListener('keydown',event=>{
+    if(event.key!=='Tab')return;
+    const controls=[...themeDialog.querySelectorAll('button:not(:disabled),select:not(:disabled)')].filter(node=>node.getClientRects().length);
+    if(!controls.length)return;
+    const first=controls[0],last=controls.at(-1);
+    if(event.shiftKey && document.activeElement===first){event.preventDefault();last.focus();}
+    else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}
+  });
+  themeDialog.addEventListener('close',()=>{
+    mallTheme?.cancel();notifyMode();
+    if(themeOpener?.isConnected && themeOpener.getClientRects().length && (available || themeOpener===directoryThemeOpen)) themeOpener.focus({preventScroll:true});
+    themeOpener=null;
+  });
+  themeApply.addEventListener('click',()=>{if(mallTheme && available) void mallTheme.select(themeSelect.value);});
+
   function setView(show, moveFocus = false) {
     const next = show && available;
     if (next === showing3D) return;
     shelfFocus?.close({focus: false});
     if (dialog.open) dialog.close();
+    if (themeDialog.open) {mallTheme?.cancel();themeDialog.close('view-change');}
     amenityPanel.close('view-change');
     if (guide.open) guide.close('view-change');
     showing3D = next;
@@ -242,13 +409,12 @@ export function createUI() {
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle('is-3d', next);
-    viewToggle.textContent = next ? 'Store directory' : 'Enter 3D Mall';
-    viewToggle.setAttribute('aria-label', next ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
+    updateViewToggle();
     help.open = false;
     headerMap.hidden = !next || !compactMap.matches;
     headerMap.setAttribute('aria-expanded', String(next && compactMap.matches && mallMap.open));
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
-    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open How to explore for controls.` : 'Store directory open. All three stores and verified product images are available below.');
+    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : 'Store directory open. All three stores and verified product images are available below.');
     viewListener?.(next);
     notifyMode();
   }
@@ -258,13 +424,10 @@ export function createUI() {
     if (!record || dialog.open || bag.open || guidePaused || amenityPanel.dialog.open) return;
     shelfFocus?.close();
     if(record.action==='amenity'){openAmenity(id);return;}
-    if(record.action==='elevator'){const ok=elevatorListener?.();announce(ok?'Elevator travelling to the other level.':'Return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
-    if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice='Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce('Seat path blocked. Approach the clear front of the bench.');}scene.focus({preventScroll:true});return;}
+    if(record.action==='elevator'){const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator, return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
+    if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce(seatNotice);}scene.focus({preventScroll:true});return;}
     if (record.action === 'map') {
-      if (!available || !showing3D) return;
-      help.open = false; mallMap.open = true;
-      focusMap();
-      announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
+      if (openMap()) announce('The kiosk screen is decorative. Use this three-store map to choose an entrance.');
       return;
     }
     returnFocus = document.activeElement;
@@ -282,21 +445,19 @@ export function createUI() {
   }
 
   function inspectNearby(id) {
-    const record = records.get(id);
-    if (showing3D && id === nearby && record?.image && !record.action && !dialog.open && !bag.open && !guidePaused &&
-        !modeSignals().panelOpen && shelfFocus?.openShelf(id, record)) return;
+    // Product Inspect is the detail action. The shelf remains an owned
+    // presentation mode for retained lifecycle/fallback coverage, but it must
+    // not be an intermediate click for a nearby SKU: the readable product
+    // viewer is the first surface opened from the user's Inspect action.
     inspect(id);
   }
 
   function showGuide(event) {
-    if (!available || !showing3D || guide.open || dialog.open || bag.open || externalPaused || document.hidden) return false;
+    if (!available || !showing3D || guide.open || dialog.open || bag.open || amenityPanel.dialog.open || externalPaused || document.hidden) return false;
     shelfFocus?.close({focus: false});
     guideFromHelp = event?.currentTarget === guideReopen;
     help.open = false; mallMap.open = false;
-    guidePaused = true;
-    onboarding.openWelcome();
-    notifyMode();
-    return true;
+    return onboarding.openWelcome();
   }
   guideReopen.addEventListener('click', showGuide);
   guide.addEventListener('close', () => {
@@ -308,9 +469,7 @@ export function createUI() {
     if (!available || !showing3D) return;
     if (action === 'list') { setView(false, true); focusDirectory(); return; }
     if (action === 'map') {
-      help.open = false; mallMap.open = true;
-      focusMap();
-      announce('Choose a store on the map. Your location has not changed.');
+      if (openMap()) announce('Choose a store on the map. Your location has not changed.');
       return;
     }
     if (action === 'dismiss' && guideFromHelp) {
@@ -320,7 +479,7 @@ export function createUI() {
     const touch = matchMedia('(pointer: coarse)').matches;
     const hint = target
       ? `${target.name}. ${target.action === 'map' ? (touch ? 'Tap Map' : 'press F or tap Map') : (touch ? 'Tap Inspect' : 'press F or tap Inspect')} for details.`
-      : 'Open How to explore to review the controls.';
+      : 'Open Help to review the controls.';
     announce(`Ready to explore. ${hint}`);
   });
 
@@ -330,14 +489,14 @@ export function createUI() {
 
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
   directoryEnter3D.addEventListener('click', () => setView(true, true));
-  function visitNewMoon() {
-    if (!available) return;
+  function visitStore(id) {
+    if (!available || !spatial.get(id)?.available) return;
     setView(true);
-    travelToStore('newmoon');
+    travelToStore(id);
   }
-  visitNewMoon3D.addEventListener('click', visitNewMoon);
+  for (const button of storeVisitButtons) button.addEventListener('click', () => visitStore(button.dataset.visitStore));
   const cardStoreButtons = [...document.querySelectorAll('[data-visit-newmoon]')];
-  for (const button of cardStoreButtons) button.addEventListener('click', visitNewMoon);
+  for (const button of cardStoreButtons) button.addEventListener('click', () => visitStore('newmoon'));
   const storeFilters = [...document.querySelectorAll('[data-store-filter]')];
   const stores = [...document.querySelectorAll('[data-store]')];
   const productSearch = document.getElementById('product-search');
@@ -477,27 +636,37 @@ export function createUI() {
           guide.open ? document.getElementById('context-navigation-guide') : undefined});
     },
     onModeState(listener) { modeListener = listener; },
+    configureMallTheme(coordinator) {
+      if(!expanded)return;
+      mallTheme=coordinator;themeSelect.replaceChildren();
+      for(const option of coordinator?.options() || [{id:'everyday',label:'Everyday'}]) {
+        const node=document.createElement('option');node.value=option.id;node.textContent=option.label;themeSelect.append(node);
+      }
+      themeOpen.hidden=false;directoryThemeOpen.hidden=false;updateMallTheme();
+    },
+    updateMallTheme,
     show3D() {
       available = true;
+      updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
-      visitNewMoon3D.hidden = false;
+      for (const button of storeVisitButtons) button.hidden = false;
       for (const button of cardStoreButtons) button.hidden = false;
       guideReopen.hidden = false;
       viewToggle.hidden = false;
       headerMap.hidden = !showing3D || !compactMap.matches;
       fallbackMessage.hidden = true;
       if (directoryTouched) {
-        viewToggle.textContent = 'Enter 3D Mall';
-        viewToggle.setAttribute('aria-label', 'Switch to the 3D virtual mall');
+        updateViewToggle();
         notifyMode();
       } else setView(true);
     },
     restored() {
       available = true;
+      updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
-      visitNewMoon3D.hidden = false;
+      for (const button of storeVisitButtons) button.hidden = false;
       for (const button of cardStoreButtons) button.hidden = false;
       // A validated renderer grants availability, never an automatic view/focus change.
       guideSeen = true; guideReopen.hidden = false;
@@ -511,15 +680,17 @@ export function createUI() {
       // Move focus only when its current 3D control is about to disappear.
       // A user already browsing the directory or header must not be interrupted.
       const active = document.activeElement;
-      const recoverFocus = showing3D && (experience.contains(active) || guide.contains(active) ||
+      const recoverFocus = showing3D && (experience.contains(active) || guide.contains(active) || themeDialog.contains(active) ||
         dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle);
       if (guide.open) guide.close('fallback');
+      if (themeDialog.open) themeDialog.close('fallback');
       guidePaused = false; guideReopen.hidden = true;
       setView(false, recoverFocus);
       available = false;
+      updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = true;
-      visitNewMoon3D.hidden = true;
+      for (const button of storeVisitButtons) button.hidden = true;
       for (const button of cardStoreButtons) button.hidden = true;
       // Directory fallback can leave setView unchanged, so refresh independently
       // of view/HUD callbacks and recover only disappearing cart-control focus.
@@ -531,7 +702,7 @@ export function createUI() {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, yaw, nearby: nextNearby, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null }) {
+    update({ zone, x, z, yaw, nearby: nextNearby, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null,elevatorState=null,elevatorUpper=7.2 }) {
       if (!guidePaused && showing3D && previousTutorialPose) {
         if (Math.hypot(x-previousTutorialPose.x,z-previousTutorialPose.z)>.02) onboarding.report('move');
         if (Math.abs(yaw-previousTutorialPose.yaw)>.01) onboarding.report('look');
@@ -550,10 +721,11 @@ export function createUI() {
         }
       }
       if (Number.isFinite(x) && Number.isFinite(z)) {
-        const point=mapPoint(x,z);
+        const point=expanded ? expandedMapPoint(x,z) : mapPoint(x,z);
         playerDot.setAttribute('cx', String(point.x));
         playerDot.setAttribute('cy', String(point.y));
       }
+      currentElevatorState=elevatorState;currentElevatorUpper=elevatorUpper;
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
         nearby = next;seatNotice=null;
@@ -588,7 +760,7 @@ export function createUI() {
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
       else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?'Tap Sit':'Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
-      else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;inspectButton.textContent='Change level';inspectButton.setAttribute('aria-label','Use elevator to change levels');}
+      else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;const action=elevatorState?(elevatorState.calling?'Calling elevator':elevatorState.docked!==(zone==='upper'?elevatorUpper:0)?'Call elevator':`Ride to ${zone==='upper'?'ground floor':'upper landing'}`):'Change level';inspectButton.textContent=action;inspectButton.setAttribute('aria-label',elevatorState?action:'Use elevator to change levels');}
       const cart=updateCartControls();
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
@@ -596,10 +768,16 @@ export function createUI() {
       inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
       notifyMode();
     },
-    handleGamepad(pad) { return onboarding.handleGamepad(pad,amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:compactMap.matches&&help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null); },
+    handleGamepad(pad) {
+      const wasThemeOpen=themeDialog.open;
+      const handled=onboarding.handleGamepad(pad,themeDialog.open?themeDialog:amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:help.open?help:compactMap.matches&&mallMap.open?mallMap:!showing3D?document.body:null);
+      // Native close queues its event; abort before a pending preparation microtask.
+      if(wasThemeOpen&&!themeDialog.open)mallTheme?.cancel();
+      return handled;
+    },
     paused() {
       const signals=modeSignals();
-      onboarding.setSuspended(amenityPanel.dialog.open||signals.productOpen||signals.bagOpen||signals.shelfOpen||!showing3D||(compactMap.matches&&(help.open||mallMap.open)));
+      syncOnboardingSuspension(signals);
       return signals.panelOpen||signals.productOpen||signals.bagOpen||signals.shelfOpen;
     },
     offerFirstGuide() { if (!guideSeen && onboarding.shouldAutoShow) showGuide(); },
@@ -616,7 +794,7 @@ export function createUI() {
       });
     },
     onCart(state,listener){cartState=state;cartListener=listener;},
-    setElevator(listener){records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
+    setElevator(listener){addMapService('visitor-lift','L','Visitor lift',liftLayout);records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
     setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },

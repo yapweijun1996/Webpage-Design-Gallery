@@ -1,0 +1,13 @@
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS reversible layout navigation preserves the tab bag
+PASS 768x1024 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 1440x900 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS expanded directory kiosk opens the live map
+PASS continuous loop: avatar clockwise, cart counterclockwise; end metrics: {'x': 10.006797790527344, 'z': 38.99923324584961, 'y': -0.0309600830078125, 'pushing': True, 'zone': 'atrium', 'drawCalls': 206, 'triangles': 816724, 'camera': {'lift': 0, 'distance': 6.5000000000000036, 'radius': 0.22, 'avatarVisible': True}, 'resources': {'geometries': 124, 'textures': 32}}
+PASS 844x390 visitor=v2: keyboard, map, three real doors, directory and bag
+PASS 390x844 &visitor=v1: keyboard, map, three real doors, directory and bag
+PASS expanded real WebGL context loss and recovery preserves the bag
+PASS expanded no-js directory fallback
+PASS expanded physics-failure directory fallback

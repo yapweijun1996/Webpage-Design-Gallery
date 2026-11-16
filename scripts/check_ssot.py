@@ -43,7 +43,10 @@ RUNTIME_GEOMETRY = {"--app-chrome-height", "--gjh-header-size", "--gjh-safe-top"
 def css_paths(root=ROOT):
     paths = list((root / "assets").glob("*.css"))
     paths += list((root / "demos").glob("**/*.css"))
-    generated = {root / "assets/tokens.css", root / "assets/gjh-themes.css"}
+    # The mall bundle is checked against its source stylesheets by the gallery
+    # generator; scanning it again would count generated copies as new debt.
+    generated = {root / "assets/tokens.css", root / "assets/gjh-themes.css",
+                 root / "demos/corporate/gjh/v11/style.bundle.css"}
     return sorted(path for path in paths if "vendor" not in path.parts and path not in generated)
 
 

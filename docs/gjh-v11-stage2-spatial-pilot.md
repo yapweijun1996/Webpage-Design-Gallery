@@ -1,7 +1,9 @@
 # GJH V11 stage 2: current-store spatial data pilot
 
-Date: 15 November 2026 (Asia/Singapore)  
+Date: 15 November 2026 (Asia/Singapore)
 Status: **implemented and tested for the existing three-store scene**. This is a compatibility pilot, not the 17-store expansion. The [stage 1 plan](gjh-v11-stage1-spatial-plan.md) and its [planning coordinates](references/gjh-mall-spatial-plan.json) remain proposals and are not loaded as current runtime geometry.
+
+The results below describe the original local pilot snapshot. For its later integration with the newer GitHub main, including preserved visitor and HUD fixes and fresh regression checks, see the [release integration report](gjh-v11-stage2-release.md).
 
 ## Shared data and consumers
 

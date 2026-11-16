@@ -1,7 +1,9 @@
 import {createCharacter} from './character.js';
 import {spatial, courtyardArrival} from './spatial.js';
+import {liftLayout} from './lift-layout.js';
+import {expandedLayout} from './expanded-layout.js';
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = []) {
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
   const character = await createCharacter(T);
   const visual = character.visual;
   scene.add(visual);
@@ -19,7 +21,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let seat=null, seatPhase='idle', seatTime=0, seatFrom=null, seatStartAngle=0, seatStartWeight=0;
   const reduceSeatMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
   let yaw = 0, pitch = .1, drag = null, stickPointer = null, stickOrigin = null;
-  let actionView=null,cameraDistance=null;
+  let actionView=null,cameraDistance=null,cameraOccluded=false,productApproach=null,productHome=null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
   const cameraBall=new R.Ball(.22),cameraRotation={x:0,y:0,z:0,w:1};
@@ -99,27 +101,54 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function restoreActionView(){if(!actionView)return;yaw=actionView.previous.yaw;pitch=actionView.previous.pitch;actionView=null;}
   function updateActionView(dt){if(!actionView||actionView.settled)return;if(keys.has('KeyQ')||keys.has('KeyE')){actionView.settled=true;return;}actionView.elapsed+=dt;const t=Math.min(1,actionView.elapsed/.35),e=t*t*(3-2*t),v=actionView;const delta=Math.atan2(Math.sin(v.targetYaw-v.fromYaw),Math.cos(v.targetYaw-v.fromYaw));yaw=v.fromYaw+delta*e;pitch=v.fromPitch+(.1-v.fromPitch)*e;if(t===1)v.settled=true;}
   function startCollection(prop,id){if(seated||!character.startCollection(prop,id))return false;beginActionView('collection',visual.rotation.y+Math.PI+.55);return true;}
-  function cancelCollection(){character.cancelCollection();if(actionView?.kind==='collection')restoreActionView();}
+  function cancelCollection(){productApproach=null;character.cancelCollection();if(['collection','product'].includes(actionView?.kind))restoreActionView();}
   let gamepad = null;
   function update(dt) {
     if (isPaused()) { clearInput(); return; }
     if (elevatorTravel) {
       const trip = elevatorTravel;
-      trip.elapsed += dt;
-      const t = reduceSeatMotion() ? 1 : Math.min(1, trip.elapsed / 2.5);
-      const eased = t * t * (3 - 2 * t);
-      const height = trip.from + (trip.to - trip.from) * eased;
-      moveSeat({x:trip.x, y:height + .89, z:trip.z});
-      trip.setHeight(height);
-      character.update('idle', dt);
-      if (t === 1) { elevatorTravel=null; capsule.setEnabled(true); vertical=0; }
+      if(trip.elevator?.expanded){
+        trip.elapsed+=dt;
+        const duration=trip.phase==='ride'?2.5:.45;
+        const t=reduceSeatMotion()?1:Math.min(1,trip.elapsed/duration),e=t*t*(3-2*t);
+        if(trip.phase==='board')moveSeat({x:trip.startX+(trip.x-trip.startX)*e,y:trip.from+.89,z:trip.startZ+(trip.z-trip.startZ)*e});
+        else if(trip.phase==='ride'){
+          const height=trip.from+(trip.to-trip.from)*e;trip.setHeight(height);moveSeat({x:trip.x,y:height+.89,z:trip.z});
+        }else moveSeat({x:trip.x+(trip.elevator.exit.x-trip.x)*e,y:trip.to+.89,z:trip.z+(trip.elevator.exit.z-trip.z)*e});
+        character.update('idle',dt);
+        if(t===1){
+          if(trip.phase==='board'){trip.phase='ride';trip.elapsed=0;trip.elevator.setRiding(true);}
+          else if(trip.phase==='ride'){trip.phase='exit';trip.elapsed=0;trip.elevator.setRiding(false);}
+          else{elevatorTravel=null;capsule.setEnabled(true);vertical=0;restoreActionView();clearInput();injected=null;}
+        }
+      }else{
+        trip.elapsed += dt;
+        const t = reduceSeatMotion() ? 1 : Math.min(1, trip.elapsed / 2.5);
+        const eased = t * t * (3 - 2 * t);
+        const height = trip.from + (trip.to - trip.from) * eased;
+        moveSeat({x:trip.x, y:height + .89, z:trip.z});
+        trip.setHeight(height);character.update('idle', dt);
+        if (t === 1) { elevatorTravel=null; capsule.setEnabled(true); vertical=0; }
+      }
       return;
     }
     updateActionView(dt);
     if(gamepad){yaw-=gamepad.lookX*1.9*dt;pitch=T.MathUtils.clamp(pitch+gamepad.lookY*1.4*dt,-.08,.9);}
     if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;character.update('idle',dt);return;}
+    if(productApproach){
+      const a=productApproach,t=Math.min(1,(a.elapsed+=dt)/.45),e=t*t*(3-2*t);
+      moveSeat({x:a.from.x+(a.to.x-a.from.x)*e,y:.91,z:a.from.z+(a.to.z-a.from.z)*e});
+      visual.rotation.y=0;character.update('walk',dt);
+      if(t===1){productApproach=null;if(a.returning)character.returnProduct();}
+      return;
+    }
+    // A transfer owns the hands and position until the item reaches its destination.
+    if(character.state.physicalProduct?.active){character.update('idle',dt);return;}
     const forward = injected?.forward ?? ((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stickY + (gamepad?.forward||0));
     const right = injected?.right ?? ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX + (gamepad?.right||0));
+    if(actionView?.kind==='product'){
+      if(Math.hypot(forward,right)>.1||character.state.physicalProduct.phase==='empty')restoreActionView();
+    }
     if(actionView?.kind==='collection'&&Math.hypot(forward,right)>.1)cancelCollection();
     if(actionView?.kind==='elevator'&&Math.hypot(forward,right)>.1)restoreActionView();
     const running = !pushing && (injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight')));
@@ -170,7 +199,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const length=sweepCamera(anchor,out);out.copy(anchor).addScaledVector(direction,length);return length;
   }
   function updateCamera(dt, instant = false) {
-    sync();target.copy(visual.position);target.y+=1.24;
+    sync();target.copy(visual.position);target.y+=1.24-.34*(character.state.seatWeight||0);
     const normalDistance=canvas.clientWidth<600?5.5:6.5,requestedDistance=actionView?3:normalDistance;
     const immediate=instant||reduceSeatMotion();
     cameraDistance=immediate?requestedDistance:T.MathUtils.lerp(cameraDistance??normalDistance,requestedDistance,1-Math.exp(-6*dt));
@@ -194,10 +223,20 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     cameraClearance=camera.position.distanceTo(target);
     // In a genuinely enclosed corner no third-person view fits. Hide only the local
     // presentation until clearance returns; never change collision or gameplay ownership.
-    visual.visible=cameraClearance>(visual.visible ? .85 : 1.05);
-    contact.visible=visual.visible;character.updateLOD?.(camera);
+    cameraOccluded=cameraClearance<(cameraOccluded?1.45:1.15);
+    character.setCameraOccluded(cameraOccluded);
+    canvas.dataset.cameraView=cameraOccluded?'close':'third-person';
+    character.updateLOD?.(camera);
+  }
+  function cartCapability() {
+    if(expanded&&body.translation().y-.875>liftLayout.upper/2)return {allowed:false,disabled:true,sceneDisabled:true,reasonCode:'upper-landing',reason:'The upper landing is visitor-only. Return to the ground floor before using the cart.'};
+    if(elevatorTravel)return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'elevator-travel',reason:'Wait for the elevator to stop.'};
+    if(character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'held-product',reason:'Return the held product to its shelf before using the cart.'};
+    if(seated)return {allowed:false,disabled:true,sceneDisabled:false,reasonCode:'seated',reason:'Stand up before using the cart.'};
+    return {allowed:Boolean(character.state.cart.available),disabled:!character.state.cart.available,sceneDisabled:!character.state.cart.available,reasonCode:character.state.cart.available?null:'unavailable',reason:character.state.cart.available?null:'The 3D cart is unavailable. Your bag selection is unchanged.'};
   }
   function setCart(value) {
+    if(value&&!cartCapability().allowed)return false;
     if ((elevatorTravel || character.state.physicalProduct?.phase!=='empty' && character.state.physicalProduct) && value) return false;
     if(!value){pushing=false;character.setCart(false);capsule.setShape(walkingShape);controller.enableAutostep(.2,.28,true);clearInput();injected=null;return true;}
     if(pushing)return true;
@@ -222,7 +261,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function sit(id) {
     if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
-    if(Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>1.1||(p.z-candidate.z)*candidate.facing>-.25)return false;
+    if(Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>1.65||(p.z-candidate.z)*candidate.facing>-.25)return false;
     seat=candidate;const exit={x:seat.exitX,y:.91,z:seat.exitZ},target={x:seat.x,y:seat.y+.875,z:seat.z};
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
     clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=visual.rotation.y;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI+seat.cameraOffset);vertical=0;
@@ -239,18 +278,31 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function teleport(zone) {
     if (elevatorTravel) return false;
-    const destination = zone === 'atrium' ? courtyardArrival : spatial.arrival(zone);
+    const destination = zone === 'atrium' ? (expanded ? expandedLayout.courtyardArrival : courtyardArrival) : expanded && zone === 'entry' ? expandedLayout.entrance : spatial.arrival(zone);
     if (!destination) return false;
-    character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
+    productApproach=null;productHome=null;character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
     const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = 0; pitch = .1; visual.rotation.y = 0; clearInput();
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }
   function useElevator(elevator) {
     const p=body.translation();
+    if(elevator.expanded){
+      const floor=p.y-.875>elevator.upper/2?elevator.upper:0;
+      if(seated||pushing||elevatorTravel||productApproach||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty'||Math.abs(p.y-.875-floor)>.35||Math.hypot(p.x-elevator.exit.x,p.z-elevator.exit.z)>elevator.radius)return false;
+      if(elevator.state.calling||elevator.state.riding)return false;
+      if(elevator.state.docked!==floor)return elevator.call(floor);
+      // Validate the full walking capsule against the real aperture before owning motion.
+      if(!clearPath(p,{x:elevator.x,y:floor+.89,z:elevator.z}))return false;
+      clearInput();injected=null;cancelCollection();vertical=0;capsule.setEnabled(false);
+      beginActionView('elevator',Math.PI/2);elevator.setRiding('boarding');
+      elevatorTravel={elevator,x:elevator.x,z:elevator.z,startX:p.x,startZ:p.z,from:floor,to:floor?0:elevator.upper,elapsed:0,phase:'board',setHeight:elevator.setHeight};
+      return true;
+    }
     if (seated || pushing || elevatorTravel || character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty' || Math.hypot(p.x-elevator.x,p.z-elevator.z)>1.45) return false;
     const from=p.y-.875 > elevator.upper/2 ? elevator.upper : 0;
     if (Math.abs(p.y-.875-from)>.35) return false;
+    elevator.prepare?.(from);
     clearInput(); injected=null; cancelCollection(); vertical=0; capsule.setEnabled(false);
     beginActionView('elevator', Math.PI / 2);
     elevatorTravel={x:elevator.x,z:elevator.z,from,to:from ? 0 : elevator.upper,elapsed:0,setHeight:elevator.setHeight};
@@ -263,12 +315,13 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     // Graphics fallback must not retain a disabled capsule or resume an old trip.
     const height = body.translation().y - .89;
     const floor = Math.abs(height - trip.from) <= Math.abs(height - trip.to) ? trip.from : trip.to;
+    if(trip.elevator?.expanded)trip.elevator.setRiding(false);
     elevatorTravel = null; trip.setHeight(floor);
-    moveSeat({x:trip.x, y:floor + .89, z:trip.z});
+    moveSeat({x:trip.elevator?.exit.x??trip.x, y:floor + .89, z:trip.elevator?.exit.z??trip.z});
     capsule.setEnabled(true); vertical = 0; clearInput(); injected = null;
     restoreActionView(); sync(); updateCamera(0, true);
   }
-  return {body, capsule, camera, sit, stand, setCart, interruptGraphics, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  return {body, capsule, camera, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     renderShelf(draw) {
       // The visitor can stand directly in front of the selected shelf. Exclude
       // only that presentation during the draw; retain all authored/gameplay state.
@@ -276,12 +329,20 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       visual.visible = contact.visible = false;
       try { draw(); } finally { visual.visible = visible; contact.visible = contactVisible; }
     },
-    pickProduct: token=>{clearInput();injected=null;return character.pickProduct?.(token);},
-    returnProduct: ()=>character.returnProduct?.(),
+    pickProduct: token=>{
+      const from=body.translation(),home=token?.approach;
+      if(!home||Math.hypot(from.x-home.x,from.z-home.z)>home.radius||!clearPath(from,{x:home.x,y:.91,z:home.z}))return false;
+      const reduced=reduceSeatMotion(),ok=character.pickProduct({...token,approachDelay:reduced?0:.45});
+      if(ok){productHome=home;if(reduced){moveSeat({x:home.x,y:.91,z:home.z});visual.rotation.y=0;sync();character.update('idle',0);}else productApproach={from:{...from},to:home,elapsed:0};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);}return ok;
+    },
+    returnProduct: ()=>{
+      const from=body.translation();if(!productHome||character.state.physicalProduct?.phase!=='held'||productApproach||Math.hypot(from.x-productHome.x,from.z-productHome.z)>productHome.radius||!clearPath(from,{x:productHome.x,y:.91,z:productHome.z}))return false;
+      if(reduceSeatMotion()){moveSeat({x:productHome.x,y:.91,z:productHome.z});visual.rotation.y=0;sync();character.returnProduct();character.update('idle',0);}else productApproach={from:{...from},to:productHome,elapsed:0,returning:true};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);return true;
+    },
     customize: changes => character.customize?.(changes),
     setPaused: fn => { isPaused = fn; },
     setGamepadInput: input => { gamepad = input; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) pitch = T.MathUtils.clamp(input.pitch, -.08, .9); },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, seated, elevatorTravel: Boolean(elevatorTravel), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:visual.visible}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, capsuleEnabled:capsule.isEnabled(), productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase:elevatorTravel?.phase||null, cartCapability:cartCapability(), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch, character: character.state}; }
   };
 }

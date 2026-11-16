@@ -1,0 +1,1038 @@
+{
+  "status": "PASS",
+  "diagnosticSHA256": "99a54962ae2704c7a82f34398e02c218ec5e69113e66ab5e8367fbb587418bd4",
+  "runtimeSHA256": {
+    "assets/onboarding/onboarding.js": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+    "assets/onboarding/onboarding.css": "b82b4ace65a530fc03085a93947562d29726cd6384992c2d6ea277fcb306a9a4",
+    "demos/corporate/gjh/v11/index.html": "a239bd894fb22be80b2230c03f549cdd65d424722504e4022f05970231f703af",
+    "demos/corporate/gjh/v11/style.css": "2b379146965cfb14ec6906c3f760c90446b48100f45ba55e6327f741e720876b",
+    "demos/corporate/gjh/v11/assets/ui.js": "f4f49bacfe012e221191e092feb91975efd047956eebfb7aab9966681da0277b"
+  },
+  "cases": [
+    {
+      "viewport": [
+        320,
+        740
+      ],
+      "query": "",
+      "motion": "reduce",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 91,
+          "width": 220,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 220,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 220,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 13.5,
+            "width": 68.9375,
+            "height": 44,
+            "top": 13.5,
+            "right": 84.9375,
+            "bottom": 57.5,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 89.9375,
+            "y": 13.5,
+            "width": 48,
+            "height": 44,
+            "top": 13.5,
+            "right": 137.9375,
+            "bottom": 57.5,
+            "left": 89.9375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 149.234375,
+            "y": 13.5,
+            "width": 82,
+            "height": 44,
+            "top": 13.5,
+            "right": 231.234375,
+            "bottom": 57.5,
+            "left": 149.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 242.53125,
+            "y": 13.5,
+            "width": 61.46875,
+            "height": 44,
+            "top": 13.5,
+            "right": 304,
+            "bottom": 57.5,
+            "left": 242.53125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "0-320x740-help-0.png",
+        "0-320x740-help-0.5.png",
+        "0-320x740-help-1.png",
+        "0-320x740-idle.png",
+        "0-320x740-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "query": "",
+      "motion": "reduce",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 13.5,
+            "width": 68.9375,
+            "height": 44,
+            "top": 13.5,
+            "right": 84.9375,
+            "bottom": 57.5,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 89.9375,
+            "y": 13.5,
+            "width": 48,
+            "height": 44,
+            "top": 13.5,
+            "right": 137.9375,
+            "bottom": 57.5,
+            "left": 89.9375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 184.234375,
+            "y": 13.5,
+            "width": 82,
+            "height": 44,
+            "top": 13.5,
+            "right": 266.234375,
+            "bottom": 57.5,
+            "left": 184.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 312.53125,
+            "y": 13.5,
+            "width": 61.46875,
+            "height": 44,
+            "top": 13.5,
+            "right": 374,
+            "bottom": 57.5,
+            "left": 312.53125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "1-390x844-help-0.png",
+        "1-390x844-help-0.5.png",
+        "1-390x844-help-1.png",
+        "1-390x844-idle.png",
+        "1-390x844-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        639,
+        826
+      ],
+      "query": "",
+      "motion": "reduce",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 91,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 328,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 13.5,
+            "width": 68.9375,
+            "height": 44,
+            "top": 13.5,
+            "right": 84.9375,
+            "bottom": 57.5,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 89.9375,
+            "y": 13.5,
+            "width": 48,
+            "height": 44,
+            "top": 13.5,
+            "right": 137.9375,
+            "bottom": 57.5,
+            "left": 89.9375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 308.734375,
+            "y": 13.5,
+            "width": 82,
+            "height": 44,
+            "top": 13.5,
+            "right": 390.734375,
+            "bottom": 57.5,
+            "left": 308.734375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 561.53125,
+            "y": 13.5,
+            "width": 61.46875,
+            "height": 44,
+            "top": 13.5,
+            "right": 623,
+            "bottom": 57.5,
+            "left": 561.53125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "2-639x826-help-0.png",
+        "2-639x826-help-0.5.png",
+        "2-639x826-help-1.png",
+        "2-639x826-idle.png",
+        "2-639x826-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        650,
+        844
+      ],
+      "query": "",
+      "motion": "reduce",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 91,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 328,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 13.5,
+            "width": 68.9375,
+            "height": 44,
+            "top": 13.5,
+            "right": 84.9375,
+            "bottom": 57.5,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 89.9375,
+            "y": 13.5,
+            "width": 48,
+            "height": 44,
+            "top": 13.5,
+            "right": 137.9375,
+            "bottom": 57.5,
+            "left": 89.9375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 314.234375,
+            "y": 13.5,
+            "width": 82,
+            "height": 44,
+            "top": 13.5,
+            "right": 396.234375,
+            "bottom": 57.5,
+            "left": 314.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 572.53125,
+            "y": 13.5,
+            "width": 61.46875,
+            "height": 44,
+            "top": 13.5,
+            "right": 634,
+            "bottom": 57.5,
+            "left": 572.53125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "3-650x844-help-0.png",
+        "3-650x844-help-0.5.png",
+        "3-650x844-help-1.png",
+        "3-650x844-idle.png",
+        "3-650x844-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        651,
+        844
+      ],
+      "query": "",
+      "motion": "reduce",
+      "compact": false,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 102,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 102,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 102,
+          "width": 328,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 19,
+            "width": 139.234375,
+            "height": 44,
+            "top": 19,
+            "right": 155.234375,
+            "bottom": 63,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 162.234375,
+            "y": 19,
+            "width": 88,
+            "height": 44,
+            "top": 19,
+            "right": 250.234375,
+            "bottom": 63,
+            "left": 162.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Store directory",
+          "rect": {
+            "x": 529.078125,
+            "y": 19,
+            "width": 105.921875,
+            "height": 44,
+            "top": 19,
+            "right": 635,
+            "bottom": 63,
+            "left": 529.078125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "4-651x844-help-0.png",
+        "4-651x844-help-0.5.png",
+        "4-651x844-help-1.png",
+        "4-651x844-idle.png",
+        "4-651x844-wide-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "wide persistent map unchanged",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        667,
+        375
+      ],
+      "query": "",
+      "motion": "reduce",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 80,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 80,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 80,
+          "width": 328,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 8,
+            "width": 139.234375,
+            "height": 44,
+            "top": 8,
+            "right": 155.234375,
+            "bottom": 52,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 162.234375,
+            "y": 8,
+            "width": 48,
+            "height": 44,
+            "top": 8,
+            "right": 210.234375,
+            "bottom": 52,
+            "left": 162.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 217.234375,
+            "y": 8,
+            "width": 88,
+            "height": 44,
+            "top": 8,
+            "right": 305.234375,
+            "bottom": 52,
+            "left": 217.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 587,
+            "y": 8,
+            "width": 64,
+            "height": 44,
+            "top": 8,
+            "right": 651,
+            "bottom": 52,
+            "left": 587
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "5-667x375-help-0.png",
+        "5-667x375-help-0.5.png",
+        "5-667x375-help-1.png",
+        "5-667x375-idle.png",
+        "5-667x375-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "query": "",
+      "motion": "reduce",
+      "compact": false,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 102,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 102,
+          "width": 328,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 102,
+          "width": 328,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 19,
+            "width": 147.875,
+            "height": 44,
+            "top": 19,
+            "right": 163.875,
+            "bottom": 63,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 360.609375,
+            "y": 19,
+            "width": 88,
+            "height": 44,
+            "top": 19,
+            "right": 448.609375,
+            "bottom": 63,
+            "left": 360.609375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Store directory",
+          "rect": {
+            "x": 1284,
+            "y": 19,
+            "width": 140,
+            "height": 44,
+            "top": 19,
+            "right": 1424,
+            "bottom": 63,
+            "left": 1284
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "6-1440x900-help-0.png",
+        "6-1440x900-help-0.5.png",
+        "6-1440x900-help-1.png",
+        "6-1440x900-idle.png",
+        "6-1440x900-wide-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "wide persistent map unchanged",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "query": "?interior=pilot",
+      "motion": "reduce",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 13.5,
+            "width": 68.9375,
+            "height": 44,
+            "top": 13.5,
+            "right": 84.9375,
+            "bottom": 57.5,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 89.9375,
+            "y": 13.5,
+            "width": 48,
+            "height": 44,
+            "top": 13.5,
+            "right": 137.9375,
+            "bottom": 57.5,
+            "left": 89.9375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 184.234375,
+            "y": 13.5,
+            "width": 82,
+            "height": 44,
+            "top": 13.5,
+            "right": 266.234375,
+            "bottom": 57.5,
+            "left": 184.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 312.53125,
+            "y": 13.5,
+            "width": 61.46875,
+            "height": 44,
+            "top": 13.5,
+            "right": 374,
+            "bottom": 57.5,
+            "left": 312.53125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "7-390x844-help-0.png",
+        "7-390x844-help-0.5.png",
+        "7-390x844-help-1.png",
+        "7-390x844-idle.png",
+        "7-390x844-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "query": "?visitor=v1",
+      "motion": "reduce",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 13.5,
+            "width": 68.9375,
+            "height": 44,
+            "top": 13.5,
+            "right": 84.9375,
+            "bottom": 57.5,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 89.9375,
+            "y": 13.5,
+            "width": 48,
+            "height": 44,
+            "top": 13.5,
+            "right": 137.9375,
+            "bottom": 57.5,
+            "left": 89.9375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 184.234375,
+            "y": 13.5,
+            "width": 82,
+            "height": 44,
+            "top": 13.5,
+            "right": 266.234375,
+            "bottom": 57.5,
+            "left": 184.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 312.53125,
+            "y": 13.5,
+            "width": 61.46875,
+            "height": 44,
+            "top": 13.5,
+            "right": 374,
+            "bottom": 57.5,
+            "left": 312.53125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "8-390x844-help-0.png",
+        "8-390x844-help-0.5.png",
+        "8-390x844-help-1.png",
+        "8-390x844-idle.png",
+        "8-390x844-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "query": "",
+      "motion": "no-preference",
+      "compact": true,
+      "helpSummaryBounds": [
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        },
+        {
+          "x": 19,
+          "y": 91,
+          "width": 290,
+          "height": 44
+        }
+      ],
+      "headerControls": [
+        {
+          "id": "",
+          "text": "GJH.VIRTUALMALL",
+          "rect": {
+            "x": 16,
+            "y": 13.5,
+            "width": 68.9375,
+            "height": 44,
+            "top": 13.5,
+            "right": 84.9375,
+            "bottom": 57.5,
+            "left": 16
+          },
+          "hit": true
+        },
+        {
+          "id": "header-map",
+          "text": "Map",
+          "rect": {
+            "x": 89.9375,
+            "y": 13.5,
+            "width": 48,
+            "height": 44,
+            "top": 13.5,
+            "right": 137.9375,
+            "bottom": 57.5,
+            "left": 89.9375
+          },
+          "hit": true
+        },
+        {
+          "id": "bag-open",
+          "text": "Bag (0)",
+          "rect": {
+            "x": 184.234375,
+            "y": 13.5,
+            "width": 82,
+            "height": 44,
+            "top": 13.5,
+            "right": 266.234375,
+            "bottom": 57.5,
+            "left": 184.234375
+          },
+          "hit": true
+        },
+        {
+          "id": "view-toggle",
+          "text": "Stores",
+          "rect": {
+            "x": 312.53125,
+            "y": 13.5,
+            "width": 61.46875,
+            "height": 44,
+            "top": 13.5,
+            "right": 374,
+            "bottom": 57.5,
+            "left": 312.53125
+          },
+          "hit": true
+        }
+      ],
+      "frames": [
+        "9-390x844-help-0.png",
+        "9-390x844-help-0.5.png",
+        "9-390x844-help-1.png",
+        "9-390x844-idle.png",
+        "9-390x844-map.png"
+      ],
+      "tutorialHelpKeyboardGamepadOneOwner": "PASS",
+      "quickGuideSettingsAndReturnFocus": "PASS",
+      "mapCloseEscapeDestinations": "PASS",
+      "staleModalTriggers": "PASS",
+      "illegalTransitions": 0,
+      "errors": []
+    },
+    {
+      "breakpoints": "650/651 and560/561",
+      "focusRecovery": "PASS",
+      "illegalTransitions": 0
+    },
+    {
+      "fallback": "WASM",
+      "directoryAndFourProducts": "PASS"
+    },
+    {
+      "fallback": "noJS",
+      "directoryAndFourProducts": "PASS"
+    }
+  ],
+  "frames": 50,
+  "limits": "Browser touch/reduced-motion and synthetic standard-controller snapshots; no physical phone, OS screen reader or hardware-controller certification."
+}

@@ -127,6 +127,17 @@
   --z-onboarding-dialog: 1000;
   --layout-onboarding-hud: 360px;
   --palette-3d-dark-overlay: #00000066;
+  --gjh-hybrid-media-gradient: linear-gradient(90deg,transparent,rgba(13,48,38,.9));
+  --gjh-hybrid-radius-label: 3px;
+  --gjh-hybrid-radius-small: 6px;
+  --gjh-hybrid-radius-control: 7px;
+  --gjh-hybrid-radius-card: 10px;
+  --gjh-hybrid-shadow-control: 0 4px 12px rgba(13,48,38,.18);
+  --gjh-hybrid-shadow-card: 0 8px 24px rgba(13,48,38,.1);
+  --gjh-hybrid-type-caption: clamp(10px,2.8vw,14px);
+  --gjh-hybrid-type-section: clamp(24px,2.5vw,32px);
+  --gjh-hybrid-type-title: clamp(26px,2.5vw,34px);
+  --gjh-hybrid-type-hero: clamp(36px,4vw,56px);
   --color-text: var(--palette-ink);
   --color-text-muted: var(--palette-muted);
   --color-action: var(--palette-indigo);
@@ -152,6 +163,8 @@
   --color-3d-dark-border: var(--palette-3d-dark-line);
   --color-3d-dark-subtle: var(--palette-3d-dark-subtle);
   --color-3d-dark-focus: var(--palette-3d-dark-focus);
+  --color-3d-dark-action: var(--palette-night-action);
+  --color-3d-dark-on-action: var(--palette-3d-dark);
   --color-3d-dark-overlay: var(--palette-3d-dark-overlay);
   --ink: var(--color-text);
   --muted: var(--color-text-muted);

@@ -1,0 +1,19 @@
+{
+  "baseline": "53e98c2",
+  "version": "1.1.43",
+  "browser": "VM Chrome / SwiftShader",
+  "checks": {
+    "unit": "49 PASS",
+    "ssot": "PASS",
+    "gallery": "PASS",
+    "demos": "PASS",
+    "pwa": "PASS",
+    "directFourSkuDesktopAnd390": "PASS",
+    "modes": "FAIL: courtyard-seat approach assertion; identical failure reproduced on untouched 53e98c2 baseline"
+  },
+  "visualReview": "Actual AU 390 screenshot inspected; independent advisor found no blocker for direct Inspect request. Later polish: enlarge can, shorten text.",
+  "limitations": [
+    "No physical iPhone Safari verification",
+    "Legacy shelf-entry tests describe superseded intermediate UX; retained shelf controller is not removed."
+  ]
+}

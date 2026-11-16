@@ -253,7 +253,8 @@ def run(output, case):
                     if case in ("all", "reduced"):
                         cases.append(((390, 844), False, True))
                     for viewport, missing, reduced in cases:
-                        result = verify(browser, base + "/Webpage-Design-Gallery/demos/corporate/gjh/v11/", base,
+                        # This suite asserts the legacy visitor asset; the released default is V2.
+                        result = verify(browser, base + "/Webpage-Design-Gallery/demos/corporate/gjh/v11/?visitor=v1", base,
                                         viewport, directory, missing, reduced)
                         results.append(result)
                         (directory / "results.json").write_text(json.dumps({

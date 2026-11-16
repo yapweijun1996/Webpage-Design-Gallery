@@ -1,6 +1,6 @@
 # GJH V11 modern mall interior redesign
 
-Updated: 15 November 2026 (Asia/Singapore)  
+Updated: 15 November 2026 (Asia/Singapore)
 Status: **design direction selected; implementation and acceptance pending**.
 
 ## Design brief

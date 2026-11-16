@@ -1,0 +1,12 @@
+PASS 320x700: approach, bidirectional lift and both exits
+PASS 390x844: approach, bidirectional lift and both exits
+PASS 768x1024: approach, bidirectional lift and both exits
+PASS 844x390: approach, bidirectional lift and both exits
+PASS 1440x900: approach, bidirectional lift and both exits
+PASS relocated directory, self-service desk and four-product showcase
+PASS cart cannot travel in visitor-only lift
+PASS held product cannot travel in visitor-only lift
+PASS directory pause and resume during lift travel
+PASS graphics interruption at 650ms: safe floor 0, movement and bag
+PASS graphics interruption at 1800ms: safe floor 7.2, movement and bag
+PASS Visitor v1 retains ground-floor stores and explains lift availability

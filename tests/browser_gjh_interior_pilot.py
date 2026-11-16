@@ -12,6 +12,7 @@ import threading
 from pathlib import Path
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
+from gjh_startup_test_helpers import use_individual_assets
 
 ROOT=Path(__file__).resolve().parents[1]
 ASSETS=ROOT/'demos/corporate/gjh/v11/assets'
@@ -61,8 +62,14 @@ def asset_states(s):return {**s['furnishings'],'shelf':s['productAssets']['shelf
 
 def open_map(page):
     if page.locator('#mall-map').evaluate('(e)=>e.open'):return
-    if page.locator('#header-map').is_visible():page.locator('#header-map').click()
-    else:page.locator('#mall-map summary').click()
+    if page.locator('#guide-dialog').evaluate('(e)=>e.open'):
+        page.locator('#guide-map').click()
+    elif page.locator('#header-map').is_visible():page.locator('#header-map').click()
+    else:
+        if not page.locator('#keyboard-help').evaluate('(e)=>e.open'):
+            page.locator('#keyboard-help > summary').click()
+        page.locator('#guide-reopen').click()
+        page.locator('#guide-map').click()
 
 
 def run():
@@ -152,6 +159,7 @@ def run():
                 # Every asset fails independently; the remaining seven must still load.
                 for failed in DEFINITIONS:
                     context=browser.new_context(viewport={'width':639,'height':826},service_workers='block',reduced_motion='reduce')
+                    use_individual_assets(context)
                     context.route('**/'+failed['file'],lambda route:route.fulfill(status=404,body='Pilot fault fixture'))
                     page,errors,requests=boot(context,url);assets=asset_states(state(page))
                     for item in DEFINITIONS:assert assets[item['kind']]['status']==('fallback' if item==failed else 'loaded'),(failed,item,assets)
@@ -163,6 +171,7 @@ def run():
                     context.close();print('Fallback PASS',failed['asset_id'],flush=True)
                 # Hash rejection exercises a valid HTTP response with invalid bytes.
                 context=browser.new_context(service_workers='block',reduced_motion='reduce')
+                use_individual_assets(context)
                 context.route('**/'+FILES['coffeeTable'],lambda route:route.fulfill(status=200,body=b'not a valid model'))
                 page,errors,_=boot(context,url);assert state(page)['furnishings']['coffeeTable']['status']=='fallback'
                 assert not errors;report['checks'].append({'corruptHashRejected':'PASS'});context.close()

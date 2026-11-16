@@ -1,0 +1,57 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (2.9215ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (4.514ms)
+✔ only the reviewed everyday and lunar options are available and invalid stored IDs are safe (3.349375ms)
+✔ lunar decorations respect the existing planter footprint and suspended event clearance (0.456791ms)
+✔ blocked storage keeps a working in-memory selection (0.226042ms)
+✔ reapplying the current theme invokes the scene commit without preparing new resources (0.157792ms)
+✔ later selection wins, stale preparation is disposed and no stale commit runs (0.516791ms)
+✔ failure and interruption leave the previous theme active and clean staged resources (0.502833ms)
+✔ a remembered supported theme is prepared before it becomes active (0.414375ms)
+✔ superseding or suspending preparation aborts the old signal (0.215375ms)
+✔ closing a pending selection aborts and disposes its late result (0.532542ms)
+✔ validated visual roles update real scene targets atomically before a future theme is committed (1.201583ms)
+✔ three stable stores share the current scene centers, entrances and ordering (4.861375ms)
+✔ location boundaries and map projection retain the existing visible behavior (0.66425ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (6.456959ms)
+✔ unavailable store cannot produce a travel destination (0.443459ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.329875
+Browser: 157.0.8103.51
+PASS 320x700: visible lunar scene, local persistence and return to Everyday (pixel difference 10.45)
+PASS 390x844: visible lunar scene, local persistence and return to Everyday (pixel difference 10.79)
+PASS 768x1024: visible lunar scene, local persistence and return to Everyday (pixel difference 10.15)
+PASS 844x390: visible lunar scene, local persistence and return to Everyday (pixel difference 7.93)
+PASS 1440x900: visible lunar scene, local persistence and return to Everyday (pixel difference 8.82)
+PASS repeated switch-back and reapply dispose decorations without resource growth
+PASS missing seasonal module keeps Everyday and succeeds on same-page retry
+PASS unavailable saved seasonal pack falls back and retries on the same page
+PASS failed banner creation rolls back and retries without reload
+PASS cancelled slow preparation never mounts; a later selection succeeds
+PASS graphics loss cancels pending decorations and permits later selection
+PASS native graphics recovery retains lunar decorations and bag, then restores Everyday
+PASS lunar cart loop/event, lift, product detail and bag
+PASS Visitor v1 lunar and Everyday
+Browser: 157.0.8103.51
+PASS 320x700: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 390x844: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 768x1024: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 844x390: discoverable settings, focus, repeated apply, retained bag and resources
+PASS 1440x900: discoverable settings, focus, repeated apply, retained bag and resources
+PASS invalid saved theme falls back, is replaced and survives reload
+PASS unavailable local storage retains in-memory theme
+PASS missing theme module preserves 3D and reports unavailable settings
+PASS settings preserve active cart
+PASS settings preserve a seated visitor
+PASS settings preserve a carried physical product
+PASS settings pause and resume an active elevator journey
+PASS graphics loss and restoration retain theme and bag
+PASS Visitor v1 expanded theme settings
+PASS original layout and no-JavaScript directory
+usage: browser_gjh_materials.py [-h] --screens SCREENS [--fallback]
+browser_gjh_materials.py: error: the following arguments are required: --screens

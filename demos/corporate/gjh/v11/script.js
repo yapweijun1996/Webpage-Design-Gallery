@@ -4,10 +4,12 @@ import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
+const expanded = new URLSearchParams(location.search).get('layout') === 'expanded';
+document.body.classList.toggle('is-expanded', expanded);
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
-let productControl=null, shelfFocus=null, guidance=null;
+let productControl=null, shelfFocus=null, guidance=null, mallTheme=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
@@ -22,12 +24,13 @@ function clearTransientState(event) {
   player?.setInput(null);
   // Overlays suspend the collection/action camera. Real interruptions cancel the
   // transient demo gesture; physical shelf products remain owned by the player.
-  if (event.kind === 'interrupt') player?.cancelCollection();
+  const interaction=player?.state;
+  if (event.kind === 'interrupt' && (!interaction?.character.physicalProduct?.held || interaction.productApproaching)) player?.cancelCollection();
   manual = false; accumulator = 0; last = performance.now();
 }
 const modes = createModes({onCleanup: clearTransientState,
   onEnter(mode) { document.body.dataset.mode = mode; }});
-const ui = createUI(), canvas = document.querySelector('#scene');
+const ui = createUI(expanded), canvas = document.querySelector('#scene');
 function syncMode(signals = ui.modeSignals()) {
   if (modes.current() === 'shelf' && !signals.shelfOpen) modes.request(modes.layers().at(-2), 'Shelf closed');
   modes.observe({...signals, seated: Boolean(player?.state.seated),
@@ -40,10 +43,23 @@ ui.onModeState(syncMode);
 setupOriginalTin(ui);
 syncMode();
 const STEP = 1 / 60;
+// Optional appearance imports cannot block required scene initialization.
+async function loadOptionalThemeModule(loader) {
+  let timer;
+  try {
+    return await Promise.race([
+      Promise.resolve().then(loader),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Optional theme module timed out')), 2000); }),
+    ]);
+  } finally { clearTimeout(timer); }
+}
+
 let previousGamepadInspect=false;
-const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null,
+const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
-  amenities: world?.amenities || null,
+  elevator:elevator?.state||null, amenities: world?.amenities || null,
+  theme: mallTheme?.state() || null,
+  themeDecorations: world?.scene.children.filter(item=>item.userData.mallThemeDecoration).map(item=>item.userData.mallThemeDecoration) || [],
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
   interaction: selectedInteraction ? {id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance} : null,
   camera: player ? {position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect} : null,
@@ -79,7 +95,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
-  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z)?.id || 'atrium';
+  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z, expanded)?.id || 'atrium';
   nearby = null; selectedInteraction = null; let best = Infinity;
   for (const item of world.interactables) {
     if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;
@@ -90,10 +106,10 @@ function updateHUD() {
   interactionDistance = best;
   productControl?.update(p,nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, collectionActive:p.character.collection.active,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName});
+  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
 }
 function tick() {
-  if (modes.paused()) return;
+  if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   for (const door of world.doors) {
     const open = p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
@@ -104,10 +120,10 @@ function tick() {
       leaf.body.setNextKinematicTranslation({x, y: 1.8, z: .05});
     }
   }
-  player.update(STEP); physics.step(); player.sync(); player.updateCamera(STEP); updateHUD();
+  elevator?.update?.(STEP,player.state); player.update(STEP); physics.step(); player.sync(); player.updateCamera(STEP); updateHUD();
 }
-function render() {
-  if (ready && !document.hidden && (!modes.paused() || modes.current() === 'shelf')) {
+function render(force = false) {
+  if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
     const guiding = !windowBlurred && ['explore', 'cart'].includes(modes.current()) && !player.state.character.collection.active;
@@ -168,12 +184,13 @@ window.addEventListener('blur', () => { windowBlurred = true; hideGuidance(); sh
 window.addEventListener('focus', () => { windowBlurred = false; if (ready) { updateHUD(); render(); } });
 window.addEventListener('resize', () => { modes.interrupt('viewport resize'); resize(); });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
+  if (document.hidden) { mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
   else { if (ready) { updateHUD(); render(); } else validateRestoration(); resume(); }
 });
 canvas.addEventListener('webglcontextlost', event => {
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
-  player?.interruptGraphics();
+  mallTheme?.suspend();
+  player?.interruptGraphics(); elevator?.interrupt?.();
   if (!fatal) graphicsStatus = 'lost';
   fallback(fatal ? 'The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D.' : 'The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.', false);
 });
@@ -220,6 +237,7 @@ function validateRestoration() {
     quality.recover(); resize();
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
+    if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
     player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
@@ -231,7 +249,7 @@ function validateRestoration() {
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
     window.__sceneFailed = false; window.__sceneReady = true;
-    ui.restored(); resume();
+    mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
   } catch {
     fallback('The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.');
   }
@@ -248,13 +266,64 @@ async function initialize() {
   try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
-  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics);
+  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded);
+  if (expanded) {
+    try {
+      const {createMallThemeCoordinator} = await loadOptionalThemeModule(() => import('./assets/mall-themes.js'));
+      let storage;
+      try { storage=window.localStorage; } catch { storage=null; }
+      const packs={
+        'lunar-new-year':{load:query=>import(`./assets/lunar-new-year.js${query}`),prepare:'prepareLunarDecor',attempts:0,promise:null},
+        christmas:{load:query=>import(`./assets/christmas.js${query}`),prepare:'prepareChristmasDecor',attempts:0,promise:null},
+        deepavali:{load:query=>import(`./assets/deepavali.js${query}`),prepare:'prepareDeepavaliDecor',attempts:0,promise:null}
+      };
+      function loadSeasonalModule(pack){
+        if(!pack.promise){
+          const query=pack.attempts++ ? `?retry=${pack.attempts}` : '';
+          const tracked=loadOptionalThemeModule(() => pack.load(query)).catch(error=>{
+            if(pack.promise===tracked)pack.promise=null;
+            throw error;
+          });
+          pack.promise=tracked;
+        }
+        return pack.promise;
+      }
+      let paintedTheme='everyday';
+      mallTheme=createMallThemeCoordinator({storage,notify:state=>{
+        ui.updateMallTheme(state);
+        if(state.active!==paintedTheme){
+          paintedTheme=state.active;
+          // A single frame shows the committed stage behind settings; the
+          // paused scene must not restart its animation loop.
+          if(!state.suspended && document.body.classList.contains('is-3d') && document.querySelector('#mall-theme-dialog').open){
+            try { render(true); } catch(error) { console.error('Theme preview could not render.',error); }
+          }
+        }
+      },async prepare(theme,{signal}){
+        if(theme.id==='everyday')return {value:theme,dispose(){}};
+        const definition=Object.hasOwn(packs,theme.id) ? packs[theme.id] : null;
+        if(!definition || signal.aborted)throw new Error('Theme unavailable');
+        const pack=await loadSeasonalModule(definition);
+        if(signal.aborted)throw new Error('Theme preparation cancelled');
+        return pack[definition.prepare](T,world.scene,theme,{signal});
+      },commit(next,previous,stage){
+        try { if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');stage?.mount?.();render(); }
+        catch(error) { world.applyMallTheme(previous);elevator?.applyMallTheme?.(previous);throw error; }
+      }});
+      if(!world.applyMallTheme(mallTheme.definition())) throw new Error('Invalid initial theme');
+      if(contextLost || interrupted) mallTheme.suspend();
+    } catch { mallTheme?.destroy();mallTheme=null; }
+    ui.configureMallTheme(mallTheme);
+  }
   if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
     const {createElevatorV2} = await import('./assets/elevator-v2.js');
-    elevator = createElevatorV2(T, R, physics, world.scene);
+    elevator = createElevatorV2(T, R, physics, world.scene, expanded);
+    if(mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {mallTheme.destroy();mallTheme=null;ui.configureMallTheme(null);}
     world.interactables.push(...elevator.interactables);
+    world.cameraObstacles.push(...(elevator.cameraObstacles||[]));
   }
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles);
+  if(mallTheme && !contextLost && !interrupted) await mallTheme.restore();
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded);
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
@@ -276,7 +345,7 @@ async function initialize() {
   });
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
-  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated}),value=>{
+  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel,capability:player.cartCapability()}),value=>{
     if(!ready)return false;
     const ok=player.setCart(value);updateHUD();render();return ok;
   });
@@ -287,7 +356,7 @@ async function initialize() {
     return player.startCollection(world.createCollectProp(id),id);
   });
   ui.onBagChange(value => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
-  player.teleport('atrium'); updateHUD();
+  player.teleport(expanded ? 'entry' : 'atrium'); updateHUD();
   initialized = true;
   new ResizeObserver(resize).observe(canvas);
   if (interrupted) { validateRestoration(); return; }
@@ -299,3 +368,4 @@ initialize().catch(error => {
   console.error('3D mall initialization failed:', error);
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
+window.addEventListener('pagehide', event=>{if(!event.persisted) mallTheme?.destroy();});

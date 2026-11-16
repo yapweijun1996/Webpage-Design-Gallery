@@ -1,18 +1,58 @@
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createFurnishings} from './furnishings.js';
+import {createShell} from './shell.js';
+import {SHELL_LAYOUT} from './interior-shell-registry.js';
 import {spatial, storeCenterX} from './spatial.js';
+import {expandedLayout} from './expanded-layout.js';
+import {atriumLayout} from './atrium-layout.js';
+import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
+import {releaseStartupAssetPack} from './startup-asset-pack.js';
+
+export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill}) {
+  if (!expanded || !theme?.materials || !theme?.lighting) return false;
+  const m=theme.materials,l=theme.lighting;
+  const colors=['floorTextured','floorFlat','ceiling','ceilingGlow','wall','green','ivory','brass','wood','oak','timber','timberAlt','glass','glow','glowEmission'];
+  const lightColors=['sky','ground','key','fill'];
+  const scalars=['ceilingGlowIntensity','glassOpacity','glassRoughness','glassMetalness','glowIntensity'];
+  if(colors.some(k=>!Number.isInteger(m[k])||m[k]<0||m[k]>0xffffff)||lightColors.some(k=>!Number.isInteger(l[k])||l[k]<0||l[k]>0xffffff)||
+     scalars.some(k=>!Number.isFinite(m[k])||m[k]<0||m[k]>3)||['ambient','keyIntensity','fillIntensity'].some(k=>!Number.isFinite(l[k])||l[k]<0||l[k]>5)||
+     ['glassOpacity','glassRoughness','glassMetalness'].some(k=>m[k]>1)) return false;
+  materials.shellFloor.color.set(materials.shellFloor.map?m.floorTextured:m.floorFlat);
+  materials.shellCeiling.color.set(m.ceiling);materials.shellCeiling.emissive.set(m.ceilingGlow);materials.shellCeiling.emissiveIntensity=m.ceilingGlowIntensity;
+  materials.shellWall.color.set(m.wall);
+  for(const role of ['green','ivory','brass','wood','oak','timber','timberAlt']) materials[role].color.set(m[role]);
+  materials.glass.color.set(m.glass);materials.glass.opacity=m.glassOpacity;materials.glass.roughness=m.glassRoughness;materials.glass.metalness=m.glassMetalness;
+  materials.glow.color.set(m.glow);materials.glow.emissive.set(m.glowEmission);materials.glow.emissiveIntensity=m.glowIntensity;
+  ambient.color.set(l.sky);ambient.groundColor.set(l.ground);ambient.intensity=l.ambient;key.color.set(l.key);key.intensity=l.keyIntensity;fill.color.set(l.fill);fill.intensity=l.fillIntensity;
+  return true;
+}
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics) {
-  const furnishings = await createFurnishings(T, true);
+export async function createWorld(T, R, physics, expanded = false) {
+  try {
+  const [furnishings, shell] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T)]);
+  let shellState = null;
+  const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
+  const ceilingObstacles=[];
+  function ceilingBox(material,x,y,z,sx,sy,sz,hole=liftLayout.shaft){
+    if(!expandedLift){box(material,x,y,z,sx,sy,sz);return [{minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2}];}
+    const panels=cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole);
+    for(const r of panels){
+      box(material,(r.minX+r.maxX)/2,y,(r.minZ+r.maxZ)/2,r.maxX-r.minX,sy,r.maxZ-r.minZ);
+      ceilingObstacles.push({min:{x:r.minX,y:y-sy/2,z:r.minZ},max:{x:r.maxX,y:y+sy/2,z:r.maxZ}});
+    }
+    return panels;
+  }
   const seats=[];
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
-  scene.fog = new T.Fog(0x53625a, 32, 85);
+  scene.fog = new T.Fog(0x53625a, expanded ? 65 : 32, expanded ? 125 : 85);
   const mat = (color, extra = {}) => new T.MeshStandardMaterial({color, roughness: .72, ...extra});
   const materials = {
     jade: mat(0x21483e, {roughness: .24, metalness: .22}), jadeAlt: mat(0x244c42, {roughness: .28, metalness: .18}),
     courtStone: mat(0x49665b, {roughness: .32, metalness: .16}),
+    shellFloor: mat(0xc9c2ac, {roughness: .9}), shellCeiling: mat(0xe7ddc8, {emissive: 0x9d8c70, emissiveIntensity: .35}),
+    shellWall: mat(0xb7b6a9, {roughness: .82}),
     rugSand: mat(0x8c8063, {roughness: 1}), rugSage: mat(0x5b6d58, {roughness: 1}),
     green: mat(0x153c30), dark: mat(0x0c2923), ivory: mat(0xe3d6b7), cream: mat(0xf5e8cb),
     brass: mat(0xb59b62, {metalness: .68, roughness: .31}), wood: mat(0x6b4931), oak: mat(0xa28055),
@@ -22,16 +62,34 @@ export async function createWorld(T, R, physics) {
     water: mat(0x4f8c80, {metalness: .48, roughness: .15}),
     glass: mat(0xa0c9be, {transparent: true, opacity: .15, metalness: .2, roughness: .1, depthWrite: false, side: T.DoubleSide})
   };
+  if(expanded){
+    // Optional, local finishes cannot hold walking behind a stalled module.
+    // The module is side-effect free: a late import never invokes its factory.
+    let timer;
+    try{
+      const module=await Promise.race([
+        import('./natural-materials.js'),
+        new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Optional finish timeout')),2000);}),
+      ]);
+      const natural=module.createNaturalSurfaceTextures(T);
+      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xffffff);materials.shellFloor.roughness=.58;}
+      if(natural.wood)for(const name of ['wood','oak','timber','timberAlt'])materials[name].map=natural.wood;
+    }catch{/* Retain usable solid finishes on module/canvas failure. */}
+    finally{clearTimeout(timer);}
+    materials.shellCeiling.color.set(0xf0e8d9);materials.shellCeiling.emissive.set(0xb3a286);materials.shellCeiling.emissiveIntensity=.55;
+    materials.shellWall.color.set(0xc9c4b6);
+    materials.glass.color.set(0xd7e9df);materials.glass.opacity=.19;materials.glass.roughness=.08;materials.glass.metalness=.08;
+  }
   const geometry = {
     box: new T.BoxGeometry(1, 1, 1), cylinder: new T.CylinderGeometry(1, 1, 1, 32), sphere: new T.SphereGeometry(1, 12, 8),
     plane: new T.PlaneGeometry(1, 1), torus: new T.TorusGeometry(1, .045, 8, 64), ring: new T.RingGeometry(.985, 1, 64)
   };
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
   const position = new T.Vector3(), scale = new T.Vector3();
-  function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0) {
+  function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ') {
     const key = `${type}:${material}`;
     if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: materials[material], transforms: []});
-    position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, 0); quaternion.setFromEuler(euler);
+    position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, 0, order); quaternion.setFromEuler(euler);
     matrix.compose(position, quaternion, scale); batches.get(key).transforms.push(matrix.clone());
   }
   function collider(x, y, z, sx, sy, sz) {
@@ -110,12 +168,12 @@ export async function createWorld(T, R, physics) {
     }
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
-  function bench(x, z, facing = 1) {
+  function bench(x, z, facing = 1, label = null) {
     const seatScale=new URLSearchParams(location.search).get('visitor') !== 'v1' ? .8 : 1;
     const seatCollider=collider(x, .3*seatScale, z, 2.5, .4*seatScale, .85);
     const index=seats.length,id=index===0?'courtyard-seat':`bench-seat-${index+1}`;
-    const name=z>0?`Courtyard bench ${index+1}`:`${x<5?'MILI':'GOGO'} bench ${index%2+1}`;
-    seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2):.45,collider:seatCollider.handle});
+    const name=label || (z>0?`Courtyard bench ${index+1}`:`${x<5?'MILI':'GOGO'} bench ${index%2+1}`);
+    seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2)*facing:.45,collider:seatCollider.handle});
     const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*seatScale,bz,sx,sy*seatScale,sz);
     if (!furnishings.place('bench', x, z, seatScale, facing)) {
       benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, .56, z, 2.55, .18, .9);
@@ -141,8 +199,17 @@ export async function createWorld(T, R, physics) {
     lightPool(x, .052, z, 4.6, 4.6);
   }
   // Continuous slab; shop thresholds remain level and physically unobstructed.
-  box('dark', 0, -.22, 3.5, 30.4, .4, 29.4, true);
-  for (let x = -14; x <= 14; x += 2) for (let z = 1; z <= 17; z += 2) box((x + z) % 4 === 1 ? 'jade' : 'jadeAlt', x, -.005, z, 1.99, .04, 1.99);
+  if (expanded) {
+    box('dark', 10, -.22, 18, 70, .4, 60, true);
+    box('shellFloor', 10, -.035, 18, 70, .04, 60);
+  } else {
+    // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
+    for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
+    const foundation = SHELL_LAYOUT.foundation_visual;
+    box(foundation.material, ...foundation.position, ...foundation.size);
+  }
+  if (!expanded) {
+  for (const [x, y, z] of SHELL_LAYOUT.retained_tiles) box((x + z) % 4 === 1 ? 'jade' : 'jadeAlt', x, y, z, 1.99, .04, 1.99);
   for (const x of [-14.6, -5, 5, 14.6]) box('brass', x, .022, 9, .025, .012, 17.8);
   for (const z of [.6, 4, 11.5, 17.3]) box('brass', 0, .023, z, 29.3, .012, .025);
   // A shallow stone-and-brass promenade gives the arrival view a designed foreground.
@@ -164,29 +231,29 @@ export async function createWorld(T, R, physics) {
       solid('box', 'jade', side * 2.9, .045, z, .25, .004, .25, Math.PI / 4);
     }
   }
-  box('green', -15, 3.3, 3.5, .3, 6.6, 29, true); box('green', 15, 3.3, 3.5, .3, 6.6, 29, true);
-  box('green', 0, 3.3, 18, 30, 6.6, .3, true);
-  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
-    // Leave a real shaft opening for the experimental lift, without changing v1.
-    for (const side of [-1, 1]) box('ivory', side * 8.2, 6.5, 9, 13.6, .3, 18);
-    box('ivory', 0, 6.5, 7.25, 2.8, .3, 14.5);
-    box('ivory', 0, 6.5, 17.75, 2.8, .3, .5);
-  } else box('ivory', 0, 6.5, 9, 30, .3, 18);
+  }
+  if (!expanded) {
+    const roof = new URLSearchParams(location.search).get('visitor') !== 'v1' ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
+    for (const component of [...SHELL_LAYOUT.caps, ...roof]) box(component.material, ...component.position, ...component.size);
+    shellState = shell.finish(scene, solid);
+  }
+  if (!expanded) {
   // Skylight replaces the central roof panel visually, with dusk glass and brass ribs.
-  box('dark', 0, 6.29, 8.3, 14.6, .06, 13);
-  box('glass', 0, 6.25, 8.3, 14.1, .025, 12.6);
-  for (let x = -7; x <= 7; x += 2) box('brass', x, 6.18, 8.3, .045, .08, 12.7);
-  for (const z of [2, 5.1, 8.3, 11.5, 14.6]) box('brass', 0, 6.15, z, 14.1, .08, .045);
+  ceilingBox('dark', 0, 6.29, 8.3, 14.6, .06, 13);
+  ceilingBox('glass', 0, 6.25, 8.3, 14.1, .025, 12.6);
+  for (let x = -7; x <= 7; x += 2) ceilingBox('brass', x, 6.18, 8.3, .045, .08, 12.7);
+  for (const z of [2, 5.1, 8.3, 11.5, 14.6]) ceilingBox('brass', 0, 6.15, z, 14.1, .08, .045);
   // Dusk-lit ceiling inset: no texture or runtime environment download.
   const skylight = new T.Mesh(new T.PlaneGeometry(14, 12.5), new T.ShaderMaterial({side: T.DoubleSide, vertexShader: 'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec2 v;void main(){gl_FragColor=vec4(mix(vec3(.13,.24,.28),vec3(.78,.52,.29),pow(1.-v.y,3.)),1.);}'}));
   skylight.rotation.x = Math.PI / 2; skylight.position.set(0, 6.23, 8.3); scene.add(skylight);
-  for (const x of [-14.5, -5, 5, 14.5]) {
+  }
+  if (!expanded) for (const x of [-14.5, -5, 5, 14.5]) {
     box('dark', x, 2.9, .4, .65, 5.8, .9, true); box('brass', x, .18, .4, .85, .18, 1.1); box('brass', x, 5.5, .4, .85, .12, 1.1);
     for (const dx of [-.19, 0, .19]) box('brass', x + dx, 2.9, .865, .018, 4.85, .025);
     box('glow', x, 5.36, .87, .52, .025, .025);
     lightPool(x, .053, 1.1, 2.6, 3.1);
   }
-  for (const x of [-14.7, 14.7]) for (const z of [4, 10, 16]) {
+  if (!expanded) for (const x of [-14.7, 14.7]) for (const z of [4, 10, 16]) {
     if (!furnishings.place('wallLight', x, z, 1, 1, 2.1, x < 0 ? Math.PI / 2 : -Math.PI / 2)) {
       box('brass', x, 2.6, z, .2, 1.1, .4); box('glow', x + (x < 0 ? .13 : -.13), 2.65, z, .12, .8, .3);
     }
@@ -194,8 +261,54 @@ export async function createWorld(T, R, physics) {
     lightPool(x < 0 ? -14 : 14, .054, z, 2.8, 3.8);
   }
   for (const x of [-9.5, 9.5]) for (const z of [4.2, 12.5]) pendant(x, z, 4.9);
-  plant(-5.7, 4); plant(5.7, 4); plant(-12.9, 15.8, 1.3); plant(12.9, 15.8, 1.3);
-  bench(-7.8, 9.5); bench(7.8, 9.5); bench(-7.8, 13, -1); bench(7.8, 13, -1);
+  if (!expanded) {
+    plant(-5.7, 4); plant(5.7, 4); plant(-12.9, 15.8, 1.3); plant(12.9, 15.8, 1.3);
+    bench(-7.8, 9.5); bench(7.8, 9.5); bench(-7.8, 13, -1); bench(7.8, 13, -1);
+  } else {
+    // Low planting preserves views while leaving the seasonal/event block clear.
+    const garden=atriumLayout.garden;
+    box('ivory',garden.x,garden.height/2,garden.z,garden.width,garden.height,garden.depth,true);
+    box('wood',garden.x,garden.height+.012,garden.z,garden.width-.18,.025,garden.depth-.18);
+    for (let i=0;i<13;i++) {
+      const x=garden.x-3.45+i*.575, z=garden.z+(i%3-1)*.65;
+      sphere('foliage',x,.57,z,.28,.14,.23);
+      for (let leaf=0;leaf<5;leaf++) {
+        const angle=leaf*Math.PI*2/5+(i%3)*.2;
+        solid('sphere',leaf%2?'leaf':'foliage',x+Math.sin(angle)*.15,.7,z+Math.cos(angle)*.15,
+          .085,i%4===0?.34:.27,.055,angle,.72,'YXZ');
+      }
+    }
+    for (const lounge of atriumLayout.lounges) {
+      // Flush stone inset; it creates a room within the open floor without a trip edge.
+      box('rugSand',lounge.x,.01,lounge.z,5.8,.012,7.8);
+      for (const side of [-1,1]) {
+        box('oak',lounge.x+side*2.84,.019,lounge.z,.035,.008,7.62);
+        box('oak',lounge.x,.019,lounge.z+side*3.74,5.7,.008,.035);
+      }
+      for (const [i,seat] of lounge.seats.entries()) bench(seat.x,seat.z,1,`${lounge.id === 'west' ? 'West' : 'East'} lounge seat ${i+1}`);
+      const table=lounge.table;
+      // A compact side table fits between the two sofas without blocking either exit.
+      cylinder('brass',table.x,.27,table.z,.055,.5);
+      cylinder('oak',table.x,.53,table.z,.29,.06);
+      cylinder('brass',table.x,.04,table.z,.2,.05);
+      collider(table.x,.28,table.z,.58,.56,.58);shadow(table.x,table.z,1,1);
+      for (const planter of lounge.planters) {
+        box('pot',planter.x,.3,planter.z,.7,.6,.7,true);
+        box('wood',planter.x,.61,planter.z,.6,.025,.6);
+        for (let i=0;i<5;i++) {
+          const a=i*Math.PI*2/5;
+          solid('sphere',i%2?'leaf':'foliage',planter.x+Math.sin(a)*.12,.8,planter.z+Math.cos(a)*.12,.08,.27,.05,a,.72,'YXZ');
+        }
+      }
+      // Shared, non-colliding ceiling lighting keeps each lounge legible at a distance.
+      for (const z of [22,26]) {
+        box('glow',lounge.x,8.34,z,4,.035,.065);
+        lightPool(lounge.x,.025,z,5,4);
+      }
+    }
+  }
+  // Remove the old focal point and its matching collider from the expanded loop.
+  if (!expanded) {
   // Low water court, not a wall blocking the whole concourse.
   if (!furnishings.place('plinth', 0, 7.5)) {
     cylinder('brass', 0, .12, 7.5, 2.25, .22); cylinder('ivory', 0, .38, 7.5, 2.04, .48);
@@ -215,22 +328,29 @@ export async function createWorld(T, R, physics) {
     solid('box', 'brass', Math.sin(a) * 2.66, .034, 7.5 + Math.cos(a) * 2.66, .035, .008, .1, a);
   }
   lightPool(0, .05, 7.5, 7.2, 7.2);
+  }
   // Three 12cm steps provide a real auto-step path to a quiet seating terrace.
-  for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
-  box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
+  if (!expanded) {
+    for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
+    box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
+  }
   const doors = [], interactables = [];
   let createCollectProp = () => null, reserveProduct = () => null, staticProductCount=0;
   let worldProductAssets = Object.freeze({status: 'not-loaded'}), shelves = [];
   // Original decorative kiosk beside the entrance, outside the central walking line.
   // The actual wayfinding interaction opens the existing three-store DOM map.
-  if (!furnishings.place('kiosk', -5.3, 10.4, 1, -1)) {
-    box('jade', -5.3, 1.22, 10.4, .94, 1.6, .22);
-    box('brass', -5.3, .08, 10.4, .96, .16, .68);
-    box('dark', -5.3, 1.3, 10.53, .78, 1.25, .035);
+  // The old kiosk artwork depicts the old three-room floorplan. Use a neutral
+  // screen in the expanded shell; its existing interaction opens the live map.
+  const directory=expanded?liftLayout.directory:{x:-5.3,z:10.4};
+  if (expanded || !furnishings.place('kiosk', directory.x, directory.z, 1, -1)) {
+    box('jade',directory.x,1.22,directory.z,.94,1.6,.22);
+    box('brass',directory.x,.08,directory.z,.96,.16,.68);
+    box('dark',directory.x,1.3,directory.z+.13,.78,1.25,.035);
+    if(expanded)sign('DIRECTORY',directory.x,1.55,directory.z+.16,.7,.16,false,90);
   }
-  collider(-5.3, 1.025, 10.4, .96, 2.05, .68);
-  shadow(-5.3, 10.4, 1.2, .9);
-  interactables.push({id: 'mall-directory', x: -5.3, z: 10.4, radius: 2.8});
+  collider(directory.x,1.025,directory.z,.96,2.05,.68);
+  shadow(directory.x,directory.z,1.2,.9);
+  interactables.push({id:'mall-directory',...directory,radius:2.8});
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
     const wall = zone === 'mili' ? 'cream' : 'green';
@@ -238,21 +358,34 @@ export async function createWorld(T, R, physics) {
     box(wall, x, 2.85, -10.5, 10, 5.7, .25, true);
     for (const side of [-1, 1]) {
       box(wall, x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5, true);
-      box('courtStone', x + side * 3.55, 2.6, 0, 2.4, 5.2, .35, true);
-      // Pale jade inset faces and brass borders lighten both sides of the portal.
-      // The original solid collision and sliding-door clearance remain unchanged.
-      for (const face of [-1, 1]) {
-        box('glass', x + side * 3.6, 2.08, face * .23, 2.12, 3.5, .055);
+      if (expanded) {
+        // Glazing is physically solid but visually transparent: shoppers can
+        // see the real existing interior without blocking the 4.7 m doorway.
+        const frame=zone==='mili'?'oak':zone==='gogo'?'jadeAlt':'green';
+        box('glass', x + side * 3.55, 2.6, 0, 2.4, 5.2, .12, true);
+        box('shellWall', x + side * 3.55, .26, .1, 2.4, .52, .2);
         for (const edge of [-1, 1]) {
-          box('brass', x + side * 3.6 + edge * 1.1, 2.08, face * .28, .035, 3.57, .045);
-          box('brass', x + side * 3.6, 2.08 + edge * 1.785, face * .28, 2.23, .035, .045);
+          box(frame, x + side * 3.55 + edge * 1.15, 2.65, .1, .11, 5.05, .18);
+          box('brass', x + side * 3.55, 2.6 + edge * 2.49, .12, 2.3, .06, .16);
+        }
+        box('brass', x + side * 3.55, 2.58, .12, 2.3, .035, .12);
+      } else {
+        // Keep the original facade and collision in the reversible legacy view.
+        for (const face of [-1, 1]) {
+          box('glass', x + side * 3.6, 2.08, face * .23, 2.12, 3.5, .055);
+          for (const edge of [-1, 1]) {
+            box('brass', x + side * 3.6 + edge * 1.1, 2.08, face * .28, .035, 3.57, .045);
+            box('brass', x + side * 3.6, 2.08 + edge * 1.785, face * .28, 2.23, .035, .045);
+          }
         }
       }
       box('brass', x + side * 2.36, 1.9, .22, .065, 3.8, .08);
       box('glow', x + side * 3.6, 3.67, .28, 2.12, .035, .04);
       lightPool(x + side * 3.6, .053, 1.15, 3.4, 3.7);
     }
-    box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
+    if (expanded) {
+      box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
+    }
     box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
     // Layered skirting and cornices add depth without moving the walls or artwork.
     for (const side of [-1, 1]) {
@@ -340,7 +473,8 @@ export async function createWorld(T, R, physics) {
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
-      const productDisplay = await addProducts(T, scene, textures, materials.brass,SHOWCASE_PRODUCTS);
+      const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
+      const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
@@ -355,7 +489,8 @@ export async function createWorld(T, R, physics) {
       box('oak', x, .92, -10.09, 4, .075, .28);
       box('glow', x, 4.77, -10.16, 3.7, .025, .07);
       interactables.push({id: zone, x, z: -9, radius: 2.5});
-      bench(x - 3, -6.8); bench(x + 3, -6.8);
+      // Store seating faces the natural route from the entrance, not the rear wall.
+      bench(x - 3, -6.8, -1); bench(x + 3, -6.8, -1);
       if (!furnishings.place('coffeeTable', x, -5.5)) {
         cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
         cylinder('brass', x, .853, -5.5, .805, .025);
@@ -388,16 +523,82 @@ export async function createWorld(T, R, physics) {
       }
     }
   }
-  const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount);
+  if (expanded) {
+    // Closed neutral bays are physical shells, not claims that tenants are open.
+    for (const bay of expandedLayout.slots.filter(item => !item.available)) {
+      const x=(bay.minX+bay.maxX)/2, z=(bay.minZ+bay.maxZ)/2;
+      box('ivory', x, .018, z, bay.maxX-bay.minX-.12, .025, bay.maxZ-bay.minZ-.12);
+      if (bay.side === 'north') {
+        box('shellWall', x, 2.6, 0, 9.9, 5.2, .25, true);
+        box('glass', x, 2.2, .15, 8.9, 3.7, .06);
+        box('brass', x, 4.35, .2, 9.1, .06, .06);
+        for (const offset of [-3, 0, 3]) box('brass', x+offset, 2.25, .2, .055, 3.9, .055);
+        box('ivory', x, .3, .2, 9.1, .45, .1);
+        for (const edge of [bay.minX,bay.maxX]) box('ivory', edge, 2.8, -6, .2, 5.6, 12, true);
+      } else {
+        const front=bay.side === 'west' ? bay.maxX : bay.minX;
+        box('shellWall', front, 2.6, z, .25, 5.2, 7.9, true);
+        box('glass', front+(bay.side === 'west' ? .15 : -.15), 2.2, z, .06, 3.7, 7);
+        box('brass', front+(bay.side === 'west' ? .2 : -.2), 4.35, z, .06, .06, 7.2);
+        for (const offset of [-2.35, 0, 2.35]) box('brass', front+(bay.side === 'west' ? .2 : -.2), 2.25, z+offset, .055, 3.9, .055);
+        box('ivory', front+(bay.side === 'west' ? .2 : -.2), .3, z, .1, .45, 7.2);
+        for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
+      }
+    }
+    // The closed glass entrance provides a visible boundary to the ground floor.
+    for (const x of [-25,45]) box('ivory',x,3.3,18,.3,6.6,60,true);
+    box('ivory',10,3.3,-12,70,6.6,.3,true);
+    for (const x of [-10.5,30.5]) box('ivory',x,3.3,48,29,6.6,.3,true);
+    box('glass',10,2.8,48,12,5.6,.3,true);
+    for (const x of [4,10,16]) box('brass',x,2.8,47.8,.08,5.6,.08);
+    // Four roof panels leave the 12 x 12 m upper landing open to the sky.
+    ceilingBox('shellCeiling',10,8.5,18,70,.25,60,liftLayout.roofOpening);
+    // Recessed strips share the retained roof footprint, including its camera opening.
+    // Reuse existing emissive/pool batches; no new lights or visitor colliders.
+    function warmStrip(x,z,width,depth){
+      const panels=ceilingBox('glow',x,8.34,z,width,.035,depth,liftLayout.roofOpening);
+      for(const r of panels)lightPool((r.minX+r.maxX)/2,.052,(r.minZ+r.maxZ)/2,
+        width>depth?r.maxX-r.minX:4.5,width>depth?4.5:r.maxZ-r.minZ);
+    }
+    for(const x of [-12,32])for(const z of [10,22,34])warmStrip(x,z,.07,6);
+    for(const x of [-5,10,25])warmStrip(x,3,6,.07);
+
+    // This is a closed reservation, not an operating facility.
+    box('ivory',25,1.5,10,6,3,4,true);
+    const facility=sign('FUTURE FACILITIES',28.07,2,10,2.5,.35,true,60);facility.rotation.y=Math.PI/2;
+    for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
+    for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
+    // A single atlas and mesh keep the fourteen numbered signs to one draw call.
+    const planned=expandedLayout.slots.filter(item=>!item.available);
+    const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=128*planned.length;
+    const ctx=canvas.getContext('2d'); ctx.fillStyle='#17372e';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#f5e8cb';ctx.font='bold 40px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    planned.forEach((bay,i)=>ctx.fillText(`S${bay.number}  ·  PLANNED SPACE`,256,128*i+64));
+    const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
+    const positions=[], uvs=[], indices=[];
+    planned.forEach((bay,i)=>{
+      const x=bay.side==='north'?(bay.minX+bay.maxX)/2:bay.side==='west'?-14.73:34.73;
+      const z=bay.side==='north'?.27:(bay.minZ+bay.maxZ)/2;
+      const angle=bay.side==='west'?Math.PI/2:bay.side==='east'?-Math.PI/2:0;
+      for (const [dx,dy] of [[-1.9,-.4],[1.9,-.4],[1.9,.4],[-1.9,.4]]) positions.push(x+dx*Math.cos(angle),3.2+dy,z-dx*Math.sin(angle));
+      const bottom=(planned.length-i-1)/planned.length, top=(planned.length-i)/planned.length;
+      uvs.push(0,bottom,1,bottom,1,top,0,top);
+      const n=i*4;indices.push(n,n+1,n+2,n,n+2,n+3);
+    });
+    const signGeometry=new T.BufferGeometry();signGeometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));signGeometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));signGeometry.setIndex(indices);signGeometry.computeBoundingSphere();
+    scene.add(new T.Mesh(signGeometry,new T.MeshBasicMaterial({map:texture})));
+  }
+  const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m)); mesh.castShadow = mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); scene.add(mesh);
   }
-  scene.add(new T.HemisphereLight(0xe4efe6, 0x6d5b3b, 2.1));
+  const ambient = new T.HemisphereLight(expanded ? 0xfff3e2 : 0xe4efe6, expanded ? 0x77634b : 0x6d5b3b, 2.1);scene.add(ambient);
   const key = new T.DirectionalLight(0xffd5a0, 2.6); key.position.set(-8, 15, 9); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
-  const fill = new T.DirectionalLight(0xb7d7e8, 1); fill.position.set(4, 8, -5); scene.add(fill);
+  const fill = new T.DirectionalLight(expanded ? 0xf4e4ce : 0xb7d7e8, expanded ? .9 : 1); fill.position.set(4, 8, -5); scene.add(fill);
+  const applyMallTheme = theme => applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();
   const signHUD = ['.site-header', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));
@@ -422,11 +623,14 @@ export async function createWorld(T, R, physics) {
       mesh.visible = !overlaps;
     }
   }
-  interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.1,seat})));
+  interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.65,seat})));
   const furnishingState=furnishings.finish(scene);
   const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
-  const cameraObstacles=seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}}));
-  return {scene, doors, seats, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  const cameraObstacles=ceilingObstacles.concat(seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
+  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, applyMallTheme, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  } finally {
+    releaseStartupAssetPack();
+  }
 }

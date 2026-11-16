@@ -1,0 +1,118 @@
+{
+  "sourceBaseline": "099069d41a77a7fc76f8ce66e6259931fa50ffde",
+  "runtimeSHA256": {
+    "assets/natural-materials.js": "3c52b59ce7ed31f38a299cf674827b9c841d6646555a41f0397daaffbdcf1406",
+    "assets/world.js": "3eed36e220698345f832709f6a5181f3c1b0a90bc0e9d4bceee943476fd5f07a",
+    "assets/elevator-v2.js": "abbd805647ed821c367cff481e22563c8ed1e22139fcf76a301597f1ad93f950"
+  },
+  "testSHA256": {
+    "gjh_natural_materials.test.mjs": "9dcf5bc1b2f56e1ad0d171172c2c76bb72b9dde7df33fc985c8f155508797d02",
+    "browser_gjh_materials.py": "5b71a888360fb8346b7e3649f5682169b2445b89cbcd18672ec0a485c15198aa"
+  },
+  "phases": {
+    "baseline": {
+      "report": "/private/tmp/gallery-expanded-stage8/baseline/report.json",
+      "reportSHA256": "df7a3ee1ba774922cd684f2189d79470ca3c94b1612716d2b6775ed3696fe1c2",
+      "logSHA256": "fc4cab5a76210ce2b6f08472ec681b181653baf96d0cc4fe8d4354185050d7a3",
+      "sourcesUnchanged": true,
+      "rows": 2,
+      "pngs": {
+        "1440-court.png": "7ed2c56d949c01826b0c16bf9b6cdac28a08f959bba1fedb352312cca5564279",
+        "1440-entry.png": "289c771009e5b1b645faa9f504e7ec7a86dd45e0aba6c6a04c2eaf4b80be9d2c",
+        "1440-store.png": "7c35e5719cd27789a9f382e1662fa2ea6c3182043891b0bec5caf52a049436d3",
+        "1440-upper.png": "698267e84629ef671902656fb07fccb021a909b6d549c01263e36bc0c7f31856",
+        "1440-west-court-walk.png": "2d89846922ab92728f6b9a24ce3415a5eb7b285a7af37b56366c9bb2f6bc5fcf",
+        "390-court.png": "ec2a51c42dbfd48e1f4cd8b7e0be536e88ce6ad253e6db1eb273a66eb72d5ffc",
+        "390-entry.png": "d1b308e17a6f0758c8976087da3945d7c686607038e8c15cbdaca45af9e6e781",
+        "390-store.png": "34cc28066d7023c891bc772b406f0c4f20d4649b63ae018f8445457beedda9c3",
+        "390-upper.png": "6a842e01a4c2b7579185e8c4f5fb6034901badbd687881bc111b654d9ba1f3e0",
+        "390-west-court-walk.png": "fa789b0f0180ce39f19d4a4b34fec001ee912a4ceeedd68757c094899187a518"
+      }
+    },
+    "early": {
+      "report": "/private/tmp/gallery-expanded-stage8/early/report.json",
+      "reportSHA256": "09ea43ca2c6a2da681f0b5cc6fa2f1c9319ae98953a76b88034139e159fd5395",
+      "logSHA256": "fc4cab5a76210ce2b6f08472ec681b181653baf96d0cc4fe8d4354185050d7a3",
+      "sourcesUnchanged": true,
+      "rows": 2,
+      "pngs": {
+        "1440-court.png": "d417f51f0d246a6f2163406676fa0c592e309988d523cf10030743fdaf31703b",
+        "1440-entry.png": "f2aea12062c186a75dda733fc166788fbaa8991de7a0ed5712c5db6a903842fa",
+        "1440-store.png": "b6eb6f5a08ff0a95b55f6fa4f047d1a5f354a4b38c55a87e903061957208cfd6",
+        "1440-upper.png": "78210828cbb8ed2e32efbdbf40f09c4544c3a875896bdaf9adc164aa5fd3aee6",
+        "1440-west-court-walk.png": "8e1f3bc54c7a484584b1765536836afad11aacd79d67eb96cf9affc2f6acba41",
+        "390-court.png": "284568c7da25610410936b33cb1da970d45fda61e52956fe0f1f56b04c28e926",
+        "390-entry.png": "12b388ffcc3cd17c278d7c73e3ce19267c2fc2fdcf70339b05152fd58cf5a33a",
+        "390-store.png": "31d2d921aedbcb681b2b35c42af941b4567c4780231c9fa2a0b3434cb5e628f2",
+        "390-upper.png": "1722c399e98b23a88a53283fa50f53caddc36777a00f52874dd13dd6dec1c577",
+        "390-west-court-walk.png": "97cc4a293a48fd0eca4611b45862346b432df3971ee4ee40a1aa5da3b3fd6d80"
+      }
+    },
+    "failures": {
+      "report": "/private/tmp/gallery-expanded-stage8/worker/failures/report.json",
+      "reportSHA256": "ffc649d3765314467e9f6ef99c8a28faaa8d62be4681fad8cc97e290d99cafb2",
+      "logSHA256": "8e00a79cc0e37f42f793dab20a80b06390b5ee490d676a9e85d797c713c75832",
+      "sourcesUnchanged": true,
+      "rows": 7,
+      "pngs": {
+        "canvas-first.png": "35147432fc3edaceaf79290a001518c60ddcf2cf29056519e676954976123185",
+        "canvas-second.png": "43fe91d248985843c7e81866cdb400755a973b3c097587950dd813c502a25f6b",
+        "context-before.png": "12b388ffcc3cd17c278d7c73e3ce19267c2fc2fdcf70339b05152fd58cf5a33a",
+        "context-restored.png": "12b388ffcc3cd17c278d7c73e3ce19267c2fc2fdcf70339b05152fd58cf5a33a",
+        "late.png": "43fe91d248985843c7e81866cdb400755a973b3c097587950dd813c502a25f6b",
+        "module-missing.png": "2607b5a0229fc85694d0328bd0a2c1dd16c5b27ecd6c79644c0ca9c3fcd49af5"
+      }
+    },
+    "normal": {
+      "report": "/private/tmp/gallery-expanded-stage8/worker/normal/report.json",
+      "reportSHA256": "c63e34ea9b03495b2bb6e30c07db1df788af8d4d97e93b8988391e9731a4f9cf",
+      "logSHA256": "78de0505708a0fbd3559c45694e40fef5067290db463f991739610a359204280",
+      "sourcesUnchanged": true,
+      "rows": 5,
+      "pngs": {
+        "1440-court.png": "71ee683849c9fc15d5cd4332ca08979e6f09f56baeb5fb0283bc9400c8b26b55",
+        "1440-entry.png": "6c52ed14ecfdca66a7b6b4f6514f5788ff31de3fe1259b747b6cbc77ea1d2787",
+        "1440-store.png": "4315ea9c2be9a0511fba39e9355440c5d12bd2af5dfd4a7adb74c48c6726f1e1",
+        "1440-upper.png": "5c89d314d92f822197577af9ea09aa36723c6a2b6df8f26d3707fef84f37bacf",
+        "1440-west-court-walk.png": "8e1f3bc54c7a484584b1765536836afad11aacd79d67eb96cf9affc2f6acba41",
+        "320-court.png": "b3d0157d4065e354e591aea3da4d175aacea7434dfd6920c6537ccde4e9038c0",
+        "320-entry.png": "7af05444a12544cc0378883dd9e5666b15157138a16e5383b5d0e36dd09b5dd7",
+        "320-store.png": "d60b6e24502b286aad704db676efe0e0049cdccff3c7cef79b5d645bdc34425c",
+        "390-court.png": "284568c7da25610410936b33cb1da970d45fda61e52956fe0f1f56b04c28e926",
+        "390-entry.png": "12b388ffcc3cd17c278d7c73e3ce19267c2fc2fdcf70339b05152fd58cf5a33a",
+        "390-store.png": "31d2d921aedbcb681b2b35c42af941b4567c4780231c9fa2a0b3434cb5e628f2",
+        "390-upper.png": "fa185cbeea2df92884ad2f63bcda5492efd99968b8a6389e0b72b26b2a73b596",
+        "390-west-court-walk.png": "97cc4a293a48fd0eca4611b45862346b432df3971ee4ee40a1aa5da3b3fd6d80",
+        "768-court.png": "e5e158db98ef2d12912a124b9e2f6c118d0a2f25345cf3bd4d77166473eba6c9",
+        "768-entry.png": "be4e202fb60607725c9cdb515596b307d4f945565b70a301d362fd276c6313fd",
+        "768-store.png": "50a7b832d9e6e50105b74cf338950def4c04af9fbd06902db033cae9be075575",
+        "844-court.png": "b34288ab54501a97478509162a763cafc53ff7db24b2496a7a2b1b5bd695b39c",
+        "844-entry.png": "afbcba7db84836ed20693eef5ee46383f85ac4b40fe1ddbbf7e6fea2a765a472",
+        "844-store.png": "8bf1b58defd8e42bf860ccd8848f48da441c5901b02ed0ca7210d260cb8480f1"
+      }
+    }
+  },
+  "scope": "Stage8 expanded natural finishes and warm existing lighting only; no theme selection/storage/seasonal packs. No physical-device/photorealistic/GPU-memory/throughput certification.",
+  "ownership": "Only3productionfiles and2newtests; root ownsapp52/generation/docs/task/release. No active childGPU/sourcewrites.",
+  "results": {
+    "baseline": "PASS2profiles10poses beforeproductionedits",
+    "early": "PASS2matchedprofiles10poses, primary pixelapproval",
+    "normal": "PASS5viewportcontexts, fourqualitypreferences on390,19PNG,zero unexpected console, allposedcalls<=200",
+    "failures": "PASS7cases:modulemissing/canvasfirst/canvassecond/lateimport/nativecontextrestore/classicv2/classicv1;6PNGs. Counters are test-only served-module instrumentation and actualrendererresource observations."
+  },
+  "optionalModuleSHA256": "3c52b59ce7ed31f38a299cf674827b9c841d6646555a41f0397daaffbdcf1406",
+  "optionalModuleBytes": 2372,
+  "qaInstrumentedModule": {
+    "sha256": "25552f215934baf729ec1d3a82b66c42f33c7c7177ce1395d06dc01c45840394",
+    "path": "/private/tmp/gallery-expanded-stage8/worker/failures/qa-natural-materials.js"
+  },
+  "pixelReview": [
+    "1440entry/store/upper comparedagainstunchanged099 baseline: subtlefloorseams/grain, warmneutralstone, labels/avatarclear and no floatingstrips.",
+    "320entry/844store/context-restored images personallyviewed afterfulltests; upper deck clearance retained; restoredfloorstillshowsstonepattern."
+  ],
+  "limits": [
+    "Two256square RGBA sourcecanvases total524288bytes beforemipmaps/browser/GPUoverhead; not a GPU allocation measurement.",
+    "Manualstep snapshots are posed outputs, not actualrenderperformance; primary ownsadjacent099/current960+960advancing-render control with33.3ms labclock.",
+    "Historical10MiBready-payload andphysicaldevice gates are not certified bythesechecks."
+  ]
+}

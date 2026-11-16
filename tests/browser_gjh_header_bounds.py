@@ -58,7 +58,7 @@ def run():
                 assert box['left'] - row['ring'] >= 0 and box['right'] + row['ring'] <= width, row
                 assert box['left'] - row['ring'] >= row['previousRight'] - .05, row
                 assert box['top'] - row['ring'] >= 0 and box['bottom'] + row['ring'] <= height, row
-                assert row['text'] == 'Store directory' and row['aria'], row
+                assert row['text'] == ('Stores' if width <= 650 else 'Store directory') and row['aria'], row
                 for label in row['labels']:
                     assert label['left'] >= box['left'] and label['right'] <= box['right'] and label['top'] >= box['top'] and label['bottom'] <= box['bottom'], row
                 page.screenshot(path=str(args.output / f'header-focus-{width}.png'))

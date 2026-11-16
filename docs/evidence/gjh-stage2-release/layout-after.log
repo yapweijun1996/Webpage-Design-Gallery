@@ -1,0 +1,6 @@
+START 320 568 touch
+READY
+PASS scene tools fit 320
+START 768 1024 touch
+READY
+PASS scene tools fit 768

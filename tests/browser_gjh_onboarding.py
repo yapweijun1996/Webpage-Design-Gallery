@@ -33,9 +33,14 @@ def run():
    page.locator('#product-dialog').wait_for(state='visible');page.evaluate('padState.buttons[0].pressed=false')
    page.locator('#product-close').click();page.wait_for_function('!document.querySelector("#product-dialog").open')
    page.wait_for_function('document.querySelector(".ob-tip h3").textContent==="You’re ready!"')
+   # The current scene suppresses tutorial tips while an interaction prompt owns
+   # the HUD. Walk clear so the real completion control is visible again.
+   move(page,1.4,-7.8);move(page,1.4,-3.5);page.evaluate('__mall.setInput(null)')
+   page.wait_for_function('!__mall.state.nearby')
    page.get_by_role('button',name='Keep exploring',exact=True).click()
-   page.evaluate('padState.buttons[9].pressed=true');guide(page);page.evaluate('padState.buttons[9].pressed=false')
-   page.evaluate('padState.buttons[1].pressed=true');closed(page);page.evaluate('padState.buttons[1].pressed=false')
+   page.evaluate('padState.buttons[9].pressed=true');page.wait_for_function('document.querySelector("#keyboard-help").open');page.evaluate('padState.buttons[9].pressed=false')
+   page.wait_for_timeout(50)
+   page.evaluate('padState.buttons[1].pressed=true');page.wait_for_function('!document.querySelector("#keyboard-help").open');page.evaluate('padState.buttons[1].pressed=false')
    page.locator('#keyboard-help').evaluate('el=>el.open=true');page.locator('#guide-reopen').click();guide(page)
    page.locator('#guide-show-next').uncheck();page.keyboard.press('Escape');closed(page)
    page.evaluate('sessionStorage.removeItem("gjh-v11-guide-seen-v1")')

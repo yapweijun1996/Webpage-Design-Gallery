@@ -1,0 +1,23 @@
+{
+  "status": "APPROVED_LOCAL_PUBLICATION_PENDING",
+  "application": {
+    "version": "1.1.52",
+    "build": "3ac382081b3b16d2"
+  },
+  "receiptReviewedSHA256": "6a1910e62399999f424da2d8360dcafa6d168f1761e1fcc1479d32535dd8ce13",
+  "findings": [],
+  "runtimeHashesVerified": 150,
+  "rawArtifactsVerified": 37,
+  "screenshotHashesVerified": 11,
+  "checks": [
+    "Eight current integration groups exit0.",
+    "Freshadjacent baseline/control comparison1920advancingframes retainscallbudgets;expanded+98triangles/+2textures,classicexact.",
+    "2x256x256x4=524288 theoretical sourceRGBAbytes;notGPUmemory.",
+    "Optional import failure/late/canvas cleanup/context restore andclassic isolation remain covered."
+  ],
+  "limits": [
+    "LocalStage8only; headCI/Pages/publicjourneysstillrequired.",
+    "No newGPU/FPS/physicaldevice/AT/darktheme/photorealismcertification.",
+    "Oldtimingsandold205claimarenotused."
+  ]
+}

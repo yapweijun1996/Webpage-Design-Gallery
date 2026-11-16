@@ -1,0 +1,7 @@
+PASS normal: bounded loading, model integrity and directory
+PASS missing-pack: bounded loading, model integrity and directory
+PASS truncated-pack: bounded loading, model integrity and directory
+PASS corrupt-model: bounded loading, model integrity and directory
+PASS slow-pack: bounded loading, model integrity and directory
+PASS individual-failure: bounded loading, model integrity and directory
+PASS missing-world: bounded loading, model integrity and directory

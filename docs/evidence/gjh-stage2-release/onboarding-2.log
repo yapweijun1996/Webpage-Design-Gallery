@@ -1,0 +1,9 @@
+{
+  "gamepadMovementCameraInspect": "PASS",
+  "modalInputIsolation": "PASS",
+  "nonblockingRealActionProgress": "PASS",
+  "menuBackAndDisconnect": "PASS",
+  "autoWelcomePreferenceAndManualReplay": "PASS",
+  "pageErrors": [],
+  "limitation": "Synthetic standard-controller snapshots through the actual application frame loop; physical controller not tested."
+}

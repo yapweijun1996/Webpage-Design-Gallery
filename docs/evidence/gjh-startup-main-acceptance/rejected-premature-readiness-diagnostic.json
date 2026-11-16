@@ -1,0 +1,27 @@
+{
+  "ready": false,
+  "failed": true,
+  "initializationError": null,
+  "restorationError": null,
+  "pixel": null,
+  "graphics": {
+    "status": "lost",
+    "losses": 1,
+    "validations": 0,
+    "initialized": false,
+    "quality": null,
+    "sceneId": null,
+    "cameraId": null,
+    "sceneChildren": 0,
+    "shadows": false,
+    "buffer": [
+      300,
+      150
+    ]
+  },
+  "message": "The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.",
+  "bridge": {
+    "originalSha256": "2ac71bcf12c9d36cef3c3a2e98e080c2ca4a90f0d4939d9a71c46bdf8c5d5a37",
+    "servedSha256": "2496acc807c257834a4aec14126cf4f16235a5b81bfaacbdef025e7cda14667b"
+  }
+}

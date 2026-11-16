@@ -1,0 +1,19 @@
+Browser: 157.0.8103.51
+PASS 320x700 visitor=v2: directory destinations, physical doors
+METRIC 390 newmoon inside: 114 draws, 778582 triangles
+METRIC 390 mili inside: 93 draws, 793374 triangles
+METRIC 390 gogo inside: 89 draws, 792040 triangles
+PASS 390 V2 physical pickup and return preserves the four-item bag
+PASS 390x844 visitor=v2: directory destinations, physical doors, four SKU and brand details, retained bag
+PASS 768x1024 visitor=v2: directory destinations, physical doors
+PASS 844x390 visitor=v2: directory destinations, physical doors
+METRIC 1440 newmoon inside: 128 draws, 787200 triangles
+METRIC 1440 mili inside: 141 draws, 804760 triangles
+METRIC 1440 gogo inside: 131 draws, 802990 triangles
+PASS 1440 V2 physical pickup and return preserves the four-item bag
+PASS 1440x900 visitor=v2: directory destinations, physical doors, four SKU and brand details, retained bag
+PASS 390x844 &visitor=v1: directory destinations, physical doors
+PASS original scene visitor=v2: all three directory destinations
+PASS original scene ?visitor=v1: all three directory destinations
+PASS no-js: readable directory and no misleading 3D action
+PASS physics-failure: readable directory and no misleading 3D action

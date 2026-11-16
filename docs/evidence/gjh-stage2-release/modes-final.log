@@ -1,0 +1,4 @@
+PASS lifecycle 390x844: 80 snapshots
+PASS lifecycle 768x1024: 41 snapshots
+PASS lifecycle 1440x900: 41 snapshots
+Evidence: /tmp/gjh-release-evidence/modes-final.json

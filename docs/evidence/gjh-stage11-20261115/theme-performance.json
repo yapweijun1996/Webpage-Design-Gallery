@@ -1,0 +1,360 @@
+[
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "browser": "157.0.8103.51",
+    "backend": "metal",
+    "startupAfterNetworkIdle": {
+      "requests": 83,
+      "decodedBytes": 11049695
+    },
+    "themes": {
+      "everyday": {
+        "idle": {
+          "draw": 153,
+          "triangles": 806034,
+          "resources": {
+            "geometries": 98,
+            "textures": 25
+          },
+          "x": 9.999995231628418,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 176,
+          "triangles": 816670,
+          "resources": {
+            "geometries": 121,
+            "textures": 25
+          },
+          "x": 9.999995231628418,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        }
+      },
+      "lunar-new-year": {
+        "idle": {
+          "draw": 164,
+          "triangles": 848756,
+          "resources": {
+            "geometries": 125,
+            "textures": 26
+          },
+          "x": 9.999993324279785,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 187,
+          "triangles": 859392,
+          "resources": {
+            "geometries": 125,
+            "textures": 26
+          },
+          "x": 9.999993324279785,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        }
+      },
+      "christmas": {
+        "idle": {
+          "draw": 167,
+          "triangles": 870748,
+          "resources": {
+            "geometries": 127,
+            "textures": 26
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 190,
+          "triangles": 881384,
+          "resources": {
+            "geometries": 127,
+            "textures": 26
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        }
+      },
+      "deepavali": {
+        "idle": {
+          "draw": 161,
+          "triangles": 832216,
+          "resources": {
+            "geometries": 126,
+            "textures": 27
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 184,
+          "triangles": 842852,
+          "resources": {
+            "geometries": 126,
+            "textures": 27
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "balanced",
+            "pixelRatio": 1.25,
+            "shadows": false,
+            "recovered": false
+          }
+        }
+      }
+    },
+    "restoredEveryday": {
+      "draw": 153,
+      "triangles": 806034,
+      "resources": {
+        "geometries": 121,
+        "textures": 25
+      },
+      "x": 9.999994277954102,
+      "z": 36,
+      "quality": {
+        "preference": "auto",
+        "tier": "balanced",
+        "pixelRatio": 1.25,
+        "shadows": false,
+        "recovered": false
+      }
+    },
+    "afterAllThemes": {
+      "requests": 86,
+      "decodedBytes": 11068751
+    }
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "browser": "157.0.8103.51",
+    "backend": "metal",
+    "startupAfterNetworkIdle": {
+      "requests": 84,
+      "decodedBytes": 11199553
+    },
+    "themes": {
+      "everyday": {
+        "idle": {
+          "draw": 182,
+          "triangles": 806202,
+          "resources": {
+            "geometries": 100,
+            "textures": 33
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 205,
+          "triangles": 816838,
+          "resources": {
+            "geometries": 123,
+            "textures": 33
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        }
+      },
+      "lunar-new-year": {
+        "idle": {
+          "draw": 193,
+          "triangles": 848924,
+          "resources": {
+            "geometries": 127,
+            "textures": 34
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 216,
+          "triangles": 859560,
+          "resources": {
+            "geometries": 127,
+            "textures": 34
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        }
+      },
+      "christmas": {
+        "idle": {
+          "draw": 196,
+          "triangles": 870916,
+          "resources": {
+            "geometries": 129,
+            "textures": 34
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 219,
+          "triangles": 881552,
+          "resources": {
+            "geometries": 129,
+            "textures": 34
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        }
+      },
+      "deepavali": {
+        "idle": {
+          "draw": 190,
+          "triangles": 832384,
+          "resources": {
+            "geometries": 128,
+            "textures": 35
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        },
+        "cart": {
+          "draw": 213,
+          "triangles": 843020,
+          "resources": {
+            "geometries": 128,
+            "textures": 35
+          },
+          "x": 9.999994277954102,
+          "z": 36,
+          "quality": {
+            "preference": "auto",
+            "tier": "detailed",
+            "pixelRatio": 2,
+            "shadows": true,
+            "recovered": false
+          }
+        }
+      }
+    },
+    "restoredEveryday": {
+      "draw": 182,
+      "triangles": 806202,
+      "resources": {
+        "geometries": 123,
+        "textures": 33
+      },
+      "x": 9.999994277954102,
+      "z": 36,
+      "quality": {
+        "preference": "auto",
+        "tier": "detailed",
+        "pixelRatio": 2,
+        "shadows": true,
+        "recovered": false
+      }
+    },
+    "afterAllThemes": {
+      "requests": 87,
+      "decodedBytes": 11218609
+    }
+  }
+]

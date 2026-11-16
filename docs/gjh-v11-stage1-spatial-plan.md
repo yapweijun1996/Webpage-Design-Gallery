@@ -1,6 +1,6 @@
 # GJH V11 stage 1: refined virtual mall spatial plan
 
-Date: 15 November 2026 (Asia/Singapore)  
+Date: 15 November 2026 (Asia/Singapore)
 Status: **internally checked conceptual design, awaiting owner review; not implemented**. The footprint and coordinates are design assumptions for a virtual mall, not measurements of GJH premises or a real building design. The [stage 1 ground/upper 2D plan](references/gjh-mall-floorplan-stage1.png) supersedes the earlier rough diagram for spatial planning; the earlier image remains as historical context. The [coordinate data](references/gjh-mall-spatial-plan.json) is the source used to render this diagram and run the geometric checks. It is a planning artifact, not a runtime spatial API. The [drawing source](references/gjh-mall-floorplan-stage1.py) and [checker](references/gjh-mall-spatial-check.py) are reproducible local tools.
 
 The subsequent [stage 2 pilot](gjh-v11-stage2-spatial-pilot.md) centralizes the existing three-store runtime only; it does not implement this proposed 17-store geometry.

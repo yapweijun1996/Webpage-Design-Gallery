@@ -1,7 +1,9 @@
 # GJH V11 stage 0: follow-up fixes and verification
 
-Date: 15 November 2026 (Asia/Singapore)  
+Date: 15 November 2026 (Asia/Singapore)
 Scope: fix the three functional and test findings from the [stage 0 baseline](gjh-v11-stage0-baseline.md). The 17-store expansion and the baseline's visual finding F3 remain in later redesign stages.
+
+**Later integration:** The public main branch independently adopted the shorter mobile label “Stores” and its own collision-safe V2 mode route. The original findings and fix results below remain historical; the [release integration report](gjh-v11-stage2-release.md) records checks against the newer combined code.
 
 ## Results
 

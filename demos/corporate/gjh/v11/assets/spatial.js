@@ -47,10 +47,12 @@ export const courtyardArrival = Object.freeze({x:-2,z:12});
 export function storeCenterX(store) { return (store.bounds.minX + store.bounds.maxX) / 2; }
 
 // Preserve the existing ground-zone boundary behavior including ±5 m edges.
-export function storeAt(x, z) {
+export function storeAt(x, z, bounded = false) {
   if (!Number.isFinite(x) || !Number.isFinite(z) || z >= spatial.stores[0].bounds.maxZ + .1) return null;
   const [left, middle, right] = spatial.stores;
-  return x < left.bounds.maxX ? left : x > right.bounds.minX ? right : middle;
+  const store = x < left.bounds.maxX ? left : x > right.bounds.minX ? right : middle;
+  const b = store.bounds;
+  return bounded && (x < b.minX || x > b.maxX || z < b.minZ) ? null : store;
 }
 export function mapPoint(x, z) {
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));

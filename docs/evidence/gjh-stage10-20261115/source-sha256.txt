@@ -1,0 +1,6 @@
+7147b5e94ff5bd6686930e303546732f0c7ab19719a337cc46574c14b0841396  demos/corporate/gjh/v11/assets/lunar-new-year.js
+98cd0cdf16b2fe9ced65db8991a9cbcb5b4e3acbbb8897c438033f8612e45359  demos/corporate/gjh/v11/assets/mall-themes.js
+cf4b4efb5065a6e4ecff8a55102edf1c25ef0f746c6b95ba54481d395c2ccff5  demos/corporate/gjh/v11/script.js
+2d03ca689115d57602d4f0bc6dbca2e24c1d821e91d2523d260eaabf0608f08d  demos/corporate/gjh/v11/index.html
+b851213eed37222f44086479c276565ebfbf789430438ca9db0504ca9ff958c3  tests/browser_gjh_lunar_theme.py
+11df752c2675798fd1fe9e7f81d71621ac1e6b576350410d6eb8f1563eba6c06  tests/gjh_mall_themes.test.mjs

@@ -1,0 +1,114 @@
+Gallery built: 1 companies, 8 designs
+{
+  "capturedAt": "2026-11-15T08:40:11.144584+00:00",
+  "cases": [
+    {
+      "width": 320,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 22,
+        "y": 694.03125,
+        "width": 276,
+        "height": 423.28125
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    },
+    {
+      "width": 390,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 22,
+        "y": 639.65625,
+        "width": 346,
+        "height": 400.1875
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    },
+    {
+      "width": 559,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 22,
+        "y": 596.671875,
+        "width": 515,
+        "height": 400.1875
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    },
+    {
+      "width": 560,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 22,
+        "y": 596.671875,
+        "width": 250,
+        "height": 398.28125
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    },
+    {
+      "width": 639,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 22,
+        "y": 572.875,
+        "width": 289.5,
+        "height": 422.96875
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    },
+    {
+      "width": 650,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 22,
+        "y": 572.875,
+        "width": 295,
+        "height": 426.40625
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    },
+    {
+      "width": 651,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 40,
+        "y": 583.859375,
+        "width": 277.5,
+        "height": 415.46875
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    },
+    {
+      "width": 1440,
+      "languages": 3,
+      "themes": 2,
+      "firstCard": {
+        "x": 120,
+        "y": 652.421875,
+        "width": 592,
+        "height": 588.9375
+      },
+      "settingsAndSelection": "PASS",
+      "consoleErrors": []
+    }
+  ],
+  "limitations": [
+    "Headless Chrome; no physical devices, Safari or screen-reader acceptance."
+  ],
+  "browserVersion": "157.0.8103.51"
+}

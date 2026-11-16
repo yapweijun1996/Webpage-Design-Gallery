@@ -90,8 +90,18 @@ class GalleryTests(unittest.TestCase):
             output = Path(directory)
             gallery.build(output)
             for name in ("assets/tokens.css", "assets/icons.svg",
+                         "assets/onboarding/action-dialog.js", "assets/onboarding/onboarding.css",
+                         "design-system/onboarding/index.html",
                          "demos/corporate/gjh/shared/interaction.css",
-                         "demos/corporate/gjh/shared/navigation.js"):
+                         "demos/corporate/gjh/shared/navigation.js",
+                         "demos/corporate/gjh/v11/style.bundle.css",
+                         "demos/corporate/gjh/v11/script.bundle.js",
+                         "demos/corporate/gjh/v11/assets/world.bundle.js",
+                         "demos/corporate/gjh/v11/assets/player.bundle.js",
+                         "demos/corporate/gjh/v11/assets/character-v2.bundle.js",
+                         "demos/corporate/gjh/v11/assets/startup-asset-pack.js",
+                         "demos/corporate/gjh/v11/assets/startup-assets.pack",
+                         "demos/corporate/gjh/v11/vendor/rapier_bg.wasm"):
                 self.assertEqual((output / name).read_bytes(), (ROOT / name).read_bytes())
             self.assertFalse((output / "design-system/tokens.json").exists())
             self.assertFalse((output / "demos/corporate/gjh/research").exists())
@@ -100,6 +110,8 @@ class GalleryTests(unittest.TestCase):
             cached = {entry["path"] for entry in entries}
             self.assertIn("assets/tokens.css", cached)
             self.assertIn("assets/icons.svg", cached)
+            self.assertNotIn("assets/onboarding/action-dialog.js", cached)
+            self.assertNotIn("design-system/onboarding/index.html", cached)
             self.assertNotIn("demos/corporate/gjh/shared/navigation.js", cached)
             self.assertNotIn("demos/corporate/gjh/v11/vendor/rapier.mjs", cached)
             self.assertTrue(all(design["thumbnail"] in cached for design in catalog["designs"]))
@@ -112,6 +124,7 @@ class GalleryTests(unittest.TestCase):
             for entry in mall_entries:
                 self.assertEqual(hashlib.sha256((mall / entry["path"]).read_bytes()).hexdigest(), entry["sha256"])
             self.assertTrue((mall / "pwa.js").is_file())
+
 
     def test_nested_pages_use_prefix_safe_sprite_and_company_identity(self):
         pages = gallery.build_pages(gallery.load_catalog())

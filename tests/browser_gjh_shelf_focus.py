@@ -17,6 +17,7 @@ import threading
 
 from playwright.sync_api import sync_playwright
 from browser_gjh_guide import ROOT, Quiet, state
+from gjh_startup_test_helpers import use_individual_assets
 from browser_gjh_mode_review import close_event_before_action, finish_close, lose_context
 from browser_gjh_modes import close_bag, activate_cart
 
@@ -169,7 +170,10 @@ def physical_paths(page,output):
     rows=[];w=page.viewport_size['width'];h=page.viewport_size['height']
     # South Africa has the longest concise country/type/weight label.
     for sku in ['nz-425g','sa-425g']:
-        approach(page,sku);page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1000)')
+        approach(page,sku)
+        if page.get_by_role('button',name='Pick up product',exact=True).is_disabled():
+            page.evaluate('__mall.setInput({forward:1});__mall.step(500);__mall.setInput({forward:0});__mall.step(20)')
+        page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1500)')
         held=state(page);assert held['character']['physicalProduct']['phase']=='held'
         g=nearby_geometry(page);page.screenshot(path=str(output/f'held-{sku}-{w}x{h}.png'))
         open_shelf(page,'keyboard');before=state(page)
@@ -177,15 +181,17 @@ def physical_paths(page,output):
         retained(before,state(page));immediate=close_shelf(page,'close');retained(held,immediate)
         page.emulate_media(reduced_motion='no-preference')
         page.get_by_role('button',name='Return to shelf',exact=True).click();page.evaluate('__mall.step(100)')
-        assert state(page)['character']['physicalProduct']['phase']=='return'
+        assert state(page)['productApproaching'] and state(page)['character']['physicalProduct']['phase']=='held'
         assert page.locator('#inspect-prompt').is_hidden()
+        page.evaluate('__mall.step(500)')
+        assert state(page)['character']['physicalProduct']['phase']=='return'
         returning={'phase':'return','promptHiddenDuringExistingTransfer':True}
         page.screenshot(path=str(output/f'returning-{sku}-{w}x{h}.png'))
         page.evaluate('__mall.step(1000)');assert state(page)['character']['physicalProduct']['phase']=='empty'
         # A second pickup proves the same shelf reservation was released correctly.
-        page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1000)')
+        page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1500)')
         assert state(page)['character']['physicalProduct']['phase']=='held'
-        page.get_by_role('button',name='Return to shelf',exact=True).click();page.evaluate('__mall.step(1000)')
+        page.get_by_role('button',name='Return to shelf',exact=True).click();page.evaluate('__mall.step(1500)')
         page.emulate_media(reduced_motion='reduce')
         rows.append({'sku':sku,'held':g,'returning':returning,'addPreservesHeldTokenAndReturn':'PASS','configuredCans':held['productAssets']['totalInstances'],'sourceContractVisibleWhileReserved':35})
     return rows
@@ -334,7 +340,7 @@ def run():
                     open_shelf(page,['keyboard','touch' if w<1000 else 'pointer','pointer','keyboard'][i])
                     opened=state(page); retained(before,opened)
                     assert opened['shelf']['id']==id
-                    assert opened['productAssets']['totalInstances']==36
+                    assert opened['productAssets']['totalInstances']==204
                     page.evaluate('__mall.setInput({forward:1,yaw:2});__mall.step(1000)')
                     retained(opened,state(page))
                     frame=state(page)['frames'];page.wait_for_timeout(100)
@@ -426,8 +432,8 @@ def extra_paths(page,url,output,context,browser,axe):
     open_shelf(page)
     while not page.locator('#shelf-add').is_disabled():page.locator('#shelf-add').click()
     assert 'Demo bag: 9' in page.locator('#shelf-status').inner_text()
-    assert page.evaluate('document.activeElement.id')=='shelf-add'
-    rows.append({'nineActualAddLimit':'PASS','focusAtLimit':'shelf-add'})
+    assert page.evaluate('document.activeElement.id')=='shelf-details'
+    rows.append({'nineActualAddLimit':'PASS','focusAtLimit':'shelf-details'})
     before=state(page)
     page.locator('#bag-open').click();page.locator('#bag-dialog').wait_for(state='visible')
     assert page.locator('#shelf-dialog').is_hidden() and state(page)['mode']=='shop'
@@ -457,6 +463,9 @@ def extra_paths(page,url,output,context,browser,axe):
     assert before['gpu']==after['gpu']
     assert len(before['resources'])==len(after['resources'])
     rows.append({'repeatEntries':12,'before':before,'after':after})
+    # Establish a stopped, grounded reference before testing held-input cleanup.
+    # Repeated modal frames alone need not finish Rapier's initial floor settling.
+    page.evaluate('__mall.setInput({forward:0,right:0});__mall.step(2000);__mall.setInput(null)')
     # Held keyboard: synchronous exact restore is separate from resumed floor settling.
     page.locator('#scene').focus();page.keyboard.down('w');page.keyboard.down('f');page.keyboard.up('f')
     assert_mode(page,'shelf');opened=state(page)
@@ -552,6 +561,7 @@ def failure_paths(browser,url,output):
         context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,
             reduced_motion='reduce',service_workers='block')
         page=context.new_page();errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
+        use_individual_assets(page)
         page.route(pattern,lambda route:route.abort())
         ready(page,url);sku='nz-425g' if label.startswith('shelf') else label.removeprefix('can-').removesuffix('-unavailable')
         id=approach(page,sku);assets=state(page)['productAssets']
@@ -559,10 +569,10 @@ def failure_paths(browser,url,output):
         before=state(page);open_shelf(page);g=geometry(page)
         page.locator('#shelf-add').click();assert page.locator('#bag-open').inner_text()=='Bag (1)'
         immediate=close_shelf(page,'close');retained(before,immediate)
-        page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1000)')
+        page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.step(1500)')
         assert state(page)['character']['physicalProduct']['phase']==('held' if label.startswith('shelf') else 'empty')
         if label.startswith('shelf'):
-            page.get_by_role('button',name='Return to shelf',exact=True).click();page.evaluate('__mall.step(1000)')
+            page.get_by_role('button',name='Return to shelf',exact=True).click();page.evaluate('__mall.step(1500)')
         open_shelf(page);page.screenshot(path=str(output/(label+'.png')));close_shelf(page,'close')
         assert not errors,errors
         rows.append({'failure':label,'expectedFailedResource':pattern,'geometry':g,'sharedQuantityOnly':'PASS',

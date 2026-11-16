@@ -12,6 +12,7 @@ import threading
 from playwright.sync_api import sync_playwright
 
 from browser_gjh_budget import ROOT, Quiet
+from browser_gjh_expanded_shell import move
 
 AXE_SHA256 = '880970c081707360e64f34cea25ff91892f5bc95675b0776925b9709dd8a68bb'
 
@@ -48,6 +49,11 @@ def run():
     assert args.axe_script and args.axe_script.is_file(), 'Provide reviewed axe-core 4.10.3'
     assert hashlib.sha256(args.axe_script.read_bytes()).hexdigest() == AXE_SHA256
     args.output.mkdir(parents=True, exist_ok=True)
+    source_paths = ['assets/onboarding/onboarding.js', 'assets/onboarding/onboarding.css',
+        'demos/corporate/gjh/v11/index.html', 'demos/corporate/gjh/v11/style.css',
+        'demos/corporate/gjh/v11/assets/ui.js']
+    source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in source_paths}
+    test_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     server = http.server.ThreadingHTTPServer(
         ('127.0.0.1', 0), functools.partial(Quiet, directory=str(ROOT)))
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -94,9 +100,15 @@ def run():
                       const modal = document.querySelector('dialog[open]');
                       const controls = [...(modal || document).querySelectorAll('button,summary,input,select')]
                         .filter(element => {const r=element.getBoundingClientRect(),s=getComputedStyle(element);
-                          return r.width>0&&r.height>0&&s.visibility!=='hidden';})
-                        .map(element => {const r=element.getBoundingClientRect();return {
-                          id:element.id,tag:element.tagName,width:r.width,height:r.height};});
+                          return element.checkVisibility()&&r.width>0&&r.height>0&&s.visibility!=='hidden';})
+                        .map(element => {
+                          // Native checkbox labels are part of the real clickable
+                          // target, independently exercised below before auditing.
+                          const target=element.matches('input[type=checkbox],input[type=radio]')&&element.labels?.[0]||element;
+                          const r=target.getBoundingClientRect(),visual=element.getBoundingClientRect();return {
+                          id:element.id,tag:element.tagName,width:r.width,height:r.height,
+                          targetOwner:target===element?'control':'associated-label',
+                          visualWidth:visual.width,visualHeight:visual.height};});
                       return {violations:audit.violations.map(r=>({id:r.id,targets:r.nodes.map(n=>n.target)})),
                         unresolved, contrast, controls};
                     }''')
@@ -112,13 +124,33 @@ def run():
                     if width in (390, 1440, 667):
                         page.screenshot(path=str(args.output / f'{state}-{width}.png'))
 
+                checkbox = page.locator('#guide-show-next')
+                preference = page.locator('#guide-dialog .ob-preference')
+                original_preference = checkbox.is_checked()
+                preference.scroll_into_view_if_needed()
+                preference_box = preference.bounding_box()
+                # A genuine pointer click on the label's far edge must toggle
+                # the checkbox; restore the prior preference with the same hit.
+                for selected in [not original_preference, original_preference]:
+                    page.mouse.click(preference_box['x'] + preference_box['width'] - 4,
+                        preference_box['y'] + preference_box['height'] / 2)
+                    assert checkbox.is_checked() == selected
+                page.locator('#guide-title').focus()
                 scan('guide')
                 guide_focus = tab_dialog(page, '#guide-dialog')
                 page.locator('#guide-start').click()
                 page.wait_for_function('document.activeElement.id === "scene"')
                 scan('explore')
                 compact = width < 651 or height < 561
-                page.locator('#header-map' if compact else '#inspect').click()
+                if compact:
+                    page.locator('#header-map').click()
+                else:
+                    # The relocated kiosk is not assumed to be near spawn.
+                    # Reach the persistent wide map through its actual guide action.
+                    page.locator('#keyboard-help summary').click()
+                    page.locator('#guide-reopen').click()
+                    page.locator('#guide-map').click()
+                    page.wait_for_function('!document.querySelector("#guide-dialog").open&&document.querySelector("#mall-map").open')
                 scan('map')
                 if compact:
                     page.keyboard.press('Escape')
@@ -141,8 +173,13 @@ def run():
                 assert page.evaluate('__mall.state.character.customization.hair') == 'short'
                 hair.select_option('swept')
                 assert hair.input_value() == 'swept'
-                assert hair.evaluate('e => {const r=e.getBoundingClientRect();'
-                    'return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}')
+                # Native select scrolling can settle after its change event.
+                page.wait_for_function('''() => {const e=document.querySelector('select[name="hair"]'),p=document.querySelector('#controls-copy'),r=e.getBoundingClientRect(),v=p.getBoundingClientRect();return e===document.activeElement&&r.top>=v.top&&r.bottom<=v.bottom&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}''', timeout=3000)
+                hair_hit = hair.evaluate('''e=>{const r=e.getBoundingClientRect(),o=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),p=document.querySelector('#controls-copy');return {viewport:[innerWidth,innerHeight],rect:r.toJSON(),hit:e.contains(o),occluder:o?.outerHTML.slice(0,600),scrollport:p.getBoundingClientRect().toJSON(),scrollTop:p.scrollTop,active:document.activeElement.name}}''')
+                if not hair_hit['hit']:
+                    (args.output / f'hair-hit-failure-{width}.json').write_text(json.dumps(hair_hit, indent=2) + '\n')
+                    page.screenshot(path=str(args.output / f'hair-hit-failure-{width}.png'))
+                assert hair_hit['hit'], hair_hit
                 if width in (390, 768, 1440):
                     page.screenshot(path=str(args.output / f'help-controls-{width}.png'))
                 for field in ['Hair colour', 'Top', 'Skin tone', 'Glasses', 'Backpack', 'Watch']:
@@ -231,18 +268,24 @@ def run():
                 page.locator('#bag-close').click()
                 page.wait_for_function('document.activeElement.id === "bag-open"')
                 # Exercise the default Visitor v2 controls through actual shelf actions.
-                page.evaluate('''() => {__mall.teleport('newmoon'); __mall.setInput({forward:1});
-                  __mall.step(3900); __mall.setInput({forward:0});}''')
+                assert page.evaluate('__mall.teleport("newmoon")')
+                move(page, -10, -2.6, 2.65)
+                move(page, -10, -7.4, 2.65)
+                shelf = page.evaluate("__mall.state.shelves.find(s => s.id === 'new-moon-nz-425g-front')")
+                move(page, (shelf['min']['x'] + shelf['max']['x']) / 2, -7.4, 2.65)
+                assert page.evaluate('__mall.state.nearby') == 'new-moon-nz-425g-front'
                 scan('shelf')
                 pickup = page.get_by_role('button', name='Pick up product', exact=True)
+                assert pickup.is_enabled(), 'The visitor must be within reach of the shelf'
                 pickup.focus()
+                assert pickup.evaluate('e => e === document.activeElement')
                 page.keyboard.press('Enter')
-                page.evaluate('__mall.step(1000)')
+                page.evaluate('__mall.step(1600)')
                 assert page.evaluate('__mall.state.character.physicalProduct.phase') == 'held'
                 scan('held-product')
                 page.get_by_role('button', name='Return to shelf', exact=True).focus()
                 page.keyboard.press('Enter')
-                page.evaluate('__mall.step(1000)')
+                page.evaluate('__mall.step(1600)')
                 assert page.evaluate('__mall.state.character.physicalProduct.phase') == 'empty'
                 page.evaluate('''() => {__mall.teleport('atrium'); __mall.setInput({right:1});
                   __mall.step(750); __mall.setInput({forward:-1}); __mall.step(1500);
@@ -261,8 +304,9 @@ def run():
                 assert not errors, errors
                 results.append({'viewport': [width, height], 'scans': scans,
                     'guideTabSequence': guide_focus, 'bagTabSequence': bag_focus,
+                    'checkboxAssociatedLabelHit': {'bounds': preference_box, 'edgeClickToggleAndRestore': 'PASS'},
                     'nativePopupKeyboardChoice': native_choice,
-                    'appearanceKeyboardFocus': 'PASS: all seven named fields',
+                    'appearanceKeyboardFocus': 'PASS: all seven named fields', 'hairImmediateHit': hair_hit,
                     'resizedOpenBag': resized_bag, 'cartKeyboardDistance': distance,
                     'normalBagCloseFocus': 'bag-open', 'pageErrors': errors})
                 page.close()
@@ -270,7 +314,9 @@ def run():
             browser.close()
     finally:
         server.shutdown()
-    report = {'environment': f'{platform.system()} {platform.machine()} Chromium {version} / {backend}',
+    assert all(hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == value for name, value in source_hashes.items())
+    assert hashlib.sha256(Path(__file__).read_bytes()).hexdigest() == test_hash
+    report = {'sourceSHA256': source_hashes, 'testSHA256': test_hash, 'environment': f'{platform.system()} {platform.machine()} Chromium {version} / {backend}',
         'axeVersion': '4.10.3', 'axeSHA256': AXE_SHA256,
         'nativeSelectFixture': native_select,
         'application': json.loads((ROOT / 'data/app.json').read_text()),

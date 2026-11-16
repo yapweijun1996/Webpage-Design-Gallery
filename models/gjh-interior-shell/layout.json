@@ -1,0 +1,1327 @@
+{
+  "schema_version": 1,
+  "coordinates": "Three.js metres, Y up, front +Z; Blender conversion (x,-z,y).",
+  "inventory_sha256": "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42",
+  "palette": {
+    "jade": {
+      "color": 2181182,
+      "roughness": 0.24,
+      "metalness": 0.22
+    },
+    "jadeAlt": {
+      "color": 2378818,
+      "roughness": 0.28,
+      "metalness": 0.18
+    },
+    "courtStone": {
+      "color": 4810331,
+      "roughness": 0.32,
+      "metalness": 0.16
+    },
+    "green": {
+      "color": 1391664,
+      "roughness": 0.72,
+      "metalness": 0
+    },
+    "dark": {
+      "color": 796963,
+      "roughness": 0.72,
+      "metalness": 0
+    },
+    "ivory": {
+      "color": 14931639,
+      "roughness": 0.72,
+      "metalness": 0
+    },
+    "brass": {
+      "color": 11901794,
+      "roughness": 0.31,
+      "metalness": 0.68
+    }
+  },
+  "assets": {
+    "wall": {
+      "asset_id": "GJH-ARC-001",
+      "source_dimensions_wdh_m": [
+        4,
+        0.2,
+        3.6
+      ],
+      "target_dimensions_wdh_m": [
+        4,
+        0.3,
+        6.6
+      ],
+      "bounds_min": [
+        -2,
+        0,
+        -0.15
+      ],
+      "bounds_max": [
+        2,
+        6.6,
+        0.15
+      ],
+      "components": [
+        {
+          "name": "Wall panel",
+          "material": "green",
+          "position": [
+            0,
+            3.3,
+            0
+          ],
+          "size": [
+            4,
+            6.6,
+            0.28
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Dark plinth",
+          "material": "dark",
+          "position": [
+            0,
+            0.08,
+            0
+          ],
+          "size": [
+            4,
+            0.16,
+            0.3
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Brass datum",
+          "material": "brass",
+          "position": [
+            0,
+            0.175,
+            0
+          ],
+          "size": [
+            4,
+            0.025,
+            0.3
+          ],
+          "bevel_m": 0.003
+        }
+      ],
+      "placements": [
+        [
+          -15,
+          0,
+          -9,
+          -1.5707963267948966
+        ],
+        [
+          -15,
+          0,
+          -5,
+          -1.5707963267948966
+        ],
+        [
+          -15,
+          0,
+          -1,
+          -1.5707963267948966
+        ],
+        [
+          -15,
+          0,
+          3,
+          -1.5707963267948966
+        ],
+        [
+          -15,
+          0,
+          7,
+          -1.5707963267948966
+        ],
+        [
+          -15,
+          0,
+          11,
+          -1.5707963267948966
+        ],
+        [
+          -15,
+          0,
+          15,
+          -1.5707963267948966
+        ],
+        [
+          15,
+          0,
+          -9,
+          1.5707963267948966
+        ],
+        [
+          15,
+          0,
+          -5,
+          1.5707963267948966
+        ],
+        [
+          15,
+          0,
+          -1,
+          1.5707963267948966
+        ],
+        [
+          15,
+          0,
+          3,
+          1.5707963267948966
+        ],
+        [
+          15,
+          0,
+          7,
+          1.5707963267948966
+        ],
+        [
+          15,
+          0,
+          11,
+          1.5707963267948966
+        ],
+        [
+          15,
+          0,
+          15,
+          1.5707963267948966
+        ],
+        [
+          -13,
+          0,
+          18,
+          0
+        ],
+        [
+          -9,
+          0,
+          18,
+          0
+        ],
+        [
+          -5,
+          0,
+          18,
+          0
+        ],
+        [
+          -1,
+          0,
+          18,
+          0
+        ],
+        [
+          3,
+          0,
+          18,
+          0
+        ],
+        [
+          7,
+          0,
+          18,
+          0
+        ],
+        [
+          11,
+          0,
+          18,
+          0
+        ]
+      ],
+      "priority": "P0",
+      "capabilities": [],
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -2,
+          0,
+          0
+        ],
+        "right": [
+          2,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          0.15
+        ],
+        "back": [
+          0,
+          0,
+          -0.15
+        ]
+      },
+      "collision_proxy": {
+        "owner": "world aggregate Rapier blocks",
+        "visual_export": false,
+        "min": [
+          -2,
+          0,
+          -0.15
+        ],
+        "max": [
+          2,
+          6.6,
+          0.15
+        ]
+      }
+    },
+    "corridor": {
+      "asset_id": "GJH-COR-001",
+      "source_dimensions_wdh_m": [
+        4,
+        4,
+        0.2
+      ],
+      "target_dimensions_wdh_m": [
+        4,
+        4,
+        0.2
+      ],
+      "bounds_min": [
+        -2,
+        0,
+        -2
+      ],
+      "bounds_max": [
+        2,
+        0.2,
+        2
+      ],
+      "components": [
+        {
+          "name": "Structural visual base",
+          "material": "jadeAlt",
+          "position": [
+            0,
+            0.08,
+            0
+          ],
+          "size": [
+            4,
+            0.16,
+            4
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Stone tile -1 -1",
+          "material": "jade",
+          "position": [
+            -1,
+            0.18,
+            -1
+          ],
+          "size": [
+            1.99,
+            0.04,
+            1.99
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Stone tile -1 1",
+          "material": "jadeAlt",
+          "position": [
+            -1,
+            0.18,
+            1
+          ],
+          "size": [
+            1.99,
+            0.04,
+            1.99
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Stone tile 1 -1",
+          "material": "jadeAlt",
+          "position": [
+            1,
+            0.18,
+            -1
+          ],
+          "size": [
+            1.99,
+            0.04,
+            1.99
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Stone tile 1 1",
+          "material": "jade",
+          "position": [
+            1,
+            0.18,
+            1
+          ],
+          "size": [
+            1.99,
+            0.04,
+            1.99
+          ],
+          "bevel_m": 0.003
+        }
+      ],
+      "placements": [
+        [
+          -13,
+          -0.185,
+          2,
+          0
+        ],
+        [
+          -13,
+          -0.185,
+          6,
+          0
+        ],
+        [
+          -13,
+          -0.185,
+          10,
+          0
+        ],
+        [
+          -13,
+          -0.185,
+          14,
+          0
+        ],
+        [
+          -9,
+          -0.185,
+          2,
+          0
+        ],
+        [
+          -9,
+          -0.185,
+          6,
+          0
+        ],
+        [
+          -9,
+          -0.185,
+          10,
+          0
+        ],
+        [
+          -9,
+          -0.185,
+          14,
+          0
+        ],
+        [
+          -5,
+          -0.185,
+          2,
+          0
+        ],
+        [
+          -5,
+          -0.185,
+          6,
+          0
+        ],
+        [
+          -5,
+          -0.185,
+          10,
+          0
+        ],
+        [
+          -5,
+          -0.185,
+          14,
+          0
+        ],
+        [
+          -1,
+          -0.185,
+          2,
+          0
+        ],
+        [
+          -1,
+          -0.185,
+          6,
+          0
+        ],
+        [
+          -1,
+          -0.185,
+          10,
+          0
+        ],
+        [
+          -1,
+          -0.185,
+          14,
+          0
+        ],
+        [
+          3,
+          -0.185,
+          2,
+          0
+        ],
+        [
+          3,
+          -0.185,
+          6,
+          0
+        ],
+        [
+          3,
+          -0.185,
+          10,
+          0
+        ],
+        [
+          3,
+          -0.185,
+          14,
+          0
+        ],
+        [
+          7,
+          -0.185,
+          2,
+          0
+        ],
+        [
+          7,
+          -0.185,
+          6,
+          0
+        ],
+        [
+          7,
+          -0.185,
+          10,
+          0
+        ],
+        [
+          7,
+          -0.185,
+          14,
+          0
+        ],
+        [
+          11,
+          -0.185,
+          2,
+          0
+        ],
+        [
+          11,
+          -0.185,
+          6,
+          0
+        ],
+        [
+          11,
+          -0.185,
+          10,
+          0
+        ],
+        [
+          11,
+          -0.185,
+          14,
+          0
+        ]
+      ],
+      "priority": "P0",
+      "capabilities": [],
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -2,
+          0,
+          0
+        ],
+        "right": [
+          2,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          2
+        ],
+        "back": [
+          0,
+          0,
+          -2
+        ]
+      },
+      "collision_proxy": {
+        "owner": "world aggregate Rapier blocks",
+        "visual_export": false,
+        "min": [
+          -2,
+          0,
+          -2
+        ],
+        "max": [
+          2,
+          0.165,
+          2
+        ]
+      }
+    },
+    "ceiling": {
+      "asset_id": "GJH-CEI-001",
+      "source_dimensions_wdh_m": [
+        4,
+        4,
+        0.25
+      ],
+      "target_dimensions_wdh_m": [
+        4,
+        4,
+        0.3
+      ],
+      "bounds_min": [
+        -2,
+        0,
+        -2
+      ],
+      "bounds_max": [
+        2,
+        0.3,
+        2
+      ],
+      "components": [
+        {
+          "name": "Ivory ceiling panel",
+          "material": "ivory",
+          "position": [
+            0,
+            0.156,
+            0
+          ],
+          "size": [
+            4,
+            0.288,
+            4
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Brass edge long",
+          "material": "brass",
+          "position": [
+            0,
+            0.006,
+            -1.991
+          ],
+          "size": [
+            4,
+            0.012,
+            0.018
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Brass edge long",
+          "material": "brass",
+          "position": [
+            0,
+            0.006,
+            1.991
+          ],
+          "size": [
+            4,
+            0.012,
+            0.018
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Brass edge short",
+          "material": "brass",
+          "position": [
+            -1.991,
+            0.006,
+            0
+          ],
+          "size": [
+            0.018,
+            0.012,
+            3.964
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Brass edge short",
+          "material": "brass",
+          "position": [
+            1.991,
+            0.006,
+            0
+          ],
+          "size": [
+            0.018,
+            0.012,
+            3.964
+          ],
+          "bevel_m": 0.003
+        }
+      ],
+      "placements": [
+        [
+          -13,
+          6.35,
+          2,
+          0
+        ],
+        [
+          -13,
+          6.35,
+          6,
+          0
+        ],
+        [
+          -13,
+          6.35,
+          10,
+          0
+        ],
+        [
+          -13,
+          6.35,
+          14,
+          0
+        ],
+        [
+          13,
+          6.35,
+          2,
+          0
+        ],
+        [
+          13,
+          6.35,
+          6,
+          0
+        ],
+        [
+          13,
+          6.35,
+          10,
+          0
+        ],
+        [
+          13,
+          6.35,
+          14,
+          0
+        ]
+      ],
+      "priority": "P0",
+      "capabilities": [],
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -2,
+          0,
+          0
+        ],
+        "right": [
+          2,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          2
+        ],
+        "back": [
+          0,
+          0,
+          -2
+        ]
+      },
+      "collision_proxy": {
+        "owner": "none; existing ceiling is visual-only",
+        "visual_export": false
+      }
+    },
+    "frontage": {
+      "asset_id": "GJH-STF-002",
+      "source_dimensions_wdh_m": [
+        8,
+        0.5,
+        3.6
+      ],
+      "target_dimensions_wdh_m": [
+        9.8,
+        0.59,
+        5.475
+      ],
+      "bounds_min": [
+        -4.9,
+        0,
+        -0.25
+      ],
+      "bounds_max": [
+        4.9,
+        5.475,
+        0.34
+      ],
+      "components": [
+        {
+          "name": "Stone pier left",
+          "material": "courtStone",
+          "position": [
+            -3.55,
+            2.6,
+            0
+          ],
+          "size": [
+            2.4,
+            5.2,
+            0.35
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Stone pier right",
+          "material": "courtStone",
+          "position": [
+            3.55,
+            2.6,
+            0
+          ],
+          "size": [
+            2.4,
+            5.2,
+            0.35
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Dark lintel",
+          "material": "dark",
+          "position": [
+            0,
+            4.7,
+            0
+          ],
+          "size": [
+            9.7,
+            1.55,
+            0.5
+          ],
+          "bevel_m": 0.003
+        },
+        {
+          "name": "Brass lintel datum",
+          "material": "brass",
+          "position": [
+            0,
+            5.45,
+            0.3
+          ],
+          "size": [
+            9.8,
+            0.045,
+            0.08
+          ],
+          "bevel_m": 0.003
+        }
+      ],
+      "placements": [
+        [
+          -10,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          10,
+          0,
+          0,
+          0
+        ]
+      ],
+      "priority": "P0",
+      "capabilities": [],
+      "sockets": {
+        "floor": [
+          0,
+          0,
+          0
+        ],
+        "left": [
+          -4.9,
+          0,
+          0
+        ],
+        "right": [
+          4.9,
+          0,
+          0
+        ],
+        "front": [
+          0,
+          0,
+          0.34
+        ],
+        "back": [
+          0,
+          0,
+          -0.25
+        ]
+      },
+      "collision_proxy": {
+        "owner": "world aggregate Rapier blocks",
+        "visual_export": false,
+        "local_records": [
+          {
+            "component": "Stone pier left"
+          },
+          {
+            "component": "Stone pier right"
+          },
+          {
+            "component": "Dark lintel"
+          }
+        ],
+        "policy": "Three solid cuboids leave the doorway aperture open; visual bounds are not a collision box."
+      }
+    }
+  },
+  "aggregate_colliders": [
+    {
+      "name": "foundation",
+      "position": [
+        0,
+        -0.22,
+        3.5
+      ],
+      "size": [
+        30.4,
+        0.4,
+        29.4
+      ]
+    },
+    {
+      "name": "outer-side--1",
+      "position": [
+        -15,
+        3.3,
+        3.5
+      ],
+      "size": [
+        0.3,
+        6.6,
+        29
+      ]
+    },
+    {
+      "name": "outer-side-1",
+      "position": [
+        15,
+        3.3,
+        3.5
+      ],
+      "size": [
+        0.3,
+        6.6,
+        29
+      ]
+    },
+    {
+      "name": "outer-arrival",
+      "position": [
+        0,
+        3.3,
+        18
+      ],
+      "size": [
+        30,
+        6.6,
+        0.3
+      ]
+    },
+    {
+      "asset": "frontage",
+      "component": "Stone pier left",
+      "placement_index": 0,
+      "name": "portal-0-Stone pier left"
+    },
+    {
+      "asset": "frontage",
+      "component": "Stone pier right",
+      "placement_index": 0,
+      "name": "portal-0-Stone pier right"
+    },
+    {
+      "asset": "frontage",
+      "component": "Dark lintel",
+      "placement_index": 0,
+      "name": "portal-0-Dark lintel"
+    },
+    {
+      "asset": "frontage",
+      "component": "Stone pier left",
+      "placement_index": 1,
+      "name": "portal-1-Stone pier left"
+    },
+    {
+      "asset": "frontage",
+      "component": "Stone pier right",
+      "placement_index": 1,
+      "name": "portal-1-Stone pier right"
+    },
+    {
+      "asset": "frontage",
+      "component": "Dark lintel",
+      "placement_index": 1,
+      "name": "portal-1-Dark lintel"
+    },
+    {
+      "asset": "frontage",
+      "component": "Stone pier left",
+      "placement_index": 2,
+      "name": "portal-2-Stone pier left"
+    },
+    {
+      "asset": "frontage",
+      "component": "Stone pier right",
+      "placement_index": 2,
+      "name": "portal-2-Stone pier right"
+    },
+    {
+      "asset": "frontage",
+      "component": "Dark lintel",
+      "placement_index": 2,
+      "name": "portal-2-Dark lintel"
+    }
+  ],
+  "caps": [
+    {
+      "name": "Wall side remainder",
+      "material": "green",
+      "position": [
+        -15,
+        3.3,
+        17.5
+      ],
+      "size": [
+        0.3,
+        6.6,
+        1
+      ],
+      "bevel_m": 0.003
+    },
+    {
+      "name": "Wall side remainder",
+      "material": "green",
+      "position": [
+        15,
+        3.3,
+        17.5
+      ],
+      "size": [
+        0.3,
+        6.6,
+        1
+      ],
+      "bevel_m": 0.003
+    },
+    {
+      "name": "Wall arrival remainder",
+      "material": "green",
+      "position": [
+        14,
+        3.3,
+        18
+      ],
+      "size": [
+        2,
+        6.6,
+        0.3
+      ],
+      "bevel_m": 0.003
+    },
+    {
+      "name": "Roof outer rear remainder",
+      "material": "ivory",
+      "position": [
+        -13,
+        6.5,
+        17
+      ],
+      "size": [
+        4,
+        0.3,
+        2
+      ],
+      "bevel_m": 0.003
+    },
+    {
+      "name": "Roof outer rear remainder",
+      "material": "ivory",
+      "position": [
+        13,
+        6.5,
+        17
+      ],
+      "size": [
+        4,
+        0.3,
+        2
+      ],
+      "bevel_m": 0.003
+    }
+  ],
+  "roof_v2": [
+    {
+      "name": "Roof inner side",
+      "material": "ivory",
+      "position": [
+        -6.2,
+        6.5,
+        9
+      ],
+      "size": [
+        9.6,
+        0.3,
+        18
+      ],
+      "bevel_m": 0.003
+    },
+    {
+      "name": "Roof inner side",
+      "material": "ivory",
+      "position": [
+        6.2,
+        6.5,
+        9
+      ],
+      "size": [
+        9.6,
+        0.3,
+        18
+      ],
+      "bevel_m": 0.003
+    },
+    {
+      "name": "Roof shaft front",
+      "material": "ivory",
+      "position": [
+        0,
+        6.5,
+        7.25
+      ],
+      "size": [
+        2.8,
+        0.3,
+        14.5
+      ],
+      "bevel_m": 0.003
+    },
+    {
+      "name": "Roof shaft rear",
+      "material": "ivory",
+      "position": [
+        0,
+        6.5,
+        17.75
+      ],
+      "size": [
+        2.8,
+        0.3,
+        0.5
+      ],
+      "bevel_m": 0.003
+    }
+  ],
+  "roof_v1": [
+    {
+      "name": "Roof continuous centre",
+      "material": "ivory",
+      "position": [
+        0,
+        6.5,
+        9
+      ],
+      "size": [
+        22,
+        0.3,
+        18
+      ],
+      "bevel_m": 0.003
+    }
+  ],
+  "foundation_visual": {
+    "name": "Foundation",
+    "material": "dark",
+    "position": [
+      0,
+      -0.22,
+      3.5
+    ],
+    "size": [
+      30.4,
+      0.4,
+      29.4
+    ],
+    "bevel_m": 0.003
+  },
+  "retained_tiles": [
+    [
+      -14,
+      -0.005,
+      17
+    ],
+    [
+      -12,
+      -0.005,
+      17
+    ],
+    [
+      -10,
+      -0.005,
+      17
+    ],
+    [
+      -8,
+      -0.005,
+      17
+    ],
+    [
+      -6,
+      -0.005,
+      17
+    ],
+    [
+      -4,
+      -0.005,
+      17
+    ],
+    [
+      -2,
+      -0.005,
+      17
+    ],
+    [
+      0,
+      -0.005,
+      17
+    ],
+    [
+      2,
+      -0.005,
+      17
+    ],
+    [
+      4,
+      -0.005,
+      17
+    ],
+    [
+      6,
+      -0.005,
+      17
+    ],
+    [
+      8,
+      -0.005,
+      17
+    ],
+    [
+      10,
+      -0.005,
+      17
+    ],
+    [
+      12,
+      -0.005,
+      17
+    ],
+    [
+      14,
+      -0.005,
+      1
+    ],
+    [
+      14,
+      -0.005,
+      3
+    ],
+    [
+      14,
+      -0.005,
+      5
+    ],
+    [
+      14,
+      -0.005,
+      7
+    ],
+    [
+      14,
+      -0.005,
+      9
+    ],
+    [
+      14,
+      -0.005,
+      11
+    ],
+    [
+      14,
+      -0.005,
+      13
+    ],
+    [
+      14,
+      -0.005,
+      15
+    ],
+    [
+      14,
+      -0.005,
+      17
+    ]
+  ]
+}

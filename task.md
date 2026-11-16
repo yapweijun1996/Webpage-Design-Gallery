@@ -1,10 +1,17 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-Status: **core demo implemented and laboratory-verified; physical-device and packaging acceptance remain open**. Checked items are limited to the evidence and environments in `docs/v11-task-evidence-matrix.md`, not blanket device or brand certification. Unchecked items are explicitly partial or deferred.
+Status: **authorized software work complete, including the four interior follow-ups and expanded-mall software/performance acceptance**. By owner decision on 2026-11-16, physical-device acceptance and branded activation of the 14 candidate storefronts are deferred, non-blocking follow-ups. The 14 storefronts remain closed neutral placeholders. Completed software is not blocked by these deferred items. Checked items retain their documented evidence and environment limits; no unperformed device test or brand authorization is represented as passed.
+
+## Deferred follow-ups — non-blocking
+
+Owner decision, 2026-11-16: defer the following work outside the completed software scope. These items do not block software completion or the existing release.
+
+- **Physical-device and accessibility acceptance — deferred, not performed:** physical iPhone Safari / Android Chrome, real safe-area insets, screen-reader sessions and the remaining device-specific contrast review. Existing browser and automated accessibility evidence keeps its original scope. Reopen as a separate acceptance task when the required devices and testing access are available.
+- **Candidate brand authorization and activation — deferred, not granted:** keep all 14 candidate storefronts as numbered, closed neutral placeholders in the scene, map and directory. Do not assign brand identities, add brand-specific assets or enable store actions as part of this completion. Reopen branded activation separately only after current relationship, content and rights are verified for each candidate.
 
 ## Objective and scope
 
-Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/Blender-3D-Gallery) to improve product discovery, navigation and presentation in the existing GJH V11 mall. Prioritize the New Moon product experience, then wayfinding and selective scene improvements. Preserve existing URLs, content, business behavior, controls and accessibility fallbacks. The later [modern boutique interior redesign](#modern-boutique-interior-redesign--2026-11-15) supersedes the original instruction to preserve the current visual direction; completed earlier phases remain historical evidence.
+Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/Blender-3D-Gallery) to improve product discovery, navigation and presentation in the existing GJH V11 mall. Prioritize the New Moon product experience, then wayfinding and selective scene improvements. Preserve existing URLs, content, business behavior, controls, accessibility fallbacks and the mall's visual direction.
 
 The mall already has three stores, the green-polo visitor, benches, planters, walking and turning controls, inspection dialogs and a list view. Its four canned products now use owner-authorized conceptual GLBs with photo-derived labels; product-detail dialogs retain default packshots and offer an opt-in unofficial 3D preview in application 1.1.14. Confirm these observations against current source and the deployed site before making changes.
 
@@ -36,7 +43,7 @@ Acceptance: the mall does not fetch models from GitHub at runtime; asset provena
 Depends on Phase 1. This is the first implementation priority.
 
 - [x] Replace the four simplified cans with the reviewed New Zealand, Australia, South Africa and Mexico models.
-- [ ] Match each model, label, name and product record against existing verified source data.
+- [x] Match each model, label, name and product record against existing verified source data.
 - [x] Generate four unofficial flat-label candidate PNGs with Codex CLI from the existing photo/SKU references (owner request, 2026-11-15). Keep estimated wrap/disclosure information and preserve the published GLBs until separately accepted.
 - [x] Evaluate the existing display-shelf model; arrange products for clear near and distant viewing.
 - [x] Provide discoverable inspection cues for F and click/tap.
@@ -116,7 +123,7 @@ Design decision: the bottom five-item navigation (Home, Shops, Events, Rewards, 
 - [x] Shelf focus mode: implemented scope in `docs/gjh-v11-shelf-focus-scope.md`; 4 verified SKUs only, shelf-level highlight, compact nearby card, demo Add to Bag without price.
 - [x] Interaction target highlight and distance hint.
 - [x] WebGL context-loss recovery and low-end quality tiers.
-- [ ] Physical iPhone Safari / Android Chrome pass, real safe-area insets, screen-reader and contrast review.
+- **Deferred, non-blocking:** physical-device and remaining device-specific accessibility acceptance is tracked in the follow-ups above, outside this completed software release scope.
 - [x] Define any future real-commerce scope separately. The existing Demo bag and pushable 3D cart are authorized simulations, with no prices, stock reservation, real orders or payment. The official eShop link is external and does not check out the demo selection. See the commerce clarification below; no real-commerce implementation is approved by this checklist.
 
 Optional scoped item, not committed: Diner Dash-style 4-table restaurant mini-game, see `docs/gjh-v11-restaurant-minigame-scope.md`.
@@ -163,7 +170,7 @@ Final deliverables: asset provenance, UI/UX change record, test evidence and lim
 
 ## Gallery design collection redesign — advisor plan, 2026-11-15
 
-Status: **implemented and headless-Chrome E2E verified; physical-device and cross-browser acceptance remain open**. This is a separate Gallery task for `/companies/gjh/index.html`, prompted by the owner's annotated 639x826 browser view. The implementation follows the screenshot/source advisor review; final results are documented in [collection redesign verification](docs/gallery-collection-redesign.md).
+Status: **implemented and headless-Chrome E2E verified; physical-device acceptance is owner-deferred and non-blocking**. Untested browser/device coverage remains unverified. This is a separate Gallery task for `/companies/gjh/index.html`, prompted by the owner's annotated 639x826 browser view. The implementation follows the screenshot/source advisor review; final results are documented in [collection redesign verification](docs/gallery-collection-redesign.md).
 
 Baseline E2E review, 15 November 2026: Gallery, PWA, preferences, 28 GJH demo browser cases and supplemental navigation/sort checks passed. Measured header/card heights support the advisor's layout concerns. Original generated outputs failed synchronization; regeneration and `--check` passed in the isolated test copy. See [E2E and advisor review](docs/gjh-gallery-advisor-e2e-review.md) for scope, evidence and limitations. This baseline does not complete redesigned-interface acceptance below.
 
@@ -270,6 +277,25 @@ Native popup keyboard option choice is NOT VERIFIED: the same sequence fails in
 an isolated HTML fixture on this host. Actual control selection events and model
 updates pass separately. Physical devices and screen-reader sessions remain open;
 this does not complete the separate final/device acceptance gates.
+
+## V11 direct product Inspect — 2026-11-15
+
+The nearby New Moon product Inspect action now opens the existing readable
+product-detail viewer immediately. It no longer requires the full Shelf view
+and a second “Inspect details” activation. The Shelf controller and layered
+mode implementation remain available for retained lifecycle and fallback
+coverage; product identity, four SKU mappings, bag state, held-product state,
+close/back restoration and mobile controls are unchanged. A nearby SKU now
+opens the existing 3D can preview automatically; if it cannot load, the
+official packshot remains visible. The focused desktop and 390px touch
+regression is `tests/browser_gjh_direct_inspect.py` with evidence in
+`docs/evidence/v11-direct-inspect/`. Chrome desktop and 390px touch checks
+pass for all four loaded 3D SKUs, repeat close/reopen and bag preservation.
+49 unit tests, SSOT, gallery, demos and PWA checks pass. The broader modes
+test stops at its courtyard-seat approach assertion on both this change and
+untouched baseline 53e98c2; it is not counted as passing. Actual screenshot
+review and independent advisor review found no blocker for this bounded fix.
+Physical iPhone Safari remains unverified.
 
 
 ## Codex CLI flat-label candidates — 2026-11-15
@@ -434,18 +460,123 @@ Source of truth for the candidate rows: [unchanged backlog v1.0](docs/references
 - [x] Document dimension/interaction anomalies, current texture-free loader limits, collision ownership, proposed LOD behavior and the four-storefront fixture versus three-store runtime distinction.
 - [x] Define documentation, baseline, pilot, shell, retail and optional-polish phases without marking future production as complete.
 - [x] D1: reproduce and resolve the pilot kiosk/cart bottleneck; verify camera framing and bidirectional cart clearance at 390/639/1440px.
-- [ ] D1 follow-up outside asset scope: consolidate HUD/map/help ownership.
+- [x] D1 follow-up outside asset scope: consolidate HUD/map/help ownership.
 - [x] D1: audit existing bench, planter, kiosk, shelf and architectural primitives; record explicit reuse/adapt/new decisions and candidate-ID mappings.
 - [x] D1: approve per-asset dimensions, coordinate conversion, snap/interaction anchors, collision authority, material compatibility and measured scene-wide budgets.
 - [x] D2: review the eight-ID pilot: PUB-002, PUB-008, PUB-017, DSP-001, STF-008, LGT-009, PUB-005 and VER-017; preserve their source priorities and correct targets before authoring.
 - [x] D2: author/adapt the reviewed pilot with editable source, GLB, manifest, applicable collision definitions, provenance and actual G01–G12 results or reasoned applicability records.
 - [x] D2: validate export in independent viewers and the actual mall; verify failed/delayed loading, lifecycle cleanup and mobile/desktop visuals.
-- [ ] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
-- [ ] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
-- [ ] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
+- [x] D3: select necessary P0 shell families and validate a traversable fixture, wayfinding and collision; retain the three-store runtime unless its expansion is separately scoped.
+- [x] D4: select supported P1 displays, seating and facilities; retain verified product content and existing bag/cart/seat/fallback behavior.
+- [x] D5: evaluate optional P2 variants, reflection/texture support, streaming and LOD only after measured cost/benefit and compatibility review.
 - [x] Verify pilot movement, cart, seats, map, all four products, independent failures, delayed-parse disposal and stable repeated List/3D resources. Retain before/after payload/draw calls and after-only frame samples; no pre-change frame-time or new transport certification is claimed.
 
 Completion requires real artifacts and evidence, not a checked inventory row. Supplied dimensions, material/LOD budgets and capability tags remain proposals until individually reviewed. The existing delivered-asset evidence and other task sections retain their own status. The later explicit request authorizes this eight-asset implementation. See [pilot review](docs/gjh-v11-interior-pilot-review.md), [acceptance manifest](models/gjh-interior-pilot/manifest.json) and [14-case E2E evidence](docs/evidence/interior-pilot-e2e.json). The subsequent commit/push request is tracked in [pilot release review](docs/gjh-v11-interior-pilot-release.md). The complete pilot uses `?interior=pilot`; the default keeps later M056 shelves, Shelf focus and graphics recovery. HUD consolidation and remaining candidates remain separate work.
+
+## Existing-source product consistency — 2026-11-15
+
+Completed the original Phase 2 [source-consistency acceptance](docs/v11-product-source-consistency-review.md).
+Fresh requests verify four official product pages, eleven unchanged original
+images and four live packshots. Actual deployed GLBs and embedded JPEGs exactly
+match pinned upstream photo-derived exports/textures; twelve rendered panel views
+and twelve live direct-Inspect/detail/preview flows pass source-consistency review after
+synchronizing the concurrent interior pilot. No
+known cross-SKU panel, factual contradiction or invented mark was found.
+
+Earlier audit notes required physical print masters for this checkbox. Independent
+contract review confirmed that this exceeded the explicit task, which permits
+estimated panel placement and Mexico's disclosed 121-degree blank sector. Those
+notes are superseded for this checklist item; no claim of full physical-wrap,
+measured dimensions, current official edition or microtext certification follows.
+The four AI comparison images remain separate and undeployed. The concurrent application 1.1.43
+and its pilot assets are preserved; this audit changes documentation only. The physical-device/screen-reader task is now
+the only unchecked item in the original mall acceptance scope; the newly added
+interior follow-ups retain their own status.
+
+## V11 merchandising density — 2026-11-15
+
+1.1.45 preserves native can size, stocks M056 at 17 facings per row (204 total), and retains optional pilot at 11 (132 total). Repeated pickup/return and direct Inspect pass in desktop/390 Chrome. Latest hybrid directory, showcase stock and camera changes are retained. Hybrid CSS literals were moved unchanged into canonical design tokens to restore SSOT; the gate was not relaxed. See docs/v11-newmoon-merchandising-density-review.md.
+
+## V11 welcome modal repair (1.1.46)
+- [x] Remove sticky footer overlap with preference/CTA on short screens.
+- [x] Improve dark action and checkbox text contrast with canonical tokens.
+- [x] Four viewport screenshot/DOM and checkbox, close/reopen/start checks; no physical iPhone claim.
+
+## Interior D1 Help and Map ownership — 2026-11-15
+
+Application 1.1.47 completes the [D1 ownership review](docs/v11-interior-hud-review.md).
+One permanent Help owner handles tutorial, H/? and controller Menu; one compact
+header Map entry serves the kiosk and quick guide. Close/Escape/controller Back
+restore the surviving focus target. Graphics, appearance, guide preferences,
+current native welcome flow, three-column mobile navigation and dark-theme fixes
+are retained. Compact Stores labels preserve the full accessible directory name.
+The latest brand imagery is preserved; its confirmed 667px Directory overflow is
+fixed with a scoped responsive column rule. No model, product, collider or mode
+engine changed.
+
+Current-source checks pass 13 HUD groups/50 frames, 70 DOM accessibility states,
+four dark welcome sizes, 14 native Guide Tab targets, shared component defaults,
+and the documented Directory/image/boundary bridges. Primary independent checks
+add 49 Python tests, six interaction cases and three strict edge cases; generation
+and SSOT pass. Historical mode/Gallery/PWA proofs retain their source boundaries,
+and the unreproduced earlier Hair hit failure remains recorded. Post-push CI,
+Pages and actual public user flows are the release gate before D3. At this D1 checkpoint only D1 was
+checked; subsequent D3/D4/D5 acceptance is recorded separately below.
+
+
+D3 bounded shell acceptance — 2026-11-15: application1.1.49 adds original
+ARC-001/COR-001/CEI-001/STF-002 to classic default/pilot, plus necessary cart
+batching that repairs the inherited220-call failure without relaxing200. Expanded
+retains its existing shell and makes zero four-kit GLB requests. Four editable
+sources,40,892-byte exports and canonical placement/proxy data have independent
+acceptance;12selected IDs are implemented and188candidates remain pending.
+Current55Python/19Node/generator/SSOT and8browser integration groups pass.
+Fourjourneys/4,745actualsteering renders peak200;960distinct advancing renders
+pass; all66collider records match pinned8768 for v1/v2 x default/pilot.
+See docs/v11-interior-shell-review.md and docs/evidence/interior-shell-integration.json.
+Immutable950 evidence remains separate. Physical-device/AT,45requests/10MiB,
+fullM1/200candidates and expanded performance are not certified. Main/CI/Pages
+and actual public flows are the publication gate before D4.
+
+
+D4 supported P1 selection — 2026-11-15: independently accepted reuse of
+DSP-001/PUB-002/PUB-008/PUB-005/LGT-009 with their existing capabilities,
+artifacts and collision/fallback owners. Default M056 is retained; DSP remains
+pilot-only. All12P1 FAC candidates have individual not-selected reasons and
+remain unimplemented; P2 PUB-017 is a retained Map dependency, not a P1 asset.
+Current14pilot E2E checks and all148runtime hashes pass against deployed D3
+e7581e6 (CI/Pages43699502215,28public hashes,fivepublic journeys).
+Selection adds zero runtime resources/IDs;12implemented and188pending remain.
+See docs/v11-interior-p1-review.md and docs/evidence/interior-p1-selection.json.
+D4 selection is complete; FAC production, D5 and physical-device/AT acceptance
+are not implied. Its own main/CI/Pages verification is required before D5.
+
+
+D5 optional detail evaluation — 2026-11-15: independently accepted measured
+policy retains supported P2 directory/plinth identities, existing PBR/product
+label pipelines, small static shell batch and current shared LOD1/lazy previews.
+No new variant/reflection/decoder/streaming/distance-switch is justified by the
+current measured Detailed active-cart200-call state. All148runtime hashes match
+the current source-equivalent480-frame sample (pairedbaseline/current960frames);
+six fresh browser loader cases prove valid3-primitive positive parse and rejection
+of5SHA-valid unsupported variants before parsing or dependent requests.
+Closing55Python/19Node/generator/SSOT pass; prior current14pilot/eightintegration
+checks remain source-pinned, not falsely claimed rerun for D5. See
+docs/v11-interior-detail-policy.md and docs/evidence/interior-detail-policy.json.
+D1/D3/D4 are already separately published (950634f/e7581e6/9c2066f); D4 CI/Pages
+43700288223 and35public hashes pass. This closes the four authorized interior
+follow-ups after D5 publication verification.12implemented/188pending remain;
+physical-device/AT and the separately scoped expanded checklist are unchanged.
+
+Visitor v2 UX follow-up — 2026-11-15: camera occlusion, natural bench entry, reachable pickup/return feedback, persistent held guidance, truthful recovery and direct Cart controls are implemented in an isolated local candidate. Real-input and advisor evidence: `docs/gjh-visitor-v2-ux-fixes.md`. Publication and physical-device performance are not claimed.
+
+Visitor v2 UX release follow-up: integrated with upstream e67c2d9, preserving its amenities, camera sweep, merchandising and automatic preview. Pre-deployment regression and real-input gates pass; public acceptance is recorded in docs/gjh-visitor-v2-ux-release.md.
+
+Visitor v2 UX public acceptance: eced12c deployed successfully via Pages run 43687815886. Seventeen public resources matched; thirteen real keyboard/touch release checks passed with normal animations and no page/console errors. See docs/gjh-visitor-v2-ux-release.md.
+
+Visitor v2 visual acceptance follow-up: screenshot review reopened the initial live input pass because onboarding covered the seated action. Separate HUD suppression now preserves tutorial progress; current local keyboard5/touch7 and unit49 pass, with final public15 gate pending in docs/gjh-visitor-v2-ux-release.md.
+
+Final Visitor v2 UX release: a7f4ef3 deployed via successful Pages run43688638355; final public17-resource byte check and fresh15-check normal-motion keyboard/touch E2E PASS, zero page/console errors. Tutorial visual obstruction and progress preservation are covered. Original dirty worktrees were not modified by this release.
 
 ## Modern boutique interior redesign — 2026-11-15
 
@@ -455,7 +586,7 @@ The earlier nine-slice outline is superseded by the more detailed, dependency-aw
 
 ## Expanded 17-store upgrade — 2026-11-15
 
-Status: **overall design direction liked by the owner; stages 0 and 1 documented, with the refined plan awaiting review; stage 2 current-store data pilot implemented, expanded interior not started**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The existing runtime still has three stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
+Status: **stages 0–5 and 7–10 completed in the opt-in expanded preview; stage 6 neutral storefront and research scope complete, with branded activation owner-deferred; stage 11b startup-budget acceptance passed and release verified**. The owner chose an expanded mall with independent candidate brand storefronts. The [dimensioned ground/upper plan](docs/references/gjh-mall-floorplan-stage1.png) and [stage 1 spatial plan](docs/gjh-v11-stage1-spatial-plan.md) propose a 70 m × 60 m shell and 17 potential stores; these remain draft technical assumptions, not final dimensions, tenant commitments or verified ownership. The default runtime has three stores; the stage 3 preview adds 14 closed neutral slots around those stores. The [master plan](docs/gjh-v11-mall-upgrade-master-plan.md) specifies migration boundaries, phased acceptance and risks; the expansion supersedes the prior three-store-only planning constraint while preserving existing journeys and their relative order.
 
 - [x] Inspect existing scene dimensions and repository company/brand research; check GJH corporate and eShop source listings.
 - [x] Produce a labelled, dimensioned 2D ground-floor draft and reconcile area arithmetic, circulation zones, seasonal space and candidate brand evidence.
@@ -464,16 +595,92 @@ Status: **overall design direction liked by the owner; stages 0 and 1 documented
 - [x] **Baseline follow-up — 320px header:** corrected the clipped directory control and verified visible, focus and hit-test bounds plus the directory round trip across five viewports. [Fix report](docs/gjh-v11-stage0-fixes.md).
 - [x] **Baseline follow-up — V2 modes:** updated the collision-safe scripted routes; all eight seats and the complete three-viewport V2 mode suite passed. [Fix report](docs/gjh-v11-stage0-fixes.md).
 - [x] **Baseline follow-up — gamepad onboarding:** reproduced stale sampled look input in manual stepping, synchronized the fixture and verified three consecutive synthetic-gamepad runs; physical controller remains untested. [Fix report](docs/gjh-v11-stage0-fixes.md).
-- [x] **1. Spatial refinement:** documented 17 independent slots, 6 m loop, portals, public uses, reserve boundary access assumptions and matching lift landings; generated a [dimensioned drawing](docs/references/gjh-mall-floorplan-stage1.png) and [coordinate/verification plan](docs/gjh-v11-stage1-spatial-plan.md). This is a checked proposal awaiting owner review, not implemented or physically certified.
-- [x] **2. Spatial data pilot:** shared current three-store IDs, numbers, nominal bounds, availability and arrival anchors across the 3D world, map and live directory; preserved legacy IDs and static fallback. [Implementation and verification](docs/gjh-v11-stage2-spatial-pilot.md). The 17-store expansion remains later work.
-- [ ] **3. Expanded shell:** implement a reversible neutral ground-floor shell and circulation; prove walking, cart paths, camera, collision and map destinations.
-- [ ] **4. Atrium and seating:** remove the gold ring; add low planting and realistic seat/service/event groups; verify collisions, routes and seat interaction.
-- [ ] **5. Existing stores:** migrate New Moon, MILI and GOGO with current product, brand, directory and bag journeys intact.
-- [ ] **6. Candidate storefronts:** add truthful placeholders, then populate each store only after its individual brand, content and rights checks.
-- [ ] **7. Elevator and facilities:** resolve two-floor lift and service routing; test travel, landing, interruption, v1/v2 and existing interaction state.
-- [ ] **8. Materials and lighting:** refine natural materials and warm premium lighting; validate actual scenes and compare resource use against the baseline.
-- [ ] **9. Theme infrastructure:** build coherent everyday theme and accessible setup with safe state, storage fallback, cancellation and cleanup.
-- [ ] **10. Seasonal packs:** implement Lunar New Year, Christmas and Diwali sets one at a time with tested switch-back, path clearance and failure handling.
-- [ ] **11. Integration:** run applicable generator, unit and browser suites; review actual desktop/mobile journeys, accessibility, performance, fallback and remaining limits.
+- [x] **1. Spatial refinement:** documented 17 independent slots, 6 m loop, portals, public uses, reserve boundary access assumptions and matching lift landings; generated a [dimensioned drawing](docs/references/gjh-mall-floorplan-stage1.png) and [coordinate/verification plan](docs/gjh-v11-stage1-spatial-plan.md). This is a checked proposal, not a physically certified plan; stage 3 implements a subset in the preview.
+- [x] **2. Spatial data pilot:** shared current three-store IDs, numbers, nominal bounds, availability and arrival anchors across the 3D world, map and live directory; preserved legacy IDs and static fallback. [Implementation and verification](docs/gjh-v11-stage2-spatial-pilot.md). The pilot covered only three stores; stage 3 added the wider preview later. Integrated on top of newer main with visitor and HUD fixes preserved; see [release verification](docs/gjh-v11-stage2-release.md).
+- [x] **3. Expanded shell:** built an opt-in, reversible 70 × 60 m ground-floor preview with 17 numbered slots (three open, 14 closed), and tested the loop, cart, map, existing stores, bag, recovery and screen sizes. [Implementation, screenshots and limits](docs/gjh-v11-stage3-expanded-shell.md).
+- [x] **4. Atrium and seating:** added a low planted bed, two lounge groups and a clear seasonal reservation to the expanded preview; verified four seat interactions, fallback, cart/loop collision, camera and screen sizes. [Implementation, visual evidence and limits](docs/gjh-v11-stage4-atrium.md).
+- [x] **5. Existing stores:** integrated New Moon, MILI and GOGO into the expanded scene with visible glazed storefronts and directory-to-3D links; verified four product details, brand-only content, map, bag, fallbacks and PWA. [Implementation and evidence](docs/gjh-v11-stage5-existing-stores.md).
+- [x] **6. Neutral candidate storefronts — accepted software scope:** [stage 6 evidence and neutral storefront slice](docs/gjh-v11-stage6-candidate-stores.md) records the 14 individual source/rights checks and implements numbered, closed neutral directory/map/frontage placeholders. The owner accepted retaining all 14 as neutral placeholders on 2026-11-16. Brand authorization and branded activation are deferred to the separate non-blocking follow-up above; this checkbox does not assert that any candidate brand is authorized or active.
+- [x] **7. Elevator and facilities:** implemented a guarded two-level visitor lift, walkable upper landing, safe courtyard arrival and relocated self-service amenities in the expanded preview; verified travel, rail collision, cart/held-product restrictions, pause, WebGL interruption, V1/V2 behavior and existing journeys. [Implementation and evidence](docs/gjh-v11-stage7-lift-facilities.md). V1 remains ground-only; the east facilities reservation is not an operating restroom.
+- [x] **8. Materials and lighting:** added optional shared procedural stone and wood finishes, clearer glass and warm batched lighting; verified multi-screen views, failure fallback, lift/stores/cart and matched performance. [Implementation and evidence](docs/gjh-v11-stage8-materials-lighting.md). The historical baseline and candidate exceeded the startup-payload budget; stage 11b subsequently addressed it.
+- [x] **9. Theme infrastructure:** added Everyday theme roles, local settings and a staged coordinator with cancellation, rollback and cleanup; verified five screen sizes, storage/module failures, real graphics recovery and retained visitor states. [Implementation and evidence](docs/gjh-v11-stage9-theme-infrastructure.md).
+- [x] **10a. Lunar New Year:** added the red-and-gold theme and removable lanterns, banner, kumquat trees and blossoms, with return to Everyday and recovery. [Implementation and evidence](docs/gjh-v11-stage10-lunar-new-year.md).
+- [x] **10b. Christmas:** added an evergreen tree, gifts, warm lights and banner with removable decoration, three-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-christmas.md).
+- [x] **10c. Deepavali:** added warm lamps, floral garlands, a flat rangoli-inspired motif and jewel tones with four-theme switching and recovery. [Implementation and evidence](docs/gjh-v11-stage10-deepavali.md).
+- [x] **11a. Integration verification:** tested all four themes, existing shopping and navigation, five viewport sizes, graphics/failure recovery, PWA and accessibility; fixed hidden offline help, stale theme preview and landscape Help focus. [Report and evidence](docs/gjh-v11-stage11-integration.md). Browser emulation is not physical-device or screen-reader certification.
+- [x] **11b. Startup performance acceptance:** added checked JavaScript bundles and a validated, recoverable pack of 19 existing models. The unchanged default-layout budget passes at all five simulated viewports: 40–42 requests, at most 10,275,478 decoded bytes and at most 198 non-cart draw calls. Against the exact `372295c` 320 × 740 baseline, the count decreased from 82 to 40 and decoded bytes increased from 9,885,537 to 9,924,394. Headroom is tight and physical-device performance remains unverified. See [stage 11b and evidence](docs/gjh-v11-stage11b-startup.md) and the [independent current-main acceptance](docs/evidence/gjh-startup-main-acceptance.json), including actual compact Map checks and native graphics interruption during pending pack loading.
 
-Proposed dimensions and a small upper landing are documented; owner review, actual-scene clearance, external service connectivity, store content/rights, theme persistence and access remain open for their respective slices. A checked planning item is not runtime implementation or acceptance.
+Proposed dimensions and a small upper landing are documented; owner review, actual-scene clearance, external service connectivity, store content/rights and any shared operator theme access remain open for their respective slices. Browser-local theme persistence is implemented. A checked planning item is not runtime implementation or acceptance.
+
+Stage6 neutral-candidate acceptance — 2026-11-15: application1.1.50 adds shared
+planned-space04–17 records,14truthful Directory entries and matching Map states,
+while retaining3open stores/4products. Native staticdetails remains readable
+withoutJS/WebGL/Rapier; closedspaces have no action and all14stale destinations
+are rejected. Existing3D labels say PLANNEDSPACE, not an opening promise.
+Fresh official-navigation observations match14draft names but establish no new
+catalog or asset permission; all runtime candidates remain unassigned/unavailable.
+Independent148source/56raw-hash review,14focusedcontexts,55Python/21Node/gen/SSOT
+and8integrationgroups pass. Paired480actualrenders hold190inactive/193cart calls
+at1440Detailed, unchanged from c652e9f. See docs/gjh-v11-stage6-candidates.md and
+docs/evidence/gjh-stage6-candidates.json. No extra model/request/geometry is added.
+Main/CI/Pages and public DOM/hash verification remain the release gate before7;
+physical-device/AT and later expanded stages are not completed by this slice.
+
+Stage6 public-check follow-up: isolate14unavailable destination calls and exact
+X/Z/frameCounter equality within one JS turn. Three controls exposed cross-RPC
+idle-frame sampling, not a demonstrated teleport mutation. Strict corrected
+14local/fivepublic checks pass; no tolerance or runtime change. Original failure
+and phase evidence remain pinned in docs/evidence/gjh-stage6-public-check.json.
+The test-only repair requires main/CI/public-byte verification before stage7.
+
+
+Stage7 local acceptance — 2026-11-15: application1.1.51/build68cc981c4eb25add
+implements a physical expanded lift cabin, shaft opening, stop gates/thresholds,
+west boarding/exit and safe interrupted-travel recovery. Empty Call requires a
+separate Ride; the upper landing is visitor-only. Canonical anchors align entrance
+Directory/Guest guide and west-court showcase, loaded/fallback proxies and4SKUs.
+Four Map letters add location information without new destinations or live services.
+Current55Python/28Node/gen/SSOT,3expanded lift configurations/5native contextlosses,
+6finalMap contexts,12pause/visibility+2resize observations, loaded/fallback service
+journeys and5normal native keyboard checks pass. Three unsafe-state guards use
+explicit QA-only synchronous body faults, not invented native journey evidence.
+Ten broader groups retain their tested pre-capability-metadata source phase with
+exact geometry/motion bridges. Fourclassic profiles retain all66colliders exactly.
+Independent local approval and1,920actual advancing samples preserveclassic200;
+expanded1440Detailed cart changes193to182calls. See docs/gjh-v11-stage7-lift.md
+and docs/evidence/gjh-stage7-lift.json. All75binaryassets remain exact; one1,494-byte
+JSmodule is added. Main/CI/Pages/public verification is required beforestage8.
+Physical-device/AT, historicalpayload gates and operatingfacilities remain unverified.
+
+
+Stage8 local acceptance — 2026-11-15: application 1.1.52/build3ac382081b3b16d2
+adds two shared256px procedural stone/wood finishes and warm existing lights in
+expanded only. Instanced strips follow the real roof/camera opening; no collider,
+new light or shadow caster is added. The optional module has a two-second deadline,
+flat fallback, partial-allocation cleanup and no late factory execution. Classic
+requests no optional finish module in focused scenes; upper lift changes one color.
+Current55Python/31Node/gen/SSOT, fiveviewports/fourqualities, sevenfault/isolation
+cases, native texture context restoration and eightcurrentintegrationgroups pass.
+Independent local approval verifies150runtime/37raw/11screenshots and1,920fresh
+adjacent-paired advancing samples: all sampled calls unchanged (classic cart200,
+expanded cart182), expanded+98triangles/+2textures/0geometry objects. Both fresh099
+andcurrent loop medians are33.3ms; older16.7ms samples are not reused for timing.
+See docs/gjh-v11-stage8-materials-lighting.md and docs/evidence/gjh-stage8-materials.json.
+ParentStage7 publication099069d/CI43711374418/37public hashes/fourpublic contexts
+is preserved separately. This stage needs its own main/CI/Pages/public gate before9.
+Physical-device/AT, historicalpayload gates and measuredGPUbytes remain unverified.
+
+
+Stage9 merged-release acceptance follow-up — application1.1.54/builda0b67bd162653c9b
+preserves owner-published646e0c2 themes/packs/integration and fixes optional-theme
+startup stalls, saved-pack timeout/retry and shared gamepad-close/prepare ordering.
+Two-second boundaries ignore late factories and clear only their own failed cache;
+Everyday restores the published stage8 lift colors. Three corrected fault cases,
+57Python/45Node/gen/SSOT and sevencurrentintegrationgroups pass. Six realThree
+batch color/geometry invariants use a clearly scoped collider stub, not physical
+Rapier/GPU certification. Forty-two retained posed theme/cart observations include
+parcel cost: expanded entrance Christmas cart193, classic Detailed cart200, exact
+warmedEveryday renderer-resource restoration. Independent local approval passes; this
+follow-up was published on main before the stage 11b request reduction was integrated.
+See docs/gjh-v11-stage9-theme-infrastructure.md and docs/evidence/gjh-stage9-acceptance.json.
+At this historical point the 45-request gate failed at 82; stage 11b later addressed it. Candidate brand permission and physical-device/AT limits remain open.

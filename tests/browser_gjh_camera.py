@@ -35,7 +35,7 @@ def run(baseline=False):
      current=(ROOT/'demos/corporate/gjh/v11/assets/player.js').read_text();old=subprocess.check_output(['git','show','ba6d8d0:demos/corporate/gjh/v11/assets/player.js'],text=True)
      a=current.index('  function sweepCamera(');b=current.index('  function setCart(',a);start=old.index('  function constrain(');end=old.index('  function setCart(',start)
      source=current[:a]+old[start:end]+current[b:];source=source.replace('  function constrain(point) {',"  const ray=new R.Ray({x:0,y:0,z:0},{x:0,y:0,z:-1});\n  function constrain(point) {")
-     page.route('**/assets/player.js',lambda route:route.fulfill(status=200,body=source,content_type='text/javascript'))
+     page.route('**/assets/player.bundle.js',lambda route:route.fulfill(status=200,body=source,content_type='text/javascript'))
     ready(page,f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?visitor={variant}')
     if not baseline:assert state(page)['drawCalls']<=200,state(page)['drawCalls']
     page.evaluate('__mall.teleport("newmoon");__mall.setInput({})');drive(page,800,right=-1);drive(page,1000,forward=-1);s=drive(page,800)
@@ -48,6 +48,11 @@ def run(baseline=False):
     for yaw in [0,.6,1.2,math.pi]:
      s=drive(page,400,yaw=yaw,pitch=-.08);assert_clear(s,variant)
     page.screenshot(path=str(OUT/f'after-benches-{width}-{variant}.png'))
+    page.evaluate('__mall.teleport("newmoon");__mall.setInput({})')
+    drive(page,1000,forward=-1);drive(page,800,right=1);drive(page,1000,forward=-1)
+    for yaw in [0,.4,math.pi]:
+     s=drive(page,500,yaw=yaw,pitch=-.08);assert_clear(s,variant)
+    page.screenshot(path=str(OUT/f'after-bench-front-{width}-{variant}.png'))
     approach(page,'desk');close(page);samples=[]
     # One continuous loop: service desk -> showcase -> ceiling sign -> service desk.
     for label,ms,inputs,expected in [('desk-to-showcase-side',1950,{'right':1},None),('showcase',1350,{'forward':1},'featured-showcase'),('clear-showcase',850,{'forward':-1},None),('sign',1100,{'right':1},'wayfinding-west'),('clear-kiosk',1100,{'right':-1},None),('front-aisle',600,{'forward':-1},None),('desk',1950,{'right':-1},'service-desk')]:

@@ -1,0 +1,170 @@
+{
+  "runtimeSourceHashes": {
+    "assets/lift-layout.js": "542572943abfe85c459a803f9d55f7eb3bb751384c93b855b594cce07fd5bb4e",
+    "assets/elevator-v2.js": "690d9d2b4ed6de23e9776b90e7279faac812ec361dbbc2853c335bf7492e3269",
+    "assets/player.js": "7425d15a33bc7c86f2b8175ca81ef578205d2310d8a0a44319516115c6b0ff48",
+    "assets/expanded-layout.js": "ddc216efaf9c96e3ab764b470903d96d389a4ef9e3f1d650e3ece58da7ebac5c",
+    "assets/world.js": "705d91ed766ba96c2e9c3989f432a7f217a6dd6801c6d23b631d0b44dc2e76ea",
+    "assets/amenities.js": "5d86b44978e385219c38d4d8818d28808988ab27a671bad80ee3241c030865e9",
+    "assets/ui.js": "a5530253fbd63298107d112faf35361bf416a2839e7612262fa307c66aa19b5f",
+    "index.html": "807fdfa086dc1beb3b6ec4245249cc05d8049ca724b94cd3c7631946d835fad9",
+    "script.js": "f94e68537a0ca7fd6dee552e0647d9c779c08a36ec226b568c560e79f47f8f0f"
+  },
+  "tests": {
+    "gjh_lift_layout.test.mjs": "cbaa340a66d1f58647e78518444a1380f61ea007b24ede8cae837e14364c3a51",
+    "browser_gjh_lift.py": "eacebb4721f7837957e5575f3bcd71d299cab870383fb7e9342cf6349e87f067",
+    "browser_gjh_lift_map.py": "ba2fbdd9d7adc6583dc3251db50f905697d9c9542eb9ec3dbc695fddcdc60dbc",
+    "browser_gjh_lift_interruptions.py": "da7c00135690c592b9e7751ae93c7d09852ac5ce0f80a0b081ef74c726a75521"
+  },
+  "phases": {
+    "focused": {
+      "reportSha256": "0ab37d3acfc409a4a808e009369bafbfef7a7a93c9164205066576cc491b2bde",
+      "logSha256": "edca2e3c09d22aab86a67082f6f672ca8eea1bc25ce40f5f5bf2f6c083c7e978",
+      "sourcesUnchanged": true,
+      "rows": 2,
+      "pngs": {
+        "390-ground.png": "8b2e28b601012de04cc9489e97117ddcd194617b9716a320369cbaa87d81345d",
+        "390-ride-0.png": "b8c44a3a0ff044a0915d030fc0e20991aef887854138061ea30bc324a28091a5",
+        "390-ride-10.png": "51c7e462351d6353652bd49692e3aaef42a27c552fb5e1f632822633035b137e",
+        "390-ride-2.png": "d1d4ee0f343f3d38aa1168c236877e0bc868199b95c23f90cd262b5213038925",
+        "390-ride-5.png": "c637b71c0ae502e6bd8eb8d9eaf22740f7c5e0762c6b585912a9f81b88b5c987",
+        "390-ride-6.png": "cd359181e360aacffc9e9003d54a074fb44c012d65cbdd42ee512f9383b5b5e2",
+        "390-ride-7.png": "0c64b37c4ee4348810849a51e134979bc06ff31a8ea56ba4f56841ce9b6c56f9",
+        "390-ride-8.png": "ccbc164a255fc3257a90b14c1530863c93a28b59c3e0e475032dc98a64b69d7d",
+        "390-upper-yaw-0.png": "8d4790fa669560d67817ae5e5327eb5e72e3746f045971f628aa430482a807f3",
+        "390-upper-yaw-1.57.png": "9d3adb71f901b5d9a8c594a093e46340e13d0f55ea59eb753f420670f950d4db",
+        "390-upper-yaw-3.14.png": "d16708dccd2e21c2f2a3cf18e1e59d64e56a03313e0df75985b4ccef3aca5e95",
+        "390-upper-yaw-4.71.png": "f15a02fce4b92321baad265f251ca5411beccc0a778532d7207d4336c6338994",
+        "390-upper.png": "3db839e6cfbf5cb257080d7ba688ff3c10b9512f6b294de22f287c97ba30824d",
+        "639-ground.png": "28ad0ca817d2882da5301866d67edc5c0cb189132d9a2d57e7e8b53650904f52",
+        "639-ride-0.png": "9c1d781103aa8f8b5557117097766667ce1c8d2c12cbe11fe47d1ddef81521bc",
+        "639-ride-10.png": "7b1761bf74c36439d7c90b3319b6d01c5c7d0f0a640efdeace2121d0dafbd580",
+        "639-ride-2.png": "e41ec16b4d3ba239c6d774b5fecdce640284f92d161dc2883a927c7e228c8383",
+        "639-ride-5.png": "7b1761bf74c36439d7c90b3319b6d01c5c7d0f0a640efdeace2121d0dafbd580",
+        "639-ride-6.png": "8920380bdc6ba276acc461b5076b6f292abea2c40b67497f7fa52cb1aec3e040",
+        "639-ride-7.png": "e41ec16b4d3ba239c6d774b5fecdce640284f92d161dc2883a927c7e228c8383",
+        "639-ride-8.png": "611aa3a3a8428a59616e602df2f336e1af71c8b6c35a5195c020773d8834648b",
+        "639-upper-yaw-0.png": "55ac80e419f4595667b35a776ab41a2f72ad1141ac069e71af4708476869a963",
+        "639-upper-yaw-1.57.png": "45241ab80f42f578a5c6be613789a08a65c22bb07a2646ab53297ff8bd9cf4eb",
+        "639-upper-yaw-3.14.png": "f00bce24b3d64de85ad67f40b346a3573585fe234162dc2afcb86ee52ca28e9d",
+        "639-upper-yaw-4.71.png": "3b674869c8babc9c64eaf3dc1a2849e9bad61d79575c96dff1bfea6606bfde74",
+        "639-upper.png": "8920380bdc6ba276acc461b5076b6f292abea2c40b67497f7fa52cb1aec3e040"
+      },
+      "result": "FAIL: reduced-motion empty call instantly docked, fixture incorrectly required ongoing call; original source/test/log retained."
+    },
+    "focused2": {
+      "reportSha256": "926041191765249a6f0a3659818d06e89b4df0df3a5c09fb7626114878359bc9",
+      "logSha256": "0b4f8f94a40bfb0ea060f19d03d017638f8af6ed0ec8d05a7d719601fdd1aebb",
+      "sourcesUnchanged": true,
+      "rows": 6,
+      "pngs": {
+        "1440-ground.png": "30ec52560aa3b3010c6ed667bb0136a89c75052d03bc6844eced3f43c9cb19ba",
+        "1440-ride-0.png": "a4074f3734a575a9e1db76faef1b846227d4c6e4b454d49f69cf1970bb0a9772",
+        "1440-ride-10.png": "beab34f828a1df486e35e16970c309d9a3b3638aeb2a81cf41a4f3788644513f",
+        "1440-ride-2.png": "bc6766e917e7d4cf87db40dc0e7792f884e32af36a9f8f27cb584c9569e4db50",
+        "1440-ride-5.png": "1197473b8af4416a3db589ee918fb59a3b3c76026053e83554c1d7157653c7af",
+        "1440-ride-6.png": "fb26c9ee1119aa175aa26243d76cd0bdf57d94d88c0a14387cda54389fc4fea6",
+        "1440-ride-7.png": "3347e9409fc2908db582d09d80dc6f75c66fbb4370f68dce78764d10d21815f0",
+        "1440-ride-8.png": "6c5e0e7b9c053a7fe4822df9424d778efba24847d347bfb97b0a72b7d8a7a0be",
+        "1440-upper-yaw-0.png": "b46a93488c199328d9ddc9a953bdf727604007480ccddb0e332c36dc604980cb",
+        "1440-upper-yaw-1.57.png": "c76d3811abc906d0a9376cdad3879975f59a2475f61d34a43edbdd545d1047ee",
+        "1440-upper-yaw-3.14.png": "5e5cfc7efb39dcfa185972dc27b7915cf471a16072cd920b87854387cd1567a2",
+        "1440-upper-yaw-4.71.png": "4ee23eac93d685266052bf1ade06bc8100564c868a21e3ce6b3778b183e12ad8",
+        "1440-upper.png": "420004a711b695d78eaaf6645e4cd60e50873779c468b70481efff404f08d98c",
+        "390-ground.png": "c85b0f377f7e56827115627f844ae0dedded363365d8f2c9f4397655cf3235ca",
+        "390-ride-0.png": "00756a4332a48353691387a4724a2b1a4e4d93f10d52db88950f70fa7dac16b6",
+        "390-ride-10.png": "2237c7c63655617d56f984cb5660eea29030d6a10dece11198bdc95ba6620674",
+        "390-ride-2.png": "72b8bb1aece92e616514e0d86264d131802a150664fe260ed5cad38e0d8523ee",
+        "390-ride-5.png": "c82e50c65a41b854dacce6d4b497e9cefafdd404f1b20011c5b85cf899556ef6",
+        "390-ride-6.png": "0691d71c588feea32ef2b50c977d5d267d1143119e9934865b0278e706c2a082",
+        "390-ride-7.png": "9290dea6ec8c43a2e8fc3375f826e451b1b2a83824d0476e91612b550256d332",
+        "390-ride-8.png": "1e3ccd5b3ebbf6d8b1e6aca75b041e487c696ce0cd15b3586abc7f657e7309cd",
+        "390-upper-yaw-0.png": "6daf98d9a5a3c6dda57e5b1c2e90c49998ecec823602462a7564c353ad4bc532",
+        "390-upper-yaw-1.57.png": "c2e0618a7a440cc29602b6d5fef6cd72030f0942faf8d308c8ab30ac29731b71",
+        "390-upper-yaw-3.14.png": "4c59508f99d72938cafcd926036415a70dae10bc7434a451b25ec84e911a5cb1",
+        "390-upper-yaw-4.71.png": "0ed4630632e64d404f5d0539956e44cdf2e42517a5841a91d750dde9e68edbf3",
+        "390-upper.png": "b6fd5142047c39754cfe9dc9d6b2d8e1d09c4d6c0ba0ae9dba0b5a50f15694b3",
+        "639-ground.png": "28ad0ca817d2882da5301866d67edc5c0cb189132d9a2d57e7e8b53650904f52",
+        "639-ride-0.png": "9c1d781103aa8f8b5557117097766667ce1c8d2c12cbe11fe47d1ddef81521bc",
+        "639-ride-10.png": "7b1761bf74c36439d7c90b3319b6d01c5c7d0f0a640efdeace2121d0dafbd580",
+        "639-ride-2.png": "e41ec16b4d3ba239c6d774b5fecdce640284f92d161dc2883a927c7e228c8383",
+        "639-ride-5.png": "7b1761bf74c36439d7c90b3319b6d01c5c7d0f0a640efdeace2121d0dafbd580",
+        "639-ride-6.png": "8920380bdc6ba276acc461b5076b6f292abea2c40b67497f7fa52cb1aec3e040",
+        "639-ride-7.png": "e41ec16b4d3ba239c6d774b5fecdce640284f92d161dc2883a927c7e228c8383",
+        "639-ride-8.png": "611aa3a3a8428a59616e602df2f336e1af71c8b6c35a5195c020773d8834648b",
+        "639-upper-yaw-0.png": "55ac80e419f4595667b35a776ab41a2f72ad1141ac069e71af4708476869a963",
+        "639-upper-yaw-1.57.png": "45241ab80f42f578a5c6be613789a08a65c22bb07a2646ab53297ff8bd9cf4eb",
+        "639-upper-yaw-3.14.png": "f00bce24b3d64de85ad67f40b346a3573585fe234162dc2afcb86ee52ca28e9d",
+        "639-upper-yaw-4.71.png": "3b674869c8babc9c64eaf3dc1a2849e9bad61d79575c96dff1bfea6606bfde74",
+        "639-upper.png": "8920380bdc6ba276acc461b5076b6f292abea2c40b67497f7fa52cb1aec3e040"
+      },
+      "result": "PASS: 3 expanded viewport/motion cases + 5 native context losses + 3 initialization controls. Protected pre-final-UI/capability metadata phase."
+    },
+    "map": {
+      "reportSha256": "0e23134f6736f4d1d9ee2cbe0b1c70320f4745cfa3466b9c04403ee4c9c8a61c",
+      "logSha256": "6995abf25f429686c9167f556ab0f3aa64035ccc49a1010fcb53ebcf8913de3b",
+      "sourcesUnchanged": true,
+      "rows": 6,
+      "pngs": {
+        "1440-map.png": "31e210e06afb10eed14143fd401a36a3c4b7dae18f3eecaa50944202fff4e53d",
+        "320-map.png": "209f2d8c81e184d2af8ff7ecc60844518a8291e372679f6d47197d83b91883b1",
+        "390-map-v1.png": "ec632baa94f64746d017b0c66a7701f181a11ce1adbeacf259b9845361e2f341",
+        "390-map.png": "dccb23d8b5176730f413d762194a9c149b2bf84c5c3d496d6f39d848e6c81772",
+        "639-map.png": "f03acfee2e497d12a591e115d0434b4768acc34b7d17f6bcf56b9de74d886555",
+        "844-map.png": "e48cdea57ad089c346a7ef7dc46d78a319fa0b42d6741a604a52494ea66d46c9"
+      },
+      "result": "PASS: 6 service-marker/Map cases + finalUI roundtrip before capability-feedback repair."
+    },
+    "addon": {
+      "reportSha256": "d140d45a23013527d019c6510f3d6f6825e9b69b2767258b727a37d2b5603dd9",
+      "logSha256": "89b9412938b949a7525dde4da43778d9a2002c02afb7f3c4525270ed1877fff9",
+      "sourcesUnchanged": true,
+      "rows": 2,
+      "pngs": {
+        "fallback.png": "44d60bfcda5ffbf6bf3bef56bc63bb698f2a1a439277c1ae9ec9f6956b761bcb",
+        "loaded.png": "96309a99ea15bf11a940840fba767d2c8b8d9dbb32c1bd60b1e2534156b5832f"
+      },
+      "result": "PASS: loaded/fallback D/G/F routes/all4SKU details+Bag; 12 pause/visibility +2 resize-valid-phase records; native Australia feedback/return; 3 isolated guard refusals. Explicit QA-only routed script/body fault; concurrent functional environment, no performance claim."
+    },
+    "map-final": {
+      "reportSha256": "6091100809162c5efb23c6b67e6974ff7e48769534ef4a5edeb03d80a0de0a18",
+      "logSha256": "6995abf25f429686c9167f556ab0f3aa64035ccc49a1010fcb53ebcf8913de3b",
+      "sourcesUnchanged": true,
+      "rows": 6,
+      "pngs": {
+        "1440-legend.png": "31e210e06afb10eed14143fd401a36a3c4b7dae18f3eecaa50944202fff4e53d",
+        "1440-map.png": "31e210e06afb10eed14143fd401a36a3c4b7dae18f3eecaa50944202fff4e53d",
+        "320-legend.png": "e94a9ffdbaf9a083ec056e3d2a21cf9ef95867ab792c1a11ca75f05b5a91b5af",
+        "320-map.png": "209f2d8c81e184d2af8ff7ecc60844518a8291e372679f6d47197d83b91883b1",
+        "390-legend-v1.png": "ec632baa94f64746d017b0c66a7701f181a11ce1adbeacf259b9845361e2f341",
+        "390-legend.png": "dccb23d8b5176730f413d762194a9c149b2bf84c5c3d496d6f39d848e6c81772",
+        "390-map-v1.png": "ec632baa94f64746d017b0c66a7701f181a11ce1adbeacf259b9845361e2f341",
+        "390-map.png": "dccb23d8b5176730f413d762194a9c149b2bf84c5c3d496d6f39d848e6c81772",
+        "639-legend.png": "f03acfee2e497d12a591e115d0434b4768acc34b7d17f6bcf56b9de74d886555",
+        "639-map.png": "f03acfee2e497d12a591e115d0434b4768acc34b7d17f6bcf56b9de74d886555",
+        "844-legend.png": "04a37d6bfa70472011142c286d40c963fd9f5aeb1dff820d6c3024b730f20ef7",
+        "844-map.png": "e48cdea57ad089c346a7ef7dc46d78a319fa0b42d6741a604a52494ea66d46c9"
+      },
+      "result": "PASS: current 6 Map cases; 12 viewport PNGs incl scrolled legend; current upper both cart controls disabled/reason and roundtrip."
+    }
+  },
+  "remaining": "Primary independent final review, uncontended actual-render comparison and release; child has no active GPU jobs or source writes.",
+  "protectedGeometryModulesExactFocused2": {
+    "assets/lift-layout.js": true,
+    "assets/elevator-v2.js": true,
+    "assets/world.js": true,
+    "assets/amenities.js": true,
+    "assets/expanded-layout.js": true,
+    "script.js": true
+  },
+  "pixelReview": [
+    "Actual old1440 upper avatar buried by expanded8.5 ceiling despite avatarVisible=true.",
+    "Reviewed new390/1440 ride6/7 and multiple390/639/1440 upper yaw PNGs: no ceiling burial; ordinary lowguard can obscure lowerlegs midride.",
+    "Reviewed current320/844 scrolled legend and fallback showcase. Map content scrolls; internal Close can leave scrolled viewport, fixed header Map remains available; native focus/scroll restores full44px Close and Enter closes. No simultaneous whole-panel-visibility claim."
+  ],
+  "limits": [
+    "No physical devices/Safari/building safety certification.",
+    "Manual-step poses and concurrent functional runs are not render-performance measurements.",
+    "Classic experimental elevator remains prototype; expanded visitor-only viewing landing is not upper retail or operating WC/staffed service."
+  ]
+}

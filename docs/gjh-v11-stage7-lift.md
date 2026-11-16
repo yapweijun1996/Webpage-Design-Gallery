@@ -1,0 +1,39 @@
+# GJH V11 stage 7: expanded lift and service routing
+
+Application 1.1.51/build `68cc981c4eb25add` implements the visitor-only lift in the opt-in expanded preview. The [receipt](evidence/gjh-stage7-lift.json) pins local acceptance, exact source phases, independent reviews, raw measurements and selected screenshots. Main/CI/Pages and public source/DOM checks are the publication gate before the next stage. Default classic geometry retains its original elevator function body. Visitor v1 remains ground-only.
+
+## Spatial and interaction ownership
+
+`assets/lift-layout.js` owns expanded lift, slab, shaft, threshold, safe exit, roof opening and amenity anchors. Runtime coordinates follow the already implemented expanded-shell transform `worldX = planX - 25`, `worldZ = 48 - planY`; the older planning document's abstract transform is not applied to the live shell. The shaft centre is (-3,10), with a 7.2m upper landing. Four disjoint slab panels leave a true 4m by 4m shaft opening inside the 12m by 12m landing. Low guards, stop-specific landing gates and thresholds, and the moving cabin's floor/walls have real Rapier collision. The lower roof and skylight have a shaft aperture; the higher expanded ceiling leaves room for the actual upper camera envelope. Camera obstacles follow the cut panels and landing guards.
+
+An explicit Call moves an empty cabin without boarding the visitor. A separate Ride owns boarding, travel and exit, with reduced-motion support. Boarding validates the walking capsule through the aperture before temporarily disabling it; completion restores the capsule at the west exit. Leaving a call's landing invalidates it. A lost WebGL context settles cabin/gates and the visitor at a safe stop without resuming a stale trip. Compact overlays pause simulation through existing mode ownership; expanded window blur also pauses the central tick. Wide-screen Map remains the existing nonmodal map.
+
+The player owns cart capability and its reason; Bag, scene controls and input commands project that same decision. The upper landing is visitor-only, with explicit feedback instead of a misleading asset-load failure. Cart, seat, held product, approach, distance and reentrant states remain guarded. Four SKU records, original GLBs, physical pickup/return and Bag retain their existing owners.
+
+## Service wayfinding and limits
+
+Expanded Directory now stands west of the entrance, Guest guide east of it, and the featured collection west of the court. Loaded and fallback amenity meshes, proxies, interactions and four showcase products use the same anchors. The safe atrium return moves to the open court at (10,12), away from the new shaft. Existing entry and three store destinations remain unchanged.
+
+Noninteractive Map markers D/G/F identify Directory, Guest guide and featured collection in both expanded visitor profiles. L appears only after the actual v2 lift registers. A wrapping legend uses the existing scroll owner; short screens may require scrolling. Existing 17 slot numbers, 14 planned spaces and three live store buttons remain intact. No service marker creates a teleport or new action.
+
+The east facilities area remains planned and nonoperating. Reserves R1/R2 remain non-public; Guest guide is self-service. This slice establishes neither real toilets/staff/service connectivity nor building-code compliance, physical access or a larger upper floor.
+
+## Evidence boundaries
+
+The baseline reproduces the original upper-camera ceiling obstruction using actual screenshots. Focused physics-phase tests cover three expanded viewport/motion configurations, bidirectional travel, real controller perimeter walks and gate blocking, empty calls/Map cancellation, five native context-loss phases, and classic/v1 controls. Their manual controller steps are posed renders, not frame-performance samples. A reduced-motion fixture correction preserves the initial failed evidence: an instant dock is valid and does not have to remain in a calling state after 650ms.
+
+Final UI has a separate six-context Map test and mobile roundtrip; an exact hash bridge proves that only UI, index and generated PWA worker changed after the focused physics run. Current generation, 55 Python tests, 28 Node contracts and SSOT 0/1211 pass. Ten broader integration groups pass on the frozen pre-capability-metadata phase; exact geometry/motion source bridges and fresh changed-behavior tests support reuse. Final tests add six Map contexts, twelve pause/visibility observations, two resize-valid-phase observations, loaded/fallback service and four-SKU journeys, and five normal-motion keyboard checks including Australia-specific Cart refusal. The QA-only synchronous body-position faults isolate three unsafe-state lift guards; they do not replace native whole-journey evidence. Four classic v1/v2 × default/pilot configurations retain all 66 actual Rapier collider records exactly. Physical iPhone/Android/Safari, real safe-area insets and assistive technology remain unverified. Historical 45-request/10MiB gates are not claimed.
+
+
+## Matched render comparison and review
+
+Sixteen sequential Chrome157/ANGLE Metal states compare baseline `f1e2108` with the final source at 390 Auto and 1440 Detailed, for original/expanded and cart inactive/active. Each state warms up for 30 advancing renders and records 120 distinct advancing renders: 1,920 measured samples overall. No other automated browser-QA process was observed at the start. Classic retains 159/162 calls at390 and197/200 at1440. Expanded changes from167/170 to157/160 at390 and190/193 to179/182 at1440. The 200-call gate is unchanged. At1440, expanded geometry resources change112/115 to104/107 and textures31 to29; triangles change805,226/815,874 to805,562/816,210. These observations cover the sampled entrance/cart states, not every viewpoint.
+
+Median loop interval is approximately16.7ms; P95 is16.7–16.8ms. This is a vsync-capped loop observation, not a GPU timer, throughput or physical-device FPS measurement. Of148 baseline runtime files,139 remain exact; nine change and one1,494-byte shared JS module is added. All75 existing binary asset files remain exact. The module adds one cold request; historical payload gates are not passed by this slice.
+
+Independent source, capability-delta and QA reviews find no confirmed P0/P1 issue. Original failed reduced-motion fixture evidence, the prefix-harness phase comparison correction, pre/final source guards and all raw artifact hashes remain separate. Visual review includes [the old upper obstruction](screenshots/gjh-stage7-lift/baseline-390-upper.png), [corrected mobile landing](screenshots/gjh-stage7-lift/upper-390.png), [desktop landing](screenshots/gjh-stage7-lift/upper-1440.png), [mid-ride roof crossing](screenshots/gjh-stage7-lift/ride-390-roof.png) and [fully scrolled320Map legend](screenshots/gjh-stage7-lift/legend-320.png). The full internal Close and full legend need not be visible simultaneously; the fixed header Map remains available, and native focus scrolls the44px Close back into view before Enter closes it.
+
+
+## Publication acceptance
+
+Commit `099069d41a77a7fc76f8ce66e6259931fa50ffde` reached main and deployed through successful [CI/Pages43711374418](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/43711374418). All37 normal public resource bodies and expected GitHub task/receipt blobs matched. Four public contexts passed expanded390/1440 native Map and collision-controller lift roundtrips, expandedv1 ground-only and classic controls; actual received source-body hashes numbered74/76/67/80. The frozen [delivery proof](evidence/gjh-stage8-materials/parent7-delivery.json) and [publication proof](evidence/gjh-stage8-materials/parent7-publication.json) are preserved as the prerequisite for stage8. This does not extend the physical-device or GPU measurement scope.

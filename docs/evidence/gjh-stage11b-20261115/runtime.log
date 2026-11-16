@@ -1,0 +1,4 @@
+PASS visitor=v2: physics loaded and visitor modules scoped
+PASS expanded lift: theme colours switch and restore
+PASS ?visitor=v1: physics loaded and visitor modules scoped
+PASS blocked WASM: accessible directory fallback

@@ -1,0 +1,11 @@
+Gallery built: 1 companies, 8 designs
+REAL RENDER current-classic 390 cart False calls 159 median 33.30000000000018 p95 33.400000000000546 advancing120
+REAL RENDER current-classic 390 cart True calls 162 median 33.30000000000109 p95 33.400000000001455 advancing120
+REAL RENDER current-classic 1440 cart False calls 197 median 33.30000000000018 p95 33.40000000000009 advancing120
+REAL RENDER current-classic 1440 cart True calls 200 median 33.30000000000109 p95 33.400000000001455 advancing120
+Gallery built: 1 companies, 8 designs
+REAL RENDER current-expanded 390 cart False calls 157 median 33.30000000000018 p95 33.40000000000009 advancing120
+REAL RENDER current-expanded 390 cart True calls 160 median 33.30000000000109 p95 33.400000000001455 advancing120
+REAL RENDER current-expanded 1440 cart False calls 179 median 33.30000000000018 p95 33.400000000000546 advancing120
+REAL RENDER current-expanded 1440 cart True calls 182 median 33.30000000000109 p95 33.399999999999636 advancing120
+ACTUAL RENDER BENCHMARK PASS 8

@@ -1,6 +1,6 @@
 # GJH V11 expanded mall: proposed ground-floor layout
 
-Date: 15 November 2026 (Asia/Singapore)  
+Date: 15 November 2026 (Asia/Singapore)
 Status: **historical rough draft**. The owner liked the direction; [stage 1 spatial plan](gjh-v11-stage1-spatial-plan.md) and its [updated drawing](references/gjh-mall-floorplan-stage1.png) supersede the rough spatial allocation below. Both are conceptual and await owner review; neither is implemented, measured from a real building or approved for construction.
 
 ## Brief and reference

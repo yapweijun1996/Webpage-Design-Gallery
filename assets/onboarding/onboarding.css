@@ -71,7 +71,7 @@
 .ob-controls-toggle[aria-expanded=true]::after{content:' −'}
 .ob-map-action{grid-column:1 / -1}
 .ob-actions>.ob-primary:only-child{grid-column:1 / -1}
-.ob-preference{display:flex;align-items:center;gap:var(--ob-space-2);min-height:var(--ob-control-min);font-size:var(--font-size-sm);color:var(--ob-muted);margin-top:var(--ob-space-2);cursor:pointer}
+.ob-preference{display:flex;align-items:center;gap:var(--ob-space-2);min-height:var(--ob-control-min);font-size:var(--font-size-sm);color:var(--ob-text);margin-top:var(--ob-space-2);cursor:pointer}
 .ob-preference input{width:var(--icon-md);height:var(--icon-md);margin:0;accent-color:var(--ob-action);flex-shrink:0}
 .ob-settings{grid-template-columns:1fr}
 .ob-stage-overview{margin-bottom:var(--ob-space-3)}

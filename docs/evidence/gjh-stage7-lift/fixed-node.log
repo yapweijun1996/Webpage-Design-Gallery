@@ -1,0 +1,36 @@
+✔ planting and furniture remain inside their reservations and clear of the loop and event (4.139917ms)
+✔ seventeen runtime shells match the stage 1 plan under one rigid translation (150.604667ms)
+✔ fourteen planned records derive only from closed slots and cannot imply reviewed tenants (1.288791ms)
+✔ static planned directory matches every canonical field without live catalog actions (2.497125ms)
+✔ Auto separates constrained, missing and capable hardware deterministically (3.508959ms)
+✔ explicit profiles and recovery use bounded DPR with truthful shadow eligibility (9.922209ms)
+✔ storage values are allowlisted (0.7805ms)
+✔ expanded lift uses actual translated plan, continuous threshold and safe courtyard return (9.661333ms)
+✔ upper deck and ceiling panels exactly cover remainder without gaps or overlapping shaft (0.695833ms)
+✔ canonical amenities and four SKU transforms remain outside shaft and circulation (2.528834ms)
+✔ lifecycle exits, cleans, suspends, enters and restores once in order (52.719458ms)
+✔ directory Inspect and Shop return to retained Menu then gameplay base (0.784792ms)
+✔ repeated observations and requests are idempotent without lifecycle effects (0.521958ms)
+✔ commands cannot manufacture gameplay or bypass the retained underlay (11.627625ms)
+✔ invalid observations fail atomically with no lifecycle effects (3.705916ms)
+✔ Inspect cannot be directly replaced by Shop in an observation (0.328583ms)
+✔ actual base changes under Shop are retained without fake Explore lifecycle (1.297875ms)
+✔ interrupt cleans once without enter, exit or restoring retained gameplay (7.228375ms)
+✔ history is bounded and distinguishes restores, rejection and interruptions (64.118708ms)
+✔ Shelf suspends each real base and restores through the same ordered lifecycle (10.991583ms)
+✔ complete boolean observations validate all Shelf combinations atomically (3.329667ms)
+✔ Shelf cannot be stacked with or directly replaced by another overlay (1.0495ms)
+✔ derived mode priority agrees with accepted observation (0.27325ms)
+✔ three stable stores share the current scene centers, entrances and ordering (5.445083ms)
+✔ location boundaries and map projection retain the existing visible behavior (1.781125ms)
+✔ registry rejects invalid identity, geometry and unsafe nominal arrivals atomically (5.662125ms)
+✔ unavailable store cannot produce a travel destination (0.261875ms)
+✔ approved shell portals and aggregate proxies match authoritative live store centers (102.96125ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2013.43425

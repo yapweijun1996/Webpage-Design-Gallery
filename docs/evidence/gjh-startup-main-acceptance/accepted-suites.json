@@ -1,0 +1,89 @@
+[
+  {
+    "name": "budget",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "tests/browser_gjh_budget.py",
+      "--evidence",
+      "/private/tmp/gallery-published-startup-review/primary/budget"
+    ],
+    "seconds": 15.7
+  },
+  {
+    "name": "pack-faults",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "tests/browser_gjh_startup_pack.py"
+    ],
+    "seconds": 14.82
+  },
+  {
+    "name": "theme-deadlines",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "tests/browser_gjh_theme_acceptance.py",
+      "--evidence",
+      "/private/tmp/gallery-published-startup-review/primary-current/theme-deadlines"
+    ],
+    "seconds": 19.24
+  },
+  {
+    "name": "published-prefix",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "tests/browser_gjh_publish_assets.py"
+    ],
+    "seconds": 13.36
+  },
+  {
+    "name": "mall-pwa",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "/private/tmp/gallery-mode-worker/run_legacy.py",
+      "tests/browser_gjh_pwa.py"
+    ],
+    "seconds": 6.93
+  },
+  {
+    "name": "expanded-pwa",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "tests/browser_gjh_expanded_pwa.py"
+    ],
+    "seconds": 12.13
+  },
+  {
+    "name": "gallery",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "tests/browser_gallery.py"
+    ],
+    "seconds": 36.63
+  },
+  {
+    "name": "gjh-demos",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "/private/tmp/gallery-mode-worker/run_legacy.py",
+      "tests/browser_gjh_demos.py"
+    ],
+    "seconds": 50.25
+  },
+  {
+    "name": "global-pwa",
+    "exitCode": 0,
+    "command": [
+      "/private/tmp/gallery-task-qa-venv/bin/python",
+      "tests/browser_pwa.py"
+    ],
+    "seconds": 37.7
+  }
+]

@@ -37,19 +37,34 @@ export function createContactSolver(T, root) {
 
 /** One shelf reservation owns a product until return or explicit reset. */
 export function createProductTransfer(T, avatar) {
-  const hand=avatar.getObjectByName('RightHand'), point=new T.Vector3();
+  const hand=avatar.getObjectByName('RightHand'), point=new T.Vector3(),offset=new T.Vector3(),rotation=new T.Quaternion(),ownerRotation=new T.Quaternion();
   let item=null,phase='empty',elapsed=0,start=null;
   function worldHand(){avatar.updateWorldMatrix(true,true);hand.getWorldPosition(point);return point;}
+  function worldCarry(){worldHand();avatar.parent.getWorldQuaternion(rotation);return point.add(offset.set(0,-.05,-.06).applyQuaternion(rotation));}
+  function hold(){
+    // A can stays upright in the palm, rather than inheriting the wrist's
+    // authored local axes and disappearing inside the forearm.
+    worldCarry();
+    item.prop.position.copy(item.owner.worldToLocal(point));
+    item.prop.quaternion.copy(item.owner.getWorldQuaternion(ownerRotation).invert().multiply(rotation));
+  }
   function reset(){item?.release();item=null;phase='empty';elapsed=0;}
   return {
-    pick(token){if(item||!token)return false;item=token;phase='pickup';elapsed=0;start=token.prop.position.clone();token.owner=token.prop.parent;return true;},
+    pick(token){if(item||!token)return false;item=token;phase='pickup';elapsed=-(token.approachDelay||0);start=token.prop.position.clone();token.owner=token.prop.parent;return true;},
     putBack(){if(phase!=='held')return false;worldHand();item.owner.attach(item.prop);start=item.prop.position.clone();phase='return';elapsed=0;return true;},
-    cancel(){if(phase==='pickup'){reset();}else if(phase==='return'){hand.attach(item.prop);item.prop.position.set(0,0,0);phase='held';elapsed=0;}},
+    cancel(){if(phase==='pickup'){reset();}else if(phase==='return'){phase='held';elapsed=0;hold();}},
     reset,
-    update(dt,reduced){if(!item)return;elapsed+=dt;if(phase==='held')return;const t=reduced?1:Math.min(1,elapsed/.65),e=t*t*(3-2*t);
-      const target=phase==='pickup'?worldHand():item.origin;
+    reachTarget(out){
+      if(!item||phase==='held')return;
+      const t=Math.max(0,Math.min(1,elapsed/.9)),reach=phase==='pickup'?Math.min(1,t/.3)*(1-Math.max(0,(t-.3)/.7)):Math.min(1,t/.7);
+      out.lerp(item.owner.localToWorld(item.origin.clone().add(new T.Vector3(0,.06,.04))),reach);
+    },
+    update(dt,reduced){if(!item)return;elapsed+=dt;if(phase==='held'){hold();return;}const t=reduced?1:Math.max(0,Math.min(1,elapsed/.9));
+      // Reach first, then lift; reverse the transfer before releasing the stock.
+      const travel=phase==='pickup'?Math.max(0,(t-.3)/.7):t,e=travel*travel*(3-2*travel);
+      const target=phase==='pickup'?worldCarry():item.origin;
       item.prop.position.lerpVectors(start,target,e);
-      if(t===1){if(phase==='return')reset();else{hand.attach(item.prop);item.prop.position.set(0,0,0);item.prop.quaternion.identity();phase='held';}}
+      if(t===1){if(phase==='return')reset();else{phase='held';hold();}}
     },
     get state(){return {phase,id:item?.id||null,active:phase==='pickup'||phase==='return',held:phase==='held'};}
   };

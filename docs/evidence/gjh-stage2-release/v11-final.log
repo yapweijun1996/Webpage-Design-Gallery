@@ -1,0 +1,74 @@
+Gallery built: 1 companies, 8 designs
+[
+  {
+    "width": 1440,
+    "drawCalls": 192,
+    "drawCallsByView": {
+      "atrium": 192,
+      "walking": 193,
+      "newmoon-portal": 153,
+      "newmoon": 137,
+      "newmoon-interior": 126,
+      "mili-portal": 175,
+      "mili": 150,
+      "mili-interior": 131,
+      "gogo-portal": 152,
+      "gogo": 128,
+      "gogo-interior": 85,
+      "max": 193
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "keyboardTurningAndFInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 768,
+    "drawCalls": 173,
+    "drawCallsByView": {
+      "atrium": 173,
+      "walking": 169,
+      "newmoon-portal": 131,
+      "newmoon": 127,
+      "newmoon-interior": 121,
+      "mili-portal": 143,
+      "mili": 137,
+      "mili-interior": 89,
+      "gogo-portal": 94,
+      "gogo": 89,
+      "gogo-interior": 81,
+      "max": 173
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "keyboardTurningAndFInspection": "PASS",
+    "errors": []
+  },
+  {
+    "width": 390,
+    "drawCalls": 158,
+    "drawCallsByView": {
+      "atrium": 158,
+      "walking": 151,
+      "newmoon-portal": 127,
+      "newmoon": 123,
+      "newmoon-interior": 116,
+      "mili-portal": 136,
+      "mili": 101,
+      "mili-interior": 85,
+      "gogo-portal": 89,
+      "gogo": 84,
+      "gogo-interior": 81,
+      "max": 158
+    },
+    "walkingCollisionDoorsInspection": "PASS",
+    "keyboardTurningAndFInspection": "PASS",
+    "errors": []
+  },
+  {
+    "reducedMotion": "PASS",
+    "hiddenPause": "PASS",
+    "contextLoss": "PASS",
+    "WebGLAndWasmFailure": "PASS",
+    "noJS": "PASS",
+    "review": "/var/folders/tx/dx_7t0r56svcjld4fx5j_pwr0000gn/T/gjh-v11-review-c93vq4ar"
+  }
+]

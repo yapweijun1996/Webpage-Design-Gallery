@@ -32,6 +32,8 @@ python -m http.server 8000
 
 Open `http://localhost:8000/`. The generated company and demo links work without JavaScript; search, filters, design details and comparison need JavaScript and an HTTP server. Do not edit generated HTML directly.
 
+The same build generates the GJH V11 combined stylesheet, startup model pack and local Rapier JavaScript/WASM split. It also verifies the checked-in JavaScript bundles against their source hashes; clean builds and `--check` need only Python. When a bundled source module changes, regeneration additionally requires the standalone Bun 1.3.11 compiler on `PATH` (no npm packages or network downloads). Edit source modules, stylesheets or the pinned Rapier source rather than generated files, then rerun the generator. See [V11 startup-budget work](docs/gjh-v11-stage11b-startup.md) for measurements and remaining limits.
+
 ## Appearance and language
 
 The gallery header offers **Light / Dark / System** appearance and **English / 简体中文 / Bahasa Melayu**. Choices persist across gallery routes and updates, synchronize across tabs and remain available offline after the shell is saved. Independent demo websites retain their own language and visual identity.
@@ -70,6 +72,8 @@ python tests/browser_gallery_theme.py
 ```
 
 Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. The Gallery and PWA suites build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.
+
+For the opt-in V11 expansion, run `node --test tests/gjh_spatial.test.mjs tests/gjh_expanded_layout.test.mjs tests/gjh_atrium_layout.test.mjs`, `python tests/browser_gjh_expanded_shell.py`, `python tests/browser_gjh_atrium.py`, `python tests/browser_gjh_store_integration.py` and `python tests/browser_gjh_expanded_pwa.py`. The [stage 5 report](docs/gjh-v11-stage5-existing-stores.md) records scope, actual views, PWA boundaries and device limitations.
 
 Run `python tests/browser_gjh_accessibility.py --axe-script /path/to/axe.min.js` for V11's five-viewport DOM accessibility, dialog keyboard, focus, touch-target and contrast checks. It requires the pinned axe-core 4.10.3 checksum recorded in the test. Set `GALLERY_WEBGL_BACKEND=metal` on macOS to use native ANGLE Metal. Browser automation does not certify physical-device or screen-reader behavior.
 
@@ -138,7 +142,16 @@ Open [the complete eight-asset pilot](demos/corporate/gjh/v11/index.html?interio
 
 The [eight-asset pilot](docs/gjh-v11-interior-pilot-review.md) integrates reusable benches, planters, a relocated directory, shelves, sign frames, wall lights, coffee tables and an atrium plinth. Editable Blender sources, reproducible commands and per-asset acceptance records live in [models/gjh-interior-pilot](models/gjh-interior-pilot/README.md); authoring files are excluded from the Pages artifact.
 
-Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. Run `python tests/browser_gjh_interior_pilot_compatibility.py` for both shelf choices and all four repeated pickup/return journeys. See [release reconciliation and results](docs/gjh-v11-interior-pilot-release.md). These complement the existing Gallery/GJH/PWA suites. Physical-device performance and the remaining 192 asset candidates are pending.
+Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. Run `python tests/browser_gjh_interior_pilot_compatibility.py` for both shelf choices and all four repeated pickup/return journeys. See [release reconciliation and results](docs/gjh-v11-interior-pilot-release.md). These complement the existing Gallery/GJH/PWA suites. Physical-device performance remains pending. The original eight-asset pilot is historical; the separate four-ID D3 follow-up above has its own acceptance evidence.
+
+## GJH V11 P0 shell
+
+Application1.1.49 integrates four original native-scale P0 shell families—ARC-001, COR-001, CEI-001 and STF-002—into the existing three-store default and pilot routes. Editable Blender sources, canonical placement/proxy data, six-view renders and portable verification tools are in [models/gjh-interior-shell](models/gjh-interior-shell/README.md). The [D3 review](docs/v11-interior-shell-review.md) and [integration receipt](docs/evidence/interior-shell-integration.json) distinguish current proof from the original pilot and pre-cart timing phase. Twelve selected IDs are implemented and locally verified;188 other candidates remain pending, with D4/D5 separate. The opt-in expanded layout retains its existing shell and bypasses these four GLBs.
+
+
+The completed [P1 selection](docs/v11-interior-p1-review.md) reuses five existing accepted assets, with12unsupported P1 FAC candidates explicitly unselected. The [measured optional-detail policy](docs/v11-interior-detail-policy.md) retains current P2 identities and the existing texture/streaming/LOD boundaries. These decisions add no runtime assets or draw calls and do not increase the12implemented candidate IDs.
+
+The shared strict static loader keeps furniture/shell validation and eight-second disposal behavior. One opaque shell batch and the necessary static-body/instanced-wheel cart batching retain the sampled200-call ceiling, all existing cart physics and wheel/IK behavior. Run `python -m unittest discover -s tests -p test_gjh_interior_shell.py -v`, `python tests/browser_gjh_interior_shell.py --evidence /private/tmp/gjh-shell-qa` and `python tests/browser_gjh_interior_shell_journeys.py --evidence /private/tmp/gjh-shell-journeys`. Authoring sources stay outside Pages; heavy live-demo resources stay outside the core PWA precache. Physical-device/FPS acceptance and the historical45-request oracle remain unpassed.
 
 ## Shared 3D onboarding UI
 
@@ -152,4 +165,16 @@ V11 includes a service desk, ceiling wayfinding signs and a glass product showca
 
 The [eight-asset pilot](docs/gjh-v11-interior-pilot-review.md) integrates reusable benches, planters, a relocated directory, shelves, sign frames, wall lights, coffee tables and an atrium plinth. Editable Blender sources, reproducible commands and per-asset acceptance records live in [models/gjh-interior-pilot](models/gjh-interior-pilot/README.md); authoring files are excluded from the Pages artifact.
 
-Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. These complement the existing Gallery/GJH/PWA suites. Physical-device performance and the remaining 192 asset candidates are pending.
+Run `python -m unittest discover -s tests -p test_gjh_interior_pilot.py -v`, `python tests/browser_gjh_interior_pilot.py` and `python tests/browser_gjh_interior_pilot_performance.py` for binary contracts, physics-driven interaction/failure journeys and local frame/resource observations. These complement the existing Gallery/GJH/PWA suites. Physical-device performance remains pending. The original eight-asset pilot is historical; the separate four-ID D3 follow-up above has its own acceptance evidence.
+
+Visitor v2 camera, pickup, seated framing and direct Cart UX fixes use `python tests/browser_gjh_visitor_v2_real_input.py` for normal-motion browser keyboard/touch journeys. See [scoped verification and limits](docs/gjh-visitor-v2-ux-fixes.md).
+
+Expanded preview stage6 adds14neutral planned-space Directory records aligned with the Map and closed3D bays, preserving the three current stores and four products. No new branded catalog or licensed assets are implied. See [candidate-space verification](docs/gjh-v11-stage6-candidates.md); run `python tests/browser_gjh_candidates.py --evidence /private/tmp/gjh-candidate-qa` for native disclosure, unavailable travel and noJS/WebGL/Rapier fallback checks.
+
+The Pages workflow runs the mall state/spatial/static-fallback contracts with the runner's Node runtime: `node --test tests/gjh_*.test.mjs`. These use built-in Node18+ APIs and require no npm packages.
+
+Expanded stage7 provides a visitor-only ground/upper lift and entrance service wayfinding. See [lift verification and limits](docs/gjh-v11-stage7-lift.md). Focused checks use `python tests/browser_gjh_lift.py --evidence /private/tmp/gjh-lift-qa`, `python tests/browser_gjh_lift_map.py --evidence /private/tmp/gjh-lift-map-qa` and `python tests/browser_gjh_lift_interruptions.py --evidence /private/tmp/gjh-lift-interruptions-qa`; the last suite explicitly isolates safety guards with a test-only routed script/body fault. Facilities remain planned, reserves non-public, and physical-device acceptance separate.
+
+Expanded stage8 adds optional shared procedural stone/wood finishes and warmer existing lights, retaining the stage7 roof/camera opening and all-cart200-call gate. See [material verification](docs/gjh-v11-stage8-materials-lighting.md). Run `python tests/browser_gjh_materials.py --evidence /private/tmp/gjh-material-qa --group all` for current viewport/quality, allocation/import failure, late completion and native texture-recovery checks.
+
+The merged theme acceptance follow-up adds bounded optional imports and synchronous gamepad-close cancellation. Run `python tests/browser_gjh_theme_acceptance.py --evidence /private/tmp/gjh-theme-acceptance`; its default mode verifies corrected behavior, late-result cleanup and same-page retry. [Evidence and scope](docs/gjh-v11-stage9-theme-infrastructure.md#merged-release-acceptance-follow-up) distinguish native UI, synthetic deferred stages, collider stubs and physical-device limits.

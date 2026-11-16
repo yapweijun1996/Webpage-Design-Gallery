@@ -1,0 +1,897 @@
+{
+  "task": "D1 consolidate HUD/Map/Help ownership",
+  "status": "VERIFIED_LOCAL_INDEPENDENT_APPROVED_POST_PUSH_VERIFICATION_REQUIRED",
+  "baselineCommit": "32bdc3134ce96a554040c75f4795a39eecaee020",
+  "application": {
+    "version": "1.1.47",
+    "build": "84f6c25a0d9e6e45"
+  },
+  "runtimeSHA256": {
+    "assets/onboarding/onboarding.js": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+    "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3",
+    "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+    "demos/corporate/gjh/v11/style.css": "f43677927b9d42a290712f95ed192b1ee0d494fccda662d493367d801ae356ea",
+    "assets/onboarding/onboarding.css": "b82b4ace65a530fc03085a93947562d29726cd6384992c2d6ea277fcb306a9a4"
+  },
+  "diagnosticSHA256": {
+    "tests/browser_gjh_hud_ownership.py": "99a54962ae2704c7a82f34398e02c218ec5e69113e66ab5e8367fbb587418bd4",
+    "tests/browser_gjh_modes.py": "05568b54129e0fda8c08b0eb943317d43525d00681257aced8f1d7e2e9299f11",
+    "tests/browser_gjh_onboarding.py": "f1268ddb0642becfedfffbaf6de21b93d2f05e92dee3905c8628e14dd910fb54",
+    "tests/browser_gjh_v11.py": "38f5445f1e1b9c5a4891a5574fd72e18c193937c6ab799d28231b85fc1af6402",
+    "tests/browser_gjh_accessibility.py": "5c11d3c34b7be83cb7ce7764f1181ef9e109d00aaff15a5f09f6fa4755556be5"
+  },
+  "scope": {
+    "authorized": "Four remaining interior tasks; D1 delivered separately before D3/D4/D5",
+    "runtimeChanged": [
+      "Shared optional Help callbacks/idle-entry flag only; native welcome DOM preserved",
+      "V11 Help/Map entry,focus,guards,tutorialsuspension,compactStoreslabel",
+      "Existing800px Directorybrand-cardfallback"
+    ],
+    "preserved": "32bdnormal-flowwelcome/mobile3columns/darktheme/sharedpreferencecolor,tokens;hybrid/hero/9AIimages;native17perSKUdensity/productrecords/models/physics/collision/threestores"
+  },
+  "finalChecks": {
+    "focusedHUD": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/welcome-focused/report.json",
+      "sha256": "b53b3f92ff7cfd27ade3716d2455e9fd1d0f2306d6969f86bc8be939fb8a82af",
+      "caseGroups": 13,
+      "viewportRouteMotionCases": 10,
+      "frames": 50,
+      "runtimeSHA256": {
+        "assets/onboarding/onboarding.js": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+        "assets/onboarding/onboarding.css": "b82b4ace65a530fc03085a93947562d29726cd6384992c2d6ea277fcb306a9a4",
+        "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+        "demos/corporate/gjh/v11/style.css": "f43677927b9d42a290712f95ed192b1ee0d494fccda662d493367d801ae356ea",
+        "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+      },
+      "diagnosticSHA256": "99a54962ae2704c7a82f34398e02c218ec5e69113e66ab5e8367fbb587418bd4",
+      "coverage": "320/390/639/650/651/667landscape/1440;default,v1,pilot,normal/reducedmotion;HelpTutorialKeyboardGamepad;MapCloseEscape;650/651and560/561mousebreakpoints;WASM/noJS;allvisibleheader44pxrects/hitsinsideviewport;fullARIApreserved",
+      "allErrorsAndIllegalTransitions": 0
+    },
+    "DOMAccessibility": {
+      "status": "PASS_CURRENT_70_STATES",
+      "path": "/private/tmp/gallery-interior-d1/welcome-accessibility/report.json",
+      "sha256": "e89de7e26ca49bf9433af1c3fd596dee1e1fa3b60e8f3288c7769b493f6a33d8",
+      "viewports": 5,
+      "scans": 70,
+      "sourceSHA256": {
+        "assets/onboarding/onboarding.js": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+        "assets/onboarding/onboarding.css": "b82b4ace65a530fc03085a93947562d29726cd6384992c2d6ea277fcb306a9a4",
+        "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+        "demos/corporate/gjh/v11/style.css": "f43677927b9d42a290712f95ed192b1ee0d494fccda662d493367d801ae356ea",
+        "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+      },
+      "testSHA256": "5c11d3c34b7be83cb7ce7764f1181ef9e109d00aaff15a5f09f6fa4755556be5",
+      "allImmediateHairHits": true,
+      "associatedCheckboxLabelActualEdgeClick": "PASSvisibleedgeclicktoggles/restores; visual20pxinputseparatelyrecorded",
+      "nativePopupChoice": "NOT_VERIFIEDwhereindependenthostfixturedoesnotchange"
+    },
+    "modes": {
+      "status": "PASS_PROTECTED_ENGINE_PHASE_WITH_CURRENT_HUD_GUIDE_BRIDGE",
+      "path": "/private/tmp/gallery-interior-d1/modes-release.json",
+      "sha256": "9294b9f0d78bde65e9affcb5ced2dd501084aebc3a168971fc31375e9e268d85",
+      "snapshots": 162,
+      "scope": "Historical759/wrapperphase162snapshots. modes.js unchanged; current13HUDmode/breakpointgroups,70DOMstates andnativeGuide14Tab/dark4sizechecks bridgefinalnativeDOM. Not162rerunonthefinalGuideDOM."
+    },
+    "independentReview": {
+      "status": "APPROVED_CURRENT_D1",
+      "reviewer": "/root/lod_review",
+      "source": "Final independent source, artifact, hash and actual-image review by /root/lod_review on2026-11-15",
+      "findings": [],
+      "scope": "Only D1 on32bd/native-flow/3-column/dark integration; currentfocused13/50,currentaxe70,Guide14,dark4sizes,shareddefaults andimage-scopedDirectorybridges accepted; no P0/P1/materialfunctionalP2; priorphases retained with scope.",
+      "limits": "Historicalaxe6immediateHairhitfailureacceptednonblockingunreproduceduncertainty; no inventedcause/fix; no newvisualscore orphysicalcertification.",
+      "currentImagerySupplement": "APPROVED",
+      "currentWelcomeSupplement": "APPROVED",
+      "protectedPhaseStatus": "APPROVED"
+    },
+    "mainCIAndPages": {
+      "status": "POST_PUSH_GATE",
+      "policy": "Primary verifies remote mainSHA, Actions deployment and actual published response hashes/user flows before starting D3. This receipt is the pre-commit acceptance snapshot."
+    },
+    "headerRoundTrip": {
+      "status": "PASS_PROTECTED_HEADER_PHASE_WITH_CURRENT_FOCUSED_BRIDGE",
+      "path": "/private/tmp/gallery-interior-d1/header-roundtrip.json",
+      "sha256": "fe55ce0771455c9f942881693c946ba0ba33dd73ac884fa3f772fbb65490bc5c",
+      "viewports": 5,
+      "statesPerViewport": 3,
+      "scope": "Recordedfiveviewport3stateroundtripbefore32bdGuide-onlydelta; exactcurrentfocused13verifiesheaderfullARIA/rects/hits/44targetsandbreakpoints."
+    },
+    "hybridImagery": {
+      "status": "PASS",
+      "viewports": [
+        1440,
+        390,
+        320
+      ],
+      "path": "/private/tmp/gallery-interior-d1/imagery-hybrid.log",
+      "sha256": "7e233593ffa9ceb07d020e59522e47c6bbf901ffc186adf9f444ba9fed028c86",
+      "testSHA256": "f487a33460463601d00639c2d264f84d47f5d69be1daeeb05e45ab988a09099d",
+      "scope": "Latestupstreamtest:3brandconceptdetails/9images,officialMILIartworkidentity,filters/search/sort/bag/3Dhandoff/20conceptgallery/nooverflow",
+      "tabletBridge": {
+        "status": "PASS",
+        "viewports": [
+          667,
+          768
+        ],
+        "path": "/private/tmp/gallery-interior-d1/imagery-hybrid-tablet.log",
+        "sha256": "2437a1a301ec90c314a35ad21a40f5c3430c503ea12e3b5337e44ea2c5b847e2",
+        "diagnosticSHA256": "e009f02949a6f188257d1790b255afaf7edc26feba569602812e9775f0236ed4",
+        "scope": "Exactupstreamhybridassertions,onlyviewportinput/ROOTadapted;finalone-columnimage-layoutdelta"
+      }
+    },
+    "imageryBreakpoint": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/imagery-boundary/report.json",
+      "sha256": "7310db774c04ceff1dfd47b53d7c8dcd0e65956285ab7aa100533fb608e4f958",
+      "cases": 4,
+      "coverage": "800and801px,closed/openbrandstrips;1versus2brand-gridtracks;43paintedDirectorytargetsperstate\u226544px,fullhorizontalviewport,actualcenterhitandnoscrolled/clippedcontent",
+      "sourceSHA256": {
+        "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3",
+        "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+        "demos/corporate/gjh/v11/style.css": "3b7205a3d353edf7f5b5f2152108e3cc4f9dd260826652f3ce9852249e6fc4dd"
+      }
+    },
+    "currentNativeGuide": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/welcome-guide-current.json",
+      "sha256": "7f4611d9a2435cf49c9794057306140e7f597ead6182583ba3843623d0918b2a",
+      "scope": "Paired32bdbaseline/current320x568nativeGuide14actualTabtargetsallhittrueinclcheckbox; normalflowfooterretained; currentmobile3columnnavall5targets76x44/font12",
+      "finalWrapperDOM": false
+    },
+    "upstreamDarkWelcomeSuite": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/welcome-current/after-dom.json",
+      "sha256": "1647350c406eea48a838ffbfe66076188d0b602dc9cd39c22965591c1b929b2b",
+      "viewports": [
+        [
+          1440,
+          900
+        ],
+        [
+          390,
+          664
+        ],
+        [
+          320,
+          568
+        ],
+        [
+          844,
+          390
+        ]
+      ],
+      "sourceTest": "tests/browser_gjh_welcome_modal_fix.py",
+      "sourceTestSHA256": "330c2e23516e8263e8efc2b83521a2b904afa07549d99c16b1a99d7a8dc9f59c",
+      "adapter": "OnlyOUTredirectedtoprivate/tmp,phaseafter;originalSwiftShaderargs/assertionsunchanged",
+      "scope": "Darksystem4sizes;normalflowfooter/preferencerelation,actualcheckboxscroll/hit/toggle,Close/reopen/persistedpreference/Start,noerrors; notanOSreader/physicaltest"
+    },
+    "sharedDefaultProfiles": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/welcome-shared-default.log",
+      "sha256": "881b9e2096b7204fbb53b848733da095b55f5c251164189ffa4ef3956b5d99f4",
+      "scope": "CurrentHelpAPI40280/sharedCSSb82:5viewports/all6standaloneprofiles/focus/preferences/inputmodes/noUIframeloop"
+    },
+    "currentDirectoryBridge": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/welcome-directory-bridge/report.json",
+      "sha256": "0f0f433225594c865d46fd68351448c72e1e06a568944fdd8090e4855a98b837",
+      "cases": 4,
+      "targetsPerState": 43,
+      "coverage": "800/801pxclosed/openconceptstrips,currentnativewelcomeintegration,1vs2brandtracks,min44/fullhorizontalviewport/actualcenterhits/unclippedcontents",
+      "sourceSHA256": {
+        "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3",
+        "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+        "demos/corporate/gjh/v11/style.css": "f43677927b9d42a290712f95ed192b1ee0d494fccda662d493367d801ae356ea"
+      },
+      "protectedImageComponentProof": "Prior25Directoryaxe/9decodedimages remain source-scoped; currentGuide-onlydelta leavesDirectorycomponentunchanged."
+    },
+    "primaryIndependent": {
+      "status": "PASS_CURRENT_SOURCE",
+      "smokeCases": 6,
+      "edgeCases": 3,
+      "sourceSHA256": {
+        "assets/onboarding/onboarding.js": "40280e52943288e13d7e5ae09abfb8e805b9458672e1b5a5607ebf4eaf99e570",
+        "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3",
+        "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+        "demos/corporate/gjh/v11/style.css": "f43677927b9d42a290712f95ed192b1ee0d494fccda662d493367d801ae356ea",
+        "assets/onboarding/onboarding.css": "b82b4ace65a530fc03085a93947562d29726cd6384992c2d6ea277fcb306a9a4"
+      },
+      "smokeReport": "/private/tmp/gallery-interior-d1/canonical-parent/smoke/report.json",
+      "edgeReport": "/private/tmp/gallery-interior-d1/canonical-parent/edges/report.json",
+      "pythonTests": 49,
+      "generator": "PASS",
+      "SSOT": "PASS:0/1211",
+      "scope": "Defaultv2/v1/pilot, H-Help, quality/appearance, guide/Escape/focus, compactMap/Escape, directory/product/3Dreturn, allheader44px/viewport/hits,320x568/844x560mouse/667x375, lastHelpselectclearofheader/footer, illegal0/errors0."
+    }
+  },
+  "confirmedRepairs": [
+    {
+      "issue": "Compact Map had header and native-summary entries",
+      "evidence": "before-latest.json; exact HEAD4-source overrides; 7 viewports"
+    },
+    {
+      "issue": "Native Help summary accepted a stale synthetic click behind Bag",
+      "evidence": "stale-help-before.log; beforefalse aftertrue; fixed using existing guarded owner"
+    },
+    {
+      "issue": "Mouse short-landscape Map header hidden by CSS while JS considered compact",
+      "evidence": "focused4.log844x560; fixed breakpoint coverage, no fixture-size substitution"
+    },
+    {
+      "issue": "Tutorial suspension depended on future input frame",
+      "evidence": "focused2.log; synchronized notification helper, no extra mode owner"
+    },
+    {
+      "issue": "Guide footer occluded actual Tab target",
+      "currentOwner": "Upstream32bdnormal-flowwelcomerepairretained;ownwrappertrialremoved",
+      "currentEvidence": "welcome-guide-current.json:baseline32bdandcandidateboth14hitstrue;originaldark4sizewelcomesuitepasses",
+      "historicalEvidenceOnly": "guide-focus-before-footer.json and guide-focus-final2.json; paired unchanged759 baseline still fails, repaired candidate14actual hits pass"
+    },
+    {
+      "issue": "Shared control styles overrode native-navigation padding",
+      "currentDisposition": "Ownintrinsic-grid/paddingbridge supersededandremoved;32bdscopednavtheme/mobile3colsretained",
+      "historicalEvidenceOnly": "guide-focus-first-bridge.json vs guide-focus-final2.json; finalpadding0,font14,alltargetheights44,alllabeltextheights19"
+    },
+    {
+      "issue": "320px Store directory header control clipped21.86px beyond viewport on unchanged759baseline andcandidate",
+      "repair": "One updateViewToggle owner publishes compact Stores/wide Store directory with unchanged fullARIA; directoryEnter3DMall remains unchanged",
+      "evidence": "help-header-before.json andheader-roundtrip.json;3203D/Directory/3Dreturn rects/ringsfullyinside"
+    }
+  ],
+  "fixtureCorrections": [
+    "Closed-details layout boxes excluded only when not actually painted; unchanged44px visible target minimum",
+    "Checkbox associated label measured only after actual visible edge click toggles/restores it; 20px visual input retained separately",
+    "Direct Inspect expected in existing held-product scenario instead of stale intermediate Shelf",
+    "Wide Map reached via actual quick-guide action rather than assuming nearby kiosk at spawn"
+  ],
+  "retainedHistoricalPhases": [
+    {
+      "claim": "Old6bc source before latest hybrid sync:13groups50framesPASS",
+      "path": "/private/tmp/gallery-interior-d1/focused5/report.json",
+      "sha256": "67c9b3a6606e5fa7238af65a966b2d196941f8d6dc8cd9e2a0cf8e1ecc3c0714"
+    },
+    {
+      "claim": "Latest759 before footer repair:13groups50framesPASS",
+      "path": "/private/tmp/gallery-interior-d1/focused6/report.json",
+      "sha256": "ce3c75a98147c891bdcc0179dcb712c28940e8b4f527facca9a94431d1b68dd6"
+    },
+    {
+      "claim": "Footer repair before final intrinsic-grid bridge:13groups50framesPASS",
+      "path": "/private/tmp/gallery-interior-d1/focused7/report.json",
+      "sha256": "ba8369773849a4a1e67b19976e4ccdd43c6ddabf14d12da738f58f443fcef131"
+    },
+    {
+      "claim": "Old6bc phase162snapshotsPASS",
+      "path": "/private/tmp/gallery-interior-d1/modes-final.json",
+      "sha256": "76910f19749f93dcba83aee2da07a7a5207422d4f05ddb5627b15a299d82fb2c"
+    },
+    {
+      "claim": "Old6bc3mouse contexts; compact exact position and angles; wide only bounded10micrometreXZ ground-settling after idle comparison",
+      "path": "/private/tmp/gallery-interior-d1/guard-and-gamepad.json",
+      "sha256": "dcb64a418ce09641f92db92d1f383a94f795f45a0228babd974ce1e295aae9df"
+    },
+    {
+      "claim": "Latest paired Guide14actual Tab hits; final label rects and baseline failure",
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-final2.json",
+      "sha256": "80903747dffe6f275cdc11f8d1df4b73124b7edfd76bcdc999c610ad834a02a5"
+    },
+    {
+      "claim": "Exact sharedJS/CSS no-footer defaults:5viewports/all6profiles/noUIframe loopPASS",
+      "path": "/private/tmp/gallery-interior-d1/shared-onboarding-footer.log",
+      "sha256": "881b9e2096b7204fbb53b848733da095b55f5c251164189ffa4ef3956b5d99f4"
+    },
+    {
+      "claim": "Latest759 generated artifact before final intrinsic-footer bridge:fullV11PASS",
+      "path": "/private/tmp/gallery-interior-d1/v11-3.log",
+      "sha256": "8e00a9787d2491af39b2441a563d12acb7d74a3800069f81062256f829cb5b75"
+    }
+  ],
+  "rawEvidence": [
+    {
+      "path": "/private/tmp/gallery-interior-d1/before-latest.py",
+      "sha256": "531b3f615d6fc97d2c43ab476c0f64f30e5d5d2d9c985725429b448fed468b95"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/before-latest.json",
+      "sha256": "55bbe5d204350eabc32be65d18422d761d5d9a49398025e09ade6b3c8a3a6468"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/before-latest-hashes.json",
+      "sha256": "c2f9470e094ac7b3fb927ebb330a64166b374fafa281d7119f6666ab046348a5"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused1.log",
+      "sha256": "2b8c81f139051d4191b37cc3b2aad43bc04b67b3933ce894b176a1122c013f01"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused2.log",
+      "sha256": "2127948b870bcc62cf0bbee44539f032d96354da975f83852ff0e19da40e35b4"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused3.log",
+      "sha256": "a9eff0256ffb76f7063736117466dd533bf8edc3ee466fa7e8ab9ad67fcddaa7"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused4.log",
+      "sha256": "8595ef272fb9c3421ca35064dd404b4e2de242faa9fa68c038c5918da70f383c"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused5.log",
+      "sha256": "67c9b3a6606e5fa7238af65a966b2d196941f8d6dc8cd9e2a0cf8e1ecc3c0714"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility.log",
+      "sha256": "f39377b66706559eddef81c51c5cd99ffa64a795397c50a40c4064dada4e3bbc"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility2.log",
+      "sha256": "b8cb60e8be4fca2bfc25ec9a019273a874259978953b65a0276387d2234305b7"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility3.log",
+      "sha256": "fcbc461f5a2ba64df43a576c04f720c99f345ec7faf78ae4900ade3e0ccc8365"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility4.log",
+      "sha256": "b4084c00ec976149ae799b1794c80218cc2dae6f8f7086c6e1c13c4fbe4eec8b"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility5.log",
+      "sha256": "137771f2d69c064f03598a02f63922eba402f3f41724fe4bdd65d4b929e1ba5b"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/v11.log",
+      "sha256": "66a325c7eb5b01d641fc171c918ddc127ddb83e1a7645ea0157861cec89f1fd0"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/v11-2.log",
+      "sha256": "336586d1fc96c46668ff8bc23157cba08071c13c76cd60fe1c9f5eabf79acfa2"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/stale-help-before.log",
+      "sha256": "227fef3e50f576dd265ae96d488969f03294bf3b1d9801206b10f319a5a1d8c1"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-before.log",
+      "sha256": "28525a1b2f086a814fb9fe1ef7faa31363fd4124def141afe91226add2e2eb83"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-after.log",
+      "sha256": "be9f5cbeda93451e5fbf814c5b6954b350090a94a65c3beb5986a1b88cb58bca"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-final.log",
+      "sha256": "ce7ad4909e937396d6e5d09e2970af35fa667acb1de042ac414e694470c7e8a4"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-final2.log",
+      "sha256": "80903747dffe6f275cdc11f8d1df4b73124b7edfd76bcdc999c610ad834a02a5"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guard-and-gamepad.log",
+      "sha256": "6cc090b225d7e3a284187f6640ba722d88e1bd737c9872ad3d7bae522c0112ad"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guard-and-gamepad-attempt2.log",
+      "sha256": "b1b847cb32d8784c25b6a9c6481ec6a636cdb07edc9e782e0eb48bee8da47edc"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guard-and-gamepad-final.log",
+      "sha256": "a1b07249a7ba5f886c3b888b87b1128079d5273f95e824eea698c06f68e853eb"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused8/report.json",
+      "sha256": "084d28012305e0fbad013c3b1fee9880af91a49fd16a118265a3b6e84d963cea"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/modes-release.json",
+      "sha256": "9294b9f0d78bde65e9affcb5ced2dd501084aebc3a168971fc31375e9e268d85"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility7/report.json",
+      "sha256": "357d9e92b333dbd27f28950334a64e09ef879b723209e461c3f844ce953e89de"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/diagnostic-axe667.log",
+      "sha256": "5283aee569df3d808eea77dbfee4984089ffb210954b77c2180b51e505ef4952"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/help-header-before.json",
+      "sha256": "bd9b028aacb72edb0ae2fe67f1df6f8bdfe3b20b9954bbb1f7f5a68697602704"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/header-roundtrip.json",
+      "sha256": "fe55ce0771455c9f942881693c946ba0ba33dd73ac884fa3f772fbb65490bc5c"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/header-roundtrip.log",
+      "sha256": "1617d9ca8250227c05c100bb0bceea67cd109bf153a0b0d29badc058dc88f3bb"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-final-capture.json",
+      "sha256": "80903747dffe6f275cdc11f8d1df4b73124b7edfd76bcdc999c610ad834a02a5"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-before-footer.json",
+      "sha256": "28525a1b2f086a814fb9fe1ef7faa31363fd4124def141afe91226add2e2eb83"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-first-bridge.json",
+      "sha256": "ce7ad4909e937396d6e5d09e2970af35fa667acb1de042ac414e694470c7e8a4"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-focus-final2.json",
+      "sha256": "80903747dffe6f275cdc11f8d1df4b73124b7edfd76bcdc999c610ad834a02a5"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused8.log",
+      "sha256": "084d28012305e0fbad013c3b1fee9880af91a49fd16a118265a3b6e84d963cea"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility6.log",
+      "sha256": "c1a10cba58d5ed7853f305a45125cecdad24e54e58accbbb7c5903ad668d48ea"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/accessibility7.log",
+      "sha256": "357d9e92b333dbd27f28950334a64e09ef879b723209e461c3f844ce953e89de"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused9/report.json",
+      "sha256": "b604bd532a9272f5fd833f6cfe2f7772d29b1101264b518311d7ba8766f66c16"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/focused9.log",
+      "sha256": "b604bd532a9272f5fd833f6cfe2f7772d29b1101264b518311d7ba8766f66c16"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/modes-release.log",
+      "sha256": "836c1f0c363677f8de8fd863cd8a1029c4dae39df4ef751c509bf1d291fb9435"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/help-header-before.log",
+      "sha256": "46c262a6fe54e4590472f941f791427469533bf075d082d6f13578b60543cdcc"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/guide-final-capture.log",
+      "sha256": "80903747dffe6f275cdc11f8d1df4b73124b7edfd76bcdc999c610ad834a02a5"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/before-imagery-sync/frozen-before.json",
+      "sha256": "ab0b0a40f3af18960d68b63cc65945ae7bc207ef4d7a87c079964a1ce83db262"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-focused/report.json",
+      "sha256": "bf5feebe1e77bafe479ddc18491f14b3857726effef067231036e2fc5090cee8"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-focused.log",
+      "sha256": "bf5feebe1e77bafe479ddc18491f14b3857726effef067231036e2fc5090cee8"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-hybrid.log",
+      "sha256": "7e233593ffa9ceb07d020e59522e47c6bbf901ffc186adf9f444ba9fed028c86"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe.log",
+      "sha256": "e4aee55c0b0fda547e947e1bfd1e709fa219aaacab5286d336030df5665fdaa1"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe-attempt1.py",
+      "sha256": "851ba4f0eb12ba2243a45d1e74ffbff5dea789af725160edc6395958bf8b901c"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe.py",
+      "sha256": "7afd48511e05a1a4f4b0006045745070477e4b2328472125693bb502c83d2a37"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-before-overflow-fix-sha256.json",
+      "sha256": "98c7efa6f671b073fb88ac3e815394bf55bfb64b96739b4a1aeaad74dea71d2b"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-focused-final/report.json",
+      "sha256": "ee389aa8e52792bdb150e2b2728acc9bc3ab927f48c80ce737c6db672fc37b5d"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-focused-final.log",
+      "sha256": "ee389aa8e52792bdb150e2b2728acc9bc3ab927f48c80ce737c6db672fc37b5d"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe/report.json",
+      "sha256": "a730a36514ce9893111e9c409c6d26baf36f96a9456cd298e7fa369604665ecf"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe3.log",
+      "sha256": "770a66cf1d0b150fdb40dd1f6dea7b1cd3557a3aae1e56d1f09f62c901d93989"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe2.log",
+      "sha256": "62b169e719627829ad8c36013347203bf890c7976e69c35bab53b3004ca93334"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe-attempt2.py",
+      "sha256": "7afd48511e05a1a4f4b0006045745070477e4b2328472125693bb502c83d2a37"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-boundary/report.json",
+      "sha256": "7310db774c04ceff1dfd47b53d7c8dcd0e65956285ab7aa100533fb608e4f958"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-boundary.py",
+      "sha256": "8aa5f4c6da7ba8a391bfdc6ef94cfdda4424640652849a40ddf4ceed56f3cfe9"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-boundary.log",
+      "sha256": "c02419bf8e5cc977736831dbe480abc3adfc2800bc507a885c32cba380072667"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-hybrid-tablet.py",
+      "sha256": "e009f02949a6f188257d1790b255afaf7edc26feba569602812e9775f0236ed4"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-hybrid-tablet.log",
+      "sha256": "2437a1a301ec90c314a35ad21a40f5c3430c503ea12e3b5337e44ea2c5b847e2"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-overflow-before.json",
+      "sha256": "79fbc94d6c8a8e63a39bc3137c1f0857c6718bf73b461350e717f8f5790075b7"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/imagery-overflow-before.log",
+      "sha256": "79fbc94d6c8a8e63a39bc3137c1f0857c6718bf73b461350e717f8f5790075b7"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/before-welcome-sync/frozen-before.json",
+      "sha256": "beaa28b6a18a80ce78ad952760154bd0db6f219f979f4394e3416546862cea9a"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-focused/report.json",
+      "sha256": "b53b3f92ff7cfd27ade3716d2455e9fd1d0f2306d6969f86bc8be939fb8a82af"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-focused.log",
+      "sha256": "b53b3f92ff7cfd27ade3716d2455e9fd1d0f2306d6969f86bc8be939fb8a82af"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-accessibility/report.json",
+      "sha256": "e89de7e26ca49bf9433af1c3fd596dee1e1fa3b60e8f3288c7769b493f6a33d8"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-accessibility.log",
+      "sha256": "e89de7e26ca49bf9433af1c3fd596dee1e1fa3b60e8f3288c7769b493f6a33d8"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-guide-current.json",
+      "sha256": "7f4611d9a2435cf49c9794057306140e7f597ead6182583ba3843623d0918b2a"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-guide-current.log",
+      "sha256": "7f4611d9a2435cf49c9794057306140e7f597ead6182583ba3843623d0918b2a"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-guide-probe.py",
+      "sha256": "743e3f532ef0123033a5a076a0a89a1a76fca6e64fe1dcf939e92586a4bf7c53"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-current/after-dom.json",
+      "sha256": "1647350c406eea48a838ffbfe66076188d0b602dc9cd39c22965591c1b929b2b"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-current.log",
+      "sha256": "1647350c406eea48a838ffbfe66076188d0b602dc9cd39c22965591c1b929b2b"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-current-runner.py",
+      "sha256": "54886f7359a8dd16fb894b921e704f39e01ea1d429aaae477307ae13fd09f1f1"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-shared-default.log",
+      "sha256": "881b9e2096b7204fbb53b848733da095b55f5c251164189ffa4ef3956b5d99f4"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/frozen-sha256.json",
+      "sha256": "86b98c8563c5d036c3c6de0c6ef57b38d9f4c62d50503036e6e7c537060878ce"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-directory-bridge/report.json",
+      "sha256": "0f0f433225594c865d46fd68351448c72e1e06a568944fdd8090e4855a98b837"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-directory-bridge.py",
+      "sha256": "068be9af2babc91298a6ddf1be837e1ccf1ae63232eefe93ab160f2fbe3d586e"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/welcome-directory-bridge.log",
+      "sha256": "c02419bf8e5cc977736831dbe480abc3adfc2800bc507a885c32cba380072667"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/canonical-parent/smoke/report.json",
+      "sha256": "8c44b9a640fff26a32a9d18dd942b8e986a16cd56c0b39b8e4ee3e1ae4442db5"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/canonical-parent/edges/report.json",
+      "sha256": "154d4087c0861c13915ffc68ca27f1283e933e0abb642440a309fb44e58e0a4f"
+    },
+    {
+      "path": "/private/tmp/gallery-interior-d1/canonical-parent/units.log",
+      "sha256": "3d4fe2850db6f37a5b84febfd5bbcf0dce519817172f22ee4e36a5e7709bb064"
+    }
+  ],
+  "representativeFrames": [
+    {
+      "path": "docs/screenshots/v11-interior-hud/before-compact-320.png",
+      "source": "/private/tmp/gallery-interior-d1/before-latest-320x740.png",
+      "sha256": "e7ed694ad14dd692fd0368ccf41703a0dbf9093850d8292c35fd5a11cc72f8bc",
+      "caption": "Historical759compactHUDbaseline"
+    },
+    {
+      "path": "docs/screenshots/v11-interior-hud/after-compact-320.png",
+      "source": "/private/tmp/gallery-interior-d1/welcome-focused/0-320x740-idle.png",
+      "sha256": "f37e5ec5f33417f5030b0818ac65c227e6e117154f1b078aee5187d5982b5b62",
+      "caption": "CurrentD1Help/Map/Stores"
+    },
+    {
+      "path": "docs/screenshots/v11-interior-hud/current-guide-320-dark.png",
+      "source": "/private/tmp/gallery-interior-d1/welcome-current/after-mobile-320x568-scrolled.png",
+      "sha256": "8dd7a7dbc5a4a55c927dcd0392c6267ec356e51a3b7acbb3ee27829f5406e663",
+      "caption": "Retained32bdnativeGuide,dark320scrolledcheckbox/footer"
+    },
+    {
+      "path": "docs/screenshots/v11-interior-hud/current-guide-desktop-dark.png",
+      "source": "/private/tmp/gallery-interior-d1/welcome-current/after-desktop.png",
+      "sha256": "709f418ced88404d92d2c6ce37a627c0a6073b7b646c390dad6773a8a98a9c67",
+      "caption": "Retained32bddarknativedesktopGuide"
+    },
+    {
+      "path": "docs/screenshots/v11-interior-hud/after-map-390.png",
+      "source": "/private/tmp/gallery-interior-d1/welcome-focused/1-390x844-map.png",
+      "sha256": "ac47bf3473034fdffd6c4b2e60573fb78e5bbd5db764daef9ce6bc8748377bf8",
+      "caption": "CurrentcompactMapClose"
+    },
+    {
+      "path": "docs/screenshots/v11-interior-hud/after-map-landscape.png",
+      "source": "/private/tmp/gallery-interior-d1/welcome-focused/5-667x375-map.png",
+      "sha256": "602c473588d07777c69379a2295d1016d895d7e06be25b9e3a3ecb6fe9bd7df7",
+      "caption": "CurrentlandscapeMap"
+    },
+    {
+      "path": "docs/screenshots/v11-interior-hud/after-help-scroll-320.png",
+      "source": "/private/tmp/gallery-interior-d1/welcome-focused/0-320x740-help-1.png",
+      "sha256": "5a9a07d101b36e258751ceb043f963011a77ec0a19f9ef7d8818910042a7b9b5",
+      "caption": "CurrentHelpbottomscroll"
+    },
+    {
+      "path": "docs/screenshots/v11-interior-hud/after-help-wide.png",
+      "source": "/private/tmp/gallery-interior-d1/welcome-focused/6-1440x900-help-0.png",
+      "sha256": "0d3bba7cebc83f3f0c5c25daf5905ef5928399b55fcf9b7d274561c4b6af7986",
+      "caption": "CurrentwideHelp"
+    }
+  ],
+  "limits": [
+    "No physical-phone/Safari/actual-inset/OS-reader/controller/FPS certification",
+    "D3/D4/D5 remain separate and unaccepted",
+    "One historical immediateHairhitfailure667inaxe6wasnotreproduced in paired5viewportprobes/full667diagnostic or exactfinal5viewport70scans. It is retained; no imagined cause, extra wait, selective retry or relaxed hitassert is claimed."
+  ],
+  "initialAuditBaseCommit": "7592632b1d339b2004047ff4187536d11fc51bdb",
+  "protectedD1ModulePhase": {
+    "baseline": "7592632b1d339b2004047ff4187536d11fc51bdb",
+    "focusedHUD": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/focused9/report.json",
+      "sha256": "b604bd532a9272f5fd833f6cfe2f7772d29b1101264b518311d7ba8766f66c16",
+      "caseGroups": 13,
+      "viewportRouteMotionCases": 10,
+      "frames": 50,
+      "runtimeSHA256": {
+        "assets/onboarding/onboarding.js": "af568391cf8eede4ccdbb802f346dfd23b6d5bf78717f700c3c8c259a6275ee8",
+        "assets/onboarding/onboarding.css": "93a36d0089a6c41ad47c77a70c2d1ee159416a7573c6d13c0e2ec2523a07e8ec",
+        "demos/corporate/gjh/v11/index.html": "153b1aeadb5a06b5178a100fe3fbfeb717031b5f85a175a068b122271086f45c",
+        "demos/corporate/gjh/v11/style.css": "0d09665d2e4a3b9b44f578def2de314dd589b66fa1937e01e4df7f7521d2d92f",
+        "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+      },
+      "diagnosticSHA256": "99a54962ae2704c7a82f34398e02c218ec5e69113e66ab5e8367fbb587418bd4",
+      "coverage": "320/390/639/650/651/667landscape/1440;default,v1,pilot,normal/reducedmotion;HelpTutorialKeyboardGamepad;MapCloseEscape;650/651and560/561mousebreakpoints;WASM/noJS;allvisibleheader44pxrects/hitsinsideviewport;fullARIApreserved",
+      "allErrorsAndIllegalTransitions": 0
+    },
+    "DOMAccessibility": {
+      "status": "PASS",
+      "path": "/private/tmp/gallery-interior-d1/accessibility7/report.json",
+      "sha256": "357d9e92b333dbd27f28950334a64e09ef879b723209e461c3f844ce953e89de",
+      "viewports": 5,
+      "scans": 70,
+      "allImmediateHairHits": true,
+      "sourceSHA256": {
+        "assets/onboarding/onboarding.js": "af568391cf8eede4ccdbb802f346dfd23b6d5bf78717f700c3c8c259a6275ee8",
+        "assets/onboarding/onboarding.css": "93a36d0089a6c41ad47c77a70c2d1ee159416a7573c6d13c0e2ec2523a07e8ec",
+        "demos/corporate/gjh/v11/index.html": "153b1aeadb5a06b5178a100fe3fbfeb717031b5f85a175a068b122271086f45c",
+        "demos/corporate/gjh/v11/style.css": "0d09665d2e4a3b9b44f578def2de314dd589b66fa1937e01e4df7f7521d2d92f",
+        "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+      },
+      "testSHA256": "5c11d3c34b7be83cb7ce7764f1181ef9e109d00aaff15a5f09f6fa4755556be5",
+      "associatedCheckboxLabelActualEdgeClick": "PASS eachviewport;20pxvisualinputrecordedseparately",
+      "nativePopupChoice": "NOT_VERIFIED when isolatedhostfixturedoesnotchange"
+    },
+    "independentReview": {
+      "status": "APPROVED",
+      "reviewer": "/root/lod_review",
+      "source": "Final runtime approval relayed by primary /root on2026-11-15",
+      "findings": [],
+      "scope": "Final5runtimehashes,focused9/axe7/320headerandlabeltarget/nativefooterproof; no P0/P1/materialfunctionalP2",
+      "limits": "Historicalaxe6immediateHairhitfailureacceptednonblockingunreproduceduncertainty; no inventedcause/fix; no newvisualscore orphysicalcertification.",
+      "currentImagerySupplement": "PENDING final image-scopedbridge/primaryacceptance; protectedD1moduleapprovalretained"
+    },
+    "scope": "Beforeimage-onlymain2f70sync. Same sharedJS/sharedCSS/hostUI bytes and exact3DexperienceHTML; new image-scopedDirectory bridge separately required."
+  },
+  "imagerySynchronization": {
+    "commit": "2f70d69aeebcbf3afc02dd3e38a8a86b42affa0f",
+    "delta": "9brand-conceptWebPs,conceptmanifest,7HTMLlines,21brandscopedCSSlines,READMEandupstreamhybridtest; no hostUI/shared/modes sourcechanges",
+    "policy": "ReappliedonlyownedD1patchandregenerated1.1.46; no upstreamimages/brandmarkup/styling/test changes discarded",
+    "unchangedProtected3DHTMLSHA256": "f359cf605461a1745c280d1c59ad58b8b77a2bad196a77a49c38b04110e3b534",
+    "sameModuleSHA256": {
+      "assets/onboarding/onboarding.js": "af568391cf8eede4ccdbb802f346dfd23b6d5bf78717f700c3c8c259a6275ee8",
+      "assets/onboarding/onboarding.css": "93a36d0089a6c41ad47c77a70c2d1ee159416a7573c6d13c0e2ec2523a07e8ec",
+      "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+    },
+    "imageDimensionProbeCorrection": "InitialadhocprobeincorrectlyequatedHTML1600x900layoutslotwithnativeWebPdimensions; corrected to compareeverydecodedimagetotheactualsourcefilepixelssize1600x901or1600x1067. No asset/layout/assertthresholdwaschanged.",
+    "responsiveRepair": {
+      "issue": "UnchangednewimageryDirectoryat667pxhasscrollWidth671;GOGOcardminimum322.94pxoverflowsnestedtwo-cardlayout",
+      "fix": "Singlebrand-cardcolumnat existing800pxbreakpoint; nohiddenoverflow,removedcontentorsmalleractions",
+      "actualBridge": "Directory25statespassplus800/801closed/open4statesand43targetsperstate;hybrid667/768pass",
+      "beforeEvidence": "/private/tmp/gallery-interior-d1/imagery-overflow-before.json"
+    },
+    "phaseStatus": "HISTORICAL_IMAGE_ONLY_SYNC_BEFORE32bd_NATIVE_WELCOME_INTEGRATION"
+  },
+  "preWelcomeIntegrationPhase": {
+    "baselineCommit": "2f70d69aeebcbf3afc02dd3e38a8a86b42affa0f",
+    "application": {
+      "version": "1.1.46",
+      "build": "bbf9bf3c70db03b5"
+    },
+    "runtimeSHA256": {
+      "assets/onboarding/onboarding.js": "af568391cf8eede4ccdbb802f346dfd23b6d5bf78717f700c3c8c259a6275ee8",
+      "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3",
+      "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+      "demos/corporate/gjh/v11/style.css": "3b7205a3d353edf7f5b5f2152108e3cc4f9dd260826652f3ce9852249e6fc4dd",
+      "assets/onboarding/onboarding.css": "93a36d0089a6c41ad47c77a70c2d1ee159416a7573c6d13c0e2ec2523a07e8ec"
+    },
+    "checks": {
+      "focusedHUD": {
+        "status": "PASS",
+        "path": "/private/tmp/gallery-interior-d1/imagery-focused-final/report.json",
+        "sha256": "ee389aa8e52792bdb150e2b2728acc9bc3ab927f48c80ce737c6db672fc37b5d",
+        "caseGroups": 13,
+        "viewportRouteMotionCases": 10,
+        "frames": 50,
+        "runtimeSHA256": {
+          "assets/onboarding/onboarding.js": "af568391cf8eede4ccdbb802f346dfd23b6d5bf78717f700c3c8c259a6275ee8",
+          "assets/onboarding/onboarding.css": "93a36d0089a6c41ad47c77a70c2d1ee159416a7573c6d13c0e2ec2523a07e8ec",
+          "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+          "demos/corporate/gjh/v11/style.css": "3b7205a3d353edf7f5b5f2152108e3cc4f9dd260826652f3ce9852249e6fc4dd",
+          "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+        },
+        "diagnosticSHA256": "99a54962ae2704c7a82f34398e02c218ec5e69113e66ab5e8367fbb587418bd4",
+        "coverage": "320/390/639/650/651/667landscape/1440;default,v1,pilot,normal/reducedmotion;HelpTutorialKeyboardGamepad;MapCloseEscape;650/651and560/561mousebreakpoints;WASM/noJS;allvisibleheader44pxrects/hitsinsideviewport;fullARIApreserved",
+        "allErrorsAndIllegalTransitions": 0
+      },
+      "DOMAccessibility": {
+        "status": "PASS_PROTECTED_MODULE_PHASE_AND_IMAGERY_DIRECTORY_BRIDGE",
+        "protectedPhase": {
+          "status": "PASS",
+          "path": "/private/tmp/gallery-interior-d1/accessibility7/report.json",
+          "sha256": "357d9e92b333dbd27f28950334a64e09ef879b723209e461c3f844ce953e89de",
+          "viewports": 5,
+          "scans": 70,
+          "allImmediateHairHits": true,
+          "sourceSHA256": {
+            "assets/onboarding/onboarding.js": "af568391cf8eede4ccdbb802f346dfd23b6d5bf78717f700c3c8c259a6275ee8",
+            "assets/onboarding/onboarding.css": "93a36d0089a6c41ad47c77a70c2d1ee159416a7573c6d13c0e2ec2523a07e8ec",
+            "demos/corporate/gjh/v11/index.html": "153b1aeadb5a06b5178a100fe3fbfeb717031b5f85a175a068b122271086f45c",
+            "demos/corporate/gjh/v11/style.css": "0d09665d2e4a3b9b44f578def2de314dd589b66fa1937e01e4df7f7521d2d92f",
+            "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+          },
+          "testSHA256": "5c11d3c34b7be83cb7ce7764f1181ef9e109d00aaff15a5f09f6fa4755556be5",
+          "associatedCheckboxLabelActualEdgeClick": "PASS eachviewport;20pxvisualinputrecordedseparately",
+          "nativePopupChoice": "NOT_VERIFIED when isolatedhostfixturedoesnotchange"
+        },
+        "imageryDirectoryBridge": {
+          "status": "PASS",
+          "path": "/private/tmp/gallery-interior-d1/imagery-directory-axe/report.json",
+          "sha256": "a730a36514ce9893111e9c409c6d26baf36f96a9456cd298e7fa369604665ecf",
+          "viewports": 5,
+          "scans": 25,
+          "sourceSHA256": {
+            "assets/onboarding/onboarding.js": "af568391cf8eede4ccdbb802f346dfd23b6d5bf78717f700c3c8c259a6275ee8",
+            "assets/onboarding/onboarding.css": "93a36d0089a6c41ad47c77a70c2d1ee159416a7573c6d13c0e2ec2523a07e8ec",
+            "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+            "demos/corporate/gjh/v11/style.css": "3b7205a3d353edf7f5b5f2152108e3cc4f9dd260826652f3ce9852249e6fc4dd",
+            "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3"
+          },
+          "diagnosticSHA256": "7afd48511e05a1a4f4b0006045745070477e4b2328472125693bb502c83d2a37",
+          "scope": "320/390/667/768/1440;Directoryclosed/all9conceptimagesopenanddecoded/MILIfilter/officialMILIartworkmodalandfocusreturn/restore;allcontrast/axe/nooverflow/illegal0",
+          "newImagerySHA256": {
+            "concept-newmoon-hotpot.webp": "0c29753089ded4a68d9dff2712e10656a9479f766c42ec8d16e4990ba12cffe8",
+            "concept-newmoon-table.webp": "b49a87b135486397d06e19c59a328db65c68d1fb691d2d35398f725652932534",
+            "concept-newmoon-serving.webp": "108e0bd2f30d4a8e98ad219e7096d94ee8afea47ddbae60a8c363c3a3a4da2e8",
+            "concept-mili-noodles.webp": "f63b954d5d0dd9e46a754e7c7809adf67ebe887e0d8de194cf3337508cb613af",
+            "concept-mili-table.webp": "aef682c072b75dd14ee76969ed95faff82a831561f2b543f7213393a32ea59a0",
+            "concept-mili-kitchen.webp": "9fddfde4a487cdf180c933a8215b96334d4ca1a280b487fd91d3c000f03ce1b3",
+            "concept-gogo-toast.webp": "0e266d3b640cff71f3a5ead16f67edf63cef0168970b76a219ccc06d00611b37",
+            "concept-gogo-pour.webp": "c7100229db22daece7ee8b7284ac7fc2465434cddd2ea3aaede4fa8aa73a3dcb",
+            "concept-gogo-garden.webp": "5d71afef897e601b568a1b90586bcc971502638b29d967a39791a36077afd782"
+          },
+          "nativeDimensions": "Eachdecodedimagecomparedwithactualsourcepixels,notHTMLlayoutslot"
+        }
+      },
+      "modes": {
+        "status": "PASS_WITH_LABEL_ONLY_BRIDGE",
+        "path": "/private/tmp/gallery-interior-d1/modes-release.json",
+        "sha256": "9294b9f0d78bde65e9affcb5ced2dd501084aebc3a168971fc31375e9e268d85",
+        "snapshots": 162,
+        "scope": "Latest759+finalfooter/Map runtime before label-only Stores adjustment;162snapshotsPASS,modes.js unchanged; exactfinalfocused9 verifies relevant open/close/breakpoint modes andzeroillegal transitions."
+      },
+      "independentReview": {
+        "status": "APPROVED",
+        "reviewer": "/root/lod_review",
+        "source": "Final runtime approval relayed by primary /root on2026-11-15",
+        "findings": [],
+        "scope": "Final5runtimehashes,focused9/axe7/320headerandlabeltarget/nativefooterproof; no P0/P1/materialfunctionalP2",
+        "limits": "Historicalaxe6immediateHairhitfailureacceptednonblockingunreproduceduncertainty; no inventedcause/fix; no newvisualscore orphysicalcertification.",
+        "currentImagerySupplement": "PENDING final image-scopedbridge/primaryacceptance; protectedD1moduleapprovalretained"
+      },
+      "mainCIAndPages": {
+        "status": "PENDING"
+      },
+      "headerRoundTrip": {
+        "status": "PASS",
+        "path": "/private/tmp/gallery-interior-d1/header-roundtrip.json",
+        "sha256": "fe55ce0771455c9f942881693c946ba0ba33dd73ac884fa3f772fbb65490bc5c",
+        "viewports": 5,
+        "statesPerViewport": 3,
+        "scope": "3Dinitial\u2192directory\u2192Enter3D\u21923Dreturn;visiblecontrols/keyboardringwithinviewport;320Storesright304ringright312,directoryEnter3DMallright300ringright308"
+      },
+      "hybridImagery": {
+        "status": "PASS",
+        "viewports": [
+          1440,
+          390,
+          320
+        ],
+        "path": "/private/tmp/gallery-interior-d1/imagery-hybrid.log",
+        "sha256": "7e233593ffa9ceb07d020e59522e47c6bbf901ffc186adf9f444ba9fed028c86",
+        "testSHA256": "f487a33460463601d00639c2d264f84d47f5d69be1daeeb05e45ab988a09099d",
+        "scope": "Latestupstreamtest:3brandconceptdetails/9images,officialMILIartworkidentity,filters/search/sort/bag/3Dhandoff/20conceptgallery/nooverflow",
+        "tabletBridge": {
+          "status": "PASS",
+          "viewports": [
+            667,
+            768
+          ],
+          "path": "/private/tmp/gallery-interior-d1/imagery-hybrid-tablet.log",
+          "sha256": "2437a1a301ec90c314a35ad21a40f5c3430c503ea12e3b5337e44ea2c5b847e2",
+          "diagnosticSHA256": "e009f02949a6f188257d1790b255afaf7edc26feba569602812e9775f0236ed4",
+          "scope": "Exactupstreamhybridassertions,onlyviewportinput/ROOTadapted;finalone-columnimage-layoutdelta"
+        }
+      },
+      "imageryBreakpoint": {
+        "status": "PASS",
+        "path": "/private/tmp/gallery-interior-d1/imagery-boundary/report.json",
+        "sha256": "7310db774c04ceff1dfd47b53d7c8dcd0e65956285ab7aa100533fb608e4f958",
+        "cases": 4,
+        "coverage": "800and801px,closed/openbrandstrips;1versus2brand-gridtracks;43paintedDirectorytargetsperstate\u226544px,fullhorizontalviewport,actualcenterhitandnoscrolled/clippedcontent",
+        "sourceSHA256": {
+          "demos/corporate/gjh/v11/assets/ui.js": "b58162ca4ff5b3a7c46a71c94a78045f4d93eeb15730edaa6207262d968c73a3",
+          "demos/corporate/gjh/v11/index.html": "2ccca6e38afed428a704f3e154935e74a23e2082cb961bf2ab565bd3e8d591e3",
+          "demos/corporate/gjh/v11/style.css": "3b7205a3d353edf7f5b5f2152108e3cc4f9dd260826652f3ce9852249e6fc4dd"
+        }
+      }
+    },
+    "scope": "Historicalcandidatewithsupersededwrapper; notfinalGuideimplementation."
+  },
+  "welcomeSynchronization": {
+    "commit": "32bdc3134ce96a554040c75f4795a39eecaee020",
+    "retained": "Normal-flowrelativeV11footer,safeareapadding,darkactiontokens/navpalette/sharedpreferencecolor,mobile3columnGuidegrid;newupstreamdocs/test/screenshotreceiptsuntouched",
+    "removedSupersededOwnCode": "OwnsuppliedfooterwrapperDOM/class/sharedCSSand5-columnintrinsic-label/paddingbridgeremoved",
+    "finalSharedStyleExactlyHEAD": true,
+    "finalSharedHelpAPIOnly": "showHelpEntry/onHelp/onBack; defaultnativeDOM/lifecycle preserved",
+    "scope": "Nochangeinmodels/records/physics/modes/amenities; D1HelpMapStores/max800fallbackretained"
+  }
+}

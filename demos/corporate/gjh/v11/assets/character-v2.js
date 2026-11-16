@@ -4,8 +4,7 @@ import {createVisitorCustomization} from './visitor-v2-customization.js';
 import {createContactSolver,createProductTransfer} from './visitor-v2-contact.js';
 import {createPushCart} from './push-cart.js';
 
-// Opt-in adapter: locomotion and authored seat poses are under test. The old
-// character stays the default until the remaining interaction contracts pass.
+// Skinned v2 adapter; v1 remains available through the explicit visitor=v1 URL.
 export async function createCharacterV2(T, createLocomotionContinuity) {
   const model = 'gjh-mall-visitor-v2';
   const gltf = await new GLTFLoader().loadAsync(new URL(`./${model}.glb`, import.meta.url).href);
@@ -79,7 +78,8 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
       }
     }
     if(transfer.state.phase!=='empty'){
-      visual.localToWorld(targetPoint.set(-.22,1.08,-.23));
+      visual.localToWorld(targetPoint.set(-.30,1.08,-.32));
+      transfer.reachTarget(targetPoint);
       solver.solve(['RightShoulder','RightElbow','RightHand'],targetPoint);
     }
     transfer.update(dt,reducedMotion.matches);
@@ -87,6 +87,7 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
   update('idle', 0);
   return {
     visual, update, updateLOD:camera=>lod.update(camera),
+    setCameraOccluded(value){avatar.visible=!value;},
     setBagCount(value) { count = Math.max(0, Number(value) || 0); cart.setCount(count); },
     setCart(value) { pushing = Boolean(value) && cart.set(value); if (!value) cart.set(false); return !value || pushing; },
     setSeatProgress(value) { seatWeight = Math.max(0, Math.min(1, value)); },

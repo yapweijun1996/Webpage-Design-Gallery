@@ -12,7 +12,11 @@ export function createShelfFocus({T, canvas, normalCamera, shelves, projection, 
   function updateQuantity() {
     if (!session) return;
     const count = quantity[session.shelf.id] || 0;
+    const hadFocus=document.activeElement===add;
     add.disabled = count >= 9;
+    // A newly disabled native button may blur to the document in Chrome.
+    // Keep keyboard focus on a useful control inside the current dialog.
+    if(hadFocus&&add.disabled)document.querySelector('#shelf-details').focus({preventScroll:true});
     add.textContent = count >= 9 ? 'Limit reached (9)' : 'Add to demo bag';
     note.textContent = `Demo bag: ${count} · max 9. Same product on every can.`;
   }

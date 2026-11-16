@@ -1,0 +1,36 @@
+# V11 stage 8 — natural finishes and warm lighting
+
+Status: local expanded-layout implementation. This refines the existing everyday look; it does not add the future theme picker, seasonal decorations, branded assets or an alternative mall layout.
+
+## Design and implementation
+
+The [selected concept image](references/gjh-mall-modern-premium-concept.png) is a mood reference rather than a screenshot or a claim of photorealism. The implemented scene keeps the green and brass language, uses a warm ivory stone floor with subtle seams and veining, adds restrained wood grain to existing built-in timber and oak materials, lightens the glazing, and warms the ceiling and ambient fill. The upper lift's glass and stone colors are coordinated with the ground level. Existing furnishings, products, shop identities, geometry, collision paths and visitor interaction ownership remain in place.
+
+[The optional procedural finish module](../demos/corporate/gjh/v11/assets/natural-materials.js) creates two repeatable 256 × 256 canvas textures locally. Their original drawn patterns use no external image, licence, image-generation service or texture download. One shared stone texture covers the expanded floor; one shared grain texture serves existing wood materials. The textures are created once per world and shared between existing instanced materials. If the module cannot load or a 2D canvas cannot be created, the expanded scene continues with solid-color finishes. The original layout does not request this optional module.
+
+Recessed warm strips and soft non-interactive light pools follow the circulation axes. They reuse the existing instanced emissive and light-pool batches rather than adding dynamic shadow-casting lights or new floor colliders. Lighting and finish changes apply only to the expanded preview. Natural reflections, physically based environment maps, real daylight and a production photorealistic material library are not claimed.
+
+## Matched observation
+
+The same local Chrome 157 / Metal backend, service-worker-blocked fresh contexts, DPR 2, reduced motion, route and quality selection were used for the [stage 7 baseline](evidence/gjh-stage8-20261115/baseline-materials.log) and [stage 8 candidate](evidence/gjh-stage8-20261115/candidate-materials.log). These are individual lab observations, not controlled device benchmarks; the reported time to scene ready varies with browser/host load. Resource counts are browser-reported decoded/encoded sizes of requests recorded by the end of the route, not compressed production traffic or GPU memory.
+
+| Courtyard sample | 390 px baseline → stage 8 | 1440 px baseline → stage 8 |
+| --- | ---: | ---: |
+| Draw calls | 153 → 153 | 182 → 182 |
+| Rendered triangles | 805,908 → 806,034 | 806,076 → 806,202 |
+| Renderer texture count | 28 → 30 | 31 → 33 |
+| Requests by route end | 81 → 82 | 82 → 83 |
+| Encoded bytes by route end | 11,027,341 → 11,031,123 | 11,177,199 → 11,180,981 |
+| Single observed ready time | 1.003 → 0.912 s | 1.381 → 0.688 s |
+
+The additional 126 triangles are the existing-batch light strips/pools; there are two additional shared generated textures and one optional JavaScript module request. Two 256 × 256 RGBA source canvases contain approximately 512 KiB of uncompressed pixel data before any browser/GPU overhead or mipmaps; this is not a measurement of GPU allocation. Do not infer a speedup from the single ready-time readings.
+
+The [cart performance sample](evidence/gjh-stage8-20261115/performance.log) checks the same stage 7 courtyard position: expanded mobile idle/cart 153/176 and desktop 182/205 draw calls, unchanged from the [stage 7 sample](evidence/gjh-stage7-20261115/performance.log). The existing 200-call laboratory limit concerns its specified non-cart scenario, while the desktop cart remains above that reference. The existing budget suite is reported separately below and its threshold was not changed.
+
+## Verification and limitations
+
+The existing `browser_gjh_budget.py` was run without changing its limits against the default three-store scene. It failed at the **10 MiB ready-stage decoded-payload gate** in both the [stage 7 baseline](evidence/gjh-stage8-20261115/budget-baseline.log) and the [stage 8 candidate](evidence/gjh-stage8-20261115/budget-candidate.log); the script stops at that first failing assertion, so it did not certify later gates. An independent [non-gating probe](evidence/gjh-stage8-20261115/budget-probe.py) under the same 320 × 740 SwiftShader configuration recorded 10,826,115 → 10,827,525 decoded bytes and 80 → 80 requests; its four sampled default-scene draw counts were 157, 117, 129 and 79 in both runs ([baseline](evidence/gjh-stage8-20261115/budget-probe-baseline.log), [candidate](evidence/gjh-stage8-20261115/budget-probe-candidate.log)). This supports a pre-existing payload problem, with 1,410 additional decoded bytes in this sample; it does not establish a full budget-suite pass or a physical-device result. The optional expanded texture module is not requested by the default scene.
+
+The final candidate passed [gallery generation](evidence/gjh-stage8-20261115/generator.log), [design generation](evidence/gjh-stage8-20261115/design.log), [SSOT](evidence/gjh-stage8-20261115/ssot.log), [49 Python tests](evidence/gjh-stage8-20261115/units.log), [layout Node tests](evidence/gjh-stage8-20261115/layout.log), [gallery browser](evidence/gjh-stage8-20261115/gallery.log), [28 older GJH demo cases](evidence/gjh-stage8-20261115/demos.log), [gallery PWA](evidence/gjh-stage8-20261115/pwa.log), [expanded PWA](evidence/gjh-stage8-20261115/gjh-pwa.log), [material/quality/failure checks](evidence/gjh-stage8-20261115/materials-final.log), [lift and interruptions](evidence/gjh-stage8-20261115/lift.log), [expanded shell and cart](evidence/gjh-stage8-20261115/shell.log), [atrium and seats](evidence/gjh-stage8-20261115/atrium.log) and [three-store product/bag integration](evidence/gjh-stage8-20261115/stores.log). The material check covers 320, 390, 768, 844 landscape and 1440 px, Low/Balanced/Detailed/Auto quality, actual screenshots, and simulated canvas-allocation and optional-module failures. No unexpected page errors or console warnings were recorded; the first strict console run identified Playwright's deliberate Service Worker blocking warning, which the [final check](evidence/gjh-stage8-20261115/materials-final.log) explicitly counts separately. The demo browser suite did not have an axe bundle, so its zero axe count is not an accessibility audit.
+
+Compare actual runtime images: [courtyard before](evidence/gjh-stage8-20261115/before-courtyard-1440.png) and [after](evidence/gjh-stage8-20261115/courtyard-1440.png); [New Moon before](evidence/gjh-stage8-20261115/before-store-1440.png) and [after](evidence/gjh-stage8-20261115/store-1440.png); [390 px courtyard](evidence/gjh-stage8-20261115/courtyard-390.png) and [844 px landscape](evidence/gjh-stage8-20261115/courtyard-844.png). [Source hashes](evidence/gjh-stage8-20261115/source-sha256.txt) identify the candidate. Browser viewport emulation is not physical-device, Safari, screen-reader or GPU-memory certification. The known payload-budget failure and prior desktop cart draw observation remain open performance work.

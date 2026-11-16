@@ -1,5 +1,13 @@
 # V11 final software verification
 
+Follow-up: the [existing-source consistency audit](v11-product-source-consistency-review.md)
+completed the original Phase 2 task using its explicitly permitted conceptual
+packaging scope. The two-item conclusion below records the earlier audit and its
+overly strict print-master interpretation; only physical-device/assistive-
+technology acceptance remains in the original mall scope; new interior follow-ups
+retain their separate status. Physical packaging
+fidelity limitations remain unverified and are not removed.
+
 Date: 2026-11-15. Runtime: application **1.1.41**, build
 `8756a8b3f0c73835`, implementation commit
 `32287f1fe116ad810337bd79ac25c1ac4b0511bc`. Documentation baseline:

@@ -17,7 +17,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 from gjh_shelf_helpers import shelf_details
 
-from browser_gjh_all_seats import approach_published_seat
+from browser_gjh_all_seats import move
 from browser_gjh_guide import Quiet, ROOT, state
 
 RUNTIME = 'demos/corporate/gjh/v11/'
@@ -83,7 +83,8 @@ def run():
     baseline = {}
     if args.baseline:
         for name in ['script.js', 'assets/modes.js', 'assets/ui.js']:
-            baseline['/' + RUNTIME + name] = subprocess.check_output(['git', 'show', args.baseline_ref + ':' + RUNTIME + name], cwd=ROOT)
+            served_name = 'script.bundle.js' if name == 'script.js' else name
+            baseline['/' + RUNTIME + served_name] = subprocess.check_output(['git', 'show', args.baseline_ref + ':' + RUNTIME + name], cwd=ROOT)
 
     class Handler(Quiet):
         def do_GET(self):
@@ -388,15 +389,19 @@ def run():
                     shot('breakpoint-restored')
 
                 # Physical shelf ownership survives ordinary product/Bag overlays.
-                page.evaluate("__mall.teleport('newmoon'); __mall.setInput({forward:1}); __mall.step(3900); __mall.setInput({forward:0})")
+                page.evaluate("__mall.teleport('newmoon')")
+                # Current physical pickup has a narrower shelf reach. Walk to
+                # the authored Australia shelf approach with collisions active.
+                move(page, -11.21, 1)
+                move(page, -11.21, -7.55)
                 page.get_by_role('button', name='Pick up product', exact=True).click()
                 page.evaluate('__mall.step(1000)')
                 held = state(page)['character']['physicalProduct']
                 assert held['phase'] == 'held'
                 page.locator('#inspect').click()
-                capture('held product Shelf', 'shelf', True)
-                shelf_details(page)
-                capture('held product Inspect', 'inspect', True)
+                # Nearby Inspect now opens the product directly; Shelf has its
+                # own dedicated lifecycle suite and is not an intermediate mode.
+                capture('held product direct Inspect', 'inspect', True)
                 page.locator('#product-close').click()
                 capture('held product Inspect close', 'explore', False)
                 page.locator('#bag-open').click()
@@ -417,7 +422,23 @@ def run():
                     assert len(seats) == 8
                     row['seats'] = []
                     for index, seat in enumerate(seats):
-                        approach_published_seat(page, index, seat)
+                        if index < 4:
+                            page.evaluate('__mall.teleport("atrium")')
+                            if seat['facing'] == 1:
+                                if seat['x'] < 0:
+                                    approach_seat(page)
+                                else:
+                                    move(page, 10.5, 12)
+                                    move(page, 10.5, seat['exitZ'])
+                            else:
+                                move(page, -2, seat['exitZ'])
+                        else:
+                            center = 0 if index < 6 else 10
+                            page.evaluate('zone => __mall.teleport(zone)', 'mili' if index < 6 else 'gogo')
+                            x = center + (-1.4 if seat['x'] < center else 1.4)
+                            move(page, x, 2.4)
+                            move(page, x, seat['exitZ'])
+                        move(page, seat['exitX'], seat['exitZ'])
                         assert state(page)['nearby'] == seat['id']
                         page.locator('#inspect').click()
                         page.evaluate('__mall.step(40)')

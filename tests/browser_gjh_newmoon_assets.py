@@ -2,6 +2,7 @@
 import functools, http.server, json, os, threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from gjh_startup_test_helpers import use_individual_assets
 ROOT=Path(__file__).resolve().parents[1]
 class Quiet(http.server.SimpleHTTPRequestHandler):
     def log_message(self,*args): pass
@@ -12,7 +13,7 @@ try:
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--no-sandbox'])
   for mode in ['loaded','404','body-timeout','hash-mismatch','invalid-dimensions','late-parse','missing-texture']:
-   page=browser.new_page();page.route('**/__asset-test',lambda route:route.fulfill(content_type='text/html',body='<!doctype html><title>Asset test</title>'));page.goto(f'http://127.0.0.1:{server.server_port}/__asset-test')
+   page=browser.new_page();use_individual_assets(page);page.route('**/__asset-test',lambda route:route.fulfill(content_type='text/html',body='<!doctype html><title>Asset test</title>'));page.goto(f'http://127.0.0.1:{server.server_port}/__asset-test')
    result=page.evaluate('''async mode => {
     const T=await import('/demos/corporate/gjh/v11/vendor/three.module.min.js');
     const {addProducts}=await import('/demos/corporate/gjh/v11/assets/products.js');

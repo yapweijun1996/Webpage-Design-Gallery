@@ -1,0 +1,41 @@
+{
+  "runtime": {
+    "cart": [
+      0.0018131043141762053,
+      0.0018131043141762053
+    ],
+    "feet": [
+      2.3551386880256624e-16,
+      0
+    ],
+    "shoeFloor": 0.02997801208753431,
+    "physical": {
+      "phase": "empty",
+      "id": null,
+      "active": false,
+      "held": false
+    },
+    "lowTriangles": 6257
+  },
+  "errors": []
+}
+{
+  "reducedMotion": {
+    "cart": [
+      0.0018128066749919256,
+      0.0018128066749916543
+    ],
+    "feet": [
+      2.3551386880256624e-16,
+      0
+    ],
+    "shoeFloor": 0.02997801208753431,
+    "physical": {
+      "phase": "empty",
+      "id": null,
+      "active": false,
+      "held": false
+    },
+    "lowTriangles": 6257
+  }
+}
