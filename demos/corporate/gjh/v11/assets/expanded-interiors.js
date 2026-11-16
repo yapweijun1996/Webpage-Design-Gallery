@@ -1,6 +1,19 @@
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
-// Furniture is a single vertex-coloured draw per bay; the image is a second draw.
+// All exports use metres, a floor-centred origin and local +Z as the front.
+const displayFiles = {
+  4:['pharmacy-counter'], 5:['pharmacy-counter'], 13:['speaker-soundbar'],
+  14:['tv-demo-table', 'tv-floor-stand', 'tv-wall-mounted'],
+  15:['electronic-keyboard'], 16:['battery-display-rack'], 17:['cordless-phone-display']
+};
+
+function displayPlacements(number, heroZ, back) {
+  if (number === 14) return [[.8, .07, heroZ], [3, .07, heroZ-.2], [-2.6, .07, back+.253]];
+  return [[number === 17 ? 1.35 : 2.6, number === 13 || number === 17 ? .99 : .07, heroZ]];
+}
+
+// Furniture is vertex-coloured and merged; model displays load only near a bay.
 // Coordinates inside each bay have the glazed front on local +Z.
 export async function createExpandedInteriors(T, expandedLayout, scene) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
@@ -9,6 +22,14 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.78, emissive:0x30281b, emissiveIntensity:.22});
   const posterGeometry = new T.PlaneGeometry(4, 2.7);
   const shops = [];
+  const models = new Map(), gltfLoader = new GLTFLoader();
+  function loadModel(name) {
+    if (!models.has(name)) {
+      models.set(name, gltfLoader.loadAsync(new URL(`./${name}.glb`, import.meta.url).href)
+        .then(gltf => gltf.scene));
+    }
+    return models.get(name);
+  }
   const ivory = 0xeee4d1, green = 0x526e5b, gold = 0xc6a66b, wood = 0x8b674a;
   const accents = {4:0x785a68, 5:0x913f35, 6:0x667887, 7:0x9c4937, 8:0x477aac,
     9:0x294f7c, 10:0x478c86, 11:0x843e43, 12:0x6f9690, 13:0x33383b,
@@ -23,7 +44,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     group.position.set((slot.minX+slot.maxX)/2, 0, (slot.minZ+slot.maxZ)/2);
     group.rotation.y = side === 'west' ? Math.PI/2 : side === 'east' ? -Math.PI/2 : 0;
     const back = -depth/2 + .18, front = depth/2;
-    const parts = [];
+    let parts = [];
     let heroOffset = 0;
     function add(geometry, x, y, z, color) {
       geometry.translate(x + heroOffset, y, z);
@@ -66,11 +87,20 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
         }
       }
     }
-    heroOffset = 2.6;
-    // Front pedestal and a large category silhouette, intentionally unlabelled.
+    const structureParts = parts;
+    parts = [];
+    heroOffset = number === 17 ? 1.35 : 2.6;
+    // Floor-standing displays replace the pedestal; tabletop products retain it.
     const heroZ = front-1.75;
-    box(0,.47,heroZ,2.1,.9,1.05,green);
-    box(0,.95,heroZ,2.25,.08,1.2,gold);
+    if (number === 13 || number === 17) {
+      parts = structureParts;
+      box(0,.47,heroZ,2.1,.9,1.05,green);
+      box(0,.95,heroZ,2.25,.08,1.2,gold);
+      parts = [];
+    } else {
+      box(0,.47,heroZ,2.1,.9,1.05,green);
+      box(0,.95,heroZ,2.25,.08,1.2,gold);
+    }
     const accent = accents[number];
     if (number >= 7 && number <= 11) {
       cylinder(0,1.5,heroZ,.37,1.05,number===8?0xd6b778:ivory);
@@ -102,11 +132,34 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
       box(0,1.59,heroZ+.19,.56,.46,.03,accent);
       box(0,2.19,heroZ,.73,.07,.36,gold);
     }
-    const merged = mergeGeometries(parts);
-    parts.forEach(part => part.dispose());
-    const furniture = new T.Mesh(merged, material);
+    const files = displayFiles[number];
+    const furnitureParts = files ? structureParts : structureParts.concat(parts);
+    const furniture = new T.Mesh(mergeGeometries(furnitureParts), material);
+    furnitureParts.forEach(part => part.dispose());
     furniture.name = `S${slot.number} furnishings`;
     group.add(furniture);
+    let loadDisplay;
+    if (files) {
+      const fallback = new T.Mesh(mergeGeometries(parts), material);
+      parts.forEach(part => part.dispose());
+      fallback.name = `S${slot.number} display fallback`;
+      group.add(fallback);
+      loadDisplay = () => {
+        const placements = displayPlacements(number, heroZ, back);
+        Promise.all(files.map(loadModel)).then(scenes => {
+          scenes.forEach((model, i) => {
+            const instance = model.clone(true);
+            instance.position.set(...placements[i]);
+            instance.name = `S${slot.number} ${files[i]}`;
+            group.add(instance);
+          });
+          group.remove(fallback);
+          fallback.geometry.dispose();
+        }).catch(() => {
+          // Keep the procedural display if a model is unavailable.
+        });
+      };
+    }
     const texture = textures[index];
     texture.colorSpace = T.SRGBColorSpace;
     const poster = new T.Mesh(posterGeometry, new T.MeshBasicMaterial({map:texture}));
@@ -115,12 +168,16 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     group.add(poster);
     group.visible = false;
     scene.add(group);
-    shops.push({group, x:group.position.x, z:group.position.z});
+    shops.push({group, x:group.position.x, z:group.position.z, loadDisplay});
   });
   return {update(visitor) {
     for (const shop of shops) {
       const dx=visitor.x-shop.x, dz=visitor.z-shop.z;
       shop.group.visible = Math.abs(visitor.y) < 5 && dx*dx+dz*dz < 17*17;
+      if (shop.group.visible && shop.loadDisplay) {
+        shop.loadDisplay();
+        shop.loadDisplay = null;
+      }
     }
   }};
 }

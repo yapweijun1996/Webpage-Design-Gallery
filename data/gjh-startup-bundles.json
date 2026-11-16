@@ -17,7 +17,7 @@
     "demos/corporate/gjh/v11/assets/context-navigation.js": "dea62dd0bb38aea995cbe967671980f779145a938da03c47f163edcd68e4ec68",
     "demos/corporate/gjh/v11/assets/deck-railings.js": "20e75235937b0a796651ab76764173293c2a8d77cb99f90ba5800ac201ac7686",
     "demos/corporate/gjh/v11/assets/demo-bag.js": "f5e2477886ed8854bba53adc079e67d6d6d1fe340183207a4f7548785585ce89",
-    "demos/corporate/gjh/v11/assets/expanded-interiors.js": "7d869ac7dd3dadd6dfbdf5cd1483f1b2d178fe9d3cf0b2efb7286c761c2e37e5",
+    "demos/corporate/gjh/v11/assets/expanded-interiors.js": "15a5e06e649ba431c6c211b807c020a13b0112f42604ce3dd223d7e606c0cdc6",
     "demos/corporate/gjh/v11/assets/expanded-layout.js": "76c28be462b5b462a9d3e92230ed74b63d1a5f36c002b67a3d8715587565d59d",
     "demos/corporate/gjh/v11/assets/expanded-storefronts.js": "378db4aca6d206c7ec35b4b2f44b68d65f175fb51bbdc49b9b5281617b458b2c",
     "demos/corporate/gjh/v11/assets/furnishings.js": "3a78f8ffd73ebdf5fc38cc7cc86ebbd1b6a45630e812a14428094497748d1644",
@@ -42,7 +42,7 @@
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "e530069f63692dbabc128e79d637fe71e497403af665a002d60960758d11ff66",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "1a86ecc08787072d8411ec047b6c3e4766e76d0b23523374bf818ea5d56e78c2",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "b96998f8500bb8472b662cf8fced7563bbb80e9cb7b2e52fc17e8ea504213d7e",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "29706129172bc24fae0e7db1ff53345086abec1f7a627042c4b8d40ce685f6df",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "8013dcd5065b22aaf771057400d90f5ea163a3eeafd01799a224b5c80a750ad5"
   }
