@@ -95,10 +95,12 @@ def run():
                 page = context.new_page()
                 online_errors = []
                 page.on("pageerror", lambda error: online_errors.append(str(error)))
-                viewport = "width=device-width, initial-scale=1, viewport-fit=cover"
-                for path in ("index.html", "companies/gjh/index.html", "designs/index.html", "compare/index.html", "offline.html"):
+                viewport = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+                shell_pages = [name for name in gallery.build_pages(catalog) if name.endswith(".html")]
+                for path in shell_pages:
                     page.goto(base + path, wait_until="networkidle")
                     assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport, path
+                page.goto(base + "index.html", wait_until="networkidle")
                 page.goto(base + "companies/gjh/index.html?review=keep", wait_until="networkidle")
                 page.wait_for_function("() => navigator.serviceWorker.ready.then(r => r.active?.state === 'activated')")
                 page.reload(wait_until="networkidle")
@@ -124,11 +126,13 @@ def run():
                     open_settings(page)
                     assert page.locator("#check-update").bounding_box()["height"] >= 44
                     assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport
-                    assert page.evaluate("""() => {
-                        const event = new Event('gesturestart', {cancelable: true});
-                        document.dispatchEvent(event);
-                        return !event.defaultPrevented;
-                    }"""), "Gallery must not suppress browser zoom gestures"
+                    for event_name in ("gesturestart", "gesturechange"):
+                        event = page.evaluate("""name => {
+                            const event = new Event(name, {cancelable: true});
+                            document.dispatchEvent(event);
+                            return event.defaultPrevented;
+                        }""", event_name)
+                        assert event, f"Gallery must suppress iOS {event_name} zoom"
                     assert page.locator('meta[name="theme-color"]').get_attribute("content") == page.locator('.site-header').evaluate('(element) => getComputedStyle(element).backgroundColor')
                     assert page.locator(".app-chrome").evaluate("e => getComputedStyle(e).transitionDuration") == "0s"
                     page.screenshot(path=str(screenshots / f"company-{width}.png"), full_page=True)
