@@ -10,7 +10,7 @@ const displayFiles = {
 
 function displayPlacements(number, heroZ, back) {
   if (number === 14) return [[.8, .07, heroZ], [3, .07, heroZ-.2], [-2.6, .07, back+.253]];
-  return [[number === 17 ? 1.35 : 2.6, number === 13 || number === 17 ? .99 : .07, heroZ]];
+  return [[number === 13 || number === 15 || number === 17 ? 1.35 : 2.6, number === 13 || number === 17 ? .99 : .07, heroZ]];
 }
 
 // Furniture is vertex-coloured and merged; model displays load only near a bay.
@@ -89,7 +89,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     }
     const structureParts = parts;
     parts = [];
-    heroOffset = number === 17 ? 1.35 : 2.6;
+    heroOffset = number === 13 || number === 15 || number === 17 ? 1.35 : 2.6;
     // Floor-standing displays replace the pedestal; tabletop products retain it.
     const heroZ = front-1.75;
     if (number === 13 || number === 17) {
