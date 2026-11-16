@@ -17,6 +17,16 @@ Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/B
 
 The expanded 17-lot storefront design is tracked in [the shop-lot design matrix](docs/gjh-v11-shop-lot-design.md). The owner-authorized concept direction uses the supplied logo and brand name on each sign, glazed storefronts with visible non-walkable displays, accurate hero-product scale where evidence supports it, and generic stand-ins where products/models are unverified. This design work does not establish tenancy, distribution, product availability, brand authorization or medical benefits.
 
+## Upper-level viewing deck — brand wall
+
+Design and implementation are tracked in [the upper-deck brand-wall brief](docs/gjh-v11-upper-deck-brand-wall.md). Add a 12 × 12 m viewing deck at +7.2 m with an atrium glass railing, a few benches and planters, and one gallery wall of 17 small brand plaques. Reuse validated local furniture/railing assets only. Build plaque art as one atlas; keep the expanded default and deck views at <=190 draw calls without changing startup cost. The independent-concept footer stays; no prices or medical claims. Keep S03, S05 and S11 neutral. Correct only expanded-layout “three stores” copy; classic retains its three-store wording.
+
+- [x] Stage 1 — Add the design brief and this checklist.
+- [ ] Stage 2 — Build the upper deck, railing, benches and planters.
+- [ ] Stage 3 — Build the 17-plaque atlas and accessible nearby/tap story interaction.
+- [ ] Stage 4 — Fix expanded-layout copy, extend `tests/browser_gjh_v11.py`, update README, regenerate outputs, and verify both views <=190 draw calls.
+
+
 - [x] Stage 2 — Build one 17-sign texture atlas with logo/text fallback and add category storefront variants.
 - [x] Stage 3 — Implement S01–S03 and S06–S11 with validated shelf/showcase models and evidence-bounded hero stand-ins.
 - [x] Stage 4 — Implement S04–S05 and S12–S17 with existing displays or simple generated geometry; record missing matching models.
