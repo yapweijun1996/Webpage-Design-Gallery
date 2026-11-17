@@ -13,7 +13,7 @@
 - [x] Use foreground frame intervals to adapt Auto between Low and Balanced without changing explicit preferences; keep the FPS diagnostics independent.
 - [x] Open the original three shop doors on approach; the other fourteen retain their existing automatic doors.
 - [x] Keep a seated NPC from disappearing solely because its 18-second timer elapsed; distance unloading, draw-budget visibility and player-priority seat release remain separate.
-- [x] Allow Auto to trial Detailed after sustained movement at near-60 FPS. Roll back slow trials and back off repeated attempts. The physical-device FPS target remains open.
+- [x] Allow Auto to trial Detailed after sustained movement near 60 FPS. On mobile, keep the current tier at a sustained 24 FPS and lower quality below the floor. Back off repeated failed trials. Physical-device FPS validation remains open.
 - [x] Bring the tested desktop Detailed shop and lift route within 200 calls, including the full turn on the upper deck.
 - [x] Keep the storefront display and visitor in frame on the portrait S04 approach.
 - [ ] Investigate first-use GPU upload and shader compilation stalls.

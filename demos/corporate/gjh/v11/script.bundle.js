@@ -2536,6 +2536,8 @@ function createUI(expanded = false) {
 // demos/corporate/gjh/v11/assets/graphics-quality.js
 var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
 var CHOICES = new Set(["auto", "low", "balanced", "detailed"]);
+var MOBILE_FPS_FLOOR = 24;
+var MOBILE_CADENCE_SLACK_MS = 1000 / 60 + 1;
 var qualityPreference = (value) => CHOICES.has(value) ? value : "auto";
 function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, recovered = false, autoTier = null }) {
   const hint = (value) => Number.isFinite(value) && value > 0;
@@ -2553,13 +2555,13 @@ function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, re
 }
 function createAdaptiveQuality({ allowDetailed = false } = {}) {
   const tiers = ["low", "balanced", "detailed"];
-  let last = null, warmUntil = 0, start = 0, count = 0, slow = 0, slowTime = 0, fast = 0, busy = 0, goodWindows = 0;
+  let last = null, warmUntil = 0, start = 0, count = 0, slow = 0, slowTime = 0, longest = 0, fast = 0, busy = 0, goodWindows = 0;
   let changedAt = -Infinity, detailedFailures = 0, detailedRetryAt = -Infinity;
-  let trialStart = 0, trialCount = 0, trialSlow = 0, trialSlowTime = 0;
+  let trialStart = 0, trialCount = 0, trialSlow = 0, trialSlowTime = 0, trialLongest = 0;
   function reset() {
     last = null;
     start = 0;
-    count = slow = slowTime = fast = busy = goodWindows = trialCount = trialSlow = trialSlowTime = 0;
+    count = slow = slowTime = longest = fast = busy = goodWindows = trialCount = trialSlow = trialSlowTime = trialLongest = 0;
     trialStart = 0;
   }
   function backoffDetailed(now) {
@@ -2568,7 +2570,7 @@ function createAdaptiveQuality({ allowDetailed = false } = {}) {
   }
   return {
     reset,
-    sample(now, active, tier, moving = true) {
+    sample(now, active, tier, moving = true, mobile = false) {
       if (!active || !Number.isFinite(now) || !tiers.includes(tier)) {
         reset();
         return null;
@@ -2588,19 +2590,22 @@ function createAdaptiveQuality({ allowDetailed = false } = {}) {
         if (!trialCount)
           trialStart = now - elapsed;
         trialCount++;
-        if (elapsed > 30) {
+        trialLongest = Math.max(trialLongest, elapsed);
+        if (elapsed > (mobile ? 1000 / MOBILE_FPS_FLOOR : 30)) {
           trialSlow++;
           trialSlowTime += Math.min(elapsed, 1500);
         }
-        if (now - trialStart >= 750) {
-          if (trialSlow >= 3 && (trialSlow / trialCount >= 0.2 || trialSlowTime / (now - trialStart) >= 0.5)) {
+        const trialDuration = now - trialStart;
+        if (mobile ? trialDuration >= 1000 && (trialCount >= 24 || trialDuration >= 3000) : trialDuration >= 750) {
+          const trialBad = mobile ? (trialCount - 1) * 1000 / (now - trialStart - trialLongest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : trialSlow / trialCount >= 0.2 || trialSlowTime / (now - trialStart) >= 0.5;
+          if (trialSlow >= 3 && trialBad) {
             backoffDetailed(now);
             changedAt = now;
             reset();
             return "balanced";
           }
           trialStart = 0;
-          trialCount = trialSlow = trialSlowTime = 0;
+          trialCount = trialSlow = trialSlowTime = trialLongest = 0;
         }
       }
       if (now < warmUntil)
@@ -2608,7 +2613,8 @@ function createAdaptiveQuality({ allowDetailed = false } = {}) {
       if (!count)
         start = now - elapsed;
       count++;
-      if (elapsed > 20) {
+      longest = Math.max(longest, elapsed);
+      if (elapsed > (mobile ? 1000 / MOBILE_FPS_FLOOR : 20)) {
         slow++;
         slowTime += Math.min(elapsed, 4000);
       }
@@ -2618,9 +2624,10 @@ function createAdaptiveQuality({ allowDetailed = false } = {}) {
         busy++;
       if (now - start < 4000 || count < 8)
         return null;
-      const bad = slow >= 3 && (slow / count >= 0.25 || slowTime / (now - start) >= 0.5), good = fast / count >= 0.9 && busy / count >= 0.5;
+      const bad = slow >= 3 && (mobile ? (count - 1) * 1000 / (now - start - longest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : slow / count >= 0.25 || slowTime / (now - start) >= 0.5);
+      const good = fast / count >= 0.9 && busy / count >= 0.5;
       goodWindows = good ? goodWindows + 1 : 0;
-      count = slow = slowTime = fast = busy = 0;
+      count = slow = slowTime = longest = fast = busy = 0;
       start = 0;
       const index = tiers.indexOf(tier);
       const ceiling = allowDetailed ? 2 : 1;
@@ -2641,6 +2648,8 @@ function createGraphicsQuality(onChange) {
   const select = document.getElementById("graphics-quality");
   const status = document.getElementById("graphics-quality-status");
   let preference = "auto", recovered = false, profile, autoTier = null;
+  let mobile = null;
+  const coarsePointer = typeof window.matchMedia === "function" ? window.matchMedia("(pointer: coarse)") : null;
   const adaptive = createAdaptiveQuality({ allowDetailed: true });
   try {
     preference = qualityPreference(localStorage.getItem(QUALITY_KEY));
@@ -2672,13 +2681,17 @@ function createGraphicsQuality(onChange) {
         adaptive.reset();
         return;
       }
-      const next = adaptive.sample(now, active, profile.tier, moving);
+      const next = adaptive.sample(now, active, profile.tier, moving, mobile);
       if (next) {
         autoTier = next;
         onChange();
       }
     },
     resolve(width) {
+      const nextMobile = width <= 650 || Boolean(coarsePointer?.matches);
+      if (mobile !== null && mobile !== nextMobile)
+        adaptive.reset();
+      mobile = nextMobile;
       profile = resolveQuality({
         preference,
         width,

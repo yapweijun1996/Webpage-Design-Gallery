@@ -203,3 +203,91 @@ test('production Auto trials Detailed after sustained moving frames and leaves p
     assert.equal(quality.state.tier,'balanced');assert.equal(saved,'auto');assert.equal(writes,0);
   } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
 });
+
+test('mobile holds quality at 24 FPS and above but downgrades sustained 23 FPS', () => {
+  for (const initial of ['balanced','detailed']) for (const fps of [24,25,30]) {
+    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial, now=0;
+    for(let i=0;i<480;i++) { now+=1000/fps; tier=controller.sample(now,true,tier,true,true)||tier; }
+    assert.equal(tier,initial,`${initial} at ${fps} FPS`);
+  }
+  for (const initial of ['balanced','detailed']) {
+    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial, now=0;
+    for(let i=0;i<300;i++) { now+=1000/23; tier=controller.sample(now,true,tier,true,true)||tier; }
+    assert.notEqual(tier,initial,`${initial} at 23 FPS`);
+  }
+});
+
+test('mobile Detailed tolerates both phases of uneven 24 FPS and an isolated stall', () => {
+  for (const initial of ['balanced','detailed']) for (const phase of [0,1]) for (let spike=1;spike<250;spike++) {
+    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial, now=0;
+    for(let i=0;i<320;i++) {
+      now += i===spike ? 1000 : ((i+phase)%2===0 ? 1000/30 : 50);
+      tier=controller.sample(now,true,tier,true,true)||tier;
+    }
+    assert.equal(tier,initial,`${initial} alternating phase ${phase}, spike ${spike}`);
+  }
+});
+
+test('mobile promotion still needs sustained near-60 FPS movement and respects retry backoff', () => {
+  const controller=createAdaptiveQuality({allowDetailed:true}); let tier='balanced',now=0;
+  for(let i=0;i<600;i++){ now+=1000/30;tier=controller.sample(now,true,tier,true,true)||tier; }
+  assert.equal(tier,'balanced');
+  for(let i=0;i<1100;i++){ now+=1000/60;tier=controller.sample(now,true,tier,false,true)||tier; }
+  assert.equal(tier,'balanced');
+  for(let i=0;i<1100;i++){ now+=1000/60;tier=controller.sample(now,true,tier,true,true)||tier; }
+  assert.equal(tier,'detailed');
+  for(let i=0;i<60;i++){now+=1000/23;tier=controller.sample(now,true,tier,true,true)||tier;}
+  assert.equal(tier,'balanced');
+  for(let i=0;i<1000;i++){now+=1000/60;tier=controller.sample(now,true,tier,true,true)||tier;}
+  assert.equal(tier,'balanced');
+});
+
+test('production detects width and coarse-pointer mobile mode only when resolving', () => {
+  const keys=['document','window','navigator','localStorage'];
+  const originals=Object.fromEntries(keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
+  let quality, queryCount=0, width=900; const coarse={matches:true};
+  const select={value:'',addEventListener(){}}; const status={textContent:''};
+  try {
+    Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>id==='graphics-quality'?select:status}});
+    Object.defineProperty(globalThis,'window',{configurable:true,value:{devicePixelRatio:2,matchMedia:()=>{queryCount++;return coarse;}}});
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
+    Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null,setItem(){}}});
+    quality=createGraphicsQuality(()=>quality.resolve(width));quality.resolve(width);
+    for(let now=0;now<10000;now+=40)quality.sample(now,true,true);
+    assert.equal(quality.state.tier,'balanced');
+    assert.equal(queryCount,1);
+    coarse.matches=false; width=1440; quality.resolve(width);
+    for(let now=10000;now<18000;now+=40)quality.sample(now,true,true);
+    assert.equal(quality.state.tier,'low');
+    assert.equal(queryCount,1);
+  } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
+});
+
+test('mobile rejects sustained uneven 23 FPS for either refresh phase', () => {
+  for (const initial of ['balanced','detailed']) for (const phase of [0,1]) {
+    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial,now=0;
+    for(let i=0;i<360;i++) {
+      now+=(i+phase)%2===0 ? 1000/30 : 2*1000/23-1000/30;
+      tier=controller.sample(now,true,tier,true,true)||tier;
+    }
+    assert.notEqual(tier,initial,`${initial} uneven 23 FPS, phase ${phase}`);
+  }
+});
+
+test('650px width uses mobile policy without a coarse pointer', () => {
+  const keys=['document','window','navigator','localStorage'];
+  const originals=Object.fromEntries(keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
+  let quality,width=650; const select={value:'',addEventListener(){}}; const status={textContent:''};
+  try {
+    Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>id==='graphics-quality'?select:status}});
+    Object.defineProperty(globalThis,'window',{configurable:true,value:{devicePixelRatio:2,matchMedia:()=>({matches:false})}});
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
+    Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null,setItem(){}}});
+    quality=createGraphicsQuality(()=>quality.resolve(width));quality.resolve(width);
+    for(let now=0;now<10000;now+=40)quality.sample(now,true,true);
+    assert.equal(quality.state.tier,'balanced');
+    width=651;quality.resolve(width);
+    for(let now=10000;now<18000;now+=40)quality.sample(now,true,true);
+    assert.equal(quality.state.tier,'low');
+  } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
+});
