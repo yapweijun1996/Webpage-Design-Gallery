@@ -1,5 +1,22 @@
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ['Performance details','性能详情','Butiran prestasi'],
+  ['Performance','性能','Prestasi'],
+  ['Close performance details','关闭性能详情','Tutup butiran prestasi'],
+  ['Frame time','帧间隔','Masa bingkai'],
+  ['95th percentile','第 95 百分位','Persentil ke-95'],
+  ['Simulation time','模拟耗时','Masa simulasi'],
+  ['Render submission','渲染提交耗时','Masa penyerahan render'],
+  ['Draw calls','绘制调用','Panggilan lukisan'],
+  ['Triangles','三角形数','Segi tiga'],
+  ['Recent slow frames','最近慢帧','Bingkai perlahan terkini'],
+  ['No slow frames in the last minute.','最近一分钟内没有慢帧。','Tiada bingkai perlahan dalam minit terakhir.'],
+  ['Long frame callback','帧回调耗时过长','Panggilan balik bingkai yang lama'],
+  ['Delayed frame','帧到达延迟','Bingkai tertangguh'],
+  ['Recent frame times','近期帧间隔','Masa bingkai terkini'],
+  ['Peak','峰值','Puncak'],
+  ['Download report (JSON)','下载报告（JSON）','Muat turun laporan (JSON)'],
+  ['Show FPS counter','显示 FPS 计数器','Tunjukkan kaunter FPS'],
   ['Drag the right joystick to move around the courtyard.','拖动右侧摇杆在中庭移动。','Seret kayu ria kanan untuk bergerak di laman.'],
   ['Drag the open scene to look around. When moving, use a second finger.','拖动场景环顾四周。移动时，用另一根手指拖动。','Seret adegan untuk melihat sekeliling. Semasa bergerak, gunakan jari kedua.'],
   ['Shopping Cart. Demo shopping cart; no orders are created.','购物车。此演示购物车不会创建订单。','Troli demo. Tiada pesanan akan dibuat.'],
@@ -277,6 +294,7 @@ const messages = new Map([
 ].map(([source, zh, ms]) => [source, {'zh-Hans':zh, ms}]));
 
 const patterns = [
+  [/^Interval (.+) · Callback (.+)$/, '帧间隔 $1 · 回调 $2', 'Selang $1 · Panggilan balik $2'],
   [/^(\d+) \/ The (.+) store$/, '$1 ／ $2 商店', '$1 / Kedai $2'],
   [/^(.+) inspiration$/, '$1 灵感', 'Inspirasi $1'],
   [/^Press F \/ tap (open|Open)$/, '按 F 或轻触开门','Tekan F atau ketik Buka'],

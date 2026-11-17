@@ -20,6 +20,472 @@ function gamepadMotion(pad) {
   return { forward: -axis(1), right: axis(0), lookX: axis(2), lookY: axis(3), run: Boolean(pad?.buttons[10]?.pressed) };
 }
 
+// demos/corporate/gjh/v11/assets/performance-monitor.js
+var FRAME_WINDOW_MS = 5000;
+var SLOW_THRESHOLD_MS = 50;
+function rollingHistory(capacity, duration) {
+  const slots = [];
+  let start = 0, count = 0;
+  function prune(now) {
+    while (count && now - slots[start].at >= duration) {
+      start = (start + 1) % capacity;
+      count--;
+    }
+  }
+  function append(now) {
+    prune(now);
+    if (count === capacity) {
+      start = (start + 1) % capacity;
+      count--;
+    }
+    const index = (start + count++) % capacity;
+    const slot = slots[index] ||= {};
+    slot.at = now;
+    return slot;
+  }
+  function values() {
+    return Array.from({ length: count }, (_, i) => slots[(start + i) % capacity]);
+  }
+  return { append, prune, values, get length() {
+    return count;
+  } };
+}
+function metric(value) {
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
+function copyFields(record, frameMs, info, detail) {
+  record.frameMs = frameMs;
+  record.drawCalls = metric(info?.render?.calls);
+  record.triangles = metric(info?.render?.triangles);
+  record.geometries = metric(info?.memory?.geometries);
+  record.textures = metric(info?.memory?.textures);
+  record.simulationMs = metric(detail?.simulationMs);
+  record.renderMs = metric(detail?.renderMs);
+  record.callbackMs = metric(detail?.callbackMs);
+  record.steps = metric(detail?.steps);
+  record.zone = detail?.zone ?? null;
+  record.x = Number.isFinite(detail?.x) ? detail.x : null;
+  record.z = Number.isFinite(detail?.z) ? detail.z : null;
+  record.tier = detail?.tier ?? null;
+  record.width = metric(detail?.width);
+  record.height = metric(detail?.height);
+}
+function createPerformanceMonitor() {
+  const frames = rollingHistory(720, FRAME_WINDOW_MS);
+  const slowFrames = rollingHistory(20, 60000);
+  const seconds = rollingHistory(120, 120000);
+  let enabled = false, previous = null, bucket = null;
+  let latest = {};
+  copyFields(latest, null);
+  function frame(now, info, detail) {
+    if (!enabled || !Number.isFinite(now))
+      return;
+    const interval = previous !== null && now > previous ? now - previous : null;
+    previous = now;
+    frames.prune(now);
+    slowFrames.prune(now);
+    seconds.prune(now);
+    if (interval !== null)
+      latest = frames.append(now);
+    else
+      latest = {};
+    copyFields(latest, interval, info, detail);
+    latest.at = now;
+    const busy = latest.callbackMs >= SLOW_THRESHOLD_MS;
+    const slow = busy || interval >= SLOW_THRESHOLD_MS;
+    if (slow) {
+      const event = slowFrames.append(now);
+      Object.assign(event, latest);
+      event.reason = busy ? "busy-callback" : "raf-gap";
+    }
+    const second = Math.floor(now / 1000) * 1000;
+    if (!bucket || bucket.at !== second) {
+      bucket = seconds.append(second);
+      Object.assign(bucket, { samples: 0, totalMs: 0, maxMs: null, maxCallbackMs: null, maxDrawCalls: null, maxTriangles: null, slowCount: 0 });
+    }
+    bucket.zone = latest.zone;
+    bucket.tier = latest.tier;
+    bucket.x = latest.x;
+    bucket.z = latest.z;
+    if (interval !== null) {
+      bucket.samples++;
+      bucket.totalMs += interval;
+      bucket.maxMs = Math.max(bucket.maxMs, interval);
+    }
+    if (latest.callbackMs !== null)
+      bucket.maxCallbackMs = Math.max(bucket.maxCallbackMs, latest.callbackMs);
+    if (latest.drawCalls !== null)
+      bucket.maxDrawCalls = Math.max(bucket.maxDrawCalls, latest.drawCalls);
+    if (latest.triangles !== null)
+      bucket.maxTriangles = Math.max(bucket.maxTriangles, latest.triangles);
+    if (slow)
+      bucket.slowCount++;
+  }
+  function snapshot({ includeHistory = true } = {}) {
+    const rows = frames.values();
+    const sorted = rows.map((row) => row.frameMs).sort((a, b) => a - b);
+    const percentile = (p) => sorted[Math.ceil(sorted.length * p) - 1] ?? null;
+    const mean = sorted.length ? sorted.reduce((sum, ms) => sum + ms, 0) / sorted.length : null;
+    const result = {
+      ...latest,
+      enabled,
+      samples: rows.length,
+      fps: mean ? 1000 / mean : null,
+      p50Ms: percentile(0.5),
+      p95Ms: percentile(0.95),
+      p99Ms: percentile(0.99),
+      slowThresholdMs: SLOW_THRESHOLD_MS,
+      slowFrameCount: slowFrames.length
+    };
+    if (includeHistory) {
+      result.history = rows.map((row) => ({ ...row }));
+      result.slowFrames = slowFrames.values().map((row) => ({ ...row }));
+      result.seconds = seconds.values().map(({ totalMs, ...row }) => {
+        const meanMs = row.samples ? totalMs / row.samples : null;
+        return { ...row, meanMs, fps: meanMs ? 1000 / meanMs : null };
+      });
+    }
+    return result;
+  }
+  return {
+    get enabled() {
+      return enabled;
+    },
+    setEnabled(value) {
+      enabled = Boolean(value);
+      if (!enabled)
+        previous = null;
+    },
+    pause() {
+      previous = null;
+    },
+    frame,
+    snapshot
+  };
+}
+
+// demos/corporate/gjh/v11/assets/spatial.js
+var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
+var MAP = Object.freeze({ minX: -15, maxX: 15, minZ: -11, maxZ: 18, width: 300, height: 290, storeWidth: 72, storeHeight: 110, storeTop: 20 });
+var SOURCE = [
+  {
+    id: "newmoon",
+    number: "01",
+    label: "New Moon",
+    floor: "ground",
+    available: true,
+    bounds: { minX: -15, maxX: -5, minZ: -10.5, maxZ: 0 },
+    arrival: { x: -10, z: 2.4 },
+    contentRef: "newmoon-title"
+  },
+  {
+    id: "mili",
+    number: "02",
+    label: "MILI",
+    floor: "ground",
+    available: true,
+    bounds: { minX: -5, maxX: 5, minZ: -10.5, maxZ: 0 },
+    arrival: { x: 0, z: 2.4 },
+    contentRef: "mili-title"
+  },
+  {
+    id: "gogo",
+    number: "03",
+    label: "GOGO",
+    floor: "ground",
+    available: true,
+    bounds: { minX: 5, maxX: 15, minZ: -10.5, maxZ: 0 },
+    arrival: { x: 10, z: 2.4 },
+    contentRef: "gogo-title"
+  }
+];
+function createSpatialRegistry(source, floor = FLOOR) {
+  if (!Array.isArray(source) || source.length !== 3 || !floor || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(floor[k])) || floor.minX >= floor.maxX || floor.minZ >= floor.maxZ)
+    throw new TypeError("Invalid spatial source or floor");
+  const ids = new Set, numbers = new Set, refs = new Set;
+  const stores = source.map((item) => {
+    if (!item || typeof item.id !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.id) || ids.has(item.id) || typeof item.number !== "string" || !/^\d{2}$/.test(item.number) || numbers.has(item.number) || typeof item.label !== "string" || !item.label.trim() || item.floor !== "ground" || typeof item.available !== "boolean" || typeof item.contentRef !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.contentRef) || refs.has(item.contentRef))
+      throw new TypeError("Invalid or duplicate store identity");
+    const { bounds: b, arrival: a } = item;
+    if (!b || !a || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(b[k])) || !Number.isFinite(a.x) || !Number.isFinite(a.z) || b.maxX - b.minX !== 10 || b.minZ !== -10.5 || b.maxZ !== 0 || b.minX < floor.minX || b.maxX > floor.maxX || b.minZ < floor.minZ || b.maxZ > floor.maxZ || Math.abs(a.x - (b.minX + b.maxX) / 2) > 2 || a.z <= b.maxZ + 0.3 || a.x < floor.minX + 0.3 || a.x > floor.maxX - 0.3 || a.z > floor.maxZ - 0.3)
+      throw new TypeError("Invalid store bounds or arrival");
+    ids.add(item.id);
+    numbers.add(item.number);
+    refs.add(item.contentRef);
+    return Object.freeze({ ...item, bounds: Object.freeze({ ...b }), arrival: Object.freeze({ ...a }) });
+  });
+  for (let i = 1;i < stores.length; i++) {
+    const prev = stores[i - 1].bounds, next = stores[i].bounds;
+    if (prev.maxX !== next.minX || prev.minZ !== next.minZ || prev.maxZ !== next.maxZ)
+      throw new TypeError("Inconsistent store geometry");
+  }
+  const byId = new Map(stores.map((store) => [store.id, store]));
+  return Object.freeze({
+    stores: Object.freeze(stores),
+    get: (id) => byId.get(id) || null,
+    arrival(id) {
+      const store = byId.get(id);
+      return store?.available ? store.arrival : null;
+    }
+  });
+}
+var spatial = createSpatialRegistry(SOURCE);
+var courtyardArrival = Object.freeze({ x: -2, z: 12 });
+function storeCenterX(store) {
+  return (store.bounds.minX + store.bounds.maxX) / 2;
+}
+function storeAt(x, z, bounded = false) {
+  if (!Number.isFinite(x) || !Number.isFinite(z) || z >= spatial.stores[0].bounds.maxZ + 0.1)
+    return null;
+  const [left, middle, right] = spatial.stores;
+  const store = x < left.bounds.maxX ? left : x > right.bounds.minX ? right : middle;
+  const b = store.bounds;
+  return bounded && (x < b.minX || x > b.maxX || z < b.minZ) ? null : store;
+}
+function mapPoint(x, z) {
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  return {
+    x: (clamp(x, MAP.minX, MAP.maxX) - MAP.minX) * MAP.width / (MAP.maxX - MAP.minX),
+    y: (clamp(z, MAP.minZ, MAP.maxZ) - MAP.minZ) * MAP.height / (MAP.maxZ - MAP.minZ)
+  };
+}
+function mapStoreRect(store) {
+  const center = mapPoint(storeCenterX(store), store.bounds.maxZ).x;
+  return { x: center - MAP.storeWidth / 2, y: MAP.storeTop, width: MAP.storeWidth, height: MAP.storeHeight };
+}
+var mapView = MAP;
+
+// demos/corporate/gjh/v11/assets/lift-layout.js
+var freeze = (value) => {
+  if (value && typeof value === "object") {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+};
+var liftLayout = freeze({
+  x: -3,
+  z: 10,
+  upper: 7.2,
+  shaft: { minX: -5, maxX: -1, minZ: 8, maxZ: 12 },
+  slab: { minX: -9, maxX: 3, minZ: 4, maxZ: 16 },
+  roofOpening: { minX: -16, maxX: 10, minZ: -3, maxZ: 23 },
+  cabin: { width: 3.2, depth: 3.2 },
+  threshold: { minX: -5, maxX: -4.6, minZ: 9, maxZ: 11 },
+  exit: { x: -6.4, z: 10 },
+  radius: 1.15,
+  directory: { x: -5, z: 45 },
+  desk: { x: 25, z: 45 },
+  showcase: { x: -7, z: 18 },
+  facilities: { minX: 21, maxX: 29, minZ: 6, maxZ: 14, status: "planned" }
+});
+
+// demos/corporate/gjh/v11/assets/expanded-layout.js
+var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
+  number: String(number).padStart(2, "0"),
+  side,
+  minX,
+  maxX,
+  minZ,
+  maxZ,
+  available: true
+});
+var expandedLayout = Object.freeze({
+  bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
+  entrance: Object.freeze({ x: 10, z: 45 }),
+  courtyardArrival: Object.freeze({ x: 10, z: 12 }),
+  lift: Object.freeze({ x: liftLayout.x, z: liftLayout.z, upper: liftLayout.upper }),
+  directory: liftLayout.directory,
+  serviceDesk: liftLayout.desk,
+  showcase: liftLayout.showcase,
+  atrium: Object.freeze({ x: 10, z: 12 }),
+  slots: Object.freeze([
+    ...Array.from({ length: 5 }, (_, i) => slot(i + 1, "north", -15 + i * 10, -5 + i * 10, -12, 0)),
+    ...Array.from({ length: 6 }, (_, i) => slot(i + 6, "west", -25, -15, i * 8, (i + 1) * 8)),
+    ...Array.from({ length: 6 }, (_, i) => slot(i + 12, "east", 35, 45, i * 8, (i + 1) * 8))
+  ]),
+  loop: Object.freeze([
+    Object.freeze({ x: -12, z: 3 }),
+    Object.freeze({ x: 32, z: 3 }),
+    Object.freeze({ x: 32, z: 39 }),
+    Object.freeze({ x: -12, z: 39 })
+  ])
+});
+var plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map((slot2) => Object.freeze({
+  id: `planned-space-${slot2.number}`,
+  number: slot2.number,
+  side: slot2.side,
+  status: "open",
+  available: slot2.available
+})));
+function shopEntrance(slot2) {
+  const normalX = slot2.side === "west" ? 1 : slot2.side === "east" ? -1 : 0;
+  const normalZ = slot2.side === "north" ? 1 : 0;
+  return {
+    x: normalX > 0 ? slot2.maxX : normalX < 0 ? slot2.minX : (slot2.minX + slot2.maxX) / 2,
+    z: normalZ ? slot2.maxZ : (slot2.minZ + slot2.maxZ) / 2,
+    normalX,
+    normalZ,
+    alongX: normalZ,
+    alongZ: -normalX,
+    yaw: Math.atan2(normalX, normalZ)
+  };
+}
+var shopArrivals = new Map(plannedSpaces.map((store) => {
+  const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
+  return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
+}));
+var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
+function expandedStoreAt(x, z) {
+  const original = storeAt(x, z, true);
+  if (original)
+    return original;
+  const index = expandedLayout.slots.findIndex((slot2, i) => i >= 3 && x > slot2.minX && x < slot2.maxX && z > slot2.minZ && z < slot2.maxZ);
+  return index >= 3 ? plannedSpaces[index - 3] : null;
+}
+var expandedMapPoint = (x, z) => ({
+  x: Math.max(0, Math.min(700, (x + 25) * 10)),
+  y: Math.max(0, Math.min(600, (z + 12) * 10))
+});
+
+// demos/corporate/gjh/v11/assets/store-destinations.js
+function storeDestinations(expanded, root = document) {
+  if (!expanded)
+    return spatial.stores;
+  return [...spatial.stores, ...plannedSpaces.map((space) => ({
+    ...space,
+    label: root.getElementById(space.id).dataset.plannedBrand
+  }))];
+}
+
+// demos/corporate/gjh/v11/assets/performance-panel.js
+var visibilityKey = "gjh-v11-show-fps";
+var milliseconds = (value) => Number.isFinite(value) ? `${value.toFixed(1)} ms` : "—";
+function drawHistory(history, line, peakLabel) {
+  if (!history?.length) {
+    line.removeAttribute("points");
+    peakLabel.textContent = "—";
+    return;
+  }
+  const start = history[0].at, duration = Math.max(1, history[history.length - 1].at - start);
+  const bins = new Map;
+  let peak = 0;
+  for (const { at, frameMs } of history) {
+    if (!Number.isFinite(at) || !Number.isFinite(frameMs))
+      continue;
+    const bin = Math.round(59 * (at - start) / duration);
+    bins.set(bin, Math.max(frameMs, bins.get(bin) || 0));
+    peak = Math.max(peak, frameMs);
+  }
+  const ceiling = Math.max(33.3, peak);
+  const points = Array.from(bins, ([bin, value]) => `${(bin * 240 / 59).toFixed(1)},${(41 - value * 40 / ceiling).toFixed(1)}`);
+  line.setAttribute("points", points.join(" "));
+  peakLabel.textContent = milliseconds(peak);
+}
+function createPerformancePanel({ snapshot, report = snapshot }) {
+  const panel = document.getElementById("performance-panel");
+  const toggle = document.getElementById("performance-visible");
+  const counter = document.getElementById("performance-fps");
+  const summary = panel.querySelector("summary");
+  const fields = panel.querySelectorAll("[data-performance]");
+  const line = document.getElementById("performance-line"), peak = document.getElementById("performance-peak");
+  const log = document.getElementById("performance-log");
+  const emptyLog = document.getElementById("performance-log-empty");
+  const locations = new Map(storeDestinations(true).map((store) => [store.id, store.label]));
+  locations.set("atrium", "Courtyard");
+  locations.set("upper", "Upper level");
+  function renderSlowFrames(data) {
+    const recent = (data?.slowFrames || []).slice(-3).reverse();
+    emptyLog.hidden = recent.length > 0;
+    const relativeTime = new Intl.RelativeTimeFormat(document.documentElement.lang || "en", { numeric: "auto" });
+    log.replaceChildren(...recent.map((event) => {
+      const row = document.createElement("li");
+      const heading = document.createElement("div");
+      const reason = document.createElement("strong");
+      reason.textContent = event.reason === "busy-callback" ? "Long frame callback" : "Delayed frame";
+      const age = document.createElement("span");
+      age.textContent = relativeTime.format(-Math.max(0, Math.round((performance.now() - event.at) / 1000)), "second");
+      heading.append(reason, age);
+      const location2 = locations.get(event.zone);
+      if (location2) {
+        const name = document.createElement("span");
+        name.textContent = location2;
+        heading.append(name);
+      }
+      const timings = document.createElement("div");
+      timings.textContent = `Interval ${milliseconds(event.frameMs)} · Callback ${milliseconds(event.callbackMs)}`;
+      row.append(heading, timings);
+      return row;
+    }));
+  }
+  try {
+    toggle.checked = localStorage.getItem(visibilityKey) !== "false";
+  } catch {}
+  panel.hidden = !toggle.checked;
+  toggle.addEventListener("change", () => {
+    panel.hidden = !toggle.checked;
+    if (panel.hidden)
+      panel.open = false;
+    try {
+      localStorage.setItem(visibilityKey, String(toggle.checked));
+    } catch {}
+  });
+  function renderDetails(data) {
+    const numbers = new Intl.NumberFormat(document.documentElement.lang || "en");
+    for (const field of fields) {
+      const key = field.dataset.performance, value = data?.[key];
+      field.textContent = key.endsWith("Ms") ? milliseconds(value) : Number.isFinite(value) ? numbers.format(value) : "—";
+    }
+    drawHistory(data?.history, line, peak);
+    renderSlowFrames(data);
+  }
+  function close() {
+    panel.open = false;
+    summary.focus({ preventScroll: true });
+  }
+  panel.addEventListener("toggle", () => {
+    if (panel.open)
+      renderDetails(snapshot());
+  });
+  document.getElementById("performance-close").addEventListener("click", close);
+  panel.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && panel.open) {
+      event.stopPropagation();
+      close();
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (panel.open && !panel.contains(event.target))
+      panel.open = false;
+  });
+  document.getElementById("performance-download").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(report(), null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob), link = document.createElement("a");
+    link.href = url;
+    link.download = `gjh-performance-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  return {
+    update(sample) {
+      if (panel.hidden)
+        return;
+      const value = Number.isFinite(sample?.fps) ? String(Math.round(sample.fps)) : "—";
+      if (counter.textContent !== value)
+        counter.textContent = value;
+      if (panel.open)
+        renderDetails(snapshot());
+    },
+    reset() {
+      counter.textContent = "—";
+      if (panel.open)
+        renderDetails(null);
+    }
+  };
+}
+
 // assets/onboarding/components.js
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -800,200 +1266,6 @@ function setupDemoBag() {
 
 // demos/corporate/gjh/v11/assets/ui.js
 import { setupNewMoonPreview } from "./assets/newmoon-detail-preview.js";
-
-// demos/corporate/gjh/v11/assets/spatial.js
-var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
-var MAP = Object.freeze({ minX: -15, maxX: 15, minZ: -11, maxZ: 18, width: 300, height: 290, storeWidth: 72, storeHeight: 110, storeTop: 20 });
-var SOURCE = [
-  {
-    id: "newmoon",
-    number: "01",
-    label: "New Moon",
-    floor: "ground",
-    available: true,
-    bounds: { minX: -15, maxX: -5, minZ: -10.5, maxZ: 0 },
-    arrival: { x: -10, z: 2.4 },
-    contentRef: "newmoon-title"
-  },
-  {
-    id: "mili",
-    number: "02",
-    label: "MILI",
-    floor: "ground",
-    available: true,
-    bounds: { minX: -5, maxX: 5, minZ: -10.5, maxZ: 0 },
-    arrival: { x: 0, z: 2.4 },
-    contentRef: "mili-title"
-  },
-  {
-    id: "gogo",
-    number: "03",
-    label: "GOGO",
-    floor: "ground",
-    available: true,
-    bounds: { minX: 5, maxX: 15, minZ: -10.5, maxZ: 0 },
-    arrival: { x: 10, z: 2.4 },
-    contentRef: "gogo-title"
-  }
-];
-function createSpatialRegistry(source, floor = FLOOR) {
-  if (!Array.isArray(source) || source.length !== 3 || !floor || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(floor[k])) || floor.minX >= floor.maxX || floor.minZ >= floor.maxZ)
-    throw new TypeError("Invalid spatial source or floor");
-  const ids = new Set, numbers = new Set, refs = new Set;
-  const stores = source.map((item) => {
-    if (!item || typeof item.id !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.id) || ids.has(item.id) || typeof item.number !== "string" || !/^\d{2}$/.test(item.number) || numbers.has(item.number) || typeof item.label !== "string" || !item.label.trim() || item.floor !== "ground" || typeof item.available !== "boolean" || typeof item.contentRef !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.contentRef) || refs.has(item.contentRef))
-      throw new TypeError("Invalid or duplicate store identity");
-    const { bounds: b, arrival: a } = item;
-    if (!b || !a || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(b[k])) || !Number.isFinite(a.x) || !Number.isFinite(a.z) || b.maxX - b.minX !== 10 || b.minZ !== -10.5 || b.maxZ !== 0 || b.minX < floor.minX || b.maxX > floor.maxX || b.minZ < floor.minZ || b.maxZ > floor.maxZ || Math.abs(a.x - (b.minX + b.maxX) / 2) > 2 || a.z <= b.maxZ + 0.3 || a.x < floor.minX + 0.3 || a.x > floor.maxX - 0.3 || a.z > floor.maxZ - 0.3)
-      throw new TypeError("Invalid store bounds or arrival");
-    ids.add(item.id);
-    numbers.add(item.number);
-    refs.add(item.contentRef);
-    return Object.freeze({ ...item, bounds: Object.freeze({ ...b }), arrival: Object.freeze({ ...a }) });
-  });
-  for (let i = 1;i < stores.length; i++) {
-    const prev = stores[i - 1].bounds, next = stores[i].bounds;
-    if (prev.maxX !== next.minX || prev.minZ !== next.minZ || prev.maxZ !== next.maxZ)
-      throw new TypeError("Inconsistent store geometry");
-  }
-  const byId = new Map(stores.map((store) => [store.id, store]));
-  return Object.freeze({
-    stores: Object.freeze(stores),
-    get: (id) => byId.get(id) || null,
-    arrival(id) {
-      const store = byId.get(id);
-      return store?.available ? store.arrival : null;
-    }
-  });
-}
-var spatial = createSpatialRegistry(SOURCE);
-var courtyardArrival = Object.freeze({ x: -2, z: 12 });
-function storeCenterX(store) {
-  return (store.bounds.minX + store.bounds.maxX) / 2;
-}
-function storeAt(x, z, bounded = false) {
-  if (!Number.isFinite(x) || !Number.isFinite(z) || z >= spatial.stores[0].bounds.maxZ + 0.1)
-    return null;
-  const [left, middle, right] = spatial.stores;
-  const store = x < left.bounds.maxX ? left : x > right.bounds.minX ? right : middle;
-  const b = store.bounds;
-  return bounded && (x < b.minX || x > b.maxX || z < b.minZ) ? null : store;
-}
-function mapPoint(x, z) {
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-  return {
-    x: (clamp(x, MAP.minX, MAP.maxX) - MAP.minX) * MAP.width / (MAP.maxX - MAP.minX),
-    y: (clamp(z, MAP.minZ, MAP.maxZ) - MAP.minZ) * MAP.height / (MAP.maxZ - MAP.minZ)
-  };
-}
-function mapStoreRect(store) {
-  const center = mapPoint(storeCenterX(store), store.bounds.maxZ).x;
-  return { x: center - MAP.storeWidth / 2, y: MAP.storeTop, width: MAP.storeWidth, height: MAP.storeHeight };
-}
-var mapView = MAP;
-
-// demos/corporate/gjh/v11/assets/lift-layout.js
-var freeze = (value) => {
-  if (value && typeof value === "object") {
-    Object.values(value).forEach(freeze);
-    Object.freeze(value);
-  }
-  return value;
-};
-var liftLayout = freeze({
-  x: -3,
-  z: 10,
-  upper: 7.2,
-  shaft: { minX: -5, maxX: -1, minZ: 8, maxZ: 12 },
-  slab: { minX: -9, maxX: 3, minZ: 4, maxZ: 16 },
-  roofOpening: { minX: -16, maxX: 10, minZ: -3, maxZ: 23 },
-  cabin: { width: 3.2, depth: 3.2 },
-  threshold: { minX: -5, maxX: -4.6, minZ: 9, maxZ: 11 },
-  exit: { x: -6.4, z: 10 },
-  radius: 1.15,
-  directory: { x: -5, z: 45 },
-  desk: { x: 25, z: 45 },
-  showcase: { x: -7, z: 18 },
-  facilities: { minX: 21, maxX: 29, minZ: 6, maxZ: 14, status: "planned" }
-});
-
-// demos/corporate/gjh/v11/assets/expanded-layout.js
-var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
-  number: String(number).padStart(2, "0"),
-  side,
-  minX,
-  maxX,
-  minZ,
-  maxZ,
-  available: true
-});
-var expandedLayout = Object.freeze({
-  bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
-  entrance: Object.freeze({ x: 10, z: 45 }),
-  courtyardArrival: Object.freeze({ x: 10, z: 12 }),
-  lift: Object.freeze({ x: liftLayout.x, z: liftLayout.z, upper: liftLayout.upper }),
-  directory: liftLayout.directory,
-  serviceDesk: liftLayout.desk,
-  showcase: liftLayout.showcase,
-  atrium: Object.freeze({ x: 10, z: 12 }),
-  slots: Object.freeze([
-    ...Array.from({ length: 5 }, (_, i) => slot(i + 1, "north", -15 + i * 10, -5 + i * 10, -12, 0)),
-    ...Array.from({ length: 6 }, (_, i) => slot(i + 6, "west", -25, -15, i * 8, (i + 1) * 8)),
-    ...Array.from({ length: 6 }, (_, i) => slot(i + 12, "east", 35, 45, i * 8, (i + 1) * 8))
-  ]),
-  loop: Object.freeze([
-    Object.freeze({ x: -12, z: 3 }),
-    Object.freeze({ x: 32, z: 3 }),
-    Object.freeze({ x: 32, z: 39 }),
-    Object.freeze({ x: -12, z: 39 })
-  ])
-});
-var plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map((slot2) => Object.freeze({
-  id: `planned-space-${slot2.number}`,
-  number: slot2.number,
-  side: slot2.side,
-  status: "open",
-  available: slot2.available
-})));
-function shopEntrance(slot2) {
-  const normalX = slot2.side === "west" ? 1 : slot2.side === "east" ? -1 : 0;
-  const normalZ = slot2.side === "north" ? 1 : 0;
-  return {
-    x: normalX > 0 ? slot2.maxX : normalX < 0 ? slot2.minX : (slot2.minX + slot2.maxX) / 2,
-    z: normalZ ? slot2.maxZ : (slot2.minZ + slot2.maxZ) / 2,
-    normalX,
-    normalZ,
-    alongX: normalZ,
-    alongZ: -normalX,
-    yaw: Math.atan2(normalX, normalZ)
-  };
-}
-var shopArrivals = new Map(plannedSpaces.map((store) => {
-  const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
-  return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
-}));
-var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
-function expandedStoreAt(x, z) {
-  const original = storeAt(x, z, true);
-  if (original)
-    return original;
-  const index = expandedLayout.slots.findIndex((slot2, i) => i >= 3 && x > slot2.minX && x < slot2.maxX && z > slot2.minZ && z < slot2.maxZ);
-  return index >= 3 ? plannedSpaces[index - 3] : null;
-}
-var expandedMapPoint = (x, z) => ({
-  x: Math.max(0, Math.min(700, (x + 25) * 10)),
-  y: Math.max(0, Math.min(600, (z + 12) * 10))
-});
-
-// demos/corporate/gjh/v11/assets/store-destinations.js
-function storeDestinations(expanded, root = document) {
-  if (!expanded)
-    return spatial.stores;
-  return [...spatial.stores, ...plannedSpaces.map((space) => ({
-    ...space,
-    label: root.getElementById(space.id).dataset.plannedBrand
-  }))];
-}
 
 // demos/corporate/gjh/v11/assets/feature-kiosk.js
 var FEATURE_KIOSK_ID = "gjh-feature-kiosk";
@@ -2438,6 +2710,10 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     scene.add(light);
     return { light, accent: new T.Color(accents[index]) };
   });
+  scene.traverse((node) => {
+    if (node.isLight)
+      node.layers.enable(2);
+  });
   function applyTheme(theme) {
     warm.set(theme?.lighting?.key ?? 16770497).lerp(interiorWarm, 0.25);
     for (const { light, accent } of lights)
@@ -2486,7 +2762,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     ceiling.scale.set(7, 0.1, 7);
     studio.add(ceiling);
     try {
-      const next = generator.fromScene(studio, 0.08);
+      const next = generator.fromScene(studio, 0.04);
       const previous = environment;
       environment = next;
       scene.environment = next.texture;
@@ -2541,10 +2817,6 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     const autoClear = renderer.autoClear, shadowAutoUpdate = renderer.shadowMap.autoUpdate;
     const before = renderer.info.render.calls;
     try {
-      scene.traverseVisible((node) => {
-        if (node.isLight)
-          node.layers.enable(2);
-      });
       camera.layers.set(2);
       scene.background = null;
       renderer.autoClear = false;
@@ -2868,6 +3140,33 @@ var modes = createModes({
 });
 var ui = createUI(expanded);
 var canvas = document.querySelector("#scene");
+var performanceMonitor = createPerformanceMonitor();
+performanceMonitor.setEnabled(true);
+var measuringFrames = false;
+var lastMetricsUpdate = -Infinity;
+function performanceReport() {
+  return {
+    ...performanceMonitor.snapshot(),
+    capturedAt: new Date().toISOString(),
+    timeOrigin: performance.timeOrigin,
+    version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
+    layout: expanded ? "expanded" : "classic",
+    viewport: { width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio() },
+    graphics: { tier: quality.state?.tier, contextLosses: losses, restorations: validations }
+  };
+}
+var performancePanel = createPerformancePanel({
+  snapshot: () => performanceMonitor.snapshot(),
+  report: performanceReport
+});
+function pausePerformance() {
+  if (!measuringFrames)
+    return;
+  measuringFrames = false;
+  performanceMonitor.pause();
+  performancePanel.reset();
+  lastMetricsUpdate = -Infinity;
+}
 spatialHud = createSpatialHud({ expanded });
 var spatialTargetName = document.getElementById("nearby-name");
 var spatialInspectButton = document.getElementById("inspect");
@@ -3035,6 +3334,7 @@ var snapshot = () => Object.freeze({
   hidden: document.hidden
 });
 Object.defineProperty(window, "__mall", { value: Object.freeze({
+  performanceReport,
   get ready() {
     return ready;
   },
@@ -3095,7 +3395,7 @@ function updateHUD() {
   shelfFocus?.setNearby(nearby);
   ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper });
 }
-function tick() {
+function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred)
     return;
   const p = player.state;
@@ -3114,26 +3414,28 @@ function tick() {
       leaf.body.setNextKinematicTranslation({ x, y: 1.8, z: 0.05 });
     }
   }
-  elevator?.update?.(STEP, player.state);
+  elevator?.update?.(STEP, p);
   player.update(STEP);
   physics.step();
   player.sync();
   npcs?.update(STEP, player.state);
   player.updateCamera(STEP);
-  updateHUD();
+  if (refreshHud)
+    updateHUD();
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === "shelf")) {
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
-    const guiding = !windowBlurred && ["explore", "cart"].includes(modes.current()) && !player.state.character.collection.active;
+    const pose = player.state;
+    const guiding = !windowBlurred && ["explore", "cart"].includes(modes.current()) && !pose.character.collection.active;
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     shelfFocus?.update(camera, modes.current() === "shelf" || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
-    world.updateShopLods(player.state);
-    atmosphere?.update(player.state);
+    world.updateShopLods(pose);
+    atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
-    const draw = () => atmosphere.render(camera, expanded && Math.abs(player.state.y) < 5 && quality.state?.tier === "detailed" && renderWidth >= 1000, npcs);
+    const draw = () => atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === "detailed" && renderWidth >= 1000, npcs);
     if (shelfFocus?.open)
       player.renderShelf(draw);
     else
@@ -3141,12 +3443,14 @@ function render(force = false) {
     frames++;
     if (window.__sceneReady)
       ui.offerFirstGuide();
+    return pose;
   }
 }
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden)
     return;
+  const callbackStart = performance.now();
   const pad = readStandardGamepad();
   const consumed = ui.handleGamepad(pad);
   const inspectPressed = Boolean(pad?.buttons[0]?.pressed);
@@ -3164,15 +3468,45 @@ function animate(now) {
   previousGamepadInspect = inspectPressed;
   const elapsed = Math.min(0.1, Math.max(0, (now - last) / 1000));
   last = now;
-  if (!manual && !modes.paused()) {
-    accumulator += elapsed;
-    while (accumulator >= STEP) {
-      tick();
-      accumulator -= STEP;
+  const advancing = !manual && !modes.paused();
+  if (advancing || modes.current() === "shelf") {
+    const simulationStart = performance.now();
+    let steps = 0;
+    if (advancing) {
+      accumulator += elapsed;
+      while (accumulator >= STEP) {
+        tick(false);
+        accumulator -= STEP;
+        steps++;
+      }
+      if (steps)
+        updateHUD();
     }
-    render();
-  } else if (modes.current() === "shelf")
-    render();
+    const renderStart = performance.now();
+    const pose = render();
+    const end = performance.now();
+    if (!windowBlurred) {
+      measuringFrames = true;
+      performanceMonitor.frame(now, renderer.info, {
+        simulationMs: renderStart - simulationStart,
+        renderMs: end - renderStart,
+        callbackMs: end - callbackStart,
+        steps,
+        zone: currentZone,
+        x: pose?.x,
+        z: pose?.z,
+        tier: quality.state?.tier,
+        width: canvas.width,
+        height: canvas.height
+      });
+      if (now - lastMetricsUpdate >= 1000) {
+        performancePanel.update(performanceMonitor.snapshot({ includeHistory: false }));
+        lastMetricsUpdate = now;
+      }
+    } else
+      pausePerformance();
+  } else
+    pausePerformance();
   frame = requestAnimationFrame(animate);
 }
 function resume() {
@@ -3189,6 +3523,7 @@ function fallback(message, terminal = true) {
     fatal = true;
     graphicsStatus = "failed";
   }
+  pausePerformance();
   hideGuidance();
   ready = false;
   window.__sceneFailed = true;
@@ -3259,6 +3594,7 @@ document.addEventListener("keydown", (event) => {
 });
 window.addEventListener("blur", () => {
   windowBlurred = true;
+  pausePerformance();
   hideGuidance();
   shelfFocus?.close();
   modes.interrupt("window blur");
@@ -3276,6 +3612,7 @@ window.addEventListener("resize", () => {
 });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
+    pausePerformance();
     mallTheme?.cancel();
     hideGuidance();
     shelfFocus?.close();

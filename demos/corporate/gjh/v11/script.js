@@ -1,4 +1,6 @@
 import {readStandardGamepad,gamepadMotion} from '../../../../assets/onboarding/gamepad.js';
+import {createPerformanceMonitor} from './assets/performance-monitor.js';
+import {createPerformancePanel} from './assets/performance-panel.js';
 import {createUI} from './assets/ui.js';
 import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
@@ -49,6 +51,30 @@ function clearTransientState(event) {
 const modes = createModes({onCleanup: clearTransientState,
   onEnter(mode) { document.body.dataset.mode = mode; }});
 const ui = createUI(expanded), canvas = document.querySelector('#scene');
+const performanceMonitor = createPerformanceMonitor();
+performanceMonitor.setEnabled(true);
+let measuringFrames = false, lastMetricsUpdate = -Infinity;
+function performanceReport() {
+  return {
+    ...performanceMonitor.snapshot(),
+    capturedAt: new Date().toISOString(),
+    timeOrigin: performance.timeOrigin,
+    version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
+    layout: expanded ? 'expanded' : 'classic',
+    viewport: {width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio()},
+    graphics: {tier: quality.state?.tier, contextLosses: losses, restorations: validations}
+  };
+}
+const performancePanel = createPerformancePanel({
+  snapshot: () => performanceMonitor.snapshot(), report: performanceReport
+});
+function pausePerformance() {
+  if (!measuringFrames) return;
+  measuringFrames = false;
+  performanceMonitor.pause();
+  performancePanel.reset();
+  lastMetricsUpdate = -Infinity;
+}
 spatialHud = createSpatialHud({expanded});
 const spatialTargetName = document.getElementById('nearby-name');
 const spatialInspectButton = document.getElementById('inspect');
@@ -159,6 +185,7 @@ const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.curr
   roomSigns: Object.freeze((world?.roomSigns || []).map(({zone, mesh, left, right, top, bottom}) => Object.freeze({zone, visible: mesh.visible, left, right, top, bottom}))),
   pixelRatio: renderer?.getPixelRatio() || 1, hidden: document.hidden});
 Object.defineProperty(window, '__mall', {value: Object.freeze({
+  performanceReport,
   get ready() { return ready; }, get state() { return snapshot(); },
   get mode() { return modes.current(); },
   heroVisibility(number) { return heroVisibility(number); },
@@ -194,7 +221,7 @@ function updateHUD() {
   shelfFocus?.setNearby(nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
 }
-function tick() {
+function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   for (const door of world.doors) {
@@ -208,28 +235,31 @@ function tick() {
       leaf.body.setNextKinematicTranslation({x, y: 1.8, z: .05});
     }
   }
-  elevator?.update?.(STEP,player.state); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state); player.updateCamera(STEP); updateHUD();
+  elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state); player.updateCamera(STEP); if (refreshHud) updateHUD();
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
-    const guiding = !windowBlurred && ['explore', 'cart'].includes(modes.current()) && !player.state.character.collection.active;
+    const pose = player.state;
+    const guiding = !windowBlurred && ['explore', 'cart'].includes(modes.current()) && !pose.character.collection.active;
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
-    world.updateShopLods(player.state);
-    atmosphere?.update(player.state);
+    world.updateShopLods(pose);
+    atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
-    const draw=()=>atmosphere.render(camera, expanded && Math.abs(player.state.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
+    const draw=()=>atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
+    return pose;
   }
 }
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;
+  const callbackStart = performance.now();
   const pad=readStandardGamepad();
   const consumed=ui.handleGamepad(pad);
   const inspectPressed=Boolean(pad?.buttons[0]?.pressed);
@@ -241,17 +271,44 @@ function animate(now) {
   }
   previousGamepadInspect=inspectPressed;
   const elapsed = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now;
-  if (!manual && !modes.paused()) {
-    accumulator += elapsed;
-    while (accumulator >= STEP) { tick(); accumulator -= STEP; }
-    render();
-  } else if (modes.current() === 'shelf') render();
+  const advancing = !manual && !modes.paused();
+  if (advancing || modes.current() === 'shelf') {
+    const simulationStart = performance.now();
+    let steps = 0;
+    if (advancing) {
+      accumulator += elapsed;
+      while (accumulator >= STEP) {
+        tick(false);
+        accumulator -= STEP;
+        steps++;
+      }
+      // During catch-up the physics still steps at its fixed rate, but only
+      // the final HUD state can be presented on this browser frame.
+      if (steps) updateHUD();
+    }
+    const renderStart = performance.now();
+    const pose = render();
+    const end = performance.now();
+    if (!windowBlurred) {
+      measuringFrames = true;
+      performanceMonitor.frame(now, renderer.info, {
+        simulationMs: renderStart - simulationStart, renderMs: end - renderStart,
+        callbackMs: end - callbackStart, steps, zone: currentZone, x: pose?.x, z: pose?.z, tier: quality.state?.tier,
+        width: canvas.width, height: canvas.height
+      });
+      if (now - lastMetricsUpdate >= 1000) {
+        performancePanel.update(performanceMonitor.snapshot({includeHistory:false}));
+        lastMetricsUpdate = now;
+      }
+    } else pausePerformance();
+  } else pausePerformance();
   frame = requestAnimationFrame(animate);
 }
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
   if (terminal) { fatal = true; graphicsStatus = 'failed'; }
+  pausePerformance();
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
   shelfFocus?.close();
@@ -271,11 +328,11 @@ document.addEventListener('keydown', event => {
       !event.altKey && !event.ctrlKey && !event.metaKey &&
       (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); if(player.state.seated){player.stand();updateHUD();}else ui.inspectNearby(nearby); }
 });
-window.addEventListener('blur', () => { windowBlurred = true; hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
+window.addEventListener('blur', () => { windowBlurred = true; pausePerformance();hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
 window.addEventListener('focus', () => { windowBlurred = false; if (ready) { updateHUD(); render(); } });
 window.addEventListener('resize', () => { modes.interrupt('viewport resize'); resize(); });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
+  if (document.hidden) { pausePerformance();mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
   else { if (ready) { updateHUD(); render(); } else validateRestoration(); resume(); }
 });
 canvas.addEventListener('webglcontextlost', event => {

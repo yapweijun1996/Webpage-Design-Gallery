@@ -125,3 +125,9 @@ The three store sections also use nine AI-generated lifestyle scenes, three per 
 V11 has its own scoped manifest and an integrity-checked worker that saves only a reconnect screen and app icons. The directory and 3D mall still require a connection; the demo bag remains session-only. Updates require an explicit action. See [PWA scope, tests and limitations](../../../../docs/gjh-v11-pwa.md).
 
 In the expanded layout, the additional storefront destinations use the IDs `planned-space-04` through `planned-space-17`. Run `python tests/browser_gjh_shop_walkthrough.py` to check arrivals, doors, interior routes, fixture collisions and exits for the ground-floor shops.
+
+## FPS and performance logs
+
+Select the FPS counter in the 3D view to inspect frame cadence, simulation time, render submission time, draw calls and triangles. Reproduce a slowdown, open the counter and choose **Download report (JSON)**. Help includes a **Show FPS** setting. The report stays in the browser until downloaded.
+
+Reports include the last five seconds of individual frames, up to two minutes of one-second summaries and the latest twenty slow events within the past minute. World coordinates, zone and quality help locate a problem. Times use milliseconds relative to the report’s `timeOrigin`. Hidden and paused intervals are excluded. A `busy-callback` identifies at least 50 ms of synchronous callback work. A `raf-gap` identifies a long interval with a shorter current callback. The render metric measures CPU submission time; GPU completion can occur later. In DevTools, `window.__mall.performanceReport()` returns the same data.

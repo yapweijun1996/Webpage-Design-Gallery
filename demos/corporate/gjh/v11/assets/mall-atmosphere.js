@@ -9,6 +9,8 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
     light.visible = false; light.castShadow = false; scene.add(light);
     return {light, accent:new T.Color(accents[index])};
   });
+  // World lights and shop accents are already attached, including hidden bays.
+  scene.traverse(node => { if (node.isLight) node.layers.enable(2); });
   function applyTheme(theme) {
     warm.set(theme?.lighting?.key ?? 0xffe5c1).lerp(interiorWarm, .25);
     for (const {light, accent} of lights) light.color.copy(warm).lerp(accent, .08);
@@ -45,7 +47,8 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
     }
     const ceiling = new T.Mesh(geometry,materials[2]); ceiling.position.y=2.9; ceiling.scale.set(7,.1,7); studio.add(ceiling);
     try {
-      const next=generator.fromScene(studio,.08);
+      // At the bundled 256px cubemap size, .04 radians uses 20 blur taps.
+      const next=generator.fromScene(studio,.04);
       const previous=environment; environment=next; scene.environment=next.texture;
       if ('environmentIntensity' in scene) scene.environmentIntensity=.4;
       previous?.dispose();
@@ -90,7 +93,6 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
     try {
       // Keep the world's color, depth and shadow maps. Only visitors and the
       // same world lights participate; no mall geometry is resubmitted.
-      scene.traverseVisible(node=>{if(node.isLight) node.layers.enable(2);});
       camera.layers.set(2); scene.background=null;
       renderer.autoClear=false; renderer.shadowMap.autoUpdate=false;
       renderer.render(scene,camera); state.submissions++;
