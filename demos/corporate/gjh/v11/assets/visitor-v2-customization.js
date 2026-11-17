@@ -14,22 +14,24 @@ export function createVisitorCustomization(root) {
     glasses: find('V2_glasses_'),
     backpack: find('V2_backpack_'),
     watch: find('V2_watch_'),
+    shoes: find('V2_shoes_'),
   };
   if (Object.values(groups).some(group => group.length === 0))
     throw new Error('Visitor customization components are missing');
   const originals = new Map();
-  for (const part of [...groups.hair, ...groups.alternateHair, ...groups.skin]) {
+  for (const part of [...groups.hair, ...groups.alternateHair, ...groups.skin, ...groups.shoes]) {
     originals.set(part, part.material);
     part.material = part.material.clone();
   }
   const colors = {light: 0xefb37e, medium: 0xb7774d, dark: 0x75472f};
   const hairColors = {brown: 0x412b1c, black: 0x211e20};
-  let state = {hair: 'swept', hairColor: 'brown', outfit: 'polo', skin: 'light', glasses: true, backpack: true, watch: true};
+  const shoeColors = {cream: null, black: 0x292c31, brown: 0x805b43};
+  let state = {hair: 'swept', hairColor: 'brown', outfit: 'polo', skin: 'light', shoes: 'cream', glasses: true, backpack: true, watch: true};
   const visible = (group, value) => { for (const part of group) part.visible = value; };
   function apply(changes = {}) {
     const next = {...state, ...changes};
     if (!['swept', 'short'].includes(next.hair) || !(next.hairColor in hairColors) ||
-        !['polo', 'hoodie'].includes(next.outfit) || !(next.skin in colors) ||
+        !['polo', 'hoodie'].includes(next.outfit) || !(next.skin in colors) || !Object.hasOwn(shoeColors, next.shoes) ||
         !['glasses', 'backpack', 'watch'].every(key => typeof next[key] === 'boolean'))
       throw new TypeError('Invalid visitor customization');
     visible(groups.hair, next.hair === 'swept');
@@ -38,6 +40,10 @@ export function createVisitorCustomization(root) {
     visible(groups.hoodie, next.outfit === 'hoodie');
     for (const part of [...groups.hair, ...groups.alternateHair]) part.material.color.setHex(hairColors[next.hairColor]);
     for (const part of groups.skin) part.material.color.setHex(colors[next.skin]);
+    for (const part of groups.shoes) {
+      if (next.shoes === 'cream') part.material.color.copy(originals.get(part).color);
+      else part.material.color.setHex(shoeColors[next.shoes]);
+    }
     for (const key of ['glasses', 'backpack', 'watch']) visible(groups[key], next[key]);
     state = next;
     return {...state};

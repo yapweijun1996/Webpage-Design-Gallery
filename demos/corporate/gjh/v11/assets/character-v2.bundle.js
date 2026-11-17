@@ -73,25 +73,27 @@ function createVisitorCustomization(root) {
     skin: find("V2_body_Warm_peach_skin"),
     glasses: find("V2_glasses_"),
     backpack: find("V2_backpack_"),
-    watch: find("V2_watch_")
+    watch: find("V2_watch_"),
+    shoes: find("V2_shoes_")
   };
   if (Object.values(groups).some((group) => group.length === 0))
     throw new Error("Visitor customization components are missing");
   const originals = new Map;
-  for (const part of [...groups.hair, ...groups.alternateHair, ...groups.skin]) {
+  for (const part of [...groups.hair, ...groups.alternateHair, ...groups.skin, ...groups.shoes]) {
     originals.set(part, part.material);
     part.material = part.material.clone();
   }
   const colors = { light: 15709054, medium: 12023629, dark: 7685935 };
   const hairColors = { brown: 4270876, black: 2170400 };
-  let state = { hair: "swept", hairColor: "brown", outfit: "polo", skin: "light", glasses: true, backpack: true, watch: true };
+  const shoeColors = { cream: null, black: 2698289, brown: 8411971 };
+  let state = { hair: "swept", hairColor: "brown", outfit: "polo", skin: "light", shoes: "cream", glasses: true, backpack: true, watch: true };
   const visible = (group, value) => {
     for (const part of group)
       part.visible = value;
   };
   function apply(changes = {}) {
     const next = { ...state, ...changes };
-    if (!["swept", "short"].includes(next.hair) || !(next.hairColor in hairColors) || !["polo", "hoodie"].includes(next.outfit) || !(next.skin in colors) || !["glasses", "backpack", "watch"].every((key) => typeof next[key] === "boolean"))
+    if (!["swept", "short"].includes(next.hair) || !(next.hairColor in hairColors) || !["polo", "hoodie"].includes(next.outfit) || !(next.skin in colors) || !Object.hasOwn(shoeColors, next.shoes) || !["glasses", "backpack", "watch"].every((key) => typeof next[key] === "boolean"))
       throw new TypeError("Invalid visitor customization");
     visible(groups.hair, next.hair === "swept");
     visible(groups.alternateHair, next.hair === "short");
@@ -101,6 +103,12 @@ function createVisitorCustomization(root) {
       part.material.color.setHex(hairColors[next.hairColor]);
     for (const part of groups.skin)
       part.material.color.setHex(colors[next.skin]);
+    for (const part of groups.shoes) {
+      if (next.shoes === "cream")
+        part.material.color.copy(originals.get(part).color);
+      else
+        part.material.color.setHex(shoeColors[next.shoes]);
+    }
     for (const key of ["glasses", "backpack", "watch"])
       visible(groups[key], next[key]);
     state = next;
@@ -538,6 +546,7 @@ async function createCharacterV2(T, createLocomotionContinuity) {
   update("idle", 0);
   return {
     visual,
+    npcSource: gltf,
     update,
     updateLOD: (camera) => lod.update(camera),
     setCameraOccluded(value) {

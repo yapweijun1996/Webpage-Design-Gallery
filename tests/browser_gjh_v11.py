@@ -148,9 +148,15 @@ def hero_visibility_gallery(page, width, height):
 
 def upper_deck_gallery(page):
     assert page.evaluate('__mall.teleport("atrium")')
+    crowded = drive(page, 100)
+    assert crowded['npcs']['active'] > 0, crowded['npcs']
+    assert crowded['drawCalls'] <= 200, crowded['drawCalls']
+    print(json.dumps({'view': 'atrium-with-npcs', 'npcs': crowded['npcs']['active'],
+                      'drawCalls': crowded['drawCalls']}), flush=True)
     for point in ((10, 5.5), (-6.4, 5.5), (-6.4, 10)):
         walk_to(page, *point)
     assert state(page)['nearby'] == 'visitor-elevator', state(page)
+    assert any(word in page.locator('#inspect').inner_text().lower() for word in ('ride', 'call')), page.locator('#inspect').inner_text()
     page.locator('#inspect').click()
     drive(page, 4500)
     upper = state(page)
@@ -324,6 +330,25 @@ def run(capture=False):
                                 assert opened['doors'][zone] > .99, opened
                                 assert opened['drawCalls'] <= 200, (zone, opened['drawCalls'])
                                 assert 'Close' in page.locator('#inspect').inner_text()
+                                if zone == 'mili':
+                                    assert opened['npcs']['active'] > 0, opened['npcs']
+                                    print(json.dumps({'view': 'mili-open-with-npcs',
+                                                      'npcs': opened['npcs']['active'],
+                                                      'drawCalls': opened['drawCalls']}), flush=True)
+                                if zone == 'newmoon':
+                                    walk_to(page, -11.21, 1.35)
+                                    walk_to(page, -11.21, -7.55)
+                                    page.get_by_role('button', name='Pick up product', exact=True).click()
+                                    drive(page, 1000)
+                                    assert state(page)['character']['physicalProduct']['phase'] == 'held', state(page)
+                                    page.get_by_role('button', name='Return to shelf', exact=True).click()
+                                    drive(page, 1000)
+                                    assert state(page)['character']['physicalProduct']['phase'] == 'empty', state(page)
+                                    assert page.evaluate('__mall.teleport("newmoon")')
+                                    drive(page, 1000)
+                                    if state(page)['doors'][zone] < .99:
+                                        page.locator('#inspect').click()
+                                        drive(page, 1000)
                                 inside = drive(page, 1400, forward=1)
                                 assert inside['z'] < -.5, inside
                                 assert inside['drawCalls'] <= 200, (zone, inside['drawCalls'])

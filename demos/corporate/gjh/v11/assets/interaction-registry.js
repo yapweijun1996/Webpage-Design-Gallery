@@ -1,6 +1,7 @@
 // Entries stay owned by the world; this adapter also sees entries added after startup.
 export function createInteractionRegistry(entries, describe = () => ({})) {
   const cache = new WeakMap();
+  const actions = new Map();
   let selectionContext = {};
   function normalize(source) {
     let item = cache.get(source);
@@ -14,6 +15,18 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
       cache.set(source, item);
     }
     return item;
+  }
+  // Auxiliary actions share IDs with nearby entries but do not compete for
+  // proximity selection (for example, pickup alongside shelf inspection).
+  function register(source) {
+    let byId = actions.get(source.kind);
+    if (!byId) actions.set(source.kind, byId = new Map());
+    const item = normalize(source);
+    byId.set(item.id, item);
+    return item;
+  }
+  function get(kind, id) {
+    return actions.get(kind)?.get(id) || null;
   }
   function nearest(position, context = {}) {
     let selected = null, distance = Infinity;
@@ -33,5 +46,5 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
     if (!item || (item.availability && !item.availability(context, item))) return false;
     return item.handler?.(item, context) ?? false;
   }
-  return {normalize, nearest, dispatch};
+  return {normalize, nearest, dispatch, register, get};
 }

@@ -11,7 +11,8 @@
     {
       "file": "visitor-v2-customization.js",
       "source": "models/gjh-mall-visitor-v2/customization.js",
-      "sha256": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4"
+      "source_sha256": "7482521ea0ef2c6106344de36c01fbc56cefc5d72e044d732b832c5ee23d13c4",
+      "note": "Locally adapted for shoe colour customization; hash identifies the upstream source, not the adapted file."
     },
     {
       "file": "gjh-mall-visitor-v2-lod1.glb",
@@ -19,5 +20,5 @@
       "sha256": "f20065ac4bf3656f5762908237c7ceec5ac8648f05d7cd23c495b73ca899f1d6"
     }
   ],
-  "note": "Pinned exported bytes from the released Visitor v2 source. Public redistribution rights remain as described by the source metadata."
+  "note": "GLB exports are pinned bytes from the released Visitor v2 source; customization.js is locally adapted. Public redistribution rights remain as described by the source metadata."
 }

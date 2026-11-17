@@ -601,7 +601,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   function travelToStore(zone){
     const store=spatial.get(zone);
     if(!showing3D||dialog.open||guidePaused||!store?.available)return;
-    if(!interactionRegistry?.dispatch({kind:'travel',handler:()=>teleportListener?.(zone)})){announce('Store travel is unavailable right now. Please try again.');return;}
+    if(!interactionRegistry?.dispatch(interactionRegistry.get('travel',zone))){announce('Store travel is unavailable right now. Please try again.');return;}
     help.open=false;if(compactMap.matches)mallMap.open=false;
     announce(`At the ${store.label} storefront.`);scene.focus({preventScroll:true});
   }
@@ -628,7 +628,12 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   document.getElementById('list-title').tabIndex = -1;
 
   return {
-    setInteractionRegistry(registry) { interactionRegistry = registry; },
+    setInteractionRegistry(registry) {
+      interactionRegistry = registry;
+      for (const store of spatial.stores) registry.register({id:store.id,kind:'travel',prompt:`Visit ${store.label}`,
+        availability:()=>showing3D&&!dialog.open&&!guidePaused&&store.available,
+        handler:()=>teleportListener?.(store.id)});
+    },
     describeInteraction(item) {
       if (item.kind === 'open' && item.door) {
         const name = `${spatial.get(item.door.zone)?.label || 'Store'} door`;
@@ -638,7 +643,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       }
       const record = records.get(item.id);
       const kind = item.kind || (record?.action === 'seat' ? 'sit' : record?.action === 'elevator' ? 'travel' : record?.action === 'map' ? 'open' : 'inspect');
-      return {kind, prompt: kind === 'sit' ? 'Sit' : kind === 'open' ? 'Open' : kind === 'travel' ? 'Travel' : 'Inspect',
+      const prompt = record?.action === 'elevator' ? () => currentElevatorState ? (currentElevatorState.calling ? 'Calling elevator' : currentElevatorState.docked !== (currentZone === 'upper' ? currentElevatorUpper : 0) ? 'Call elevator' : `Ride to ${currentZone === 'upper' ? 'ground floor' : 'upper landing'}`) : 'Change level' : record?.action === 'map' ? 'Map' : kind === 'sit' ? 'Sit' : kind === 'open' ? 'Open' : kind === 'travel' ? 'Travel' : kind === 'pickup' ? 'Pick up' : 'Inspect';
+      return {kind, prompt,
         availability: () => records.has(item.id), handler: () => {
           if (dialog.open || bag.open || guidePaused || amenityPanel.dialog.open) return false;
           shelfFocus?.close();
@@ -786,7 +792,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         const isMap = record?.action === 'map';
         const touchOnly = matchMedia('(pointer: coarse)').matches;
         const prompt = typeof selectedInteraction?.prompt === 'function' ? selectedInteraction.prompt() : selectedInteraction?.prompt || 'Inspect';
-        inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? `Tap ${prompt}` : `Press F / tap ${prompt}`);
+        inspectButton.textContent = isMap ? (touchOnly ? `Tap to open ${prompt.toLowerCase()}` : `Press F / tap ${prompt}`) : (touchOnly ? `Tap ${prompt}` : `Press F / tap ${prompt}`);
         if (isShelf) inspectButton.textContent = 'Inspect';
         if(isBrandStory)inspectButton.textContent=touchOnly?'Tap story':'Press F / tap story';
         inspectButton.setAttribute('aria-label',isBrandStory?`Read the ${record.brand} brand story`:isMap?expanded?'Open the expanded mall map from the directory kiosk':'Open the three-store map from the directory kiosk':nearby?`Inspect ${records.get(nearby).name}`:'Inspect nearby display');
@@ -802,7 +808,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
       else if(nearby&&selectedInteraction?.kind==='sit'){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
-      else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;const action=elevatorState?(elevatorState.calling?'Calling elevator':elevatorState.docked!==(zone==='upper'?elevatorUpper:0)?'Call elevator':`Ride to ${zone==='upper'?'ground floor':'upper landing'}`):'Change level';inspectButton.textContent=action;inspectButton.setAttribute('aria-label',elevatorState?action:'Use elevator to change levels');}
+      else if(nearby&&selectedInteraction?.kind==='travel'){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;inspectButton.textContent=action;inspectButton.setAttribute('aria-label',action);}
       else if(nearby&&selectedInteraction?.kind==='open'&&selectedInteraction.door){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=records.get(nearby).name;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`${action} ${records.get(nearby).name}`);}
       const cart=updateCartControls();
       document.body.classList.toggle('is-pushing',Boolean(cart.active));

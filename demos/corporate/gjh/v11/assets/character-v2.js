@@ -86,7 +86,7 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
   }
   update('idle', 0);
   return {
-    visual, update, updateLOD:camera=>lod.update(camera),
+    visual, npcSource:gltf, update, updateLOD:camera=>lod.update(camera),
     setCameraOccluded(value){avatar.visible=!value;},
     setBagCount(value) { count = Math.max(0, Number(value) || 0); cart.setCount(count); },
     setCart(value) { pushing = Boolean(value) && cart.set(value); if (!value) cart.set(false); return !value || pushing; },

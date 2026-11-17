@@ -326,7 +326,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     capsule.setEnabled(true); vertical = 0; clearInput(); injected = null;
     restoreActionView(); sync(); updateCamera(0, true);
   }
-  return {body, capsule, camera, get visual() { return visual; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  return {body, capsule, camera, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     renderShelf(draw) {
       // The visitor can stand directly in front of the selected shelf. Exclude
       // only that presentation during the draw; retain all authored/gameplay state.

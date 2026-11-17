@@ -13,7 +13,7 @@ document.body.classList.toggle('is-expanded', expanded);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let three;
-let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null;
+let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
@@ -111,6 +111,7 @@ function heroVisibility(number) {
 const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
   elevator:elevator?.state||null, amenities: world?.amenities || null,
+  npcs: npcs?.state || null,
   theme: mallTheme?.state() || null,
   themeDecorations: world?.scene.children.filter(item=>item.userData.mallThemeDecoration).map(item=>item.userData.mallThemeDecoration) || [],
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
@@ -177,7 +178,7 @@ function tick() {
       leaf.body.setNextKinematicTranslation({x, y: 1.8, z: .05});
     }
   }
-  elevator?.update?.(STEP,player.state); player.update(STEP); physics.step(); player.sync(); player.updateCamera(STEP); updateHUD();
+  elevator?.update?.(STEP,player.state); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state); player.updateCamera(STEP); updateHUD();
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
@@ -191,8 +192,17 @@ function render(force = false) {
     atmosphere?.update(player.state);
     world.updateSigns(camera, canvas);
     const draw=()=>atmosphere.render(camera, expanded && Math.abs(player.state.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000);
-    if (shelfFocus?.open) player.renderShelf(draw);
-    else draw();
+    const renderScene=()=>shelfFocus?.open ? player.renderShelf(draw) : draw();
+    // Measure the actual view before adding ambient visitors. Camera movement,
+    // doors and shop LODs can change the non-NPC draw cost in a single frame.
+    if(npcs?.state.active) {
+      npcs.setVisible(false);
+      renderScene();
+      if(renderer.info.render.calls+npcs.state.drawCalls<=200) {
+        npcs.setVisible(true);
+        renderScene();
+      }
+    } else renderScene();
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
   }
@@ -232,7 +242,7 @@ ui.onTeleport(zone => {
   if (!player.teleport(zone)) return false;
   updateHUD(); render(); canvas.focus({preventScroll: true}); return true;
 });
-ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;const ok=sit?player.sit(id):player.stand();updateHUD();render();return ok;});
+ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();render();return ok;});
 ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
 document.addEventListener('keydown', event => {
   if(event.code==='Escape'&&!modes.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
@@ -277,6 +287,7 @@ function resize() {
   viewportWidth = innerWidth; viewportHeight = innerHeight;
   if (!width || !height) return;
   const profile = quality.resolve(width);
+  npcs?.setQuality({tier:profile.tier,mobile:width<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
   if (!contextLost) {
     if (resized || renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
       renderer.setPixelRatio(profile.pixelRatio); renderer.setSize(width, height, false);
@@ -391,6 +402,10 @@ async function initialize() {
   }
   if(mallTheme && !contextLost && !interrupted) await mallTheme.restore();
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded);
+  if(player.npcSource){
+    const {createNpcSystem} = await import('./assets/npcs.js');
+    npcs=createNpcSystem(T,{scene:world.scene,source:player.npcSource,seats:world.seats,physics,R,playerCollider:player.capsule,playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
+  }
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
@@ -437,4 +452,4 @@ initialize().catch(error => {
   console.error('3D mall initialization failed:', error);
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
-window.addEventListener('pagehide', event=>{if(!event.persisted) mallTheme?.destroy();});
+window.addEventListener('pagehide', event=>{if(!event.persisted) { mallTheme?.destroy(); npcs?.dispose(); }});

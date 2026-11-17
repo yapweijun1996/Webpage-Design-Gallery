@@ -908,6 +908,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     get visual() {
       return visual;
     },
+    get npcSource() {
+      return character.npcSource;
+    },
     sit,
     stand,
     setCart,
