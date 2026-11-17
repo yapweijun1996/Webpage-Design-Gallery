@@ -31,8 +31,8 @@ def run():
                 """))
                 page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/')
                 page.wait_for_function('window.__sceneReady && window.npcTest',timeout=90000)
-                if page.locator('#loader-enter-now').is_visible(): page.locator('#loader-enter-now').click()
-                page.locator('#app-loader').wait_for(state='hidden',timeout=45000)
+                # This test does not exercise early entry: let preparation finish normally.
+                page.locator('#app-loader').wait_for(state='hidden',timeout=90000)
                 result=page.evaluate('''() => {
                   const {scene,seats}=npcTest.options,system=npcTest.system;
                   __mall.teleport('mili'); __mall.setInput({forward:0}); __mall.step(500);

@@ -1025,7 +1025,15 @@ def run(capture=False):
                         elif failure=='wasm':
                             context.add_init_script('WebAssembly.instantiate=async()=>{throw new Error("Physics denied")};WebAssembly.instantiateStreaming=WebAssembly.instantiate')
                         page=context.new_page(); page.goto(url)
-                        if failure!='nojs': page.wait_for_function('window.__sceneFailed===true')
+                        if failure!='nojs':
+                            page.wait_for_function('window.__sceneFailed===true')
+                            assert page.locator('#app-loader').is_visible()
+                            assert page.locator('#loader-status').is_visible()
+                            assert page.locator('#loader-retry').is_visible() and page.locator('#loader-retry').is_enabled()
+                            assert page.locator('#loader-directory').is_visible()
+                            page.locator('#loader-directory').click()
+                            assert page.locator('#app-loader').is_hidden()
+                            assert page.locator('#store-list').evaluate('el => el === document.activeElement')
                         assert page.locator('#store-list').is_visible()
                         assert page.locator('.product-card').count()==4
                         assert page.locator('#mili-title').is_visible() and page.locator('#gogo-title').is_visible()
