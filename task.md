@@ -710,3 +710,12 @@ warmedEveryday renderer-resource restoration. Independent local approval passes;
 follow-up was published on main before the stage 11b request reduction was integrated.
 See docs/gjh-v11-stage9-theme-infrastructure.md and docs/evidence/gjh-stage9-acceptance.json.
 At this historical point the 45-request gate failed at 82; stage 11b later addressed it. Candidate brand permission and physical-device/AT limits remain open.
+
+## 2026-11-17 follow-up: shop displays, lighting, zoom lock (owner request)
+- [x] Zoom lock on v11 index/offline viewport (46a5df6, live, Pages deploy green); test `tests/gjh_v11_zoom_lock.test.mjs`.
+- [x] Integrate 8 of 15 new Blender models (pharmacy counter, soundbar, TV x3, keyboard, battery rack, cordless phone); 6 skipped with no matching shop; ice-cream cart and piano NOT FOUND. Committed on `omp/v11-newmodels-1117`, not pushed.
+- [x] Tiered lighting/atmosphere (main light, per-shop lights, procedural env, desktop-only bloom, faint fog); tests pass, draw calls max 200.
+- [ ] Taste gate: new displays still small/hidden behind mullions, scene still flat beige. Round 2: larger displays, stronger key-light contrast, re-inspect screenshots at 390 and 1440.
+- [ ] Push to main only after the taste gate passes; confirm Pages deploy and live version.
+- [ ] P1 model requests for the owner's AI agent: grand piano, chilled drinks/ice-cream freezer, ice-cream cart, mullion-free glazed storefront module, canned-food pyramid display.
+- [ ] Physical-device acceptance (deferred); public redistribution terms of the new model licences unspecified.
