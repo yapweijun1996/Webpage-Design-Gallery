@@ -1,10 +1,18 @@
 # Goh Joo Hin Pte Ltd — Company Profile
 
-> Research profile for an independent design concept. This document is not an official company publication and does not imply endorsement. Details are based on public sources reviewed on 11 November 2026 and should be confirmed with GJH before publication or business use.
+Independent public-source research for the gallery. Company and channel research updated on 17 November 2026 (Singapore). The New Moon product and artwork review below retains its 11 November capture date.
 
 ## Overview
 
-Goh Joo Hin Pte Ltd (GJH) is a Singapore business whose website describes activities in fast-moving consumer goods (FMCG), electronics, and health and nutrition. Its story began as a provision store on Rochor Road in the 1940s. Today, its website describes a regional network connecting brands and products with customers across Asia Pacific. [1]
+Goh Joo Hin Pte Ltd (GJH) develops food brands and distributes goods across food, electronics and health. One household might encounter it through a can of New Moon abalone, a school through a case of laksa paste, and an audio buyer through an LG promotion. Those are three different customers and three different routes to market. [GJH business history](https://www.gjhglobal.com/about-us/) · [Health Promotion Board supplier entry](https://www.hpb.gov.sg/schools/school-programmes/healthy-meals-suppliers-list/goh-joo-hin-pte-ltd/) · [LG Singapore promotion](https://www.lg.com/sg/tncs/lg-sound-suite-mix-and-match-promotion/)
+
+### Singapore company record
+
+| Question | Evidence |
+| --- | --- |
+| Which entity operates the eShop? | The shop terms identify **Goh Joo Hin Pte Ltd**, UEN **199306282E**, as operator. The same UEN resolves to a live exempt private company limited by shares in ACRA's October 2026 data. [Shop terms](https://www.gjheshop.com/terms-and-conditions/) · [ACRA record by UEN](https://data.gov.sg/api/action/datastore_search?resource_id=d_b58303c68e9cf0d2ae93b73ffdbfbfa1&q=199306282E&limit=1) |
+| When did the business begin? | GJH traces the Goh brothers' Rochor Road provision store to the **1940s**. **23 September 1993** is the incorporation date of the present company. New Moon dates its own brand and first abalone product to **1959**. [Company history](https://www.gjhglobal.com/about-us/) · [ACRA dataset, search by UEN](https://data.gov.sg/datasets/d_b58303c68e9cf0d2ae93b73ffdbfbfa1/view) · [New Moon history](https://www.gjhglobal.com/newmoon-history/) |
+| How is it registered? | ACRA records primary SSIC **46309** (other wholesale of food, beverages and tobacco) and secondary **46436** (wholesale of audio and video equipment, excluding electrical and electronic components). These codes describe registration categories. [ACRA record](https://data.gov.sg/api/action/datastore_search?resource_id=d_b58303c68e9cf0d2ae93b73ffdbfbfa1&q=199306282E&limit=1) · [SingStat classification](https://www.singstat.gov.sg/-/media/files/standards_and_classifications/industrial_classification/ssic2025report.pdf) |
 
 ## Business Areas
 
@@ -19,7 +27,10 @@ Goh Joo Hin Pte Ltd (GJH) is a Singapore business whose website describes activi
 | New Moon | A GJH-managed and distributed food product line; its history identifies abalone as the first product. [2][7] |
 | MILI | A GJH-managed and distributed canned food product line, including fruit, vegetables, meat, seafood, and sauces. [3] |
 | GOGO | A GJH-managed and distributed product line covering drinks and ice cream. [4] |
+| Flying Wheel | GJH includes Flying Wheel among its house brands in its SG60 account. Its own brand page features abalone. The two accounts give different dates for its beginnings. [GJH's SG60 account](https://www.theedgesingapore.com/SG60/heritage/tradition-inspires-tomorrow) · [Flying Wheel](https://www.gjhglobal.com/flying-wheel/) |
 | Borsch Med | A healthcare supplement brand described on GJH's website. [6] |
+
+The brand name Borsch Med also appears in a separate ACRA entry. **Borsch Med Pte. Ltd.**, UEN **200006993N**, was incorporated on **10 August 2000** and shares the Gul Avenue address. The brand history dates registration of the brand to **2004**. Shareholding between the two companies remains unverified. The [22-name relationship register](../../../../docs/gjh-multibrand-directory.md) distinguishes house brands, distribution milestones and storefront listings. [Borsch Med ACRA record](https://data.gov.sg/api/action/datastore_search?resource_id=d_3a3807c023c61ddfba947dc069eb53f2&q=200006993N&limit=1) · [Brand history](https://www.gjhglobal.com/borsch-med-history/)
 
 ## Selected History
 
@@ -28,15 +39,26 @@ Goh Joo Hin Pte Ltd (GJH) is a Singapore business whose website describes activi
 - **1981:** GJH's company timeline identifies MILI as its second house brand. [1]
 - **2004:** GJH's timeline records expansion into health through Borsch Med; the brand history states that Borsch Med was registered in 2004. [1][8]
 
-The company timeline places GOGO under 1982, while the GOGO page states 1986. This discrepancy remains unresolved; neither date should be presented as verified without confirmation. [1][4]
+GJH places GOGO and Flying Wheel together in its 1982 export milestone. Their own pages give 1986 and 2004, respectively. Use their products and export role in a heritage narrative and leave the individual founding years open. [Corporate timeline](https://www.gjhglobal.com/about-us/) · [GOGO](https://www.gjhglobal.com/gogo/) · [Flying Wheel](https://www.gjhglobal.com/flying-wheel/)
+
+The timeline dates its move into cordless phones with Gigaset to 2006, Sony personal entertainment to 2011, GP Batteries to 2016, Casio musical instruments and LG home entertainment to 2018, and SteelSeries gaming peripherals to 2025. LG provides separate evidence for a more recent, narrower role. It names GJH as a participating **retailer** in its Singapore Sound Suite campaign for 1–30 November 2026. Current distribution territories and exclusivity would require separate evidence. [GJH timeline](https://www.gjhglobal.com/about-us/) · [LG campaign terms](https://www.lg.com/sg/tncs/lg-sound-suite-mix-and-match-promotion/)
+
+Singapore's Community Development Councils also record a local community role. North East CDC and GJH organised the New Moon Big Walk on 1 August 2010 and jointly established a S$200,000 healthcare fund for seniors. The report gives separate figures for the walk's rice donations and the healthcare fund. [CDC FY2010 annual report, printed p. 14](https://file.go.gov.sg/cdcar-2010.pdf#page=16)
 
 ## Regional Presence
 
-GJH says its distribution network serves markets across Asia Pacific. Its examples include Singapore, Malaysia, Indonesia, China, Hong Kong, Thailand, Brunei, Vietnam, Cambodia, and the Philippines. This is not evidence that each product or brand is currently available in every market. [1]
+GJH describes a distributor network supported by warehousing, and names markets including Singapore, Malaysia, Indonesia, China, Hong Kong, Thailand, Brunei, Vietnam, Cambodia and the Philippines. Its contact page lists offices in Singapore and Senai, Johor. The New Moon page separately reports trademark protection in 17 markets. Use office locations for a contact map and verify the product and destination before making an availability claim. [Corporate profile](https://www.gjhglobal.com/about-us/) · [Office locations](https://www.gjhglobal.com/contact-us/) · [New Moon brand](https://www.gjhglobal.com/newmoon/)
 
-## Contact
+## Customers and channels
 
-GJH lists its Singapore office at **8 Gul Avenue, Singapore 629652** and provides an enquiry form and a Malaysia office address on its official contact page. For current contact details and business enquiries, use the [official contact page](https://www.gjh.com.sg/contact-us/). [9]
+| Audience | What the evidence shows | Suggested webpage action |
+| --- | --- | --- |
+| Retail shopper | GJH operates a multi-brand eShop. A New Zealand abalone listing specifies its own pack size and origin. | Show origin and weight on the individual item, then open the official listing. [eShop product](https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/) |
+| Institutional food buyer | Singapore's Health Promotion Board lists GJH as a supplier and gives examples of both MILI sauces and New Moon products, including laksa paste in cases of 24 × 100 g. | Give buyers a searchable product name, case size and supplier contact. [HPB supplier list](https://www.hpb.gov.sg/schools/school-programmes/healthy-meals-suppliers-list/goh-joo-hin-pte-ltd/) |
+| Corporate gift buyer | GJH offers staff gifts, charity packs and customised bulk orders through corporate sales. | Send an organiser choosing a quantity and occasion to the official corporate sales team. [Corporate sales](https://www.gjhglobal.com/corporate-sales/) |
+| Brand owner or trade partner | The company publishes a regional distribution profile and an enquiry route. Its Singapore office address is **8 Gul Avenue, Singapore 629652**, matching the ACRA record. | Let a partner identify the product line and market and reach the official enquiry form. [Business profile](https://www.gjhglobal.com/about-us/) · [Official contact](https://www.gjhglobal.com/contact-us/) |
+
+No audited revenue, channel mix, current market-share figure or complete subsidiary/shareholder register was established in this review. The channel examples support different navigation choices without estimating the size of each business.
 
 ## Verification and Use
 
@@ -48,7 +70,7 @@ For this project, the user confirmed authorization to use GJH/New Moon official 
 
 The subsequent [New Moon heritage/gifting brief](../../../../docs/new-moon-story-gifting-brief.md) separates the owner's proposed consumer-brand experience from this company profile, reconciles conflicting supplied claims, and records the Option A concept board. Its generated visuals and placeholder wordmark are not official brand or product assets.
 
-Research reviewed on 11 November 2026. This section records public-source evidence and editorial implications, not legal ownership certification or an independent product-quality assessment.
+Product and campaign material was reviewed on 11 November 2026. The 17 November update adds the Singapore trademark record to the brand history.
 
 ### Company, Brand and Product
 
@@ -57,6 +79,8 @@ GJH's company timeline identifies New Moon as a house brand; its brand page desc
 ### Historical Nuance
 
 New Moon's official history dates the brand to 1959. A GJH-attributed feature hosted by The Edge Singapore says it joined GJH's portfolio in the mid-1980s. A 19 January 2023 Vulcan Post article, explicitly marked as sponsored, describes an acquisition in the 1980s. These sources distinguish brand establishment from later portfolio ownership; no acquisition agreement or precise transaction date was verified. The Edge feature is company-attributed material, not independent confirmation. [7][10][11]
+
+An IPOS record ties the early history to a product. The New Moon mark for **canned abalone** was filed on **23 April 1959** and registered on **8 March 1960**. IPOS lists Goh Joo Hin Pte Ltd as the current proprietor. The record leaves the date GJH acquired the mark open. [IPOS record T5924841J](https://data.gov.sg/api/action/datastore_search?resource_id=d_6145acb2130bf781165258e76a584383&filters=%7B%22applicationNumber%22%3A%22T5924841J%22%7D&limit=1)
 
 Safe wording: "Established in 1959, New Moon is a food and beverage brand managed and distributed by Goh Joo Hin." Avoid asserting that GJH founded or acquired New Moon in 1959 without further evidence. [2][7]
 

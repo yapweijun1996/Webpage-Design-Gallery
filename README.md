@@ -8,9 +8,11 @@ Application **1.1.0** introduced the compact gallery layouts, responsive preview
 
 See the [1.1.0 release review](docs/ssot-release-review.md) for the actual verification scope. The static gate reports zero remaining declarations in its measured raw-style categories; this does not mean every layout dimension is tokenized. Physical-device testing, screen-reader sessions and field performance remain separate from the local browser evidence.
 
-## GJH brand planning
+## GJH research and the next company demo
 
-The [multi-brand directory and mall plan](docs/gjh-multibrand-directory.md) records the 22-name research scope, official channel evidence, historical relationships and unresolved candidates. It is documentation, not a claim that all proposed stores or products are implemented.
+The [GJH company profile](demos/corporate/gjh/research/company-profile.md) covers the Singapore company record, trading history, customers and sales channels. The [22-name brand register](docs/gjh-multibrand-directory.md) traces house brands, Singapore trademark records and reported distribution relationships to their sources.
+
+The [next-company recommendation](docs/next-company-demo.md) proposes Thow Kwang Pottery Jungle for a visitor and workshop guide, compares two alternatives, and outlines the first page.
 
 ## Browse
 
