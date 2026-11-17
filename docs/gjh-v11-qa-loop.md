@@ -27,3 +27,12 @@ Tests and draw-call budgets pass while the scene still looks flat and does not m
 - Round-1 displays are small or hidden behind mullions; scene still flat beige.
 - Missing models (owner's AI agent): grand piano, chilled freezer, ice-cream cart, mullion-free glazed storefront module, canned-food pyramid display.
 - Physical-device acceptance deferred; new model licences have unspecified public redistribution terms.
+
+## Core experience (owner, 2026-11-17): the acceptance target
+1. GTA-style free roaming: third-person character, walk, run, camera orbit, explore the mall (not clicking product cards).
+2. Real multi-floor mall (about 70 m x 60 m): central atrium, second-floor viewing deck, shops, corridors, escalators, rest areas, food area, directory kiosks, advertising lightboxes.
+3. Interactive products: walk up to a product (e.g. New Moon abalone can), Inspect, rotate in 3D, see the real package and official image, product info, add to Bag.
+4. Modular chibi characters: big head, small body, swappable hair, clothes, shoes, accessories; Idle, Walk, Run, Sit, Pick Up; NPCs in the mall.
+5. Desktop and mobile: WASD + mouse; full-screen joystick with Run, Interact, Camera, Map and Bag buttons; no large install.
+
+Every advisor round scores against these five items first, then the per-shop checklist.
