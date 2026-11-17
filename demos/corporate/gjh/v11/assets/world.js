@@ -6,7 +6,7 @@ import {createFurnishings} from './furnishings.js';
 import {createShell} from './shell.js';
 import {SHELL_LAYOUT} from './interior-shell-registry.js';
 import {spatial, storeCenterX} from './spatial.js';
-import {expandedLayout} from './expanded-layout.js';
+import {expandedLayout, shopEntrance} from './expanded-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 import {addShopSignAtlas} from './shop-signs.js';
 import {addExpandedStorefronts} from './expanded-storefronts.js';
@@ -41,7 +41,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
-  const ceilingObstacles=[];
+  const ceilingObstacles=[], shopObstacles=[];
   function ceilingBox(material,x,y,z,sx,sy,sz,hole=liftLayout.shaft){
     if(!expandedLift){box(material,x,y,z,sx,sy,sz);return [{minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2}];}
     const panels=cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole);
@@ -735,18 +735,39 @@ export async function createWorld(T, R, physics, expanded = false) {
     activeShopSlot=null;
     }
   if (expanded) {
-    // Planned bays remain physically closed; their glazing reveals the displays.
-    for (const bay of expandedLayout.slots.filter(item => !item.available)) {
-      const x=(bay.minX+bay.maxX)/2, z=(bay.minZ+bay.maxZ)/2;
-      box('ivory', x, .018, z, bay.maxX-bay.minX-.12, .025, bay.maxZ-bay.minZ-.12);
-      if (bay.side === 'north') {
-        collider(x, 2.6, 0, 9.9, 5.2, .25);
-        for (const edge of [bay.minX,bay.maxX]) box('ivory', edge, 2.8, -6, .2, 5.6, 12, true);
-      } else {
-        const front=bay.side === 'west' ? bay.maxX : bay.minX;
-        collider(front, 2.6, z, .25, 5.2, 7.9);
-        for (const edge of [bay.minZ,bay.maxZ]) box('ivory', x, 2.8, edge, 10, 5.6, .2, true);
+    const slide = addExpandedStorefronts(T,expandedLayout,scene);
+    for (const bay of expandedLayout.slots.slice(3)) {
+      const {x,z,alongX,alongZ,normalX,normalZ}=shopEntrance(bay);
+      const width = normalZ ? bay.maxX-bay.minX : bay.maxZ-bay.minZ;
+      const halfOpening=1.24, paneWidth=width/2-halfOpening;
+      const leaves=[];
+      for (const side of [-1,1]) {
+        const offset=side*(halfOpening+paneWidth/2);
+        collider(x+alongX*offset,1.96,z+alongZ*offset,
+          normalZ ? paneWidth : .18,3.92,normalZ ? .18 : paneWidth);
+        const body=physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(
+          x+alongX*side*.64+normalX*.025,1.97,z+alongZ*side*.64+normalZ*.025));
+        physics.createCollider(R.ColliderDesc.cuboid(normalZ ? .62 : .035,1.93,normalZ ? .035 : .62),body);
+        leaves.push({side,body});
       }
+      const door={
+        zone:`planned-space-${bay.number}`, x,z,open:0,
+        advance(visitor,dt,reducedMotion) {
+          const dx=visitor.x-x,dz=visitor.z-z;
+          const nearby=visitor.y<2 && Math.abs(dx*alongX+dz*alongZ)<2.25 &&
+            Math.abs(dx*normalX+dz*normalZ)<3.25;
+          const next=reducedMotion ? Number(nearby) : Math.max(0,Math.min(1,this.open+(nearby?1:-1)*dt*3));
+          if (next===this.open) return;
+          this.open=next;
+          const travel=1.30*next;
+          slide(bay.number,travel);
+          for (const {side,body} of leaves) {
+            const along=side*(.64+travel);
+            body.setNextKinematicTranslation({x:x+alongX*along+normalX*.025,y:1.97,z:z+alongZ*along+normalZ*.025});
+          }
+        }
+      };
+      doors.push(door);
     }
     // The closed glass entrance provides a visible boundary to the ground floor.
     for (const x of [-25,45]) box('ivory',x,3.3,18,.3,6.6,60,true);
@@ -826,10 +847,14 @@ export async function createWorld(T, R, physics, expanded = false) {
     for(const [x,z] of [[-9,4],[3,4],[-9,16],[3,16]])deckRailings.place('post',x,z);
     railingState=deckRailings?.finish(scene)||null;
     activeDeck=false;
-    addExpandedStorefronts(T,expandedLayout,scene);
     const shopSigns=await addShopSignAtlas(T,expandedLayout,scene);
     shopSigns.layers.enable(1);
     const interiors=await createExpandedInteriors(T,expandedLayout,scene);
+    for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
+      collider(x,y,z,width,height,depth);
+      shopObstacles.push({min:{x:x-width/2,y:y-height/2,z:z-depth/2},
+        max:{x:x+width/2,y:y+height/2,z:z+depth/2}});
+    }
     shopLodUpdates.push(interiors.update);
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
@@ -880,7 +905,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       if(!bay)continue;
       const x=(bay.minX+bay.maxX)/2;
       // The three occupied stores are visible through their north arcade doors.
-      const z=bay.available ? Math.min(bay.maxZ,Math.max(bay.minZ,visitor.z)) : (bay.minZ+bay.maxZ)/2;
+      const z=Number(bay.number)<=3 ? Math.min(bay.maxZ,Math.max(bay.minZ,visitor.z)) : (bay.minZ+bay.maxZ)/2;
       mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.z-z)<shopDistance;
       mesh.visible=mesh.userData.shopLodNear;
       if (mesh.visible && !deckVisible) furnishings.loadShopDetails(mesh.userData.shopSlot);
@@ -894,7 +919,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
-  const cameraObstacles=ceilingObstacles.concat(seats.filter(seat=>seat.floor===0).map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
+  const cameraObstacles=ceilingObstacles.concat(shopObstacles,seats.filter(seat=>seat.floor===0).map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
   let brandWallPromise=null;
   function ensureBrandWall(){
     if(!expanded)return Promise.reject(new Error('Brand wall is only available in the expanded mall'));

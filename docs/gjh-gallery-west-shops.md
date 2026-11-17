@@ -1,6 +1,6 @@
 # Blender gallery fixtures for S04–S11
 
-These eight display-only bays use local static GLBs from the owner’s [Blender-3D-Gallery](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/a87117622ed25efc5f804c9ee6ed0171e4946cf7/models). The shop assignments follow the architectural references in [the mall anchor gallery](mall-design-anchors/README.md). The products are illustrative, unbranded props. S05 uses a generic carton stand; no specific product or brand relationship is represented by the model.
+These eight walkable shops use local static GLBs from the owner’s [Blender-3D-Gallery](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/a87117622ed25efc5f804c9ee6ed0171e4946cf7/models). The shop assignments follow the architectural references in [the mall anchor gallery](mall-design-anchors/README.md). The products are illustrative, unbranded props. S05 uses a generic carton stand; no specific product or brand relationship is represented by the model.
 
 | Bay | Source model | Placement | Authored dimensions W × H × D (m) | Runtime primitives |
 |---|---|---|---:|---:|

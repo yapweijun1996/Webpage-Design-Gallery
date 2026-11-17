@@ -77,14 +77,16 @@ def run():
                 if width==390 and not visitor:
                     # Chromium dispatches actual touch events to the canvas, including pointer capture.
                     cdp=context.new_cdp_session(page);before=position(page)
-                    cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':200,'y':350}]})
-                    cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':200,'y':300}]})
+                    stick=page.locator('#joystick').bounding_box();x=stick['x']+stick['width']/2;y=stick['y']+stick['height']/2
+                    cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]})
+                    cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x,'y':y-35}]})
                     page.wait_for_timeout(350)
                     cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
                     assert position(page)['z'] < before['z']-.15, ('touch movement',before,position(page))
                 open_map(page)
-                assert page.locator('.expanded-map-number').count()==17
-                assert page.locator('.map-planned').count()==14
+                assert page.locator('#mall-map .expanded-map-number').count()==17
+                assert page.locator('[data-space-status="open"]').count()==14
+                assert page.locator('#map-destination option').count()==17
                 assert page.locator('[data-teleport]').count()==3
                 if args.screens and not visitor and width in (390,768,1440):
                     page.screenshot(path=str(args.screens/f'map-{width}.png'))
@@ -96,7 +98,9 @@ def run():
                     dot=page.locator('#player-dot')
                     assert abs(float(dot.get_attribute('cx'))-(x+25)*10)<1
                     assert abs(float(dot.get_attribute('cy'))-144)<1
-                    page.evaluate('__mall.setInput({forward:1});__mall.step(1600);__mall.setInput({forward:0});__mall.step(20)')
+                    inspect=page.locator('#inspect')
+                    if 'open' in (inspect.get_attribute('aria-label') or '').lower() and inspect.is_visible(): inspect.click()
+                    page.evaluate('__mall.setInput({forward:0,run:false});__mall.step(450);__mall.setInput({forward:1,run:false});__mall.step(1400);__mall.setInput({forward:0});__mall.step(20)')
                     assert position(page)['zone']==ident and position(page)['z']<0,position(page)
                     if ident!='gogo':open_map(page)
                 page.locator('#view-toggle').click()
@@ -121,7 +125,7 @@ def run():
                     assert page.evaluate('__mall.teleport("entry")')
                     for x,z in [(10,39),(32,39),(32,3),(-12,3),(-12,39),(10,39)]: move(page,x,z,2.65)
                     page.evaluate('__mall.setInput({forward:0});__mall.step(20)')
-                    page.locator('#scene-cart').click();assert position(page)['pushing']
+                    page.locator('#mall-tools > summary').click();page.locator('#scene-cart').click();assert position(page)['pushing']
                     for x,z in [(-12,39),(-12,3),(32,3),(32,39),(10,39)]: move(page,x,z,1.8)
                     print('PASS continuous loop: avatar clockwise, cart counterclockwise; end metrics:',position(page),flush=True)
                     if args.screens: page.screenshot(path=str(args.screens/'cart-1440.png'))

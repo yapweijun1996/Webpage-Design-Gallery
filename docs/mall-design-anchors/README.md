@@ -92,6 +92,12 @@ Four public-space anchors and seventeen AI-generated shopfront concepts. Select 
 
 [![Gigaset architectural concept](S17.webp)](S17.webp)
 
+## Inside all seventeen shops
+
+The map takes the player to the public side of each entrance. These captures use the normal third-person camera after the character crosses the threshold and walks around the displays. Each visit ends by walking back through the same door.
+
+[New Moon to Pien Tze Huang](runtime/walk-S01-S05.webp) · [Flying Wheel to Hormel](runtime/walk-S06-S11.webp) · [Zeria to Gigaset](runtime/walk-S12-S17.webp)
+
 ## Gallery furnishings in the 17 shops
 
 In-app browser views pair each reference with a shopfront view and a closer look at the gallery model. S01–S03 are photographed inside the open stores. S04–S17 are viewed through the glass from the arcade.
@@ -115,4 +121,4 @@ Each sheet pairs the design reference with the original and revised WebGL views 
 
 [Three open stores](runtime/open-stores-comparison.jpg) · [GOGO stools in the walkthrough](runtime/S03-bar-stools.webp) · [Directory model provenance](../gjh-public-architecture.md) · [Stool model provenance](../gjh-gogo-bar-stool.md)
 
-S01–S03 are enterable. S04–S17 are display-only rooms viewed from the concourse. Real-time materials simplify reflections, foliage and packaging. Casio now displays a baby grand and bench alongside its electronic keyboard.
+All seventeen shops can be explored on foot. The storefront comparison sheets were captured from the concourse. Real-time materials simplify reflections, foliage and packaging. Casio now displays a baby grand and bench alongside its electronic keyboard.

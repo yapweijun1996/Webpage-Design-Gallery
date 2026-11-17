@@ -925,7 +925,7 @@ var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
   maxX,
   minZ,
   maxZ,
-  available: number <= 3
+  available: true
 });
 var expandedLayout = Object.freeze({
   bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
@@ -948,17 +948,52 @@ var expandedLayout = Object.freeze({
     Object.freeze({ x: -12, z: 39 })
   ])
 });
-var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
+var plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map((slot2) => Object.freeze({
   id: `planned-space-${slot2.number}`,
   number: slot2.number,
   side: slot2.side,
-  status: "display-only",
+  status: "open",
   available: slot2.available
 })));
+function shopEntrance(slot2) {
+  const normalX = slot2.side === "west" ? 1 : slot2.side === "east" ? -1 : 0;
+  const normalZ = slot2.side === "north" ? 1 : 0;
+  return {
+    x: normalX > 0 ? slot2.maxX : normalX < 0 ? slot2.minX : (slot2.minX + slot2.maxX) / 2,
+    z: normalZ ? slot2.maxZ : (slot2.minZ + slot2.maxZ) / 2,
+    normalX,
+    normalZ,
+    alongX: normalZ,
+    alongZ: -normalX,
+    yaw: Math.atan2(normalX, normalZ)
+  };
+}
+var shopArrivals = new Map(plannedSpaces.map((store) => {
+  const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
+  return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
+}));
+var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
+function expandedStoreAt(x, z) {
+  const original = storeAt(x, z, true);
+  if (original)
+    return original;
+  const index = expandedLayout.slots.findIndex((slot2, i) => i >= 3 && x > slot2.minX && x < slot2.maxX && z > slot2.minZ && z < slot2.maxZ);
+  return index >= 3 ? plannedSpaces[index - 3] : null;
+}
 var expandedMapPoint = (x, z) => ({
   x: Math.max(0, Math.min(700, (x + 25) * 10)),
   y: Math.max(0, Math.min(600, (z + 12) * 10))
 });
+
+// demos/corporate/gjh/v11/assets/store-destinations.js
+function storeDestinations(expanded, root = document) {
+  if (!expanded)
+    return spatial.stores;
+  return [...spatial.stores, ...plannedSpaces.map((space) => ({
+    ...space,
+    label: root.getElementById(space.id).dataset.plannedBrand
+  }))];
+}
 
 // demos/corporate/gjh/v11/assets/feature-kiosk.js
 var FEATURE_KIOSK_ID = "gjh-feature-kiosk";
@@ -975,7 +1010,6 @@ var FEATURE_KIOSK_RECORD = Object.freeze({
 
 // demos/corporate/gjh/v11/assets/ui.js
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-var plannedSideLabels = Object.freeze({ north: "North side", west: "West side", east: "East side" });
 function createUI(expanded = false) {
   const scene = document.getElementById("scene");
   const experience = document.getElementById("experience");
@@ -987,7 +1021,7 @@ function createUI(expanded = false) {
   if (listSummary) {
     const labels = listSummary.querySelectorAll("strong"), separators = listSummary.querySelectorAll("span");
     if (expanded) {
-      labels[1].textContent = "3 open stores";
+      labels[1].textContent = "14 concept stores";
     } else {
       labels[1].textContent = "4 products";
       labels[2].hidden = true;
@@ -995,6 +1029,11 @@ function createUI(expanded = false) {
       separators[1].hidden = true;
     }
   }
+  const conceptDirectory = document.getElementById("planned-spaces-directory");
+  conceptDirectory.hidden = !expanded;
+  conceptDirectory.open = expanded;
+  const destinations = storeDestinations(expanded);
+  const destinationById = new Map(destinations.map((store) => [store.id, store]));
   const viewToggle = document.getElementById("view-toggle");
   const directoryEnter3D = document.getElementById("directory-enter-3d");
   const storeVisitButtons = [...document.querySelectorAll("[data-visit-store]")];
@@ -1022,9 +1061,9 @@ function createUI(expanded = false) {
   const playerDot = document.getElementById("player-dot");
   const floorplan = document.querySelector(".floorplan"), mapCaption = document.querySelector(".map-caption");
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel = expanded ? `Expanded ground-floor preview: ${expandedLayout.slots.length} numbered spaces, including ${spatial.stores.length} open stores and ${plannedSpaces.length} display-only storefronts. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel = expanded ? `Ground floor: ${destinations.length} stores open to explore. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute("aria-label", floorplanLabel);
-  const mapCaptionText = [...mapCaption.childNodes].find((n) => n.nodeType === Node.TEXT_NODE && n.textContent.includes("You are here"));
+  const mapCaptionText = [...mapCaption.childNodes].find((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
   const inspectPrompt = document.getElementById("inspect-prompt");
   const inspectButton = document.getElementById("inspect");
   const nearbyName = document.getElementById("nearby-name");
@@ -1297,11 +1336,13 @@ function createUI(expanded = false) {
   layoutLink.href = layoutURL.href;
   layoutLink.textContent = expanded ? "Classic 3-store view" : "Return to the expanded mall";
   document.getElementById("layout-preview-notice").hidden = !expanded;
-  document.getElementById("layout-preview-notice").textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} display-only storefronts.`;
-  if (expanded)
-    document.getElementById("planned-spaces-directory").open = true;
   if (expanded) {
-    document.getElementById("layout-preview-notice").textContent = `— Ground-floor preview: 3 open stores and 14 display-only storefronts. ${new URLSearchParams(location.search).get("visitor") === "v1" ? "The lift is available with Visitor v2." : "The lift serves the small upper viewing level; stow the cart before travel."} Facilities remain planned.`;
+    document.getElementById("layout-preview-notice").textContent = "Ground floor: 17 stores open to explore.";
+    const destinationSelect = document.getElementById("map-destination");
+    for (const store of destinations)
+      destinationSelect.add(new Option(`${store.number} · ${store.label}`, store.id));
+    document.getElementById("map-destination-controls").hidden = false;
+    document.getElementById("map-visit").addEventListener("click", () => travelToStore(destinationSelect.value));
     const ns = "http://www.w3.org/2000/svg";
     floorplan.setAttribute("viewBox", "0 0 700 600");
     floorplan.setAttribute("preserveAspectRatio", "xMidYMid meet");
@@ -1316,20 +1357,22 @@ function createUI(expanded = false) {
     playerDot.setAttribute("r", "10");
     for (const bay of expandedLayout.slots) {
       const origin = expandedMapPoint(bay.minX, bay.minZ);
-      let rect = bay.available ? floorplan.querySelector(`[data-map-store="${spatial.stores[Number(bay.number) - 1].id}"]`) : document.createElementNS(ns, "rect");
-      rect.setAttribute("class", bay.available ? "map-store" : "map-store map-planned");
-      for (const [key, value] of Object.entries({ x: origin.x + 2, y: origin.y + 2, width: (bay.maxX - bay.minX) * 10 - 4, height: (bay.maxZ - bay.minZ) * 10 - 4, rx: 3 }))
-        rect.setAttribute(key, value);
-      if (!bay.available) {
-        const space = plannedSpaces.find((item) => item.number === bay.number);
-        rect.setAttribute("data-space-id", space.id);
-        rect.setAttribute("data-space-status", space.status);
-        const title = document.createElementNS(ns, "title");
-        const brand = document.getElementById(space.id).dataset.plannedBrand;
-        title.textContent = `${space.number} · ${brand} · ${plannedSideLabels[space.side]} · Display only · No entry`;
-        rect.append(title);
+      const store = destinations[Number(bay.number) - 1];
+      let rect = floorplan.querySelector(`[data-map-store="${store.id}"]`);
+      if (!rect) {
+        rect = document.createElementNS(ns, "rect");
+        rect.dataset.mapStore = store.id;
+        rect.dataset.spaceId = store.id;
+        rect.dataset.spaceStatus = store.status;
+        rect.setAttribute("class", "map-store");
         floorplan.insertBefore(rect, playerDot);
       }
+      for (const [key, value] of Object.entries({ x: origin.x + 2, y: origin.y + 2, width: (bay.maxX - bay.minX) * 10 - 4, height: (bay.maxZ - bay.minZ) * 10 - 4, rx: 3 }))
+        rect.setAttribute(key, value);
+      const tooltip = document.createElementNS(ns, "title");
+      tooltip.textContent = `${store.number} · ${store.label}`;
+      rect.append(tooltip);
+      rect.addEventListener("click", () => travelToStore(store.id));
       const label = document.createElementNS(ns, "text");
       label.setAttribute("class", "expanded-map-number");
       label.setAttribute("x", origin.x + (bay.maxX - bay.minX) * 5);
@@ -1338,7 +1381,7 @@ function createUI(expanded = false) {
       label.textContent = bay.number;
       floorplan.insertBefore(label, playerDot);
     }
-    document.querySelector(".map-scale").textContent = `${plannedSpaces.length} display-only storefronts`;
+    document.querySelector(".map-scale").textContent = "17 stores";
   }
   const mapServices = [];
   let servicesLegend = null;
@@ -1404,8 +1447,8 @@ function createUI(expanded = false) {
     if (article.dataset.brand)
       article.dataset.brandName = store.label;
   }
-  storeList.querySelector('[data-store-filter="all"]').textContent = expanded ? "All open stores (3)" : `All stores (${spatial.stores.length})`;
-  storeList.querySelector(".list-summary strong").textContent = expanded ? "17-store plan" : `${spatial.stores.length} stores`;
+  storeList.querySelector('[data-store-filter="all"]').textContent = expanded ? "Featured stores (3)" : `All stores (${spatial.stores.length})`;
+  storeList.querySelector(".list-summary strong").textContent = expanded ? "17 stores" : `${spatial.stores.length} stores`;
   function focusMap() {
     notifyMode();
     mapButtons[0]?.focus({ preventScroll: true });
@@ -1484,7 +1527,7 @@ function createUI(expanded = false) {
   records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for (const [id, name] of [["service-desk", "Guest services"], ["wayfinding-west", "Store directions"], ["wayfinding-east", "Store directions"], ["featured-showcase", "New Moon featured collection"]])
     records.set(id, { name, action: "amenity" });
-  const zones = { atrium: "Courtyard", ...Object.fromEntries(spatial.stores.map((store) => [store.id, store.label])), upper: "Upper level" };
+  const zones = { atrium: "Courtyard", ...Object.fromEntries(destinations.map((store) => [store.id, store.label])), upper: "Upper level" };
   let available = false;
   let showing3D = false;
   let currentZone = "atrium";
@@ -1610,7 +1653,7 @@ function createUI(expanded = false) {
     headerMap.setAttribute("aria-expanded", String(next && mallMap.open));
     if (moveFocus)
       (next ? scene : document.getElementById("list-title")).focus({ preventScroll: true });
-    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded ? "Store directory open. The 17-store mall plan includes three open stores and verified product images." : "Store directory open. All three stores and verified product images are available below.");
+    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded ? "Store directory open. Explore all 17 stores and four featured products." : "Store directory open. All three stores and verified product images are available below.");
     viewListener?.(next);
     notifyMode();
   }
@@ -1691,7 +1734,7 @@ function createUI(expanded = false) {
   viewToggle.addEventListener("click", () => setView(!showing3D, true));
   directoryEnter3D.addEventListener("click", () => setView(true, true));
   function visitStore(id) {
-    if (!available || !spatial.get(id)?.available)
+    if (!available || !destinationById.get(id)?.available)
       return;
     setView(true);
     travelToStore(id);
@@ -1810,16 +1853,17 @@ function createUI(expanded = false) {
     button2.addEventListener("click", () => inspect(button2.dataset.inspect));
   }
   function travelToStore(zone) {
-    const store = spatial.get(zone);
+    const store = destinationById.get(zone);
     if (!showing3D || dialog.open || !store?.available)
       return;
     if (!interactionRegistry?.dispatch(interactionRegistry.get("travel", zone))) {
       announce("Store travel is unavailable right now. Please try again.");
       return;
     }
+    if (expanded)
+      document.getElementById("map-destination").value = zone;
     help.open = false;
-    if (compactMap.matches)
-      mallMap.open = false;
+    mallMap.open = false;
     announce(`At the ${store.label} storefront.`);
     scene.focus({ preventScroll: true });
   }
@@ -1831,14 +1875,18 @@ function createUI(expanded = false) {
     else {
       storeFilter = "all";
       updateCatalog();
-      const title = document.getElementById(`${zone}-title`);
+      const title = document.getElementById(`${zone}-title`) || document.getElementById(zone)?.querySelector("h3");
+      if (!title)
+        return;
+      if (conceptDirectory.contains(title))
+        conceptDirectory.open = true;
       title.tabIndex = -1;
       title.scrollIntoView({ block: "start" });
       title.focus({ preventScroll: true });
     }
   }
   function openAmenity(id) {
-    const storeActions = spatial.stores.filter((store) => store.available).map((store) => ({ id: store.id, label: { en: `Visit ${store.label}`, "zh-CN": `前往 ${store.label}` }, onSelect: () => navigateStore(store.id) }));
+    const storeActions = destinations.filter((store) => store.available).map((store) => ({ id: store.id, label: { en: `Visit ${store.label}`, "zh-CN": `前往 ${store.label}` }, onSelect: () => navigateStore(store.id) }));
     const directory = { id: "directory", label: { en: "Browse store directory", "zh-CN": "浏览店铺目录" }, onSelect: () => setView(false, true) };
     if (id === "featured-showcase") {
       return amenityPanel.open({ title: { en: "New Moon featured collection", "zh-CN": "New Moon 精选产品" }, description: { en: "Choose a product to view its official image and details. The display door stays closed; the 3D cans are unofficial visual demonstrations.", "zh-CN": "选择产品查看官方图片与详情。展柜门保持关闭，3D 罐身为非官方视觉示意。" }, actions: [...document.querySelectorAll("[data-product]")].map((card) => {
@@ -1848,7 +1896,7 @@ function createUI(expanded = false) {
       }) });
     } else {
       const desk = id === "service-desk";
-      return amenityPanel.open({ title: desk ? { en: "Guest services", "zh-CN": "访客服务" } : { en: "Find your store", "zh-CN": "寻找店铺" }, description: desk ? { en: "Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.", "zh-CN": "选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。" } : { en: "Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.", "zh-CN": "一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。" }, actions: [...storeActions, directory, ...desk && showing3D ? [{ id: "help", label: { en: "How to explore", "zh-CN": "如何探索" }, onSelect: () => showGuide() }] : []] });
+      return amenityPanel.open({ title: desk ? { en: "Guest services", "zh-CN": "访客服务" } : { en: "Find your store", "zh-CN": "寻找店铺" }, description: desk ? { en: "Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.", "zh-CN": "选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。" } : expanded ? { en: "Choose a store to go to its entrance.", "zh-CN": "选择店铺即可前往入口。" } : { en: "Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.", "zh-CN": "一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。" }, actions: [...storeActions, directory, ...desk && showing3D ? [{ id: "help", label: { en: "How to explore", "zh-CN": "如何探索" }, onSelect: () => showGuide() }] : []] });
     }
   }
   for (const button2 of document.querySelectorAll("[data-amenity]")) {
@@ -1864,7 +1912,7 @@ function createUI(expanded = false) {
         if (available && showing3D)
           tutorial.report("interact");
       });
-      for (const store of spatial.stores)
+      for (const store of destinations)
         registry2.register({
           id: store.id,
           kind: "travel",
@@ -1875,7 +1923,7 @@ function createUI(expanded = false) {
     },
     describeInteraction(item) {
       if (item.kind === "open" && item.door) {
-        const name = `${spatial.get(item.door.zone)?.label || "Store"} door`;
+        const name = `${destinationById.get(item.door.zone)?.label || "Store"} door`;
         records.set(item.id, { name, action: "door" });
         return {
           kind: "open",
@@ -1964,7 +2012,7 @@ function createUI(expanded = false) {
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
       for (const button2 of storeVisitButtons)
-        button2.hidden = false;
+        button2.hidden = !destinationById.has(button2.dataset.visitStore);
       for (const button2 of cardStoreButtons)
         button2.hidden = false;
       guideReopen.hidden = false;
@@ -1985,7 +2033,7 @@ function createUI(expanded = false) {
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
       for (const button2 of storeVisitButtons)
-        button2.hidden = false;
+        button2.hidden = !destinationById.has(button2.dataset.visitStore);
       for (const button2 of cardStoreButtons)
         button2.hidden = false;
       guideReopen.hidden = false;
@@ -2649,6 +2697,7 @@ function setAttribute(element2, name, value) {
     element2.setAttribute(name, text);
 }
 function createSpatialHud({ expanded = false, root = document } = {}) {
+  const shops = new Map(storeDestinations(expanded, root).map((store) => [store.id, store]));
   const floor = root.getElementById("floor-indicator");
   const target = root.getElementById("nearest-target");
   const interact = root.getElementById("control-interact");
@@ -2704,7 +2753,7 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
     }) {
       const upper = zone === "upper";
       const floorLabel = upper ? "Floor 02 - Upper Level" : "Floor 01 - Atrium";
-      const shop = !upper && spatial.get(zone);
+      const shop = !upper && shops.get(zone);
       setText(floor, shop ? `${floorLabel} · ${shop.label}` : floorLabel);
       const mapContext = travelling ? "Ground-floor plan · Lift in transit" : upper ? "Ground-floor plan · You are on Floor 02" : "Ground-floor plan · You are here";
       setText(context, mapContext);
@@ -3026,7 +3075,7 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
 }), writable: false });
 function updateHUD() {
   const p = player.state;
-  currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : storeAt(p.x, p.z, expanded)?.id || "atrium";
+  currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
   if (expanded && currentZone === "upper" && !brandWallStarted) {
     brandWallStarted = true;
     world.ensureBrandWall().then(({ records }) => {
@@ -3048,6 +3097,10 @@ function tick() {
     return;
   const p = player.state;
   for (const door of world.doors) {
+    if (door.advance) {
+      door.advance(p, STEP, reducedMotion2.matches);
+      continue;
+    }
     if (expanded && (p.y > 2 || Math.hypot(p.x - door.x, p.z) > 5))
       door.targetOpen = false;
     const open = expanded ? door.targetOpen : p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
@@ -3144,7 +3197,7 @@ function fallback(message, terminal = true) {
   ui.fallback(message);
 }
 ui.onTeleport((zone) => {
-  if (!ready || player.state.elevatorTravel || !spatial.arrival(zone))
+  if (!ready || player.state.elevatorTravel || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone)))
     return false;
   manual = false;
   player.cancelCollection();

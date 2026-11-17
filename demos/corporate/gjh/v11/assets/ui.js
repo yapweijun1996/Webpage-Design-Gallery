@@ -5,13 +5,13 @@ import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
-import {expandedLayout, expandedMapPoint, plannedSpaces} from './expanded-layout.js';
+import {expandedLayout, expandedMapPoint} from './expanded-layout.js';
+import {storeDestinations} from './store-destinations.js';
 import {liftLayout} from './lift-layout.js';
 import {icon} from './icons.js';
 import {FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD} from './feature-kiosk.js';
 
 
-const plannedSideLabels = Object.freeze({north: 'North side', west: 'West side', east: 'East side'});
 export function createUI(expanded = false) {
   const scene = document.getElementById('scene');
   const experience = document.getElementById('experience');
@@ -21,9 +21,14 @@ export function createUI(expanded = false) {
   const listSummary=document.querySelector('.list-summary');
   if(listSummary){
     const labels=listSummary.querySelectorAll('strong'),separators=listSummary.querySelectorAll('span');
-    if(expanded){labels[1].textContent='3 open stores';}
+    if(expanded){labels[1].textContent='14 concept stores';}
     else{labels[1].textContent='4 products';labels[2].hidden=true;separators[0].textContent=' / ';separators[1].hidden=true;}
   }
+  const conceptDirectory = document.getElementById('planned-spaces-directory');
+  conceptDirectory.hidden = !expanded;
+  conceptDirectory.open = expanded;
+  const destinations = storeDestinations(expanded);
+  const destinationById = new Map(destinations.map(store => [store.id, store]));
   const viewToggle = document.getElementById('view-toggle');
   const directoryEnter3D = document.getElementById('directory-enter-3d');
   const storeVisitButtons = [...document.querySelectorAll('[data-visit-store]')];
@@ -45,9 +50,9 @@ export function createUI(expanded = false) {
   const playerDot = document.getElementById('player-dot');
   const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel=expanded ? `Expanded ground-floor preview: ${expandedLayout.slots.length} numbered spaces, including ${spatial.stores.length} open stores and ${plannedSpaces.length} display-only storefronts. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel=expanded ? `Ground floor: ${destinations.length} stores open to explore. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute('aria-label',floorplanLabel);
-  const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.includes('You are here'));
+  const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.trim());
   const inspectPrompt = document.getElementById('inspect-prompt');
   const inspectButton = document.getElementById('inspect');
   const nearbyName = document.getElementById('nearby-name');
@@ -247,10 +252,12 @@ export function createUI(expanded = false) {
 layoutLink.href=layoutURL.href;
 layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded mall';
   document.getElementById('layout-preview-notice').hidden=!expanded;
-  document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} display-only storefronts.`;
-  if (expanded) document.getElementById('planned-spaces-directory').open = true;
   if (expanded) {
-    document.getElementById('layout-preview-notice').textContent = `— Ground-floor preview: 3 open stores and 14 display-only storefronts. ${new URLSearchParams(location.search).get('visitor') === 'v1' ? 'The lift is available with Visitor v2.' : 'The lift serves the small upper viewing level; stow the cart before travel.'} Facilities remain planned.`;
+    document.getElementById('layout-preview-notice').textContent = 'Ground floor: 17 stores open to explore.';
+    const destinationSelect = document.getElementById('map-destination');
+    for (const store of destinations) destinationSelect.add(new Option(`${store.number} · ${store.label}`, store.id));
+    document.getElementById('map-destination-controls').hidden = false;
+    document.getElementById('map-visit').addEventListener('click', () => travelToStore(destinationSelect.value));
     const ns='http://www.w3.org/2000/svg';
     floorplan.setAttribute('viewBox','0 0 700 600'); floorplan.setAttribute('preserveAspectRatio','xMidYMid meet');
     const background=floorplan.querySelector('.map-courtyard');
@@ -262,22 +269,26 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     playerDot.setAttribute('r','10');
     for(const bay of expandedLayout.slots){
       const origin=expandedMapPoint(bay.minX,bay.minZ);
-      let rect=bay.available ? floorplan.querySelector(`[data-map-store="${spatial.stores[Number(bay.number)-1].id}"]`) : document.createElementNS(ns,'rect');
-      rect.setAttribute('class',bay.available?'map-store':'map-store map-planned');
-      for(const [key,value] of Object.entries({x:origin.x+2,y:origin.y+2,width:(bay.maxX-bay.minX)*10-4,height:(bay.maxZ-bay.minZ)*10-4,rx:3}))rect.setAttribute(key,value);
-      if(!bay.available) {
-        const space = plannedSpaces.find(item => item.number === bay.number);
-        rect.setAttribute('data-space-id', space.id); rect.setAttribute('data-space-status', space.status);
-        const title = document.createElementNS(ns, 'title');
-        const brand = document.getElementById(space.id).dataset.plannedBrand;
-        title.textContent = `${space.number} · ${brand} · ${plannedSideLabels[space.side]} · Display only · No entry`;
-        rect.append(title); floorplan.insertBefore(rect,playerDot);
+      const store = destinations[Number(bay.number)-1];
+      let rect = floorplan.querySelector(`[data-map-store="${store.id}"]`);
+      if (!rect) {
+        rect = document.createElementNS(ns, 'rect');
+        rect.dataset.mapStore = store.id;
+        rect.dataset.spaceId = store.id;
+        rect.dataset.spaceStatus = store.status;
+        rect.setAttribute('class','map-store');
+        floorplan.insertBefore(rect, playerDot);
       }
+      for(const [key,value] of Object.entries({x:origin.x+2,y:origin.y+2,width:(bay.maxX-bay.minX)*10-4,height:(bay.maxZ-bay.minZ)*10-4,rx:3}))rect.setAttribute(key,value);
+      const tooltip = document.createElementNS(ns, 'title');
+      tooltip.textContent = `${store.number} · ${store.label}`;
+      rect.append(tooltip);
+      rect.addEventListener('click', () => travelToStore(store.id));
       const label=document.createElementNS(ns,'text');label.setAttribute('class','expanded-map-number');
       label.setAttribute('x',origin.x+(bay.maxX-bay.minX)*5);label.setAttribute('y',origin.y+(bay.maxZ-bay.minZ)*5+6);
       label.setAttribute('text-anchor','middle');label.textContent=bay.number;floorplan.insertBefore(label,playerDot);
     }
-    document.querySelector('.map-scale').textContent=`${plannedSpaces.length} display-only storefronts`;
+    document.querySelector('.map-scale').textContent = '17 stores';
   }
   const mapServices=[];
   let servicesLegend=null;
@@ -322,8 +333,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     article.querySelector('.store-story > .eyebrow').textContent=`${store.number} / The ${store.label} store`;
     if (article.dataset.brand) article.dataset.brandName=store.label;
   }
-  storeList.querySelector('[data-store-filter="all"]').textContent=expanded?'All open stores (3)':`All stores (${spatial.stores.length})`;
-  storeList.querySelector('.list-summary strong').textContent=expanded?'17-store plan':`${spatial.stores.length} stores`;
+  storeList.querySelector('[data-store-filter="all"]').textContent=expanded?'Featured stores (3)':`All stores (${spatial.stores.length})`;
+  storeList.querySelector('.list-summary strong').textContent=expanded?'17 stores':`${spatial.stores.length} stores`;
   function focusMap() {
     // Publish the footer reservation before revealing the focused destination.
     notifyMode();
@@ -369,7 +380,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
-  const zones = { atrium: 'Courtyard', ...Object.fromEntries(spatial.stores.map(store=>[store.id,store.label])), upper: 'Upper level' };
+  const zones = { atrium: 'Courtyard', ...Object.fromEntries(destinations.map(store=>[store.id,store.label])), upper: 'Upper level' };
   let available = false;
   let showing3D = false;
   let currentZone = 'atrium';
@@ -461,7 +472,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     headerMap.hidden = !next;
     headerMap.setAttribute('aria-expanded', String(next && mallMap.open));
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
-    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded?'Store directory open. The 17-store mall plan includes three open stores and verified product images.':'Store directory open. All three stores and verified product images are available below.');
+    announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded?'Store directory open. Explore all 17 stores and four featured products.':'Store directory open. All three stores and verified product images are available below.');
     viewListener?.(next);
     notifyMode();
   }
@@ -519,7 +530,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
   directoryEnter3D.addEventListener('click', () => setView(true, true));
   function visitStore(id) {
-    if (!available || !spatial.get(id)?.available) return;
+    if (!available || !destinationById.get(id)?.available) return;
     setView(true);
     travelToStore(id);
   }
@@ -610,19 +621,20 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     button.addEventListener('click', () => inspect(button.dataset.inspect));
   }
   function travelToStore(zone){
-    const store=spatial.get(zone);
+    const store=destinationById.get(zone);
     if(!showing3D||dialog.open||!store?.available)return;
     if(!interactionRegistry?.dispatch(interactionRegistry.get('travel',zone))){announce('Store travel is unavailable right now. Please try again.');return;}
-    help.open=false;if(compactMap.matches)mallMap.open=false;
+    if(expanded)document.getElementById('map-destination').value=zone;
+    help.open=false;mallMap.open=false;
     announce(`At the ${store.label} storefront.`);scene.focus({preventScroll:true});
   }
   for(const button of mapButtons)button.addEventListener('click',()=>travelToStore(button.dataset.teleport));
   function navigateStore(zone){
     if(showing3D)travelToStore(zone);
-    else {storeFilter='all';updateCatalog();const title=document.getElementById(`${zone}-title`);title.tabIndex=-1;title.scrollIntoView({block:'start'});title.focus({preventScroll:true});}
+    else {storeFilter='all';updateCatalog();const title=document.getElementById(`${zone}-title`) || document.getElementById(zone)?.querySelector('h3');if(!title)return;if(conceptDirectory.contains(title))conceptDirectory.open=true;title.tabIndex=-1;title.scrollIntoView({block:'start'});title.focus({preventScroll:true});}
   }
   function openAmenity(id){
-    const storeActions=spatial.stores.filter(store=>store.available).map(store=>({id:store.id,label:{en:`Visit ${store.label}`,'zh-CN':`前往 ${store.label}`},onSelect:()=>navigateStore(store.id)}));
+    const storeActions=destinations.filter(store=>store.available).map(store=>({id:store.id,label:{en:`Visit ${store.label}`,'zh-CN':`前往 ${store.label}`},onSelect:()=>navigateStore(store.id)}));
     const directory={id:'directory',label:{en:'Browse store directory','zh-CN':'浏览店铺目录'},onSelect:()=>setView(false,true)};
     if(id==='featured-showcase'){
       return amenityPanel.open({title:{en:'New Moon featured collection','zh-CN':'New Moon 精选产品'},description:{en:'Choose a product to view its official image and details. The display door stays closed; the 3D cans are unofficial visual demonstrations.','zh-CN':'选择产品查看官方图片与详情。展柜门保持关闭，3D 罐身为非官方视觉示意。'},actions:[...document.querySelectorAll('[data-product]')].map(card=>{
@@ -632,7 +644,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       })});
     }else{
       const desk=id==='service-desk';
-      return amenityPanel.open({title:desk?{en:'Guest services','zh-CN':'访客服务'}:{en:'Find your store','zh-CN':'寻找店铺'},description:desk?{en:'Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.','zh-CN':'选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。'}:{en:'Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.','zh-CN':'一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。'},actions:[...storeActions,directory,...(desk&&showing3D?[{id:'help',label:{en:'How to explore','zh-CN':'如何探索'},onSelect:()=>showGuide()}]:[])]});
+      return amenityPanel.open({title:desk?{en:'Guest services','zh-CN':'访客服务'}:{en:'Find your store','zh-CN':'寻找店铺'},description:desk?{en:'Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.','zh-CN':'选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。'}:expanded?{en:'Choose a store to go to its entrance.','zh-CN':'选择店铺即可前往入口。'}:{en:'Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.','zh-CN':'一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。'},actions:[...storeActions,directory,...(desk&&showing3D?[{id:'help',label:{en:'How to explore','zh-CN':'如何探索'},onSelect:()=>showGuide()}]:[])]});
     }
   }
   for(const button of document.querySelectorAll('[data-amenity]')){button.hidden=false;button.addEventListener('click',()=>openAmenity(button.dataset.amenity));}
@@ -645,13 +657,13 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       unsubscribeInteractions = registry.subscribe(() => {
         if (available && showing3D) tutorial.report('interact');
       });
-      for (const store of spatial.stores) registry.register({id:store.id,kind:'travel',prompt:`Visit ${store.label}`,
+      for (const store of destinations) registry.register({id:store.id,kind:'travel',prompt:`Visit ${store.label}`,
         availability:()=>showing3D&&!dialog.open&&store.available,
         handler:()=>teleportListener?.(store.id)});
     },
     describeInteraction(item) {
       if (item.kind === 'open' && item.door) {
-        const name = `${spatial.get(item.door.zone)?.label || 'Store'} door`;
+        const name = `${destinationById.get(item.door.zone)?.label || 'Store'} door`;
         records.set(item.id, {name, action:'door'});
         return {kind:'open', prompt:() => item.door.targetOpen ? 'Close' : 'Open',
           handler:() => { if (dialog.open || bag.open || amenityPanel.dialog.open) return false; item.door.toggle(); scene.focus({preventScroll:true}); return true; }};
@@ -705,7 +717,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
-      for (const button of storeVisitButtons) button.hidden = false;
+      for (const button of storeVisitButtons) button.hidden = !destinationById.has(button.dataset.visitStore);
       for (const button of cardStoreButtons) button.hidden = false;
       guideReopen.hidden = false;
       if (railGuide) railGuide.hidden = false;
@@ -722,7 +734,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       updateMallTheme();
       directoryLoading.hidden = true;
       directoryEnter3D.hidden = false;
-      for (const button of storeVisitButtons) button.hidden = false;
+      for (const button of storeVisitButtons) button.hidden = !destinationById.has(button.dataset.visitStore);
       for (const button of cardStoreButtons) button.hidden = false;
       // A validated renderer grants availability, never an automatic view/focus change.
       guideReopen.hidden = false;

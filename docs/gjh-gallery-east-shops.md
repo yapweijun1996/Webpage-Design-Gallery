@@ -1,6 +1,6 @@
 # East arcade gallery models
 
-The six fixtures below use original Blender-3D-Gallery exports from commit `a87117622ed25efc5f804c9ee6ed0171e4946cf7`. Each local GLB matches the upstream export byte-for-byte. Placement follows the corresponding S12–S17 reference and keeps the fronts display-only.
+The six fixtures below use original Blender-3D-Gallery exports from commit `a87117622ed25efc5f804c9ee6ed0171e4946cf7`. Each local GLB matches the upstream export byte-for-byte. Placement follows the corresponding S12–S17 reference.
 
 | Bay | Source and asset rights | Placement | GLB bytes | Source primitives | SHA-256 |
 | --- | --- | --- | ---: | ---: | --- |

@@ -1,9 +1,10 @@
+import {spatial, storeAt} from './spatial.js';
 import {liftLayout} from './lift-layout.js';
 // Stage 1 coordinates translated to preserve the three existing shop interiors.
 // Plan origin is south-west; world X = plan X - 25, world Z = 48 - plan Y.
 const slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
   number: String(number).padStart(2, '0'), side, minX, maxX, minZ, maxZ,
-  available: number <= 3
+  available: true
 });
 export const expandedLayout = Object.freeze({
   bounds: Object.freeze({minX:-25, maxX:45, minZ:-12, maxZ:48}),
@@ -24,10 +25,33 @@ export const expandedLayout = Object.freeze({
 });
 // Slot geometry owns availability. Display names come from the brand kit and
 // are also present in the static directory for visitors without JavaScript.
-export const plannedSpaces = Object.freeze(expandedLayout.slots.filter(slot => !slot.available).map(slot => Object.freeze({
+export const plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map(slot => Object.freeze({
   id: `planned-space-${slot.number}`, number: slot.number, side: slot.side,
-  status: 'display-only', available: slot.available
+  status: 'open', available: slot.available
 })));
+
+// Facade normal points from the shop into the arcade, and its lateral axis
+// follows the local positive X of the window studio and door leaf meshes.
+export function shopEntrance(slot) {
+  const normalX = slot.side === 'west' ? 1 : slot.side === 'east' ? -1 : 0;
+  const normalZ = slot.side === 'north' ? 1 : 0;
+  return {
+    x:normalX > 0 ? slot.maxX : normalX < 0 ? slot.minX : (slot.minX+slot.maxX)/2,
+    z:normalZ ? slot.maxZ : (slot.minZ+slot.maxZ)/2,
+    normalX, normalZ, alongX:normalZ, alongZ:-normalX, yaw:Math.atan2(normalX,normalZ)
+  };
+}
+const shopArrivals = new Map(plannedSpaces.map(store => {
+  const entrance = shopEntrance(expandedLayout.slots[Number(store.number)-1]);
+  return [store.id,Object.freeze({x:entrance.x+2.4*entrance.normalX,z:entrance.z+2.4*entrance.normalZ,yaw:entrance.yaw})];
+}));
+export const expandedStoreArrival = id => shopArrivals.get(id) || spatial.arrival(id);
+export function expandedStoreAt(x,z) {
+  const original=storeAt(x,z,true);
+  if(original)return original;
+  const index=expandedLayout.slots.findIndex((slot,i)=>i>=3 && x>slot.minX && x<slot.maxX && z>slot.minZ && z<slot.maxZ);
+  return index>=3 ? plannedSpaces[index-3] : null;
+}
 
 export const expandedMapPoint = (x,z) => ({
   x: Math.max(0, Math.min(700, (x + 25) * 10)),

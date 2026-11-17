@@ -1,7 +1,7 @@
+import {shopEntrance} from './expanded-layout.js';
 import {loadBrandKit} from './shop-signs.js';
 
-// Static display fronts for unavailable bays and decorative trim for the
-// existing three entrances. The world owns all doors and collision boundaries.
+// Batch facade trim and sliding glass leaves across the expanded mall.
 export function addExpandedStorefronts(T, layout, scene) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
@@ -12,23 +12,25 @@ export function addExpandedStorefronts(T, layout, scene) {
       transparent: true, opacity: .065, depthWrite: false}), matrices: []}
   };
   const transform = new T.Object3D();
+  const slidingParts = new Map();
   for (const bay of layout.slots) {
     const number = Number(bay.number);
-    const angle = bay.side === 'north' ? 0 : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2;
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    const x = bay.side === 'north' ? (bay.minX + bay.maxX) / 2 : bay.side === 'west' ? bay.maxX : bay.minX;
-    const z = bay.side === 'north' ? bay.maxZ : (bay.minZ + bay.maxZ) / 2;
+    const {x,z,alongX:cos,normalX:sin,yaw:angle} = shopEntrance(bay);
     const width = (bay.side === 'north' ? bay.maxX - bay.minX : bay.maxZ - bay.minZ) - .6;
     // Local positive Z always faces the concourse.
-    const box = (kind, along, y, depth, w, h, d) => {
+    const box = (kind, along, y, depth, w, h, d, leaf = 0) => {
       transform.position.set(x + along * cos + depth * sin, y, z - along * sin + depth * cos);
       transform.rotation.set(0, angle, 0);
       transform.scale.set(w, h, d);
       transform.updateMatrix();
       batches[kind].matrices.push(transform.matrix.clone());
+      if (leaf) {
+        if (!slidingParts.has(bay.number)) slidingParts.set(bay.number, []);
+        slidingParts.get(bay.number).push({kind,index:batches[kind].matrices.length-1,dx:leaf*cos,dz:-leaf*sin});
+      }
       if (kind === 'accent') batches.accent.slots.push(bay.number);
     };
-    if (bay.available) {
+    if (number <= 3) {
       // Leave the existing 4.7 m entrance and its moving leaves unobstructed.
       box('accent', 0, 5.55, .32, width, .14, .24);
       for (const side of [-1, 1]) {
@@ -55,15 +57,15 @@ export function addExpandedStorefronts(T, layout, scene) {
       // Alternate slim and broad end markers to distinguish adjacent bays.
       box('accent', side * (width / 2 - .35), 3.69, .22, number % 2 ? .18 : .38, .32, .08);
 
-      // Two glazed, closed leaves keep a recognisable doorway in every bay.
-      box('glass', side * .64, 1.97, .025, 1.2, 3.86, .06);
-      box('frame', side * .64, .12, .09, 1.2, .24, .18);
-      box('brass', side * .019, 2, .1, .022, 4, .035);
-      box('brass', side * .18, 1.16, .21, .045, .55, .06);
+      // Each leaf retracts behind its fixed window when approached from either side.
+      box('glass', side * .64, 1.97, .025, 1.2, 3.86, .06, side);
+      box('frame', side * .64, .12, .09, 1.2, .24, .18, side);
+      box('brass', side * .019, 2, .1, .022, 4, .035, side);
+      box('brass', side * .18, 1.16, .21, .045, .55, .06, side);
     }
     box('frame', 0, 4, .08, width, .16, .24);
   }
-  const meshes = [];
+  const meshes = {};
   for (const [kind, batch] of Object.entries(batches)) {
     if (!batch.matrices.length) continue;
     const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
@@ -85,7 +87,14 @@ export function addExpandedStorefronts(T, layout, scene) {
     mesh.receiveShadow = kind !== 'glass';
     mesh.computeBoundingSphere();
     scene.add(mesh);
-    meshes.push(mesh);
+    meshes[kind] = mesh;
   }
-  return meshes;
+  const moved = new T.Matrix4();
+  return function slide(number, travel) {
+    for(const {kind,index,dx,dz} of slidingParts.get(number)) {
+      moved.copy(batches[kind].matrices[index]);
+      moved.elements[12]+=dx*travel; moved.elements[14]+=dz*travel;
+      meshes[kind].setMatrixAt(index,moved); meshes[kind].instanceMatrix.needsUpdate=true;
+    }
+  };
 }

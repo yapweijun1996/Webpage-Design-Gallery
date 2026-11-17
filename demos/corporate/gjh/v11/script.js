@@ -4,7 +4,7 @@ import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
-import {expandedLayout} from './assets/expanded-layout.js';
+import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
@@ -181,7 +181,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
-  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : storeAt(p.x, p.z, expanded)?.id || 'atrium';
+  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if(expanded&&currentZone==='upper'&&!brandWallStarted){
     brandWallStarted=true;
     world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();render();})
@@ -198,6 +198,7 @@ function tick() {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   for (const door of world.doors) {
+    if (door.advance) { door.advance(p, STEP, reducedMotion.matches); continue; }
     if (expanded && (p.y > 2 || Math.hypot(p.x - door.x, p.z) > 5)) door.targetOpen = false;
     const open = expanded ? door.targetOpen : p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
     door.open = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
@@ -257,7 +258,7 @@ function fallback(message, terminal = true) {
   cancelAnimationFrame(frame); frame = 0; modes.interrupt('fallback'); ui.fallback(message);
 }
 ui.onTeleport(zone => {
-  if (!ready || player.state.elevatorTravel || !spatial.arrival(zone)) return false;
+  if (!ready || player.state.elevatorTravel || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone))) return false;
   manual = false; player.cancelCollection(); player.setInput(null);
   if (!player.teleport(zone)) return false;
   updateHUD(); render(); canvas.focus({preventScroll: true}); return true;

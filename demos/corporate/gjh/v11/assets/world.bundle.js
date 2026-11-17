@@ -1280,7 +1280,7 @@ var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
   maxX,
   minZ,
   maxZ,
-  available: number <= 3
+  available: true
 });
 var expandedLayout = Object.freeze({
   bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
@@ -1303,13 +1303,30 @@ var expandedLayout = Object.freeze({
     Object.freeze({ x: -12, z: 39 })
   ])
 });
-var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
+var plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map((slot2) => Object.freeze({
   id: `planned-space-${slot2.number}`,
   number: slot2.number,
   side: slot2.side,
-  status: "display-only",
+  status: "open",
   available: slot2.available
 })));
+function shopEntrance(slot2) {
+  const normalX = slot2.side === "west" ? 1 : slot2.side === "east" ? -1 : 0;
+  const normalZ = slot2.side === "north" ? 1 : 0;
+  return {
+    x: normalX > 0 ? slot2.maxX : normalX < 0 ? slot2.minX : (slot2.minX + slot2.maxX) / 2,
+    z: normalZ ? slot2.maxZ : (slot2.minZ + slot2.maxZ) / 2,
+    normalX,
+    normalZ,
+    alongX: normalZ,
+    alongZ: -normalX,
+    yaw: Math.atan2(normalX, normalZ)
+  };
+}
+var shopArrivals = new Map(plannedSpaces.map((store) => {
+  const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
+  return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
+}));
 
 // demos/corporate/gjh/v11/assets/atrium-layout.js
 var point = (x, z) => Object.freeze({ x, z });
@@ -1411,7 +1428,7 @@ async function addShopSignAtlas(T, layout, scene) {
   layout.slots.forEach((bay) => {
     const index = Number(bay.number) - 1;
     const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX + 0.27 : bay.minX - 0.27;
-    const z = bay.side === "north" ? bay.available ? 0.48 : 0.26 : (bay.minZ + bay.maxZ) / 2;
+    const z = bay.side === "north" ? Number(bay.number) <= 3 ? 0.48 : 0.26 : (bay.minZ + bay.maxZ) / 2;
     const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
     const widthOnWall = bay.side === "north" ? 8.6 : 6.8;
     const height = 1.18, cos = Math.cos(angle), sin = Math.sin(angle);
@@ -1456,23 +1473,26 @@ function addExpandedStorefronts(T, layout, scene) {
     }), matrices: [] }
   };
   const transform = new T.Object3D;
+  const slidingParts = new Map;
   for (const bay of layout.slots) {
     const number = Number(bay.number);
-    const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX : bay.minX;
-    const z = bay.side === "north" ? bay.maxZ : (bay.minZ + bay.maxZ) / 2;
+    const { x, z, alongX: cos, normalX: sin, yaw: angle } = shopEntrance(bay);
     const width = (bay.side === "north" ? bay.maxX - bay.minX : bay.maxZ - bay.minZ) - 0.6;
-    const box = (kind, along, y, depth, w, h, d) => {
+    const box = (kind, along, y, depth, w, h, d, leaf = 0) => {
       transform.position.set(x + along * cos + depth * sin, y, z - along * sin + depth * cos);
       transform.rotation.set(0, angle, 0);
       transform.scale.set(w, h, d);
       transform.updateMatrix();
       batches[kind].matrices.push(transform.matrix.clone());
+      if (leaf) {
+        if (!slidingParts.has(bay.number))
+          slidingParts.set(bay.number, []);
+        slidingParts.get(bay.number).push({ kind, index: batches[kind].matrices.length - 1, dx: leaf * cos, dz: -leaf * sin });
+      }
       if (kind === "accent")
         batches.accent.slots.push(bay.number);
     };
-    if (bay.available) {
+    if (number <= 3) {
       box("accent", 0, 5.55, 0.32, width, 0.14, 0.24);
       for (const side of [-1, 1]) {
         box("accent", side * 2.47, 1.95, 0.21, 0.12, 3.7, 0.08);
@@ -1494,14 +1514,14 @@ function addExpandedStorefronts(T, layout, scene) {
       box("frame", side * 1.3, 2.02, 0.08, 0.12, 4.04, 0.24);
       box("brass", side * 1.3, 2.02, 0.22, 0.035, 3.72, 0.04);
       box("accent", side * (width / 2 - 0.35), 3.69, 0.22, number % 2 ? 0.18 : 0.38, 0.32, 0.08);
-      box("glass", side * 0.64, 1.97, 0.025, 1.2, 3.86, 0.06);
-      box("frame", side * 0.64, 0.12, 0.09, 1.2, 0.24, 0.18);
-      box("brass", side * 0.019, 2, 0.1, 0.022, 4, 0.035);
-      box("brass", side * 0.18, 1.16, 0.21, 0.045, 0.55, 0.06);
+      box("glass", side * 0.64, 1.97, 0.025, 1.2, 3.86, 0.06, side);
+      box("frame", side * 0.64, 0.12, 0.09, 1.2, 0.24, 0.18, side);
+      box("brass", side * 0.019, 2, 0.1, 0.022, 4, 0.035, side);
+      box("brass", side * 0.18, 1.16, 0.21, 0.045, 0.55, 0.06, side);
     }
     box("frame", 0, 4, 0.08, width, 0.16, 0.24);
   }
-  const meshes = [];
+  const meshes = {};
   for (const [kind, batch] of Object.entries(batches)) {
     if (!batch.matrices.length)
       continue;
@@ -1522,9 +1542,18 @@ function addExpandedStorefronts(T, layout, scene) {
     mesh.receiveShadow = kind !== "glass";
     mesh.computeBoundingSphere();
     scene.add(mesh);
-    meshes.push(mesh);
+    meshes[kind] = mesh;
   }
-  return meshes;
+  const moved = new T.Matrix4;
+  return function slide(number, travel) {
+    for (const { kind, index, dx, dz } of slidingParts.get(number)) {
+      moved.copy(batches[kind].matrices[index]);
+      moved.elements[12] += dx * travel;
+      moved.elements[14] += dz * travel;
+      meshes[kind].setMatrixAt(index, moved);
+      meshes[kind].instanceMatrix.needsUpdate = true;
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
@@ -1540,6 +1569,7 @@ var sage = 7767146;
 var charcoal = 2961458;
 var silver = 12895165;
 var white = 16250089;
+var shopIslandZ = -0.63;
 var shopLamp = 16770727;
 var finishes = {
   4: [14864301, 10976642, 15785927],
@@ -1558,10 +1588,11 @@ var finishes = {
   17: [11175012, 4406329, 14468520]
 };
 function buildWindowStudio(n, t, width, depth) {
-  const { box, column, disc, bar, arch, ring, ellipse, tapered } = t;
+  const { box, column, disc, bar, arch, ring, ellipse, tapered, block } = t;
   const [wall, base, floor] = finishes[n];
   const back = -depth / 2 + 0.38, front = depth / 2 - 0.18, side = width / 2 - 0.23, span = front - back, mid = (front + back) / 2;
   const cabinet = (x, z, w, h, d, body, cap) => {
+    block(x, (h + 0.26) / 2, z, w + 0.09, h + 0.26, d + 0.09);
     box(x, 0.12, z, w - 0.1, 0.23, d - 0.1, brass);
     box(x, 0.18 + h / 2, z, w, h, d, body);
     box(x, 0.21 + h, z, w + 0.09, 0.095, d + 0.09, cap);
@@ -1610,6 +1641,7 @@ function buildWindowStudio(n, t, width, depth) {
     }
   }
   function shelf(x, z, w, kind = "tin", c = base, arched = false) {
+    block(x, 1.62, z + 0.2, w, 3.18, 0.57);
     const frame = n >= 12 ? silver : brass;
     box(x, 1.62, z, w, 3.18, 0.12, wall);
     for (const s of [-1, 1])
@@ -1624,6 +1656,7 @@ function buildWindowStudio(n, t, width, depth) {
   }
   function sideShelf(s, c = oak, kind = "tin") {
     const x = s * (side - 0.29);
+    block(x - s * 0.18, 1.59, mid, 0.5, 3.13, span - 0.7);
     box(x, 1.58, mid, 0.15, 3.02, span - 0.7, wall);
     for (let row = 0;row < 4; row++) {
       const y = 0.55 + row * 0.66;
@@ -1647,6 +1680,7 @@ function buildWindowStudio(n, t, width, depth) {
   }
   function plant(x, z, h) {
     const y = 0.46;
+    block(x, 0.35, z, 0.49, 0.65, 0.49);
     tapered(x, y / 2 + 0.09, z, 0.23, 0.17, y, cream);
     for (let k = 0;k < 6; k++) {
       const a = k * 2.39, r = 0.26 + k % 2 * 0.09, dx = Math.cos(a) * r, dz = Math.sin(a) * r, top = h - k % 3 * 0.18;
@@ -1655,6 +1689,7 @@ function buildWindowStudio(n, t, width, depth) {
     }
   }
   function circleIsland(x, z, r, h, c) {
+    block(x, (h + 0.3) / 2, z, r * 2.06, h + 0.3, r * 2.06);
     column(x, 0.16, z, r * 0.89, 0.18, brass);
     column(x, 0.22 + h / 2, z, r, h, c);
     column(x, 0.25 + h, z, r * 1.03, 0.1, cream);
@@ -1673,11 +1708,17 @@ function buildWindowStudio(n, t, width, depth) {
       bar(x + a * w, y + b * h, z + 0.095, x + e * w, y + f * h, z + 0.095, 0.039, 15248796);
   }
   function sofa(x, z, c) {
+    block(x, 0.39, z, 1.66, 0.78, 0.8);
     box(x, 0.35, z, 1.6, 0.34, 0.77, c);
     box(x, 0.59, z - 0.32, 1.61, 0.47, 0.19, c);
     for (const k of [-1, 1])
       box(x + k * 0.75, 0.52, z, 0.16, 0.32, 0.71, c);
   }
+  block(0, 2.12, back, side * 2, 4.18, 0.13);
+  block(0, 4.19, mid, side * 2, 0.18, span);
+  for (const s of [-1, 1])
+    block(s * side, 2.1, mid, 0.13, 4.13, span);
+  block(0, 0.041, mid, side * 2, 0.08, span);
   box(0, 0.041, mid, side * 2, 0.08, span, floor);
   box(0, 2.12, back, side * 2, 4.18, 0.13, wall);
   box(0, 4.19, mid, side * 2, 0.18, span, cream);
@@ -1697,7 +1738,17 @@ function buildWindowStudio(n, t, width, depth) {
     sideShelf(-1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
     sideShelf(1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
   }
-  const rear = back + 0.26, island = mid + 1.23;
+  box(0, 3.69, back + 0.46, 3.68, 0.47, 0.27, brass);
+  const exitZ = front - 0.04;
+  box(0, 3.78, exitZ, 0.67, 0.29, 0.07, 1662791);
+  for (const x of [-0.165, 0.165])
+    box(x, 3.78, exitZ - 0.044, 0.026, 0.207, 0.016, pearl);
+  box(0, 3.885, exitZ - 0.044, 0.35, 0.022, 0.016, pearl);
+  disc(0.045, 3.826, exitZ - 0.06, 0.03, 0.018, pearl);
+  bar(0.02, 3.794, exitZ - 0.059, -0.015, 3.74, exitZ - 0.059, 0.034, pearl);
+  bar(-0.008, 3.75, exitZ - 0.06, 0.045, 3.7, exitZ - 0.06, 0.024, pearl);
+  bar(-0.008, 3.75, exitZ - 0.06, -0.074, 3.717, exitZ - 0.06, 0.024, pearl);
+  const rear = back + 0.26, island = shopIslandZ;
   const windowX = -side + 1.1, windowZ = front - 0.94;
   if ([6, 7, 8, 9, 11].includes(n))
     provisionDisplay(windowX, windowZ, n === 6 ? "pack" : n === 8 ? "jar" : "tin");
@@ -1716,6 +1767,7 @@ function buildWindowStudio(n, t, width, depth) {
     case 5:
       for (let s = -1;s <= 1; s++)
         shelf(s * 2.1, rear, 1.88, "tin", 13741441);
+      block(-side + 1.51, 1, mid - 1, 2.13, 2, 0.4);
       for (let i = 0;i < 5; i++)
         for (let j = 0;j < 4; j++) {
           const x = -side + 0.65 + i * 0.43, y = 0.43 + j * 0.4;
@@ -1807,6 +1859,7 @@ function buildWindowStudio(n, t, width, depth) {
     case 11:
       for (let i = -1;i <= 1; i++)
         shelf(i * 1.83, rear, 1.73, "tin", 9059902);
+      block(0, 0.58, island, 2.74, 1.16, 1.24);
       for (const x of [-1.21, 1.21])
         for (const dz of [-0.46, 0.46])
           box(x, 0.6, island + dz, 0.14, 1.05, 0.14, walnut);
@@ -1839,10 +1892,11 @@ function buildWindowStudio(n, t, width, depth) {
       for (let i = -15;i <= 15; i++)
         box(i * 0.185, 1.95, rear, 0.085, 3.67, 0.12, i % 3 ? walnut : oak);
       screen(0, 2.14, rear + 0.23, 2.33, 1.34);
-      sofa(-0.99, island, 10786692);
-      sofa(1.02, mid - 0.45, 7891807);
+      sofa(-1.46, island, 10786692);
+      sofa(0.44, mid - 1.66, 7891807);
       circleIsland(0.68, island + 0.48, 0.39, 0.32, walnut);
       for (const x of [-2.5, 2.5]) {
+        block(x, 1.09, rear + 0.58, 0.46, 1.99, 0.5);
         box(x, 1.09, rear + 0.58, 0.43, 1.99, 0.44, charcoal);
         for (const y of [0.72, 1.41])
           disc(x, y, rear + 0.826, 0.135, 0.036, silver);
@@ -1864,6 +1918,7 @@ function buildWindowStudio(n, t, width, depth) {
       circleIsland(0.71, island, 0.52, 0.37, oak);
       ringLight(0, mid, 1.38, 3.72);
       for (const x of [-side + 0.61, -side + 1.3]) {
+        block(x, 1.24, mid + 1, 0.62, 2.23, 0.66);
         box(x, 1.24, mid + 1, 0.61, 2.23, 0.64, silver);
         box(x, 1.44, mid + 1.34, 0.49, 0.035, 0.04, charcoal);
       }
@@ -1875,14 +1930,16 @@ function buildWindowStudio(n, t, width, depth) {
       for (let i = -15;i <= 15; i++)
         box(i * 0.19, 1.96, rear, 0.065, 3.61, 0.13, oak);
       cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak);
+      block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
+      block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
       for (const x of [0.46, 1.73])
-        box(x, 0.51, mid + 0.53, 0.13, 0.84, 0.13, charcoal);
-      box(1.1, 1.1, mid + 0.47, 1.63, 0.36, 0.72, charcoal);
+        box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
+      box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
       for (let i = 0;i < 19; i++)
-        box(0.38 + i * 0.08, 1.2, mid + 0.89, 0.074, 0.05, 0.25, pearl);
-      box(1.1, 0.61, mid + 1.56, 0.99, 0.16, 0.49, charcoal);
+        box(0.38 + i * 0.08, 1.2, mid - 0.51, 0.074, 0.05, 0.25, pearl);
+      box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
       for (const x of [0.74, 1.46])
-        box(x, 0.33, mid + 1.56, 0.08, 0.48, 0.36, walnut);
+        box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
       pendant(-1.36, mid - 1.3, 2.94, 0.26, brass);
       break;
     case 16:
@@ -1892,7 +1949,7 @@ function buildWindowStudio(n, t, width, depth) {
         for (let j = 0;j < 4; j++)
           packageRow(x, 0.66 + j * 0.56, rear + 0.15, 3, 0.22, "pack", base);
       }
-      for (const x of [-1.31, 0.87]) {
+      for (const x of [-1.62, 1.62]) {
         cabinet(x, island + (x > 0 ? 0.32 : 0), 1.48, 0.78, 0.98, base, white);
         packageRow(x, 1.09, island + 0.03, 4, 0.25, "pack", white);
       }
@@ -1928,24 +1985,24 @@ var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
   scale
 });
 var westShopPlacements = {
-  4: [fixture("mosquito-patch-pack", -1.57, 1.2875, 1.62)],
+  4: [fixture("mosquito-patch-pack", -1.57, 1.2875, shopIslandZ + 0.29)],
   5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
   6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
-  7: [fixture("stacked-can-pyramid", -1.18, 0.081, 3.62, -0.07, 0.88)],
+  7: [fixture("stacked-can-pyramid", -1.56, 0.081, 2.65, -0.07, 0.88)],
   8: [fixture("peanut-butter-jar-stand", -2.52, 0.081, 4.57, 0.015)],
   9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
-  10: [fixture("abalone-gift-box-display", -0.55, 1.09, 1.75)],
-  11: [fixture("food-display-cabinet", -1.18, 0.081, 3.28, -0.12)]
+  10: [fixture("abalone-gift-box-display", -0.55, 1.09, shopIslandZ + 0.42)],
+  11: [fixture("food-display-cabinet", -1.61, 0.081, 2.74, -0.12)]
 };
 
 // demos/corporate/gjh/v11/assets/gallery-east-shops.js
 var eastShopPlacements = {
-  12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.045, 2.92], yaw: 0.11, scale: 1.14 }],
-  13: [{ file: "gallery-assets/headphone-display-stand.glb", position: [-2.45, 0.045, 3.05], yaw: 0.18, scale: 1.2 }],
-  14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.045, 2.58], yaw: 0.08, scale: 1.03 }],
-  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.045, 2.47], yaw: 0.22, scale: 0.93 }],
-  16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.045, 2.81], yaw: 0.12, scale: 0.96 }],
-  17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-1.87, 0.045, 2.22], yaw: 1.08, scale: 0.86 }]
+  12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
+  13: [{ file: "gallery-assets/headphone-display-stand.glb", position: [-2.45, 0.081, 3.05], yaw: 0.18, scale: 1.2 }],
+  14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.081, 2.58], yaw: 0.08, scale: 1.03 }],
+  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 }],
+  16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.081, 2.81], yaw: 0.12, scale: 0.96 }],
+  17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-2.22, 0.081, 2.22], yaw: 1.5, scale: 0.86 }]
 };
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
@@ -1960,6 +2017,19 @@ var displayFiles = {
   17: ["cordless-phone-display"]
 };
 var galleryPlacements = { ...westShopPlacements, ...eastShopPlacements };
+var floorModelSize = {
+  "medicine-health-box-set": [0.6, 1.7, 0.35],
+  "instant-noodle-pack-display": [0.8, 1.8, 0.4],
+  "stacked-can-pyramid": [1.2, 1.8, 1.2],
+  "peanut-butter-jar-stand": [0.8, 1.02, 0.5],
+  "shelf-food-aisle": [1.2, 1.8, 0.5],
+  "food-display-cabinet": [1.25, 1.29, 0.7],
+  "headphone-display-stand": [0.6, 1.4, 0.4],
+  refrigerator: [0.63, 1.88, 0.76],
+  "grand-piano": [1.5, 1.82, 2.35],
+  "shelf-electronics-display": [1.2, 1.8, 0.45],
+  "lounge-sofa-bench": [3, 0.8, 1.5]
+};
 function displayPlacements(number, heroX, heroZ) {
   if (number === 14)
     return [[heroX - 0.55, 0.07, heroZ, 0.65], [heroX + 0.7, 0.07, heroZ, 0.8]];
@@ -1998,7 +2068,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
   const atlas = document.createElement("canvas");
   atlas.width = atlas.height = 2048;
   const atlasContext = atlas.getContext("2d");
-  const shops = [];
+  const shops = [], collisionBoxes = [];
   const models = new Map, gltfLoader = new GLTFLoader3;
   function loadModel(name) {
     if (!models.has(name)) {
@@ -2054,7 +2124,19 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     function cylinder(x, y, z, r, h2, color) {
       add(new T.CylinderGeometry(r, r, h2, 12), x, y, z, color);
     }
+    function block(x, y, z, w2, h2, d) {
+      const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
+      collisionBoxes.push({
+        x: group.position.x + x * c + z * sn,
+        y,
+        z: group.position.z - x * sn + z * c,
+        width: w2 * Math.abs(c) + d * Math.abs(sn),
+        height: h2,
+        depth: w2 * Math.abs(sn) + d * Math.abs(c)
+      });
+    }
     const tools = {
+      block,
       ellipse(x, y, z, rx, ry, rz, c, turn, lean) {
         add(new T.SphereGeometry(1, 10, 6).scale(rx, ry, rz).rotateZ(lean).rotateY(turn), x, y, z, c);
       },
@@ -2092,6 +2174,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     parts = [];
     heroOffset = side === "north" ? 3 : 2.55;
     const heroZ = front - 1;
+    block(heroOffset, 1.47, heroZ, 2.18, 2.94, 1.16);
     box(0, 0.12, heroZ, 2.06, 0.22, 0.98, creamStone(number));
     for (const x of [-1.04, 1.04])
       cylinder(x, 1.63, heroZ - 0.46, 0.023, 2.57, gold);
@@ -2180,19 +2263,41 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     atlasContext.fillRect(column * cell, row * cell, cell, cell);
     const posterWidth = 0.68, posterHeight = 0.51;
     const aspect = image.width / image.height, panelAspect = posterWidth / posterHeight;
-    const w = cell * Math.min(1, aspect / panelAspect), h = cell * Math.min(1, panelAspect / aspect);
-    atlasContext.drawImage(image, column * cell + (cell - w) / 2, row * cell + (cell - h) / 2, w, h);
+    const photoHeight = cell * 0.8, bandHeight = cell - photoHeight;
+    const w = cell * Math.min(1, aspect / panelAspect), h = photoHeight * Math.min(1, panelAspect / aspect);
+    atlasContext.drawImage(image, column * cell + (cell - w) / 2, row * cell + (photoHeight - h) / 2, w, h);
     textures[index].dispose();
-    const poster = new T.PlaneGeometry(posterWidth, posterHeight);
-    const uv = poster.attributes.uv;
-    for (let i = 0;i < uv.count; i++)
-      uv.setXY(i, (column + 0.004 + uv.getX(i) * 0.992) / 4, (3 - row + 0.004 + uv.getY(i) * 0.992) / 4);
-    poster.translate(heroOffset - 0.61, 0.42, heroZ + 0.56).applyMatrix4(group.matrix);
-    posterParts.push(poster);
+    const bandY = row * cell + photoHeight;
+    const signColours = { 7: "#732b27", 8: "#213967", 9: "#172b45", 11: "#723433" };
+    atlasContext.fillStyle = signColours[number] || "#183c30";
+    atlasContext.fillRect(column * cell, bandY, cell, bandHeight);
+    atlasContext.font = number >= 13 ? "600 57px Arial" : "bold 60px Georgia";
+    atlasContext.textAlign = "center";
+    atlasContext.textBaseline = "middle";
+    atlasContext.fillStyle = number === 9 ? "#ffd161" : "#fff0d0";
+    atlasContext.fillText(kit[`S${slot2.number}`].brand, column * cell + cell / 2, bandY + bandHeight * 0.51, cell - 32);
+    const tileBottom = (3 - row) / 4, bandTop = tileBottom + 0.2 / 4;
+    function atlasPanel(w2, h2, x, y, z, v0, v1) {
+      const panel = new T.PlaneGeometry(w2, h2), uv = panel.attributes.uv;
+      for (let i = 0;i < uv.count; i++)
+        uv.setXY(i, (column + 0.005 + uv.getX(i) * 0.99) / 4, v0 + (v1 - v0) * uv.getY(i));
+      panel.translate(x, y, z).applyMatrix4(group.matrix);
+      posterParts.push(panel);
+    }
+    atlasPanel(posterWidth, posterHeight, heroOffset - 0.61, 0.42, heroZ + 0.56, bandTop + 0.001, tileBottom + 0.249);
+    atlasPanel(3.63, 0.415, 0, 3.69, -front + 0.98, tileBottom + 0.001, bandTop - 0.001);
     group.visible = false;
     scene.add(group);
     const loadHero = loadDisplay;
     const placements = galleryPlacements[number];
+    for (const { file, position: [x, y, z], yaw = 0, scale = 1 } of placements) {
+      const size = floorModelSize[file.split("/").pop().replace(/\.glb$/, "")];
+      if (!size)
+        continue;
+      const [w2, h2, d] = size.map((value) => value * scale);
+      const c = Math.abs(Math.cos(yaw)), sn = Math.abs(Math.sin(yaw));
+      block(x, y + h2 / 2, z, c * w2 + sn * d, h2, sn * w2 + c * d);
+    }
     async function loadShop() {
       await Promise.all([
         loadHero?.(),
@@ -2262,7 +2367,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     else
       window.setTimeout(run, 100);
   }
-  return { update(visitor) {
+  return { collisionBoxes, update(visitor) {
     lastVisitor = { x: visitor.x, z: visitor.z };
     let nearest = null, nearestDistance = 11 * 11;
     for (const shop of shops) {
@@ -2646,7 +2751,7 @@ async function createWorld(T, R, physics, expanded = false) {
         if (!bay)
           continue;
         const x = (bay.minX + bay.maxX) / 2;
-        const z = bay.available ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
+        const z = Number(bay.number) <= 3 ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
         mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.z - z) < shopDistance;
         mesh.visible = mesh.userData.shopLodNear;
         if (mesh.visible && !deckVisible)
@@ -2676,7 +2781,7 @@ async function createWorld(T, R, physics, expanded = false) {
     const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
     let shellState = null;
     const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
-    const ceilingObstacles = [];
+    const ceilingObstacles = [], shopObstacles = [];
     const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
     scene.background = new T.Color(expanded ? 12244444 : 1650226);
@@ -3336,19 +3441,40 @@ async function createWorld(T, R, physics, expanded = false) {
         for (const r of panels)
           lightPool((r.minX + r.maxX) / 2, 0.052, (r.minZ + r.maxZ) / 2, width > depth ? r.maxX - r.minX : 4.5, width > depth ? 4.5 : r.maxZ - r.minZ);
       };
-      for (const bay of expandedLayout.slots.filter((item) => !item.available)) {
-        const x = (bay.minX + bay.maxX) / 2, z = (bay.minZ + bay.maxZ) / 2;
-        box("ivory", x, 0.018, z, bay.maxX - bay.minX - 0.12, 0.025, bay.maxZ - bay.minZ - 0.12);
-        if (bay.side === "north") {
-          collider(x, 2.6, 0, 9.9, 5.2, 0.25);
-          for (const edge of [bay.minX, bay.maxX])
-            box("ivory", edge, 2.8, -6, 0.2, 5.6, 12, true);
-        } else {
-          const front = bay.side === "west" ? bay.maxX : bay.minX;
-          collider(front, 2.6, z, 0.25, 5.2, 7.9);
-          for (const edge of [bay.minZ, bay.maxZ])
-            box("ivory", x, 2.8, edge, 10, 5.6, 0.2, true);
+      const slide = addExpandedStorefronts(T, expandedLayout, scene);
+      for (const bay of expandedLayout.slots.slice(3)) {
+        const { x, z, alongX, alongZ, normalX, normalZ } = shopEntrance(bay);
+        const width = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
+        const halfOpening = 1.24, paneWidth = width / 2 - halfOpening;
+        const leaves = [];
+        for (const side of [-1, 1]) {
+          const offset = side * (halfOpening + paneWidth / 2);
+          collider(x + alongX * offset, 1.96, z + alongZ * offset, normalZ ? paneWidth : 0.18, 3.92, normalZ ? 0.18 : paneWidth);
+          const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(x + alongX * side * 0.64 + normalX * 0.025, 1.97, z + alongZ * side * 0.64 + normalZ * 0.025));
+          physics.createCollider(R.ColliderDesc.cuboid(normalZ ? 0.62 : 0.035, 1.93, normalZ ? 0.035 : 0.62), body);
+          leaves.push({ side, body });
         }
+        const door = {
+          zone: `planned-space-${bay.number}`,
+          x,
+          z,
+          open: 0,
+          advance(visitor, dt, reducedMotion) {
+            const dx = visitor.x - x, dz = visitor.z - z;
+            const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25;
+            const next = reducedMotion ? Number(nearby) : Math.max(0, Math.min(1, this.open + (nearby ? 1 : -1) * dt * 3));
+            if (next === this.open)
+              return;
+            this.open = next;
+            const travel = 1.3 * next;
+            slide(bay.number, travel);
+            for (const { side, body } of leaves) {
+              const along = side * (0.64 + travel);
+              body.setNextKinematicTranslation({ x: x + alongX * along + normalX * 0.025, y: 1.97, z: z + alongZ * along + normalZ * 0.025 });
+            }
+          }
+        };
+        doors.push(door);
       }
       for (const x of [-25, 45])
         box("ivory", x, 3.3, 18, 0.3, 6.6, 60, true);
@@ -3429,10 +3555,16 @@ async function createWorld(T, R, physics, expanded = false) {
         deckRailings.place("post", x, z);
       railingState = deckRailings?.finish(scene) || null;
       activeDeck = false;
-      addExpandedStorefronts(T, expandedLayout, scene);
       const shopSigns = await addShopSignAtlas(T, expandedLayout, scene);
       shopSigns.layers.enable(1);
       const interiors = await createExpandedInteriors(T, expandedLayout, scene);
+      for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
+        collider(x, y, z, width, height, depth);
+        shopObstacles.push({
+          min: { x: x - width / 2, y: y - height / 2, z: z - depth / 2 },
+          max: { x: x + width / 2, y: y + height / 2, z: z + depth / 2 }
+        });
+      }
       shopLodUpdates.push(interiors.update);
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
@@ -3472,7 +3604,7 @@ async function createWorld(T, R, physics, expanded = false) {
     interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
     const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh));
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
-    const cameraObstacles = ceilingObstacles.concat(seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
+    const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;
     return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings: railingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {

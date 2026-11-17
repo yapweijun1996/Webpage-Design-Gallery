@@ -14,6 +14,17 @@ const displayFiles = {
 
 const galleryPlacements = {...westShopPlacements, ...eastShopPlacements};
 
+// Meter dimensions use the original GLB bounds. Register footprints at scene
+// creation, so late-loading furnishings cannot appear around a visitor.
+const floorModelSize = {
+  'medicine-health-box-set':[.60,1.70,.35], 'instant-noodle-pack-display':[.80,1.80,.40],
+  'stacked-can-pyramid':[1.20,1.80,1.20], 'peanut-butter-jar-stand':[.80,1.02,.50],
+  'shelf-food-aisle':[1.20,1.80,.50], 'food-display-cabinet':[1.25,1.29,.70],
+  'headphone-display-stand':[.60,1.40,.40], 'refrigerator':[.63,1.88,.76],
+  'grand-piano':[1.50,1.82,2.35], 'shelf-electronics-display':[1.20,1.80,.45],
+  'lounge-sofa-bench':[3,.80,1.50]
+};
+
 function displayPlacements(number, heroX, heroZ) {
   if (number === 14) return [[heroX-.55, .07, heroZ, .65], [heroX+.7, .07, heroZ, .8]];
   const height = number === 13 || number === 17 ? .94 : .07;
@@ -54,7 +65,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
   const atlas = document.createElement('canvas');
   atlas.width = atlas.height = 2048;
   const atlasContext = atlas.getContext('2d');
-  const shops = [];
+  const shops = [], collisionBoxes = [];
   const models = new Map(), gltfLoader = new GLTFLoader();
   function loadModel(name) {
     if (!models.has(name)) {
@@ -92,7 +103,15 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     }
     function box(x,y,z,w,h,d,color) { add(new T.BoxGeometry(w,h,d),x,y,z,color); }
     function cylinder(x,y,z,r,h,color) { add(new T.CylinderGeometry(r,r,h,12),x,y,z,color); }
+    function block(x,y,z,w,h,d) {
+      const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
+      collisionBoxes.push({
+        x:group.position.x+x*c+z*sn, y, z:group.position.z-x*sn+z*c,
+        width:w*Math.abs(c)+d*Math.abs(sn), height:h, depth:w*Math.abs(sn)+d*Math.abs(c)
+      });
+    }
     const tools = {
+      block,
       ellipse(x,y,z,rx,ry,rz,c,turn,lean) {
         add(new T.SphereGeometry(1,10,6).scale(rx,ry,rz).rotateZ(lean).rotateY(turn),x,y,z,c);
       },
@@ -125,6 +144,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     heroOffset = side === 'north' ? 3 : 2.55;
     // The merchandise fixture sits inside a window, clear of the doorway.
     const heroZ = front - 1;
+    block(heroOffset,1.47,heroZ,2.18,2.94,1.16);
     box(0,.12,heroZ,2.06,.22,.98,creamStone(number));
     // Narrow uprights and a picture light frame the hero without obscuring the room.
     for (const x of [-1.04,1.04]) cylinder(x,1.63,heroZ-.46,.023,2.57,gold);
@@ -215,18 +235,38 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     atlasContext.fillRect(column*cell,row*cell,cell,cell);
     const posterWidth = .68, posterHeight = .51;
     const aspect = image.width/image.height, panelAspect = posterWidth/posterHeight;
-    const w = cell*Math.min(1,aspect/panelAspect), h = cell*Math.min(1,panelAspect/aspect);
-    atlasContext.drawImage(image,column*cell+(cell-w)/2,row*cell+(cell-h)/2,w,h);
+    const photoHeight = cell*.80, bandHeight = cell-photoHeight;
+    const w = cell*Math.min(1,aspect/panelAspect), h = photoHeight*Math.min(1,panelAspect/aspect);
+    atlasContext.drawImage(image,column*cell+(cell-w)/2,row*cell+(photoHeight-h)/2,w,h);
     textures[index].dispose();
-    const poster = new T.PlaneGeometry(posterWidth,posterHeight);
-    const uv = poster.attributes.uv;
-    for(let i=0;i<uv.count;i++) uv.setXY(i,(column+.004+uv.getX(i)*.992)/4,(3-row+.004+uv.getY(i)*.992)/4);
-    poster.translate(heroOffset-.61,.42,heroZ+.56).applyMatrix4(group.matrix);
-    posterParts.push(poster);
+    const bandY=row*cell+photoHeight;
+    const signColours={7:'#732b27',8:'#213967',9:'#172b45',11:'#723433'};
+    atlasContext.fillStyle=signColours[number] || '#183c30';
+    atlasContext.fillRect(column*cell,bandY,cell,bandHeight);
+    atlasContext.font=number>=13?'600 57px Arial':'bold 60px Georgia';
+    atlasContext.textAlign='center'; atlasContext.textBaseline='middle';
+    atlasContext.fillStyle=number===9?'#ffd161':'#fff0d0';
+    atlasContext.fillText(kit[`S${slot.number}`].brand,column*cell+cell/2,bandY+bandHeight*.51,cell-32);
+    const tileBottom=(3-row)/4, bandTop=tileBottom+.2/4;
+    function atlasPanel(w,h,x,y,z,v0,v1) {
+      const panel=new T.PlaneGeometry(w,h), uv=panel.attributes.uv;
+      for(let i=0;i<uv.count;i++) uv.setXY(i,(column+.005+uv.getX(i)*.99)/4,v0+(v1-v0)*uv.getY(i));
+      panel.translate(x,y,z).applyMatrix4(group.matrix);
+      posterParts.push(panel);
+    }
+    atlasPanel(posterWidth,posterHeight,heroOffset-.61,.42,heroZ+.56,bandTop+.001,tileBottom+.249);
+    atlasPanel(3.63,.415,0,3.69,-front+.98,tileBottom+.001,bandTop-.001);
     group.visible = false;
     scene.add(group);
     const loadHero = loadDisplay;
     const placements = galleryPlacements[number];
+    for(const {file,position:[x,y,z],yaw=0,scale=1} of placements) {
+      const size=floorModelSize[file.split('/').pop().replace(/\.glb$/,'')];
+      if(!size) continue; // Countertop pack displays share their supporting island.
+      const [w,h,d]=size.map(value=>value*scale);
+      const c=Math.abs(Math.cos(yaw)), sn=Math.abs(Math.sin(yaw));
+      block(x,y+h/2,z,c*w+sn*d,h,sn*w+c*d);
+    }
     // Secondary furnishings belong to the bay, so they remain visible when a
     // visitor looks across adjoining windows and the nearest hero changes.
     async function loadShop() {
@@ -280,7 +320,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     if ('requestIdleCallback' in window) window.requestIdleCallback(run, {timeout: 1500});
     else window.setTimeout(run, 100);
   }
-  return {update(visitor) {
+  return {collisionBoxes, update(visitor) {
     lastVisitor = {x:visitor.x, z:visitor.z};
     let nearest = null, nearestDistance = 11*11;
     for (const shop of shops) {

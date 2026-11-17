@@ -1,4 +1,4 @@
-"""Verify display-only storefronts and their map/directory correspondence."""
+"""Verify visitable concept stores and their map/directory correspondence."""
 import functools
 import http.server
 import os
@@ -28,8 +28,12 @@ def run():
                 open_map(page)
                 labels = page.locator('#mall-map .expanded-map-number').all_text_contents()
                 assert labels == [f'{i:02d}' for i in range(1,18)], labels
-                assert '14 display-only storefronts' in page.locator('#mall-map .floorplan').get_attribute('aria-label')
-                assert page.locator('#mall-map .map-planned').count() == 14 and page.locator('[data-teleport]').count() == 3
+                assert '17 stores open to explore' in page.locator('#mall-map .floorplan').get_attribute('aria-label')
+                assert page.locator('#mall-map [data-map-store]').count() == 17 and page.locator('#map-destination option').count() == 17
+                page.locator('#map-destination').select_option('planned-space-17')
+                page.locator('#map-visit').focus()
+                page.keyboard.press('Enter')
+                page.wait_for_function('Math.abs(__mall.state.x - 32.6) < 0.1 && Math.abs(__mall.state.z - 44) < 0.1')
                 if page.locator('#map-close').is_visible(): page.locator('#map-close').click()
                 page.locator('#view-toggle').click()
                 detail = page.locator('#planned-spaces-directory'); assert detail.is_visible()
@@ -38,20 +42,28 @@ def run():
                 assert detail.evaluate('(e)=>e.open')
                 items=detail.locator('li').all_text_contents()
                 assert len(items)==14 and [detail.locator('li').nth(i).get_attribute('data-planned-number') for i in range(14)]==[f'{i:02d}' for i in range(4,18)], items
-                assert all('Display only · No entry' in x for x in items)
-                assert detail.locator('a,button').count()==0
+                assert all('Visit ' in x and ' in 3D' in x for x in items)
+                assert detail.locator('[data-visit-store]:visible').count()==14
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
                 for ident in ['newmoon','mili','gogo']:
                     assert page.locator(f'[data-visit-store="{ident}"]').is_visible()
                 if width in (390,1440):
                     detail.scroll_into_view_if_needed();page.screenshot(path=str(SCREENS/f'directory-{width}.png'))
                 if width==1440:
-                    page.locator('[data-visit-store="newmoon"]').click()
-                    move(page,20,2.5,2.65)
-                    page.evaluate('__mall.setInput({forward:0,yaw:0});__mall.step(50)')
+                    settings=page.locator('.mall-app-settings')
+                    settings.locator('summary').click()
+                    language=settings.locator('[data-mall-language]')
+                    for code,heading,action in [('zh-Hans','概念店（14）','在 3D 中参观 Casio'),('ms','Kedai konsep (14)','Lawati Casio dalam 3D')]:
+                        language.select_option(code)
+                        assert detail.locator('summary').inner_text()==heading
+                        assert detail.locator('[data-visit-store="planned-space-15"]').inner_text()==action
+                    language.select_option('en')
+                    settings.locator('summary').click()
+                    page.locator('[data-visit-store="planned-space-04"]').click()
+                    page.wait_for_function('Math.abs(__mall.state.x - 20) < 0.1 && Math.abs(__mall.state.z - 2.4) < 0.1')
                     page.screenshot(path=str(SCREENS/'north-storefront.png'))
                 assert not errors,errors
-                print(f'PASS {width}x{height}: numbered map, keyboard directory, closed spaces and open-store controls',flush=True)
+                print(f'PASS {width}x{height}: numbered map, keyboard map travel, directory and concept store controls',flush=True)
                 context.close()
             for mode in ['default','no-js','physics-failure']:
                 context=browser.new_context(java_script_enabled=mode!='no-js',service_workers='block')
@@ -62,6 +74,7 @@ def run():
                 if mode=='default': page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
                 assert page.locator('[data-store]').count()==3 and page.locator('.product-card').count()==4
                 assert page.locator('#planned-spaces-directory').count()==1 and page.locator('#planned-spaces-list li').count()==14
+                if mode!='default': assert page.locator('#planned-spaces-directory [data-visit-store]:visible').count()==0
                 print(f'PASS {mode}: truthful directory fallback',flush=True); context.close()
             browser.close()
     finally: server.shutdown(); server.server_close()

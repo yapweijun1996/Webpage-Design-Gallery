@@ -249,7 +249,7 @@ var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
   maxX,
   minZ,
   maxZ,
-  available: number <= 3
+  available: true
 });
 var expandedLayout = Object.freeze({
   bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
@@ -272,13 +272,31 @@ var expandedLayout = Object.freeze({
     Object.freeze({ x: -12, z: 39 })
   ])
 });
-var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
+var plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map((slot2) => Object.freeze({
   id: `planned-space-${slot2.number}`,
   number: slot2.number,
   side: slot2.side,
-  status: "display-only",
+  status: "open",
   available: slot2.available
 })));
+function shopEntrance(slot2) {
+  const normalX = slot2.side === "west" ? 1 : slot2.side === "east" ? -1 : 0;
+  const normalZ = slot2.side === "north" ? 1 : 0;
+  return {
+    x: normalX > 0 ? slot2.maxX : normalX < 0 ? slot2.minX : (slot2.minX + slot2.maxX) / 2,
+    z: normalZ ? slot2.maxZ : (slot2.minZ + slot2.maxZ) / 2,
+    normalX,
+    normalZ,
+    alongX: normalZ,
+    alongZ: -normalX,
+    yaw: Math.atan2(normalX, normalZ)
+  };
+}
+var shopArrivals = new Map(plannedSpaces.map((store) => {
+  const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
+  return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
+}));
+var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
 
 // demos/corporate/gjh/v11/assets/player.js
 async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
@@ -830,7 +848,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   function teleport(zone) {
     if (elevatorTravel)
       return false;
-    const destination = zone === "atrium" ? expanded ? expandedLayout.courtyardArrival : courtyardArrival : expanded && zone === "entry" ? expandedLayout.entrance : spatial.arrival(zone);
+    const destination = zone === "atrium" ? expanded ? expandedLayout.courtyardArrival : courtyardArrival : expanded && zone === "entry" ? expandedLayout.entrance : expanded ? expandedStoreArrival(zone) : spatial.arrival(zone);
     if (!destination)
       return false;
     productApproach = null;
@@ -847,9 +865,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     body.setTranslation({ x, y: 0.89, z }, true);
     body.setNextKinematicTranslation({ x, y: 0.89, z });
     vertical = 0;
-    yaw = 0;
+    yaw = destination.yaw || 0;
     pitch = 0.1;
-    visual.rotation.y = 0;
+    visual.rotation.y = yaw;
     clearInput();
     physics.step();
     updateCamera(0, true);

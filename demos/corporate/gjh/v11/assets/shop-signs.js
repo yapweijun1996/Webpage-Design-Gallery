@@ -68,7 +68,7 @@ export async function addShopSignAtlas(T, layout, scene) {
   layout.slots.forEach(bay => {
     const index = Number(bay.number) - 1;
     const x = bay.side === 'north' ? (bay.minX + bay.maxX) / 2 : bay.side === 'west' ? bay.maxX + .27 : bay.minX - .27;
-    const z = bay.side === 'north' ? (bay.available ? .48 : .26) : (bay.minZ + bay.maxZ) / 2;
+    const z = bay.side === 'north' ? (Number(bay.number) <= 3 ? .48 : .26) : (bay.minZ + bay.maxZ) / 2;
     // Keep the atlas face toward the approach; DoubleSide alone would mirror the
     // lettering when a visitor sees the back of a reversed quad.
     const angle = bay.side === 'north' ? 0 : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2;

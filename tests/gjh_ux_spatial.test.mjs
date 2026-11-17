@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {createSpatialHud} from '../demos/corporate/gjh/v11/assets/ux-spatial-hud.js';
 import {createInteractionRegistry} from '../demos/corporate/gjh/v11/assets/interaction-registry.js';
@@ -36,6 +37,13 @@ class Element {
 function fixture(expanded = false) {
   const elements = Object.fromEntries(['floor-indicator', 'nearest-target', 'control-interact', 'mini-map', 'mini-map-plan']
     .map(id => [id, new Element({id})]));
+  if (expanded) {
+    const directory = readFileSync(new URL('../demos/corporate/gjh/v11/index.html',import.meta.url),'utf8');
+    for (const [,id,brand] of directory.matchAll(/<li id="(planned-space-\d+)"[^>]*data-planned-brand="([^"]+)"/g)) {
+      elements[id] = new Element({id});
+      elements[id].dataset.plannedBrand = brand;
+    }
+  }
   const source = new Element({class:'floorplan', viewBox:expanded ? '0 0 700 600' : '0 0 300 290'});
   const service = new Element({id:'map-service', 'data-service':'directory'});
   service.append(new Element({id:'service-label'}));
@@ -61,6 +69,10 @@ for (const expanded of [false, true]) {
     assert.equal(f.heading.getAttribute('transform'), `translate(${point.x} ${point.y}) rotate(-90)`);
     f.hud.update({position:{x:-10,z:-5,yaw:0}, zone:'newmoon'});
     assert.equal(f.elements['floor-indicator'].textContent, 'Floor 01 - Atrium · New Moon');
+    if (expanded) {
+      f.hud.update({position:{x:39,z:44,yaw:0}, zone:'planned-space-17'});
+      assert.equal(f.elements['floor-indicator'].textContent, 'Floor 01 - Atrium · Gigaset');
+    }
   });
 }
 

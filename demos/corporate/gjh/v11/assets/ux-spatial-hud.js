@@ -1,4 +1,5 @@
-import {mapPoint, spatial} from './spatial.js';
+import {mapPoint} from './spatial.js';
+import {storeDestinations} from './store-destinations.js';
 import {expandedMapPoint} from './expanded-layout.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -15,6 +16,7 @@ function setAttribute(element, name, value) {
 // Call only after createUI has configured the shared map and its service markers.
 // This is a second DOM view of that map, never another scene or renderer.
 export function createSpatialHud({expanded = false, root = document} = {}) {
+  const shops = new Map(storeDestinations(expanded, root).map(store => [store.id, store]));
   const floor = root.getElementById('floor-indicator');
   const target = root.getElementById('nearest-target');
   const interact = root.getElementById('control-interact');
@@ -59,7 +61,7 @@ export function createSpatialHud({expanded = false, root = document} = {}) {
       targetLabel = '', active = false, usable = true, travelling = false}) {
       const upper = zone === 'upper';
       const floorLabel = upper ? 'Floor 02 - Upper Level' : 'Floor 01 - Atrium';
-      const shop = !upper && spatial.get(zone);
+      const shop = !upper && shops.get(zone);
       setText(floor, shop ? `${floorLabel} · ${shop.label}` : floorLabel);
       const mapContext = travelling ? 'Ground-floor plan · Lift in transit' : upper
         ? 'Ground-floor plan · You are on Floor 02' : 'Ground-floor plan · You are here';

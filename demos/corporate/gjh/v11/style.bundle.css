@@ -1644,7 +1644,11 @@ body:not(.is-3d):has(#mall-connection-notice:not([hidden])) .mall-update-notice{
 .is-expanded .map-plan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
 .is-expanded .floorplan{grid-column:1/-1}
 .is-expanded .map-store-button{background:var(--gjh-color-expanded-map-button);color:var(--gjh-color-expanded-map-text);position:static;width:auto!important;height:auto!important;min-width:0;min-height:44px;gap:2px;white-space:normal;font-size:var(--gjh-type-product-inspect)}
-.is-expanded .map-planned{fill:var(--gjh-color-expanded-map-planned);stroke:var(--gjh-color-expanded-map-outline);stroke-width:3}
+.is-expanded .map-store[data-map-store]{cursor:pointer}
+.is-expanded .expanded-map-number{pointer-events:none}
+#map-destination-controls:not([hidden]){display:flex;gap:var(--space-2);margin-top:var(--space-2)}
+#map-destination-controls select{flex:1;min-width:0}
+#map-destination-controls button,.planned-spaces-list button{min-height:var(--size-control);padding-inline:var(--space-3);border:1px solid currentColor}
 .is-expanded .expanded-map-number{fill:var(--gjh-color-expanded-map-text);font:var(--gjh-font-expanded-map-number)}
 .is-expanded .map-walkway{stroke-width:5;stroke-dasharray:12 10}
 .is-expanded .map-label{font-size:var(--font-size-xl)}
@@ -1652,7 +1656,7 @@ body:not(.is-3d):has(#mall-connection-notice:not([hidden])) .mall-update-notice{
 .layout-preview a{display:inline-flex;align-items:center;min-height:var(--size-control);text-decoration:underline;text-underline-offset:.2em}
 
 
-/* Planned spaces remain informational and outside the live store/product catalog. */
+/* Concept stores share directory styling with the facilities disclosure. */
 .planned-spaces-directory{margin:var(--space-7) 0;padding:var(--space-4);border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper)}
 .planned-spaces-directory>summary{min-height:var(--size-control);padding:var(--space-2) 0;cursor:pointer;font-weight:700}
 .planned-spaces-directory>p{color:var(--muted);margin:var(--space-3) 0}
