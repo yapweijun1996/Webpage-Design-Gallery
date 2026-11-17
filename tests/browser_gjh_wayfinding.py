@@ -37,7 +37,7 @@ def run():
                 page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/',
                           timeout=60000)
                 page.wait_for_function('__mall?.ready && __sceneReady', timeout=60000)
-                page.locator('#guide-start').click()
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
                 page.wait_for_function('document.activeElement.id === "scene"')
                 page.evaluate('__mall.setInput({}); __mall.step(17)')
                 signs = page.evaluate('__mall.state.roomSigns')
@@ -55,8 +55,8 @@ def run():
                         page.locator('#header-map').click()
                         page.wait_for_function('__mall.mode === "menu"')
                     elif not page.locator('#mall-map').evaluate('e => e.open'):
-                        # The welcome guide closes the desktop map; use the entrance kiosk.
-                        page.locator('#inspect').click()
+                        # Open the full map explicitly on desktop.
+                        page.locator('#header-map').click()
                     button = page.locator(f'[data-teleport="{zone}"]')
                     assert button.get_attribute('aria-label') == f'Go to the {name} storefront'
                     assert button.evaluate('e => {const r=e.getBoundingClientRect();'

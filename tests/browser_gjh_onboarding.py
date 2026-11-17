@@ -13,15 +13,17 @@ def run():
    page.add_init_script("""window.padState={connected:true,mapping:'standard',axes:[0,0,0,0],buttons:Array.from({length:16},()=>({pressed:false}))};Object.defineProperty(navigator,'getGamepads',{value:()=>window.padState?[window.padState]:[]});""")
    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/',wait_until='domcontentloaded',timeout=60000)
    page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=90000);guide(page)
-   initial=state(page);page.evaluate('padState.axes[2]=.5');page.wait_for_function('document.querySelector("#guide-dialog .ob-mode").textContent==="Gamepad"')
-   assert state(page)['x']==initial['x'] and state(page)['z']==initial['z']
-   page.evaluate('padState.axes[2]=0');page.locator('#guide-start').click();closed(page)
-   page.locator('.ob-tip').wait_for(state='visible');page.wait_for_function('document.activeElement.id==="scene"')
+   initial=state(page);page.evaluate('padState.axes[2]=.5')
+   page.wait_for_function('yaw=>Math.abs(__mall.state.yaw-yaw)>.12',arg=initial['yaw'])
+   page.evaluate('padState.axes[2]=0')
+   assert page.locator('#guide-count').inner_text()=='1/3'
+   assert not state(page)['paused']
    page.evaluate('padState.axes[1]=-1');page.wait_for_function('z=>__mall.state.z<z-.12',arg=initial['z']);page.evaluate('padState.axes[1]=0')
-   page.wait_for_function('document.querySelector(".ob-tip h3").textContent==="Look around"')
+   page.wait_for_function('document.querySelector("#guide-count").textContent==="2/3"')
    page.screenshot(path=str(OUT/'tutorial-look-desktop.png'))
-   page.evaluate('padState.axes[2]=.8');page.wait_for_function('Math.abs(__mall.state.yaw)>.12');page.evaluate('padState.axes[2]=0')
-   page.wait_for_function('document.querySelector(".ob-tip h3").textContent==="Inspect"')
+   yaw=state(page)['yaw'];page.evaluate('padState.axes[2]=.8')
+   page.wait_for_function('yaw=>Math.abs(__mall.state.yaw-yaw)>.12',arg=yaw);page.evaluate('padState.axes[2]=0')
+   page.wait_for_function('document.querySelector("#guide-count").textContent==="3/3"')
    # Let the real frame loop consume the neutral stick before manual stepping;
    # otherwise its last sampled look input continues turning during the fixture.
    page.evaluate('''async () => {await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame)}''')
@@ -31,29 +33,22 @@ def run():
    page.evaluate('__mall.setInput(null)')
    page.wait_for_function('__mall.state.nearby==="mili"');page.evaluate('padState.buttons[0].pressed=true')
    page.locator('#product-dialog').wait_for(state='visible');page.evaluate('padState.buttons[0].pressed=false')
+   paused=state(page);page.evaluate('padState.axes[1]=-1;padState.axes[2]=.8')
+   page.wait_for_timeout(120);after=state(page)
+   assert all(abs(after[k]-paused[k])<.001 for k in ['x','z','yaw']),[paused,after]
+   page.evaluate('padState.axes[1]=0;padState.axes[2]=0')
+   assert page.evaluate('localStorage.getItem("gjh-v11-tutorial-v1")')=='completed'
    page.locator('#product-close').click();page.wait_for_function('!document.querySelector("#product-dialog").open')
-   page.wait_for_function('document.querySelector(".ob-tip h3").textContent==="You’re ready!"')
-   # The current scene suppresses tutorial tips while an interaction prompt owns
-   # the HUD. Walk clear so the real completion control is visible again.
-   move(page,1.4,-7.8);move(page,1.4,-3.5);page.evaluate('__mall.setInput(null)')
-   page.wait_for_function('!__mall.state.nearby')
-   page.get_by_role('button',name='Keep exploring',exact=True).click()
+   closed(page)
    page.evaluate('padState.buttons[9].pressed=true');page.wait_for_function('document.querySelector("#keyboard-help").open');page.evaluate('padState.buttons[9].pressed=false')
    page.wait_for_timeout(50)
    page.evaluate('padState.buttons[1].pressed=true');page.wait_for_function('!document.querySelector("#keyboard-help").open');page.evaluate('padState.buttons[1].pressed=false')
-   page.locator('#keyboard-help').evaluate('el=>el.open=true');page.locator('#guide-reopen').click();guide(page)
-   page.locator('#guide-show-next').uncheck();page.keyboard.press('Escape');closed(page)
-   page.evaluate('sessionStorage.removeItem("gjh-v11-guide-seen-v1")')
-   page.reload(wait_until='domcontentloaded');page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=90000)
-   assert not page.locator('#guide-dialog').is_visible()
-   page.locator('#keyboard-help').evaluate('el=>el.open=true');page.locator('#guide-reopen').click();guide(page)
-   assert not page.locator('#guide-show-next').is_checked()
-   page.keyboard.press('Escape');closed(page)
+   page.locator('#scene').focus()
    page.evaluate('padState=null');page.wait_for_timeout(100);stopped=state(page);page.wait_for_timeout(100)
    after=state(page);assert abs(after['x']-stopped['x'])<.001 and abs(after['z']-stopped['z'])<.001
    assert not errors,errors
    browser.close()
  finally:server.shutdown()
- result={'gamepadMovementCameraInspect':'PASS','modalInputIsolation':'PASS','nonblockingRealActionProgress':'PASS','menuBackAndDisconnect':'PASS','autoWelcomePreferenceAndManualReplay':'PASS','pageErrors':errors,'limitation':'Synthetic standard-controller snapshots through the actual application frame loop; physical controller not tested.'}
+ result={'gamepadMovementCameraInspect':'PASS','modalInputIsolation':'PASS','nonblockingRealActionProgress':'PASS','menuBackAndDisconnect':'PASS','pageErrors':errors,'limitation':'Synthetic standard-controller snapshots through the actual application frame loop; physical controller not tested.'}
  (OUT/'integration-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':run()

@@ -27,7 +27,7 @@ def run():
                 errors = []; page.on('pageerror', lambda error: errors.append(str(error)))
                 page.goto(f'http://127.0.0.1:{server.server_port}{URL_PATH}')
                 page.wait_for_function('__mall?.ready && __sceneReady', timeout=60000)
-                page.locator('#guide-start').click(); page.wait_for_function('document.activeElement.id === "scene"')
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus(); page.wait_for_function('document.activeElement.id === "scene"')
                 for sku in ('nz-425g', 'au-425g', 'sa-425g', 'mx-454g'):
                     approach(page, sku)
                     page.screenshot(path=str(args.output / f'after-nearby-{sku}-{width}.png'), full_page=True)

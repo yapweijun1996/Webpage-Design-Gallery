@@ -258,8 +258,8 @@ def held_touch_paths(page,context,output):
 def ready(page,url):
     page.goto(url,timeout=60000)
     page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
-    if page.locator('#guide-dialog').is_visible():
-        native_close(page,'#guide-dialog',lambda:page.locator('#guide-start').click())
+    if page.locator('#guide-card').is_visible():
+        page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state='hidden'); page.locator('#scene').focus()
     page.wait_for_function("document.activeElement.id === 'scene'")
 
 
@@ -445,7 +445,7 @@ def extra_paths(page,url,output,context,browser,axe):
     page.locator('#view-toggle').click();page.wait_for_function("__mall.mode==='explore'")
     rows.append({'bagListMaxNine':'PASS'})
     # Native external modal entry and Map must also cancel Shelf without stale focus.
-    for selector in ['#product-dialog','#bag-dialog','#original-tin-dialog','#guide-dialog']:
+    for selector in ['#product-dialog','#bag-dialog','#original-tin-dialog']:
         approach(page);open_shelf(page)
         page.locator(selector).evaluate('e=>e.showModal()')
         page.wait_for_function("!document.querySelector('#shelf-dialog').open")

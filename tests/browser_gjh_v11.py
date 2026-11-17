@@ -54,7 +54,7 @@ def targets(page):
 
 
 def mobile_hud(page):
-    overlaps = page.locator('.site-header,#keyboard-help,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt').evaluate_all('''els => {
+    overlaps = page.locator('.site-header,#keyboard-help,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt,#guide-card,.control-bar').evaluate_all('''els => {
       // Closed details retain descendant layout boxes in current Chrome; those
       // boxes are not painted map content. Mode-suppressed walking controls also
       // retain boxes. Check every painted open-map/control rectangle.
@@ -68,6 +68,89 @@ def mobile_hud(page):
       ).map(b=>[a.name,b.name]));
     }''')
     assert not overlaps, overlaps
+
+
+def dismiss_tutorial(page):
+    page.locator('#guide-card').wait_for(state='visible')
+    page.locator('#guide-skip').click()
+    page.wait_for_function("document.querySelector('#guide-card').hidden && !__mall.state.paused")
+    page.locator('#scene').focus()
+
+
+def ux_hud_coverage(browser, url):
+    results = []
+    output = Path.home() / 'omp-tasks/out'
+    output.mkdir(parents=True, exist_ok=True)
+    for width, height in ((1440, 900), (390, 844)):
+        context = browser.new_context(viewport={'width': width, 'height': height},
+                                      has_touch=width == 390, service_workers='block')
+        page = context.new_page()
+        page.goto(url)
+        page.wait_for_function('window.__sceneReady && window.__mall?.ready')
+        card = page.locator('#guide-card')
+        card.wait_for(state='visible')
+        assert not state(page)['paused']
+        assert page.locator('#guide-count').inner_text() == '1/3'
+        assert page.locator('.ux-tutorial-segment').count() == 3
+        assert page.locator('#guide-back').is_disabled()
+        bounds = card.bounding_box()
+        assert bounds['width'] <= (300 if width > 650 else width - 24), bounds
+        page.locator('#app-loader').wait_for(state='hidden')
+        assert bounds['y'] >= height / 2, bounds
+        assert not page.locator('#control-interact').is_visible()
+        assert page.locator('#floor-indicator').inner_text() == 'Floor 01 - Atrium'
+        assert page.locator('#mini-map').is_visible() == (width > 650)
+        assert page.locator('#header-map').is_visible()
+        assert not page.locator('#mall-map').evaluate('el=>el.open')
+        assert page.locator('#hud-rail #keyboard-help').count() == 1
+        assert 'inventory' in page.locator('#bag-open').get_attribute('aria-label')
+        if width == 390:
+            mobile_hud(page)
+        else:
+            assert page.locator('.control-bar').inner_text().find('W A S D') >= 0
+        page.screenshot(path=str(output / f'ux1-{width}.png'), scale='css')
+        before = state(page)
+        page.locator('#scene').focus()
+        page.keyboard.down('w')
+        page.wait_for_function('z=>__mall.state.z<z-.15', arg=before['z'])
+        page.keyboard.up('w')
+        page.wait_for_function("document.querySelector('#guide-count').textContent==='2/3'")
+        page.locator('#guide-back').click()
+        assert page.locator('#guide-count').inner_text() == '1/3'
+        page.locator('#guide-next').click()
+        assert page.locator('#guide-count').inner_text() == '2/3'
+        box = page.locator('#scene').bounding_box()
+        x, y = box['x'] + box['width'] * .4, box['y'] + box['height'] * .45
+        page.mouse.move(x, y)
+        page.mouse.down()
+        page.mouse.move(x + 90, y, steps=8)
+        page.mouse.up()
+        page.wait_for_function("document.querySelector('#guide-count').textContent==='3/3'")
+        assert page.evaluate('__mall.teleport("mili")')
+        drive(page, 17)
+        assert page.locator('#control-interact').is_visible()
+        assert 'Nearest:' in page.locator('#nearest-target').inner_text()
+        page.locator('#scene').focus()
+        page.keyboard.press('f')
+        page.wait_for_function("document.querySelector('#guide-card').hidden")
+        drive(page, 1000)
+        assert state(page)['doors']['mili'] > .99
+        peak = max(before['drawCalls'], state(page)['drawCalls'])
+        assert peak <= 200, peak
+        page.reload()
+        page.wait_for_function('window.__sceneReady && window.__mall?.ready')
+        assert card.is_hidden()
+        page.locator('#rail-guide').click()
+        card.wait_for(state='visible')
+        page.locator('#guide-next').click()
+        page.locator('#guide-skip').click()
+        page.reload()
+        page.wait_for_function('window.__sceneReady && window.__mall?.ready')
+        assert card.is_hidden()
+        results.append({'viewport': [width, height], 'tutorialActionsAndPersistence': 'PASS',
+                        'drawCalls': peak, 'screenshot': str(output / f'ux1-{width}.png')})
+        context.close()
+    return results
 
 
 def state(page):
@@ -355,9 +438,7 @@ def npc_budget_coverage(browser, url):
                 page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=90000)
                 assert page.evaluate('document.body.classList.contains("is-expanded")')
                 assert state(page)['graphics']['quality']['tier'] == tier
-                page.locator('#guide-dialog').wait_for(state='visible')
-                page.locator('#guide-start').click()
-                page.wait_for_function("!document.querySelector('#guide-dialog').open && !__mall.state.paused")
+                dismiss_tutorial(page)
                 install_npc_budget_probe(page, cap)
                 assert page.evaluate('__mall.teleport("atrium")')
                 for _ in range(56):
@@ -674,6 +755,7 @@ def run(capture=False):
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
                 try:
                     evidence.append({'loader': loader_coverage(browser, url)})
+                    evidence.append({'uxHud': ux_hud_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/')})
                     evidence.extend(npc_budget_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/'))
                     for query, expected in (('', True), ('?layout=classic', False)):
                         context = browser.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2, reduced_motion='reduce')
@@ -688,9 +770,7 @@ def run(capture=False):
                         assert initial['drawCalls'] <= (190 if expected else 200), initial
                         if expected:
                             assert abs(initial['x'] - 10) < .1 and abs(initial['z'] - 45) < .1
-                            page.locator('#guide-dialog').wait_for(state='visible')
-                            page.locator('#guide-start').click()
-                            page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                            dismiss_tutorial(page)
                             for zone in ('newmoon', 'mili', 'gogo'):
                                 assert page.evaluate('zone => __mall.teleport(zone)', zone)
                                 closed = drive(page, 1000)
@@ -743,9 +823,7 @@ def run(capture=False):
                         page.on('request', lambda r: external.append(r.url) if r.url.startswith('http') and not r.url.startswith(base) else None)
                         page.goto(url); page.wait_for_function('window.__mall?.ready && window.__sceneReady')
                         # Complete the genuine first-use flow before existing walking/asset assertions.
-                        page.locator("#guide-dialog").wait_for(state="visible")
-                        page.locator("#guide-start").click()
-                        page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                        dismiss_tutorial(page)
                         # Drain the initial frame before capturing a frozen scene.
                         drive(page, 0)
                         initial = state(page); assert initial['drawCalls'] <= 200, initial['drawCalls']
@@ -917,9 +995,7 @@ def run(capture=False):
                     page.on('console',lambda message:brand_wall_errors.append(message.text) if message.type=='error' else None)
                     page.goto(base+'/gallery/demos/corporate/gjh/v11/')
                     page.wait_for_function('window.__mall?.ready && window.__sceneReady')
-                    page.locator('#guide-dialog').wait_for(state='visible')
-                    page.locator('#guide-start').click()
-                    page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                    dismiss_tutorial(page)
                     drive(page,0)
                     expanded_default_draw_calls=state(page)['drawCalls']
                     assert expanded_default_draw_calls<=190,expanded_default_draw_calls
@@ -939,17 +1015,13 @@ def run(capture=False):
                         page=context.new_page()
                         page.goto(base+'/gallery/demos/corporate/gjh/v11/')
                         page.wait_for_function('window.__mall?.ready && window.__sceneReady')
-                        page.locator('#guide-dialog').wait_for(state='visible')
-                        page.locator('#guide-start').click()
-                        page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                        dismiss_tutorial(page)
                         evidence.append({'heroVisibility':hero_visibility_gallery(page,width,height)})
                         context.close()
                     context = browser.new_context(reduced_motion='reduce')
                     page = context.new_page(); page.goto(url); page.wait_for_function('window.__mall?.ready')
                     # Complete the genuine first-use flow before existing walking/asset assertions.
-                    page.locator("#guide-dialog").wait_for(state="visible")
-                    page.locator("#guide-start").click()
-                    page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                    dismiss_tutorial(page)
                     page.evaluate('__mall.setInput({});__mall.teleport("mili");__mall.step(17)')
                     assert state(page)['reducedMotion'] and state(page)['doors']['mili']==1
                     count = state(page)['frames']

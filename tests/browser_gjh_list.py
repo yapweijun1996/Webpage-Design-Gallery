@@ -16,7 +16,7 @@ def run():
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
    for width,height in [(320,740),(390,844),(768,1024),(1440,900)]:
     context=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-list').click();page.locator('#store-list').wait_for(state='visible')
+    page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click();page.locator('#store-list').wait_for(state='visible')
     assert page.locator('.product-card').count()==4
     assert not page.evaluate('document.documentElement.scrollWidth>innerWidth')
     ids=page.locator('.store-list [id]').evaluate_all('els=>els.map(e=>e.id)');assert ids.index('newmoon-title')<ids.index('mili-title')<ids.index('gogo-title')<ids.index('original-demo-tin-title')

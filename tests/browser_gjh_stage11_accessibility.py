@@ -18,7 +18,7 @@ def run():
    print('Browser:',browser.version,flush=True)
    for width,height in [(320,700),(390,844),(768,1024),(844,390),(1440,900)]:
     context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=2,has_touch=width<1000,reduced_motion='reduce',service_workers='block')
-    context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+    context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded');page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert page.evaluate('window.__sceneReady===true')
     assert page.locator('.mall-app-settings').is_hidden(), 'Offline help must not be focusable behind the 3D scene'

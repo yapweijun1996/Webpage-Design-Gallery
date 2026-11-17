@@ -93,7 +93,7 @@ def geometry(page, shelf=False, cue=True):
         point:{hidden:point.hidden,rect:rect(point),text:point.textContent,decorative:point.getAttribute('aria-hidden'),pointer:getComputedStyle(point).pointerEvents},
         shelf:{hidden:outline.hidden,rect:rect(outline)},
         others:[...document.querySelectorAll('#keyboard-help,#mall-map,#joystick,#run-toggle,.scene-disclaimer')].filter(visible).map(e=>({id:e.id||e.className,rect:rect(e)})),
-        distance:document.querySelector('#nearby-distance').textContent,live:!!document.querySelector('#nearby-distance').closest('[aria-live],[role=status]'),
+        distance:document.querySelector('#nearby-distance').textContent,live:document.querySelector('#nearby-distance').closest('[aria-live],[role=status]'),
         overflow:document.documentElement.scrollWidth>innerWidth,viewport:[innerWidth,innerHeight]};
     }''')
     w,h=row['viewport'];r=row['prompt'];assert not row['overflow'],row
@@ -263,7 +263,7 @@ def mode_paths(page,context,browser):
     rows=[];print('MODE kiosk',flush=True);walk_target(page,'kiosk');page.locator('#scene').focus();page.keyboard.press('f')
     if page.evaluate('__mall.mode')=='menu':hidden(page)
     page.keyboard.press('Escape');page.evaluate('__mall.step(20)')
-    for selector in ['#bag-dialog','#product-dialog','#original-tin-dialog','#guide-dialog']:
+    for selector in ['#bag-dialog','#product-dialog','#original-tin-dialog']:
         print('MODE modal',selector,flush=True);walk_target(page,'kiosk');page.locator(selector).evaluate('e=>e.showModal()');settle(page);hidden(page)
         close_event_before_action(page,selector);page.locator(selector).evaluate('e=>e.close()');finish_close(page)
         page.evaluate('__mall.step(20)');assert shown(page)['nearby-distance'];rows.append({'nativeModal':selector,'cleared':'PASS'})
@@ -370,8 +370,8 @@ def asset_failures(browser,url,output):
             rows.append({'asset':label,'aborted':pattern,'existingRequiredTextureFallback':'PASS',
                          'guidanceCleared':'PASS','directoryNativeInspect':'PASS','pageErrors':errors})
         else:
-            if page.locator('#guide-dialog').is_visible():
-                close_event_before_action(page,'#guide-dialog');page.locator('#guide-start').click();finish_close(page)
+            if page.locator('#guide-card').is_visible():
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state='hidden'); page.locator('#scene').focus()
             walk_target(page,category);focus_action(page);g=geometry(page)
             page.screenshot(path=str(output/f'asset-failure-{label}.png'));page.locator('#inspect').click()
             assert page.locator('#mall-map').evaluate('e=>e.open');hidden(page)

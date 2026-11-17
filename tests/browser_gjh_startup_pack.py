@@ -40,7 +40,7 @@ def run():
                 cases = [selected]
             for mode in cases:
                 context = browser.new_context(viewport={'width':390, 'height':844}, reduced_motion='reduce', service_workers='block')
-                context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+                context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page = context.new_page()
                 requests, errors, pending = [], [], []
                 page.on('request', lambda request: requests.append(request.url))

@@ -11,7 +11,7 @@ def run():
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'--enable-unsafe-swiftshader'])
    for w,h in ([(390,844)] if args.live else [(320,740),(390,844),(430,932),(768,1024),(844,390),(1440,900)]):
     page=browser.new_page(viewport={'width':w,'height':h},has_touch=True,reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto(url);page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-list').click();page.locator('#store-list').wait_for(state='visible')
+    page.goto(url);page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click();page.locator('#store-list').wait_for(state='visible')
     for preview in [False,True]:
      opener=page.locator('[data-inspect="new-moon-mx-454g-front"]');opener.click()
      if preview:page.wait_for_function('__newMoonPreview.state.loaded')

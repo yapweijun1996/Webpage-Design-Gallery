@@ -47,7 +47,7 @@ def run():
   with sync_playwright() as p:
    b=p.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),args=['--use-angle=metal','--ignore-gpu-blocklist'])
    for w,h,motion in [(390,844,'no-preference'),(639,826,'reduce'),(1440,900,'no-preference')]:
-    c=b.new_context(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion=motion,service_workers='block');c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+    c=b.new_context(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion=motion,service_workers='block');c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
     row={'viewport':[w,h],'motion':motion,'states':{},'errors':errors};report['checks'].append(row)
     lobby(page);dock(page);walk(page,-6.4,10.95);row['states']['ground']=state(page);page.screenshot(path=str(out/f'{w}-ground.png'))
@@ -89,7 +89,7 @@ def run():
       page.evaluate('__liftLoss.restoreContext()');page.wait_for_function('__mall.ready',timeout=60000);page.locator('#graphics-return').click();step(page);lobby(page)
     assert not errors and state(page)['illegalCount']==0;save(out/'report.json',report);print('LIFT PASS',w,flush=True);c.close()
    for query in ['?layout=classic&visitor=v1','?layout=expanded&visitor=v1','?layout=classic']:
-    c=b.new_context(reduced_motion='reduce',service_workers='block');c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'+query);page.wait_for_function('window.__sceneReady===true',timeout=90000)
+    c=b.new_context(reduced_motion='reduce',service_workers='block');c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'+query);page.wait_for_function('window.__sceneReady===true',timeout=90000)
     assert state(page)['elevator'] is None;assert page.locator('[data-store]').count()==3 and page.locator('[data-product]').count()==4;report['checks'].append({'query':query,'unchangedClassicOrGroundOnly':'PASS'});c.close()
    b.close()
  finally:

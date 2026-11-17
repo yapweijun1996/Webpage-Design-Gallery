@@ -39,7 +39,7 @@ export function setupDemoBag() {
   function render(value) {
     const active = document.activeElement, focusKey = active?.dataset.bagFocus;
     const total = Object.values(value).reduce((a,b)=>a+b,0);
-    open.textContent = `Bag (${total})`; open.prepend(bagIcon); open.setAttribute('aria-label',`Open demo bag, ${total} items`);
+    open.textContent = `Bag (${total})`; open.prepend(bagIcon); open.setAttribute('aria-label',`Open inventory bag, ${total} collected items`); open.title = 'Inventory Bag — items collected in the mall, not purchases';
     items.replaceChildren(); empty.hidden = total > 0; clear.hidden = total === 0;
     for (const [id,quantity] of Object.entries(value)) {
       const record=records.get(id), row=document.createElement('li'), image=document.createElement('img'), name=document.createElement('h3'), controls=document.createElement('div'), count=document.createElement('output');

@@ -29,7 +29,7 @@ def run():
         try:
             with sync_playwright() as p:
                 context = p.chromium.launch_persistent_context(user_data_dir=str(root / 'profile'), executable_path=os.environ['GALLERY_CHROME'], viewport={'width': 390, 'height': 844}, reduced_motion='reduce', headless=True, args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'), '--enable-unsafe-swiftshader'])
-                context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1', '1')")
+                context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1', 'dismissed')")
                 page = context.new_page()
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))

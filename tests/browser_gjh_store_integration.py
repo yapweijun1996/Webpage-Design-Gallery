@@ -30,7 +30,7 @@ def run():
         for width,height,visitor in [(320,700,''),(390,844,''),(768,1024,''),(844,390,''),(1440,900,''),(390,844,'&visitor=v1')]:
           context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=2,
             has_touch=width<1000,reduced_motion='reduce',service_workers='block')
-          context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+          context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
           page=context.new_page();errors=[]
           page.on('pageerror',lambda e:errors.append(str(e)))
           page.goto(base+'?layout=expanded'+visitor);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
@@ -102,7 +102,7 @@ def run():
           context.close()
         for query in ['', '?visitor=v1']:
           context=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
-          context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+          context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
           page=context.new_page();page.goto(base+query);page.wait_for_function('window.__sceneReady',timeout=90000)
           for ident,label,x in STORES:
             page.locator('#view-toggle').click();page.locator(f'[data-visit-store="{ident}"]').click()

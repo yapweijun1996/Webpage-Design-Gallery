@@ -12,7 +12,7 @@ def run():
   with sync_playwright() as pw:
    b=pw.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'--ignore-gpu-blocklist'])
    for width,height in [(320,568),(390,844),(667,375),(844,390),(1440,900)]:
-    c=b.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block');c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+    c=b.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block');c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     p=c.new_page();p.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');p.wait_for_function('window.__sceneReady',timeout=90000);p.locator('#keyboard-help summary').click()
     hair=p.get_by_role('combobox',name='Hair',exact=True);hair.focus();assert hair.evaluate('e=>e===document.activeElement')
     # The visitor can scroll away while a field remains focused; changing that

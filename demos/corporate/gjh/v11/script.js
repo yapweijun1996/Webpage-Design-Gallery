@@ -7,6 +7,7 @@ import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
+import {createSpatialHud} from './assets/ux-spatial-hud.js';
 import {icon} from './assets/icons.js';
 document.querySelectorAll('[data-icon]').forEach(slot => slot.replaceWith(icon(slot.dataset.icon, {size: 18})));
 for (const [selector, name, size] of [
@@ -26,14 +27,14 @@ document.body.classList.toggle('is-expanded', expanded);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let three;
-let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null;
+let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
 const quality = createGraphicsQuality(() => resize());
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
-function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); }
+function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
 let nearby = null, currentZone = 'atrium';
 function clearTransientState(event) {
   hideGuidance();
@@ -48,6 +49,19 @@ function clearTransientState(event) {
 const modes = createModes({onCleanup: clearTransientState,
   onEnter(mode) { document.body.dataset.mode = mode; }});
 const ui = createUI(expanded), canvas = document.querySelector('#scene');
+spatialHud = createSpatialHud({expanded});
+const spatialTargetName = document.getElementById('nearby-name');
+const spatialInspectButton = document.getElementById('inspect');
+function updateSpatialHud() {
+  if (!player) return;
+  const p = player.state;
+  spatialHud.update({position:p, zone:currentZone, interaction:selectedInteraction,
+    distance:interactionDistance, targetLabel:spatialTargetName.textContent,
+    travelling:Boolean(p.elevatorTravel), usable:!spatialInspectButton.disabled,
+    active:ready && !modes.paused() && !windowBlurred && !document.hidden &&
+      document.body.classList.contains('is-3d') && ['explore', 'cart'].includes(modes.current()) &&
+      !p.character.collection.active && !p.productApproaching});
+}
 function syncMode(signals = ui.modeSignals()) {
   if (modes.current() === 'shelf' && !signals.shelfOpen) modes.request(modes.layers().at(-2), 'Shelf closed');
   modes.observe({...signals, seated: Boolean(player?.state.seated),
@@ -55,6 +69,7 @@ function syncMode(signals = ui.modeSignals()) {
   document.body.dataset.mode = modes.current();
   ui.projectMode(modes.current());
   if (!['explore', 'cart'].includes(modes.current())) hideGuidance();
+  updateSpatialHud();
 }
 ui.onModeState(syncMode);
 setupOriginalTin(ui);

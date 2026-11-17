@@ -7,7 +7,7 @@ try:
  with sync_playwright() as p:
   b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
   for w,h,touch in ([(390,844,True)] if args.url else [(390,844,True),(1440,900,False)]):
-   page=b.new_page(viewport={'width':w,'height':h},has_touch=touch);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-start').click();page.wait_for_function('document.activeElement.id==="scene"')
+   page=b.new_page(viewport={'width':w,'height':h},has_touch=touch);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"')
    for zone,label in [('newmoon','New Moon'),('mili','MILI'),('gogo','GOGO')]:
     page.evaluate('(zone)=>{__mall.teleport(zone);__mall.setInput({forward:1});__mall.step(2500)}',zone)
     assert state(page)['zone']==zone,state(page)['z'];assert page.locator('#location-name').inner_text()==label

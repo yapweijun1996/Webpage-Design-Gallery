@@ -2,6 +2,15 @@
 
 Status: **previous authorized software work and the requested 17-lot visual-concept delivery are complete**. The 2026-11-16 owner decision still defers physical-device acceptance and real/operational brand activation. This task authorizes the limited visual use of supplied brand names and logos on concept storefronts; it does not verify tenancy, current brand relationships, merchandise, claims, or general artwork rights. No unperformed device acceptance or real-world authorization is represented as passed.
 
+## UX round 1 — P0 + P1 (2026-11-17)
+
+- [x] **P0-1 — Implemented:** replace the blocking welcome with a compact nonmodal three-step tutorial, action-based progress, Skip/Back/Next and guarded per-viewer localStorage dismissal.
+- [x] **P0-2 — Implemented:** persistent desktop control bar and hints for the existing touch joystick, Run, contextual interaction and two-finger camera gesture; no invented Escape menu.
+- [x] **P1-1 — Implemented:** one GJH/location/directory/map/inventory header and a Guide/Help/Shopping Cart/Theme rail; distinct Studio bag/cart icons, labels and tooltips.
+- [x] **P1-2 — Implemented:** floor chip, reused SVG Mini Map, registry-backed nearest-target hint and in-range-only F affordance; no new 3D draw calls.
+- [x] Update HUD behavioral tests, migrate affected browser startup callers and document controls/gaps in [the HUD brief](docs/gjh-v11-ux-hud.md).
+- [x] **Verified:** build/check, Node, Python gallery, SSOT and Chrome/Metal acceptance all RC 0; maximum sampled draw calls 194. Real 1440×900 and 390×844 screenshots saved under `/Users/admin/omp-tasks/out/ux1-*.png`; no tracked browser byproducts. Intended changes committed for this round; no push. Separate migrated browser suites were syntax-checked, not executed.
+
 ## Deferred follow-ups — non-blocking
 
 Owner decision, 2026-11-16: defer the following work outside the completed software scope. These items do not block software completion or the existing release.

@@ -15,7 +15,7 @@ def write_source(path,text):
   if os.path.exists(name):os.unlink(name)
 
 def boot(browser,url,w,h,preference='auto',failure=None,instrument=None):
- c=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=1,has_touch=w<1000,reduced_motion='reduce',service_workers='block');c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");pending=[];requests=[]
+ c=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=1,has_touch=w<1000,reduced_motion='reduce',service_workers='block');c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");pending=[];requests=[]
  if failure in ['canvas-first','canvas-second']:
   fail_at=1 if failure=='canvas-first' else 2
   c.add_init_script("window.__finishCanvases=0;const old=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...rest){if(type==='2d'&&this.width===256&&this.height===256){window.__finishCanvases++;if(window.__finishCanvases==="+str(fail_at)+")return null;}return old.call(this,type,...rest);}")

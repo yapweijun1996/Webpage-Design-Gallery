@@ -114,7 +114,7 @@ def review_cart_fallback(browser, url, rows, shot, page_errors):
         page.on('pageerror', lambda error: errors.append(str(error)))
         try:
             wait_ready(page, url)
-            page.locator('#guide-list').click()
+            page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
             page.locator('#store-list').wait_for(state='visible')
             add_selection(page)
             if not directory:
@@ -165,7 +165,7 @@ def review_cart_fallback(browser, url, rows, shot, page_errors):
     page.on('pageerror', lambda error: page_errors.append(str(error)))
     try:
         wait_ready(page, url)
-        page.locator('#guide-list').click()
+        page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
         page.locator('#store-list').wait_for(state='visible')
         add_selection(page)
         page.locator('#bag-open').click()
@@ -198,7 +198,7 @@ def review_cart_fallback(browser, url, rows, shot, page_errors):
             route.abort()
         page.route('**/shopping-cart.glb', fail_cart)
         wait_ready(page, url)
-        page.locator('#guide-list').click()
+        page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
         page.locator('#store-list').wait_for(state='visible')
         add_selection(page)
         page.locator('#bag-open').click()
@@ -254,8 +254,8 @@ def run():
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
             wait_ready(page, url)
-            page.locator('#guide-start').click()
-            page.wait_for_function("!document.querySelector('#guide-dialog').open")
+            page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
+            page.wait_for_function("document.querySelector('#guide-card').hidden")
             page.locator('#header-map').click()
             observe(page, 'compact map open', 'menu', True, ['explore', 'menu'])
             page.locator('#bag-open').click()
@@ -297,44 +297,13 @@ def run():
             rows.append({'scenario': 'compact map/help under Bag', 'result': 'PASS',
                 'evidence': 'real controls, retained layers, native close/escape, post-close focus; compact/wide/compact resize under Bag'})
 
-            # Guide opened from Help: dismiss retains Help; Map handoff stays
-            # continuously inside blocking Menu and never resumes Explore.
-            page.locator('#keyboard-help summary').click()
-            page.locator('#guide-reopen').click()
-            page.locator('#guide-dialog').wait_for(state='visible')
-            observe(page, 'guide opened from Help', 'menu', True, ['explore', 'menu'])
+            page.locator('#header-map').click()
+            observe(page, 'compact Map opens', 'menu', True, ['explore', 'menu'])
             page.keyboard.press('Escape')
-            page.wait_for_function("!document.querySelector('#guide-dialog').open && document.querySelector('#keyboard-help').open")
-            observe(page, 'guide dismiss restores Help', 'menu', True, ['explore', 'menu'])
-            assert page.locator('#guide-reopen').evaluate('el => el === document.activeElement')
-            page.locator('#guide-reopen').click()
-            page.locator('#guide-dialog').wait_for(state='visible')
-            before_history = page.evaluate('__mall.state.modeHistory')
-            before_frames = state(page)['frames']
-            page.locator('#guide-map').click()
-            page.wait_for_function("!document.querySelector('#guide-dialog').open && document.querySelector('#mall-map').open")
-            map_state = observe(page, 'guide Map handoff', 'menu', True, ['explore', 'menu'])
-            assert map_state['history'] == before_history, (before_history, map_state['history'])
-            assert state(page)['frames'] == before_frames
-            assert page.locator('[data-teleport]').first.evaluate('el => el === document.activeElement')
-            shot(page, 'guide-map-handoff')
-            page.keyboard.press('Escape')
-            page.wait_for_function("!document.querySelector('#mall-map').open")
-            page.locator('#keyboard-help summary').click()
-            page.locator('#guide-reopen').click()
-            before_history = page.evaluate('__mall.state.modeHistory')
-            page.locator('#guide-list').click()
+            page.locator('#view-toggle').click()
             page.locator('#store-list').wait_for(state='visible')
-            page.wait_for_function("!document.querySelector('#guide-dialog').open")
-            final_history = page.evaluate('__mall.state.modeHistory')
-            transitions = final_history[len(before_history):]
-            assert not any(e['from'] == 'menu' and e['to'] == 'explore' for e in transitions), transitions
             assert page.evaluate('document.activeElement.id') == 'list-title'
-            shot(page, 'guide-list-handoff')
-            assert page.evaluate('__mall.state.illegalCount') == 0
-            rows.append({'scenario': 'Guide from Help: dismiss, Map and List', 'result': 'PASS',
-                'mapModeHistoryDelta': [], 'listFinalFocus': 'list-title',
-                'listModeHistoryDelta': transitions})
+            page.locator('#view-toggle').click()
             context.close()
 
             # Explicit List control owns exit cleanup from real Seated and Cart.
@@ -345,7 +314,7 @@ def run():
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
             wait_ready(page, url)
-            page.locator('#guide-list').click()
+            page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
             page.locator('#view-toggle').click()
             approach_seat(page)
             page.locator('#inspect').click()
@@ -380,7 +349,7 @@ def run():
             page = context.new_page()
             page.on('pageerror', lambda error: page_errors.append(str(error)))
             wait_ready(page, url)
-            page.locator('#guide-list').click()
+            page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
             page.locator('.product-card [data-inspect]').first.click()
             page.locator('#product-add').click()
             close_event_before_action(page, '#product-dialog')
@@ -451,7 +420,7 @@ def run():
             page = context.new_page()
             page.on('pageerror', lambda error: page_errors.append(str(error)))
             wait_ready(page, url)
-            page.locator('#guide-list').click()
+            page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
             page.locator('#view-toggle').click()
             approach_seat(page)
             page.locator('#inspect').click()
@@ -491,7 +460,7 @@ def run():
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 wait_ready(page, url)
-                page.locator('#guide-list').click()
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
                 page.locator('#store-list').wait_for(state='visible')
                 add_selection(page)
                 if overlay == 'directory-product':
@@ -542,7 +511,7 @@ def run():
                   id:document.activeElement.id || '',
                   inspectId:document.activeElement.dataset?.inspect || '',
                   hiddenAncestor:!!document.activeElement.closest('[hidden]'),
-                  experienceHidden:!!document.querySelector('#experience[hidden]')})''')
+                  experienceHidden:document.querySelector('#experience[hidden]')})''')
                 assert focus['id'] != 'scene'
                 if focus['hiddenAncestor']:
                     failures.append({'scenario': f'WebGL context loss under {overlay}',
@@ -567,7 +536,7 @@ def run():
             try:
                 debug = page.evaluate('''() => ({focus:document.activeElement.id,
                   mode:window.__mall?.mode, state:window.__mall?.state,
-                  guideOpen:document.querySelector('#guide-dialog')?.open,
+                  guideOpen:!document.querySelector('#guide-card')?.hidden,
                   mapOpen:document.querySelector('#mall-map')?.open,
                   helpOpen:document.querySelector('#keyboard-help')?.open})''')
                 (args.output / 'failure.json').write_text(json.dumps(debug, indent=2) + '\n')

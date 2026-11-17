@@ -9,8 +9,8 @@ OUT=ROOT.parent/'evidence/mall-amenities'
 FILES={'desk':'mall-service-desk.glb','signs':'mall-wayfinding-ceiling-sign.glb','showcase':'mall-glass-showcase.glb'}
 def ready(page,url):
  page.goto(url,wait_until='domcontentloaded');page.wait_for_function('window.__mall?.ready&&window.__sceneReady',timeout=90000)
- page.locator('#guide-start').click();page.wait_for_function('!document.querySelector("#guide-dialog").open&&!__mall.state.paused')
- page.locator('[data-ob-action=skip]').click()
+ page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.querySelector("#guide-card").hidden&&!__mall.state.paused')
+
  page.evaluate('__mall.setInput({});__mall.step(17)')
 def approach(page,kind):
  page.evaluate('__mall.setInput({});__mall.teleport("atrium")')
@@ -59,7 +59,7 @@ def run():
     page.keyboard.press('Tab');assert page.locator('#amenity-dialog .ob-close').evaluate('e=>e===document.activeElement')
     page.evaluate('__mall.setInput({forward:1});__mall.step(200)');assert state(page)['z']==before['z']
     page.screenshot(path=str(OUT/f'service-desk-{width}.png'))
-    page.locator('[data-object-action=help]').click();page.locator('#guide-dialog').wait_for(state='visible');page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#guide-dialog").open&&!__mall.state.paused')
+    page.locator('[data-object-action=help]').click();page.wait_for_function('document.querySelector("#keyboard-help").open');page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#keyboard-help").open&&!__mall.state.paused')
     # The model has a solid conservative footprint, with an approachable guest side.
     approach(page,'desk');close(page);drive(page,17);page.screenshot(path=str(OUT/f'desk-model-{width}.png'));stopped=drive(page,1800,forward=1);assert stopped['z']>=6.5,stopped
     approach(page,'signs');assert 'Choose a store' in page.locator('#inspect').get_attribute('aria-label');page.screenshot(path=str(OUT/f'wayfinding-{width}.png'))

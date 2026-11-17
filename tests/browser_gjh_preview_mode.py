@@ -34,7 +34,7 @@ def run():
                 page = browser.new_page(viewport={'width': width, 'height': height}, reduced_motion='reduce')
                 page.goto(url)
                 page.wait_for_function('__mall.ready && __sceneReady', timeout=60000)
-                page.locator('#guide-list').click()
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
                 for sku in ['nz-425g', 'au-425g', 'sa-425g', 'mx-454g']:
                     page.locator(f'[data-inspect="new-moon-{sku}-front"]').click()
                     page.wait_for_function('__newMoonPreview.state.loaded', timeout=30000)

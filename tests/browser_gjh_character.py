@@ -161,10 +161,10 @@ def verify(browser, url, base, viewport, directory, missing=False, reduced=False
             assert hashlib.sha256(raw).hexdigest() == hashlib.sha256((ROOT / ASSET).read_bytes()).hexdigest()
             result["servedSha256"] = hashlib.sha256(raw).hexdigest()
             page.wait_for_function("window.__mall?.ready && window.__sceneReady", timeout=60000)
-            # Complete the genuine first-use flow before existing walking/asset assertions.
-            page.locator("#guide-dialog").wait_for(state="visible")
-            page.locator("#guide-start").click()
-            page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+            # Dismiss the nonmodal first-use card before existing walking/asset assertions.
+            page.locator("#guide-card").wait_for(state="visible")
+            page.locator("#guide-skip").click(); page.locator("#guide-card").wait_for(state="hidden"); page.locator("#scene").focus()
+            page.wait_for_function("document.querySelector('#guide-card').hidden && document.activeElement.id === 'scene'")
             page.evaluate("__mall.setInput({}); __mall.teleport('atrium')")
             initial = drive(page, 400, yaw=0)
             character = initial["character"]

@@ -9,7 +9,7 @@ def run():
   with sync_playwright() as p:
    b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
    for w,h in ([(390,680)] if args.live else [(390,680),(844,390)]):
-    page=b.new_page(viewport={'width':w,'height':h},has_touch=True,reduced_motion='reduce');ready(page,args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.screenshot(path=str(out/f'guide-{w}.png'));page.locator('#guide-start').click();page.wait_for_function('document.activeElement.id==="scene"');page.evaluate('__mall.step(0)')
+    page=b.new_page(viewport={'width':w,'height':h},has_touch=True,reduced_motion='reduce');ready(page,args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.screenshot(path=str(out/f'guide-{w}.png'));page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');page.evaluate('__mall.step(0)')
     cdp=page.context.new_cdp_session(page);points={}
     def send(kind):
      cdp.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':list(points.values())})
@@ -38,7 +38,7 @@ def run():
     page.evaluate('window.lastTouchPointer=null;document.querySelector("#scene").addEventListener("pointerdown",e=>window.lastTouchPointer=e.pointerId,{once:true})');down(1,x,y);move(1,x,y-40);tick();page.evaluate('document.querySelector("#scene").releasePointerCapture(window.lastTouchPointer)');move(1,x,y-50);stopped(state(page));up(1)
     # HUD clicks remain HUD actions, and a modal absorbs new touches.
     s=state(page);page.locator('#run-toggle').tap();stopped(s);assert page.locator('#run-toggle').get_attribute('aria-pressed')=='true';page.locator('#run-toggle').tap()
-    reopen(page);s=state(page);down(1,5,5);move(1,35,25);up(1);stopped(s);page.locator('#guide-close').click();closed(page)
+    page.locator('#keyboard-help > summary').click();s=state(page);down(1,5,5);move(1,35,25);up(1);stopped(s)
     page.locator('#keyboard-help').evaluate('e=>e.open=false');page.locator('#scene').focus();page.evaluate('__mall.step(0)')
     down(1,x,y);move(1,x,y-40);tick();page.set_viewport_size({'width':w,'height':h-30});page.wait_for_function('!document.querySelector("#joystick").classList.contains("is-floating")');stopped(state(page));points.clear();send('touchCancel')
     records.append({'viewport':[w,h],'leftCenterRightOrigins':'PASS','tapDeadzone':'PASS','twoTouchRolesAndThirdIgnored':'PASS','releaseCancelLostCaptureResize':'PASS','runAndModalIsolation':'PASS'});page.close()

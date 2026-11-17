@@ -14,7 +14,7 @@ def run():
    browser=pw.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
    for width,height in [(390,844),(1440,900)]:
     context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=2,has_touch=width<1000,reduced_motion='reduce',service_workers='block')
-    context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+    context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     page=context.new_page();errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
     page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded');page.wait_for_function('window.__sceneReady',timeout=90000);page.wait_for_load_state('networkidle');page.evaluate('__mall.teleport("atrium")')
     def sample():

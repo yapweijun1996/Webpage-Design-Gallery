@@ -64,7 +64,9 @@ def inspection_returns(browser, url, output):
             reduced_motion='reduce',service_workers='block')
         page=context.new_page()
         ready(page,url)
-        native_action(page,'#guide-dialog',lambda:page.locator('#context-shops').click())
+        if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
+        page.locator('#scene').focus()
+        page.locator('#view-toggle').click()
         # Include the lowest reachable product/brand trigger, not just Original tin.
         lowest=page.locator('#store-list [data-inspect]').evaluate_all("es=>es.reduce((a,b)=>a.getBoundingClientRect().bottom>b.getBoundingClientRect().bottom?a:b).dataset.inspect")
         for selector,dialog,close in [('#original-tin-open','#original-tin-dialog','#original-tin-close'),
@@ -242,26 +244,10 @@ def run():
                         page.screenshot(path=str(args.output / f'{label}-{width}x{height}.png'))
                     return result
 
-                check('guide', True, 'context-navigation-guide')
-                row['focusPaths']['guide'] = tab_dialog(page, '#guide-dialog')
-                page.locator('#guide-title').focus()
-                page.keyboard.press('Shift+Tab')
-                assert page.evaluate('document.activeElement.id') == 'context-shops'
-                row['focusOutline'] = outline()
-                page.keyboard.press('Tab')
-                assert page.locator('#guide-dialog .ob-settings-toggle').evaluate('e => e === document.activeElement')
-                page.keyboard.press('Tab')
-                assert page.evaluate('document.activeElement.id') == 'guide-close'
-                # The shared onboarding guide now owns its own scrolling and
-                # preference control instead of the retired guide footnote.
-                page.locator('#guide-show-next').focus()
-                preference = page.locator('#guide-show-next').bounding_box()
-                content = page.locator('#guide-dialog').bounding_box()
-                assert preference['y'] >= content['y'] and preference['y'] + preference['height'] <= content['y'] + content['height'] + 1, (preference, content)
-                before = state(page)
-                native_action(page, '#guide-dialog', lambda: page.locator('#context-home').click())
-                page.wait_for_function('document.activeElement.id === "scene"')
-                preserved(before, state(page))
+                assert page.locator('#guide-card').is_visible()
+                check('guide', False)
+                page.locator('#guide-skip').click()
+                page.locator('#scene').focus()
                 check('explore', False)
                 compact = width <= 650 or height <= 560
                 if compact:
@@ -295,7 +281,10 @@ def run():
                     preserved(before,state(page))
                     check('map-home-touch',False)
                 else:
+                    assert not page.locator('#mall-map').evaluate('e=>e.open')
+                    page.locator('#header-map').click()
                     check('wide-map-live', False)
+                    page.locator('#header-map').click()
                 page.locator('#keyboard-help summary').click()
                 check('help', compact, 'context-navigation-global' if compact else None)
                 fields = page.locator('#controls-copy select')
@@ -305,10 +294,13 @@ def run():
                 page.locator('#guide-reopen').focus()
                 assert page.locator('#guide-reopen').evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}')
                 page.locator('#guide-reopen').click()
-                check('reopened-guide', True, 'context-navigation-guide')
-                native_action(page, '#guide-dialog', lambda: page.locator('#context-shops').click())
+                page.locator('#guide-card').wait_for(state='visible')
+                check('reopened-guide', False)
+                page.locator('#view-toggle').click()
                 page.wait_for_function('document.activeElement.id === "list-title"')
                 check('directory', True, 'context-navigation-global')
+                page.locator('#context-shops').focus()
+                row['focusOutline'] = outline()
                 page.locator('#original-tin-open').focus()
                 assert page.locator('#original-tin-open').evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}')
                 page.locator('.site-footer a').focus()
@@ -381,7 +373,8 @@ def run():
                         reduced_motion='reduce', service_workers='block')
                     page = context.new_page()
                     ready(page, url)
-                    native_action(page, '#guide-dialog', lambda: page.locator('#guide-start').click())
+                    if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
+                    page.locator('#scene').focus()
                     page.locator('#view-toggle').click()
                     add_selection(page)
                     page.locator('#context-home').click()
@@ -394,22 +387,20 @@ def run():
                         page.locator('#bag-open').click()
                         activate_cart(page)
                         page.wait_for_function('__mall.state.pushing')
-                    for surface in ['map', 'help', 'guide', 'bag']:
+                    for surface in ['map', 'help', 'bag']:
                         before = state(page)
                         if surface == 'map':
                             page.locator('#header-map').click()
-                        elif surface in ['help', 'guide']:
+                        elif surface == 'help':
                             page.locator('#keyboard-help summary').click()
-                            if surface == 'guide':
-                                page.locator('#guide-reopen').click()
                         else:
                             page.locator('#bag-open').click()
                         page.wait_for_function('!document.querySelector("#context-navigation").hidden')
                         assert page.locator('#context-home').get_attribute('aria-current') == 'page'
                         assert page.locator('#context-navigation [aria-current]').count() == 1
                         page.evaluate('__mall.setInput({forward:1})')
-                        if surface in ['bag', 'guide']:
-                            native_action(page, '#bag-dialog' if surface == 'bag' else '#guide-dialog', lambda: page.locator('#context-home').click())
+                        if surface == 'bag':
+                            native_action(page, '#bag-dialog', lambda: page.locator('#context-home').click())
                         else:
                             page.locator('#context-home').click()
                         page.wait_for_function('expected=>__mall.mode===expected', arg=base)
@@ -421,13 +412,14 @@ def run():
                     native_action(page, '#bag-dialog', lambda: page.locator('#context-shops').click())
                     page.wait_for_function('document.activeElement.id === "list-title"')
                     assert not state(page)['seated'] and not state(page)['pushing']
-                    rows.append({'base': base, 'homePreservedAllFourSurfaces': True, 'shopsStandStow': True})
+                    rows.append({'base': base, 'homePreservedMapHelpBag': True, 'shopsStandStow': True})
                     context.close()
 
                 context = browser.new_context(viewport={'width': 650, 'height': 844}, reduced_motion='reduce', service_workers='block')
                 page = context.new_page()
                 ready(page, url)
-                native_action(page, '#guide-dialog', lambda: page.locator('#guide-start').click())
+                if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
+                page.locator('#scene').focus()
                 page.locator('#header-map').click()
                 page.locator('#context-home').focus()
                 page.set_viewport_size({'width': 651, 'height': 844})
@@ -453,7 +445,9 @@ def run():
                 context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce', service_workers='block')
                 page = context.new_page()
                 ready(page, url)
-                native_action(page, '#guide-dialog', lambda: page.locator('#context-shops').click())
+                if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
+                page.locator('#scene').focus()
+                page.locator('#view-toggle').click()
                 add_selection(page)
                 page.locator('#bag-open').click()
                 page.locator('#context-home').focus()

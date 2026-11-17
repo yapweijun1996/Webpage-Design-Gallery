@@ -23,12 +23,10 @@ with sync_playwright() as p:
         page.on('pageerror',lambda e:errors.append(str(e)))
         page.goto(os.environ.get('GJH_V2_URL','http://127.0.0.1:18769/demos/corporate/gjh/v11/?visitor=v2'))
         page.wait_for_function('window.__mall?.ready',timeout=60000)
-        start=page.get_by_role('button',name='Start exploring',exact=True)
-        if start.is_visible():
-            start.click()
-            page.wait_for_function("!document.querySelector('#guide-dialog').open")
-        skip=page.get_by_role('button',name='Skip tutorial',exact=True)
-        if skip.is_visible(): skip.click()
+        skip=page.locator('#guide-skip')
+        if skip.is_visible():
+            skip.click()
+            page.locator('#guide-card').wait_for(state='hidden')
         if page.locator('#mall-map').evaluate('(n)=>n.open') and width<650:
             page.locator('#header-map').click()
         page.locator('#scene').focus()
@@ -36,7 +34,7 @@ with sync_playwright() as p:
         resumed_at=page.evaluate('__mall.state.frames')
         page.wait_for_function('(frames)=>__mall.state.frames>frames',arg=resumed_at,timeout=60000)
         page.evaluate("""()=>{__mall.teleport('newmoon');__mall.setInput({forward:1});__mall.step(3900);__mall.setInput({forward:0});}""")
-        print('Approach',page.evaluate('({x:__mall.state.x,z:__mall.state.z,nearby:__mall.state.nearby,guide:document.querySelector("#guide-dialog").open,map:document.querySelector("#mall-map").open})'),flush=True)
+        print('Approach',page.evaluate('({x:__mall.state.x,z:__mall.state.z,nearby:__mall.state.nearby,guide:!document.querySelector("#guide-card").hidden,map:document.querySelector("#mall-map").open})'),flush=True)
         page.get_by_role('button',name='Pick up product',exact=True).click()
         page.evaluate('__mall.step(1000)')
         assert page.evaluate('__mall.state.character.physicalProduct.phase')=='held'

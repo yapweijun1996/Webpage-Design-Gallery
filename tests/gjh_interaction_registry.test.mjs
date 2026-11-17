@@ -83,3 +83,25 @@ test('registered auxiliary pickup and map travel do not replace nearby inspectio
   assert.equal(destination, 'store');
   assert.equal(registry.get('pickup','missing'), null);
 });
+
+test('success subscribers cover later registered kinds, ignore failures and unsubscribe', () => {
+  const registry = createInteractionRegistry([]);
+  const events = [];
+  const unsubscribe = registry.subscribe((item, context) => events.push([item.kind, context.input]));
+  const context = {input: 'keyboard'};
+  for (const kind of ['sit', 'inspect', 'open', 'pickup', 'travel']) {
+    const item = registry.register({id: kind, kind, handler: () => true});
+    assert.equal(registry.dispatch(item, context), true);
+  }
+  assert.deepEqual(events, ['sit', 'inspect', 'open', 'pickup', 'travel'].map(kind => [kind, 'keyboard']));
+  for (const result of [false, undefined, null, 0]) {
+    registry.dispatch(registry.register({id: 'failed', kind: 'inspect', handler: () => result}), context);
+  }
+  registry.dispatch(registry.register({id: 'blocked', kind: 'open', availability: () => false,
+    handler: () => { throw new Error('Unavailable actions must not run'); }}), context);
+  registry.dispatch(null, context);
+  assert.equal(events.length, 5);
+  unsubscribe();
+  registry.dispatch(registry.register({id: 'later', kind: 'pickup', handler: () => true}), context);
+  assert.equal(events.length, 5);
+});

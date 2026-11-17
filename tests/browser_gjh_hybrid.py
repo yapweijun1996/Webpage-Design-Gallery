@@ -28,7 +28,7 @@ def run():
             try:
                 for width, height in [(1440, 900), (390, 844), (320, 700)]:
                     context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce')
-                    context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1', '1')")
+                    context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1', 'dismissed')")
                     page = context.new_page()
                     errors = []
                     page.on('pageerror', lambda error: errors.append(str(error)))

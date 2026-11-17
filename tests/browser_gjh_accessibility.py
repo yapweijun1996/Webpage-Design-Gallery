@@ -49,9 +49,8 @@ def run():
     assert args.axe_script and args.axe_script.is_file(), 'Provide reviewed axe-core 4.10.3'
     assert hashlib.sha256(args.axe_script.read_bytes()).hexdigest() == AXE_SHA256
     args.output.mkdir(parents=True, exist_ok=True)
-    source_paths = ['assets/onboarding/onboarding.js', 'assets/onboarding/onboarding.css',
-        'demos/corporate/gjh/v11/index.html', 'demos/corporate/gjh/v11/style.css',
-        'demos/corporate/gjh/v11/assets/ui.js']
+    source_paths = ['demos/corporate/gjh/v11/index.html', 'demos/corporate/gjh/v11/style.css',
+        'demos/corporate/gjh/v11/assets/ui.js', 'demos/corporate/gjh/v11/assets/ux-tutorial.js']
     source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in source_paths}
     test_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     server = http.server.ThreadingHTTPServer(
@@ -102,8 +101,7 @@ def run():
                         .filter(element => {const r=element.getBoundingClientRect(),s=getComputedStyle(element);
                           return element.checkVisibility()&&r.width>0&&r.height>0&&s.visibility!=='hidden';})
                         .map(element => {
-                          // Native checkbox labels are part of the real clickable
-                          // target, independently exercised below before auditing.
+                          // Associated labels contribute to native input hit targets.
                           const target=element.matches('input[type=checkbox],input[type=radio]')&&element.labels?.[0]||element;
                           const r=target.getBoundingClientRect(),visual=element.getBoundingClientRect();return {
                           id:element.id,tag:element.tagName,width:r.width,height:r.height,
@@ -124,37 +122,30 @@ def run():
                     if width in (390, 1440, 667):
                         page.screenshot(path=str(args.output / f'{state}-{width}.png'))
 
-                checkbox = page.locator('#guide-show-next')
-                preference = page.locator('#guide-dialog .ob-preference')
-                original_preference = checkbox.is_checked()
-                preference.scroll_into_view_if_needed()
-                preference_box = preference.bounding_box()
-                # A genuine pointer click on the label's far edge must toggle
-                # the checkbox; restore the prior preference with the same hit.
-                for selected in [not original_preference, original_preference]:
-                    page.mouse.click(preference_box['x'] + preference_box['width'] - 4,
-                        preference_box['y'] + preference_box['height'] / 2)
-                    assert checkbox.is_checked() == selected
-                page.locator('#guide-title').focus()
+                page.locator('#guide-card').wait_for(state='visible')
                 scan('guide')
-                guide_focus = tab_dialog(page, '#guide-dialog')
-                page.locator('#guide-start').click()
-                page.wait_for_function('document.activeElement.id === "scene"')
+                page.locator('#guide-skip').focus()
+                guide_focus = [page.evaluate('document.activeElement.id')]
+                page.keyboard.press('Tab')
+                guide_focus.append(page.evaluate('document.activeElement.id'))
+                assert guide_focus == ['guide-skip', 'guide-next'], guide_focus
+                assert page.locator('#guide-next').evaluate('e => parseFloat(getComputedStyle(e).outlineWidth) >= 2')
+                page.keyboard.press('Tab')
+                assert page.evaluate('!document.activeElement.closest("#guide-card")')
+                page.locator('#guide-skip').click()
+                page.locator('#guide-card').wait_for(state='hidden')
+                page.locator('#scene').focus()
                 scan('explore')
                 compact = width < 651 or height < 561
-                if compact:
-                    page.locator('#header-map').click()
-                else:
-                    # The relocated kiosk is not assumed to be near spawn.
-                    # Reach the persistent wide map through its actual guide action.
-                    page.locator('#keyboard-help summary').click()
-                    page.locator('#guide-reopen').click()
-                    page.locator('#guide-map').click()
-                    page.wait_for_function('!document.querySelector("#guide-dialog").open&&document.querySelector("#mall-map").open')
+                assert not page.locator('#mall-map').evaluate('e => e.open')
+                page.locator('#header-map').click()
+                page.wait_for_function('document.querySelector("#mall-map").open')
                 scan('map')
                 if compact:
                     page.keyboard.press('Escape')
                     assert page.locator('#header-map').evaluate('e => e === document.activeElement')
+                else:
+                    page.locator('#header-map').click()
                 page.locator('#keyboard-help summary').click()
                 scan('help')
                 hair = page.get_by_role('combobox', name='Hair', exact=True)
@@ -304,7 +295,6 @@ def run():
                 assert not errors, errors
                 results.append({'viewport': [width, height], 'scans': scans,
                     'guideTabSequence': guide_focus, 'bagTabSequence': bag_focus,
-                    'checkboxAssociatedLabelHit': {'bounds': preference_box, 'edgeClickToggleAndRestore': 'PASS'},
                     'nativePopupKeyboardChoice': native_choice,
                     'appearanceKeyboardFocus': 'PASS: all seven named fields', 'hairImmediateHit': hair_hit,
                     'resizedOpenBag': resized_bag, 'cartKeyboardDistance': distance,

@@ -9,7 +9,7 @@ def run():
   with sync_playwright() as p:
    b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
    for w,h in ([(390,680)] if args.url else [(320,680),(390,680),(844,390)]):
-    page=b.new_page(viewport={'width':w,'height':h},has_touch=True,reduced_motion='reduce');ready(page,args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-list').click();closed(page)
+    page=b.new_page(viewport={'width':w,'height':h},has_touch=True,reduced_motion='reduce');ready(page,args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click();closed(page)
     buttons=page.locator('.product-card [data-inspect]');assert buttons.count()==4
     for i in range(4):
      buttons.nth(i).click();page.locator('#product-add').click();assert 'Added to demo bag' in page.locator('#product-bag-status').inner_text();assert page.locator('#product-shop').get_attribute('href')=='https://www.gjheshop.com/'

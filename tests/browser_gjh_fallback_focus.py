@@ -13,12 +13,15 @@ def run():
     for mode in ['scene','guide','product','map','list-product','header']:
      page=browser.new_page(viewport={'width':width,'height':height},has_touch=width<600,reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
      page.goto(args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
-     if mode!='guide':page.locator('#guide-start').click();page.wait_for_function('document.activeElement.id==="scene"')
+     if mode!='guide':
+      if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
+      page.locator('#scene').focus()
+     else:page.locator('#guide-skip').focus()
      if mode=='product':
       page.evaluate('__mall.teleport("newmoon");__mall.setInput({});__mall.step(400);__mall.setInput({forward:1});__mall.step(1500);__mall.setInput({right:-1});__mall.step(300);__mall.setInput({forward:1});__mall.step(2300);__mall.setInput({})')
       assert page.evaluate('__mall.state.nearby'),page.evaluate('__mall.state');page.locator('#scene').focus();page.keyboard.press('f');page.locator('#product-dialog').wait_for(state='visible')
      elif mode=='map':
-      page.locator('#mall-map').evaluate('e=>e.open=true');page.locator('[data-teleport]').first.focus()
+      page.locator('#header-map').click();page.locator('[data-teleport]').first.focus()
      elif mode=='list-product':
       page.locator('#view-toggle').click();page.locator('[data-product] [data-inspect]').first.click();page.locator('#product-close').focus()
      elif mode=='header':page.locator('header a').first.focus()
@@ -28,7 +31,7 @@ def run():
      after=page.evaluate('document.activeElement.id || document.activeElement.tagName');print(json.dumps({'viewport':[width,height],'mode':mode,'before':active,'after':after}),flush=True)
      if mode in ['scene','guide','product','map']:
       assert after=='list-title','Hidden 3D focus must recover to directory heading'
-      assert not page.locator('#guide-dialog').evaluate('e=>e.open') and not page.locator('#product-dialog').evaluate('e=>e.open')
+      assert page.locator('#guide-card').is_hidden() and not page.locator('#product-dialog').evaluate('e=>e.open')
       page.keyboard.press('Tab');assert page.evaluate('document.activeElement.getClientRects().length>0 && !document.activeElement.closest("[hidden]")')
       page.locator('[data-product] [data-inspect]').first.focus();page.keyboard.press('Enter');page.locator('#product-dialog').wait_for(state='visible');page.keyboard.press('Escape')
      elif mode=='list-product':

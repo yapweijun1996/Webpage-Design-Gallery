@@ -8,7 +8,7 @@ def run():
   with sync_playwright() as p:
    b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
    for reduced in [False,True]:
-    page=b.new_page(viewport={'width':390,'height':680},has_touch=True,reduced_motion='reduce' if reduced else 'no-preference');ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-start').click();closed(page);page.evaluate('__mall.setInput({right:1});__mall.step(1000);__mall.setInput({forward:0});__mall.step(200)');page.locator('#view-toggle').click()
+    page=b.new_page(viewport={'width':390,'height':680},has_touch=True,reduced_motion='reduce' if reduced else 'no-preference');ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();closed(page);page.evaluate('__mall.setInput({right:1});__mall.step(1000);__mall.setInput({forward:0});__mall.step(200)');page.locator('#view-toggle').click()
     for i in range(4):
      page.locator('.product-card [data-inspect]').nth(i).click()
      page.locator('#product-collect').scroll_into_view_if_needed()

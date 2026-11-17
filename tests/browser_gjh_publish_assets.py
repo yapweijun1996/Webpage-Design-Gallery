@@ -36,7 +36,7 @@ def run():
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=['--use-angle=metal'])
                 for query in ('?layout=classic', ''):
                     context = browser.new_context(viewport={'width':390, 'height':844}, reduced_motion='reduce', service_workers='block')
-                    context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+                    context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                     page = context.new_page()
                     errors, failed = [], []
                     page.on('pageerror', lambda error: errors.append(str(error)))

@@ -33,9 +33,9 @@ def run():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 ready(page, f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/')
                 guide(page)
-                page.locator('#guide-start').click()
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
                 closed(page)
-                page.locator('[data-ob-action=skip]').click()
+
                 page.locator('#bag-open').focus()
                 page.keyboard.press('Tab')
                 row = page.evaluate('''() => {

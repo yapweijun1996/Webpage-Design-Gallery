@@ -37,7 +37,7 @@ GLTFLoader.prototype.parseAsync = async function(...args) {
      assert audit['disposedGeometries']==audit['geometryCount'] and audit['disposedMaterials']==audit['materialCount'],audit
      assert state['primitives']==0,state
     else:assert audit['disposedGeometries']==0 and audit['disposedMaterials']==0,audit
-    page.locator('#guide-start').click();page.wait_for_function('document.activeElement.id==="scene"');before=page.evaluate('__mall.state');page.evaluate('__mall.setInput({forward:1});__mall.step(500)');after=page.evaluate('__mall.state');assert abs(after['z']-before['z'])>.1
+    page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');before=page.evaluate('__mall.state');page.evaluate('__mall.setInput({forward:1});__mall.step(500)');after=page.evaluate('__mall.state');assert abs(after['z']-before['z'])>.1
     assert not errors,errors;results.append({'mode':mode,'status':state,'disposal':audit,'walking':'PASS'});context.close()
    b.close()
  finally:server.shutdown()

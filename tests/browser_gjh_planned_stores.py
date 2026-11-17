@@ -20,7 +20,7 @@ def run():
             browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'), '--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
             for width, height in [(320,700), (390,844), (768,1024), (1440,900), (844,390)]:
                 context = browser.new_context(viewport={'width':width,'height':height}, has_touch=width<1000, reduced_motion='reduce', service_workers='block')
-                context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+                context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page = context.new_page(); errors=[]
                 page.on('pageerror', lambda e: errors.append(str(e)))
                 page.goto(url+'?layout=expanded'); page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)

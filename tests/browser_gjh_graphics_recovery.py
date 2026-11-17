@@ -206,8 +206,9 @@ def run():
         return c,page
     def ready(page,target=url,start=True):
         page.goto(target);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
-        if page.locator('#guide-dialog').is_visible():
-            native_close(page,'#guide-dialog',lambda:page.locator('#guide-start' if start else '#guide-list').click())
+        if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
+        if start:page.locator('#scene').focus()
+        else:page.locator('#view-toggle').click()
         page.locator('#scene').evaluate("e=>e.addEventListener('webglcontextrestored',()=>__graphicsProbe.timeline.push('after-Three-listener'))")
         freeze(page)
     try:
@@ -408,11 +409,11 @@ def run():
                     assert not page.evaluate('__mall.ready')
                     pending.pop().continue_();page.unroute('**/'+asset)
                     page.wait_for_function('__mall.ready',timeout=60000)
-                    assert page.locator('#store-list').is_visible() and page.locator('#guide-dialog').is_hidden()
+                    assert page.locator('#store-list').is_visible() and page.locator('#guide-card').is_hidden()
                     enter(page);freeze(page)
-                    assert page.locator('#mall-map').evaluate('e=>e.open')==(width>=1000)
+                    assert not page.locator('#mall-map').evaluate('e=>e.open')
                     shot(page,'startup-'+str(width)+'-'+asset.split('/')[-1],True)
-                    row('startup-native-loss',viewport=[width,height],awaitedAsset=asset,initialMapOpen=width>=1000,metrics=metrics(page));c.close()
+                    row('startup-native-loss',viewport=[width,height],awaitedAsset=asset,initialMapOpen=False,metrics=metrics(page));c.close()
                 # Real elevator movement interrupted in both halves: nearest-floor settlement and walking.
                 for elapsed in [650,1800]:
                     c,page=context(browser,motion='no-preference');ready(page)

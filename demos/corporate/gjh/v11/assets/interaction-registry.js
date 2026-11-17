@@ -2,6 +2,7 @@
 export function createInteractionRegistry(entries, describe = () => ({})) {
   const cache = new WeakMap();
   const actions = new Map();
+  const listeners = new Set();
   let selectionContext = {};
   function normalize(source) {
     let item = cache.get(source);
@@ -44,7 +45,10 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
   }
   function dispatch(item, context = selectionContext) {
     if (!item || (item.availability && !item.availability(context, item))) return false;
-    return item.handler?.(item, context) ?? false;
+    const result = item.handler?.(item, context) ?? false;
+    if (result) for (const listener of listeners) listener(item, context);
+    return result;
   }
-  return {normalize, nearest, dispatch, register, get};
+  function subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); }
+  return {normalize, nearest, dispatch, register, get, subscribe};
 }

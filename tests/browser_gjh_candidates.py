@@ -42,7 +42,7 @@ def run():
      browser=p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args=['--use-angle=metal','--ignore-gpu-blocklist'])
      expected=None
      for width,height,expanded,dark in [(390,844,False,False),(639,826,False,False),(1440,1000,False,False),(320,740,True,False),(390,844,True,False),(639,826,True,False),(1440,1000,True,False),(320,740,True,True)]:
-      context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',color_scheme='dark' if dark else 'light',service_workers='block');context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+('?layout=expanded' if expanded else ''),wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready&&window.__sceneReady',timeout=90000)
+      context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',color_scheme='dark' if dark else 'light',service_workers='block');context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+('?layout=expanded' if expanded else ''),wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready&&window.__sceneReady',timeout=90000)
       expected=page.evaluate('async()=> (await import("./assets/expanded-layout.js")).plannedSpaces')
       section=page.locator('#planned-spaces-directory');assert section.evaluate('e=>e.open')==expanded
       if expanded:

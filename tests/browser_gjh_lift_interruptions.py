@@ -29,7 +29,7 @@ def pause_checks(page,phase):
  page.evaluate("window.dispatchEvent(new Event('blur'));__mall.setInput(null)");before=state(page);page.wait_for_timeout(220);after=still(page,before);result.append({'signal':'synthetic-window-blur','phase':phase,'before':before,'after':after});page.evaluate("window.dispatchEvent(new Event('focus'))")
  page.locator('#keyboard-help > summary').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Help','phase':phase,'after':still(page,before)});page.locator('#keyboard-help > summary').click();page.wait_for_function('!__mall.state.paused')
  page.locator('#header-map').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Map','phase':phase,'after':still(page,before)});page.locator('#map-close').click();page.wait_for_function('!__mall.state.paused')
- page.locator('#keyboard-help > summary').click();page.locator('#guide-reopen').click();page.wait_for_function('document.querySelector("#guide-dialog").open');before=state(page);result.append({'signal':'Guide','phase':phase,'after':still(page,before)});page.locator('#guide-close').click();page.wait_for_function('document.querySelector("#keyboard-help").open');page.locator('#keyboard-help > summary').click();page.wait_for_function('!__mall.state.paused')
+ page.locator('#keyboard-help > summary').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Help','phase':phase,'after':still(page,before)});page.locator('#keyboard-help > summary').click();page.wait_for_function('!__mall.state.paused')
  page.locator('#view-toggle').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'List','phase':phase,'after':still(page,before)});page.locator('#view-toggle').click();page.wait_for_function('!__mall.state.paused')
  before=page.evaluate("()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));__mall.setInput(null);return __mall.state}");page.wait_for_timeout(220);after=state(page);assert after['frames']==before['frames'] and abs(after['y']-before['y'])<1e-6 and after['elevatorPhase']==before['elevatorPhase'];result.append({'signal':'synthetic-hidden-native-clock','phase':phase,'before':before,'after':after});page.evaluate("delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))")
  old=page.viewport_size;page.set_viewport_size({'width':old['width']+1,'height':old['height']});page.set_viewport_size(old);s=state(page);assert s['elevatorTravel'] or s['elevator']['calling'];result.append({'signal':'native-resize-valid-phase','phase':phase,'after':s});step(page)
@@ -63,7 +63,7 @@ def run():
   with sync_playwright() as p:
    browser=p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args=['--use-angle=metal','--ignore-gpu-blocklist'])
    for fallback in [False,True]:
-    c=browser.new_context(viewport={'width':390,'height':844},has_touch=True,reduced_motion='no-preference',service_workers='block');c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+    c=browser.new_context(viewport={'width':390,'height':844},has_touch=True,reduced_motion='no-preference',service_workers='block');c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     if fallback:
      use_individual_assets(c)
      for name in ['mall-service-desk.glb','mall-glass-showcase.glb']:c.route('**/'+name,lambda route:route.abort())

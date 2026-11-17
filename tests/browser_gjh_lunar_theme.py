@@ -13,7 +13,7 @@ def run():
  url=f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded'
  def fresh(browser,w=390,h=844,init=''):
   c=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=2,has_touch=w<1000,reduced_motion='reduce',service_workers='block')
-  c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1');"+init)
+  c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed');"+init)
   p=c.new_page();errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
  def ready(p,query=''):
   p.goto(url+query);p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')

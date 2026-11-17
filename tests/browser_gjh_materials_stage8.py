@@ -14,7 +14,7 @@ def run():
    print('Browser:',browser.version,flush=True)
    for w,h in [(320,700),(390,844),(768,1024),(844,390),(1440,900)]:
     c=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=2,has_touch=w<1000,reduced_motion='reduce',service_workers='block')
-    c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+    c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     page=c.new_page();errors=[];console=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('console',lambda message:console.append(f'{message.type}: {message.text}') if message.type in ('warning','error') else None)
     started=time.monotonic();page.goto(url);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);ready=round(time.monotonic()-started,3)
@@ -42,14 +42,14 @@ def run():
     print(json.dumps({'viewport':[w,h],'readySeconds':ready,'points':points,'network':resources,'pageErrors':errors,'consoleWarningsOrErrors':unexpectedConsole,'serviceWorkerBlockedByFixture':len(fixtureWarnings)}),flush=True);c.close()
    if args.fallback:
     c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
-    c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1');window.__materialFailures=0;const old=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...rest){if(type==='2d'&&this.width===256&&this.height===256){window.__materialFailures++;return null}return old.call(this,type,...rest)}")
+    c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed');window.__materialFailures=0;const old=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...rest){if(type==='2d'&&this.width===256&&this.height===256){window.__materialFailures++;return null}return old.call(this,type,...rest)}")
     page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
     assert page.evaluate('window.__sceneReady===true') and not errors,errors
     assert page.evaluate('window.__materialFailures > 0')
     assert page.evaluate('__mall.teleport("newmoon")');page.locator('#view-toggle').click();assert page.locator('[data-store]').count()==3
     print('PASS simulated procedural texture creation failure retains scene and directory',flush=True);c.close()
     c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
-    c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+    c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     page=c.new_page();errors=[];blocked=[];page.on('pageerror',lambda e:errors.append(str(e)))
     def block(route):
      blocked.append(route.request.url);route.abort()

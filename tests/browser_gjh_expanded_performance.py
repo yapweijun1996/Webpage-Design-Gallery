@@ -25,7 +25,7 @@ def run():
                 for query in ['?layout=classic', '']:
                     context=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=2,
                         has_touch=w<1000,reduced_motion='reduce',service_workers='block')
-                    context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+                    context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                     page=context.new_page();page.goto(base+query);page.wait_for_function('window.__sceneReady',timeout=90000)
                     page.evaluate('__mall.teleport("atrium");__mall.setInput({forward:0,yaw:0});__mall.step(100)')
                     idle=page.evaluate('''()=>{let s=__mall.state;return {draw:s.drawCalls,triangles:s.renderTriangles,resources:s.rendererResources,quality:s.graphics.quality}}''')

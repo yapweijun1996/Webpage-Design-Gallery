@@ -22,7 +22,7 @@ def run():
         browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
         for width,height in [(320,700),(390,844),(768,1024),(844,390),(1440,900)]:
           c=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block')
-          c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+          c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
           page.goto(url);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert page.evaluate('window.__sceneReady'),errors
           page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-6.4,10)
           assert state(page)['nearby']=='visitor-elevator',(width,state(page)['nearby'])
@@ -48,7 +48,7 @@ def run():
           print(f'PASS {width}x{height}: approach, bidirectional lift and both exits',flush=True);c.close()
         # Services are separate from the lift lobby and remain actionable.
         c=browser.new_context(viewport={'width':1440,'height':900},reduced_motion='reduce',service_workers='block')
-        c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
+        c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
         page.evaluate('__mall.teleport("entry")');move(page,-5,42.2);assert state(page)['nearby']=='mall-directory'
         page.locator('#inspect').click();assert page.locator('#mall-map').evaluate('(e)=>e.open')
         page.evaluate('__mall.teleport("entry")');move(page,25,46);assert state(page)['nearby']=='service-desk',state(page)['nearby']
@@ -59,14 +59,14 @@ def run():
         print('PASS relocated directory, self-service desk and four-product showcase',flush=True);c.close()
         # A cart can approach the lift but cannot be carried between levels.
         c=browser.new_context(viewport={'width':1440,'height':900},reduced_motion='reduce',service_workers='block')
-        c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
+        c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
         page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);page.locator('#scene-cart').click();assert state(page)['pushing']
         move(page,-6.6,10,1.8);assert state(page)['nearby']=='visitor-elevator'
         page.locator('#inspect').click();assert not state(page)['elevatorTravel'] and abs(state(page)['y'])<.1
         assert 'stow the cart' in page.locator('#mall-status').inner_text().lower()
         print('PASS cart cannot travel in visitor-only lift',flush=True);c.close()
         c=browser.new_context(viewport={'width':1440,'height':900},reduced_motion='reduce',service_workers='block')
-        c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
+        c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
         page.evaluate('__mall.teleport("newmoon")');move(page,-10,-2.6);move(page,-10,-7.4)
         shelf=page.evaluate("__mall.state.shelves.find(s=>s.id==='new-moon-nz-425g-front')")
         move(page,(shelf['min']['x']+shelf['max']['x'])/2,-7.4)
@@ -77,7 +77,7 @@ def run():
         assert not state(page)['elevatorTravel'] and 'return held products' in page.locator('#mall-status').inner_text().lower()
         print('PASS held product cannot travel in visitor-only lift',flush=True);c.close()
         c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='no-preference',service_workers='block')
-        c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
+        c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
         page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-6.4,10)
         page.evaluate("()=>{document.querySelector('#inspect').click();__mall.setInput({});__mall.step(500)}")
         page.locator('#view-toggle').click();before=state(page)['y'];page.evaluate('__mall.step(2000)')
@@ -89,7 +89,7 @@ def run():
         # lower and upper portions of the actual vertical journey.
         for elapsed in [1100,2400]:
           c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='no-preference',service_workers='block')
-          c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
+          c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
           page.locator('#view-toggle').click();page.locator('[data-add]').first.click();page.locator('#view-toggle').click()
           page.evaluate('__mall.teleport("newmoon")');move(page,-10,10);move(page,-6.4,10)
           page.evaluate("()=>{document.querySelector('#inspect').click();__mall.setInput({});}");page.evaluate('ms=>__mall.step(ms)',elapsed)
@@ -103,7 +103,7 @@ def run():
           move(page,-7,10);assert abs(state(page)['y']-floor)<.1 and '1' in page.locator('#bag-open').inner_text()
           print(f'PASS graphics interruption at {elapsed}ms: safe floor {floor}, movement and bag',flush=True);c.close()
         c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
-        c.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')");page=c.new_page();page.goto(url+'&visitor=v1');page.wait_for_function('window.__sceneReady',timeout=90000)
+        c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(url+'&visitor=v1');page.wait_for_function('window.__sceneReady',timeout=90000)
         page.locator('#view-toggle').click();assert 'lift is available with Visitor v2' in page.locator('#layout-preview-notice').inner_text()
         assert page.locator('[data-store]').count()==3
         print('PASS Visitor v1 retains ground-floor stores and explains lift availability',flush=True);c.close()

@@ -161,12 +161,11 @@ def run():
                         raise
                     ready(page, f'http://127.0.0.1:{server.server_port}{prefix}/demos/corporate/gjh/v11/')
                     settle(page)
-                    guide = geometry(page)
-                    row['states'].append({'name': 'guide', **guide})
+                    assert page.locator('#guide-card').is_visible()
+                    assert page.locator('#context-navigation').is_hidden()
                     page.screenshot(path=str(args.output/f'{name}-guide.png'))
-                    assert_nav(guide, width, height, insets)
-                    assert guide['host'] == 'context-navigation-guide', guide
-                    native_action(page, '#guide-dialog', lambda: page.locator('#guide-start').click())
+                    page.locator('#guide-skip').click()
+                    page.locator('#scene').focus()
                     page.locator('#header-map').click()
                     page.wait_for_function('__mall.mode === "menu"')
                     settle(page)

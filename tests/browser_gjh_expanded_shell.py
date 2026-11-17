@@ -40,7 +40,7 @@ def move(page, x, z, speed):
     raise AssertionError(('failed to reach waypoint', (x,z), position(page)))
 
 def open_map(page):
-    if page.locator('#header-map').is_visible():
+    if not page.locator('#mall-map').evaluate('(e)=>e.open'):
         page.locator('#header-map').click()
     assert page.locator('#mall-map').evaluate('(e)=>e.open')
 
@@ -61,7 +61,7 @@ def run():
             for width,height,visitor in [(320,700,''),(390,844,''),(768,1024,''),(1440,900,''),(844,390,''),(390,844,'&visitor=v1')]:
                 context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,
                     device_scale_factor=2,reduced_motion='reduce',service_workers='block')
-                context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+                context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page=context.new_page(); errors=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.goto(url+'?layout=expanded'+visitor,wait_until='domcontentloaded')
@@ -138,7 +138,7 @@ def run():
                 context.close()
             # The opt-in shell must retain the existing recovery and list fallback.
             context=browser.new_context(viewport={'width':390,'height':844},service_workers='block')
-            context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+            context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
             page=context.new_page();page.goto(url+'?layout=expanded');page.wait_for_function('window.__sceneReady',timeout=90000)
             page.locator('#view-toggle').click();page.locator('[data-add]').first.click();page.locator('#view-toggle').click()
             page.evaluate("window.__lossExtension=document.querySelector('#scene').getContext('webgl2').getExtension('WEBGL_lose_context');if(!__lossExtension)throw Error('Context-loss extension unavailable');__lossExtension.loseContext()")

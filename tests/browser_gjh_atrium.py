@@ -31,7 +31,7 @@ def run():
             for width,height,visitor in [(320,700,''),(390,844,''),(768,1024,''),(1440,900,''),(844,390,''),(390,844,'&visitor=v1')]:
                 context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=2,
                     has_touch=width<1000,reduced_motion='reduce',service_workers='block')
-                context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+                context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page=context.new_page();errors=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
@@ -79,7 +79,7 @@ def run():
                 context.close()
             # Missing optional furniture still yields a usable seat and collider.
             context=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
-            context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+            context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
             page=context.new_page();use_individual_assets(page);page.route('**/GJH_PUB_002.glb',lambda route:route.abort())
             page.goto(base);page.wait_for_function('window.__sceneReady',timeout=90000)
             assert page.evaluate('__mall.state.furnishings.bench.status')=='fallback'

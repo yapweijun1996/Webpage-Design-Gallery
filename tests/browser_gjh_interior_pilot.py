@@ -50,9 +50,8 @@ def boot(context,url):
     page.on('pageerror',lambda error:errors.append(str(error)))
     page.on('request',lambda request:requests.update([Path(urlsplit(request.url).path).name]))
     page.goto(url,wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready && window.__sceneReady',timeout=60000)
-    if page.locator('#guide-dialog').is_visible():page.locator('#guide-start').click()
-    if page.locator('.ob-ui').count():
-        skip=page.locator('[data-ob-action="skip"]');skip.wait_for(state='visible');skip.click()
+    if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
+
     page.locator('#scene').focus();drive(page)
     return page,errors,requests
 
@@ -62,14 +61,7 @@ def asset_states(s):return {**s['furnishings'],'shelf':s['productAssets']['shelf
 
 def open_map(page):
     if page.locator('#mall-map').evaluate('(e)=>e.open'):return
-    if page.locator('#guide-dialog').evaluate('(e)=>e.open'):
-        page.locator('#guide-map').click()
-    elif page.locator('#header-map').is_visible():page.locator('#header-map').click()
-    else:
-        if not page.locator('#keyboard-help').evaluate('(e)=>e.open'):
-            page.locator('#keyboard-help > summary').click()
-        page.locator('#guide-reopen').click()
-        page.locator('#guide-map').click()
+    page.locator('#header-map').click()
 
 
 def run():

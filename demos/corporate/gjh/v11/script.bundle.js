@@ -20,38 +20,6 @@ function gamepadMotion(pad) {
   return { forward: -axis(1), right: axis(0), lookX: axis(2), lookY: axis(3), run: Boolean(pad?.buttons[10]?.pressed) };
 }
 
-// assets/onboarding/icons.js
-var shapes = {
-  move: ["M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4"],
-  look: ["M8 6a4 4 0 0 1 8 0v6a4 4 0 0 1-8 0Z", "M12 2v5M2 12h4M18 12h4M4 10l-2 2 2 2M20 10l2 2-2 2"],
-  inspect: ["M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14M15 15l6 6"],
-  touch: ["M7 13V7a2 2 0 0 1 4 0v5-8a2 2 0 0 1 4 0v9l2-2a2 2 0 0 1 3 3l-4 6H9l-5-5a2 2 0 0 1 3-2M2 4h3M19 4h3"],
-  gamepad: ["M7 7h10c3 0 5 10 3 11-2 1-4-3-5-3H9c-1 0-3 4-5 3-2-1 0-11 3-11ZM6 11h4M8 9v4M16 10h.01M18 12h.01"],
-  "gamepad-look": ["M7 7h10c3 0 5 10 3 11-2 1-4-3-5-3H9c-1 0-3 4-5 3-2-1 0-11 3-11Z", "M16 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4M16 9v1M16 18v1M12 14h1M19 14h1"],
-  "gamepad-move": ["M7 7h10c3 0 5 10 3 11-2 1-4-3-5-3H9c-1 0-3 4-5 3-2-1 0-11 3-11Z", "M8 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4M8 7v1M8 16v1M4 12h1M11 12h1"],
-  ready: ["M21 12a9 9 0 1 1-5-8M7 12l4 4L21 5"]
-};
-function controlIcon(name) {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("focusable", "false");
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", "1.6");
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
-  svg.classList.add("ob-icon");
-  for (const [index, d] of (shapes[name] || shapes.inspect).entries()) {
-    const path = document.createElementNS(svg.namespaceURI, "path");
-    path.setAttribute("d", d);
-    if (name.startsWith("gamepad-") && index === 1)
-      path.classList.add("ob-icon-highlight");
-    svg.append(path);
-  }
-  return svg;
-}
-
 // assets/onboarding/components.js
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -67,56 +35,6 @@ function button(text, className, action) {
   if (action)
     node.addEventListener("click", action);
   return node;
-}
-function keyboardKey(label) {
-  return element("kbd", "ob-key", label);
-}
-function controlList(steps, mode, locale, icon = controlIcon) {
-  const list = element("ol", "ob-controls");
-  list.dataset.inputMode = mode;
-  for (const [index, step] of steps.entries()) {
-    const row = element("li");
-    const label = element("span", "ob-control-name");
-    label.append(icon(step.id), document.createTextNode(step.label[locale]));
-    const binding = element("span", "ob-binding");
-    for (const part of step.bindings[mode][locale]) {
-      binding.append(part.key ? keyboardKey(part.key) : element("span", "", part.text));
-    }
-    row.append(label, binding);
-    list.append(row);
-  }
-  return list;
-}
-function stepProgress(current, total, label) {
-  const wrapper = element("div", "ob-progress");
-  const progress = element("progress");
-  progress.max = total;
-  progress.value = current;
-  progress.setAttribute("aria-label", label);
-  const text = element("span", "", label);
-  wrapper.append(progress, text);
-  return wrapper;
-}
-function helpButton(label, action) {
-  return button(label, "ob-help", action);
-}
-function guideStages(labels, current, caption) {
-  const wrapper = element("div", "ob-stage-overview");
-  const list = element("ol", "ob-stages");
-  list.setAttribute("aria-label", caption);
-  labels.forEach((label, index) => {
-    const item = element("li");
-    const marker = element("span", "ob-stage-dot", index + 1 < current ? "✓" : String(index + 1));
-    marker.setAttribute("aria-hidden", "true");
-    item.append(marker, document.createTextNode(label));
-    if (index + 1 === current)
-      item.setAttribute("aria-current", "step");
-    if (index + 1 < current)
-      item.dataset.complete = "true";
-    list.append(item);
-  });
-  wrapper.append(list);
-  return wrapper;
 }
 function trapDialogFocus(event, dialog, initial) {
   if (event.key !== "Tab")
@@ -226,540 +144,179 @@ function createActionDialog({ id, scene, getPreferences, onOpen = () => {}, onCl
   };
 }
 
-// assets/onboarding/locales.js
-var messages = {
-  en: {
-    welcome: "Welcome",
-    close: "Close quick guide",
-    controls: "Quick controls",
-    keyboard: "Keyboard",
-    touch: "Touch",
-    gamepad: "Gamepad",
-    auto: "Auto",
-    settings: "Appearance",
-    theme: "Theme",
-    language: "Language",
-    input: "Input mode",
-    light: "Light",
-    dark: "Dark",
-    system: "System",
-    start: "Start exploring",
-    map: "Choose a store",
-    list: "Browse directory",
-    prefer: "Prefer a list?",
-    help: "Help",
-    next: "Next tip",
-    skip: "Skip tutorial",
-    ready: "You’re ready!",
-    done: "Keep exploring",
-    restart: "Replay tutorial",
-    showNextTime: "Show this guide next time",
-    back: "Previous tip",
-    details: "View quick controls",
-    phase: (current, total) => `Stage ${current} of ${total}`,
-    readyCopy: "You can review the controls in Help anytime.",
-    footnote: "Controls are always available in Help.",
-    tip: (current, total) => `Tip ${current} of ${total}`,
-    stages: ["Welcome", "Learn controls", "You’re ready"]
-  },
-  "zh-CN": {
-    welcome: "欢迎",
-    close: "关闭快速指引",
-    controls: "快速操作",
-    keyboard: "键盘",
-    touch: "触控",
-    gamepad: "手柄",
-    auto: "自动",
-    settings: "外观",
-    theme: "主题",
-    language: "语言",
-    input: "输入模式",
-    light: "浅色",
-    dark: "深色",
-    system: "跟随系统",
-    start: "开始探索",
-    map: "选择店铺",
-    list: "浏览目录",
-    prefer: "想查看列表？",
-    help: "帮助",
-    next: "下一提示",
-    skip: "跳过教程",
-    ready: "准备就绪！",
-    done: "继续探索",
-    restart: "重播教程",
-    showNextTime: "下次显示此指引",
-    back: "上一提示",
-    details: "查看快速操作",
-    phase: (current, total) => `阶段 ${current} / ${total}`,
-    readyCopy: "随时可在帮助中查看操作说明。",
-    footnote: "随时可在帮助中查看操作说明。",
-    tip: (current, total) => `提示 ${current} / ${total}`,
-    stages: ["欢迎", "学习操作", "准备就绪"]
-  }
-};
-
-// assets/onboarding/onboarding.js
-function createOnboarding({
-  id = "onboarding",
-  appName,
-  copy,
-  steps,
-  scene,
-  modes = ["keyboard", "touch"],
-  actions = ["map", "list"],
-  theme = "system",
-  locale = "en",
-  canOpen = () => true,
-  onAction = () => {},
-  onOpen = () => {},
-  onClose = () => {},
-  storageKey = id,
-  parent = document.body,
-  footer = null,
-  showHelpEntry = true,
-  onHelp = null,
-  onBack = null,
-  controlIcon: controlIcon2 = controlIcon,
-  closeIcon = null
-} = {}) {
-  if (!appName || !scene || !steps?.length)
-    throw new Error("Onboarding requires appName, scene and steps.");
-  if (!/^[a-zA-Z0-9_-]+$/.test(id) || document.getElementById(`${id}-dialog`))
-    throw new Error("Onboarding requires a unique valid id.");
-  if (!modes.length || modes.some((mode2) => !["keyboard", "touch", "gamepad"].includes(mode2)))
-    throw new Error("Unsupported onboarding input mode.");
-  for (const step of steps)
-    for (const mode2 of modes)
-      for (const lang of Object.keys(messages)) {
-        if (!step.label?.[lang] || !step.bindings?.[mode2]?.[lang])
-          throw new Error(`Missing onboarding copy: ${step.id}/${mode2}/${lang}`);
-      }
-  const controller = new AbortController, { signal } = controller;
-  const coarse = matchMedia("(pointer: coarse)"), dark = matchMedia("(prefers-color-scheme: dark)");
-  let showNextTime = true, controlsExpanded = !matchMedia("(max-width: 650px)").matches;
-  let modePreference = "auto", mode = coarse.matches && modes.includes("touch") ? "touch" : modes[0];
-  let visible = false, tutorial = false, tipIndex = 0, previousFocus = null, previousHUDAction = null, settingsOpen = false;
-  let hudSuppressed = false;
-  let suspended = false, lastGamepadButtons = [], gamepadDirectionAt = 0;
-  const key = `ob:${storageKey}:preferences:v1`;
+// demos/corporate/gjh/v11/assets/ux-tutorial.js
+var tutorialStorageKey = "gjh-v11-tutorial-v1";
+var actions = ["move", "look", "interact"];
+function createTutorialState({ storage = () => globalThis.localStorage } = {}) {
+  let remembered = false, open = false, active = false, step = 0, previousPose = null;
+  const listeners = new Set;
   try {
-    const saved = JSON.parse(localStorage.getItem(key) || "{}");
-    if (typeof saved.showNextTime === "boolean")
-      showNextTime = saved.showNextTime;
-    if (["light", "dark", "system"].includes(saved.theme))
-      theme = saved.theme;
-    if (messages[saved.locale])
-      locale = saved.locale;
-    if (saved.mode === "auto" || modes.includes(saved.mode))
-      modePreference = saved.mode;
+    remembered = ["dismissed", "completed"].includes(storage()?.getItem(tutorialStorageKey));
   } catch {}
-  if (!messages[locale])
-    locale = "en";
-  if (!["light", "dark", "system"].includes(theme))
-    theme = "system";
-  if (modePreference !== "auto")
-    mode = modePreference;
-  const dialog = element("dialog", "ob-ui ob-dialog");
-  dialog.id = `${id}-dialog`;
-  const hud = element("div", "ob-ui ob-hud");
-  hud.hidden = true;
-  const live = element("p", "ob-live");
-  live.setAttribute("role", "status");
-  live.setAttribute("aria-live", "polite");
-  live.setAttribute("aria-atomic", "true");
-  hud.append(live);
-  parent.append(dialog, hud);
-  function save() {
+  const snapshot = () => ({ open, active, step, action: actions[step], remembered });
+  const publish = () => {
+    for (const listener of listeners)
+      listener(snapshot());
+  };
+  function finish(value) {
+    open = false;
+    remembered = true;
+    previousPose = null;
     try {
-      localStorage.setItem(key, JSON.stringify({ theme, locale, mode: modePreference, showNextTime }));
+      storage()?.setItem(tutorialStorageKey, value);
     } catch {}
+    publish();
   }
-  function applyTheme() {
-    for (const root of [dialog, hud]) {
-      root.dataset.obTheme = theme === "system" ? dark.matches ? "dark" : "light" : theme;
-      root.lang = locale;
+  function advance() {
+    if (step === actions.length - 1)
+      finish("completed");
+    else {
+      step++;
+      publish();
     }
-  }
-  function text() {
-    return messages[locale];
-  }
-  function currentCopy() {
-    return copy[locale] || copy.en;
-  }
-  function actionButton(action, className) {
-    const node = button(currentCopy().actions?.[action] || text()[action], className, () => dialog.close(action));
-    node.id = `${id}-${action}`;
-    return node;
-  }
-  function settingsField(name, values, selected) {
-    const label = element("label", "", text()[name]);
-    const select = element("select");
-    select.dataset.obSetting = name;
-    for (const [value, title] of values) {
-      const option = element("option", "", title);
-      option.value = value;
-      select.append(option);
-    }
-    select.value = selected;
-    select.addEventListener("change", () => {
-      if (name === "theme")
-        theme = select.value;
-      if (name === "language")
-        locale = select.value;
-      if (name === "input") {
-        modePreference = select.value;
-        if (modePreference !== "auto")
-          mode = modePreference;
-        else
-          mode = coarse.matches && modes.includes("touch") ? "touch" : modes[0];
-      }
-      save();
-      renderDialog();
-      renderHUD();
-      dialog.querySelector(`[data-ob-setting="${name}"]`)?.focus({ preventScroll: true });
-    });
-    label.append(select);
-    return label;
-  }
-  function renderDialog() {
-    const t = text(), content = currentCopy();
-    dialog.replaceChildren();
-    dialog.setAttribute("aria-labelledby", `${id}-title`);
-    dialog.setAttribute("aria-describedby", `${id}-description`);
-    const header = element("div", "ob-header");
-    const close = button(closeIcon ? "" : "×", "ob-close", () => dialog.close("dismiss"));
-    if (closeIcon)
-      close.append(closeIcon());
-    close.id = `${id}-close`;
-    close.setAttribute("aria-label", t.close);
-    header.append(element("p", "ob-eyebrow", `${appName} · ${t.welcome}`), close);
-    const title = element("h2", "ob-title", content.title);
-    title.id = `${id}-title`;
-    title.tabIndex = -1;
-    const description = element("p", "ob-description", content.description);
-    description.id = `${id}-description`;
-    const heading = element("div", "ob-section-heading");
-    heading.append(element("h3", "", t.controls), element("span", "ob-mode", t[mode]));
-    const context = element("div", "ob-context");
-    context.append(settingsField("input", ["auto", ...modes].map((value) => [value, value === "auto" ? `${t.auto} · ${t[mode]}` : t[value]]), modePreference), settingsField("language", [["en", "English"], ["zh-CN", "简体中文"]], locale));
-    const settings = element("div", "ob-settings");
-    settings.id = `${id}-settings`;
-    settings.hidden = !settingsOpen;
-    settings.append(settingsField("theme", ["system", "light", "dark"].map((value) => [value, t[value]]), theme));
-    const toggle = button(t.settings, "ob-settings-toggle", () => {
-      settingsOpen = !settingsOpen;
-      settings.hidden = !settingsOpen;
-      toggle.setAttribute("aria-expanded", String(settingsOpen));
-    });
-    toggle.setAttribute("aria-expanded", String(settingsOpen));
-    toggle.setAttribute("aria-controls", settings.id);
-    close.before(toggle);
-    const actionsRow = element("div", "ob-actions");
-    actionsRow.append(actionButton("start", "ob-primary"));
-    if (actions.includes("list"))
-      actionsRow.append(actionButton("list", "ob-secondary-button"));
-    if (actions.includes("map"))
-      actionsRow.append(actionButton("map", "ob-text-button ob-map-action"));
-    const stages = guideStages(t.stages, 1, t.phase(1, 3));
-    const controls = controlList(steps, mode, locale, controlIcon2);
-    controls.id = `${id}-controls`;
-    controls.hidden = !controlsExpanded;
-    const controlsToggle = button(t.details, "ob-controls-toggle ob-text-button", () => {
-      controlsExpanded = !controlsExpanded;
-      controls.hidden = !controlsExpanded;
-      controlsToggle.setAttribute("aria-expanded", String(controlsExpanded));
-    });
-    controlsToggle.textContent = t.controls;
-    controlsToggle.setAttribute("aria-expanded", String(controlsExpanded));
-    controlsToggle.setAttribute("aria-controls", controls.id);
-    const preference = element("label", "ob-preference");
-    const checkbox = element("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = showNextTime;
-    checkbox.id = `${id}-show-next`;
-    checkbox.addEventListener("change", () => {
-      showNextTime = checkbox.checked;
-      save();
-    });
-    preference.append(checkbox, document.createTextNode(t.showNextTime));
-    heading.querySelector("h3").replaceChildren(controlsToggle);
-    dialog.append(header, stages, title, description, context, settings, heading, controls, actionsRow, preference);
-    if (footer)
-      dialog.append(footer);
-    applyTheme();
-  }
-  function renderHUD(announce = false) {
-    const t = text();
-    const focusedAction = hud.contains(document.activeElement) ? document.activeElement.dataset.obAction : null;
-    hud.replaceChildren(live);
-    hud.hidden = !visible || suspended || hudSuppressed || dialog.open || !tutorial && !showHelpEntry;
-    if (tutorial) {
-      const tip = element("aside", "ob-tip");
-      tip.setAttribute("aria-label", t.controls);
-      const header = element("div", "ob-tip-header");
-      const done = tipIndex >= steps.length;
-      const title = element("h3", "", done ? t.ready : steps[tipIndex].label[locale]);
-      title.prepend(controlIcon2(done ? "ready" : steps[tipIndex].id));
-      header.append(title);
-      const dismiss = button(closeIcon ? "" : "×", "ob-close", stopTutorial);
-      if (closeIcon)
-        dismiss.append(closeIcon());
-      dismiss.setAttribute("aria-label", t.skip);
-      dismiss.dataset.obAction = "skip";
-      header.append(dismiss);
-      tip.append(guideStages(t.stages, done ? 3 : 2, t.phase(done ? 3 : 2, 3)), header, stepProgress(Math.min(tipIndex + 1, steps.length), steps.length, t.tip(Math.min(tipIndex + 1, steps.length), steps.length)));
-      if (!done) {
-        const list = controlList([steps[tipIndex]], mode, locale, controlIcon2);
-        const illustration = element("div", "ob-gesture");
-        illustration.append(controlIcon2(mode === "touch" ? "touch" : mode === "gamepad" ? steps[tipIndex].id === "look" ? "gamepad-look" : steps[tipIndex].id === "move" ? "gamepad-move" : "gamepad" : steps[tipIndex].id));
-        tip.append(illustration, list);
-      } else
-        tip.append(element("p", "ob-tip-copy", t.readyCopy));
-      const controls = element("div", "ob-tip-actions");
-      const help = button(t.help, "ob-text-button", requestHelp);
-      help.dataset.obAction = "help";
-      if (tipIndex > 0) {
-        const back = button(t.back, "ob-text-button", () => {
-          tipIndex--;
-          renderHUD(true);
-        });
-        back.dataset.obAction = "back";
-        controls.append(back);
-      }
-      const next = button(done ? t.done : t.next, "ob-primary", () => {
-        if (done)
-          stopTutorial();
-        else {
-          tipIndex++;
-          renderHUD(true);
-        }
-      });
-      next.dataset.obAction = "next";
-      controls.append(help, next);
-      tip.append(controls);
-      hud.append(tip);
-      if (announce)
-        live.textContent = done ? t.ready : `${t.tip(tipIndex + 1, steps.length)}: ${steps[tipIndex].label[locale]}`;
-    } else if (showHelpEntry) {
-      const entry = helpButton(`${t.help} · ?`, requestHelp);
-      entry.dataset.obAction = "help";
-      hud.append(entry);
-    }
-    applyTheme();
-    if (focusedAction && !hud.hidden)
-      (hud.querySelector(`[data-ob-action="${focusedAction}"]`) || hud.querySelector("[data-ob-action=next]"))?.focus({ preventScroll: true });
-  }
-  function requestHelp() {
-    if (!visible || dialog.open || !canOpen())
-      return false;
-    return onHelp ? onHelp() : openWelcome();
-  }
-  function stopTutorial() {
-    tutorial = false;
-    renderHUD();
-    scene.focus({ preventScroll: true });
-  }
-  function openWelcome() {
-    if (!visible || dialog.open || !canOpen())
-      return false;
-    previousFocus = document.activeElement;
-    previousHUDAction = hud.contains(previousFocus) ? previousFocus.dataset.obAction : null;
-    renderDialog();
-    onOpen();
-    dialog.showModal();
-    renderHUD();
-    dialog.querySelector(".ob-title").focus({ preventScroll: true });
     return true;
   }
-  function setInputMode(next, { automatic = false } = {}) {
-    if (!modes.includes(next) || automatic && modePreference !== "auto" || mode === next)
-      return;
-    mode = next;
-    const list = dialog.querySelector(".ob-controls");
-    if (list) {
-      const nextList = controlList(steps, mode, locale, controlIcon2);
-      nextList.id = list.id;
-      nextList.hidden = list.hidden;
-      list.replaceWith(nextList);
-    }
-    const auto = dialog.querySelector("[data-ob-setting=input] option[value=auto]");
-    if (auto)
-      auto.textContent = `${text().auto} · ${text()[mode]}`;
-    const label = dialog.querySelector(".ob-mode");
-    if (label)
-      label.textContent = text()[mode];
-    renderHUD();
+  function next() {
+    return open && active ? advance() : false;
   }
-  dialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    dialog.close("dismiss");
-  }, { signal });
-  dialog.addEventListener("keydown", (event) => trapDialogFocus(event, dialog, dialog.querySelector(".ob-title")), { signal });
-  dialog.addEventListener("close", () => {
-    const action = dialog.returnValue;
-    if (action === "start") {
-      tutorial = true;
-      tipIndex = 0;
-    }
-    renderHUD();
-    if (action === "start")
-      scene.focus({ preventScroll: true });
-    else if (previousHUDAction && hud.querySelector(`[data-ob-action="${previousHUDAction}"]`))
-      hud.querySelector(`[data-ob-action="${previousHUDAction}"]`).focus({ preventScroll: true });
-    else if (previousFocus?.isConnected && previousFocus.getClientRects().length)
-      previousFocus.focus({ preventScroll: true });
-    else
-      scene.focus({ preventScroll: true });
-    onClose(action);
-    onAction(action);
-  }, { signal });
-  scene.addEventListener("pointerdown", (event) => setInputMode(event.pointerType === "touch" ? "touch" : "keyboard", { automatic: true }), { signal });
-  document.addEventListener("keydown", (event) => {
-    const target = event.target;
-    if (!visible || event.ctrlKey || event.metaKey || event.altKey || target.closest('input,select,textarea,[contenteditable="true"]'))
-      return;
-    if (event.key === "Escape" && hud.contains(target)) {
-      event.preventDefault();
-      stopTutorial();
-      return;
-    }
-    if ((event.key === "?" || event.key.toLowerCase() === "h") && (target === scene || target === document.body)) {
-      event.preventDefault();
-      requestHelp();
-    }
-    if (target === scene || target === document.body)
-      setInputMode("keyboard", { automatic: true });
-  }, { signal });
-  dark.addEventListener("change", applyTheme, { signal });
-  coarse.addEventListener("change", () => setInputMode(coarse.matches ? "touch" : "keyboard", { automatic: true }), { signal });
-  renderDialog();
-  renderHUD();
+  function report(action) {
+    return open && (active || action === "interact") && actions[step] === action ? advance() : false;
+  }
   return {
-    dialog,
-    openWelcome,
-    setInputMode,
-    get mode() {
-      return mode;
+    snapshot,
+    subscribe(listener) {
+      listeners.add(listener);
+      listener(snapshot());
+      return () => listeners.delete(listener);
     },
-    get preferences() {
-      return { theme, locale, resolvedTheme: theme === "system" ? dark.matches ? "dark" : "light" : theme };
-    },
-    get shouldAutoShow() {
-      return showNextTime;
-    },
-    setVisible(value) {
-      visible = Boolean(value);
-      if (!visible && dialog.open)
-        dialog.close("view-change");
-      renderHUD();
-    },
-    setSuspended(value) {
-      if (suspended === Boolean(value))
+    setActive(value) {
+      const nextActive = Boolean(value);
+      if (active === nextActive)
         return;
-      suspended = Boolean(value);
-      renderHUD();
+      active = nextActive;
+      previousPose = null;
+      publish();
     },
-    setHUDSuppressed(value) {
-      if (hudSuppressed === Boolean(value))
-        return;
-      hudSuppressed = Boolean(value);
-      renderHUD();
+    offer() {
+      if (remembered || open)
+        return false;
+      open = true;
+      step = 0;
+      previousPose = null;
+      publish();
+      return true;
     },
-    report(action) {
-      if (tutorial && !suspended && !dialog.open && steps[tipIndex]?.id === action) {
-        tipIndex++;
-        renderHUD(true);
-      }
+    reopen() {
+      open = true;
+      step = 0;
+      previousPose = null;
+      publish();
     },
-    handleGamepad(pad, navigationRoot = null) {
-      if (!pad || !modes.includes("gamepad")) {
-        lastGamepadButtons = [];
+    dismiss() {
+      finish("dismissed");
+    },
+    next,
+    back() {
+      if (!open || !active || step === 0)
+        return false;
+      step--;
+      publish();
+      return true;
+    },
+    report,
+    reportPose(pose) {
+      if (!open || !active || ![pose.x, pose.z, pose.yaw].every(Number.isFinite)) {
+        previousPose = null;
         return false;
       }
-      const rising = (index) => pad.buttons[index]?.pressed && !lastGamepadButtons[index];
-      const active = pad.axes.some((value) => Math.abs(value) > 0.2) || pad.buttons.some((value) => value.pressed);
-      if (active)
-        setInputMode("gamepad", { automatic: true });
-      const now = performance.now();
-      const navigation = dialog.open ? dialog : navigationRoot;
-      if (navigation && now - gamepadDirectionAt > 180) {
-        const controls = [...navigation.querySelectorAll("button,select,input,a[href],summary")].filter((node) => node.getClientRects().length && !node.disabled);
-        const onSelect = document.activeElement.matches("select");
-        const direction = pad.buttons[13]?.pressed || !onSelect && pad.buttons[15]?.pressed || pad.axes[1] > 0.5 ? 1 : pad.buttons[12]?.pressed || !onSelect && pad.buttons[14]?.pressed || pad.axes[1] < -0.5 ? -1 : 0;
-        if (direction) {
-          const index = controls.indexOf(document.activeElement);
-          controls[(index + direction + controls.length) % controls.length]?.focus();
-          gamepadDirectionAt = now;
-        }
-      }
-      const consumed = Boolean(navigation);
-      if (navigation && document.activeElement.matches("select") && (rising(0) || rising(14) || rising(15))) {
-        const select = document.activeElement, delta = rising(14) ? -1 : 1;
-        select.selectedIndex = (select.selectedIndex + delta + select.options.length) % select.options.length;
-        select.dispatchEvent(new Event("change", { bubbles: true }));
-      } else if (navigation && rising(0) && document.activeElement.matches("button,input[type=checkbox],a[href],summary"))
-        document.activeElement.click();
-      if (navigation instanceof HTMLDialogElement && rising(1))
-        navigation.close("dismiss");
-      else if (navigation && rising(1))
-        onBack?.(navigation);
-      if (!dialog.open && rising(9))
-        requestHelp();
-      lastGamepadButtons = pad.buttons.map((value) => value.pressed);
-      return consumed;
-    },
-    destroy() {
-      const wasOpen = dialog.open;
-      controller.abort();
-      if (wasOpen) {
-        dialog.close("destroy");
-        onClose("destroy");
-      }
-      dialog.remove();
-      hud.remove();
+      const previous = previousPose;
+      previousPose = { x: pose.x, z: pose.z, yaw: pose.yaw };
+      if (!previous)
+        return false;
+      if (actions[step] === "move" && Math.hypot(pose.x - previous.x, pose.z - previous.z) > 0.02)
+        return report("move");
+      const turn = Math.atan2(Math.sin(pose.yaw - previous.yaw), Math.cos(pose.yaw - previous.yaw));
+      if (actions[step] === "look" && Math.abs(turn) > 0.01)
+        return report("look");
+      return false;
     }
   };
 }
-
-// assets/onboarding/profiles.js
-var key = (value) => ({ key: value });
-var text = (value) => ({ text: value });
-function createExperienceProfile(kind = "mall") {
-  const titles = {
-    mall: ["GJH Virtual Mall", "Explore a new way to shop.", "探索全新的购物方式。"],
-    gallery: ["3D Gallery", "Discover a different perspective.", "发现不一样的视角。"],
-    hotel: ["Hotel", "Make yourself at home.", "探索你的入住空间。"],
-    parking: ["Parking", "Find your way around.", "轻松了解停车空间。"],
-    showroom: ["Product Showroom", "Take a closer look.", "近距离探索产品。"],
-    other: ["3D Experience", "Explore at your own pace.", "按自己的节奏探索。"]
+function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
+  const state = createTutorialState();
+  const card = document.createElement("section");
+  card.id = "guide-card";
+  card.className = "ux-tutorial";
+  card.hidden = true;
+  card.setAttribute("role", "region");
+  card.setAttribute("aria-labelledby", "guide-title");
+  const element2 = (tag, className, text) => {
+    const node = document.createElement(tag);
+    node.className = className;
+    if (text)
+      node.textContent = text;
+    return node;
   };
-  const [appName, en, zh] = titles[kind] || titles.other;
-  const domainActions = {
-    mall: [["Choose a store", "Browse directory"], ["选择店铺", "浏览目录"]],
-    gallery: [["View gallery map", "Browse exhibits"], ["查看展馆地图", "浏览展品"]],
-    hotel: [["View floor plan", "Browse rooms"], ["查看楼层图", "浏览客房"]],
-    parking: [["View parking plan", "Browse parking areas"], ["查看停车平面图", "浏览停车区域"]],
-    showroom: [["Choose a display", "Browse products"], ["选择展区", "浏览产品"]],
-    other: [["Open map", "Browse directory"], ["打开地图", "浏览目录"]]
+  const button2 = (id, label, action) => {
+    const node = element2("button", "ux-tutorial-button", label);
+    node.id = id;
+    node.type = "button";
+    node.addEventListener("click", action);
+    return node;
   };
-  const labels = domainActions[kind] || domainActions.other;
-  return { appName, copy: { en: { title: en, actions: { map: labels[0][0], list: labels[0][1] }, description: "Move through the space, look around, and inspect what interests you." }, "zh-CN": { title: zh, actions: { map: labels[1][0], list: labels[1][1] }, description: "自由移动、环顾四周，近距离查看感兴趣的内容。" } }, steps: [
-    { id: "move", label: { en: "Move", "zh-CN": "移动" }, bindings: {
-      keyboard: { en: [...["W", "A", "S", "D"].map(key), text("or arrows")], "zh-CN": [...["W", "A", "S", "D"].map(key), text("或方向键")] },
-      touch: { en: [text("Drag to move")], "zh-CN": [text("拖动移动")] },
-      gamepad: { en: [text("Left stick")], "zh-CN": [text("左摇杆")] }
-    } },
-    { id: "look", label: { en: "Look around", "zh-CN": "环顾四周" }, bindings: {
-      keyboard: { en: [text("Drag /"), key("Q"), key("E")], "zh-CN": [text("拖动 /"), key("Q"), key("E")] },
-      touch: { en: [text("Hold one finger; swipe with a second")], "zh-CN": [text("保持一指按住，第二指滑动")] },
-      gamepad: { en: [text("Right stick")], "zh-CN": [text("右摇杆")] }
-    } },
-    { id: "inspect", label: { en: "Inspect", "zh-CN": "查看" }, bindings: {
-      keyboard: { en: [key("F"), text("near a display")], "zh-CN": [text("靠近展品按"), key("F")] },
-      touch: { en: [text("Tap the context button")], "zh-CN": [text("点击情境操作按钮")] },
-      gamepad: { en: [key("A"), text("near a display")], "zh-CN": [text("靠近展品按"), key("A")] }
-    } }
-  ] };
+  const header = element2("div", "ux-tutorial-header");
+  const title = element2("h2", "ux-tutorial-title", "Getting Started");
+  title.id = "guide-title";
+  const count = element2("span", "ux-tutorial-count");
+  count.id = "guide-count";
+  const skip = button2("guide-skip", "Skip", () => {
+    state.dismiss();
+    onDismiss();
+  });
+  header.append(title, count, skip);
+  const progress = element2("div", "ux-tutorial-progress");
+  progress.setAttribute("aria-hidden", "true");
+  const segments = actions.map(() => element2("span", "ux-tutorial-segment"));
+  progress.append(...segments);
+  const stepTitle = element2("h3", "ux-tutorial-step-title");
+  stepTitle.id = "guide-step-title";
+  const copy = element2("p", "ux-tutorial-copy");
+  copy.id = "guide-step-copy";
+  const announcement = element2("p", "sr-only ux-tutorial-announcement");
+  announcement.setAttribute("role", "status");
+  announcement.setAttribute("aria-live", "polite");
+  announcement.setAttribute("aria-atomic", "true");
+  const controls = element2("div", "ux-tutorial-actions");
+  const back = button2("guide-back", "Back", () => state.back());
+  const next = button2("guide-next", "Next", () => {
+    state.next();
+    if (!state.snapshot().open)
+      onDismiss();
+  });
+  controls.append(back, next);
+  card.append(header, progress, stepTitle, copy, announcement, controls);
+  parent.append(card);
+  const steps = [
+    ["Move around", touch ? "Use the left joystick to walk around the courtyard." : "Use WASD or the arrow keys to walk around the courtyard."],
+    ["Look around", touch ? "Keep one finger on the joystick; drag with a second finger to look around." : "Drag the scene to look around. On a controller, use the right stick."],
+    ["Try an interaction", touch ? "Approach a door, bench or display, then tap its action." : "Approach a door, bench or display, then press F or select its action."]
+  ];
+  let announcedStep = null;
+  state.subscribe(({ open, active, step }) => {
+    card.hidden = !open || !active;
+    count.textContent = `${step + 1}/3`;
+    count.setAttribute("aria-label", `Step ${step + 1} of 3`);
+    for (let index = 0;index < segments.length; index++)
+      segments[index].dataset.state = index < step ? "complete" : index === step ? "current" : "pending";
+    stepTitle.textContent = steps[step][0];
+    copy.textContent = steps[step][1];
+    back.disabled = step === 0;
+    next.textContent = step === 2 ? "Done" : "Next";
+    if (open && active && announcedStep !== step)
+      announcement.textContent = `Getting Started. Step ${step + 1} of 3: ${steps[step][0]}.`;
+    announcedStep = open && active ? step : null;
+  });
+  return { card, ...state };
 }
 
 // demos/corporate/gjh/v11/assets/context-navigation.js
@@ -776,8 +333,8 @@ function createContextNavigation({ globalHost, directory, onHome, onShops, recov
   nav.className = "context-navigation";
   nav.setAttribute("aria-label", "Mall navigation");
   nav.hidden = true;
-  const actions = document.createElement("div");
-  actions.className = "context-navigation-actions";
+  const actions2 = document.createElement("div");
+  actions2.className = "context-navigation-actions";
   const note = document.createElement("p");
   note.id = "context-navigation-note";
   note.textContent = "Events, Rewards and Profile are unavailable in this demo.";
@@ -805,10 +362,10 @@ function createContextNavigation({ globalHost, directory, onHome, onShops, recov
           onShops();
       });
     }
-    actions.append(button2);
+    actions2.append(button2);
     return [item.id, button2];
   }));
-  nav.append(actions, homeNote, note);
+  nav.append(actions2, homeNote, note);
   globalHost.append(nav);
   let reservedHeight = -1, previous = null;
   let visibilityFrame = 0;
@@ -1082,9 +639,9 @@ function icon(name, { size = 24, label } = {}) {
 // demos/corporate/gjh/v11/assets/demo-bag.js
 function createBagStore(ids, storage = null) {
   const allowed = new Set(ids), quantities = new Map, listeners = new Set;
-  const key2 = "gjh-v11-demo-bag-v1";
+  const key = "gjh-v11-demo-bag-v1";
   try {
-    const saved = JSON.parse(storage?.getItem(key2) || "{}");
+    const saved = JSON.parse(storage?.getItem(key) || "{}");
     for (const id of allowed)
       if (Number.isInteger(saved?.[id]) && saved[id] > 0 && saved[id] <= 9)
         quantities.set(id, saved[id]);
@@ -1103,7 +660,7 @@ function createBagStore(ids, storage = null) {
   function publish() {
     const value = snapshot();
     try {
-      storage?.setItem(key2, JSON.stringify(value));
+      storage?.setItem(key, JSON.stringify(value));
     } catch {}
     listeners.forEach((listener) => listener(value));
   }
@@ -1136,10 +693,10 @@ function setupDemoBag() {
   const header = dialog.querySelector(".bag-top");
   const measureHeader = () => dialog.style.setProperty("--bag-header-height", `${header.getBoundingClientRect().height}px`);
   new ResizeObserver(measureHeader).observe(header);
-  function button2(text2, label, action) {
+  function button2(text, label, action) {
     const el = document.createElement("button");
     el.type = "button";
-    el.textContent = text2;
+    el.textContent = text;
     el.setAttribute("aria-label", label);
     el.addEventListener("click", action);
     return el;
@@ -1149,7 +706,8 @@ function setupDemoBag() {
     const total = Object.values(value).reduce((a, b) => a + b, 0);
     open.textContent = `Bag (${total})`;
     open.prepend(bagIcon);
-    open.setAttribute("aria-label", `Open demo bag, ${total} items`);
+    open.setAttribute("aria-label", `Open inventory bag, ${total} collected items`);
+    open.title = "Inventory Bag — items collected in the mall, not purchases";
     items.replaceChildren();
     empty.hidden = total > 0;
     clear.hidden = total === 0;
@@ -1406,12 +964,6 @@ var expandedMapPoint = (x, z) => ({
 
 // demos/corporate/gjh/v11/assets/ui.js
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-function onboardingIcon(name) {
-  const names = { move: "move", look: "mouse", inspect: "search", touch: "smartphone", gamepad: "search", "gamepad-look": "mouse", "gamepad-move": "move", ready: "check" };
-  const element2 = icon(names[name], { size: 24 });
-  element2.classList.add("ob-icon");
-  return element2;
-}
 var plannedSideLabels = Object.freeze({ north: "North side", west: "West side", east: "East side" });
 function setupPlannedDirectory(expanded) {
   const section = document.getElementById("planned-spaces-directory");
@@ -1422,7 +974,7 @@ function setupPlannedDirectory(expanded) {
   for (const space of plannedSpaces) {
     const item = document.createElement("li");
     item.id = space.id;
-    for (const [key2, value] of Object.entries({
+    for (const [key, value] of Object.entries({
       space: space.id,
       number: space.number,
       side: space.side,
@@ -1430,7 +982,7 @@ function setupPlannedDirectory(expanded) {
       available: String(space.available),
       ...space.admission
     }))
-      item.setAttribute(`data-planned-${key2}`, value);
+      item.setAttribute(`data-planned-${key}`, value);
     const heading = document.createElement("h3");
     heading.textContent = space.label;
     const location2 = document.createElement("p");
@@ -1507,56 +1059,49 @@ function createUI(expanded = false) {
   inspectPrompt.append(nearbyStory);
   const help = document.getElementById("keyboard-help");
   const mallMap = document.getElementById("mall-map");
-  let guideFromHUD = false;
-  const guideFooter = document.createElement("div");
-  guideFooter.id = "context-navigation-guide";
-  guideFooter.className = "context-navigation-footer";
-  const onboarding = createOnboarding({
-    ...createExperienceProfile("mall"),
-    id: "guide",
-    storageKey: "gjh-v11",
-    scene,
-    footer: guideFooter,
-    controlIcon: onboardingIcon,
-    closeIcon: () => icon("close", { size: 24 }),
-    modes: ["keyboard", "touch", "gamepad"],
-    showHelpEntry: false,
-    onHelp: openHelp,
-    onBack: closeGamepadPanel,
-    canOpen: () => available && showing3D && !dialog.open && !bag.open && !amenityPanel.dialog.open && !themeDialog.open && !externalPaused,
-    onOpen: () => {
-      guidePaused = true;
-      guideFromHelp = document.activeElement === guideReopen;
-      guideFromHUD = Boolean(document.activeElement.closest(".ob-hud"));
-      notifyMode();
+  const tutorial = createTutorial({
+    parent: experience,
+    touch: matchMedia("(pointer: coarse)").matches,
+    onDismiss: () => {
+      if (showing3D)
+        scene.focus({ preventScroll: true });
     }
   });
-  const guide = onboarding.dialog;
-  const amenityPanel = createActionDialog({ id: "amenity-dialog", scene, closeIcon: () => icon("close", { size: 24 }), getPreferences: () => onboarding.preferences, onOpen: () => notifyMode(), onClose: () => notifyMode() });
-  let previousTutorialPose = null;
-  let guideFromHelp = false;
-  const guideReopen = document.getElementById("guide-reopen");
-  const guideSessionKey = "gjh-v11-guide-seen-v1";
-  const touchGuide = matchMedia("(pointer: coarse)");
-  let guideSeen = false, guidePaused = false;
+  let amenityLocale = "en", amenityTheme = "system";
   try {
-    guideSeen = sessionStorage.getItem(guideSessionKey) === "1";
+    const saved = JSON.parse(localStorage.getItem("ob:gjh-v11:preferences:v1") || "{}");
+    if (["en", "zh-CN"].includes(saved.locale))
+      amenityLocale = saved.locale;
+    if (["light", "dark", "system"].includes(saved.theme))
+      amenityTheme = saved.theme;
   } catch {}
+  const amenityPanel = createActionDialog({
+    id: "amenity-dialog",
+    scene,
+    closeIcon: () => icon("close", { size: 24 }),
+    getPreferences: () => ({ locale: amenityLocale, resolvedTheme: amenityTheme === "system" ? matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light" : amenityTheme }),
+    onOpen: () => notifyMode(),
+    onClose: () => notifyMode()
+  });
+  const guideReopen = document.getElementById("guide-reopen");
+  const railGuide = document.getElementById("rail-guide");
+  for (const entry of [guideReopen, railGuide])
+    entry?.setAttribute("aria-controls", "guide-card");
+  const touchGuide = matchMedia("(pointer: coarse)");
+  let unsubscribeInteractions = null, lastGamepadButtons = [], gamepadDirectionAt = 0;
   let modeListener = null, shelfFocus = null;
   const modeSignals = () => ({
     productOpen: document.getElementById("product-dialog").open || externalPaused || document.getElementById("original-tin-dialog").open,
     bagOpen: document.getElementById("bag-dialog").open,
     shelfOpen: Boolean(shelfFocus?.open),
-    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || guidePaused || guide.open || compactMap.matches && (help.open || mallMap.open)
+    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || compactMap.matches && (help.open || mallMap.open)
   });
-  function syncOnboardingSuspension(signals) {
-    const actionHUD = showing3D && (!inspectPrompt.hidden || cartState().active || cartState().heldProduct);
-    onboarding.setHUDSuppressed(Boolean(actionHUD));
-    onboarding.setSuspended(themeDialog.open || amenityPanel.dialog.open || signals.productOpen || signals.bagOpen || signals.shelfOpen || !showing3D || help.open || compactMap.matches && mallMap.open);
+  function syncTutorialSuspension(signals) {
+    tutorial.setActive(available && showing3D && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen && !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
   }
   const notifyMode = () => {
     const signals = modeSignals();
-    syncOnboardingSuspension(signals);
+    syncTutorialSuspension(signals);
     if (signals.shelfOpen && (signals.productOpen || signals.bagOpen || signals.panelOpen))
       shelfFocus.close({ focus: false });
     modeListener?.(modeSignals());
@@ -1568,7 +1113,7 @@ function createUI(expanded = false) {
   }
   let mapReturnFocus = headerMap;
   function canUsePanels() {
-    return available && showing3D && !guidePaused && !guide.open && !dialog.open && !bag.open && !amenityPanel.dialog.open && !themeDialog.open && !externalPaused && !document.hidden;
+    return available && showing3D && !dialog.open && !bag.open && !amenityPanel.dialog.open && !themeDialog.open && !externalPaused && !document.hidden;
   }
   function openMap() {
     if (!canUsePanels())
@@ -1577,13 +1122,13 @@ function createUI(expanded = false) {
     help.open = false;
     mapReturnFocus = headerMap;
     mallMap.open = true;
-    headerMap.setAttribute("aria-expanded", String(compactMap.matches));
+    headerMap.setAttribute("aria-expanded", "true");
     updateCompactPanels();
     focusMap();
     return true;
   }
   function closeMap() {
-    if (!compactMap.matches || !canUsePanels())
+    if (!canUsePanels())
       return;
     mallMap.open = false;
     headerMap.setAttribute("aria-expanded", "false");
@@ -1613,45 +1158,78 @@ function createUI(expanded = false) {
       help.querySelector("summary").focus({ preventScroll: true });
     }
   }
+  function handlePanelGamepad(pad, navigation) {
+    if (!pad) {
+      lastGamepadButtons = [];
+      return false;
+    }
+    const rising = (index) => pad.buttons[index]?.pressed && !lastGamepadButtons[index];
+    const now = performance.now();
+    if (navigation && now - gamepadDirectionAt > 180) {
+      const controls = [...navigation.querySelectorAll("button,select,input,a[href],summary")].filter((node) => node.getClientRects().length && !node.disabled);
+      const onSelect = document.activeElement.matches("select");
+      const direction = pad.buttons[13]?.pressed || !onSelect && pad.buttons[15]?.pressed || pad.axes[1] > 0.5 ? 1 : pad.buttons[12]?.pressed || !onSelect && pad.buttons[14]?.pressed || pad.axes[1] < -0.5 ? -1 : 0;
+      if (direction) {
+        const index = controls.indexOf(document.activeElement);
+        controls[(index + direction + controls.length) % controls.length]?.focus();
+        gamepadDirectionAt = now;
+      }
+    }
+    if (navigation && document.activeElement.matches("select") && (rising(0) || rising(14) || rising(15))) {
+      const select = document.activeElement, delta = rising(14) ? -1 : 1;
+      select.selectedIndex = (select.selectedIndex + delta + select.options.length) % select.options.length;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    } else if (navigation && rising(0) && document.activeElement.matches("button,input[type=checkbox],a[href],summary")) {
+      document.activeElement.click();
+    }
+    if (navigation instanceof HTMLDialogElement && rising(1))
+      navigation.close("dismiss");
+    else if (navigation && rising(1))
+      closeGamepadPanel(navigation);
+    if (rising(9) && !document.querySelector("dialog[open]"))
+      openHelp();
+    lastGamepadButtons = pad.buttons.map((button2) => button2.pressed);
+    return Boolean(navigation);
+  }
   help.querySelector("summary").addEventListener("click", (event) => {
     if (!canUsePanels())
       event.preventDefault();
   });
   document.getElementById("map-close").addEventListener("click", closeMap);
   function updateViewToggle() {
-    viewToggle.textContent = showing3D ? compactMap.matches ? "Stores" : "Store directory" : "Enter 3D Mall";
+    viewToggle.textContent = showing3D ? "Store Directory" : "Enter 3D Mall";
     viewToggle.setAttribute("aria-label", showing3D ? "Switch to the accessible store directory" : "Switch to the 3D virtual mall");
   }
   const resetMap = () => {
-    mallMap.open = !guide.open && !compactMap.matches;
+    mallMap.open = false;
   };
   resetMap();
   compactMap.addEventListener("change", () => {
     const active = document.activeElement;
     resetMap();
     updateViewToggle();
-    headerMap.hidden = !showing3D || !compactMap.matches;
-    headerMap.setAttribute("aria-expanded", String(compactMap.matches && mallMap.open));
+    headerMap.hidden = !showing3D;
+    headerMap.setAttribute("aria-expanded", String(mallMap.open));
     updateCompactPanels();
     if (showing3D && (active === headerMap && headerMap.hidden || mallMap.contains(active) && !mallMap.open && active !== mallMap.querySelector("summary"))) {
       if (shelfFocus?.open)
         shelfFocus.focus();
       else
-        (compactMap.matches ? headerMap : scene).focus({ preventScroll: true });
+        headerMap.focus({ preventScroll: true });
     }
     notifyMode();
   });
   mallMap.addEventListener("toggle", () => {
     if (compactMap.matches && mallMap.open)
       help.open = false;
-    headerMap.setAttribute("aria-expanded", String(compactMap.matches && mallMap.open));
+    headerMap.setAttribute("aria-expanded", String(mallMap.open));
     updateCompactPanels();
     notifyMode();
   });
   help.addEventListener("toggle", () => {
     if (compactMap.matches && help.open)
       mallMap.open = false;
-    headerMap.setAttribute("aria-expanded", "false");
+    headerMap.setAttribute("aria-expanded", String(mallMap.open));
     updateCompactPanels();
     notifyMode();
   });
@@ -1682,10 +1260,6 @@ function createUI(expanded = false) {
         help.open = false;
         mallMap.open = false;
       }
-      if (guide.open) {
-        guide.close("start");
-        return;
-      }
       setView(true, !bag.open);
       if (bag.open)
         bag.closeTo(scene);
@@ -1694,10 +1268,6 @@ function createUI(expanded = false) {
       notifyMode();
     },
     onShops() {
-      if (guide.open) {
-        guide.close("list");
-        return;
-      }
       const fromBag = bag.open;
       setView(false, !fromBag);
       focusDirectory(!fromBag);
@@ -1711,7 +1281,7 @@ function createUI(expanded = false) {
     if (moveFocus)
       listTitle.focus({ preventScroll: true });
   }
-  const modePanels = [themeDialog, amenityPanel.dialog, dialog, bagDialog, help, guide, mallMap, document.getElementById("original-tin-dialog")];
+  const modePanels = [themeDialog, amenityPanel.dialog, dialog, bagDialog, help, mallMap, document.getElementById("original-tin-dialog")];
   const modeObserver = new MutationObserver(notifyMode);
   for (const panel of modePanels)
     modeObserver.observe(panel, { attributes: true, attributeFilter: ["open"] });
@@ -1739,8 +1309,8 @@ function createUI(expanded = false) {
     floorplan.setAttribute("viewBox", "0 0 700 600");
     floorplan.setAttribute("preserveAspectRatio", "xMidYMid meet");
     const background = floorplan.querySelector(".map-courtyard");
-    for (const [key2, value] of Object.entries({ x: 1, y: 1, width: 698, height: 598, rx: 0 }))
-      background.setAttribute(key2, value);
+    for (const [key, value] of Object.entries({ x: 1, y: 1, width: 698, height: 598, rx: 0 }))
+      background.setAttribute(key, value);
     floorplan.querySelector(".map-walkway").setAttribute("d", "M130 150H570V510H130Z");
     floorplan.querySelector(".map-label:not(.map-entry)").setAttribute("y", "320");
     floorplan.querySelector(".map-label:not(.map-entry)").setAttribute("x", "350");
@@ -1751,8 +1321,8 @@ function createUI(expanded = false) {
       const origin = expandedMapPoint(bay.minX, bay.minZ);
       let rect = bay.available ? floorplan.querySelector(`[data-map-store="${spatial.stores[Number(bay.number) - 1].id}"]`) : document.createElementNS(ns, "rect");
       rect.setAttribute("class", bay.available ? "map-store" : "map-store map-planned");
-      for (const [key2, value] of Object.entries({ x: origin.x + 2, y: origin.y + 2, width: (bay.maxX - bay.minX) * 10 - 4, height: (bay.maxZ - bay.minZ) * 10 - 4, rx: 3 }))
-        rect.setAttribute(key2, value);
+      for (const [key, value] of Object.entries({ x: origin.x + 2, y: origin.y + 2, width: (bay.maxX - bay.minX) * 10 - 4, height: (bay.maxZ - bay.minZ) * 10 - 4, rx: 3 }))
+        rect.setAttribute(key, value);
       if (!bay.available) {
         const space = plannedSpaces.find((item) => item.number === bay.number);
         rect.setAttribute("data-space-id", space.id);
@@ -1786,16 +1356,16 @@ function createUI(expanded = false) {
     group.append(title);
     const marker = document.createElementNS(ns, "rect");
     marker.setAttribute("class", "map-store");
-    for (const [key2, value] of Object.entries({ x: position.x - 20, y: position.y - 20, width: 40, height: 40, rx: 8 }))
-      marker.setAttribute(key2, value);
-    const text2 = document.createElementNS(ns, "text");
-    text2.setAttribute("x", position.x);
-    text2.setAttribute("y", position.y + 8);
-    text2.setAttribute("text-anchor", "middle");
-    text2.style.font = "var(--gjh-font-expanded-map-number)";
-    text2.style.fill = "var(--gjh-color-expanded-map-text)";
-    text2.textContent = letter;
-    group.append(marker, text2);
+    for (const [key, value] of Object.entries({ x: position.x - 20, y: position.y - 20, width: 40, height: 40, rx: 8 }))
+      marker.setAttribute(key, value);
+    const text = document.createElementNS(ns, "text");
+    text.setAttribute("x", position.x);
+    text.setAttribute("y", position.y + 8);
+    text.setAttribute("text-anchor", "middle");
+    text.style.font = "var(--gjh-font-expanded-map-number)";
+    text.style.fill = "var(--gjh-color-expanded-map-text)";
+    text.textContent = letter;
+    group.append(marker, text);
     floorplan.insertBefore(group, playerDot);
     mapServices.push({ id, letter, label });
     if (!servicesLegend) {
@@ -1822,8 +1392,8 @@ function createUI(expanded = false) {
       throw new Error(`Missing store content for ${store.id}`);
     const rect = mapStoreRect(store);
     if (!expanded)
-      for (const key2 of ["x", "y", "width", "height"])
-        mapRect.setAttribute(key2, String(rect[key2]));
+      for (const key of ["x", "y", "width", "height"])
+        mapRect.setAttribute(key, String(rect[key]));
     mapButton.style.left = `${rect.x / mapView.width * 100}%`;
     mapButton.style.width = `${rect.width / mapView.width * 100}%`;
     mapButton.querySelector("span").textContent = store.number;
@@ -1856,14 +1426,15 @@ function createUI(expanded = false) {
     cartToggle.textContent = cart.active ? "Stow cart" : "Use cart in 3D";
     cartToggle.disabled = !cart.available || !cart.active && cart.capability?.disabled === true;
     sceneCart.hidden = !cart.available || !showing3D || compactMap.matches && (mallMap.open || help.open);
-    const cartLabel = cart.active ? "Stow cart" : "Cart";
+    const cartLabel = cart.active ? "Stow Cart" : "Shopping Cart";
     if (sceneCart.textContent !== cartLabel)
       sceneCart.textContent = cartLabel;
     if (sceneCart.firstChild !== cartIcon)
       sceneCart.prepend(cartIcon);
     sceneCart.setAttribute("aria-pressed", String(cart.active));
     sceneCart.disabled = !cart.available || !cart.active && cart.capability?.sceneDisabled === true;
-    sceneCart.title = cartReason(cart) || "";
+    sceneCart.title = `${cartReason(cart) ? `${cartReason(cart)} ` : ""}Demo shopping cart. No orders are created.`;
+    sceneCart.setAttribute("aria-label", `${cartLabel}. Demo shopping cart; no orders are created.${cartReason(cart) ? ` ${cartReason(cart)}` : ""}`);
     sceneCart.setAttribute("aria-describedby", "cart-status");
     if (previousCartAvailable !== cart.available || previousCartMode !== cart.active || previousCartSeated !== cart.seated || previousHeldProduct !== cart.heldProduct || previousElevatorTravel !== cart.elevatorTravel || previousCartReason !== cart.capability?.reason) {
       cartStatus.textContent = cartReason(cart) && !cart.active ? cartReason(cart) : !cart.available ? "The 3D cart is unavailable. Your bag selection is unchanged." : cart.heldProduct ? heldInstruction(cart) : cart.elevatorTravel ? "Wait for the elevator to stop." : cart.seated ? "Stand up before using the cart." : cart.active ? "Cart active. Slower walking with a wide turning clearance; stow before sitting." : "Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.";
@@ -1913,7 +1484,7 @@ function createUI(expanded = false) {
   const records = new Map([["courtyard-seat", { name: "Courtyard bench", action: "seat" }], ["mall-directory", { name: "Directory kiosk · Decorative screen", action: "map" }]]);
   for (const [id, name] of [["service-desk", "Guest services"], ["wayfinding-west", "Store directions"], ["wayfinding-east", "Store directions"], ["featured-showcase", "New Moon featured collection"]])
     records.set(id, { name, action: "amenity" });
-  const zones = { atrium: "The courtyard", ...Object.fromEntries(spatial.stores.map((store) => [store.id, store.label])), upper: "Upper level" };
+  const zones = { atrium: "Courtyard", ...Object.fromEntries(spatial.stores.map((store) => [store.id, store.label])), upper: "Upper level" };
   let available = false;
   let showing3D = false;
   let currentZone = "atrium";
@@ -1924,7 +1495,7 @@ function createUI(expanded = false) {
   let teleportListener = null;
   let viewListener = null;
   document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape" || !showing3D || !compactMap.matches || dialog.open || bag.open || guide.open || amenityPanel.dialog.open)
+    if (event.key !== "Escape" || !showing3D || !compactMap.matches || dialog.open || bag.open || amenityPanel.dialog.open)
       return;
     const panel = help.open ? help : mallMap.open ? mallMap : null;
     if (panel) {
@@ -2021,18 +1592,16 @@ function createUI(expanded = false) {
       themeDialog.close("view-change");
     }
     amenityPanel.close("view-change");
-    if (guide.open)
-      guide.close("view-change");
     showing3D = next;
-    onboarding.setVisible(next);
+    mallMap.open = false;
     locationName.textContent = next ? zones[currentZone] : "The store directory";
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle("is-3d", next);
     updateViewToggle();
     help.open = false;
-    headerMap.hidden = !next || !compactMap.matches;
-    headerMap.setAttribute("aria-expanded", String(next && compactMap.matches && mallMap.open));
+    headerMap.hidden = !next;
+    headerMap.setAttribute("aria-expanded", String(next && mallMap.open));
     if (moveFocus)
       (next ? scene : document.getElementById("list-title")).focus({ preventScroll: true });
     announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded ? "Store directory open. The 17-store mall plan includes three open stores and verified product images." : "Store directory open. All three stores and verified product images are available below.");
@@ -2060,18 +1629,19 @@ function createUI(expanded = false) {
       return ok;
     },
     map: () => {
-      if (openMap())
+      const opened = openMap();
+      if (opened)
         announce(expanded ? "The directory kiosk shows the expanded mall map." : "The kiosk screen is decorative. Use this three-store map to choose an entrance.");
+      return opened;
     }
   };
   function inspect(id) {
     const record = records.get(id);
-    if (!record || dialog.open || bag.open || guidePaused || amenityPanel.dialog.open)
-      return;
+    if (!record || dialog.open || bag.open || amenityPanel.dialog.open)
+      return false;
     shelfFocus?.close();
     if (record.action === "brand-story") {
       returnFocus = document.activeElement;
-      onboarding.report("inspect");
       productTitle.textContent = `${record.brand} · ${record.tagline}`;
       productImage.src = record.image;
       productImage.alt = record.alt;
@@ -2080,9 +1650,8 @@ function createUI(expanded = false) {
       dialog.showModal();
       closeButton.focus({ preventScroll: true });
       notifyMode();
-      return;
+      return true;
     }
-    onboarding.report("inspect");
     productTitle.textContent = record.name;
     productImage.src = record.image;
     productImage.alt = record.alt;
@@ -2093,53 +1662,25 @@ function createUI(expanded = false) {
     newMoonPreview.open(id);
     closeButton.focus({ preventScroll: true });
     notifyMode();
+    return true;
   }
   function inspectNearby(id) {
     if (selectedInteraction?.id === id)
       interactionRegistry?.dispatch(selectedInteraction);
   }
-  function showGuide(event) {
-    if (!available || !showing3D || guide.open || dialog.open || bag.open || amenityPanel.dialog.open || externalPaused || document.hidden)
+  function showGuide() {
+    if (!canUsePanels())
       return false;
     shelfFocus?.close({ focus: false });
-    guideFromHelp = event?.currentTarget === guideReopen;
     help.open = false;
     mallMap.open = false;
-    return onboarding.openWelcome();
+    updateCompactPanels();
+    notifyMode();
+    tutorial.reopen();
+    return true;
   }
   guideReopen.addEventListener("click", showGuide);
-  guide.addEventListener("close", () => {
-    guidePaused = false;
-    const action = guide.returnValue;
-    if (action === "fallback" || action === "view-change")
-      return;
-    guideSeen = true;
-    try {
-      sessionStorage.setItem(guideSessionKey, "1");
-    } catch {}
-    if (!available || !showing3D)
-      return;
-    if (action === "list") {
-      setView(false, true);
-      focusDirectory();
-      return;
-    }
-    if (action === "map") {
-      if (openMap())
-        announce("Choose a store on the map. Your location has not changed.");
-      return;
-    }
-    if (action === "dismiss" && guideFromHelp) {
-      help.open = true;
-      guideReopen.focus({ preventScroll: true });
-    } else if (!guideFromHUD)
-      scene.focus({ preventScroll: true });
-    const target = nearby ? records.get(nearby) : null;
-    const touch = matchMedia("(pointer: coarse)").matches;
-    const hint = target ? `${target.name}. ${target.action === "map" ? touch ? "Tap Map" : "press F or tap Map" : touch ? "Tap Inspect" : "press F or tap Inspect"} for details.` : "Open Help to review the controls.";
-    announce(`Ready to explore. ${hint}`);
-  });
-  guide.addEventListener("close", notifyMode);
+  railGuide?.addEventListener("click", showGuide);
   viewToggle.addEventListener("click", () => setView(!showing3D, true));
   directoryEnter3D.addEventListener("click", () => setView(true, true));
   function visitStore(id) {
@@ -2263,7 +1804,7 @@ function createUI(expanded = false) {
   }
   function travelToStore(zone) {
     const store = spatial.get(zone);
-    if (!showing3D || dialog.open || guidePaused || !store?.available)
+    if (!showing3D || dialog.open || !store?.available)
       return;
     if (!interactionRegistry?.dispatch(interactionRegistry.get("travel", zone))) {
       announce("Store travel is unavailable right now. Please try again.");
@@ -2293,14 +1834,14 @@ function createUI(expanded = false) {
     const storeActions = spatial.stores.filter((store) => store.available).map((store) => ({ id: store.id, label: { en: `Visit ${store.label}`, "zh-CN": `前往 ${store.label}` }, onSelect: () => navigateStore(store.id) }));
     const directory = { id: "directory", label: { en: "Browse store directory", "zh-CN": "浏览店铺目录" }, onSelect: () => setView(false, true) };
     if (id === "featured-showcase") {
-      amenityPanel.open({ title: { en: "New Moon featured collection", "zh-CN": "New Moon 精选产品" }, description: { en: "Choose a product to view its official image and details. The display door stays closed; the 3D cans are unofficial visual demonstrations.", "zh-CN": "选择产品查看官方图片与详情。展柜门保持关闭，3D 罐身为非官方视觉示意。" }, actions: [...document.querySelectorAll("[data-product]")].map((card) => {
+      return amenityPanel.open({ title: { en: "New Moon featured collection", "zh-CN": "New Moon 精选产品" }, description: { en: "Choose a product to view its official image and details. The display door stays closed; the 3D cans are unofficial visual demonstrations.", "zh-CN": "选择产品查看官方图片与详情。展柜门保持关闭，3D 罐身为非官方视觉示意。" }, actions: [...document.querySelectorAll("[data-product]")].map((card) => {
         const [country, weight] = card.querySelector(".eyebrow").textContent.split("/").map((value) => value.trim());
         const translated = { "New Zealand": "新西兰", Australia: "澳大利亚", "South Africa": "南非", Mexico: "墨西哥" }[country] || country;
         return { id: card.dataset.product, label: card.dataset.productName, title: { en: `${country} abalone`, "zh-CN": `${translated}鲍鱼` }, description: weight, image: card.dataset.productImage, onSelect: () => inspect(card.dataset.product) };
       }) });
     } else {
       const desk = id === "service-desk";
-      amenityPanel.open({ title: desk ? { en: "Guest services", "zh-CN": "访客服务" } : { en: "Find your store", "zh-CN": "寻找店铺" }, description: desk ? { en: "Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.", "zh-CN": "选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。" } : { en: "Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.", "zh-CN": "一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。" }, actions: [...storeActions, directory, ...desk && showing3D ? [{ id: "help", label: { en: "How to explore", "zh-CN": "如何探索" }, onSelect: () => showGuide() }] : []] });
+      return amenityPanel.open({ title: desk ? { en: "Guest services", "zh-CN": "访客服务" } : { en: "Find your store", "zh-CN": "寻找店铺" }, description: desk ? { en: "Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.", "zh-CN": "选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。" } : { en: "Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.", "zh-CN": "一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。" }, actions: [...storeActions, directory, ...desk && showing3D ? [{ id: "help", label: { en: "How to explore", "zh-CN": "如何探索" }, onSelect: () => showGuide() }] : []] });
     }
   }
   for (const button2 of document.querySelectorAll("[data-amenity]")) {
@@ -2311,12 +1852,17 @@ function createUI(expanded = false) {
   return {
     setInteractionRegistry(registry2) {
       interactionRegistry = registry2;
+      unsubscribeInteractions?.();
+      unsubscribeInteractions = registry2.subscribe(() => {
+        if (available && showing3D)
+          tutorial.report("interact");
+      });
       for (const store of spatial.stores)
         registry2.register({
           id: store.id,
           kind: "travel",
           prompt: `Visit ${store.label}`,
-          availability: () => showing3D && !dialog.open && !guidePaused && store.available,
+          availability: () => showing3D && !dialog.open && store.available,
           handler: () => teleportListener?.(store.id)
         });
     },
@@ -2328,7 +1874,7 @@ function createUI(expanded = false) {
           kind: "open",
           prompt: () => item.door.targetOpen ? "Close" : "Open",
           handler: () => {
-            if (dialog.open || bag.open || guidePaused || amenityPanel.dialog.open)
+            if (dialog.open || bag.open || amenityPanel.dialog.open)
               return false;
             item.door.toggle();
             scene.focus({ preventScroll: true });
@@ -2344,7 +1890,7 @@ function createUI(expanded = false) {
         prompt,
         availability: () => records.has(item.id),
         handler: () => {
-          if (dialog.open || bag.open || guidePaused || amenityPanel.dialog.open)
+          if (dialog.open || bag.open || amenityPanel.dialog.open)
             return false;
           shelfFocus?.close();
           return (interactionHandlers[records.get(item.id)?.action] || inspect)(item.id);
@@ -2363,9 +1909,9 @@ function createUI(expanded = false) {
         nearbyDistance.hidden = !show;
       if (!show)
         return null;
-      const text2 = `≈${distance.toFixed(1)} m`;
-      if (nearbyDistance.textContent !== text2)
-        nearbyDistance.textContent = text2;
+      const text = `≈${distance.toFixed(1)} m`;
+      if (nearbyDistance.textContent !== text)
+        nearbyDistance.textContent = text;
       return record.action === "brand-story" ? record.brand : record.compactName || (record.action === "map" ? "Directory kiosk" : record.action === "elevator" ? `Elevator · ${currentZone === "upper" ? "Upper level" : "Ground floor"}` : record.name);
     },
     setShelfFocus(controller) {
@@ -2383,7 +1929,7 @@ function createUI(expanded = false) {
         mode,
         available,
         destination: showing3D ? "home" : "shops",
-        host: bag.open ? document.getElementById("context-navigation-bag") : guide.open ? document.getElementById("context-navigation-guide") : undefined
+        host: bag.open ? document.getElementById("context-navigation-bag") : undefined
       });
     },
     onModeState(listener) {
@@ -2415,8 +1961,10 @@ function createUI(expanded = false) {
       for (const button2 of cardStoreButtons)
         button2.hidden = false;
       guideReopen.hidden = false;
+      if (railGuide)
+        railGuide.hidden = false;
       viewToggle.hidden = false;
-      headerMap.hidden = !showing3D || !compactMap.matches;
+      headerMap.hidden = !showing3D;
       fallbackMessage.hidden = true;
       if (directoryTouched) {
         updateViewToggle();
@@ -2433,8 +1981,9 @@ function createUI(expanded = false) {
         button2.hidden = false;
       for (const button2 of cardStoreButtons)
         button2.hidden = false;
-      guideSeen = true;
       guideReopen.hidden = false;
+      if (railGuide)
+        railGuide.hidden = false;
       viewToggle.hidden = false;
       return3D.hidden = false;
       updateCartControls();
@@ -2444,13 +1993,12 @@ function createUI(expanded = false) {
     },
     fallback(message) {
       const active = document.activeElement;
-      const recoverFocus = showing3D && (experience.contains(active) || guide.contains(active) || themeDialog.contains(active) || dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle);
-      if (guide.open)
-        guide.close("fallback");
+      const recoverFocus = showing3D && (experience.contains(active) || themeDialog.contains(active) || dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle);
       if (themeDialog.open)
         themeDialog.close("fallback");
-      guidePaused = false;
       guideReopen.hidden = true;
+      if (railGuide)
+        railGuide.hidden = true;
       setView(false, recoverFocus);
       available = false;
       updateMallTheme();
@@ -2470,13 +2018,7 @@ function createUI(expanded = false) {
       announce(fallbackMessage.textContent);
     },
     update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2 }) {
-      if (!guidePaused && showing3D && previousTutorialPose) {
-        if (Math.hypot(x - previousTutorialPose.x, z - previousTutorialPose.z) > 0.02)
-          onboarding.report("move");
-        if (Math.abs(yaw - previousTutorialPose.yaw) > 0.01)
-          onboarding.report("look");
-      }
-      previousTutorialPose = { x, z, yaw };
+      tutorial.reportPose({ x, z, yaw });
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
         const upper = zone === "upper";
@@ -2594,19 +2136,20 @@ function createUI(expanded = false) {
     },
     handleGamepad(pad) {
       const wasThemeOpen = themeDialog.open;
-      const handled = onboarding.handleGamepad(pad, themeDialog.open ? themeDialog : amenityPanel.dialog.open ? amenityPanel.dialog : dialog.open ? dialog : bag.open ? bagDialog : help.open ? help : compactMap.matches && mallMap.open ? mallMap : !showing3D ? document.body : null);
+      const handled = handlePanelGamepad(pad, themeDialog.open ? themeDialog : amenityPanel.dialog.open ? amenityPanel.dialog : dialog.open ? dialog : bag.open ? bagDialog : help.open ? help : mallMap.open ? mallMap : !showing3D ? document.body : null);
       if (wasThemeOpen && !themeDialog.open)
         mallTheme?.cancel();
       return handled;
     },
     paused() {
       const signals = modeSignals();
-      syncOnboardingSuspension(signals);
       return signals.panelOpen || signals.productOpen || signals.bagOpen || signals.shelfOpen;
     },
     offerFirstGuide() {
-      if (!guideSeen && onboarding.shouldAutoShow)
-        showGuide();
+      if (canUsePanels()) {
+        notifyMode();
+        tutorial.offer();
+      }
     },
     setExternalPaused(value) {
       externalPaused = Boolean(value);
@@ -2791,7 +2334,7 @@ function createModes({
       return commit([...layers, next], reason);
     },
     observe(signals, reason = "UI/player observation") {
-      if (!signals || typeof signals !== "object" || Array.isArray(signals) || Object.keys(signals).some((key2) => !SIGNALS.includes(key2)) || SIGNALS.some((key2) => typeof signals[key2] !== "boolean") || signals.seated && signals.cartActive || signals.productOpen && signals.bagOpen || signals.shelfOpen && (signals.panelOpen || signals.productOpen || signals.bagOpen))
+      if (!signals || typeof signals !== "object" || Array.isArray(signals) || Object.keys(signals).some((key) => !SIGNALS.includes(key)) || SIGNALS.some((key) => typeof signals[key] !== "boolean") || signals.seated && signals.cartActive || signals.productOpen && signals.bagOpen || signals.shelfOpen && (signals.panelOpen || signals.productOpen || signals.bagOpen))
         return reject("invalid-observation", reason);
       const base = signals.seated ? "seated" : signals.cartActive ? "cart" : "explore";
       if (base !== layers[0] && !BASE_EDGES[layers[0]].includes(base))
@@ -3016,7 +2559,8 @@ function createMallAtmosphere(T, renderer, scene, slots) {
 // demos/corporate/gjh/v11/assets/interaction-registry.js
 function createInteractionRegistry(entries, describe = () => ({})) {
   const cache = new WeakMap;
-  const actions = new Map;
+  const actions2 = new Map;
+  const listeners = new Set;
   let selectionContext = {};
   function normalize(source) {
     let item = cache.get(source);
@@ -3040,15 +2584,15 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     return item;
   }
   function register(source) {
-    let byId = actions.get(source.kind);
+    let byId = actions2.get(source.kind);
     if (!byId)
-      actions.set(source.kind, byId = new Map);
+      actions2.set(source.kind, byId = new Map);
     const item = normalize(source);
     byId.set(item.id, item);
     return item;
   }
   function get(kind, id) {
-    return actions.get(kind)?.get(id) || null;
+    return actions2.get(kind)?.get(id) || null;
   }
   function nearest(position, context = {}) {
     let selected = null, distance = Infinity;
@@ -3073,9 +2617,115 @@ function createInteractionRegistry(entries, describe = () => ({})) {
   function dispatch(item, context = selectionContext) {
     if (!item || item.availability && !item.availability(context, item))
       return false;
-    return item.handler?.(item, context) ?? false;
+    const result = item.handler?.(item, context) ?? false;
+    if (result)
+      for (const listener of listeners)
+        listener(item, context);
+    return result;
   }
-  return { normalize, nearest, dispatch, register, get };
+  function subscribe(listener) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  }
+  return { normalize, nearest, dispatch, register, get, subscribe };
+}
+
+// demos/corporate/gjh/v11/assets/ux-spatial-hud.js
+var SVG_NS = "http://www.w3.org/2000/svg";
+function setText(element2, text) {
+  if (element2 && element2.textContent !== text)
+    element2.textContent = text;
+}
+function setAttribute(element2, name, value) {
+  const text = String(value);
+  if (element2 && element2.getAttribute(name) !== text)
+    element2.setAttribute(name, text);
+}
+function createSpatialHud({ expanded = false, root = document } = {}) {
+  const floor = root.getElementById("floor-indicator");
+  const target = root.getElementById("nearest-target");
+  const interact = root.getElementById("control-interact");
+  const miniMap = root.getElementById("mini-map");
+  const plan = root.getElementById("mini-map-plan");
+  const source = root.querySelector(".floorplan");
+  const map = source && plan ? source.cloneNode(true) : null;
+  const dot = map?.querySelector("#player-dot");
+  let heading = null, context = null;
+  if (map) {
+    for (const element2 of [map, ...map.querySelectorAll("*")]) {
+      for (const name of element2.getAttributeNames()) {
+        if (name === "id" || name.startsWith("data-"))
+          element2.removeAttribute(name);
+      }
+    }
+    map.setAttribute("class", "mini-map-floorplan");
+    map.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    if (dot) {
+      dot.classList.add("mini-map-player");
+      dot.setAttribute("fill", "var(--gjh-color-player-dot)");
+      dot.setAttribute("stroke", "var(--green)");
+      dot.setAttribute("stroke-width", "3");
+      const radius = Number(dot.getAttribute("r")) || 6;
+      heading = root.createElementNS(SVG_NS, "path");
+      heading.setAttribute("class", "mini-map-heading");
+      heading.setAttribute("d", `M0 ${-radius * 2.7} L${-radius * 0.8} ${-radius * 1.2} L${radius * 0.8} ${-radius * 1.2} Z`);
+      heading.setAttribute("fill", "var(--green)");
+      map.append(heading);
+    }
+    context = root.createElement("p");
+    context.className = "mini-map-context";
+    plan.replaceChildren(map, context);
+  }
+  function suspend() {
+    if (interact)
+      interact.hidden = true;
+    if (target)
+      target.hidden = true;
+  }
+  suspend();
+  return {
+    suspend,
+    update({
+      position,
+      zone = "atrium",
+      interaction = null,
+      distance = Infinity,
+      targetLabel = "",
+      active = false,
+      usable = true,
+      travelling = false
+    }) {
+      const upper = zone === "upper";
+      const floorLabel = upper ? "Floor 02 - Upper Level" : "Floor 01 - Atrium";
+      const shop = !upper && spatial.get(zone);
+      setText(floor, shop ? `${floorLabel} · ${shop.label}` : floorLabel);
+      const mapContext = travelling ? "Ground-floor plan · Lift in transit" : upper ? "Ground-floor plan · You are on Floor 02" : "Ground-floor plan · You are here";
+      setText(context, mapContext);
+      setAttribute(map, "aria-label", mapContext);
+      if (miniMap)
+        miniMap.dataset.floor = upper ? "02" : "01";
+      if (position && Number.isFinite(position.x) && Number.isFinite(position.z)) {
+        const point = expanded ? expandedMapPoint(position.x, position.z) : mapPoint(position.x, position.z);
+        setAttribute(dot, "cx", point.x);
+        setAttribute(dot, "cy", point.y);
+        const angle = -(position.yaw || 0) * 180 / Math.PI;
+        setAttribute(heading, "transform", `translate(${point.x} ${point.y}) rotate(${angle})`);
+      }
+      if (dot)
+        dot.style.display = upper || travelling ? "none" : "";
+      if (heading)
+        heading.style.display = upper || travelling ? "none" : "";
+      const near = Boolean(active && !travelling && usable && interaction && Number.isFinite(distance));
+      if (interact)
+        interact.hidden = !near;
+      const label = targetLabel.trim();
+      if (target) {
+        target.hidden = !near || !label;
+        if (near && label)
+          setText(target, `Nearest: ${label} · ${distance.toFixed(1)} m`);
+      }
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/script.js
@@ -3113,6 +2763,7 @@ var mallTheme = null;
 var brandWallStarted = false;
 var atmosphere = null;
 var npcs = null;
+var spatialHud = null;
 var initialized = false;
 var fatal = false;
 var contextLost = false;
@@ -3135,6 +2786,7 @@ function hideGuidance() {
   guidance?.hide();
   shelfFocus?.hideNearby();
   ui.clearGuidance();
+  spatialHud?.suspend();
 }
 var nearby = null;
 var currentZone = "atrium";
@@ -3157,6 +2809,24 @@ var modes = createModes({
 });
 var ui = createUI(expanded);
 var canvas = document.querySelector("#scene");
+spatialHud = createSpatialHud({ expanded });
+var spatialTargetName = document.getElementById("nearby-name");
+var spatialInspectButton = document.getElementById("inspect");
+function updateSpatialHud() {
+  if (!player)
+    return;
+  const p = player.state;
+  spatialHud.update({
+    position: p,
+    zone: currentZone,
+    interaction: selectedInteraction,
+    distance: interactionDistance,
+    targetLabel: spatialTargetName.textContent,
+    travelling: Boolean(p.elevatorTravel),
+    usable: !spatialInspectButton.disabled,
+    active: ready && !modes.paused() && !windowBlurred && !document.hidden && document.body.classList.contains("is-3d") && ["explore", "cart"].includes(modes.current()) && !p.character.collection.active && !p.productApproaching
+  });
+}
 function syncMode(signals = ui.modeSignals()) {
   if (modes.current() === "shelf" && !signals.shelfOpen)
     modes.request(modes.layers().at(-2), "Shelf closed");
@@ -3169,6 +2839,7 @@ function syncMode(signals = ui.modeSignals()) {
   ui.projectMode(modes.current());
   if (!["explore", "cart"].includes(modes.current()))
     hideGuidance();
+  updateSpatialHud();
 }
 ui.onModeState(syncMode);
 setupOriginalTin(ui);

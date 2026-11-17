@@ -27,7 +27,7 @@ def run():
                 errors = []; page.on('pageerror', lambda error: errors.append(str(error)))
                 page.goto(f'http://127.0.0.1:{server.server_port}{URL_PATH}')
                 page.wait_for_function('__mall?.ready && __sceneReady', timeout=60000)
-                page.locator('#guide-start').click(); page.wait_for_function('document.activeElement.id === "scene"')
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus(); page.wait_for_function('document.activeElement.id === "scene"')
                 assets = page.evaluate('__mall.state.productAssets')
                 assert assets['totalInstances'] == 204
                 for record in assets['cans'].values():

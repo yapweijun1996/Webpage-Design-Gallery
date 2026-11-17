@@ -19,13 +19,13 @@ def run(out=OUT):
    for width,height in [(320,740),(390,844),(768,1024),(1440,900),(844,390)]:
     context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block');page=context.new_page();external=[];errors=[]
     page.on('request',lambda r:external.append(r.url) if r.url.startswith('http') and not r.url.startswith(base+'/') else None);page.on('pageerror',lambda e:errors.append(str(e)))
-    start=time.monotonic();page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-dialog').wait_for(state='visible');ready_ms=round((time.monotonic()-start)*1000)
-    before=page.evaluate('__mall.state.frames');page.wait_for_timeout(250);assert page.evaluate('__mall.state.frames')==before,'Guide must pause rendering'
+    start=time.monotonic();page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-card').wait_for(state='visible');ready_ms=round((time.monotonic()-start)*1000)
+
     initial=page.evaluate('performance.getEntriesByType("resource").map(e=>({path:new URL(e.name).pathname,bytes:e.decodedBodySize}))');assert not any('original-demo-food-tin.glb' in r['path'] for r in initial),'Original tin must remain lazy'
     save(out/f'ready-{width}x{height}.json',{'viewport':[width,height],'resources':initial,'count':len(initial),'decodedBytes':sum(r['bytes'] for r in initial)})
     assert sum(r['bytes'] for r in initial)<=10*1024*1024,'Ready-stage decoded payload exceeds 10 MiB laboratory budget'
     assert len(initial)<=45,'Ready-stage resource count exceeds 45'
-    page.locator('#guide-start').click();page.wait_for_function('!document.querySelector("#guide-dialog").open && document.activeElement.id==="scene"');page.evaluate('__mall.setInput({});__mall.step(17)')
+    page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.querySelector("#guide-card").hidden && document.activeElement.id==="scene"');page.evaluate('__mall.setInput({});__mall.step(17)')
     calls={}
     for zone in ['atrium','newmoon','mili','gogo']:
      page.evaluate('(z)=>{__mall.teleport(z);__mall.step(17)}',zone);calls[zone]=page.evaluate('__mall.state.drawCalls')

@@ -43,9 +43,8 @@ def run():
                 page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
                 page.goto(url + query, wait_until='domcontentloaded')
                 page.wait_for_function('window.__mall?.ready&&window.__sceneReady', timeout=90000)
-                page.locator('#guide-dialog').wait_for(state='visible')
-                page.locator('#guide-start').click()
-                page.locator('.ob-tip').wait_for(state='visible')
+                page.locator('#guide-card').wait_for(state='visible')
+                page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
                 compact = width <= 650 or (height <= 560 and width > height)
                 expected = 'menu' if compact else 'explore'
                 stem = f'{index}-{width}x{height}'
@@ -59,13 +58,11 @@ def run():
                 def help_open():
                     page.wait_for_function('document.querySelector("#keyboard-help").open')
                     page.wait_for_function('m=>__mall.mode===m', arg=expected)
-                    assert page.locator('#guide-dialog').is_hidden()
+                    assert page.locator('#guide-card').is_hidden()
                     assert page.locator('#keyboard-help>summary').inner_text() == 'Help'
-                    assert page.locator('.ob-tip').is_hidden()
                     assert page.evaluate('__mall.state.paused') == compact
 
-                # The contextual tutorial's Help action uses the same Help owner.
-                page.locator('.ob-tip [data-ob-action=help]').click()
+                page.locator('#keyboard-help>summary').click()
                 help_open()
                 assert page.locator('#keyboard-help>summary').evaluate('e=>e===document.activeElement')
                 assert page.locator('#graphics-quality').count() == 1
@@ -82,30 +79,8 @@ def run():
                 assert bounds[0] == bounds[1] == bounds[2]
                 page.locator('#graphics-quality').select_option('low')
                 assert page.locator('#graphics-quality').input_value() == 'low'
-                # Nested quick guide retains its settings and control-mode switcher.
-                page.locator('#guide-reopen').click()
-                page.locator('#guide-dialog').wait_for(state='visible')
-                assert not page.locator('#keyboard-help').evaluate('e=>e.open')
-                for mode in ['keyboard', 'touch', 'gamepad']:
-                    page.locator('#guide-dialog [data-ob-setting=input]').select_option(mode)
-                    assert page.locator('#guide-dialog .ob-controls').get_attribute('data-input-mode') == mode
-                page.locator('#guide-dialog [data-ob-setting=language]').select_option('zh-CN')
-                assert page.locator('#guide-dialog').get_attribute('lang') == 'zh-CN'
-                page.locator('#guide-dialog [data-ob-setting=language]').select_option('en')
-                page.locator('#guide-dialog .ob-settings-toggle').click()
-                page.locator('#guide-dialog [data-ob-setting=theme]').select_option('dark')
-                assert page.locator('#guide-dialog').get_attribute('data-ob-theme') == 'dark'
-                page.locator('#guide-dialog [data-ob-setting=theme]').select_option('system')
-                page.keyboard.press('Escape')
-                help_open()
-                page.wait_for_function('document.activeElement.id==="guide-reopen"')
                 page.locator('#keyboard-help>summary').click()
-                page.locator('.ob-tip').wait_for(state='visible')
-                page.locator('.ob-tip [data-ob-action=skip]').click()
-                assert page.locator('.ob-help').count() == 0
-                assert page.locator('.ob-hud').is_hidden()
-                assert page.locator('#mall-map>summary').is_hidden()
-                assert page.locator('#header-map').is_visible() == compact
+                assert page.locator('#header-map').is_visible()
                 header_controls = page.locator('.site-header a,.site-header button').evaluate_all('''els=>els.filter(e=>e.checkVisibility()).map(e=>{const r=e.getBoundingClientRect();return {id:e.id,text:e.textContent.trim(),rect:r.toJSON(),hit:e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}})''')
                 for control in header_controls:
                     rect = control['rect']
@@ -151,13 +126,7 @@ def run():
                     assert not page.locator('#keyboard-help').evaluate('e=>e.open')
                     page.locator('#map-close').click()
                 else:
-                    # A quick-guide visit intentionally closes the wide map.
-                    # Reopen it through the real guide Map action, then verify
-                    # its retained nonblocking desktop policy and destinations.
-                    page.locator('#keyboard-help>summary').click()
-                    page.locator('#guide-reopen').click()
-                    page.locator('#guide-map').click()
-                    page.wait_for_function('!document.querySelector("#guide-dialog").open&&document.querySelector("#mall-map").open')
+                    page.locator('#header-map').click()
                     page.wait_for_function('__mall.mode==="explore"&&!__mall.state.paused')
                     assert page.locator('#map-close').is_hidden()
                     for zone, x in [('newmoon', -10), ('mili', 0), ('gogo', 10)]:
@@ -171,7 +140,7 @@ def run():
                 old_map = page.locator('#mall-map').evaluate('e=>e.open')
                 page.evaluate('document.querySelector("#header-map").click();document.querySelector("#guide-reopen").click();document.querySelector("#keyboard-help>summary").click()')
                 assert page.locator('#mall-map').evaluate('e=>e.open') == old_map
-                assert page.locator('#guide-dialog').is_hidden()
+                assert page.locator('#guide-card').is_hidden()
                 assert not page.locator('#keyboard-help').evaluate('e=>e.open')
                 assert page.locator('#bag-dialog').is_visible()
                 page.locator('#bag-close').click()
@@ -184,7 +153,7 @@ def run():
             # Resize with focused map content through both compact boundaries.
             context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce')
             page = context.new_page()
-            page.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+            page.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
             page.goto(url); page.wait_for_function('window.__mall?.ready&&window.__sceneReady', timeout=90000)
             page.locator('#header-map').click()
             page.set_viewport_size({'width': 651, 'height': 844})

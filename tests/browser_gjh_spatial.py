@@ -29,12 +29,13 @@ def run():
             for width,height,query in [(1440,900,''),(390,844,''),(390,844,'?visitor=v1')]:
                 context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,
                     reduced_motion='reduce',service_workers='block')
-                context.add_init_script("sessionStorage.setItem('gjh-v11-guide-seen-v1','1')")
+                context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page=context.new_page();errors=[]
                 page.on('pageerror',lambda error:errors.append(str(error)))
                 page.goto(url+query,wait_until='domcontentloaded')
                 page.wait_for_function('window.__sceneReady === true',timeout=90000)
                 assert page.locator('#scene').is_visible()
+                if width >= 1000: page.locator('#header-map').click()
                 assert page.locator('#location-name').text_content()=='The courtyard'
                 assert page.locator('[data-map-store]').count()==3
                 for ident,number,label,x,map_x in STORES:

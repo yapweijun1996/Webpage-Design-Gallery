@@ -25,9 +25,7 @@ def run():
       assert page.locator('[data-store]').evaluate_all('els=>els.map(e=>e.dataset.store)')==['newmoon','mili','gogo']
       for zone,x in (('newmoon',-10),('mili',0),('gogo',10)):
        if not page.locator('#mall-map').evaluate('e=>e.open'):
-        if page.locator('#header-map').is_visible():page.locator('#header-map').click()
-        else:
-         page.locator('#keyboard-help > summary').click();page.locator('#guide-reopen').click();page.locator('#guide-map').click()
+        page.locator('#header-map').click()
        page.locator(f'[data-teleport="{zone}"]').click();checked_drive(page);s=base.state(page);assert abs(s['x']-x)<.01 and abs(s['z']-2.4)<.01
       row['wayfindingAgreement']='PASS'
       page.evaluate('()=>__mall.teleport("newmoon")');checked_drive(page);base.walk_to(page,-13,2.4);blocked=checked_drive(page,600000,right=-1);assert -14.53<blocked['x']<-14.4 and abs(blocked['y']+.02)<.03;row['longInputWallBlock']={'x':blocked['x'],'requestedMs':600000,'controllerMaximumFixedSubsteps':600}
