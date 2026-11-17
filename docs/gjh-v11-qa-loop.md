@@ -43,3 +43,16 @@ Every advisor round scores against these five items first, then the per-shop che
 3. Interaction must be meaningful: products support Inspect, doors support Open, chairs support Sit. Do not make every object clickable.
 
 Advisors check these three rules in every round (sit coverage, door open, product inspect, no pointless clickable objects).
+
+## Full vision (owner, 2026-11-17): Singapore-Malaysia Virtual World
+The final goal is a complete Singapore-Malaysia Virtual World, not a small mall demo.
+1. All 17 GJH brands: each with its own shop, brand visuals, product display and an enterable interior. Real product data must be verified; never invent SKUs.
+2. Real multi-floor mall: atrium, second-floor viewing deck, more floors, escalators, lifts, connecting corridors, food area and public facilities, free movement between floors.
+3. Complete Singapore world: HDB, MRT, shophouse, hawker centre, kopitiam, offices, homes, streets, parks and malls.
+4. Complete Malaysia world: kampung, terrace house, shoplot, pasar malam, mamak, shopping malls, residential areas and city streetscape.
+
+### Notes for planning (manager)
+- Supersedes the earlier "glazed storefront, no walkable interior" decision for the long term: shops must become enterable. Treat as a later phase; the current glazed-facade work stays as the interim state.
+- The 200 draw-call single-scene budget cannot carry a whole world. A district-streaming design (chunked districts, LOD, unload far areas) is needed before Singapore and Malaysia districts are added.
+- The Blender-3D-Gallery already holds many Singapore and Malaysia models (HDB staircase, shophouse staircase, kampung house staircase, hawker stalls, kopitiam kettle, wet-market counters and more); reuse before requesting new ones.
+- Suggested phases: P0 v11 mall quality (current loop); P1 multi-floor and enterable shops; P2 streaming architecture; P3 Singapore districts; P4 Malaysia districts.

@@ -729,3 +729,4 @@ See [docs/gjh-v11-qa-loop.md](docs/gjh-v11-qa-loop.md).
 - [ ] Per-shop rounds, S01 first: change, evidence, advisor review, rework, push, record.
 - [ ] 20-minute SGT progress reports until the loop is finished.
 - [ ] Interaction rules (owner 2026-11-17): audit every chair, stool and bench for Sit support; doors Open; products Inspect; keep walls, decor and ordinary lights static. See docs/gjh-v11-qa-loop.md.
+- [ ] Vision upgrade (owner 2026-11-17): Singapore-Malaysia Virtual World. Phases P0 mall quality, P1 multi-floor and enterable shops, P2 district streaming architecture, P3 Singapore districts, P4 Malaysia districts. See docs/gjh-v11-qa-loop.md. Open: enterable interiors supersede the glazed-only decision.
