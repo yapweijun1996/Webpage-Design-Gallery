@@ -74,3 +74,17 @@ footer { background: var(--tomato); color: var(--paper); border-top: .65rem soli
   .masthead nav { gap: .65rem;}
   .masthead nav a { font-size: var(--type-masthead-nav-a);}
 }
+
+.menu-bookmarks { display: grid; max-width: 26rem; border-top: 1px solid var(--ink); }
+.menu-bookmarks a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding-inline: .15rem;
+  border-bottom: 1px solid var(--ink);
+  color: var(--ink);
+  text-decoration: none;
+}
+.menu-bookmarks a span { color: var(--tomato); }
+.menu-bookmarks a:hover, .menu-bookmarks a:focus-visible { color: var(--tomato); }

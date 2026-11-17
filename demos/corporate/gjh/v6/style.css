@@ -233,3 +233,19 @@ section[id] { scroll-margin-top: 28px; }
 .footer-bottom { font-size: var(--gjh-type-eyebrow); }
 @media (max-width: 600px) { .concept-notice { font-size: var(--gjh-type-concept-notice); } }
 @media (max-width: 600px) { .bento-tile .eyebrow { font-size: var(--gjh-type-concept-notice); letter-spacing: .04em; } .tile-link { font-size: var(--gjh-type-eyebrow); } .sku p { font-size: var(--gjh-type-small); } }
+
+.bento-photo.origin-plate {
+  display: grid;
+  grid-template-rows: auto minmax(5rem, 1fr) auto auto;
+  gap: .5rem;
+  padding: clamp(1.3rem, 3.8vw, 3.3rem);
+  background: var(--gjh-color-skip);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  text-decoration: none;
+}
+.origin-images { display: flex; align-items: center; justify-content: center; min-height: 0; }
+.bento-photo .origin-images img { position: static; width: 48%; height: auto; max-height: 11rem; object-fit: contain; }
+.origin-plate strong { font-size: var(--gjh-type-bento-tile-strong); line-height: 1; }
+.origin-action { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: .55rem; font-weight: 700; }
+.origin-plate:hover .origin-action { text-decoration: underline; }

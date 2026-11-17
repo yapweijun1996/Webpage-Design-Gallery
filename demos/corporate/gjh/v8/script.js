@@ -30,6 +30,15 @@ milestones.forEach((button, index) => button.addEventListener('click', () => {
   manualMilestone = true;
   setMilestone(index, true);
 }));
+function openLinkedChapter() {
+  const index = milestones.findIndex(button => '#' + button.id === location.hash);
+  if (index < 0) return;
+  manualMilestone = true;
+  setMilestone(index, true);
+  setEra(milestones[index].dataset.milestone);
+}
+window.addEventListener('hashchange', openLinkedChapter);
+openLinkedChapter();
 document.querySelectorAll('[data-market]').forEach(button => button.addEventListener('click', () => {
   document.querySelectorAll('[data-market]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
   document.querySelectorAll('[data-connection]').forEach(path => path.classList.toggle('active', path.dataset.connection === button.dataset.market));

@@ -219,3 +219,16 @@ h1, h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.045em; }
 .concept-notice { font-size: var(--gjh-type-eyebrow); }
 .footer-bottom { font-size: var(--gjh-type-eyebrow); }
 @media (max-width: 600px) { .concept-notice { font-size: var(--gjh-type-concept-notice); } }
+
+.hero-covers figure { position: relative; }
+.hero-covers figcaption a {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+.hero-covers figcaption a::after { content: ""; position: absolute; inset: 0; }
+.hero-covers figure:focus-within { outline: var(--focus-width) solid currentColor; outline-offset: 3px; }
+.hero-covers figcaption a:hover strong { text-decoration: underline; }

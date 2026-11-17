@@ -10,3 +10,8 @@ body { --paper:var(--yeos-paper); --ink:var(--yeos-deep-red); }
 .receipt button { margin-top:.6rem; background:var(--yeos-deep-red); color:var(--yeos-paper); }
 .result { border-top:1px dashed var(--ink); padding-top:1rem; font-family:var(--font-family-code); }
 @media(max-width:700px) { .worksheet { grid-template-columns:1fr; gap:1.25rem; } .pic-intro h1 br { display:initial; } }
+
+.packing-slip { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; border-block: 1px dashed var(--ink); padding-block: .8rem; margin-bottom: 1rem; font-family: var(--font-family-code); }
+.packing-slip strong { font-size: var(--yeos-section-type); letter-spacing: -.075em; line-height: 1; overflow-wrap: anywhere; }
+.packing-slip b, .packing-slip small { display: block; }
+.packing-slip b { font-size: var(--font-size-lg); }

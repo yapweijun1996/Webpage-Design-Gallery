@@ -60,10 +60,23 @@ const drinks = new Map(cards.map(card => [card.id, card]));
 for (const select of selectors) {
   for (const card of cards) select.add(new Option(card.querySelector('h3').textContent, card.id));
 }
-selectors[1].value = 'soy';
+const pair = new URLSearchParams(location.search);
+const left = pair.get('left');
+const right = pair.get('right');
+if (drinks.has(left) && drinks.has(right) && left !== right) {
+  selectors[0].value = left;
+  selectors[1].value = right;
+} else {
+  selectors[1].value = 'soy';
+}
 
 function renderComparison() {
   const selected = selectors.map(select => drinks.get(select.value));
+  const link = new URL(location.href);
+  link.searchParams.set('left', selected[0].id);
+  link.searchParams.set('right', selected[1].id);
+  link.hash = 'compare';
+  document.querySelector('#pair-link').href = link.href;
   const names = selected.map(card => card.querySelector('h3').textContent);
   selectors.forEach((select, i) => {
     for (const option of select.options) option.disabled = option.value === selectors[1 - i].value;

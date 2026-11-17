@@ -6,7 +6,7 @@
 .ticket {
   background: var(--wash);
   border: 1px solid var(--accent);
-  padding: clamp(1.4rem, 4vw, 3.2rem);
+  padding: var(--ticket-gutter);
   color: var(--accent);
 }
 .address {
@@ -55,5 +55,57 @@ h1 i {
   #routes {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+}
+
+#routes.route-picker {
+  display: block;
+  margin-top: 1.4rem;
+}
+.route-picker details {
+  border-color: var(--accent);
+}
+.route-picker details[open] {
+  background: var(--wash);
+  padding-inline: 0.8rem;
+}
+.route-picker summary {
+  font-weight: 700;
+}
+.ticket {
+  position: relative;
+  border-bottom: 5px double var(--accent);
+}
+
+.ticket {
+  --ticket-gutter: var(--space-8);
+  background-image: linear-gradient(110deg, var(--wash) 60%, var(--paper));
+}
+.ticket-foot::before,
+.ticket-foot::after {
+  content: "";
+  position: absolute;
+  width: 0.85rem;
+  height: 0.85rem;
+  top: -0.51rem;
+  background: var(--paper);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-circle);
+}
+.ticket-foot {
+  position: relative;
+}
+.ticket-foot::before {
+  left: calc(-1 * var(--ticket-gutter) - 0.5rem);
+  clip-path: inset(0 0 0 50%);
+}
+.ticket-foot::after {
+  right: calc(-1 * var(--ticket-gutter) - 0.5rem);
+  clip-path: inset(0 50% 0 0);
+}
+
+@media (max-width: 740px) {
+  .ticket {
+    --ticket-gutter: var(--space-6);
   }
 }

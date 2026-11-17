@@ -17,17 +17,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v1/screenshots/1440.png",
         "width": 1440,
-        "height": 5352
+        "height": 5411
       },
       "tablet": {
         "path": "demos/corporate/gjh/v1/screenshots/768.png",
         "width": 768,
-        "height": 6650
+        "height": 6709
       },
       "mobile": {
         "path": "demos/corporate/gjh/v1/screenshots/390.png",
         "width": 390,
-        "height": 8765
+        "height": 8887
       }
     },
     "devices": [
@@ -56,17 +56,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v5/screenshots/1440.png",
         "width": 1440,
-        "height": 5811
+        "height": 5859
       },
       "tablet": {
         "path": "demos/corporate/gjh/v5/screenshots/768.png",
         "width": 768,
-        "height": 6183
+        "height": 6231
       },
       "mobile": {
         "path": "demos/corporate/gjh/v5/screenshots/390.png",
         "width": 390,
-        "height": 8492
+        "height": 8540
       }
     },
     "devices": [
@@ -95,17 +95,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v6/screenshots/1440.png",
         "width": 1440,
-        "height": 6637
+        "height": 6685
       },
       "tablet": {
         "path": "demos/corporate/gjh/v6/screenshots/768.png",
         "width": 768,
-        "height": 8183
+        "height": 8231
       },
       "mobile": {
         "path": "demos/corporate/gjh/v6/screenshots/390.png",
         "width": 390,
-        "height": 10193
+        "height": 10332
       }
     },
     "devices": [
@@ -134,17 +134,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v7/screenshots/1440.png",
         "width": 1440,
-        "height": 5958
+        "height": 6024
       },
       "tablet": {
         "path": "demos/corporate/gjh/v7/screenshots/768.png",
         "width": 768,
-        "height": 7083
+        "height": 7149
       },
       "mobile": {
         "path": "demos/corporate/gjh/v7/screenshots/390.png",
         "width": 390,
-        "height": 9564
+        "height": 9712
       }
     },
     "devices": [
@@ -173,17 +173,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v8/screenshots/1440.png",
         "width": 1440,
-        "height": 6293
+        "height": 6341
       },
       "tablet": {
         "path": "demos/corporate/gjh/v8/screenshots/768.png",
         "width": 768,
-        "height": 5595
+        "height": 5643
       },
       "mobile": {
         "path": "demos/corporate/gjh/v8/screenshots/390.png",
         "width": 390,
-        "height": 7322
+        "height": 7365
       }
     },
     "devices": [
@@ -211,18 +211,18 @@
     "screenshots": {
       "desktop": {
         "path": "demos/corporate/gjh/v9/screenshots/1440.png",
-        "width": 2880,
-        "height": 1776
+        "width": 1440,
+        "height": 1110
       },
       "tablet": {
         "path": "demos/corporate/gjh/v9/screenshots/768.png",
-        "width": 1536,
-        "height": 1824
+        "width": 768,
+        "height": 1234
       },
       "mobile": {
         "path": "demos/corporate/gjh/v9/screenshots/390.png",
-        "width": 780,
-        "height": 1368
+        "width": 390,
+        "height": 1009
       }
     },
     "devices": [
@@ -329,17 +329,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v12/screenshots/1440.png",
         "width": 1440,
-        "height": 4652
+        "height": 4695
       },
       "tablet": {
         "path": "demos/corporate/gjh/v12/screenshots/768.png",
         "width": 768,
-        "height": 3716
+        "height": 3758
       },
       "mobile": {
         "path": "demos/corporate/gjh/v12/screenshots/390.png",
         "width": 390,
-        "height": 4953
+        "height": 5004
       }
     },
     "devices": [
@@ -368,17 +368,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v13/screenshots/1440.png",
         "width": 1440,
-        "height": 3857
+        "height": 3929
       },
       "tablet": {
         "path": "demos/corporate/gjh/v13/screenshots/768.png",
         "width": 768,
-        "height": 3565
+        "height": 3636
       },
       "mobile": {
         "path": "demos/corporate/gjh/v13/screenshots/390.png",
         "width": 390,
-        "height": 6015
+        "height": 6082
       }
     },
     "devices": [
@@ -407,17 +407,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v14/screenshots/1440.png",
         "width": 1440,
-        "height": 3823
+        "height": 3953
       },
       "tablet": {
         "path": "demos/corporate/gjh/v14/screenshots/768.png",
         "width": 768,
-        "height": 3495
+        "height": 3539
       },
       "mobile": {
         "path": "demos/corporate/gjh/v14/screenshots/390.png",
         "width": 390,
-        "height": 5322
+        "height": 5431
       }
     },
     "devices": [
@@ -446,17 +446,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v15/screenshots/1440.png",
         "width": 1440,
-        "height": 3840
+        "height": 3884
       },
       "tablet": {
         "path": "demos/corporate/gjh/v15/screenshots/768.png",
         "width": 768,
-        "height": 3275
+        "height": 3385
       },
       "mobile": {
         "path": "demos/corporate/gjh/v15/screenshots/390.png",
         "width": 390,
-        "height": 3921
+        "height": 4074
       }
     },
     "devices": [
@@ -485,17 +485,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v16/screenshots/1440.png",
         "width": 1440,
-        "height": 4645
+        "height": 4719
       },
       "tablet": {
         "path": "demos/corporate/gjh/v16/screenshots/768.png",
         "width": 768,
-        "height": 3798
+        "height": 3843
       },
       "mobile": {
         "path": "demos/corporate/gjh/v16/screenshots/390.png",
         "width": 390,
-        "height": 4931
+        "height": 5017
       }
     },
     "devices": [
@@ -523,17 +523,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v17/screenshots/1440.png",
         "width": 1440,
-        "height": 1618
+        "height": 1691
       },
       "tablet": {
         "path": "demos/corporate/gjh/v17/screenshots/768.png",
         "width": 768,
-        "height": 1237
+        "height": 1351
       },
       "mobile": {
         "path": "demos/corporate/gjh/v17/screenshots/390.png",
         "width": 390,
-        "height": 2462
+        "height": 2565
       }
     },
     "devices": [
@@ -562,17 +562,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v18/screenshots/1440.png",
         "width": 1440,
-        "height": 1800
+        "height": 1845
       },
       "tablet": {
         "path": "demos/corporate/gjh/v18/screenshots/768.png",
         "width": 768,
-        "height": 1298
+        "height": 1343
       },
       "mobile": {
         "path": "demos/corporate/gjh/v18/screenshots/390.png",
         "width": 390,
-        "height": 1515
+        "height": 1564
       }
     },
     "devices": [
@@ -601,17 +601,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v19/screenshots/1440.png",
         "width": 1440,
-        "height": 1150
+        "height": 1198
       },
       "tablet": {
         "path": "demos/corporate/gjh/v19/screenshots/768.png",
         "width": 768,
-        "height": 1558
+        "height": 1656
       },
       "mobile": {
         "path": "demos/corporate/gjh/v19/screenshots/390.png",
         "width": 390,
-        "height": 1418
+        "height": 1541
       }
     },
     "devices": [

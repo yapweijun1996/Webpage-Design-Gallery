@@ -1,0 +1,402 @@
+[
+  {
+    "key": "kiln-anatomy-plate",
+    "version": "v1",
+    "kind": "primary",
+    "style": "Museum interpretation plate",
+    "headline": "Inside the dragon kiln",
+    "action": "Explore the kiln",
+    "image": "demos/heritage/thow-kwang/v1/assets/kiln-section.svg",
+    "composition": "plate",
+    "background": "#f7f4e9",
+    "ink": "#282e25",
+    "accent": "#a43c25",
+    "notes": "Leave the drawn chamber unobstructed and place the selected part’s label on its own ruled strip immediately below.",
+    "detail": "Follow the rising chamber from the lower firebox to the chimney at the uphill end.",
+    "items": [
+      "Firebox",
+      "Firing chamber",
+      "Chimney"
+    ]
+  },
+  {
+    "key": "lorong-tawas-ticket",
+    "version": "v2",
+    "kind": "primary",
+    "style": "Botanical destination ticket",
+    "headline": "Plan your visit",
+    "action": "Choose a visit route",
+    "image": "demos/heritage/thow-kwang/v1/assets/garden.webp",
+    "composition": "ticket",
+    "background": "#edf4e9",
+    "ink": "#182c21",
+    "accent": "#255d43",
+    "notes": "Use a perforated address card as the destination landmark beside the native visit-route picker.",
+    "detail": "Find 85 Lorong Tawas and choose the right route for an independent visit, a group or a workshop.",
+    "items": [
+      "85 Lorong Tawas",
+      "Singapore 639823",
+      "Official directions"
+    ]
+  },
+  {
+    "key": "clay-studio-arches",
+    "version": "v3",
+    "kind": "primary",
+    "style": "Studio exhibition diptych",
+    "headline": "The clay studio",
+    "action": "Compare techniques",
+    "image": "demos/heritage/thow-kwang/v1/assets/hands.webp",
+    "composition": "split",
+    "background": "#fbedd2",
+    "ink": "#332b23",
+    "accent": "#95432c",
+    "notes": "Frame the wheel and hand-building studies as offset arches with a linked caption beneath each one.",
+    "detail": "See how shaping clay on a turning wheel differs from working the material by hand.",
+    "items": [
+      "Wheel throwing",
+      "Hand building",
+      "Private sessions"
+    ]
+  },
+  {
+    "key": "educators-ruled-notes",
+    "version": "v4",
+    "kind": "primary",
+    "style": "Educator’s ruled notebook",
+    "headline": "Teachers’ field notes",
+    "action": "Open the lesson",
+    "image": "demos/heritage/thow-kwang/v1/assets/sketch-card.svg",
+    "composition": "spread",
+    "background": "#f1efe3",
+    "ink": "#292b36",
+    "accent": "#3b427a",
+    "notes": "Put the model classroom question on a lifted margin sheet next to the lesson introduction.",
+    "detail": "Use a bowl to help pupils separate an observation from a claim that needs evidence.",
+    "items": [
+      "Before the visit",
+      "At the kiln",
+      "Back in class"
+    ]
+  },
+  {
+    "key": "wheel-gesture-contact-sheet",
+    "version": "v5",
+    "kind": "primary",
+    "style": "Monochrome studio contact sheet",
+    "headline": "At the potter’s wheel",
+    "action": "Explore the gestures",
+    "image": "demos/heritage/thow-kwang/v1/assets/hands.webp",
+    "composition": "frieze",
+    "background": "#20221f",
+    "ink": "#f0eee2",
+    "accent": "#e5a58f",
+    "notes": "Pair an edge-to-edge monochrome hand study with short numbered gesture strips that open independently.",
+    "detail": "Follow a potter through centring, opening, lifting and shaping a vessel.",
+    "items": [
+      "Centre and open",
+      "Lift the wall",
+      "Shape the rim"
+    ]
+  },
+  {
+    "key": "ember-firing-essay",
+    "version": "v6",
+    "kind": "primary",
+    "style": "Cinematic material essay",
+    "headline": "Wood & ember",
+    "action": "Read the fire essay",
+    "image": "demos/heritage/thow-kwang/v1/assets/ember.webp",
+    "composition": "cover",
+    "background": "#201e1a",
+    "ink": "#f6eddd",
+    "accent": "#ecac85",
+    "notes": "Use embers as the dominant atmospheric field and attach a smaller glazed-surface sample to the opposite corner.",
+    "detail": "Trace how fuel, moving ash and the finished surface connect inside a wood-fired kiln.",
+    "items": [
+      "Fuel",
+      "Ash",
+      "Surface"
+    ]
+  },
+  {
+    "key": "glaze-study-lightbox",
+    "version": "v7",
+    "kind": "primary",
+    "style": "Material study lightbox",
+    "headline": "Glaze library",
+    "action": "Magnify the surface",
+    "image": "demos/heritage/thow-kwang/v1/assets/glaze.webp",
+    "composition": "plate",
+    "background": "#e8f1e4",
+    "ink": "#253324",
+    "accent": "#27573c",
+    "notes": "Give the rim image an inspection frame with a visible control that changes magnification within the same crop.",
+    "detail": "Look closely at a green rim and compare the clay body, glaze and traces of wood ash.",
+    "items": [
+      "Clay body",
+      "Glaze",
+      "Wood ash"
+    ]
+  },
+  {
+    "key": "family-picture-postcard",
+    "version": "v8",
+    "kind": "primary",
+    "style": "Family picture postcard",
+    "headline": "A family visit",
+    "action": "Play the looking game",
+    "image": "demos/heritage/thow-kwang/v1/assets/bisque.webp",
+    "composition": "stack",
+    "background": "#ffedc7",
+    "ink": "#302c21",
+    "accent": "#26623d",
+    "notes": "Tuck a readable clue card against the illustrated forms so a child and a companion can study the object together.",
+    "detail": "Pick a shape, follow its outline with your eyes and ask someone else what they see.",
+    "items": [
+      "Look for a curve",
+      "Find a shadow",
+      "Guess its use"
+    ]
+  },
+  {
+    "key": "group-organiser-brief",
+    "version": "v9",
+    "kind": "primary",
+    "style": "Group organiser worksheet",
+    "headline": "In good company",
+    "action": "Prepare a group brief",
+    "image": "demos/heritage/thow-kwang/v1/assets/kiln-section.svg",
+    "composition": "dashboard",
+    "background": "#f4f4ef",
+    "ink": "#212a34",
+    "accent": "#353e85",
+    "notes": "Make the 15-person heritage-tour threshold the strongest numerical element and keep the group-size field beside its guidance.",
+    "detail": "Check the tour minimum or collect the details for a private workshop enquiry.",
+    "items": [
+      "Party size",
+      "Possible dates",
+      "Access needs"
+    ]
+  },
+  {
+    "key": "heritage-three-date-journal",
+    "version": "v10",
+    "kind": "primary",
+    "style": "Letterpress heritage journal",
+    "headline": "The heritage journal",
+    "action": "Read the chronology",
+    "image": "demos/heritage/thow-kwang/v1/assets/still.webp",
+    "composition": "spread",
+    "background": "#f6f1e6",
+    "ink": "#272720",
+    "accent": "#83432b",
+    "notes": "Run the three dated sources across a double-rule masthead above an illustrated ceramics feature.",
+    "detail": "Read the records behind the kiln’s construction, the Tan family business and the heritage award.",
+    "items": [
+      "1940 · The kiln",
+      "1965 · The family",
+      "2020 · The award"
+    ]
+  },
+  {
+    "key": "kiln-lexicon-letterpress",
+    "version": "v11",
+    "kind": "primary",
+    "style": "Two-colour dictionary index",
+    "headline": "Kiln lexicon",
+    "action": "Browse definitions",
+    "image": "demos/heritage/thow-kwang/v1/assets/kiln-section.svg",
+    "composition": "index",
+    "background": "#f4f2ed",
+    "ink": "#202637",
+    "accent": "#3c438b",
+    "notes": "Set the real initials from the dictionary in a typesetter’s grid with the search field visible alongside.",
+    "detail": "Find an unfamiliar kiln or pottery term by its first letter or by a word in the definition.",
+    "items": [
+      "Ash",
+      "Firebox",
+      "Glaze"
+    ]
+  },
+  {
+    "key": "vessel-museum-cabinet",
+    "version": "v12",
+    "kind": "primary",
+    "style": "Dark object cabinet",
+    "headline": "The vessel cabinet",
+    "action": "Trace the contours",
+    "image": "demos/heritage/thow-kwang/v1/assets/still.webp",
+    "composition": "frieze",
+    "background": "#1d241f",
+    "ink": "#f0edde",
+    "accent": "#e8bd80",
+    "notes": "Present the three vessel studies at an equal scale and reveal one distinguishing contour per form.",
+    "detail": "Compare the bowl’s broad rim, the jar’s curved shoulder and the cup’s flared side.",
+    "items": [
+      "Bowl",
+      "Jar",
+      "Cup"
+    ]
+  },
+  {
+    "key": "field-sketch-paper-stack",
+    "version": "v13",
+    "kind": "primary",
+    "style": "Artist’s tear-out sketchpad",
+    "headline": "Field sketchbook",
+    "action": "Download the sketch sheet",
+    "image": "demos/heritage/thow-kwang/v1/assets/sketch-card.svg",
+    "composition": "stack",
+    "background": "#e9ece1",
+    "ink": "#263128",
+    "accent": "#315b3b",
+    "notes": "Tilt the sheet slightly against a ruled binding edge and keep the printable download at its foot.",
+    "detail": "Take a printable contour exercise or save a short written observation about a vessel.",
+    "items": [
+      "Draw the contour",
+      "Enlarge a detail",
+      "Leave a question"
+    ]
+  },
+  {
+    "key": "three-stop-walking-diary",
+    "version": "v14",
+    "kind": "primary",
+    "style": "Botanical walking diary",
+    "headline": "A slow afternoon",
+    "action": "Choose a stop",
+    "image": "demos/heritage/thow-kwang/v1/assets/garden.webp",
+    "composition": "split",
+    "background": "#f1f1df",
+    "ink": "#28352c",
+    "accent": "#366248",
+    "notes": "Use an arched light study opposite a three-stop route strip that leads to the setting, kiln and vessels.",
+    "detail": "Take a self-paced look at light, slope and form at three suggested stops.",
+    "items": [
+      "Setting",
+      "Kiln",
+      "Vessel"
+    ]
+  },
+  {
+    "key": "visitor-services-directory",
+    "version": "v15",
+    "kind": "primary",
+    "style": "Modernist wayfinding desk",
+    "headline": "The visitor desk",
+    "action": "Find an official resource",
+    "image": "demos/heritage/thow-kwang/v1/assets/kiln-section.svg",
+    "composition": "dashboard",
+    "background": "#f6f4ec",
+    "ink": "#242c29",
+    "accent": "#95402b",
+    "notes": "Treat the visit, class and history choices as service-counter signs above a clear grid of official destinations.",
+    "detail": "Choose the operator’s directions, workshop information or history by the purpose of your visit.",
+    "items": [
+      "Plan a visit",
+      "Take a class",
+      "Explore the history"
+    ]
+  },
+  {
+    "key": "kiln-blueprint-sheet",
+    "version": "v1",
+    "kind": "alternate",
+    "style": "Cyanotype architectural sheet",
+    "headline": "How the kiln breathes",
+    "action": "Study the kiln section",
+    "image": "demos/heritage/thow-kwang/v1/assets/kiln-section.svg",
+    "composition": "poster",
+    "background": "#163849",
+    "ink": "#f5eee0",
+    "accent": "#eed18e",
+    "notes": "For an alternate anatomy plate, set the entire elevation on a cool drawing board and align the three labels like drafting keys.",
+    "detail": "Read the head, climbing chamber and chimney in one continuous elevation.",
+    "items": [
+      "Lower firebox",
+      "Rising chamber",
+      "Uphill chimney"
+    ]
+  },
+  {
+    "key": "teachers-specimen-cards",
+    "version": "v4",
+    "kind": "alternate",
+    "style": "Classroom specimen cards",
+    "headline": "What can a bowl tell us?",
+    "action": "Open the classroom exercise",
+    "image": "demos/heritage/thow-kwang/v1/assets/bisque.webp",
+    "composition": "index",
+    "background": "#f7e9d3",
+    "ink": "#342c28",
+    "accent": "#8c3b39",
+    "notes": "Replace the ruled spread in this alternate with three upright enquiry cards arranged beside a still life of unfinished vessels.",
+    "detail": "Ask the class to name one visible detail, one possible explanation and one question for the maker.",
+    "items": [
+      "Observe",
+      "Infer",
+      "Ask"
+    ]
+  },
+  {
+    "key": "glaze-botanical-folio",
+    "version": "v7",
+    "kind": "alternate",
+    "style": "Botanical specimen folio",
+    "headline": "Read the surface",
+    "action": "Open the samples",
+    "image": "demos/heritage/thow-kwang/v1/assets/glaze.webp",
+    "composition": "cover",
+    "background": "#21392c",
+    "ink": "#f4edda",
+    "accent": "#dfc888",
+    "notes": "Crop the green rim across the cover and pin a pale specimen slip to the lower edge for an alternative close-reading layout.",
+    "detail": "Start with a reflected highlight and work outward to the coating and the clay beneath it.",
+    "items": [
+      "Rim",
+      "Glaze",
+      "Body"
+    ]
+  },
+  {
+    "key": "family-business-archive",
+    "version": "v10",
+    "kind": "alternate",
+    "style": "Photographic archive drawer",
+    "headline": "Three dates at Lorong Tawas",
+    "action": "Read the three records",
+    "image": "demos/heritage/thow-kwang/v1/assets/bisque.webp",
+    "composition": "ticket",
+    "background": "#e4dbca",
+    "ink": "#332b24",
+    "accent": "#714338",
+    "notes": "Use a vertical filing-tab composition for the source dates and an unglazed still life as the archive’s object study.",
+    "detail": "Follow the dated evidence from the kiln’s construction to recognition of its living craft.",
+    "items": [
+      "1940",
+      "1965",
+      "2020"
+    ]
+  },
+  {
+    "key": "afternoon-foldout-guide",
+    "version": "v14",
+    "kind": "alternate",
+    "style": "Fold-out pocket itinerary",
+    "headline": "Follow the afternoon light",
+    "action": "See the three stops",
+    "image": "demos/heritage/thow-kwang/v1/assets/garden.webp",
+    "composition": "poster",
+    "background": "#efe4d6",
+    "ink": "#242e2a",
+    "accent": "#7e3c36",
+    "notes": "Fold the suggested walk into three panels, with a continuous sunlit wall tying the waypoints together.",
+    "detail": "Start in a visitor area, look along the kiln’s slope and finish by observing a single vessel.",
+    "items": [
+      "Light",
+      "Slope",
+      "Form"
+    ]
+  }
+]

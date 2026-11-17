@@ -1344,3 +1344,6 @@ button svg {
     transform:none !important;
   }
 }
+
+.map-layout button { display: grid; gap: .12rem; align-content: center; }
+.map-layout button small { font-size: var(--gjh-type-wordmark-caption); font-weight: 400; }

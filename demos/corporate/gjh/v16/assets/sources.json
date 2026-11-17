@@ -49,6 +49,13 @@
       "sourceReceipt": "../../v8/assets/sources.json",
       "kind": "product-front",
       "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg"
+    },
+    {
+      "file": "new-moon-nz-425g-back.jpg",
+      "sha256": "8cbdbeb68255d9f4b5d04a97326b8332dac653de502221d88585e981aeffc0ac",
+      "sourceReceipt": "../../v9/assets/sources.json",
+      "kind": "product-photo",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Back.jpg"
     }
   ],
   "font": {

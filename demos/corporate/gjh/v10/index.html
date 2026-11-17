@@ -19,6 +19,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
   <script defer src="../../../../src/demo-pwa.js"></script>
+<link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v10">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -48,10 +49,10 @@
           <nav class="floor-plan" aria-label="Navigate the arcade">
             <p class="eyebrow">The floor plan</p>
             <div class="map-rooms">
-              <button type="button" data-room="newmoon"><span class="room-number">01</span><span>New Moon</span></button>
-              <button type="button" data-room="mili"><span class="room-number">02</span><span>MILI</span></button>
-              <button type="button" data-room="gogo"><span class="room-number">03</span><span>GOGO</span></button>
-              <button type="button" data-room="lobby" aria-current="location"><span class="room-number">00</span><span>Lobby</span></button>
+              <button type="button" data-room="newmoon" aria-describedby="room-newmoon-contents"><span class="room-number">01</span><span class="map-label">New Moon<small id="room-newmoon-contents">Pack gallery</small></span></button>
+              <button type="button" data-room="mili" aria-describedby="room-mili-contents"><span class="room-number">02</span><span class="map-label">MILI<small id="room-mili-contents">Pantry art</small></span></button>
+              <button type="button" data-room="gogo" aria-describedby="room-gogo-contents"><span class="room-number">03</span><span class="map-label">GOGO<small id="room-gogo-contents">Brand art</small></span></button>
+              <button type="button" data-room="lobby" aria-current="location" aria-describedby="room-lobby-contents"><span class="room-number">00</span><span class="map-label">Lobby<small id="room-lobby-contents">All stores</small></span></button>
             </div>
           </nav>
           <div class="room-steps" role="group" aria-label="Move between rooms">
@@ -120,7 +121,7 @@
     </section>
   </main>
 
-  <footer class="site-footer"><p>GJH Virtual Stores <span>— Independent concept</span></p><a href="https://www.gjheshop.com/">Official GJH eShop</a></footer>
+  <footer class="site-footer"><p>GJH Virtual Stores <span>— Independent concept</span></p><a href="https://www.gjheshop.com/">Official GJH eShop</a> <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#gjh-v10">View design reference</a></footer>
 
   <dialog id="product-dialog" class="product-dialog" aria-labelledby="product-title" aria-describedby="product-disclaimer">
     <div class="dialog-top"><p class="eyebrow">A closer look</p><button id="product-close" type="button" aria-label="Close product details"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>

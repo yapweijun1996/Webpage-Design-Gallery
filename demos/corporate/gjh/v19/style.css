@@ -158,3 +158,7 @@ footer a { color: var(--cobalt);}
   nav { gap: .8rem;}
   .footer-inner { align-items: flex-start; flex-direction: column; gap: .15rem;}
 }
+
+.retail-setting { margin-block: .25rem .85rem; border-block: 1px solid var(--line); }
+.retail-setting summary { cursor: pointer; padding-block: .6rem; min-height: 44px; font-weight: 700; }
+.retail-setting select { margin-bottom: 1rem; }

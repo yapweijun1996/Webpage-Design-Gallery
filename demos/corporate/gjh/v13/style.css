@@ -562,3 +562,7 @@ footer {
     display: none;
   }
 }
+
+.hero-bottom.sector-desk { display: flex; flex-wrap: wrap; gap: .2rem 1.1rem; }
+.sector-desk a { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
+.sector-desk a:hover, .sector-desk a:focus-visible { text-decoration: underline; }

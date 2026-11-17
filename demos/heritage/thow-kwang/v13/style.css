@@ -39,3 +39,58 @@
     padding-inline: 0;
   }
 }
+
+.note-paper {
+  margin-top: 1.2rem;
+  border-block: 1px solid var(--accent);
+  background: var(--wash);
+  padding-inline: 1rem;
+}
+.note-paper label,
+.note-paper textarea {
+  display: block;
+  width: 100%;
+}
+.note-paper label {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+.note-paper textarea {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  padding: 0.6rem;
+  resize: vertical;
+}
+.note-paper button {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  text-decoration: underline;
+}
+.note-paper button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.note-paper [role="status"] {
+  font-size: var(--font-size-sm);
+}
+
+.paper-stack {
+  position: relative;
+  border: 1px solid var(--line);
+  border-left: 0.4rem double var(--accent);
+  border-bottom: 0.4rem double var(--ink);
+}
+.paper-stack img {
+  border: 1px solid var(--line);
+}
+.note-paper summary {
+  border-bottom: 1px dashed var(--line);
+  color: var(--accent);
+}
+.note-paper textarea {
+  border-left: 0.2rem solid var(--accent);
+}

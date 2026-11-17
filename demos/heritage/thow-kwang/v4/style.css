@@ -54,3 +54,26 @@
     margin-right: 0.7rem;
   }
 }
+
+.answer-key {
+  margin-top: 1.2rem;
+  border-color: var(--accent);
+}
+.answer-key summary {
+  color: var(--accent);
+}
+
+.margin-note {
+  border-top: 0.38rem solid var(--accent);
+  border-bottom: 3px double var(--accent);
+}
+.margin-note .cap {
+  display: inline-block;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--accent);
+  color: var(--accent);
+}
+.answer-key[open] div {
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--accent);
+}

@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="style.css">
   <script defer src="../../../../src/demo-pwa.js"></script>
   <link rel="icon" type="image/png" sizes="192x192" href="../../../../assets/icons/gallery-192.png">
+  <script src="script.js" defer></script>
+<link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#yeos-v15">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -26,6 +28,11 @@
     <header class="atlas-mast wrap">
       <p class="tag">Desk reference / Singapore</p>
       <h1>Beverage atlas</h1>
+      <div class="atlas-search" hidden>
+        <label for="atlas-query">Find a drink or ingredient</label>
+        <div><input type="search" id="atlas-query" autocomplete="off"><button type="button" id="atlas-clear" hidden>Clear</button></div>
+        <p id="atlas-count" role="status"></p>
+      </div>
     </header>
     <div class="atlas wrap">
       <aside>
@@ -118,6 +125,6 @@
   <footer class="wrap base">
     <p>Independent design concept for Yeo Hiap Seng Limited.</p>
     <a href="https://yeos.com.sg/">Yeo’s Singapore ↗</a>
-  </footer>
+   <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#yeos-v15">View design reference</a></footer>
 </body>
 </html>

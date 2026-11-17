@@ -654,3 +654,19 @@ figcaption {
     bottom: 22px;
   }
 }
+
+.hero-art .specimen-source { display: inline-flex; align-items: center; min-height: 44px; color: inherit; font-weight: 700; }
+.specimen-source:hover { text-decoration: underline; }
+
+.hero-art figcaption { flex-wrap: wrap; align-items: center; gap: .2rem .7rem; }
+.hero-art .pack-side {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: .25rem .55rem;
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}

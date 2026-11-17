@@ -51,7 +51,7 @@ export function createTutorialState({storage = () => globalThis.localStorage} = 
 }
 
 /** A nonmodal region: rendering never changes focus or the gameplay pause state. */
-export function createTutorial({parent, onDismiss = () => {}, touch = false} = {}) {
+export function createTutorial({parent, onDismiss = () => {}, onBrowseProducts, touch = false} = {}) {
   const state = createTutorialState();
   const card = document.createElement('section');
   card.id = 'guide-card'; card.className = 'ux-tutorial'; card.hidden = true;
@@ -69,7 +69,14 @@ export function createTutorial({parent, onDismiss = () => {}, touch = false} = {
   const title = element('h2', 'ux-tutorial-title', 'Getting Started'); title.id = 'guide-title';
   const count = element('span', 'ux-tutorial-count'); count.id = 'guide-count';
   const skip = button('guide-skip', 'Skip', () => { state.dismiss(); onDismiss(); });
-  header.append(title, count, skip);
+  const products = button('guide-products', 'Featured products', () => {
+    state.dismiss();
+    onBrowseProducts();
+  });
+  products.setAttribute('aria-controls', 'featured-products');
+  header.append(title, count);
+  if (onBrowseProducts) header.append(products);
+  header.append(skip);
   const progress = element('div', 'ux-tutorial-progress'); progress.setAttribute('aria-hidden', 'true');
   const segments = actions.map(() => element('span', 'ux-tutorial-segment')); progress.append(...segments);
   const stepTitle = element('h3', 'ux-tutorial-step-title'); stepTitle.id = 'guide-step-title';
@@ -88,6 +95,8 @@ export function createTutorial({parent, onDismiss = () => {}, touch = false} = {
   let announcedStep = null;
   state.subscribe(({open, active, step}) => {
     card.hidden = !open || !active;
+    products.hidden = step !== 0;
+    header.classList.toggle('has-product-choice', Boolean(onBrowseProducts) && step === 0);
     count.textContent = `${step + 1}/3`; count.setAttribute('aria-label', `Step ${step + 1} of 3`);
     for (let index = 0; index < segments.length; index++) segments[index].dataset.state = index < step ? 'complete' : index === step ? 'current' : 'pending';
     stepTitle.textContent = steps[step][0]; copy.textContent = steps[step][1];

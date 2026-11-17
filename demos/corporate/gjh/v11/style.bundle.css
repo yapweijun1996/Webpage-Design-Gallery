@@ -2175,6 +2175,18 @@ html[data-gjh-design="v11"] body.is-3d{--gjh-header-size:52px}
 #performance-log li{padding:var(--space-1) 0;border-bottom:1px solid var(--line)}
 #performance-log li>div{display:flex;flex-wrap:wrap;gap:0 var(--space-2);align-items:baseline}
 
+.ux-tutorial-header.has-product-choice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.ux-tutorial-header.has-product-choice #guide-products {
+  justify-self: start;
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+}
+
 /* Source: assets/onboarding/onboarding.tokens.css */
 /* Component aliases only. Canonical values live in design-system/tokens.json. */
 .ob-ui {

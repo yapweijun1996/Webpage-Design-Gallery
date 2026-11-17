@@ -34,6 +34,11 @@ demo_pwas = importlib.util.module_from_spec(DEMO_PWA_SPEC)
 DEMO_PWA_SPEC.loader.exec_module(demo_pwas)
 
 
+ATLAS_SPEC = importlib.util.spec_from_file_location("build_style_atlas", ROOT / "scripts/build_style_atlas.py")
+style_atlas = importlib.util.module_from_spec(ATLAS_SPEC)
+ATLAS_SPEC.loader.exec_module(style_atlas)
+
+
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
@@ -110,6 +115,16 @@ def load_catalog(root=ROOT):
         own = [d for d in designs if d["companyId"] == company["id"]]
         if not own or company["featuredVersion"] not in {d["version"] for d in own}:
             raise ValueError(f"Missing designs or featured version: {company['id']}")
+        landing = company.get("landing")
+        if landing:
+            image = local_path(directory, landing["image"]).relative_to(directory)
+            if (len(image.parts) != 3 or image.parts[0] not in {d["version"] for d in own}
+                    or image.parts[1] != "assets" or image.suffix not in {".jpg", ".jpeg", ".png", ".svg", ".webp"}):
+                raise ValueError(f"Landing artwork must be a published demo image: {image}")
+            if not re.fullmatch(r"[a-z0-9-]*", landing["anchor"]):
+                raise ValueError(f"Invalid landing anchor: {company['id']}")
+            if landing["alternativeVersion"] not in {d["version"] for d in own}:
+                raise ValueError(f"Unknown alternative design: {company['id']}")
     unique(designs, "design")
     designs.sort(key=lambda d: (d["companyId"], d["order"], d["id"]))
     return {"companies": companies, "categories": categories, "styles": styles, "designs": designs}
@@ -151,6 +166,23 @@ def company_card(company, designs, prefix, categories):
       <div class="company-cover"><img src="{prefix}{escape(featured['thumbnail'])}" alt="Design preview for {name}" width="720" height="450" loading="lazy"><span class="cover-badge">DESIGN COLLECTION</span></div>
       <div class="company-card-copy"><div class="card-topline"><span class="company-monogram" aria-hidden="true">{escape(company['initials'])}</span><span class="industry-label">{escape(category_name)} &middot; {escape(company['location'])}</span></div>
       <h3>{name}</h3><p class="card-description">{escape(company['description'])}</p><div class="card-bottom"><span>{plural(len(own), 'design concept')}</span><span class="card-action">Explore designs <span aria-hidden="true">{icon("arrow-right", prefix)}</span></span></div></div></a>'''
+
+
+def collection_feature(company, designs):
+    by_version = {design["version"]: design for design in designs}
+    featured = by_version[company["featuredVersion"]]
+    landing = company.get("landing", {})
+    image = (company["demoDirectory"] + "/" + landing["image"]) if landing else featured["thumbnail"]
+    target = featured["demoPath"]
+    if landing.get("anchor"):
+        target += "#" + landing["anchor"]
+    links = [(target, landing.get("action", featured["title"]), "primary-link")]
+    alternative = by_version.get(landing.get("alternativeVersion"))
+    if alternative:
+        links.append((alternative["demoPath"], landing["alternativeAction"], "collection-alternative"))
+    actions = "".join(f'<a class="{style}" href="../../{escape(path)}">{escape(label)} {icon("arrow-right", "../../")}</a>'
+                      for path, label, style in links)
+    return {"collection_image": escape(image), "collection_actions": actions}
 
 
 def design_card(design, company, can_compare):
@@ -226,6 +258,7 @@ def runtime_resources(catalog):
         if vendor.is_dir():
             resources.update(p.relative_to(ROOT) for p in vendor.iterdir() if p.is_file())
         resources.update(Path(s["path"]) for s in design["screenshots"].values())
+    resources.update(style_atlas.resources(ROOT))
     return sorted(resources)
 
 
@@ -275,13 +308,11 @@ def build_pages(catalog, release=None):
         can_compare = len(own) > 1
         content = render(
             "company", prefix="../../", company_id=escape(company["id"]), company_name=escape(company["name"]),
-            initials=escape(company["initials"]), company_description=escape(company["description"]),
+            company_description=escape(company["description"]), **collection_feature(company, own),
             industry=escape(company["industry"]), location=escape(company["location"]),
-            design_summary=plural(len(own), "design concept"), official_website=escape(company["officialWebsite"]),
+            official_website=escape(company["officialWebsite"]),
             design_count=len(own), design_cards="".join(design_card(d, company, can_compare) for d in own),
             collection_title="Explore the designs" if can_compare else "Explore the design",
-            collection_eyebrow='<p class="eyebrow">ONE COMPANY. DIFFERENT PERSPECTIVES.</p>' if can_compare else "",
-            collection_hint='<p>Choose a direction. Make it your own.</p>' if can_compare else "",
             collection_controls=render("collection-controls", prefix="../../", style_options=options) if can_compare else "",
         )
         pages[f"companies/{company['slug']}/index.html"] = shell(title=escape(company["name"]) + " — Design collection", description=escape(company["description"]), prefix="../../", current="", page_kind="company", content=content)
@@ -294,8 +325,9 @@ def build_pages(catalog, release=None):
 
 
 def pwa_outputs(pages, catalog, release):
-    paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if p.as_posix() not in ("src/demo-pwa.js", "assets/demo-pwa.css") and not p.as_posix().startswith(("demos/", "assets/onboarding/", "design-system/onboarding/"))}
+    paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if p.as_posix() not in ("src/demo-pwa.js", "assets/demo-pwa.css") and not p.as_posix().startswith(("demos/", "style-atlas/images/", "style-atlas/sheets/", "assets/onboarding/", "design-system/onboarding/"))}
     paths.update(design["thumbnail"] for design in catalog["designs"])
+    paths.update(c["demoDirectory"] + "/" + c["landing"]["image"] for c in catalog["companies"] if c.get("landing"))
     entries = []
     for name in sorted(paths):
         data = pages[name].encode("utf-8") if name in pages else source_bytes(ROOT / name)
@@ -323,6 +355,7 @@ def build(output=ROOT, check=False):
     gjh_js.build(check=check)
     design_system.build(ROOT, check=check)
     catalog = load_catalog()
+    style_atlas.build(ROOT, catalog, check)
     release = release_info(catalog)
     pages = build_pages(catalog, release)
     pages.update(pwa_outputs(pages, catalog, release))

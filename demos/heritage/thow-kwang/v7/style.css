@@ -60,3 +60,62 @@ h1 i {
     margin-inline: 0.4rem;
   }
 }
+
+.sample-window {
+  overflow: hidden;
+}
+.loupe-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+}
+.loupe-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.loupe-label::before {
+  content: "+";
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: var(--radius-circle);
+  border: 1px solid currentColor;
+}
+.loupe-toggle:checked + .loupe-label::before {
+  content: "−";
+}
+.loupe-toggle:focus-visible + .loupe-label {
+  outline: var(--focus-width) solid var(--accent);
+}
+.loupe-toggle:checked ~ .sample-window img {
+  transform: scale(2.1);
+  transform-origin: 57% 68%;
+}
+
+.glaze .sample-window {
+  border: 1px solid var(--accent);
+  background: var(--wash);
+}
+.glaze .loupe-label {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  padding: 0 0.65rem;
+  border: 1px solid var(--accent);
+  border-bottom: none;
+  color: var(--paper);
+  background: var(--accent);
+}
+.glaze .loupe-toggle:focus-visible + .loupe-label {
+  outline-color: var(--ink);
+  outline-offset: 0.16rem;
+}
+.glaze .loupe-label::before {
+  flex: none;
+}

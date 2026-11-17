@@ -70,3 +70,74 @@
     display: inline;
   }
 }
+
+.lex-cover .intro {
+  grid-row: 1;
+  grid-column: 2;
+}
+.letter-index {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--wash);
+  border-block: 4px double var(--accent);
+  color: var(--accent);
+  padding: 1.2rem;
+}
+.letter-index p {
+  grid-column: 1/-1;
+}
+.letter-index a {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  font: inherit;
+  font-family: var(--sign);
+  font-size: var(--font-size-display);
+  min-height: 44px;
+}
+.letter-index a:hover {
+  color: var(--paper);
+  background: var(--accent);
+}
+.lex-cover .find {
+  margin-top: 1.25rem;
+}
+.lex-cover .find input {
+  font-size: var(--font-size-base);
+}
+.lex-cover .quiet {
+  margin: 0.4rem 0;
+}
+@media (max-width: 740px) {
+  .lex-cover .intro {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .letter-index {
+    grid-template-columns: repeat(6, 1fr);
+    padding: 0.6rem;
+  }
+  .letter-index a {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+.letter-index {
+  border: 1px solid var(--accent);
+  border-block: 4px double var(--accent);
+}
+.letter-index p {
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+.letter-index a {
+  border: 1px solid var(--line);
+  margin: -1px 0 0 -1px;
+  font-variant-caps: small-caps;
+}
+.words details:target {
+  border-left: 3px solid var(--accent);
+  padding-left: 0.8rem;
+}

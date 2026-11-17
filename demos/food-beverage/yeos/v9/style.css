@@ -8,3 +8,13 @@ body { --paper:var(--yeos-paper); --ink:var(--yeos-ink); }
 .date { font-family:Instrument,Georgia,serif; font-size:var(--yeos-section-type); color:var(--yeos-red); line-height:1; }
 .entries h2 { font-size:var(--yeos-card-type); margin-bottom:.7rem; }
 @media(max-width:700px) { .archive-body { grid-template-columns:1fr; gap:1rem; } .archive aside nav { display:flex; flex-wrap:wrap; gap:.2rem 1rem; } .archive aside nav a { margin:.4rem 0; } .date { font-size:var(--yeos-card-type); } }
+
+.archive-feature { display: grid; grid-template-columns: 1.25fr .75fr; align-items: stretch; margin: 1.2rem 0; border-block: 1px solid var(--ink); }
+.archive-feature > div { align-self: center; padding: 1rem clamp(1rem,4vw,3rem) 1rem 0; }
+.archive-deck { max-width: 29ch; font-family: Instrument, Georgia, serif; font-size: var(--yeos-card-type); line-height: 1.12; }
+.archive-feature a { display: flex; align-items: center; justify-content: start; gap: 1rem; text-decoration: none; border-left: 1px solid var(--ink); padding: .6rem 1rem; }
+.archive-feature img { width: min(32%, 7rem); height: auto; aspect-ratio: 1; object-fit: cover; }
+.archive-feature span { font-size: var(--font-size-sm); }
+.archive-feature a:focus-visible strong, .archive-feature a:hover strong { text-decoration: underline; }
+.entries :target { background: var(--palette-warning-surface); }
+@media(max-width:700px) { .archive-feature { grid-template-columns: 1fr; } .archive-feature a { padding: .5rem 0; border-left: 0; border-top: 1px solid var(--rule); } .archive-feature img { width: 3.5rem; } }

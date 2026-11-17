@@ -92,6 +92,9 @@ def check_catalogue(root):
 
 class QuietHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        if self.server.disconnected:
+            self.close_connection = True
+            return
         path = urlsplit(self.path).path
         override = self.server.overrides.get(path)
         if override is None:
@@ -176,6 +179,32 @@ def verify_demo(context, path, asset):
         page.close()
 
 
+def verify_offline_pair(context, path, server):
+    page = context.new_page()
+    try:
+        page.goto(path)
+        assert page.evaluate("Boolean(navigator.serviceWorker.controller)"), path
+        page.get_by_label("First drink").select_option("black-soy")
+        page.get_by_label("Second drink").select_option("bandung")
+        permalink = page.locator("#pair-link").get_attribute("href")
+        assert urlsplit(permalink).fragment == "compare"
+        context.new_cdp_session(page).send("Network.clearBrowserCache")
+        context.set_offline(True)
+        # Requests from the worker itself must also be unable to reach the origin.
+        server.disconnected = True
+        page.goto("about:blank")
+        response = page.goto(permalink, wait_until="domcontentloaded")
+        assert response and response.ok and response.from_service_worker and page.url == permalink
+        expect(page.get_by_label("First drink")).to_have_value("black-soy")
+        expect(page.get_by_label("Second drink")).to_have_value("bandung")
+        expect(page.get_by_role("row", name="Can Not listed 300 mL")).to_be_visible()
+        print("PASS offline comparison permalink preserves both selections and the fragment", flush=True)
+    finally:
+        server.disconnected = False
+        context.set_offline(False)
+        page.close()
+
+
 def verify_release_update(context, root, base, path, overrides):
     """Serve a mixed publication, then its matching release, without editing the artifact."""
     directory = posixpath.dirname(path) + "/"
@@ -237,6 +266,7 @@ def run(root):
         (Path(directory) / PREFIX.strip("/")).symlink_to(root, target_is_directory=True)
         server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=directory))
         server.overrides = {}
+        server.disconnected = False
         Thread(target=server.serve_forever, daemon=True).start()
         base = f"http://127.0.0.1:{server.server_port}{PREFIX}"
         try:
@@ -255,6 +285,7 @@ def run(root):
                     assert scopes <= set(registered), (scopes, registered)
                     print(f"Verified {len(scopes)} independently registered demo scopes", flush=True)
                     page.close()
+                    verify_offline_pair(context, urljoin(base, paths["yeos", "v1"]), server)
                     verify_release_update(context, root, base, paths["gjh", "v18"], server.overrides)
                 finally:
                     context.close()

@@ -1,0 +1,402 @@
+[
+  {
+    "key": "drinks-index",
+    "version": "v1",
+    "kind": "primary",
+    "style": "Red-ink editorial index",
+    "headline": "The drinks index.",
+    "action": "Explore the drinks",
+    "image": "demos/food-beverage/yeos/v1/assets/hero.webp",
+    "composition": "split",
+    "background": "#faf7ed",
+    "ink": "#292b24",
+    "accent": "#a72c22",
+    "notes": "Place the serving photograph on the red half and leave two clear choices beside the masthead. The pack route in V1 leads to a shareable pair.",
+    "detail": "Explore six Singapore drinks by flavour or compare the sizes of two packs.",
+    "items": [
+      "Tea",
+      "Soy",
+      "Asian drinks"
+    ]
+  },
+  {
+    "key": "tea-house",
+    "version": "v2",
+    "kind": "primary",
+    "style": "Botanical photography diptych",
+    "headline": "Leaf or blossom?",
+    "action": "Read the tea profiles",
+    "image": "demos/food-beverage/yeos/v1/assets/green-tea.webp",
+    "composition": "spread",
+    "background": "#eef2df",
+    "ink": "#193e30",
+    "accent": "#386a36",
+    "notes": "Set tall leaf and blossom photographs in staggered arches. Use the caption beneath each print as the direct link to its botanical profile.",
+    "detail": "Follow first-harvest tea buds or Hang Bai Ju chrysanthemums into the tea house.",
+    "items": [
+      "Spring leaf",
+      "Hang Bai Ju blossom",
+      "Pack lists"
+    ]
+  },
+  {
+    "key": "soy-study",
+    "version": "v3",
+    "kind": "primary",
+    "style": "Duotone specimen spread",
+    "headline": "The soy study.",
+    "action": "Compare the soy packs",
+    "image": "demos/food-beverage/yeos/v1/assets/black-soy.webp",
+    "composition": "split",
+    "background": "#f7e5bc",
+    "ink": "#30291f",
+    "accent": "#763e32",
+    "notes": "Align the labels on the light and dark specimen plates so four pack formats and two pack formats can be read across one line. Carry that pair into V1.",
+    "detail": "Soy Bean Milk comes in four listed packs. Black Soy Milk comes in two.",
+    "items": [
+      "Whole soy beans",
+      "Two-bean blend",
+      "Pack comparison"
+    ]
+  },
+  {
+    "key": "kopitiam-board",
+    "version": "v4",
+    "kind": "primary",
+    "style": "Chalk menu and photo print",
+    "headline": "On the board.",
+    "action": "Open a drink",
+    "image": "demos/food-beverage/yeos/v1/assets/chrysanthemum.webp",
+    "composition": "plate",
+    "background": "#202823",
+    "ink": "#f7f2db",
+    "accent": "#f0c882",
+    "notes": "Keep the six native menu disclosures in reading order and tie the angled counter photograph to whichever drink the visitor opens.",
+    "detail": "Choose a line on the board to see the drink, its ingredients and its pack sizes.",
+    "items": [
+      "Tea",
+      "Soy",
+      "Fruit and rose"
+    ]
+  },
+  {
+    "key": "pack-finder",
+    "version": "v5",
+    "kind": "primary",
+    "style": "Technical inventory matrix",
+    "headline": "Find a pack.",
+    "action": "Show a pack size",
+    "image": "demos/food-beverage/yeos/v1/assets/soy.webp",
+    "composition": "dashboard",
+    "background": "#f4f5fd",
+    "ink": "#172543",
+    "accent": "#3348a4",
+    "notes": "Treat the selected matrix column as the source of the oversized coverage fraction. Keep the total and proportional bar immediately above the table.",
+    "detail": "Choose a format to see how many of the six drinks are offered in it.",
+    "items": [
+      "250 mL carton",
+      "300 mL can",
+      "1 L carton"
+    ]
+  },
+  {
+    "key": "botanical-sheets",
+    "version": "v6",
+    "kind": "primary",
+    "style": "Herbarium specimen cards",
+    "headline": "Botanical notes.",
+    "action": "Open a specimen",
+    "image": "demos/food-beverage/yeos/v1/assets/chrysanthemum.webp",
+    "composition": "frieze",
+    "background": "#f0eee3",
+    "ink": "#314637",
+    "accent": "#486444",
+    "notes": "Use three adjacent crop windows as a photographic specimen key. Each window opens and bookmarks the actual ingredient disclosure.",
+    "detail": "Trace a flower, a leaf or a bean to its drink profile.",
+    "items": [
+      "Flower",
+      "Leaf",
+      "Bean blend"
+    ]
+  },
+  {
+    "key": "lychee-monograph",
+    "version": "v7",
+    "kind": "primary",
+    "style": "Fruit-poster monograph",
+    "headline": "Lychee season.",
+    "action": "Read the fruit notes",
+    "image": "demos/food-beverage/yeos/v1/assets/lychee.webp",
+    "composition": "poster",
+    "background": "#7d251f",
+    "ink": "#ffefdf",
+    "accent": "#ffd59a",
+    "notes": "Keep the circular serving portrait above a measurement strip. Use one common 1,500 mL scale for the four pack capacities.",
+    "detail": "See how a 250 mL carton compares with a 300 mL can and the two bottle sizes.",
+    "items": [
+      "250 mL carton",
+      "380 mL bottle",
+      "1.5 L bottle"
+    ]
+  },
+  {
+    "key": "rose-milk-studio",
+    "version": "v8",
+    "kind": "primary",
+    "style": "Instant-film ingredient study",
+    "headline": "Rose milk studio.",
+    "action": "Explore the ingredients",
+    "image": "demos/food-beverage/yeos/v1/assets/bandung.webp",
+    "composition": "plate",
+    "background": "#fae4df",
+    "ink": "#772323",
+    "accent": "#a4484d",
+    "notes": "Use the serving plate as an ingredient viewfinder. A rose selection crops toward the petals, milk crops into the glass and Together restores the full print.",
+    "detail": "Look closely at the rose essence and creamy milk behind Bandung.",
+    "items": [
+      "Rose essence",
+      "Milk",
+      "Together"
+    ]
+  },
+  {
+    "key": "nanyang-archive",
+    "version": "v9",
+    "kind": "primary",
+    "style": "Newspaper archive spread",
+    "headline": "The Nanyang archive.",
+    "action": "Read the chronology",
+    "image": "demos/food-beverage/yeos/v1/assets/soy.webp",
+    "composition": "index",
+    "background": "#f6f0df",
+    "ink": "#29251f",
+    "accent": "#9e372c",
+    "notes": "Run a two-rule newspaper masthead across the page. Separate the historical lead from the photograph of today's Soy Bean Milk with a vertical column rule.",
+    "detail": "Follow the business from its beginnings in Zhangzhou to Nanyang in the 1930s.",
+    "items": [
+      "1901",
+      "1930s",
+      "Today’s range"
+    ]
+  },
+  {
+    "key": "picnic-counter",
+    "version": "v10",
+    "kind": "primary",
+    "style": "Gingham picnic worksheet",
+    "headline": "Picnic counter.",
+    "action": "Calculate packs",
+    "image": "demos/food-beverage/yeos/v1/assets/lychee.webp",
+    "composition": "ticket",
+    "background": "#f9efdc",
+    "ink": "#612b26",
+    "accent": "#a32724",
+    "notes": "Frame the quantity as a packing slip against the gingham sheet. Put the number and container first, followed by the unit capacity and spare volume.",
+    "detail": "Enter your guest count and portion size to round the shopping list up to whole packs.",
+    "items": [
+      "Guests",
+      "Volume per guest",
+      "Individual pack"
+    ]
+  },
+  {
+    "key": "cooler-shelf",
+    "version": "v11",
+    "kind": "primary",
+    "style": "Night-market shelf display",
+    "headline": "Cooler shelf.",
+    "action": "Choose a container",
+    "image": "demos/food-beverage/yeos/v1/assets/green-tea.webp",
+    "composition": "stack",
+    "background": "#18232b",
+    "ink": "#f0f2df",
+    "accent": "#9fe3bd",
+    "notes": "Treat capacity labels as removable shelf tickets. Filtering the cabinet hides both incompatible drinks and incompatible tickets on the cards that remain.",
+    "detail": "Find the listed drinks and sizes for a carton, can or bottle.",
+    "items": [
+      "Cartons",
+      "Cans",
+      "Bottles"
+    ]
+  },
+  {
+    "key": "tasting-notebook",
+    "version": "v12",
+    "kind": "primary",
+    "style": "Ruled tasting journal",
+    "headline": "Tasting notebook.",
+    "action": "Write a tasting note",
+    "image": "demos/food-beverage/yeos/v1/assets/black-soy.webp",
+    "composition": "spread",
+    "background": "#f5f0e3",
+    "ink": "#333125",
+    "accent": "#785031",
+    "notes": "Stamp the selected serving photograph beside its printed drink name in the notebook margin. A flight can open the correct drink's page directly.",
+    "detail": "Record aroma, texture and finish in a note saved on this device.",
+    "items": [
+      "Choose a drink",
+      "Tasting note",
+      "Save on this device"
+    ]
+  },
+  {
+    "key": "drink-dial",
+    "version": "v13",
+    "kind": "primary",
+    "style": "Rotary flavour dial",
+    "headline": "The drink dial.",
+    "action": "Choose a flavour",
+    "image": "demos/food-beverage/yeos/v1/assets/bandung.webp",
+    "composition": "plate",
+    "background": "#ececfa",
+    "ink": "#293d72",
+    "accent": "#3e458c",
+    "notes": "Use the six positions as real profile links. The centre photograph and the printed readout follow keyboard focus as well as the pointer.",
+    "detail": "Preview a flavour direction, then open the matching drink profile.",
+    "items": [
+      "Floral tea",
+      "Soft soy",
+      "Rose milk"
+    ]
+  },
+  {
+    "key": "tasting-flight",
+    "version": "v14",
+    "kind": "primary",
+    "style": "Perforated tasting menu",
+    "headline": "Tasting flight.",
+    "action": "Choose a flight",
+    "image": "demos/food-beverage/yeos/v1/assets/green-tea.webp",
+    "composition": "frieze",
+    "background": "#fff0ce",
+    "ink": "#332e22",
+    "accent": "#805323",
+    "notes": "Join the three pour cards on one continuous strip with tear lines between servings. Give every pour its own route to a matching notebook entry.",
+    "detail": "Try a sequence of three drinks and record a note for a particular pour.",
+    "items": [
+      "Garden",
+      "Bean",
+      "Fruit and flower"
+    ]
+  },
+  {
+    "key": "beverage-atlas",
+    "version": "v15",
+    "kind": "primary",
+    "style": "Alphabetical desk reference",
+    "headline": "Beverage atlas.",
+    "action": "Find a drink",
+    "image": "demos/food-beverage/yeos/v1/assets/bandung.webp",
+    "composition": "index",
+    "background": "#f7f8fa",
+    "ink": "#172638",
+    "accent": "#364c95",
+    "notes": "Give the masthead a labelled search slot. Keep its filtered letter rail aligned with the surviving entries and place the result count by the query.",
+    "detail": "Look up a drink by name, ingredient or the wording of a pack size.",
+    "items": [
+      "Drink name",
+      "Ingredient",
+      "Pack size"
+    ]
+  },
+  {
+    "key": "photo-contact-sheet",
+    "version": "v1",
+    "kind": "alternate",
+    "style": "Photographer’s contact sheet",
+    "headline": "Six drinks, one index.",
+    "action": "Explore the drinks",
+    "image": "demos/food-beverage/yeos/v1/assets/hero.webp",
+    "composition": "cover",
+    "background": "#f1ece2",
+    "ink": "#222522",
+    "accent": "#81422b",
+    "notes": "An alternate index could place the three featured serving studies in a contact-sheet rail. Selecting a frame would move the profile link to that drink.",
+    "detail": "Start with a serving photograph and open the drink behind it.",
+    "items": [
+      "Chrysanthemum Tea",
+      "Soy Bean Milk",
+      "Lychee Drink"
+    ]
+  },
+  {
+    "key": "capacity-ruler",
+    "version": "v5",
+    "kind": "alternate",
+    "style": "Industrial measuring register",
+    "headline": "Measure the pack range.",
+    "action": "Choose a pack",
+    "image": "demos/food-beverage/yeos/v1/assets/black-soy.webp",
+    "composition": "dashboard",
+    "background": "#f2ede2",
+    "ink": "#202b2e",
+    "accent": "#126046",
+    "notes": "An alternate pack finder could organise the five sizes on a ruled measuring scale. The selected tick would isolate the matching column and retain drink names.",
+    "detail": "Read the five Singapore pack formats from 250 mL to 1.5 L.",
+    "items": [
+      "250 mL",
+      "380 mL",
+      "1.5 L"
+    ]
+  },
+  {
+    "key": "bandung-colour-study",
+    "version": "v8",
+    "kind": "alternate",
+    "style": "Colour-field tasting plate",
+    "headline": "Rose, milk, Bandung.",
+    "action": "Study the blend",
+    "image": "demos/food-beverage/yeos/v1/assets/bandung.webp",
+    "composition": "poster",
+    "background": "#702b42",
+    "ink": "#fff3e7",
+    "accent": "#ffc7bb",
+    "notes": "An alternate ingredient studio could pair three broad colour fields with the existing rose, milk and finished-drink controls, using one serving image throughout.",
+    "detail": "Select a component to examine the role it plays in the drink.",
+    "items": [
+      "Aroma",
+      "Creamy base",
+      "Finished drink"
+    ]
+  },
+  {
+    "key": "picnic-packing-label",
+    "version": "v10",
+    "kind": "alternate",
+    "style": "Parcel-label packing slip",
+    "headline": "Pack for the picnic.",
+    "action": "Work out the pack count",
+    "image": "demos/food-beverage/yeos/v1/assets/lychee.webp",
+    "composition": "ticket",
+    "background": "#e5dfcb",
+    "ink": "#1e3536",
+    "accent": "#325d58",
+    "notes": "An alternate calculator could make the whole-pack result the central parcel label. Keep guest count and serving volume on the stub beside it.",
+    "detail": "Work from your planned serving volume to the number of individual packs.",
+    "items": [
+      "Quantity",
+      "Capacity per pack",
+      "Spare volume"
+    ]
+  },
+  {
+    "key": "archive-route",
+    "version": "v9",
+    "kind": "alternate",
+    "style": "Railway route chronology",
+    "headline": "From Zhangzhou to Nanyang.",
+    "action": "Follow the family history",
+    "image": "demos/food-beverage/yeos/v1/assets/soy.webp",
+    "composition": "stack",
+    "background": "#e7eee7",
+    "ink": "#253a35",
+    "accent": "#935232",
+    "notes": "An alternate chronology could lay the two historical milestones on a simple route line and end at the present-day product entry. Distinguish a modern serving photograph from archival evidence.",
+    "detail": "Read the 1901 founding and the family business’s move to Nanyang in the 1930s.",
+    "items": [
+      "Zhangzhou",
+      "Nanyang",
+      "Soy Bean Milk"
+    ]
+  }
+]

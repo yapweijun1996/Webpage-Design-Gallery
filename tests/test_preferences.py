@@ -32,7 +32,7 @@ class PreferencesTests(unittest.TestCase):
                 if tag in ('script', 'style', 'noscript'):
                     self.skipped += 1
                 if not self.skipped:
-                    self.messages.update(value for key, value in attrs if key in ('aria-label', 'title', 'placeholder', 'alt'))
+                    self.messages.update(value for key, value in attrs if value and key in ('aria-label', 'title', 'placeholder', 'alt'))
 
             def handle_endtag(self, tag):
                 if tag in ('script', 'style', 'noscript'):

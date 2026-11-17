@@ -708,7 +708,7 @@ function createTutorialState({ storage = () => globalThis.localStorage } = {}) {
     }
   };
 }
-function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
+function createTutorial({ parent, onDismiss = () => {}, onBrowseProducts, touch = false } = {}) {
   const state = createTutorialState();
   const card = document.createElement("section");
   card.id = "guide-card";
@@ -739,7 +739,15 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
     state.dismiss();
     onDismiss();
   });
-  header.append(title, count, skip);
+  const products = button2("guide-products", "Featured products", () => {
+    state.dismiss();
+    onBrowseProducts();
+  });
+  products.setAttribute("aria-controls", "featured-products");
+  header.append(title, count);
+  if (onBrowseProducts)
+    header.append(products);
+  header.append(skip);
   const progress = element2("div", "ux-tutorial-progress");
   progress.setAttribute("aria-hidden", "true");
   const segments = actions.map(() => element2("span", "ux-tutorial-segment"));
@@ -770,6 +778,8 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
   let announcedStep = null;
   state.subscribe(({ open, active, step }) => {
     card.hidden = !open || !active;
+    products.hidden = step !== 0;
+    header.classList.toggle("has-product-choice", Boolean(onBrowseProducts) && step === 0);
     count.textContent = `${step + 1}/3`;
     count.setAttribute("aria-label", `Step ${step + 1} of 3`);
     for (let index = 0;index < segments.length; index++)
@@ -1354,6 +1364,14 @@ function createUI(expanded = false) {
     onDismiss: () => {
       if (showing3D)
         scene.focus({ preventScroll: true });
+    },
+    onBrowseProducts: () => {
+      storeFilter = "all";
+      productSearch.value = "";
+      productCategory.value = "all";
+      updateCatalog();
+      setView(false);
+      document.getElementById("featured-heading").focus();
     }
   });
   let amenityLocale = "en", amenityTheme = "system";

@@ -11,7 +11,9 @@ const topics = {
 form.addEventListener('submit', event => {
   event.preventDefault();
   const category = form.querySelector('input[name="category"]:checked').labels[0].textContent.trim();
-  brief.value = 'Hello Goh Joo Hin, I am a retail buyer interested in ' + category.toLowerCase() + '. ' + topics[form.elements.topic.value];
+  const setting = form.elements.setting;
+  const context = setting.value ? ' My retail setting is ' + setting.selectedOptions[0].textContent.toLowerCase() + '.' : '';
+  brief.value = 'Hello Goh Joo Hin, I am a retail buyer interested in ' + category.toLowerCase() + '.' + context + ' ' + topics[form.elements.topic.value];
   result.hidden = false;
   brief.focus();
   status.textContent = 'Your brief is ready to copy.';

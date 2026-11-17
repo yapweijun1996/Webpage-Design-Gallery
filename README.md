@@ -22,6 +22,12 @@ The [company shortlist](docs/next-company-demo.md) compares three Singapore demo
 
 Each concept has its own install identity. The [demo PWA guide](docs/company-demo-pwas.md) covers offline content, update controls and device verification.
 
+## Landing page ideas and review tools
+
+The [landing style atlas](https://yapweijun1996.github.io/Webpage-Design-Gallery/style-atlas/) pairs the 46 demos with 60 original visual references. The [GitHub image index](style-atlas/README.md) links each WebP to its edition. Every live demo links back to its primary reference.
+
+The [design directions](docs/landing-design-directions.md) describe the first screen and primary visitor action for every edition. Each collection offers two task-based entrances alongside the official company link. The [local review skill](.agents/skills/gallery-landing-review/SKILL.md) and [before/after tool](scripts/review_landings.py) support future revisions.
+
 ## Browse
 
 - `/index.html`: company discovery with search, category filtering, sorting and pagination.
@@ -71,6 +77,8 @@ python -m unittest discover -s tests -p 'test_*.py' -v
 python tests/browser_gallery.py
 python tests/browser_yeos_drinks.py
 python tests/browser_yeos_editions.py
+python demos/food-beverage/yeos/landing_checks.py
+python demos/corporate/gjh/landing_checks.py
 python demos/heritage/thow-kwang/browser_checks.py
 python tests/browser_company_pwas.py
 python tests/browser_premium_landings.py
@@ -83,6 +91,7 @@ python tests/browser_gjh_furnishings.py
 python -m unittest discover -s tests -p test_gjh_character.py -v
 python tests/browser_gjh_character.py
 python tests/browser_pwa.py
+python tests/browser_style_atlas.py
 python -m unittest discover -s tests -p test_preferences.py -v
 python tests/browser_preferences.py
 python tests/browser_gallery_theme.py

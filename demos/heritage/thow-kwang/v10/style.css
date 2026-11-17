@@ -63,3 +63,59 @@
     font-size: var(--font-size-xl);
   }
 }
+
+.archive-years {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-block: 3px double var(--ink);
+}
+.archive-years a {
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.65rem;
+  padding: 0.6rem 0.2rem;
+  text-decoration: none;
+}
+.archive-years a + a {
+  border-left: 1px solid var(--line);
+}
+.archive-years b {
+  color: var(--accent);
+  font-family: var(--sign);
+  font-size: var(--font-size-2xl);
+  font-weight: 400;
+  line-height: 1.15;
+}
+.archive-years span {
+  font-size: var(--font-size-sm);
+}
+.archive-years a:hover {
+  text-decoration: underline;
+}
+@media (max-width: 480px) {
+  .archive-years a {
+    display: grid;
+    justify-items: center;
+    gap: 0;
+  }
+}
+
+.archive-years {
+  padding-block: 0.2rem;
+}
+.archive-years b {
+  font-size: var(--font-size-3xl);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+#chronology .doc-row:target {
+  background: var(--wash);
+  border-left: 0.25rem solid var(--accent);
+  padding-left: 1rem;
+}
+@media (max-width: 480px) {
+  .archive-years b {
+    font-size: var(--font-size-2xl);
+  }
+}

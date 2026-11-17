@@ -19,7 +19,8 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
     <script defer src="../../../../src/demo-pwa.js"></script>
-  </head>
+  <link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v14">
+</head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <div class="notice">
@@ -50,7 +51,13 @@
           ><a class="button" href="#story"
             >Discover our story <span aria-hidden="true">↘</span></a
           ></div
-        ><figure class="hero-photo"
+        ><fieldset class="archive-switch">
+          <legend>Two views of the beginnings</legend>
+          <input id="counter-view" type="radio" name="archive-view" checked />
+          <label for="counter-view">Illustration</label>
+          <input id="archive-view" type="radio" name="archive-view" />
+          <label for="archive-view">Historical image</label>
+          <figure class="hero-photo counter-image"
           ><img
             src="assets/provision-counter-1120.webp"
             srcset="
@@ -64,7 +71,12 @@
           /><figcaption
             ><span>The provision counter</span
             ><span>AI illustration</span></figcaption
-          ></figure
+          ></figure>
+          <figure class="archive-image">
+            <img src="assets/gjh-history-composite.jpg" width="550" height="240" loading="lazy" alt="GJH’s published composite showing the earlier shopfronts" />
+            <figcaption><span>Shopfronts</span><span>GJH historical composite</span></figcaption>
+          </figure>
+        </fieldset
         ></section
       >
       <div class="ribbon"
@@ -192,7 +204,7 @@
           ><a href="#top">Back to top ↑</a
           ><a href="../../../../companies/gjh/index.html"
             >All GJH concepts ↗</a
-          ></div
+          > <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#gjh-v14">View design reference</a></div
         ><small
           >Independent, unofficial concept. No affiliation or
           endorsement.</small

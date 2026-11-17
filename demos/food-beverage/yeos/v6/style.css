@@ -11,3 +11,10 @@ body { --paper:var(--palette-editorial-wash); --ink:var(--palette-success); --ru
 .spec[open] summary::after { content:"−"; }
 .spec div { padding:.4rem .5rem 1.25rem; }
 @media(max-width:700px) { .specimens { grid-template-columns:1fr; } }
+
+.specimen-key { max-width: 46rem; margin: 1.5rem auto 0; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border: 1px solid var(--ink); }
+.specimen-key a { padding: .55rem; text-decoration: none; min-width: 0; }
+.specimen-key a + a { border-left: 1px solid var(--ink); }
+.specimen-key img { width: 100%; height: auto; aspect-ratio: 2.8; object-fit: cover; object-position: 50% 72%; }
+.specimen-key span { display: block; margin-top: .45rem; font-family: var(--font-family-code); font-size: var(--font-size-sm); }
+.spec:target { background: var(--palette-success-surface); }

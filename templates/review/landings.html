@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landing page comparisons</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: auto; max-width: 100rem; background: #f9f7f0; color: #232921; font: 1rem/1.5 system-ui,sans-serif; padding: 1rem clamp(.8rem,3vw,3rem) 3rem; }
+h1,h2,h3 { line-height: 1.15; }
+h1,h2 { font-family: Georgia,serif; font-weight: normal; }
+h1 { font-size: clamp(2.4rem,5vw,4rem); margin-bottom: .5rem; }
+h2 { font-size: clamp(2rem,4vw,3rem); border-top: 1px solid #697062; padding-top: 1rem; }
+h3 { font-size: 1.3rem; margin: 1.75rem 0 .6rem; }
+small,figcaption { color: #52584b; font: .875rem/1.4 system-ui,sans-serif; }
+nav { display: flex; flex-wrap: wrap; gap: 0 1.25rem; }
+a { color: #634420; padding-block: .65rem; }
+label { display: inline-block; } select { font: inherit; min-height: 44px; }
+.comparison { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: clamp(.5rem,2vw,2rem); margin: .5rem 0 1rem; }
+[hidden] { display: none; }
+figure { margin: 0; min-width: 0; }
+figcaption { margin: 0 0 .35rem; }
+img { display: block; width: 100%; height: auto; border: 1px solid #d6d9ce; }
+[data-width="390"] { max-width: 54rem; }
+@media (max-width: 600px) { .comparison { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header><h1>Landing page comparisons</h1>
+<p>$count designs. Compare the first screen at commit <code>$revision</code> with the captured working tree.</p>
+<nav aria-label="Companies">$links</nav>
+<label id="width-control" hidden>Viewport <select>$options</select></label></header>
+<main>$sections</main>
+<script>
+const control = document.querySelector('#width-control');
+const select = control.querySelector('select');
+function showViewport() {
+  for (const pair of document.querySelectorAll('[data-width]')) pair.hidden = pair.dataset.width !== select.value;
+}
+control.hidden = false;
+select.addEventListener('change', showViewport);
+showViewport();
+</script>
+</body></html>

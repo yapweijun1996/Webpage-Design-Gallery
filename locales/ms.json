@@ -1,5 +1,8 @@
 {
   "messages": {
+    "View design reference": "Lihat rujukan reka bentuk",
+    "View design references": "Lihat rujukan reka bentuk",
+    "Explore the style atlas": "Terokai atlas gaya",
     "Theme": "Tema",
     "Language": "Bahasa",
     "System": "Sistem",
@@ -255,7 +258,14 @@
     "Look up six drinks in an alphabetical reference atlas.": "Cari enam minuman dalam rujukan mengikut abjad.",
     "Saved collections and demos are available offline. Connect to open a new demo, view a full screenshot or visit an official website.": "Koleksi dan demo yang disimpan tersedia di luar talian. Sambung ke Internet untuk membuka demo baharu, melihat tangkapan skrin penuh atau melawat laman rasmi.",
     "Offline. Saved collections and demos are available. Connect to open a new demo or a full screenshot.": "Di luar talian. Koleksi dan demo yang disimpan tersedia. Sambung untuk membuka demo baharu atau tangkapan skrin penuh.",
-    "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.": "Gunakan pilihan pemasangan pelayar. Pada iPhone atau iPad, pilih Kongsi → Tambah ke Skrin Utama. Galeri menyimpan koleksi dan imej kecil. Buka demo semasa dalam talian untuk menyediakan fail luar taliannya."
+    "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.": "Gunakan pilihan pemasangan pelayar. Pada iPhone atau iPad, pilih Kongsi → Tambah ke Skrin Utama. Galeri menyimpan koleksi dan imej kecil. Buka demo semasa dalam talian untuk menyediakan fail luar taliannya.",
+    "Explore the brand portfolio": "Terokai portfolio jenama",
+    "Prepare a trade enquiry": "Sediakan pertanyaan perniagaan",
+    "Compare two drinks": "Bandingkan dua minuman",
+    "Find a flavour": "Cari perisa",
+    "Explore the dragon kiln": "Terokai relau naga",
+    "Plan your visit": "Rancang lawatan anda",
+    "Open a company collection to try a live design or compare two directions side by side.": "Buka koleksi syarikat untuk mencuba demo atau membandingkan dua reka bentuk secara bersebelahan."
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "Memaparkan {shown} daripada {total} syarikat sepadan",

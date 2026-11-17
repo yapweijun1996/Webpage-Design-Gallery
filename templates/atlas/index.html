@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f4ec"><title>Landing style atlas · Webpage Design Gallery</title>
+<meta name="description" content="Explore original landing-page design references beside the live Singapore company demos they inform.">
+<link rel="icon" href="../assets/icons/gallery-192.png"><link rel="manifest" href="../manifest.webmanifest"><link rel="stylesheet" href="atlas.css">
+</head>
+<body id="top">
+<a class="skip" href="#collections">Skip to designs</a>
+<header class="top"><a href="../index.html">Webpage Design Gallery</a><nav aria-label="Company references">$navigation</nav></header>
+<main>
+<div class="intro"><h1>Landing style atlas<span>.</span></h1><p>$total original UI mockups for three Singapore companies. Open a reference at full size, compare it with the published preview, or try the working demo.</p></div>
+<form id="filter" hidden><label for="kind">Show</label> <select id="kind"><option value="">All references</option><option value="primary">Primary references</option><option value="alternate">Alternate directions</option></select> <output aria-live="polite"></output></form>
+<div id="collections">$sections</div>
+</main>
+<footer><p>Independent design concepts. Each card records whether its mockup is AI-generated or typeset from project assets. Historical scenes and architectural drawings are illustrative. The linked demos identify sources for company facts.</p><a href="#top">Back to top</a></footer>
+<script>
+const filter = document.querySelector('#filter');
+const kind = filter.querySelector('select');
+const cards = [...document.querySelectorAll('[data-kind]')];
+function updateFilter() {
+  for (const card of cards) card.hidden = !!kind.value && card.dataset.kind !== kind.value;
+  filter.querySelector('output').value = cards.filter(card => !card.hidden).length + ' references';
+}
+function revealTarget() {
+  const target = document.getElementById(location.hash.slice(1));
+  if (target?.matches('[data-kind]') && target.hidden) {
+    kind.value = '';
+    updateFilter();
+    target.scrollIntoView();
+  }
+}
+filter.hidden = false;
+kind.addEventListener('change', updateFilter);
+window.addEventListener('hashchange', revealTarget);
+updateFilter();
+</script>
+</body></html>

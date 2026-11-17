@@ -63,3 +63,65 @@
     font-size: var(--font-size-lg);
   }
 }
+
+.shape-guide {
+  text-align: center;
+  padding-top: 1.4rem;
+}
+.shape-guide label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.shape-guide input {
+  accent-color: var(--accent);
+  width: 1.1rem;
+  height: 1.1rem;
+  vertical-align: middle;
+}
+.specimen-grid {
+  text-align: left;
+  margin-top: 0.65rem;
+}
+.contour,
+.contour-label {
+  display: none;
+}
+.contour {
+  color: var(--paper);
+}
+.contour-label {
+  min-height: 1.7rem;
+  font-size: var(--font-size-sm);
+  color: var(--ink);
+}
+#show-contours:checked ~ .specimen-grid .contour,
+#show-contours:checked ~ .specimen-grid .contour-label {
+  display: block;
+}
+
+.object {
+  display: grid;
+  align-content: end;
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    var(--wash) 25%,
+    var(--paper) 95%
+  );
+  border-bottom: 3px double currentColor;
+}
+.object .cap {
+  align-self: start;
+}
+.object strong {
+  margin-top: 0.4rem;
+}
+.object:hover svg,
+.object:focus-visible svg {
+  outline: 1px dashed currentColor;
+  outline-offset: -0.25rem;
+}
+#catalogue .doc-row:target {
+  padding-left: 0.9rem;
+  border-left: 3px solid var(--accent);
+}

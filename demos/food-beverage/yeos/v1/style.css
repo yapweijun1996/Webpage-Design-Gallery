@@ -162,3 +162,17 @@ summary::-webkit-details-marker { display: none; }
 .pack-compare td, .pack-compare th { border-bottom: 1px solid var(--yeos-line); padding: .8em .45em; overflow-wrap: anywhere; }
 .pack-compare thead { background: var(--yeos-pale); }
 @media (max-width: 480px) { .pair-fields { grid-template-columns: 1fr; } }
+
+.intro-actions { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 1.25rem; }
+.pair-shortcut { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; color: var(--yeos-deep-red); font-weight: 700; font-size: var(--font-size-sm); }
+#pair-link { margin-top: .65rem; font-size: var(--font-size-sm); }
+
+.intro-actions { align-items: center; gap: .55rem; margin-top: 1.1rem; }
+.intro-actions .primary, .intro-actions .pair-shortcut { margin-top: 0; border: 1px solid var(--yeos-red); border-radius: var(--radius-sm); padding: .62rem .88rem; justify-content: space-between; }
+.intro-actions .pair-shortcut { text-decoration: none; }
+.intro-actions .pair-shortcut:hover { background: var(--yeos-pale); }
+@media (min-width: 861px) {
+  .hero { grid-template-columns: 1.12fr .88fr; }
+  .hero .feature { grid-column: 1; grid-row: 1; }
+  .hero .intro { grid-column: 2; grid-row: 1; }
+}

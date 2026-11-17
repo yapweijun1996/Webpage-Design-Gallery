@@ -15,6 +15,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
   <script defer src="../../../../src/demo-pwa.js"></script>
+<link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v17">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -31,14 +32,18 @@
         <p class="eyebrow">A Singapore food journal</p>
         <h1 id="title">Pantry<br><em>Notes.</em></h1>
         <p class="intro">A weeknight wok, a long Sunday lunch, an ice pop in the shade. Find a Goh Joo Hin brand for your table.</p>
-        <a class="button" href="#occasions">Choose an occasion <span aria-hidden="true">↓</span></a>
+        <nav class="menu-bookmarks" aria-label="Choose a meal">
+          <a href="#supper">Weeknight supper <span aria-hidden="true">↘</span></a>
+          <a href="#sunday">Sunday lunch <span aria-hidden="true">↘</span></a>
+          <a href="#break">Afternoon break <span aria-hidden="true">↘</span></a>
+        </nav>
       </div>
       <figure class="cover">
         <picture>
           <source media="(max-width: 650px)" srcset="assets/shared-table-small.webp" width="690" height="540">
           <img src="assets/shared-table.webp" width="1170" height="728" fetchpriority="high" alt="Sunlit bowls and dishes on a linen table, with hands reaching in from both sides.">
         </picture>
-        <figcaption><span>Between courses</span><span>Concept illustration</span></figcaption>
+        <figcaption><span>Shared table</span><span>Concept illustration</span></figcaption>
       </figure>
     </section>
     <section class="menu frame" id="occasions" aria-labelledby="menu-title" tabindex="-1">
@@ -47,7 +52,7 @@
         <p>Choose your occasion to explore the brand on GJH’s website.</p>
       </div>
       <div class="cards">
-        <article>
+        <article id="supper" tabindex="-1">
           <a href="https://www.gjhglobal.com/mili/">
             <img loading="lazy" width="570" height="425" src="assets/weeknight-supper.webp" alt="A cook tossing noodles in a wok beside fresh greens.">
             <div class="card-copy">
@@ -57,7 +62,7 @@
             </div>
           </a>
         </article>
-        <article>
+        <article id="sunday" tabindex="-1">
           <a href="https://www.gjhglobal.com/newmoon/">
             <img loading="lazy" width="570" height="425" src="assets/sunday-lunch.webp" alt="A platter of braised abalone set down at a table for sharing.">
             <div class="card-copy">
@@ -67,7 +72,7 @@
             </div>
           </a>
         </article>
-        <article>
+        <article id="break" tabindex="-1">
           <a href="https://www.gjhglobal.com/gogo/">
             <img loading="lazy" width="570" height="425" src="assets/afternoon-break.webp" alt="A woman pausing for an ice pop on a coral bench in the shade.">
             <div class="card-copy">
@@ -85,6 +90,6 @@
       <div><p class="footer-name">Pantry <em>Notes.</em></p><p>Independent GJH design concept with AI-generated editorial illustrations.</p></div>
       <div class="footer-links"><a href="https://www.gjhglobal.com/about-us/">About Goh Joo Hin <span aria-hidden="true">↗</span></a><a href="#top">Back to top <span aria-hidden="true">↑</span></a></div>
     </div>
-  </footer>
+   <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#gjh-v17">View design reference</a></footer>
 </body>
 </html>

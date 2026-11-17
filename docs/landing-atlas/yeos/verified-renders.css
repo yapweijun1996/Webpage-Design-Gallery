@@ -1,0 +1,129 @@
+@font-face{font-family:Manrope;src:url("ASSET_PATH/manrope-latin.woff2")}
+@font-face{font-family:Instrument;src:url("ASSET_PATH/instrument-serif.ttf")}
+@font-face{font-family:Instrument;src:url("ASSET_PATH/instrument-serif-italic.ttf");font-style:italic}
+*{box-sizing:border-box}
+body{width:1560px;height:976px;margin:0;color:#25251e;background:#f7f1e5;font:24px/1.35 Manrope,sans-serif}
+header{height:85px;padding:0 66px;display:flex;align-items:center;gap:35px;border-bottom:1px solid currentColor}
+header>span:not(.brand),header b,small{font:700 16px/1.3 Manrope,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+header b{margin-left:auto}
+.brand{font:italic 700 50px/1 Georgia,serif;letter-spacing:-.1em}
+h1,h2,p,figure{margin:0}
+h1,h2{font-family:Instrument,Georgia,serif;font-weight:400;line-height:.91}
+h1{font-size:126px;letter-spacing:-.035em}
+h2{font-size:72px}
+small{display:block}
+img{display:block;width:100%;height:100%;object-fit:cover}
+.button{display:inline-block;padding:16px 30px;background:var(--button,#292822);color:var(--button-text,#fffaf0);font-size:21px;border-radius:32px}
+.tags{display:flex;flex-wrap:wrap;gap:9px}
+.tags span{padding:6px 16px;border:1px solid currentColor;border-radius:90px;font-size:18px}
+
+.soy-study{background:#f7edcf;color:#35291c;--button:#5b351f}
+.soyhead{height:256px;margin:0 66px;display:flex;align-items:center;justify-content:space-between}
+.soyhead h1{font-size:126px;margin-top:9px}
+.soyhead p{max-width:332px;margin-bottom:14px;font:30px/1 Instrument,serif}
+.specimens{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 66px}
+.specimens article{height:573px;position:relative;padding:30px;border:1px solid}
+.specimens .soy{background:#fdf7e9}
+.specimens .black-soy{background:#282522;color:#f9efd5}
+.samplephoto{position:absolute;right:36px;top:28px;width:227px;height:280px;overflow:hidden;border-radius:49% 49% 3px 3px}
+.samplefacts{padding:22px 9px;position:relative}
+.samplefacts h2{max-width:290px;margin:41px 0 110px;font-size:83px;min-height:152px}
+.samplefacts>b{display:block;border-top:1px solid;padding-top:15px;font-size:30px;margin-bottom:10px}
+.samplefacts .tags{max-width:578px}
+.specimens .black-soy .samplephoto img{filter:saturate(.85)}
+
+.pack-finder{color:#182e72;background:#f5f6fa}
+.pack-finder header{background:#132e8e;color:#fff}
+.inventory{display:grid;grid-template-columns:410px 1fr;gap:42px;padding:55px 62px 36px}
+.inventory-intro{position:relative;border-right:1px solid #9caace;padding:16px 32px 0 0}
+.inventory-intro h1{font:800 101px/.87 Manrope,sans-serif;color:#101e54;letter-spacing:-.085em;margin:27px 0}
+.inventory-intro p{font-size:24px;max-width:286px}
+.active-format{background:#233ca8;color:white;border-radius:4px;margin-top:26px;padding:13px 21px;display:flex;justify-content:space-between}
+.inventory-photo{margin:32px 0 0 12px;width:222px;background:white;border:1px solid #adb3bd;padding:9px;transform:rotate(-4deg)}
+.inventory-photo img{height:153px;object-position:50% 60%}
+.inventory-photo span{display:block;font-size:16px;padding:8px 4px 0}
+.inventory-board{padding:0 0 0 4px}
+.count{display:flex;align-items:center;gap:42px;margin:0 0 34px;padding:0 0 20px;border-bottom:8px solid #334aaa}
+.count strong{font:800 134px/.99 Manrope,sans-serif;letter-spacing:-.075em}
+.count span{font-size:29px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+.inventory th,.inventory td{border-bottom:1px solid #aebde3;padding:15px 6px;text-align:center;font-size:20px}
+.inventory th:first-child{width:237px;text-align:left}
+.inventory thead th{font-size:17px}
+.inventory th:nth-child(3),.inventory td:nth-child(3){background:#dbe5ff;color:#142c84}
+.inventory td{font-size:27px}
+.legend{margin-top:21px;font-size:17px}
+
+.picnic-counter{--button:#8c2625;color:#501f1e;background-color:#f9ebd6;background-image:repeating-linear-gradient(0deg,transparent 0 34px,#bc544326 34px 68px),repeating-linear-gradient(90deg,transparent 0 34px,#bc544326 34px 68px)}
+.picnic-counter header{background:#fff9ea}
+.picnic{display:grid;grid-template-columns:1fr 1fr;height:891px;padding:51px 89px 63px;gap:68px}
+.picnic-copy{position:relative;padding:24px 0 0 20px}
+.picnic-copy h1{margin:17px 0 15px;font-size:151px}
+.picnic-copy p{font:36px Instrument,serif}
+.fruit{position:absolute;left:126px;bottom:2px;width:308px;height:308px;border:14px solid #fff9e8;border-radius:50%;overflow:hidden;outline:1px solid #b59774;box-shadow:5px 10px 0 #9d70582b;transform:rotate(-10deg)}
+.slip{align-self:center;transform:rotate(1.5deg);position:relative;padding:44px 48px 42px;background:#fffaf0;border-top:4px double #9d574a;box-shadow:6px 9px 0 #a7755626}
+.slip:after{content:"";position:absolute;top:100%;inset-inline:0;height:12px;background:linear-gradient(135deg,#fffaf0 25%,transparent 0) -10px 0 / 20px 20px,linear-gradient(225deg,#fffaf0 25%,transparent 0) -10px 0 / 20px 20px}
+.slip h2{margin:12px 0 23px;font-size:79px}
+.receipt-rows>div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-top:1px dashed #a67b70;padding:12px 0}
+.quantity{display:flex;align-items:center;gap:22px;border-block:2px dashed #a67b70;padding:5px 0;margin-top:3px}
+.quantity>strong{font:italic 136px/.98 Instrument,serif}
+.quantity span,.quantity b{display:block}
+.quantity b{font:52px Instrument,serif}
+.slip>p{font-size:19px;margin:16px 0 25px}
+
+.tasting-notebook{background:repeating-linear-gradient(94deg,#4c5141 0 3px,#505544 3px 8px);color:#423626;--button:#604d32}
+.tasting-notebook header{color:#f4ead5;border-color:#b6b198}
+.desk{margin:44px 76px 0;height:791px;display:grid;grid-template-columns:.94fr 1.06fr;background:#f7edd7;box-shadow:4px 6px 0 #d6cab2,8px 10px 0 #b9aa8c,17px 20px 5px #242b2633;border-radius:9px 27px 19px 12px;transform:rotate(-.7deg);overflow:hidden}
+.journal-left,.journal-right{position:relative;padding:42px 58px}
+.journal-left{border-right:3px solid #b0a283;background:linear-gradient(90deg,#f4ecd9 92%,#d9ccb0)}
+.journal-left h1{font-size:116px;margin-top:22px}
+.journal-left figure{width:290px;background:#faf8ee;padding:13px;margin:50px auto 0;transform:rotate(-7deg);box-shadow:0 2px 4px #615b463f}
+.journal-left figure:before{content:"";position:absolute;top:-15px;left:95px;width:96px;height:32px;background:#b99d647a;transform:rotate(-3deg)}
+.journal-left figure img{height:236px}
+.journal-left figcaption{padding:12px 0 2px;text-align:center;font:italic 32px Instrument,serif}
+.journal-right{padding-top:70px;background:linear-gradient(90deg,#dfd3b8,#f6ecd6 8%)}
+.journal-right h2{font-size:89px;margin:26px 0 10px}
+.ingredient{max-width:460px}
+.lines{margin:30px 0 33px;padding:15px 0;color:#665235}
+.lines p{font:italic 39px Instrument,serif;margin-bottom:12px}
+.lines em{display:block;border-bottom:1px solid #aa9c7d;font:italic 27px/62px Instrument,serif}
+
+.beverage-atlas{background:#f5f5fa;color:#12204c;--button:#293c8d}
+.beverage-atlas header{background:#202f6c;color:white}
+.atlas{margin:43px 66px}
+.atlas-title{display:grid;grid-template-columns:1fr 458px;align-items:end;column-gap:35px}
+.atlas-title small{grid-column:1/-1}
+.atlas-title h1{font-size:116px}
+.search{display:flex;gap:18px;align-items:center;border:2px solid #40528e;padding:14px 17px;margin-bottom:7px}
+.search b{font:40px/.6 Manrope,sans-serif}
+.search strong{margin-left:auto;font-size:19px}
+.entry{display:grid;grid-template-columns:180px 1fr 435px;gap:24px;border-top:6px double currentColor;margin-top:41px;padding-top:49px}
+.initial{font:215px/.83 Instrument,serif;color:#30468c}
+.entry h2{font-size:85px;max-width:495px;margin:22px 0 14px}
+.entry p{max-width:530px;margin-bottom:27px}
+.entry .tags{max-width:500px}
+.entry .button{margin-top:44px}
+.entry figure{margin:0 6px 0 3px;height:478px;border:12px solid white;outline:1px solid #c2baca;transform:rotate(3deg);box-shadow:7px 8px 0 #d9dce8}
+
+.capacity-ruler{background:#edefe1;color:#243f32;--button:#294b35}
+.capacity-ruler header{border-top:9px solid #21392b}
+.cabinet{display:grid;grid-template-columns:1.06fr .94fr;gap:62px;margin:51px 70px}
+.scale h1{font:800 85px/.96 Manrope,sans-serif;letter-spacing:-.075em;margin:22px 0 32px}
+.measures{position:relative;padding-top:5px;border-block:1px solid #627962;background:#f4f4e9}
+.measure{display:grid;grid-template-columns:172px 1fr;min-height:61px;align-items:center;padding:0 15px;gap:10px}
+.measure label{font-size:19px;font-weight:800}
+.measure i{height:29px;background:repeating-linear-gradient(90deg,#abbaa5 0 1px,transparent 1px 10%);position:relative}
+.measure i b{height:14px;position:absolute;top:8px;left:0;background:#9aab8c}
+.measure.active{background:#e2e9d9}
+.measure.active i b{background:#224b33}
+.scale .button{margin-top:27px}
+.ruler-specimen{border:1px solid #49604e;background:#d4deca;padding:29px;align-self:center}
+.dial{height:181px;background:#f0f0dd;border:5px solid #526a53;border-radius:10px;position:relative;padding:27px 30px;overflow:hidden}
+.dial i{position:absolute;inset:0 0 auto;height:19px;background:repeating-linear-gradient(90deg,#556949 0 2px,transparent 2px 15px)}
+.dial span{display:block;text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-size:16px}
+.dial strong{font:77px/1.25 Georgia,serif;letter-spacing:-.06em}
+.specimen-slide{border:1px solid #778875;margin:21px 0 0;background:#f4f1e8}
+.specimen-slide img{width:100%;height:240px;object-position:50% 53%}
+.specimen-slide>div{padding:21px}
+.specimen-slide h2{font-size:63px;margin:8px 0}
+.specimen-slide p{font-size:20px}

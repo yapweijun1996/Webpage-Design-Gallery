@@ -8,3 +8,12 @@ body { --paper: var(--palette-editorial-paper); }
 .s2 { background:var(--palette-warning-surface); }
 .s3 { background:var(--palette-night-paper); color:var(--palette-night-paper-ink); }
 @media(max-width:700px) { .soy-title { display:block; } .soy-title p { margin-top:.7rem; } .sample .photo { width:65%; } }
+
+.soy-comparison a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+.spec-label { margin: 0 0 1.15rem; border-block: 1px solid currentColor; }
+.spec-label summary { display: flex; justify-content: space-between; align-items: center; gap: .6rem; min-height: 44px; }
+.spec-label .tag { margin: 0; }
+.spec-label strong { text-align: right; font-weight: 500; font-family: var(--font-family-code); font-size: var(--font-size-sm); }
+.spec-label strong::after { content: " +"; }
+.spec-label[open] strong::after { content: " −"; }
+.spec-label a { display: inline-flex; align-items: center; min-height: 44px; }

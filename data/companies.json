@@ -12,7 +12,14 @@
     "demoDirectory": "demos/corporate/gjh",
     "featuredVersion": "v7",
     "status": "published",
-    "officialWebsite": "https://www.gjh.com.sg/"
+    "officialWebsite": "https://www.gjh.com.sg/",
+    "landing": {
+      "image": "v12/assets/family-dining-mobile.webp",
+      "action": "Explore the brand portfolio",
+      "anchor": "brands",
+      "alternativeVersion": "v19",
+      "alternativeAction": "Prepare a trade enquiry"
+    }
   },
   {
     "id": "yeos",
@@ -27,7 +34,14 @@
     "demoDirectory": "demos/food-beverage/yeos",
     "featuredVersion": "v1",
     "status": "published",
-    "officialWebsite": "https://yeos.com.sg/"
+    "officialWebsite": "https://yeos.com.sg/",
+    "landing": {
+      "image": "v1/assets/hero.webp",
+      "action": "Compare two drinks",
+      "anchor": "compare",
+      "alternativeVersion": "v13",
+      "alternativeAction": "Find a flavour"
+    }
   },
   {
     "id": "thow-kwang",
@@ -42,6 +56,13 @@
     "demoDirectory": "demos/heritage/thow-kwang",
     "featuredVersion": "v1",
     "status": "published",
-    "officialWebsite": "https://thowkwang.com.sg/"
+    "officialWebsite": "https://thowkwang.com.sg/",
+    "landing": {
+      "image": "v1/assets/kiln-section.svg",
+      "action": "Explore the dragon kiln",
+      "anchor": "",
+      "alternativeVersion": "v2",
+      "alternativeAction": "Plan your visit"
+    }
   }
 ]

@@ -77,3 +77,51 @@ h1 i {
     height: 44px;
   }
 }
+
+.kiln-caption {
+  display: grid;
+  gap: 0.6rem;
+}
+.kiln-reading {
+  padding: 1rem 1.15rem;
+  border-left: 3px solid var(--accent);
+  background: var(--wash);
+}
+.kiln-reading strong {
+  color: var(--accent);
+}
+.kiln-reading p {
+  margin-top: 0.25rem;
+  font-family: var(--body);
+  font-size: var(--font-size-sm);
+  color: var(--ink);
+}
+.kiln-caption small {
+  font-size: var(--font-size-xs);
+}
+
+.kiln-drawing {
+  border: 1px solid var(--ink);
+  outline: 1px solid var(--line);
+  outline-offset: 0.3rem;
+}
+.kiln-caption {
+  margin-top: 0.4rem;
+}
+.kiln-reading {
+  display: grid;
+  grid-template-columns: minmax(7.3rem, 0.45fr) 1fr;
+  gap: 0.9rem;
+  align-items: baseline;
+  border: 1px solid var(--line);
+  border-left: 0.35rem solid var(--accent);
+}
+.kiln-reading p {
+  margin: 0;
+}
+@media (max-width: 740px) {
+  .kiln-reading {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}

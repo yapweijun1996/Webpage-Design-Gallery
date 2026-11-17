@@ -50,3 +50,47 @@ summary {
     order: 2;
   }
 }
+
+#sequence.gesture-sequence {
+  display: block;
+  margin-top: 1.15rem;
+}
+.gesture-sequence summary {
+  padding-block: 0.5rem;
+  font-size: var(--font-size-xl);
+}
+.gesture-sequence details[open] {
+  border-color: var(--accent);
+}
+.gesture-sequence details[open] summary {
+  color: var(--accent);
+}
+.wheel-photo img {
+  aspect-ratio: 1;
+  max-height: 620px;
+}
+@media (max-width: 740px) {
+  .wheel-photo img {
+    aspect-ratio: 1.6;
+  }
+}
+
+.wheel-photo .plate {
+  padding: 0.65rem 0.65rem 0;
+  border: 1px solid var(--line);
+  background: var(--wash);
+}
+.wheel-photo .plate img {
+  filter: grayscale(1) contrast(1.12);
+}
+.wheel-photo figcaption {
+  padding: 0.65rem 0;
+}
+.gesture-sequence summary {
+  font-variant-numeric: tabular-nums;
+}
+.gesture-sequence details[open] {
+  padding-inline: 0.8rem;
+  border-inline-start: 0.22rem solid var(--accent);
+  background: var(--wash);
+}

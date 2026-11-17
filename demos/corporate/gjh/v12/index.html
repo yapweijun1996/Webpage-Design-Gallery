@@ -15,7 +15,8 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
     <script defer src="../../../../src/demo-pwa.js"></script>
-  </head>
+  <link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v12">
+</head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header class="header wrap"
@@ -59,9 +60,10 @@
             alt="AI-created concept illustration of a family sharing a meal"
           />
           </picture><figcaption>AI-CREATED CONCEPT ILLUSTRATION</figcaption></figure
-        ><div class="hero-caption"
-          ><span>GOOD FOOD. GOOD COMPANY.</span
-          ><a href="#story">SCROLL TO EXPLORE ↓</a><span>01 / 04</span></div
+        ><nav class="hero-caption table-index" aria-label="At the table">
+          <a href="#at-table-newmoon">For a shared meal · New Moon ↘</a>
+          <a href="#at-table-mili">For the pantry · MILI ↘</a>
+        </nav
         ></section
       >
       <section class="story section wrap" id="story"
@@ -105,7 +107,7 @@
               make a day feel like yours.</p
             ></div
           ><div class="brand-grid"
-            ><article class="brand-card moon"
+            ><article id="at-table-newmoon" tabindex="-1" class="brand-card moon"
               ><div class="brand-image"
                 ><img
                   src="assets/new-moon-nz-425g-front.jpg"
@@ -123,7 +125,7 @@
                   >Explore New Moon ↗</a
                 ></div
               ></article
-            ><article class="brand-card mili"
+            ><article id="at-table-mili" tabindex="-1" class="brand-card mili"
               ><div class="brand-image"
                 ><img
                   src="assets/mili-brand-cover.jpg"
@@ -179,7 +181,7 @@
           ><a href="#story">Our story</a><a href="#brands">Our brands</a
           ><a href="../../../../companies/gjh/index.html"
             >All design concepts</a
-          ></div
+          > <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#gjh-v12">View design reference</a></div
         ><div class="fine"
           >Independent, unofficial design concept.<br />Not affiliated with or
           endorsed by Goh Joo Hin Pte Ltd.<br />Hero is an AI-created concept

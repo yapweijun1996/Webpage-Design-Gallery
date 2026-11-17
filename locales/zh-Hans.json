@@ -1,5 +1,8 @@
 {
   "messages": {
+    "View design reference": "查看设计参考图",
+    "View design references": "查看设计参考图",
+    "Explore the style atlas": "浏览落地页风格图集",
     "Theme": "主题",
     "Language": "语言",
     "System": "跟随系统",
@@ -255,7 +258,14 @@
     "Look up six drinks in an alphabetical reference atlas.": "按英文字母顺序查阅六款饮品。",
     "Saved collections and demos are available offline. Connect to open a new demo, view a full screenshot or visit an official website.": "已保存的设计集和演示可离线浏览。首次打开演示、查看完整截图或访问官网时需要联网。",
     "Offline. Saved collections and demos are available. Connect to open a new demo or a full screenshot.": "当前离线。可浏览已保存的设计集和演示。打开新演示或完整截图时需要联网。",
-    "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.": "使用浏览器的安装功能。在 iPhone 或 iPad 上，选择“分享”→“添加到主屏幕”。图库会保存设计集和缩略图。联网打开演示即可准备其离线文件。"
+    "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.": "使用浏览器的安装功能。在 iPhone 或 iPad 上，选择“分享”→“添加到主屏幕”。图库会保存设计集和缩略图。联网打开演示即可准备其离线文件。",
+    "Explore the brand portfolio": "探索品牌组合",
+    "Prepare a trade enquiry": "准备商务咨询",
+    "Compare two drinks": "比较两款饮品",
+    "Find a flavour": "按风味找饮品",
+    "Explore the dragon kiln": "探索龙窑",
+    "Plan your visit": "规划参观行程",
+    "Open a company collection to try a live design or compare two directions side by side.": "进入公司设计集，体验可操作的演示，或并排比较两种设计。"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "显示 {total} 家匹配公司中的 {shown} 家",

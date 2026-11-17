@@ -219,3 +219,6 @@ body[data-view="3d"]:not([data-room="lobby"]) .page-intro h1 { display: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+.map-rooms .map-label { display: grid; gap: .15em; text-align: left; }
+.map-rooms .map-label small { font-size: var(--gjh-type-wordmark-caption); font-weight: 400; line-height: 1.25; }

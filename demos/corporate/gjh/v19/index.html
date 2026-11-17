@@ -17,6 +17,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
   <script defer src="../../../../src/demo-pwa.js"></script>
+<link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v19">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -50,7 +51,7 @@
       <div class="sheet-top"><p class="eyebrow">Retail enquiries</p><span class="paper-mark" aria-hidden="true">↗</span></div>
       <h2 id="enquiry-title">Build your brief.</h2>
       <div id="brief-app" hidden>
-        <p class="sheet-intro">Choose a category and a topic to draft a message for the GJH contact form.</p>
+        <p class="sheet-intro">Choose a category and topic. Add your retail setting if you want a more specific enquiry.</p>
         <form id="brief-form">
           <fieldset>
             <legend>Product category</legend>
@@ -64,6 +65,16 @@
             <option value="availability">Stock and availability</option>
             <option value="partnership">Retail partnership</option>
           </select>
+          <details class="retail-setting">
+            <summary>Add a retail setting</summary>
+            <label class="topic-label" for="retail-setting">Where will you sell the range?</label>
+            <select id="retail-setting" name="setting">
+              <option value="">General enquiry</option>
+              <option value="shop">Independent shop</option>
+              <option value="grocery">Grocery retail</option>
+              <option value="online">Online retail</option>
+            </select>
+          </details>
           <button class="action" id="prepare-brief" type="submit">Prepare brief <span aria-hidden="true">→</span></button>
         </form>
         <section class="brief-result" id="brief-result" aria-labelledby="result-title" hidden>
@@ -87,7 +98,7 @@
   <footer>
     <div class="footer-inner measure">
       <p>An independent design study for Goh Joo Hin.</p>
-      <a href="../../../../companies/gjh/index.html">All GJH concepts <span aria-hidden="true">↗</span></a>
+      <a href="../../../../companies/gjh/index.html">All GJH concepts <span aria-hidden="true">↗</span></a> <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#gjh-v19">View design reference</a>
     </div>
   </footer>
 </body>

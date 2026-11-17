@@ -7,3 +7,20 @@ body { --paper:var(--palette-error-surface); --ink:var(--yeos-deep-red); --rule:
 .formula { border-block:1px solid var(--ink); padding-block:1rem; }
 .formula h2 { font-size:var(--yeos-card-type); margin-bottom:.5rem; }
 @media(max-width:700px) { .rose { display:flex; flex-direction:column-reverse; align-items:stretch; } .portrait { width:min(85%,390px); align-self:center; } }
+
+.portrait-frame { overflow: hidden; }
+.portrait figcaption { margin-top: .7rem; text-align: center; font-family: Instrument, Georgia, serif; font-size: var(--yeos-card-type); }
+.portrait .caption-rose, .portrait .caption-milk { display: none; }
+.rose:has([data-choice="rose"][aria-pressed="true"]) .photo { transform: scale(1.9); transform-origin: 94% 85%; }
+.rose:has([data-choice="milk"][aria-pressed="true"]) .photo { transform: scale(1.65); transform-origin: 35% 32%; }
+.rose:has([data-choice="rose"][aria-pressed="true"]) .caption-bandung,
+.rose:has([data-choice="milk"][aria-pressed="true"]) .caption-bandung { display: none; }
+.rose:has([data-choice="rose"][aria-pressed="true"]) .caption-rose,
+.rose:has([data-choice="milk"][aria-pressed="true"]) .caption-milk { display: inline; }
+
+.studio .choices { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .45rem; align-items: start; }
+.studio .choices button { border-radius: var(--radius-sm); padding: .3rem .3rem .45rem; background: var(--palette-white); color: var(--ink); font-family: Instrument, Georgia, serif; font-size: var(--font-size-lg); line-height: 1.15; }
+.studio .choices button::before { content: ""; display: block; width: 100%; aspect-ratio: 2; margin-bottom: .4rem; background-image: url("../v1/assets/bandung.webp"); background-size: cover; background-position: 55% 53%; }
+.studio .choices [data-choice="rose"]::before { background-size: 240%; background-position: 92% 85%; }
+.studio .choices [data-choice="milk"]::before { background-size: 210%; background-position: 32% 48%; }
+.studio .choices [aria-pressed="true"] { border-bottom: .32rem solid var(--ink); font-weight: 700; }

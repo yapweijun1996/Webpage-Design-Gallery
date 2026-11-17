@@ -44,9 +44,9 @@
     "demos/corporate/gjh/v11/assets/spatial.js": "7cafcdf06b91dec11675ce25601e42fd30b618a80abfde7ef13024d8fb1d6b25",
     "demos/corporate/gjh/v11/assets/static-asset.js": "ea70b7e7becf1c3cb60b820e97ae2a8725597b176de67b4eca8d796e5ab56f37",
     "demos/corporate/gjh/v11/assets/store-destinations.js": "b5c8aa850caee6d56995cddf8855c5497cf8a288cab157edc783b1175c69f0f3",
-    "demos/corporate/gjh/v11/assets/ui.js": "2f64ba6dec51062cb9b1218137d889b69e46a39bc352aa333e9b3a3fb552f18f",
+    "demos/corporate/gjh/v11/assets/ui.js": "bbef4da9dbb13c8124ac64415273ac0f3256040e272e8427b243ad35f2467d7f",
     "demos/corporate/gjh/v11/assets/ux-spatial-hud.js": "e0f74bfb64deb3d89579671eb6e15b2b54d20429cbafeea0b645743d914be61b",
-    "demos/corporate/gjh/v11/assets/ux-tutorial.js": "42f8b4d19ed26a6676cb1566da7091dc15d568b3b36a685aff7ea9945253d0eb",
+    "demos/corporate/gjh/v11/assets/ux-tutorial.js": "076b451281b24019fdde9c4fba6368d66c3ffb2baef7c7b0b37fc095c2571272",
     "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "8b187c6df79c017dbbe6287aba072ec412ba0ecdc0af7c1f16972351075f9fa3",
     "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "06f77543852578d8d3e11de82e8d0e6b9e063b32ac37e5655d986d3229da165d",
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "85803a5d45a8c1fbe501ee2ea6f5085dba791cbc87e75c3117be99bc7324c205",
@@ -55,7 +55,7 @@
     "demos/corporate/gjh/v11/script.js": "0f21a092591992d226a7521f3a2af84b94ee976f56add68725832d5c3dfb88a2"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "a9b8a5f5c612c280b994b620e2277c6b07c31bc56130a790738637f005adb707",
+    "demos/corporate/gjh/v11/script.bundle.js": "a4e3235d54a7b2986268ed580c974464b50b75894fe9027571c35c53b3fdbb66",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "291357fdf97dd44f0551090ba999b5e3529cee7d261196e2527aa2537d7b1a78",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "f2b3e048197bc1948f095e223ec7ee9fd002ce030b7f1fd7c4757198204d5d30",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "cd02fa848f72168ae607037392bc001495dd0e56eeee57fe9c66a7c23ef46e22"

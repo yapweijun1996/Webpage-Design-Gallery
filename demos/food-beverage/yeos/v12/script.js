@@ -4,8 +4,12 @@ const entry = document.querySelector('#entry');
 const message = document.querySelector('#saved');
 const prefix = 'yeos-tasting-notebook:';
 const drafts = new Map();
+const requested = new URLSearchParams(location.search).get('drink');
+if ([...drink.options].some(option => option.value === requested)) drink.value = requested;
 let active = drink.value;
 function loadSaved() {
+  document.querySelector('#journal-drink').textContent = drink.selectedOptions[0].textContent;
+  document.querySelector('#journal-portrait').src = '../v1/assets/' + active + '.webp';
   try {
     entry.value = drafts.get(active) ?? localStorage.getItem(prefix + active) ?? '';
     message.textContent = drafts.has(active) ? 'Unsaved changes.' : entry.value ? 'Saved note loaded.' : '';

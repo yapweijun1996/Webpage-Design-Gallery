@@ -11,3 +11,9 @@ body { --paper:var(--palette-night-page); --ink:var(--palette-night-ink); --rule
 .shelves a { font-size:var(--font-size-sm); }
 @media(max-width:800px) { .cooler header { align-items:start; flex-direction:column; } .shelves { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:500px) { .shelves { grid-template-columns:1fr; } .shelves article { display:grid; grid-template-columns:35% 1fr; } .shelves .photo { height:100%; } }
+
+.cooler header { margin-bottom: .5rem; }
+.shelf-count { color: var(--palette-night-success); font-family: var(--font-family-code); font-size: var(--font-size-sm); margin-bottom: 1rem; }
+.pack-tickets { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; padding: 0; margin: .75rem 0; list-style: none; }
+.pack-tickets li { border: 1px solid var(--palette-night-line); padding: .18rem .42rem; font-family: var(--font-family-code); font-size: var(--font-size-xs); }
+.cooler:has([data-choice]:not([data-choice="all"])[aria-pressed="true"]) .pack-tickets li { border-color: var(--palette-night-success); color: var(--palette-night-success); }

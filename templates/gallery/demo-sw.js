@@ -51,7 +51,9 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== BASE.origin) return;
   if (url.pathname === BASE.pathname) url.pathname += 'index.html';
+  // The document keeps its query and fragment. Only the saved file key is canonical.
   url.search = '';
+  url.hash = '';
   if (canonical.has(url.href)) {
     event.respondWith(caches.open(CACHE).then(cache => cache.match(url)).then(response =>
       response || new Response('Saved content is unavailable. Reconnect and check for updates.', {status: 503})));

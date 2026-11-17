@@ -1,5 +1,8 @@
 {
   "messages": {
+    "View design reference": "View design reference",
+    "View design references": "View design references",
+    "Explore the style atlas": "Explore the style atlas",
     "Theme": "Theme",
     "Language": "Language",
     "System": "System",
@@ -255,7 +258,14 @@
     "Look up six drinks in an alphabetical reference atlas.": "Look up six drinks in an alphabetical reference atlas.",
     "Saved collections and demos are available offline. Connect to open a new demo, view a full screenshot or visit an official website.": "Saved collections and demos are available offline. Connect to open a new demo, view a full screenshot or visit an official website.",
     "Offline. Saved collections and demos are available. Connect to open a new demo or a full screenshot.": "Offline. Saved collections and demos are available. Connect to open a new demo or a full screenshot.",
-    "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.": "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files."
+    "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.": "Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.",
+    "Explore the brand portfolio": "Explore the brand portfolio",
+    "Prepare a trade enquiry": "Prepare a trade enquiry",
+    "Compare two drinks": "Compare two drinks",
+    "Find a flavour": "Find a flavour",
+    "Explore the dragon kiln": "Explore the dragon kiln",
+    "Plan your visit": "Plan your visit",
+    "Open a company collection to try a live design or compare two directions side by side.": "Open a company collection to try a live design or compare two directions side by side."
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "Showing {shown} of {total} matching company",

@@ -110,3 +110,8 @@ h1 em { color: var(--lilac); font: var(--font-h1-em); letter-spacing: -.072em;}
   .wave { gap: 2px;}
   .masthead nav a { font-size: var(--type-masthead-nav-a-3);}
 }
+
+.cover-presets { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; gap: .35rem; margin-top: 1.1rem; }
+.cover-presets a { display: grid; min-width: 4.5rem; min-height: 44px; align-content: center; padding: .35rem .65rem; border: 1px solid currentColor; color: var(--paper); text-decoration: none; }
+.cover-presets a span { font-size: var(--type-channels-small); font-weight: 700; }
+.cover-presets a[aria-current], .cover-presets a:focus-visible, .cover-presets a:hover { color: var(--ink); background: var(--lime); }

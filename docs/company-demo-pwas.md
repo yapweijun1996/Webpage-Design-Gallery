@@ -6,7 +6,7 @@ Release 1.2.0 contains 16 Goh Joo Hin designs, 15 Yeo Hiap Seng designs and 15 T
 
 | Application | After the first successful online visit | Requires a connection |
 | --- | --- | --- |
-| Gallery and three company collections | Directory, filters, translations, design metadata and thumbnails | Full gallery screenshots and first-time demo visits |
+| Gallery and three company collections | Directory, filters, translations, design metadata, collection artwork and thumbnails | Full gallery screenshots and first-time demo visits |
 | 45 standalone demos | The selected edition, its styles, scripts, images and local fonts. Yeo’s pack comparison and Thow Kwang’s kiln diagram remain interactive. | Other editions until first saved, official product links, directions, workshop schedules and booking |
 | GJH V11 virtual mall | Saved lightweight reconnect page managed by the mall’s existing worker | 3D scene, product catalogue and shop links. [Mall profile](gjh-v11-pwa.md) |
 
@@ -19,6 +19,8 @@ The generator reads demo metadata, the authored theme colour and the publication
 A candidate worker fetches the release identity with a versioned URL, verifies each response and stores files in a scope-and-build-specific cache. A failed network request, identity mismatch, quota error or hash mismatch discards the candidate. The active worker continues serving the last verified edition. A waiting release offers **Update and reload**. Other open tabs retain their current document until their reader reloads. No form submissions or transactions are queued. Local tasting notes remain under the notebook’s own storage key.
 
 To publish, run the gallery checks and rebuild from sources. The Pages workflow publishes the allowlisted artifact under the repository URL prefix. To roll back, revert the affected change in Git, regenerate, run the checks and push the resulting commit to main. Open the demo and check for updates once Pages has published the rollback.
+
+The service worker resolves a saved document by its path. Shared links retain their query and fragment in the browser, so a saved Yeo’s drinks comparison can reopen with both selections and its comparison section while offline. The gallery saves the style atlas index and stylesheet. Its full-size reference images are available online.
 
 ## Verification
 

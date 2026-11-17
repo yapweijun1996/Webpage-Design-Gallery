@@ -62,7 +62,15 @@ export function createUI(expanded = false) {
   const help = document.getElementById('keyboard-help');
   const mallMap = document.getElementById('mall-map');
   const tutorial = createTutorial({parent: experience, touch: matchMedia('(pointer: coarse)').matches,
-    onDismiss: () => { if (showing3D) scene.focus({preventScroll: true}); }});
+    onDismiss: () => { if (showing3D) scene.focus({preventScroll: true}); },
+    onBrowseProducts: () => {
+      storeFilter = 'all';
+      productSearch.value = '';
+      productCategory.value = 'all';
+      updateCatalog();
+      setView(false);
+      document.getElementById('featured-heading').focus();
+    }});
   // Amenity dialogs retain their saved language/theme without mounting onboarding.
   let amenityLocale = 'en', amenityTheme = 'system';
   try {

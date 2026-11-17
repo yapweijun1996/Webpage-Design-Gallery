@@ -10,3 +10,10 @@ body { --paper:var(--palette-warning-surface); --ink:var(--yeos-ink); --rule:var
 .flight-list h3 { margin:.5rem 0; }
 .flight-list a { display:inline-block; margin-top:.8rem; font-size:var(--font-size-sm); }
 @media(max-width:700px) { .flight header { align-items:start; flex-direction:column; } .flight-list { grid-template-columns:1fr; } .flight-list li { display:grid; grid-template-columns:32% 1fr; } .flight-list .photo { height:100%; } }
+
+.flight-list { gap: 0; border-block: 1px solid var(--ink); }
+.flight-list li { border: 0; }
+.flight-list li + li { border-left: 1px dashed var(--palette-warning); }
+.flight-list li .journal-action { display: flex; align-items: center; min-height: 44px; font-weight: 700; width: fit-content; }
+.flight-list .journal-action + a { margin-top: 0; }
+@media(max-width:700px) { .flight-list li + li { border-left: 0; border-top: 1px dashed var(--palette-warning); } }

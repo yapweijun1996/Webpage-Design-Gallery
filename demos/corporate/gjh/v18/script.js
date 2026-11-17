@@ -1,4 +1,4 @@
-const channelLinks = [...document.querySelectorAll('.channels a')];
+const channelLinks = [...document.querySelectorAll('.channels a, .cover-presets a')];
 const scenes = [...document.querySelectorAll('.scene')];
 
 function selectChannel(fragment) {

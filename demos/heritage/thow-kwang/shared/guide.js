@@ -4,14 +4,31 @@ window.thowKwangGuide = {
     const plate = document.querySelector("[data-kiln]");
     if (!plate) return;
     const panels = [...document.querySelectorAll("details[data-part]")];
+    const caption = plate.querySelector("[data-kiln-caption]");
     const select = () => {
-      plate.dataset.selected = panels.find((p) => p.open)?.dataset.part || "";
+      const active = panels.find((panel) => panel.open);
+      plate.dataset.selected = active?.dataset.part || "";
+      caption.hidden = !active;
+      if (active) {
+        caption.querySelector("strong").textContent =
+          active.querySelector("summary").textContent;
+        caption.querySelector("p").textContent =
+          active.querySelector("div").textContent;
+      }
+      for (const pin of plate.querySelectorAll("[data-zone]")) {
+        if (pin.dataset.zone === plate.dataset.selected)
+          pin.setAttribute("aria-current", "true");
+        else pin.removeAttribute("aria-current");
+      }
     };
     panels.forEach((panel) => panel.addEventListener("toggle", select));
     document.querySelectorAll("a[data-zone]").forEach((link) =>
-      link.addEventListener("click", () => {
+      link.addEventListener("click", (event) => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+          return;
         const panel = panels.find((item) => item.id === link.dataset.zone);
         if (panel) {
+          event.preventDefault();
           panels.forEach((item) => {
             item.open = item === panel;
           });

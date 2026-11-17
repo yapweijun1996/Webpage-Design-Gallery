@@ -437,3 +437,7 @@ a:focus-visible {
 .contact a:focus-visible {
   outline-color: var(--outline-color-notice-a-focus-visible);
 }
+
+.range-note { border-top: 1px solid currentColor; margin-top: .6rem; }
+.range-note summary { cursor: pointer; padding-block: .55rem; min-height: 44px; font-weight: 700; }
+.range-note[open] p { margin: 0 0 .75rem; }

@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="style.css">
   <script defer src="../../../../src/demo-pwa.js"></script>
   <link rel="icon" type="image/png" sizes="192x192" href="../../../../assets/icons/gallery-192.png">
+  <script src="script.js" defer></script>
+<link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#yeos-v6">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -27,10 +29,15 @@
       <header>
         <p class="tag">Ingredient field notebook</p>
         <h1>Botanical <em>notes</em></h1>
-        <p class="lead">Open a specimen to see which drink it belongs to.</p>
+        <p class="lead">Trace a flower, a leaf or a bean to the drink it makes.</p>
+        <nav class="specimen-key" aria-label="Featured ingredient specimens">
+          <a href="#spec-chrysanthemum"><img src="../v1/assets/chrysanthemum.webp" width="506" height="506" alt=""><span>Flower ↘</span></a>
+          <a href="#spec-green-tea"><img src="../v1/assets/green-tea.webp" width="506" height="506" alt=""><span>Leaf ↘</span></a>
+          <a href="#spec-black-soy"><img src="../v1/assets/black-soy.webp" width="506" height="506" alt=""><span>Bean blend ↘</span></a>
+        </nav>
       </header>
       <section class="specimens" aria-label="Ingredient specimens">
-        <details class="spec">
+        <details class="spec" id="spec-chrysanthemum">
           <summary><img class="photo" src="../v1/assets/chrysanthemum.webp" width="506" height="506" alt="A glass of golden tea with chrysanthemum flowers"><span><small>Flower</small>Hang Bai Ju chrysanthemums</span></summary>
           <div>
             <h3>Chrysanthemum Tea</h3>
@@ -38,7 +45,7 @@
             <a href="https://yeos.com.sg/product/chrysanthemum-tea/">Official product page ↗</a>
           </div>
         </details>
-        <details class="spec">
+        <details class="spec" id="spec-green-tea">
           <summary><img class="photo" src="../v1/assets/green-tea.webp" width="506" height="506" alt="A glass of green tea beside fresh green leaves"><span><small>Leaf</small>First spring tea buds</span></summary>
           <div>
             <h3>First Harvest Green Tea</h3>
@@ -46,7 +53,7 @@
             <a href="https://yeos.com.sg/product/jasmine-green-tea/">Official product page ↗</a>
           </div>
         </details>
-        <details class="spec">
+        <details class="spec" id="spec-soy">
           <summary><img class="photo" src="../v1/assets/soy.webp" width="506" height="506" alt="A glass of pale soy milk with soy beans"><span><small>Bean</small>Whole soy beans</span></summary>
           <div>
             <h3>Soy Bean Milk</h3>
@@ -54,7 +61,7 @@
             <a href="https://yeos.com.sg/product/soy-bean-milk/">Official product page ↗</a>
           </div>
         </details>
-        <details class="spec">
+        <details class="spec" id="spec-black-soy">
           <summary><img class="photo" src="../v1/assets/black-soy.webp" width="506" height="506" alt="A glass of dark soy milk with black soy beans"><span><small>Bean blend</small>Soy beans and black soy beans</span></summary>
           <div>
             <h3>Black Soy Milk</h3>
@@ -62,7 +69,7 @@
             <a href="https://yeos.com.sg/product/black-soy-milk-2/">Official product page ↗</a>
           </div>
         </details>
-        <details class="spec">
+        <details class="spec" id="spec-lychee">
           <summary><img class="photo" src="../v1/assets/lychee.webp" width="506" height="506" alt="A glass of lychee drink with fresh lychees"><span><small>Fruit flavour</small>Lychee flavour</span></summary>
           <div>
             <h3>Lychee Drink</h3>
@@ -70,7 +77,7 @@
             <a href="https://yeos.com.sg/product/lychee-drink/">Official product page ↗</a>
           </div>
         </details>
-        <details class="spec">
+        <details class="spec" id="spec-bandung">
           <summary><img class="photo" src="../v1/assets/bandung.webp" width="506" height="506" alt="A glass of pink Bandung with rose petals"><span><small>Rose essence</small>Milk and rose essence</span></summary>
           <div>
             <h3>Bandung Rose Milk Drink</h3>
@@ -84,6 +91,6 @@
   <footer class="wrap base">
     <p>Independent design concept for Yeo Hiap Seng Limited.</p>
     <a href="https://yeos.com.sg/">Yeo’s Singapore ↗</a>
-  </footer>
+   <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#yeos-v6">View design reference</a></footer>
 </body>
 </html>

@@ -15,6 +15,8 @@ These fifteen independent concepts explore a single question from different pers
 
 Official operator pages checked 17 November 2026. The observation prompts, self-guided itinerary, silhouettes and educational worksheet are original concept material, not official activities. The six generative photo illustrations show generic pottery, fire, clay work and light; none claims to document this company, its site or its products. The local Instrument Serif and Manrope assets include their Open Font License notices.
 
+The [landing design notes](../../../docs/thow-kwang-landing-improvements.md) record the individual first-screen decisions and how to exercise each new feature.
+
 ## Pages and primary tasks
 
 | Version | Concept | Main task |

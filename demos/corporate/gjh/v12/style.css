@@ -460,3 +460,7 @@ figcaption,
 .fine {
   font-size: var(--type-pill);
 }
+
+.hero-caption.table-index { flex-wrap: wrap; gap: .25rem 1rem; padding-block: .25rem; }
+.table-index a { display: inline-flex; min-height: 44px; align-items: center; }
+.table-index a:hover { text-decoration: underline; }

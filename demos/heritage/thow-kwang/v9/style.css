@@ -62,3 +62,57 @@
     grid-column: 1/-1;
   }
 }
+
+.party-check {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 1.1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid currentColor;
+  grid-column: 1/-1;
+}
+.party-check label {
+  font-weight: 700;
+}
+.party-check input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+.party-check output {
+  font-size: var(--font-size-sm);
+}
+.party-check output:empty {
+  display: none;
+}
+.party-check input:focus-visible {
+  outline-color: var(--btn-ink);
+}
+
+.team-card {
+  border-block: 0.35rem double var(--btn-ink);
+  outline: 1px solid var(--accent);
+}
+.team-card strong {
+  font-variant-numeric: tabular-nums;
+}
+.party-check {
+  border-top-style: dashed;
+  grid-template-columns: minmax(0, 1fr) minmax(5.5rem, 0.7fr);
+  align-items: center;
+}
+.party-check output {
+  grid-column: 1/-1;
+}
+.party-check input {
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 390px) {
+  .party-check {
+    grid-template-columns: 1fr;
+  }
+}

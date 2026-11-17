@@ -74,6 +74,22 @@ class GalleryTests(unittest.TestCase):
         self.assertNotIn('class="compare-tray"', page)
         self.assertIn('class="compare-checkbox"', pages["companies/gjh/index.html"])
 
+    def test_collection_actions_resolve_to_published_designs_and_sections(self):
+        catalog = gallery.load_catalog()
+        pages = gallery.build_pages(catalog)
+        for company in catalog["companies"]:
+            with self.subTest(company=company["id"]):
+                page = pages[f"companies/{company['slug']}/index.html"]
+                landing = company["landing"]
+                directory = company["demoDirectory"]
+                primary = directory + "/" + company["featuredVersion"] + "/index.html"
+                anchor = landing["anchor"]
+                if anchor:
+                    self.assertRegex((ROOT / primary).read_text(), rf'id=["\']{re.escape(anchor)}["\']')
+                self.assertIn('href="../../' + primary + ("#" + anchor if anchor else "") + '"', page)
+                self.assertIn(f'href="../../{directory}/{landing["alternativeVersion"]}/index.html"', page)
+                self.assertIn(f'src="../../{directory}/{landing["image"]}"', page)
+
     def test_generation_is_deterministic(self):
         catalog = gallery.load_catalog()
         self.assertEqual(gallery.build_pages(catalog), gallery.build_pages(copy.deepcopy(catalog)))
@@ -154,6 +170,10 @@ class GalleryTests(unittest.TestCase):
             self.assertNotIn("demos/corporate/gjh/shared/navigation.js", cached)
             self.assertNotIn("demos/corporate/gjh/v11/vendor/rapier.mjs", cached)
             self.assertTrue(all(design["thumbnail"] in cached for design in catalog["designs"]))
+            for company in catalog["companies"]:
+                artwork = company["demoDirectory"] + "/" + company["landing"]["image"]
+                self.assertIn(artwork, cached)
+                self.assertTrue((output / artwork).is_file())
             mall = output / "demos/corporate/gjh/v11"
             mall_worker = (mall / "pwa-sw.js").read_text()
             mall_entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", mall_worker, re.S).group(1))

@@ -1,0 +1,142 @@
+[
+  {
+    "key": "division-directory", "version": "v1", "kind": "primary", "style": "Swiss corporate directory",
+    "headline": "Good things. Every day. Connected.", "action": "Explore food", "image": "demos/corporate/gjh/v1/assets/family-lifestyle.jpg",
+    "composition": "split", "background": "#f5f5ee", "ink": "#143b32", "accent": "#396953",
+    "notes": "Keep the portrait in a ruled right-hand column. Set the three named divisions on separate baselines so a first-time visitor can scan straight to a business panel.",
+    "detail": "Find the division behind the products you know.", "items": ["Food", "Electronics", "Health & nutrition"]
+  },
+  {
+    "key": "heritage-food-monthly", "version": "v5", "kind": "primary", "style": "Food magazine cover",
+    "headline": "Goodness, passed on.", "action": "Visit New Moon", "image": "demos/corporate/gjh/v5/assets/new-moon-brand-cover.jpg",
+    "composition": "cover", "background": "#391c1c", "ink": "#fff5e7", "accent": "#f2ce95",
+    "notes": "Crop the brand cover like a food magazine feature and keep the three linked cover captions aligned along a single editorial rule.",
+    "detail": "Choose a familiar cover to visit its official brand page.", "items": ["New Moon", "MILI", "GOGO"]
+  },
+  {
+    "key": "pack-origins", "version": "v6", "kind": "primary", "style": "Modern bento packaging study",
+    "headline": "One brand. Distinct origins.", "action": "Compare the origins", "image": "demos/corporate/gjh/v6/assets/new-moon-mx-454g-front.jpg",
+    "composition": "plate", "background": "#e6efdc", "ink": "#233c2e", "accent": "#446333",
+    "notes": "Give the Mexico tin a square sample tile with generous space around the label. Its adjacent origin index brings the New Zealand and Mexico pairing into the larger four-pack comparison.",
+    "detail": "Start with the 454 g Mexico pack, then compare the other origins.", "items": ["Mexico", "New Zealand", "Four origins"]
+  },
+  {
+    "key": "trade-concierge", "version": "v7", "kind": "primary", "style": "Private-client hospitality",
+    "headline": "The connections behind everyday life.", "action": "Explore partnerships", "image": "demos/corporate/gjh/v7/assets/connected-lifestyle.jpg",
+    "composition": "index", "background": "#172321", "ink": "#f3f0e7", "accent": "#e3c699",
+    "notes": "Give the photograph a narrow portrait crop and pair it with three quiet, parallel destinations. Use a warm brass rule to guide the eye to the partnership route.",
+    "detail": "Choose a division, read about partnerships or find the contact desk.", "items": ["Businesses", "Partnerships", "Contact"]
+  },
+  {
+    "key": "family-chronicle", "version": "v8", "kind": "primary", "style": "Cinematic family chronicle",
+    "headline": "Generations of Goodness.", "action": "Choose a chapter", "image": "demos/corporate/gjh/v8/assets/family-dining.webp",
+    "composition": "frieze", "background": "#17392c", "ink": "#f7efdb", "accent": "#edcf91",
+    "notes": "Preserve the three generations in the dinner illustration and place the dated chapter links in a horizontal strip below it. Keep the date and destination together on narrow screens.",
+    "detail": "Follow the story from the Rochor Road provision store to Borsch Med.", "items": ["1940s · Rochor Road", "1959 · New Moon", "1981 · MILI"]
+  },
+  {
+    "key": "shopfront-signs", "version": "v9", "kind": "primary", "style": "Painted neighbourhood shop signage",
+    "headline": "A little closer to everyday goodness.", "action": "Enter the pantry", "image": "demos/corporate/gjh/v9/assets/mili-brand-cover.jpg",
+    "composition": "stack", "background": "#f5dfae", "ink": "#4c2821", "accent": "#864732",
+    "notes": "Make each brand sign read like an address with its exhibit printed just beneath. Put pantry photography behind the MILI sign to signal what happens after entry.",
+    "detail": "MILI’s street sign leads to its pantry.", "items": ["MILI · Pantry", "New Moon · Four packs", "GOGO · Refreshment"]
+  },
+  {
+    "key": "arcade-night-map", "version": "v10", "kind": "primary", "style": "After-dark arcade programme",
+    "headline": "A little closer to goodness.", "action": "Open the pack gallery", "image": "demos/corporate/gjh/v11/assets/concept-atrium.webp",
+    "composition": "dashboard", "background": "#131e33", "ink": "#f4ead5", "accent": "#ecc781",
+    "notes": "Frame the illustrative atrium as an evening programme, with each exhibit name on its own line beside its room. The reference image sets the mood for the edition’s selectable 3D map.",
+    "detail": "Use the map to enter the New Moon gallery and inspect the packs.", "items": ["Pack gallery", "Pantry art", "All stores"]
+  },
+  {
+    "key": "mall-arrivals", "version": "v11", "kind": "primary", "style": "Visitor arrival board",
+    "headline": "Everyday, explored.", "action": "Featured products", "image": "demos/corporate/gjh/v11/assets/concept-wayfinding.webp",
+    "composition": "split", "background": "#102e28", "ink": "#f8f2de", "accent": "#d9cd88",
+    "notes": "Use the mall’s illustrated wayfinding panel beside an arrivals board. Give the product shortcut equal prominence with the basic orientation controls so a visitor can immediately reach four real packs.",
+    "detail": "Go straight to four New Moon packs, or explore the mall on foot.", "items": ["Featured products", "Walking guide", "Store wayfinding"]
+  },
+  {
+    "key": "family-table-spread", "version": "v12", "kind": "primary", "style": "Sunday supplement spread",
+    "headline": "Made for the moments we share.", "action": "For a shared meal", "image": "demos/corporate/gjh/v12/assets/family-dining.webp",
+    "composition": "spread", "background": "#fcf0df", "ink": "#472d29", "accent": "#98583a",
+    "notes": "Treat the family-table illustration as a double-page spread. Set the two food destinations on a caption rail under the image, where readers traditionally look for names.",
+    "detail": "Choose New Moon for a shared meal or MILI for the pantry.", "items": ["Family table", "New Moon", "MILI"]
+  },
+  {
+    "key": "industry-desks", "version": "v13", "kind": "primary", "style": "Financial broadsheet",
+    "headline": "Connections that matter.", "action": "Open the electronics desk", "image": "demos/corporate/gjh/v13/assets/connected-lifestyle.jpg",
+    "composition": "frieze", "background": "#e5e8e3", "ink": "#152a3e", "accent": "#3c526d",
+    "notes": "Use a formal masthead and a single photographic band. Set the three official sector-and-brand links like newspaper desks, with clear horizontal rules and compact titles.",
+    "detail": "Each sector desk leads directly to a representative brand.", "items": ["Food · New Moon", "Electronics · Sony", "Health · Borsch Med"]
+  },
+  {
+    "key": "provision-archive", "version": "v14", "kind": "primary", "style": "Historical exhibition catalogue",
+    "headline": "Good things gather here.", "action": "See the archive", "image": "demos/corporate/gjh/v14/assets/provision-counter-1120.webp",
+    "composition": "poster", "background": "#f3e0bd", "ink": "#492e21", "accent": "#805137",
+    "notes": "Mount the provision-counter illustration as an exhibition print with its source caption attached. Leave space for the original-site composite and the two-position image switch.",
+    "detail": "Switch between the illustrated counter and GJH’s historical composite.", "items": ["Counter illustration", "Archive view", "Source caption"]
+  },
+  {
+    "key": "brand-field-guide", "version": "v15", "kind": "primary", "style": "Illustrated brand field guide",
+    "headline": "Life is better in good company.", "action": "Open MILI’s range note", "image": "demos/corporate/gjh/v15/assets/portfolio-study-1120.webp",
+    "composition": "index", "background": "#e3eaeb", "ink": "#243d48", "accent": "#426b6b",
+    "notes": "Print the portfolio study as a field-guide plate with ordered specimen rows. Fold each brand’s range note into its own row, visually aligned with the corresponding name.",
+    "detail": "Open a brand’s range note to see the kinds of products it carries.", "items": ["New Moon", "MILI", "GOGO"]
+  },
+  {
+    "key": "abalone-object-label", "version": "v16", "kind": "primary", "style": "Museum object label",
+    "headline": "A little goodness goes a long way.", "action": "View back label", "image": "demos/corporate/gjh/v16/assets/new-moon-front-480.webp",
+    "composition": "plate", "background": "#f8eee6", "ink": "#442940", "accent": "#875366",
+    "notes": "Centre one complete tin inside a generous matte with the front label upright. Put the flip control and exact SKU beside its object caption so neither competes with the pack.",
+    "detail": "Inspect both sides of the New Moon New Zealand 425 g tin.", "items": ["New Zealand", "425 g", "Official product"]
+  },
+  {
+    "key": "pantry-cookbook", "version": "v17", "kind": "primary", "style": "Clothbound family cookbook",
+    "headline": "Pantry Notes.", "action": "Find a weeknight supper", "image": "demos/corporate/gjh/v17/assets/shared-table.webp",
+    "composition": "spread", "background": "#f7ecd0", "ink": "#4e362a", "accent": "#80512d",
+    "notes": "Place the shared table opposite an oversized cookbook title with short ribbon-like meal bookmarks. Preserve the actual meal names so the reader recognizes the matching entry.",
+    "detail": "Choose an occasion and find its place at the table.", "items": ["Weeknight supper", "Sunday lunch", "Afternoon break"]
+  },
+  {
+    "key": "record-receiver", "version": "v18", "kind": "primary", "style": "Analogue receiver faceplate",
+    "headline": "Everyday Frequencies.", "action": "Tune in", "image": "demos/corporate/gjh/v18/assets/record-grooves.webp",
+    "composition": "dashboard", "background": "#232724", "ink": "#f2eee5", "accent": "#e7ad64",
+    "notes": "Crop into the record grooves and align the channel names on a calibrated preset strip. Give the selected channel a visible indicator that matches the in-page guide.",
+    "detail": "Listen, watch, play or connect through the electronics channel guide.", "items": ["Listen", "Watch", "Play"]
+  },
+  {
+    "key": "buyers-working-desk", "version": "v19", "kind": "primary", "style": "Procurement worksheet",
+    "headline": "The Partner Desk.", "action": "Prepare brief", "image": "demos/corporate/gjh/v19/assets/partner-review.webp",
+    "composition": "ticket", "background": "#f4eee0", "ink": "#283a36", "accent": "#436b5a",
+    "notes": "Make the paper worksheet the dominant surface and use the buying-desk illustration as context. Put the optional retail setting where a buyer expects to qualify a request.",
+    "detail": "Add a retail setting to give your introduction a practical starting point.", "items": ["Independent shop", "Grocery retail", "Online retail"]
+  },
+  {
+    "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
+    "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
+    "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",
+    "notes": "Give the dated source composite a broad photographic frame and set the historical chapter names vertically like an archivist’s index. Caption the published composite explicitly.",
+    "detail": "Start at GJH’s provision-store beginnings, then follow the timeline.", "items": ["Rochor Road", "New Moon", "Borsch Med"]
+  },
+  {
+    "key": "pack-label-proof", "version": "v16", "kind": "alternate", "style": "Packaging proof sheet",
+    "headline": "View back label", "action": "View front label", "image": "demos/corporate/gjh/v16/assets/new-moon-nz-425g-back.jpg",
+    "composition": "stack", "background": "#e6ebe6", "ink": "#1e322e", "accent": "#4b675d",
+    "notes": "Lead with the actual back label on a light proofing sheet. Keep a separate side indicator and pack weight visible rather than adding simulated ingredient or nutrition data.",
+    "detail": "Turn the New Zealand 425 g specimen to compare the front and back.", "items": ["Back label", "Front label", "425 g"]
+  },
+  {
+    "key": "sunday-menu-card", "version": "v17", "kind": "alternate", "style": "Tabletop menu card",
+    "headline": "Sunday lunch", "action": "Open Sunday lunch", "image": "demos/corporate/gjh/v17/assets/sunday-lunch.webp",
+    "composition": "poster", "background": "#482b23", "ink": "#fff0d4", "accent": "#f2c597",
+    "notes": "Lead with one meal as a stand-up menu card. Give the Sunday photograph the full visual area and place a compact occasion index beneath it for the other two meal entries.",
+    "detail": "Use the Sunday lunch bookmark to open its entry in Pantry Notes.", "items": ["Sunday lunch", "Weeknight supper", "Afternoon break"]
+  },
+  {
+    "key": "newmoon-drawer", "version": "v11", "kind": "alternate", "style": "Stockroom drawer catalogue",
+    "headline": "Featured products from New Moon", "action": "Explore featured products", "image": "demos/corporate/gjh/v11/assets/new-moon-au-425g-front.jpg",
+    "composition": "ticket", "background": "#e9e2cb", "ink": "#333a28", "accent": "#5d663d",
+    "notes": "Begin the mall visit at the result of its product shortcut. Treat each origin as a drawer label with the pack’s photograph above, and keep the wayfinding link at the foot of the directory.",
+    "detail": "Browse four New Moon packs in the mall directory.", "items": ["Australia · 425 g", "Mexico · 454 g", "All four packs"]
+  }
+]

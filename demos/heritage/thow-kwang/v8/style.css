@@ -44,3 +44,49 @@
   padding: 0 1rem;
   border-radius: var(--radius-xl);
 }
+
+.game-card {
+  position: relative;
+  max-width: 23rem;
+  margin: -1.8rem 0 0 auto;
+  background: var(--wash);
+  color: var(--ink);
+  border: 2px solid var(--accent);
+  padding: 0.8rem 1rem;
+}
+.game-card strong {
+  display: block;
+  font-family: var(--sign);
+  font-size: var(--font-size-xl);
+}
+.game-card p {
+  font-size: var(--font-size-sm);
+}
+.game-card .mini {
+  margin-top: 0.3rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  color: var(--accent);
+}
+.picturebook .plate figcaption {
+  padding-bottom: 1.8rem;
+}
+
+.game-card {
+  border-radius: var(--radius-sm);
+  border-block: 3px double var(--accent);
+  padding-left: 1.1rem;
+}
+.game-card .cap {
+  display: block;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px dashed var(--accent);
+}
+.game-card strong {
+  margin-block: 0.5rem 0.2rem;
+}
+.game-card .mini {
+  font-weight: 700;
+}

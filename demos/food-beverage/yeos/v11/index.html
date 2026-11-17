@@ -16,6 +16,7 @@
   <script defer src="../../../../src/demo-pwa.js"></script>
   <script defer src="script.js"></script>
   <link rel="icon" type="image/png" sizes="192x192" href="../../../../assets/icons/gallery-192.png">
+<link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#yeos-v11">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -37,13 +38,18 @@
           <button type="button" data-choice="bottle" aria-pressed="false">Bottles</button>
         </div>
       </header>
-      <p class="sr" role="status" id="count"></p>
+      <p class="shelf-count" role="status" id="count">6 drinks on the shelf</p>
       <div class="shelves">
         <article data-formats="bottle can carton">
           <img class="photo" src="../v1/assets/chrysanthemum.webp" width="506" height="506" alt="A glass of golden tea with chrysanthemum flowers">
           <div>
             <h2>Chrysanthemum Tea</h2>
-            <p>250 mL carton · 300 mL can · 380 mL bottle · 1.5 L bottle</p>
+            <ul class="pack-tickets" aria-label="Available packs">
+              <li data-container="carton">250 mL carton</li>
+              <li data-container="can">300 mL can</li>
+              <li data-container="bottle">380 mL bottle</li>
+              <li data-container="bottle">1.5 L bottle</li>
+            </ul>
             <a href="https://yeos.com.sg/product/chrysanthemum-tea/">Product details ↗</a>
           </div>
         </article>
@@ -51,7 +57,12 @@
           <img class="photo" src="../v1/assets/soy.webp" width="506" height="506" alt="A glass of pale soy milk with soy beans">
           <div>
             <h2>Soy Bean Milk</h2>
-            <p>250 mL carton · 300 mL can · 380 mL bottle · 1 L carton</p>
+            <ul class="pack-tickets" aria-label="Available packs">
+              <li data-container="carton">250 mL carton</li>
+              <li data-container="can">300 mL can</li>
+              <li data-container="bottle">380 mL bottle</li>
+              <li data-container="carton">1 L carton</li>
+            </ul>
             <a href="https://yeos.com.sg/product/soy-bean-milk/">Product details ↗</a>
           </div>
         </article>
@@ -59,7 +70,11 @@
           <img class="photo" src="../v1/assets/bandung.webp" width="506" height="506" alt="A glass of pink Bandung with rose petals">
           <div>
             <h2>Bandung Rose Milk Drink</h2>
-            <p>250 mL carton · 300 mL can · 380 mL bottle</p>
+            <ul class="pack-tickets" aria-label="Available packs">
+              <li data-container="carton">250 mL carton</li>
+              <li data-container="can">300 mL can</li>
+              <li data-container="bottle">380 mL bottle</li>
+            </ul>
             <a href="https://yeos.com.sg/product/bandung-rose-syrup-milk-drink/">Product details ↗</a>
           </div>
         </article>
@@ -67,7 +82,12 @@
           <img class="photo" src="../v1/assets/green-tea.webp" width="506" height="506" alt="A glass of green tea beside fresh green leaves">
           <div>
             <h2>First Harvest Green Tea</h2>
-            <p>250 mL carton · 300 mL can · 380 mL bottle · 1.5 L bottle</p>
+            <ul class="pack-tickets" aria-label="Available packs">
+              <li data-container="carton">250 mL carton</li>
+              <li data-container="can">300 mL can</li>
+              <li data-container="bottle">380 mL bottle</li>
+              <li data-container="bottle">1.5 L bottle</li>
+            </ul>
             <a href="https://yeos.com.sg/product/jasmine-green-tea/">Product details ↗</a>
           </div>
         </article>
@@ -75,7 +95,10 @@
           <img class="photo" src="../v1/assets/black-soy.webp" width="506" height="506" alt="A glass of dark soy milk with black soy beans">
           <div>
             <h2>Black Soy Milk</h2>
-            <p>380 mL bottle · 1 L carton</p>
+            <ul class="pack-tickets" aria-label="Available packs">
+              <li data-container="bottle">380 mL bottle</li>
+              <li data-container="carton">1 L carton</li>
+            </ul>
             <a href="https://yeos.com.sg/product/black-soy-milk-2/">Product details ↗</a>
           </div>
         </article>
@@ -83,7 +106,12 @@
           <img class="photo" src="../v1/assets/lychee.webp" width="506" height="506" alt="A glass of lychee drink with fresh lychees">
           <div>
             <h2>Lychee Drink</h2>
-            <p>250 mL carton · 300 mL can · 380 mL bottle · 1.5 L bottle</p>
+            <ul class="pack-tickets" aria-label="Available packs">
+              <li data-container="carton">250 mL carton</li>
+              <li data-container="can">300 mL can</li>
+              <li data-container="bottle">380 mL bottle</li>
+              <li data-container="bottle">1.5 L bottle</li>
+            </ul>
             <a href="https://yeos.com.sg/product/lychee-drink/">Product details ↗</a>
           </div>
         </article>
@@ -93,6 +121,6 @@
   <footer class="wrap base">
     <p>Independent design concept for Yeo Hiap Seng Limited.</p>
     <a href="https://yeos.com.sg/">Yeo’s Singapore ↗</a>
-  </footer>
+   <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#yeos-v11">View design reference</a></footer>
 </body>
 </html>

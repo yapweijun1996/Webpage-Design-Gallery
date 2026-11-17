@@ -13,3 +13,8 @@ body { --paper:var(--palette-subtle); --ink:var(--palette-indigo-dark); }
 .profiles a { display:inline-block; margin-top:.45rem; font-size:var(--font-size-sm); }
 .profiles article:target { outline:2px solid var(--ink); outline-offset:4px; }
 @media(max-width:700px) { .dial-intro,.profiles { grid-template-columns:1fr; } .position { padding:.45rem; font-size:var(--font-size-xs); } }
+
+.dial-reading { margin-top: 1.1rem; padding: .65rem 0 .65rem .9rem; border-left: 3px solid var(--ink); }
+#dial-name { font-family: Instrument, Georgia, serif; font-size: var(--yeos-card-type); }
+.dial .on-dial { color: var(--paper); background: var(--ink); }
+.dial .photo { border: 3px double var(--ink); }
