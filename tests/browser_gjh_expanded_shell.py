@@ -143,15 +143,24 @@ def run():
             # The opt-in shell must retain the existing recovery and list fallback.
             context=browser.new_context(viewport={'width':390,'height':844},service_workers='block')
             context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
-            page=context.new_page();page.goto(url+'?layout=expanded');page.wait_for_function('window.__sceneReady',timeout=90000)
+            page=context.new_page()
+            graphics_errors=[]
+            page.on('console', lambda message: graphics_errors.append(message.text) if 'WebGL: INVALID_' in message.text else None)
+            page.goto(url+'?layout=expanded');page.wait_for_function('window.__sceneReady',timeout=90000)
             page.locator('#view-toggle').click();page.locator('[data-add]').first.click();page.locator('#view-toggle').click()
             page.evaluate("window.__lossExtension=document.querySelector('#scene').getContext('webgl2').getExtension('WEBGL_lose_context');if(!__lossExtension)throw Error('Context-loss extension unavailable');__lossExtension.loseContext()")
             page.wait_for_function('__mall.state.graphics.status === "lost" || __mall.state.graphics.status === "failed"')
             assert page.locator('#store-list').is_visible() and '1' in page.locator('#bag-open').inner_text()
             page.evaluate('__lossExtension.restoreContext()')
-            page.wait_for_function('__mall.ready && __mall.state.graphics.validations>0',timeout=60000)
+            page.wait_for_function('__mall.ready || __mall.state.graphics.status === "failed"',timeout=60000)
+            assert page.evaluate('__mall.ready && __mall.state.graphics.validations>0'), page.locator('#fallback-message').inner_text()
             assert page.locator('#graphics-return').is_visible();page.locator('#graphics-return').click()
             assert page.locator('#scene').is_visible() and '1' in page.locator('#bag-open').inner_text()
+            frames=page.evaluate('__mall.state.frames')
+            page.wait_for_function('start => __mall.state.frames > start',arg=frames)
+            page.locator('#bag-open').click()
+            assert page.locator('#bag-items li').count()==1
+            assert not graphics_errors, graphics_errors
             print('PASS expanded real WebGL context loss and recovery preserves the bag',flush=True);context.close()
             for mode in ['no-js','physics-failure']:
                 context=browser.new_context(java_script_enabled=mode!='no-js',service_workers='block')

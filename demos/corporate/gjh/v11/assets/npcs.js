@@ -172,6 +172,9 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     for(const skeleton of skeletons) skeleton.dispose();
     visitors.splice(visitors.indexOf(npc),1);
   }
+  function clearVisitors() {
+    for (const npc of [...visitors]) remove(npc);
+  }
   function spawn(point,seat=null) {
     const avatar=cloneNpcRig(template), visual=new T.Group();
     avatar.visible=true; avatar.rotation.y=Math.PI; visual.add(avatar); visual.position.set(point.x,point.y||0,point.z);
@@ -254,7 +257,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     measure(admission.nonNpcCalls,false);
   }
   return {
-    update, releaseSeat,
+    update, releaseSeat, clearVisitors,
     admit(nonNpcCalls) { showing=true; return measure(nonNpcCalls,true); },
     setVisible(value) { showing=Boolean(value); applyVisibility(); },
     setDrawCallBudget(value) { settings.drawCallBudget=value; measure(admission.nonNpcCalls,false); },
@@ -262,7 +265,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     dispose() {
       if(disposed)return;
       disposed=true;
-      for(const npc of [...visitors]) remove(npc);
+      clearVisitors();
       for(const geometry of ownedGeometry) geometry.dispose();
       for(const skeleton of templateSkeletons) skeleton.dispose();
       admission=nextNpcAdmission();

@@ -2459,6 +2459,11 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       nearest[i].light.visible = true;
   }
   let environment = null;
+  function releaseEnvironment() {
+    scene.environment = null;
+    environment?.dispose();
+    environment = null;
+  }
   function restoreEnvironment() {
     const generator = new T.PMREMGenerator(renderer), studio = new T.Scene;
     const geometry = new T.BoxGeometry(1, 1, 1);
@@ -2489,9 +2494,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
         scene.environmentIntensity = 0.4;
       previous?.dispose();
     } catch (error) {
-      scene.environment = null;
-      environment?.dispose();
-      environment = null;
+      releaseEnvironment();
       throw error;
     } finally {
       generator.dispose();
@@ -2606,7 +2609,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.shadowMap.autoUpdate = shadowAutoUpdate;
     }
   }
-  return { update, applyTheme, restoreEnvironment, render, get state() {
+  return { update, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
     return state;
   } };
 }
@@ -3296,6 +3299,8 @@ canvas.addEventListener("webglcontextlost", (event) => {
   restorePending = true;
   losses++;
   mallTheme?.suspend();
+  atmosphere?.releaseEnvironment();
+  npcs?.clearVisitors();
   player?.interruptGraphics();
   elevator?.interrupt?.();
   if (!fatal)

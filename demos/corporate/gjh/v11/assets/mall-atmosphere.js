@@ -29,6 +29,11 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
   }
 
   let environment = null;
+  function releaseEnvironment() {
+    scene.environment=null;
+    environment?.dispose();
+    environment=null;
+  }
   function restoreEnvironment() {
     const generator = new T.PMREMGenerator(renderer), studio = new T.Scene();
     const geometry = new T.BoxGeometry(1,1,1);
@@ -45,7 +50,7 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
       if ('environmentIntensity' in scene) scene.environmentIntensity=.4;
       previous?.dispose();
     } catch (error) {
-      scene.environment=null; environment?.dispose(); environment=null;
+      releaseEnvironment();
       throw error;
     } finally {
       generator.dispose(); geometry.dispose(); materials.forEach(material=>material.dispose());
@@ -129,5 +134,5 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.setRenderTarget(target); renderer.info.autoReset=autoReset; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
     }
   }
-  return {update,applyTheme,restoreEnvironment,render,get state(){return state;}};
+  return {update,applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
 }

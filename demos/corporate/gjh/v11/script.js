@@ -282,6 +282,9 @@ canvas.addEventListener('webglcontextlost', event => {
   window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
   mallTheme?.suspend();
+  // Retire the reflection target and NPC bone textures against their original context.
+  atmosphere?.releaseEnvironment();
+  npcs?.clearVisitors();
   player?.interruptGraphics(); elevator?.interrupt?.();
   if (!fatal) graphicsStatus = 'lost';
   fallback(fatal ? 'The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D.' : 'The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.', false);
