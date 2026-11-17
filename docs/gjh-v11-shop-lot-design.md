@@ -40,7 +40,7 @@ The New Moon can variants remain the only verified slot-matched product GLBs; th
 
 **NOT FOUND:** an ice-cream cart or upright piano in the upstream model checkout. The watch-display-case has no matching watch shop, and aquarium-tank and koi-fish have no matching aquarium shop. The round-event-platform, arched-gateway-sign and skylight-roof-module have no matching product display in the supplied shop allocation; they are not used.
 
-The displays sit near the glazing in open bays. A shoulder-offset camera and off-centre approach keep the visitor away from the fixture in the shopcheck views. Each fixture includes the local hero image behind its merchandise; generic models are scaled up to 1.5× their exported metre scale, and some use raised platforms. The phone remains a small tabletop object.
+The displays sit near the glazing in open bays. The walking camera follows the visitor on the horizontal centreline. Shopcheck views retain their off-centre approach to the fixtures. Each fixture includes the local hero image behind its merchandise; generic models are scaled up to 1.5× their exported metre scale, and some use raised platforms. The phone remains a small tabletop object.
 
 ## Stage 5 performance evidence
 

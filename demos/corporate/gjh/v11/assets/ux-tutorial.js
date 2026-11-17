@@ -81,8 +81,8 @@ export function createTutorial({parent, onDismiss = () => {}, touch = false} = {
   const next = button('guide-next', 'Next', () => { state.next(); if (!state.snapshot().open) onDismiss(); });
   controls.append(back, next); card.append(header, progress, stepTitle, copy, announcement, controls); parent.append(card);
   const steps = [
-    ['Move around', touch ? 'Use the left joystick to walk around the courtyard.' : 'Use WASD or the arrow keys to walk around the courtyard.'],
-    ['Look around', touch ? 'Keep one finger on the joystick; drag with a second finger to look around.' : 'Drag the scene to look around. On a controller, use the right stick.'],
+    ['Move around', touch ? 'Drag the right joystick to move around the courtyard.' : 'Use WASD or the arrow keys to walk around the courtyard.'],
+    ['Look around', touch ? 'Drag the open scene to look around. When moving, use a second finger.' : 'Drag the scene to look around. On a controller, use the right stick.'],
     ['Try an interaction', touch ? 'Approach a door, bench or display, then tap its action.' : 'Approach a door, bench or display, then press F or select its action.'],
   ];
   let announcedStep = null;

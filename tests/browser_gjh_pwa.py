@@ -45,6 +45,18 @@ def run():
                 assert page.locator('#mall-update-notice').is_hidden(), 'Fresh installation must not announce a nonexistent update'
                 assert page.evaluate('window.__sceneReady === true')
                 if page.locator('#experience').is_visible(): page.locator('#view-toggle').click()
+                settings = page.locator('.mall-app-settings')
+                settings.locator('summary').click()
+                language = settings.locator('[data-mall-language]')
+                language.select_option('zh-Hans')
+                assert page.locator('#directory-enter-3d').inner_text().strip() == '进入 3D 商场'
+                assert page.evaluate("localStorage.getItem('wdg.language')") == 'zh-Hans'
+                page.wait_for_function("v => document.querySelector('#mall-check-update bdi').textContent === 'v' + v", arg=release_a['version'])
+                language.select_option('ms')
+                assert 'Masuk' in page.locator('#directory-enter-3d').inner_text()
+                language.select_option('en')
+                assert 'Enter 3D Mall' in page.locator('#directory-enter-3d').inner_text()
+                settings.locator('summary').click()
                 manifest = context.new_cdp_session(page).send('Page.getAppManifest')
                 assert not manifest.get('errors'), manifest
                 parsed = json.loads(manifest['data'])
@@ -112,6 +124,7 @@ def run():
                 page.wait_for_function("() => document.querySelector('#mall-apply-update').disabled")
                 context.set_offline(False)
                 page.wait_for_function("() => !document.querySelector('#mall-apply-update').disabled", timeout=30000)
+                page.wait_for_function("v => document.querySelector('#mall-apply-update bdi')?.textContent === 'v' + v", arg=release_b['version'])
                 before = page.evaluate("() => navigator.serviceWorker.controller.scriptURL")
                 assert before.endswith('/pwa-sw.js')
                 navigations = []

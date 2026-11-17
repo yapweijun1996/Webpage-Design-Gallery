@@ -3,7 +3,7 @@ from browser_gjh_guide import *
 import argparse
 
 def run():
- ap=argparse.ArgumentParser();ap.add_argument('--url');ap.add_argument('--live',action='store_true');args=ap.parse_args();out=ROOT.parent/'evidence/v11-floating-stick';out.mkdir(exist_ok=True)
+ ap=argparse.ArgumentParser();ap.add_argument('--url');ap.add_argument('--live',action='store_true');args=ap.parse_args();out=ROOT.parent/'evidence/v11-floating-stick';out.mkdir(parents=True,exist_ok=True)
  server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT)));threading.Thread(target=server.serve_forever,daemon=True).start();records=[]
  try:
   with sync_playwright() as p:
@@ -23,6 +23,23 @@ def run():
     def stopped(before):
      after=tick();assert abs(after['x']-before['x'])<1e-5 and abs(after['z']-before['z'])<1e-5 and after['yaw']==before['yaw'],{k:after[k]-before[k] for k in ['x','z','yaw']}
     bounds=page.locator('#scene').bounding_box();y=bounds['y']+bounds['height']*.42
+    switch = page.locator('#fullscreen-joystick')
+    assert not switch.is_checked()
+    before=state(page);down(1,w*.5,y);move(1,w*.6,y);after=tick();up(1)
+    assert abs(after['x']-before['x'])<.01 and abs(after['z']-before['z'])<.01 and after['yaw']!=before['yaw']
+    page.evaluate('__mall.teleport("atrium")')
+    pad=page.locator('#joystick').bounding_box()
+    px,py=pad['x']+pad['width']/2,pad['y']+pad['height']/2
+    assert px>w/2 and page.locator('#run-toggle').get_attribute('aria-pressed')=='true'
+    before=state(page);down(1,px,py);move(1,px,py-40);after=tick();up(1)
+    assert after['animation']=='run' and after['z']<before['z']-.5
+    page.locator('#mall-tools > summary').click()
+    page.locator('#keyboard-help > summary').click()
+    switch.check()
+    page.reload()
+    page.wait_for_function('window.__mall?.ready && window.__sceneReady')
+    assert switch.is_checked()
+    page.locator('#scene').focus()
     for fraction in [.12,.5,.88]:
      page.evaluate('__mall.teleport("atrium")');x=w*fraction;assert page.evaluate('([x,y])=>document.elementFromPoint(x,y).id',[x,y])=='scene'
      before=state(page);down(1,x,y);tick();stopped(before);move(1,x,y-40);after=tick();assert after['z']<before['z']-.5 and after['yaw']==before['yaw']
@@ -37,9 +54,9 @@ def run():
     down(1,x,y);move(1,x,y-40);tick();points.clear();send('touchCancel');stopped(state(page))
     page.evaluate('window.lastTouchPointer=null;document.querySelector("#scene").addEventListener("pointerdown",e=>window.lastTouchPointer=e.pointerId,{once:true})');down(1,x,y);move(1,x,y-40);tick();page.evaluate('document.querySelector("#scene").releasePointerCapture(window.lastTouchPointer)');move(1,x,y-50);stopped(state(page));up(1)
     # HUD clicks remain HUD actions, and a modal absorbs new touches.
-    s=state(page);page.locator('#run-toggle').tap();stopped(s);assert page.locator('#run-toggle').get_attribute('aria-pressed')=='true';page.locator('#run-toggle').tap()
-    page.locator('#keyboard-help > summary').click();s=state(page);down(1,5,5);move(1,35,25);up(1);stopped(s)
-    page.locator('#keyboard-help').evaluate('e=>e.open=false');page.locator('#scene').focus();page.evaluate('__mall.step(0)')
+    s=state(page);page.locator('#run-toggle').tap();stopped(s);assert page.locator('#run-toggle').get_attribute('aria-pressed')=='false';page.locator('#run-toggle').tap()
+    page.locator('#mall-tools > summary').click();page.locator('#keyboard-help > summary').click();s=state(page);down(1,5,5);move(1,35,25);up(1);stopped(s)
+    page.locator('#keyboard-help').evaluate('e=>e.open=false');page.locator('#mall-tools').evaluate('e=>e.open=false');page.locator('#scene').focus();page.evaluate('__mall.step(0)')
     down(1,x,y);move(1,x,y-40);tick();page.set_viewport_size({'width':w,'height':h-30});page.wait_for_function('!document.querySelector("#joystick").classList.contains("is-floating")');stopped(state(page));points.clear();send('touchCancel')
     records.append({'viewport':[w,h],'leftCenterRightOrigins':'PASS','tapDeadzone':'PASS','twoTouchRolesAndThirdIgnored':'PASS','releaseCancelLostCaptureResize':'PASS','runAndModalIsolation':'PASS'});page.close()
    b.close()

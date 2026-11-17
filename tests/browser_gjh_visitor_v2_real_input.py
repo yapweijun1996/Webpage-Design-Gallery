@@ -109,8 +109,8 @@ def go(page, x, z, touch=False, tolerance=.22):
                (['d' if r > 0 else 'a'] if abs(r) > tolerance/2 else [])
         if touch:
             # Browser-generated touch input traverses the same pointer handlers as a finger.
-            box = page.locator('#scene').bounding_box()
-            cx, cy = box['x']+box['width']*.52, box['y']+box['height']*.65
+            box = page.locator('#joystick').bounding_box()
+            cx, cy = box['x']+box['width']/2, box['y']+box['height']/2
             length = max(.0001, math.hypot(f, r))
             cdp.send('Input.dispatchTouchEvent', {'type':'touchStart', 'touchPoints':[{'x':cx,'y':cy,'id':1}]})
             cdp.send('Input.dispatchTouchEvent', {'type':'touchMove', 'touchPoints':[{'x':cx+40*r/length,'y':cy-40*f/length,'id':1}]})

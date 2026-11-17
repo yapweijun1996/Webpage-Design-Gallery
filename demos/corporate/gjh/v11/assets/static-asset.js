@@ -42,7 +42,8 @@ export async function loadStaticAsset(T, definition, baseURL) {
         try {
           if (abandoned) throw Error('timeout');
           const root = gltf.scene.getObjectByName(definition.asset_id);
-          if (root?.userData.asset_id !== definition.asset_id) throw Error('invalid');
+          const rootExtras = definition.rootExtras ?? {asset_id: definition.asset_id};
+          if (!root || Object.entries(rootExtras).some(([key, value]) => root.userData[key] !== value)) throw Error('invalid');
           gltf.scene.updateMatrixWorld(true);
           const bounds = new T.Box3().setFromObject(gltf.scene);
           const size = bounds.getSize(new T.Vector3());

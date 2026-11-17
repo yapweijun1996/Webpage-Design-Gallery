@@ -323,6 +323,7 @@ def run():
                 context=browser.new_context(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion='reduce',service_workers='block')
                 context.add_init_script('('+GPU_PROBE+')()')
                 page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+                context.add_init_script("localStorage.setItem('gjh.v11.fullscreenJoystick', 'true')")
                 ready(page,url)
                 row={'viewport':[w,h],'initial':metrics(page),'shelves':[]}
                 assert sum(r['decoded'] for r in row['initial']['resources'])<=10*1024*1024

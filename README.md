@@ -36,7 +36,7 @@ The same build generates the GJH V11 combined stylesheet, startup model pack and
 
 ## Appearance and language
 
-The gallery header offers **Light / Dark / System** appearance and **English / 简体中文 / Bahasa Melayu**. Choices persist across gallery routes and updates, synchronize across tabs and remain available offline after the shell is saved. Independent demo websites retain their own language and visual identity.
+The gallery header offers **Light / Dark / System** appearance and **English / 简体中文 / Bahasa Melayu**. Choices persist across gallery routes and updates, synchronize across tabs and remain available offline after the shell is saved. The GJH v11 mall shares the gallery language preference for its controls and directory. In the mall, open Tools → Help to change language or check the installed version for updates.
 
 Translations live in `locales/*.json`; update every pack when adding gallery copy. The build rejects missing keys and broken placeholders. See [PWA preferences and acceptance](docs/pwa-preferences.md) for scope, ownership, recovery, performance budget and device limitations.
 

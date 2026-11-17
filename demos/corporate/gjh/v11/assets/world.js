@@ -223,6 +223,28 @@ export async function createWorld(T, R, physics, expanded = false) {
   if (expanded) {
     box('dark', 10, -.22, 18, 70, .4, 60, true);
     box('shellFloor', 10, -.035, 18, 70, .04, 60);
+    // Twin stone borders lead from the entrance to the planted court. The
+    // detailing sits flush above the slab and shares existing material batches.
+    for (const x of [6.8, 13.2]) {
+      box('green', x, -.009, 32.5, .46, .008, 29);
+      box('brass', x, -.002, 32.5, .035, .004, 29);
+    }
+    for (const z of [22, 28, 34, 40, 46]) {
+      for (const x of [6.8, 13.2]) {
+        solid('box', 'brass', x, .002, z, .38, .005, .38, Math.PI / 4);
+        solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
+      }
+    }
+    // A suspended oak canopy frames the entry promenade. Stepped blade
+    // depths form a shallow vault, with concealed lighting at either edge.
+    for (const z of [28, 35, 42]) {
+      box('wood', 10, 8.2, z, 11.4, .38, 2.7);
+      for (let i = -9; i <= 9; i++) {
+        const depth = .22 + .5 * (i / 9) ** 2;
+        box('oak', 10 + i * .6, 8.02 - depth / 2, z, .16, depth, 2.64);
+      }
+      for (const x of [4.5, 15.5]) box('glow', x, 7.86, z, .06, .06, 2.64);
+    }
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);

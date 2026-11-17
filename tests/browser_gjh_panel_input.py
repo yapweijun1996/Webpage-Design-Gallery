@@ -8,7 +8,7 @@ def run():
   with sync_playwright() as p:
    b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
    for w,h in ([(390,680)] if args.url else [(390,680),(844,390),(1440,900)]):
-    page=b.new_page(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion='no-preference');ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');page.evaluate('__mall.step(0)');cdp=page.context.new_cdp_session(page)
+    page=b.new_page(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion='no-preference');page.add_init_script("localStorage.setItem('gjh.v11.fullscreenJoystick', 'true')");ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');page.evaluate('__mall.step(0)');cdp=page.context.new_cdp_session(page)
     def touch(kind,x,y):
      cdp.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[{'id':1,'x':x,'y':y}]});page.evaluate('()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))')
     if w==1440:

@@ -90,6 +90,21 @@ export function createUI(expanded = false) {
     getPreferences:()=>({locale:amenityLocale,resolvedTheme:amenityTheme==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):amenityTheme}),
     onOpen:()=>notifyMode(),onClose:()=>notifyMode()});
   const guideReopen = document.getElementById('guide-reopen');
+  const toolsMenu = document.getElementById('mall-tools');
+  const toolsSummary = toolsMenu.querySelector('summary');
+  toolsMenu.addEventListener('toggle', () => {
+    if (!toolsMenu.open) help.open = false;
+  });
+  document.addEventListener('pointerdown', event => {
+    if (toolsMenu.open && !toolsMenu.contains(event.target) && !event.target.closest('dialog[open]')) toolsMenu.open = false;
+  });
+  toolsMenu.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !help.open && toolsMenu.open) {
+      event.preventDefault();
+      toolsMenu.open = false;
+      toolsSummary.focus();
+    }
+  });
   const railGuide = document.getElementById('rail-guide');
   for (const entry of [guideReopen, railGuide]) entry?.setAttribute('aria-controls', 'guide-card');
   const touchGuide = matchMedia('(pointer: coarse)');
@@ -132,6 +147,7 @@ export function createUI(expanded = false) {
     if (!canUsePanels()) return false;
     shelfFocus?.close({focus: false});
     if (compactMap.matches) mallMap.open = false;
+    toolsMenu.open = true;
     help.open = true; updateCompactPanels(); notifyMode();
     help.querySelector('summary').focus({preventScroll: true});
     return true;
@@ -367,7 +383,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   function toggleCart(){const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){const message=cartReason(state)|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
     if(next){setView(true);bag.closeTo(scene);}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';
-    sceneCart.setAttribute('aria-pressed',String(next));scene.focus({preventScroll:true});
+    toolsMenu.open=false;sceneCart.setAttribute('aria-pressed',String(next));scene.focus({preventScroll:true});
   }
   cartToggle.addEventListener('click',toggleCart);sceneCart.addEventListener('click',toggleCart);
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
@@ -456,6 +472,10 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle('is-3d', next);
+    toolsMenu.open = false;
+    const assetNotice = document.getElementById('loader-asset-notice');
+    if (next) document.getElementById('controls-copy').append(assetNotice);
+    else document.querySelector('.site-header').after(assetNotice);
     updateViewToggle();
     help.open = false;
     headerMap.hidden = !next;
@@ -509,6 +529,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     if (!canUsePanels()) return false;
     shelfFocus?.close({focus: false});
     help.open = false; mallMap.open = false; updateCompactPanels(); notifyMode();
+    toolsMenu.open = false;
     tutorial.reopen();
     return true;
   }

@@ -54,7 +54,7 @@ def targets(page):
 
 
 def mobile_hud(page):
-    overlaps = page.locator('.site-header,#keyboard-help,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt,#guide-card,.control-bar').evaluate_all('''els => {
+    overlaps = page.locator('.site-header,#mall-tools>summary,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt,#guide-card,.control-bar').evaluate_all('''els => {
       // Closed details retain descendant layout boxes in current Chrome; those
       // boxes are not painted map content. Mode-suppressed walking controls also
       // retain boxes. Check every painted open-map/control rectangle.
@@ -102,12 +102,12 @@ def ux_hud_coverage(browser, url):
         assert page.locator('#mini-map').is_visible() == (width > 650)
         assert page.locator('#header-map').is_visible()
         assert not page.locator('#mall-map').evaluate('el=>el.open')
-        assert page.locator('#hud-rail #keyboard-help').count() == 1
+        assert page.locator('#mall-tools > summary').is_visible()
+        assert page.locator('#keyboard-help summary').is_hidden()
+        assert page.locator('.control-bar').is_hidden()
         assert 'inventory' in page.locator('#bag-open').get_attribute('aria-label')
         if width == 390:
             mobile_hud(page)
-        else:
-            assert page.locator('.control-bar').inner_text().find('W A S D') >= 0
         page.screenshot(path=str(output / f'ux1-{width}.png'), scale='css')
         before = state(page)
         page.locator('#scene').focus()
@@ -128,7 +128,7 @@ def ux_hud_coverage(browser, url):
         page.wait_for_function("document.querySelector('#guide-count').textContent==='3/3'")
         assert page.evaluate('__mall.teleport("mili")')
         drive(page, 17)
-        assert page.locator('#control-interact').is_visible()
+        assert page.locator('#inspect-prompt button').first.is_visible()
         assert 'Nearest:' in page.locator('#nearest-target').inner_text()
         page.locator('#scene').focus()
         page.keyboard.press('f')
@@ -140,6 +140,7 @@ def ux_hud_coverage(browser, url):
         page.reload()
         page.wait_for_function('window.__sceneReady && window.__mall?.ready')
         assert card.is_hidden()
+        page.locator('#mall-tools > summary').click()
         page.locator('#rail-guide').click()
         card.wait_for(state='visible')
         page.locator('#guide-next').click()
@@ -650,7 +651,7 @@ def room_signs(page):
         page.wait_for_timeout(150)
         assert state(page)['frames'] == frames
         return
-    rectangles = page.locator('.site-header,#keyboard-help,#mall-map').evaluate_all(
+    rectangles = page.locator('.site-header,#mall-tools>summary,#mall-map').evaluate_all(
         'els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}})')
     for sign in state(page)['roomSigns']:
         if not sign['visible']:
@@ -835,6 +836,7 @@ def run(capture=False):
                             mall_map = page.locator('#mall-map')
                             mobile_hud(page)
                             assert not mall_map.evaluate('el=>el.open')
+                            page.locator('#mall-tools > summary').click()
                             page.locator('#keyboard-help summary').click()
                             page.locator('#header-map').click()
                             page.wait_for_function('!document.querySelector("#keyboard-help").open')
@@ -885,7 +887,7 @@ def run(capture=False):
                             page.wait_for_function('Math.abs(__mall.state.yaw)>.1')
                             cdp.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
                             page.locator('#run-toggle').click()
-                            assert page.locator('#run-toggle').get_attribute('aria-pressed')=='true'
+                            assert page.locator('#run-toggle').get_attribute('aria-pressed')=='false'
                             page.locator('#run-toggle').click()
                             page.evaluate('__mall.setInput({})')
                         page.evaluate('__mall.teleport("atrium")')

@@ -110,6 +110,7 @@ def run():
             for width, height in sizes:
                 context = browser.new_context(viewport={'width': width, 'height': height},
                     has_touch=width < 1000, reduced_motion='reduce', service_workers='block')
+                context.add_init_script("localStorage.setItem('gjh.v11.fullscreenJoystick', 'true')")
                 page = context.new_page()
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))

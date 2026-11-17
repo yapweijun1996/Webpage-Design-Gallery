@@ -297,8 +297,8 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
   card.append(header, progress, stepTitle, copy, announcement, controls);
   parent.append(card);
   const steps = [
-    ["Move around", touch ? "Use the left joystick to walk around the courtyard." : "Use WASD or the arrow keys to walk around the courtyard."],
-    ["Look around", touch ? "Keep one finger on the joystick; drag with a second finger to look around." : "Drag the scene to look around. On a controller, use the right stick."],
+    ["Move around", touch ? "Drag the right joystick to move around the courtyard." : "Use WASD or the arrow keys to walk around the courtyard."],
+    ["Look around", touch ? "Drag the open scene to look around. When moving, use a second finger." : "Drag the scene to look around. On a controller, use the right stick."],
     ["Try an interaction", touch ? "Approach a door, bench or display, then tap its action." : "Approach a door, bench or display, then press F or select its action."]
   ];
   let announcedStep = null;
@@ -1097,6 +1097,23 @@ function createUI(expanded = false) {
     onClose: () => notifyMode()
   });
   const guideReopen = document.getElementById("guide-reopen");
+  const toolsMenu = document.getElementById("mall-tools");
+  const toolsSummary = toolsMenu.querySelector("summary");
+  toolsMenu.addEventListener("toggle", () => {
+    if (!toolsMenu.open)
+      help.open = false;
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (toolsMenu.open && !toolsMenu.contains(event.target) && !event.target.closest("dialog[open]"))
+      toolsMenu.open = false;
+  });
+  toolsMenu.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !help.open && toolsMenu.open) {
+      event.preventDefault();
+      toolsMenu.open = false;
+      toolsSummary.focus();
+    }
+  });
   const railGuide = document.getElementById("rail-guide");
   for (const entry of [guideReopen, railGuide])
     entry?.setAttribute("aria-controls", "guide-card");
@@ -1155,6 +1172,7 @@ function createUI(expanded = false) {
     shelfFocus?.close({ focus: false });
     if (compactMap.matches)
       mallMap.open = false;
+    toolsMenu.open = true;
     help.open = true;
     updateCompactPanels();
     notifyMode();
@@ -1489,6 +1507,7 @@ function createUI(expanded = false) {
       bag.closeTo(scene);
     }
     cartStatus.textContent = next ? "Cart active. Slower walking; stow before sitting. Your bag selection is unchanged." : "Cart stowed. Your bag selection is unchanged.";
+    toolsMenu.open = false;
     sceneCart.setAttribute("aria-pressed", String(next));
     scene.focus({ preventScroll: true });
   }
@@ -1612,6 +1631,12 @@ function createUI(expanded = false) {
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle("is-3d", next);
+    toolsMenu.open = false;
+    const assetNotice = document.getElementById("loader-asset-notice");
+    if (next)
+      document.getElementById("controls-copy").append(assetNotice);
+    else
+      document.querySelector(".site-header").after(assetNotice);
     updateViewToggle();
     help.open = false;
     headerMap.hidden = !next;
@@ -1690,6 +1715,7 @@ function createUI(expanded = false) {
     mallMap.open = false;
     updateCompactPanels();
     notifyMode();
+    toolsMenu.open = false;
     tutorial.reopen();
     return true;
   }

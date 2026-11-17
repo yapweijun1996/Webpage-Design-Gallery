@@ -1,3 +1,4 @@
+import './assets/mall-language.js';
 import {icon} from './assets/icons.js';
 
 /* V11 owns only its scoped offline fallback. Live mall resources stay network-only. */
@@ -5,6 +6,9 @@ import {icon} from './assets/icons.js';
   const root = new URL('../../../../', location.href);
   const install = document.querySelector('#mall-install');
   const check = document.querySelector('#mall-check-update');
+  const checks = [...document.querySelectorAll('[data-mall-check]')];
+  const setChecking = disabled => checks.forEach(button => { button.disabled = disabled; });
+  const sceneStatus = document.querySelector('[data-mall-check-status]');
   const status = document.querySelector('#mall-app-status');
   const connection = document.querySelector('#mall-connection-notice');
   const notice = document.querySelector('#mall-update-notice');
@@ -18,6 +22,14 @@ import {icon} from './assets/icons.js';
   let registration, prompt, checking = false, applying = false, lastCheck = 0, nextWorker = null;
   let hadMallController = navigator.serviceWorker?.controller?.scriptURL === workerURL;
 
+  function showVersion(release) {
+    if (typeof release?.version !== 'string') return;
+    document.querySelectorAll('[data-mall-version]').forEach(label => { label.textContent = 'v' + release.version; });
+  }
+  function setCheckStatus(text) {
+    status.textContent = text;
+    sceneStatus.textContent = text;
+  }
   function connectionState(connected) {
     connection.hidden = connected;
     if (!applying) update.disabled = !connected;
@@ -44,11 +56,18 @@ import {icon} from './assets/icons.js';
     update.textContent = otherTab ? 'Reload' : 'Update';
     update.prepend(updateIcon);
     notice.hidden = false;
+    const releaseWorker = worker || registration?.active;
+    version(releaseWorker).then(release => {
+      if (nextWorker !== worker) return;
+      const number = document.createElement('bdi');
+      number.textContent = 'v' + release.version;
+      if (!update.querySelector('bdi')) update.append(' ', number);
+    }).catch(() => { /* Keep the manual update action when metadata is unavailable. */ });
   }
   async function checkForUpdates(manual = false) {
     if (!registration || checking || applying || (!manual && Date.now() - lastCheck < 600000)) return;
-    checking = true; lastCheck = Date.now(); check.disabled = true;
-    if (manual) status.textContent = 'Checking for updates…';
+    checking = true; lastCheck = Date.now(); setChecking(true);
+    if (manual) setCheckStatus('Checking for updates…');
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 10000);
@@ -68,15 +87,15 @@ import {icon} from './assets/icons.js';
         });
       }
       if (registration.waiting) offer(registration.waiting);
-      else if (manual) status.textContent = 'No verified update is waiting.';
+      else if (manual) setCheckStatus('No verified update is waiting.');
     } catch {
-      status.textContent = 'Connection or update check unavailable. The current page remains open; reconnect and try again.';
-    } finally { checking = false; check.disabled = false; }
+      setCheckStatus('Connection or update check unavailable. The current page remains open; reconnect and try again.');
+    } finally { checking = false; setChecking(false); }
   }
   update.addEventListener('click', async () => {
     if (applying) return;
     if (document.querySelector('dialog[open]')) { message.textContent = 'Close the open dialog before updating.'; return; }
-    applying = true; update.disabled = true; check.disabled = true;
+    applying = true; update.disabled = true; setChecking(true);
     message.textContent = 'Updating the mall… Your demo bag stays in this tab.';
     try {
       if (nextWorker && registration?.waiting === nextWorker) {
@@ -91,7 +110,7 @@ import {icon} from './assets/icons.js';
       }
       location.reload();
     } catch {
-      applying = false; update.disabled = !connection.hidden; check.disabled = false;
+      applying = false; update.disabled = !connection.hidden; setChecking(false);
       message.textContent = 'The update could not finish. Your current page remains available; try again.';
     }
   });
@@ -113,7 +132,9 @@ import {icon} from './assets/icons.js';
     } catch { connectionState(false); status.textContent = 'Connection unavailable. Reconnect to browse the mall and its products.'; }
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdates(); });
-  check.addEventListener('click', () => checkForUpdates(true));
+  checks.forEach(button => button.addEventListener('click', () => checkForUpdates(true)));
+  fetch(new URL('version.json', root), {cache:'no-store'}).then(response => response.ok ? response.json() : null)
+    .then(release => { if (!registration?.active) showVersion(release); }).catch(() => {});
   if (!navigator.onLine) connectionState(false);
   if ('serviceWorker' in navigator && window.isSecureContext) {
     navigator.serviceWorker.addEventListener('message', event => {
@@ -126,7 +147,7 @@ import {icon} from './assets/icons.js';
       status.textContent = 'The mall requires a connection. An offline reconnect screen is saved on this device.';
     });
     navigator.serviceWorker.register(workerURL, {scope:'./', updateViaCache:'none'}).then(value => {
-      registration = value; check.hidden = false;
+      registration = value; setChecking(false);
       value.addEventListener('updatefound', () => {
         const worker = value.installing;
         worker?.addEventListener('statechange', () => {
@@ -139,7 +160,10 @@ import {icon} from './assets/icons.js';
       if (value.waiting) offer(value.waiting);
       status.textContent = 'The mall requires a connection. Preparing offline help…';
       navigator.serviceWorker.ready.then(ready => {
-        if (ready.scope === value.scope && ready.active) status.textContent = 'The mall requires a connection. An offline reconnect screen is saved on this device.';
+        if (ready.scope === value.scope && ready.active) {
+          version(ready.active).then(showVersion).catch(() => {});
+          status.textContent = 'The mall requires a connection. An offline reconnect screen is saved on this device.';
+        }
       }).catch(() => { status.textContent = 'Offline support is unavailable. You can continue browsing online.'; });
       checkForUpdates();
     }).catch(() => { status.textContent = 'Offline support is unavailable. You can continue browsing online.'; });

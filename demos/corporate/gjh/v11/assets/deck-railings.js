@@ -8,7 +8,12 @@ const sources = Object.freeze({
 
 export async function createDeckRailings(T) {
   const records={};
-  await Promise.all(Object.entries(sources).map(async([kind,definition])=>records[kind]=await loadStaticAsset(T,definition,import.meta.url)));
+  const spacing = {bay1m: 1, bay: 2, post: 0};
+  await Promise.all(Object.entries(sources).map(async ([kind, definition]) => {
+    // The source GLBs identify their root by name and carry metric module metadata.
+    const rootExtras = {units: 'metres', origin: 'floor centre', centre_spacing_m: spacing[kind]};
+    records[kind] = await loadStaticAsset(T, {...definition, rootExtras}, import.meta.url);
+  }));
   const placements={bay1m:[],bay:[],post:[]};
   return {
     place(kind,x,z,yaw=0) {

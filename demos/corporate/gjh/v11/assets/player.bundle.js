@@ -299,7 +299,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   controller.setMaxSlopeClimbAngle(Math.PI / 4);
   controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set;
-  let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
+  let vertical = 0, runToggle = true, stickX = 0, stickY = 0, injected = null;
   let seated = false, pushing = false, elevatorTravel = null;
   const walkingShape = new R.Capsule(0.55, 0.3), cartShape = new R.Cylinder(0.85, 1.4);
   let seat = null, seatPhase = "idle", seatTime = 0, seatFrom = null, seatStartAngle = 0, seatStartWeight = 0;
@@ -354,13 +354,21 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     }
   });
   document.addEventListener("keyup", (event) => keys.delete(event.code));
+  const fullScreenControl = document.querySelector("#fullscreen-joystick");
+  const stickPreferenceKey = "gjh.v11.fullscreenJoystick";
+  try {
+    fullScreenControl.checked = localStorage.getItem(stickPreferenceKey) === "true";
+  } catch {}
+  fullScreenControl.addEventListener("change", () => {
+    clearInput();
+    try {
+      localStorage.setItem(stickPreferenceKey, String(fullScreenControl.checked));
+    } catch {}
+  });
+  runButton.setAttribute("aria-pressed", String(runToggle));
   runButton.addEventListener("click", () => {
     runToggle = !runToggle;
     runButton.setAttribute("aria-pressed", String(runToggle));
-    const runIcon = runButton.querySelector("svg");
-    runButton.textContent = runToggle ? "Run: on" : "Run";
-    if (runIcon)
-      runButton.prepend(runIcon);
   });
   function dragStick(event) {
     if (!stickOrigin)
@@ -375,19 +383,25 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (isPaused() || event.button !== 0)
       return;
     if (event.pointerType === "touch") {
-      if (stickPointer !== null && drag)
+      const box = joystick.getBoundingClientRect();
+      const onPad = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
+      if (stickPointer === null && (onPad || fullScreenControl.checked)) {
+        stickPointer = event.pointerId;
+        if (fullScreenControl.checked) {
+          stickOrigin = { x: event.clientX, y: event.clientY };
+          const bounds = canvas.getBoundingClientRect();
+          joystick.style.setProperty("--stick-left", `${event.clientX - bounds.left - box.width / 2}px`);
+          joystick.style.setProperty("--stick-top", `${event.clientY - bounds.top - box.height / 2}px`);
+          joystick.classList.add("is-floating");
+        } else {
+          stickOrigin = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+        }
+        dragStick(event);
+      } else if (!drag) {
+        drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      } else
         return;
       canvas.focus({ preventScroll: true });
-      if (stickPointer === null) {
-        stickPointer = event.pointerId;
-        stickOrigin = { x: event.clientX, y: event.clientY };
-        const bounds = canvas.getBoundingClientRect(), size = joystick.getBoundingClientRect().width || 76;
-        joystick.style.setProperty("--stick-left", `${event.clientX - bounds.left - size / 2}px`);
-        joystick.style.setProperty("--stick-top", `${event.clientY - bounds.top - size / 2}px`);
-        joystick.classList.add("is-floating");
-        dragStick(event);
-      } else
-        drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
     } else {
       if (drag)
         return;
@@ -555,7 +569,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       cancelCollection();
     if (actionView?.kind === "elevator" && Math.hypot(forward, right) > 0.1)
       restoreActionView();
-    const running = !pushing && (injected?.run ?? (runToggle || keys.has("ShiftLeft") || keys.has("ShiftRight")));
+    const running = !pushing && (injected?.run ?? (stickPointer !== null && runToggle || keys.has("ShiftLeft") || keys.has("ShiftRight")));
     const turning = (keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0);
     yaw += turning * (110 * Math.PI / 180) * dt;
     const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 5 : 2.65;
@@ -627,10 +641,6 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     sync();
     target.copy(visual.position);
     target.y += 1.24 - 0.34 * (character.state.seatWeight || 0);
-    if (expanded && !actionView && !seated && !elevatorTravel) {
-      target.x += 1.15 * Math.cos(yaw);
-      target.z -= 1.15 * Math.sin(yaw);
-    }
     const normalDistance = expanded ? canvas.clientWidth < 600 ? 5 : 5.2 : canvas.clientWidth < 600 ? 5.5 : 6.5;
     const requestedDistance = actionView ? 3 : normalDistance;
     const immediate = instant || reduceSeatMotion();

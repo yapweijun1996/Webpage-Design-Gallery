@@ -14,7 +14,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   const controller = physics.createCharacterController(.025);
   controller.enableAutostep(.2, .28, true); controller.enableSnapToGround(.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
-  const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
+  const keys = new Set(); let vertical = 0, runToggle = true, stickX = 0, stickY = 0, injected = null;
   let seated = false, pushing=false, elevatorTravel=null;
   // A conservative full-turn footprint encloses avatar and cart. No sweeping corners.
   const walkingShape=new R.Capsule(.55,.3), cartShape=new R.Cylinder(.85,1.4);
@@ -52,7 +52,18 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
   });
   document.addEventListener('keyup', event => keys.delete(event.code));
-  runButton.addEventListener('click', () => { runToggle = !runToggle; runButton.setAttribute('aria-pressed', String(runToggle)); const runIcon=runButton.querySelector('svg'); runButton.textContent = runToggle ? 'Run: on' : 'Run'; if(runIcon)runButton.prepend(runIcon); });
+  const fullScreenControl = document.querySelector('#fullscreen-joystick');
+  const stickPreferenceKey = 'gjh.v11.fullscreenJoystick';
+  try { fullScreenControl.checked = localStorage.getItem(stickPreferenceKey) === 'true'; } catch {}
+  fullScreenControl.addEventListener('change', () => {
+    clearInput();
+    try { localStorage.setItem(stickPreferenceKey, String(fullScreenControl.checked)); } catch {}
+  });
+  runButton.setAttribute('aria-pressed', String(runToggle));
+  runButton.addEventListener('click', () => {
+    runToggle = !runToggle;
+    runButton.setAttribute('aria-pressed', String(runToggle));
+  });
   function dragStick(event) {
     if (!stickOrigin) return;
     const dx = event.clientX - stickOrigin.x, dy = event.clientY - stickOrigin.y;
@@ -60,20 +71,29 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     stickX = distance ? dx / distance * strength : 0; stickY = distance ? -dy / distance * strength : 0;
     thumb.style.transform = `translate(${stickX * 18}px, ${-stickY * 18}px)`;
   }
-  // Touch roles stay fixed for the lifetime of each pointer. The first canvas touch
-  // moves from any origin; a second touch looks. HUD/modal targets never enter here.
+  // Assign each finger once so releasing one never changes another finger's role.
   canvas.addEventListener('pointerdown', event => {
     if (isPaused() || event.button !== 0) return;
     if (event.pointerType === 'touch') {
-      if (stickPointer !== null && drag) return; // Ignore a third finger.
+      const box = joystick.getBoundingClientRect();
+      const onPad = event.clientX >= box.left && event.clientX <= box.right &&
+        event.clientY >= box.top && event.clientY <= box.bottom;
+      if (stickPointer === null && (onPad || fullScreenControl.checked)) {
+        stickPointer = event.pointerId;
+        if (fullScreenControl.checked) {
+          stickOrigin = {x:event.clientX, y:event.clientY};
+          const bounds = canvas.getBoundingClientRect();
+          joystick.style.setProperty('--stick-left', `${event.clientX - bounds.left - box.width / 2}px`);
+          joystick.style.setProperty('--stick-top', `${event.clientY - bounds.top - box.height / 2}px`);
+          joystick.classList.add('is-floating');
+        } else {
+          stickOrigin = {x:box.left + box.width / 2, y:box.top + box.height / 2};
+        }
+        dragStick(event);
+      } else if (!drag) {
+        drag = {id:event.pointerId, x:event.clientX, y:event.clientY};
+      } else return;
       canvas.focus({preventScroll: true});
-      if (stickPointer === null) {
-        stickPointer = event.pointerId; stickOrigin = {x:event.clientX, y:event.clientY};
-        const bounds = canvas.getBoundingClientRect(), size = joystick.getBoundingClientRect().width || 76;
-        joystick.style.setProperty('--stick-left', `${event.clientX - bounds.left - size / 2}px`);
-        joystick.style.setProperty('--stick-top', `${event.clientY - bounds.top - size / 2}px`);
-        joystick.classList.add('is-floating'); dragStick(event);
-      } else drag = {id:event.pointerId, x:event.clientX, y:event.clientY};
     } else {
       if (drag) return;
       canvas.focus({preventScroll: true}); drag = {id:event.pointerId, x:event.clientX, y:event.clientY};
@@ -151,7 +171,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     if(actionView?.kind==='collection'&&Math.hypot(forward,right)>.1)cancelCollection();
     if(actionView?.kind==='elevator'&&Math.hypot(forward,right)>.1)restoreActionView();
-    const running = !pushing && (injected?.run ?? (runToggle || keys.has('ShiftLeft') || keys.has('ShiftRight')));
+    const running = !pushing && (injected?.run ?? ((stickPointer !== null && runToggle) || keys.has('ShiftLeft') || keys.has('ShiftRight')));
     const turning = (keys.has('KeyQ') ? 1 : 0) - (keys.has('KeyE') ? 1 : 0);
     yaw += turning * (110 * Math.PI / 180) * dt;
     const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 5 : 2.65;
@@ -200,10 +220,6 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function updateCamera(dt, instant = false) {
     sync();target.copy(visual.position);target.y+=1.24-.34*(character.state.seatWeight||0);
-    // Look over the visitor's shoulder so storefront displays stay visible.
-    if (expanded && !actionView && !seated && !elevatorTravel) {
-      target.x+=1.15*Math.cos(yaw); target.z-=1.15*Math.sin(yaw);
-    }
     const normalDistance=expanded ? (canvas.clientWidth<600?5:5.2) : (canvas.clientWidth<600?5.5:6.5);
     const requestedDistance=actionView?3:normalDistance;
     const immediate=instant||reduceSeatMotion();
