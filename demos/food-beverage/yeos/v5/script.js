@@ -1,14 +1,15 @@
 const picker = document.querySelector('#pack');
 const reading = document.querySelector('.pack-reading');
 const rows = [...document.querySelectorAll('tbody tr')];
-function selectPack() {
+function selectPack(event) {
   const all = picker.value === 'all';
   let available = rows.length;
   if (!all) {
     available = rows.filter(row => row.querySelector('[data-col="' + picker.value + '"]').textContent.trim() === '●').length;
   }
   for (const cell of document.querySelectorAll('[data-col]')) {
-    cell.hidden = !all && picker.value !== cell.dataset.col;
+    cell.hidden = Boolean(event) && !all && picker.value !== cell.dataset.col;
+    cell.classList.toggle('selected-format', !all && picker.value === cell.dataset.col);
   }
   document.querySelector('#match-total').textContent = available + ' / ' + rows.length;
   document.querySelector('#match-label').textContent = all ? 'Drinks in the pack guide' :

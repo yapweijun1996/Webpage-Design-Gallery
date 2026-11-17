@@ -8,7 +8,7 @@ def run():
    for width,height,failure in [(390,844,False),(1440,900,False),(390,844,True)]:
     context=b.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     if failure:page.route('**/mall-directory-kiosk.glb',lambda route:route.fulfill(status=404,body=''))
-    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');page.evaluate('__mall.setInput({});__mall.step(17)')
+    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');page.evaluate('__mall.setInput({});__mall.step(17)')
     state=page.evaluate('__mall.state');asset=state['furnishings']['kiosk'];assert asset['status']==('fallback' if failure else 'loaded') and asset['instances']==1
     assert state['nearby']=='mall-directory';assert 'Decorative screen' in page.locator('#nearby-name').inner_text()
     page.screenshot(path=str(OUT/f'kiosk-{width}-fallback-{failure}.png'))

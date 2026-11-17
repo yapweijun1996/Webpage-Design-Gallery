@@ -16,7 +16,7 @@ def run():
     context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=2,has_touch=width<1000,reduced_motion='reduce',service_workers='block')
     context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     page=context.new_page();errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
-    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded');page.wait_for_function('window.__sceneReady',timeout=90000);page.wait_for_load_state('networkidle');page.evaluate('__mall.teleport("atrium")')
+    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded#experience');page.wait_for_function('window.__sceneReady',timeout=90000);page.wait_for_load_state('networkidle');page.evaluate('__mall.teleport("atrium")')
     def sample():
      page.evaluate('__mall.setInput({forward:0,yaw:0});__mall.step(100)')
      return page.evaluate('''()=>{const s=__mall.state;return {draw:s.drawCalls,triangles:s.renderTriangles,resources:s.rendererResources,x:s.x,z:s.z,quality:s.graphics.quality}}''')

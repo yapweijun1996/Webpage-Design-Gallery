@@ -1,4 +1,5 @@
 """Verify automatic preview loading, failures, cancellation and focus recovery."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import http.server
@@ -32,7 +33,7 @@ def run():
                 '--use-angle=' + os.environ.get('GALLERY_WEBGL_BACKEND', 'swiftshader'), '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
             for width, height in ([(390, 844)] if args.live else [(390, 844), (1440, 900)]):
                 page = browser.new_page(viewport={'width': width, 'height': height}, reduced_motion='reduce')
-                page.goto(url)
+                page.goto(mall_entry_url(url))
                 page.wait_for_function('__mall.ready && __sceneReady', timeout=60000)
                 page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
                 for sku in ['nz-425g', 'au-425g', 'sa-425g', 'mx-454g']:

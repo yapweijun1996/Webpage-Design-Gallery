@@ -1,4 +1,5 @@
 """Test the real v2 GLB, contact solver, shelf reservation and LOD in Chrome."""
+from gjh_startup_test_helpers import mall_entry_url
 import json, os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -8,7 +9,7 @@ with sync_playwright() as p:
     page=browser.new_page()
     errors=[]
     page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto(os.environ.get('GJH_V2_URL','http://127.0.0.1:18769/demos/corporate/gjh/v11/?visitor=v2'))
+    page.goto(mall_entry_url(os.environ.get('GJH_V2_URL','http://127.0.0.1:18769/demos/corporate/gjh/v11/?visitor=v2')))
     page.wait_for_function('window.__mall?.ready',timeout=60000)
     result=page.evaluate((ROOT/'tests/visitor-v2-runtime.js').read_text())
     assert not errors, errors
@@ -21,7 +22,7 @@ with sync_playwright() as p:
     for width,height in ([] if os.environ.get('GJH_MODULE_ONLY')=='1' else [(390,844),(1280,800)]):
         page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce')
         page.on('pageerror',lambda e:errors.append(str(e)))
-        page.goto(os.environ.get('GJH_V2_URL','http://127.0.0.1:18769/demos/corporate/gjh/v11/?visitor=v2'))
+        page.goto(mall_entry_url(os.environ.get('GJH_V2_URL','http://127.0.0.1:18769/demos/corporate/gjh/v11/?visitor=v2')))
         page.wait_for_function('window.__mall?.ready',timeout=60000)
         skip=page.locator('#guide-skip')
         if skip.is_visible():

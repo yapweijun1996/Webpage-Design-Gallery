@@ -61,5 +61,14 @@
     "licenseFile": "OFL-Manrope.txt",
     "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
     "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
-  }
+  },
+  "conceptArtwork": [
+    {
+      "file": "sunday-lunch.webp",
+      "sha256": "32083e79160bc56cb44d113eafd86fd59d5f0cf9d80138e8c8cad12a7dae7e9d",
+      "kind": "local-concept-illustration",
+      "sourceReceipt": "../../v17/assets/sources.json",
+      "sourceFile": "sunday-lunch.webp"
+    }
+  ]
 }

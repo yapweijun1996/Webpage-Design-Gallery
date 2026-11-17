@@ -52,10 +52,10 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "85803a5d45a8c1fbe501ee2ea6f5085dba791cbc87e75c3117be99bc7324c205",
     "demos/corporate/gjh/v11/assets/window-studios.js": "a218f09780cf7b8c11cfa018b1d3b9d89e489a62e42f7c10a2faacd2dec4747e",
     "demos/corporate/gjh/v11/assets/world.js": "6705dba37826862d54ca539753004cb9c6877861aa551f9cd18517bb9be059d1",
-    "demos/corporate/gjh/v11/script.js": "54d4d6cd774b03f65566508398b3b9f9ee4496287f7e3ef20da0338313c8f01e"
+    "demos/corporate/gjh/v11/script.js": "8861846f7a82c6e86afcd8a192a35838ca9e72befb80f8aa8d894d2f828f46a8"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "68e1e58894f378eae709be0d59a8854f3ebc8e17c451dfbedbd8ae053a4a5974",
+    "demos/corporate/gjh/v11/script.bundle.js": "f388118951f5f565bf26fb4ad4dc7560b4a57beae2e28a6f928a2366b8af585e",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "726df167936deec60bea19e7ae3eb019072a3cbefbe2fb598b9da11be9c40769",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "f2b3e048197bc1948f095e223ec7ee9fd002ce030b7f1fd7c4757198204d5d30",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "4c1f7aa3ef76be902b3ed28c46bcb21b7fb63aa557ca10d8f19ace3ca97c20cb"

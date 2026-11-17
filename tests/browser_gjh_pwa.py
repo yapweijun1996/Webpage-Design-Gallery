@@ -41,6 +41,7 @@ def run():
                 page.wait_for_function("() => navigator.serviceWorker.controller?.scriptURL.endsWith('/demos/corporate/gjh/v11/pwa-sw.js')", timeout=30000)
                 page.reload(wait_until='domcontentloaded')
                 page.wait_for_function("() => navigator.serviceWorker.controller?.scriptURL.endsWith('/demos/corporate/gjh/v11/pwa-sw.js')", timeout=30000)
+                page.locator('#arrival-walk').click()
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert page.locator('#mall-update-notice').is_hidden(), 'Fresh installation must not announce a nonexistent update'
                 assert page.evaluate('window.__sceneReady === true')
@@ -79,6 +80,7 @@ def run():
                 assert page.evaluate("sessionStorage.getItem('gjh-v11-demo-bag-v1')") == saved
                 context.set_offline(False)
                 page.locator('a', has_text='Try again').click()
+                page.locator('#arrival-walk').click()
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert page.locator('#bag-open').inner_text() == 'Bag (1)'
                 if page.locator('#experience').is_visible(): page.locator('#view-toggle').click()

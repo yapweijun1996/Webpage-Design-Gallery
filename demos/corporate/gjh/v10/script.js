@@ -91,6 +91,22 @@ function selectRoom(room) {
   travel(room);
 }
 document.querySelectorAll('button[data-room]').forEach(button => button.addEventListener('click', () => selectRoom(button.dataset.room)));
+// The illustrated programme and the playable map share the same room state.
+const programme = document.querySelector('.arcade-entry');
+programme.addEventListener('click', event => {
+  const link = event.target.closest('[data-arcade-room]');
+  if (!link || document.body.dataset.view !== '3d') return;
+  event.preventDefault();
+  if (link.dataset.arcadeRoom === 'lobby') {
+    setView('list');
+    document.getElementById('list-title').focus();
+  } else {
+    selectRoom(link.dataset.arcadeRoom);
+    canvas.focus();
+  }
+  programme.hidden = true;
+});
+document.querySelector('.wordmark').addEventListener('click', () => { programme.hidden = false; });
 document.querySelectorAll('[data-step]').forEach(button => button.addEventListener('click', () => {
   selectRoom(rooms[(rooms.indexOf(current) + Number(button.dataset.step) + rooms.length) % rooms.length]);
 }));

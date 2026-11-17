@@ -17,3 +17,11 @@ body { --paper: var(--palette-success-surface); --ink: var(--palette-success); -
 .tea-diptych span { display: flex; align-items: center; min-height: 44px; border-bottom: 1px solid currentColor; font-family: Instrument, Georgia, serif; font-size: var(--font-size-xl); line-height: 1; }
 .tea-card:target { border-top-width: 4px; }
 @media(max-width:700px) { .tea-diptych { max-width: 390px; justify-self: center; } .tea-diptych img { aspect-ratio: 1; } }
+
+body { --paper:var(--palette-success-surface); background-color:color-mix(in srgb,var(--palette-warning-surface) 31%,var(--palette-success-surface)); }
+.tea-opener { gap:4%; grid-template-columns:.83fr 1.17fr; padding-block:clamp(2rem,4vw,4rem); }
+.tea-opener h1 { font-family:Georgia,serif; letter-spacing:-.06em; }
+.tea-opener .stack { max-width:29rem; }
+.tea-opener .lead { font-family:Instrument,Georgia,serif; font-size:var(--font-size-2xl); line-height:1.12; }
+.tea-diptych img { aspect-ratio:.64; }
+@media(max-width:700px) { .tea-opener { grid-template-columns:1fr; } .tea-diptych img { aspect-ratio:.78; } .tea-opener .lead { font-size:var(--font-size-lg); } }

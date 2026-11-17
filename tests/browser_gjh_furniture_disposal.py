@@ -28,7 +28,7 @@ GLTFLoader.prototype.parseAsync = async function(...args) {
 };
 '''.replace('MODE',json.dumps(mode))
     loader=(ROOT/'demos/corporate/gjh/v11/vendor/GLTFLoader.js').read_text();page.route('**/vendor/GLTFLoader.js',lambda route:route.fulfill(body=loader+suffix,content_type='text/javascript'))
-    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.wait_for_function('window.__furnitureAudit');
+    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.wait_for_function('window.__furnitureAudit');
     if mode=='late':page.wait_for_timeout(2200)
     audit=page.evaluate('__furnitureAudit');state=page.evaluate('__mall.state.furnishings.bench');assert audit['geometryCount']>0 and audit['materialCount']>0,audit
     expected='loaded' if mode=='normal' else 'fallback';assert state['status']==expected,state

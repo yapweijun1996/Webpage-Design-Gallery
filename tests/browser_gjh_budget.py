@@ -1,4 +1,5 @@
 """Reproducible laboratory payload, rendering and modal-lifecycle audit for V11."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse,functools,http.server,json,os,platform,threading,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -19,7 +20,7 @@ def run(out=OUT):
    for width,height in [(320,740),(390,844),(768,1024),(1440,900),(844,390)]:
     context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',service_workers='block');page=context.new_page();external=[];errors=[]
     page.on('request',lambda r:external.append(r.url) if r.url.startswith('http') and not r.url.startswith(base+'/') else None);page.on('pageerror',lambda e:errors.append(str(e)))
-    start=time.monotonic();page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-card').wait_for(state='visible');ready_ms=round((time.monotonic()-start)*1000)
+    start=time.monotonic();page.goto(mall_entry_url(url));page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-card').wait_for(state='visible');ready_ms=round((time.monotonic()-start)*1000)
 
     initial=page.evaluate('performance.getEntriesByType("resource").map(e=>({path:new URL(e.name).pathname,bytes:e.decodedBodySize}))');assert not any('original-demo-food-tin.glb' in r['path'] for r in initial),'Original tin must remain lazy'
     save(out/f'ready-{width}x{height}.json',{'viewport':[width,height],'resources':initial,'count':len(initial),'decodedBytes':sum(r['bytes'] for r in initial)})

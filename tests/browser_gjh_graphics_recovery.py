@@ -3,6 +3,7 @@
 Native WEBGL_lose_context is used only here. Hardware/hidden/validation-fault
 fixtures are explicitly labelled. Raw evidence defaults outside the checkout.
 """
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import hashlib
@@ -205,7 +206,7 @@ def run():
         page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
         return c,page
     def ready(page,target=url,start=True):
-        page.goto(target);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
+        page.goto(mall_entry_url(target));page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
         if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
         if start:page.locator('#scene').focus()
         else:page.locator('#view-toggle').click()
@@ -354,7 +355,7 @@ def run():
                 row('second-native-loss-invalidates-pending-restore',metrics=metrics(page));c.close()
                 # Completion while the actual context remains lost cannot publish ready.
                 c,page=context(browser);pending=[]
-                page.route('**/assets/world.bundle.js',lambda r:pending.append(r));page.goto(url,wait_until='domcontentloaded')
+                page.route('**/assets/world.bundle.js',lambda r:pending.append(r));page.goto(mall_entry_url(url),wait_until='domcontentloaded')
                 for _ in range(150):
                     if pending:break
                     page.wait_for_timeout(20)
@@ -398,7 +399,7 @@ def run():
                 # Delayed source responses exercise real initialization awaits, not synthetic ready state.
                 for asset,width,height in [('vendor/three.module.min.js',390,844),('assets/world.bundle.js',390,844),('assets/gjh-mall-visitor-v2.glb',390,844),('assets/world.bundle.js',1440,900)]:
                     c,page=context(browser,width,height);pending=[]
-                    page.route('**/'+asset,lambda route:pending.append(route));page.goto(url,wait_until='domcontentloaded')
+                    page.route('**/'+asset,lambda route:pending.append(route));page.goto(mall_entry_url(url),wait_until='domcontentloaded')
                     page.wait_for_function('window.__mall !== undefined')
                     for _ in range(150):
                         if pending:break
@@ -446,7 +447,7 @@ def run():
                     if failure=='no-wasm':page.route('**/rapier.mjs',lambda r:r.abort())
                     if failure=='asset':page.route('**/gjh-mall-visitor-v2.glb',lambda r:r.abort())
                     if failure=='wasm-during-loss':
-                        pending=[];page.route('**/rapier.mjs',lambda r:pending.append(r));page.goto(url)
+                        pending=[];page.route('**/rapier.mjs',lambda r:pending.append(r));page.goto(mall_entry_url(url))
                         for _ in range(150):
                             if pending:break
                             page.wait_for_timeout(20)
@@ -456,7 +457,7 @@ def run():
                         if failure=='validation-fault':
                             page.evaluate("document.querySelector('#scene').getContext('webgl2').readPixels=()=>{throw Error('TEST readback fault')};__lossExtension.restoreContext()")
                         else:page.wait_for_timeout(150)
-                    else:page.goto(url)
+                    else:page.goto(mall_entry_url(url))
                     if failure!='unrestored':page.wait_for_function('__mall.state.graphics.status==="failed"',timeout=60000)
                     assert not page.evaluate('__mall.ready') and page.locator('#graphics-return').is_hidden()
                     assert page.locator('#graphics-reload').is_visible()

@@ -3,22 +3,6 @@
   --accent: var(--palette-success);
   --wash: var(--palette-success-surface);
 }
-.diary {
-  display: grid;
-  grid-template-columns: 0.86fr 1.14fr;
-  align-items: center;
-  gap: 7%;
-  padding-block: 2.5rem;
-}
-.diary-photo img {
-  aspect-ratio: 1.2;
-  border-top-left-radius: var(--radius-pill);
-  border-top-right-radius: var(--radius-pill);
-}
-.diary h1 i {
-  display: block;
-  color: var(--accent);
-}
 .stops {
   list-style: none;
   padding: 0;
@@ -48,18 +32,6 @@
 }
 .stops p {
   color: var(--mute);
-}
-@media (max-width: 740px) {
-  .diary {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  .diary-photo {
-    order: 2;
-  }
-  .diary-photo img {
-    aspect-ratio: 1.7;
-  }
 }
 
 .walk-strip {
@@ -122,4 +94,88 @@
   margin: 0 auto 0.3rem;
   border: 1px solid currentColor;
   border-radius: var(--radius-circle);
+}
+
+.folio-14 {
+  display: grid;
+  grid-template-columns: 1fr 1.08fr;
+  gap: 5%;
+  align-items: center;
+  padding: 1% 0 4%;
+  color: var(--accent);
+}
+.folio-14 h1 {
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-sm));
+}
+.walk-painting {
+  aspect-ratio: 0.83;
+  object-fit: cover;
+  border-start-start-radius: var(--radius-pill);
+  border-start-end-radius: var(--radius-pill);
+}
+.folio-14 .folio-summary {
+  font-style: italic;
+  color: var(--ink);
+}
+.folio-14 .walk-strip {
+  display: flex;
+  align-items: end;
+  gap: 7%;
+  border: 0;
+  margin: 1.5rem 0;
+}
+.folio-14 .walk-strip a {
+  padding: 0;
+  border: 0;
+  font-family: Georgia, serif;
+}
+.folio-14 .walk-strip a::after {
+  display: none;
+}
+.folio-14 .walk-strip a img {
+  width: 100%;
+  aspect-ratio: 1.3;
+  object-fit: cover;
+  transform: rotate(-2deg);
+}
+.folio-14 .walk-strip a:nth-child(2) img {
+  transform: rotate(3deg);
+}
+.folio-14 .walk-strip a span {
+  font:
+    italic var(--font-size-lg) Georgia,
+    serif;
+  color: var(--accent);
+  display: block;
+  border: 0;
+  background: none;
+  width: auto;
+  height: auto;
+  padding: 0.4rem;
+}
+.folio-14 .folio-action {
+  border-radius: var(--radius-pill);
+}
+@media (max-width: 740px) {
+  .folio-14 {
+    grid-template-columns: 1fr;
+    padding: 1.4rem 0;
+    gap: 1.4rem;
+  }
+  .folio-14 > div {
+    grid-row: 1;
+  }
+  .folio-14 h1 {
+    font-size: var(--font-size-display);
+  }
+  .walk-painting {
+    width: min(100%, 440px);
+    height: 255px;
+    object-position: 50% 63%;
+    justify-self: center;
+  }
+  .folio-14 .walk-strip {
+    margin: 0.65rem 0;
+    gap: 0.65rem;
+  }
 }

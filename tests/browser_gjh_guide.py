@@ -1,4 +1,5 @@
 """Real-browser nonmodal guidance, wayfinding, replay and persistence coverage."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools,http.server,json,os,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -11,7 +12,7 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
   except (BrokenPipeError,ConnectionResetError):pass
 
 def ready(page,url):
- page.goto(url,wait_until='domcontentloaded');page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
+ page.goto(mall_entry_url(url),wait_until='domcontentloaded');page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
 
 def guide(page):page.locator('#guide-card').wait_for(state='visible')
 def closed(page):page.locator('#guide-card').wait_for(state='hidden')
@@ -72,7 +73,7 @@ def run():
    for failure in ['wasm','nojs']:
     context=browser.new_context(java_script_enabled=failure!='nojs');page=context.new_page()
     if failure=='wasm':page.route('**/rapier.mjs',lambda r:r.abort())
-    page.goto(url)
+    page.goto(mall_entry_url(url, "" if failure == "nojs" else "experience"))
     if failure=='wasm':page.wait_for_function('window.__sceneFailed')
     assert page.locator('#store-list').is_visible() and not page.locator('#guide-card').is_visible()
     assert page.locator('.product-card').count()==4;context.close()

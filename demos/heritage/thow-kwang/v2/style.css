@@ -3,42 +3,6 @@
   --wash: var(--palette-success-surface);
   --paper: var(--palette-white);
 }
-.ticket {
-  background: var(--wash);
-  border: 1px solid var(--accent);
-  padding: var(--ticket-gutter);
-  color: var(--accent);
-}
-.address {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  margin: 1.3rem 0;
-  line-height: 0.86;
-}
-.address strong {
-  font-family: var(--sign);
-  font-size: calc(var(--font-editorial-hero) + var(--font-size-2xl));
-  font-weight: 400;
-  letter-spacing: -0.07em;
-}
-.address span {
-  font-size: var(--font-size-3xl);
-  font-weight: 800;
-  letter-spacing: -0.06em;
-}
-.ticket-foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  border-top: 2px dashed var(--accent);
-  padding-top: 1rem;
-}
-.ticket .cap {
-  color: var(--accent);
-}
 #routes {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -72,40 +36,120 @@ h1 i {
 .route-picker summary {
   font-weight: 700;
 }
-.ticket {
-  position: relative;
-  border-bottom: 5px double var(--accent);
-}
 
-.ticket {
-  --ticket-gutter: var(--space-8);
-  background-image: linear-gradient(110deg, var(--wash) 60%, var(--paper));
+body {
+  background: color-mix(
+    in srgb,
+    var(--palette-success-surface) 76%,
+    var(--palette-editorial-wash)
+  );
 }
-.ticket-foot::before,
-.ticket-foot::after {
+.folio-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+  margin: clamp(3rem, 6vw, 6rem) 2%;
+  color: var(--accent);
+  background: var(--palette-warning-surface);
+  border: 2px solid var(--accent);
+  outline: 1px solid var(--accent);
+  outline-offset: 0.4rem;
+}
+.folio-2::before {
   content: "";
   position: absolute;
-  width: 0.85rem;
-  height: 0.85rem;
-  top: -0.51rem;
-  background: var(--paper);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-circle);
+  left: -3%;
+  top: -16%;
+  width: 54%;
+  height: 25%;
+  background: url(assets/ginger.webp) left top / contain no-repeat;
+  pointer-events: none;
 }
-.ticket-foot {
-  position: relative;
+.ticket-face {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-align: center;
+  min-height: min(590px, 44vw);
+  padding-top: clamp(3rem, 7vw, 7rem);
 }
-.ticket-foot::before {
-  left: calc(-1 * var(--ticket-gutter) - 0.5rem);
-  clip-path: inset(0 0 0 50%);
+.ticket-face .folio-copy {
+  margin: 0 0.75rem;
 }
-.ticket-foot::after {
-  right: calc(-1 * var(--ticket-gutter) - 0.5rem);
-  clip-path: inset(0 50% 0 0);
+.ticket-face .folio-summary {
+  margin: 1.2rem auto 0.6rem;
+  font-style: italic;
+  max-width: 25ch;
 }
-
+.ticket-face > img {
+  margin-top: auto;
+  height: clamp(120px, 17vw, 275px);
+  object-fit: fill;
+}
+.ticket-stub {
+  border-left: 4px dotted var(--accent);
+  padding: clamp(1.2rem, 3vw, 4rem);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+.ticket-stub .postage {
+  width: min(100%, 310px);
+}
+.ticket-stub p {
+  font-family: Georgia, serif;
+  font-size: var(--font-size-xl);
+  line-height: 1.25;
+}
+.ticket-stub .folio-text {
+  padding: 0.25rem;
+}
+.route-list {
+  width: min(800px, 100%);
+  margin: 3rem auto;
+}
+.route-list h2 {
+  margin-bottom: 1.3rem;
+}
 @media (max-width: 740px) {
-  .ticket {
-    --ticket-gutter: var(--space-6);
+  .folio-2 {
+    grid-template-columns: 1fr;
+    margin: 2.1rem 0.4rem 1.5rem;
+  }
+  .folio-2::before {
+    top: -5%;
+    width: 76%;
+    height: 16%;
+  }
+  .ticket-face {
+    min-height: 0;
+    padding-top: 2.5rem;
+  }
+  .ticket-face h1 {
+    font-size: var(--font-size-display);
+  }
+  .ticket-face > img {
+    height: 115px;
+  }
+  .ticket-stub {
+    border: 0;
+    border-top: 3px dotted var(--accent);
+    padding: 0.8rem 1rem 1rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.2rem 0.65rem;
+    align-items: center;
+  }
+  .ticket-stub .postage {
+    grid-row: span 2;
+  }
+  .ticket-stub p {
+    font-size: var(--font-size-base);
+  }
+  .ticket-stub .folio-text {
+    font-size: var(--font-size-sm);
+  }
+  .ticket-stub .folio-action {
+    grid-column: 1 / -1;
   }
 }

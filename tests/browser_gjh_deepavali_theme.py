@@ -1,4 +1,5 @@
 """Real Deepavali/Everyday/Lunar New Year/Christmas transitions, clearances and failure recovery."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse,functools,http.server,io,json,os,threading
 from pathlib import Path
 from PIL import Image,ImageChops,ImageStat
@@ -16,7 +17,7 @@ def run():
   c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed');"+init)
   p=c.new_page();errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
  def ready(p,query=''):
-  p.goto(url+query);p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
+  p.goto(mall_entry_url(url+query));p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
  def open_theme(p):
   p.locator('#mall-theme-open').click();assert p.locator('#mall-theme-dialog').is_visible()
  def choose(p,ident):

@@ -3,27 +3,6 @@
   --accent: var(--palette-indigo-dark);
   --wash: var(--palette-subtle);
 }
-.lex-cover {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  align-items: center;
-  gap: 5%;
-}
-.lex-mark {
-  background: var(--wash);
-  color: var(--accent);
-  font-family: var(--sign);
-  font-size: calc(var(--font-editorial-hero) + var(--font-size-2xl));
-  text-align: center;
-  letter-spacing: -0.07em;
-  padding: 1rem 0.5rem;
-  line-height: 1.05;
-  border-block: 4px double currentColor;
-}
-.lex-mark span {
-  display: block;
-  font-style: italic;
-}
 .find {
   display: grid;
   gap: 0.3rem;
@@ -56,25 +35,6 @@
 .words summary:after {
   margin-left: auto;
 }
-@media (max-width: 740px) {
-  .lex-cover {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .lex-mark {
-    font-size: var(--font-size-3xl);
-    text-align: left;
-    padding: 0.5rem 1rem;
-  }
-  .lex-mark span {
-    display: inline;
-  }
-}
-
-.lex-cover .intro {
-  grid-row: 1;
-  grid-column: 2;
-}
 .letter-index {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -101,20 +61,7 @@
   color: var(--paper);
   background: var(--accent);
 }
-.lex-cover .find {
-  margin-top: 1.25rem;
-}
-.lex-cover .find input {
-  font-size: var(--font-size-base);
-}
-.lex-cover .quiet {
-  margin: 0.4rem 0;
-}
 @media (max-width: 740px) {
-  .lex-cover .intro {
-    grid-row: 1;
-    grid-column: 1;
-  }
   .letter-index {
     grid-template-columns: repeat(6, 1fr);
     padding: 0.6rem;
@@ -140,4 +87,70 @@
 .words details:target {
   border-left: 3px solid var(--accent);
   padding-left: 0.8rem;
+}
+
+.folio-11 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4%;
+  align-items: center;
+  padding: 3% 0;
+  border-top: 2px solid var(--accent);
+}
+.type-column {
+  padding-left: 2%;
+}
+.folio-11 h1 {
+  font-weight: 700;
+}
+.folio-11 .folio-summary {
+  font-style: italic;
+}
+.folio-11 .find {
+  width: 100%;
+  margin: 1rem 0 0.4rem;
+}
+.folio-11 .letter-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  background: none;
+  border: 0;
+  border-block: 1px solid var(--line);
+  padding: 0.4rem 0;
+  margin: 0.8rem 0 1rem;
+}
+.folio-11 .letter-index a {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-right: 1px solid var(--line);
+  padding: 0.4rem 0.1rem;
+  min-width: 44px;
+  min-height: 44px;
+  font:
+    var(--font-size-xl) Georgia,
+    serif;
+  font-weight: 700;
+}
+.folio-11 .lexicon-print {
+  width: 100%;
+  mix-blend-mode: multiply;
+}
+@media (max-width: 740px) {
+  .folio-11 {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+    padding: 1.5rem 0;
+  }
+  .folio-11 .type-column {
+    padding: 0;
+  }
+  .folio-11 .lexicon-print {
+    width: 65%;
+    max-height: 240px;
+    object-fit: contain;
+    justify-self: end;
+  }
 }

@@ -3,27 +3,6 @@
   --wash: var(--palette-subtle);
   --paper: var(--palette-white);
 }
-.brief {
-  display: grid;
-  grid-template-columns: 1.3fr 0.7fr;
-  gap: 2rem 6%;
-  align-items: center;
-}
-.brief-top {
-  grid-column: 1/-1;
-  display: flex;
-  justify-content: space-between;
-  border-block: 3px double var(--accent);
-  padding: 0.7rem 0;
-}
-.brief h1 {
-  font-family: var(--body);
-  font-weight: 800;
-}
-.brief i {
-  font-family: var(--sign);
-  color: var(--accent);
-}
 .team-card {
   padding: 2rem;
   background: var(--accent);
@@ -48,10 +27,6 @@
   max-width: 42rem;
 }
 @media (max-width: 740px) {
-  .brief {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
   .team-card {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -114,5 +89,131 @@
 @media (max-width: 390px) {
   .party-check {
     grid-template-columns: 1fr;
+  }
+}
+
+.folio-9 {
+  display: grid;
+  grid-template-columns: 0.86fr 1.14fr;
+  align-items: end;
+  gap: 4%;
+  padding: 2.75% 0 4%;
+  background: var(--palette-editorial-paper);
+}
+.brief-engraving {
+  width: 100%;
+  mix-blend-mode: multiply;
+}
+.brief-form {
+  padding: 2% 5% 1% 0;
+  align-self: center;
+}
+.brief-form h1 {
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-base));
+  font-weight: 700;
+}
+.brief-form .folio-summary {
+  font: var(--font-size-xl) var(--body);
+}
+.folio-9 .team-card {
+  display: grid;
+  grid-template-columns: 0.65fr 1fr;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  background: var(--wash);
+  border: 0;
+  color: var(--ink);
+  padding: 1.1rem 1.4rem;
+}
+.folio-9 .team-card > strong {
+  font:
+    calc(var(--font-editorial-hero) + var(--font-size-xl)) Georgia,
+    serif;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  grid-column: 1;
+  line-height: 1;
+}
+.folio-9 .team-card > p {
+  font:
+    var(--font-size-2xl) Georgia,
+    serif;
+  font-weight: 700;
+  line-height: 1.05;
+  border-left: 1px solid var(--accent);
+  padding-left: 1rem;
+  color: var(--ink);
+  margin: 0;
+}
+.folio-9 .party-check {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  border-top: 1px solid var(--accent);
+  color: var(--ink);
+  padding-top: 1rem;
+}
+.folio-9 .party-check input {
+  width: 100%;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--accent);
+}
+.folio-9 .party-check output {
+  grid-column: 1/-1;
+  color: var(--ink);
+}
+.brief-form > .folio-action {
+  margin-top: 1.15rem;
+}
+@media (max-width: 740px) {
+  .folio-9 {
+    grid-template-columns: 1fr;
+    padding: 1.3rem 0.75rem;
+    gap: 0.5rem;
+  }
+  .brief-form {
+    padding: 0;
+    grid-row: 1;
+  }
+  .brief-form h1 {
+    font-size: var(--font-size-display);
+  }
+  .brief-form .folio-summary {
+    font-size: var(--font-size-lg);
+  }
+  .folio-9 .team-card {
+    padding: 0.6rem 0.8rem;
+  }
+  .folio-9 .team-card > strong {
+    font-size: var(--font-size-display);
+  }
+  .folio-9 .team-card > p {
+    font-size: var(--font-size-lg);
+  }
+  .brief-engraving {
+    width: min(68%, 270px);
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 1001px) {
+  .folio-9 {
+    grid-template-columns: 0.79fr 1.21fr;
+    gap: 3%;
+  }
+  .brief-form h1 {
+    font-size: var(--font-editorial-hero);
+  }
+}
+@media (min-width: 741px) {
+  .folio-9 .team-card > strong {
+    font-size: calc(
+      var(--font-editorial-hero) + var(--font-size-display) +
+        var(--font-size-display)
+    );
+    letter-spacing: -0.06em;
   }
 }

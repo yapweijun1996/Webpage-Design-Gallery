@@ -3,6 +3,7 @@
 --root and --prefix also exercise a generated build mounted under a project prefix.
 Only existing player test APIs steer gameplay; surface/mode visibility is never fabricated.
 """
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import gzip
@@ -42,7 +43,7 @@ def preserved(before, after):
 
 
 def ready(page, url):
-    page.goto(url, timeout=60000)
+    page.goto(mall_entry_url(url), timeout=60000)
     page.wait_for_function('__mall?.ready && window.__sceneReady', timeout=60000)
 
 

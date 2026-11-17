@@ -1,4 +1,5 @@
 """Focused real-browser review of retained V11 mode layers and interruptions."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import http.server
@@ -19,7 +20,7 @@ RUNTIME = 'demos/corporate/gjh/v11/'
 
 
 def wait_ready(page, url):
-    page.goto(url, timeout=60000)
+    page.goto(mall_entry_url(url), timeout=60000)
     page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=60000)
 
 

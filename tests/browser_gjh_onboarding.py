@@ -11,7 +11,7 @@ def run():
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=[f'--use-angle={os.environ.get("GALLERY_WEBGL_BACKEND","swiftshader")}', '--enable-unsafe-swiftshader'])
    page=browser.new_page(viewport={'width':1440,'height':900},reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
    page.add_init_script("""window.padState={connected:true,mapping:'standard',axes:[0,0,0,0],buttons:Array.from({length:16},()=>({pressed:false}))};Object.defineProperty(navigator,'getGamepads',{value:()=>window.padState?[window.padState]:[]});""")
-   page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/',wait_until='domcontentloaded',timeout=60000)
+   page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience',wait_until='domcontentloaded',timeout=60000)
    page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=90000);guide(page)
    initial=state(page);page.evaluate('padState.axes[2]=.5')
    page.wait_for_function('yaw=>Math.abs(__mall.state.yaw-yaw)>.12',arg=initial['yaw'])

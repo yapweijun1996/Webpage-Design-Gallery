@@ -1,5 +1,6 @@
 """Exercise the pinned visitor, real mall poses, animation blends and failure directory."""
 
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import hashlib
@@ -135,7 +136,7 @@ def verify(browser, url, base, viewport, directory, missing=False, reduced=False
         label = "missing" if missing else "reduced" if reduced else "loaded"
         result = {"width": width, "case": label, "poses": {}, "transitions": {}}
         with page.expect_response(lambda response: response.url.endswith("/" + MODEL)) as response_info:
-            page.goto(url, wait_until="domcontentloaded")
+            page.goto(mall_entry_url(url), wait_until="domcontentloaded")
         response = response_info.value
         if missing:
             assert response.status == 404

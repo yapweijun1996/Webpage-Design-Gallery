@@ -58,7 +58,7 @@ def verify(page, edition):
             expect(page.locator(".portrait figcaption span:visible")).to_have_count(1)
             expect(page.locator(".caption-" + ingredient)).to_be_visible()
     elif edition == 9:
-        page.locator(".archive-feature a").press("Enter")
+        page.locator(".archive-product").press("Enter")
         expect(page.locator("#soy h3")).to_be_in_viewport()
     elif edition == 10:
         page.get_by_label("Number of guests").fill("7")

@@ -29,14 +29,16 @@
       <header>
         <div>
           <p class="tag">Singapore drinks / Container guide</p>
-          <h1>Cooler shelf</h1>
+          <h1>Cooler shelf.</h1>
+          <p class="lead">Find the listed drinks and sizes for a carton, can or bottle.</p><a class="pill" href="#shelf-choices">Choose a container ↓</a>
         </div>
-        <div class="choices" role="group" aria-label="Container type" hidden data-controls>
+        <div class="choices" id="shelf-choices" role="group" aria-label="Container type" hidden data-controls>
           <button type="button" data-choice="all" aria-pressed="true">All containers</button>
           <button type="button" data-choice="carton" aria-pressed="false">Cartons</button>
           <button type="button" data-choice="can" aria-pressed="false">Cans</button>
           <button type="button" data-choice="bottle" aria-pressed="false">Bottles</button>
         </div>
+        <figure class="cabinet"><img src="assets/cabinet.webp" width="706" height="974" alt="An illustrated drinks cabinet with shelves for cartons, cans and bottles"></figure>
       </header>
       <p class="shelf-count" role="status" id="count">6 drinks on the shelf</p>
       <div class="shelves">

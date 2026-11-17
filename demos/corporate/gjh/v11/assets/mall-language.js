@@ -1,5 +1,10 @@
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ["New Moon abalone", "New Moon 鲍鱼", "Abalon New Moon"],
+  ["Store wayfinding · Concept illustration", "商店导览 · 概念插画", "Penunjuk arah kedai · Ilustrasi konsep"],
+  ["Go straight to four New Moon packs, or explore the mall on foot.", "直接查看四款 New Moon 产品，或步行探索商场。", "Lihat terus empat pek New Moon atau terokai pusat beli-belah dengan berjalan kaki."],
+  ["Walking guide", "步行导览", "Panduan berjalan kaki"],
+  ["Virtual mall / Visitor arrivals", "虚拟商场 / 访客入口", "Pusat beli-belah maya / Ketibaan pelawat"],
   ['Performance details','性能详情','Butiran prestasi'],
   ['Performance','性能','Prestasi'],
   ['Close performance details','关闭性能详情','Tutup butiran prestasi'],

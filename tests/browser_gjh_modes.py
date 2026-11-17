@@ -4,6 +4,7 @@ Uses the existing Python Playwright installation; no Node packages are required.
 --baseline serves the three original runtime files from the pinned baseline ref without changing the
 worktree, to reproduce the pre-patch failures with the same browser and controls.
 """
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import http.server
@@ -142,7 +143,7 @@ def run():
                 def shot(label):
                     page.screenshot(path=str(args.output / f'{label}-{width}.png'))
 
-                page.goto(url, timeout=60000)
+                page.goto(mall_entry_url(url), timeout=60000)
                 page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=60000)
                 page.locator('#guide-card').wait_for(state='visible')
                 if not args.baseline:
@@ -458,7 +459,7 @@ def run():
                 # product, Bag and scene handoff, without changing the default.
                 context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce')
                 page = context.new_page()
-                page.goto(url + '?visitor=v1')
+                page.goto(mall_entry_url(url + '?visitor=v1'))
                 page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=60000)
                 page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click()
                 page.locator('.product-card [data-inspect]').first.click()

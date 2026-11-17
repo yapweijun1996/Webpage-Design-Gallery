@@ -3,7 +3,7 @@
   "industry": "FMCG, Electronics, Health & Nutrition",
   "title": "Goh Joo Hin - Portfolio Modern",
   "version": "v6",
-  "designStyle": "Modular berry-and-yellow company introduction with a product-aware brand portfolio.",
+  "designStyle": "A pale sage packaging study pairs official pack photographs with a four-origin comparison.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v6/",
   "officialWebsite": "https://www.gjh.com.sg/",
@@ -11,7 +11,7 @@
   "id": "gjh-v6",
   "companyId": "gjh",
   "displayTitle": "Portfolio Modern",
-  "summary": "A modular portfolio direction with original brand imagery and four source-matched New Moon SKUs.",
+  "summary": "Compare four New Moon abalone origins, starting with the 454 g Mexico pack beside the 425 g New Zealand pack.",
   "styles": [
     "corporate",
     "minimal"

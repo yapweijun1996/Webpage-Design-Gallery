@@ -1,4 +1,5 @@
 """Expanded atrium: collision-safe planting, seat interactions and circulation."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import http.server
@@ -35,7 +36,7 @@ def run():
                 page=context.new_page();errors=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
-                page.goto(base+visitor);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
+                page.goto(mall_entry_url(base+visitor));page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
                 assert page.evaluate('window.__sceneReady === true')
                 page.locator('#view-toggle').click();page.locator('[data-add]').first.click();page.locator('#view-toggle').click()
                 seats=state(page)['seats'];assert len(seats)==8
@@ -81,7 +82,7 @@ def run():
             context=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
             context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
             page=context.new_page();use_individual_assets(page);page.route('**/GJH_PUB_002.glb',lambda route:route.abort())
-            page.goto(base);page.wait_for_function('window.__sceneReady',timeout=90000)
+            page.goto(mall_entry_url(base));page.wait_for_function('window.__sceneReady',timeout=90000)
             assert page.evaluate('__mall.state.furnishings.bench.status')=='fallback'
             seat=state(page)['seats'][0]
             for x,z in [(10,35),(-8,35),(-8,21),(seat['exitX'],21),(seat['exitX'],seat['exitZ'])]:move(page,x,z,2.65)

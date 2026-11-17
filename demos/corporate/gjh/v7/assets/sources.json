@@ -82,5 +82,35 @@
     "licenseFile": "OFL-Manrope.txt",
     "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
     "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
-  }
+  },
+  "conceptArtwork": [
+    {
+      "file": "concept-lounge.webp",
+      "sha256": "157429ef4ff78f3c44dae6729c0afa23e4a5c2d6dd790b9d5b7498424dff0000",
+      "kind": "local-concept-illustration",
+      "sourceReceipt": "../../v11/assets/concept-imagery.json",
+      "sourceFile": "concept-lounge.webp"
+    },
+    {
+      "file": "partner-storefront-food.webp",
+      "kind": "local-concept-illustration",
+      "sourceReceipt": "../../v11/assets/concept-imagery.json",
+      "sourceFile": "concept-storefront-food.webp",
+      "sha256": "46fd5269aca3bbde6dea55c1e2d512d8f6362001c0e232c9ffc542af30817406"
+    },
+    {
+      "file": "partner-gathering.webp",
+      "kind": "local-concept-illustration",
+      "sourceReceipt": "../../v11/assets/concept-imagery.json",
+      "sourceFile": "concept-gathering.webp",
+      "sha256": "324f317a0f5e79d920603d9be8735547426560d2514d84cc05bcf50678534559"
+    },
+    {
+      "file": "partner-service-desk.webp",
+      "kind": "local-concept-illustration",
+      "sourceReceipt": "../../v11/assets/concept-imagery.json",
+      "sourceFile": "concept-service-desk.webp",
+      "sha256": "647b31787dfbc54c9c20c2a699979d4a3a13520f6ab775574361931019dc1345"
+    }
+  ]
 }

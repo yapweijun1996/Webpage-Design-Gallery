@@ -3,7 +3,7 @@
   "industry": "FMCG, Electronics, Health & Nutrition",
   "title": "Goh Joo Hin - The Goodness Table",
   "version": "v14",
-  "designStyle": "Forest green, warm sand and an editorial food story.",
+  "designStyle": "A historical exhibition catalogue pairs an illustrated provision counter with an archival image and timeline.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v14/",
   "officialWebsite": "https://www.gjhglobal.com/",
@@ -11,7 +11,7 @@
   "id": "gjh-v14",
   "companyId": "gjh",
   "displayTitle": "The Goodness Table",
-  "summary": "A warm forest-and-sand editorial story connecting heritage with everyday food.",
+  "summary": "Switch between a provision-counter illustration and the archive, then explore the history of the Rochor Road shop.",
   "styles": [
     "heritage",
     "editorial"

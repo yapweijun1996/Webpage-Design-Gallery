@@ -77,7 +77,7 @@ def run():
                     has_touch=width < 1000, reduced_motion='reduce', service_workers='block')
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
-                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/',
+                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience',
                           timeout=60000)
                 page.wait_for_function('__mall?.ready && __sceneReady', timeout=60000)
                 page.add_script_tag(path=str(args.axe_script))

@@ -1,4 +1,5 @@
 """E2E of all eight pilot assets, scene contracts and independent failure paths."""
+from gjh_startup_test_helpers import mall_entry_url
 import collections
 import functools
 import http.server
@@ -49,7 +50,7 @@ def boot(context,url):
     page=context.new_page();errors=[];requests=collections.Counter()
     page.on('pageerror',lambda error:errors.append(str(error)))
     page.on('request',lambda request:requests.update([Path(urlsplit(request.url).path).name]))
-    page.goto(url,wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready && window.__sceneReady',timeout=60000)
+    page.goto(mall_entry_url(url),wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready && window.__sceneReady',timeout=60000)
     if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
 
     page.locator('#scene').focus();drive(page)
@@ -189,7 +190,7 @@ GLTFLoader.prototype.parseAsync = async function(...args) {
                 report['checks'].append({'lateParseDisposed':'PASS','geometryDisposals':page.evaluate('window.__pilotLateDisposals')});context.close()
                 # No WebGL: unchanged product directory must remain usable.
                 context=browser.new_context(service_workers='block');context.add_init_script("const real=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return type.includes('webgl')?null:real.call(this,type,...args)}")
-                page=context.new_page();page.goto(url);page.locator('.product-card [data-inspect]').first.wait_for(state='visible')
+                page=context.new_page();page.goto(mall_entry_url(url, 'store-list'));page.locator('.product-card [data-inspect]').first.wait_for(state='visible')
                 page.locator('.product-card [data-inspect]').first.click();assert page.locator('#product-image').is_visible()
                 report['checks'].append({'noWebGLDirectory':'PASS'});context.close()
                 report['browserVersion']=browser.version;browser.close()

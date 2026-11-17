@@ -1,4 +1,5 @@
 """Exercise the opt-in expanded shell with real Chrome and Rapier collisions."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import http.server
@@ -64,7 +65,7 @@ def run():
                 context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page=context.new_page(); errors=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
-                page.goto(url+'?layout=expanded'+visitor,wait_until='domcontentloaded')
+                page.goto(mall_entry_url(url+'?layout=expanded'+visitor),wait_until='domcontentloaded')
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
                 assert page.evaluate('window.__sceneReady === true'), 'expanded 3D initialization failed'
                 assert abs(position(page)['x']-10)<.1 and abs(position(page)['z']-45)<.1
@@ -146,7 +147,7 @@ def run():
             page=context.new_page()
             graphics_errors=[]
             page.on('console', lambda message: graphics_errors.append(message.text) if 'WebGL: INVALID_' in message.text else None)
-            page.goto(url+'?layout=expanded');page.wait_for_function('window.__sceneReady',timeout=90000)
+            page.goto(mall_entry_url(url+'?layout=expanded'));page.wait_for_function('window.__sceneReady',timeout=90000)
             page.locator('#view-toggle').click();page.locator('[data-add]').first.click();page.locator('#view-toggle').click()
             page.evaluate("window.__lossExtension=document.querySelector('#scene').getContext('webgl2').getExtension('WEBGL_lose_context');if(!__lossExtension)throw Error('Context-loss extension unavailable');__lossExtension.loseContext()")
             page.wait_for_function('__mall.state.graphics.status === "lost" || __mall.state.graphics.status === "failed"')
@@ -166,7 +167,7 @@ def run():
                 context=browser.new_context(java_script_enabled=mode!='no-js',service_workers='block')
                 page=context.new_page()
                 if mode=='physics-failure':page.route('**/rapier.mjs',lambda route:route.abort())
-                page.goto(url+'?layout=expanded')
+                page.goto(mall_entry_url(url+'?layout=expanded', '' if mode=='no-js' else 'experience'))
                 if mode=='physics-failure':page.wait_for_function('window.__sceneFailed',timeout=90000)
                 assert page.locator('#store-list').is_visible() and page.locator('[data-store]').count()==3
                 assert page.locator('.product-card').count()==4

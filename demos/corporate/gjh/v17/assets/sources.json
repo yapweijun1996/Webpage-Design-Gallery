@@ -30,6 +30,18 @@
       "kind": "ai-generated editorial illustration",
       "sourceAssetId": "009",
       "sha256": "8eed60cfa6f2176956573128a7cb50dfecc2d5562ed60b28fe72293d3257fe33"
+    },
+    {
+      "file": "pantry-watercolour.webp",
+      "kind": "ai-concept-illustration",
+      "subject": "A home cook serving her family at a round table in Singapore.",
+      "sha256": "37819001f659ced34ccf4c06c810f983f859b1cfd69ae21e158ef4e58e45b027"
+    },
+    {
+      "file": "pantry-watercolour-480.webp",
+      "kind": "display-derivative",
+      "parentFile": "pantry-watercolour.webp",
+      "sha256": "5c6b4f04a77889efb9c15cf8e8c064bbd37cc8ef088f9abfc6849eaed22db5e1"
     }
   ],
   "brandInformation": [

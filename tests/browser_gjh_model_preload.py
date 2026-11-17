@@ -90,7 +90,7 @@ def run_scenario(browser, base, scenario):
           const west=await import('./assets/gallery-west-shops.js');
           const east=await import('./assets/gallery-east-shops.js');
           return [...new Set(Object.values({...west.westShopPlacements,...east.eastShopPlacements})
-            .flat().map(p => new URL(p.file, location.href+'assets/').pathname))];
+            .flat().map(p => new URL(p.file, new URL('./assets/', document.baseURI)).pathname))];
         }''')
         expected += ['/demos/corporate/gjh/v11/assets/' + name + '.glb' for name in HEROES]
         deadline = time.monotonic() + float(os.environ.get('GALLERY_MODEL_SETTLE_TIMEOUT', '100'))
@@ -240,7 +240,7 @@ def main():
                 with http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler) as server:
                     threading.Thread(target=server.serve_forever, daemon=True).start()
                     try:
-                        base = f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'
+                        base = f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience'
                         if scenario in ('early', 'directory'):
                             run_exit(browser, base, scenario)
                         elif scenario == 'loss':

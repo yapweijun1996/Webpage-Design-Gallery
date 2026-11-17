@@ -68,12 +68,17 @@ def render(root, catalog):
             image_url = escape(image.relative_to("style-atlas").as_posix())
             live = "https://yapweijun1996.github.io/Webpage-Design-Gallery/" + design["demoPath"]
             markdown.append(f'| {version.upper()} · {kind} | {item["style"]} | [Open WebP]({image_url}) | [Open demo]({live}) |')
+            audit_link = ""
+            evidence = path.parent / "audit" / (version + ".webp")
+            if kind == "primary" and evidence.is_file():
+                url = "https://github.com/yapweijun1996/Webpage-Design-Gallery/blob/main/" + evidence.relative_to(root).as_posix()
+                audit_link = f'<a href="{escape(url)}">Desktop and phone audit</a>'
             cards.append(f'''<article id="{anchor}" data-kind="{kind}">
   <a class="art" href="{image_url}" aria-label="Open full-size {subject} mockup"><img src="{image_url}" alt="{subject} landing concept for {title}" loading="lazy" decoding="async" width="1440" height="900"></a>
   <div class="caption"><p class="edition">{role} · {escape(version.upper())} · {medium}</p><h3>{subject}</h3>
   <p>{escape(item["notes"])}</p>
   <div class="actions"><a href="../{escape(design["demoPath"])}">Open {escape(design["title"])} <span aria-hidden="true">↗</span></a><a href="{image_url}">Full-size mockup</a></div>
-  <details><summary>Compare with the gallery preview</summary><figure><img src="../{escape(design["thumbnail"])}" loading="lazy" decoding="async" width="720" height="450" alt="Published gallery preview of {escape(design["title"])}"><figcaption>Current demo · {escape(design["title"])}</figcaption></figure></details></div>
+  <details><summary>Compare with the gallery preview</summary><figure><img src="../{escape(design["thumbnail"])}" loading="lazy" decoding="async" width="720" height="450" alt="Published gallery preview of {escape(design["title"])}"><figcaption>Current demo · {escape(design["title"])}</figcaption></figure>{audit_link}</details></div>
 </article>''')
         expected = {version for cid, version in designs if cid == company_id}
         if factual_renders - keys:

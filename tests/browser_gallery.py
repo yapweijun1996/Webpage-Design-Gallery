@@ -198,7 +198,7 @@ def run():
                     page.wait_for_function("() => document.querySelector('.detail-image').scrollTop > 0")
                     page.get_by_role("link", name="Open live demo", exact=False).click()
                     assert "/demos/corporate/gjh/v6/" in page.url
-                    assert page.locator("h1").inner_text().startswith("Everyday brands.")
+                    assert " ".join(page.locator("h1").inner_text().split()) == "One brand. Distinct origins."
                     assert page.locator(".identity img").get_attribute("src") == "assets/gjh-logo.png"
                     assert not errors, errors
                     evidence.append({"width": width, "companyFlow": "PASS", "filters": "PASS", "compare": "PASS", "deviceWidths": "PASS", "syncScroll": "PASS", "images": "PASS", "consoleErrors": errors})

@@ -1,4 +1,5 @@
 """Published-demo integration checks and rendered review outputs for four conceptual cans."""
+from gjh_startup_test_helpers import mall_entry_url
 from browser_gjh_budget import ROOT, Quiet, functools, http, threading, sync_playwright, os, json
 from browser_gjh_v11 import drive
 from gjh_startup_test_helpers import use_individual_assets
@@ -17,7 +18,7 @@ def run():
     page=browser.new_page(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     if failed:
      use_individual_assets(page);page.route('**/assets/gjh-m056-shelf-lod1.glb',lambda r:r.fulfill(status=404,body=''))
-    page.goto(url);page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"')
+    page.goto(mall_entry_url(url));page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"')
     assets=page.evaluate('__mall.state.productAssets');assert assets['shelf']['status']==('fallback' if failed else 'loaded');assert all(c['status']=='loaded' for c in assets['cans'].values());assert assets['totalInstances']==204
     page.screenshot(path=str(out/f'entrance-{width}-{failed}.png'))
     page.evaluate('__mall.teleport("newmoon")');drive(page,400);drive(page,1500,forward=1);drive(page,300,right=-1);drive(page,2300,forward=1)
@@ -42,7 +43,7 @@ def run():
     page.locator('#view-toggle').click();assert '121-degree' in page.locator('.packaging-note').inner_text();assert page.locator('.product-card').count()==4
     assert not errors,errors;results.append({'width':width,'shelfFailure':failed,'fourCorrectDetails':records,'shelfCollisionZ':state['z'],'assetStatus':assets,'errors':errors});page.close()
    # Render exact vendored LOD1 bytes in a standalone QA scene, not a public viewer feature.
-   page=browser.new_page(viewport={'width':1000,'height':500});page.goto(url);page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
+   page=browser.new_page(viewport={'width':1000,'height':500});page.goto(mall_entry_url(url));page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
    await_script='''async()=>{
     const T=await import('./vendor/three.module.min.js');const {GLTFLoader}=await import('./vendor/GLTFLoader.js');
     document.body.replaceChildren();document.body.style.margin='0';const canvas=document.createElement('canvas');document.body.append(canvas);

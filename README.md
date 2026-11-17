@@ -24,7 +24,7 @@ Each concept has its own install identity. The [demo PWA guide](docs/company-dem
 
 ## Landing page ideas and review tools
 
-The [landing style atlas](https://yapweijun1996.github.io/Webpage-Design-Gallery/style-atlas/) pairs the 46 demos with 60 original visual references. The [GitHub image index](style-atlas/README.md) links each WebP to its edition. Every live demo links back to its primary reference.
+The [landing style atlas](https://yapweijun1996.github.io/Webpage-Design-Gallery/style-atlas/) pairs the 46 demos with 60 original visual references. The [GitHub image index](style-atlas/README.md) links each WebP to its edition. Every live demo links back to its primary reference. In **1.4.0**, the [46-page visual audit](docs/landing-atlas/anchor-audit.md) pairs each mockup with before-and-after desktop and phone captures. The [GJH visitor arrivals board](demos/corporate/gjh/v11/index.html) offers a direct [product directory](demos/corporate/gjh/v11/index.html#featured-heading) and a separate [3D mall entrance](demos/corporate/gjh/v11/index.html#experience).
 
 The [design directions](docs/landing-design-directions.md) describe the first screen and primary visitor action for every edition. Each collection offers two task-based entrances alongside the official company link. The [local review skill](.agents/skills/gallery-landing-review/SKILL.md) and [before/after tool](scripts/review_landings.py) support future revisions.
 

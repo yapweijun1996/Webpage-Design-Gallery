@@ -1,4 +1,5 @@
 """Keyboard recovery when the real mall WebGL context is lost."""
+from gjh_startup_test_helpers import mall_entry_url
 from browser_gjh_budget import ROOT, Quiet, functools, http, threading, sync_playwright, os, json
 from pathlib import Path
 import argparse
@@ -12,7 +13,7 @@ def run():
    for width,height in [(390,844),(1440,900)]:
     for mode in ['scene','guide','product','map','list-product','header']:
      page=browser.new_page(viewport={'width':width,'height':height},has_touch=width<600,reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-     page.goto(args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
+     page.goto(mall_entry_url(args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'));page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
      if mode!='guide':
       if page.locator('#guide-card').is_visible():page.locator('#guide-skip').click()
       page.locator('#scene').focus()

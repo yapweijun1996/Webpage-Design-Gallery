@@ -24,7 +24,7 @@ def run():
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
             page.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
-            page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/')
+            page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience')
             page.wait_for_function('window.__mall?.ready', timeout=90000)
             for number in range(1, 18):
                 result = page.evaluate("""async n => {

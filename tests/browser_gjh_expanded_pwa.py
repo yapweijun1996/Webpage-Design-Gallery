@@ -1,4 +1,5 @@
 """Expanded query preserves the scoped PWA fallback and tab bag on reconnect."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools
 import http.server
 import os
@@ -19,7 +20,7 @@ def run():
           '--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'--enable-unsafe-swiftshader'])
         context=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce')
         context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
-        page=context.new_page();page.goto(url);page.wait_for_function('window.__sceneReady',timeout=90000)
+        page=context.new_page();page.goto(mall_entry_url(url));page.wait_for_function('window.__sceneReady',timeout=90000)
         page.wait_for_function("navigator.serviceWorker.controller?.scriptURL.endsWith('/v11/pwa-sw.js')",timeout=30000)
         page.locator('#view-toggle').click();page.locator('[data-add]').first.click()
         assert '1' in page.locator('#bag-open').inner_text()

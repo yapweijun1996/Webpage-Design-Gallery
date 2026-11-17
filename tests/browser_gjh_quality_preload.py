@@ -56,7 +56,7 @@ def main():
                     context=browser.new_context(viewport={'width':1280,'height':800}, reduced_motion='reduce', service_workers='block')
                     page=context.new_page()
                     page.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed'); localStorage.setItem('gjh-v11-graphics-quality-v1','auto')")
-                    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/',wait_until='domcontentloaded')
+                    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience',wait_until='domcontentloaded')
                     page.locator('#loader-enter-now').wait_for(state='visible',timeout=90000)
                     page.bring_to_front()
                     before=quality(page)

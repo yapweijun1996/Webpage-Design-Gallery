@@ -29,7 +29,7 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
 def run():
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=str(ROOT)))
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    base = f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'
+    base = f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience'
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=['--use-angle=metal'])

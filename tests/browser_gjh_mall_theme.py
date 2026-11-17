@@ -1,4 +1,5 @@
 """Mall-theme settings, retained visitor state and recovery on real Chrome."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse,functools,http.server,os,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -15,7 +16,7 @@ def run():
   c=browser.new_context(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion=motion,service_workers='block')
   c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed');"+init)
   p=c.new_page();errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
- def ready(p):p.goto(url);p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
+ def ready(p):p.goto(mall_entry_url(url));p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
  def open_theme(p,button='#mall-theme-open'):
   p.locator(button).click();d=p.locator('#mall-theme-dialog');assert d.is_visible();assert p.evaluate('document.activeElement.id')=='mall-theme-title';return d
  def apply(p,ident=None):
@@ -99,11 +100,11 @@ def run():
    assert p.evaluate('__mall.state.theme.active==="everyday" && !__mall.state.theme.suspended');p.locator('#graphics-return').click()
    assert '1' in p.locator('#bag-open').inner_text();open_theme(p);apply(p);close(p,'mall-theme-open')
    print('PASS graphics loss and restoration retain theme and bag',flush=True);c.close()
-   c,p,errors=fresh(browser);p.goto(url+'&visitor=v1');p.wait_for_function('window.__sceneReady',timeout=90000)
+   c,p,errors=fresh(browser);p.goto(mall_entry_url(url+'&visitor=v1'));p.wait_for_function('window.__sceneReady',timeout=90000)
    open_theme(p);apply(p);close(p,'mall-theme-open');assert p.evaluate('__mall.state.theme.active==="everyday"') and not errors
    print('PASS Visitor v1 expanded theme settings',flush=True);c.close()
    # The expanded default exposes its theme settings; the static fallback keeps the control hidden.
-   c,p,errors=fresh(browser);p.goto(url.replace('?layout=expanded',''));p.wait_for_function('window.__sceneReady',timeout=90000)
+   c,p,errors=fresh(browser);p.goto(mall_entry_url(url.replace('?layout=expanded','')));p.wait_for_function('window.__sceneReady',timeout=90000)
    assert p.locator('#mall-theme-open').is_visible() and p.locator('#directory-theme-open').is_visible();assert p.locator('[data-space-id]').count()==14;c.close()
    c=browser.new_context(java_script_enabled=False,service_workers='block');p=c.new_page();p.goto(url.replace('?layout=expanded',''));assert p.locator('#directory-theme-open').is_hidden() and p.locator('[data-store]').count()==3;c.close()
    print('PASS expanded default and no-JavaScript directory',flush=True);browser.close()

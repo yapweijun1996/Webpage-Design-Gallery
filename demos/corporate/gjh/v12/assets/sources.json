@@ -35,6 +35,18 @@
       "sourceReceipt": "../../v8/assets/sources.json",
       "kind": "product-front",
       "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg"
+    },
+    {
+      "file": "family-watercolour.webp",
+      "kind": "ai-concept-illustration",
+      "subject": "Wide family meal in a Singapore home with blue and white porcelain and flowering shutters.",
+      "sha256": "7d50b6d22142ed8ed71b6abada723584721559f49d6beca51b057650eae8443a"
+    },
+    {
+      "file": "family-watercolour-720.webp",
+      "kind": "display-derivative",
+      "parentFile": "family-watercolour.webp",
+      "sha256": "7d5670250f40401348808e5079d25612e05c750db5237e53d919910c6da89adf"
     }
   ],
   "font": {

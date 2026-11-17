@@ -1,4 +1,5 @@
 """Exercise the real original-tin GLB, controls, responsive layout and failure lifecycle."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools, http.server, json, os, threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -16,7 +17,7 @@ def framed(page):
 def directory(page,url):
  # Standalone viewer must work even when the mall physics runtime cannot start.
  page.route('**/rapier.mjs',lambda route:route.abort())
- page.goto(url)
+ page.goto(mall_entry_url(url, "store-list"))
  page.locator('#original-tin-open').wait_for(state='visible')
 def open_loaded(page):
  page.locator('#original-tin-open').click()

@@ -1,4 +1,5 @@
 """Source-pinned mall amenities: real placement, interactions, collisions and fallbacks."""
+from gjh_startup_test_helpers import mall_entry_url
 import collections,functools,http.server,json,os,threading,hashlib
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -8,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT.parent/'evidence/mall-amenities'
 FILES={'desk':'mall-service-desk.glb','signs':'mall-wayfinding-ceiling-sign.glb','showcase':'mall-glass-showcase.glb'}
 def ready(page,url):
- page.goto(url,wait_until='domcontentloaded');page.wait_for_function('window.__mall?.ready&&window.__sceneReady',timeout=90000)
+ page.goto(mall_entry_url(url),wait_until='domcontentloaded');page.wait_for_function('window.__mall?.ready&&window.__sceneReady',timeout=90000)
  page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.querySelector("#guide-card").hidden&&!__mall.state.paused')
 
  page.evaluate('__mall.setInput({});__mall.step(17)')

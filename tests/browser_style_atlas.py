@@ -48,10 +48,16 @@ def check(browser, base):
           return imgs.map(img=>[img.naturalWidth,img.naturalHeight]);
         }""")
         assert all(w >= 800 and h >= 500 and w > h for w, h in sizes), sizes
+        expect(page.locator("article[data-kind=alternate] details a")).to_have_count(0)
         primary = page.locator("article[data-kind=primary]").evaluate_all("""articles => articles.map(article => [
-          article.id, article.querySelector('.actions a').href
+          article.id, article.querySelector('.actions a').href, article.querySelector('details a')?.href
         ])""")
-        for anchor, demo in primary:
+        for anchor, demo, audit in primary:
+            company, version = anchor.rsplit("-", 1)
+            evidence = Path("docs", "landing-atlas", company, "audit", version + ".webp")
+            assert (ROOT / evidence).is_file(), evidence
+            expected = "https://github.com/yapweijun1996/Webpage-Design-Gallery/blob/main/" + evidence.as_posix()
+            assert audit == expected, (anchor, audit)
             response = context.request.get(demo)
             assert response.ok, (demo, response.status)
             related = RelatedLinks()
@@ -87,7 +93,7 @@ def check(browser, base):
         expect(page.locator("article:visible")).to_have_count(60)
         page.locator("#yeos-v1 summary").press("Enter")
         expect(page.locator("#yeos-v1 figure")).to_be_visible()
-    print("PASS: 60 full-size references, 46 bidirectional demo links, 14 alternates, filters, keyboard, no-script and four widths.")
+    print("PASS: 60 full-size references, 46 bidirectional demo links and audit sheets, 14 alternates, filters, keyboard, no-script and four widths.")
 
 
 def main():

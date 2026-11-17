@@ -46,7 +46,7 @@ def activate(page, selector):
     action.press('Enter')
 
 
-def journey(page, version, product_preview_width=None):
+def journey(page, version):
     if version in EXTERNAL:
         if version == 16:
             activate(page, 'button.pack-side')
@@ -74,21 +74,30 @@ def journey(page, version, product_preview_width=None):
         page.reload()
         expect(page.locator('#chapter-2004')).to_have_attribute('aria-pressed', 'true')
     elif version == 9:
-        activate(page, '[data-map-room="mili"]')
+        activate(page, '.street-entry .entry-action')
         expect(page.locator('.scene-world')).to_have_attribute('data-current-room', 'mili')
         expect(page.locator('#map-mili-detail')).to_have_text('Pantry')
     elif version == 10:
-        activate(page, '[data-room="newmoon"]')
+        page.wait_for_function("document.body.dataset.view === '3d'", timeout=90000)
+        activate(page, '[data-arcade-room="newmoon"]')
         expect(page.locator('body')).to_have_attribute('data-room', 'newmoon')
         expect(page.locator('.scene-products')).to_be_visible()
     elif version == 11:
-        activate(page, '#guide-products')
+        expect(page.locator('#mall-arrivals')).to_be_visible()
+        expect(page.locator('.arrival-board li')).to_have_count(4)
+        activate(page, '#arrival-products')
+        page.wait_for_url('**/#featured-heading')
         expect(page.locator('#featured-heading')).to_be_focused()
         expect(page.locator('#store-list .product-card:visible')).to_have_count(4)
-        if product_preview_width:
-            capture_preview(page, version, product_preview_width)
-        activate(page, '.mall-preview')
-        expect(page.locator('#amenities-title')).to_be_focused()
+        page.locator('#product-search').fill('mexico')
+        expect(page.locator('#store-list .product-card:visible')).to_have_count(1)
+        assert page.evaluate("!performance.getEntriesByType('resource').some(r => /rapier|three\\.module|\\.glb(?:$|[?#])/.test(r.name))")
+        page.go_back()
+        expect(page.locator('#mall-arrivals')).to_be_visible()
+        activate(page, '.arrival-board a[href="#arrival-nz"]')
+        expect(page.locator('#arrival-nz')).to_be_focused()
+        page.go_back()
+        expect(page.locator('#mall-arrivals')).to_be_visible()
     elif version == 14:
         page.locator('#counter-view').focus()
         page.keyboard.press('ArrowRight')
@@ -106,7 +115,8 @@ def journey(page, version, product_preview_width=None):
         expect(page.locator('.scene:visible')).to_have_count(1)
         expect(page.locator('.channels a[href="#play"]')).to_have_attribute('aria-current', 'true')
     elif version == 19:
-        activate(page, '.retail-setting summary')
+        if not page.locator('.retail-setting').evaluate('details => details.open'):
+            activate(page, '.retail-setting summary')
         page.locator('#retail-setting').select_option('online')
         activate(page, '#prepare-brief')
         assert 'online retail' in page.locator('#brief-text').input_value()
@@ -161,23 +171,10 @@ def run(versions, capture):
                         page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v{version}/',
                                   wait_until='domcontentloaded')
                         page.evaluate('document.fonts.ready')
-                        if version == 10:
-                            page.wait_for_function("document.body.dataset.view === '3d'")
-                        if version == 11:
-                            page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=90000)
-                            # The scene can become ready behind the optional model-preparation screen.
-                            page.wait_for_function("document.querySelector('#app-loader').hidden || "
-                                                   "!document.querySelector('#loader-enter-now').hidden", timeout=90000)
-                            page.locator('#loader-enter-now').evaluate(
-                                "button => { if (!button.hidden && !button.closest('#app-loader').hidden) button.click(); }")
-                            expect(page.locator('#app-loader')).to_be_hidden(timeout=30000)
-                            expect(page.locator('#guide-products')).to_be_visible()
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (version, width)
-                        # The mall desktop preview shows the spatial guide. Small screens show the products it opens.
-                        product_preview = capture and version == 11 and width in (390, 768)
-                        if capture and width != 320 and not product_preview:
+                        if capture and width != 320:
                             capture_preview(page, version, width)
-                        journey(page, version, width if product_preview else None)
+                        journey(page, version)
                         assert not errors, (version, width, errors)
                         print(f'V{version} {width}px PASS', flush=True)
         finally:

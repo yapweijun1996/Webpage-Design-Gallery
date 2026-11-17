@@ -3,7 +3,7 @@
   "industry": "FMCG, Electronics, Health & Nutrition",
   "title": "Goh Joo Hin - Everyday, In Colour",
   "version": "v15",
-  "designStyle": "Cobalt blue, warm ochre and modular portfolio storytelling.",
+  "designStyle": "An illustrated field guide uses numbered brand entries, specimen photographs and short product notes.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v15/",
   "officialWebsite": "https://www.gjhglobal.com/",
@@ -11,7 +11,7 @@
   "id": "gjh-v15",
   "companyId": "gjh",
   "displayTitle": "Everyday, In Colour",
-  "summary": "A bold cobalt-and-ochre portfolio direction celebrating distinct everyday brands.",
+  "summary": "Open the field notes for New Moon, MILI and GOGO to see the kinds of products each carries.",
   "styles": [
     "corporate",
     "editorial"

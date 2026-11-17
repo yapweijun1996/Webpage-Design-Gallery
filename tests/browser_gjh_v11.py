@@ -748,19 +748,19 @@ def run(capture=False):
         server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         base = f'http://127.0.0.1:{server.server_port}'
-        url = base + '/gallery/demos/corporate/gjh/v11/?layout=classic&visitor=v1'
+        url = base + '/gallery/demos/corporate/gjh/v11/?layout=classic&visitor=v1#experience'
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
                 try:
                     evidence.append({'loader': loader_coverage(browser, url)})
-                    evidence.append({'uxHud': ux_hud_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/')})
-                    evidence.extend(npc_budget_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/'))
+                    evidence.append({'uxHud': ux_hud_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/#experience')})
+                    evidence.extend(npc_budget_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/#experience'))
                     for query, expected in (('', True), ('?layout=classic', False)):
                         context = browser.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2, reduced_motion='reduce')
                         page = context.new_page()
                         started = time.monotonic()
-                        page.goto(base + '/gallery/demos/corporate/gjh/v11/' + query)
+                        page.goto(base + '/gallery/demos/corporate/gjh/v11/' + query + '#experience')
                         page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                         ready_ms = round((time.monotonic() - started) * 1000)
                         assert page.evaluate('window.__sceneReady === true'), page.locator('#fallback-message').inner_text()
@@ -981,7 +981,7 @@ def run(capture=False):
                     page=context.new_page(); brand_wall_errors=[]
                     page.on('pageerror',lambda error:brand_wall_errors.append(str(error)))
                     page.on('console',lambda message:brand_wall_errors.append(message.text) if message.type=='error' else None)
-                    page.goto(base+'/gallery/demos/corporate/gjh/v11/')
+                    page.goto(base+'/gallery/demos/corporate/gjh/v11/#experience')
                     page.wait_for_function('window.__mall?.ready && window.__sceneReady')
                     dismiss_tutorial(page)
                     drive(page,0)
@@ -1001,7 +1001,7 @@ def run(capture=False):
                         context=browser.new_context(viewport={'width':width,'height':height},
                             device_scale_factor=2,has_touch=width<600,reduced_motion='reduce')
                         page=context.new_page()
-                        page.goto(base+'/gallery/demos/corporate/gjh/v11/')
+                        page.goto(base+'/gallery/demos/corporate/gjh/v11/#experience')
                         page.wait_for_function('window.__mall?.ready && window.__sceneReady')
                         dismiss_tutorial(page)
                         evidence.append({'heroVisibility':hero_visibility_gallery(page,width,height)})
@@ -1024,7 +1024,7 @@ def run(capture=False):
                             context.add_init_script('const get=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t,...a){return /webgl/.test(t)?null:get.call(this,t,...a)}')
                         elif failure=='wasm':
                             context.add_init_script('WebAssembly.instantiate=async()=>{throw new Error("Physics denied")};WebAssembly.instantiateStreaming=WebAssembly.instantiate')
-                        page=context.new_page(); page.goto(url)
+                        page=context.new_page(); page.goto(url.removesuffix('#experience') if failure=='nojs' else url)
                         if failure!='nojs':
                             page.wait_for_function('window.__sceneFailed===true')
                             assert page.locator('#app-loader').is_visible()

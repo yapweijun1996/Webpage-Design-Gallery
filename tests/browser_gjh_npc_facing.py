@@ -33,7 +33,7 @@ def run():
                     return system;
                   }
                 """))
-                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/')
+                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience')
                 page.wait_for_function('window.__sceneReady && window.npcTest', timeout=90000)
                 result = page.evaluate((ROOT/'tests/gjh_npc_walks.mjs').read_text())
                 assert result['walkers'] >= 2 and result['metres'] > 8, result

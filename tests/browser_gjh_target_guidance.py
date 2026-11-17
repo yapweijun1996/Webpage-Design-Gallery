@@ -4,6 +4,7 @@ Only the existing movement/test API steers the visitor. Hidden-state and near-pl
 fixtures are explicitly labelled; resource comparison serves pinned sources without
 changing the checkout. Screenshots and detailed evidence default to /tmp.
 """
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import hashlib
@@ -357,7 +358,7 @@ def asset_failures(browser,url,output):
     for label,pattern,category in [('kiosk','**/mall-directory-kiosk.glb','kiosk'),('brand','**/mili-brand-cover.jpg','mili')]:
         context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,reduced_motion='reduce',service_workers='block')
         page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-        page.route(pattern,lambda route:route.abort());page.goto(url)
+        page.route(pattern,lambda route:route.abort());page.goto(mall_entry_url(url))
         page.wait_for_function('window.__mall?.ready || window.__sceneFailed',timeout=60000)
         if label=='brand':
             # World textures are required by the existing initializer. Their

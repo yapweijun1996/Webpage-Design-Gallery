@@ -1,4 +1,5 @@
 """Check the hybrid directory, demo bag and 3D handoff in real Chrome."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools
 import http.server
 import os
@@ -32,7 +33,7 @@ def run():
                     page = context.new_page()
                     errors = []
                     page.on('pageerror', lambda error: errors.append(str(error)))
-                    page.goto(url, wait_until='domcontentloaded')
+                    page.goto(mall_entry_url(url), wait_until='domcontentloaded')
                     page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                     assert page.evaluate('window.__sceneReady === true'), '3D mall failed to start'
                     if page.locator('#experience').is_visible():

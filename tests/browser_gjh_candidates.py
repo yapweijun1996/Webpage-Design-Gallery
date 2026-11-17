@@ -1,4 +1,5 @@
 """Concept store identity parity and native fallback/interaction checks."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse,functools,hashlib,http.server,json,os,tempfile,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -42,7 +43,7 @@ def run():
      browser=p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args=['--use-angle=metal','--ignore-gpu-blocklist'])
      expected=None
      for width,height,expanded,dark in [(390,844,False,False),(639,826,False,False),(1440,1000,False,False),(320,740,True,False),(390,844,True,False),(639,826,True,False),(1440,1000,True,False),(320,740,True,True)]:
-      context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',color_scheme='dark' if dark else 'light',service_workers='block');context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+('?layout=expanded' if expanded else '?layout=classic'),wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready&&window.__sceneReady',timeout=90000)
+      context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',color_scheme='dark' if dark else 'light',service_workers='block');context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(mall_entry_url(url+('?layout=expanded' if expanded else '?layout=classic')),wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready&&window.__sceneReady',timeout=90000)
       slots=page.evaluate('async()=> (await import("./assets/expanded-layout.js")).plannedSpaces')
       kit=json.loads((BASE/'assets/brand-kit/brand-kit.json').read_text())
       expected=[dict(slot,brand=kit['S'+slot['number']]['brand'],label=slot['number']+' · '+kit['S'+slot['number']]['brand']) for slot in slots]
@@ -75,7 +76,7 @@ def run():
        context=browser.new_context(viewport={'width':390,'height':844},java_script_enabled=mode!='no-js',service_workers='block');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
        if mode=='physics-failure':page.route('**/rapier.mjs',lambda route:route.abort())
        if mode=='webgl-failure':context.add_init_script("const originalContext=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return String(type).includes('webgl')?null:originalContext.call(this,type,...args)}")
-       page.goto(url+('?layout=expanded' if expanded else '?layout=classic'),wait_until='domcontentloaded')
+       page.goto(mall_entry_url(url+('?layout=expanded' if expanded else '?layout=classic'), "" if mode == "no-js" else "experience"),wait_until='domcontentloaded')
        if mode in ['physics-failure','webgl-failure']:page.wait_for_function('()=>window.__sceneFailed===true',timeout=90000)
        assert page.locator('#store-list').is_visible();section=page.locator('#planned-spaces-directory')
        if section.is_visible() and section.get_attribute('open') is None:section.locator('summary').click()

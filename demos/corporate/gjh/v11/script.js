@@ -598,7 +598,8 @@ async function initialize() {
   } else window.mallLoader?.complete('frame');
   window.__sceneReady = true; ui.offerFirstGuide(); resume();
 }
-initialize().catch(error => {
+// The directory mounts its controls above without downloading physics, models or a WebGL world.
+if (document.body.dataset.entryMode !== 'directory') initialize().catch(error => {
   console.error('3D mall initialization failed:', error);
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });

@@ -1,4 +1,5 @@
 """Check split physics loading, its fallback, and V1/V2 module selection."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools
 import http.server
 import os
@@ -33,7 +34,7 @@ def run():
                 page = context.new_page()
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
-                page.goto(base + query)
+                page.goto(mall_entry_url(base + query))
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert page.evaluate('window.__sceneReady === true')
                 paths = page.evaluate("performance.getEntriesByType('resource').map(e=>new URL(e.name).pathname)")
@@ -64,7 +65,7 @@ def run():
             context = browser.new_context(service_workers='block')
             page = context.new_page()
             page.route('**/rapier_bg.wasm', lambda route: route.abort())
-            page.goto(base)
+            page.goto(mall_entry_url(base))
             page.wait_for_function('window.__sceneFailed === true', timeout=90000)
             assert page.locator('#fallback-message').is_visible()
             assert 'physics engine could not start' in page.locator('#fallback-message').inner_text()

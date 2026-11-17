@@ -21,3 +21,22 @@ body { --paper:var(--palette-white); --ink:var(--palette-ink); --rule:var(--pale
 .atlas-search input { width: 100%; min-width: 0; }
 .atlas-search p { font-family: var(--font-family-code); font-size: var(--font-size-xs); margin-top: .3rem; }
 @media(max-width:700px) { .atlas-mast { grid-template-columns: 1fr; } .atlas-search { margin-top: 1.1rem; } }
+
+body { --paper:var(--palette-page); --ink:var(--palette-indigo-dark); }
+.bar { max-width:none; background:var(--palette-indigo-dark); color:var(--palette-white); }
+.atlas-mast { padding-block:2.5rem 1.3rem; border-bottom:5px double var(--ink); }
+.atlas-mast h1 { font-family:Instrument,Georgia,serif; font-size:var(--yeos-hero-type); font-weight:400; letter-spacing:-.05em; }
+.atlas { display:block; }
+.atlas aside { border:0; display:flex; align-items:center; gap:.8rem; margin:1rem 0; }
+.atlas aside nav { margin:0; }
+.letter h2 { font-family:Instrument,Georgia,serif; font-weight:400; font-size:var(--yeos-section-type); }
+.letter:nth-child(1 of .letter:not([hidden])) h2 { font-size:var(--yeos-hero-type); }
+.letter:nth-child(1 of .letter:not([hidden])) article:nth-child(1 of article:not([hidden])) { gap:5%; min-height:23rem; align-items:center; }
+.letter:nth-child(1 of .letter:not([hidden])) article:nth-child(1 of article:not([hidden])) img { width:37%; max-width:23rem; height:auto; aspect-ratio:.96; border:.65rem solid var(--palette-white); box-shadow:var(--shadow-raised); transform:rotate(2deg); }
+.letter:nth-child(1 of .letter:not([hidden])) article:nth-child(1 of article:not([hidden])) h3 { font-size:var(--yeos-section-type); }
+.letter article a { display:inline-flex; align-items:center; min-height:44px; }
+@media(max-width:700px) { .atlas-mast h1,.letter:nth-child(1 of .letter:not([hidden])) h2 { font-size:var(--yeos-section-type); } .atlas aside { flex-wrap:wrap; } .letter:nth-child(1 of .letter:not([hidden])) article:nth-child(1 of article:not([hidden])) { display:flex; flex-direction:column; align-items:stretch; gap:1rem; } .letter:nth-child(1 of .letter:not([hidden])) article:nth-child(1 of article:not([hidden])) h3 { font-size:var(--yeos-card-type); } .letter:nth-child(1 of .letter:not([hidden])) article:nth-child(1 of article:not([hidden])) img { align-self:center; width:72%; max-height:11rem; } }
+
+.format-list { display:flex; flex-wrap:wrap; gap:.35rem; padding:0; margin:.6rem 0; list-style:none; }
+.format-list li { font-size:var(--font-size-sm); border:1px solid currentColor; border-radius:var(--radius-pill); padding:.23rem .6rem; }
+.letter article a { background:var(--palette-indigo-dark); color:var(--palette-white); border-radius:var(--radius-pill); padding:.45rem .85rem; font-size:var(--font-size-sm); font-weight:700; text-decoration:none; }

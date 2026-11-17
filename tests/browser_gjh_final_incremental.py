@@ -12,7 +12,7 @@ def run():
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
    for width,height in [(320,740),(768,1024)]:
     page=browser.new_page(viewport={'width':width,'height':height},has_touch=True,reduced_motion='reduce',service_workers='block');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
+    page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
     initial=page.evaluate('performance.getEntriesByType("resource").map(e=>({path:new URL(e.name).pathname,bytes:e.decodedBodySize}))')
     size=sum(r['bytes'] for r in initial);assert size<=10*1024*1024 and len(initial)<=45,(size,len(initial))
     page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');page.evaluate('__mall.setInput({})')

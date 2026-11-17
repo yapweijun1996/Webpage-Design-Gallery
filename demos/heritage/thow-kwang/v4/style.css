@@ -3,30 +3,6 @@
   --wash: var(--palette-subtle);
   --paper: var(--palette-editorial-paper);
 }
-.notebook {
-  display: grid;
-  grid-template-columns: 1fr 0.55fr;
-  gap: 1.2rem 6vw;
-  border-left: 3px double var(--accent);
-  padding-left: clamp(1.2rem, 4vw, 4rem);
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 35px,
-    var(--line) 36px
-  );
-}
-.ruler {
-  grid-column: 1/-1;
-  display: flex;
-  justify-content: space-between;
-  font: inherit;
-  font-family: var(--mono);
-  font-size: var(--font-size-xs);
-  border-bottom: 1px solid var(--accent);
-  padding-bottom: 0.5rem;
-  color: var(--accent);
-}
 .margin-note {
   align-self: center;
   border: 1px solid var(--accent);
@@ -43,13 +19,7 @@
 .checks {
   max-width: 48rem;
 }
-.notebook .lede {
-  background: var(--paper);
-}
 @media (max-width: 740px) {
-  .notebook {
-    grid-template-columns: 1fr;
-  }
   .margin-note {
     margin-right: 0.7rem;
   }
@@ -76,4 +46,113 @@
 .answer-key[open] div {
   padding-left: 0.8rem;
   border-left: 2px solid var(--accent);
+}
+
+.folio-4 {
+  display: grid;
+  grid-template-columns: 1.12fr 0.84fr 0.92fr;
+  gap: 2%;
+  align-items: center;
+  padding: 6% 2% 2% 5%;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--palette-editorial-paper) 0 34px,
+    var(--line) 34px 35px
+  );
+  border-block: 1px solid var(--line);
+}
+.folio-4 h1 {
+  font-weight: 700;
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-sm));
+}
+.folio-4 .bowl-study {
+  width: 112%;
+  max-width: none;
+  mix-blend-mode: multiply;
+  justify-self: center;
+}
+.folio-4 .folio-copy,
+.folio-4 .margin-note {
+  position: relative;
+}
+.folio-4 .margin-note {
+  width: 100%;
+  transform: rotate(-3deg);
+  padding: clamp(1rem, 2.5vw, 3rem);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent);
+}
+.folio-4 .margin-note p {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: var(--font-size-xl);
+  line-height: 1.25;
+}
+.lesson-stages {
+  grid-column: 1/-1;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+  margin-top: 2rem;
+  padding: 1rem 0;
+  font:
+    italic var(--font-size-lg) Georgia,
+    serif;
+}
+@media (max-width: 850px) {
+  .folio-4 {
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.8fr);
+    gap: 0.8rem;
+    padding: 1.75rem 0.6rem 1rem 1.45rem;
+  }
+  .folio-4 h1 {
+    font-size: var(--font-size-display);
+  }
+  .folio-4 .bowl-study {
+    width: 100%;
+  }
+  .folio-4 .margin-note {
+    grid-column: 1/-1;
+    transform: rotate(-1deg);
+  }
+  .folio-4 .margin-note p {
+    font-size: var(--font-size-lg);
+  }
+  .lesson-stages {
+    font-size: var(--font-size-sm);
+    gap: 0.35rem;
+    margin-top: 0;
+  }
+  .folio-4 .filing-marks {
+    left: 0.25rem;
+  }
+}
+
+@media (max-width: 740px) {
+  .folio-4 {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.42fr);
+    align-items: start;
+  }
+  .folio-4 .folio-copy {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+  .folio-4 h1 {
+    font-size: var(--font-size-display);
+    max-width: none;
+    overflow-wrap: normal;
+  }
+  .folio-4 .folio-summary {
+    max-width: 65%;
+  }
+  .folio-4 .bowl-study {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    width: 118%;
+    justify-self: end;
+    pointer-events: none;
+  }
 }

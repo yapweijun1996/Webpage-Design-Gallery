@@ -30,7 +30,7 @@ def run():
                         for width, height, reduced in ((1440, 900, 'no-preference'), (390, 844, 'reduce')):
                             context = browser.new_context(viewport={'width':width, 'height':height}, has_touch=width<1000, reduced_motion=reduced, service_workers='block')
                             page = context.new_page()
-                            page.goto(f'http://127.0.0.1:{server.server_port}/gallery/demos/corporate/gjh/v11/?layout={layout}')
+                            page.goto(f'http://127.0.0.1:{server.server_port}/gallery/demos/corporate/gjh/v11/?layout={layout}#experience')
                             page.wait_for_function('window.__sceneReady && window.__mall?.ready', timeout=90000)
                             dismiss_tutorial(page)
                             if layout == 'expanded':

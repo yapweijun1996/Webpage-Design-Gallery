@@ -8,7 +8,7 @@ function filterAtlas() {
   for (const group of groups) {
     let matches = 0;
     for (const entry of group.querySelectorAll('article')) {
-      const text = [...entry.querySelectorAll('h3, p')].map(node => node.textContent).join(' ');
+      const text = [...entry.querySelectorAll('h3, p, .format-list li')].map(node => node.textContent).join(' ');
       entry.hidden = !text.toLocaleLowerCase('en-SG').includes(term);
       if (!entry.hidden) matches++;
     }

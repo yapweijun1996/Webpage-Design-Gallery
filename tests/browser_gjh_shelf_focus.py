@@ -3,6 +3,7 @@
 --baseline-ref serves that revision's runtime sources without changing the worktree.
 GPU counters are browser-observed GL object balances, not measured device memory/FPS.
 """
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import hashlib
@@ -256,7 +257,7 @@ def held_touch_paths(page,context,output):
 
 
 def ready(page,url):
-    page.goto(url,timeout=60000)
+    page.goto(mall_entry_url(url),timeout=60000)
     page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000)
     if page.locator('#guide-card').is_visible():
         page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state='hidden'); page.locator('#scene').focus()

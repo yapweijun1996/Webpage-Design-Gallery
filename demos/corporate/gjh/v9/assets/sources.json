@@ -284,5 +284,14 @@
   },
   "officialLinks": {
     "eshop": "https://www.gjheshop.com/"
-  }
+  },
+  "conceptArtwork": [
+    {
+      "file": "concept-storefront-food.webp",
+      "sha256": "65fd9099bb2a5654638072240477b79f7192998e59897fc3e1fc67cf99c86d98",
+      "kind": "local-concept-illustration",
+      "sourceReceipt": "../../v11/assets/concept-imagery.json",
+      "sourceFile": "concept-storefront-food.webp"
+    }
+  ]
 }

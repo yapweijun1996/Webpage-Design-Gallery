@@ -1,67 +1,6 @@
-.journal {
-  padding-top: 1.2rem;
-}
-.dateline {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 3px double var(--ink);
-  font-family: var(--mono);
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.1em;
-  padding-bottom: 0.5rem;
-}
-.journal .intro {
-  text-align: center;
-  margin: 1.3rem auto;
-}
-.journal .kicker {
-  justify-content: center;
-}
-.journal .lede {
-  margin-inline: auto;
-  max-width: 60ch;
-}
-.journal h1 {
-  font-size: calc(var(--font-editorial-hero) + var(--font-size-2xl));
-}
-.journal-lead {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  border-top: 1px solid var(--ink);
-  padding-top: 1.2rem;
-  gap: 2rem;
-  align-items: center;
-}
-.journal-lead img {
-  aspect-ratio: 2.8;
-  object-position: center 58%;
-  filter: sepia(0.35);
-}
-.pull {
-  border-left: 1px solid var(--ink);
-  padding-left: 2rem;
-}
-.pull p {
-  font-family: var(--sign);
-  font-size: var(--font-size-3xl);
-  line-height: 1.1;
-  margin: 0.6rem 0 1rem;
-}
 .doc-row .index {
   font-size: var(--font-size-lg);
   color: var(--accent);
-}
-@media (max-width: 740px) {
-  .journal-lead {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .journal h1 {
-    font-size: var(--font-editorial-hero);
-  }
-  .pull p {
-    font-size: var(--font-size-xl);
-  }
 }
 
 .archive-years {
@@ -117,5 +56,86 @@
 @media (max-width: 480px) {
   .archive-years b {
     font-size: var(--font-size-2xl);
+  }
+}
+
+.folio-10 {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  align-items: center;
+  gap: 2%;
+  padding: 1% 0 3%;
+  color: var(--ink);
+}
+.folio-10 .archive-years {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-block: 4px double var(--ink);
+  padding: 0;
+}
+.folio-10 .archive-years a {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.2rem;
+  font:
+    italic var(--font-size-xl) Georgia,
+    serif;
+}
+.folio-10 .archive-years a b {
+  color: var(--ink);
+  font:
+    var(--font-size-xl) Georgia,
+    serif;
+  font-weight: 700;
+}
+.folio-10 .archive-years a span {
+  font: inherit;
+}
+.folio-10 .folio-copy {
+  padding: 1.5rem 0 1.5rem 3%;
+}
+.folio-10 h1 {
+  font-weight: 700;
+}
+.journal-print {
+  width: 100%;
+  mix-blend-mode: multiply;
+}
+body:has(.folio-10) {
+  background: var(--paper) url(../v1/assets/paper.webp) repeat;
+}
+@media (max-width: 740px) {
+  .folio-10 {
+    grid-template-columns: 1fr;
+  }
+  .folio-10 .archive-years a {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .folio-10 .archive-years a span {
+    font-size: var(--font-size-xs);
+  }
+  .folio-10 .archive-years a b {
+    font-size: var(--font-size-lg);
+  }
+  .folio-10 .folio-copy {
+    padding: 1rem 0 0.3rem;
+  }
+  .journal-print {
+    max-height: 250px;
+    object-fit: contain;
+  }
+}
+
+@media (min-width: 1001px) {
+  .folio-10 {
+    grid-template-columns: 0.98fr 1.02fr;
+  }
+  .folio-10 h1 {
+    font-size: var(--font-editorial-hero);
   }
 }

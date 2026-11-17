@@ -4142,10 +4142,11 @@ async function initialize() {
   ui.offerFirstGuide();
   resume();
 }
-initialize().catch((error) => {
-  console.error("3D mall initialization failed:", error);
-  fallback("The 3D mall could not load. All stores and verified products remain available in the accessible list below.");
-});
+if (document.body.dataset.entryMode !== "directory")
+  initialize().catch((error) => {
+    console.error("3D mall initialization failed:", error);
+    fallback("The 3D mall could not load. All stores and verified products remain available in the accessible list below.");
+  });
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
     mallTheme?.destroy();

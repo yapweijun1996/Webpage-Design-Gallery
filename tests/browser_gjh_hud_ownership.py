@@ -1,4 +1,5 @@
 """Real-browser single Help/Map ownership, shortcuts, focus and retained controls."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import hashlib
@@ -41,7 +42,7 @@ def run():
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
-                page.goto(url + query, wait_until='domcontentloaded')
+                page.goto(mall_entry_url(url + query), wait_until='domcontentloaded')
                 page.wait_for_function('window.__mall?.ready&&window.__sceneReady', timeout=90000)
                 page.locator('#guide-card').wait_for(state='visible')
                 page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
@@ -154,7 +155,7 @@ def run():
             context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce')
             page = context.new_page()
             page.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
-            page.goto(url); page.wait_for_function('window.__mall?.ready&&window.__sceneReady', timeout=90000)
+            page.goto(mall_entry_url(url)); page.wait_for_function('window.__mall?.ready&&window.__sceneReady', timeout=90000)
             page.locator('#header-map').click()
             page.set_viewport_size({'width': 651, 'height': 844})
             page.wait_for_function('__mall.mode==="explore"')
@@ -174,7 +175,7 @@ def run():
                 context = browser.new_context(java_script_enabled=javascript, viewport={'width': 390, 'height': 844})
                 page = context.new_page()
                 if javascript: page.route('**/rapier.mjs', lambda route: route.abort())
-                page.goto(url)
+                page.goto(mall_entry_url(url) if javascript else url)
                 if javascript: page.wait_for_function('window.__sceneFailed')
                 assert page.locator('#store-list').is_visible() and page.locator('.product-card').count() == 4
                 assert page.locator('#experience').is_hidden()

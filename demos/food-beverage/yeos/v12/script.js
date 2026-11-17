@@ -9,6 +9,7 @@ if ([...drink.options].some(option => option.value === requested)) drink.value =
 let active = drink.value;
 function loadSaved() {
   document.querySelector('#journal-drink').textContent = drink.selectedOptions[0].textContent;
+  document.querySelector('#stamp-name').textContent = drink.selectedOptions[0].textContent;
   document.querySelector('#journal-portrait').src = '../v1/assets/' + active + '.webp';
   try {
     entry.value = drafts.get(active) ?? localStorage.getItem(prefix + active) ?? '';

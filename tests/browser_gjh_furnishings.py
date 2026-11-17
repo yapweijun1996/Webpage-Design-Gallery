@@ -1,5 +1,6 @@
 """Verify original V11 furnishings, instance reuse and independent model fallbacks."""
 
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import collections
 import functools
@@ -49,7 +50,7 @@ def verify_case(browser, url, base, viewport, screenshots, failed_model=None, fa
                 external.append(request.url)
 
         page.on("request", observe_request)
-        page.goto(url, wait_until="domcontentloaded")
+        page.goto(mall_entry_url(url), wait_until="domcontentloaded")
         page.wait_for_function("window.__mall?.ready && window.__sceneReady", timeout=60000)
         # Dismiss the nonmodal first-use card before existing walking/asset assertions.
         page.locator("#guide-card").wait_for(state="visible")

@@ -71,5 +71,86 @@ if (typeof document !== 'undefined') {
     document.getElementById('store-list').focus({preventScroll: true});
   });
   window.mallLoader = state;
-  import('../script.bundle.js').catch(() => state.fail('The 3D mall could not start. Retry or browse the store directory.'));
+  const entrance = document.getElementById('mall-arrivals');
+  document.documentElement.classList.add('mall-routing');
+  let entryMode = 'arrivals';
+  let directoryWithinWalk = false;
+  let directoryMounted = false;
+  let pendingReturn;
+  function route() {
+    const hash = location.hash;
+    const target = hash ? document.getElementById(hash.slice(1)) : null;
+    const mode = !hash || target === entrance ? 'arrivals' :
+      hash === '#experience' || hash === '#scene' ? 'walk' :
+      target && document.getElementById('store-list').contains(target) ? 'directory' : null;
+    pendingReturn?.disconnect();
+    if (mode === 'walk' && entryMode === 'walk' && directoryWithinWalk) {
+      directoryWithinWalk = false;
+      const toggle = document.getElementById('view-toggle');
+      const returnToWalk = () => {
+        if (toggle.hidden || !document.getElementById('experience').hidden) return;
+        toggle.click();
+        document.getElementById('scene').focus();
+        pendingReturn?.disconnect();
+      };
+      if (toggle.hidden) {
+        pendingReturn = new MutationObserver(returnToWalk);
+        pendingReturn.observe(toggle, {attributes:true, attributeFilter:['hidden']});
+      }
+      returnToWalk();
+      return;
+    }
+    if (!mode || mode === entryMode) return;
+    if (mode === 'arrivals' && entryMode === 'directory') {
+      // The directory has no active renderer. Its return need not reload the document.
+      entryMode = 'arrivals';
+      document.body.setAttribute('data-arrivals','');
+      delete document.body.dataset.entryMode;
+      entrance.hidden = false;
+      document.getElementById('arrival-products').focus({preventScroll:true});
+      window.scrollTo(0,0);
+      return;
+    }
+    if (mode === 'walk' && directoryMounted) { location.reload(); return; }
+    // A mode switch from a running document releases its renderer and resets the loader.
+    // Keeping the fragment lets native Back, Forward and the existing Retry button replay the choice.
+    if (entryMode === 'walk' && mode === 'directory') {
+      // Dismissing a partially loaded world keeps its preload queue and progress.
+      directoryWithinWalk = true;
+      state.dismiss();
+      const toggle = document.getElementById('view-toggle');
+      if (document.getElementById('store-list').hidden && !toggle.hidden) toggle.click();
+      target.focus({preventScroll:true});
+      target.scrollIntoView({block:'start'});
+      return;
+    }
+    if (entryMode !== 'arrivals') { location.reload(); return; }
+    entryMode = mode;
+    entrance.hidden = true;
+    document.body.removeAttribute('data-arrivals');
+    document.body.dataset.entryMode = mode;
+    if (mode === 'directory') {
+      state.dismiss();
+      if (directoryMounted) {
+        const search = document.getElementById('product-search');
+        search.value = '';
+        document.getElementById('product-category').value = 'all';
+        document.querySelector('[data-store-filter="all"]')?.click();
+        search.dispatchEvent(new Event('input', {bubbles:true}));
+      }
+      target.focus({preventScroll:true});
+      target.scrollIntoView({block:'start'});
+    } else {
+      overlay.hidden = false;
+      document.getElementById('loader-directory').focus();
+    }
+    import('../script.bundle.js').then(() => {
+      // Initial catalog sorting can move the focused card. Restore focus only while the visitor is still at entry.
+      if (mode === 'directory') directoryMounted = true;
+      if (entryMode === 'directory' && (document.activeElement === document.body || document.activeElement === target))
+        target.focus({preventScroll:true});
+    }).catch(() => state.fail('The 3D mall could not start. Retry or browse the store directory.'));
+  }
+  window.addEventListener('hashchange', route);
+  route();
 }

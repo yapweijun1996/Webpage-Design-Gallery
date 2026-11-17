@@ -1,0 +1,119 @@
+/* The visitor-facing cover and the reading sections share a single document. */
+.mast.wrap,
+main.wrap {
+  width: min(1480px, calc(100% - clamp(36px, 7vw, 112px)));
+}
+.mast.wrap {
+  border: 0;
+  padding-block: clamp(12px, 2vw, 29px);
+}
+.brand {
+  font-family: Georgia, serif;
+  font-size: var(--font-size-xl);
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+}
+.brand svg {
+  display: none;
+}
+.brand small {
+  font: inherit;
+}
+.nav a:last-child {
+  border: 0;
+  border-radius: var(--radius-none);
+  text-decoration: underline;
+}
+.folio {
+  position: relative;
+  isolation: isolate;
+  margin-inline: auto;
+}
+.folio h1 {
+  font-family: Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.064em;
+  line-height: 0.96;
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-xl));
+  margin: 0;
+}
+.folio-summary {
+  font-family: Georgia, serif;
+  font-size: var(--font-size-xl);
+  line-height: 1.32;
+  max-width: 37ch;
+  margin: 1.2rem 0 1.6rem;
+}
+.folio-action,
+.folio-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-height: 46px;
+  padding: 0.7rem 1.15rem;
+  background: var(--accent);
+  color: var(--btn-ink);
+  border: 0;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-family: Georgia, serif;
+  font-size: var(--font-size-lg);
+  text-decoration: none;
+  cursor: pointer;
+}
+.folio-action:hover,
+.folio-text:hover {
+  text-decoration: underline;
+}
+.folio-text {
+  background: none;
+  color: var(--ink);
+  text-decoration: underline;
+}
+.folio-copy {
+  min-width: 0;
+}
+.folio :where(img) {
+  width: 100%;
+}
+.folio :where(a, label):focus-visible {
+  outline-offset: 2px;
+}
+main.wrap > .chapter,
+main.wrap > .sources,
+main.wrap > .band {
+  max-width: 1200px;
+  margin-inline: auto;
+}
+.filing-marks {
+  position: absolute;
+  top: 1rem;
+  bottom: 1rem;
+  left: 1.2rem;
+  width: 0.65rem;
+  background: radial-gradient(circle, var(--line) 33%, transparent 40%) center
+    top / 100% 2.3rem repeat-y;
+}
+@media (max-width: 740px) {
+  .mast.wrap,
+  main.wrap {
+    width: calc(100% - 32px);
+  }
+  .mast.wrap {
+    padding-block: 12px;
+  }
+  .brand {
+    font-size: var(--font-size-lg);
+  }
+  .folio h1 {
+    font-size: calc(var(--font-size-display) + var(--font-size-xs));
+  }
+  .folio-summary {
+    font-size: var(--font-size-lg);
+    margin: 0.75rem 0 1rem;
+  }
+  .folio-action {
+    font-size: var(--font-size-base);
+  }
+}

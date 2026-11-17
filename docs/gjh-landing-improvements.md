@@ -27,7 +27,7 @@ The date for New Moon marks its brand origin. V14 identifies the archive image a
 
 The [edition journey check](../demos/corporate/gjh/landing_checks.py) serves the repository locally, opens each selected edition in Chrome and exercises a representative action by keyboard. It checks horizontal overflow and uncaught JavaScript errors at 320, 390, 768 and 1440 CSS pixels. It also checks responsive image decoding when flipping the V16 pack. External navigation is intercepted in this test so the exercise is repeatable without live brand websites.
 
-V11’s desktop preview shows the spatial guide. Its 390 and 768 pixel previews show the directory at the featured products reached through that guide.
+V11’s current desktop, tablet and phone previews show the visitor arrivals board. Featured products opens the lightweight directory, while Enter 3D mall starts the spatial guide. The [primary-reference audit](landing-atlas/gjh/anchor-audit.md) records the later visual changes across all 16 editions.
 
 Run the following commands from the repository with Playwright, Pillow and Chrome installed. The first command verifies the journeys. The second refreshes the editions’ tracked previews and gallery thumbnails. Real-device performance and visitor conversion require separate measurements.
 

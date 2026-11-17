@@ -17,17 +17,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v1/screenshots/1440.png",
         "width": 1440,
-        "height": 5411
+        "height": 5407
       },
       "tablet": {
         "path": "demos/corporate/gjh/v1/screenshots/768.png",
         "width": 768,
-        "height": 6709
+        "height": 6506
       },
       "mobile": {
         "path": "demos/corporate/gjh/v1/screenshots/390.png",
         "width": 390,
-        "height": 8887
+        "height": 8181
       }
     },
     "devices": [
@@ -56,17 +56,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v5/screenshots/1440.png",
         "width": 1440,
-        "height": 5859
+        "height": 5709
       },
       "tablet": {
         "path": "demos/corporate/gjh/v5/screenshots/768.png",
         "width": 768,
-        "height": 6231
+        "height": 6426
       },
       "mobile": {
         "path": "demos/corporate/gjh/v5/screenshots/390.png",
         "width": 390,
-        "height": 8540
+        "height": 8180
       }
     },
     "devices": [
@@ -82,7 +82,7 @@
     "slug": "v6",
     "version": "v6",
     "title": "Portfolio Modern",
-    "description": "A modular portfolio direction with original brand imagery and four source-matched New Moon SKUs.",
+    "description": "Compare four New Moon abalone origins, starting with the 454 g Mexico pack beside the 425 g New Zealand pack.",
     "styles": [
       "corporate",
       "minimal"
@@ -95,17 +95,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v6/screenshots/1440.png",
         "width": 1440,
-        "height": 6685
+        "height": 6531
       },
       "tablet": {
         "path": "demos/corporate/gjh/v6/screenshots/768.png",
         "width": 768,
-        "height": 8231
+        "height": 7561
       },
       "mobile": {
         "path": "demos/corporate/gjh/v6/screenshots/390.png",
         "width": 390,
-        "height": 10332
+        "height": 9696
       }
     },
     "devices": [
@@ -134,17 +134,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v7/screenshots/1440.png",
         "width": 1440,
-        "height": 6024
+        "height": 6023
       },
       "tablet": {
         "path": "demos/corporate/gjh/v7/screenshots/768.png",
         "width": 768,
-        "height": 7149
+        "height": 6940
       },
       "mobile": {
         "path": "demos/corporate/gjh/v7/screenshots/390.png",
         "width": 390,
-        "height": 9712
+        "height": 8939
       }
     },
     "devices": [
@@ -173,17 +173,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v8/screenshots/1440.png",
         "width": 1440,
-        "height": 6341
+        "height": 6366
       },
       "tablet": {
         "path": "demos/corporate/gjh/v8/screenshots/768.png",
         "width": 768,
-        "height": 5643
+        "height": 5668
       },
       "mobile": {
         "path": "demos/corporate/gjh/v8/screenshots/390.png",
         "width": 390,
-        "height": 7365
+        "height": 7390
       }
     },
     "devices": [
@@ -238,7 +238,7 @@
     "slug": "v10",
     "version": "v10",
     "title": "Virtual Stores 3D",
-    "description": "Explore New Moon, MILI and GOGO in a real 3D scene rendered locally with Three.js, with camera-driven store navigation and an accessible list alternative.",
+    "description": "Enter the New Moon pack gallery or MILI pantry from a moonlit arcade. The complete store list is also available.",
     "styles": [
       "immersive",
       "heritage"
@@ -277,7 +277,7 @@
     "slug": "v11",
     "version": "v11",
     "title": "Virtual Mall",
-    "description": "Walk, run and explore one continuous mall with an animated character, physical collisions, opening storefronts and verified New Moon, MILI and GOGO displays. Includes an accessible store directory.",
+    "description": "Choose a New Moon product on the arrivals board, browse the directory or explore the walkable mall.",
     "styles": [
       "immersive",
       "heritage"
@@ -329,17 +329,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v12/screenshots/1440.png",
         "width": 1440,
-        "height": 4695
+        "height": 4418
       },
       "tablet": {
         "path": "demos/corporate/gjh/v12/screenshots/768.png",
         "width": 768,
-        "height": 3758
+        "height": 3927
       },
       "mobile": {
         "path": "demos/corporate/gjh/v12/screenshots/390.png",
         "width": 390,
-        "height": 5004
+        "height": 4686
       }
     },
     "devices": [
@@ -355,7 +355,7 @@
     "slug": "v13",
     "version": "v13",
     "title": "The Connection",
-    "description": "A navy and mint corporate direction built around people, partnerships and the portfolio.",
+    "description": "Open the electronics desk or use the business index to reach New Moon, Sony and Borsch Med.",
     "styles": [
       "corporate",
       "editorial"
@@ -368,17 +368,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v13/screenshots/1440.png",
         "width": 1440,
-        "height": 3929
+        "height": 3942
       },
       "tablet": {
         "path": "demos/corporate/gjh/v13/screenshots/768.png",
         "width": 768,
-        "height": 3636
+        "height": 3463
       },
       "mobile": {
         "path": "demos/corporate/gjh/v13/screenshots/390.png",
         "width": 390,
-        "height": 6082
+        "height": 5499
       }
     },
     "devices": [
@@ -394,7 +394,7 @@
     "slug": "v14",
     "version": "v14",
     "title": "The Goodness Table",
-    "description": "A warm forest-and-sand editorial story connecting heritage with everyday food.",
+    "description": "Switch between a provision-counter illustration and the archive, then explore the history of the Rochor Road shop.",
     "styles": [
       "heritage",
       "editorial"
@@ -407,17 +407,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v14/screenshots/1440.png",
         "width": 1440,
-        "height": 3953
+        "height": 3938
       },
       "tablet": {
         "path": "demos/corporate/gjh/v14/screenshots/768.png",
         "width": 768,
-        "height": 3539
+        "height": 3704
       },
       "mobile": {
         "path": "demos/corporate/gjh/v14/screenshots/390.png",
         "width": 390,
-        "height": 5431
+        "height": 5219
       }
     },
     "devices": [
@@ -433,7 +433,7 @@
     "slug": "v15",
     "version": "v15",
     "title": "Everyday, In Colour",
-    "description": "A bold cobalt-and-ochre portfolio direction celebrating distinct everyday brands.",
+    "description": "Open the field notes for New Moon, MILI and GOGO to see the kinds of products each carries.",
     "styles": [
       "corporate",
       "editorial"
@@ -446,17 +446,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v15/screenshots/1440.png",
         "width": 1440,
-        "height": 3884
+        "height": 3882
       },
       "tablet": {
         "path": "demos/corporate/gjh/v15/screenshots/768.png",
         "width": 768,
-        "height": 3385
+        "height": 3290
       },
       "mobile": {
         "path": "demos/corporate/gjh/v15/screenshots/390.png",
         "width": 390,
-        "height": 4074
+        "height": 3800
       }
     },
     "devices": [
@@ -485,17 +485,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v16/screenshots/1440.png",
         "width": 1440,
-        "height": 4719
+        "height": 4628
       },
       "tablet": {
         "path": "demos/corporate/gjh/v16/screenshots/768.png",
         "width": 768,
-        "height": 3843
+        "height": 4001
       },
       "mobile": {
         "path": "demos/corporate/gjh/v16/screenshots/390.png",
         "width": 390,
-        "height": 5017
+        "height": 4731
       }
     },
     "devices": [
@@ -523,17 +523,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v17/screenshots/1440.png",
         "width": 1440,
-        "height": 1691
+        "height": 1673
       },
       "tablet": {
         "path": "demos/corporate/gjh/v17/screenshots/768.png",
         "width": 768,
-        "height": 1351
+        "height": 1544
       },
       "mobile": {
         "path": "demos/corporate/gjh/v17/screenshots/390.png",
         "width": 390,
-        "height": 2565
+        "height": 2455
       }
     },
     "devices": [
@@ -562,17 +562,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v18/screenshots/1440.png",
         "width": 1440,
-        "height": 1845
+        "height": 1818
       },
       "tablet": {
         "path": "demos/corporate/gjh/v18/screenshots/768.png",
         "width": 768,
-        "height": 1343
+        "height": 1497
       },
       "mobile": {
         "path": "demos/corporate/gjh/v18/screenshots/390.png",
         "width": 390,
-        "height": 1564
+        "height": 1766
       }
     },
     "devices": [
@@ -601,17 +601,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v19/screenshots/1440.png",
         "width": 1440,
-        "height": 1198
+        "height": 1135
       },
       "tablet": {
         "path": "demos/corporate/gjh/v19/screenshots/768.png",
         "width": 768,
-        "height": 1656
+        "height": 1600
       },
       "mobile": {
         "path": "demos/corporate/gjh/v19/screenshots/390.png",
         "width": 390,
-        "height": 1541
+        "height": 1460
       }
     },
     "devices": [
@@ -1045,7 +1045,7 @@
     "slug": "v12",
     "version": "v12",
     "title": "The Vessel Cabinet",
-    "description": "Compare three original pottery silhouettes and learn to read the rim, shoulder and foot of a vessel.",
+    "description": "Compare three illustrated ceramic vessels and trace their rims, shoulders and feet.",
     "styles": [
       "editorial"
     ],

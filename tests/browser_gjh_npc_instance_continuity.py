@@ -29,7 +29,7 @@ def run():
                     const system=createSystem(T,options); window.npcTest={options,system}; return system;
                   }
                 """))
-                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/')
+                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience')
                 page.wait_for_function('window.__sceneReady && window.npcTest',timeout=90000)
                 result=page.evaluate('''() => {
                   const {scene,seats}=npcTest.options,system=npcTest.system;

@@ -1,4 +1,5 @@
 """Matched expanded-mall material screenshots, resources, and fallback."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse,functools,http.server,json,os,threading,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -17,7 +18,7 @@ def run():
     c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
     page=c.new_page();errors=[];console=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('console',lambda message:console.append(f'{message.type}: {message.text}') if message.type in ('warning','error') else None)
-    started=time.monotonic();page.goto(url);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);ready=round(time.monotonic()-started,3)
+    started=time.monotonic();page.goto(mall_entry_url(url));page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);ready=round(time.monotonic()-started,3)
     assert page.evaluate('window.__sceneReady===true') and not errors,errors
     page.wait_for_load_state('networkidle')
     if w==390:
@@ -43,7 +44,7 @@ def run():
    if args.fallback:
     c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
     c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed');window.__materialFailures=0;const old=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...rest){if(type==='2d'&&this.width===256&&this.height===256){window.__materialFailures++;return null}return old.call(this,type,...rest)}")
-    page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
+    page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(mall_entry_url(url));page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
     assert page.evaluate('window.__sceneReady===true') and not errors,errors
     assert page.evaluate('window.__materialFailures > 0')
     assert page.evaluate('__mall.teleport("newmoon")');page.locator('#view-toggle').click();assert page.locator('[data-store]').count()==3
@@ -54,7 +55,7 @@ def run():
     def block(route):
      blocked.append(route.request.url);route.abort()
     page.route('**/natural-materials.js',block)
-    page.goto(url);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
+    page.goto(mall_entry_url(url));page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
     assert page.evaluate('window.__sceneReady===true') and not errors and blocked,(errors,blocked)
     assert page.evaluate('__mall.teleport("mili")');page.locator('#view-toggle').click();assert page.locator('[data-store]').count()==3
     print('PASS missing optional texture module retains scene and directory',flush=True);c.close()

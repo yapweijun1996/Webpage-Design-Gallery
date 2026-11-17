@@ -39,6 +39,42 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             pass
 
 
+def check_concept_receipts(assets, sources, official_hashes):
+    for asset in sources.get("conceptArtwork", []):
+        image = assets / asset["file"]
+        digest = hashlib.sha256(image.read_bytes()).hexdigest()
+        assert asset["kind"] == "local-concept-illustration" and digest not in official_hashes, image
+        assert digest == asset["sha256"], image
+        receipt = assets / asset["sourceReceipt"]
+        original = receipt.parent / asset["sourceFile"]
+        source = json.loads(receipt.read_text())
+        records = source.get("images", []) + source.get("assets", [])
+        record = next((item for item in records if item["file"] == original.name), None)
+        assert record and original.is_file(), original
+        if "sha256" in record:
+            assert hashlib.sha256(original.read_bytes()).hexdigest() == record["sha256"], original
+        if image.name == original.name:
+            assert image.read_bytes() == original.read_bytes(), (image, original)
+
+
+def check_entry_action(page, version):
+    action = page.locator(".entry .entry-action")
+    target = {
+        "v1": "#business-food", "v5": "https://www.gjh.com.sg/newmoon/",
+        "v6": "#new-moon", "v7": "#partnership",
+    }[version]
+    assert action.is_visible() and action.get_attribute("href") == target, (version, target)
+    if version == "v5":
+        page.route(target, lambda route: route.fulfill(content_type="text/html", body="<title>Brand destination fixture</title>"))
+        action.press("Enter")
+        page.wait_for_url(target)
+        page.go_back()
+    else:
+        action.press("Enter")
+        page.wait_for_function("target => location.hash === target", arg=target)
+        assert page.locator(target).is_visible(), (version, target)
+
+
 def run(axe_script=None):
     evidence = {
         "capturedAt": datetime.now(timezone.utc).isoformat(),
@@ -55,6 +91,7 @@ def run(axe_script=None):
         evidence["axe"] = {"version": "4.10.3", "sha256": hashlib.sha256(axe_script.read_bytes()).hexdigest()}
     manifest = json.loads((ROOT / "assets/companies/gjh/official/manifest.json").read_text())
     official_hashes = {a["sha256"] for a in manifest["assets"]}
+    documented_images = {}
     for version in VERSIONS:
         assets = ROOT / f"demos/corporate/gjh/{version}/assets"
         source = (assets.parent / "index.html").read_text(encoding="utf-8")
@@ -63,6 +100,10 @@ def run(axe_script=None):
         for asset in sources["assets"]:
             digest = hashlib.sha256((assets / asset["file"]).read_bytes()).hexdigest()
             assert digest == asset["sha256"] and digest in official_hashes, (version, asset["file"])
+        check_concept_receipts(assets, sources, official_hashes)
+        documented_images[version] = {
+            "assets/" + asset["file"] for asset in sources["assets"] + sources.get("conceptArtwork", [])
+        }
         font = sources["font"]
         assert hashlib.sha256((assets / font["file"]).read_bytes()).hexdigest() == font["sha256"]
         assert "SIL OPEN FONT LICENSE" in (assets / font["licenseFile"]).read_text(encoding="utf-8")
@@ -94,6 +135,8 @@ def run(axe_script=None):
                         for image in page.locator("img").all():
                             image.evaluate("image => image.loading = 'eager'")
                         page.evaluate("Promise.all(Array.from(document.images, image => image.decode()))")
+                        image_paths = set(page.locator("img").evaluate_all("imgs => imgs.map(img => img.getAttribute('src'))"))
+                        assert image_paths <= documented_images[version], (version, image_paths - documented_images[version])
                         assert page.locator("h1").count() == 1
                         assert page.locator("main").count() == 1
                         assert page.locator(".identity img").get_attribute("src") == "assets/gjh-logo.png"
@@ -159,6 +202,7 @@ def run(axe_script=None):
                                     incomplete: result.incomplete.map(v => ({id: v.id, targets: v.nodes.map(n => n.target)}))};
                             }""")
                             violations, incomplete = result["violations"], result["incomplete"]
+                        check_entry_action(page, version)
                         assert not failed_responses, failed_responses
                         assert not errors, errors
                         case = {"version": version, "width": width, "layoutOverflow": "PASS", "navigationAndKeyboard": "PASS", "images": "PASS", "reducedMotion": "PASS", "consoleErrors": errors, "failedResponses": failed_responses, "axeViolations": violations, "axeNeedsManualReview": incomplete}

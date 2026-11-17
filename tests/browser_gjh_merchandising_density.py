@@ -1,4 +1,5 @@
 """Verify nearby product Inspect opens the readable product viewer directly."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse, functools, http.server, json, os, threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -25,7 +26,7 @@ def run():
                 page = browser.new_page(viewport={'width': width, 'height': height}, has_touch=width < 650,
                                         reduced_motion='reduce', service_workers='block')
                 errors = []; page.on('pageerror', lambda error: errors.append(str(error)))
-                page.goto(f'http://127.0.0.1:{server.server_port}{URL_PATH}')
+                page.goto(mall_entry_url(f'http://127.0.0.1:{server.server_port}{URL_PATH}'))
                 page.wait_for_function('__mall?.ready && __sceneReady', timeout=60000)
                 page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus(); page.wait_for_function('document.activeElement.id === "scene"')
                 assets = page.evaluate('__mall.state.productAssets')

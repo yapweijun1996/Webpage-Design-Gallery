@@ -72,7 +72,7 @@ def run():
      served=source.replace(needle,needle+"Object.defineProperty(window,'__stage7QA',{value:{player,elevator,physics,world}});")
      report['qaExposure']={'sourceSha256':hashlib.sha256(source.encode()).hexdigest(),'servedSha256':hashlib.sha256(served.encode()).hexdigest(),'insertion':'Object.defineProperty(window, __stage7QA, actual private references); only after setPaused'}
      write_source(out/'qa-script.js',served);route.fulfill(response=response,body=served)
-    c.route('**/v11/script.bundle.js',expose);page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
+    c.route('**/v11/script.bundle.js',expose);page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?layout=expanded#experience');page.wait_for_function('window.__sceneReady===true',timeout=90000)
     row={'fallback':fallback,'errors':errors};report['checks'].append(row)
     s=state(page)
     for kind,point in [('desk',(25,45)),('showcase',(-7,18))]:

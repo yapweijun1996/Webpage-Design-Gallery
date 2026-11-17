@@ -58,12 +58,12 @@ def check_accessibility_regressions(page, version, width):
 
     selectors = {
         'v12': '.hero h1, header nav',
-        'v13': '.hero h1, .visual-label, .contact h2',
-        'v14': '.ribbon',
-        'v15': '.hero h1, .brand-row h3, .notice',
+        'v13': '.hero h1, .hero .entry-action, .sector-desk, .contact h2',
+        'v14': '.hero h1, .entry-switch label, .ribbon',
+        'v15': '.hero h1, .field-rows a, .brand-row h3, .notice',
         'v16': '.hero h1, #navigation:visible',
-        'v17': '.masthead, .footer-links',
-        'v18': '.masthead, .cover h1, .channels',
+        'v17': '.masthead, .hero h1, .menu-bookmarks, .footer-links',
+        'v18': '.masthead, .hero h1, .cover-presets, .channels',
         'v19': 'h1, #navigation',
     }
     if version in selectors:

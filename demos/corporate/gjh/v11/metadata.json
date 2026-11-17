@@ -3,7 +3,7 @@
   "industry": "FMCG, Electronics, Health & Nutrition",
   "title": "Goh Joo Hin - Virtual Mall",
   "version": "v11",
-  "designStyle": "A freely walkable third-person shopping world with a dusk skylight, jade marble, warm brass, real-scale stores and source-verified brand displays.",
+  "designStyle": "A dark green visitor arrivals board pairs a walking guide with four official pack photographs and links into the 3D mall.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v11/",
   "officialWebsite": "https://www.gjh.com.sg/",
@@ -11,7 +11,7 @@
   "id": "gjh-v11",
   "companyId": "gjh",
   "displayTitle": "Virtual Mall",
-  "summary": "Walk, run and explore one continuous mall with an animated character, physical collisions, opening storefronts and verified New Moon, MILI and GOGO displays. Includes an accessible store directory.",
+  "summary": "Choose a New Moon product on the arrivals board, browse the directory or explore the walkable mall.",
   "styles": ["immersive", "heritage"],
   "order": 80
 }

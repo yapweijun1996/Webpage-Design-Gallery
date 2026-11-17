@@ -19,6 +19,7 @@
   <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
   <script defer src="../../../../src/demo-pwa.js"></script>
 <link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v9">
+<link rel="stylesheet" href="../shared/landing.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -33,37 +34,10 @@
       <div class="world-shell">
         <div class="scene-world" data-current-room="lobby" aria-label="Evening brand street">
           <div class="street-camera">
-            <section class="street-stage" data-room-panel="lobby" aria-label="The street">
-              <div class="sky depth-layer" aria-hidden="true"><span class="moon"></span><span class="distant-roofs"></span></div>
-              <div class="trees depth-layer" aria-hidden="true"><span class="tree tree-left"></span><span class="tree tree-right"></span><span class="lantern lantern-far"></span></div>
-              <div class="street-floor depth-layer" aria-hidden="true"></div>
-              <div class="facades depth-layer">
-                <article class="facade facade-newmoon">
-                  <div class="cornice" aria-hidden="true"></div>
-                  <div class="shop-sign"><span class="sign-art"><img src="assets/new-moon-logo.svg" alt="New Moon" width="180" height="70"></span></div>
-                  <div class="awning" aria-hidden="true"></div>
-                  <div class="shop-window"><div class="window-tile"><img src="assets/new-moon-nz-425g-front.jpg" alt="New Moon New Zealand abalone, 425g" width="1000" height="1000"></div><span class="window-shelf" aria-hidden="true"></span></div>
-                  <button class="store-door" type="button" data-room="newmoon" aria-label="Enter New Moon"><span>Enter <span class="door-brand">New Moon</span></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-                </article>
-                <article class="facade facade-mili">
-                  <div class="cornice" aria-hidden="true"></div>
-                  <div class="shop-sign"><span class="sign-art"><img src="assets/mili-logo.jpg" alt="MILI" width="180" height="70"></span></div>
-                  <div class="awning" aria-hidden="true"></div>
-                  <div class="shop-window"><div class="window-tile"><img src="assets/mili-brand-cover.jpg" alt="Official MILI brand artwork" width="500" height="500"></div><span class="window-shelf" aria-hidden="true"></span></div>
-                  <button class="store-door" type="button" data-room="mili" aria-label="Enter MILI"><span>Enter <span class="door-brand">MILI</span></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-                </article>
-                <article class="facade facade-gogo">
-                  <div class="cornice" aria-hidden="true"></div>
-                  <div class="shop-sign"><span class="sign-art"><img src="assets/gogo-logo.jpg" alt="GOGO" width="180" height="70"></span></div>
-                  <div class="awning" aria-hidden="true"></div>
-                  <div class="shop-window"><div class="window-tile"><img src="assets/gogo-brand-cover.jpg" alt="Official GOGO brand artwork" width="438" height="438"></div><span class="window-shelf" aria-hidden="true"></span></div>
-                  <button class="store-door" type="button" data-room="gogo" aria-label="Enter GOGO"><span>Enter <span class="door-brand">GOGO</span></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-                </article>
-              </div>
-              <div class="foreground depth-layer" aria-hidden="true"><span class="lantern lantern-near"></span><span class="plant plant-left"><i></i><i></i><i></i><i></i><i></i></span><span class="plant plant-right"><i></i><i></i><i></i><i></i><i></i></span></div>
-            </section>
+            <section class="street-stage" data-room-panel="lobby" aria-label="The street"><div class="street-entry"><figure><img src="assets/concept-storefront-food.webp" alt="Illustration of a neighbourhood food storefront" ><figcaption>Storefront concept illustration</figcaption></figure><div><p class="entry-kicker">The street map</p><h1 id="page-title">A little closer to <em>everyday goodness.</em></h1><nav aria-label="Choose a storefront"><button type="button" class="store-door" data-room="newmoon"><b>New Moon</b><span>Four packs</span><i aria-hidden="true">↗</i></button><button type="button" class="store-door" data-room="mili"><b>MILI</b><span>Pantry</span><i aria-hidden="true">↗</i></button><button type="button" class="store-door" data-room="gogo"><b>GOGO</b><span>Refreshment</span><i aria-hidden="true">↗</i></button></nav><button type="button" class="entry-action" data-room="mili">Enter the pantry <span aria-hidden="true">↗</span></button></div></div>
+              </section>
           </div>
-          <div class="street-title"><p class="eyebrow">GJH · An evening on brand street</p><h1 id="page-title">A little closer<br>to everyday goodness.</h1><p>Choose a shopfront or use the street map below.</p></div>
+
           <section class="room brand-room" data-room-panel="newmoon" aria-label="New Moon store" hidden>
             <div class="room-intro"><p class="eyebrow">01 / New Moon</p><h2 tabindex="-1">Goodness, shared.</h2><p>Explore the collection. Select a pack to see its original views.</p><img class="room-logo" src="assets/new-moon-logo.svg" alt="New Moon" width="180" height="70"></div>
             <div class="shelf-wall">

@@ -1,4 +1,5 @@
 """V11 directory redesign: actual cards, content, keyboard and fallback checks."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools,http.server,json,os,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -16,7 +17,7 @@ def run():
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
    for width,height in [(320,740),(390,844),(768,1024),(1440,900)]:
     context=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto(url);page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click();page.locator('#store-list').wait_for(state='visible')
+    page.goto(mall_entry_url(url));page.wait_for_function('window.__mall?.ready && window.__sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#view-toggle').click();page.locator('#store-list').wait_for(state='visible')
     assert page.locator('.product-card').count()==4
     assert not page.evaluate('document.documentElement.scrollWidth>innerWidth')
     ids=page.locator('.store-list [id]').evaluate_all('els=>els.map(e=>e.id)');assert ids.index('newmoon-title')<ids.index('mili-title')<ids.index('gogo-title')<ids.index('original-demo-tin-title')
@@ -31,7 +32,7 @@ def run():
    for mode in ['wasm','nojs']:
     context=browser.new_context(viewport={'width':390,'height':844},java_script_enabled=mode!='nojs');page=context.new_page()
     if mode=='wasm':page.route('**/rapier.mjs',lambda r:r.abort())
-    page.goto(url)
+    page.goto(mall_entry_url(url, "" if mode == "nojs" else "experience"))
     if mode=='wasm':page.wait_for_function('window.__sceneFailed')
     assert page.locator('#store-list').is_visible();assert page.locator('.product-card').count()==4;assert not page.evaluate('document.documentElement.scrollWidth>innerWidth');page.screenshot(path=str(OUT/f'fallback-{mode}.png'));context.close()
    browser.close()

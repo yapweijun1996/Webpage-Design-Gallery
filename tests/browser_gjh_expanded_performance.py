@@ -1,4 +1,5 @@
 """Matched local classic/expanded observations; not a device or GPU timing benchmark."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools
 import http.server
 import json
@@ -26,7 +27,7 @@ def run():
                     context=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=2,
                         has_touch=w<1000,reduced_motion='reduce',service_workers='block')
                     context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
-                    page=context.new_page();page.goto(base+query);page.wait_for_function('window.__sceneReady',timeout=90000)
+                    page=context.new_page();page.goto(mall_entry_url(base+query));page.wait_for_function('window.__sceneReady',timeout=90000)
                     page.evaluate('__mall.teleport("atrium");__mall.setInput({forward:0,yaw:0});__mall.step(100)')
                     idle=page.evaluate('''()=>{let s=__mall.state;return {draw:s.drawCalls,triangles:s.renderTriangles,resources:s.rendererResources,quality:s.graphics.quality}}''')
                     page.evaluate('__mall.setInput(null)')

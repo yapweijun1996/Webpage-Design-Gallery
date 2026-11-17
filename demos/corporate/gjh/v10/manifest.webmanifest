@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Goh Joo Hin · Virtual Stores 3D",
   "short_name": "Virtual Stores 3D",
-  "description": "Explore New Moon, MILI and GOGO in a real 3D scene rendered locally with Three.js, with camera-driven store navigation and an accessible list alternative.",
+  "description": "Enter the New Moon pack gallery or MILI pantry from a moonlit arcade. The complete store list is also available.",
   "lang": "en-SG",
   "start_url": "./index.html",
   "scope": "./",

@@ -1,4 +1,5 @@
 """Real Chromium input-capture interruption regression (not physical-device QA)."""
+from gjh_startup_test_helpers import mall_entry_url
 from browser_gjh_budget import ROOT, Quiet, functools, http, threading, sync_playwright, os, json
 from pathlib import Path
 import argparse
@@ -11,7 +12,7 @@ def run():
    browser=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
    for width,height in [(390,844),(844,390)]:
     page=browser.new_page(viewport={'width':width,'height':height},has_touch=True,reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto(args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/');page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"')
+    page.goto(mall_entry_url(args.url or f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/'));page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"')
     page.evaluate('''()=>{window.pointerEvents=[];for(const type of ['pointerdown','gotpointercapture','lostpointercapture'])scene.addEventListener(type,e=>pointerEvents.push({type,id:e.pointerId,trusted:e.isTrusted}));}''')
     cdp=page.context.new_cdp_session(page)
     def touch(kind,x=None,y=None):cdp.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[] if x is None else [{'x':x,'y':y,'id':1}]})

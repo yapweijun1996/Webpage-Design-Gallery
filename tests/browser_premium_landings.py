@@ -28,6 +28,57 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             pass
 
 
+def check_entry_action(page, version, width):
+    """Activate the same first-screen control a visitor sees in this edition."""
+    if version == 'v13':
+        destination = 'https://www.gjh.com.sg/sony/'
+        action = page.locator('.hero .entry-action')
+        assert action.get_attribute('href') == destination
+        page.route(destination, lambda route: route.fulfill(
+            content_type='text/html', body='<title>Official destination fixture</title>'
+        ))
+        action.press('Enter')
+        page.wait_for_url(destination)
+        page.go_back()
+        return
+
+    if version == 'v14':
+        assert page.get_by_role('group', name='Choose an exhibition image').is_visible()
+        assert page.locator('.hero .counter-image').is_visible()
+        page.locator('.hero .entry-action').click()
+        assert page.locator('#archive-view').is_checked() and page.locator('.archive-image').is_visible()
+        assert page.locator('.counter-image').is_hidden()
+        page.locator('#archive-view').press('ArrowLeft')
+        assert page.locator('#counter-view').is_checked() and page.locator('.counter-image').is_visible()
+        assert page.locator('.archive-image').is_hidden()
+
+    if version == 'v16':
+        flip = page.locator('.hero button.pack-side')
+        pack = page.locator('#pack-portrait')
+        front = pack.get_attribute('src')
+        flip.press('Enter')
+        assert pack.get_attribute('src').endswith('/assets/new-moon-nz-425g-back.jpg')
+        assert 'Back label' in pack.get_attribute('alt') and 'front' in flip.inner_text().lower()
+        assert pack.evaluate('img => img.decode().then(() => img.naturalWidth > 0)')
+        flip.press('Space')
+        assert pack.get_attribute('src') == front and 'back' in flip.inner_text().lower()
+
+    selector, destination = {
+        'v12': ('.hero .entry-action', '#at-table-newmoon'),
+        'v14': ('.archive-strip', '#story'),
+        'v15': ('.field-rows a:first-child', '#field-newmoon'),
+        'v16': ('.hero .round-link', '#collection'),
+        'v17': ('.hero .entry-action', '#supper'),
+        'v18': ('.hero .entry-action', '#guide'),
+        'v19': ('.introduction .jump', '#enquiry'),
+    }[version]
+    action = page.locator(selector)
+    assert action.get_attribute('href') == destination, (version, width, 'entry target')
+    action.press('Enter')
+    page.wait_for_function('target => location.hash === target', arg=destination)
+    assert page.locator(destination).is_visible(), (version, width, 'entry destination')
+
+
 def review_task(page, version):
     if version == 'v12':
         assert page.locator('.hero .lead-link').get_attribute('href') == '#brands'
@@ -157,11 +208,7 @@ def run(capture=False, axe_script=None, site_root=ROOT):
                         assert toggle.get_attribute('aria-expanded') == 'true' and page.locator('#navigation a').first.is_visible()
                         page.keyboard.press('Escape')
                         assert toggle.get_attribute('aria-expanded') == 'false' and toggle.evaluate('(el) => document.activeElement === el')
-                    action = page.locator('main a[href^="#"]').first
-                    destination = action.get_attribute('href')
-                    action.click()
-                    assert page.evaluate('location.hash') == destination, (version, width, 'primary action')
-                    assert page.locator(destination).is_visible(), (version, width, 'action destination')
+                    check_entry_action(page, version, width)
                     check_accessibility_regressions(page, version, width)
                     review_task(page, version)
                     assert not errors and not failed_responses, (version, width, errors, failed_responses)
@@ -182,7 +229,13 @@ def run(capture=False, axe_script=None, site_root=ROOT):
                     assert page.locator('h1').is_visible(), (version, width, 'no JavaScript heading')
                     assert page.locator('nav a').first.is_visible(), (version, width, 'no JavaScript navigation')
                     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (version, width, 'no JavaScript overflow')
-                    if version == 'v17':
+                    if version == 'v16':
+                        reverse = page.locator('.hero a.pack-side')
+                        assert reverse.is_visible() and reverse.get_attribute('href') == 'assets/new-moon-nz-425g-back.jpg'
+                        reverse.press('Enter')
+                        page.wait_for_url('**/new-moon-nz-425g-back.jpg')
+                        assert page.locator('img').evaluate('img => img.decode().then(() => img.naturalWidth > 0)')
+                    elif version == 'v17':
                         assert all(link.is_visible() for link in page.locator('#occasions article a').all())
                     elif version == 'v18':
                         assert page.locator('.scene:visible').count() == 4

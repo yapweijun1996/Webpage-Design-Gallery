@@ -1,4 +1,5 @@
 """Real-browser parity of the current scene, map, directory and fallbacks."""
+from gjh_startup_test_helpers import mall_entry_url
 import functools
 import http.server
 import os
@@ -32,7 +33,7 @@ def run():
                 context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page=context.new_page();errors=[]
                 page.on('pageerror',lambda error:errors.append(str(error)))
-                page.goto(url+query,wait_until='domcontentloaded')
+                page.goto(mall_entry_url(url+query),wait_until='domcontentloaded')
                 page.wait_for_function('window.__sceneReady === true',timeout=90000)
                 assert page.locator('#scene').is_visible()
                 if width >= 1000: page.locator('#header-map').click()
@@ -98,7 +99,7 @@ def run():
                 context=browser.new_context(java_script_enabled=mode!='no-js',service_workers='block')
                 page=context.new_page()
                 if mode=='physics-failure': page.route('**/rapier.mjs',lambda route:route.abort())
-                page.goto(url,wait_until='domcontentloaded')
+                page.goto(mall_entry_url(url) if mode!='no-js' else url,wait_until='domcontentloaded')
                 if mode=='physics-failure':page.wait_for_function('window.__sceneFailed === true',timeout=90000)
                 assert page.locator('#store-list').is_visible()
                 assert page.locator('[data-store]').count()==3 and page.locator('.product-card').count()==4

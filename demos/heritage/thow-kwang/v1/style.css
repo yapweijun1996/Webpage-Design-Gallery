@@ -61,11 +61,7 @@ h1 i {
 .annotations > p {
   margin-bottom: 0.35rem;
 }
-.cover {
-  grid-template-columns: 0.78fr 1.22fr;
-}
 @media (max-width: 740px) {
-  .cover,
   #structure {
     grid-template-columns: 1fr;
   }
@@ -123,5 +119,124 @@ h1 i {
   .kiln-reading {
     grid-template-columns: 1fr;
     gap: 0.25rem;
+  }
+}
+
+:root {
+  --paper: var(--palette-editorial-paper);
+  --accent: var(--palette-editorial-ink);
+}
+body {
+  background: var(--paper) url(assets/paper.webp) repeat;
+}
+.folio-1 .folio-copy {
+  position: absolute;
+  top: 2%;
+  left: 1%;
+  width: 46%;
+  z-index: var(--z-skip-static);
+  pointer-events: none;
+}
+.folio-1 .folio-action {
+  pointer-events: auto;
+}
+.folio-1 .folio-summary {
+  max-width: 26ch;
+}
+.folio-1 .kiln-drawing {
+  border: 0;
+  outline: 0;
+}
+.folio-1 .pin {
+  font-family: Georgia, serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+  border-color: var(--ink);
+}
+.folio-1 .pin-firebox {
+  top: 74.8%;
+  left: 20.65%;
+}
+.folio-1 .pin-chamber {
+  top: 54.73%;
+  left: 51.54%;
+}
+.folio-1 .pin-chimney {
+  top: 23.2%;
+  left: 94.1%;
+}
+.folio-1 .pin[aria-current],
+.folio-1 .pin:hover {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--paper);
+}
+.folio-1 .kiln-caption {
+  margin: -3.4rem 0 1.8rem auto;
+  width: 59%;
+  position: relative;
+}
+.folio-1 .kiln-reading {
+  background: var(--paper);
+  grid-template-columns: auto 1fr;
+  border: 0;
+  border-top: 2px solid var(--ink);
+  padding: 0.75rem 0;
+}
+.folio-1 .kiln-caption small {
+  font-family: var(--body);
+}
+@media (max-width: 900px) {
+  .folio-1 .folio-copy {
+    position: relative;
+    width: auto;
+    top: auto;
+    left: auto;
+    padding-top: 1rem;
+  }
+  .folio-1 .folio-summary {
+    max-width: 37ch;
+  }
+  .folio-1 .kiln-drawing {
+    margin: 0.7rem 0;
+  }
+  .folio-1 .kiln-caption {
+    width: 100%;
+    margin: 0 0 1.2rem;
+  }
+  .folio-1 .kiln-reading {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
+
+.kiln-key {
+  display: flex;
+  gap: 1.2rem;
+  list-style: decimal inside;
+  margin: 0;
+  padding: 0;
+  font-family: Georgia, serif;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--ink);
+}
+.kiln-key li + li {
+  border-left: 1px solid var(--ink);
+  padding-left: 1rem;
+}
+@media (min-width: 901px) {
+  .folio-1 .kiln-caption {
+    margin-top: -7rem;
+  }
+}
+@media (max-width: 740px) {
+  .kiln-key {
+    gap: 0.5rem;
+    font-size: var(--font-size-sm);
+  }
+  .kiln-key li + li {
+    padding-left: 0.5rem;
   }
 }

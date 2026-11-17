@@ -3,7 +3,7 @@
   "industry": "FMCG, Electronics, Health & Nutrition",
   "title": "Goh Joo Hin - Virtual Stores 3D",
   "version": "v10",
-  "designStyle": "A real-time WebGL 3D brand world with perspective cameras, dimensional storefronts, lighting and textured official assets in forest green, champagne gold and warm ivory.",
+  "designStyle": "A moonlit exhibition programme uses a vaulted arcade and illuminated rooms as a map into the 3D brand world.",
   "thumbnail": "assets/thumbnail.webp",
   "demoRoute": "demos/corporate/gjh/v10/",
   "officialWebsite": "https://www.gjh.com.sg/",
@@ -11,7 +11,7 @@
   "id": "gjh-v10",
   "companyId": "gjh",
   "displayTitle": "Virtual Stores 3D",
-  "summary": "Explore New Moon, MILI and GOGO in a real 3D scene rendered locally with Three.js, with camera-driven store navigation and an accessible list alternative.",
+  "summary": "Enter the New Moon pack gallery or MILI pantry from a moonlit arcade. The complete store list is also available.",
   "styles": [
     "immersive",
     "heritage"

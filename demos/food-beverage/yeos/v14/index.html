@@ -29,15 +29,17 @@
       <header>
         <div>
           <p class="tag">An independent tasting menu</p>
-          <h1>Tasting <em>flight</em></h1>
+          <h1>Tasting <em>flight.</em></h1><p class="lead">Try a sequence of three drinks and record a note for a particular pour.</p>
         </div>
-        <div class="choices" role="group" aria-label="Choose a flight" hidden data-controls>
+        <h2 class="choose-title" id="flight-tickets">Choose a flight</h2>
+        <div class="choices" role="group" aria-labelledby="flight-tickets" hidden data-controls>
           <button type="button" data-choice="garden" aria-pressed="true">Garden</button>
           <button type="button" data-choice="beans" aria-pressed="false">Bean</button>
           <button type="button" data-choice="fruit" aria-pressed="false">Fruit & flower</button>
         </div>
+        <a class="pill open-flight" href="#flight-pours">Open the pours and tasting notes ↓</a>
       </header>
-      <div class="flights" aria-live="polite">
+      <div id="flight-pours" class="flights" aria-live="polite">
         <section data-panel="garden">
           <h2>The garden flight</h2>
           <p>Two floral drinks and a leaf tea.</p>

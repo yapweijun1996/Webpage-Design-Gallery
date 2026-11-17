@@ -31,28 +31,29 @@
           <p class="tag">Picnic planning</p>
           <h1>Picnic<br><em>counter.</em></h1>
           <p class="lead">Plan a pour for every guest. Your packing slip rounds the shopping quantity up to whole packs.</p>
-          <div class="packing-slip">
-            <strong id="pack-quantity">6</strong>
-            <span><b id="pack-unit">cartons</b><small id="pack-capacity">250 mL each</small></span>
-          </div>
+          <figure class="picnic-plate"><img src="../v1/assets/lychee.webp" width="506" height="506" alt="Lychee drink on a fruit plate"></figure>
           <a href="../v5/index.html">See which drinks have each pack ↗</a>
         </div>
         <div class="receipt">
-          <h2>Picnic tally</h2>
+          <h2>Your packing slip</h2>
           <form id="tally" hidden>
             <label for="guests">Number of guests</label>
-            <input type="number" id="guests" min="1" max="10000" step="1" value="6" required>
+            <input type="number" id="guests" min="1" max="10000" step="1" value="7" required>
             <label for="serve">Planned volume per person (mL)</label>
             <input type="number" id="serve" min="1" max="10000" step="1" value="250" required>
             <label for="size">Individual pack</label>
             <select id="size" name="size">
               <option value="250">250 mL carton</option>
-              <option value="300">300 mL can</option>
+              <option value="300" selected>300 mL can</option>
               <option value="380">380 mL bottle</option>
             </select>
             <button>Calculate packs</button>
           </form>
-          <p class="result" role="status" id="estimate">6 guests × 250 mL = 1,500 mL. Six 250 mL cartons cover this picnic.</p>
+          <div class="packing-slip">
+            <strong id="pack-quantity">6</strong>
+            <span><b id="pack-unit">cans</b><small id="pack-capacity">300 mL each</small></span>
+          </div>
+          <p class="result" role="status" id="estimate">1,750 mL planned · 6 packs of 300 mL · 50 mL spare.</p>
         </div>
       </div>
     </section>

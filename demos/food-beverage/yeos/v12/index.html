@@ -27,11 +27,40 @@
   <main id="main">
     <div class="wrap notebook section">
       <div class="book-head">
-        <p class="tag">A personal drinks journal</p>
-        <h1>Tasting <em>notebook</em></h1>
+        <p class="tag">Selected entry / tasting journal</p>
+        <h1>Tasting<br><em>notebook.</em></h1>
+        <figure class="entry-print"><img id="journal-portrait" src="../v1/assets/chrysanthemum.webp" width="506" height="506" alt=""><figcaption id="stamp-name">Chrysanthemum Tea</figcaption></figure>
       </div>
-      <div class="duo pages">
-        <section class="reference">
+      <div class="pages">
+
+        <section class="note">
+          <div class="journal-heading">
+            <div><p class="tag">Tasting page</p><h2>My tasting notes</h2><p id="journal-drink">Chrysanthemum Tea</p></div>
+
+          </div>
+          <p>Describe the aroma, texture and finish of a drink you tried.</p>
+          <form id="journal" hidden>
+            <label for="drink">Drink</label>
+            <select id="drink" name="drink">
+              <option value="chrysanthemum">Chrysanthemum Tea</option>
+              <option value="green-tea">First Harvest Green Tea</option>
+              <option value="soy">Soy Bean Milk</option>
+              <option value="black-soy">Black Soy Milk</option>
+              <option value="lychee">Lychee Drink</option>
+              <option value="bandung">Bandung Rose Milk Drink</option>
+            </select>
+            <label for="entry">Your tasting note</label>
+            <textarea id="entry" rows="5" maxlength="3000"></textarea>
+            <button>Save note on this device</button>
+          </form>
+          <p class="save-status" id="saved" role="status"></p>
+          <noscript>
+            <p>Write down the drink name, aroma, texture and finish in your own notebook.</p>
+          </noscript>
+        </section>
+      </div>
+    </div>
+    <div class="wrap reference-wrap"><section class="reference">
           <h2>Drink reference</h2>
           <p>Open a drink to read its ingredient note.</p>
           <details>
@@ -64,34 +93,7 @@
             <p>Milk and rose essence give Bandung its creamy floral character.</p>
             <a href="https://yeos.com.sg/product/bandung-rose-syrup-milk-drink/">Official product page ↗</a>
           </details>
-        </section>
-        <section class="note">
-          <div class="journal-heading">
-            <div><h2>My tasting notes</h2><p id="journal-drink">Chrysanthemum Tea</p></div>
-            <img id="journal-portrait" src="../v1/assets/chrysanthemum.webp" width="506" height="506" alt="">
-          </div>
-          <p>Describe the aroma, texture and finish of a drink you tried.</p>
-          <form id="journal" hidden>
-            <label for="drink">Drink</label>
-            <select id="drink" name="drink">
-              <option value="chrysanthemum">Chrysanthemum Tea</option>
-              <option value="green-tea">First Harvest Green Tea</option>
-              <option value="soy">Soy Bean Milk</option>
-              <option value="black-soy">Black Soy Milk</option>
-              <option value="lychee">Lychee Drink</option>
-              <option value="bandung">Bandung Rose Milk Drink</option>
-            </select>
-            <label for="entry">Your tasting note</label>
-            <textarea id="entry" rows="5" maxlength="3000"></textarea>
-            <button>Save note on this device</button>
-          </form>
-          <p class="save-status" id="saved" role="status"></p>
-          <noscript>
-            <p>Write down the drink name, aroma, texture and finish in your own notebook.</p>
-          </noscript>
-        </section>
-      </div>
-    </div>
+        </section></div>
   </main>
   <footer class="wrap base">
     <p>Independent design concept for Yeo Hiap Seng Limited.</p>

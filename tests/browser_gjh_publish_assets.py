@@ -41,7 +41,7 @@ def run():
                     errors, failed = [], []
                     page.on('pageerror', lambda error: errors.append(str(error)))
                     page.on('response', lambda response: failed.append((response.url, response.status)) if response.status >= 400 else None)
-                    page.goto(f'http://127.0.0.1:{server.server_port}/gallery/demos/corporate/gjh/v11/{query}')
+                    page.goto(f'http://127.0.0.1:{server.server_port}/gallery/demos/corporate/gjh/v11/{query}#experience')
                     page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                     assert page.evaluate('window.__sceneReady === true')
                     assert page.locator('#scene').is_visible()

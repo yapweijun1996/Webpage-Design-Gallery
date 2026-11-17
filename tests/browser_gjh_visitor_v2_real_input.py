@@ -1,4 +1,5 @@
 """Normal-motion journeys driven by browser keyboard/touch, never simulation hooks."""
+from gjh_startup_test_helpers import mall_entry_url
 import json
 import math
 import os
@@ -57,7 +58,7 @@ def start(browser, width, height, touch=False):
     page.on('console', lambda m: warnings.append(m.text) if m.type in ['warning', 'error'] else None)
     print('START',width,height,'touch' if touch else 'keyboard',flush=True)
     page.set_default_timeout(90000)
-    page.goto(URL,wait_until='domcontentloaded',timeout=90000)
+    page.goto(mall_entry_url(URL),wait_until='domcontentloaded',timeout=90000)
     wait(page, 'window.__mall?.ready', 90000)
     guide = page.locator('#guide-skip')
     if guide.is_visible():

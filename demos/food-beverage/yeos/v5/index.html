@@ -28,24 +28,26 @@
     <section class="wrap matrix section">
       <div class="matrix-title">
         <p class="tag">Singapore range / Packaging</p>
-        <h1>Pack finder<span>.</span></h1>
-        <p class="lead">Choose a pack to isolate its column across six drinks.</p>
-      </div>
-      <div class="pack-reading" hidden>
-        <strong id="match-total"></strong>
-        <div><p id="match-label"></p><div class="match-track" aria-hidden="true"><span></span></div></div>
-      </div>
-      <div class="matrix-control" hidden data-controls>
+        <h1>Find a <br>pack<span>.</span></h1>
+        <p class="lead">Choose a pack to isolate its column across the six drinks in this guide.</p>
+        <div class="matrix-control" hidden data-controls>
         <label for="pack">Show pack</label>
         <select id="pack" name="pack">
           <option value="all">All sizes</option>
           <option value="0">250 mL carton</option>
-          <option value="1">300 mL can</option>
+          <option value="1" selected>300 mL can</option>
           <option value="2">380 mL bottle</option>
           <option value="3">1 L carton</option>
           <option value="4">1.5 L bottle</option>
         </select>
       </div>
+        <figure class="inventory-print"><img src="../v1/assets/soy.webp" width="506" height="506" alt=""><figcaption>Soy Bean Milk</figcaption></figure>
+      </div>
+      <div class="pack-reading" hidden>
+        <strong id="match-total"></strong>
+        <div><p id="match-label"></p><div class="match-track" aria-hidden="true"><span></span></div></div>
+      </div>
+
       <p class="scroll-guide">Scroll across to see all five pack sizes.</p>
       <div class="table-wrap" tabindex="0" role="region" aria-label="Pack availability, scroll horizontally if needed">
         <table>

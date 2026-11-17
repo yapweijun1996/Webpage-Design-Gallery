@@ -1,4 +1,5 @@
 """Expanded-only procedural finishes: matched poses, quality, faults and late import."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse,functools,hashlib,http.server,json,os,tempfile,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -22,7 +23,7 @@ def boot(browser,url,w,h,preference='auto',failure=None,instrument=None):
  if failure=='module-missing':c.route('**/natural-materials.js',lambda route:route.abort())
  elif failure=='late':c.route('**/natural-materials.js',lambda route:pending.append(route))
  elif instrument:c.route('**/natural-materials.js',lambda route:route.fulfill(status=200,content_type='text/javascript',body=instrument))
- page=c.new_page();errors=[];console=[];page.on('console',lambda m:console.append({'type':m.type,'text':m.text,'url':m.location.get('url','')}) if m.type in ['warning','error'] else None);page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append(r.url));page.goto(url,wait_until='domcontentloaded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
+ page=c.new_page();errors=[];console=[];page.on('console',lambda m:console.append({'type':m.type,'text':m.text,'url':m.location.get('url','')}) if m.type in ['warning','error'] else None);page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append(r.url));page.goto(mall_entry_url(url),wait_until='domcontentloaded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
  page.locator('#keyboard-help > summary').click();page.locator('#graphics-quality').select_option(preference);page.locator('#keyboard-help > summary').click();step(page)
  return c,page,errors,requests,pending,console
 

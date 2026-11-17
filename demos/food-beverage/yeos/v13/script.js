@@ -14,4 +14,4 @@ for (const link of positions) {
   link.addEventListener('focus', () => preview(link));
 }
 document.querySelector('.dial-reading').hidden = false;
-preview(positions.find(link => link.hash === location.hash) || positions[0]);
+preview(positions.find(link => link.hash === location.hash) || positions[5]);

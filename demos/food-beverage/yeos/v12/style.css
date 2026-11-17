@@ -1,20 +1,20 @@
-body { --paper:var(--palette-editorial-paper); --ink:var(--palette-editorial-ink); }
-.book-head { padding-bottom:1.6rem; }
-.book-head h1 { font-size:var(--font-editorial-hero); }
-.pages { border:1px solid var(--yeos-line); background:var(--yeos-paper); }
-.pages section { padding:clamp(1.2rem,3vw,3rem); }
-.pages h2 { font-size:var(--yeos-card-type); }
-.pages section > p { margin:.7rem 0 1rem; max-width:42ch; }
-.reference { border-right:1px solid var(--yeos-line); }
-.reference details { border-bottom:1px solid var(--yeos-line); }
-.note { background:repeating-linear-gradient(transparent 0 31px,var(--yeos-line) 31px 32px); }
-.note form { display:grid; gap:.5rem; }
-.note label { font-weight:800; }
-.note textarea { width:100%; padding:.65rem; resize:vertical; }
-.note button { background:var(--ink); color:var(--paper); }
-.save-status { font-size:var(--font-size-sm); }
-@media(max-width:700px) { .pages { display:flex; flex-direction:column-reverse; } .reference { border:0; border-top:1px solid var(--rule); } }
-
-.journal-heading { display: flex; gap: 1rem; align-items: center; justify-content: space-between; padding-bottom: 1rem; border-bottom: 2px solid var(--ink); }
-.journal-heading img { width: clamp(3.5rem, 7vw, 6rem); height: auto; aspect-ratio: 1; padding: .22rem; border: 1px solid var(--ink); transform: rotate(3deg); background: var(--paper); }
-.journal-heading p { margin-top: .4rem; font-family: var(--font-family-code); font-size: var(--font-size-sm); }
+body { --desk:var(--palette-night-paper-wash); --paper:var(--yeos-paper); --ink:var(--palette-night-warning-surface); background:var(--desk); }
+.bar,.base { color:var(--palette-night-paper-ink); }
+.notebook { display:grid; grid-template-columns:.92fr 1.08fr; padding-block:clamp(1.2rem,3vw,3rem); }
+.book-head,.pages { background-color:color-mix(in srgb,var(--palette-warning-surface) 58%,var(--yeos-paper)); padding:clamp(1.3rem,4vw,4rem); min-width:0; }
+.book-head { border:1px solid var(--yeos-line); border-end-start-radius:var(--radius-lg); border-start-start-radius:var(--radius-lg); background-image:linear-gradient(90deg,transparent 87%,var(--yeos-line)); }
+.book-head h1 { font-size:var(--yeos-hero-type); }
+.entry-print { width:65%; max-width:17rem; margin:clamp(2rem,4vw,4rem) auto 1rem; transform:rotate(-6deg); position:relative; background:var(--yeos-paper); box-shadow:var(--shadow-raised); padding:.55rem; }
+.entry-print:before { content:""; width:36%; height:1.4rem; position:absolute; top:-.65rem; left:31%; background:var(--palette-night-warning); opacity:.78; }
+.entry-print img { width:100%; height:auto; aspect-ratio:1; }
+.entry-print figcaption { text-align:center; padding-top:.5rem; font-family:Instrument,Georgia,serif; font-style:italic; font-size:var(--font-size-xl); }
+.pages { border-end-end-radius:var(--radius-lg); border-start-end-radius:var(--radius-lg); border:1px solid var(--yeos-line); background-image:linear-gradient(90deg,var(--yeos-pale),transparent 6%); }
+.note h2 { font-size:var(--yeos-card-type); } .note .tag { margin:0; }
+.journal-heading #journal-drink { font-family:Instrument,Georgia,serif; font-size:var(--yeos-section-type); line-height:1; margin:.7rem 0; }
+.note form { display:grid; gap:.35rem; margin-top:1rem; }
+.note input,.note select,.note textarea { width:100%; }
+.note textarea { padding:.6rem; resize:vertical; font:inherit; border:1px solid var(--yeos-line); background:repeating-linear-gradient(transparent 0 27px,var(--yeos-line) 27px 28px); line-height:28px; }
+.note button { background:var(--ink); color:var(--paper); margin-top:.5rem; }
+.reference { color:var(--palette-night-paper-ink); margin:1rem 0 2rem; } .reference h2 { font-size:var(--yeos-card-type); }
+.reference details { border-bottom:1px solid var(--palette-night-paper-line); }
+@media(max-width:700px) { .notebook { grid-template-columns:1fr; } .book-head { display:grid; grid-template-columns:1fr 36%; gap:.35rem 1rem; align-items:center; } .book-head .tag { grid-column:1/-1; } .book-head h1 { font-size:var(--yeos-section-type); } .entry-print { width:100%; margin:.5rem 0; } .entry-print figcaption { font-size:var(--font-size-sm); } .pages { border-radius:var(--radius-none); } }

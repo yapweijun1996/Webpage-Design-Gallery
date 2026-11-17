@@ -1,4 +1,5 @@
 """Verify automatic New Moon previews, gesture zoom, fallback and resource cleanup."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import http.server
@@ -33,7 +34,7 @@ def run():
         return page.evaluate('__newMoonPreview.state')
 
     def ready(page):
-        page.goto(url)
+        page.goto(mall_entry_url(url))
         page.wait_for_function('__mall.ready && __sceneReady', timeout=60000)
         page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
         page.locator('#view-toggle').click()
@@ -145,7 +146,7 @@ def run():
                     page.close()
                     page = browser.new_page(viewport={'width': 390, 'height': 844})
                     page.add_init_script('HTMLCanvasElement.prototype.getContext=()=>null')
-                    page.goto(url)
+                    page.goto(mall_entry_url(url, 'store-list'))
                     page.locator('.product-inspect').first.wait_for(state='visible')
                     open_sku(page, 'nz-425g')
                     page.wait_for_function('__newMoonPreview.state.status === "error"', timeout=30000)

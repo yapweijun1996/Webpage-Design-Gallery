@@ -3,6 +3,7 @@
 Deferred stages and factory counters are QA-only module instrumentation. They
 exercise the actual coordinator/UI; they are not physical controller input.
 """
+from gjh_startup_test_helpers import mall_entry_url
 import argparse,functools,hashlib,http.server,json,os,tempfile,threading,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -43,7 +44,7 @@ def run():
   with sync_playwright() as p:
    browser=p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args=['--use-angle=metal','--ignore-gpu-blocklist'])
    if args.group in ['all','module']:
-    c,page,errors,console=context(browser);pending=[];page.route('**/mall-themes.js',lambda route:pending.append(route));page.goto(url,wait_until='domcontentloaded');wait_request(page,pending);started=time.monotonic();page.wait_for_timeout(2600)
+    c,page,errors,console=context(browser);pending=[];page.route('**/mall-themes.js',lambda route:pending.append(route));page.goto(mall_entry_url(url),wait_until='domcontentloaded');wait_request(page,pending);started=time.monotonic();page.wait_for_timeout(2600)
     assert page.evaluate('__mall.ready && window.__sceneReady===true');freeze(page);before=snapshot(page);assert before['theme'] is None
     source=(RUNTIME/'assets/mall-themes.js').read_text();needle='  const records=new Map();';assert source.count(needle)==1
     served="window.__qaCoordinatorModuleEvaluated=1;\n"+source.replace(needle,"  window.__qaCoordinatorFactory=(window.__qaCoordinatorFactory||0)+1;\n"+needle,1);atomic_text(out/'qa-late-coordinator.js',served);pending.pop().fulfill(status=200,content_type='text/javascript',body=served);page.wait_for_function('window.__qaCoordinatorModuleEvaluated===1');freeze(page);after=snapshot(page)
@@ -55,7 +56,7 @@ def run():
     def pack(route):
      if '?' not in route.request.url:pending.append(route)
      else:route.fulfill(status=200,content_type='text/javascript',body=served)
-    page.route('**/christmas.js*',pack);page.goto(url,wait_until='domcontentloaded');wait_request(page,pending);page.wait_for_timeout(2600);assert page.evaluate('__mall.ready && window.__sceneReady===true');freeze(page);before=snapshot(page);assert before['theme']['active']=='everyday' and before['theme']['pending'] is None
+    page.route('**/christmas.js*',pack);page.goto(mall_entry_url(url),wait_until='domcontentloaded');wait_request(page,pending);page.wait_for_timeout(2600);assert page.evaluate('__mall.ready && window.__sceneReady===true');freeze(page);before=snapshot(page);assert before['theme']['active']=='everyday' and before['theme']['pending'] is None
     pending.pop().fulfill(status=200,content_type='text/javascript',body=served);page.wait_for_function('window.__qaPackEvaluations===1');freeze(page);after=snapshot(page);assert page.evaluate('window.__qaPackFactory||0')==0 and after['theme']['active']=='everyday' and after['resources']==before['resources'] and after['children']==before['children']
     page.locator('#mall-theme-open').click();page.locator('#mall-theme-select').select_option('christmas');page.locator('#mall-theme-apply').click();page.wait_for_function('__mall.state.theme.active==="christmas" && __mall.state.theme.pending===null',timeout=30000);assert page.evaluate('window.__qaPackFactory')==1 and page.evaluate('window.__qaPackEvaluations')==2;retry=snapshot(page);assert retry['drawCalls']<=200;assert len([u for u in requests if '/christmas.js' in u])==2;assert any('/christmas.js?retry=' in u for u in requests)
     page.keyboard.press('Escape');page.wait_for_function('document.activeElement.id==="mall-theme-open"');assert not errors
@@ -64,7 +65,7 @@ def run():
     c,page,errors,console=context(browser)
     def expose(route):
      response=route.fetch();source=response.text();needle='var ui = createUI(expanded);';assert source.count(needle)==1;served=source.replace(needle,needle+"Object.defineProperty(window,'__themeQA',{value:{ui}});");atomic_text(out/'qa-script.js',served);report['qaBridge']={'sourceSha256':hashlib.sha256(source.encode()).hexdigest(),'servedSha256':hashlib.sha256(served.encode()).hexdigest()};route.fulfill(response=response,body=served)
-    page.route('**/v11/script.bundle.js',expose);page.goto(url,wait_until='domcontentloaded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
+    page.route('**/v11/script.bundle.js',expose);page.goto(mall_entry_url(url),wait_until='domcontentloaded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
     page.evaluate('''async()=>{const {createMallThemeCoordinator,EVERYDAY}=await import('./assets/mall-themes.js');window.__qaCommits=[];window.__qaDisposed=0;window.__qaAlternative={...EVERYDAY,id:'qa-deferred',label:'QA deferred'};__themeQA.ui.configureMallTheme(window.__qaCoordinator=createMallThemeCoordinator({registry:[EVERYDAY,__qaAlternative],storage:null,prepare:()=>new Promise(resolve=>window.__qaResolve=resolve),commit:next=>__qaCommits.push(next.id),notify:s=>__themeQA.ui.updateMallTheme(s)}));}''')
     page.locator('#mall-theme-open').click()
     # An assignment expression would make Playwright await the unresolved promise.

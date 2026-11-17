@@ -1,4 +1,5 @@
 """Three-store 3D/directory, detail and bag parity in the expanded shell."""
+from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
 import http.server
@@ -33,7 +34,7 @@ def run():
           context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
           page=context.new_page();errors=[]
           page.on('pageerror',lambda e:errors.append(str(e)))
-          page.goto(base+'?layout=expanded'+visitor);page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
+          page.goto(mall_entry_url(base+'?layout=expanded'+visitor));page.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000)
           assert page.evaluate('window.__sceneReady===true')
           page.locator('#view-toggle').click()
           for ident,label,x in STORES:
@@ -103,7 +104,7 @@ def run():
         for query in ['', '?visitor=v1']:
           context=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',service_workers='block')
           context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
-          page=context.new_page();page.goto(base+query);page.wait_for_function('window.__sceneReady',timeout=90000)
+          page=context.new_page();page.goto(mall_entry_url(base+query));page.wait_for_function('window.__sceneReady',timeout=90000)
           for ident,label,x in STORES:
             page.locator('#view-toggle').click();page.locator(f'[data-visit-store="{ident}"]').click()
             page.wait_for_function('x=>Math.abs(__mall.state.x-x)<.1&&Math.abs(__mall.state.z-2.4)<.1',arg=x)
@@ -111,7 +112,7 @@ def run():
         for mode in ['no-js','physics-failure']:
           context=browser.new_context(java_script_enabled=mode!='no-js',service_workers='block');page=context.new_page()
           if mode=='physics-failure':page.route('**/rapier.mjs',lambda route:route.abort())
-          page.goto(base+'?layout=expanded')
+          page.goto(mall_entry_url(base+'?layout=expanded', '' if mode=='no-js' else 'experience'))
           if mode=='physics-failure':page.wait_for_function('window.__sceneFailed',timeout=90000)
           assert page.locator('#store-list').is_visible() and page.locator('[data-store]').count()==3 and page.locator('.product-card').count()==4
           assert all(page.locator(f'[data-visit-store="{ident}"]').is_hidden() for ident,_,_ in STORES)
