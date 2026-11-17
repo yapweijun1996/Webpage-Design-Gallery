@@ -5,9 +5,13 @@ const icon = (name) => `<svg class="gallery-icon" aria-hidden="true" focusable="
 const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const params = new URLSearchParams(location.search);
 
-function setQuery(values, push = false) {
-  const url = new URL(location.href);
+function withQuery(url, values) {
   Object.entries(values).forEach(([key, value]) => value ? url.searchParams.set(key, value) : url.searchParams.delete(key));
+  return url;
+}
+
+function setQuery(values, push = false) {
+  const url = withQuery(new URL(location.href), values);
   if (url.href !== location.href) history[push ? 'pushState' : 'replaceState'](null, '', url);
 }
 
@@ -126,6 +130,13 @@ function initCompany() {
   const tray = document.querySelector('.compare-tray');
   new ResizeObserver(() => document.documentElement.style.setProperty('--compare-tray-height', tray.hidden ? '0px' : tray.offsetHeight + 'px')).observe(tray);
   const company = document.querySelector('.design-section').dataset.company;
+  function syncNavigation() {
+    const [left, right] = selected;
+    const state = { left, right, style: style.value, sort: sort.value === 'curated' ? '' : sort.value };
+    setQuery(state);
+    if (right) compare.href = withQuery(new URL('compare/index.html', appRoot), { company, ...state }).href;
+    else compare.removeAttribute('href');
+  }
   function updateSelection() {
     const choices = [...selected];
     document.querySelector('#selection-count').textContent = `${choices.length} of 2 selected`;
@@ -155,17 +166,23 @@ function initCompany() {
     });
     compare.setAttribute('aria-disabled', String(choices.length !== 2));
     compare.tabIndex = choices.length === 2 ? 0 : -1;
-    if (choices.length === 2) compare.href = urlFor(`compare/index.html?${new URLSearchParams({ company, left: choices[0], right: choices[1] })}`);
-    else compare.removeAttribute('href');
+    syncNavigation();
     document.querySelector('#clear-selection').disabled = choices.length === 0;
   }
-  function restoreFilters() {
+  function restoreCollection() {
     const state = new URLSearchParams(location.search);
     selectValue(style, state.get('style'), '');
     selectValue(sort, state.get('sort'), 'curated');
+    selected.clear();
+    for (const key of ['left', 'right']) {
+      const version = state.get(key);
+      if (cards.some((card) => card.dataset.design === version)) selected.add(version);
+    }
+    updateSelection();
+    filter();
   }
   function filter() {
-    setQuery({ style: style.value, sort: sort.value === 'curated' ? '' : sort.value });
+    syncNavigation();
     let visible = 0;
     const ordered = [...cards].sort((a, b) => sort.value === 'title' ? a.dataset.title.localeCompare(b.dataset.title) : Number(a.dataset.order) - Number(b.dataset.order));
     ordered.forEach((card) => { document.querySelector('.design-grid').append(card); card.hidden = !!style.value && !card.dataset.styles.split(' ').includes(style.value); if (!card.hidden) visible += 1; });
@@ -183,8 +200,8 @@ function initCompany() {
     selected.clear(); updateSelection(); style.focus();
   });
   compare.addEventListener('click', (event) => { if (selected.size !== 2) event.preventDefault(); });
-  window.addEventListener('popstate', () => { restoreFilters(); filter(); });
-  restoreFilters(); updateSelection(); filter();
+  window.addEventListener('popstate', restoreCollection);
+  restoreCollection();
 }
 
 async function catalog() {
@@ -229,7 +246,15 @@ async function initCompare() {
     const choices = ['left', 'right'].map((side) => designs.find((design) => design.companyId === company?.id && design.version === params.get(side)));
     if (!company || choices.some((design) => !design) || choices[0].id === choices[1].id) throw new Error('Choose two different designs from the same company to compare.');
     document.querySelector('#compare-company').textContent = company.name;
-    const back = document.querySelector('#compare-back'); back.href = urlFor(`companies/${company.slug}/index.html`); back.textContent = `Back to ${company.name} designs`;
+    const collection = urlFor(`companies/${company.slug}/index.html`);
+    const style = params.get('style');
+    const back = document.querySelector('#compare-back');
+    back.href = withQuery(new URL(collection), {
+      left: choices[0].version, right: choices[1].version,
+      style: designs.some((design) => design.companyId === company.id && design.styles.includes(style)) ? style : '',
+      sort: params.get('sort') === 'title' ? 'title' : ''
+    }).href;
+    back.textContent = `Back to ${company.name} designs`;
     document.querySelector('#compare-breadcrumb').textContent = company.name + ' / Compare';
     document.title = `${choices[0].title} vs ${choices[1].title} — ${company.name}`;
     container.innerHTML = `<div class="compare-toolbar"><div class="device-control" role="group" aria-label="Preview device">${['desktop', 'tablet', 'mobile'].map((device) => `<button type="button" data-device="${device}" aria-pressed="${device === 'desktop'}">${device}</button>`).join('')}</div><label class="sync-control"><input type="checkbox" id="sync-scroll">Sync scroll</label><label class="mode-control">View<select id="compare-mode"><option value="live">Live demos</option><option value="screenshots">Screenshots</option></select></label></div><p class="compare-help">Live previews scale to fit. Scroll each preview independently, or enable sync scroll to compare relative page positions.</p><p class="visually-hidden" id="compare-status" role="status" aria-live="polite"></p><div class="compare-grid">${choices.map((design, index) => `<section class="compare-panel" aria-label="${escape(design.title)} preview"><div class="compare-panel-header"><div><span class="version-badge">${escape(design.version.toUpperCase())}</span><h2>${escape(design.title)}</h2></div><a href="${urlFor(design.demoPath)}">Open demo ${icon('arrow-up-right')}</a></div><div class="frame-stage" data-panel="${index}"><iframe title="${escape(design.title)} live demo" src="${urlFor(design.demoPath)}"></iframe></div><div class="screenshot-stage" hidden><img alt="${escape(design.title)} comparison screenshot"></div><div class="panel-footer"><span data-size-label></span><button type="button" data-fullscreen="${index}">Fullscreen preview</button></div></section>`).join('')}</div><p class="small-note">Independent concepts. Sync scroll matches relative page position; different section heights can result in different content being visible.</p>`;
@@ -248,7 +273,11 @@ async function initCompare() {
       container.querySelectorAll('button[data-device]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.device === device)));
       container.querySelectorAll('.compare-panel').forEach((panel, index) => {
         panel.querySelector('.frame-stage').hidden = mode !== 'live'; panel.querySelector('.screenshot-stage').hidden = mode === 'live';
-        const image = panel.querySelector('.screenshot-stage img'); image.src = urlFor(choices[index].screenshots[device].path);
+        if (mode === 'screenshots') {
+          const image = panel.querySelector('.screenshot-stage img');
+          const source = urlFor(choices[index].screenshots[device].path);
+          if (image.src !== source) image.src = source;
+        }
         panel.querySelector('[data-size-label]').textContent = `${sizes[device][0]}px ${device} preview`;
         panel.querySelector('[data-fullscreen]').disabled = mode !== 'live' || !document.fullscreenEnabled;
       });
@@ -260,7 +289,9 @@ async function initCompare() {
       // Official-site links leave the preview in a new tab, preserving the comparison.
       try {
         win.document.querySelectorAll('a[href]').forEach((link) => {
-          if (new URL(link.href).origin !== location.origin) {
+          if (link.href === collection) {
+            link.href = back.href; link.target = '_top';
+          } else if (new URL(link.href).origin !== location.origin) {
             link.target = '_blank'; link.rel = 'noopener noreferrer';
           }
         });

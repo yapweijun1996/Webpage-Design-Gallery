@@ -11,12 +11,21 @@ from tempfile import TemporaryDirectory
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
+from premium_landing_accessibility import check_accessibility_regressions
+
 ROOT = Path(__file__).resolve().parents[1]
 VERSIONS = tuple(f'v{number}' for number in range(12, 20))
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
+
+    def copyfile(self, source, outputfile):
+        try:
+            super().copyfile(source, outputfile)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            # Chrome may cancel in-flight resources when a test navigates away.
+            pass
 
 
 def review_task(page, version):
@@ -84,7 +93,7 @@ def run(capture=False, axe_script=None, site_root=ROOT):
             chrome = os.environ.get('GALLERY_CHROME', r'C:\Program Files\Google\Chrome\Application\chrome.exe')
             browser = playwright.chromium.launch(executable_path=chrome, headless=True)
             for version in VERSIONS:
-                for width, height in ((320, 800), (390, 844), (768, 1024), (1440, 900)):
+                for width, height in ((320, 800), (390, 844), (430, 932), (768, 1024), (1024, 768), (1440, 900)):
                     page = browser.new_page(viewport={'width': width, 'height': height}, reduced_motion='reduce')
                     errors = []
                     failed_responses = []
@@ -94,6 +103,11 @@ def run(capture=False, axe_script=None, site_root=ROOT):
                     response = page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/{version}/index.html', wait_until='networkidle')
                     assert response.status == 200, (version, width, response.status)
                     assert page.locator('h1').count() == 1 and page.locator('h1').is_visible(), (version, width, 'heading')
+                    if width == 390 and version in ('v12', 'v13', 'v16'):
+                        hero = page.locator({'v12': '.hero-image img', 'v13': '.hero-visual img', 'v16': '.hero-art img'}[version])
+                        hero.evaluate('img => img.decode()')
+                        transfer = hero.evaluate("""img => performance.getEntriesByName(img.currentSrc).at(-1)?.encodedBodySize""")
+                        assert transfer and transfer < 140_000, (version, 'mobile hero bytes', transfer)
                     if version == 'v13':
                         page.evaluate('() => document.fonts.ready.then(() => true)')
                         rects = page.locator('h1').evaluate("el => { const range = document.createRange(); range.selectNodeContents(el); return [...range.getClientRects()].map(rect => ({left: rect.left, right: rect.right})); }")
@@ -148,6 +162,7 @@ def run(capture=False, axe_script=None, site_root=ROOT):
                     action.click()
                     assert page.evaluate('location.hash') == destination, (version, width, 'primary action')
                     assert page.locator(destination).is_visible(), (version, width, 'action destination')
+                    check_accessibility_regressions(page, version, width)
                     review_task(page, version)
                     assert not errors and not failed_responses, (version, width, errors, failed_responses)
                     print(f'{version} {width}px PASS', flush=True)

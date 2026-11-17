@@ -12,6 +12,7 @@ import os
 import tempfile
 import threading
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 from playwright.sync_api import sync_playwright
 
@@ -31,6 +32,40 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError):
             # Browsers cancel in-flight screenshot transfers when navigating away.
             pass
+
+
+def check_landing_review(page, base):
+    company = base + "companies/gjh/index.html"
+    page.goto(company)
+    page.select_option("#style-filter", "corporate")
+    page.select_option("#design-sort", "title")
+    # Reverse the gallery order to verify left/right selection order independently.
+    for version in ("v19", "v13"):
+        page.locator(f'input[value="{version}"]').check()
+    expected = {"left": ["v19"], "right": ["v13"], "style": ["corporate"], "sort": ["title"]}
+    collection_url = page.url
+    assert parse_qs(urlsplit(collection_url).query) == expected
+    page.reload()
+    assert page.locator(".compare-checkbox input:checked").count() == 2
+    page.locator("#compare-selected").click()
+    page.wait_for_selector(".compare-panel")
+    assert parse_qs(urlsplit(page.url).query) == {**expected, "company": ["gjh"]}
+    assert page.locator(".compare-panel h2").all_text_contents() == ["The Partner Desk", "The Connection"]
+    page.go_back()
+    assert page.locator("#selection-count").inner_text() == "2 of 2 selected"
+    page.go_forward()
+    page.locator("#compare-back").click()
+    assert urlsplit(page.url).path == urlsplit(collection_url).path
+    assert parse_qs(urlsplit(page.url).query) == expected
+    assert page.locator("#style-filter").input_value() == "corporate"
+    assert page.locator("#design-sort").input_value() == "title"
+    assert page.locator('input[value="v19"]').is_checked() and page.locator('input[value="v13"]').is_checked()
+    page.locator("#compare-selected").click()
+    # A collection link inside the preview returns the whole window to the review.
+    page.frame_locator(".compare-panel iframe").first.get_by_role("link", name="All GJH concepts").click()
+    page.wait_for_url(company + "?*")
+    assert parse_qs(urlsplit(page.url).query) == expected
+    assert page.locator("#selection-count").inner_text() == "2 of 2 selected"
 
 
 def run():
@@ -113,6 +148,8 @@ def run():
                     assert page.locator('.compare-checkbox input:checked').count() == 0
                     page.locator('input[value="v5"]').check()
                     page.locator('input[value="v7"]').check()
+                    screenshot_requests = []
+                    page.on("request", lambda request: screenshot_requests.append(request.url) if "/screenshots/" in request.url else None)
                     page.get_by_role("link", name="Compare selected").click()
                     page.wait_for_selector("iframe")
                     page.wait_for_load_state("networkidle")
@@ -138,11 +175,15 @@ def run():
                     page.wait_for_timeout(250)
                     ratios = [frame.evaluate("scrollY / Math.max(1, document.documentElement.scrollHeight-innerHeight)") for frame in frames]
                     assert abs(ratios[0] - ratios[1]) < .025, ratios
+                    assert not screenshot_requests, screenshot_requests
                     page.select_option("#compare-mode", "screenshots")
                     assert page.locator(".frame-stage:visible").count() == 0
                     assert page.locator("#sync-scroll").is_disabled()
                     for image in page.locator(".screenshot-stage img").all():
                         image.evaluate("(image) => image.decode()")
+                    assert {urlsplit(url).path.rsplit("/", 3)[1] for url in screenshot_requests} == {"v5", "v7"}
+                    if width in (390, 1440):
+                        check_landing_review(page, base)
                     page.goto(base + "companies/gjh/index.html", wait_until="networkidle")
                     page.locator('.design-card[data-design="v6"] .details-link').click()
                     page.wait_for_selector("#detail-screenshot")
@@ -189,6 +230,13 @@ def run():
                 demo = page.get_by_role("link", name="Open live demo")
                 demo.click()
                 assert "/demos/food-beverage/yeos/v1/" in page.url
+                for query in ("left=v13&right=v13", "left=unknown&right=v13&style=unknown&sort=unknown"):
+                    page.goto(base + "companies/gjh/index.html?" + query)
+                    assert page.locator("#selection-count").inner_text() == "1 of 2 selected"
+                    assert parse_qs(urlsplit(page.url).query) == {"left": ["v13"]}
+                    assert page.locator("#compare-selected").get_attribute("aria-disabled") == "true"
+                    page.locator("#clear-selection").click()
+                    assert not urlsplit(page.url).query
                 for query in ("company=gjh&left=v5&right=v5", "company=unknown&left=v1&right=v7", "company=gjh&left=v1"):
                     page.goto(base + "compare/index.html?" + query)
                     page.wait_for_selector(".error-state")

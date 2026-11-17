@@ -8,20 +8,20 @@ a:focus-visible, [tabindex="-1"]:focus-visible { outline: 3px solid currentColor
 .skip { position: absolute; inset: .5rem auto auto .5rem; transform: translateY(-170%); background: var(--ink); color: var(--color-skip); padding: .6rem; z-index: var(--layer-skip);}
 .skip:focus { transform: none;}
 .frame { width: min(92%, 1350px); margin-inline: auto;}
-.masthead { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--tomato); padding-block: .65rem; color: var(--tomato);}
+.masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--tomato); padding-block: .65rem; color: var(--tomato);}
 .masthead a { display: inline-flex; min-height: 44px; align-items: center;}
 .imprint { gap: .6rem; font: var(--font-imprint); letter-spacing: -.055em; white-space: nowrap;}
 .check { width: 1.15rem; height: 1.15rem; background: conic-gradient(var(--tomato) 25%, transparent 0 50%, var(--tomato) 0 75%, transparent 0) 0 0 / 66.6667% 66.6667%;}
-.masthead nav, .footer-links { display: flex; gap: clamp(.8rem, 3vw, 2.5rem);}
+.masthead nav, .footer-links { display: flex; flex-wrap: wrap; gap: clamp(.8rem, 3vw, 2.5rem);}
 nav a, .footer-links a { gap: .3rem; font-size: var(--type-nav-a); font-weight: 600;}
 nav a:hover, .footer-links a:hover, .imprint:hover { text-decoration: underline; text-underline-offset: .25rem;}
-.hero { display: grid; grid-template-columns: .83fr 1.17fr; gap: clamp(1.1rem, 4vw, 4rem); align-items: center; padding: clamp(2rem,4.6vw,4.65rem) 0;}
+.hero { display: grid; grid-template-columns: minmax(0, .83fr) minmax(0, 1.17fr); gap: clamp(1.1rem, 4vw, 4rem); align-items: center; padding: clamp(2rem,4.6vw,4.65rem) 0;}
 .hero-copy { padding-bottom: .55rem;}
 p, h1, h2, h3, figure { margin: 0;}
 .eyebrow, figcaption { font-size: var(--type-eyebrow); font-weight: 700; letter-spacing: .07em;}
 .eyebrow { color: var(--tomato); text-transform: uppercase;}
 h1, h2, h3, .footer-name { font-family: var(--serif); font-weight: 400;}
-h1 { color: var(--tomato); font-size: var(--type-h1); line-height: .79; letter-spacing: -.084em; margin: .22em 0 .24em -.055em;}
+h1 { overflow-wrap: anywhere; color: var(--tomato); font-size: var(--type-h1); line-height: .79; letter-spacing: -.084em; margin: .22em 0 .24em -.055em;}
 h1 em { font-weight: normal;}
 .intro { max-width: 34ch; font-family: var(--serif); font-size: var(--type-intro); line-height: 1.39;}
 .button { display: inline-flex; justify-content: space-between; align-items: center; gap: 1.25rem; min-height: 46px; margin-top: 1.2rem; padding: .7rem 1.1rem; border-radius: var(--radius-button); background: var(--tomato); color: var(--paper); font-size: var(--type-button); font-weight: 700;}
@@ -29,7 +29,7 @@ h1 em { font-weight: normal;}
 .button:focus-visible { outline-color: var(--ink);}
 .cover picture { display: block;}
 .cover img { display: block; width: 100%; height: auto; aspect-ratio: 1.43; object-fit: cover;}
-figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; color: var(--tomato); margin-top: .65rem; letter-spacing: .025em;}
+figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 1rem; color: var(--tomato); margin-top: .65rem; letter-spacing: .025em;}
 figcaption span:first-child { font: var(--font-figcaption-span-first-child);}
 .menu { border-top: 4px double var(--tomato); padding-bottom: clamp(3rem,5vw,5rem);}
 .menu-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: clamp(1.8rem,3.6vw,3.3rem) 0 1.5rem;}

@@ -28,7 +28,13 @@
         document.getElementById(decodeURIComponent(link.hash.slice(1)))?.focus({preventScroll: true});
       }
     });
-    document.addEventListener('focusin', event => { lastFocus = event.target; });
+    document.addEventListener('focusin', event => {
+      lastFocus = event.target;
+      if (toggle.getAttribute('aria-expanded') === 'true' &&
+          !navigation.contains(lastFocus) && !toggle.contains(lastFocus)) {
+        closeMenu();
+      }
+    });
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
         closeMenu(true);

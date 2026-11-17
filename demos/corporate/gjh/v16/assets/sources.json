@@ -1,5 +1,5 @@
 {
-  "meaning": "Unmodified copies of recorded assets; project use authorized, no official endorsement or formal brand approval implied.",
+  "meaning": "Source records identify the original files. Display derivatives list their parent file and checksum. Project use is authorized for this independent study.",
   "assets": [
     {
       "file": "borsch-med-quality.png",
@@ -70,6 +70,15 @@
       "width": 438,
       "height": 438,
       "note": "WebP display copy at the full 438 × 438 source dimensions. Preserves the original composition, baked-in branding and sRGB profile."
+    },
+    {
+      "file": "new-moon-front-480.webp",
+      "sourceFile": "new-moon-nz-425g-front.jpg",
+      "sourceSha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+      "sha256": "ee0e01396452f3fbc28c02b41a0562f15702fe338c909a6c3e5ad96f9f31d8fa",
+      "width": 480,
+      "height": 480,
+      "note": "Proportional packshot display copy retaining the full product and source colour profile."
     }
   ]
 }

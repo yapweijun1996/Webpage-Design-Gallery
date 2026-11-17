@@ -31,3 +31,4 @@ document.getElementById('select-brief').addEventListener('click', () => {
 });
 
 document.getElementById('brief-app').hidden = false;
+document.getElementById('brief-fallback').hidden = true;

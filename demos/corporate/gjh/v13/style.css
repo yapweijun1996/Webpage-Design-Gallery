@@ -101,7 +101,7 @@ a:focus-visible {
 }
 .hero-layout {
   display: grid;
-  grid-template-columns: 1fr 46%;
+  grid-template-columns: minmax(0, 1fr) 46%;
   align-items: center;
   min-height: 630px;
 }
@@ -126,6 +126,8 @@ a:focus-visible {
   margin-right: 0.65rem;
 }
 h1 {
+  overflow-wrap: anywhere;
+  hyphens: auto;
   font-size: var(--type-h1);
   line-height: 0.99;
   margin: 2.5rem 0;
@@ -189,6 +191,7 @@ h2 em {
   left: 2rem;
   right: 2rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: end;
   justify-content: space-between;
   gap: 1rem;
@@ -199,6 +202,8 @@ h2 em {
   font-weight: 800;
 }
 .visual-label strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: Georgia, serif;
   font-weight: 400;
   font-size: var(--type-visual-label-strong);
@@ -206,6 +211,7 @@ h2 em {
 }
 .hero-bottom {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
   justify-content: space-between;
   align-items: center;
@@ -226,6 +232,7 @@ h2 em {
 }
 .section-marker {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 2rem;
   border-top: var(--border-top-section-marker);
@@ -241,6 +248,8 @@ h2 em {
 .approach h2,
 .portfolio h2,
 .contact h2 {
+  overflow-wrap: anywhere;
+  hyphens: auto;
   font-size: var(--type-approach-h2);
   line-height: 1.08;
 }
@@ -268,7 +277,7 @@ h2 em {
 }
 .principles {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
   gap: 2rem;
   margin-top: 7rem;
 }
@@ -314,7 +323,7 @@ h2 em {
 }
 .cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
   gap: 1.5rem;
 }
 .cards article a {

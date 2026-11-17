@@ -14,8 +14,8 @@ a:focus-visible, [tabindex="-1"]:focus-visible { outline: var(--outline-a-focus-
 .skip { position: absolute; z-index: var(--layer-skip); top: -100px; left: 18px; padding: 10px 16px; background: var(--lime); color: var(--ink);}
 .skip:focus { top: 12px;}
 .masthead, .masthead nav, .brand, .wave, .tune, .guide-heading, .channels a, .footer { display: flex; align-items: center;}
-.masthead { min-height: 73px; justify-content: space-between; gap: 16px;}
-.masthead nav { gap: clamp(16px, 3.5vw, 56px);}
+.masthead { flex-wrap: wrap; min-height: 73px; justify-content: space-between; gap: 16px;}
+.masthead nav { flex-wrap: wrap; gap: clamp(16px, 3.5vw, 56px);}
 .masthead nav a, .footer a { display: inline-flex; align-items: center; gap: .55em; min-height: 44px; font-size: var(--type-masthead-nav-a); font-weight: 600;}
 .masthead nav a:hover, .footer a:hover { color: var(--lime);}
 .brand { gap: .65em; min-height: 44px; font-size: var(--type-brand); font-weight: 700; letter-spacing: -.055em; white-space: nowrap;}
@@ -34,7 +34,7 @@ a:focus-visible, [tabindex="-1"]:focus-visible { outline: var(--outline-a-focus-
 .cover .eyebrow { color: var(--lime);}
 .signal { width: 8px; height: 8px; border-radius: var(--radius-signal); background: currentColor; box-shadow: var(--box-shadow-signal); margin-inline: 4px;}
 h1, h2, h3 { margin: 0;}
-h1 { margin: clamp(27px, 3vw, 48px) 0 30px; font-size: var(--type-h1); font-weight: 600; letter-spacing: -.085em; line-height: .88;}
+h1 { overflow-wrap: anywhere; hyphens: auto; margin: clamp(27px, 3vw, 48px) 0 30px; font-size: var(--type-h1); font-weight: 600; letter-spacing: -.085em; line-height: .88;}
 h1 em { color: var(--lilac); font: var(--font-h1-em); letter-spacing: -.072em;}
 .intro { max-width: 395px; margin: 0; color: var(--color-intro); font-size: var(--type-intro);}
 .tune { width: fit-content; gap: 28px; margin-top: 29px; padding: 13px 19px; background: var(--lime); color: var(--ink); font-size: var(--type-tune); font-weight: 700;}
@@ -77,7 +77,8 @@ h1 em { color: var(--lilac); font: var(--font-h1-em); letter-spacing: -.072em;}
   .cover-content { padding-block: 65px 68px;}
   h1 { font-size: var(--type-h1-2);}
   .guide-layout { grid-template-columns: 1fr; gap: 24px;}
-  .channels { display: grid; grid-template-columns: repeat(2,minmax(0,1fr));}
+  /* Keep pairs of channels together until enlarged text needs a full row. */
+  .channels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, max(50%, 8rem)), 1fr));}
   .channels a { padding: 12px 8px; gap: 9px; font-size: var(--type-channels-a-2);}
   .channels a:nth-child(odd) { border-right: var(--border-right-channels-a-nth-child-odd);}
   .channels a[aria-current], .channels a:hover { padding-inline: 8px;}

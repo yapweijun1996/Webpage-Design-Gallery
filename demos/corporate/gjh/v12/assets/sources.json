@@ -1,5 +1,5 @@
 {
-  "meaning": "Unmodified copies of recorded assets; project use authorized, no official endorsement or formal brand approval implied.",
+  "meaning": "Source records identify the original files. Display derivatives list their parent file and checksum. Project use is authorized for this independent study.",
   "assets": [
     {
       "file": "family-dining.webp",
@@ -46,5 +46,16 @@
     "licenseFile": "OFL-Manrope.txt",
     "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
     "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
-  }
+  },
+  "derivatives": [
+    {
+      "file": "family-dining-mobile.webp",
+      "sourceFile": "family-dining.webp",
+      "sourceSha256": "97ff07a063b22b6c4b5797e9b97d25e3b393da25146499eb7299d22da06c49d3",
+      "sha256": "b45a9eb69ad47e05548e26c09249f6496c1e066f0928cd14bb5af37aa78d1375",
+      "width": 864,
+      "height": 864,
+      "note": "Square phone composition matching the existing CSS focal point, with the full source height before resizing."
+    }
+  ]
 }

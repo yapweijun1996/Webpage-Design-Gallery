@@ -56,14 +56,19 @@ em {
   letter-spacing: -0.06em;
 }
 .notice {
+  align-items: center;
   display: flex;
   gap: 1rem;
   justify-content: space-between;
-  padding: 0.75rem 4vw;
+  padding: 0 4vw;
   background: var(--background-notice);
   color: var(--color-notice);
   font-size: var(--type-notice);
   letter-spacing: 0.06em;
+}
+.notice a {
+  gap: 0.3em;
+  flex-shrink: 0;
 }
 .header {
   padding: 1rem 4vw;
@@ -206,6 +211,7 @@ em {
   border-top: var(--border-top-brand-list);
 }
 .brand-row {
+  position: relative;
   display: grid;
   grid-template-columns: 0.7fr 2fr 1fr;
   align-items: center;
@@ -225,18 +231,25 @@ em {
 .brand-text h3 span {
   font-size: var(--type-brand-text-h3-span);
   vertical-align: top;
-  margin-left: 1rem;
+  white-space: nowrap;
 }
 .brand-text p {
   max-width: 22rem;
   font-size: var(--type-identity);
 }
-.brand-text a {
-  display: inline-block;
-  font-weight: 700;
-  font-size: var(--type-notice);
-  text-underline-offset: 0.4rem;
-  margin-top: 1rem;
+.brand-text h3 a {
+  text-decoration: none;
+}
+.brand-text h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.brand-row:hover h3 a,
+.brand-row:focus-within h3 a {
+  text-decoration: underline;
+  text-decoration-thickness: 0.05em;
+  text-underline-offset: 0.12em;
 }
 .brand-row img {
   width: 100%;
@@ -329,12 +342,6 @@ a:focus-visible {
   outline-color: var(--outline-color-contact-a-focus-visible);
 }
 @media (max-width: 760px) {
-  .notice {
-    flex-wrap: wrap;
-  }
-  .notice a {
-    width: 100%;
-  }
   .header {
     align-items: start;
     flex-direction: column;
@@ -348,10 +355,13 @@ a:focus-visible {
     min-height: 0;
   }
   .hero-copy {
-    padding: 4rem 1rem;
+    padding: 2rem 1rem;
+  }
+  .hero-copy h1 {
+    overflow-wrap: anywhere;
   }
   .hero-visual {
-    padding: 1.5rem 1rem;
+    padding: 1rem;
   }
   .ticker {
     font-size: var(--type-notice);
@@ -372,9 +382,6 @@ a:focus-visible {
   }
   .brand-text h3 {
     font-size: var(--type-brand-text-h3);
-  }
-  .brand-text h3 span {
-    display: none;
   }
   .brand-text p {
     font-size: var(--type-header-nav);
@@ -404,6 +411,11 @@ a:focus-visible {
     margin-right: 1rem;
   }
 }
+@media (max-width: 360px) {
+  .hero-copy h1 {
+    font-size: var(--type-h2);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -413,7 +425,6 @@ a:focus-visible {
 /* Preserve comfortable touch targets for navigation and portfolio links. */
 .notice a,
 .header nav a,
-.brand-text a,
 footer nav a {
   display: inline-flex;
   align-items: center;

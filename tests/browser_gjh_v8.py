@@ -350,8 +350,8 @@ def run(axe_script=None):
                 context = browser.new_context(viewport={"width": 1440, "height": 900})
                 page = context.new_page()
                 page.goto(base, wait_until="networkidle")
-                page.locator(".company-card").click()
-                expected_designs = len(gallery.load_catalog()["designs"])
+                page.locator('.company-card[data-company="gjh"]').click()
+                expected_designs = sum(design["companyId"] == "gjh" for design in gallery.load_catalog()["designs"])
                 assert page.locator(".design-card").count() == expected_designs
                 assert page.locator('.design-card[data-design="v8"]').count() == 1
                 page.goto(base + "companies/gjh/index.html", wait_until="networkidle")

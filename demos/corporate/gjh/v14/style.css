@@ -67,7 +67,7 @@ h3 {
 .notice {
   background: var(--background-notice);
   color: var(--color-notice);
-  padding: 0.7rem 5vw;
+  padding: 0 5vw;
   font-size: var(--type-notice);
   letter-spacing: 0.02em;
   display: flex;
@@ -75,6 +75,8 @@ h3 {
   align-items: center;
 }
 .notice a {
+  gap: 0.3em;
+  flex-shrink: 0;
   margin-left: auto;
 }
 .header {
@@ -319,13 +321,6 @@ a:focus-visible {
   .wrap {
     width: min(100% - 2rem, 1400px);
   }
-  .notice {
-    flex-wrap: wrap;
-  }
-  .notice a {
-    margin-left: 0;
-    width: 100%;
-  }
   .header {
     align-items: start;
     flex-direction: column;
@@ -373,6 +368,18 @@ a:focus-visible {
   }
   .footer div:nth-child(2) {
     display: flex;
+  }
+  .ribbon {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+    white-space: normal;
+    overflow: visible;
+    text-align: center;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
   }
   .ribbon span:last-child {
     display: none;

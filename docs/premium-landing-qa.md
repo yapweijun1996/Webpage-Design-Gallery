@@ -1,20 +1,34 @@
 # Premium landing-page QA
 
-Release 1.1.64, November 17, 2026. The review covers eight independent GJH landing pages and their gallery integration. See the [page-by-page findings and next-iteration plan](gjh-landing-roadmap.md), [desktop overview](screenshots/premium-landings/overview.jpg) and [mobile overview](screenshots/premium-landings/mobile.jpg).
+Release 1.1.66, November 17, 2026. The review covers eight independent GJH landing pages and their gallery integration. See the [page-by-page findings and next-iteration plan](gjh-landing-roadmap.md), [desktop overview](screenshots/premium-landings/overview.jpg) and [mobile overview](screenshots/premium-landings/mobile.jpg).
 
 ## Browser evidence
 
 | Check | Result |
 | --- | --- |
 | Built site | The production generator included two companies and seventeen designs, including sixteen GJH concepts. The landing-page test served the generated Pages artifact. All eight pages loaded their local images, CSS and scripts without recorded console errors or local HTTP failures. |
-| Responsive layout | Chrome 157 passed all 32 combinations of V12–V19 and 320, 390, 768 and 1440 CSS pixels. Each page had one visible primary heading and no document-level horizontal overflow. Extra V13 tests measured actual heading text bounds on either side of its narrow breakpoint. |
+| Responsive layout | Chrome 157 passed all 48 combinations of V12–V19 and 320, 390, 430, 768, 1024 and 1440 CSS pixels. Each page had one visible primary heading and no document-level horizontal overflow. Extra V13 tests measured actual heading text bounds on either side of its narrow breakpoint. |
 | Keyboard and accessibility | The skip link reached main content on every route. Automatic WCAG-tagged axe-core 4.10.3 scans returned zero violations at 390 and 1440 for all eight initial states. Focused checks also covered the selected V18 channel and the generated V19 draft. V16 Escape returned focus to the menu button. |
 | Without JavaScript | At 320 and 390 each page kept its heading, navigation and readable width. V17 links exposed the food profiles, V18 exposed all four chapters and V19 offered the official contact form directly. |
 | Page-specific tasks | V17 exercised a brand link and Back to restore the last-opened marker using a deterministic brand-destination fixture. V18 switched four channels by keyboard, restored a channel with Back and retained it on reload. V19 generated a category/topic-specific draft, selected the full message and cleared stale text after an input change. |
 | External destinations | A separate live check fetched all 18 distinct URLs and matched page titles or content to the expected destinations. Sony and Casio's manufacturer URLs returned 403 in the tested browser. Their replacements on GJH's own site returned 200. The contact form was opened for verification without submitting an enquiry. |
 | Gallery and PWA regressions | Isolated browser suites exercised filtering, device switching, live/screenshot comparison, error states, offline access, update integrity and legacy GJH navigation. The legacy demo suite covered 28 viewport cases and four no-JavaScript paths. |
 | Asset integrity | All 98 original WebPs decoded. IDs, sizes, dimensions, transparency and SHA-256 matched the library manifest. Full-resolution assets total 15,683,678 bytes. Each concept uses only its selected local runtime files. |
-| Build checks | Theme generation and the design-system debt check passed. All 61 Python tests passed. The Node suite passed 103 tests and skipped one optional comparison with an external SVG Icon Studio checkout. |
+| Build checks | Theme generation and the design-system debt check passed. All 61 Python tests passed. The Node suite passed 104 tests and skipped one optional comparison with an external SVG Icon Studio checkout. |
+
+## Advisor review and retest
+
+Three independent reviewers examined visual hierarchy, keyboard and failure states, and gallery navigation. The following findings were reproduced on release 1.1.64 and retested after the changes.
+
+| Journey | Reproduction | Fix and acceptance |
+| --- | --- | --- |
+| Compare and return | At 390 and 1440px, select Corporate, sort by title, choose V13 and V19 and open Compare. Returning cleared all three choices. “All concepts” inside a live frame opened another collection inside that frame. | The review URL carries two ordered design IDs and the collection controls. Return, reload, Back/Forward and the in-frame collection link preserve that state. Unknown and duplicate IDs are normalized against the current collection. |
+| Load live previews | Opening V12/V17 in Live mode requested 1,514,156 bytes of hidden screenshots on mobile and 3,321,178 bytes on desktop. | Live mode now requests zero comparison PNGs. Selecting Screenshots loads the two previews matching the selected width. |
+| Read at enlarged text spacing | V13's title reached x351 at 320px. V14 cut off a ribbon label. The V15 and V18 titles and V17 navigation could exceed a narrow screen. | Wrapping and flexible tracks accommodate additional word/letter spacing. Targeted glyph bounds are checked against both the viewport and clipping containers. |
+| Recognize and use mobile actions | At 390px, the V14/V15 notice took 116/118px. V15's brand names had arrows, but only separate text links worked. | Both notices retain a 44px gallery target. V15's first image moved from y873 to y724. Each brand row offers one keyboard link with a click target that includes the image. |
+| Leave a disclosure | With the V16 phone menu open, tab past its last link and press Escape. Keyboard focus jumped back to an offscreen toggle. | Leaving the disclosure closes it and keeps focus at the user's destination. Escape while inside the open menu still returns focus to the toggle. |
+| Recover from a script failure | Blocking only V19's page script left the enquiry section without a form or contact link in a JavaScript-enabled browser. | Official contact is available in the initial HTML. The working brief builder replaces that fallback after its handlers initialize. |
+| Download a phone hero | At 390px, V12 and V13 downloaded wide desktop photos. V16 requested a 1000px packshot for a roughly 177px display. | On a cold 1× viewport, V12's hero response fell from 144,378 to 91,366 bytes, V13 from 175,782 to 126,312 and V16 from 143,514 to 24,568. The photos retain their focal points and the entire pack remains visible. These are image body sizes, independent of CDN compression for other resources. |
 
 ## Changes confirmed during review
 

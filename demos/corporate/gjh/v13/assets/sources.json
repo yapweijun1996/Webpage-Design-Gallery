@@ -1,5 +1,5 @@
 {
-  "meaning": "Unmodified copies of recorded assets; project use authorized, no official endorsement or formal brand approval implied.",
+  "meaning": "Source records identify the original files. Display derivatives list their parent file and checksum. Project use is authorized for this independent study.",
   "assets": [
     {
       "file": "connected-lifestyle.jpg",
@@ -53,5 +53,16 @@
     "licenseFile": "OFL-Manrope.txt",
     "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
     "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
-  }
+  },
+  "derivatives": [
+    {
+      "file": "connected-lifestyle-mobile.webp",
+      "sourceFile": "connected-lifestyle.jpg",
+      "sourceSha256": "b2f33ff5807d40dbe98b671943f5c6c1c6d3797f395cab9387ecfd2d9fadb557",
+      "sha256": "1f255dd40bad943be6e4386c1a7c97d070f6008d8c5f3255bfa66f72ccad42af",
+      "width": 850,
+      "height": 850,
+      "note": "Square phone composition matching the existing CSS focal point, with the full source height before resizing."
+    }
+  ]
 }
