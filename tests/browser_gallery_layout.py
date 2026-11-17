@@ -38,6 +38,9 @@ def run():
                     summary = page.locator('.gallery-settings > summary')
                     for language in ('en', 'zh-Hans', 'ms'):
                         select_preference(page, '#language-select', language)
+                        brand = page.locator('.site-identity')
+                        visible_name = ' '.join(brand.inner_text().split())
+                        assert page.get_by_role('link', name=visible_name, exact=True).and_(brand).count() == 1, language
                         for theme in ('light', 'dark'):
                             select_preference(page, '#theme-select', theme)
                             if width <= 1000:
@@ -85,10 +88,14 @@ def run():
                     # Resize with settings open: desktop and mobile must both recover.
                     if width == 639:
                         summary.click()
+                        # Chrome dispatches media-query changes on a rendering update.
+                        page.evaluate('''() => { window.desktopSettingsChange = new Promise(resolve =>
+                            matchMedia('(max-width: 1000px)').addEventListener('change', resolve, {once:true})); }''')
                         page.set_viewport_size({'width': 1440, 'height': 826})
+                        page.evaluate('window.desktopSettingsChange.then(() => true)')
                         assert page.locator('#theme-select').is_visible()
                         page.set_viewport_size({'width': width, 'height': 826})
-                        assert not page.locator('.gallery-settings').evaluate('(e)=>e.open')
+                        page.locator('.gallery-settings:not([open])').wait_for()
                     for preview in page.locator('.design-preview').all():
                         rect = preview.bounding_box()
                         assert abs(rect['height'] - (180 if width < 560 else rect['width'] / 1.6)) < 1, (width, rect)

@@ -17,7 +17,11 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
     throw new Error('Visitor model must be authored at metre scale with feet at floor zero');
   }
   avatar.rotation.y = Math.PI;
-  avatar.traverse(node => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; } });
+  // Tiny face details and a wristwatch do not materially change the visitor's
+  // floor silhouette, but each otherwise adds another full shadow-map draw.
+  const shadowDetail = new Set(['V2_body_Glasses_and_eyes', 'V2_glasses_Glasses_and_eyes',
+    'V2_body_Warm_smile', 'V2_watch_Glasses_and_eyes']);
+  avatar.traverse(node => { if (node.isMesh) { node.castShadow = !shadowDetail.has(node.name); node.receiveShadow = true; } });
   const visual = new T.Group(); visual.add(avatar);
   const cart = await createPushCart(T, avatar, visual);
   const solver=createContactSolver(T,avatar), transfer=createProductTransfer(T,avatar);

@@ -14,7 +14,7 @@ import threading
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("build_gallery", ROOT / "scripts/build_gallery.py")
@@ -57,7 +57,7 @@ def check_landing_review(page, base):
     page.locator("#compare-back").click()
     assert urlsplit(page.url).path == urlsplit(collection_url).path
     assert parse_qs(urlsplit(page.url).query) == expected
-    assert page.locator("#style-filter").input_value() == "corporate"
+    expect(page.locator("#style-filter")).to_have_value("corporate")
     assert page.locator("#design-sort").input_value() == "title"
     assert page.locator('input[value="v19"]').is_checked() and page.locator('input[value="v13"]').is_checked()
     page.locator("#compare-selected").click()

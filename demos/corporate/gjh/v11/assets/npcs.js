@@ -27,6 +27,24 @@ function visibleDrawCalls(root) {
   return Math.max(1,count);
 }
 
+// The two batching passes share the same strict geometry, binding and object contract.
+function compatibleNpcGeometry(other,node) {
+  const a=other.geometry,geometry=node.geometry,attrs=Object.keys(geometry.attributes).sort();
+  if(other.parent!==node.parent || Boolean(other.isSkinnedMesh)!==Boolean(node.isSkinnedMesh) ||
+    other.renderOrder!==node.renderOrder || other.layers.mask!==node.layers.mask || other.frustumCulled!==node.frustumCulled ||
+    other.castShadow!==node.castShadow || other.receiveShadow!==node.receiveShadow ||
+    !other.matrix.equals(node.matrix) || Boolean(a.index)!==Boolean(geometry.index) ||
+    Object.keys(a.attributes).sort().join(',')!==attrs.join(',')) return false;
+  if(attrs.some(name=>{
+    const x=a.attributes[name],y=geometry.attributes[name];
+    return x.itemSize!==y.itemSize || x.normalized!==y.normalized || x.array.constructor!==y.array.constructor || x.gpuType!==y.gpuType;
+  })) return false;
+  if(node.isSkinnedMesh && (!other.bindMatrix.equals(node.bindMatrix) || other.bindMode!==node.bindMode ||
+    other.skeleton.bones.length!==node.skeleton.bones.length ||
+    other.skeleton.bones.some((bone,i)=>bone!==node.skeleton.bones[i] || !other.skeleton.boneInverses[i].equals(node.skeleton.boneInverses[i])))) return false;
+  return true;
+}
+
 // Merge only interchangeable, unanimated leaf parts. No source buffer is changed
 // or disposed, and no transform is baked into geometry used by another rig.
 function optimizeNpcTemplate(root,protectedNodes) {
@@ -42,22 +60,7 @@ function optimizeNpcTemplate(root,protectedNodes) {
       !geometry.groups.length && geometry.drawRange.start===0 && geometry.drawRange.count===Infinity) {
       const attrs=Object.keys(geometry.attributes).sort();
       const supported=attrs.every(name=>geometry.attributes[name].isBufferAttribute && !geometry.attributes[name].isInstancedBufferAttribute);
-      const matches=other=>{
-        const a=other.geometry;
-        if(other.parent!==node.parent || other.material!==node.material || Boolean(other.isSkinnedMesh)!==Boolean(node.isSkinnedMesh) ||
-          other.renderOrder!==node.renderOrder || other.layers.mask!==node.layers.mask || other.frustumCulled!==node.frustumCulled ||
-          other.castShadow!==node.castShadow || other.receiveShadow!==node.receiveShadow ||
-          !other.matrix.equals(node.matrix) || Boolean(a.index)!==Boolean(geometry.index) ||
-          Object.keys(a.attributes).sort().join(',')!==attrs.join(',')) return false;
-        if(attrs.some(name=>{
-          const x=a.attributes[name],y=geometry.attributes[name];
-          return x.itemSize!==y.itemSize || x.normalized!==y.normalized || x.array.constructor!==y.array.constructor || x.gpuType!==y.gpuType;
-        })) return false;
-        if(node.isSkinnedMesh && (!other.bindMatrix.equals(node.bindMatrix) || other.bindMode!==node.bindMode ||
-          other.skeleton.bones.length!==node.skeleton.bones.length ||
-          other.skeleton.bones.some((bone,i)=>bone!==node.skeleton.bones[i] || !other.skeleton.boneInverses[i].equals(node.skeleton.boneInverses[i])))) return false;
-        return true;
-      };
+      const matches=other=>other.material===node.material && compatibleNpcGeometry(other,node);
       if(supported) {
         const group=groups.find(group=>matches(group[0]));
         if(group) group.push(node); else groups.push([node]);
@@ -76,6 +79,55 @@ function optimizeNpcTemplate(root,protectedNodes) {
     for(const node of group.slice(1)) node.parent.remove(node);
   }
   return owned;
+}
+
+// The shipped visitor's opaque colour-only parts share the same rough PBR
+// surface. Preserve those colours per vertex while sharing one draw material.
+function mergeVisitorColours(T,root,protectedNodes) {
+  const names=new Set(['GJH emerald polo','Warm peach skin','Cream white','Swept chestnut hair',
+    'Denim cuff','Navy denim','Hoodie slate','Backpack charcoal','Backpack trim']);
+  const groups=[],signatures=new WeakMap();
+  function materialSignature(material) {
+    if(signatures.has(material))return signatures.get(material);
+    let signature=null;
+    try { const data=material.toJSON(); delete data.metadata; delete data.uuid; delete data.name; delete data.color; signature=JSON.stringify(data); }
+    catch { /* Leave unrepresentable materials separate. */ }
+    signatures.set(material,signature);return signature;
+  }
+  root.updateMatrixWorld(true);
+  root.traverseVisible(node=>{
+    const m=node.material,g=node.geometry;
+    if (!node.visible || !node.isSkinnedMesh || node.isInstancedMesh || node.isBatchedMesh || node.children.length || !node.parent || protectedNodes.has(node) ||
+        !node.name.startsWith('V2_') || !m?.isMeshStandardMaterial || !names.has(m.name) || m.transparent ||
+        m.opacity!==1 || m.vertexColors || m.alphaTest || m.emissive.getHex()!==0 || m.map || m.normalMap ||
+        m.roughnessMap || m.metalnessMap || m.emissiveMap || m.alphaMap || m.aoMap || m.lightMap || m.envMap ||
+        m.onBeforeCompile!==T.Material.prototype.onBeforeCompile || m.onBeforeRender!==T.Material.prototype.onBeforeRender ||
+        m.customProgramCacheKey!==T.Material.prototype.customProgramCacheKey ||
+        node.onBeforeRender!==T.Object3D.prototype.onBeforeRender || node.onAfterRender!==T.Object3D.prototype.onAfterRender ||
+        node.morphTargetInfluences?.length || Object.keys(g.morphAttributes).length || g.groups.length ||
+        g.drawRange.start!==0 || g.drawRange.count!==Infinity) return;
+    const signature=materialSignature(m),attrs=Object.keys(g.attributes).sort();
+    if(!signature || attrs.includes('color') || attrs.some(k=>!g.attributes[k].isBufferAttribute || g.attributes[k].isInstancedBufferAttribute)) return;
+    const same=other=>materialSignature(other.material)===signature && compatibleNpcGeometry(other,node);
+    const group=groups.find(candidate=>same(candidate[0]));
+    if(group)group.push(node);else groups.push([node]);
+  });
+  const geometries=[],materials=[];
+  for(const group of groups) {
+    if(group.length<2)continue;
+    const parts=group.map(node=>{
+      const g=node.geometry.clone(),count=g.attributes.position.count,c=node.material.color,colors=new Float32Array(count*3);
+      for(let i=0;i<count;i++){colors[3*i]=c.r;colors[3*i+1]=c.g;colors[3*i+2]=c.b;}
+      g.setAttribute('color',new T.BufferAttribute(colors,3));return g;
+    });
+    const merged=mergeGeometries(parts);parts.forEach(g=>g.dispose());
+    if(!merged)continue;
+    const material=group[0].material.clone();material.color.setRGB(1,1,1);material.vertexColors=true;
+    geometries.push(merged);materials.push(material);group[0].geometry=merged;group[0].material=material;
+    group[0].boundingBox=null;group[0].boundingSphere=null;
+    for(const node of group.slice(1))node.parent.remove(node);
+  }
+  return {geometries,materials};
 }
 
 export function npcLimit({tier='balanced',mobile=false,enabled=true}={}) {
@@ -132,7 +184,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
   const available=Boolean(source?.scene && Object.values(clips).every(clip=>clip && clip.duration>0 && clip.tracks.length));
   const template=available?cloneNpcRig(source.scene):null;
   const templateSkeletons=new Set();
-  let ownedGeometry=[];
+  let ownedGeometry=[],ownedMaterials=[];
   if(template) {
     const originals=[],copies=[],protectedNodes=new Set();
     source.scene.traverse(node=>originals.push(node));
@@ -148,6 +200,8 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     }
     template.visible=true;
     ownedGeometry=optimizeNpcTemplate(template,protectedNodes);
+    const compact=mergeVisitorColours(T,template,protectedNodes);
+    ownedGeometry.push(...compact.geometries);ownedMaterials=compact.materials;
   }
   const callsPerNpc=template?visibleDrawCalls(template):0;
   const limitForSettings=()=>available && !disposed ? npcLimit(settings) : 0;
@@ -288,6 +342,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       disposed=true;
       clearVisitors();
       for(const geometry of ownedGeometry) geometry.dispose();
+      for(const material of ownedMaterials) material.dispose();
       for(const skeleton of templateSkeletons) skeleton.dispose();
       admission=nextNpcAdmission();
     },

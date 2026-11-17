@@ -1,4 +1,39 @@
 import {loadStaticAsset} from './static-asset.js';
+import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+
+// Opaque parts with the same surface can share a draw in both the colour and
+// shadow passes. Preserve separate transparent parts and their render order.
+function batchOpaqueRailings(T, primitives) {
+  const buckets = new Map(), result = [], replaced = new Set();
+  for (const primitive of primitives) {
+    const {geometry, material} = primitive;
+    if (material.transparent || material.opacity < 1 || material.alphaTest > 0) {
+      result.push(primitive); continue;
+    }
+    const signature = Object.entries(geometry.attributes).map(([name, attr]) =>
+      `${name}:${attr.itemSize}:${attr.normalized}:${attr.array.constructor.name}`).sort().join('|');
+    if (!buckets.has(material)) buckets.set(material, new Map());
+    const groups = buckets.get(material);
+    if (!groups.has(signature)) groups.set(signature, []);
+    groups.get(signature).push(primitive);
+  }
+  for (const [material, groups] of buckets) for (const bucket of groups.values()) {
+    if (bucket.length === 1) { result.push(bucket[0]); continue; }
+    const parts = bucket.map(({geometry,matrix}) => {
+      const part = geometry.index ? geometry.toNonIndexed() : geometry.clone();
+      part.applyMatrix4(matrix); return part;
+    });
+    const geometry = mergeGeometries(parts);
+    parts.forEach(part => part.dispose());
+    if (!geometry) { result.push(...bucket); continue; }
+    geometry.computeBoundingSphere();
+    result.push({geometry,material,matrix:new T.Matrix4()});
+    bucket.forEach(item => replaced.add(item.geometry));
+  }
+  const retained = new Set(result.map(item => item.geometry));
+  for (const geometry of replaced) if (!retained.has(geometry)) geometry.dispose();
+  return result;
+}
 
 const sources = Object.freeze({
   bay1m: Object.freeze({asset_id:'ASSET_MallGlass1m',file:'mall-glass-railing-1m.glb',sha256:'556cfc03f38a0cb0c21a125a318c5dc251976e18598f3d15f3e0979dc2dfd49d',dimensions_m:[1.1599999964237213,1.1209999322891235,.1599999964237213],bounds_min:[-.5799999982118607,0,-.07999999821186066],bounds_max:[.5799999982118607,1.1209999322891235,.07999999821186066]}),
@@ -13,6 +48,8 @@ export async function createDeckRailings(T) {
     // The source GLBs identify their root by name and carry metric module metadata.
     const rootExtras = {units: 'metres', origin: 'floor centre', centre_spacing_m: spacing[kind]};
     records[kind] = await loadStaticAsset(T, {...definition, rootExtras}, import.meta.url);
+    records[kind].sourcePrimitiveCount = records[kind].primitives.length;
+    if (records[kind].status === 'loaded') records[kind].primitives = batchOpaqueRailings(T, records[kind].primitives);
   }));
   const placements={bay1m:[],bay:[],post:[]};
   return {
@@ -32,7 +69,7 @@ export async function createDeckRailings(T) {
         });
         mesh.castShadow=mesh.receiveShadow=true;mesh.computeBoundingSphere();mesh.userData.deckLod=true;scene.add(mesh);
       }
-      return Object.freeze(Object.fromEntries(Object.entries(records).map(([kind,record])=>[kind,Object.freeze({status:record.status,reason:record.reason,instances:placements[kind].length,primitives:record.primitives.length})])));
+      return Object.freeze(Object.fromEntries(Object.entries(records).map(([kind,record])=>[kind,Object.freeze({status:record.status,reason:record.reason,instances:placements[kind].length,primitives:record.sourcePrimitiveCount})])));
     }
   };
 }

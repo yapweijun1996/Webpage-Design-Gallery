@@ -503,9 +503,15 @@ async function createCharacterV2(T, createLocomotionContinuity) {
     throw new Error("Visitor model must be authored at metre scale with feet at floor zero");
   }
   avatar.rotation.y = Math.PI;
+  const shadowDetail = new Set([
+    "V2_body_Glasses_and_eyes",
+    "V2_glasses_Glasses_and_eyes",
+    "V2_body_Warm_smile",
+    "V2_watch_Glasses_and_eyes"
+  ]);
   avatar.traverse((node) => {
     if (node.isMesh) {
-      node.castShadow = true;
+      node.castShadow = !shadowDetail.has(node.name);
       node.receiveShadow = true;
     }
   });

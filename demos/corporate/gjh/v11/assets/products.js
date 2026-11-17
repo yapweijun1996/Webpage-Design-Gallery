@@ -103,7 +103,8 @@ function fallbackCan(T, scene, textures, brass, sku, placements) {
   const label = new T.InstancedMesh(new T.CylinderGeometry(.974, .974, 512 / 594, 24, 1, true, -Math.PI / 2, Math.PI), new T.MeshStandardMaterial({map: new T.CanvasTexture(canvas), roughness: .65}), placements.length);
   const matrix = new T.Matrix4(), scale = new T.Vector3(canBounds.x / 2, canBounds.y, canBounds.z / 2);
   placements.forEach((placement, index) => { matrix.compose(placement.clone().add(new T.Vector3(0, canBounds.y / 2, 0)), new T.Quaternion(), scale); body.setMatrixAt(index, matrix); label.setMatrixAt(index, matrix); });
-  body.castShadow = body.receiveShadow = label.castShadow = label.receiveShadow = true; scene.add(body, label);
+  body.castShadow = label.castShadow = false;
+  body.receiveShadow = label.receiveShadow = true; scene.add(body, label);
 }
 
 function fallbackShelf(T, scene, displayShelves = []) {
@@ -141,22 +142,54 @@ function batchShelf(T, primitives) {
   return result;
 }
 
+// Shadow depth needs positions only. One geometry retains the shelf's actual
+// silhouette without submitting every visible material again to the shadow map.
+function shelfShadowGeometry(primitives) {
+  const parts = primitives.map(({geometry}) => {
+    const part = geometry.index ? geometry.toNonIndexed() : geometry.clone();
+    for (const name of Object.keys(part.attributes)) if (name !== 'position') part.deleteAttribute(name);
+    return part;
+  });
+  const merged = mergeGeometries(parts);
+  parts.forEach(part => part.dispose());
+  merged.computeBoundingSphere();
+  return merged;
+}
+
 export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null) {
   const shopLodInstances=[],hiddenShopLodMatrix=new T.Matrix4().makeScale(0,0,0);
+  let shadowMesh = null;
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
   const sourceShelfPrimitives=shelfRecord.primitives.length;
   if(shelfRecord.status==='loaded')shelfRecord.primitives=batchShelf(T,shelfRecord.primitives);
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene, displayShelves);
-  else for (const primitive of shelfRecord.primitives) {
-    const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, shelfXs.length+displayShelves.length);
-    shelfXs.forEach((x, index) => { const matrix = new T.Matrix4(); matrix.compose(new T.Vector3(x, 0, -9.25), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), shelfRotation), new T.Vector3(1, 1, 1)); const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix);mesh.setMatrixAt(index,instance);shopLodInstances.push({mesh,index,matrix:instance,x,z:-9.25,visible:null}); });
-    displayShelves.forEach((placement,index)=>{
-      const matrix=new T.Matrix4().compose(new T.Vector3(placement.x,0,placement.z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),placement.rotation),new T.Vector3(1,1,1));
-      const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix),instanceIndex=shelfXs.length+index;
-      mesh.setMatrixAt(instanceIndex,instance);
-      shopLodInstances.push({mesh,index:instanceIndex,matrix:instance,x:placement.x,z:placement.z,visible:null});
-    });
-    mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
+  else {
+    const shadow = {geometry:shelfShadowGeometry(shelfRecord.primitives),
+      material:new T.MeshBasicMaterial({colorWrite:false,depthWrite:false,side:T.DoubleSide}),
+      matrix:new T.Matrix4(), shadowOnly:true};
+    const placements = [
+      ...shelfXs.map(x => ({x, z: -9.25, rotation: shelfRotation})),
+      ...displayShelves,
+    ];
+    for (const primitive of [...shelfRecord.primitives, shadow]) {
+      const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
+      if (primitive.shadowOnly) {
+        mesh.name = 'Product shelf shadow';
+        shadowMesh = mesh;
+      }
+      placements.forEach(({x, z, rotation}, index) => {
+        const matrix = new T.Matrix4().compose(
+          new T.Vector3(x, 0, z),
+          new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), rotation),
+          new T.Vector3(1, 1, 1)
+        ).multiply(primitive.matrix);
+        mesh.setMatrixAt(index, matrix);
+        shopLodInstances.push({mesh, index, matrix, x, z, visible: null});
+      });
+      mesh.castShadow = Boolean(primitive.shadowOnly);
+      mesh.receiveShadow = !primitive.shadowOnly;
+      scene.add(mesh);
+    }
   }
   function updateShopLods(visitor) {
     for(const item of shopLodInstances){
@@ -191,11 +224,13 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
         const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix);mesh.setMatrixAt(index,instance);
         if(index<shelfPlacements.length||heroCan&&sku==='nz-425g'&&index===placements.length-1)shopLodInstances.push({mesh,index,matrix:instance,x:position.x,z:position.z,visible:null});
       });
-      mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh); batches.push(mesh);
+      // Small shelf products receive the shelf's shadows; omitting their
+      // individual shadow passes keeps the shelves and visitor casting.
+      mesh.castShadow = false; mesh.receiveShadow = true; scene.add(mesh); batches.push(mesh);
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {displayedProducts:showcase.length,updateShopLods,shelfPositions:shelfXs, shelves, reserveProduct(id) {
+  return {displayedProducts:showcase.length,updateShopLods,setShadows(enabled) { if (shadowMesh) shadowMesh.visible = enabled; }, shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);
     if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
     entry.reserved = true;

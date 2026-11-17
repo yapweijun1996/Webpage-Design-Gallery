@@ -249,7 +249,7 @@ function render(force = false) {
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
-    world.updateShopLods(pose);
+    world.updateShopLods(pose, renderer.shadowMap.enabled);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
     const draw=()=>atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
@@ -413,7 +413,15 @@ function resize() {
   }
   if (resized) {
     renderWidth = width; renderHeight = height;
-    player.camera.aspect = width / height; player.camera.fov = width < 600 ? 68 : 58; player.camera.updateProjectionMatrix();
+    const camera = player.camera;
+    camera.aspect = width / height;
+    camera.fov = width < 600 ? 68 : 58;
+    if (expanded && width < 600 && width < height) {
+      // Keep both the visitor and the adjacent shop window in portrait frame.
+      const portraitFov = 2 * Math.atan(Math.tan(Math.PI / 6) / camera.aspect) * 180 / Math.PI;
+      camera.fov = Math.min(100, Math.max(camera.fov, portraitFov));
+    }
+    camera.updateProjectionMatrix();
     if (shelfFocus?.open) shelfFocus.resize(); else player.updateCamera(0, true);
   }
   render();

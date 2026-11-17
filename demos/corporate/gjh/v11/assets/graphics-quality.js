@@ -7,7 +7,7 @@ export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memo
   const hint = value => Number.isFinite(value) && value > 0;
   const constrained = (hint(cores) && cores <= 2) || (hint(memory) && memory <= 2);
   const choice = qualityPreference(preference);
-  // CPU/RAM hints do not establish GPU capacity; leave Detailed as an explicit choice.
+  // CPU/RAM hints do not establish GPU capacity; Auto starts conservatively.
   const tier = recovered ? 'low' : choice !== 'auto' ? choice : ['low','balanced','detailed'].includes(autoTier) ? autoTier : constrained ? 'low' : 'balanced';
   const cap = tier === 'low' ? 1 : tier === 'balanced' && width < 600 ? 1.25 : tier === 'balanced' && choice === 'auto' && width >= 1000 ? 1.5 : 2;
   return Object.freeze({preference: choice, tier, pixelRatio: Math.min(hint(dpr) ? dpr : 1, cap),
@@ -18,8 +18,14 @@ export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memo
 // movement; four-second windows and a cooldown prevent transient flapping.
 export function createAdaptiveQuality({allowDetailed=false}={}) {
   const tiers=['low','balanced','detailed'];
-  let last=null, warmUntil=0, start=0, count=0, slow=0, slowTime=0, fast=0, busy=0, goodWindows=0, changedAt=-Infinity;
-  function reset() { last=null; start=0; count=slow=slowTime=fast=busy=goodWindows=0; }
+  let last=null, warmUntil=0, start=0, count=0, slow=0, slowTime=0, fast=0, busy=0, goodWindows=0;
+  let changedAt=-Infinity, detailedFailures=0, detailedRetryAt=-Infinity;
+  let trialStart=0, trialCount=0, trialSlow=0, trialSlowTime=0;
+  function reset() { last=null; start=0; count=slow=slowTime=fast=busy=goodWindows=trialCount=trialSlow=trialSlowTime=0; trialStart=0; }
+  function backoffDetailed(now) {
+    detailedFailures++;
+    detailedRetryAt=now+30000*2**Math.min(detailedFailures-1,2);
+  }
   return {
     reset,
     sample(now, active, tier, moving=true) {
@@ -29,6 +35,20 @@ export function createAdaptiveQuality({allowDetailed=false}={}) {
       // Explicit lifecycle interruptions reset the sampler; a long foreground
       // frame remains evidence, but cannot trigger a downgrade by itself.
       if (elapsed<=0) { reset(); return null; }
+      // Roll back promptly when enough frames exceed 30ms (about 33 FPS).
+      // One isolated stall is insufficient; failed trials back off.
+      if (allowDetailed && tier==='detailed') {
+        if (!trialCount) trialStart=now-elapsed;
+        trialCount++;
+        if (elapsed>30) { trialSlow++; trialSlowTime+=Math.min(elapsed,1500); }
+        if (now-trialStart>=750) {
+          if (trialSlow>=3 && (trialSlow/trialCount>=.2 || trialSlowTime/(now-trialStart)>=.5)) {
+            backoffDetailed(now);
+            changedAt=now; reset(); return 'balanced';
+          }
+          trialStart=0; trialCount=trialSlow=trialSlowTime=0;
+        }
+      }
       if (now<warmUntil) return null;
       if (!count) start=now-elapsed;
       count++; if (elapsed>20) { slow++; slowTime+=Math.min(elapsed,4000); } if (elapsed<=18.5) fast++; if (moving) busy++;
@@ -38,8 +58,13 @@ export function createAdaptiveQuality({allowDetailed=false}={}) {
       count=slow=slowTime=fast=busy=0; start=0;
       const index=tiers.indexOf(tier);
       const ceiling=allowDetailed?2:1;
-      const next=bad&&index>0?tiers[index-1]:goodWindows>=3&&now-changedAt>=10000&&index<ceiling?tiers[index+1]:null;
-      if (next) { changedAt=now; reset(); return next; }
+      const next=bad&&index>0?tiers[index-1]:goodWindows>=3&&now-changedAt>=10000&&index<ceiling&&(tier!=='balanced'||now>=detailedRetryAt)?tiers[index+1]:null;
+      if (next) {
+        if (tier==='detailed' && next==='balanced') {
+          backoffDetailed(now);
+        }
+        changedAt=now; reset(); return next;
+      }
       return null;
     }
   };
@@ -49,7 +74,7 @@ export function createGraphicsQuality(onChange) {
   const select = document.getElementById('graphics-quality');
   const status = document.getElementById('graphics-quality-status');
   let preference = 'auto', recovered = false, profile, autoTier = null;
-  const adaptive=createAdaptiveQuality();
+  const adaptive=createAdaptiveQuality({allowDetailed:true});
   try { preference = qualityPreference(localStorage.getItem(QUALITY_KEY)); } catch { /* Optional preference storage. */ }
   select.value = preference;
   select.addEventListener('change', () => {
@@ -69,7 +94,7 @@ export function createGraphicsQuality(onChange) {
       profile = resolveQuality({preference, width, dpr: window.devicePixelRatio,
         cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory, recovered, autoTier});
       const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-      status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Softer image; less rendering work.' : 'Resolution follows the screen within a fixed limit.'}${preference === 'auto' && !recovered ? ' Auto currently uses up to Balanced; choose Detailed manually.' : ''} Downloads and products stay the same.`;
+      status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Softer image; less rendering work.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
       return profile;
     },
     get state() { return profile; },

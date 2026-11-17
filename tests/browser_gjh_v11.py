@@ -71,6 +71,7 @@ def mobile_hud(page):
 
 
 def dismiss_tutorial(page):
+    page.locator('#app-loader').wait_for(state='hidden', timeout=90000)
     page.locator('#guide-card').wait_for(state='visible')
     page.locator('#guide-skip').click()
     page.wait_for_function("document.querySelector('#guide-card').hidden && !__mall.state.paused")
@@ -140,6 +141,7 @@ def ux_hud_coverage(browser, url):
         assert peak <= 200, peak
         page.reload()
         page.wait_for_function('window.__sceneReady && window.__mall?.ready')
+        page.locator('#app-loader').wait_for(state='hidden', timeout=90000)
         assert card.is_hidden()
         page.locator('#mall-tools > summary').click()
         page.locator('#rail-guide').click()
@@ -148,6 +150,7 @@ def ux_hud_coverage(browser, url):
         page.locator('#guide-skip').click()
         page.reload()
         page.wait_for_function('window.__sceneReady && window.__mall?.ready')
+        page.locator('#app-loader').wait_for(state='hidden', timeout=90000)
         assert card.is_hidden()
         results.append({'viewport': [width, height], 'tutorialActionsAndPersistence': 'PASS',
                         'drawCalls': peak, 'screenshot': str(output / f'ux1-{width}.png')})
@@ -889,11 +892,10 @@ def run(capture=False):
                         drive(page, 100)
                         assert state(page)['animation']=='idle'
                         for zone in ('newmoon', 'mili', 'gogo'):
-                            if width == 390:
+                            if not page.locator('#mall-map').evaluate('el=>el.open'):
                                 page.locator('#header-map').click()
                             page.locator(f'[data-teleport="{zone}"]').click()
-                            if width == 390:
-                                assert not page.locator('#mall-map').evaluate('el=>el.open')
+                            assert not page.locator('#mall-map').evaluate('el=>el.open')
                             page.evaluate('__mall.setInput({})')
                             assert abs(state(page)['x']-{'newmoon':-10,'mili':0,'gogo':10}[zone])<.05
                             opened = drive(page, 400)

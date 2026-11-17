@@ -101,14 +101,38 @@ export async function createWorld(T, R, physics, expanded = false) {
   const doorFrameGeometry = mergeGeometries(doorFrameParts);
   doorFrameParts.forEach(part=>part.dispose());
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
+  // These matte and wood finishes differ only in tint within each group.
+  // Keep separate batches for each shop, the deck and public architecture.
+  const finishForRole = new Map();
+  const finishMaterials = {}, colourBatches = [];
+  if (expanded) {
+    for (const [finish, roles] of Object.entries({
+      matte: ['green','dark','ivory','cream','foliage','leaf','pot','seat'],
+      woodGrain: ['wood','oak','timber','timberAlt']
+    })) {
+      const base = materials[roles[0]].clone();
+      base.color.set(0xffffff);
+      finishMaterials[finish] = base;
+      for (const role of roles) finishForRole.set(role, finish);
+    }
+  }
+  function refreshInstanceColours() {
+    for (const {mesh, colours} of colourBatches) {
+      colours.forEach((colour, index) => mesh.setColorAt(index, colour));
+      mesh.instanceColor.needsUpdate = true;
+    }
+  }
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
-  let activeShopSlot=null,activeDeck=false,railingState=null,interiorModels=null;
+  let activeShopSlot=null,activeDeck=false,railingState=null,interiorModels=null,productDisplay=null;
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ', rz = 0) {
-    const key = `${type}:${material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}${activeDeck?':deck':''}`;
-    if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: materials[material], transforms: [],shopSlot:activeShopSlot,deckLod:activeDeck});
+    const finish = finishForRole.get(material);
+    const key = `${type}:${finish || material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}${activeDeck?':deck':''}`;
+    if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: finish ? finishMaterials[finish] : materials[material], transforms: [],shopSlot:activeShopSlot,deckLod:activeDeck, colours: finish ? [] : null});
+    const batch = batches.get(key);
+    if (finish) batch.colours.push(materials[material].color);
     position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, rz, order); quaternion.setFromEuler(euler);
-    matrix.compose(position, quaternion, scale); batches.get(key).transforms.push(matrix.clone());
+    matrix.compose(position, quaternion, scale); batch.transforms.push(matrix.clone());
   }
   function collider(x, y, z, sx, sy, sz) {
     return physics.createCollider(R.ColliderDesc.cuboid(sx / 2, sy / 2, sz / 2).setTranslation(x, y, z));
@@ -479,8 +503,8 @@ export async function createWorld(T, R, physics, expanded = false) {
     if (expanded) {
       box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
     }
-    activeShopSlot=expanded?Number(store.number):null;
     box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
+    activeShopSlot=expanded?Number(store.number):null;
     if (expanded && zone === 'newmoon') {
       // Recessed bronze-edged coffers draw the eye along the product aisle.
       for (const z of [-2.5, -5.4, -8.3]) {
@@ -652,7 +676,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
       const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
-      const productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],expanded?[-10,0,-1.25]:null);
+      productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],expanded?[-10,0,-1.25]:null);
       shopLodUpdates.push(productDisplay.updateShopLods);
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -864,6 +888,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   interactables.push(...amenities.interactables);
   for (const batch of batches.values()) {
     const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
+    if (batch.colours) colourBatches.push({mesh, colours: batch.colours});
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
     mesh.castShadow = false; mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); mesh.userData.shopSlot=batch.shopSlot;mesh.userData.deckLod=batch.deckLod;
     if(batch.material===materials.glow)mesh.layers.enable(1);
@@ -874,7 +899,12 @@ export async function createWorld(T, R, physics, expanded = false) {
   const key = new T.DirectionalLight(expanded ? 0xffe0bc : 0xffd5a0, expanded ? 2.6 : 2.1); key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9])); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
   const fill = new T.DirectionalLight(expanded ? 0xcbdde5 : 0xe9d8c2, expanded ? .4 : .45); fill.position.set(4, 8, -5); scene.add(fill);
-  const applyMallTheme = theme => applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
+  refreshInstanceColours();
+  const applyMallTheme = theme => {
+    const applied = applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
+    if (applied) refreshInstanceColours();
+    return applied;
+  };
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();
   const signHUD = ['.site-header', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));
@@ -900,7 +930,8 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
   }
   let deckLodMeshes=null;
-  function updateShopLods(visitor) {
+  function updateShopLods(visitor, shadows = true) {
+    productDisplay?.setShadows(shadows);
     if(!expanded)return;
     const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
     for(const mesh of shopLodMeshes){
@@ -909,7 +940,9 @@ export async function createWorld(T, R, physics, expanded = false) {
       const x=(bay.minX+bay.maxX)/2;
       // The three occupied stores are visible through their north arcade doors.
       const z=Number(bay.number)<=3 ? Math.min(bay.maxZ,Math.max(bay.minZ,visitor.z)) : (bay.minZ+bay.maxZ)/2;
-      mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.z-z)<shopDistance;
+      // The viewing deck overlooks the shop roofs. Include the visitor's
+      // elevation when choosing which ground-floor interiors to draw.
+      mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.y,visitor.z-z)<shopDistance;
       mesh.visible=mesh.userData.shopLodNear;
       if (mesh.visible && !deckVisible) furnishings.loadShopDetails(mesh.userData.shopSlot);
     }

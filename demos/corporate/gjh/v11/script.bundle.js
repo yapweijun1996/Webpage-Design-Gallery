@@ -2553,11 +2553,18 @@ function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, re
 }
 function createAdaptiveQuality({ allowDetailed = false } = {}) {
   const tiers = ["low", "balanced", "detailed"];
-  let last = null, warmUntil = 0, start = 0, count = 0, slow = 0, slowTime = 0, fast = 0, busy = 0, goodWindows = 0, changedAt = -Infinity;
+  let last = null, warmUntil = 0, start = 0, count = 0, slow = 0, slowTime = 0, fast = 0, busy = 0, goodWindows = 0;
+  let changedAt = -Infinity, detailedFailures = 0, detailedRetryAt = -Infinity;
+  let trialStart = 0, trialCount = 0, trialSlow = 0, trialSlowTime = 0;
   function reset() {
     last = null;
     start = 0;
-    count = slow = slowTime = fast = busy = goodWindows = 0;
+    count = slow = slowTime = fast = busy = goodWindows = trialCount = trialSlow = trialSlowTime = 0;
+    trialStart = 0;
+  }
+  function backoffDetailed(now) {
+    detailedFailures++;
+    detailedRetryAt = now + 30000 * 2 ** Math.min(detailedFailures - 1, 2);
   }
   return {
     reset,
@@ -2576,6 +2583,25 @@ function createAdaptiveQuality({ allowDetailed = false } = {}) {
       if (elapsed <= 0) {
         reset();
         return null;
+      }
+      if (allowDetailed && tier === "detailed") {
+        if (!trialCount)
+          trialStart = now - elapsed;
+        trialCount++;
+        if (elapsed > 30) {
+          trialSlow++;
+          trialSlowTime += Math.min(elapsed, 1500);
+        }
+        if (now - trialStart >= 750) {
+          if (trialSlow >= 3 && (trialSlow / trialCount >= 0.2 || trialSlowTime / (now - trialStart) >= 0.5)) {
+            backoffDetailed(now);
+            changedAt = now;
+            reset();
+            return "balanced";
+          }
+          trialStart = 0;
+          trialCount = trialSlow = trialSlowTime = 0;
+        }
       }
       if (now < warmUntil)
         return null;
@@ -2598,8 +2624,11 @@ function createAdaptiveQuality({ allowDetailed = false } = {}) {
       start = 0;
       const index = tiers.indexOf(tier);
       const ceiling = allowDetailed ? 2 : 1;
-      const next = bad && index > 0 ? tiers[index - 1] : goodWindows >= 3 && now - changedAt >= 1e4 && index < ceiling ? tiers[index + 1] : null;
+      const next = bad && index > 0 ? tiers[index - 1] : goodWindows >= 3 && now - changedAt >= 1e4 && index < ceiling && (tier !== "balanced" || now >= detailedRetryAt) ? tiers[index + 1] : null;
       if (next) {
+        if (tier === "detailed" && next === "balanced") {
+          backoffDetailed(now);
+        }
         changedAt = now;
         reset();
         return next;
@@ -2612,7 +2641,7 @@ function createGraphicsQuality(onChange) {
   const select = document.getElementById("graphics-quality");
   const status = document.getElementById("graphics-quality-status");
   let preference = "auto", recovered = false, profile, autoTier = null;
-  const adaptive = createAdaptiveQuality();
+  const adaptive = createAdaptiveQuality({ allowDetailed: true });
   try {
     preference = qualityPreference(localStorage.getItem(QUALITY_KEY));
   } catch {}
@@ -2660,7 +2689,7 @@ function createGraphicsQuality(onChange) {
         autoTier
       });
       const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-      status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Softer image; less rendering work." : "Resolution follows the screen within a fixed limit."}${preference === "auto" && !recovered ? " Auto currently uses up to Balanced; choose Detailed manually." : ""} Downloads and products stay the same.`;
+      status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Softer image; less rendering work." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
       return profile;
     },
     get state() {
@@ -3519,7 +3548,7 @@ function render(force = false) {
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     shelfFocus?.update(camera, modes.current() === "shelf" || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
-    world.updateShopLods(pose);
+    world.updateShopLods(pose, renderer.shadowMap.enabled);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
     const draw = () => atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === "detailed" && renderWidth >= 1000, npcs);
@@ -3805,9 +3834,14 @@ function resize() {
   if (resized) {
     renderWidth = width;
     renderHeight = height;
-    player.camera.aspect = width / height;
-    player.camera.fov = width < 600 ? 68 : 58;
-    player.camera.updateProjectionMatrix();
+    const camera = player.camera;
+    camera.aspect = width / height;
+    camera.fov = width < 600 ? 68 : 58;
+    if (expanded && width < 600 && width < height) {
+      const portraitFov = 2 * Math.atan(Math.tan(Math.PI / 6) / camera.aspect) * 180 / Math.PI;
+      camera.fov = Math.min(100, Math.max(camera.fov, portraitFov));
+    }
+    camera.updateProjectionMatrix();
     if (shelfFocus?.open)
       shelfFocus.resize();
     else

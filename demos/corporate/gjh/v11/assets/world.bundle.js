@@ -601,7 +601,7 @@ function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider }) {
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/lift-layout.js
 var freeze = (value) => {
@@ -908,6 +908,50 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
 }
 
 // demos/corporate/gjh/v11/assets/deck-railings.js
+import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+function batchOpaqueRailings(T, primitives) {
+  const buckets = new Map, result = [], replaced = new Set;
+  for (const primitive of primitives) {
+    const { geometry, material } = primitive;
+    if (material.transparent || material.opacity < 1 || material.alphaTest > 0) {
+      result.push(primitive);
+      continue;
+    }
+    const signature = Object.entries(geometry.attributes).map(([name, attr]) => `${name}:${attr.itemSize}:${attr.normalized}:${attr.array.constructor.name}`).sort().join("|");
+    if (!buckets.has(material))
+      buckets.set(material, new Map);
+    const groups = buckets.get(material);
+    if (!groups.has(signature))
+      groups.set(signature, []);
+    groups.get(signature).push(primitive);
+  }
+  for (const [material, groups] of buckets)
+    for (const bucket of groups.values()) {
+      if (bucket.length === 1) {
+        result.push(bucket[0]);
+        continue;
+      }
+      const parts = bucket.map(({ geometry: geometry2, matrix }) => {
+        const part = geometry2.index ? geometry2.toNonIndexed() : geometry2.clone();
+        part.applyMatrix4(matrix);
+        return part;
+      });
+      const geometry = mergeGeometries2(parts);
+      parts.forEach((part) => part.dispose());
+      if (!geometry) {
+        result.push(...bucket);
+        continue;
+      }
+      geometry.computeBoundingSphere();
+      result.push({ geometry, material, matrix: new T.Matrix4 });
+      bucket.forEach((item) => replaced.add(item.geometry));
+    }
+  const retained = new Set(result.map((item) => item.geometry));
+  for (const geometry of replaced)
+    if (!retained.has(geometry))
+      geometry.dispose();
+  return result;
+}
 var sources = Object.freeze({
   bay1m: Object.freeze({ asset_id: "ASSET_MallGlass1m", file: "mall-glass-railing-1m.glb", sha256: "556cfc03f38a0cb0c21a125a318c5dc251976e18598f3d15f3e0979dc2dfd49d", dimensions_m: [1.1599999964237213, 1.1209999322891235, 0.1599999964237213], bounds_min: [-0.5799999982118607, 0, -0.07999999821186066], bounds_max: [0.5799999982118607, 1.1209999322891235, 0.07999999821186066] }),
   bay: Object.freeze({ asset_id: "ASSET_MallGlass2m", file: "mall-glass-railing-2m.glb", sha256: "037b734e7285961e93a75184f7aab28f4a20498fbac5639ed2cd0fab0958c6c5", dimensions_m: [2.1599999964237213, 1.1209999322891235, 0.1599999964237213], bounds_min: [-1.0799999982118607, 0, -0.07999999821186066], bounds_max: [1.0799999982118607, 1.1209999322891235, 0.07999999821186066] }),
@@ -919,6 +963,9 @@ async function createDeckRailings(T) {
   await Promise.all(Object.entries(sources).map(async ([kind, definition]) => {
     const rootExtras = { units: "metres", origin: "floor centre", centre_spacing_m: spacing[kind] };
     records[kind] = await loadStaticAsset(T, { ...definition, rootExtras }, import.meta.url);
+    records[kind].sourcePrimitiveCount = records[kind].primitives.length;
+    if (records[kind].status === "loaded")
+      records[kind].primitives = batchOpaqueRailings(T, records[kind].primitives);
   }));
   const placements = { bay1m: [], bay: [], post: [] };
   return {
@@ -947,7 +994,7 @@ async function createDeckRailings(T) {
           mesh.userData.deckLod = true;
           scene.add(mesh);
         }
-      return Object.freeze(Object.fromEntries(Object.entries(records).map(([kind, record]) => [kind, Object.freeze({ status: record.status, reason: record.reason, instances: placements[kind].length, primitives: record.primitives.length })])));
+      return Object.freeze(Object.fromEntries(Object.entries(records).map(([kind, record]) => [kind, Object.freeze({ status: record.status, reason: record.reason, instances: placements[kind].length, primitives: record.sourcePrimitiveCount })])));
     }
   };
 }
@@ -1808,7 +1855,7 @@ function addExpandedStorefronts(T, layout, scene) {
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
-import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/window-studios.js
 var cream = 15984077;
@@ -2871,12 +2918,12 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     const hero = new T.Group;
     hero.name = `S${slot2.number} hero display`;
     hero.userData.modelReady = !files;
-    const fixture2 = new T.Mesh(mergeGeometries2(fixtureParts), material);
+    const fixture2 = new T.Mesh(mergeGeometries3(fixtureParts), material);
     fixtureParts.forEach((part) => part.dispose());
     hero.add(fixture2);
     group.add(hero);
     let loadDisplay, display, loaded = false;
-    const fallback = new T.Mesh(mergeGeometries2(parts), material);
+    const fallback = new T.Mesh(mergeGeometries3(parts), material);
     parts.forEach((part) => part.dispose());
     fallback.name = `S${slot2.number} display fallback`;
     hero.add(fallback);
@@ -2974,7 +3021,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     });
   });
   for (const [wing, parts] of studioParts) {
-    const scenery = new T.Mesh(mergeGeometries2(parts), material);
+    const scenery = new T.Mesh(mergeGeometries3(parts), material);
     scenery.name = `Concourse window studios: ${wing}`;
     scene.add(scenery);
     for (const part of parts)
@@ -2982,7 +3029,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
   }
   const art = new T.CanvasTexture(atlas);
   art.colorSpace = T.SRGBColorSpace;
-  const pictures = new T.Mesh(mergeGeometries2(posterParts), new T.MeshBasicMaterial({ map: art }));
+  const pictures = new T.Mesh(mergeGeometries3(posterParts), new T.MeshBasicMaterial({ map: art }));
   pictures.name = "Concourse window artwork";
   scene.add(pictures);
   for (const part of posterParts)
@@ -3216,16 +3263,25 @@ async function createWorld(T, R, physics, expanded = false) {
         ceilingObstacles.push({ min: { x: r.minX, y: y - sy / 2, z: r.minZ }, max: { x: r.maxX, y: y + sy / 2, z: r.maxZ } });
       }
       return panels;
+    }, refreshInstanceColours = function() {
+      for (const { mesh, colours } of colourBatches) {
+        colours.forEach((colour, index) => mesh.setColorAt(index, colour));
+        mesh.instanceColor.needsUpdate = true;
+      }
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
-      const key2 = `${type}:${material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
+      const finish = finishForRole.get(material);
+      const key2 = `${type}:${finish || material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
       if (!batches.has(key2))
-        batches.set(key2, { geometry: geometry[type], material: materials[material], transforms: [], shopSlot: activeShopSlot, deckLod: activeDeck });
+        batches.set(key2, { geometry: geometry[type], material: finish ? finishMaterials[finish] : materials[material], transforms: [], shopSlot: activeShopSlot, deckLod: activeDeck, colours: finish ? [] : null });
+      const batch = batches.get(key2);
+      if (finish)
+        batch.colours.push(materials[material].color);
       position.set(x, y, z);
       scale.set(sx, sy, sz);
       euler.set(rx, ry, rz, order);
       quaternion.setFromEuler(euler);
       matrix.compose(position, quaternion, scale);
-      batches.get(key2).transforms.push(matrix.clone());
+      batch.transforms.push(matrix.clone());
     }, collider = function(x, y, z, sx, sy, sz) {
       return physics.createCollider(R.ColliderDesc.cuboid(sx / 2, sy / 2, sz / 2).setTranslation(x, y, z));
     }, box = function(m, x, y, z, sx, sy, sz, collision = false) {
@@ -3407,7 +3463,8 @@ async function createWorld(T, R, physics, expanded = false) {
           }
         mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
-    }, updateShopLods = function(visitor) {
+    }, updateShopLods = function(visitor, shadows = true) {
+      productDisplay?.setShadows(shadows);
       if (!expanded)
         return;
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
@@ -3417,7 +3474,7 @@ async function createWorld(T, R, physics, expanded = false) {
           continue;
         const x = (bay.minX + bay.maxX) / 2;
         const z = Number(bay.number) <= 3 ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
-        mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.z - z) < shopDistance;
+        mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.y, visitor.z - z) < shopDistance;
         mesh.visible = mesh.userData.shopLodNear;
         if (mesh.visible && !deckVisible)
           furnishings.loadShopDetails(mesh.userData.shopSlot);
@@ -3520,11 +3577,25 @@ async function createWorld(T, R, physics, expanded = false) {
     };
     const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
     doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
-    const doorFrameGeometry = mergeGeometries3(doorFrameParts);
+    const doorFrameGeometry = mergeGeometries4(doorFrameParts);
     doorFrameParts.forEach((part) => part.dispose());
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
+    const finishForRole = new Map;
+    const finishMaterials = {}, colourBatches = [];
+    if (expanded) {
+      for (const [finish, roles] of Object.entries({
+        matte: ["green", "dark", "ivory", "cream", "foliage", "leaf", "pot", "seat"],
+        woodGrain: ["wood", "oak", "timber", "timberAlt"]
+      })) {
+        const base = materials[roles[0]].clone();
+        base.color.set(16777215);
+        finishMaterials[finish] = base;
+        for (const role of roles)
+          finishForRole.set(role, finish);
+      }
+    }
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
-    let activeShopSlot = null, activeDeck = false, railingState = null, interiorModels = null;
+    let activeShopSlot = null, activeDeck = false, railingState = null, interiorModels = null, productDisplay = null;
     const tagShopLod = (mesh) => {
       if (expanded && activeShopSlot !== null) {
         mesh.userData.shopSlot = activeShopSlot;
@@ -3807,8 +3878,8 @@ async function createWorld(T, R, physics, expanded = false) {
         box("dark", x, 4.7, 0, 9.7, 1.55, 0.5, true);
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
       }
-      activeShopSlot = expanded ? Number(store.number) : null;
       box("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4);
+      activeShopSlot = expanded ? Number(store.number) : null;
       if (expanded && zone === "newmoon") {
         for (const z of [-2.5, -5.4, -8.3]) {
           box("ivory", x, 5.63, z, 7.9, 0.12, 2.35);
@@ -3991,7 +4062,7 @@ async function createWorld(T, R, physics, expanded = false) {
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
-        const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
+        productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
         shopLodUpdates.push(productDisplay.updateShopLods);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
@@ -4234,6 +4305,8 @@ async function createWorld(T, R, physics, expanded = false) {
     interactables.push(...amenities.interactables);
     for (const batch of batches.values()) {
       const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
+      if (batch.colours)
+        colourBatches.push({ mesh, colours: batch.colours });
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
       mesh.castShadow = false;
       mesh.receiveShadow = batch.material !== materials.lightPool;
@@ -4259,7 +4332,13 @@ async function createWorld(T, R, physics, expanded = false) {
     const fill = new T.DirectionalLight(expanded ? 13360613 : 15325378, expanded ? 0.4 : 0.45);
     fill.position.set(4, 8, -5);
     scene.add(fill);
-    const applyMallTheme = (theme) => applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill });
+    refreshInstanceColours();
+    const applyMallTheme = (theme) => {
+      const applied = applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill });
+      if (applied)
+        refreshInstanceColours();
+      return applied;
+    };
     sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);
     const signPoint = new T.Vector3;
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));

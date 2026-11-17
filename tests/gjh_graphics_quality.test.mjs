@@ -53,8 +53,10 @@ test('Auto trials Detailed only after sustained 60/120 Hz and rolls back sustain
     assert.equal(short.tier,'balanced');
     const fast=sampleFor(controller,short.tier,interval,3000,short.now);
     assert.equal(fast.tier,'detailed'); assert.equal(fast.changes.length,1);
-    const slow=sampleFor(controller,fast.tier,1000/30,8000,fast.now);
+    const slow=sampleFor(controller,fast.tier,1000/30,2000,fast.now);
     assert.equal(slow.tier,'balanced'); assert.equal(slow.changes.length,1);
+    const sustained=sampleFor(controller,slow.tier,1000/30,8000,slow.now);
+    assert.equal(sustained.tier,'low');
   }
 });
 
@@ -137,14 +139,14 @@ test('manual preferences and recovered mode never adapt or rewrite storage', () 
     Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
     Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>saved,setItem:(key,value)=>{saved=value;writes++;}}});
     quality=createGraphicsQuality(()=>{callbacks++;quality.resolve(1440);}); quality.resolve(1440);
-    assert.match(status.textContent,/Auto currently uses up to Balanced/);
+    assert.match(status.textContent,/Auto: Balanced/);
     // Ineligible frames model hidden, blurred, modal and interrupted states.
     for(let now=0;now<20000;now+=1000/30) quality.sample(now,false,true);
     assert.equal(quality.state.tier,'balanced'); assert.equal(callbacks,0); assert.equal(writes,0);
     for(let now=20000;now<28000;now+=1000/30) quality.sample(now,true,true);
     assert.equal(quality.state.tier,'low'); assert.equal(saved,'auto'); assert.equal(writes,0); assert.equal(callbacks,1);
     select.value='detailed'; listener(); assert.equal(saved,'detailed'); assert.equal(writes,1);
-    assert.doesNotMatch(status.textContent,/Auto currently uses up to Balanced/);
+    assert.match(status.textContent,/Detailed/);
     for(let now=28000;now<68000;now+=1000/30) quality.sample(now,true,true);
     assert.equal(quality.state.tier,'detailed'); assert.equal(callbacks,2); assert.equal(writes,1);
     quality.recover();quality.resolve(1440);
@@ -153,4 +155,51 @@ test('manual preferences and recovered mode never adapt or rewrite storage', () 
   } finally {
     for(const key of keys) if(originals[key]) Object.defineProperty(globalThis,key,originals[key]); else delete globalThis[key];
   }
+});
+
+test('failed Detailed trials roll back promptly and back off repeated retries', () => {
+  const controller=createAdaptiveQuality({allowDetailed:true});
+  let result=sampleFor(controller,'balanced',1000/60,16000);
+  assert.equal(result.tier,'detailed');
+  let start=result.now;
+  result=sampleFor(controller,result.tier,40,2200,result.now);
+  assert.equal(result.tier,'balanced');assert.ok(result.changes[0].at-start<2000);
+  controller.reset(); // Interruptions clear samples, but retain the retry cooldown.
+  result=sampleFor(controller,result.tier,1000/60,28000,result.now);assert.equal(result.tier,'balanced');
+  result=sampleFor(controller,result.tier,1000/60,6000,result.now);assert.equal(result.tier,'detailed');
+  start=result.now;result=sampleFor(controller,result.tier,40,2200,result.now);
+  assert.equal(result.tier,'balanced');assert.ok(result.changes[0].at-start<2000);
+  result=sampleFor(controller,result.tier,1000/60,57000,result.now);assert.equal(result.tier,'balanced');
+  result=sampleFor(controller,result.tier,1000/60,7000,result.now);assert.equal(result.tier,'detailed');
+});
+
+test('one long Detailed frame does not trigger an emergency rollback', () => {
+  const controller=createAdaptiveQuality({allowDetailed:true});
+  let result=sampleFor(controller,'balanced',1000/60,16000);
+  assert.equal(result.tier,'detailed');
+  assert.equal(controller.sample(result.now+1300,true,result.tier,true),null);
+  assert.equal(controller.sample(result.now+1316.7,true,result.tier,true),null);
+  result=sampleFor(controller,result.tier,1000/60,4000,result.now+1316.7);
+  assert.equal(result.tier,'detailed');
+});
+
+test('production Auto trials Detailed after sustained moving frames and leaves preferences alone', () => {
+  const keys=['document','window','navigator','localStorage'];
+  const originals=Object.fromEntries(keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
+  let saved='auto',writes=0,quality;
+  const select={value:'',addEventListener(){}};const status={textContent:''};
+  try {
+    Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>id==='graphics-quality'?select:status}});
+    Object.defineProperty(globalThis,'window',{configurable:true,value:{devicePixelRatio:2}});
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
+    Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>saved,setItem:()=>{writes++;}}});
+    quality=createGraphicsQuality(()=>quality.resolve(1440));quality.resolve(1440);
+    for(let now=0;now<25000;now+=1000/60)quality.sample(now,true,false);
+    assert.equal(quality.state.tier,'balanced');
+    for(let now=25000;now<43000;now+=1000/60)quality.sample(now,true,true);
+    assert.equal(quality.state.tier,'detailed');assert.equal(quality.state.shadows,true);assert.match(status.textContent,/Auto: Detailed/);
+    assert.equal(saved,'auto');assert.equal(writes,0);
+    for(let now=43000;now<45500;now+=40)quality.sample(now,true,true);
+    assert.equal(quality.state.tier,'balanced');assert.equal(saved,'auto');assert.equal(writes,0);
+  } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
 });
