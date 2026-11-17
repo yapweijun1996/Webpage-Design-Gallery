@@ -26,6 +26,10 @@ Use reviewed assets from [Blender-3D-Gallery](https://github.com/yapweijun1996/B
 
 The expanded 17-lot storefront design is tracked in [the shop-lot design matrix](docs/gjh-v11-shop-lot-design.md). The owner-authorized concept direction uses the supplied logo and brand name on each sign, glazed storefronts with visible non-walkable displays, accurate hero-product scale where evidence supports it, and generic stand-ins where products/models are unverified. This design work does not establish tenancy, distribution, product availability, brand authorization or medical benefits.
 
+## Brand storefront and atrium pass
+
+Expanded-layout fascia, brand-colour entrances, a conceptual GJH feature kiosk and warmer low-cost atrium finishes are described in [the brand/interior notes](docs/gjh-v11-brand-interior.md). Physical-device visual acceptance and real-world brand authorization remain separate.
+
 ## Upper-level viewing deck — brand wall
 
 Design and implementation are tracked in [the upper-deck brand-wall brief](docs/gjh-v11-upper-deck-brand-wall.md). Add a 12 × 12 m viewing deck at +7.2 m with an atrium glass railing, a few benches and planters, and one gallery wall of 17 small brand plaques. Reuse validated local furniture/railing assets only. Build plaque art as one atlas; keep the expanded default and deck views at <=190 draw calls without changing startup cost. The independent-concept footer stays; no prices or medical claims. Keep S03, S05 and S11 neutral. Correct only expanded-layout “three stores” copy; classic retains its three-store wording.

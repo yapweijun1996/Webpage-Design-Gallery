@@ -8,6 +8,7 @@ import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
 import {expandedLayout, expandedMapPoint, plannedSpaces} from './expanded-layout.js';
 import {liftLayout} from './lift-layout.js';
 import {icon} from './icons.js';
+import {FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD} from './feature-kiosk.js';
 
 
 const plannedSideLabels = Object.freeze({north: 'North side', west: 'West side', east: 'East side'});
@@ -370,6 +371,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   }
   cartToggle.addEventListener('click',toggleCart);sceneCart.addEventListener('click',toggleCart);
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
+  records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
   const zones = { atrium: 'Courtyard', ...Object.fromEntries(spatial.stores.map(store=>[store.id,store.label])), upper: 'Upper level' };
   let available = false;

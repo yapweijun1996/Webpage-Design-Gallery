@@ -957,26 +957,36 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/shop-signs.js
-var SHOPS = Object.freeze([
-  ["New Moon", "S01-new-moon.webp"],
-  ["MILI", "S02-mili.webp"],
-  ["GOGO", "S03-gogo.webp"],
-  ["Borsch Med", "S04-borsch-med.webp"],
-  ["Pien Tze Huang", "S05-pien-tze-huang.webp"],
-  ["Flying Wheel", "S06-flying-wheel.webp"],
-  ["Gu Long", "S07-gu-long.webp"],
-  ["Skippy", "S08-skippy.webp"],
-  ["SPAM", "S09-spam.webp"],
-  ["California Mexico", "S10-california-mexico.webp"],
-  ["Hormel", "S11-hormel.webp"],
-  ["Zeria", "S12-zeria.webp"],
-  ["Sony", "S13-sony.webp"],
-  ["LG", "S14-lg.webp"],
-  ["Casio", "S15-casio.webp"],
-  ["GP", "S16-gp.webp"],
-  ["Gigaset", "S17-gigaset.webp"]
-]);
-var SLOT_COUNT = 17;
+var LOGOS = [
+  "S01-new-moon.webp",
+  "S02-mili.webp",
+  "S03-gogo.webp",
+  "S04-borsch-med.webp",
+  "S05-pien-tze-huang.webp",
+  "S06-flying-wheel.webp",
+  "S07-gu-long.webp",
+  "S08-skippy.webp",
+  "S09-spam.webp",
+  "S10-california-mexico.webp",
+  "S11-hormel.webp",
+  "S12-zeria.webp",
+  "S13-sony.webp",
+  "S14-lg.webp",
+  "S15-casio.webp",
+  "S16-gp.webp",
+  "S17-gigaset.webp"
+];
+var SLOT_COUNT = LOGOS.length;
+var brandKitPromise;
+function loadBrandKit() {
+  if (!brandKitPromise)
+    brandKitPromise = fetch(new URL("./brand-kit/brand-kit.json", import.meta.url)).then((response) => {
+      if (!response.ok)
+        throw new Error("Brand-kit metadata unavailable");
+      return response.json();
+    });
+  return brandKitPromise;
+}
 function loadImage(url) {
   return new Promise((resolve) => {
     const image = new Image;
@@ -991,40 +1001,38 @@ async function addShopSignAtlas(T, layout, scene) {
   canvas.width = width;
   canvas.height = rowHeight * SLOT_COUNT;
   const context = canvas.getContext("2d");
-  const logos = await Promise.all(SHOPS.map(([, file]) => loadImage(new URL(`./brands/${file}`, import.meta.url).href)));
-  SHOPS.forEach(([name], index) => {
+  const [kit, logos] = await Promise.all([
+    loadBrandKit(),
+    Promise.all(LOGOS.map((file) => loadImage(new URL(`./brands/${file}`, import.meta.url).href)))
+  ]);
+  LOGOS.forEach((_, index) => {
+    const name = kit[`S${String(index + 1).padStart(2, "0")}`].brand;
     const y = index * rowHeight;
-    context.fillStyle = "#102e26";
+    context.fillStyle = "#09271d";
     context.fillRect(0, y, width, rowHeight);
     context.strokeStyle = "#d0b36e";
-    context.lineWidth = 8;
-    context.strokeRect(8, y + 8, width - 16, rowHeight - 16);
-    if (index === 0) {
-      context.fillStyle = "#b53a32";
-      context.fillRect(16, y + rowHeight - 10, width - 32, 4);
-    }
+    context.lineWidth = 5;
+    context.strokeRect(4, y + 4, width - 8, rowHeight - 8);
     const logo = logos[index];
     if (logo) {
-      const maxLogoWidth = 380, maxLogoHeight = 80;
+      const maxLogoWidth = 270, maxLogoHeight = 90;
       const scale = Math.min(maxLogoWidth / logo.width, maxLogoHeight / logo.height);
       const logoWidth = logo.width * scale, logoHeight = logo.height * scale;
-      context.drawImage(logo, 32 + (maxLogoWidth - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
+      context.drawImage(logo, 18 + (maxLogoWidth - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
     }
-    context.fillStyle = "#fff4dd";
-    context.font = "bold 44px Arial";
-    context.textAlign = "center";
+    context.fillStyle = "#fff9e9";
+    context.font = "bold 72px Arial";
+    context.textAlign = "left";
     context.textBaseline = "middle";
-    context.fillText(name, 980, y + rowHeight / 2, 960);
+    context.fillText(name, 315, y + rowHeight / 2, width - 340);
   });
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;
   const positions = [], uvs = [], indices = [];
   layout.slots.forEach((bay) => {
-    if (bay.available)
-      return;
     const index = Number(bay.number) - 1;
     const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX + 0.27 : bay.minX - 0.27;
-    const z = bay.side === "north" ? 0.26 : (bay.minZ + bay.maxZ) / 2;
+    const z = bay.side === "north" ? bay.available ? 0.48 : 0.26 : (bay.minZ + bay.maxZ) / 2;
     const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
     const widthOnWall = bay.side === "north" ? 8.6 : 6.8;
     const height = 1.18, cos = Math.cos(angle), sin = Math.sin(angle);
@@ -1034,7 +1042,7 @@ async function addShopSignAtlas(T, layout, scene) {
       [widthOnWall / 2, height / 2],
       [-widthOnWall / 2, height / 2]
     ]) {
-      positions.push(x + dx * cos, 4.35 + dy, z - dx * sin);
+      positions.push(x + dx * cos, 4.75 + dy, z - dx * sin);
     }
     const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
     uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
@@ -1058,6 +1066,7 @@ function addExpandedStorefronts(T, layout, scene) {
   const batches = {
     frame: { material: new T.MeshStandardMaterial({ color: 1656373, roughness: 0.66 }), matrices: [] },
     brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.65, roughness: 0.38 }), matrices: [] },
+    accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
     glass: { material: new T.MeshStandardMaterial({
       color: 12179920,
       metalness: 0.05,
@@ -1069,8 +1078,7 @@ function addExpandedStorefronts(T, layout, scene) {
   };
   const transform = new T.Object3D;
   for (const bay of layout.slots) {
-    if (bay.available)
-      continue;
+    const number = Number(bay.number);
     const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
     const cos = Math.cos(angle), sin = Math.sin(angle);
     const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX : bay.minX;
@@ -1082,18 +1090,31 @@ function addExpandedStorefronts(T, layout, scene) {
       transform.scale.set(w, h, d);
       transform.updateMatrix();
       batches[kind].matrices.push(transform.matrix.clone());
+      if (kind === "accent")
+        batches.accent.slots.push(bay.number);
     };
+    if (bay.available) {
+      box("accent", 0, 5.55, 0.32, width, 0.14, 0.24);
+      for (const side of [-1, 1]) {
+        box("accent", side * 2.47, 1.95, 0.21, 0.12, 3.7, 0.08);
+      }
+      continue;
+    }
     const windowWidth = (width - 2.7) / 2;
     const windowCenter = 1.3 + windowWidth / 2;
     box("frame", 0, 4.75, 0, width, 1.5, 0.36);
     box("brass", 0, 4.02, 0.21, width, 0.055, 0.08);
     box("brass", 0, 5.48, 0.21, width, 0.055, 0.08);
+    box("accent", 0, 5.55, 0.24, width, 0.14, 0.42);
+    box("accent", 0, 3.9, 0.22, 2.65, 0.13, 0.12);
     for (const side of [-1, 1]) {
       box("glass", side * windowCenter, 2.17, 0, windowWidth, 3.35, 0.06);
       box("frame", side * windowCenter, 0.25, 0.07, windowWidth, 0.5, 0.22);
       box("brass", side * windowCenter, 0.51, 0.2, windowWidth, 0.045, 0.05);
       box("frame", side * (width / 2 - 0.07), 2.02, 0.08, 0.14, 4.04, 0.24);
       box("frame", side * 1.3, 2.02, 0.08, 0.12, 4.04, 0.24);
+      box("accent", side * 1.3, 2.02, 0.22, 0.09, 3.72, 0.06);
+      box("accent", side * (width / 2 - 0.35), 3.69, 0.22, number % 2 ? 0.18 : 0.38, 0.32, 0.08);
       box("brass", side * windowCenter, 2.4, 0.12, windowWidth, 0.035, 0.05);
       box("glass", side * 0.64, 1.97, 0.025, 1.2, 3.86, 0.06);
       box("frame", side * 0.64, 0.12, 0.09, 1.2, 0.24, 0.18);
@@ -1108,6 +1129,17 @@ function addExpandedStorefronts(T, layout, scene) {
       continue;
     const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
     batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
+    if (batch.slots) {
+      const paletteIndex = [0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1];
+      loadBrandKit().then((kit) => {
+        const color = new T.Color;
+        batch.slots.forEach((slot2, index) => {
+          color.set(kit[`S${slot2}`].palette[paletteIndex[Number(slot2) - 1]].hex);
+          mesh.setColorAt(index, color);
+        });
+        mesh.instanceColor.needsUpdate = true;
+      }).catch((error) => console.warn("Storefront accent colours unavailable:", error));
+    }
     mesh.name = `Expanded storefront ${kind}`;
     mesh.receiveShadow = kind !== "glass";
     mesh.computeBoundingSphere();
@@ -1437,6 +1469,40 @@ function createSeatAnchor(placement, collider) {
   };
 }
 
+// demos/corporate/gjh/v11/assets/feature-kiosk.js
+var FEATURE_KIOSK_ID = "gjh-feature-kiosk";
+var FEATURE_KIOSK_RECORD = Object.freeze({
+  name: "GJH Premium Selection",
+  brand: "GJH",
+  tagline: "Premium Selection",
+  story: "Explore the GJH Premium Selection, a conceptual feature display for this virtual mall. The gift boxes and tins shown here are illustrative, not actual products.",
+  image: "assets/gjh-logo.png",
+  alt: "GJH logo",
+  kind: "Feature display · independent virtual mall concept",
+  action: "brand-story"
+});
+function addFeatureKiosk({ x, z, box, cylinder, sign }) {
+  box("dark", x, 0.48, z, 1.75, 0.96, 1.35);
+  box("brass", x, 0.08, z, 1.78, 0.06, 1.38);
+  box("glow", x, 0.87, z + 0.69, 1.65, 0.035, 0.025);
+  box("brass", x, 0.96, z, 1.8, 0.06, 1.4);
+  box("ivory", x, 1.01, z, 1.72, 0.06, 1.32);
+  box("jade", x - 0.23, 1.17, z, 0.31, 0.26, 0.28);
+  box("brass", x - 0.23, 1.305, z, 0.32, 0.018, 0.29);
+  box("cream", x + 0.19, 1.14, z + 0.05, 0.26, 0.2, 0.25);
+  box("brass", x + 0.19, 1.245, z + 0.05, 0.27, 0.018, 0.26);
+  cylinder("jadeAlt", x + 0.18, 1.38, z - 0.19, 0.12, 0.34);
+  cylinder("brass", x + 0.18, 1.555, z - 0.19, 0.125, 0.025);
+  cylinder("ivory", x - 0.1, 1.41, z - 0.23, 0.1, 0.27);
+  cylinder("brass", x - 0.1, 1.55, z - 0.23, 0.105, 0.02);
+  box("dark", x, 1.85, z - 0.48, 1.55, 0.65, 0.08);
+  box("brass", x, 2.19, z - 0.48, 1.6, 0.025, 0.1);
+  box("glow", x, 1.54, z - 0.42, 1.42, 0.025, 0.025);
+  sign("GJH", x, 1.98, z - 0.425, 1.35, 0.2, false, 105);
+  sign("PREMIUM SELECTION", x, 1.73, z - 0.425, 1.35, 0.17, false, 55);
+  return { id: FEATURE_KIOSK_ID, x, z, floor: 0, radius: 1.8 };
+}
+
 // demos/corporate/gjh/v11/assets/world.js
 function applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
@@ -1696,8 +1762,8 @@ async function createWorld(T, R, physics, expanded = false) {
         const natural = module.createNaturalSurfaceTextures(T);
         if (natural.stone) {
           materials.shellFloor.map = natural.stone;
-          materials.shellFloor.color.set(13947078);
-          materials.shellFloor.roughness = 0.58;
+          materials.shellFloor.color.set(15260614);
+          materials.shellFloor.roughness = 0.38;
         }
         if (natural.wood)
           for (const name of ["wood", "oak", "timber", "timberAlt"])
@@ -1706,7 +1772,7 @@ async function createWorld(T, R, physics, expanded = false) {
         clearTimeout(timer);
       }
       if (!materials.shellFloor.map)
-        materials.shellFloor.color.set(11184028);
+        materials.shellFloor.color.set(14338222);
       materials.shellCeiling.color.set(15788249);
       materials.shellCeiling.emissive.set(11772550);
       materials.shellCeiling.emissiveIntensity = 0.55;
@@ -1878,9 +1944,9 @@ async function createWorld(T, R, physics, expanded = false) {
       for (let i = 0;i < 13; i++) {
         const x = garden.x - 3.45 + i * 0.575, z = garden.z + (i % 3 - 1) * 0.65;
         sphere("foliage", x, 0.57, z, 0.28, 0.14, 0.23);
-        for (let leaf = 0;leaf < 5; leaf++) {
-          const angle = leaf * Math.PI * 2 / 5 + i % 3 * 0.2;
-          solid("sphere", leaf % 2 ? "leaf" : "foliage", x + Math.sin(angle) * 0.15, 0.7, z + Math.cos(angle) * 0.15, 0.085, i % 4 === 0 ? 0.34 : 0.27, 0.055, angle, 0.72, "YXZ");
+        for (let leaf = 0;leaf < 8; leaf++) {
+          const angle = leaf * Math.PI * 2 / 8 + i % 3 * 0.2;
+          solid("sphere", leaf % 2 ? "leaf" : "foliage", x + Math.sin(angle) * 0.2, 0.72, z + Math.cos(angle) * 0.2, 0.1, i % 4 === 0 ? 0.38 : 0.3, 0.065, angle, 0.72, "YXZ");
         }
       }
       for (const lounge2 of atriumLayout.lounges) {
@@ -1900,10 +1966,11 @@ async function createWorld(T, R, physics, expanded = false) {
         for (const planter of lounge2.planters) {
           box("pot", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
           box("wood", planter.x, 0.61, planter.z, 0.6, 0.025, 0.6);
-          for (let i = 0;i < 5; i++) {
-            const a = i * Math.PI * 2 / 5;
+          for (let i = 0;i < 9; i++) {
+            const a = i * Math.PI * 2 / 9;
             solid("sphere", i % 2 ? "leaf" : "foliage", planter.x + Math.sin(a) * 0.12, 0.8, planter.z + Math.cos(a) * 0.12, 0.08, 0.27, 0.05, a, 0.72, "YXZ");
           }
+          lightPool(planter.x, 0.024, planter.z, 2.2, 2.2);
         }
         for (const z of [22, 26]) {
           box("glow", lounge2.x, 8.34, z, 4, 0.035, 0.065);
@@ -1943,6 +2010,11 @@ async function createWorld(T, R, physics, expanded = false) {
       box("ivory", -11, 0.18, 14, 3.1, 0.36, 2.8, true);
     }
     const doors = [], interactables = [];
+    if (expanded) {
+      interactables.push(addFeatureKiosk({ x: 10, z: 20, box, cylinder, sign }));
+      collider(10, 0.5, 20, 1.8, 1, 1.4);
+      lightPool(10, 0.054, 20, 4, 4);
+    }
     let createCollectProp = () => null, reserveProduct = () => null, staticProductCount = 0;
     let worldProductAssets = Object.freeze({ status: "not-loaded" }), shelves = [];
     const directory = expanded ? liftLayout.directory : { x: -5.3, z: 10.4 };
@@ -2202,6 +2274,13 @@ async function createWorld(T, R, physics, expanded = false) {
           warmStrip(x, z, 0.07, 6);
       for (const x of [-5, 10, 25])
         warmStrip(x, 3, 6, 0.07);
+      for (const x of [-9, 29])
+        warmStrip(x, 20, 0.09, 27);
+      for (const z of [6.5, 33.5])
+        warmStrip(10, z, 38, 0.09);
+      for (const radius of [2.2, 3.2])
+        solid("torus", "glow", 10, 8.05, 20, radius, radius, 0.8, 0, -Math.PI / 2);
+      lightPool(10, 0.053, 20, 8, 8);
       box("ivory", 25, 1.5, 10, 6, 3, 4, true);
       const facility = sign("FUTURE FACILITIES", 28.07, 2, 10, 2.5, 0.35, true, 60);
       facility.rotation.y = Math.PI / 2;

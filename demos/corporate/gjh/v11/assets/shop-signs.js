@@ -1,12 +1,19 @@
-const SHOPS = Object.freeze([
-  ['New Moon', 'S01-new-moon.webp'], ['MILI', 'S02-mili.webp'], ['GOGO', 'S03-gogo.webp'],
-  ['Borsch Med', 'S04-borsch-med.webp'], ['Pien Tze Huang', 'S05-pien-tze-huang.webp'],
-  ['Flying Wheel', 'S06-flying-wheel.webp'], ['Gu Long', 'S07-gu-long.webp'], ['Skippy', 'S08-skippy.webp'],
-  ['SPAM', 'S09-spam.webp'], ['California Mexico', 'S10-california-mexico.webp'], ['Hormel', 'S11-hormel.webp'],
-  ['Zeria', 'S12-zeria.webp'], ['Sony', 'S13-sony.webp'], ['LG', 'S14-lg.webp'], ['Casio', 'S15-casio.webp'],
-  ['GP', 'S16-gp.webp'], ['Gigaset', 'S17-gigaset.webp'],
-]);
-const SLOT_COUNT = 17;
+const LOGOS = [
+  'S01-new-moon.webp', 'S02-mili.webp', 'S03-gogo.webp', 'S04-borsch-med.webp',
+  'S05-pien-tze-huang.webp', 'S06-flying-wheel.webp', 'S07-gu-long.webp', 'S08-skippy.webp',
+  'S09-spam.webp', 'S10-california-mexico.webp', 'S11-hormel.webp', 'S12-zeria.webp',
+  'S13-sony.webp', 'S14-lg.webp', 'S15-casio.webp', 'S16-gp.webp', 'S17-gigaset.webp'
+];
+const SLOT_COUNT = LOGOS.length;
+let brandKitPromise;
+export function loadBrandKit() {
+  if (!brandKitPromise) brandKitPromise = fetch(new URL('./brand-kit/brand-kit.json', import.meta.url))
+    .then(response => {
+      if (!response.ok) throw new Error('Brand-kit metadata unavailable');
+      return response.json();
+    });
+  return brandKitPromise;
+}
 
 function loadImage(url) {
   return new Promise(resolve => {
@@ -22,31 +29,33 @@ export async function addShopSignAtlas(T, layout, scene) {
   const canvas = document.createElement('canvas');
   canvas.width = width; canvas.height = rowHeight * SLOT_COUNT;
   const context = canvas.getContext('2d');
-  const logos = await Promise.all(SHOPS.map(([, file]) => loadImage(new URL(`./brands/${file}`, import.meta.url).href)));
-  SHOPS.forEach(([name], index) => {
+  const [kit, logos] = await Promise.all([
+    loadBrandKit(),
+    Promise.all(LOGOS.map(file => loadImage(new URL(`./brands/${file}`, import.meta.url).href)))
+  ]);
+  LOGOS.forEach((_, index) => {
+    const name = kit[`S${String(index + 1).padStart(2, '0')}`].brand;
     const y = index * rowHeight;
-    context.fillStyle = '#102e26'; context.fillRect(0, y, width, rowHeight);
-    context.strokeStyle = '#d0b36e'; context.lineWidth = 8; context.strokeRect(8, y + 8, width - 16, rowHeight - 16);
-    if(index===0){context.fillStyle='#b53a32';context.fillRect(16,y+rowHeight-10,width-32,4);}
+    context.fillStyle = '#09271d'; context.fillRect(0, y, width, rowHeight);
+    context.strokeStyle = '#d0b36e'; context.lineWidth = 5; context.strokeRect(4, y + 4, width - 8, rowHeight - 8);
     const logo = logos[index];
     if (logo) {
-      const maxLogoWidth = 380, maxLogoHeight = 80;
+      const maxLogoWidth = 270, maxLogoHeight = 90;
       const scale = Math.min(maxLogoWidth / logo.width, maxLogoHeight / logo.height);
       const logoWidth = logo.width * scale, logoHeight = logo.height * scale;
-      context.drawImage(logo, 32 + (maxLogoWidth - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
+      context.drawImage(logo, 18 + (maxLogoWidth - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
     }
-    context.fillStyle = '#fff4dd'; context.font = 'bold 44px Arial';
-    context.textAlign = 'center'; context.textBaseline = 'middle';
-    context.fillText(name, 980, y + rowHeight / 2, 960);
+    context.fillStyle = '#fff9e9'; context.font = 'bold 72px Arial';
+    context.textAlign = 'left'; context.textBaseline = 'middle';
+    context.fillText(name, 315, y + rowHeight / 2, width - 340);
   });
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;
   const positions = [], uvs = [], indices = [];
   layout.slots.forEach(bay => {
-    if (bay.available) return;
     const index = Number(bay.number) - 1;
     const x = bay.side === 'north' ? (bay.minX + bay.maxX) / 2 : bay.side === 'west' ? bay.maxX + .27 : bay.minX - .27;
-    const z = bay.side === 'north' ? .26 : (bay.minZ + bay.maxZ) / 2;
+    const z = bay.side === 'north' ? (bay.available ? .48 : .26) : (bay.minZ + bay.maxZ) / 2;
     // Keep the atlas face toward the approach; DoubleSide alone would mirror the
     // lettering when a visitor sees the back of a reversed quad.
     const angle = bay.side === 'north' ? 0 : bay.side === 'west' ? Math.PI / 2 : -Math.PI / 2;
@@ -54,7 +63,7 @@ export async function addShopSignAtlas(T, layout, scene) {
     const height = 1.18, cos = Math.cos(angle), sin = Math.sin(angle);
     for (const [dx, dy] of [[-widthOnWall / 2, -height / 2], [widthOnWall / 2, -height / 2],
       [widthOnWall / 2, height / 2], [-widthOnWall / 2, height / 2]]) {
-      positions.push(x + dx * cos, 4.35 + dy, z - dx * sin);
+      positions.push(x + dx * cos, 4.75 + dy, z - dx * sin);
     }
     const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
     uvs.push(0, bottom, 1, bottom, 1, top, 0, top);

@@ -16,7 +16,12 @@ export function createNaturalSurfaceTextures(T, makeCanvas = () => document.crea
   }
   try {
     const stone = canvas(), sc = stone.context;
-    sc.fillStyle = '#e8e1d2'; sc.fillRect(0, 0, 256, 256);
+    sc.fillStyle = '#eadccb'; sc.fillRect(0, 0, 256, 256);
+    // Broad, translucent bands suggest a baked sheen without reflection passes.
+    for (let i = 0; i < 16; i++) {
+      sc.fillStyle = `rgba(255,250,239,${.13 * (1 - Math.abs(i - 7.5) / 8)})`;
+      sc.fillRect(i * 16, 0, 16, 256);
+    }
     // Veins remain understated so repeated two-metre slabs read as stone,
     // rather than a high-contrast wallpaper or artificial checkerboard.
     for (let i = 0; i < 10; i++) {

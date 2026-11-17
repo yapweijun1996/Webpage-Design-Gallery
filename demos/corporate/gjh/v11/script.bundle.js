@@ -962,6 +962,19 @@ var expandedMapPoint = (x, z) => ({
   y: Math.max(0, Math.min(600, (z + 12) * 10))
 });
 
+// demos/corporate/gjh/v11/assets/feature-kiosk.js
+var FEATURE_KIOSK_ID = "gjh-feature-kiosk";
+var FEATURE_KIOSK_RECORD = Object.freeze({
+  name: "GJH Premium Selection",
+  brand: "GJH",
+  tagline: "Premium Selection",
+  story: "Explore the GJH Premium Selection, a conceptual feature display for this virtual mall. The gift boxes and tins shown here are illustrative, not actual products.",
+  image: "assets/gjh-logo.png",
+  alt: "GJH logo",
+  kind: "Feature display · independent virtual mall concept",
+  action: "brand-story"
+});
+
 // demos/corporate/gjh/v11/assets/ui.js
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var plannedSideLabels = Object.freeze({ north: "North side", west: "West side", east: "East side" });
@@ -1482,6 +1495,7 @@ function createUI(expanded = false) {
   cartToggle.addEventListener("click", toggleCart);
   sceneCart.addEventListener("click", toggleCart);
   const records = new Map([["courtyard-seat", { name: "Courtyard bench", action: "seat" }], ["mall-directory", { name: "Directory kiosk · Decorative screen", action: "map" }]]);
+  records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for (const [id, name] of [["service-desk", "Guest services"], ["wayfinding-west", "Store directions"], ["wayfinding-east", "Store directions"], ["featured-showcase", "New Moon featured collection"]])
     records.set(id, { name, action: "amenity" });
   const zones = { atrium: "Courtyard", ...Object.fromEntries(spatial.stores.map((store) => [store.id, store.label])), upper: "Upper level" };

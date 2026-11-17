@@ -13,6 +13,7 @@ import {createExpandedInteriors} from './expanded-interiors.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {createSeatPlacements, createSeatAnchor} from './seat-placements.js';
+import {addFeatureKiosk} from './feature-kiosk.js';
 
 export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill}) {
   if (!expanded || !theme?.materials || !theme?.lighting) return false;
@@ -78,11 +79,11 @@ export async function createWorld(T, R, physics, expanded = false) {
         new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Optional finish timeout')),2000);}),
       ]);
       const natural=module.createNaturalSurfaceTextures(T);
-      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xd4d0c6);materials.shellFloor.roughness=.58;}
+      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xe8dbc6);materials.shellFloor.roughness=.38;}
       if(natural.wood)for(const name of ['wood','oak','timber','timberAlt'])materials[name].map=natural.wood;
     }catch{/* Retain usable solid finishes on module/canvas failure. */}
     finally{clearTimeout(timer);}
-    if(!materials.shellFloor.map) materials.shellFloor.color.set(0xaaa79c);
+    if(!materials.shellFloor.map) materials.shellFloor.color.set(0xdac8ae);
     materials.shellCeiling.color.set(0xf0e8d9);materials.shellCeiling.emissive.set(0xb3a286);materials.shellCeiling.emissiveIntensity=.55;
     materials.shellWall.color.set(0xc9c4b6);
     materials.glass.color.set(0xd7e9df);materials.glass.opacity=.19;materials.glass.roughness=.08;materials.glass.metalness=.08;
@@ -292,10 +293,10 @@ export async function createWorld(T, R, physics, expanded = false) {
     for (let i=0;i<13;i++) {
       const x=garden.x-3.45+i*.575, z=garden.z+(i%3-1)*.65;
       sphere('foliage',x,.57,z,.28,.14,.23);
-      for (let leaf=0;leaf<5;leaf++) {
-        const angle=leaf*Math.PI*2/5+(i%3)*.2;
-        solid('sphere',leaf%2?'leaf':'foliage',x+Math.sin(angle)*.15,.7,z+Math.cos(angle)*.15,
-          .085,i%4===0?.34:.27,.055,angle,.72,'YXZ');
+      for (let leaf=0;leaf<8;leaf++) {
+        const angle=leaf*Math.PI*2/8+(i%3)*.2;
+        solid('sphere',leaf%2?'leaf':'foliage',x+Math.sin(angle)*.2,.72,z+Math.cos(angle)*.2,
+          .1,i%4===0?.38:.3,.065,angle,.72,'YXZ');
       }
     }
     for (const lounge of atriumLayout.lounges) {
@@ -315,10 +316,11 @@ export async function createWorld(T, R, physics, expanded = false) {
       for (const planter of lounge.planters) {
         box('pot',planter.x,.3,planter.z,.7,.6,.7,true);
         box('wood',planter.x,.61,planter.z,.6,.025,.6);
-        for (let i=0;i<5;i++) {
-          const a=i*Math.PI*2/5;
+        for (let i=0;i<9;i++) {
+          const a=i*Math.PI*2/9;
           solid('sphere',i%2?'leaf':'foliage',planter.x+Math.sin(a)*.12,.8,planter.z+Math.cos(a)*.12,.08,.27,.05,a,.72,'YXZ');
         }
+        lightPool(planter.x,.024,planter.z,2.2,2.2);
       }
       // Shared, non-colliding ceiling lighting keeps each lounge legible at a distance.
       for (const z of [22,26]) {
@@ -355,6 +357,11 @@ export async function createWorld(T, R, physics, expanded = false) {
     box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   }
   const doors = [], interactables = [];
+  if (expanded) {
+    interactables.push(addFeatureKiosk({x:10,z:20,box,cylinder,sign}));
+    collider(10,.5,20,1.8,1,1.4);
+    lightPool(10,.054,20,4,4);
+  }
   let createCollectProp = () => null, reserveProduct = () => null, staticProductCount=0;
   let worldProductAssets = Object.freeze({status: 'not-loaded'}), shelves = [];
   // Original decorative kiosk beside the entrance, outside the central walking line.
@@ -585,6 +592,11 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
     for(const x of [-12,32])for(const z of [10,22,34])warmStrip(x,z,.07,6);
     for(const x of [-5,10,25])warmStrip(x,3,6,.07);
+    // Cove strips and suspended rings reuse emissive instances, not dynamic lights.
+    for(const x of [-9,29]) warmStrip(x,20,.09,27);
+    for(const z of [6.5,33.5]) warmStrip(10,z,38,.09);
+    for(const radius of [2.2,3.2]) solid('torus','glow',10,8.05,20,radius,radius,.8,0,-Math.PI/2);
+    lightPool(10,.053,20,8,8);
 
     // This is a closed reservation, not an operating facility.
     box('ivory',25,1.5,10,6,3,4,true);
