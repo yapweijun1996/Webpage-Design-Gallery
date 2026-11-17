@@ -1,0 +1,40 @@
+{
+  "sourceManifest": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+  "assets": [
+    {
+      "file": "shared-table.webp",
+      "kind": "ai-generated editorial illustration",
+      "sourceAssetId": "069",
+      "sha256": "f56edd5d1c372981ab63e5383b35ea12edae46fe8d48e2df2db3c1626e789f69"
+    },
+    {
+      "file": "shared-table-small.webp",
+      "kind": "ai-generated editorial illustration",
+      "sourceAssetId": "069",
+      "sha256": "3e1ad0680b3a92963e4887245e2ea70e2cf1f671153e0e6c4d96f714e940d70a"
+    },
+    {
+      "file": "sunday-lunch.webp",
+      "kind": "ai-generated editorial illustration",
+      "sourceAssetId": "001",
+      "sha256": "32083e79160bc56cb44d113eafd86fd59d5f0cf9d80138e8c8cad12a7dae7e9d"
+    },
+    {
+      "file": "weeknight-supper.webp",
+      "kind": "ai-generated editorial illustration",
+      "sourceAssetId": "005",
+      "sha256": "013d6b6e3f0b75f9674539b06d989615a4112945d7b00088c54c2ae15abd89c3"
+    },
+    {
+      "file": "afternoon-break.webp",
+      "kind": "ai-generated editorial illustration",
+      "sourceAssetId": "009",
+      "sha256": "8eed60cfa6f2176956573128a7cb50dfecc2d5562ed60b28fe72293d3257fe33"
+    }
+  ],
+  "brandInformation": [
+    "https://www.gjhglobal.com/mili/",
+    "https://www.gjhglobal.com/newmoon/",
+    "https://www.gjhglobal.com/gogo/"
+  ]
+}

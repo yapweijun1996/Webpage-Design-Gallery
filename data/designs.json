@@ -311,6 +311,317 @@
     "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
   },
   {
+    "id": "gjh-v12",
+    "companyId": "gjh",
+    "slug": "v12",
+    "version": "v12",
+    "title": "The Shared Table",
+    "description": "An editorial direction in warm ivory and terracotta, celebrating shared moments and everyday brands.",
+    "styles": [
+      "editorial",
+      "heritage"
+    ],
+    "status": "concept",
+    "order": 90,
+    "demoPath": "demos/corporate/gjh/v12/index.html",
+    "thumbnail": "demos/corporate/gjh/v12/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v12/screenshots/1440.png",
+        "width": 1440,
+        "height": 4652
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v12/screenshots/768.png",
+        "width": 768,
+        "height": 3716
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v12/screenshots/390.png",
+        "width": 390,
+        "height": 4954
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v13",
+    "companyId": "gjh",
+    "slug": "v13",
+    "version": "v13",
+    "title": "The Connection",
+    "description": "A navy and mint corporate direction built around people, partnerships and the portfolio.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 100,
+    "demoPath": "demos/corporate/gjh/v13/index.html",
+    "thumbnail": "demos/corporate/gjh/v13/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v13/screenshots/1440.png",
+        "width": 1440,
+        "height": 3857
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v13/screenshots/768.png",
+        "width": 768,
+        "height": 3565
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v13/screenshots/390.png",
+        "width": 390,
+        "height": 6017
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v14",
+    "companyId": "gjh",
+    "slug": "v14",
+    "version": "v14",
+    "title": "The Goodness Table",
+    "description": "A warm forest-and-sand editorial story connecting heritage with everyday food.",
+    "styles": [
+      "heritage",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 110,
+    "demoPath": "demos/corporate/gjh/v14/index.html",
+    "thumbnail": "demos/corporate/gjh/v14/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v14/screenshots/1440.png",
+        "width": 1440,
+        "height": 3845
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v14/screenshots/768.png",
+        "width": 768,
+        "height": 3517
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v14/screenshots/390.png",
+        "width": 390,
+        "height": 5378
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v15",
+    "companyId": "gjh",
+    "slug": "v15",
+    "version": "v15",
+    "title": "Everyday, In Colour",
+    "description": "A bold cobalt-and-ochre portfolio direction celebrating distinct everyday brands.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 120,
+    "demoPath": "demos/corporate/gjh/v15/index.html",
+    "thumbnail": "demos/corporate/gjh/v15/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v15/screenshots/1440.png",
+        "width": 1440,
+        "height": 3867
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v15/screenshots/768.png",
+        "width": 768,
+        "height": 3410
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v15/screenshots/390.png",
+        "width": 390,
+        "height": 4231
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v16",
+    "companyId": "gjh",
+    "slug": "v16",
+    "version": "v16",
+    "title": "The Everyday Collection",
+    "description": "A contemporary editorial collection of familiar brands and a Singapore story.",
+    "styles": [
+      "editorial",
+      "corporate"
+    ],
+    "status": "concept",
+    "order": 130,
+    "demoPath": "demos/corporate/gjh/v16/index.html",
+    "thumbnail": "demos/corporate/gjh/v16/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v16/screenshots/1440.png",
+        "width": 1440,
+        "height": 4645
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v16/screenshots/768.png",
+        "width": 768,
+        "height": 3798
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v16/screenshots/390.png",
+        "width": 390,
+        "height": 4931
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v17",
+    "companyId": "gjh",
+    "slug": "v17",
+    "version": "v17",
+    "title": "Pantry Notes",
+    "description": "Choose a kitchen occasion and discover three GJH food brands through an illustrated Singapore food journal.",
+    "styles": [
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 140,
+    "demoPath": "demos/corporate/gjh/v17/index.html",
+    "thumbnail": "demos/corporate/gjh/v17/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v17/screenshots/1440.png",
+        "width": 1440,
+        "height": 1618
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v17/screenshots/768.png",
+        "width": 768,
+        "height": 1207
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v17/screenshots/390.png",
+        "width": 390,
+        "height": 2462
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v18",
+    "companyId": "gjh",
+    "slug": "v18",
+    "version": "v18",
+    "title": "Everyday Frequencies",
+    "description": "Tune into four electronics scenes, from a quiet listening room to a call home.",
+    "styles": [
+      "immersive",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 150,
+    "demoPath": "demos/corporate/gjh/v18/index.html",
+    "thumbnail": "demos/corporate/gjh/v18/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v18/screenshots/1440.png",
+        "width": 1440,
+        "height": 1800
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v18/screenshots/768.png",
+        "width": 768,
+        "height": 1298
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v18/screenshots/390.png",
+        "width": 390,
+        "height": 1515
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "gjh-v19",
+    "companyId": "gjh",
+    "slug": "v19",
+    "version": "v19",
+    "title": "The Partner Desk",
+    "description": "A workspace for retail buyers to prepare a product enquiry before contacting Goh Joo Hin.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 160,
+    "demoPath": "demos/corporate/gjh/v19/index.html",
+    "thumbnail": "demos/corporate/gjh/v19/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v19/screenshots/1440.png",
+        "width": 1440,
+        "height": 1150
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v19/screenshots/768.png",
+        "width": 768,
+        "height": 1558
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v19/screenshots/390.png",
+        "width": 390,
+        "height": 1418
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
     "id": "yeos-v1",
     "companyId": "yeos",
     "slug": "v1",

@@ -1,0 +1,101 @@
+{
+  "meaning": "Locally resized editorial illustrations from the GJH landing concept library. Scenes are illustrative and do not depict official product photography.",
+  "assets": [
+    {
+      "file": "record-grooves.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "051",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "e02c66b762903f7806e7efaeee10b6490c7eafb4683999c515a0507b979037e5",
+      "sha256": "854e312a202e97456e9e632fb48c6fe1321173195fd1aa2988c193f9da17c8c0"
+    },
+    {
+      "file": "record-grooves-small.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "051",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "e02c66b762903f7806e7efaeee10b6490c7eafb4683999c515a0507b979037e5",
+      "sha256": "d1aec1c920396ea94b0b630ddd2eb8e69de75f4515fbd1b30247d9254d0c477b"
+    },
+    {
+      "file": "listen.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "049",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "b9ea12ca2cdc2be4ca50ba221a5c041e17a445e47dc4e27382f04e848530d45f",
+      "sha256": "b81f8e8ef9979eaf3af5a23c34827745e08d94a161c20988f796bb80ab763d6b"
+    },
+    {
+      "file": "listen-portrait.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "050",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "b622dabffcfa7b7a6ab68323d4159051415d4f8583f5b1848e86d9fb3802019a",
+      "sha256": "f0b2681a5a8caa4117013a23aa950c36f94f98a54ec4d483cb14306191f3191d"
+    },
+    {
+      "file": "watch.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "053",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "3c056f9e0bd36d960738fd8e4f6ac66d9fcf22dd2f84374c962d50b5efe12d68",
+      "sha256": "e2a909b88057a886df83258e54106b7f807abf08fc989cb87ff4b69e739cb87d"
+    },
+    {
+      "file": "watch-portrait.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "054",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "22ed5693756ff791f9eb1cfcf8b53122a3e7849e0d003f1f2862f32908c9e317",
+      "sha256": "3001a997e04565647a6aa7ad5dda0b63699c180f4b105904a6c1a86b6430460b"
+    },
+    {
+      "file": "play.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "057",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "b9b03d0299ad8703df916b39fb2232ffe017102d34839c451b6ebc68047d1b60",
+      "sha256": "74ebc614e33b9b145976238aa335ee9392a1b36591e076a6840d8a62b287b6bc"
+    },
+    {
+      "file": "play-portrait.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "058",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "13231859b8dd477a1994aa5c36ae33768aa5cd4db3e4aa5ba58cc94005579f24",
+      "sha256": "23db9527c577b58cd6afc6e330cb1a01da6169f40efc90926c2a22abe6e3c8cf"
+    },
+    {
+      "file": "connect.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "065",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "2cbea6549fc881caa50a2566fd9e5fa9219cf294261c19a1f3b23fa8720d9d57",
+      "sha256": "aa992593230336ff61f8b6ec378683603eacb22f05b4c771d359111d440faca1"
+    },
+    {
+      "file": "connect-portrait.webp",
+      "kind": "generated-editorial-image",
+      "sourceId": "066",
+      "sourceReceipt": "../../../../../assets/companies/gjh/landing-concepts/manifest.json",
+      "sourceSha256": "2a3f46f17c8d21e13397f2c3ec47dd266650f98987d462ceabe94a6bf166ef11",
+      "sha256": "4bf93b074e27dd82c978f1b69f968dab2612e5619536a7ddee9de5bfc936f3e6"
+    }
+  ],
+  "font": {
+    "name": "Manrope Latin variable subset, 400-700",
+    "sourceUrl": "https://fonts.gstatic.com/s/manrope/v23/xn7gYHE41ni1AdIRggexSg.woff2",
+    "sha256": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+    "file": "manrope-latin.woff2",
+    "license": "SIL Open Font License 1.1",
+    "licenseFile": "OFL-Manrope.txt",
+    "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
+    "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
+  },
+  "brandDestinations": {
+    "Sony": "https://www.gjhglobal.com/sony/",
+    "LG": "https://www.lg.com/sg/tvs-soundbars/oled/",
+    "Casio": "https://www.gjhglobal.com/casio/",
+    "Gigaset": "https://www.gigaset.com/hq_en/telephones/cordless-phones/"
+  }
+}

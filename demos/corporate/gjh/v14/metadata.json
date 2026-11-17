@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - The Goodness Table",
+  "version": "v14",
+  "designStyle": "Forest green, warm sand and an editorial food story.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v14/",
+  "officialWebsite": "https://www.gjhglobal.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v14",
+  "companyId": "gjh",
+  "displayTitle": "The Goodness Table",
+  "summary": "A warm forest-and-sand editorial story connecting heritage with everyday food.",
+  "styles": [
+    "heritage",
+    "editorial"
+  ],
+  "order": 110
+}

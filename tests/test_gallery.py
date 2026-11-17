@@ -21,7 +21,7 @@ class GalleryTests(unittest.TestCase):
     def test_real_companies_contain_their_own_versions(self):
         catalog = gallery.load_catalog()
         versions = [d["version"] for d in catalog["designs"] if d["companyId"] == "gjh"]
-        self.assertEqual(versions, ["v1", "v5", "v6", "v7", "v8", "v9", "v10", "v11"])
+        self.assertEqual(versions, ["v1", *(f"v{number}" for number in range(5, 20))])
         self.assertEqual([d["id"] for d in catalog["designs"] if d["companyId"] == "yeos"], ["yeos-v1"])
 
     def test_v8_metadata_exposes_immersive_concept_contract(self):

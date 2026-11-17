@@ -1,0 +1,3 @@
+{
+  "company": "Goh Joo Hin Pte Ltd", "industry": "FMCG, Electronics, Health & Nutrition", "title": "Goh Joo Hin - The Connection", "version": "v13", "designStyle": "Contemporary corporate design in deep navy, soft mint and editorial typography.", "thumbnail": "assets/thumbnail.webp", "demoRoute": "demos/corporate/gjh/v13/", "officialWebsite": "https://www.gjh.com.sg/", "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.", "id": "gjh-v13", "companyId": "gjh", "displayTitle": "The Connection", "summary": "A navy and mint corporate direction built around people, partnerships and the portfolio.", "styles": ["corporate", "editorial"], "order": 100
+}

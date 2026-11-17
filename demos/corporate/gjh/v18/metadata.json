@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Everyday Frequencies",
+  "version": "v18",
+  "designStyle": "A plum-black record sleeve with lilac typography, acid-green cues and an interactive channel guide.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v18/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v18",
+  "companyId": "gjh",
+  "displayTitle": "Everyday Frequencies",
+  "summary": "Tune into four electronics scenes, from a quiet listening room to a call home.",
+  "styles": [
+    "immersive",
+    "editorial"
+  ],
+  "order": 150
+}

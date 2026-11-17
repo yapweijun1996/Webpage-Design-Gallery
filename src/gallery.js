@@ -221,6 +221,8 @@ async function initDesign() {
 
 async function initCompare() {
   const container = document.querySelector('#compare-content');
+  document.querySelector('#compare-company').hidden = false;
+  container.querySelector('.loading-message').hidden = false;
   try {
     const { companies, designs } = await catalog();
     const company = companies.find((item) => item.id === params.get('company'));
@@ -287,7 +289,10 @@ async function initCompare() {
     new ResizeObserver(resize).observe(container.querySelector('.compare-grid'));
     document.addEventListener('fullscreenchange', resize);
     update();
-  } catch (error) { errorState(container, error.message); }
+  } catch (error) {
+    document.querySelector('#compare-company').textContent = 'Comparison unavailable.';
+    errorState(container, error.message);
+  }
 }
 
 initSettings();

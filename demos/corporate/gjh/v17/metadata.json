@@ -1,0 +1,17 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Pantry Notes",
+  "version": "v17",
+  "designStyle": "A culinary journal with tomato-red masthead typography, warm paper and sunlit tabletop illustrations.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v17/",
+  "officialWebsite": "https://www.gjhglobal.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v17",
+  "companyId": "gjh",
+  "displayTitle": "Pantry Notes",
+  "summary": "Choose a kitchen occasion and discover three GJH food brands through an illustrated Singapore food journal.",
+  "styles": ["editorial"],
+  "order": 140
+}

@@ -1,0 +1,57 @@
+{
+  "meaning": "Unmodified copies of recorded assets; project use authorized, no official endorsement or formal brand approval implied.",
+  "assets": [
+    {
+      "file": "connected-lifestyle.jpg",
+      "sha256": "b2f33ff5807d40dbe98b671943f5c6c1c6d3797f395cab9387ecfd2d9fadb557",
+      "sourceReceipt": "../../v7/assets/sources.json",
+      "kind": "official asset",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/banner-com.jpg"
+    },
+    {
+      "file": "gjh-history-composite.jpg",
+      "sha256": "89a674fd19460ffae08b7863193e0d7fec80e83101a5c865a98e3ebf1bfd00c6",
+      "sourceReceipt": "../../v8/assets/sources.json",
+      "kind": "historical-composite",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1.jpg"
+    },
+    {
+      "file": "gjh-logo.png",
+      "sha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "sourceReceipt": "../../v8/assets/sources.json",
+      "kind": "company-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png"
+    },
+    {
+      "file": "gogo-brand-cover.jpg",
+      "sha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "sourceReceipt": "../../v8/assets/sources.json",
+      "kind": "brand-photo",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg"
+    },
+    {
+      "file": "mili-brand-cover.jpg",
+      "sha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "sourceReceipt": "../../v8/assets/sources.json",
+      "kind": "brand-photo",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg"
+    },
+    {
+      "file": "new-moon-brand-cover.jpg",
+      "sha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "sourceReceipt": "../../v8/assets/sources.json",
+      "kind": "brand-photo",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg"
+    }
+  ],
+  "font": {
+    "name": "Manrope Latin variable subset, 400-700",
+    "sourceUrl": "https://fonts.gstatic.com/s/manrope/v23/xn7gYHE41ni1AdIRggexSg.woff2",
+    "sha256": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+    "file": "manrope-latin.woff2",
+    "license": "SIL Open Font License 1.1",
+    "licenseFile": "OFL-Manrope.txt",
+    "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
+    "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
+  }
+}

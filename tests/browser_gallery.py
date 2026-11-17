@@ -164,6 +164,14 @@ def run():
                     context.close()
                 # These fixtures deliberately abort/replace network responses; isolate
                 # them from the real service worker tested in browser_pwa.py.
+                no_script = browser.new_context(java_script_enabled=False)
+                no_script_page = no_script.new_page()
+                no_script_page.goto(base + "compare/index.html")
+                assert no_script_page.locator("noscript").is_visible()
+                assert "Interactive comparison needs JavaScript." in no_script_page.locator("noscript").inner_text()
+                assert no_script_page.locator("#compare-company").is_hidden()
+                assert no_script_page.locator("#compare-content .loading-message").is_hidden()
+                no_script.close()
                 context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
                 page = context.new_page()
                 page.goto(base)
@@ -185,6 +193,13 @@ def run():
                     page.goto(base + "compare/index.html?" + query)
                     page.wait_for_selector(".error-state")
                     assert page.locator("iframe").count() == 0
+                    assert page.locator("#compare-company").inner_text() == "Comparison unavailable."
+                page.route("**/data/designs.json", lambda route: route.abort())
+                page.goto(base + "compare/index.html?company=gjh&left=v1&right=v7")
+                page.wait_for_selector(".error-state")
+                assert page.locator("#compare-company").inner_text() == "Comparison unavailable."
+                assert page.get_by_role("link", name="Browse companies").is_visible()
+                page.unroute("**/data/designs.json")
                 page.goto(base + "designs/index.html?company=gjh&design=missing")
                 page.wait_for_selector(".error-state")
                 page.route("**/data/designs.json", lambda route: route.abort())

@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **two companies and nine designs**. All concepts are unofficial and do not imply company endorsement.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **two companies and seventeen designs**. All concepts are unofficial and do not imply company endorsement.
 
 The [Design System SSOT](ds.md) owns shared gallery design and UX contracts, the prioritized UI audit, cross-project reuse boundaries and acceptance criteria. Its version 1.0.0 tracks the executable token/icon registry, gallery adoption and remaining verification. Run `python scripts/check_ssot.py` to check generated artifacts and prevent new design-system debt.
 
@@ -22,6 +22,8 @@ The [company shortlist](docs/next-company-demo.md) compares three Singapore demo
 - `/designs/index.html?company=gjh&design=v6`: design details and captured desktop/tablet/mobile screenshots.
 - `/compare/index.html?company=gjh&left=v5&right=v7`: two live previews or screenshots, device widths, optional relative scroll synchronization, and fullscreen preview where supported.
 - Existing `demos/corporate/gjh/v1/`, `v5/`, `v6/`, `v7/`, `v8/` and `v9/` URLs are preserved; `v10/` adds a real 3D store arcade and `v11/` adds a freely walkable virtual mall.
+- `v12/`–`v16/` explore five premium landing-page directions. See the [design study](docs/premium-landing-study.md) for references and comparison notes.
+- `v17/`–`v19/` add Pantry Notes, Everyday Frequencies and The Partner Desk. The [landing-page roadmap and review tasks](docs/gjh-landing-roadmap.md) cover all eight concepts.
 
 ## Local development
 
@@ -60,6 +62,7 @@ python scripts/build_gallery.py --check
 python -m unittest discover -s tests -p 'test_*.py' -v
 python tests/browser_gallery.py
 python tests/browser_yeos_drinks.py
+python tests/browser_premium_landings.py
 python tests/browser_gallery_layout.py
 python tests/browser_gjh_demos.py
 python tests/browser_gjh_v9.py
@@ -75,6 +78,8 @@ python tests/browser_gallery_theme.py
 ```
 
 Browser checks use the locally installed Playwright Python package and Chrome. Set `GALLERY_CHROME` if Chrome is elsewhere. The Gallery and PWA suites build into temporary directories and verify a GitHub Pages-style path prefix. The GJH check captures updated device screenshots and thumbnails; run the gallery generator again afterward. Add `--axe-script /path/to/axe.min.js` to run an already-reviewed local axe-core 4.10.3 bundle. See [gallery evidence](docs/gallery-v2-review.md) and the [GJH redesign review](docs/gjh-redesign-review.md) for coverage and limitations.
+
+The premium landing-page runner also accepts `--axe-script /path/to/axe.min.js` for the pinned axe-core 4.10.3 checks at 390 and 1440px. Add `--capture` to refresh only V12–V19 screenshots and thumbnails, then regenerate the gallery. Use `--site-root _site` to exercise the published artifact. Screenshot generation requires Pillow in the browser-test environment. See [premium landing-page QA](docs/premium-landing-qa.md) for coverage and limitations.
 
 For the opt-in V11 expansion, run `node --test tests/gjh_spatial.test.mjs tests/gjh_expanded_layout.test.mjs tests/gjh_atrium_layout.test.mjs`, `python tests/browser_gjh_expanded_shell.py`, `python tests/browser_gjh_atrium.py`, `python tests/browser_gjh_store_integration.py` and `python tests/browser_gjh_expanded_pwa.py`. The [stage 5 report](docs/gjh-v11-stage5-existing-stores.md) records scope, actual views, PWA boundaries and device limitations.
 

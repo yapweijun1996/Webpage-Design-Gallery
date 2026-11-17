@@ -89,7 +89,7 @@ class DesignSystemTests(unittest.TestCase):
 
     def test_all_version_themes_are_isolated_and_complete(self):
         registry = json.loads((self.root / "design-system/themes.json").read_text())
-        self.assertEqual(set(registry["themes"]), {"v1", "v5", "v6", "v7", "v8", "v9", "v10", "v11"})
+        self.assertEqual(set(registry["themes"]), {"v1", *(f"v{number}" for number in range(5, 20))})
         css = builder.render_themes(self.root)
         for version in registry["themes"]:
             self.assertIn(f'html[data-gjh-design="{version}"]', css)

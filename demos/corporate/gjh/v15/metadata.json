@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Everyday, In Colour",
+  "version": "v15",
+  "designStyle": "Cobalt blue, warm ochre and modular portfolio storytelling.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v15/",
+  "officialWebsite": "https://www.gjhglobal.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v15",
+  "companyId": "gjh",
+  "displayTitle": "Everyday, In Colour",
+  "summary": "A bold cobalt-and-ochre portfolio direction celebrating distinct everyday brands.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 120
+}

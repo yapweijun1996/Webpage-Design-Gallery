@@ -1,0 +1,34 @@
+{
+  "assets": [
+    {
+      "file": "partner-review.webp",
+      "source": "assets/companies/gjh/landing-concepts/images/070.webp",
+      "sourceId": "070",
+      "kind": "AI-generated editorial illustration",
+      "sha256": "d847491ef6fb65430397b4344f5eccd216d2af447befb41aafc4d11210dbc016",
+      "dimensions": [
+        960,
+        540
+      ]
+    },
+    {
+      "file": "partner-review-small.webp",
+      "source": "assets/companies/gjh/landing-concepts/images/070.webp",
+      "sourceId": "070",
+      "kind": "AI-generated editorial illustration",
+      "sha256": "d3eb1298a0038055944b1695aa1665903bb789c28137be652fc896aa013c0b60",
+      "dimensions": [
+        600,
+        338
+      ]
+    },
+    {
+      "file": "gjh-logo.png",
+      "sha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "sourceReceipt": "../../v8/assets/sources.json",
+      "kind": "company-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png"
+    }
+  ],
+  "editorialNote": "The studio shelf review is an independent AI-generated scene. The people do not represent Goh Joo Hin employees or partners."
+}

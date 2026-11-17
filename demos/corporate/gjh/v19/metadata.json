@@ -1,0 +1,17 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - The Partner Desk",
+  "version": "v19",
+  "designStyle": "A cobalt and porcelain buyer's workspace with editorial typography and a locally generated enquiry brief.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v19/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-v19",
+  "companyId": "gjh",
+  "displayTitle": "The Partner Desk",
+  "summary": "A workspace for retail buyers to prepare a product enquiry before contacting Goh Joo Hin.",
+  "styles": ["corporate", "editorial"],
+  "order": 160
+}
