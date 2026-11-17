@@ -750,3 +750,18 @@ See [docs/gjh-v11-qa-loop.md](docs/gjh-v11-qa-loop.md).
 - [x] Pushed to main (a05c0bb, Pages deploy green, live bundle verified): new model displays (S04/S05, S13-S17), tiered lighting, interaction registry, seat anchors (upper-deck benches sittable except one overlapping the lift shaft was moved), shop-door Open, goal.md, QA loop docs, model inventory. Owner chose to push all although the terra visual advisor scored the mall 4/10 FAIL.
 - [ ] Visual quality is still below the concept (flat mood, small hero displays); waits for P1 models: glazed storefront module, chilled freezer, grand piano, ice-cream cart, canned-food pyramid.
 - [ ] Next engine steps: Pick Up and Travel through the registry, shoes in character customisation, NPCs, escalator, district streaming (P2).
+
+## 2026-11-17 UX round 2 — shop HUD
+
+- [x] Use existing public zone/position state and shared spatial classification for every open shop and its entrance apron; exclude the upper deck.
+- [x] Auto-minimize tutorial to a tappable Guide chip; preserve progress/dismissal, allow expansion/minimization, restore on exit and collapse on re-entry.
+- [x] Keep mobile Mini Map hidden; shrink desktop shop Mini Map to 132 px and restore on exit.
+- [x] Collapse mobile shop tools to a 44 px icon column with accessible names; keep automatic tutorial/tools outside the central 60% rectangle.
+- [x] Slim mobile header from 112 px to 92 px without removing directory, Map, Bag or location; retain 44 px action targets.
+- [x] Differentiate Guide (`info`) from Help (`help-circle`), using unchanged SVG-Icon-Studio registry bytes after sync. Separate tutorial and controls/settings panels remain separate.
+- [x] Keep F/tap proximity actions, joystick, Run and bottom hints functional; explicit mobile guide expansion uses the bottom fifth and moves walking controls clear.
+- [x] Build / generated check / Node / gallery unittest / SSOT: RC 0. Node: 100 passed, one optional Studio comparison skipped; Python: 12 passed.
+- [x] Wait for the other browser process, then run the full Chrome/Metal suite alone: RC 0, first invocation, maximum logged draw calls 195. No known-flaky room-sign rerun required.
+- [x] Capture and inspect 1440 × 900 and 390 × 844 atrium, New Moon entrance and shop interior screenshots: `/Users/admin/omp-tasks/out/ux2-{atrium,newmoon-entrance,shop-interior}-{1440,390}.png`; log `/Users/admin/omp-tasks/out/ux2-browser.log`.
+- [x] Preserve viewport lock, NPC budget, Bloom, scene/storefronts and New Moon content; no dependencies or GitHub Actions added. Details: [HUD brief](docs/gjh-v11-ux-hud.md).
+- Physical-device safe areas and screen-reader acceptance remain unperformed; no push/public deployment is part of this task.

@@ -114,3 +114,34 @@ test('every successful registry interaction completes the final step, including 
     assert.equal(tutorial.snapshot().open, false, kind);
   }
 });
+
+test('shop entry collapses without losing progress and leaving restores the card', () => {
+  const tutorial = start();
+  tutorial.report('move');
+  tutorial.setShop(true);
+  assert.equal(tutorial.snapshot().collapsed, true);
+  assert.equal(tutorial.snapshot().step, 1);
+  tutorial.expand();
+  tutorial.setShop(true);
+  assert.equal(tutorial.snapshot().collapsed, false, 'position updates must not undo explicit expansion');
+  tutorial.collapse();
+  assert.equal(tutorial.snapshot().collapsed, true);
+  tutorial.setShop(false);
+  assert.equal(tutorial.snapshot().collapsed, false);
+  assert.equal(tutorial.snapshot().step, 1);
+  tutorial.setShop(true);
+  assert.equal(tutorial.snapshot().collapsed, true, 'a later visit collapses again');
+});
+
+test('explicit Guide replay expands in a shop but entering never resurrects dismissal', () => {
+  const tutorial = start();
+  tutorial.dismiss();
+  tutorial.setShop(true);
+  assert.equal(tutorial.snapshot().open, false);
+  tutorial.reopen();
+  assert.equal(tutorial.snapshot().collapsed, false);
+  assert.equal(tutorial.snapshot().open, true);
+  tutorial.setActive(false);
+  tutorial.setActive(true);
+  assert.equal(tutorial.snapshot().collapsed, false, 'panel suspension retains the explicit choice');
+});

@@ -108,7 +108,7 @@ def ux_hud_coverage(browser, url):
             mobile_hud(page)
         else:
             assert page.locator('.control-bar').inner_text().find('W A S D') >= 0
-        page.screenshot(path=str(output / f'ux1-{width}.png'), scale='css')
+        page.screenshot(path=str(output / f'ux2-atrium-{width}.png'), scale='css')
         before = state(page)
         page.locator('#scene').focus()
         page.keyboard.down('w')
@@ -147,8 +147,70 @@ def ux_hud_coverage(browser, url):
         page.reload()
         page.wait_for_function('window.__sceneReady && window.__mall?.ready')
         assert card.is_hidden()
+        # Entrance and interior HUD use the same zone/position state as __mall.
+        page.locator('#rail-guide').click()
+        full_map_width = page.locator('#mini-map').bounding_box()['width'] if width > 650 else None
+        guide_icon = page.locator('#rail-guide svg').inner_html()
+        assert guide_icon != page.locator('#keyboard-help summary svg').inner_html()
+        if width == 390:
+            assert page.locator('.site-header').bounding_box()['height'] <= 92
+            for selector in ('#header-map', '#bag-open', '#view-toggle', '.header-location'):
+                assert page.locator(selector).is_visible()
+        for zone in ('newmoon', 'mili', 'gogo'):
+            assert page.evaluate('zone => __mall.teleport(zone)', zone)
+            drive(page, 17)
+            assert page.locator('#experience').evaluate("el=>el.classList.contains('is-shop-hud')")
+            assert page.locator('#guide-chip').is_visible()
+            assert page.locator('#guide-content').is_hidden()
+            if width == 390:
+                mobile_hud(page)
+                rail = page.locator('#hud-rail').bounding_box()
+                assert rail['width'] == 44, rail
+                for selector in ('#rail-guide', '#keyboard-help summary', '#scene-cart', '#mall-theme-open'):
+                    assert page.locator(selector).get_attribute('aria-label')
+                    assert page.locator(selector + ' .hud-tool-label').is_hidden()
+                # Automatic surfaces must stay outside the central 60% rectangle.
+                assert page.locator('#guide-card,#hud-rail').evaluate_all('''els=>els.every(el=>{
+                  const r=el.getBoundingClientRect();
+                  return r.right<=innerWidth*.2 || r.left>=innerWidth*.8 ||
+                    r.bottom<=innerHeight*.2 || r.top>=innerHeight*.8;
+                })''')
+            else:
+                assert page.locator('#mini-map').bounding_box()['width'] < full_map_width
+            page.locator('#guide-chip').click()
+            assert page.locator('#guide-content').is_visible()
+            if width == 390:
+                mobile_hud(page)
+                assert card.bounding_box()['y'] >= height * .8 - 1
+            page.locator('#guide-collapse').click()
+            if zone == 'newmoon':
+                page.screenshot(path=str(output / f'ux2-newmoon-entrance-{width}.png'), scale='css')
+            assert page.locator('#control-interact').is_visible()
+            page.locator('#inspect').click()
+            drive(page, 1000)
+            inside = drive(page, 1400, forward=1)
+            assert inside['zone'] == zone and inside['z'] < -.5, inside
+            peak = max(peak, inside['drawCalls'])
+            assert page.locator('#guide-chip').is_visible()
+            if width == 390:
+                mobile_hud(page)
+                page.locator('#run-toggle').click()
+                assert page.locator('#run-toggle').get_attribute('aria-pressed') == 'true'
+                page.locator('#run-toggle').click()
+            if zone == 'newmoon':
+                page.screenshot(path=str(output / f'ux2-shop-interior-{width}.png'), scale='css')
+            assert page.evaluate('__mall.teleport("atrium")')
+            drive(page, 17)
+            assert not page.locator('#experience').evaluate("el=>el.classList.contains('is-shop-hud')")
+            assert page.locator('#guide-content').is_visible()
+            if width > 650:
+                assert page.locator('#mini-map').bounding_box()['width'] == full_map_width
+            else:
+                assert page.locator('#hud-rail').bounding_box()['width'] == 82
+        assert peak <= 200, peak
         results.append({'viewport': [width, height], 'tutorialActionsAndPersistence': 'PASS',
-                        'drawCalls': peak, 'screenshot': str(output / f'ux1-{width}.png')})
+                        'drawCalls': peak, 'screenshots': [str(output / f'ux2-{view}-{width}.png')
+                            for view in ('atrium', 'newmoon-entrance', 'shop-interior')]})
         context.close()
     return results
 

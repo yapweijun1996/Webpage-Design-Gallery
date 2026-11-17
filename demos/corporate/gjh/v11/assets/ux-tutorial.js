@@ -4,9 +4,10 @@ const actions = ['move', 'look', 'interact'];
 /** Only confirmed actions for the current step advance this session. */
 export function createTutorialState({storage = () => globalThis.localStorage} = {}) {
   let remembered = false, open = false, active = false, step = 0, previousPose = null;
+  let shop = false, expanded = false;
   const listeners = new Set();
   try { remembered = ['dismissed', 'completed'].includes(storage()?.getItem(tutorialStorageKey)); } catch { /* Storage is optional. */ }
-  const snapshot = () => ({open, active, step, action: actions[step], remembered});
+  const snapshot = () => ({open, active, step, action: actions[step], remembered, shop, collapsed: shop && !expanded});
   const publish = () => { for (const listener of listeners) listener(snapshot()); };
   function finish(value) {
     open = false; remembered = true; previousPose = null;
@@ -32,7 +33,14 @@ export function createTutorialState({storage = () => globalThis.localStorage} = 
       active = nextActive; previousPose = null; publish();
     },
     offer() { if (remembered || open) return false; open = true; step = 0; previousPose = null; publish(); return true; },
-    reopen() { open = true; step = 0; previousPose = null; publish(); },
+    reopen() { open = true; step = 0; previousPose = null; expanded = shop; publish(); },
+    setShop(value) {
+      const nextShop = Boolean(value);
+      if (shop === nextShop) return;
+      shop = nextShop; expanded = false; publish();
+    },
+    expand() { if (shop) { expanded = true; publish(); } },
+    collapse() { if (shop) { expanded = false; publish(); } },
     dismiss() { finish('dismissed'); },
     next,
     back() { if (!open || !active || step === 0) return false; step--; publish(); return true; },
@@ -65,10 +73,15 @@ export function createTutorial({parent, onDismiss = () => {}, touch = false} = {
     const node = element('button', 'ux-tutorial-button', label); node.id = id; node.type = 'button';
     node.addEventListener('click', action); return node;
   };
+  const chip = button('guide-chip', 'Guide', () => state.expand());
+  chip.setAttribute('aria-label', 'Expand Getting Started guide');
+  chip.setAttribute('aria-controls', 'guide-content');
+  const content = element('div', 'ux-tutorial-content'); content.id = 'guide-content';
   const header = element('div', 'ux-tutorial-header');
   const title = element('h2', 'ux-tutorial-title', 'Getting Started'); title.id = 'guide-title';
   const count = element('span', 'ux-tutorial-count'); count.id = 'guide-count';
   const skip = button('guide-skip', 'Skip', () => { state.dismiss(); onDismiss(); });
+  const collapse = button('guide-collapse', 'Minimize', () => state.collapse());
   header.append(title, count, skip);
   const progress = element('div', 'ux-tutorial-progress'); progress.setAttribute('aria-hidden', 'true');
   const segments = actions.map(() => element('span', 'ux-tutorial-segment')); progress.append(...segments);
@@ -79,14 +92,19 @@ export function createTutorial({parent, onDismiss = () => {}, touch = false} = {
   const controls = element('div', 'ux-tutorial-actions');
   const back = button('guide-back', 'Back', () => state.back());
   const next = button('guide-next', 'Next', () => { state.next(); if (!state.snapshot().open) onDismiss(); });
-  controls.append(back, next); card.append(header, progress, stepTitle, copy, announcement, controls); parent.append(card);
+  controls.append(back, collapse, next);
+  content.append(header, progress, stepTitle, copy, announcement, controls);
+  card.append(chip, content); parent.append(card);
   const steps = [
     ['Move around', touch ? 'Use the left joystick to walk around the courtyard.' : 'Use WASD or the arrow keys to walk around the courtyard.'],
     ['Look around', touch ? 'Keep one finger on the joystick; drag with a second finger to look around.' : 'Drag the scene to look around. On a controller, use the right stick.'],
     ['Try an interaction', touch ? 'Approach a door, bench or display, then tap its action.' : 'Approach a door, bench or display, then press F or select its action.'],
   ];
   let announcedStep = null;
-  state.subscribe(({open, active, step}) => {
+  state.subscribe(({open, active, step, shop, collapsed}) => {
+    chip.hidden = !collapsed; content.hidden = collapsed; collapse.hidden = !shop;
+    chip.setAttribute('aria-expanded', String(!collapsed));
+    card.classList.toggle('is-collapsed', collapsed);
     card.hidden = !open || !active;
     count.textContent = `${step + 1}/3`; count.setAttribute('aria-label', `Step ${step + 1} of 3`);
     for (let index = 0; index < segments.length; index++) segments[index].dataset.state = index < step ? 'complete' : index === step ? 'current' : 'pending';

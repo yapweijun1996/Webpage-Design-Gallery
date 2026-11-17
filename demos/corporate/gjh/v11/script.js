@@ -20,6 +20,7 @@ for (const [selector, name, size] of [
 ]) {
   document.querySelector(selector).prepend(icon(name, {size}));
 }
+document.querySelector('#mall-theme-open').setAttribute('aria-label', 'Theme: mall appearance');
 document.querySelector('#interaction-point').append(icon('map-pin', {size: 18}));
 const expanded = new URLSearchParams(location.search).get('layout') !== 'classic';
 document.body.classList.toggle('is-expanded', expanded);

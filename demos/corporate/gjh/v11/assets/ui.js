@@ -4,7 +4,7 @@ export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
-import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
+import {spatial, storeAt, mapPoint, mapStoreRect, mapView} from './spatial.js';
 import {expandedLayout, expandedMapPoint, plannedSpaces} from './expanded-layout.js';
 import {liftLayout} from './lift-layout.js';
 import {icon} from './icons.js';
@@ -338,6 +338,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let currentElevatorState=null,currentElevatorUpper=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   const sceneCart=document.querySelector('#scene-cart');
+  const sceneCartLabel=sceneCart.querySelector('.hud-tool-label');
   const cartIcon=icon('cart',{size:18});
   const interactionIcons=new Map();
   function updateCartControls() {
@@ -348,7 +349,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     cartToggle.disabled=!cart.available||(!cart.active&&cart.capability?.disabled===true);
     sceneCart.hidden=!cart.available||!showing3D||(compactMap.matches&&(mallMap.open||help.open));
     const cartLabel=cart.active?'Stow Cart':'Shopping Cart';
-    if(sceneCart.textContent!==cartLabel)sceneCart.textContent=cartLabel;
+    if(sceneCartLabel.textContent!==cartLabel)sceneCartLabel.textContent=cartLabel;
     if(sceneCart.firstChild!==cartIcon)sceneCart.prepend(cartIcon);
     sceneCart.setAttribute('aria-pressed',String(cart.active));
     sceneCart.disabled=!cart.available||(!cart.active&&cart.capability?.sceneDisabled===true);
@@ -760,6 +761,13 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     },
     update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null,elevatorState=null,elevatorUpper=7.2 }) {
       tutorial.reportPose({x,z,yaw});
+      // Reuse the public zone/position classification, extending only the
+      // entrance threshold. No scene query or second interaction scan.
+      const shop = zone !== 'upper' && Boolean(spatial.get(zone) || storeAt(x, z - 2.5, true));
+      if (experience.classList.contains('is-shop-hud') !== shop) {
+        experience.classList.toggle('is-shop-hud', shop);
+        tutorial.setShop(shop);
+      }
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
         const upper=zone==='upper';playerDot.style.display=upper?'none':'';mapCaption.querySelector('.map-key').hidden=upper;floorplan.setAttribute('aria-label',upper?'Ground floor map. Choose a store to return to its entrance.':floorplanLabel);if(mapCaptionText)mapCaptionText.textContent=upper?' Ground floor map ':'You are here';

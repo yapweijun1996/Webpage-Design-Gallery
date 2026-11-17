@@ -149,11 +149,12 @@ var tutorialStorageKey = "gjh-v11-tutorial-v1";
 var actions = ["move", "look", "interact"];
 function createTutorialState({ storage = () => globalThis.localStorage } = {}) {
   let remembered = false, open = false, active = false, step = 0, previousPose = null;
+  let shop = false, expanded = false;
   const listeners = new Set;
   try {
     remembered = ["dismissed", "completed"].includes(storage()?.getItem(tutorialStorageKey));
   } catch {}
-  const snapshot = () => ({ open, active, step, action: actions[step], remembered });
+  const snapshot = () => ({ open, active, step, action: actions[step], remembered, shop, collapsed: shop && !expanded });
   const publish = () => {
     for (const listener of listeners)
       listener(snapshot());
@@ -210,7 +211,28 @@ function createTutorialState({ storage = () => globalThis.localStorage } = {}) {
       open = true;
       step = 0;
       previousPose = null;
+      expanded = shop;
       publish();
+    },
+    setShop(value) {
+      const nextShop = Boolean(value);
+      if (shop === nextShop)
+        return;
+      shop = nextShop;
+      expanded = false;
+      publish();
+    },
+    expand() {
+      if (shop) {
+        expanded = true;
+        publish();
+      }
+    },
+    collapse() {
+      if (shop) {
+        expanded = false;
+        publish();
+      }
     },
     dismiss() {
       finish("dismissed");
@@ -264,6 +286,11 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
     node.addEventListener("click", action);
     return node;
   };
+  const chip = button2("guide-chip", "Guide", () => state.expand());
+  chip.setAttribute("aria-label", "Expand Getting Started guide");
+  chip.setAttribute("aria-controls", "guide-content");
+  const content = element2("div", "ux-tutorial-content");
+  content.id = "guide-content";
   const header = element2("div", "ux-tutorial-header");
   const title = element2("h2", "ux-tutorial-title", "Getting Started");
   title.id = "guide-title";
@@ -273,6 +300,7 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
     state.dismiss();
     onDismiss();
   });
+  const collapse = button2("guide-collapse", "Minimize", () => state.collapse());
   header.append(title, count, skip);
   const progress = element2("div", "ux-tutorial-progress");
   progress.setAttribute("aria-hidden", "true");
@@ -293,8 +321,9 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
     if (!state.snapshot().open)
       onDismiss();
   });
-  controls.append(back, next);
-  card.append(header, progress, stepTitle, copy, announcement, controls);
+  controls.append(back, collapse, next);
+  content.append(header, progress, stepTitle, copy, announcement, controls);
+  card.append(chip, content);
   parent.append(card);
   const steps = [
     ["Move around", touch ? "Use the left joystick to walk around the courtyard." : "Use WASD or the arrow keys to walk around the courtyard."],
@@ -302,7 +331,12 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
     ["Try an interaction", touch ? "Approach a door, bench or display, then tap its action." : "Approach a door, bench or display, then press F or select its action."]
   ];
   let announcedStep = null;
-  state.subscribe(({ open, active, step }) => {
+  state.subscribe(({ open, active, step, shop, collapsed }) => {
+    chip.hidden = !collapsed;
+    content.hidden = collapsed;
+    collapse.hidden = !shop;
+    chip.setAttribute("aria-expanded", String(!collapsed));
+    card.classList.toggle("is-collapsed", collapsed);
     card.hidden = !open || !active;
     count.textContent = `${step + 1}/3`;
     count.setAttribute("aria-label", `Step ${step + 1} of 3`);
@@ -1430,6 +1464,7 @@ function createUI(expanded = false) {
   let currentElevatorState = null, currentElevatorUpper = null;
   const cartControls = document.querySelector("#cart-controls"), cartToggle = document.querySelector("#cart-toggle"), cartStatus = document.querySelector("#cart-status");
   const sceneCart = document.querySelector("#scene-cart");
+  const sceneCartLabel = sceneCart.querySelector(".hud-tool-label");
   const cartIcon = icon("cart", { size: 18 });
   const interactionIcons = new Map;
   function updateCartControls() {
@@ -1440,8 +1475,8 @@ function createUI(expanded = false) {
     cartToggle.disabled = !cart.available || !cart.active && cart.capability?.disabled === true;
     sceneCart.hidden = !cart.available || !showing3D || compactMap.matches && (mallMap.open || help.open);
     const cartLabel = cart.active ? "Stow Cart" : "Shopping Cart";
-    if (sceneCart.textContent !== cartLabel)
-      sceneCart.textContent = cartLabel;
+    if (sceneCartLabel.textContent !== cartLabel)
+      sceneCartLabel.textContent = cartLabel;
     if (sceneCart.firstChild !== cartIcon)
       sceneCart.prepend(cartIcon);
     sceneCart.setAttribute("aria-pressed", String(cart.active));
@@ -2033,6 +2068,11 @@ function createUI(expanded = false) {
     },
     update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2 }) {
       tutorial.reportPose({ x, z, yaw });
+      const shop = zone !== "upper" && Boolean(spatial.get(zone) || storeAt(x, z - 2.5, true));
+      if (experience.classList.contains("is-shop-hud") !== shop) {
+        experience.classList.toggle("is-shop-hud", shop);
+        tutorial.setShop(shop);
+      }
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
         const upper = zone === "upper";
@@ -2754,6 +2794,7 @@ for (const [selector, name, size] of [
 ]) {
   document.querySelector(selector).prepend(icon(name, { size }));
 }
+document.querySelector("#mall-theme-open").setAttribute("aria-label", "Theme: mall appearance");
 document.querySelector("#interaction-point").append(icon("map-pin", { size: 18 }));
 var expanded = new URLSearchParams(location.search).get("layout") !== "classic";
 document.body.classList.toggle("is-expanded", expanded);

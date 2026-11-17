@@ -1,6 +1,6 @@
-# GJH v11 UX round 1 — HUD
+# GJH v11 UX — exploration and shop HUD
 
-## Implemented scope
+## Round 1 implemented scope
 
 - **P0-1 Tutorial:** `assets/ux-tutorial.js` replaces the blocking welcome with a nonmodal Getting Started card. Desktop width is 300px; mobile uses a compact edge sheet above the joystick and bottom bar, below the viewport centre. Skip, Back and Next/Done accompany a numeric 1/3 counter and three progress segments. Confirmed translation, camera yaw and successful registry dispatch advance only the current step. Opening a panel suspends the card, not the other way around. Automatic progress never moves focus. Skip/Done returns focus to the scene.
 - **Viewer memory:** `localStorage` key `gjh-v11-tutorial-v1` stores `dismissed` or `completed`. Access and writes are guarded; memory-only dismissal works when storage is blocked. Guide in the right rail and Show quick guide in Help explicitly replay it. The old session welcome flag and shared onboarding modal are no longer used by v11. Previously saved shared language/theme preferences remain readable for amenity dialogs.
@@ -24,7 +24,7 @@ The allowed browser acceptance entry is `tests/browser_gjh_v11.py`; it now exerc
 
 Screenshots: `/Users/admin/omp-tasks/out/ux1-1440.png`, `/Users/admin/omp-tasks/out/ux1-390.png`. Browser log: `/Users/admin/omp-tasks/out/ux1-browser.log`.
 
-## Verification results
+## Round 1 verification results
 
 - Gallery generation and `--check`: RC 0.
 - `node --test tests/gjh_*.test.mjs`: RC 0; 98 passed, one optional external Studio-checkout comparison skipped.
@@ -33,3 +33,23 @@ Screenshots: `/Users/admin/omp-tasks/out/ux1-1440.png`, `/Users/admin/omp-tasks/
 - `tests/browser_gjh_v11.py`, installed Google Chrome with Metal: final RC 0; maximum logged draw-call sample **194**, including the NPC quality sweeps. The initial invocation lacked the Chrome environment variable; a subsequent run exposed a 36px mobile logo target. The target was restored to 44px and the complete browser entry passed.
 - Python AST syntax check: 98 browser scripts parsed; no other browser entry was executed.
 - Real screenshots at 1440×900 and 390×844 were inspected. The final capture waits for the startup loader to be hidden. No tracked browser evidence, demo screenshots or thumbnails changed.
+
+## Round 2 — shop-aware declutter (2026-11-17)
+
+- `assets/ui.js` consumes the same zone and player position published through `window.__mall.state`. Existing `storeAt` classification extends 2.5 m into the entrance apron; upper-floor browsing is excluded. No second interaction scan or scene query is introduced.
+- Entering any open shop or its entrance automatically minimizes the active tutorial to a 64 × 44 px Guide chip. Tap expands it; Minimize restores the chip. Progress, dismissal and panel suspension survive these transitions. Leaving restores the full card without resurrecting a dismissed guide; a later visit collapses again.
+- Shop Mini Map: hidden on mobile as before; desktop shrinks from 190 px to 132 px, with an 88 px plan and no secondary context rows. Exit restores its original dimensions and context.
+- Mobile shop rail: one 44 px icon column, hidden label spans, retained accessible names and tooltips. Guide uses Studio `info`; Help retains `help-circle`. They remain separate: Guide teaches three actions, Help contains controls, graphics and visitor settings. Registry sync succeeded against `/Users/admin/Documents/GitHub/_worktrees/svg-icon-gjh-six-icons`; both icons already existed, so no draft was necessary and registry bytes are unchanged.
+- Mobile navigation reserves 92 px instead of 112 px, retaining GJH / VIRTUAL MALL, location, Map, inventory Bag and Store Directory, with 44 px action targets.
+- Automatic shop tutorial/rail surfaces stay outside the central 60% viewport rectangle. Explicit mobile guide expansion is scrollable within the bottom fifth; walking controls and the hint bar lift above it rather than being covered. Existing contextual F/tap interaction hints remain registry-owned and working.
+- Viewport zoom lock, scene/storefronts, New Moon assets, NPC admission and Bloom are unchanged. Only DOM/CSS behavior changes; no rendering passes, dependencies or workflows are added.
+
+### Round 2 verification
+
+- Gallery build and `--check`: RC 0. SSOT: RC 0, no new debt. An initial font-size-based label-hiding attempt failed SSOT; replaced with hidden label spans before browser acceptance.
+- Node contracts: RC 0; 100 passed, one optional Studio comparison skipped. Tutorial regression cases cover collapse/progress/restoration, re-entry, explicit replay and dismissed-state preservation.
+- Gallery unittest: RC 0; 12 passed.
+- Full `tests/browser_gjh_v11.py`, installed Google Chrome / Metal: **RC 0 on the first invocation**, maximum logged renderer calls **195**. The process gate waited in 30-second intervals until `pgrep -f browser_gjh_v11` returned no matches. No room-sign flaky rerun was needed.
+- Browser coverage walks through all three entrances/interiors at 1440 × 900 and 390 × 844; checks chip expansion/minimization, central clearance, restoration, distinct SVGs, accessible icon-only actions, retained navigation, F/tap interaction and Run. Existing full-suite movement/joystick coverage remains passing.
+- Six screenshots captured and visually inspected: `/Users/admin/omp-tasks/out/ux2-{atrium,newmoon-entrance,shop-interior}-{1440,390}.png`. Log: `/Users/admin/omp-tasks/out/ux2-browser.log`.
+- Physical-device safe areas and screen-reader acceptance remain unperformed. This round does not change close-camera fascia framing or scene geometry.
