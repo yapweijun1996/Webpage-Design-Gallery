@@ -86,3 +86,5 @@ The lift is **FOUND and measured in motion**, not inferred from either landing. 
 Screenshots `~/omp-tasks/out/npc2-1440.png` and `npc2-390.png` each show two real NPCs, with the tutorial dismissed. Their screenshot-only smoke passed (RC=0). Desktop Detailed Bloom was asserted active on every ground-floor frame; upper-floor direct rendering retained main's eligibility rule. No camera/framing, loader, icons or interaction-registry behavior changed. Physical-device performance remains unverified.
 
 Other required checks passed (RC=0): generated `build_gallery.py --check`, all `gjh_*.test.mjs` (86 passed, one optional icon-catalog check skipped), 12 `test_gallery.py` unit tests, and `check_ssot.py`.
+
+In the expanded mall, walkers can select adjacent arcade waypoints up to 12.5 metres away. The walking rig faces the direction of travel, and seated poses face the accessible side of the bench. Run `python tests/browser_gjh_npc_facing.py` to verify the skinned face orientation and movement against the live mall colliders.

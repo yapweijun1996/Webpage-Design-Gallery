@@ -896,7 +896,7 @@ def run(capture=False):
                         page.screenshot(path=str(review / f'walking-{width}.png'), scale='css')
                         draw_calls['walking'] = moved['drawCalls']
                         ran = drive(page, 300, right=1, run=True)
-                        assert ran['animation']=='run' and ran['x'] > moved['x']+1.2, ran
+                        assert ran['animation']=='run' and 1.8 < ran['x']-moved['x'] < 2.3, ran
                         # Repeated high-speed steps cannot tunnel through the outer wall.
                         stopped = drive(page, 6000, right=1, run=True)
                         assert 14 < stopped['x'] < 14.6, stopped

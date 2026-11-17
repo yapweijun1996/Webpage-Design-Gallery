@@ -174,17 +174,20 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const running = !pushing && (injected?.run ?? ((stickPointer !== null && runToggle) || keys.has('ShiftLeft') || keys.has('ShiftRight')));
     const turning = (keys.has('KeyQ') ? 1 : 0) - (keys.has('KeyE') ? 1 : 0);
     yaw += turning * (110 * Math.PI / 180) * dt;
-    const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 5 : 2.65;
+    const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 7.5 : 2.65;
     const dx = (-Math.sin(yaw) * forward + Math.cos(yaw) * right) / length, dz = (-Math.cos(yaw) * forward - Math.sin(yaw) * right) / length;
     vertical = controller.computedGrounded() ? -.5 : Math.max(-18, vertical - 24 * dt);
     movement.x = dx * speed * dt; movement.y = vertical * dt; movement.z = dz * speed * dt;
     controller.computeColliderMovement(capsule, movement);
     const corrected = controller.computedMovement(), position = body.translation();
     next.x = position.x + corrected.x; next.y = position.y + corrected.y; next.z = position.z + corrected.z; body.setNextKinematicTranslation(next);
-    const walking = Math.hypot(corrected.x, corrected.z) > .001;
+    const distance = Math.hypot(corrected.x, corrected.z);
+    const walking = distance > .001;
     const state = walking ? running ? 'run' : 'walk' : 'idle';
     const requested = Math.hypot(forward, right) > .001 ? running ? 'run' : 'walk' : 'idle';
-    character.update(state, dt, requested);
+    // The in-place sprint originally covered 5 metres per second at normal playback.
+    const sprintRate = running && dt > 0 ? Math.min(speed, distance / dt) / 5 : 1;
+    character.update(state, dt, requested, sprintRate);
     if(actionView?.kind==='collection'&&!character.state.collection.active)restoreActionView();
     if (walking || turning) {
       const angle = walking ? Math.atan2(-dx, -dz) : yaw, delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));

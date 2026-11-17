@@ -73,7 +73,8 @@ async function createCharacter(T) {
   const resolveLocomotion = createLocomotionContinuity();
   actions.idle.paused = reducedMotion.matches;
   mixer.update(0);
-  function update(actual, dt, requested = actual) {
+  function update(actual, dt, requested = actual, sprintRate = 1) {
+    actions.run.setEffectiveTimeScale(sprintRate);
     const state = resolveLocomotion(actual, requested, dt);
     if (state !== animation) {
       if (state !== "idle") {
@@ -588,7 +589,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const running = !pushing && (injected?.run ?? (stickPointer !== null && runToggle || keys.has("ShiftLeft") || keys.has("ShiftRight")));
     const turning = (keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0);
     yaw += turning * (110 * Math.PI / 180) * dt;
-    const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 5 : 2.65;
+    const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 7.5 : 2.65;
     const dx = (-Math.sin(yaw) * forward + Math.cos(yaw) * right) / length, dz = (-Math.cos(yaw) * forward - Math.sin(yaw) * right) / length;
     vertical = controller.computedGrounded() ? -0.5 : Math.max(-18, vertical - 24 * dt);
     movement.x = dx * speed * dt;
@@ -600,10 +601,12 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     next.y = position.y + corrected.y;
     next.z = position.z + corrected.z;
     body.setNextKinematicTranslation(next);
-    const walking = Math.hypot(corrected.x, corrected.z) > 0.001;
+    const distance = Math.hypot(corrected.x, corrected.z);
+    const walking = distance > 0.001;
     const state = walking ? running ? "run" : "walk" : "idle";
     const requested = Math.hypot(forward, right) > 0.001 ? running ? "run" : "walk" : "idle";
-    character.update(state, dt, requested);
+    const sprintRate = running && dt > 0 ? Math.min(speed, distance / dt) / 5 : 1;
+    character.update(state, dt, requested, sprintRate);
     if (actionView?.kind === "collection" && !character.state.collection.active)
       restoreActionView();
     if (walking || turning) {

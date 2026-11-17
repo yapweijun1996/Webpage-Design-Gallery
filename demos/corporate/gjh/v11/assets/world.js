@@ -236,7 +236,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
-    buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden:atriumLayout.garden});
+    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden:atriumLayout.garden}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);

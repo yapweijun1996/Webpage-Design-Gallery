@@ -111,13 +111,32 @@ test('distance loading, player-priority seats, quality changes and disposal',()=
   system.dispose(); assert.equal(scene.children.length,0); system.update(.016,player); assert.equal(system.state.active,0);
 });
 
-test('physics blocks spawn and paths; player proximity removes visitors',()=>{
+test('physics blocks spawn and paths; approaching a visitor does not remove it',()=>{
   const {system,scene,block}=fixture({seats:[],tier:'low'});
   block(true); system.update(.016,player); assert.equal(system.state.active,0);
   block(false); system.update(.016,player); assert.equal(system.state.active,2);
-  const p=scene.children[0].position;
+  const visitor=scene.children[0], p=visitor.position.clone();
   system.update(.016,{x:p.x,y:0,z:p.z,seatId:null});
-  assert.ok(scene.children.every(child=>Math.hypot(child.position.x-p.x,child.position.z-p.z)>=1.6));
+  assert.ok(scene.children.includes(visitor));
+});
+
+test('walking visitors face their direction of travel',()=>{
+  const {system,scene}=fixture({seats:[],tier:'low'});
+  system.update(.016,player); admitFrames(system);
+  let checked=false;
+  for(let i=0;i<150 && !checked;i++) {
+    const before=scene.children.map(visual=>({visual,position:visual.position.clone()}));
+    system.update(.1,player);
+    for(const {visual,position} of before) {
+      const displacement=visual.position.clone().sub(position); displacement.y=0;
+      if(displacement.length()<.001) continue;
+      const facing=visual.children[0].children[0].getWorldDirection(new T.Vector3()); facing.y=0;
+      assert.ok(facing.normalize().dot(displacement.normalize())>.99);
+      checked=true; break;
+    }
+  }
+  assert.ok(checked, 'a visitor must walk during the test');
+  system.dispose();
 });
 
 test('missing shared model disables the system without loading anything',()=>{
@@ -174,6 +193,18 @@ test('budget admission changes visibility without disturbing independent simulat
   assert.equal(system.state.active,6);
   system.setQuality({enabled:false}); assert.equal(system.state.visible,0);
   system.update(.016,player); assert.equal(system.state.active,0);
+});
+
+test('visibility does not swap visitors when the player changes nearest order',()=>{
+  const {system,scene}=fixture({tier:'low',seats:[],drawCallBudget:10});
+  system.update(.016,player); admitFrames(system); system.setDrawCallBudget(1);
+  const visible=scene.children.find(child=>child.visible);
+  assert.ok(visible);
+  const other=scene.children.find(child=>child!==visible);
+  system.update(.016,{x:other.position.x+2,y:0,z:other.position.z,seatId:null});
+  assert.equal(visible.visible,true);
+  assert.equal(other.visible,false);
+  system.dispose();
 });
 
 test('compatible skinned and static parts merge once with owned buffers and independent rigs',()=>{
@@ -292,7 +323,7 @@ test('player geometry, visibility, material arrays and LOD switches cannot alter
   source.mesh.geometry=new T.SphereGeometry(); source.mesh.visible=false; source.mesh.material[0]=new T.MeshBasicMaterial({transparent:true,side:T.DoubleSide});
   near.visible=false; far.visible=true;
   system.update(.016,player);
-  const avatar=scene.children[0].children[0],mesh=meshes(avatar).find(node=>node.isSkinnedMesh);
+  const avatar=scene.children[0].children[0].children[0],mesh=meshes(avatar).find(node=>node.isSkinnedMesh);
   assert.equal(mesh.geometry,original); assert.equal(mesh.visible,true); assert.equal(mesh.material[0],material);
   const copyLod=avatar.children.find(node=>node.isLOD);
   assert.equal(copyLod.autoUpdate,false); assert.equal(copyLod.levels[0].object.visible,true); assert.equal(copyLod.levels[1].object.visible,false);

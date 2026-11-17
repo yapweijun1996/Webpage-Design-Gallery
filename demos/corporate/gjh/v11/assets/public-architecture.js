@@ -1,6 +1,6 @@
 import {loadStaticAsset} from './static-asset.js';
 // Fit the public rooms to the existing circulation and collision footprints.
-// All architecture except the printed court directory joins the world's batches.
+// The authored directory and chandelier keep their exported geometry.
 export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
@@ -200,6 +200,25 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     box('wood',x,.30,z,1.40,.60,1.40,true);
     tree(x,z,4.55);
   }
+  // A03's trailing greenery softens the upper clerestory. Planter boxes
+  // and folded blades use the existing timber and canopy instance batches.
+  for (let bay=0; bay<5; bay++) {
+    for (const north of [true,false]) {
+      const x=north ? -12.9+4.3*bay : -15.80;
+      const z=north ? -2.34 : .20+4.3*bay;
+      box('oak',x,10.55,z,north ? 2.7 : .38,.26,north ? .38 : 2.7);
+      for(let stem=0;stem<8;stem++){
+        const along=-1.17+stem*.335;
+        const count=4+Math.floor(random()*5);
+        for(let n=0;n<count;n++){
+          const offset=along+.10*Math.sin(n*.75+stem);
+          const front=.20+.055*Math.cos(n*.66);
+          solid('publicLeaf',leafColors[(stem+n)%2],x+(north?offset:front),10.78-n*.13,
+            z+(north?front:offset),.58,1,.55, (north?0:Math.PI/2)+(n%2?-.63:.63),.78,'YXZ');
+        }
+      }
+    }
+  }
   // This original gallery fixture is a static sign beside the actual lift.
   // Optional loading never delays the first interactive frame.
   const totem = new T.Group();
@@ -250,4 +269,32 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     box('glow',x,.32,garden.z+1.47,2.25,.025,.02);
   }
   lightPool(garden.x,.053,garden.z+1.7,9,2.5);
+
+  // The ceiling plate meets the underside of the central vault rib. The
+  // pendant tips stay 6m above the floor, clear of visitors and the camera.
+  const chandelier = new T.Group();
+  chandelier.name='Gallery atrium chandelier';
+  chandelier.position.set(10,5.98,30.55);
+  chandelier.visible=false;
+  scene.add(chandelier);
+  let requested=false;
+  async function loadChandelier() {
+    if (!chandelier.visible) { requested=false; return; }
+    const record=await loadStaticAsset(T,{file:'atrium-chandelier.glb',asset_id:'ASSET_AtriumChandelier',
+      sha256:'dd38e05584ce57f01a5323951254ef63c47fbea61b57ece525fc0ef5bfe5fb26',
+      dimensions_m:[3,2,3],rootExtras:{units:'metres'}},import.meta.url);
+    chandelier.userData.sourceStatus=record.status;
+    for(const primitive of record.primitives){
+      const mesh=new T.Mesh(primitive.geometry,primitive.material);
+      mesh.applyMatrix4(primitive.matrix);chandelier.add(mesh);
+    }
+  }
+  return function updateChandelier(visitor) {
+    const dx=visitor.x-chandelier.position.x,dz=visitor.z-chandelier.position.z;
+    chandelier.visible=visitor.y<5 && dx*dx+dz*dz<24*24;
+    if (!chandelier.visible || requested) return;
+    requested=true;
+    if ('requestIdleCallback' in window) window.requestIdleCallback(loadChandelier,{timeout:1500});
+    else setTimeout(loadChandelier,0);
+  };
 }

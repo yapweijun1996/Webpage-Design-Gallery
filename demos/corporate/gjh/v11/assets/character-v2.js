@@ -39,7 +39,8 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const resolveLocomotion = createLocomotionContinuity();
   let animation = 'idle', seatWeight = 0, pushing = false, count = 0;
-  function update(actual, dt, requested = actual) {
+  function update(actual, dt, requested = actual, sprintRate = 1) {
+    actions.run.setEffectiveTimeScale(sprintRate);
     const movement = resolveLocomotion(actual, requested, dt);
     const target = pushing && movement !== 'idle' ? 'push' : movement;
     if (target !== animation) {

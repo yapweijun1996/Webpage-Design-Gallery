@@ -68,7 +68,8 @@ export async function createCharacter(T) {
   actions.idle.paused = reducedMotion.matches;
   mixer.update(0);
 
-  function update(actual, dt, requested = actual) {
+  function update(actual, dt, requested = actual, sprintRate = 1) {
+    actions.run.setEffectiveTimeScale(sprintRate);
     const state = resolveLocomotion(actual, requested, dt);
     if (state !== animation) {
       // Preserve footfall phase when changing pace, including interrupted fades.

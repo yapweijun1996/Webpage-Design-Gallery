@@ -125,6 +125,8 @@ export function cloneNpcRig(source) {
 export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, lastPlayer=null;
   let admission=nextNpcAdmission();
+  // Expanded arcade waypoints are up to twelve metres apart.
+  const maxLeg = expanded ? 12.5 : 9;
   const visitors=[], routes=NPC_ROUTES[expanded?'expanded':'classic'].map(([x,z])=>({x,y:0,z}));
   const clips=Object.fromEntries(['idle','walk','sit'].map(name=>[name,source?.animations?.find(clip=>clip.name===name)]));
   const available=Boolean(source?.scene && Object.values(clips).every(clip=>clip && clip.duration>0 && clip.tracks.length));
@@ -150,15 +152,30 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
   const callsPerNpc=template?visibleDrawCalls(template):0;
   const limitForSettings=()=>available && !disposed ? npcLimit(settings) : 0;
   function applyVisibility() {
-    const ordered=lastPlayer?[...visitors].sort((a,b)=>distance(a.visual.position,lastPlayer)-distance(b.visual.position,lastPlayer)):visitors;
-    ordered.forEach((npc,i)=>{npc.visual.visible=showing && i<admission.admitted;});
-    return showing?Math.min(admission.admitted,visitors.length):0;
+    // Change membership only when a slot opens or closes. Crossing another
+    // visitor's distance must not cause either avatar to blink out of view.
+    const target = Math.min(visitors.length,admission.admitted);
+    let count = 0;
+    for (const npc of visitors) if (npc.admitted) count++;
+    while (count !== target) {
+      const add = count < target;
+      let choice = null, best = add ? Infinity : -Infinity;
+      for (const npc of visitors) {
+        if (npc.admitted === add) continue;
+        const d = lastPlayer ? distance(npc.visual.position,lastPlayer) : 0;
+        if (add ? d < best : d > best) { best=d; choice=npc; }
+      }
+      choice.admitted=add;
+      count += add ? 1 : -1;
+    }
+    for (const npc of visitors) npc.visual.visible=showing && npc.admitted;
+    return showing ? target : 0;
   }
   function measure(nonNpcCalls,advance) {
     admission=nextNpcAdmission(admission,{nonNpcCalls,callsPerNpc,limit:limitForSettings(),active:visitors.length,drawCallBudget:settings.drawCallBudget,advance});
     return applyVisibility();
   }
-  const shape=new R.Capsule(.55,.3), rotation={x:0,y:0,z:0,w:1};
+  const shape=new R.Capsule(.55,.3), rotation={x:0,y:0,z:0,w:1}, facingOffset=new T.Quaternion().setFromAxisAngle(T.Object3D.DEFAULT_UP,Math.PI);
   const clear = p => !physics.intersectionWithShape({x:p.x,y:(p.y||0)+.91,z:p.z},rotation,shape,undefined,undefined,playerCollider,playerBody);
   function clearPath(a,b) {
     const steps=Math.max(1,Math.ceil(distance(a,b)/.3));
@@ -176,10 +193,11 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     for (const npc of [...visitors]) remove(npc);
   }
   function spawn(point,seat=null) {
-    const avatar=cloneNpcRig(template), visual=new T.Group();
-    avatar.visible=true; avatar.rotation.y=Math.PI; visual.add(avatar); visual.position.set(point.x,point.y||0,point.z);
+    const avatar=cloneNpcRig(template), visual=new T.Group(), facing=new T.Group();
+    // Animation tracks can overwrite the glTF root quaternion; keep the facing offset outside the rig.
+    avatar.visible=true; facing.add(avatar); visual.add(facing); visual.position.set(point.x,point.y||0,point.z);
     visual.rotation.y=seat?.angle||0; avatar.position.y=seat?-.13:0;
-    visual.layers.set(2);
+    visual.layers.set(2); facing.layers.set(2);
     avatar.traverse(node=>{
       node.layers.set(2);
       if(node.isMesh){node.castShadow=false;node.receiveShadow=true;node.raycast=ignoreRaycast;}
@@ -188,13 +206,8 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     const mixer=new T.AnimationMixer(avatar), actions={};
     for(const name of ['idle','walk','sit']) { actions[name]=mixer.clipAction(clips[name]); actions[name].setEffectiveWeight(name===(seat?'sit':'idle')?1:0).play(); }
     actions.sit.paused=true; actions.sit.time=Math.max(0,clips.sit.duration-.00001);
-    mixer.update(0); scene.add(visual);
-    visitors.push({visual,avatar,mixer,actions,seat,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,seatTime:0});
-  }
-  function setMode(npc,mode) {
-    if(npc.mode===mode) return;
-    npc.mode=mode;
-    for(const [name,action] of Object.entries(npc.actions)) action.setEffectiveWeight(name===mode?1:0);
+    mixer.update(0); facing.quaternion.copy(avatar.quaternion).invert().premultiply(facingOffset); scene.add(visual);
+    visitors.push({visual,facing,avatar,mixer,actions,seat,admitted:false,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,seatTime:0,blockedTime:0});
   }
   function releaseSeat(id) {
     const npc=visitors.find(candidate=>candidate.seat?.id===id);
@@ -210,26 +223,35 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     seatCooldown=Math.max(0,seatCooldown-dt);
     for(const npc of [...visitors]) {
       const p=npc.visual.position;
-      if(visitors.length>limit || Math.abs(player.y-p.y)>3 || distance(p,player)>UNLOAD_DISTANCE || distance(p,player)<PLAYER_CLEARANCE || npc.seat?.id===player.seatId) { remove(npc); continue; }
+      if(visitors.length>limit || Math.abs(player.y-p.y)>3 || distance(p,player)>UNLOAD_DISTANCE || (npc.seat && npc.seat.id===player.seatId)) { remove(npc); continue; }
       if(npc.seat && (npc.seatTime+=dt)>=18) { remove(npc); seatCooldown=20; continue; }
       if(!npc.seat) {
         npc.delay-=dt;
         if(!npc.target && npc.delay<=0) {
           for(let i=0;i<routes.length;i++) {
             const target=routes[(npc.route+i)%routes.length];
-            if(distance(p,target)>1 && distance(p,target)<9 && clearPath(p,target)) { npc.target=target; npc.route=(npc.route+i+1)%routes.length; break; }
+            if(distance(p,target)>1 && distance(p,target)<=maxLeg && clearPath(p,target)) { npc.target=target; npc.route=(npc.route+i+1)%routes.length; break; }
           }
           if(!npc.target) npc.delay=3;
         }
         if(npc.target) {
           const d=distance(p,npc.target), step=Math.min(d,dt*.7);
           const next={x:p.x+(npc.target.x-p.x)*step/d,y:p.y,z:p.z+(npc.target.z-p.z)*step/d};
-          if(distance(next,player)<PLAYER_CLEARANCE+0.4 || visitors.some(other=>other!==npc && distance(next,other.visual.position)<1.2) || !clear(next)) setMode(npc,'idle');
-          else { p.x=next.x; p.z=next.z; npc.visual.rotation.y=Math.atan2(-npc.target.x+p.x,-npc.target.z+p.z); setMode(npc,'walk'); }
-          if(d<=step+.001) { npc.target=null; npc.delay=2+(serial++%4); setMode(npc,'idle'); }
+          if(distance(next,player)<PLAYER_CLEARANCE+0.4 || visitors.some(other=>other!==npc && distance(next,other.visual.position)<1.2) || !clear(next)) {
+            npc.mode='idle';
+            // A moving visitor or player may block a route indefinitely; retry another route.
+            if ((npc.blockedTime+=dt)>=2) { npc.target=null; npc.delay=1; npc.blockedTime=0; }
+          } else { p.x=next.x; p.z=next.z; npc.blockedTime=0; npc.visual.rotation.y=Math.atan2(-npc.target.x+p.x,-npc.target.z+p.z); npc.mode='walk'; }
+          if(d<=step+.001) { npc.target=null; npc.delay=2+(serial++%4); npc.mode='idle'; }
         }
       }
+      const blend=1-Math.exp(-10*dt);
+      for(const [name,action] of Object.entries(npc.actions)) {
+        const target=name===npc.mode?1:0;
+        action.setEffectiveWeight(action.getEffectiveWeight()+(target-action.getEffectiveWeight())*blend);
+      }
       npc.mixer.update(dt);
+      npc.facing.quaternion.copy(npc.avatar.quaternion).invert().premultiply(facingOffset);
     }
     if(!limit || Math.abs(player.y)>3) { measure(admission.nonNpcCalls,false); return; }
     // Seat anchors are from the world's registered seats, not invented furniture.

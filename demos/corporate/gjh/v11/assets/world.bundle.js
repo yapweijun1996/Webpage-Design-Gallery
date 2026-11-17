@@ -306,6 +306,22 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("wood", x, 0.3, z, 1.4, 0.6, 1.4, true);
     tree(x, z, 4.55);
   }
+  for (let bay = 0;bay < 5; bay++) {
+    for (const north of [true, false]) {
+      const x = north ? -12.9 + 4.3 * bay : -15.8;
+      const z = north ? -2.34 : 0.2 + 4.3 * bay;
+      box("oak", x, 10.55, z, north ? 2.7 : 0.38, 0.26, north ? 0.38 : 2.7);
+      for (let stem = 0;stem < 8; stem++) {
+        const along = -1.17 + stem * 0.335;
+        const count = 4 + Math.floor(random() * 5);
+        for (let n = 0;n < count; n++) {
+          const offset = along + 0.1 * Math.sin(n * 0.75 + stem);
+          const front = 0.2 + 0.055 * Math.cos(n * 0.66);
+          solid("publicLeaf", leafColors[(stem + n) % 2], x + (north ? offset : front), 10.78 - n * 0.13, z + (north ? front : offset), 0.58, 1, 0.55, (north ? 0 : Math.PI / 2) + (n % 2 ? -0.63 : 0.63), 0.78, "YXZ");
+        }
+      }
+    }
+  }
   const totem = new T.Group;
   totem.name = "Gallery lift directory standee";
   totem.position.set(-6.1, 0, 13.75);
@@ -385,6 +401,42 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("glow", x, 0.32, garden.z + 1.47, 2.25, 0.025, 0.02);
   }
   lightPool(garden.x, 0.053, garden.z + 1.7, 9, 2.5);
+  const chandelier = new T.Group;
+  chandelier.name = "Gallery atrium chandelier";
+  chandelier.position.set(10, 5.98, 30.55);
+  chandelier.visible = false;
+  scene.add(chandelier);
+  let requested = false;
+  async function loadChandelier() {
+    if (!chandelier.visible) {
+      requested = false;
+      return;
+    }
+    const record = await loadStaticAsset(T, {
+      file: "atrium-chandelier.glb",
+      asset_id: "ASSET_AtriumChandelier",
+      sha256: "dd38e05584ce57f01a5323951254ef63c47fbea61b57ece525fc0ef5bfe5fb26",
+      dimensions_m: [3, 2, 3],
+      rootExtras: { units: "metres" }
+    }, import.meta.url);
+    chandelier.userData.sourceStatus = record.status;
+    for (const primitive of record.primitives) {
+      const mesh = new T.Mesh(primitive.geometry, primitive.material);
+      mesh.applyMatrix4(primitive.matrix);
+      chandelier.add(mesh);
+    }
+  }
+  return function updateChandelier(visitor) {
+    const dx = visitor.x - chandelier.position.x, dz = visitor.z - chandelier.position.z;
+    chandelier.visible = visitor.y < 5 && dx * dx + dz * dz < 24 * 24;
+    if (!chandelier.visible || requested)
+      return;
+    requested = true;
+    if ("requestIdleCallback" in window)
+      window.requestIdleCallback(loadChandelier, { timeout: 1500 });
+    else
+      setTimeout(loadChandelier, 0);
+  };
 }
 
 // demos/corporate/gjh/v11/assets/world.js
@@ -2926,7 +2978,7 @@ async function createWorld(T, R, physics, expanded = false) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden: atriumLayout.garden });
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden: atriumLayout.garden }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
