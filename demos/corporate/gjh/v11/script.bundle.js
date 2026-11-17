@@ -1708,6 +1708,7 @@ function createUI(expanded = false) {
   let currentZone = "atrium";
   let externalPaused = false;
   let nearby = null;
+  let interactionRegistry = null, selectedInteraction = null;
   let returnFocus = null;
   let teleportListener = null;
   let viewListener = null;
@@ -1827,23 +1828,16 @@ function createUI(expanded = false) {
     viewListener?.(next);
     notifyMode();
   }
-  function inspect(id) {
-    const record = records.get(id);
-    if (!record || dialog.open || bag.open || guidePaused || amenityPanel.dialog.open)
-      return;
-    shelfFocus?.close();
-    if (record.action === "amenity") {
-      openAmenity(id);
-      return;
-    }
-    if (record.action === "elevator") {
+  const interactionHandlers = {
+    amenity: (id) => openAmenity(id),
+    elevator: () => {
       const calling = currentElevatorState && currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0);
       const ok = elevatorListener?.();
       announce(ok ? calling ? "Elevator called. Wait here, then choose Ride when it arrives." : "Elevator travelling to the other level." : "Wait for the elevator, return held products and stow the cart before travelling.");
       scene.focus({ preventScroll: true });
-      return;
-    }
-    if (record.action === "seat") {
+      return ok;
+    },
+    seat: (id) => {
       const ok = seatListener?.(true, id);
       seatNotice = null;
       if (!ok) {
@@ -1852,13 +1846,18 @@ function createUI(expanded = false) {
         announce(seatNotice);
       }
       scene.focus({ preventScroll: true });
-      return;
-    }
-    if (record.action === "map") {
+      return ok;
+    },
+    map: () => {
       if (openMap())
         announce(expanded ? "The directory kiosk shows the expanded mall map." : "The kiosk screen is decorative. Use this three-store map to choose an entrance.");
-      return;
     }
+  };
+  function inspect(id) {
+    const record = records.get(id);
+    if (!record || dialog.open || bag.open || guidePaused || amenityPanel.dialog.open)
+      return;
+    shelfFocus?.close();
     if (record.action === "brand-story") {
       returnFocus = document.activeElement;
       onboarding.report("inspect");
@@ -1885,7 +1884,8 @@ function createUI(expanded = false) {
     notifyMode();
   }
   function inspectNearby(id) {
-    inspect(id);
+    if (selectedInteraction?.id === id)
+      interactionRegistry?.dispatch(selectedInteraction);
   }
   function showGuide(event) {
     if (!available || !showing3D || guide.open || dialog.open || bag.open || amenityPanel.dialog.open || externalPaused || document.hidden)
@@ -2054,7 +2054,7 @@ function createUI(expanded = false) {
     const store = spatial.get(zone);
     if (!showing3D || dialog.open || guidePaused || !store?.available)
       return;
-    if (!teleportListener?.(zone)) {
+    if (!interactionRegistry?.dispatch({ kind: "travel", handler: () => teleportListener?.(zone) })) {
       announce("Store travel is unavailable right now. Please try again.");
       return;
     }
@@ -2098,6 +2098,39 @@ function createUI(expanded = false) {
   }
   document.getElementById("list-title").tabIndex = -1;
   return {
+    setInteractionRegistry(registry) {
+      interactionRegistry = registry;
+    },
+    describeInteraction(item) {
+      if (item.kind === "open" && item.door) {
+        const name = `${spatial.get(item.door.zone)?.label || "Store"} door`;
+        records.set(item.id, { name, action: "door" });
+        return {
+          kind: "open",
+          prompt: () => item.door.targetOpen ? "Close" : "Open",
+          handler: () => {
+            if (dialog.open || bag.open || guidePaused || amenityPanel.dialog.open)
+              return false;
+            item.door.toggle();
+            scene.focus({ preventScroll: true });
+            return true;
+          }
+        };
+      }
+      const record = records.get(item.id);
+      const kind = item.kind || (record?.action === "seat" ? "sit" : record?.action === "elevator" ? "travel" : record?.action === "map" ? "open" : "inspect");
+      return {
+        kind,
+        prompt: kind === "sit" ? "Sit" : kind === "open" ? "Open" : kind === "travel" ? "Travel" : "Inspect",
+        availability: () => records.has(item.id),
+        handler: () => {
+          if (dialog.open || bag.open || guidePaused || amenityPanel.dialog.open)
+            return false;
+          shelfFocus?.close();
+          return (interactionHandlers[records.get(item.id)?.action] || inspect)(item.id);
+        }
+      };
+    },
     modeSignals,
     clearGuidance() {
       if (!nearbyDistance.hidden)
@@ -2216,7 +2249,7 @@ function createUI(expanded = false) {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, yaw, nearby: nextNearby, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2 }) {
+    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2 }) {
       if (!guidePaused && showing3D && previousTutorialPose) {
         if (Math.hypot(x - previousTutorialPose.x, z - previousTutorialPose.z) > 0.02)
           onboarding.report("move");
@@ -2250,6 +2283,7 @@ function createUI(expanded = false) {
       }
       currentElevatorState = elevatorState;
       currentElevatorUpper = elevatorUpper;
+      selectedInteraction = interaction;
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
         nearby = next;
@@ -2280,7 +2314,8 @@ function createUI(expanded = false) {
         const amenityAction = nearby === "service-desk" ? "Get help" : nearby?.startsWith("wayfinding-") ? "Choose a store" : nearby === "featured-showcase" ? "View collection" : null;
         const isMap = record?.action === "map";
         const touchOnly = matchMedia("(pointer: coarse)").matches;
-        inspectButton.textContent = isMap ? touchOnly ? "Tap to open map" : "Press F / tap Map" : touchOnly ? "Tap Inspect" : "Press F / tap Inspect";
+        const prompt = typeof selectedInteraction?.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction?.prompt || "Inspect";
+        inspectButton.textContent = isMap ? touchOnly ? "Tap to open map" : "Press F / tap Map" : touchOnly ? `Tap ${prompt}` : `Press F / tap ${prompt}`;
         if (isShelf)
           inspectButton.textContent = "Inspect";
         if (isBrandStory)
@@ -2301,15 +2336,21 @@ function createUI(expanded = false) {
         nearbyName.textContent = `${seatName || "Bench"} · ${seatPhase === "align" ? "Aligning" : seatPhase === "sit" ? "Sitting down" : seatPhase === "stand" ? "Standing up" : "Seated"}`;
         inspectButton.textContent = seatPhase === "stand" ? "Standing up…" : seatPhase === "seated" ? "Stand up" : "Cancel / stand";
         inspectButton.setAttribute("aria-label", seatPhase === "seated" ? "Stand up from bench" : "Cancel sitting and stand");
-      } else if (nearby && records.get(nearby).action === "seat") {
+      } else if (nearby && selectedInteraction?.kind === "sit") {
+        const action = typeof selectedInteraction.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction.prompt;
         nearbyName.textContent = `${records.get(nearby).name} · Sit here`;
-        inspectButton.textContent = touchGuide.matches ? "Tap Sit" : "Press F / tap Sit";
+        inspectButton.textContent = touchGuide.matches ? `Tap ${action}` : `Press F / tap ${action}`;
         inspectButton.setAttribute("aria-label", `Sit on ${records.get(nearby).name}`);
       } else if (nearby && records.get(nearby).action === "elevator") {
         nearbyName.textContent = `Elevator · ${zone === "upper" ? "Upper level" : "Ground floor"}`;
         const action = elevatorState ? elevatorState.calling ? "Calling elevator" : elevatorState.docked !== (zone === "upper" ? elevatorUpper : 0) ? "Call elevator" : `Ride to ${zone === "upper" ? "ground floor" : "upper landing"}` : "Change level";
         inspectButton.textContent = action;
         inspectButton.setAttribute("aria-label", elevatorState ? action : "Use elevator to change levels");
+      } else if (nearby && selectedInteraction?.kind === "open" && selectedInteraction.door) {
+        const action = typeof selectedInteraction.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction.prompt;
+        nearbyName.textContent = records.get(nearby).name;
+        inspectButton.textContent = touchGuide.matches ? `Tap ${action}` : `Press F / tap ${action}`;
+        inspectButton.setAttribute("aria-label", `${action} ${records.get(nearby).name}`);
       }
       const cart = updateCartControls();
       document.body.classList.toggle("is-pushing", Boolean(cart.active));
@@ -2700,6 +2741,59 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   return { update, applyTheme, restoreEnvironment, render };
 }
 
+// demos/corporate/gjh/v11/assets/interaction-registry.js
+function createInteractionRegistry(entries, describe = () => ({})) {
+  const cache = new WeakMap;
+  let selectionContext = {};
+  function normalize(source) {
+    let item = cache.get(source);
+    if (!item) {
+      const defaults = describe(source) || {};
+      const anchor = source.anchor || { x: source.x, y: source.y ?? 0, z: source.z };
+      item = {
+        ...defaults,
+        ...source,
+        anchor,
+        x: anchor.x,
+        y: anchor.y ?? source.y ?? 0,
+        z: anchor.z,
+        floor: source.floor ?? source.y ?? 0,
+        availability: source.availability || defaults.availability || (() => true),
+        prompt: source.prompt ?? defaults.prompt ?? "",
+        handler: source.handler || defaults.handler
+      };
+      cache.set(source, item);
+    }
+    return item;
+  }
+  function nearest(position, context = {}) {
+    let selected = null, distance = Infinity;
+    selectionContext = context;
+    if (context.travelling)
+      return { item: null, distance };
+    for (const source of entries) {
+      const item = normalize(source);
+      const floor = typeof item.floor === "number" ? item.floor : item.y;
+      if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
+        continue;
+      if (item.seat && (position.z - item.seat.z) * item.seat.facing > -0.25)
+        continue;
+      const d = Math.hypot(position.x - item.anchor.x, position.z - item.anchor.z);
+      if (d < item.radius && d < distance) {
+        selected = item;
+        distance = d;
+      }
+    }
+    return { item: selected, distance };
+  }
+  function dispatch(item, context = selectionContext) {
+    if (!item || item.availability && !item.availability(context, item))
+      return false;
+    return item.handler?.(item, context) ?? false;
+  }
+  return { normalize, nearest, dispatch };
+}
+
 // demos/corporate/gjh/v11/script.js
 var expanded = new URLSearchParams(location.search).get("layout") !== "classic";
 document.body.classList.toggle("is-expanded", expanded);
@@ -2739,6 +2833,7 @@ var quality = createGraphicsQuality(() => resize());
 var selectedInteraction = null;
 var interactionDistance = Infinity;
 var windowBlurred = false;
+var interactions;
 function hideGuidance() {
   guidance?.hide();
   shelfFocus?.hideNearby();
@@ -2963,32 +3058,22 @@ function updateHUD() {
       render();
     }).catch((error) => console.error("Upper deck brand wall could not load:", error));
   }
-  nearby = null;
-  selectedInteraction = null;
-  let best = Infinity;
-  for (const item of world.interactables) {
-    if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > 0.5))
-      continue;
-    if (item.seat && (p.z - item.seat.z) * item.seat.facing > -0.25)
-      continue;
-    const distance = Math.hypot(p.x - item.x, p.z - item.z);
-    if (distance < item.radius && distance < best) {
-      nearby = item.id;
-      selectedInteraction = item;
-      best = distance;
-    }
-  }
-  interactionDistance = best;
+  const selection = interactions.nearest(p, { travelling: Boolean(p.elevatorTravel), player: p });
+  selectedInteraction = selection.item;
+  interactionDistance = selection.distance;
+  nearby = selectedInteraction?.id || null;
   productControl?.update(p, nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper });
+  ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper });
 }
 function tick() {
   if (modes.paused() || expanded && windowBlurred)
     return;
   const p = player.state;
   for (const door of world.doors) {
-    const open = !expanded && p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
+    if (expanded && (p.y > 2 || Math.hypot(p.x - door.x, p.z) > 5))
+      door.targetOpen = false;
+    const open = expanded ? door.targetOpen : p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
     door.open = reducedMotion2.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);
@@ -3040,7 +3125,7 @@ function animate(now) {
       player.stand();
       updateHUD();
     } else
-      ui.inspect(nearby);
+      ui.inspectNearby(nearby);
   }
   previousGamepadInspect = inspectPressed;
   const elapsed = Math.min(0.1, Math.max(0, (now - last) / 1000));
@@ -3414,9 +3499,11 @@ async function initialize() {
     }
   });
   ui.setShelfFocus(shelfFocus);
+  interactions = createInteractionRegistry(world.interactables, (item) => ui.describeInteraction(item));
+  ui.setInteractionRegistry(interactions);
   if (elevator) {
     const { installPhysicalProductControl } = await import("./assets/visitor-v2-product-ui.js");
-    productControl = installPhysicalProductControl(player, world, () => modes.paused());
+    productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions);
     const { installVisitorV2Controls } = await import("./assets/visitor-v2-controls.js");
     installVisitorV2Controls(document.querySelector("#controls-copy"), (changes) => {
       player.customize(changes);

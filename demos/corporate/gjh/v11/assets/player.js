@@ -254,11 +254,11 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function clearAt(position,ignoreBench=false){return !physics.intersectionWithShape(position,rotation,walkingShape,undefined,undefined,capsule,body,ignoreBench?c=>c.handle!==seat.collider:undefined);}
   function clearPath(from,to,ignoreBench=false){const steps=Math.max(1,Math.ceil(Math.hypot(to.x-from.x,to.y-from.y,to.z-from.z)/.08));for(let i=0;i<=steps;i++){const t=i/steps;if(!clearAt({x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t,z:from.z+(to.z-from.z)*t},ignoreBench))return false;}return true;}
   function moveSeat(position){body.setTranslation(position,true);body.setNextKinematicTranslation(position);}
-  function finishStand(){moveSeat({x:seat.exitX,y:.91,z:seat.exitZ});seated=false;seatPhase='idle';seat=null;restoreActionView();character.setSeated(false);capsule.setEnabled(true);clearInput();injected=null;vertical=0;}
+  function finishStand(){moveSeat({x:seat.exitX,y:seat.floor+.91,z:seat.exitZ});seated=false;seatPhase='idle';seat=null;restoreActionView();character.setSeated(false);capsule.setEnabled(true);clearInput();injected=null;vertical=0;}
   function updateSeat(dt){
     if(seatPhase==='seated')return;
     seatTime+=dt;const duration=seatPhase==='align'?.35:.85,t=Math.min(1,seatTime/duration),e=t*t*(3-2*t);
-    const end=seatPhase==='sit'?{x:seat.x,y:seat.y+.875,z:seat.z}:{x:seat.exitX,y:.91,z:seat.exitZ};
+    const end=seatPhase==='sit'?{x:seat.x,y:seat.y+.875,z:seat.z}:{x:seat.exitX,y:seat.floor+.91,z:seat.exitZ};
     moveSeat({x:seatFrom.x+(end.x-seatFrom.x)*e,y:seatFrom.y+(end.y-seatFrom.y)*e,z:seatFrom.z+(end.z-seatFrom.z)*e});
     const delta=Math.atan2(Math.sin(seat.angle-seatStartAngle),Math.cos(seat.angle-seatStartAngle));visual.rotation.y=seatStartAngle+delta*e;
     character.setSeatProgress(seatPhase==='sit'?e:seatPhase==='stand'?seatStartWeight*(1-e):0);
@@ -266,8 +266,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function sit(id) {
     if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
-    if(Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>1.65||(p.z-candidate.z)*candidate.facing>-.25)return false;
-    seat=candidate;const exit={x:seat.exitX,y:.91,z:seat.exitZ},target={x:seat.x,y:seat.y+.875,z:seat.z};
+    if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||(p.z-candidate.z)*candidate.facing>-.25)return false;
+    seat=candidate;const exit={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ},target={x:seat.x,y:seat.y+.875,z:seat.z};
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
     clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=visual.rotation.y;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI+seat.cameraOffset);vertical=0;
     if(reduceSeatMotion()){moveSeat(target);visual.rotation.y=seat.angle;seatPhase='seated';character.setSeated(true);}
@@ -275,7 +275,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function stand(instant=false) {
     if(!seated)return false;if(seatPhase==='stand'&&!instant)return true;
-    const position={x:seat.exitX,y:.91,z:seat.exitZ};
+    const position={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ};
     if(!clearAt(position)||!clearPath(body.translation(),position,true))return false;
     clearInput();injected=null;seatFrom={...body.translation()};seatStartAngle=visual.rotation.y;seatStartWeight=character.state.seatWeight;seatTime=0;seatPhase='stand';
     if(instant||reduceSeatMotion())finishStand();

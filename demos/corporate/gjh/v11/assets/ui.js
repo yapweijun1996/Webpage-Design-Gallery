@@ -342,6 +342,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let currentZone = 'atrium';
   let externalPaused = false;
   let nearby = null;
+  let interactionRegistry = null, selectedInteraction = null;
   let returnFocus = null;
   let teleportListener = null;
   let viewListener = null;
@@ -428,18 +429,17 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     viewListener?.(next);
     notifyMode();
   }
+  const interactionHandlers = {
+    amenity: id => openAmenity(id),
+    elevator: () => {const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator, return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return ok;},
+    seat: id => {const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce(seatNotice);}scene.focus({preventScroll:true});return ok;},
+    map: () => {if (openMap()) announce(expanded?'The directory kiosk shows the expanded mall map.':'The kiosk screen is decorative. Use this three-store map to choose an entrance.');},
+  };
 
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || guidePaused || amenityPanel.dialog.open) return;
     shelfFocus?.close();
-    if(record.action==='amenity'){openAmenity(id);return;}
-    if(record.action==='elevator'){const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator, return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return;}
-    if(record.action==='seat'){const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce(seatNotice);}scene.focus({preventScroll:true});return;}
-    if (record.action === 'map') {
-      if (openMap()) announce(expanded?'The directory kiosk shows the expanded mall map.':'The kiosk screen is decorative. Use this three-store map to choose an entrance.');
-      return;
-    }
     if(record.action==='brand-story'){
       returnFocus=document.activeElement;
       onboarding.report('inspect');
@@ -467,7 +467,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     // presentation mode for retained lifecycle/fallback coverage, but it must
     // not be an intermediate click for a nearby SKU: the readable product
     // viewer is the first surface opened from the user's Inspect action.
-    inspect(id);
+    if (selectedInteraction?.id === id) interactionRegistry?.dispatch(selectedInteraction);
   }
 
   function showGuide(event) {
@@ -601,7 +601,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   function travelToStore(zone){
     const store=spatial.get(zone);
     if(!showing3D||dialog.open||guidePaused||!store?.available)return;
-    if(!teleportListener?.(zone)){announce('Store travel is unavailable right now. Please try again.');return;}
+    if(!interactionRegistry?.dispatch({kind:'travel',handler:()=>teleportListener?.(zone)})){announce('Store travel is unavailable right now. Please try again.');return;}
     help.open=false;if(compactMap.matches)mallMap.open=false;
     announce(`At the ${store.label} storefront.`);scene.focus({preventScroll:true});
   }
@@ -628,6 +628,23 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   document.getElementById('list-title').tabIndex = -1;
 
   return {
+    setInteractionRegistry(registry) { interactionRegistry = registry; },
+    describeInteraction(item) {
+      if (item.kind === 'open' && item.door) {
+        const name = `${spatial.get(item.door.zone)?.label || 'Store'} door`;
+        records.set(item.id, {name, action:'door'});
+        return {kind:'open', prompt:() => item.door.targetOpen ? 'Close' : 'Open',
+          handler:() => { if (dialog.open || bag.open || guidePaused || amenityPanel.dialog.open) return false; item.door.toggle(); scene.focus({preventScroll:true}); return true; }};
+      }
+      const record = records.get(item.id);
+      const kind = item.kind || (record?.action === 'seat' ? 'sit' : record?.action === 'elevator' ? 'travel' : record?.action === 'map' ? 'open' : 'inspect');
+      return {kind, prompt: kind === 'sit' ? 'Sit' : kind === 'open' ? 'Open' : kind === 'travel' ? 'Travel' : 'Inspect',
+        availability: () => records.has(item.id), handler: () => {
+          if (dialog.open || bag.open || guidePaused || amenityPanel.dialog.open) return false;
+          shelfFocus?.close();
+          return (interactionHandlers[records.get(item.id)?.action] || inspect)(item.id);
+        }};
+    },
     modeSignals,
     clearGuidance() { if (!nearbyDistance.hidden) nearbyDistance.hidden = true; },
     updateGuidance(item, distance, active) {
@@ -720,7 +737,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, yaw, nearby: nextNearby, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null,elevatorState=null,elevatorUpper=7.2 }) {
+    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null,elevatorState=null,elevatorUpper=7.2 }) {
       if (!guidePaused && showing3D && previousTutorialPose) {
         if (Math.hypot(x-previousTutorialPose.x,z-previousTutorialPose.z)>.02) onboarding.report('move');
         if (Math.abs(yaw-previousTutorialPose.yaw)>.01) onboarding.report('look');
@@ -744,6 +761,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         playerDot.setAttribute('cy', String(point.y));
       }
       currentElevatorState=elevatorState;currentElevatorUpper=elevatorUpper;
+      selectedInteraction = interaction;
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
         nearby = next;seatNotice=null;
@@ -767,7 +785,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         const amenityAction=nearby==='service-desk'?'Get help':nearby?.startsWith('wayfinding-')?'Choose a store':nearby==='featured-showcase'?'View collection':null;
         const isMap = record?.action === 'map';
         const touchOnly = matchMedia('(pointer: coarse)').matches;
-        inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? 'Tap Inspect' : 'Press F / tap Inspect');
+        const prompt = typeof selectedInteraction?.prompt === 'function' ? selectedInteraction.prompt() : selectedInteraction?.prompt || 'Inspect';
+        inspectButton.textContent = isMap ? (touchOnly ? 'Tap to open map' : 'Press F / tap Map') : (touchOnly ? `Tap ${prompt}` : `Press F / tap ${prompt}`);
         if (isShelf) inspectButton.textContent = 'Inspect';
         if(isBrandStory)inspectButton.textContent=touchOnly?'Tap story':'Press F / tap story';
         inspectButton.setAttribute('aria-label',isBrandStory?`Read the ${record.brand} brand story`:isMap?expanded?'Open the expanded mall map from the directory kiosk':'Open the three-store map from the directory kiosk':nearby?`Inspect ${records.get(nearby).name}`:'Inspect nearby display');
@@ -782,8 +801,9 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       }
       seated=isSeated;document.body.classList.toggle('is-seated',seated);
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
-      else if(nearby&&records.get(nearby).action==='seat'){nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?'Tap Sit':'Press F / tap Sit';inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
+      else if(nearby&&selectedInteraction?.kind==='sit'){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
       else if(nearby&&records.get(nearby).action==='elevator'){nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;const action=elevatorState?(elevatorState.calling?'Calling elevator':elevatorState.docked!==(zone==='upper'?elevatorUpper:0)?'Call elevator':`Ride to ${zone==='upper'?'ground floor':'upper landing'}`):'Change level';inspectButton.textContent=action;inspectButton.setAttribute('aria-label',elevatorState?action:'Use elevator to change levels');}
+      else if(nearby&&selectedInteraction?.kind==='open'&&selectedInteraction.door){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=records.get(nearby).name;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`${action} ${records.get(nearby).name}`);}
       const cart=updateCartControls();
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';

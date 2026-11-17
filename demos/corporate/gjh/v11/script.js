@@ -6,6 +6,7 @@ import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
+import {createInteractionRegistry} from './assets/interaction-registry.js';
 const expanded = new URLSearchParams(location.search).get('layout') !== 'classic';
 document.body.classList.toggle('is-expanded', expanded);
 
@@ -18,7 +19,7 @@ let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
 const quality = createGraphicsQuality(() => resize());
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
-let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false;
+let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); }
 let nearby = null, currentZone = 'atrium';
 function clearTransientState(event) {
@@ -156,23 +157,19 @@ function updateHUD() {
     world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();render();})
       .catch(error=>console.error('Upper deck brand wall could not load:',error));
   }
-  nearby = null; selectedInteraction = null; let best = Infinity;
-  for (const item of world.interactables) {
-    if (elevator && (p.elevatorTravel || Math.abs(p.y - (item.y ?? 0)) > .5)) continue;
-    if(item.seat && (p.z-item.seat.z)*item.seat.facing>-.25)continue;
-    const distance = Math.hypot(p.x - item.x, p.z - item.z);
-    if (distance < item.radius && distance < best) { nearby = item.id; selectedInteraction = item; best = distance; }
-  }
-  interactionDistance = best;
+  const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p});
+  selectedInteraction = selection.item; interactionDistance = selection.distance;
+  nearby = selectedInteraction?.id || null;
   productControl?.update(p,nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
+  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
 }
 function tick() {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   for (const door of world.doors) {
-    const open = !expanded && p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
+    if (expanded && (p.y > 2 || Math.hypot(p.x - door.x, p.z) > 5)) door.targetOpen = false;
+    const open = expanded ? door.targetOpen : p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
     door.open = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);
@@ -210,7 +207,7 @@ function animate(now) {
   if(!manual)player.setGamepadInput(!consumed&&!ui.paused()&&focused?gamepadMotion(pad):null);
   if(inspectPressed&&!previousGamepadInspect&&!consumed&&!ui.paused()&&focused&&nearby){
     player.clearInput();
-    if(player.state.seated){player.stand();updateHUD();}else ui.inspect(nearby);
+    if(player.state.seated){player.stand();updateHUD();}else ui.inspectNearby(nearby);
   }
   previousGamepadInspect=inspectPressed;
   const elapsed = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now;
@@ -403,9 +400,11 @@ async function initialize() {
     onChange: () => { syncMode(); render(); }, onDetails: ui.inspect, onAdd: ui.addToBag,
     onRestore: resized => { if (resized) player.updateCamera(0, true); }});
   ui.setShelfFocus(shelfFocus);
+  interactions = createInteractionRegistry(world.interactables, item => ui.describeInteraction(item));
+  ui.setInteractionRegistry(interactions);
   if (elevator) {
     const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
-    productControl=installPhysicalProductControl(player,world,()=>modes.paused());
+    productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions);
     const {installVisitorV2Controls} = await import('./assets/visitor-v2-controls.js');
     installVisitorV2Controls(document.querySelector('#controls-copy'), changes => { player.customize(changes); render(); });
   }

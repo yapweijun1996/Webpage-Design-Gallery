@@ -1,4 +1,4 @@
-export function installPhysicalProductControl(player,world,paused) {
+export function installPhysicalProductControl(player,world,paused,interactions) {
   document.querySelector('#visitor-motion-help').textContent='Visitor v2 reaches for physical shelf products and uses hand/foot contact adjustment. Pick up and return use a side close-up. The held-item status names the return shelf; return the item before using Cart, a seat or the elevator. Close walls temporarily hide the visitor to keep the view clear.';
   document.querySelector('#bag-description').textContent='Session-only demo selections. No payment or order. Physical products picked from a shelf are carried separately and must be returned to the same shelf before sitting, using a cart or travelling in the elevator.';
   document.querySelector('.collection-note').textContent='Bag selections are separate from physical shelf products. In the 3D aisle, use Pick up product and Return to shelf.';
@@ -8,13 +8,17 @@ export function installPhysicalProductControl(player,world,paused) {
   prompt.classList.add('has-physical-product');prompt.append(button,notice);let nearby=null;
   const heldStatus=document.querySelector('#held-product-status');
   const labels=new Map([...document.querySelectorAll('.product-card[data-product]')].map(card=>[card.dataset.product,card.querySelector('.eyebrow').textContent.trim().replaceAll(' / ',' ')]));
+  const pickupAction = {kind:'pickup', handler() {
+    const s=player.state,held=s.character.physicalProduct;
+    if(held.phase==='held'){if(nearby===held.id)return player.returnProduct();}
+    else if(held.phase==='empty'&&nearby?.startsWith('new-moon-')&&!s.seated&&!s.pushing&&!s.elevatorTravel){
+      const token=world.reserveProduct(nearby);if(token){const ok=player.pickProduct(token);if(!ok)token.release();return ok;}
+    }
+    return false;
+  }};
   button.addEventListener('click',()=>{
     if(paused())return;
-    const s=player.state,held=s.character.physicalProduct;
-    if(held.phase==='held'){if(nearby===held.id)player.returnProduct();}
-    else if(held.phase==='empty'&&nearby?.startsWith('new-moon-')&&!s.seated&&!s.pushing&&!s.elevatorTravel){
-      const token=world.reserveProduct(nearby);if(token&&!player.pickProduct(token))token.release();
-    }
+    interactions.dispatch(pickupAction);
     document.querySelector('#scene').focus({preventScroll:true});
   });
   return {update(s,id){nearby=id;const p=s.character.physicalProduct;

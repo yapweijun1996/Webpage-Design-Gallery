@@ -11,6 +11,7 @@ import {addExpandedStorefronts} from './expanded-storefronts.js';
 import {createExpandedInteriors} from './expanded-interiors.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
+import {createSeatPlacements, createSeatAnchor} from './seat-placements.js';
 
 export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill}) {
   if (!expanded || !theme?.materials || !theme?.lighting) return false;
@@ -47,7 +48,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
     return panels;
   }
-  const seats=[];
+  const seats=[], seatPlacements=createSeatPlacements(expanded);
   const scene = new T.Scene();
   scene.background = new T.Color(0x192e32);
   scene.fog = new T.Fog(0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
@@ -175,12 +176,11 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
-  function bench(x, z, facing = 1, label = null) {
+  function bench(placement) {
+    const {x,z,facing}=placement;
     const seatScale=new URLSearchParams(location.search).get('visitor') !== 'v1' ? .8 : 1;
-    const seatCollider=collider(x, .3*seatScale, z, 2.5, .4*seatScale, .85);
-    const index=seats.length,id=index===0?'courtyard-seat':`bench-seat-${index+1}`;
-    const name=label || (z>0?`Courtyard bench ${index+1}`:`${x<5?'MILI':'GOGO'} bench ${index%2+1}`);
-    seats.push({id,name,x,z:z-.23*facing,y:.015,exitX:x,exitZ:z-1.2*facing,facing,angle:facing===1?0:Math.PI,cameraOffset:z<0?(index%2===0?-Math.PI/2:Math.PI/2)*facing:.45,collider:seatCollider.handle});
+    const seatCollider=collider(x, .3*seatScale, z, placement.clearance.colliderWidth, .4*seatScale, placement.clearance.colliderDepth);
+    seats.push(createSeatAnchor(placement,seatCollider.handle));
     const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*seatScale,bz,sx,sy*seatScale,sz);
     if (!furnishings.place('bench', x, z, seatScale, facing, 0, null, activeShopSlot)) {
       benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, .56, z, 2.55, .18, .9);
@@ -270,7 +270,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   for (const x of [-9.5, 9.5]) for (const z of [4.2, 12.5]) pendant(x, z, 4.9);
   if (!expanded) {
     plant(-5.7, 4); plant(5.7, 4); plant(-12.9, 15.8, 1.3); plant(12.9, 15.8, 1.3);
-    bench(-7.8, 9.5); bench(7.8, 9.5); bench(-7.8, 13, -1); bench(7.8, 13, -1);
+    for (const placement of seatPlacements.filter(item=>item.group==='atrium')) bench(placement);
   } else {
     // Low planting preserves views while leaving the seasonal/event block clear.
     const garden=atriumLayout.garden;
@@ -292,7 +292,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         box('oak',lounge.x+side*2.84,.019,lounge.z,.035,.008,7.62);
         box('oak',lounge.x,.019,lounge.z+side*3.74,5.7,.008,.035);
       }
-      for (const [i,seat] of lounge.seats.entries()) bench(seat.x,seat.z,1,`${lounge.id === 'west' ? 'West' : 'East'} lounge seat ${i+1}`);
+      for (const placement of seatPlacements.filter(item=>item.group==='atrium' && item.name.startsWith(lounge.id === 'west' ? 'West' : 'East'))) bench(placement);
       const table=lounge.table;
       // A compact side table fits between the two sofas without blocking either exit.
       cylinder('brass',table.x,.27,table.z,.055,.5);
@@ -464,7 +464,9 @@ export async function createWorld(T, R, physics, expanded = false) {
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, .05));
       physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, .03), body); leaves.push({group, body, side});
     }
-    doors.push({zone, x, open: 0, leaves});
+    const door={zone, x, open:0, targetOpen:false, leaves, toggle(){this.targetOpen=!this.targetOpen;return this.targetOpen;}};
+    doors.push(door);
+    if(expanded)interactables.push({id:`${zone}-door`,kind:'open',x,z:0,y:0,floor:0,radius:2.5,door});
     pendant(x, -4, 4.2); pendant(x, -8, 4.2);
     const light = new T.PointLight(zone === 'gogo' ? 0xcce9c2 : 0xffdfa9, 45, 15, 2); light.position.set(x, 4.5, -6); scene.add(light);
     box('brass', x, .22, -10.32, 9.3, .045, .04);
@@ -499,7 +501,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       box('glow', x, 4.77, -10.16, 3.7, .025, .07);
       interactables.push({id: zone, x, z: -9, radius: 2.5});
       // Store seating faces the natural route from the entrance, not the rear wall.
-      bench(x - 3, -6.8, -1); bench(x + 3, -6.8, -1);
+      for (const placement of seatPlacements.filter(item=>item.group===zone)) bench(placement);
       if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
         cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
         cylinder('brass', x, .853, -5.5, .805, .025);
@@ -593,16 +595,19 @@ export async function createWorld(T, R, physics, expanded = false) {
     // Warm timber seating and areca planters form a central lounge without
     // narrowing the approach to the plaque wall or the lift.
     activeDeck=true;
-    const deckBench=(x,z,facing)=>{
+    const deckBench=placement=>{
+      const {x,z,facing}=placement;
       if(!furnishings.place('bench',x,z,.8,facing,liftLayout.upper,null,-1)){
         box('wood',x,liftLayout.upper+.24,z,2.3,.32,.72);
         box('seat',x,liftLayout.upper+.49,z,2.34,.18,.76);
         box('seat',x,liftLayout.upper+.82,z+facing*.28,2.34,.54,.16);
         box('brass',x,liftLayout.upper+.44,z-facing*.38,2.32,.025,.025);
       }
-      collider(x,liftLayout.upper+.26,z,2.3,.5,.76);
+      // Leave capsule clearance between each bench and the adjacent planter.
+      const seatCollider=collider(x,liftLayout.upper+.26,z,placement.clearance.colliderWidth,.5,placement.clearance.colliderDepth);
+      if(placement.accessible!==false)seats.push(createSeatAnchor(placement,seatCollider.handle));
     };
-    deckBench(-6.1,8.8,1);deckBench(.1,8.8,1);deckBench(-3,11.7,1);
+    for(const placement of seatPlacements.filter(item=>item.group==='deck'))deckBench(placement);
     for(const [x,z] of [[-8.1,12.8],[2.1,12.8],[-8.1,9.2],[2.1,9.2]]){
       if(!furnishings.place('planter',x,z,.68,1,liftLayout.upper,null,-1)){
         box('pot',x,liftLayout.upper+.24,z,.68,.48,.68,true);
@@ -684,12 +689,12 @@ export async function createWorld(T, R, physics, expanded = false) {
     for(const mesh of deckLodMeshes)mesh.visible=deckVisible;
     for(const update of shopLodUpdates)update(visitor);
   }
-  interactables.push(...seats.map(seat=>({id:seat.id,x:seat.exitX,z:seat.exitZ,radius:1.65,seat})));
+  interactables.push(...seats.map(seat=>({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,floor:seat.floor,radius:seat.clearance.interactionRadius,seat})));
   const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh));
   const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
-  const cameraObstacles=ceilingObstacles.concat(seats.map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
+  const cameraObstacles=ceilingObstacles.concat(seats.filter(seat=>seat.floor===0).map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
   let brandWallPromise=null;
   function ensureBrandWall(){
     if(!expanded)return Promise.reject(new Error('Brand wall is only available in the expanded mall'));

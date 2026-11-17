@@ -1322,6 +1322,88 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
 
 // demos/corporate/gjh/v11/assets/world.js
 import { releaseStartupAssetPack } from "./startup-asset-pack.js";
+
+// demos/corporate/gjh/v11/assets/seat-placements.js
+function createSeatPlacements(expanded) {
+  const placements = [];
+  const add = (group, x, z, facing = 1, name = null, floor = 0, accessible = true) => {
+    const index = placements.length;
+    const id = index === 0 ? "courtyard-seat" : `bench-seat-${index + 1}`;
+    const anchor = { x, y: floor + 0.015, z: z - 0.23 * facing };
+    const exit = { x, y: floor, z: z - 1.2 * facing };
+    const pose = {
+      facing,
+      angle: facing === 1 ? 0 : Math.PI,
+      cameraOffset: z < 0 ? (index % 2 === 0 ? -Math.PI / 2 : Math.PI / 2) * facing : 0.45
+    };
+    const clearance = {
+      interactionRadius: 1.65,
+      capsuleRadius: 0.3,
+      colliderWidth: group === "deck" ? accessible ? 2 : 2.3 : 2.5,
+      colliderDepth: group === "deck" ? 0.76 : 0.85
+    };
+    placements.push({
+      id,
+      group,
+      name: name || (z > 0 ? `Courtyard bench ${index + 1}` : `${x < 5 ? "MILI" : "GOGO"} bench ${index % 2 + 1}`),
+      x,
+      z,
+      facing,
+      floor,
+      cameraOffset: pose.cameraOffset,
+      accessible,
+      anchor,
+      exit,
+      pose,
+      clearance
+    });
+  };
+  if (expanded) {
+    for (const lounge2 of atriumLayout.lounges)
+      for (const [i, point2] of lounge2.seats.entries())
+        add("atrium", point2.x, point2.z, 1, `${lounge2.id === "west" ? "West" : "East"} lounge seat ${i + 1}`);
+  } else {
+    add("atrium", -7.8, 9.5);
+    add("atrium", 7.8, 9.5);
+    add("atrium", -7.8, 13, -1);
+    add("atrium", 7.8, 13, -1);
+  }
+  for (const store of spatial.stores.filter((store2) => store2.id !== "newmoon")) {
+    const x = storeCenterX(store);
+    add(store.id, x - 3, -6.8, -1);
+    add(store.id, x + 3, -6.8, -1);
+  }
+  if (expanded) {
+    add("deck", -6.1, 8.8, 1, "Upper deck bench 1", liftLayout.upper);
+    add("deck", 0.1, 8.8, 1, "Upper deck bench 2", liftLayout.upper);
+    add("deck", -3, 11.7, 1, "Upper deck bench 3", liftLayout.upper, false);
+  }
+  return placements;
+}
+function createSeatAnchor(placement, collider) {
+  const { id, name, floor, anchor, exit, pose, clearance, accessible } = placement;
+  return {
+    id,
+    name,
+    x: anchor.x,
+    y: anchor.y,
+    z: anchor.z,
+    exitX: exit.x,
+    exitZ: exit.z,
+    floor,
+    facing: pose.facing,
+    angle: pose.angle,
+    cameraOffset: pose.cameraOffset,
+    collider,
+    anchor,
+    exit,
+    pose,
+    clearance,
+    accessible
+  };
+}
+
+// demos/corporate/gjh/v11/assets/world.js
 function applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
     return false;
@@ -1442,12 +1524,11 @@ async function createWorld(T, R, physics, expanded = false) {
       }
       collider(x, 0.4, z, 0.85, 0.8, 0.85);
       shadow(x, z, 2.1, 2.1);
-    }, bench = function(x, z, facing = 1, label = null) {
+    }, bench = function(placement) {
+      const { x, z, facing } = placement;
       const seatScale2 = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
-      const seatCollider = collider(x, 0.3 * seatScale2, z, 2.5, 0.4 * seatScale2, 0.85);
-      const index = seats.length, id = index === 0 ? "courtyard-seat" : `bench-seat-${index + 1}`;
-      const name = label || (z > 0 ? `Courtyard bench ${index + 1}` : `${x < 5 ? "MILI" : "GOGO"} bench ${index % 2 + 1}`);
-      seats.push({ id, name, x, z: z - 0.23 * facing, y: 0.015, exitX: x, exitZ: z - 1.2 * facing, facing, angle: facing === 1 ? 0 : Math.PI, cameraOffset: z < 0 ? (index % 2 === 0 ? -Math.PI / 2 : Math.PI / 2) * facing : 0.45, collider: seatCollider.handle });
+      const seatCollider = collider(x, 0.3 * seatScale2, z, placement.clearance.colliderWidth, 0.4 * seatScale2, placement.clearance.colliderDepth);
+      seats.push(createSeatAnchor(placement, seatCollider.handle));
       const benchBox = (m, bx, by, bz, sx, sy, sz) => box(m, bx, by * seatScale2, bz, sx, sy * seatScale2, sz);
       if (!furnishings.place("bench", x, z, seatScale2, facing, 0, null, activeShopSlot)) {
         benchBox("wood", x, 0.3, z, 2.5, 0.4, 0.85);
@@ -1534,7 +1615,7 @@ async function createWorld(T, R, physics, expanded = false) {
     let shellState = null;
     const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
     const ceilingObstacles = [];
-    const seats = [];
+    const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
     scene.background = new T.Color(1650226);
     scene.fog = new T.Fog(12037532, expanded ? 75 : 40, expanded ? 155 : 100);
@@ -1745,10 +1826,8 @@ async function createWorld(T, R, physics, expanded = false) {
       plant(5.7, 4);
       plant(-12.9, 15.8, 1.3);
       plant(12.9, 15.8, 1.3);
-      bench(-7.8, 9.5);
-      bench(7.8, 9.5);
-      bench(-7.8, 13, -1);
-      bench(7.8, 13, -1);
+      for (const placement of seatPlacements.filter((item) => item.group === "atrium"))
+        bench(placement);
     } else {
       const garden = atriumLayout.garden;
       box("ivory", garden.x, garden.height / 2, garden.z, garden.width, garden.height, garden.depth, true);
@@ -1767,8 +1846,8 @@ async function createWorld(T, R, physics, expanded = false) {
           box("oak", lounge2.x + side * 2.84, 0.019, lounge2.z, 0.035, 0.008, 7.62);
           box("oak", lounge2.x, 0.019, lounge2.z + side * 3.74, 5.7, 0.008, 0.035);
         }
-        for (const [i, seat] of lounge2.seats.entries())
-          bench(seat.x, seat.z, 1, `${lounge2.id === "west" ? "West" : "East"} lounge seat ${i + 1}`);
+        for (const placement of seatPlacements.filter((item) => item.group === "atrium" && item.name.startsWith(lounge2.id === "west" ? "West" : "East")))
+          bench(placement);
         const table = lounge2.table;
         cylinder("brass", table.x, 0.27, table.z, 0.055, 0.5);
         cylinder("oak", table.x, 0.53, table.z, 0.29, 0.06);
@@ -1951,7 +2030,13 @@ async function createWorld(T, R, physics, expanded = false) {
         physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
         leaves.push({ group, body, side });
       }
-      doors.push({ zone, x, open: 0, leaves });
+      const door = { zone, x, open: 0, targetOpen: false, leaves, toggle() {
+        this.targetOpen = !this.targetOpen;
+        return this.targetOpen;
+      } };
+      doors.push(door);
+      if (expanded)
+        interactables.push({ id: `${zone}-door`, kind: "open", x, z: 0, y: 0, floor: 0, radius: 2.5, door });
       pendant(x, -4, 4.2);
       pendant(x, -8, 4.2);
       const light = new T.PointLight(zone === "gogo" ? 13429186 : 16768937, 45, 15, 2);
@@ -1996,8 +2081,8 @@ async function createWorld(T, R, physics, expanded = false) {
         box("oak", x, 0.92, -10.09, 4, 0.075, 0.28);
         box("glow", x, 4.77, -10.16, 3.7, 0.025, 0.07);
         interactables.push({ id: zone, x, z: -9, radius: 2.5 });
-        bench(x - 3, -6.8, -1);
-        bench(x + 3, -6.8, -1);
+        for (const placement of seatPlacements.filter((item) => item.group === zone))
+          bench(placement);
         if (!furnishings.place("coffeeTable", x, -5.5, 1, 1, 0, null, activeShopSlot)) {
           cylinder("brass", x, 0.4, -5.5, 0.08, 0.75);
           cylinder("oak", x, 0.8, -5.5, 0.8, 0.1);
@@ -2102,18 +2187,20 @@ async function createWorld(T, R, physics, expanded = false) {
       lightPool(-3, liftLayout.upper + 0.035, 13.35, 8.8, 2.8);
       activeDeck = false;
       activeDeck = true;
-      const deckBench = (x, z, facing) => {
+      const deckBench = (placement) => {
+        const { x, z, facing } = placement;
         if (!furnishings.place("bench", x, z, 0.8, facing, liftLayout.upper, null, -1)) {
           box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
           box("seat", x, liftLayout.upper + 0.49, z, 2.34, 0.18, 0.76);
           box("seat", x, liftLayout.upper + 0.82, z + facing * 0.28, 2.34, 0.54, 0.16);
           box("brass", x, liftLayout.upper + 0.44, z - facing * 0.38, 2.32, 0.025, 0.025);
         }
-        collider(x, liftLayout.upper + 0.26, z, 2.3, 0.5, 0.76);
+        const seatCollider = collider(x, liftLayout.upper + 0.26, z, placement.clearance.colliderWidth, 0.5, placement.clearance.colliderDepth);
+        if (placement.accessible !== false)
+          seats.push(createSeatAnchor(placement, seatCollider.handle));
       };
-      deckBench(-6.1, 8.8, 1);
-      deckBench(0.1, 8.8, 1);
-      deckBench(-3, 11.7, 1);
+      for (const placement of seatPlacements.filter((item) => item.group === "deck"))
+        deckBench(placement);
       for (const [x, z] of [[-8.1, 12.8], [2.1, 12.8], [-8.1, 9.2], [2.1, 9.2]]) {
         if (!furnishings.place("planter", x, z, 0.68, 1, liftLayout.upper, null, -1)) {
           box("pot", x, liftLayout.upper + 0.24, z, 0.68, 0.48, 0.68, true);
@@ -2179,10 +2266,10 @@ async function createWorld(T, R, physics, expanded = false) {
     const signPoint = new T.Vector3;
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
     let deckLodMeshes = null;
-    interactables.push(...seats.map((seat) => ({ id: seat.id, x: seat.exitX, z: seat.exitZ, radius: 1.65, seat })));
+    interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
     const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh));
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
-    const cameraObstacles = ceilingObstacles.concat(seats.map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
+    const cameraObstacles = ceilingObstacles.concat(seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;
     return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings: railingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {

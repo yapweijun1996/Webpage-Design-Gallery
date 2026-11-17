@@ -85,16 +85,17 @@ def drive(page, ms, **inputs):
       return state;
     }''', [inputs, ms])
 
-def walk_to(page, x, z):
+def walk_to(page, x, z, precise=False):
     for _ in range(160):
         current = state(page)
         dx, dz = x - current['x'], z - current['z']
         distance = math.hypot(dx, dz)
-        if distance < .07:
+        if distance < (.003 if precise else .07):
             drive(page, 17)
             return
-        duration = max(17, min(450, distance / 2.65 * 1000))
-        drive(page, duration, forward=-dz / distance, right=dx / distance, yaw=0)
+        speed = min(1, distance / .15) if precise else 1
+        duration = max(17, min(450, distance / (2.65 * speed) * 1000))
+        drive(page, duration, forward=-dz / distance * speed, right=dx / distance * speed, yaw=0)
     raise AssertionError(('Unreached upper-deck waypoint', x, z, state(page)))
 
 
@@ -167,6 +168,29 @@ def upper_deck_gallery(page):
     assert page.locator('#product-description').inner_text() == story.inner_text()
     page.keyboard.press('Escape')
     assert not page.locator('#product-dialog').is_visible()
+    # Approach a deck bench from its open side, then exercise the real HUD
+    # action and return to the published exit on the upper floor.
+    deck_seats = [seat for seat in state(page)['seats']
+                  if seat['id'] == 'bench-seat-9']
+    assert len(deck_seats) == 1, deck_seats
+    seat = deck_seats[0]
+    # The route passes between the west planter and bench, outside the lift
+    # shaft; the usable gap is only slightly wider than the walking capsule.
+    walk_to(page, -6.51, 13.6)
+    walk_to(page, -7.43, 13.6, precise=True)
+    walk_to(page, -7.43, seat['exitZ'], precise=True)
+    walk_to(page, seat['exitX'], seat['exitZ'])
+    assert state(page)['nearby'] == seat['id'], state(page)
+    page.locator('#inspect').click()
+    seated = drive(page, 1600)
+    assert seated['seated'] and seated['seatId'] == seat['id'] and seated['seatPhase'] == 'seated', seated
+    assert abs(seated['y'] - 7.2) < .1, seated
+    assert page.locator('#inspect').inner_text() == 'Stand up'
+    page.locator('#inspect').click()
+    stood = drive(page, 1200)
+    assert not stood['seated'] and stood['seatPhase'] == 'idle', stood
+    assert abs(stood['x'] - seat['exitX']) < .05 and abs(stood['z'] - seat['exitZ']) < .05, stood
+    assert abs(stood['y'] - 7.2) < .1, stood
     return upper
 
 
@@ -266,8 +290,28 @@ def run(capture=False):
                         assert initial['drawCalls'] <= (190 if expected else 200), initial
                         if expected:
                             assert abs(initial['x'] - 10) < .1 and abs(initial['z'] - 45) < .1
-                            page.evaluate('__mall.teleport("mili");__mall.setInput({});__mall.step(1000)')
-                            assert state(page)['doors']['mili']==0 and state(page)['z']>0, state(page)
+                            page.locator('#guide-dialog').wait_for(state='visible')
+                            page.locator('#guide-start').click()
+                            page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                            for zone in ('newmoon', 'mili', 'gogo'):
+                                assert page.evaluate('zone => __mall.teleport(zone)', zone)
+                                closed = drive(page, 1000)
+                                assert closed['doors'][zone] == 0 and closed['nearby'] == f'{zone}-door', closed
+                                assert 'Open' in page.locator('#inspect').inner_text()
+                                page.locator('#inspect').click()
+                                opened = drive(page, 1000)
+                                assert opened['doors'][zone] > .99, opened
+                                assert opened['drawCalls'] <= 200, (zone, opened['drawCalls'])
+                                assert 'Close' in page.locator('#inspect').inner_text()
+                                inside = drive(page, 1400, forward=1)
+                                assert inside['z'] < -.5, inside
+                                assert inside['drawCalls'] <= 200, (zone, inside['drawCalls'])
+                                assert page.evaluate('zone => __mall.teleport(zone)', zone)
+                                drive(page, 17)
+                                assert state(page)['nearby'] == f'{zone}-door', state(page)
+                                page.locator('#inspect').click()
+                                closed = drive(page, 1000)
+                                assert closed['doors'][zone] == 0, closed
                         else:
                             assert page.locator('[data-space-id]').count() == 0
                         layout_evidence.append({'query':query or '(no query)','expanded':expected,'readyMsObserved':ready_ms,'drawCalls':initial['drawCalls']})
