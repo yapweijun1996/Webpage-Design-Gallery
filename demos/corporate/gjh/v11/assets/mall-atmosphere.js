@@ -74,26 +74,60 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
     postScene=new T.Scene(); postCamera=new T.Camera();
     quad=new T.Mesh(new T.PlaneGeometry(2,2),composite); quad.frustumCulled=false; postScene.add(quad);
   }
-  function render(camera, enabled) {
-    if (!enabled) { renderer.render(scene,camera); return; }
-    initPost();
-    const size=renderer.getDrawingBufferSize(bufferSize);
-    base.setSize(size.x,size.y); glow.setSize(Math.max(1,Math.floor(size.x/4)),Math.max(1,Math.floor(size.y/4)));
-    composite.uniforms.texel.value.set(1/glow.width,1/glow.height);
+  const state={bloom:false,nonNpcCalls:0,npcCalls:0,admitted:0,totalCalls:0,submissions:0};
+  function renderVisitors(camera,npcs,reservedCalls) {
+    state.nonNpcCalls=renderer.info.render.calls+reservedCalls;
+    state.admitted=npcs?.admit(state.nonNpcCalls)||0;
+    if (!state.admitted) return;
+    const mask=camera.layers.mask, background=scene.background;
+    const autoClear=renderer.autoClear, shadowAutoUpdate=renderer.shadowMap.autoUpdate;
+    const before=renderer.info.render.calls;
+    try {
+      // Keep the world's color, depth and shadow maps. Only visitors and the
+      // same world lights participate; no mall geometry is resubmitted.
+      scene.traverseVisible(node=>{if(node.isLight) node.layers.enable(2);});
+      camera.layers.set(2); scene.background=null;
+      renderer.autoClear=false; renderer.shadowMap.autoUpdate=false;
+      renderer.render(scene,camera); state.submissions++;
+    } finally {
+      camera.layers.mask=mask; scene.background=background;
+      renderer.autoClear=autoClear; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
+    }
+    state.npcCalls=renderer.info.render.calls-before;
+  }
+  function render(camera, enabled, npcs) {
+    state.bloom=Boolean(enabled);
+    state.npcCalls=0; state.submissions=0;
+    const autoReset=renderer.info.autoReset, shadowAutoUpdate=renderer.shadowMap.autoUpdate;
     const target=renderer.getRenderTarget(), mask=camera.layers.mask, background=scene.background;
     const clearColor=renderer.getClearColor(savedClearColor), clearAlpha=renderer.getClearAlpha();
-    const autoReset=renderer.info.autoReset, shadowAutoUpdate=renderer.shadowMap.autoUpdate;
     try {
       renderer.info.autoReset=false; renderer.info.reset();
-      renderer.setRenderTarget(base); renderer.render(scene,camera);
-      renderer.shadowMap.autoUpdate=false;
-      camera.layers.set(1); scene.background=null; renderer.setClearColor(0x000000,0);
-      renderer.setRenderTarget(glow); renderer.clear(); renderer.render(scene,camera);
-      renderer.setRenderTarget(target); renderer.render(postScene,postCamera);
+      npcs?.setVisible(false);
+      if (!enabled) {
+        renderer.render(scene,camera); state.submissions++;
+        renderVisitors(camera,npcs,0);
+      } else {
+        initPost();
+        const size=renderer.getDrawingBufferSize(bufferSize);
+        base.setSize(size.x,size.y); glow.setSize(Math.max(1,Math.floor(size.x/4)),Math.max(1,Math.floor(size.y/4)));
+        composite.uniforms.texel.value.set(1/glow.width,1/glow.height);
+        renderer.setRenderTarget(base); renderer.render(scene,camera); state.submissions++;
+        renderer.shadowMap.autoUpdate=false;
+        camera.layers.set(1); scene.background=null; renderer.setClearColor(0x000000,0);
+        renderer.setRenderTarget(glow); renderer.clear(); renderer.render(scene,camera); state.submissions++;
+        // Glow is now measured, not predicted from the previous view. Reserve
+        // the single composite draw before admitting visitors into base.
+        renderer.setRenderTarget(base);
+        camera.layers.mask=mask; scene.background=background;
+        renderVisitors(camera,npcs,1);
+        renderer.setRenderTarget(target); renderer.render(postScene,postCamera); state.submissions++;
+      }
+      state.totalCalls=renderer.info.render.calls;
     } finally {
       camera.layers.mask=mask; scene.background=background; renderer.setClearColor(clearColor,clearAlpha);
       renderer.setRenderTarget(target); renderer.info.autoReset=autoReset; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
     }
   }
-  return {update,applyTheme,restoreEnvironment,render};
+  return {update,applyTheme,restoreEnvironment,render,get state(){return state;}};
 }

@@ -1532,6 +1532,10 @@ async function createWorld(T, R, physics, expanded = false) {
       scene.add(mesh);
       return tagShopLod(mesh);
     }, shadow = function(x, z, w, d) {
+      if (!expanded) {
+        solid("plane", "contact", x, 0.018, z, w, d, 1, 0, -Math.PI / 2);
+        return;
+      }
       const mesh = new T.Mesh(plane, contact);
       mesh.rotation.x = -Math.PI / 2;
       mesh.position.set(x, 0.018, z);
@@ -1768,6 +1772,7 @@ async function createWorld(T, R, physics, expanded = false) {
     shadowContext.fillStyle = gradient;
     shadowContext.fillRect(0, 0, 64, 64);
     const contact = new T.MeshBasicMaterial({ map: new T.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false });
+    materials.contact = contact;
     const poolCanvas = document.createElement("canvas");
     poolCanvas.width = poolCanvas.height = 64;
     const poolContext = poolCanvas.getContext("2d"), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);

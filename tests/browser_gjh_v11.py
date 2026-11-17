@@ -159,6 +159,287 @@ def hero_visibility_gallery(page, width, height):
     return results
 
 
+def install_npc_budget_probe(page, cap):
+    """Observe real renderer submissions, not just the application's last counter."""
+    page.evaluate('''async cap => {
+      const T = await import('./vendor/three.module.min.js');
+      const probe = window.__npcBudgetProbe = {
+        cap, enabled:false, label:'setup', frames:[], errors:[], pending:[], queued:false
+      };
+      const originalScene = T.Scene.prototype.onBeforeRender;
+      const wrappedMeshes = new WeakSet(), instrumented = new WeakSet();
+      const check = (ok, message, frame) => {
+        if (!ok) probe.errors.push({message, frame});
+      };
+      function finishFrame() {
+        probe.queued=false;
+        const submissions=probe.pending.splice(0);
+        if (!probe.enabled || !submissions.length) return;
+        // Run after the entire synchronous step/HUD/rAF callback, once the
+        // application has committed this frame's admission and budget state.
+        const s=__mall.state, b=s.renderBudget, n=s.npcs;
+        const world=submissions.filter(p=>p.scene===s.graphics.sceneId);
+        const npc=world.filter(p=>p.mask===4);
+        const total=submissions.reduce((sum,p)=>sum+p.calls,0);
+        const npcCalls=npc.reduce((sum,p)=>sum+p.calls,0);
+        const frame={label:probe.label, tier:s.graphics.quality.tier,
+          active:n?.active, admitted:n?.admitted, visible:n?.visible,
+          perNPC:n?.callsPerNpc, nonNPC:total-npcCalls, npcCalls, total,
+          bloom:b?.bloom, y:s.y, elevatorTravel:s.elevatorTravel,
+          renderedNPCs:npc.flatMap(p=>p.visitors).length,
+          submissions:submissions.map(({visitors,...p})=>p)};
+        probe.frames.push(frame);
+        check(Boolean(b), 'Missing renderBudget telemetry', frame);
+        check(Number.isInteger(total) && total<=200, 'Actual frame exceeds 200 calls', frame);
+        check(s.drawCalls===total, 'drawCalls omits renderer submissions', frame);
+        check(n?.limit===cap && n.active<=cap && n.active>=0,
+          'Simulation exceeds requested tier cap', frame);
+        check(Number.isInteger(n?.admitted) && n.admitted>=0 &&
+          n.admitted<=n.active && n.visible===n.admitted,
+          'Invalid admission/visibility count', frame);
+        if (!b) return;
+        const expectedBloom=s.graphics.quality.tier==='detailed' &&
+          innerWidth>=1000 && Math.abs(s.y)<5;
+        check(b.bloom===expectedBloom, 'Incorrect tier/floor Bloom path', frame);
+        check(b.totalCalls===total && b.nonNpcCalls===total-npcCalls &&
+          b.npcCalls===npcCalls && b.admitted===n.admitted,
+          'Budget telemetry differs from observed rendering', frame);
+        const submissionCount=Array.isArray(b.submissions)?b.submissions.length:b.submissions;
+        check(submissionCount===submissions.length, 'Submission telemetry mismatch', frame);
+        const expected=[1,...(b.bloom?[2]:[]),...(n.admitted>0?[4]:[])];
+        check(JSON.stringify(world.map(p=>p.mask))===JSON.stringify(expected),
+          'Repeated full-world submission or incorrect layer masks', frame);
+        const composite=submissions.filter(p=>p.scene!==s.graphics.sceneId);
+        check(composite.length===(b.bloom?1:0) &&
+          (!b.bloom || submissions.at(-1)===composite[0]),
+          'Bloom composite must be one separate final scene', frame);
+        check(npc.every(p=>!p.autoClear && !p.shadowAutoUpdate && !p.background),
+          'NPC overlay clears the base/depth or updates shadows', frame);
+        check(npcCalls<=n.admitted*n.callsPerNpc,
+          'NPC template underestimates real draw calls', frame);
+      }
+      T.Scene.prototype.onBeforeRender=function(renderer,...args) {
+        if (!instrumented.has(renderer)) {
+          instrumented.add(renderer);
+          probe.rendererObserved=true;
+          const originalRender=renderer.render;
+          renderer.render=function(scene,camera) {
+            const before=this.info.render.calls, autoReset=this.info.autoReset;
+            const submission={scene:scene.uuid,mask:camera.layers.mask,
+              autoClear:this.autoClear,shadowAutoUpdate:this.shadowMap.autoUpdate,
+              background:scene.background!==null,visitors:[]};
+            probe.current=submission;
+            const result=originalRender.call(this,scene,camera);
+            submission.calls=this.info.render.calls-(autoReset?0:before);
+            probe.current=null;
+            if (probe.enabled) {
+              probe.pending.push(submission);
+              if (!probe.queued) {probe.queued=true;queueMicrotask(finishFrame);}
+            }
+            return result;
+          };
+        }
+        // A mesh callback proves the visitor was actually submitted through the
+        // camera/frustum tests; admitted-but-offscreen visitors do not qualify.
+        this.traverse(node=>{
+          if (!node.isMesh || !(node.layers.mask&4) || wrappedMeshes.has(node)) return;
+          wrappedMeshes.add(node);
+          const original=node.onBeforeRender;
+          node.onBeforeRender=function(renderer,scene,camera,...rest) {
+            const current=probe.current;
+            if (current?.mask===4) {
+              let root=this;
+              while(root.parent && root.parent!==scene) root=root.parent;
+              const center=root.getWorldPosition(new T.Vector3());
+              const feet=center.clone().project(camera);
+              const head=center.clone().add(new T.Vector3(0,1.7,0)).project(camera);
+              const height=Math.abs(head.y-feet.y)*innerHeight/2;
+              if (feet.z>-1 && feet.z<1 && Math.abs(feet.x)<.9 &&
+                feet.y>-.9 && head.y<.9 && height>=32 &&
+                !current.visitors.includes(root.uuid)) current.visitors.push(root.uuid);
+            }
+            return original.call(this,renderer,scene,camera,...rest);
+          };
+        });
+        return originalScene.call(this,renderer,...args);
+      };
+      // The discovery callback runs inside the first render; only start
+      // recording after its renderer wrapper is installed for complete frames.
+      __mall.setInput({});__mall.step(0);
+      await Promise.resolve();
+      if (!probe.rendererObserved) throw Error('No renderer observed during probe setup');
+      probe.enabled=true;
+    }''', cap)
+
+
+def npc_budget_frames(page):
+    result = page.evaluate('''() => ({
+      frames:__npcBudgetProbe.frames, errors:__npcBudgetProbe.errors
+    })''')
+    assert not result['errors'], result['errors'][:3]
+    assert result['frames'], 'No complete rendered frames observed'
+    return result['frames']
+
+
+def npc_budget_sweep(page, label):
+    page.evaluate('label=>__npcBudgetProbe.label=label', label)
+    start = len(npc_budget_frames(page)) if page.evaluate('__npcBudgetProbe.frames.length') else 0
+    # In addition to a full orbit, jump directly across the expensive view:
+    # the admission decision must use this frame, not yesterday's camera cost.
+    before = drive(page, 17, yaw=0)
+    sudden = drive(page, 17, yaw=math.pi)
+    assert abs(sudden['yaw'] - math.pi) < 1e-6, sudden['yaw']
+    assert abs(sum(a*b for a,b in zip(before['camera']['quaternion'], sudden['camera']['quaternion']))) < .1, (before['camera'], sudden['camera'])
+    for index in range(25):
+        drive(page, 17, yaw=-math.pi + index * math.tau / 24)
+    drive(page, 17, yaw=0)
+    frames = npc_budget_frames(page)[start:]
+    assert frames, label
+    current = state(page)
+    row = {'npcBudgetState':label, 'width':page.viewport_size['width'],
+           'tier':current['graphics']['quality']['tier'],
+           'cap':current['npcs']['limit'], 'active':current['npcs']['active'],
+           'admitted':current['npcs']['admitted'],
+           'nonNPC':current['renderBudget']['nonNpcCalls'],
+           'perNPC':current['npcs']['callsPerNpc'],
+           'total':current['renderBudget']['totalCalls'],
+           'sweepMax':max(frame['total'] for frame in frames),
+           'nonNPCRange':[min(frame['nonNPC'] for frame in frames), max(frame['nonNPC'] for frame in frames)],
+           'admittedRange':[min(frame['admitted'] for frame in frames), max(frame['admitted'] for frame in frames)],
+           'npcCallsMax':max(frame['npcCalls'] for frame in frames),
+           'renderedFrames':len(frames)}
+    print(json.dumps(row), flush=True)
+    return row
+
+
+def npc_budget_screenshot(page, width):
+    """Find real admitted visitors from real walking positions; never spawn fixtures."""
+    tutorial = page.locator('[data-ob-action="skip"]')
+    if tutorial.is_visible():
+        tutorial.click()
+    assert page.evaluate('__mall.teleport("atrium")')
+    best = 0
+    # These are the same clear atrium/lift-approach corridors as the deck route.
+    for point in ((10, 12), (10, 5.5), (0, 5.5), (-6.4, 5.5)):
+        walk_to(page, *point)
+        for _ in range(56):
+            drive(page, 17, yaw=0)
+        for index in range(32):
+            drive(page, 17, yaw=-math.pi + index * math.tau / 32, pitch=.1)
+            frame = npc_budget_frames(page)[-1]
+            best = max(best, frame['renderedNPCs'])
+            if frame['renderedNPCs'] >= 2:
+                destination = Path.home() / 'omp-tasks/out' / f'npc2-{width}.png'
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                page.screenshot(path=str(destination), scale='css')
+                return {'path':str(destination), 'renderedNPCs':frame['renderedNPCs'],
+                        'admitted':frame['admitted'], 'total':frame['total']}
+    raise AssertionError(('No atrium frame with several visible real NPCs', width, best))
+
+
+def npc_budget_coverage(browser, url):
+    results = []
+    for width, height in ((1440, 900), (390, 844)):
+        for tier in ('low', 'balanced', 'detailed'):
+            cap = ({'low':1, 'balanced':2, 'detailed':3} if width < 1000
+                   else {'low':2, 'balanced':4, 'detailed':6})[tier]
+            context = browser.new_context(viewport={'width':width, 'height':height},
+                                          device_scale_factor=2, has_touch=width<1000, reduced_motion='reduce')
+            context.add_init_script(
+                f"localStorage.setItem('gjh-v11-graphics-quality-v1', {json.dumps(tier)});")
+            page = context.new_page()
+            errors = []
+            page.on('pageerror', lambda error: errors.append(str(error)))
+            try:
+                page.goto(url)
+                page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=90000)
+                assert page.evaluate('document.body.classList.contains("is-expanded")')
+                assert state(page)['graphics']['quality']['tier'] == tier
+                page.locator('#guide-dialog').wait_for(state='visible')
+                page.locator('#guide-start').click()
+                page.wait_for_function("!document.querySelector('#guide-dialog').open && !__mall.state.paused")
+                install_npc_budget_probe(page, cap)
+                assert page.evaluate('__mall.teleport("atrium")')
+                for _ in range(56):
+                    drive(page, 17)
+                assert state(page)['npcs']['active'] > 0, state(page)['npcs']
+                rows = [npc_budget_sweep(page, 'atrium')]
+                for zone in ('newmoon', 'mili', 'gogo'):
+                    assert page.evaluate('zone=>__mall.teleport(zone)', zone)
+                    closed = drive(page, 17, yaw=0)
+                    assert closed['nearby'] == f'{zone}-door', closed
+                    assert closed['doors'][zone] == 0, closed['doors']
+                    assert 'Open' in page.locator('#inspect').inner_text()
+                    page.locator('#inspect').click()
+                    for _ in range(16):
+                        opened = drive(page, 75, yaw=0)
+                    assert opened['doors'][zone] > .99, opened['doors']
+                    rows.append(npc_budget_sweep(page, f'{zone}-open'))
+                    assert 'Close' in page.locator('#inspect').inner_text()
+                    page.locator('#inspect').click()
+                    for _ in range(16):
+                        closed = drive(page, 75, yaw=0)
+                    assert closed['doors'][zone] == 0, closed['doors']
+                    rows.append(npc_budget_sweep(page, f'{zone}-closed'))
+                screenshot = npc_budget_screenshot(page, width) if tier == 'detailed' else None
+                # Reduced motion makes yaw/door changes truly instantaneous;
+                # restore motion for a real, observable ride between floors.
+                page.emulate_media(reduced_motion='no-preference')
+                assert page.evaluate('__mall.teleport("atrium")')
+                for point in ((10, 5.5), (-6.4, 5.5), (-6.4, 10)):
+                    walk_to(page, *point)
+                assert state(page)['nearby'] == 'visitor-elevator', state(page)
+                assert any(word in page.locator('#inspect').inner_text().lower()
+                           for word in ('ride', 'call'))
+                page.evaluate('__npcBudgetProbe.label="elevator-travel"')
+                page.locator('#inspect').click()
+                travel = []
+                for _ in range(65):
+                    current = drive(page, 100, yaw=0)
+                    if current['elevatorTravel']:
+                        travel.append(current)
+                    if current['y'] > 7.1 and not current['elevatorTravel']:
+                        break
+                assert travel and any(.2 < item['y'] < 7 for item in travel), travel
+                assert abs(current['y'] - 7.2) < .1 and not current['elevatorTravel'], current
+                frames = npc_budget_frames(page)
+                lift_frames = [frame for frame in frames if frame['label']=='elevator-travel']
+                moving = [frame for frame in lift_frames
+                          if frame['elevatorTravel'] and .2 < frame['y'] < 7]
+                assert moving, lift_frames
+                in_motion = moving[len(moving) // 2]
+                lift_row = {'npcBudgetState':'elevator-travel', 'width':width,
+                            'tier':tier, 'cap':cap,
+                            'active':in_motion['active'], 'admitted':in_motion['admitted'],
+                            'nonNPC':in_motion['nonNPC'], 'perNPC':in_motion['perNPC'],
+                            'total':in_motion['total'],
+                            'sweepMax':max(frame['total'] for frame in lift_frames),
+                            'admittedRange':[min(frame['admitted'] for frame in lift_frames if frame['elevatorTravel']),
+                                             max(frame['admitted'] for frame in lift_frames if frame['elevatorTravel'])],
+                            'nonNPCRange':[min(frame['nonNPC'] for frame in lift_frames if frame['elevatorTravel']),
+                                           max(frame['nonNPC'] for frame in lift_frames if frame['elevatorTravel'])],
+                            'movingFrames':sum(frame['elevatorTravel'] for frame in lift_frames)}
+                assert lift_row['movingFrames'] > 0, lift_row
+                print(json.dumps(lift_row), flush=True)
+                rows.append(lift_row)
+                page.wait_for_function('__mall.state.brandPlaqueCount===17', timeout=10000)
+                page.emulate_media(reduced_motion='reduce')
+                rows.append(npc_budget_sweep(page, 'upper-deck'))
+                frames = npc_budget_frames(page)
+                if tier == 'detailed' and width == 1440:
+                    ground = [frame for frame in frames if abs(frame['y']) < .2]
+                    assert ground and all(frame['bloom'] for frame in ground), ground[:3]
+                assert not errors, errors
+                result = {'npcBudget':{'width':width, 'tier':tier, 'cap':cap, 'states':rows,
+                          'maxCalls':max(frame['total'] for frame in frames),
+                          'renderedFrames':len(frames), 'screenshot':screenshot}}
+                print(json.dumps(result), flush=True)
+                results.append(result)
+            finally:
+                context.close()
+    return results
+
+
 def upper_deck_gallery(page):
     assert page.evaluate('__mall.teleport("atrium")')
     crowded = drive(page, 100)
@@ -393,6 +674,7 @@ def run(capture=False):
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
                 try:
                     evidence.append({'loader': loader_coverage(browser, url)})
+                    evidence.extend(npc_budget_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/'))
                     for query, expected in (('', True), ('?layout=classic', False)):
                         context = browser.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2, reduced_motion='reduce')
                         page = context.new_page()

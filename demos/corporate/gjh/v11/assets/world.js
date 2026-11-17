@@ -159,7 +159,13 @@ export async function createWorld(T, R, physics, expanded = false) {
   const shadowContext = shadowCanvas.getContext('2d'), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
   gradient.addColorStop(0, 'rgba(4,18,12,.58)'); gradient.addColorStop(.35, 'rgba(4,18,12,.34)'); gradient.addColorStop(1, 'rgba(4,18,12,0)'); shadowContext.fillStyle = gradient; shadowContext.fillRect(0, 0, 64, 64);
   const contact = new T.MeshBasicMaterial({map: new T.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false});
-  function shadow(x, z, w, d) { const mesh = new T.Mesh(plane, contact); mesh.rotation.x = -Math.PI / 2; mesh.position.set(x, .018, z); mesh.scale.set(w, d, 1); scene.add(mesh); tagShopLod(mesh); }
+  materials.contact=contact;
+  function shadow(x, z, w, d) {
+    // Legacy quads share texture, color and floor plane; one batch preserves
+    // their blending while leaving room for the previously uncounted shadows.
+    if (!expanded) { solid('plane','contact',x,.018,z,w,d,1,0,-Math.PI/2); return; }
+    const mesh = new T.Mesh(plane, contact); mesh.rotation.x = -Math.PI / 2; mesh.position.set(x, .018, z); mesh.scale.set(w, d, 1); scene.add(mesh); tagShopLod(mesh);
+  }
   // One soft light texture and one instance batch serve every floor and wall wash.
   const poolCanvas = document.createElement('canvas'); poolCanvas.width = poolCanvas.height = 64;
   const poolContext = poolCanvas.getContext('2d'), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);

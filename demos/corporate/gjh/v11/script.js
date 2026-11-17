@@ -125,6 +125,7 @@ const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.curr
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
   elevator:elevator?.state||null, amenities: world?.amenities || null,
   npcs: npcs?.state || null,
+  renderBudget: atmosphere ? {...atmosphere.state} : null,
   theme: mallTheme?.state() || null,
   themeDecorations: world?.scene.children.filter(item=>item.userData.mallThemeDecoration).map(item=>item.userData.mallThemeDecoration) || [],
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
@@ -204,18 +205,8 @@ function render(force = false) {
     world.updateShopLods(player.state);
     atmosphere?.update(player.state);
     world.updateSigns(camera, canvas);
-    const draw=()=>atmosphere.render(camera, expanded && Math.abs(player.state.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000);
-    const renderScene=()=>shelfFocus?.open ? player.renderShelf(draw) : draw();
-    // Measure the actual view before adding ambient visitors. Camera movement,
-    // doors and shop LODs can change the non-NPC draw cost in a single frame.
-    if(npcs?.state.active) {
-      npcs.setVisible(false);
-      renderScene();
-      if(renderer.info.render.calls+npcs.state.drawCalls<=200) {
-        npcs.setVisible(true);
-        renderScene();
-      }
-    } else renderScene();
+    const draw=()=>atmosphere.render(camera, expanded && Math.abs(player.state.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
+    if (shelfFocus?.open) player.renderShelf(draw); else draw();
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
   }
