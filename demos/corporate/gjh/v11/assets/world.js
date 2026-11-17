@@ -393,7 +393,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         box('glass', x + side * 3.55, 2.6, 0, 2.4, 5.2, .12, true);
         box('shellWall', x + side * 3.55, .26, .1, 2.4, .52, .2);
         for (const edge of [-1, 1]) {
-          box(frame, x + side * 3.55 + edge * 1.15, 2.65, .1, .11, 5.05, .18);
+          box(frame, x + side * 3.55 + edge * 1.15, 2.65, .1, zone === 'newmoon' ? .045 : .11, 5.05, .18);
           box('brass', x + side * 3.55, 2.6 + edge * 2.49, .12, 2.3, .06, .16);
         }
         box('brass', x + side * 3.55, 2.58, .12, 2.3, .035, .12);
@@ -472,6 +472,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       activeShopSlot = null;
       art(logo, x, 4.72, .31, 3.5);
       box('glow', x, 5.12, .31, 3.7, .025, .045);
+      box('glow', x, 4.04, .31, 9.1, .055, .07);
       box('newMoonRed', x + .9, 3.05, -3.45, 3.05, .6, .08);
       box('brass', x + .9, 2.73, -3.39, 3.1, .035, .06);
       art(logo, x + .9, 3.05, -3.4, 2.8);
@@ -513,6 +514,26 @@ export async function createWorld(T, R, physics, expanded = false) {
       for (let i = 0; i < 9; i++) box('brass', x + 1.9 + i * .22, .56, -3.35, .025, 1, .025);
       box('brass', x + 2.8, 1.08, -3.285, 2.17, .045, .03);
       box('brass', x + 2.8, .09, -3.36, 2.1, .08, .03);
+      box('oak', x + 2.8, .58, -3.325, 1.68, .68, .035);
+      box('newMoonRed', x + 2.8, .58, -3.30, 1.55, .55, .025);
+      box('dark', x + 2.5, 1.25, -4.03, .45, .08, .3);
+      box('dark', x + 2.5, 1.48, -4.16, .42, .4, .06);
+      box('brass', x + 2.5, 1.48, -4.12, .38, .35, .025);
+      box('dark', x + 2.5, 1.48, -4.10, .33, .29, .025);
+      // Side-wall merchandise is decorative and shares the existing instanced batches.
+      for (const z of [-7.8, -5.3, -2.8]) {
+        for (const y of [1.35, 2.05, 2.75, 3.45]) {
+          box('oak', x + 4.38, y, z, .48, .09, 2.15);
+          box('brass', x + 4.12, y + .03, z, .025, .05, 2.15);
+          for (let i = 0; i < 7; i++) {
+            const pz = z - .84 + i * .28;
+            box(i === 3 ? 'newMoonRed' : i % 2 ? 'ivory' : 'cream', x + 4.31, y + .22, pz, .28, .36, .22);
+            box('brass', x + 4.16, y + .22, pz, .025, .06, .19);
+          }
+        }
+        for (const edge of [-1, 1]) box('oak', x + 4.55, 2.45, z + edge * 1.1, .18, 2.55, .09);
+      }
+      lightPool(x, .06, -5.7, 2.8, 2.4);
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
@@ -525,7 +546,14 @@ export async function createWorld(T, R, physics, expanded = false) {
         sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true);
       }
       staticProductCount=productDisplay.displayedProducts;worldProductAssets = productDisplay.assets; shelves = productDisplay.shelves; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
-      plant(x - 3.6, -2.3);
+      if (expanded) {
+        cylinder('pot', x - 3.05, .3, .7, .32, .6);
+        cylinder('brass', x - 3.05, .61, .7, .33, .04);
+        for (let i = 0; i < 9; i++) {
+          const a = i * Math.PI * 2 / 9;
+          sphere(i % 2 ? 'leaf' : 'foliage', x - 3.05 + Math.cos(a) * .22, 1.15 + (i % 3) * .17, .7 + Math.sin(a) * .22, .18, .54, .12);
+        }
+      } else plant(x - 3.6, -2.3);
     } else {
       const cover = `${zone}-brand-cover.jpg`;
       box('brass', x, 2.85, -10.3, 3.65, 3.65, .08); art(cover, x, 2.85, -10.24, 3.48);

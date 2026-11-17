@@ -2042,7 +2042,7 @@ async function createWorld(T, R, physics, expanded = false) {
           box("glass", x + side * 3.55, 2.6, 0, 2.4, 5.2, 0.12, true);
           box("shellWall", x + side * 3.55, 0.26, 0.1, 2.4, 0.52, 0.2);
           for (const edge of [-1, 1]) {
-            box(frame, x + side * 3.55 + edge * 1.15, 2.65, 0.1, 0.11, 5.05, 0.18);
+            box(frame, x + side * 3.55 + edge * 1.15, 2.65, 0.1, zone === "newmoon" ? 0.045 : 0.11, 5.05, 0.18);
             box("brass", x + side * 3.55, 2.6 + edge * 2.49, 0.12, 2.3, 0.06, 0.16);
           }
           box("brass", x + side * 3.55, 2.58, 0.12, 2.3, 0.035, 0.12);
@@ -2121,6 +2121,7 @@ async function createWorld(T, R, physics, expanded = false) {
         activeShopSlot = null;
         art(logo, x, 4.72, 0.31, 3.5);
         box("glow", x, 5.12, 0.31, 3.7, 0.025, 0.045);
+        box("glow", x, 4.04, 0.31, 9.1, 0.055, 0.07);
         box("newMoonRed", x + 0.9, 3.05, -3.45, 3.05, 0.6, 0.08);
         box("brass", x + 0.9, 2.73, -3.39, 3.1, 0.035, 0.06);
         art(logo, x + 0.9, 3.05, -3.4, 2.8);
@@ -2176,6 +2177,26 @@ async function createWorld(T, R, physics, expanded = false) {
           box("brass", x + 1.9 + i * 0.22, 0.56, -3.35, 0.025, 1, 0.025);
         box("brass", x + 2.8, 1.08, -3.285, 2.17, 0.045, 0.03);
         box("brass", x + 2.8, 0.09, -3.36, 2.1, 0.08, 0.03);
+        box("oak", x + 2.8, 0.58, -3.325, 1.68, 0.68, 0.035);
+        box("newMoonRed", x + 2.8, 0.58, -3.3, 1.55, 0.55, 0.025);
+        box("dark", x + 2.5, 1.25, -4.03, 0.45, 0.08, 0.3);
+        box("dark", x + 2.5, 1.48, -4.16, 0.42, 0.4, 0.06);
+        box("brass", x + 2.5, 1.48, -4.12, 0.38, 0.35, 0.025);
+        box("dark", x + 2.5, 1.48, -4.1, 0.33, 0.29, 0.025);
+        for (const z of [-7.8, -5.3, -2.8]) {
+          for (const y of [1.35, 2.05, 2.75, 3.45]) {
+            box("oak", x + 4.38, y, z, 0.48, 0.09, 2.15);
+            box("brass", x + 4.12, y + 0.03, z, 0.025, 0.05, 2.15);
+            for (let i = 0;i < 7; i++) {
+              const pz = z - 0.84 + i * 0.28;
+              box(i === 3 ? "newMoonRed" : i % 2 ? "ivory" : "cream", x + 4.31, y + 0.22, pz, 0.28, 0.36, 0.22);
+              box("brass", x + 4.16, y + 0.22, pz, 0.025, 0.06, 0.19);
+            }
+          }
+          for (const edge of [-1, 1])
+            box("oak", x + 4.55, 2.45, z + edge * 1.1, 0.18, 2.55, 0.09);
+        }
+        lightPool(x, 0.06, -5.7, 2.8, 2.4);
         cylinder("pot", x + 3.48, 1.38, -4, 0.15, 0.32);
         cylinder("brass", x + 3.48, 1.545, -4, 0.155, 0.025);
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
@@ -2194,7 +2215,15 @@ async function createWorld(T, R, physics, expanded = false) {
         shelves = productDisplay.shelves;
         createCollectProp = productDisplay.createCollectProp;
         reserveProduct = productDisplay.reserveProduct;
-        plant(x - 3.6, -2.3);
+        if (expanded) {
+          cylinder("pot", x - 3.05, 0.3, 0.7, 0.32, 0.6);
+          cylinder("brass", x - 3.05, 0.61, 0.7, 0.33, 0.04);
+          for (let i = 0;i < 9; i++) {
+            const a = i * Math.PI * 2 / 9;
+            sphere(i % 2 ? "leaf" : "foliage", x - 3.05 + Math.cos(a) * 0.22, 1.15 + i % 3 * 0.17, 0.7 + Math.sin(a) * 0.22, 0.18, 0.54, 0.12);
+          }
+        } else
+          plant(x - 3.6, -2.3);
       } else {
         const cover = `${zone}-brand-cover.jpg`;
         box("brass", x, 2.85, -10.3, 3.65, 3.65, 0.08);

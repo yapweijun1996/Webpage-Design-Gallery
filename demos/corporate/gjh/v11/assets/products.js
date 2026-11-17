@@ -145,8 +145,8 @@ function batchShelf(T, primitives) {
   return result;
 }
 
-// One small, non-interactive fixture leaves the entry and the counter approach clear.
-const heroFixture = Object.freeze({x: -12.2, z: -3.55, width: 1.35, depth: .68, height: .84});
+// The low, central fixture remains navigable on both sides.
+const heroFixture = Object.freeze({x: -9.35, z: -5.7, width: 1.5, depth: .8, height: .78});
 
 function addDisplayTrim(T, scene, brass, shopLodInstances) {
   const redParts = [], goldParts = [];
@@ -156,7 +156,9 @@ function addDisplayTrim(T, scene, brass, shopLodInstances) {
   }
   const {x, z, width, depth, height} = heroFixture;
   redParts.push([x, height / 2, z, width, height, depth]);
+  redParts.push([x, height + .12, z - .16, 1.04, .24, .48]);
   goldParts.push([x, height + .025, z, width + .08, .05, depth + .08],
+    [x, height + .255, z - .16, 1.1, .03, .52],
     [x, .055, z, width + .04, .07, depth + .04]);
   const geometry = new T.BoxGeometry(1, 1, 1);
   const red = new T.MeshStandardMaterial({color: 0x8f1621, roughness: .48});

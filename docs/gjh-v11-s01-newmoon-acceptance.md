@@ -63,3 +63,20 @@ Round 1 scores below are the worker's recorded after-scores; the visual advisor 
 | B4 dead targets | Partial | Partial | Feature tins are not highlighted; full target audit not independently exercised. |
 
 P1 chilled freezer and mullion-free glazed storefront remain unavailable and are not simulated. Round 1 sampled maxima: desktop 168, mobile 89 draw calls. Round 2 sampled atrium/entrance/door-open/inside: desktop 149/153/153/171, mobile 80/84/84/90. These are sampled maxima, not proof for every scene state. The single round 2 browser suite returned RC=1 when the first fixture placement blocked shelf approach; the fixture was moved left afterward and a focused desktop door/shelf Inspect, 3D rotation and Add to Bag check passed. The full browser suite was not rerun. Physical-device performance and independent round 2 advisor and manager approval are NOT FOUND.
+
+### Round 3 — implementer visual assessment
+
+| Item | Score | Evidence and remaining defect |
+|---|---|---|
+| A1 fascia | Partial | The wordmark remains obscured by the HUD at the entrance, especially at 390. |
+| A2 glazing | Partial | Side-frame uprights are thinner; the door and horizontal rails still cross the view. P1 glazing remains outstanding. |
+| A3 shelves | Partial | The right wall now has dense ivory, gold and red box rows; the rear tins remain small from the entrance. |
+| A4 hero | Partial | The centered tin pyramid is fully within the mobile frame, but remains visually small against the rear shelves and its plinth is not clearly distinguishable. |
+| A5 counter | Partial | Framed front, slab and POS are visible; the backdrop is still limited. |
+| A6 greenery | Pass | An instanced plant stands beside the left entrance jamb. |
+| A7 light | Partial | A warm fascia strip and floor pool were added without lights; bright pale-wall areas remain. |
+| A8 material | Partial | Timber shelves and gold trim break up the right wall; some pale areas remain flat. |
+
+The feature tins and decorative boxes are not inspectable; B2 remains Partial. Door opening was captured, but B3–B4 and sections D–F were not independently reviewed in this round. HUD changes are outside this round. Captures and the before/after comparison are stored under `~/omp-tasks/out/s01r3-*`; these scores are not independent advisor approval.
+
+The first full Round 3 browser run returned RC=1: the initial centered fixture blocked the automated rear-shelf approach. The fixture was moved right to clear that route; the full rerun returned RC=0. The build and check, Node tests (one optional Studio checkout test skipped), gallery unittest and SSOT check passed. The browser log's maximum sampled draw call count was 193. Capture samples at atrium/entrance/door-open/inside were 156/150/160/168 at 1440 and 77/85/85/92 at 390.
