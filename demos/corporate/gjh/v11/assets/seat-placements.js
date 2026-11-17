@@ -32,9 +32,8 @@ export function createSeatPlacements(expanded) {
   if (expanded) {
     add('deck', -6.1, 8.8, 1, 'Upper deck bench 1', liftLayout.upper);
     add('deck', .1, 8.8, 1, 'Upper deck bench 2', liftLayout.upper);
-    // This bench overlaps the lift shaft and its front is behind the guard.
-    // Preserve the model, but do not expose an unsafe sit/stand route.
-    add('deck', -3, 11.7, 1, 'Upper deck bench 3', liftLayout.upper, false);
+    // Face the clear approach between the bench and shaft guard.
+    add('deck', -3, 6, -1, 'Upper deck bench 3', liftLayout.upper);
   }
   return placements;
 }

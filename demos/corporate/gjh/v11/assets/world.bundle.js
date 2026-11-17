@@ -7,6 +7,9 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/world.js
+import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
+
 // demos/corporate/gjh/v11/assets/lift-layout.js
 var freeze = (value) => {
   if (value && typeof value === "object") {
@@ -668,11 +671,42 @@ var INTERIOR_PILOT = Object.freeze({
 
 // demos/corporate/gjh/v11/assets/furnishings.js
 var sources2 = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")));
+function batchFurniture(T, primitives) {
+  const parts = primitives.map((primitive) => {
+    const source = primitive.geometry;
+    const geometry = source.index ? source.toNonIndexed() : source.clone();
+    geometry.applyMatrix4(primitive.matrix);
+    for (const name of Object.keys(geometry.attributes))
+      if (name !== "position" && name !== "normal")
+        geometry.deleteAttribute(name);
+    const count = geometry.attributes.position.count, colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
+    for (let i = 0;i < count; i++) {
+      colour.set([material.color.r, material.color.g, material.color.b], i * 3);
+      surface.set([material.roughness, material.metalness], i * 2);
+    }
+    geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
+    geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
+    return geometry;
+  });
+  const mesh = opaqueBatch(T, parts, false);
+  for (const geometry of new Set(primitives.map((primitive) => primitive.geometry)))
+    geometry.dispose();
+  for (const material of new Set(primitives.map((primitive) => primitive.material)))
+    material.dispose();
+  return [{ geometry: mesh.geometry, material: mesh.material, matrix: new T.Matrix4 }];
+}
 async function createFurnishings(T, shadows) {
   const records = {};
   await Promise.all(Object.entries(sources2).map(async ([kind, definition]) => {
     const record = records[kind] = { status: "fallback", reason: null, primitives: [], placements: [] };
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
+    record.sourcePrimitiveCount = record.primitives.length;
+    if (record.status === "loaded" && ["bench", "planter", "coffeeTable", "storeSign", "wallLight"].includes(kind)) {
+      const opaque = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() === 0);
+      const emissive = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() !== 0);
+      if (opaque.length > 1)
+        record.primitives = [...batchFurniture(T, opaque), ...emissive];
+    }
   }));
   return {
     place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
@@ -716,7 +750,7 @@ async function createFurnishings(T, shadows) {
           status: record.status,
           reason: record.reason,
           instances: record.placements.length,
-          primitives: record.primitives.length
+          primitives: record.sourcePrimitiveCount
         });
       }
       scene.add(group);
@@ -1376,7 +1410,7 @@ function createSeatPlacements(expanded) {
   if (expanded) {
     add("deck", -6.1, 8.8, 1, "Upper deck bench 1", liftLayout.upper);
     add("deck", 0.1, 8.8, 1, "Upper deck bench 2", liftLayout.upper);
-    add("deck", -3, 11.7, 1, "Upper deck bench 3", liftLayout.upper, false);
+    add("deck", -3, 6, -1, "Upper deck bench 3", liftLayout.upper);
   }
   return placements;
 }
@@ -1686,6 +1720,10 @@ async function createWorld(T, R, physics, expanded = false) {
       torus: new T.TorusGeometry(1, 0.045, 8, 64),
       ring: new T.RingGeometry(0.985, 1, 64)
     };
+    const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
+    doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
+    const doorFrameGeometry = mergeGeometries3(doorFrameParts);
+    doorFrameParts.forEach((part) => part.dispose());
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
     let activeShopSlot = null, activeDeck = false, railingState = null;
@@ -2016,16 +2054,7 @@ async function createWorld(T, R, physics, expanded = false) {
         const glass = new T.Mesh(geometry.box, materials.glass);
         glass.scale.set(2.25, 3.5, 0.06);
         group.add(glass);
-        for (const dx of [-1.12, 1.12]) {
-          const frame = new T.Mesh(geometry.box, materials.brass);
-          frame.scale.set(0.035, 3.5, 0.065);
-          frame.position.x = dx;
-          group.add(frame);
-        }
-        const rail = new T.Mesh(geometry.box, materials.brass);
-        rail.scale.set(2.25, 0.035, 0.065);
-        rail.position.y = -1.73;
-        group.add(rail);
+        group.add(new T.Mesh(doorFrameGeometry, materials.brass));
         const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, 0.05));
         physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
         leaves.push({ group, body, side });

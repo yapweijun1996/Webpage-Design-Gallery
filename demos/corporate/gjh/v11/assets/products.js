@@ -1,4 +1,5 @@
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {fetchStartupAsset} from './startup-asset-pack.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 
@@ -118,9 +119,33 @@ function fallbackShelf(T, scene, displayShelves = []) {
 }
 
 
+// The native M056 has 29 independently transformed mesh nodes but only five
+// materials. Bake each node into shelf-local space and batch by its actual
+// material, retaining UVs, textures, emissive surfaces and the shelf instances.
+function batchShelf(T, primitives) {
+  const buckets=new Map();
+  for(const primitive of primitives){
+    const geometry=primitive.geometry.index?primitive.geometry.toNonIndexed():primitive.geometry.clone();
+    geometry.applyMatrix4(primitive.matrix);
+    if(!buckets.has(primitive.material))buckets.set(primitive.material,[]);
+    buckets.get(primitive.material).push(geometry);
+  }
+  const result=[];
+  for(const [material,parts] of buckets){
+    const geometry=mergeGeometries(parts);
+    parts.forEach(part=>part.dispose());
+    geometry.computeBoundingSphere();
+    result.push({geometry,material,matrix:new T.Matrix4()});
+  }
+  for(const geometry of new Set(primitives.map(primitive=>primitive.geometry)))geometry.dispose();
+  return result;
+}
+
 export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null) {
   const shopLodInstances=[],hiddenShopLodMatrix=new T.Matrix4().makeScale(0,0,0);
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
+  const sourceShelfPrimitives=shelfRecord.primitives.length;
+  if(shelfRecord.status==='loaded')shelfRecord.primitives=batchShelf(T,shelfRecord.primitives);
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene, displayShelves);
   else for (const primitive of shelfRecord.primitives) {
     const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, shelfXs.length+displayShelves.length);
@@ -191,7 +216,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     // Geometry/materials are shared with the shelf: never dispose on gesture completion.
     return group;
   }, interactables, colliders: shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})), assets: Object.freeze({
-    shelf: Object.freeze({model:interiorPilot ? shelf.asset_id : 'GJH-M056', assetId:interiorPilot ? shelf.asset_id : null, lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4+displayShelves.length, primitives: shelfRecord.primitives.length, dimensions: shelfRecord.size}),
+    shelf: Object.freeze({model:interiorPilot ? shelf.asset_id : 'GJH-M056', assetId:interiorPilot ? shelf.asset_id : null, lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4+displayShelves.length, primitives: sourceShelfPrimitives, dimensions: shelfRecord.size}),
     cans: Object.freeze(Object.fromEntries(canRecords.map((record, index) => {
       const x = shelfXs[index];
       const placements = Object.freeze(shelfTops.flatMap(y => productOffsets.map(dx => Object.freeze({x: x + dx, y, z: productZ}))));

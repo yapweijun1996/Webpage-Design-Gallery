@@ -191,6 +191,25 @@ def upper_deck_gallery(page):
     assert not stood['seated'] and stood['seatPhase'] == 'idle', stood
     assert abs(stood['x'] - seat['exitX']) < .05 and abs(stood['z'] - seat['exitZ']) < .05, stood
     assert abs(stood['y'] - 7.2) < .1, stood
+    # The relocated third bench is registered and reachable without crossing
+    # the shaft guard. Exercise its real interaction and published exit too.
+    deck_seats = [item for item in state(page)['seats']
+                  if item['id'] == 'bench-seat-11']
+    assert len(deck_seats) == 1, deck_seats
+    seat = deck_seats[0]
+    walk_to(page, -7.43, stood['z'], precise=True)
+    walk_to(page, -7.43, seat['exitZ'], precise=True)
+    walk_to(page, seat['exitX'], seat['exitZ'], precise=True)
+    assert state(page)['nearby'] == seat['id'], state(page)
+    page.locator('#inspect').click()
+    seated = drive(page, 1600)
+    assert seated['seated'] and seated['seatId'] == seat['id'] and seated['seatPhase'] == 'seated', seated
+    assert abs(seated['y'] - 7.2) < .1, seated
+    page.locator('#inspect').click()
+    stood = drive(page, 1200)
+    assert not stood['seated'] and stood['seatPhase'] == 'idle', stood
+    assert abs(stood['x'] - seat['exitX']) < .05 and abs(stood['z'] - seat['exitZ']) < .05, stood
+    assert abs(stood['y'] - 7.2) < .1, stood
     return upper
 
 
@@ -278,7 +297,7 @@ def run(capture=False):
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
                 try:
                     for query, expected in (('', True), ('?layout=classic', False)):
-                        context = browser.new_context(reduced_motion='reduce')
+                        context = browser.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2, reduced_motion='reduce')
                         page = context.new_page()
                         started = time.monotonic()
                         page.goto(base + '/gallery/demos/corporate/gjh/v11/' + query)
@@ -300,6 +319,8 @@ def run(capture=False):
                                 assert 'Open' in page.locator('#inspect').inner_text()
                                 page.locator('#inspect').click()
                                 opened = drive(page, 1000)
+                                print(json.dumps({'door': zone, 'viewport': [1440, 900],
+                                                  'drawCalls': opened['drawCalls']}), flush=True)
                                 assert opened['doors'][zone] > .99, opened
                                 assert opened['drawCalls'] <= 200, (zone, opened['drawCalls'])
                                 assert 'Close' in page.locator('#inspect').inner_text()
@@ -415,6 +436,8 @@ def run(capture=False):
                             assert abs(state(page)['x']-{'newmoon':-10,'mili':0,'gogo':10}[zone])<.05
                             opened = drive(page, 400)
                             assert opened['doors'][zone] > .99, opened
+                            assert opened['drawCalls'] <= 200, (width, zone, opened['drawCalls'])
+                            max_draw_calls = max(max_draw_calls, opened['drawCalls'])
                             draw_calls[f'{zone}-portal'] = opened['drawCalls']
                             room_signs(page)
                             page.screenshot(path=str(review / f'{zone}-portal-{width}.png'), scale='css')

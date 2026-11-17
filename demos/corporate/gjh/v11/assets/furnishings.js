@@ -1,14 +1,44 @@
-// Optional, self-contained furniture. Each source primitive is instanced across placements.
+// Optional furniture; opaque surfaces are merged before instancing across placements.
 import {loadStaticAsset} from './static-asset.js';
+import {opaqueBatch} from './opaque-batch.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 
 const sources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf')));
+
+// These pinned, texture-free surfaces are opaque and non-emissive. Merge them
+// once while retaining their PBR values and per-shop visibility.
+function batchFurniture(T, primitives) {
+  const parts=primitives.map(primitive=>{
+    const source=primitive.geometry;
+    const geometry=source.index?source.toNonIndexed():source.clone();
+    geometry.applyMatrix4(primitive.matrix);
+    for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal')geometry.deleteAttribute(name);
+    const count=geometry.attributes.position.count, colour=new Float32Array(count*3), surface=new Float32Array(count*2), material=primitive.material;
+    for(let i=0;i<count;i++){
+      colour.set([material.color.r,material.color.g,material.color.b],i*3);
+      surface.set([material.roughness,material.metalness],i*2);
+    }
+    geometry.setAttribute('color',new T.BufferAttribute(colour,3));
+    geometry.setAttribute('obSurface',new T.BufferAttribute(surface,2));
+    return geometry;
+  });
+  const mesh=opaqueBatch(T,parts,false);
+  for(const geometry of new Set(primitives.map(primitive=>primitive.geometry)))geometry.dispose();
+  for(const material of new Set(primitives.map(primitive=>primitive.material)))material.dispose();
+  return [{geometry:mesh.geometry,material:mesh.material,matrix:new T.Matrix4()}];
+}
 
 export async function createFurnishings(T, shadows) {
   const records = {};
   await Promise.all(Object.entries(sources).map(async ([kind, definition]) => {
     const record = records[kind] = {status: 'fallback', reason: null, primitives: [], placements: []};
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
+    record.sourcePrimitiveCount=record.primitives.length;
+    if(record.status==='loaded'&&['bench','planter','coffeeTable','storeSign','wallLight'].includes(kind)){
+      const opaque=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()===0);
+      const emissive=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()!==0);
+      if(opaque.length>1)record.primitives=[...batchFurniture(T,opaque),...emissive];
+    }
   }));
   return {
     place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
@@ -43,7 +73,7 @@ export async function createFurnishings(T, shadows) {
           }
         }
         state[kind] = Object.freeze({assetId: sources[kind].asset_id, identity: sources[kind].sha256, dimensions: sources[kind].dimensions_m, status: record.status, reason: record.reason,
-          instances: record.placements.length, primitives: record.primitives.length});
+          instances: record.placements.length, primitives: record.sourcePrimitiveCount});
       }
       scene.add(group);
       return Object.freeze(state);

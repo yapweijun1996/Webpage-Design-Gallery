@@ -4,15 +4,15 @@ The registry in `assets/interaction-registry.js` adapts the world's existing int
 
 ## Adding a seat
 
-Add a placement to `assets/seat-placements.js` with its floor, position, facing and name. The world uses the placement to create the model and collider and derives the seat and exit anchors. The player checks the capsule path to the anchor and the exit before allowing a sit or stand. Verify both approaches against actual surrounding colliders and the floor; a nominal anchor alone does not prove accessibility. Existing ground-floor seats and the two accessible upper-deck benches share this path.
+Add a placement to `assets/seat-placements.js` with its floor, position, facing and name. The world uses the placement to create the model and collider and derives the seat and exit anchors. The player checks the capsule path to the anchor and the exit before allowing a sit or stand. Verify both approaches against actual surrounding colliders and the floor; a nominal anchor alone does not prove accessibility. Existing ground-floor seats and all three upper-deck benches share this path.
 
-The third upper-deck bench at `(-3, 11.7)` is not registered: it overlaps the lift shaft and its front exit is behind the guard, over the shaft opening. Registering it safely requires changing the geometry or placement, which conflicts with the no-visual-change constraint. No other seat-like models were identified in the scene modules.
+The third upper-deck bench is at `(-3, 6)`, facing its exit at `(-3, 7.2)` between the bench and the lift's south guard. This moves it off the shaft and registers it as a seat. The placement tests check the slab and guard clearance; the browser test exercises the sit/stand route against the actual colliders.
 
 ## Adding a door
 
 Create the two existing-style kinematic sliding leaves and their bodies, add a door record to `world.doors`, and add a ground-floor `open` interaction with a stable ID, radius and door reference. The HUD derives Open/Close and the handler toggles the target; the fixed-step loop moves both meshes and bodies. Expanded-mode doors close after the visitor leaves. Classic-mode automatic opening is unchanged. Verify clearance on both sides and test opening, passage and closing.
 
-The 200-draw-call budget is not met in every sampled state: a 1440 × 900 Metal smoke test measured 235 calls at the open MILI door. The 390 × 844 door-toggle smoke measured 90, 142 and 101 calls for New Moon, MILI and GOGO respectively.
+Opaque furniture and trim primitives are merged by placement group before instancing, retaining surface colors and PBR values. Each movable glass leaf shares a merged frame geometry; product shelf meshes are batched by their original materials. The browser suite checks the 200-call limit with each expanded-layout door open at desktop resolution.
 
 ## Static geometry
 

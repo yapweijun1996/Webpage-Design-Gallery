@@ -1,3 +1,4 @@
+import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createDeckRailings} from './deck-railings.js';
 import {createFurnishings} from './furnishings.js';
@@ -90,6 +91,12 @@ export async function createWorld(T, R, physics, expanded = false) {
     box: new T.BoxGeometry(1, 1, 1), cylinder: new T.CylinderGeometry(1, 1, 1, 32), sphere: new T.SphereGeometry(1, 12, 8),
     plane: new T.PlaneGeometry(1, 1), torus: new T.TorusGeometry(1, .045, 8, 64), ring: new T.RingGeometry(.985, 1, 64)
   };
+  // Each moving leaf has three fixed brass pieces; bake their local transforms
+  // into one shared geometry while the parent and physics body remain movable.
+  const doorFrameParts = [-1.12,1.12].map(x => geometry.box.clone().scale(.035,3.5,.065).translate(x,0,0));
+  doorFrameParts.push(geometry.box.clone().scale(2.25,.035,.065).translate(0,-1.73,0));
+  const doorFrameGeometry = mergeGeometries(doorFrameParts);
+  doorFrameParts.forEach(part=>part.dispose());
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
   let activeShopSlot=null,activeDeck=false,railingState=null;
@@ -459,8 +466,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     for (const side of [-1, 1]) {
       const group = new T.Group(); group.position.set(x + side * 1.16, 1.8, .05); scene.add(group);
       const glass = new T.Mesh(geometry.box, materials.glass); glass.scale.set(2.25, 3.5, .06); group.add(glass);
-      for (const dx of [-1.12, 1.12]) { const frame = new T.Mesh(geometry.box, materials.brass); frame.scale.set(.035, 3.5, .065); frame.position.x = dx; group.add(frame); }
-      const rail = new T.Mesh(geometry.box, materials.brass); rail.scale.set(2.25, .035, .065); rail.position.y = -1.73; group.add(rail);
+      group.add(new T.Mesh(doorFrameGeometry, materials.brass));
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, .05));
       physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, .03), body); leaves.push({group, body, side});
     }
