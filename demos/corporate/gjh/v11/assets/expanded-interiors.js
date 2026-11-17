@@ -1,5 +1,7 @@
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {buildWindowStudio, shopLamp} from './window-studios.js';
+import {westShopPlacements} from './gallery-west-shops.js';
+import {eastShopPlacements} from './gallery-east-shops.js';
 import {loadBrandKit} from './shop-signs.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
@@ -9,6 +11,8 @@ const displayFiles = {
   14:['tv-demo-table', 'tv-floor-stand'],
   15:['electronic-keyboard'], 16:['battery-display-rack'], 17:['cordless-phone-display']
 };
+
+const galleryPlacements = {...westShopPlacements, ...eastShopPlacements};
 
 function displayPlacements(number, heroX, heroZ) {
   if (number === 14) return [[heroX-.55, .07, heroZ, .65], [heroX+.7, .07, heroZ, .8]];
@@ -54,7 +58,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
   const models = new Map(), gltfLoader = new GLTFLoader();
   function loadModel(name) {
     if (!models.has(name)) {
-      models.set(name, gltfLoader.loadAsync(new URL(`./${name}.glb`, import.meta.url).href)
+      models.set(name, gltfLoader.loadAsync(new URL(name, import.meta.url).href)
         .then(gltf => gltf.scene));
     }
     return models.get(name);
@@ -186,7 +190,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
       hero.add(display);
       loadDisplay = () => {
         const placements = displayPlacements(number, heroOffset, heroZ);
-        return Promise.all(files.map(loadModel)).then(scenes => {
+        return Promise.all(files.map(name => loadModel(`./${name}.glb`))).then(scenes => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements[i];
@@ -221,8 +225,29 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     posterParts.push(poster);
     group.visible = false;
     scene.add(group);
+    const loadHero = loadDisplay;
+    const placements = galleryPlacements[number];
+    // Secondary furnishings belong to the bay, so they remain visible when a
+    // visitor looks across adjoining windows and the nearest hero changes.
+    async function loadShop() {
+      await Promise.all([
+        loadHero?.(),
+        ...placements.map(async ({file, position, yaw = 0, scale = 1}) => {
+          try {
+            const model = (await loadModel(`./${file}`)).clone(true);
+            model.position.set(...position);
+            model.rotation.y = yaw;
+            model.scale.setScalar(scale);
+            model.name = `S${slot.number} gallery: ${file}`;
+            group.add(model);
+          } catch (error) {
+            console.warn(`Unavailable shop furnishing: ${file}`, error);
+          }
+        })
+      ]);
+    }
     shops.push({group, x:group.position.x, z:group.position.z, display, fallback,
-      isLoaded: () => loaded, loadDisplay});
+      isLoaded: () => loaded, loadDisplay: loadShop});
   });
   for (const [wing, parts] of studioParts) {
     const scenery = new T.Mesh(mergeGeometries(parts), material);

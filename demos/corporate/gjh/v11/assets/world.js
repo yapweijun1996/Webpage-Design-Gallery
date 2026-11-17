@@ -534,7 +534,9 @@ export async function createWorld(T, R, physics, expanded = false) {
           for(const y of [1.35,2.17,3.0]) {
             box('oak',x-4.45,y,z,.45,.085,2.15);
             box('glow',x-4.24,y-.055,z,.025,.024,2.07);
-            for(const dz of [-.72,-.23,.23,.72]) cylinder('cream',x-4.43,y+.18,z+dz,.14,.265);
+            const rack = y === 3 && z !== -7.35 &&
+              furnishings.place('pantryRack',x-4.43,z,1,1,y+.0425,Math.PI/2,activeShopSlot);
+            if (!rack) for(const dz of [-.72,-.23,.23,.72]) cylinder('cream',x-4.43,y+.18,z+dz,.14,.265);
           }
         }
       }
@@ -634,6 +636,11 @@ export async function createWorld(T, R, physics, expanded = false) {
           for (const end of [-1,1]) cylinder(material,x+2.65,y,-4+end,radius,height);
         }
         collider(x+2.65,.57,-4,1.56,1.14,3.30);
+        const top = 1.185;
+        furnishings.place('teaKettle',x+2.8,-4.55,1,1,top,-.45,activeShopSlot);
+        for (const [dx,dz] of [[-.35,.54],[.15,.73],[-.29,-.05]]) {
+          furnishings.place('teaCup',x+2.65+dx,-4+dz,1,1,top,.2,activeShopSlot);
+        }
       } else {
         box('green', x + 2.8, .55, -4, 2.1, 1.1, 1.25, true); box('cream', x + 2.8, 1.15, -4, 2.2, .12, 1.4);
         for (let i = 0; i < 9; i++) box('brass', x + 1.9 + i * .22, .56, -3.35, .025, 1, .025);
@@ -683,6 +690,7 @@ export async function createWorld(T, R, physics, expanded = false) {
           box('water',cx,.59,cz,1.55,1.16,3.25);
           box('brass',cx,.10,cz,1.57,.16,3.29);
           box('cream',cx,1.2,cz,1.67,.12,3.4);
+          furnishings.place('coffeeMachine',cx+.16,cz+.55,1,1,1.26,-Math.PI/2,activeShopSlot);
           collider(cx,.59,cz,1.55,1.18,3.25);
           for(let dz=-1.55;dz<1.61;dz+=.10) box('jadeAlt',cx-.79,.65,cz+dz,.045,.88,.045);
           for(let dx=-.73;dx<.77;dx+=.10) box('jadeAlt',cx+dx,.65,cz+1.64,.045,.88,.045);
@@ -875,6 +883,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       const z=bay.available ? Math.min(bay.maxZ,Math.max(bay.minZ,visitor.z)) : (bay.minZ+bay.maxZ)/2;
       mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.z-z)<shopDistance;
       mesh.visible=mesh.userData.shopLodNear;
+      if (mesh.visible && !deckVisible) furnishings.loadShopDetails(mesh.userData.shopSlot);
     }
     if(!deckLodMeshes){deckLodMeshes=[];scene.traverse(mesh=>{if(mesh.userData.deckLod)deckLodMeshes.push(mesh);});}
     for(const mesh of deckLodMeshes)mesh.visible=deckVisible;

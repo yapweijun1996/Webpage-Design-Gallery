@@ -197,7 +197,7 @@ def runtime_resources(catalog):
         resources.update(directory / name for name in ("index.html", "style.css", "script.js"))
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
-        for nested in ("brand-kit", "brands"):
+        for nested in ("brand-kit", "brands", "gallery-assets"):
             resources.update(path.relative_to(ROOT) for path in (assets / nested).rglob("*") if path.is_file())
         vendor = ROOT / directory / "vendor"
         if vendor.is_dir():

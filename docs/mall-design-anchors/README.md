@@ -92,6 +92,16 @@ Four public-space anchors and seventeen AI-generated shopfront concepts. Select 
 
 [![Gigaset architectural concept](S17.webp)](S17.webp)
 
+## Gallery furnishings in the 17 shops
+
+In-app browser views pair each reference with a shopfront view and a closer look at the gallery model. S01–S03 are photographed inside the open stores. S04–S17 are viewed through the glass from the arcade.
+
+| Shops | Reference and live views | Models and provenance |
+| --- | --- | --- |
+| S01–S05 | [New Moon through Pien Tze Huang](runtime/gallery-S01-S05.webp) | [Open shops](../gjh-gallery-open-shops.md) · [S04–S11](../gjh-gallery-west-shops.md) |
+| S06–S11 | [Flying Wheel through Hormel](runtime/gallery-S06-S11.webp) | [West arcade](../gjh-gallery-west-shops.md) |
+| S12–S17 | [Zeria through Gigaset](runtime/gallery-S12-S17.webp) | [East arcade](../gjh-gallery-east-shops.md) |
+
 ## Runtime views
 
 Each sheet pairs the design reference with the original and revised WebGL views at the same camera position. Open stores also have player-height captures taken from the arcade.
@@ -105,4 +115,4 @@ Each sheet pairs the design reference with the original and revised WebGL views 
 
 [Three open stores](runtime/open-stores-comparison.jpg) · [GOGO stools in the walkthrough](runtime/S03-bar-stools.webp) · [Directory model provenance](../gjh-public-architecture.md) · [Stool model provenance](../gjh-gogo-bar-stool.md)
 
-S01–S03 are enterable. S04–S17 are display-only rooms viewed from the concourse. Real-time materials simplify reflections, foliage and packaging. Casio features an electronic keyboard in the instrument display.
+S01–S03 are enterable. S04–S17 are display-only rooms viewed from the concourse. Real-time materials simplify reflections, foliage and packaging. Casio now displays a baby grand and bench alongside its electronic keyboard.

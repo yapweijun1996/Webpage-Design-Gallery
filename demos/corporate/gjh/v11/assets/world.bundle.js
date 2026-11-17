@@ -967,17 +967,57 @@ var INTERIOR_PILOT = Object.freeze({
 
 // demos/corporate/gjh/v11/assets/furnishings.js
 var pilotSources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")));
+var shopSources = Object.freeze({
+  barStool: {
+    asset_id: "ASSET_MallBarStool",
+    file: "gogo-bar-stool.glb",
+    sha256: "c4546f8de005aef723c7fd2a175e0b6544b26277792c985eb85d8ffe2aa4b3b3",
+    dimensions_m: [0.48, 1.04, 0.48],
+    rootExtras: { units: "metres" }
+  },
+  teaCup: {
+    asset_id: "ASSET_KopitiamSaucerAndCup",
+    file: "kopitiam-saucer-and-cup.glb",
+    sha256: "61dfd3673a88072c1d152d3dde91f3e1fcc09579b6ac70090ead8b319769f7d7",
+    dimensions_m: [0.156, 0.088, 0.156],
+    rootExtras: { units: "metres" }
+  },
+  teaKettle: {
+    asset_id: "ASSET_KopitiamKettle",
+    file: "kopitiam-kettle.glb",
+    sha256: "fef5f8192497110031216cbcdfe143b5dba6ba9362a9613154beb46259db953a",
+    dimensions_m: [0.4041, 0.36, 0.27],
+    rootExtras: { units: "metres" }
+  },
+  pantryRack: {
+    asset_id: "ASSET_CondimentBottleJarSet",
+    file: "condiment-bottle-jar-set.glb",
+    sha256: "5e1eac9c16e1c38057ba0363d5f38d95bf78a79113743df126316f64df56008c",
+    dimensions_m: [0.9, 1.1, 0.35],
+    rootExtras: { units: "metres" }
+  },
+  coffeeMachine: {
+    asset_id: "ASSET_CoffeeMachine",
+    file: "coffee-machine.glb",
+    sha256: "155666679065cdec42f9b1f831bcc7b67959487a6f518e36f5d06925d90d2022",
+    dimensions_m: [0.481056, 0.5045, 0.58],
+    rootExtras: { units: "metres" }
+  }
+});
 function batchFurniture(T, primitives) {
   const parts = primitives.map((primitive) => {
     const source = primitive.geometry;
     const geometry = source.index ? source.toNonIndexed() : source.clone();
     geometry.applyMatrix4(primitive.matrix);
+    const vertexColour = primitive.material.vertexColors && geometry.getAttribute("color");
     for (const name of Object.keys(geometry.attributes))
       if (name !== "position" && name !== "normal")
         geometry.deleteAttribute(name);
     const count = geometry.attributes.position.count, colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
     for (let i = 0;i < count; i++) {
-      colour.set([material.color.r, material.color.g, material.color.b], i * 3);
+      colour[i * 3] = material.color.r * (vertexColour ? vertexColour.getX(i) : 1);
+      colour[i * 3 + 1] = material.color.g * (vertexColour ? vertexColour.getY(i) : 1);
+      colour[i * 3 + 2] = material.color.b * (vertexColour ? vertexColour.getZ(i) : 1);
       surface.set([material.roughness, material.metalness], i * 2);
     }
     geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
@@ -992,68 +1032,98 @@ function batchFurniture(T, primitives) {
   return [{ geometry: mesh.geometry, material: mesh.material, matrix: new T.Matrix4 }];
 }
 async function createFurnishings(T, shadows, expanded = false) {
-  const sources2 = expanded ? { ...pilotSources, barStool: {
-    asset_id: "ASSET_MallBarStool",
-    file: "gogo-bar-stool.glb",
-    sha256: "c4546f8de005aef723c7fd2a175e0b6544b26277792c985eb85d8ffe2aa4b3b3",
-    dimensions_m: [0.48, 1.04, 0.48],
-    rootExtras: { units: "metres" }
-  } } : pilotSources;
+  const sources2 = expanded ? { ...pilotSources, ...shopSources } : pilotSources;
   const records = {};
-  await Promise.all(Object.entries(sources2).map(async ([kind, definition]) => {
-    const record = records[kind] = { status: "fallback", reason: null, primitives: [], placements: [] };
+  const pendingByShop = new Map;
+  const group = new T.Group;
+  group.name = "Blender furnishings";
+  let registerMesh;
+  async function load2(kind) {
+    const definition = sources2[kind], record = records[kind];
+    record.status = "loading";
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
     record.sourcePrimitiveCount = record.primitives.length;
-    if (record.status === "loaded" && ["bench", "planter", "coffeeTable", "storeSign", "wallLight", "barStool"].includes(kind)) {
+    if (record.status === "loaded" && (["bench", "planter", "coffeeTable", "storeSign", "wallLight"].includes(kind) || Object.hasOwn(shopSources, kind))) {
       const opaque = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() === 0);
       const emissive = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() !== 0);
       if (opaque.length > 1)
         record.primitives = [...batchFurniture(T, opaque), ...emissive];
     }
+  }
+  await Promise.all(Object.keys(sources2).map((kind) => {
+    records[kind] = { status: "pending", reason: null, primitives: [], placements: [], sourcePrimitiveCount: 0 };
+    if (!Object.hasOwn(shopSources, kind) || kind === "barStool")
+      return load2(kind);
   }));
+  function mount(kind) {
+    const record = records[kind];
+    const placementsBySlot = new Map;
+    for (const placement of record.placements) {
+      if (!placementsBySlot.has(placement.shopSlot))
+        placementsBySlot.set(placement.shopSlot, []);
+      placementsBySlot.get(placement.shopSlot).push(placement);
+    }
+    for (const primitive of record.primitives) {
+      for (const [shopSlot, placements] of placementsBySlot) {
+        const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
+        mesh.name = `${kind} primitive`;
+        placements.forEach((placement, index) => mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(placement.transform, primitive.matrix)));
+        mesh.castShadow = shadows && !["wallLight", "storeSign"].includes(kind);
+        mesh.receiveShadow = true;
+        mesh.computeBoundingSphere();
+        if (shopSlot === -1)
+          mesh.userData.deckLod = true;
+        else if (shopSlot !== null) {
+          mesh.userData.shopSlot = shopSlot;
+          registerMesh(mesh);
+        }
+        group.add(mesh);
+      }
+    }
+  }
   return {
     place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
       const record = records[kind];
       const transform = new T.Matrix4().compose(new T.Vector3(x, baseY, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), yaw ?? (facing < 0 ? Math.PI : 0)), new T.Vector3(1, height, 1));
       record.placements.push({ transform, shopSlot });
-      return record.status === "loaded";
+      return record.status === "loaded" || record.status === "pending";
+    },
+    loadShopDetails(shopSlot) {
+      const kinds = pendingByShop.get(shopSlot);
+      if (!kinds)
+        return;
+      pendingByShop.delete(shopSlot);
+      for (const kind of kinds) {
+        load2(kind).then(() => mount(kind));
+      }
     },
     finish(scene, onShopLodMesh = () => {}) {
-      const group = new T.Group;
-      group.name = "Blender furnishings";
+      registerMesh = onShopLodMesh;
       const state = {};
       for (const [kind, record] of Object.entries(records)) {
-        const placementsBySlot = new Map;
-        for (const placement of record.placements) {
-          if (!placementsBySlot.has(placement.shopSlot))
-            placementsBySlot.set(placement.shopSlot, []);
-          placementsBySlot.get(placement.shopSlot).push(placement);
-        }
-        for (const primitive of record.primitives) {
-          for (const [shopSlot, placements] of placementsBySlot) {
-            const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
-            mesh.name = `${kind} primitive`;
-            placements.forEach((placement, index) => mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(placement.transform, primitive.matrix)));
-            mesh.castShadow = shadows && !["wallLight", "storeSign"].includes(kind);
-            mesh.receiveShadow = true;
-            mesh.computeBoundingSphere();
-            if (shopSlot === -1)
-              mesh.userData.deckLod = true;
-            else if (shopSlot !== null) {
-              mesh.userData.shopSlot = shopSlot;
-              onShopLodMesh(mesh);
-            }
-            group.add(mesh);
+        if (record.status === "pending") {
+          const slot = record.placements[0]?.shopSlot;
+          if (slot != null) {
+            if (!pendingByShop.has(slot))
+              pendingByShop.set(slot, []);
+            pendingByShop.get(slot).push(kind);
           }
-        }
+        } else
+          mount(kind);
         state[kind] = Object.freeze({
           assetId: sources2[kind].asset_id,
           identity: sources2[kind].sha256,
           dimensions: sources2[kind].dimensions_m,
-          status: record.status,
-          reason: record.reason,
           instances: record.placements.length,
-          primitives: record.sourcePrimitiveCount
+          get status() {
+            return record.status;
+          },
+          get reason() {
+            return record.reason;
+          },
+          get primitives() {
+            return record.sourcePrimitiveCount;
+          }
         });
       }
       scene.add(group);
@@ -1850,6 +1920,34 @@ function buildWindowStudio(n, t, width, depth) {
   }
 }
 
+// demos/corporate/gjh/v11/assets/gallery-west-shops.js
+var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
+  file: `gallery-assets/${name}.glb`,
+  position: [x, y, z],
+  yaw,
+  scale
+});
+var westShopPlacements = {
+  4: [fixture("mosquito-patch-pack", -1.57, 1.2875, 1.62)],
+  5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
+  6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
+  7: [fixture("stacked-can-pyramid", -1.18, 0.081, 3.62, -0.07, 0.88)],
+  8: [fixture("peanut-butter-jar-stand", -2.52, 0.081, 4.57, 0.015)],
+  9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
+  10: [fixture("abalone-gift-box-display", -0.55, 1.09, 1.75)],
+  11: [fixture("food-display-cabinet", -1.18, 0.081, 3.28, -0.12)]
+};
+
+// demos/corporate/gjh/v11/assets/gallery-east-shops.js
+var eastShopPlacements = {
+  12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.045, 2.92], yaw: 0.11, scale: 1.14 }],
+  13: [{ file: "gallery-assets/headphone-display-stand.glb", position: [-2.45, 0.045, 3.05], yaw: 0.18, scale: 1.2 }],
+  14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.045, 2.58], yaw: 0.08, scale: 1.03 }],
+  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.045, 2.47], yaw: 0.22, scale: 0.93 }],
+  16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.045, 2.81], yaw: 0.12, scale: 0.96 }],
+  17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-1.87, 0.045, 2.22], yaw: 1.08, scale: 0.86 }]
+};
+
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
 import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
 var displayFiles = {
@@ -1861,6 +1959,7 @@ var displayFiles = {
   16: ["battery-display-rack"],
   17: ["cordless-phone-display"]
 };
+var galleryPlacements = { ...westShopPlacements, ...eastShopPlacements };
 function displayPlacements(number, heroX, heroZ) {
   if (number === 14)
     return [[heroX - 0.55, 0.07, heroZ, 0.65], [heroX + 0.7, 0.07, heroZ, 0.8]];
@@ -1903,7 +2002,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
   const models = new Map, gltfLoader = new GLTFLoader3;
   function loadModel(name) {
     if (!models.has(name)) {
-      models.set(name, gltfLoader.loadAsync(new URL(`./${name}.glb`, import.meta.url).href).then((gltf) => gltf.scene));
+      models.set(name, gltfLoader.loadAsync(new URL(name, import.meta.url).href).then((gltf) => gltf.scene));
     }
     return models.get(name);
   }
@@ -2045,9 +2144,9 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     const hero = new T.Group;
     hero.name = `S${slot2.number} hero display`;
     hero.userData.modelReady = !files;
-    const fixture = new T.Mesh(mergeGeometries2(fixtureParts), material);
+    const fixture2 = new T.Mesh(mergeGeometries2(fixtureParts), material);
     fixtureParts.forEach((part) => part.dispose());
-    hero.add(fixture);
+    hero.add(fixture2);
     group.add(hero);
     let loadDisplay, display, loaded = false;
     const fallback = new T.Mesh(mergeGeometries2(parts), material);
@@ -2059,11 +2158,11 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
       display.visible = false;
       hero.add(display);
       loadDisplay = () => {
-        const placements = displayPlacements(number, heroOffset, heroZ);
-        return Promise.all(files.map(loadModel)).then((scenes) => {
+        const placements2 = displayPlacements(number, heroOffset, heroZ);
+        return Promise.all(files.map((name) => loadModel(`./${name}.glb`))).then((scenes) => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
-            const [x, y, z, scale] = placements[i];
+            const [x, y, z, scale] = placements2[i];
             instance.position.set(x, y, z);
             instance.scale.setScalar(scale);
             instance.name = `S${slot2.number} ${files[i]}`;
@@ -2092,6 +2191,25 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     posterParts.push(poster);
     group.visible = false;
     scene.add(group);
+    const loadHero = loadDisplay;
+    const placements = galleryPlacements[number];
+    async function loadShop() {
+      await Promise.all([
+        loadHero?.(),
+        ...placements.map(async ({ file, position, yaw = 0, scale = 1 }) => {
+          try {
+            const model = (await loadModel(`./${file}`)).clone(true);
+            model.position.set(...position);
+            model.rotation.y = yaw;
+            model.scale.setScalar(scale);
+            model.name = `S${slot2.number} gallery: ${file}`;
+            group.add(model);
+          } catch (error) {
+            console.warn(`Unavailable shop furnishing: ${file}`, error);
+          }
+        })
+      ]);
+    }
     shops.push({
       group,
       x: group.position.x,
@@ -2099,7 +2217,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
       display,
       fallback,
       isLoaded: () => loaded,
-      loadDisplay
+      loadDisplay: loadShop
     });
   });
   for (const [wing, parts] of studioParts) {
@@ -2531,6 +2649,8 @@ async function createWorld(T, R, physics, expanded = false) {
         const z = bay.available ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
         mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.z - z) < shopDistance;
         mesh.visible = mesh.userData.shopLodNear;
+        if (mesh.visible && !deckVisible)
+          furnishings.loadShopDetails(mesh.userData.shopSlot);
       }
       if (!deckLodMeshes) {
         deckLodMeshes = [];
@@ -2970,8 +3090,10 @@ async function createWorld(T, R, physics, expanded = false) {
             for (const y of [1.35, 2.17, 3]) {
               box("oak", x - 4.45, y, z, 0.45, 0.085, 2.15);
               box("glow", x - 4.24, y - 0.055, z, 0.025, 0.024, 2.07);
-              for (const dz of [-0.72, -0.23, 0.23, 0.72])
-                cylinder("cream", x - 4.43, y + 0.18, z + dz, 0.14, 0.265);
+              const rack = y === 3 && z !== -7.35 && furnishings.place("pantryRack", x - 4.43, z, 1, 1, y + 0.0425, Math.PI / 2, activeShopSlot);
+              if (!rack)
+                for (const dz of [-0.72, -0.23, 0.23, 0.72])
+                  cylinder("cream", x - 4.43, y + 0.18, z + dz, 0.14, 0.265);
             }
           }
         }
@@ -3086,6 +3208,11 @@ async function createWorld(T, R, physics, expanded = false) {
               cylinder(material, x + 2.65, y, -4 + end, radius, height);
           }
           collider(x + 2.65, 0.57, -4, 1.56, 1.14, 3.3);
+          const top = 1.185;
+          furnishings.place("teaKettle", x + 2.8, -4.55, 1, 1, top, -0.45, activeShopSlot);
+          for (const [dx, dz] of [[-0.35, 0.54], [0.15, 0.73], [-0.29, -0.05]]) {
+            furnishings.place("teaCup", x + 2.65 + dx, -4 + dz, 1, 1, top, 0.2, activeShopSlot);
+          }
         } else {
           box("green", x + 2.8, 0.55, -4, 2.1, 1.1, 1.25, true);
           box("cream", x + 2.8, 1.15, -4, 2.2, 0.12, 1.4);
@@ -3149,6 +3276,7 @@ async function createWorld(T, R, physics, expanded = false) {
             box("water", cx, 0.59, cz, 1.55, 1.16, 3.25);
             box("brass", cx, 0.1, cz, 1.57, 0.16, 3.29);
             box("cream", cx, 1.2, cz, 1.67, 0.12, 3.4);
+            furnishings.place("coffeeMachine", cx + 0.16, cz + 0.55, 1, 1, 1.26, -Math.PI / 2, activeShopSlot);
             collider(cx, 0.59, cz, 1.55, 1.18, 3.25);
             for (let dz = -1.55;dz < 1.61; dz += 0.1)
               box("jadeAlt", cx - 0.79, 0.65, cz + dz, 0.045, 0.88, 0.045);

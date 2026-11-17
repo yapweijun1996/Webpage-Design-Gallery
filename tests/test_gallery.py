@@ -104,6 +104,9 @@ class GalleryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
             gallery.build(output)
+            gallery_models = Path("demos/corporate/gjh/v11/assets/gallery-assets")
+            for source in (gallery.ROOT / gallery_models).glob("*.glb"):
+                self.assertEqual((output / gallery_models / source.name).read_bytes(), source.read_bytes())
             for name in ("assets/tokens.css", "assets/icons.svg", "assets/icons/gallery-maskable-512.png",
                          "assets/onboarding/action-dialog.js", "assets/onboarding/onboarding.css",
                          "design-system/onboarding/index.html",
