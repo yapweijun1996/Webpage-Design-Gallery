@@ -357,7 +357,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   runButton.addEventListener("click", () => {
     runToggle = !runToggle;
     runButton.setAttribute("aria-pressed", String(runToggle));
+    const runIcon = runButton.querySelector("svg");
     runButton.textContent = runToggle ? "Run: on" : "Run";
+    if (runIcon)
+      runButton.prepend(runIcon);
   });
   function dragStick(event) {
     if (!stickOrigin)

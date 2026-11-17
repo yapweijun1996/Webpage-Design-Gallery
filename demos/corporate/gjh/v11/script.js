@@ -7,6 +7,19 @@ import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
+import {icon} from './assets/icons.js';
+document.querySelectorAll('[data-icon]').forEach(slot => slot.replaceWith(icon(slot.dataset.icon, {size: 18})));
+for (const [selector, name, size] of [
+  ['#mall-map > summary', 'map-pin', 22],
+  ['#header-map', 'map-pin', 18],
+  ['#keyboard-help > summary', 'help-circle', 18],
+  ['#mall-theme-open', 'theme', 18],
+  ['#directory-theme-open', 'theme', 18],
+  ['#run-toggle', 'run', 20],
+]) {
+  document.querySelector(selector).prepend(icon(name, {size}));
+}
+document.querySelector('#interaction-point').append(icon('map-pin', {size: 18}));
 const expanded = new URLSearchParams(location.search).get('layout') !== 'classic';
 document.body.classList.toggle('is-expanded', expanded);
 

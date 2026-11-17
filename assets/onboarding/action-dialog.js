@@ -1,7 +1,7 @@
 import {element,button,trapDialogFocus} from './components.js';
 
 /** Shared modal actions for scene objects; the host supplies domain callbacks. */
-export function createActionDialog({id,scene,getPreferences,onOpen=()=>{},onClose=()=>{}}) {
+export function createActionDialog({id,scene,getPreferences,onOpen=()=>{},onClose=()=>{},closeIcon=null}) {
   const dialog=element('dialog','ob-ui ob-dialog');dialog.id=id;
   dialog.setAttribute('aria-labelledby',`${id}-title`);dialog.setAttribute('aria-describedby',`${id}-description`);
   document.body.append(dialog);let opener=null,selection=null,title;
@@ -23,7 +23,7 @@ export function createActionDialog({id,scene,getPreferences,onOpen=()=>{},onClos
       const prefs=getPreferences(),locale=prefs.locale;
       dialog.lang=locale;dialog.dataset.obTheme=prefs.resolvedTheme;
       const header=element('div','ob-header');
-      const close=button('×','ob-close',()=>dialog.close('dismiss'));close.setAttribute('aria-label',locale==='zh-CN'?'关闭':'Close');
+      const close=button(closeIcon?'':'×','ob-close',()=>dialog.close('dismiss'));if(closeIcon)close.append(closeIcon());close.setAttribute('aria-label',locale==='zh-CN'?'关闭':'Close');
       header.append(element('p','ob-eyebrow',local(config.eyebrow||{en:'Virtual Mall','zh-CN':'虚拟商城'},locale)),close);
       title=element('h2','ob-title',local(config.title,locale));title.id=`${id}-title`;title.tabIndex=-1;
       const description=element('p','ob-description',local(config.description,locale));description.id=`${id}-description`;

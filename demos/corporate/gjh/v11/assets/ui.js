@@ -8,6 +8,14 @@ import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
 import {expandedLayout, expandedMapPoint, plannedSpaces} from './expanded-layout.js';
 import {liftLayout} from './lift-layout.js';
+import {icon} from './icons.js';
+
+function onboardingIcon(name) {
+  const names = {move:'move', look:'mouse', inspect:'search', touch:'smartphone', gamepad:'search', 'gamepad-look':'mouse', 'gamepad-move':'move', ready:'check'};
+  const element = icon(names[name], {size:24});
+  element.classList.add('ob-icon');
+  return element;
+}
 
 const plannedSideLabels = Object.freeze({north: 'North side', west: 'West side', east: 'East side'});
 function setupPlannedDirectory(expanded) {
@@ -77,10 +85,10 @@ export function createUI(expanded = false) {
   const mallMap = document.getElementById('mall-map');
   let guideFromHUD=false;
   const guideFooter=document.createElement('div');guideFooter.id='context-navigation-guide';guideFooter.className='context-navigation-footer';
-  const onboarding = createOnboarding({...createExperienceProfile('mall'), id:'guide', storageKey:'gjh-v11', scene, footer:guideFooter,
+  const onboarding = createOnboarding({...createExperienceProfile('mall'), id:'guide', storageKey:'gjh-v11', scene, footer:guideFooter, controlIcon:onboardingIcon, closeIcon:()=>icon('close',{size:24}),
     modes:['keyboard','touch','gamepad'], showHelpEntry:false, onHelp:openHelp, onBack:closeGamepadPanel, canOpen:()=>available&&showing3D&&!dialog.open&&!bag.open&&!amenityPanel.dialog.open&&!themeDialog.open&&!externalPaused, onOpen:()=>{guidePaused=true;guideFromHelp=document.activeElement===guideReopen;guideFromHUD=Boolean(document.activeElement.closest('.ob-hud'));notifyMode();} });
   const guide = onboarding.dialog;
-  const amenityPanel=createActionDialog({id:'amenity-dialog',scene,getPreferences:()=>onboarding.preferences,onOpen:()=>notifyMode(),onClose:()=>notifyMode()});
+  const amenityPanel=createActionDialog({id:'amenity-dialog',scene,closeIcon:()=>icon('close',{size:24}),getPreferences:()=>onboarding.preferences,onOpen:()=>notifyMode(),onClose:()=>notifyMode()});
   let previousTutorialPose = null;
   let guideFromHelp = false;
   const guideReopen = document.getElementById('guide-reopen');
@@ -307,6 +315,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let currentElevatorState=null,currentElevatorUpper=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   const sceneCart=document.querySelector('#scene-cart');
+  const cartIcon=icon('cart',{size:18});
+  const interactionIcons=new Map();
   function updateCartControls() {
     const cart=cartState();
     const recoverFocus=!cart.available&&bag.open&&cartControls.contains(document.activeElement);
@@ -314,7 +324,9 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     cartToggle.textContent=cart.active?'Stow cart':'Use cart in 3D';
     cartToggle.disabled=!cart.available||(!cart.active&&cart.capability?.disabled===true);
     sceneCart.hidden=!cart.available||!showing3D||(compactMap.matches&&(mallMap.open||help.open));
-    sceneCart.textContent=cart.active?'Stow cart':'Cart';
+    const cartLabel=cart.active?'Stow cart':'Cart';
+    if(sceneCart.textContent!==cartLabel)sceneCart.textContent=cartLabel;
+    if(sceneCart.firstChild!==cartIcon)sceneCart.prepend(cartIcon);
     sceneCart.setAttribute('aria-pressed',String(cart.active));
     sceneCart.disabled=!cart.available||(!cart.active&&cart.capability?.sceneDisabled===true);
     sceneCart.title=cartReason(cart)||'';
@@ -810,6 +822,10 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       else if(nearby&&selectedInteraction?.kind==='sit'){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
       else if(nearby&&selectedInteraction?.kind==='travel'){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;inspectButton.textContent=action;inspectButton.setAttribute('aria-label',action);}
       else if(nearby&&selectedInteraction?.kind==='open'&&selectedInteraction.door){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=records.get(nearby).name;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`${action} ${records.get(nearby).name}`);}
+      const iconName=seated||selectedInteraction?.kind==='sit'?'sit':selectedInteraction?.kind==='travel'?'lift':selectedInteraction?.kind==='open'&&selectedInteraction.door?'door':selectedInteraction?.kind==='pickup'?'pick-up':records.get(nearby)?.action==='map'?'map-pin':'quality-inspection';
+      if(!interactionIcons.has(iconName))interactionIcons.set(iconName,icon(iconName,{size:18}));
+      const actionIcon=interactionIcons.get(iconName);
+      if(inspectButton.firstChild!==actionIcon){inspectButton.querySelector('svg')?.remove();inspectButton.prepend(actionIcon);}
       const cart=updateCartControls();
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';

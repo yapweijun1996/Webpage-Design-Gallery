@@ -75,8 +75,8 @@ function signTexture(T,x,rear){
   // Group destinations by direction to keep the authored panel legible at native scale.
   const left=destinations.filter(([,destination])=>(destination<x)!==rear).map(([label])=>label);
   const right=destinations.filter(([,destination])=>(destination<x)===rear).map(([label])=>label);
-  context.fillText(`← ${left.join(' · ')}`,40,65,944);
-  context.textAlign='right';context.fillText(`${right.join(' · ')} →`,984,191,944);
+  context.fillText(`LEFT: ${left.join(' · ')}`,40,65,944);
+  context.textAlign='right';context.fillText(`RIGHT: ${right.join(' · ')}`,984,191,944);
   const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;return texture;
 }
 export async function addAmenities(T,scene,collider,createCollectProp,shadows,staticProductCount=null,expanded=false){

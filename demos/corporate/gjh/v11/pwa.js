@@ -1,3 +1,5 @@
+import {icon} from './assets/icons.js';
+
 /* V11 owns only its scoped offline fallback. Live mall resources stay network-only. */
 (() => {
   const root = new URL('../../../../', location.href);
@@ -8,6 +10,10 @@
   const notice = document.querySelector('#mall-update-notice');
   const update = document.querySelector('#mall-apply-update');
   const message = document.querySelector('#mall-update-message');
+  install.prepend(icon('download', {size:18}));
+  check.prepend(icon('refresh', {size:18}));
+  const updateIcon = icon('refresh', {size:18});
+  update.prepend(updateIcon);
   const workerURL = new URL('./pwa-sw.js', location.href).href;
   let registration, prompt, checking = false, applying = false, lastCheck = 0, nextWorker = null;
   let hadMallController = navigator.serviceWorker?.controller?.scriptURL === workerURL;
@@ -36,6 +42,7 @@
     nextWorker = worker;
     message.textContent = otherTab ? 'The mall was updated in another tab. Reload when you are ready.' : 'A mall update is ready. Your demo bag stays in this tab.';
     update.textContent = otherTab ? 'Reload' : 'Update';
+    update.prepend(updateIcon);
     notice.hidden = false;
   }
   async function checkForUpdates(manual = false) {

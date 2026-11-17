@@ -1,3 +1,5 @@
+import {icon} from './icons.js';
+
 /** Session-only demo selection. No prices, checkout, orders or network writes. */
 export function createBagStore(ids, storage = null) {
   const allowed = new Set(ids), quantities = new Map(), listeners = new Set();
@@ -26,6 +28,7 @@ export function setupDemoBag() {
   let storage = null; try { storage = sessionStorage; } catch { /* Memory-only fallback. */ }
   const store = createBagStore(records.keys(), storage);
   const dialog = document.querySelector('#bag-dialog'), open = document.querySelector('#bag-open'), close = document.querySelector('#bag-close'), items = document.querySelector('#bag-items'), empty = document.querySelector('#bag-empty'), clear = document.querySelector('#bag-clear'), add = document.querySelector('#product-add'), note = document.querySelector('#product-bag-status'), status = document.querySelector('#bag-status');
+  const bagIcon=icon('shopping-bag',{size:18});
   const collect=document.querySelector('#product-collect');
   let current = null, collectListener=null, canCollect=()=>false;
   let returnFocus = open;
@@ -36,12 +39,13 @@ export function setupDemoBag() {
   function render(value) {
     const active = document.activeElement, focusKey = active?.dataset.bagFocus;
     const total = Object.values(value).reduce((a,b)=>a+b,0);
-    open.textContent = `Bag (${total})`; open.setAttribute('aria-label',`Open demo bag, ${total} items`);
+    open.textContent = `Bag (${total})`; open.prepend(bagIcon); open.setAttribute('aria-label',`Open demo bag, ${total} items`);
     items.replaceChildren(); empty.hidden = total > 0; clear.hidden = total === 0;
     for (const [id,quantity] of Object.entries(value)) {
       const record=records.get(id), row=document.createElement('li'), image=document.createElement('img'), name=document.createElement('h3'), controls=document.createElement('div'), count=document.createElement('output');
       image.src=record.image;image.alt='';image.width=64;image.height=64;name.textContent=record.name;count.textContent=quantity===9?'9 (max)':`${quantity}`;count.setAttribute('aria-label',`Quantity ${quantity}${quantity===9?', maximum per item':''}`);
-      const minus=button('−',`Decrease ${record.name}`,()=>{store.change(id,-1);status.textContent=`${record.name} quantity decreased.`;}), plus=button('+',`Increase ${record.name}`,()=>{store.change(id,1);status.textContent=`${record.name} quantity increased.`;}), remove=button('Remove',`Remove ${record.name}`,()=>{store.remove(id);status.textContent=`${record.name} removed.`;});
+      const minus=button('',`Decrease ${record.name}`,()=>{store.change(id,-1);status.textContent=`${record.name} quantity decreased.`;}), plus=button('',`Increase ${record.name}`,()=>{store.change(id,1);status.textContent=`${record.name} quantity increased.`;}), remove=button('Remove',`Remove ${record.name}`,()=>{store.remove(id);status.textContent=`${record.name} removed.`;});
+      minus.append(icon('minus',{size:18}));plus.append(icon('plus',{size:18}));
       [minus,plus,remove].forEach((el,i)=>el.dataset.bagFocus=`${id}-${i}`);plus.disabled=quantity===9;
       controls.className='bag-quantity';controls.append(minus,count,plus,remove);row.append(image,name,controls);items.append(row);
     }

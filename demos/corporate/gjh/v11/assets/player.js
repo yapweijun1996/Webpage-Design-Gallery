@@ -52,7 +52,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
   });
   document.addEventListener('keyup', event => keys.delete(event.code));
-  runButton.addEventListener('click', () => { runToggle = !runToggle; runButton.setAttribute('aria-pressed', String(runToggle)); runButton.textContent = runToggle ? 'Run: on' : 'Run'; });
+  runButton.addEventListener('click', () => { runToggle = !runToggle; runButton.setAttribute('aria-pressed', String(runToggle)); const runIcon=runButton.querySelector('svg'); runButton.textContent = runToggle ? 'Run: on' : 'Run'; if(runIcon)runButton.prepend(runIcon); });
   function dragStick(event) {
     if (!stickOrigin) return;
     const dx = event.clientX - stickOrigin.x, dy = event.clientY - stickOrigin.y;

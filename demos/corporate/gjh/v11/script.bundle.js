@@ -308,13 +308,13 @@ function button(text, className, action) {
 function keyboardKey(label) {
   return element("kbd", "ob-key", label);
 }
-function controlList(steps, mode, locale) {
+function controlList(steps, mode, locale, icon = controlIcon) {
   const list = element("ol", "ob-controls");
   list.dataset.inputMode = mode;
   for (const [index, step] of steps.entries()) {
     const row = element("li");
     const label = element("span", "ob-control-name");
-    label.append(controlIcon(step.id), document.createTextNode(step.label[locale]));
+    label.append(icon(step.id), document.createTextNode(step.label[locale]));
     const binding = element("span", "ob-binding");
     for (const part of step.bindings[mode][locale]) {
       binding.append(part.key ? keyboardKey(part.key) : element("span", "", part.text));
@@ -370,7 +370,7 @@ function trapDialogFocus(event, dialog, initial) {
 }
 
 // assets/onboarding/action-dialog.js
-function createActionDialog({ id, scene, getPreferences, onOpen = () => {}, onClose = () => {} }) {
+function createActionDialog({ id, scene, getPreferences, onOpen = () => {}, onClose = () => {}, closeIcon = null }) {
   const dialog = element("dialog", "ob-ui ob-dialog");
   dialog.id = id;
   dialog.setAttribute("aria-labelledby", `${id}-title`);
@@ -404,7 +404,9 @@ function createActionDialog({ id, scene, getPreferences, onOpen = () => {}, onCl
       dialog.lang = locale;
       dialog.dataset.obTheme = prefs.resolvedTheme;
       const header = element("div", "ob-header");
-      const close = button("×", "ob-close", () => dialog.close("dismiss"));
+      const close = button(closeIcon ? "" : "×", "ob-close", () => dialog.close("dismiss"));
+      if (closeIcon)
+        close.append(closeIcon());
       close.setAttribute("aria-label", locale === "zh-CN" ? "关闭" : "Close");
       header.append(element("p", "ob-eyebrow", local(config.eyebrow || { en: "Virtual Mall", "zh-CN": "虚拟商城" }, locale)), close);
       title = element("h2", "ob-title", local(config.title, locale));
@@ -553,7 +555,9 @@ function createOnboarding({
   footer = null,
   showHelpEntry = true,
   onHelp = null,
-  onBack = null
+  onBack = null,
+  controlIcon: controlIcon2 = controlIcon,
+  closeIcon = null
 } = {}) {
   if (!appName || !scene || !steps?.length)
     throw new Error("Onboarding requires appName, scene and steps.");
@@ -660,7 +664,9 @@ function createOnboarding({
     dialog.setAttribute("aria-labelledby", `${id}-title`);
     dialog.setAttribute("aria-describedby", `${id}-description`);
     const header = element("div", "ob-header");
-    const close = button("×", "ob-close", () => dialog.close("dismiss"));
+    const close = button(closeIcon ? "" : "×", "ob-close", () => dialog.close("dismiss"));
+    if (closeIcon)
+      close.append(closeIcon());
     close.id = `${id}-close`;
     close.setAttribute("aria-label", t.close);
     header.append(element("p", "ob-eyebrow", `${appName} · ${t.welcome}`), close);
@@ -692,7 +698,7 @@ function createOnboarding({
     if (actions.includes("map"))
       actionsRow.append(actionButton("map", "ob-text-button ob-map-action"));
     const stages = guideStages(t.stages, 1, t.phase(1, 3));
-    const controls = controlList(steps, mode, locale);
+    const controls = controlList(steps, mode, locale, controlIcon2);
     controls.id = `${id}-controls`;
     controls.hidden = !controlsExpanded;
     const controlsToggle = button(t.details, "ob-controls-toggle ob-text-button", () => {
@@ -730,17 +736,19 @@ function createOnboarding({
       const header = element("div", "ob-tip-header");
       const done = tipIndex >= steps.length;
       const title = element("h3", "", done ? t.ready : steps[tipIndex].label[locale]);
-      title.prepend(controlIcon(done ? "ready" : steps[tipIndex].id));
+      title.prepend(controlIcon2(done ? "ready" : steps[tipIndex].id));
       header.append(title);
-      const dismiss = button("×", "ob-close", stopTutorial);
+      const dismiss = button(closeIcon ? "" : "×", "ob-close", stopTutorial);
+      if (closeIcon)
+        dismiss.append(closeIcon());
       dismiss.setAttribute("aria-label", t.skip);
       dismiss.dataset.obAction = "skip";
       header.append(dismiss);
       tip.append(guideStages(t.stages, done ? 3 : 2, t.phase(done ? 3 : 2, 3)), header, stepProgress(Math.min(tipIndex + 1, steps.length), steps.length, t.tip(Math.min(tipIndex + 1, steps.length), steps.length)));
       if (!done) {
-        const list = controlList([steps[tipIndex]], mode, locale);
+        const list = controlList([steps[tipIndex]], mode, locale, controlIcon2);
         const illustration = element("div", "ob-gesture");
-        illustration.append(controlIcon(mode === "touch" ? "touch" : mode === "gamepad" ? steps[tipIndex].id === "look" ? "gamepad-look" : steps[tipIndex].id === "move" ? "gamepad-move" : "gamepad" : steps[tipIndex].id));
+        illustration.append(controlIcon2(mode === "touch" ? "touch" : mode === "gamepad" ? steps[tipIndex].id === "look" ? "gamepad-look" : steps[tipIndex].id === "move" ? "gamepad-move" : "gamepad" : steps[tipIndex].id));
         tip.append(illustration, list);
       } else
         tip.append(element("p", "ob-tip-copy", t.readyCopy));
@@ -806,7 +814,7 @@ function createOnboarding({
     mode = next;
     const list = dialog.querySelector(".ob-controls");
     if (list) {
-      const nextList = controlList(steps, mode, locale);
+      const nextList = controlList(steps, mode, locale, controlIcon2);
       nextList.id = list.id;
       nextList.hidden = list.hidden;
       list.replaceWith(nextList);
@@ -1123,6 +1131,191 @@ function createContextNavigation({ globalHost, directory, onHome, onShops, recov
   };
 }
 
+// demos/corporate/gjh/v11/assets/icons.js
+var registry = Object.freeze({
+  "arrow-down": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 5v14M18 13l-6 6-6-6"/>
+</svg>
+`,
+  "arrow-down-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 5 19 19M7 19h12V7"/>
+</svg>
+`,
+  "arrow-left": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M19 12H5M11 6l-6 6 6 6"/>
+</svg>
+`,
+  "arrow-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 12h14M13 6l6 6-6 6"/>
+</svg>
+`,
+  "arrow-up": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 19V5M6 11l6-6 6 6"/>
+</svg>
+`,
+  "arrow-up-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 19 19 5M7 5h12v12"/>
+</svg>
+`,
+  camera: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2ZM18 10h.01"/>
+  <circle cx="12" cy="14" r="4"/>
+</svg>
+`,
+  cart: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M3 3.9h1.9l2.34 10.55a2 2 0 0 0 1.95 1.55h7.32a2 2 0 0 0 1.94-1.51L20.5 7.9H5.79"/>
+  <circle cx="10" cy="19.9" r="1.7"/>
+  <circle cx="17" cy="19.9" r="1.7"/>
+</svg>
+`,
+  check: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m4 12 5 5L20 6"/>
+</svg>
+`,
+  "chevron-down": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m5 9 7 7 7-7"/>
+</svg>
+`,
+  "chevron-left": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m15 5-7 7 7 7"/>
+</svg>
+`,
+  "chevron-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m9 5 7 7-7 7"/>
+</svg>
+`,
+  "chevron-up": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m5 15 7-7 7 7"/>
+</svg>
+`,
+  close: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m6 6 12 12M18 6 6 18"/>
+</svg>
+`,
+  door: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4 21h16M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M8.5 21V6h7v15M13 13h.01"/>
+</svg>
+`,
+  download: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>
+</svg>
+`,
+  eye: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M2.75 12C4.95 7.7 8.05 5.5 12 5.5s7.05 2.2 9.25 6.5c-2.2 4.3-5.3 6.5-9.25 6.5S4.95 16.3 2.75 12Z"/>
+  <circle cx="12" cy="12" r="2.9"/>
+</svg>
+`,
+  "help-circle": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="12" cy="12" r="9.25"/>
+  <path d="M9.1 9.15a2.9 2.9 0 0 1 5.65.95c0 1.9-2.85 2.85-2.85 2.85"/>
+  <path d="M12 16.9h.01"/>
+</svg>
+`,
+  info: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="12" cy="12" r="9.25"/>
+  <path d="M12 11v5M12 7.8h.01"/>
+</svg>
+`,
+  keyboard: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="2" y="6" width="20" height="12" rx="2"/>
+  <path d="M5 9h.01M8.5 9h.01M12 9h.01M15.5 9h.01M19 9h.01M5 12h.01M8.5 12h.01M12 12h.01M15.5 12h.01M19 12h.01M7 15h10"/>
+</svg>
+`,
+  lift: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="4" y="6" width="16" height="15" rx="1"/>
+  <path d="M12 6v15M8 3l1.5-1.5L11 3M13 2l1.5 1.5L16 2M9.5 12v3M14.5 12v3"/>
+</svg>
+`,
+  "map-pin": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M19.5 10.1c0 4.6-5.1 9.4-6.83 10.87a1.03 1.03 0 0 1-1.34 0C9.6 19.5 4.5 14.7 4.5 10.1a7.5 7.5 0 0 1 15 0Z"/>
+  <circle cx="12" cy="10.1" r="2.75"/>
+</svg>
+`,
+  menu: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4 6h16M4 12h16M4 18h16"/>
+</svg>
+`,
+  minus: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 12h14"/>
+</svg>
+`,
+  mouse: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="7" y="3" width="10" height="18" rx="5"/>
+  <path d="M12 3v6M7 9h10"/>
+</svg>
+`,
+  move: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>
+</svg>
+`,
+  "pick-up": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M8 4h8v6H8zM12 4v2M3 17l3-2h4l2 1h4a1.5 1.5 0 0 1 0 3h-5M3 20h12l5-2.5a1.4 1.4 0 0 0-1.25-2.5L16 16"/>
+</svg>
+`,
+  plus: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 5v14M5 12h14"/>
+</svg>
+`,
+  "quality-inspection": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m3 6.5 6-3 6 3-6 3zM3 6.5v9l6 3 3-1.5M15 6.5v4M9 9.5v9"/>
+  <circle cx="17" cy="16" r="3.5"/>
+  <path d="m19.5 18.5 2 2M15.5 16l1 1 2-2"/>
+</svg>
+`,
+  refresh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4.5 8a8 8 0 0 1 13-2L20 9M20 4v5h-5"/>
+  <path d="M19.5 16a8 8 0 0 1-13 2L4 15M4 20v-5h5"/>
+</svg>
+`,
+  run: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="15.5" cy="4" r="1.75"/>
+  <path d="m9 9 3-2 3 1 1.5 3 2.5 1M12 7l-2 5 3 2-1 3.5M10 12l-2.5 3-3 1M13 14l3 2 1 4M7.5 15 6 20"/>
+</svg>
+`,
+  search: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="10.5" cy="10.5" r="6.75"/>
+  <path d="m20.5 20.5-5.23-5.23"/>
+</svg>
+`,
+  "shopping-bag": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 7h14l2 14H3zM8 8V6a4 4 0 0 1 8 0v2"/>
+</svg>
+`,
+  sit: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="10" cy="4" r="1.75"/>
+  <path d="M9.5 7.5v5l3 2h3l1.5 5M9.5 8l3 2 2.5.5M7 10v5a2 2 0 0 0 2 2h5M7 17v3m7-3v3"/>
+</svg>
+`,
+  smartphone: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="7" y="2" width="10" height="20" rx="2"/>
+  <path d="M10 5h4M11 19h2"/>
+</svg>
+`,
+  theme: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="12" cy="12" r="5"/>
+  <path d="M12 7v10M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+</svg>
+`
+});
+function icon(name, { size = 24, label } = {}) {
+  if (!Object.hasOwn(registry, name))
+    throw new Error(`Unknown icon: ${name}`);
+  const parsed = new DOMParser().parseFromString(registry[name], "image/svg+xml");
+  const svg = document.importNode(parsed.documentElement, true);
+  svg.setAttribute("width", size);
+  svg.setAttribute("height", size);
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("focusable", "false");
+  if (label) {
+    svg.removeAttribute("aria-hidden");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", label);
+  } else {
+    svg.setAttribute("aria-hidden", "true");
+  }
+  return svg;
+}
+
 // demos/corporate/gjh/v11/assets/demo-bag.js
 function createBagStore(ids, storage = null) {
   const allowed = new Set(ids), quantities = new Map, listeners = new Set;
@@ -1173,6 +1366,7 @@ function setupDemoBag() {
   } catch {}
   const store = createBagStore(records.keys(), storage);
   const dialog = document.querySelector("#bag-dialog"), open = document.querySelector("#bag-open"), close = document.querySelector("#bag-close"), items = document.querySelector("#bag-items"), empty = document.querySelector("#bag-empty"), clear = document.querySelector("#bag-clear"), add = document.querySelector("#product-add"), note = document.querySelector("#product-bag-status"), status = document.querySelector("#bag-status");
+  const bagIcon = icon("shopping-bag", { size: 18 });
   const collect = document.querySelector("#product-collect");
   let current = null, collectListener = null, canCollect = () => false;
   let returnFocus = open;
@@ -1191,6 +1385,7 @@ function setupDemoBag() {
     const active = document.activeElement, focusKey = active?.dataset.bagFocus;
     const total = Object.values(value).reduce((a, b) => a + b, 0);
     open.textContent = `Bag (${total})`;
+    open.prepend(bagIcon);
     open.setAttribute("aria-label", `Open demo bag, ${total} items`);
     items.replaceChildren();
     empty.hidden = total > 0;
@@ -1204,16 +1399,18 @@ function setupDemoBag() {
       name.textContent = record.name;
       count.textContent = quantity === 9 ? "9 (max)" : `${quantity}`;
       count.setAttribute("aria-label", `Quantity ${quantity}${quantity === 9 ? ", maximum per item" : ""}`);
-      const minus = button2("−", `Decrease ${record.name}`, () => {
+      const minus = button2("", `Decrease ${record.name}`, () => {
         store.change(id, -1);
         status.textContent = `${record.name} quantity decreased.`;
-      }), plus = button2("+", `Increase ${record.name}`, () => {
+      }), plus = button2("", `Increase ${record.name}`, () => {
         store.change(id, 1);
         status.textContent = `${record.name} quantity increased.`;
       }), remove = button2("Remove", `Remove ${record.name}`, () => {
         store.remove(id);
         status.textContent = `${record.name} removed.`;
       });
+      minus.append(icon("minus", { size: 18 }));
+      plus.append(icon("plus", { size: 18 }));
       [minus, plus, remove].forEach((el, i) => el.dataset.bagFocus = `${id}-${i}`);
       plus.disabled = quantity === 9;
       controls.className = "bag-quantity";
@@ -1446,6 +1643,12 @@ var expandedMapPoint = (x, z) => ({
 
 // demos/corporate/gjh/v11/assets/ui.js
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function onboardingIcon(name) {
+  const names = { move: "move", look: "mouse", inspect: "search", touch: "smartphone", gamepad: "search", "gamepad-look": "mouse", "gamepad-move": "move", ready: "check" };
+  const element2 = icon(names[name], { size: 24 });
+  element2.classList.add("ob-icon");
+  return element2;
+}
 var plannedSideLabels = Object.freeze({ north: "North side", west: "West side", east: "East side" });
 function setupPlannedDirectory(expanded) {
   const section = document.getElementById("planned-spaces-directory");
@@ -1551,6 +1754,8 @@ function createUI(expanded = false) {
     storageKey: "gjh-v11",
     scene,
     footer: guideFooter,
+    controlIcon: onboardingIcon,
+    closeIcon: () => icon("close", { size: 24 }),
     modes: ["keyboard", "touch", "gamepad"],
     showHelpEntry: false,
     onHelp: openHelp,
@@ -1564,7 +1769,7 @@ function createUI(expanded = false) {
     }
   });
   const guide = onboarding.dialog;
-  const amenityPanel = createActionDialog({ id: "amenity-dialog", scene, getPreferences: () => onboarding.preferences, onOpen: () => notifyMode(), onClose: () => notifyMode() });
+  const amenityPanel = createActionDialog({ id: "amenity-dialog", scene, closeIcon: () => icon("close", { size: 24 }), getPreferences: () => onboarding.preferences, onOpen: () => notifyMode(), onClose: () => notifyMode() });
   let previousTutorialPose = null;
   let guideFromHelp = false;
   const guideReopen = document.getElementById("guide-reopen");
@@ -1879,6 +2084,8 @@ function createUI(expanded = false) {
   let currentElevatorState = null, currentElevatorUpper = null;
   const cartControls = document.querySelector("#cart-controls"), cartToggle = document.querySelector("#cart-toggle"), cartStatus = document.querySelector("#cart-status");
   const sceneCart = document.querySelector("#scene-cart");
+  const cartIcon = icon("cart", { size: 18 });
+  const interactionIcons = new Map;
   function updateCartControls() {
     const cart = cartState();
     const recoverFocus = !cart.available && bag.open && cartControls.contains(document.activeElement);
@@ -1886,7 +2093,11 @@ function createUI(expanded = false) {
     cartToggle.textContent = cart.active ? "Stow cart" : "Use cart in 3D";
     cartToggle.disabled = !cart.available || !cart.active && cart.capability?.disabled === true;
     sceneCart.hidden = !cart.available || !showing3D || compactMap.matches && (mallMap.open || help.open);
-    sceneCart.textContent = cart.active ? "Stow cart" : "Cart";
+    const cartLabel = cart.active ? "Stow cart" : "Cart";
+    if (sceneCart.textContent !== cartLabel)
+      sceneCart.textContent = cartLabel;
+    if (sceneCart.firstChild !== cartIcon)
+      sceneCart.prepend(cartIcon);
     sceneCart.setAttribute("aria-pressed", String(cart.active));
     sceneCart.disabled = !cart.available || !cart.active && cart.capability?.sceneDisabled === true;
     sceneCart.title = cartReason(cart) || "";
@@ -2335,10 +2546,10 @@ function createUI(expanded = false) {
   }
   document.getElementById("list-title").tabIndex = -1;
   return {
-    setInteractionRegistry(registry) {
-      interactionRegistry = registry;
+    setInteractionRegistry(registry2) {
+      interactionRegistry = registry2;
       for (const store of spatial.stores)
-        registry.register({
+        registry2.register({
           id: store.id,
           kind: "travel",
           prompt: `Visit ${store.label}`,
@@ -2597,6 +2808,14 @@ function createUI(expanded = false) {
         nearbyName.textContent = records.get(nearby).name;
         inspectButton.textContent = touchGuide.matches ? `Tap ${action}` : `Press F / tap ${action}`;
         inspectButton.setAttribute("aria-label", `${action} ${records.get(nearby).name}`);
+      }
+      const iconName = seated || selectedInteraction?.kind === "sit" ? "sit" : selectedInteraction?.kind === "travel" ? "lift" : selectedInteraction?.kind === "open" && selectedInteraction.door ? "door" : selectedInteraction?.kind === "pickup" ? "pick-up" : records.get(nearby)?.action === "map" ? "map-pin" : "quality-inspection";
+      if (!interactionIcons.has(iconName))
+        interactionIcons.set(iconName, icon(iconName, { size: 18 }));
+      const actionIcon = interactionIcons.get(iconName);
+      if (inspectButton.firstChild !== actionIcon) {
+        inspectButton.querySelector("svg")?.remove();
+        inspectButton.prepend(actionIcon);
       }
       const cart = updateCartControls();
       document.body.classList.toggle("is-pushing", Boolean(cart.active));
@@ -3053,6 +3272,18 @@ function createInteractionRegistry(entries, describe = () => ({})) {
 }
 
 // demos/corporate/gjh/v11/script.js
+document.querySelectorAll("[data-icon]").forEach((slot2) => slot2.replaceWith(icon(slot2.dataset.icon, { size: 18 })));
+for (const [selector, name, size] of [
+  ["#mall-map > summary", "map-pin", 22],
+  ["#header-map", "map-pin", 18],
+  ["#keyboard-help > summary", "help-circle", 18],
+  ["#mall-theme-open", "theme", 18],
+  ["#directory-theme-open", "theme", 18],
+  ["#run-toggle", "run", 20]
+]) {
+  document.querySelector(selector).prepend(icon(name, { size }));
+}
+document.querySelector("#interaction-point").append(icon("map-pin", { size: 18 }));
 var expanded = new URLSearchParams(location.search).get("layout") !== "classic";
 document.body.classList.toggle("is-expanded", expanded);
 var reducedMotion2 = matchMedia("(prefers-reduced-motion: reduce)");

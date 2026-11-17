@@ -1,4 +1,4 @@
-import {controlIcon} from './icons.js';
+import {controlIcon as defaultControlIcon} from './icons.js';
 import {element, button, controlList, stepProgress, helpButton, guideStages, trapDialogFocus} from './components.js';
 import {messages} from './locales.js';
 
@@ -6,7 +6,8 @@ import {messages} from './locales.js';
 export function createOnboarding({id = 'onboarding', appName, copy, steps, scene,
   modes = ['keyboard', 'touch'], actions = ['map', 'list'], theme = 'system', locale = 'en',
   canOpen = () => true, onAction = () => {}, onOpen = () => {}, onClose = () => {}, storageKey = id,
-  parent = document.body, footer = null, showHelpEntry = true, onHelp = null, onBack = null} = {}) {
+  parent = document.body, footer = null, showHelpEntry = true, onHelp = null, onBack = null,
+  controlIcon = defaultControlIcon, closeIcon = null} = {}) {
   if (!appName || !scene || !steps?.length) throw new Error('Onboarding requires appName, scene and steps.');
   if (!/^[a-zA-Z0-9_-]+$/.test(id) || document.getElementById(`${id}-dialog`)) throw new Error('Onboarding requires a unique valid id.');
   if (!modes.length || modes.some(mode => !['keyboard','touch','gamepad'].includes(mode))) throw new Error('Unsupported onboarding input mode.');
@@ -68,7 +69,7 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
     dialog.replaceChildren();
     dialog.setAttribute('aria-labelledby', `${id}-title`); dialog.setAttribute('aria-describedby', `${id}-description`);
     const header = element('div', 'ob-header');
-    const close = button('×', 'ob-close', () => dialog.close('dismiss')); close.id = `${id}-close`; close.setAttribute('aria-label', t.close);
+    const close = button(closeIcon ? '' : '×', 'ob-close', () => dialog.close('dismiss')); if(closeIcon) close.append(closeIcon()); close.id = `${id}-close`; close.setAttribute('aria-label', t.close);
     header.append(element('p', 'ob-eyebrow', `${appName} · ${t.welcome}`), close);
     const title = element('h2', 'ob-title', content.title); title.id = `${id}-title`; title.tabIndex = -1;
     const description = element('p', 'ob-description', content.description); description.id = `${id}-description`;
@@ -88,7 +89,7 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
     if(actions.includes('list'))actionsRow.append(actionButton('list','ob-secondary-button'));
     if(actions.includes('map'))actionsRow.append(actionButton('map','ob-text-button ob-map-action'));
     const stages=guideStages(t.stages,1,t.phase(1,3));
-    const controls=controlList(steps,mode,locale);controls.id=`${id}-controls`;controls.hidden=!controlsExpanded;
+    const controls=controlList(steps,mode,locale,controlIcon);controls.id=`${id}-controls`;controls.hidden=!controlsExpanded;
     const controlsToggle=button(t.details,'ob-controls-toggle ob-text-button',()=>{
       controlsExpanded=!controlsExpanded;controls.hidden=!controlsExpanded;controlsToggle.setAttribute('aria-expanded',String(controlsExpanded));
     });controlsToggle.textContent=t.controls;controlsToggle.setAttribute('aria-expanded',String(controlsExpanded));controlsToggle.setAttribute('aria-controls',controls.id);
@@ -110,9 +111,9 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
       const done = tipIndex >= steps.length;
       const title=element('h3','',done ? t.ready : steps[tipIndex].label[locale]);
       title.prepend(controlIcon(done?'ready':steps[tipIndex].id));header.append(title);
-      const dismiss=button('×','ob-close',stopTutorial);dismiss.setAttribute('aria-label',t.skip);dismiss.dataset.obAction='skip';header.append(dismiss);
+      const dismiss=button(closeIcon?'':'×','ob-close',stopTutorial);if(closeIcon)dismiss.append(closeIcon());dismiss.setAttribute('aria-label',t.skip);dismiss.dataset.obAction='skip';header.append(dismiss);
       tip.append(guideStages(t.stages,done?3:2,t.phase(done?3:2,3)),header, stepProgress(Math.min(tipIndex+1,steps.length),steps.length,t.tip(Math.min(tipIndex+1,steps.length),steps.length)));
-      if (!done) { const list=controlList([steps[tipIndex]],mode,locale);
+      if (!done) { const list=controlList([steps[tipIndex]],mode,locale,controlIcon);
         const illustration=element('div','ob-gesture');illustration.append(controlIcon(mode==='touch'?'touch':mode==='gamepad'?(steps[tipIndex].id==='look'?'gamepad-look':steps[tipIndex].id==='move'?'gamepad-move':'gamepad'):steps[tipIndex].id));
         tip.append(illustration,list); }
       else tip.append(element('p','ob-tip-copy',t.readyCopy));
@@ -147,7 +148,7 @@ export function createOnboarding({id = 'onboarding', appName, copy, steps, scene
     mode = next;
     // Refresh only the changing guidance, preserving focus and open settings.
     const list = dialog.querySelector('.ob-controls');
-    if(list){const nextList=controlList(steps,mode,locale);nextList.id=list.id;nextList.hidden=list.hidden;list.replaceWith(nextList);}
+    if(list){const nextList=controlList(steps,mode,locale,controlIcon);nextList.id=list.id;nextList.hidden=list.hidden;list.replaceWith(nextList);}
     const auto=dialog.querySelector('[data-ob-setting=input] option[value=auto]');if(auto)auto.textContent=`${text().auto} · ${text()[mode]}`;
     const label=dialog.querySelector('.ob-mode'); if(label)label.textContent=text()[mode];
     renderHUD();

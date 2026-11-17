@@ -13,13 +13,13 @@ export function button(text, className, action) {
   return node;
 }
 export function keyboardKey(label) { return element('kbd', 'ob-key', label); }
-export function controlList(steps, mode, locale) {
+export function controlList(steps, mode, locale, icon = controlIcon) {
   const list = element('ol', 'ob-controls');
   list.dataset.inputMode = mode;
   for (const [index, step] of steps.entries()) {
     const row = element('li');
     const label = element('span', 'ob-control-name');
-    label.append(controlIcon(step.id), document.createTextNode(step.label[locale]));
+    label.append(icon(step.id), document.createTextNode(step.label[locale]));
     const binding = element('span', 'ob-binding');
     for (const part of step.bindings[mode][locale]) {
       binding.append(part.key ? keyboardKey(part.key) : element('span', '', part.text));
