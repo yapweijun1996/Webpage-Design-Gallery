@@ -62,6 +62,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     shellWall: mat(0xb7b6a9, {roughness: .82}),
     rugSand: mat(0x8c8063, {roughness: 1}), rugSage: mat(0x5b6d58, {roughness: 1}),
     green: mat(0x153c30), dark: mat(0x0c2923), ivory: mat(0xe3d6b7), cream: mat(0xf5e8cb),
+    newMoonRed: mat(0x8f1621, {roughness: .48}),
     brass: mat(0xb59b62, {metalness: .68, roughness: .31}), wood: mat(0x6b4931), oak: mat(0xa28055),
     timber: mat(0xa48b67), timberAlt: mat(0xa08763),
     foliage: mat(0x315b38), leaf: mat(0x527548), pot: mat(0xb6ab8c), seat: mat(0xc8b38e),
@@ -382,7 +383,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     const zone = store.id, x = storeCenterX(store);
     const wall = zone === 'mili' ? 'cream' : 'green';
     for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
-    box(wall, x, 2.85, -10.5, 10, 5.7, .25, true);
+    box(zone === 'newmoon' ? 'newMoonRed' : wall, x, 2.85, -10.5, 10, 5.7, .25, true);
     for (const side of [-1, 1]) {
       box(wall, x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5, true);
       if (expanded) {
@@ -411,7 +412,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       lightPool(x + side * 3.6, .053, 1.15, 3.4, 3.7);
     }
     if (expanded) {
-      box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
+      box(zone === 'newmoon' ? 'newMoonRed' : 'dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
     }
     activeShopSlot=expanded?Number(store.number):null;
     box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
@@ -466,11 +467,19 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
     box('brass', x, .03, .25, 4.7, .025, .7);
     const logo = zone === 'newmoon' ? 'new-moon-logo.svg' : `${zone}-logo.jpg`;
-    if (!furnishings.place('storeSign', x, .28, 1, 1, 4.065, null, activeShopSlot)) {
-      box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05);
+    if (zone === 'newmoon' && expanded) {
+      // The fascia is part of the distant facade, not the near-interior LOD.
+      activeShopSlot = null;
+      art(logo, x, 4.72, .31, 5.2);
+      box('glow', x, 5.36, .31, 5.4, .025, .045);
+      activeShopSlot = Number(store.number);
+    } else {
+      if (!furnishings.place('storeSign', x, .28, 1, 1, 4.065, null, activeShopSlot)) {
+        box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05);
+      }
+      art(logo, x, 4.67, .4, 2.2);
+      box('glow', x, 5.36, .36, 2.42, .025, .045);
     }
-    art(logo, x, 4.67, .4, 2.2);
-    box('glow', x, 5.36, .36, 2.42, .025, .045);
     box('brass', x, 4.02, .29, 9.3, .025, .04);
     const label = sign(`${store.number}  /  ${store.label.toUpperCase()}`, x, 3.5, .38, 3.9, .48, true, 80);
     roomSigns.push({zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0});
@@ -491,11 +500,12 @@ export async function createWorld(T, R, physics, expanded = false) {
     box('brass', x, .22, -10.32, 9.3, .045, .04);
     if (zone === 'newmoon') {
       // The asset display owns its geometry and collision bounds; no legacy rack remains.
+      for (const dx of [-4.3, -2.15, 0, 2.15, 4.3]) box('brass', x + dx, 3.55, -10.35, .035, 2.8, .025);
       lightPool(x, .054, -8.6, 7.5, 2.1);
       const cover = art('new-moon-brand-cover.jpg', x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
       box('brass', x - 4.665, 2.8, -5.8, .035, cover.scale.y + .14, 3.74);
       box('oak', x - 4.67, 2.8, -5.8, .04, cover.scale.y + .28, 3.88);
-      box('green', x + 2.8, .55, -4, 2.1, 1.1, 1.25, true); box('cream', x + 2.8, 1.15, -4, 2.2, .12, 1.4);
+      box('newMoonRed', x + 2.8, .55, -4, 2.1, 1.1, 1.25, true); box('cream', x + 2.8, 1.15, -4, 2.2, .12, 1.4);
       for (let i = 0; i < 9; i++) box('brass', x + 1.9 + i * .22, .56, -3.35, .025, 1, .025);
       box('brass', x + 2.8, 1.08, -3.285, 2.17, .045, .03);
       box('brass', x + 2.8, .09, -3.36, 2.1, .08, .03);

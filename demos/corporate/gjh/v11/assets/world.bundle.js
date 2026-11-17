@@ -1737,6 +1737,7 @@ async function createWorld(T, R, physics, expanded = false) {
       dark: mat(796963),
       ivory: mat(14931639),
       cream: mat(16115915),
+      newMoonRed: mat(9377313, { roughness: 0.48 }),
       brass: mat(11901794, { metalness: 0.68, roughness: 0.31 }),
       wood: mat(7031089),
       oak: mat(10649685),
@@ -2033,7 +2034,7 @@ async function createWorld(T, R, physics, expanded = false) {
       const wall = zone === "mili" ? "cream" : "green";
       for (let i = 0;i < 18; i++)
         box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
-      box(wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
+      box(zone === "newmoon" ? "newMoonRed" : wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
       for (const side of [-1, 1]) {
         box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
         if (expanded) {
@@ -2059,7 +2060,7 @@ async function createWorld(T, R, physics, expanded = false) {
         lightPool(x + side * 3.6, 0.053, 1.15, 3.4, 3.7);
       }
       if (expanded) {
-        box("dark", x, 4.7, 0, 9.7, 1.55, 0.5, true);
+        box(zone === "newmoon" ? "newMoonRed" : "dark", x, 4.7, 0, 9.7, 1.55, 0.5, true);
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
       }
       activeShopSlot = expanded ? Number(store.number) : null;
@@ -2114,12 +2115,19 @@ async function createWorld(T, R, physics, expanded = false) {
         }
       box("brass", x, 0.03, 0.25, 4.7, 0.025, 0.7);
       const logo = zone === "newmoon" ? "new-moon-logo.svg" : `${zone}-logo.jpg`;
-      if (!furnishings.place("storeSign", x, 0.28, 1, 1, 4.065, null, activeShopSlot)) {
-        box("brass", x, 4.67, 0.3, 2.52, 1.21, 0.09);
-        box("cream", x, 4.67, 0.36, 2.42, 1.11, 0.05);
+      if (zone === "newmoon" && expanded) {
+        activeShopSlot = null;
+        art(logo, x, 4.72, 0.31, 5.2);
+        box("glow", x, 5.36, 0.31, 5.4, 0.025, 0.045);
+        activeShopSlot = Number(store.number);
+      } else {
+        if (!furnishings.place("storeSign", x, 0.28, 1, 1, 4.065, null, activeShopSlot)) {
+          box("brass", x, 4.67, 0.3, 2.52, 1.21, 0.09);
+          box("cream", x, 4.67, 0.36, 2.42, 1.11, 0.05);
+        }
+        art(logo, x, 4.67, 0.4, 2.2);
+        box("glow", x, 5.36, 0.36, 2.42, 0.025, 0.045);
       }
-      art(logo, x, 4.67, 0.4, 2.2);
-      box("glow", x, 5.36, 0.36, 2.42, 0.025, 0.045);
       box("brass", x, 4.02, 0.29, 9.3, 0.025, 0.04);
       const label = sign(`${store.number}  /  ${store.label.toUpperCase()}`, x, 3.5, 0.38, 3.9, 0.48, true, 80);
       roomSigns.push({ zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0 });
@@ -2150,11 +2158,13 @@ async function createWorld(T, R, physics, expanded = false) {
       scene.add(light);
       box("brass", x, 0.22, -10.32, 9.3, 0.045, 0.04);
       if (zone === "newmoon") {
+        for (const dx of [-4.3, -2.15, 0, 2.15, 4.3])
+          box("brass", x + dx, 3.55, -10.35, 0.035, 2.8, 0.025);
         lightPool(x, 0.054, -8.6, 7.5, 2.1);
         const cover = art("new-moon-brand-cover.jpg", x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
         box("brass", x - 4.665, 2.8, -5.8, 0.035, cover.scale.y + 0.14, 3.74);
         box("oak", x - 4.67, 2.8, -5.8, 0.04, cover.scale.y + 0.28, 3.88);
-        box("green", x + 2.8, 0.55, -4, 2.1, 1.1, 1.25, true);
+        box("newMoonRed", x + 2.8, 0.55, -4, 2.1, 1.1, 1.25, true);
         box("cream", x + 2.8, 1.15, -4, 2.2, 0.12, 1.4);
         for (let i = 0;i < 9; i++)
           box("brass", x + 1.9 + i * 0.22, 0.56, -3.35, 0.025, 1, 0.025);
