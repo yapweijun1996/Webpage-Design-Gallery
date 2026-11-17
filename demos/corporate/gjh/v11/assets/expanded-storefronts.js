@@ -3,8 +3,8 @@
 export function addExpandedStorefronts(T, layout, scene) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
-    frame: {material: new T.MeshStandardMaterial({color: 0x163c30, roughness: .66}), matrices: []},
-    brass: {material: new T.MeshStandardMaterial({color: 0xb99a5c, metalness: .65, roughness: .38}), matrices: []},
+    frame: {material: new T.MeshStandardMaterial({color: 0x194635, roughness: .66}), matrices: []},
+    brass: {material: new T.MeshStandardMaterial({color: 0xc9a55e, metalness: .65, roughness: .38}), matrices: []},
     glass: {material: new T.MeshStandardMaterial({color: 0xb9d9d0, metalness: .05, roughness: .18,
       transparent: true, opacity: .23, depthWrite: false}), matrices: []}
   };

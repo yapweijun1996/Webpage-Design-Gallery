@@ -1,17 +1,17 @@
 // Local, static lighting resources. No environment image or postprocessing asset is fetched.
 export function createMallAtmosphere(T, renderer, scene, slots) {
   const accents = [0xb84739,0xd4a159,0x79a992,0x785a68,0x913f35,0x667887,0x9c4937,0x477aac,0x294f7c,0x478c86,0x843e43,0x6f9690,0x777f85,0x665079,0x82756a,0x4b9993,0x62696a];
-  const warm = new T.Color(0xffd5a0), interiorWarm = new T.Color(0xffbd78);
+  const warm = new T.Color(0xffe5c1), interiorWarm = new T.Color(0xffd5a0);
   const lights = slots.map((slot, index) => {
-    const light = new T.PointLight(0xffd5a0, 16, 9, 2);
+    const light = new T.PointLight(0xffe5c1, 28, 11, 2);
     light.name = `Shop ${String(index + 1).padStart(2, '0')} accent light`;
     light.position.set((slot.minX + slot.maxX) / 2, 4.2, (slot.minZ + slot.maxZ) / 2);
     light.visible = false; light.castShadow = false; scene.add(light);
     return {light, accent:new T.Color(accents[index])};
   });
   function applyTheme(theme) {
-    warm.set(theme?.lighting?.key ?? 0xffd5a0).lerp(interiorWarm, .35);
-    for (const {light, accent} of lights) light.color.copy(warm).lerp(accent, .16);
+    warm.set(theme?.lighting?.key ?? 0xffe5c1).lerp(interiorWarm, .25);
+    for (const {light, accent} of lights) light.color.copy(warm).lerp(accent, .08);
   }
   applyTheme(null);
   // Reuse the same small candidate array and keep no more than six lights active.

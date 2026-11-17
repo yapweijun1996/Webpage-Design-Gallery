@@ -98,6 +98,53 @@ def walk_to(page, x, z):
     raise AssertionError(('Unreached upper-deck waypoint', x, z, state(page)))
 
 
+def hero_visibility_gallery(page, width, height):
+    """Measure the rendered display fixture and visitor in each planned bay."""
+    setback = .48
+    assert page.evaluate('__mall.teleport("entry")')
+    walk_to(page, 32, 42)
+    walk_to(page, 32, 3)
+    results = []
+
+    def measure(number, x, z, yaw):
+        walk_to(page, x, z)
+        drive(page, 500, yaw=yaw, pitch=.1)
+        page.wait_for_function(
+            'n => { const v=__mall.heroVisibility(n); return v && v.loaded && v.hero && v.avatar; }',
+            arg=number, timeout=30000)
+        # A frame after loading activates the real model in the nearest bay.
+        drive(page, 100, yaw=yaw, pitch=.1)
+        sample = page.evaluate('n => __mall.heroVisibility(n)', number)
+        hero, avatar = sample['hero'], sample['avatar']
+        assert sample['loaded'] and hero and avatar, (number, sample)
+        assert hero['inFront'] and avatar['inFront'], (number, sample)
+        assert 0 <= hero['left'] < hero['right'] <= width, (number, sample)
+        assert 0 <= hero['top'] < hero['bottom'] <= height, (number, sample)
+        assert (hero['right'] <= avatar['left'] or avatar['right'] <= hero['left']
+                or hero['bottom'] <= avatar['top'] or avatar['bottom'] <= hero['top']), (number, sample)
+        coverage = (hero['right']-hero['left'])*(hero['bottom']-hero['top'])/(width*height)
+        assert coverage >= .04, (number, coverage, sample)
+        assert state(page)['drawCalls'] <= 200, (number, state(page)['drawCalls'])
+        row = {'shop':f'S{number:02}', 'viewport':[width,height], 'coverage':round(coverage, 5),
+               'hero':hero, 'avatar':avatar}
+        results.append(row)
+        print(json.dumps(row), flush=True)
+
+    # Match the contact-sheet camera pose in each window.
+    for number in (4, 5):
+        center = -10 + (number-1)*10
+        measure(number, center+3-2.4, setback, -.2)
+    for number in range(12, 18):
+        center_z = (number-12)*8+4
+        measure(number, 35-setback, center_z+2.55-2.4, -math.pi/2-.2)
+    walk_to(page, 32, 43)
+    walk_to(page, -12, 43)
+    for number in range(11, 5, -1):
+        center_z = (number-6)*8+4
+        measure(number, -15+setback, center_z-2.55+2.4, math.pi/2-.2)
+    return results
+
+
 def upper_deck_gallery(page):
     assert page.evaluate('__mall.teleport("atrium")')
     for point in ((10, 5.5), (-6.4, 5.5), (-6.4, 10)):
@@ -421,6 +468,17 @@ def run(capture=False):
                     assert state(page)['drawCalls']<=190
                     context.close()
                     evidence.append({'expandedDefaultDrawCalls':expanded_default_draw_calls,'upperDeckBrandWall':brand_wall_evidence})
+                    for width,height in ((390,844),(1440,900)):
+                        context=browser.new_context(viewport={'width':width,'height':height},
+                            device_scale_factor=2,has_touch=width<600,reduced_motion='reduce')
+                        page=context.new_page()
+                        page.goto(base+'/gallery/demos/corporate/gjh/v11/')
+                        page.wait_for_function('window.__mall?.ready && window.__sceneReady')
+                        page.locator('#guide-dialog').wait_for(state='visible')
+                        page.locator('#guide-start').click()
+                        page.wait_for_function("!document.querySelector('#guide-dialog').open && document.activeElement.id === 'scene'")
+                        evidence.append({'heroVisibility':hero_visibility_gallery(page,width,height)})
+                        context.close()
                     context = browser.new_context(reduced_motion='reduce')
                     page = context.new_page(); page.goto(url); page.wait_for_function('window.__mall?.ready')
                     # Complete the genuine first-use flow before existing walking/asset assertions.

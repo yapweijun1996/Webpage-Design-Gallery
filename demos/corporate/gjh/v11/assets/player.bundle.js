@@ -624,7 +624,12 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     sync();
     target.copy(visual.position);
     target.y += 1.24 - 0.34 * (character.state.seatWeight || 0);
-    const normalDistance = canvas.clientWidth < 600 ? 5.5 : 6.5, requestedDistance = actionView ? 3 : normalDistance;
+    if (expanded && !actionView && !seated && !elevatorTravel) {
+      target.x += 1.15 * Math.cos(yaw);
+      target.z -= 1.15 * Math.sin(yaw);
+    }
+    const normalDistance = expanded ? canvas.clientWidth < 600 ? 5 : 5.2 : canvas.clientWidth < 600 ? 5.5 : 6.5;
+    const requestedDistance = actionView ? 3 : normalDistance;
     const immediate = instant || reduceSeatMotion();
     cameraDistance = immediate ? requestedDistance : T.MathUtils.lerp(cameraDistance ?? normalDistance, requestedDistance, 1 - Math.exp(-6 * dt));
     cameraRadius = Math.max(0.22, camera.near * Math.tan(camera.fov * Math.PI / 360) * Math.hypot(1, camera.aspect) + 0.08);
@@ -900,6 +905,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     body,
     capsule,
     camera,
+    get visual() {
+      return visual;
+    },
     sit,
     stand,
     setCart,

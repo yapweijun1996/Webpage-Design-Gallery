@@ -11,6 +11,7 @@ document.body.classList.toggle('is-expanded', expanded);
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
+let three;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
@@ -57,6 +58,55 @@ async function loadOptionalThemeModule(loader) {
 }
 
 let previousGamepadInspect=false;
+// Screen-space bounds are derived from visible render meshes, including the
+// currently animated avatar, rather than from nominal layout dimensions.
+function heroVisibility(number) {
+  if (!three || !world || !player || !expanded) return null;
+  const T=three, camera=player.camera, rect=canvas.getBoundingClientRect();
+  const project = root => {
+    if (!root) return null;
+    for (let p=root; p; p=p.parent) if (!p.visible) return null;
+    root.updateWorldMatrix(true, true); camera.updateWorldMatrix(true, false);
+    const out={left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity,inFront:true};
+    const point=new T.Vector3();
+    function visit(object) {
+      if (!object.visible) return;
+      if (object.isMesh && object.geometry) {
+        let bounds;
+        if (object.isSkinnedMesh) {
+          object.computeBoundingBox();
+          bounds=object.boundingBox;
+        } else {
+          if (!object.geometry.boundingBox) object.geometry.computeBoundingBox();
+          bounds=object.geometry.boundingBox;
+        }
+        if (bounds && !bounds.isEmpty()) for (const x of [bounds.min.x,bounds.max.x])
+          for (const y of [bounds.min.y,bounds.max.y]) for (const z of [bounds.min.z,bounds.max.z]) {
+            point.set(x,y,z).applyMatrix4(object.matrixWorld).project(camera);
+            if (point.z < -1 || point.z > 1) out.inFront=false;
+            const px=rect.left+(point.x+1)*rect.width/2, py=rect.top+(1-point.y)*rect.height/2;
+            out.left=Math.min(out.left,px); out.right=Math.max(out.right,px);
+            out.top=Math.min(out.top,py); out.bottom=Math.max(out.bottom,py);
+          }
+      }
+      for (const child of object.children) visit(child);
+    }
+    visit(root);
+    return Number.isFinite(out.left) ? out : null;
+  };
+  if (number == null) {
+    const position=player.body.translation();
+    const nearest=expandedLayout.slots.filter(slot=>Number(slot.number)>=4).map(slot=>({
+      slot, distance:Math.hypot(position.x-(slot.minX+slot.maxX)/2,position.z-(slot.minZ+slot.maxZ)/2)
+    })).sort((a,b)=>a.distance-b.distance)[0];
+    number=nearest?.slot.number;
+  }
+  const id=String(number).padStart(2,'0');
+  const hero=world.scene.getObjectByName(`S${id} hero display`);
+  if (!hero) return null;
+  return Object.freeze({number:id, hero:project(hero), avatar:project(player.visual),
+    loaded:hero.userData.modelReady === true});
+}
 const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
   elevator:elevator?.state||null, amenities: world?.amenities || null,
@@ -65,6 +115,7 @@ const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.curr
   productAssets: world?.productAssets || null, shelves: world?.shelves || [], shelf: shelfFocus?.state || null,
   brandPlaqueCount: world?.scene.getObjectByName('Seventeen brand wall plaques')?.geometry.index?.count / 6 || 0,
   interaction: selectedInteraction ? {id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance} : null,
+  get heroVisibility() { return heroVisibility(); },
   camera: player ? {position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect} : null,
   graphics: Object.freeze({status: graphicsStatus, losses, validations, initialized, quality: quality.state,
     sceneId: world?.scene.uuid || null, cameraId: player?.camera.uuid || null, sceneChildren: world?.scene.children.length || 0,
@@ -79,6 +130,7 @@ const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.curr
 Object.defineProperty(window, '__mall', {value: Object.freeze({
   get ready() { return ready; }, get state() { return snapshot(); },
   get mode() { return modes.current(); },
+  heroVisibility(number) { return heroVisibility(number); },
   teleport(zone) { if (!ready || !player.teleport(zone)) return false; updateHUD(); render(); return true; },
   setInput(input) {
     if (!ready || modes.paused()) return;
@@ -272,6 +324,7 @@ async function initialize() {
   const context = canvas.getContext('webgl2', {antialias: true, alpha: false, powerPreference: 'high-performance'});
   if (!context) { fallback(expanded?'WebGL is unavailable. The 17-store mall plan and verified products remain in the accessible directory below.':'WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.'); return; }
   const T = await import('./vendor/three.module.min.js');
+  three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({canvas, context, antialias: true});
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;

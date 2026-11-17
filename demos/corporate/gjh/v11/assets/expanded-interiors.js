@@ -8,11 +8,11 @@ const displayFiles = {
   15:['electronic-keyboard'], 16:['battery-display-rack'], 17:['cordless-phone-display']
 };
 
-function displayPlacements(number, heroZ) {
-  if (number === 14) return [[-1.85, .22, heroZ, 1.1], [1.85, .22, heroZ, 1.2]];
-  const height = number === 13 || number === 17 ? 1.09 : number === 15 ? .42 : number === 16 ? .22 : .07;
-  const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 1;
-  return [[1.85, height, heroZ, scale]];
+function displayPlacements(number, heroX, heroZ) {
+  if (number === 14) return [[heroX-.55, .07, heroZ, .65], [heroX+.7, .07, heroZ, .8]];
+  const height = number === 13 || number === 17 ? .94 : .07;
+  const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : .7;
+  return [[heroX, height, heroZ, scale]];
 }
 
 // Furniture is vertex-coloured and merged; model displays load only near a bay.
@@ -91,35 +91,16 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     }
     const structureParts = parts;
     parts = [];
-    heroOffset = 1.85;
-    // Keep the hero in a glazed window, clear of the central door and visitor.
+    heroOffset = side === 'north' ? 3 : 2.55;
+    // The merchandise fixture sits inside a window, clear of the doorway.
     const heroZ = front - 1;
-    if (number === 13 || number === 17) {
-      parts = structureParts;
-      box(0,.52,heroZ,2.1,1,1.05,green);
-      box(0,1.05,heroZ,2.25,.08,1.2,ivory);
-      parts = [];
-    } else if (number === 14) {
-      parts = structureParts;
-      for (const x of [-3.7, 0]) {
-        box(x,.14,heroZ,2.2,.14,1.25,green);
-        box(x,.205,heroZ,2.2,.03,1.25,ivory);
-      }
-      parts = [];
+    box(0,1.7,heroZ-.5,2.1,2.45,.10,accents[number]);
+    if (!displayFiles[number] || number === 13 || number === 17) {
       box(0,.47,heroZ,2.1,.9,1.05,green);
-      box(0,.95,heroZ,2.25,.08,1.2,ivory);
-    } else if (number === 15 || number === 16) {
-      parts = structureParts;
-      const top = number === 15 ? .42 : .22;
-      box(0,(top+.07)/2,heroZ,1.85,top-.07,1.15,green);
-      box(0,top-.025,heroZ,1.85,.05,1.15,ivory);
-      parts = [];
-      box(0,.47,heroZ,2.1,.9,1.05,green);
-      box(0,.95,heroZ,2.25,.08,1.2,ivory);
-    } else {
-      box(0,.47,heroZ,2.1,.9,1.05,green);
-      box(0,.95,heroZ,2.25,.08,1.2,ivory);
+      box(0,.95,heroZ,2.2,.08,1.15,ivory);
     }
+    const fixtureParts = parts;
+    parts = [];
     const accent = accents[number];
     if (number >= 7 && number <= 11) {
       cylinder(0,1.5,heroZ,.37,1.05,number===8?0xd6b778:ivory);
@@ -152,22 +133,29 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
       box(0,2.19,heroZ,.73,.07,.36,gold);
     }
     const files = displayFiles[number];
-    const furnitureParts = files ? structureParts : structureParts.concat(parts);
+    const furnitureParts = structureParts;
     const furniture = new T.Mesh(mergeGeometries(furnitureParts), material);
     furnitureParts.forEach(part => part.dispose());
     furniture.name = `S${slot.number} furnishings`;
     group.add(furniture);
-    let loadDisplay, display, fallback, loaded = false;
+    const hero = new T.Group();
+    hero.name = `S${slot.number} hero display`;
+    hero.userData.modelReady = !files;
+    const fixture = new T.Mesh(mergeGeometries(fixtureParts), material);
+    fixtureParts.forEach(part => part.dispose());
+    hero.add(fixture);
+    group.add(hero);
+    let loadDisplay, display, loaded = false;
+    const fallback = new T.Mesh(mergeGeometries(parts), material);
+    parts.forEach(part => part.dispose());
+    fallback.name = `S${slot.number} display fallback`;
+    hero.add(fallback);
     if (files) {
-      fallback = new T.Mesh(mergeGeometries(parts), material);
-      parts.forEach(part => part.dispose());
-      fallback.name = `S${slot.number} display fallback`;
-      group.add(fallback);
       display = new T.Group();
       display.visible = false;
-      group.add(display);
+      hero.add(display);
       loadDisplay = () => {
-        const placements = displayPlacements(number, heroZ);
+        const placements = displayPlacements(number, heroOffset, heroZ);
         Promise.all(files.map(loadModel)).then(scenes => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
@@ -178,6 +166,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
             display.add(instance);
           });
           loaded = true;
+          hero.userData.modelReady = true;
           fallback.visible = !display.visible;
         }).catch(() => {
           // Keep the procedural display if a model is unavailable.
@@ -188,8 +177,9 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     texture.colorSpace = T.SRGBColorSpace;
     const poster = new T.Mesh(posterGeometry, new T.MeshBasicMaterial({map:texture}));
     poster.name = `S${slot.number} hero image`;
-    poster.position.set(0,2.9,back+.151);
-    group.add(poster);
+    poster.position.set(heroOffset,1.8,heroZ-.43);
+    poster.scale.set(.5,.55,1);
+    hero.add(poster);
     group.visible = false;
     scene.add(group);
     shops.push({group, x:group.position.x, z:group.position.z, display, fallback,

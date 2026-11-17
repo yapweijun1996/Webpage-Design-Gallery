@@ -4,7 +4,7 @@ The separately developed [local stage 8 report](gjh-v11-stage8-materials-local.m
 
 ## Current expanded-mall lighting
 
-The expanded mall now uses a lower, cooler hemisphere fill and a stronger angled warm directional key. Short-range, non-shadow-casting shop accents mix a restrained shop color into warm light; at most six are active near the visitor. The darker, slightly cool stone floor tint separates it from the lighter walls in both textured and flat-fallback modes. Seasonal themes retain their own color overrides while inheriting the revised intensity and floor values. Classic global lighting is unchanged; its shop accents also use the revised range and color mix.
+The everyday palette uses lighter ivory walls and ceilings with forest-green and champagne-gold accents. Warm, non-shadow-casting shop lights blend a small amount of each shop's accent color; at most six are active near the visitor. Seasonal themes retain their color overrides. Classic global lighting is unchanged; its shop accents use the same warm lights.
 
 These changes reuse the existing lights and materials, add no external assets or geometry, and leave the direct mobile/Low render path and selective desktop bloom unchanged. Visual readability and the 200-call budget require fresh browser verification; historical measurements below do not establish the result for this revision.
 

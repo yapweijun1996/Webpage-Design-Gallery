@@ -2561,9 +2561,9 @@ import { setupOriginalTin } from "./assets/original-tin.js";
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
 function createMallAtmosphere(T, renderer, scene, slots) {
   const accents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324, 4689030, 8666691, 7313040, 7831429, 6705273, 8549738, 4954515, 6449514];
-  const warm = new T.Color(16766368), interiorWarm = new T.Color(16760184);
+  const warm = new T.Color(16770497), interiorWarm = new T.Color(16766368);
   const lights = slots.map((slot2, index) => {
-    const light = new T.PointLight(16766368, 16, 9, 2);
+    const light = new T.PointLight(16770497, 28, 11, 2);
     light.name = `Shop ${String(index + 1).padStart(2, "0")} accent light`;
     light.position.set((slot2.minX + slot2.maxX) / 2, 4.2, (slot2.minZ + slot2.maxZ) / 2);
     light.visible = false;
@@ -2572,9 +2572,9 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     return { light, accent: new T.Color(accents[index]) };
   });
   function applyTheme(theme) {
-    warm.set(theme?.lighting?.key ?? 16766368).lerp(interiorWarm, 0.35);
+    warm.set(theme?.lighting?.key ?? 16770497).lerp(interiorWarm, 0.25);
     for (const { light, accent } of lights)
-      light.color.copy(warm).lerp(accent, 0.16);
+      light.color.copy(warm).lerp(accent, 0.08);
   }
   applyTheme(null);
   const nearest = [];
@@ -2715,6 +2715,7 @@ var frame = 0;
 var last = 0;
 var accumulator = 0;
 var frames = 0;
+var three;
 var productControl = null;
 var shelfFocus = null;
 var guidance = null;
@@ -2795,6 +2796,72 @@ async function loadOptionalThemeModule(loader) {
   }
 }
 var previousGamepadInspect = false;
+function heroVisibility(number) {
+  if (!three || !world || !player || !expanded)
+    return null;
+  const T = three, camera = player.camera, rect = canvas.getBoundingClientRect();
+  const project = (root) => {
+    if (!root)
+      return null;
+    for (let p = root;p; p = p.parent)
+      if (!p.visible)
+        return null;
+    root.updateWorldMatrix(true, true);
+    camera.updateWorldMatrix(true, false);
+    const out = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity, inFront: true };
+    const point = new T.Vector3;
+    function visit(object) {
+      if (!object.visible)
+        return;
+      if (object.isMesh && object.geometry) {
+        let bounds;
+        if (object.isSkinnedMesh) {
+          object.computeBoundingBox();
+          bounds = object.boundingBox;
+        } else {
+          if (!object.geometry.boundingBox)
+            object.geometry.computeBoundingBox();
+          bounds = object.geometry.boundingBox;
+        }
+        if (bounds && !bounds.isEmpty())
+          for (const x of [bounds.min.x, bounds.max.x])
+            for (const y of [bounds.min.y, bounds.max.y])
+              for (const z of [bounds.min.z, bounds.max.z]) {
+                point.set(x, y, z).applyMatrix4(object.matrixWorld).project(camera);
+                if (point.z < -1 || point.z > 1)
+                  out.inFront = false;
+                const px = rect.left + (point.x + 1) * rect.width / 2, py = rect.top + (1 - point.y) * rect.height / 2;
+                out.left = Math.min(out.left, px);
+                out.right = Math.max(out.right, px);
+                out.top = Math.min(out.top, py);
+                out.bottom = Math.max(out.bottom, py);
+              }
+      }
+      for (const child of object.children)
+        visit(child);
+    }
+    visit(root);
+    return Number.isFinite(out.left) ? out : null;
+  };
+  if (number == null) {
+    const position = player.body.translation();
+    const nearest = expandedLayout.slots.filter((slot2) => Number(slot2.number) >= 4).map((slot2) => ({
+      slot: slot2,
+      distance: Math.hypot(position.x - (slot2.minX + slot2.maxX) / 2, position.z - (slot2.minZ + slot2.maxZ) / 2)
+    })).sort((a, b) => a.distance - b.distance)[0];
+    number = nearest?.slot.number;
+  }
+  const id = String(number).padStart(2, "0");
+  const hero = world.scene.getObjectByName(`S${id} hero display`);
+  if (!hero)
+    return null;
+  return Object.freeze({
+    number: id,
+    hero: project(hero),
+    avatar: project(player.visual),
+    loaded: hero.userData.modelReady === true
+  });
+}
 var snapshot = () => Object.freeze({
   ...player?.state || {},
   mode: modes.current(),
@@ -2815,6 +2882,9 @@ var snapshot = () => Object.freeze({
   shelf: shelfFocus?.state || null,
   brandPlaqueCount: world?.scene.getObjectByName("Seventeen brand wall plaques")?.geometry.index?.count / 6 || 0,
   interaction: selectedInteraction ? { id: selectedInteraction.id, x: selectedInteraction.x, y: selectedInteraction.y ?? 0, z: selectedInteraction.z, radius: selectedInteraction.radius, distance: interactionDistance } : null,
+  get heroVisibility() {
+    return heroVisibility();
+  },
   camera: player ? { position: player.camera.position.toArray(), quaternion: player.camera.quaternion.toArray(), fov: player.camera.fov, aspect: player.camera.aspect } : null,
   graphics: Object.freeze({
     status: graphicsStatus,
@@ -2849,6 +2919,9 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   },
   get mode() {
     return modes.current();
+  },
+  heroVisibility(number) {
+    return heroVisibility(number);
   },
   teleport(zone) {
     if (!ready || !player.teleport(zone))
@@ -3205,6 +3278,7 @@ async function initialize() {
     return;
   }
   const T = await import("./vendor/three.module.min.js");
+  three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({ canvas, context, antialias: true });
   renderer.outputColorSpace = T.SRGBColorSpace;
