@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Kopitiam Board",
+  "version": "v4",
+  "designStyle": "A chalk-dark café board uses ruled menu rows, handwritten-style italic display and a pinned photograph.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v4/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v4",
+  "companyId": "yeos",
+  "displayTitle": "Kopitiam Board",
+  "summary": "Browse six drinks on a kopitiam-inspired menu board.",
+  "styles": [
+    "heritage"
+  ],
+  "order": 40
+}

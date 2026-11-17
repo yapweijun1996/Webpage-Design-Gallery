@@ -1,0 +1,63 @@
+:root {
+  --paper: var(--palette-editorial-paper);
+  --accent: var(--palette-success);
+  --wash: var(--palette-success-surface);
+}
+.diary {
+  display: grid;
+  grid-template-columns: 0.86fr 1.14fr;
+  align-items: center;
+  gap: 7%;
+  padding-block: 2.5rem;
+}
+.diary-photo img {
+  aspect-ratio: 1.2;
+  border-top-left-radius: var(--radius-pill);
+  border-top-right-radius: var(--radius-pill);
+}
+.diary h1 i {
+  display: block;
+  color: var(--accent);
+}
+.stops {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0 0.55rem;
+  max-width: 50rem;
+}
+.stops li {
+  position: relative;
+  padding: 0 0 1.55rem 1.6rem;
+  border-left: 1px solid var(--accent);
+}
+.stops li:last-child {
+  border-color: transparent;
+}
+.stops li:before {
+  content: "";
+  width: 0.75rem;
+  height: 0.75rem;
+  position: absolute;
+  top: 0.16rem;
+  left: -0.38rem;
+  background: var(--accent);
+  border-radius: var(--radius-circle);
+}
+.stops h3 {
+  margin: 0.3rem 0;
+}
+.stops p {
+  color: var(--mute);
+}
+@media (max-width: 740px) {
+  .diary {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .diary-photo {
+    order: 2;
+  }
+  .diary-photo img {
+    aspect-ratio: 1.7;
+  }
+}

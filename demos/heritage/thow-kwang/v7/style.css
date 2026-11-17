@@ -1,0 +1,62 @@
+:root {
+  --paper: var(--palette-success-surface);
+  --accent: var(--palette-success);
+  --wash: var(--palette-editorial-paper);
+}
+.cover .plate {
+  background: var(--wash);
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  transform: rotate(1.5deg);
+}
+.cover .plate img {
+  aspect-ratio: 1.75;
+}
+.cover .intro {
+  max-width: 30rem;
+}
+h1 i {
+  display: block;
+  color: var(--accent);
+}
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.swatch {
+  border: 1px solid var(--line);
+  background: var(--wash);
+  padding: 1rem;
+}
+.sample {
+  height: 6rem;
+  margin-bottom: 1rem;
+  background: var(--accent);
+}
+.s0 .sample {
+  background: var(--palette-editorial-accent);
+}
+.s1 .sample {
+  background: var(--palette-success);
+}
+.s2 .sample {
+  background: var(--palette-night-paper-muted);
+}
+.swatch h3 {
+  margin: 0.5rem 0;
+}
+.swatch p {
+  color: var(--mute);
+}
+@media (max-width: 740px) {
+  .swatches {
+    grid-template-columns: 1fr;
+  }
+  .sample {
+    height: 3rem;
+  }
+  .cover .plate {
+    margin-inline: 0.4rem;
+  }
+}

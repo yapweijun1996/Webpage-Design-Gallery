@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Rose Milk Studio",
+  "version": "v8",
+  "designStyle": "A rose-tinted ingredient studio layers an intimate drink portrait alongside a three-part composition selector.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v8/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v8",
+  "companyId": "yeos",
+  "displayTitle": "Rose Milk Studio",
+  "summary": "Discover the milk and rose essence behind Bandung.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 80
+}

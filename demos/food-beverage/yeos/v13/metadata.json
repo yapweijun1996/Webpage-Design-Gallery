@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – The Drink Dial",
+  "version": "v13",
+  "designStyle": "A circular flavour navigator places six directions around a photographic centre, with an indexed profile for each choice.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v13/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v13",
+  "companyId": "yeos",
+  "displayTitle": "The Drink Dial",
+  "summary": "Choose a flavour direction to discover a drink.",
+  "styles": [
+    "immersive"
+  ],
+  "order": 130
+}

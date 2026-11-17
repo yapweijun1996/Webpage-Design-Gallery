@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Botanical Notes",
+  "version": "v6",
+  "designStyle": "A field notebook arranges circular photographic specimens in a labeled two-column cabinet.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v6/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v6",
+  "companyId": "yeos",
+  "displayTitle": "Botanical Notes",
+  "summary": "Open ingredient specimen notes for six Singapore drinks.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 60
+}

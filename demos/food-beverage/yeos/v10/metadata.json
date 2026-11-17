@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Picnic Counter",
+  "version": "v10",
+  "designStyle": "A picnic-red planning worksheet combines a checkered tablecloth, a receipt-style result and labeled inputs.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v10/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v10",
+  "companyId": "yeos",
+  "displayTitle": "Picnic Counter",
+  "summary": "Estimate how many individual packs will cover a picnic.",
+  "styles": [
+    "minimal"
+  ],
+  "order": 100
+}

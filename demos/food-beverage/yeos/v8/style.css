@@ -1,0 +1,9 @@
+body { --paper:var(--palette-error-surface); --ink:var(--yeos-deep-red); --rule:var(--yeos-line); }
+.rose { align-items:center; gap:clamp(2rem,7vw,7rem); }
+.portrait { background:var(--palette-white); padding:clamp(.8rem,2vw,2rem); transform:rotate(-2deg); border:1px solid var(--rule); }
+.portrait .photo { aspect-ratio:.83; }
+.studio h1 { margin-bottom:1rem; }
+.studio .choices { margin:1.5rem 0 1rem; }
+.formula { border-block:1px solid var(--ink); padding-block:1rem; }
+.formula h2 { font-size:var(--yeos-card-type); margin-bottom:.5rem; }
+@media(max-width:700px) { .rose { display:flex; flex-direction:column-reverse; align-items:stretch; } .portrait { width:min(85%,390px); align-self:center; } }

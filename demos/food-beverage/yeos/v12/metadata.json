@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Tasting Notebook",
+  "version": "v12",
+  "designStyle": "A ruled paper notebook pairs a compact drink reference with an editable, locally saved tasting entry.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v12/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v12",
+  "companyId": "yeos",
+  "displayTitle": "Tasting Notebook",
+  "summary": "Keep personal tasting notes for six drinks on this device.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 120
+}

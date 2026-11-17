@@ -22,7 +22,11 @@ class GalleryTests(unittest.TestCase):
         catalog = gallery.load_catalog()
         versions = [d["version"] for d in catalog["designs"] if d["companyId"] == "gjh"]
         self.assertEqual(versions, ["v1", *(f"v{number}" for number in range(5, 20))])
-        self.assertEqual([d["id"] for d in catalog["designs"] if d["companyId"] == "yeos"], ["yeos-v1"])
+        self.assertEqual({c["id"] for c in catalog["companies"]}, {"gjh", "yeos", "thow-kwang"})
+        for company in catalog["companies"]:
+            designs = [d for d in catalog["designs"] if d["companyId"] == company["id"]]
+            self.assertGreaterEqual(len({d["demoPath"] for d in designs}), 15)
+            self.assertEqual(len({d["title"] for d in designs}), len(designs))
 
     def test_v8_metadata_exposes_immersive_concept_contract(self):
         catalog = gallery.load_catalog()
@@ -59,7 +63,9 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(page.count('id="company-search"'), 1)
 
     def test_single_design_collection_links_to_demo_without_comparison_controls(self):
-        pages = gallery.build_pages(gallery.load_catalog())
+        catalog = gallery.load_catalog()
+        catalog["designs"] = [d for d in catalog["designs"] if d["companyId"] != "yeos" or d["version"] == "v1"]
+        pages = gallery.build_pages(catalog)
         page = pages["companies/yeos/index.html"]
         self.assertIn('href="../../demos/food-beverage/yeos/v1/index.html"', page)
         self.assertIn('company=yeos&amp;design=v1', page)

@@ -1,0 +1,46 @@
+:root {
+  --paper: var(--palette-warning-surface);
+  --ink: var(--palette-editorial-ink);
+  --accent: var(--palette-success);
+  --wash: var(--palette-success-surface);
+}
+.picturebook {
+  position: relative;
+  padding: 1.25rem;
+}
+.picturebook img {
+  border: 6px solid var(--ink);
+  border-radius: var(--radius-xl);
+  aspect-ratio: 1.55;
+}
+.caption-tag {
+  position: absolute;
+  left: 0;
+  bottom: 2.6rem;
+  transform: rotate(-8deg);
+  background: var(--accent);
+  color: var(--btn-ink);
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+}
+.caption-tag i {
+  font-family: var(--sign);
+  font-size: var(--font-size-xl);
+}
+.intro h1 {
+  font-family: var(--body);
+  font-weight: 800;
+}
+.intro h1 i {
+  font-family: var(--sign);
+  color: var(--accent);
+}
+#game summary {
+  font-size: var(--font-size-xl);
+}
+#game details {
+  border: 2px solid var(--ink);
+  margin: 0.55rem 0;
+  padding: 0 1rem;
+  border-radius: var(--radius-xl);
+}

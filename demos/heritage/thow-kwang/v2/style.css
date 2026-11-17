@@ -1,0 +1,59 @@
+:root {
+  --accent: var(--palette-success);
+  --wash: var(--palette-success-surface);
+  --paper: var(--palette-white);
+}
+.ticket {
+  background: var(--wash);
+  border: 1px solid var(--accent);
+  padding: clamp(1.4rem, 4vw, 3.2rem);
+  color: var(--accent);
+}
+.address {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin: 1.3rem 0;
+  line-height: 0.86;
+}
+.address strong {
+  font-family: var(--sign);
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-2xl));
+  font-weight: 400;
+  letter-spacing: -0.07em;
+}
+.address span {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+}
+.ticket-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 2px dashed var(--accent);
+  padding-top: 1rem;
+}
+.ticket .cap {
+  color: var(--accent);
+}
+#routes {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 3rem;
+}
+h1 {
+  font-family: var(--body);
+  font-weight: 800;
+}
+h1 i {
+  font-family: var(--sign);
+}
+@media (max-width: 740px) {
+  #routes {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

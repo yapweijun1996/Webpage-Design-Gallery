@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Pack Finder",
+  "version": "v5",
+  "designStyle": "A cobalt technical matrix uses high-contrast pack columns and a targeted size selector.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v5/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v5",
+  "companyId": "yeos",
+  "displayTitle": "Pack Finder",
+  "summary": "Find which drinks come in a selected pack size and container.",
+  "styles": [
+    "corporate"
+  ],
+  "order": 50
+}

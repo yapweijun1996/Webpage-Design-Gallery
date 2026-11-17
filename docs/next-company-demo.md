@@ -2,7 +2,7 @@
 
 The 17 November 2026 portfolio review recommends **Thow Kwang Industry Pte Ltd**, the operator of **Thow Kwang Pottery Jungle** at 85 Lorong Tawas. Build a mobile-first visitor guide called *A First Visit to the Dragon Kiln*. The operator offers public pottery workshops and visits for organised groups. In 2020, the National Heritage Board named the company a recipient of the Stewards of Singapore's Intangible Cultural Heritage Award for wood-fired pottery. [Operator and address](https://thowkwang.com.sg/contact-us/) · [Official workshops](https://www.potteryjungle.com/pottery-workshop) · [NHB award announcement, p. 1](https://www.nhb.gov.sg/-/media/nhb/files/media/releases/new-releases/media-release--six-practitioners-recognised-in-nhbs-the-stewards-of-singapores-ich-award.pdf) · [Operator's account](https://www.potteryjungle.com/our-story)
 
-The owner selected the third candidate, Yeo Hiap Seng, for the next build. [The Drinks Index](../demos/food-beverage/yeos/v1/index.html) implements that choice. The ranking below records the original research recommendation.
+The owner selected the third candidate, Yeo Hiap Seng, for the next build. [The Drinks Index](../demos/food-beverage/yeos/v1/index.html) implements that choice. Thow Kwang subsequently joined the gallery with [Inside the Dragon Kiln](../demos/heritage/thow-kwang/v1/index.html) and [fourteen related concepts](../companies/thow-kwang/index.html). The ranking below records the original research recommendation.
 
 ## Why this company follows GJH
 

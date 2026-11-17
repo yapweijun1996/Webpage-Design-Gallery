@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – Teachers’ Field Notes",
+  "version": "v4",
+  "designStyle": "A ruled teaching notebook with a lesson plan, reflection prompts and an interactive preparation checklist.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v4/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v4",
+  "companyId": "thow-kwang",
+  "displayTitle": "Teachers’ Field Notes",
+  "summary": "Prepare a school visit with an observation lesson, a class checklist and official school-group contacts.",
+  "styles": [
+    "minimal"
+  ],
+  "order": 40
+}

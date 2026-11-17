@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – A Slow Afternoon",
+  "version": "v14",
+  "designStyle": "A leafy travel diary invites readers through three unhurried stops with a light, open composition.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v14/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v14",
+  "companyId": "thow-kwang",
+  "displayTitle": "A Slow Afternoon",
+  "summary": "Follow an unhurried self-guided observation itinerary, with official access and visit information.",
+  "styles": [
+    "immersive"
+  ],
+  "order": 140
+}

@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – In Good Company",
+  "version": "v9",
+  "designStyle": "A structured organiser’s briefing sheet connects group size, purpose and access needs to the right enquiry.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v9/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v9",
+  "companyId": "thow-kwang",
+  "displayTitle": "In Good Company",
+  "summary": "Build a group enquiry brief and compare heritage tours with private team or school workshops.",
+  "styles": [
+    "corporate"
+  ],
+  "order": 90
+}

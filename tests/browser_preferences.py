@@ -46,7 +46,7 @@ def contrast(first, second):
 
 
 def run():
-    packs = {code: json.loads((ROOT / f'locales/{code}.json').read_text()) for code in ('en', 'zh-Hans', 'ms')}
+    packs = gallery.validate_locales()
     for pack in packs.values():
         for kind in ('messages', 'patterns'):
             assert pack[kind].keys() == packs['en'][kind].keys(), 'Translation keys incomplete'
@@ -109,7 +109,7 @@ def run():
                 assert page.locator('#theme-select').input_value() == 'dark'
                 select_preference(page, '#language-select', 'zh-Hans')
                 page.locator('#company-search').fill('新加坡')
-                assert page.locator('.company-card:visible').count() == 2
+                assert page.locator('.company-card:visible').count() == 3
                 page.locator('#company-search').fill('杨协成')
                 assert page.locator('.company-card:visible').get_attribute('data-company') == 'yeos'
                 page.locator('#company-search').fill('新加坡')
@@ -207,7 +207,9 @@ def run():
                 o.wait_for_selector('html[data-preferences-ready]')
                 assert o.locator('html').get_attribute('lang') == 'ms'
                 assert o.locator('html').get_attribute('data-theme') == 'dark'
-                assert o.locator('.design-card').count() == 8
+                designs = json.loads((output / 'data/designs.json').read_text())
+                expected = sum(design['companyId'] == 'gjh' for design in designs)
+                assert o.locator('.design-card').count() == expected
                 checks.append('Real failed network probe, offline cold reload, all cached languages and persisted dark Malay deep link')
                 offline.close(); browser.close()
                 evidence = {'standard':'pwa:product-standard', 'profile':'CONTENT', 'build':json.loads((output/'version.json').read_text()), 'timestamp':datetime.now(timezone.utc).isoformat(), 'os':platform.platform(), 'browser':'Chromium', 'browser_version':browser.version, 'status':'PASS', 'checks':checks, 'limitations':['Physical iOS/Android install, Safari, Firefox, Edge and screen readers NOT_RUN; field performance INSUFFICIENT_DATA']}

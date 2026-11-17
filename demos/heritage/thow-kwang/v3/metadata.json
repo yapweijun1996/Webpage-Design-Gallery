@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – The Clay Studio",
+  "version": "v3",
+  "designStyle": "A light studio magazine with a circular window onto the wheel and a class-comparison spread.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v3/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v3",
+  "companyId": "thow-kwang",
+  "displayTitle": "The Clay Studio",
+  "summary": "Match a wheel or hand-building interest to public or private pottery workshop information.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 30
+}

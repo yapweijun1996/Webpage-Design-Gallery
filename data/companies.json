@@ -28,5 +28,20 @@
     "featuredVersion": "v1",
     "status": "published",
     "officialWebsite": "https://yeos.com.sg/"
+  },
+  {
+    "id": "thow-kwang",
+    "slug": "thow-kwang",
+    "name": "Thow Kwang Pottery Jungle",
+    "legalName": "Thow Kwang Industry Pte Ltd",
+    "initials": "TK",
+    "industry": "Heritage & Craft",
+    "categories": ["heritage"],
+    "location": "Singapore",
+    "description": "Explore the dragon kiln, studio workshops and the Tan family's pottery heritage at Lorong Tawas.",
+    "demoDirectory": "demos/heritage/thow-kwang",
+    "featuredVersion": "v1",
+    "status": "published",
+    "officialWebsite": "https://thowkwang.com.sg/"
   }
 ]

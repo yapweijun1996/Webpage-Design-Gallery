@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – At the Potter’s Wheel",
+  "version": "v5",
+  "designStyle": "A monochrome wheel study uses a photo-led diptych and a sequential technique reader.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v5/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v5",
+  "companyId": "thow-kwang",
+  "displayTitle": "At the Potter’s Wheel",
+  "summary": "Follow four wheel-forming gestures, then find the official beginner workshop listing.",
+  "styles": [
+    "immersive"
+  ],
+  "order": 50
+}

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#faf7ee">
+  <meta name="description" content="Explore three curated flights of Singapore drinks.">
+  <title>Tasting Flight — Yeo Hiap Seng</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
+  <link rel="stylesheet" href="../../../../assets/tokens.css">
+  <link rel="stylesheet" href="../shared/editions.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="../../../../src/demo-pwa.js"></script>
+  <script defer src="../shared/panel-selector.js"></script>
+  <link rel="icon" type="image/png" sizes="192x192" href="../../../../assets/icons/gallery-192.png">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="wrap bar">
+    <a class="brand" href="../v1/index.html" aria-label="Yeo’s Drinks Index">Yeo’s</a>
+    <nav aria-label="Packaging"><a href="../v1/index.html#compare">Compare two drinks ↗</a></nav>
+  </header>
+  <main id="main">
+    <div class="wrap flight section">
+      <header>
+        <div>
+          <p class="tag">An independent tasting menu</p>
+          <h1>Tasting <em>flight</em></h1>
+        </div>
+        <div class="choices" role="group" aria-label="Choose a flight" hidden data-controls>
+          <button type="button" data-choice="garden" aria-pressed="true">Garden</button>
+          <button type="button" data-choice="beans" aria-pressed="false">Bean</button>
+          <button type="button" data-choice="fruit" aria-pressed="false">Fruit & flower</button>
+        </div>
+      </header>
+      <div class="flights" aria-live="polite">
+        <section data-panel="garden">
+          <h2>The garden flight</h2>
+          <p>Two floral drinks and a leaf tea.</p>
+          <ol class="flight-list">
+            <li>
+              <img class="photo" src="../v1/assets/chrysanthemum.webp" width="506" height="506" alt="A glass of golden tea with chrysanthemum flowers">
+              <div>
+                <p class="meta">Pour 1</p>
+                <h3>Chrysanthemum Tea</h3>
+                <p>A floral tea brewed with Hang Bai Ju chrysanthemums.</p>
+                <a href="https://yeos.com.sg/product/chrysanthemum-tea/">Drink details ↗</a>
+              </div>
+            </li>
+            <li>
+              <img class="photo" src="../v1/assets/green-tea.webp" width="506" height="506" alt="A glass of green tea beside fresh green leaves">
+              <div>
+                <p class="meta">Pour 2</p>
+                <h3>First Harvest Green Tea</h3>
+                <p>A green tea brewed from the first spring buds.</p>
+                <a href="https://yeos.com.sg/product/jasmine-green-tea/">Drink details ↗</a>
+              </div>
+            </li>
+            <li>
+              <img class="photo" src="../v1/assets/bandung.webp" width="506" height="506" alt="A glass of pink Bandung with rose petals">
+              <div>
+                <p class="meta">Pour 3</p>
+                <h3>Bandung Rose Milk Drink</h3>
+                <p>Milk and rose essence give Bandung its creamy floral character.</p>
+                <a href="https://yeos.com.sg/product/bandung-rose-syrup-milk-drink/">Drink details ↗</a>
+              </div>
+            </li>
+          </ol>
+        </section>
+        <section data-panel="beans">
+          <h2>The bean flight</h2>
+          <p>Two soy drinks with a green tea finish.</p>
+          <ol class="flight-list">
+            <li>
+              <img class="photo" src="../v1/assets/soy.webp" width="506" height="506" alt="A glass of pale soy milk with soy beans">
+              <div>
+                <p class="meta">Pour 1</p>
+                <h3>Soy Bean Milk</h3>
+                <p>Whole soy beans give the drink its smooth texture.</p>
+                <a href="https://yeos.com.sg/product/soy-bean-milk/">Drink details ↗</a>
+              </div>
+            </li>
+            <li>
+              <img class="photo" src="../v1/assets/black-soy.webp" width="506" height="506" alt="A glass of dark soy milk with black soy beans">
+              <div>
+                <p class="meta">Pour 2</p>
+                <h3>Black Soy Milk</h3>
+                <p>A blend of two types of whole soy beans.</p>
+                <a href="https://yeos.com.sg/product/black-soy-milk-2/">Drink details ↗</a>
+              </div>
+            </li>
+            <li>
+              <img class="photo" src="../v1/assets/green-tea.webp" width="506" height="506" alt="A glass of green tea beside fresh green leaves">
+              <div>
+                <p class="meta">Pour 3</p>
+                <h3>First Harvest Green Tea</h3>
+                <p>A green tea brewed from the first spring buds.</p>
+                <a href="https://yeos.com.sg/product/jasmine-green-tea/">Drink details ↗</a>
+              </div>
+            </li>
+          </ol>
+        </section>
+        <section data-panel="fruit">
+          <h2>The fruit & flower flight</h2>
+          <p>Lychee, rose milk and chrysanthemum.</p>
+          <ol class="flight-list">
+            <li>
+              <img class="photo" src="../v1/assets/lychee.webp" width="506" height="506" alt="A glass of lychee drink with fresh lychees">
+              <div>
+                <p class="meta">Pour 1</p>
+                <h3>Lychee Drink</h3>
+                <p>A light fruit drink with a sweet lychee flavour.</p>
+                <a href="https://yeos.com.sg/product/lychee-drink/">Drink details ↗</a>
+              </div>
+            </li>
+            <li>
+              <img class="photo" src="../v1/assets/bandung.webp" width="506" height="506" alt="A glass of pink Bandung with rose petals">
+              <div>
+                <p class="meta">Pour 2</p>
+                <h3>Bandung Rose Milk Drink</h3>
+                <p>Milk and rose essence give Bandung its creamy floral character.</p>
+                <a href="https://yeos.com.sg/product/bandung-rose-syrup-milk-drink/">Drink details ↗</a>
+              </div>
+            </li>
+            <li>
+              <img class="photo" src="../v1/assets/chrysanthemum.webp" width="506" height="506" alt="A glass of golden tea with chrysanthemum flowers">
+              <div>
+                <p class="meta">Pour 3</p>
+                <h3>Chrysanthemum Tea</h3>
+                <p>A floral tea brewed with Hang Bai Ju chrysanthemums.</p>
+                <a href="https://yeos.com.sg/product/chrysanthemum-tea/">Drink details ↗</a>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer class="wrap base">
+    <p>Independent design concept for Yeo Hiap Seng Limited.</p>
+    <a href="https://yeos.com.sg/">Yeo’s Singapore ↗</a>
+  </footer>
+</body>
+</html>

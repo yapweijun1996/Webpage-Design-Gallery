@@ -19,7 +19,7 @@ class PreferencesTests(unittest.TestCase):
         gallery.validate_locales()
 
     def test_generated_gallery_copy_is_translatable(self):
-        pack = json.loads((ROOT / 'locales/en.json').read_text())
+        pack = json.loads((ROOT / 'locales/source/en.json').read_text())
         patterns = [re.compile('^' + re.sub(r'\\\{\w+\\\}', '.+?', re.escape(key)) + '$') for key in pack['patterns']]
 
         class CopyParser(HTMLParser):

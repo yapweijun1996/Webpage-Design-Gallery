@@ -1,6 +1,6 @@
 # Gallery PWA — Architecture and Acceptance
 
-The application now follows the KB `pwa:product-standard` and `pwa:sw-install-integrity` workflows. Scope is the company-first Gallery under its own project URL prefix. Corporate demos remain independent, network-only documents; this does not add a cart, messaging channel or backend.
+The application now follows the KB `pwa:product-standard` and `pwa:sw-install-integrity` workflows. Scope is the company-first Gallery under its own project URL prefix. Independent demos own narrower install scopes. See [company demo PWA coverage](company-demo-pwas.md) for their offline behavior.
 
 ## Ownership and Lifecycle
 
@@ -15,7 +15,7 @@ The active shell is cache-first to preserve one coherent release until acceptanc
 
 ## Offline Contract
 
-After a successful initial install: discovery, local search, filters, company collections, design metadata and thumbnails are saved. Demos, full-resolution screenshots, external sites and commerce channels need a connection. Failed demo navigation redirects to a cached explanation; missing full screenshots receive a labelled placeholder. No sensitive/user-generated data is cached. Closing the browser does not guarantee background checks; checks resume when the Gallery is used.
+After a successful initial install: discovery, local search, filters, company collections, design metadata and thumbnails are saved. A first visit to a demo, full-resolution screenshots, external sites and commerce channels need a connection. Previously saved demos use their own worker. Failed demo navigation redirects to a cached explanation; missing full screenshots receive a labelled placeholder. No sensitive/user-generated data is cached. Closing the browser does not guarantee background checks; checks resume when the Gallery is used.
 
 The release has a light-only theme, opaque white system chrome, `viewport-fit=cover` and safe-area padding. A transform-based header hides/reveals with scrolling and remains visible for keyboard focus or update prompts. Back-to-top is contextual and safe-area aware. Both respect reduced motion. CSP permits only local scripts/connects/frames; inline styles remain allowed for the existing comparison sizing code.
 

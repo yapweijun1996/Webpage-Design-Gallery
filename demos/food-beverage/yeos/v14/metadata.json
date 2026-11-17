@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Tasting Flight",
+  "version": "v14",
+  "designStyle": "A golden tasting menu places three numbered pours on a single tray with switchable editorial flights.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v14/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v14",
+  "companyId": "yeos",
+  "displayTitle": "Tasting Flight",
+  "summary": "Explore three curated flights of Singapore drinks.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 140
+}

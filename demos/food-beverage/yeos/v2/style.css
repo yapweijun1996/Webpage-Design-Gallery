@@ -1,0 +1,11 @@
+body { --paper: var(--palette-success-surface); --ink: var(--palette-success); --rule: var(--yeos-line); }
+.tea-opener { align-items: center; gap: 9%; padding-block: 4rem; }
+.tea-opener h1 { font-size: var(--yeos-hero-type); }
+.tea-opener figure { max-width: 480px; justify-self: center; }
+.tea-opener .photo { aspect-ratio: 1.12; border-top-left-radius: 50%; border-top-right-radius: 50%; }
+.tea-opener figcaption { text-align: center; margin-top: .6rem; font-style: italic; }
+.tea-leaves { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2rem; padding-bottom: 4rem; }
+.tea-card { border-top: 1px solid var(--ink); padding-top: 1.4rem; display: grid; grid-template-columns: 32% 1fr; gap: 1.25rem; }
+.tea-card .photo { height: auto; }
+.tea-card h2 { font-size: var(--yeos-card-type); margin-bottom: .65rem; }
+@media(max-width:700px) { .tea-opener { gap: 2rem; padding-block: 2.4rem; } .tea-opener h1 { font-size: var(--yeos-section-type); } .tea-opener h1 br { display:initial; } .tea-opener figure { width: 90%; } .tea-leaves { grid-template-columns: 1fr; } }

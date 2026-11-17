@@ -1,0 +1,13 @@
+body { --paper:var(--palette-editorial-wash); --ink:var(--palette-success); --rule:var(--yeos-line); }
+.field header { text-align:center; padding-bottom:2rem; }
+.field .lead { margin:.8rem auto 0; }
+.specimens { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:0 2rem; }
+.spec { border-block-start:1px solid var(--ink); }
+.spec summary { display:flex; gap:1.25rem; align-items:center; padding:1.1rem 0; }
+.spec .photo { width:clamp(54px,6vw,92px); height:auto; border-radius:var(--radius-circle); }
+.spec summary span { font-family:Instrument,Georgia,serif; font-size:var(--yeos-card-type); font-weight:400; line-height:1; }
+.spec summary small { display:block; font-family:var(--font-family-code); font-size:var(--font-size-xs); margin-bottom:.5rem; text-transform:uppercase; }
+.spec summary::after { content:"+"; margin-left:auto; }
+.spec[open] summary::after { content:"−"; }
+.spec div { padding:.4rem .5rem 1.25rem; }
+@media(max-width:700px) { .specimens { grid-template-columns:1fr; } }

@@ -55,7 +55,7 @@ self.addEventListener('fetch', (event) => {
     // One coherent shell stays active until the user accepts a waiting release.
     // Query parameters remain in the page URL; only the cache key is canonical.
     event.respondWith((async () => {
-      // Live demos are network-only, including shared styles. An older gallery
+      // A demo without its own active worker needs fresh network styles. An older gallery
       // worker must not combine the latest demo with its cached theme tokens.
       const client = event.clientId && await self.clients.get(event.clientId);
       if (request.mode !== 'navigate' && client?.url.startsWith(new URL('demos/', BASE).href)) {
@@ -67,7 +67,7 @@ self.addEventListener('fetch', (event) => {
     })());
     return;
   }
-  // Independent demos and large screenshots are network-only, never silently stale.
+  // The gallery worker delegates independent demos to the network or their narrower scope.
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).then(async (response) => {
       if (response.status === 404) {

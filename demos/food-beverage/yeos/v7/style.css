@@ -1,0 +1,12 @@
+body { --paper:var(--palette-error-surface); --ink:var(--yeos-deep-red); }
+.fruit-poster { background:var(--yeos-deep-red); color:var(--yeos-paper); overflow:hidden; }
+.poster-grid { display:grid; grid-template-columns:1fr .95fr; gap:2rem; align-items:center; padding-block:3rem; }
+.poster-grid .tag { color:var(--palette-night-warning); }
+.poster-grid .pill { background:var(--yeos-paper); color:var(--yeos-deep-red); margin-top:2rem; }
+.poster-grid figure { width:min(100%,480px); aspect-ratio:1; border:1px solid var(--yeos-paper); padding:.6rem; border-radius:var(--radius-circle); }
+.poster-grid .photo { border-radius:var(--radius-circle); }
+.fruit-notes { max-width:900px; }
+.fruit-notes h2 { margin-bottom:1rem; }
+.fruit-notes details { border-top:1px solid var(--ink); }
+.fruit-notes > a { margin-top:1rem; display:inline-block; }
+@media(max-width:700px) { .poster-grid { grid-template-columns:1fr; } .poster-grid figure { max-width:270px; justify-self:end; margin-top:-.5rem; } }

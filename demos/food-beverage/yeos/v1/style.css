@@ -151,3 +151,14 @@ summary::-webkit-details-marker { display: none; }
 @media (min-width: 651px) and (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
+
+.pack-sizes { padding-inline-start: 1.2em; color: var(--yeos-muted); font-size: var(--font-size-sm); }
+.pack-compare { border-top: 1px solid var(--yeos-line); padding-block: clamp(32px, 5vw, 72px); }
+.pack-compare h2 span { color: var(--yeos-red); }
+.pair-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-block: 1.5rem; }
+.pair-fields label { display: grid; gap: .4rem; font-weight: 650; }
+.pair-fields select { min-width: 0; width: 100%; min-height: 44px; padding: .45rem; border: 1px solid var(--yeos-line); background: var(--yeos-paper); color: inherit; font: inherit; font-size: var(--font-size-base); }
+.pack-compare table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: left; }
+.pack-compare td, .pack-compare th { border-bottom: 1px solid var(--yeos-line); padding: .8em .45em; overflow-wrap: anywhere; }
+.pack-compare thead { background: var(--yeos-pale); }
+@media (max-width: 480px) { .pair-fields { grid-template-columns: 1fr; } }

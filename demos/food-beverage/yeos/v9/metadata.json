@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – The Nanyang Archive",
+  "version": "v9",
+  "designStyle": "An archival broadsheet uses an ink border, a contents rail and oversized dated timeline entries.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v9/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v9",
+  "companyId": "yeos",
+  "displayTitle": "The Nanyang Archive",
+  "summary": "Follow the Yeo family business from Zhangzhou to Nanyang.",
+  "styles": [
+    "heritage"
+  ],
+  "order": 90
+}

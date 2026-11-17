@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – Field Sketchbook",
+  "version": "v13",
+  "designStyle": "An artist’s worktable pairs a printable dotted worksheet with a pencil-like palette and drawing prompts.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v13/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v13",
+  "companyId": "thow-kwang",
+  "displayTitle": "Field Sketchbook",
+  "summary": "Download a printable observation card and use three drawing prompts to study pottery on a visit.",
+  "styles": [
+    "minimal"
+  ],
+  "order": 130
+}

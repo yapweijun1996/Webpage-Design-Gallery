@@ -40,6 +40,18 @@ def check_filters(page):
     expect(visible).to_have_count(6)
 
 
+def check_comparison(page):
+    first, second = page.get_by_label("First drink"), page.get_by_label("Second drink")
+    expect(page.get_by_role("row", name="Bottle 380 mL / 1.5 L 380 mL")).to_be_visible()
+    first.select_option("black-soy")
+    second.select_option("bandung")
+    expect(first.locator('option[value="bandung"]')).to_be_disabled()
+    expect(second.locator('option[value="black-soy"]')).to_be_disabled()
+    expect(page.get_by_role("row", name="Carton 1 L 250 mL")).to_be_visible()
+    expect(page.get_by_role("row", name="Can Not listed 300 mL")).to_be_visible()
+    expect(page.locator("#pack-status")).to_contain_text("Black Soy Milk and Bandung Rose Milk Drink")
+
+
 def check_featured_drinks(page):
     link = page.locator("#featured-link")
     image = page.locator("#featured-image")
@@ -121,6 +133,7 @@ def run(capture=False):
                     page.evaluate("document.fonts.ready")
                     if capture and width in (1440, 768, 390):
                         frames[width] = page.screenshot(animations="disabled")
+                    check_comparison(page)
                     check_filters(page)
                     check_featured_drinks(page)
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width

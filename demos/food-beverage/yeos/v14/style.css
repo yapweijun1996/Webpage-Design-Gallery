@@ -1,0 +1,12 @@
+body { --paper:var(--palette-warning-surface); --ink:var(--yeos-ink); --rule:var(--yeos-line); }
+.flight header { display:flex; align-items:end; justify-content:space-between; gap:1.5rem; border-bottom:2px solid var(--ink); padding-bottom:1.5rem; }
+.flights section { margin:1.8rem 0; }
+.flights h2 { font-size:var(--yeos-card-type); }
+.flights section > p { margin:.6rem 0 1.2rem; }
+.flight-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:0; padding:0; gap:1.2rem; list-style:none; }
+.flight-list li { background:var(--yeos-paper); border-bottom:3px solid var(--palette-warning); }
+.flight-list .photo { aspect-ratio:1.8; height:auto; }
+.flight-list li div { padding:1.1rem; }
+.flight-list h3 { margin:.5rem 0; }
+.flight-list a { display:inline-block; margin-top:.8rem; font-size:var(--font-size-sm); }
+@media(max-width:700px) { .flight header { align-items:start; flex-direction:column; } .flight-list { grid-template-columns:1fr; } .flight-list li { display:grid; grid-template-columns:32% 1fr; } .flight-list .photo { height:100%; } }

@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – Wood & Ember",
+  "version": "v6",
+  "designStyle": "A dark, ember-lit cover opens into a three-part visual essay on a wood firing.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v6/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v6",
+  "companyId": "thow-kwang",
+  "displayTitle": "Wood & Ember",
+  "summary": "Read how wood, flame and ash shape fired pottery and where to check official firing updates.",
+  "styles": [
+    "immersive"
+  ],
+  "order": 60
+}

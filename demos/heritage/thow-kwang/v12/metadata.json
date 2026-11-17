@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – The Vessel Cabinet",
+  "version": "v12",
+  "designStyle": "A dark museum cabinet presents drawn vessel profiles, accession-style labels and an object-reading guide.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v12/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v12",
+  "companyId": "thow-kwang",
+  "displayTitle": "The Vessel Cabinet",
+  "summary": "Compare three original pottery silhouettes and learn to read the rim, shoulder and foot of a vessel.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 120
+}

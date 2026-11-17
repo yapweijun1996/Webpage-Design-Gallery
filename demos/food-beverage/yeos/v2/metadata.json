@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Tea House",
+  "version": "v2",
+  "designStyle": "A garden-green tea folio pairs an arched still life with two illustrated tasting profiles.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v2/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v2",
+  "companyId": "yeos",
+  "displayTitle": "Tea House",
+  "summary": "Read two tea profiles and compare their pack formats.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 20
+}

@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – Inside the Dragon Kiln",
+  "version": "v1",
+  "designStyle": "Museum field guide with an original annotated kiln section, archival typography and deliberate vermilion highlights.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v1/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v1",
+  "companyId": "thow-kwang",
+  "displayTitle": "Inside the Dragon Kiln",
+  "summary": "Trace heat through a cutaway of the dragon kiln and choose a self-guided visit, group tour or workshop.",
+  "styles": [
+    "heritage"
+  ],
+  "order": 10
+}

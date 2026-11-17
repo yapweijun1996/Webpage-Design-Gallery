@@ -29,6 +29,11 @@ gjh_js = importlib.util.module_from_spec(GJH_JS_SPEC)
 GJH_JS_SPEC.loader.exec_module(gjh_js)
 
 
+DEMO_PWA_SPEC = importlib.util.spec_from_file_location("build_demo_pwas", ROOT / "scripts/build_demo_pwas.py")
+demo_pwas = importlib.util.module_from_spec(DEMO_PWA_SPEC)
+DEMO_PWA_SPEC.loader.exec_module(demo_pwas)
+
+
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
@@ -163,7 +168,8 @@ def design_card(design, company, can_compare):
 
 def validate_locales(directory=ROOT / "locales"):
     """Reject incomplete packs and broken dynamic placeholders before publication."""
-    packs = {code: read_json(directory / f"{code}.json") for code in ("en", "zh-Hans", "ms")}
+    packs = {code: read_json(directory / f"{code}.json") for code in ("zh-Hans", "ms")}
+    packs["en"] = read_json(directory / "source/en.json")
     for code, pack in packs.items():
         for kind in ("messages", "patterns"):
             messages = pack.get(kind)
@@ -174,11 +180,26 @@ def validate_locales(directory=ROOT / "locales"):
             for key, value in messages.items():
                 if sorted(re.findall(r"\{\w+\}", key)) != sorted(re.findall(r"\{\w+\}", value)):
                     raise ValueError(f"Invalid locale placeholders: {code}/{key}")
+    return packs
+
+
+def build_english_pack(pack, check):
+    # English HTML already supplies identity translations; patterns still drive dynamic labels.
+    runtime = {"messages": {key: value for key, value in pack["messages"].items() if key != value},
+               "patterns": pack["patterns"]}
+    content = json.dumps(runtime, ensure_ascii=False, indent=2) + "\n"
+    target = ROOT / "locales/en.json"
+    if target.is_file() and target.read_text(encoding="utf-8") == content:
+        return
+    if check:
+        raise ValueError("Regenerate locales/en.json from locales/source/en.json")
+    with target.open("w", encoding="utf-8", newline="\n") as output:
+        output.write(content)
 
 
 def runtime_resources(catalog):
     resources = {Path(name) for name in (
-        "assets/tokens.css", "assets/gjh-themes.css", "assets/icons.svg", "assets/gallery.css", "assets/pwa.css", "src/gallery.js", "src/pwa.js", "src/preferences-boot.js", "src/preferences.js",
+        "src/demo-pwa.js", "assets/demo-pwa.css", "assets/tokens.css", "assets/gjh-themes.css", "assets/icons.svg", "assets/gallery.css", "assets/pwa.css", "src/gallery.js", "src/pwa.js", "src/preferences-boot.js", "src/preferences.js",
         "locales/en.json", "locales/zh-Hans.json", "locales/ms.json",
         "data/companies.json", "data/categories.json", "data/styles.json", "manifest.webmanifest",
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png", "assets/icons/gallery-maskable-512.png",
@@ -195,7 +216,8 @@ def runtime_resources(catalog):
                              if path.is_file() and path.suffix in (".css", ".js"))
     for design in catalog["designs"]:
         directory = Path(design["demoPath"]).parent
-        resources.update(directory / name for name in ("index.html", "style.css", "script.js"))
+        resources.add(directory / "index.html")
+        resources.update(directory / name for name in ("style.css", "script.js") if (ROOT / directory / name).is_file())
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
         for nested in ("brand-kit", "brands", "gallery-assets"):
@@ -220,7 +242,7 @@ def release_info(catalog):
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise ValueError("Application version must use major.minor.patch")
     digest = hashlib.sha256(json.dumps(catalog, sort_keys=True).encode("utf-8"))
-    inputs = runtime_resources(catalog) + list((ROOT / "templates/gallery").glob("*")) + [Path("scripts/build_gallery.py"), Path("data/app.json")]
+    inputs = runtime_resources(catalog) + list((ROOT / "templates/gallery").glob("*")) + [Path("scripts/build_gallery.py"), Path("scripts/build_demo_pwas.py"), Path("data/app.json")]
     for name in sorted(set(path.relative_to(ROOT) if path.is_absolute() else path for path in inputs)):
         digest.update(name.as_posix().encode("utf-8") + b"\0" + source_bytes(ROOT / name))
     return {"version": version, "build": digest.hexdigest()[:16]}
@@ -272,7 +294,7 @@ def build_pages(catalog, release=None):
 
 
 def pwa_outputs(pages, catalog, release):
-    paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if not p.as_posix().startswith(("demos/", "assets/onboarding/", "design-system/onboarding/"))}
+    paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if p.as_posix() not in ("src/demo-pwa.js", "assets/demo-pwa.css") and not p.as_posix().startswith(("demos/", "assets/onboarding/", "design-system/onboarding/"))}
     paths.update(design["thumbnail"] for design in catalog["designs"])
     entries = []
     for name in sorted(paths):
@@ -286,12 +308,15 @@ def pwa_outputs(pages, catalog, release):
     mall_entries = [{"path": name, "sha256": hashlib.sha256(source_bytes(mall_root / name)).hexdigest()} for name in mall_paths]
     mall_worker = (ROOT / "templates/gallery/gjh-v11-sw.js").read_text(encoding="utf-8")
     mall_worker = mall_worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(mall_entries, indent=2))
-    return {"version.json": json.dumps(release, indent=2) + "\n", "sw.js": worker,
-            "demos/corporate/gjh/v11/pwa-sw.js": mall_worker}
+    outputs = demo_pwas.outputs(ROOT, catalog, release, runtime_resources(catalog), source_bytes)
+    outputs.update({"version.json": json.dumps(release, indent=2) + "\n", "sw.js": worker,
+                    "demos/corporate/gjh/v11/pwa-sw.js": mall_worker})
+    return outputs
 
 
 def build(output=ROOT, check=False):
-    validate_locales()
+    packs = validate_locales()
+    build_english_pack(packs["en"], check)
     rapier.build(check=check)
     gjh_css.build(check=check)
     gjh_pack.build(check=check)

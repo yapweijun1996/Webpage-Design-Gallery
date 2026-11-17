@@ -1,0 +1,52 @@
+.demo-install, .demo-back-top {
+  box-sizing: border-box;
+  background: var(--palette-ink);
+  color: var(--palette-white);
+  font: var(--font-size-base)/var(--line-height-body) var(--font-family-body);
+  text-align: left;
+}
+.demo-install {
+  position: relative;
+  z-index: var(--z-skip-static);
+  margin: 0;
+  padding: 0 max(1rem, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(1rem, env(safe-area-inset-left));
+}
+.demo-install > summary {
+  display: list-item;
+  cursor: pointer;
+  padding: .7rem 0;
+  min-height: 44px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+}
+.demo-install-body { max-width: 66rem; padding: .3rem 0 1rem; }
+.demo-install-body p { margin: 0 0 .75rem; color: inherit; font: inherit; }
+.demo-install-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.demo-install-actions button, .demo-back-top, .demo-update-notice {
+  min-width: 44px;
+  min-height: 44px;
+  padding: .4rem .8rem;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  color: var(--palette-white);
+  background: var(--palette-ink);
+  cursor: pointer;
+}
+.demo-install [hidden], .demo-back-top[hidden], .demo-update-notice[hidden] { display: none !important; }
+.demo-install :focus-visible, .demo-back-top:focus-visible, .demo-update-notice:focus-visible { outline: var(--focus-width) solid var(--palette-warning-surface); outline-offset: -3px; }
+.demo-back-top { position: fixed; right: max(.9rem, env(safe-area-inset-right)); bottom: max(.9rem, env(safe-area-inset-bottom)); z-index: var(--z-skip-static); text-align: center; }
+
+.demo-update-notice {
+  position: fixed; z-index: var(--z-tray);
+  right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom));
+}
+@media (max-width: 650px) {
+  body > .demo-reading-header {
+    position: sticky; top: 0; z-index: var(--z-header);
+    background-color: var(--demo-nav-surface);
+    padding-top: env(safe-area-inset-top);
+  }
+  .demo-reading-header.demo-header-away:not(:focus-within) { transform: translateY(-100%); }
+}

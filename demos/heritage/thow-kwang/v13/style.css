@@ -1,0 +1,41 @@
+:root {
+  --paper: var(--palette-editorial-wash);
+  --wash: var(--palette-editorial-paper);
+  --accent: var(--palette-success);
+}
+.paper-stack {
+  transform: rotate(-3deg);
+  padding: 1rem;
+  background: var(--wash);
+  border: 1px solid var(--line);
+  border-bottom: 5px double var(--ink);
+}
+.paper-stack img {
+  width: 100%;
+}
+.paper-stack .mini {
+  margin: 0.4rem;
+}
+.cover {
+  padding-inline: 0.5rem;
+}
+.doc-row .index {
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-circle);
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+.intro i {
+  color: var(--accent);
+}
+@media (max-width: 740px) {
+  .paper-stack {
+    margin: 0.5rem;
+  }
+  .cover {
+    padding-inline: 0;
+  }
+}

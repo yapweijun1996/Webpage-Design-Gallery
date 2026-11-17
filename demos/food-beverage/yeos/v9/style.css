@@ -1,0 +1,10 @@
+body { --paper:var(--yeos-paper); --ink:var(--yeos-ink); }
+.archive > .tag { text-align:center; }
+.archive h1 { text-align:center; padding-block:.4rem 1.3rem; border-bottom:5px double var(--ink); }
+.archive-body { display:grid; grid-template-columns:1fr 2.6fr; gap:4rem; padding-top:2rem; }
+.archive aside nav a { display:block; margin:.8rem 0; }
+.archive aside > a { display:inline-block; margin-top:1.4rem; }
+.entries article { display:grid; grid-template-columns:28% 1fr; gap:1rem; padding-block:1.3rem; border-bottom:1px solid var(--rule); }
+.date { font-family:Instrument,Georgia,serif; font-size:var(--yeos-section-type); color:var(--yeos-red); line-height:1; }
+.entries h2 { font-size:var(--yeos-card-type); margin-bottom:.7rem; }
+@media(max-width:700px) { .archive-body { grid-template-columns:1fr; gap:1rem; } .archive aside nav { display:flex; flex-wrap:wrap; gap:.2rem 1rem; } .archive aside nav a { margin:.4rem 0; } .date { font-size:var(--yeos-card-type); } }

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#faf7ee">
+  <meta name="description" content="Estimate how many individual packs will cover a picnic.">
+  <title>Picnic Counter — Yeo Hiap Seng</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
+  <link rel="stylesheet" href="../../../../assets/tokens.css">
+  <link rel="stylesheet" href="../shared/editions.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="../../../../src/demo-pwa.js"></script>
+  <script defer src="script.js"></script>
+  <link rel="icon" type="image/png" sizes="192x192" href="../../../../assets/icons/gallery-192.png">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="wrap bar">
+    <a class="brand" href="../v1/index.html" aria-label="Yeo’s Drinks Index">Yeo’s</a>
+    <nav aria-label="Packaging"><a href="../v1/index.html#compare">Compare two drinks ↗</a></nav>
+  </header>
+  <main id="main">
+    <section class="picnic">
+      <div class="wrap worksheet">
+        <div class="pic-intro">
+          <p class="tag">Picnic planning</p>
+          <h1>Picnic<br><em>counter.</em></h1>
+          <p class="lead">Work out the packs needed for the volume you plan to serve. Round up to a whole pack.</p>
+          <a href="../v5/index.html">See which drinks have each pack ↗</a>
+        </div>
+        <div class="receipt">
+          <h2>Picnic tally</h2>
+          <form id="tally" hidden>
+            <label for="guests">Number of guests</label>
+            <input type="number" id="guests" min="1" max="10000" step="1" value="6" required>
+            <label for="serve">Planned volume per person (mL)</label>
+            <input type="number" id="serve" min="1" max="10000" step="1" value="250" required>
+            <label for="size">Individual pack</label>
+            <select id="size" name="size">
+              <option value="250">250 mL carton</option>
+              <option value="300">300 mL can</option>
+              <option value="380">380 mL bottle</option>
+            </select>
+            <button>Calculate packs</button>
+          </form>
+          <p class="result" role="status" id="estimate">6 guests × 250 mL = 1,500 mL. Six 250 mL cartons cover this picnic.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap base">
+    <p>Independent design concept for Yeo Hiap Seng Limited.</p>
+    <a href="https://yeos.com.sg/">Yeo’s Singapore ↗</a>
+  </footer>
+</body>
+</html>

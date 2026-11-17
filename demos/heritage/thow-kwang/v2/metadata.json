@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – Plan Your Visit",
+  "version": "v2",
+  "designStyle": "A graphic destination ticket pairs oversized address type with route decisions and a detachable-style travel card.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v2/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v2",
+  "companyId": "thow-kwang",
+  "displayTitle": "Plan Your Visit",
+  "summary": "Compare the self-guided and group routes and find the official directions to 85 Lorong Tawas.",
+  "styles": [
+    "minimal"
+  ],
+  "order": 20
+}

@@ -1,0 +1,64 @@
+:root {
+  --accent: var(--palette-indigo-dark);
+  --wash: var(--palette-subtle);
+  --paper: var(--palette-white);
+}
+.brief {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 2rem 6%;
+  align-items: center;
+}
+.brief-top {
+  grid-column: 1/-1;
+  display: flex;
+  justify-content: space-between;
+  border-block: 3px double var(--accent);
+  padding: 0.7rem 0;
+}
+.brief h1 {
+  font-family: var(--body);
+  font-weight: 800;
+}
+.brief i {
+  font-family: var(--sign);
+  color: var(--accent);
+}
+.team-card {
+  padding: 2rem;
+  background: var(--accent);
+  color: var(--btn-ink);
+}
+.team-card .cap {
+  color: inherit;
+}
+.team-card strong {
+  display: block;
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-2xl));
+  line-height: 1.05;
+  letter-spacing: -0.08em;
+}
+.team-card strong span {
+  font-size: var(--font-size-display);
+}
+.team-card p {
+  max-width: 25ch;
+}
+#brief .checks {
+  max-width: 42rem;
+}
+@media (max-width: 740px) {
+  .brief {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .team-card {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .team-card .cap {
+    grid-column: 1/-1;
+  }
+}

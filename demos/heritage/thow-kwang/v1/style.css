@@ -1,0 +1,79 @@
+.kiln-drawing {
+  position: relative;
+}
+.kiln-drawing img {
+  width: 100%;
+  height: auto;
+}
+.kiln figcaption {
+  font-family: var(--mono);
+  font-size: var(--font-size-xs);
+}
+.pin {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-circle);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--ink);
+}
+.pin-firebox {
+  top: 48%;
+  left: 11%;
+}
+.pin-chamber {
+  top: 22%;
+  left: 43%;
+}
+.pin-chimney {
+  top: 14%;
+  left: 91%;
+}
+.kiln[data-selected="firebox"] .pin-firebox,
+.kiln[data-selected="chamber"] .pin-chamber,
+.kiln[data-selected="chimney"] .pin-chimney,
+.pin:hover {
+  background: var(--accent);
+  color: var(--btn-ink);
+  border-color: var(--paper);
+}
+h1 i {
+  color: var(--accent);
+}
+#structure {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8%;
+}
+#structure .section-intro {
+  display: block;
+}
+#structure .section-intro p {
+  margin-top: 1rem;
+}
+.annotations > p {
+  margin-bottom: 0.35rem;
+}
+.cover {
+  grid-template-columns: 0.78fr 1.22fr;
+}
+@media (max-width: 740px) {
+  .cover,
+  #structure {
+    grid-template-columns: 1fr;
+  }
+  #structure {
+    gap: 0.5rem;
+  }
+  .pin {
+    width: 44px;
+    height: 44px;
+  }
+}

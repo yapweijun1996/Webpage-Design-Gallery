@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – The Visitor Desk",
+  "version": "v15",
+  "designStyle": "A wayfinding desk with numbered departments and direct, clearly labelled official destinations.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v15/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v15",
+  "companyId": "thow-kwang",
+  "displayTitle": "The Visitor Desk",
+  "summary": "Find the right official resource for directions, kiln tours, heritage reading or a pottery workshop.",
+  "styles": [
+    "corporate"
+  ],
+  "order": 150
+}

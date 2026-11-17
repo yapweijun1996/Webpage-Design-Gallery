@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Cooler Shelf",
+  "version": "v11",
+  "designStyle": "A dark refrigerated display sets bright square still lifes over thick shelf edges and container controls.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v11/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v11",
+  "companyId": "yeos",
+  "displayTitle": "Cooler Shelf",
+  "summary": "Browse the cooler by carton, can or bottle.",
+  "styles": [
+    "immersive"
+  ],
+  "order": 110
+}

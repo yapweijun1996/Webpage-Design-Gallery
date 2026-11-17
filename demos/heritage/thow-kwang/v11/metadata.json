@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – Kiln Lexicon",
+  "version": "v11",
+  "designStyle": "A typographic dictionary includes a working text search and accessible expandable entries.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v11/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v11",
+  "companyId": "thow-kwang",
+  "displayTitle": "Kiln Lexicon",
+  "summary": "Search eight plain-language pottery and kiln terms, with links back to the operator’s craft sources.",
+  "styles": [
+    "minimal"
+  ],
+  "order": 110
+}

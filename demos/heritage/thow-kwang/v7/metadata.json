@@ -1,0 +1,19 @@
+{
+  "company": "Thow Kwang Industry Pte Ltd",
+  "industry": "Heritage & Craft",
+  "title": "Thow Kwang – Glaze Library",
+  "version": "v7",
+  "designStyle": "A celadon material archive juxtaposes a close-cropped rim with compact labelled samples.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/heritage/thow-kwang/v7/",
+  "officialWebsite": "https://www.potteryjungle.com/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Thow Kwang Industry Pte Ltd.",
+  "id": "thow-kwang-v7",
+  "companyId": "thow-kwang",
+  "displayTitle": "Glaze Library",
+  "summary": "Use a visual sample and glossary to distinguish clay body, glaze and deposited ash.",
+  "styles": [
+    "editorial"
+  ],
+  "order": 70
+}

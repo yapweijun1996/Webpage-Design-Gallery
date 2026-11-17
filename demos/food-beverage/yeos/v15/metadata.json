@@ -1,0 +1,19 @@
+{
+  "company": "Yeo Hiap Seng Limited",
+  "industry": "Food & Beverage",
+  "title": "Yeo Hiap Seng – Beverage Atlas",
+  "version": "v15",
+  "designStyle": "An alphabetical desk reference combines bold initial letters, a compact jump index and a column of photographic entries.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/food-beverage/yeos/v15/",
+  "officialWebsite": "https://yeos.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited.",
+  "id": "yeos-v15",
+  "companyId": "yeos",
+  "displayTitle": "Beverage Atlas",
+  "summary": "Look up six drinks in an alphabetical reference atlas.",
+  "styles": [
+    "minimal"
+  ],
+  "order": 150
+}

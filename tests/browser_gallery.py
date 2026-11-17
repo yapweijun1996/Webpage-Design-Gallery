@@ -222,9 +222,9 @@ def run():
                 assert yeos.count() == 1 and yeos.get_attribute("data-company") == "yeos"
                 yeos.click()
                 assert page.url.endswith("companies/yeos/index.html")
-                assert page.locator(".design-card").count() == 1
-                assert page.locator(".compare-checkbox, .compare-tray").count() == 0
-                page.locator(".details-link").click()
+                assert page.locator(".design-card").count() >= 15
+                assert page.locator(".compare-checkbox").count() == page.locator(".design-card").count()
+                page.locator('.design-card[data-design="v1"] .details-link').click()
                 page.get_by_role("heading", name="The Drinks Index").wait_for()
                 assert page.locator('#detail-content a[href*="compare/"]').count() == 0
                 demo = page.get_by_role("link", name="Open live demo")

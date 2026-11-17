@@ -1,0 +1,56 @@
+@font-face { font-family: Manrope; src: url("../v1/assets/manrope-latin.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: Instrument; src: url("../v1/assets/instrument-serif.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: Instrument; src: url("../v1/assets/instrument-serif-italic.ttf") format("truetype"); font-style: italic; font-display: swap; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { --paper: var(--yeos-paper); --ink: var(--yeos-ink); --accent: var(--yeos-red); --rule: var(--yeos-line); margin: 0; background: var(--paper); color: var(--ink); font-family: Manrope, var(--font-family-body); line-height: 1.5; }
+a { color: inherit; text-underline-offset: .19em; }
+a:hover { text-decoration-thickness: .13em; }
+a:focus-visible, summary:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }
+[hidden] { display: none !important; }
+.skip { position: absolute; inset: 6px auto auto 5px; transform: translateY(-180%); background: var(--paper); padding: .7rem; z-index: var(--z-overlay); }
+.skip:focus { transform: none; }
+.wrap { max-width: 1376px; padding-left: max(clamp(1.2rem, 5vw, 5.5rem), env(safe-area-inset-left)); padding-right: max(clamp(1.2rem, 5vw, 5.5rem), env(safe-area-inset-right)); margin-inline: auto; }
+.bar, .base { display: flex; align-items: center; justify-content: space-between; gap: 1.1rem; }
+.bar { min-height: 78px; padding-top: env(safe-area-inset-top); border-bottom: 1px solid var(--rule); }
+.brand { font: inherit; font-weight: 800; font-size: var(--font-size-2xl); line-height: 1; letter-spacing: -.09em; text-decoration: none; }
+nav a, .base, .meta, .tag, th, button, label, select { font-size: var(--font-size-sm); }
+.bar nav a, .brand { display: inline-flex; align-items: center; min-height: 44px; }
+nav a { font-weight: 700; }
+.base { border-top: 1px solid var(--rule); flex-wrap: wrap; padding-block: 1.8rem; }
+.base p { margin: 0; }
+main { min-height: 75vh; }
+h1, h2, h3, p, figure, dl { margin: 0; }
+h1, h2, h3 { font-family: Instrument, Georgia, serif; font-weight: 400; line-height: .95; }
+h1 { font-size: var(--yeos-hero-type); letter-spacing: -.045em; }
+h2 { font-size: var(--yeos-section-type); }
+h3 { font-size: var(--yeos-card-type); }
+.tag, .meta, dt, th { font-size: var(--font-size-xs); letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
+.tag { display: block; margin-bottom: 1.1rem; }
+.lead { font-size: var(--font-size-lg); max-width: 44ch; }
+img { display: block; max-width: 100%; }
+.photo { width: 100%; height: 100%; object-fit: cover; }
+button, select, input, textarea { font-family: inherit; font-size: var(--font-size-base); color: inherit; background: var(--paper); }
+button, select, input, textarea, .pill { border: 1px solid var(--ink); }
+button, select, input, .pill { min-height: 44px; padding: .6rem .85rem; }
+button, summary, select { cursor: pointer; }
+button[aria-pressed="true"], .pill { background: var(--ink); color: var(--paper); }
+.pill { display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-pill); font-size: var(--font-size-sm); font-weight: 700; text-decoration: none; }
+.choices { display: flex; flex-wrap: wrap; gap: .45rem; }
+.choices button { border-radius: var(--radius-pill); }
+summary { padding-block: .7rem; font-weight: 700; }
+details p, details a { margin: .4rem 0 1rem; }
+details a { display: inline-block; }
+.section { padding-block: clamp(2.8rem, 6vw, 6rem); }
+section, article { scroll-margin-top: 1.2rem; }
+.duo { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.stack > * + * { margin-top: 1.25rem; }
+.sr { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
+@media(max-width:700px) {
+  .duo { grid-template-columns: minmax(0,1fr); }
+  .bar { min-height: 64px; }
+  h1 { font-size: var(--font-editorial-hero); }
+  .base { align-items: flex-start; flex-direction: column; }
+  .lead { font-size: var(--font-size-base); }
+}
+@media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } }

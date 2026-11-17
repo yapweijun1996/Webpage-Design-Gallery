@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#faf7ee">
+  <meta name="description" content="Find which drinks come in a selected pack size and container.">
+  <title>Pack Finder — Yeo Hiap Seng</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
+  <link rel="stylesheet" href="../../../../assets/tokens.css">
+  <link rel="stylesheet" href="../shared/editions.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="../../../../src/demo-pwa.js"></script>
+  <script defer src="script.js"></script>
+  <link rel="icon" type="image/png" sizes="192x192" href="../../../../assets/icons/gallery-192.png">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="wrap bar">
+    <a class="brand" href="../v1/index.html" aria-label="Yeo’s Drinks Index">Yeo’s</a>
+    <nav aria-label="Packaging"><a href="../v1/index.html#compare">Compare two drinks ↗</a></nav>
+  </header>
+  <main id="main">
+    <section class="wrap matrix section">
+      <div class="matrix-title">
+        <p class="tag">Singapore range / Packaging</p>
+        <h1>Pack finder<span>.</span></h1>
+        <p class="lead">Choose a pack to isolate its column across six drinks.</p>
+      </div>
+      <div class="matrix-control" hidden data-controls>
+        <label for="pack">Show pack</label>
+        <select id="pack" name="pack">
+          <option value="all">All sizes</option>
+          <option value="0">250 mL carton</option>
+          <option value="1">300 mL can</option>
+          <option value="2">380 mL bottle</option>
+          <option value="3">1 L carton</option>
+          <option value="4">1.5 L bottle</option>
+        </select>
+      </div>
+      <p class="scroll-guide">Scroll across to see all five pack sizes.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Pack availability, scroll horizontally if needed">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Drink</th>
+              <th scope="col" data-col="0">250 mL carton</th>
+              <th scope="col" data-col="1">300 mL can</th>
+              <th scope="col" data-col="2">380 mL bottle</th>
+              <th scope="col" data-col="3">1 L carton</th>
+              <th scope="col" data-col="4">1.5 L bottle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Chrysanthemum Tea</th>
+              <td data-col="0"><span aria-label="Available">●</span></td>
+              <td data-col="1"><span aria-label="Available">●</span></td>
+              <td data-col="2"><span aria-label="Available">●</span></td>
+              <td data-col="3"><span aria-label="Not listed">—</span></td>
+              <td data-col="4"><span aria-label="Available">●</span></td>
+            </tr>
+            <tr>
+              <th scope="row">First Harvest Green Tea</th>
+              <td data-col="0"><span aria-label="Available">●</span></td>
+              <td data-col="1"><span aria-label="Available">●</span></td>
+              <td data-col="2"><span aria-label="Available">●</span></td>
+              <td data-col="3"><span aria-label="Not listed">—</span></td>
+              <td data-col="4"><span aria-label="Available">●</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Soy Bean Milk</th>
+              <td data-col="0"><span aria-label="Available">●</span></td>
+              <td data-col="1"><span aria-label="Available">●</span></td>
+              <td data-col="2"><span aria-label="Available">●</span></td>
+              <td data-col="3"><span aria-label="Available">●</span></td>
+              <td data-col="4"><span aria-label="Not listed">—</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Black Soy Milk</th>
+              <td data-col="0"><span aria-label="Not listed">—</span></td>
+              <td data-col="1"><span aria-label="Not listed">—</span></td>
+              <td data-col="2"><span aria-label="Available">●</span></td>
+              <td data-col="3"><span aria-label="Available">●</span></td>
+              <td data-col="4"><span aria-label="Not listed">—</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Lychee Drink</th>
+              <td data-col="0"><span aria-label="Available">●</span></td>
+              <td data-col="1"><span aria-label="Available">●</span></td>
+              <td data-col="2"><span aria-label="Available">●</span></td>
+              <td data-col="3"><span aria-label="Not listed">—</span></td>
+              <td data-col="4"><span aria-label="Available">●</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Bandung Rose Milk Drink</th>
+              <td data-col="0"><span aria-label="Available">●</span></td>
+              <td data-col="1"><span aria-label="Available">●</span></td>
+              <td data-col="2"><span aria-label="Available">●</span></td>
+              <td data-col="3"><span aria-label="Not listed">—</span></td>
+              <td data-col="4"><span aria-label="Not listed">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="legend">● Available &nbsp; — Not listed in the Singapore range</p>
+      <a href="../v1/index.html#compare">Compare the packs for two drinks ↗</a>
+    </section>
+  </main>
+  <footer class="wrap base">
+    <p>Independent design concept for Yeo Hiap Seng Limited.</p>
+    <a href="https://yeos.com.sg/">Yeo’s Singapore ↗</a>
+  </footer>
+</body>
+</html>

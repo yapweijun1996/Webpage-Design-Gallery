@@ -1,0 +1,72 @@
+:root {
+  --paper: var(--palette-white);
+  --accent: var(--palette-indigo-dark);
+  --wash: var(--palette-subtle);
+}
+.lex-cover {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  align-items: center;
+  gap: 5%;
+}
+.lex-mark {
+  background: var(--wash);
+  color: var(--accent);
+  font-family: var(--sign);
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-2xl));
+  text-align: center;
+  letter-spacing: -0.07em;
+  padding: 1rem 0.5rem;
+  line-height: 1.05;
+  border-block: 4px double currentColor;
+}
+.lex-mark span {
+  display: block;
+  font-style: italic;
+}
+.find {
+  display: grid;
+  gap: 0.3rem;
+  font-size: var(--font-size-sm);
+  max-width: 42rem;
+  font-weight: 700;
+}
+.find input {
+  font: inherit;
+  padding: 0.85rem;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  background: var(--paper);
+}
+#definitions .quiet {
+  margin: 0.6rem 0;
+}
+.words summary {
+  justify-content: start;
+  font-family: var(--sign);
+  font-size: var(--font-size-xl);
+}
+.words summary > span {
+  font-family: var(--mono);
+  font-size: var(--font-size-xs);
+  padding: 0.35rem 0.5rem;
+  background: var(--wash);
+  color: var(--accent);
+}
+.words summary:after {
+  margin-left: auto;
+}
+@media (max-width: 740px) {
+  .lex-cover {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .lex-mark {
+    font-size: var(--font-size-3xl);
+    text-align: left;
+    padding: 0.5rem 1rem;
+  }
+  .lex-mark span {
+    display: inline;
+  }
+}

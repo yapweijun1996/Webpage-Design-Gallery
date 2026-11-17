@@ -1,0 +1,36 @@
+:root {
+  --paper: var(--palette-warning-surface);
+  --wash: var(--palette-white);
+  --accent: var(--palette-editorial-accent);
+}
+.cover .plate img {
+  aspect-ratio: 1.4;
+  border-radius: var(--radius-pill);
+}
+.cover .plate {
+  transform: rotate(-3deg);
+  padding: 1rem;
+}
+.intro {
+  border-left: 1px solid var(--accent);
+  padding-left: 2rem;
+}
+h1 i {
+  display: block;
+  color: var(--accent);
+}
+.tiles {
+  gap: 0;
+}
+.tile {
+  border: 1px solid var(--line);
+  background: var(--wash);
+}
+@media (max-width: 740px) {
+  .cover .plate {
+    order: 2;
+  }
+  .intro {
+    padding-left: 1rem;
+  }
+}

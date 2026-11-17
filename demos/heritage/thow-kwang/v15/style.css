@@ -1,0 +1,75 @@
+:root {
+  --paper: var(--palette-white);
+  --accent: var(--palette-editorial-accent);
+  --wash: var(--palette-editorial-paper);
+}
+.cover {
+  padding-top: 2.5rem;
+}
+.desk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.desk-head h1 {
+  font-family: var(--body);
+  font-weight: 800;
+}
+.desk-head i {
+  font-family: var(--sign);
+  color: var(--accent);
+}
+.desk-symbol {
+  font-family: var(--mono);
+  font-size: calc(var(--font-editorial-hero) + var(--font-size-2xl));
+  padding: 0 2rem;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  line-height: 1.25;
+}
+.directory {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.department {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.55rem;
+  align-items: start;
+  padding: 1.4rem;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--ink);
+}
+.department:hover {
+  background: var(--wash);
+}
+.department h2 {
+  font-size: var(--font-size-3xl);
+}
+.department strong {
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+}
+.department p {
+  color: var(--mute);
+}
+.department .cap {
+  color: var(--accent);
+}
+@media (max-width: 740px) {
+  .directory {
+    grid-template-columns: 1fr;
+  }
+  .desk-symbol {
+    display: none;
+  }
+  .department {
+    padding: 1rem;
+  }
+  .department h2 {
+    font-size: var(--font-size-2xl);
+  }
+}

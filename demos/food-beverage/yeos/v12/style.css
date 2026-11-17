@@ -1,0 +1,16 @@
+body { --paper:var(--palette-editorial-paper); --ink:var(--palette-editorial-ink); }
+.book-head { padding-bottom:1.6rem; }
+.book-head h1 { font-size:var(--font-editorial-hero); }
+.pages { border:1px solid var(--yeos-line); background:var(--yeos-paper); }
+.pages section { padding:clamp(1.2rem,3vw,3rem); }
+.pages h2 { font-size:var(--yeos-card-type); }
+.pages section > p { margin:.7rem 0 1rem; max-width:42ch; }
+.reference { border-right:1px solid var(--yeos-line); }
+.reference details { border-bottom:1px solid var(--yeos-line); }
+.note { background:repeating-linear-gradient(transparent 0 31px,var(--yeos-line) 31px 32px); }
+.note form { display:grid; gap:.5rem; }
+.note label { font-weight:800; }
+.note textarea { width:100%; padding:.65rem; resize:vertical; }
+.note button { background:var(--ink); color:var(--paper); }
+.save-status { font-size:var(--font-size-sm); }
+@media(max-width:700px) { .pages { display:flex; flex-direction:column-reverse; } .reference { border:0; border-top:1px solid var(--rule); } }

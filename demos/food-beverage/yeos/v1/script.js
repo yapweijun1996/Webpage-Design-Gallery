@@ -53,3 +53,37 @@ caption.addEventListener('click', () => {
   if (slides[current].card.hidden) selectFamily('all');
 });
 window.addEventListener('hashchange', revealLinkedDrink);
+
+const picker = document.querySelector('#pair-picker');
+const selectors = [...picker.querySelectorAll('select')];
+const drinks = new Map(cards.map(card => [card.id, card]));
+for (const select of selectors) {
+  for (const card of cards) select.add(new Option(card.querySelector('h3').textContent, card.id));
+}
+selectors[1].value = 'soy';
+
+function renderComparison() {
+  const selected = selectors.map(select => drinks.get(select.value));
+  const names = selected.map(card => card.querySelector('h3').textContent);
+  selectors.forEach((select, i) => {
+    for (const option of select.options) option.disabled = option.value === selectors[1 - i].value;
+    picker.querySelectorAll('thead th')[i + 1].textContent = names[i];
+  });
+  const body = picker.querySelector('tbody');
+  body.replaceChildren();
+  for (const format of ['carton', 'can', 'bottle']) {
+    const row = body.insertRow();
+    const label = document.createElement('th');
+    label.scope = 'row';
+    label.textContent = format[0].toUpperCase() + format.slice(1);
+    row.append(label);
+    for (const card of selected) {
+      const sizes = [...card.querySelectorAll('[data-format="' + format + '"] span')];
+      row.insertCell().textContent = sizes.map(size => size.textContent).join(' / ') || 'Not listed';
+    }
+  }
+  document.querySelector('#pack-status').textContent = 'Comparing ' + names.join(' and ') + '.';
+}
+for (const select of selectors) select.addEventListener('change', renderComparison);
+renderComparison();
+picker.hidden = false;

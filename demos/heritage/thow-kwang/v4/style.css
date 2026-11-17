@@ -1,0 +1,56 @@
+:root {
+  --accent: var(--palette-indigo-dark);
+  --wash: var(--palette-subtle);
+  --paper: var(--palette-editorial-paper);
+}
+.notebook {
+  display: grid;
+  grid-template-columns: 1fr 0.55fr;
+  gap: 1.2rem 6vw;
+  border-left: 3px double var(--accent);
+  padding-left: clamp(1.2rem, 4vw, 4rem);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 35px,
+    var(--line) 36px
+  );
+}
+.ruler {
+  grid-column: 1/-1;
+  display: flex;
+  justify-content: space-between;
+  font: inherit;
+  font-family: var(--mono);
+  font-size: var(--font-size-xs);
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 0.5rem;
+  color: var(--accent);
+}
+.margin-note {
+  align-self: center;
+  border: 1px solid var(--accent);
+  background: var(--wash);
+  padding: 1.4rem;
+  transform: rotate(2deg);
+}
+.margin-note p {
+  font-family: var(--sign);
+  font-size: var(--font-size-3xl);
+  line-height: 1.05;
+  margin-top: 0.8rem;
+}
+.checks {
+  max-width: 48rem;
+}
+.notebook .lede {
+  background: var(--paper);
+}
+@media (max-width: 740px) {
+  .notebook {
+    grid-template-columns: 1fr;
+  }
+  .margin-note {
+    margin-right: 0.7rem;
+  }
+}

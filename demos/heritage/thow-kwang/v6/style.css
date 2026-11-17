@@ -1,0 +1,44 @@
+:root {
+  --paper: var(--palette-night-paper);
+  --ink: var(--palette-night-paper-ink);
+  --mute: var(--palette-night-paper-muted);
+  --line: var(--palette-night-paper-line);
+  --accent: var(--palette-night-paper-accent);
+  --btn-ink: var(--palette-night-paper);
+  --wash: var(--palette-night-paper-wash);
+  color-scheme: dark;
+}
+.cover {
+  padding-block: 1.3rem;
+}
+.ember-cover {
+  background:
+    linear-gradient(90deg, var(--paper), transparent),
+    url(../v1/assets/ember.webp) center 55% / cover;
+  min-height: 470px;
+  padding: clamp(1.6rem, 5vw, 4rem);
+  display: grid;
+  align-items: end;
+}
+.ember-cover .intro {
+  max-width: 35rem;
+  background: var(--paper);
+  padding: 1.25rem 1.6rem;
+  border-left: 3px solid var(--accent);
+}
+.cover .quiet {
+  margin-top: 0.55rem;
+}
+.doc-row h3 {
+  font-style: italic;
+}
+.doc-row .index {
+  font-family: var(--sign);
+  font-size: var(--font-size-2xl);
+}
+@media (max-width: 740px) {
+  .ember-cover {
+    padding: 7rem 0.75rem 0.75rem;
+    min-height: 390px;
+  }
+}

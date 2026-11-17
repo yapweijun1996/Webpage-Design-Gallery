@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **two companies and seventeen designs**. All concepts are unofficial and do not imply company endorsement.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **three companies and 46 designs**. All concepts are unofficial and do not imply company endorsement.
 
 The [Design System SSOT](ds.md) owns shared gallery design and UX contracts, the prioritized UI audit, cross-project reuse boundaries and acceptance criteria. Its version 1.0.0 tracks the executable token/icon registry, gallery adoption and remaining verification. Run `python scripts/check_ssot.py` to check generated artifacts and prevent new design-system debt.
 
@@ -13,6 +13,14 @@ See the [1.1.0 release review](docs/ssot-release-review.md) for the actual verif
 The [GJH company profile](demos/corporate/gjh/research/company-profile.md) covers the Singapore company record, trading history, customers and sales channels. The [22-name brand register](docs/gjh-multibrand-directory.md) traces house brands, Singapore trademark records and reported distribution relationships to their sources.
 
 The [company shortlist](docs/next-company-demo.md) compares three Singapore demo subjects. The [Yeo Hiap Seng collection](companies/yeos/index.html) opens [The Drinks Index](demos/food-beverage/yeos/v1/index.html), an independent guide to six drinks by family, flavour and pack format.
+
+| Company | Concepts | Start here |
+| --- | ---: | --- |
+| Goh Joo Hin | 16 | [Company collection](companies/gjh/index.html) |
+| Yeo Hiap Seng | 15 | [Compare the official pack sizes of any two of six drinks](demos/food-beverage/yeos/v1/index.html#compare) |
+| Thow Kwang Pottery Jungle | 15 | [Inside the Dragon Kiln](demos/heritage/thow-kwang/v1/index.html) · [Visitor research and design index](demos/heritage/thow-kwang/README.md) |
+
+Each concept has its own install identity. The [demo PWA guide](docs/company-demo-pwas.md) covers offline content, update controls and device verification.
 
 ## Browse
 
@@ -42,12 +50,12 @@ The same build generates the GJH V11 combined stylesheet, startup model pack and
 
 The gallery header offers **Light / Dark / System** appearance and **English / 简体中文 / Bahasa Melayu**. Choices persist across gallery routes and updates, synchronize across tabs and remain available offline after the shell is saved. The GJH v11 mall shares the gallery language preference for its controls and directory. In the mall, open Tools → Help to change language or check the installed version for updates.
 
-Translations live in `locales/*.json`; update every pack when adding gallery copy. The build rejects missing keys and broken placeholders. See [PWA preferences and acceptance](docs/pwa-preferences.md) for scope, ownership, recovery, performance budget and device limitations.
+Update `locales/source/en.json`, `locales/zh-Hans.json` and `locales/ms.json` when adding gallery copy. The generator writes the compact runtime English pack to `locales/en.json`. The build rejects missing keys and broken placeholders. See [PWA preferences and acceptance](docs/pwa-preferences.md) for scope, ownership, recovery, performance budget and device limitations.
 
 ## Add a company or design
 
 1. Add a company to `data/companies.json` with a stable `id`, unique `slug`, category IDs, official website and demo directory. Keep IDs stable when renaming a company.
-2. Add independent demos under that company's demo directory. Each version needs `index.html`, `style.css`, `script.js`, `assets/`, screenshots at `1440.png`, `768.png` and `390.png`, and `metadata.json` following an existing version's contract.
+2. Add independent demos under that company's demo directory. Each version needs an `index.html`, its own visual design, an `assets/` directory, screenshots at `1440.png`, `768.png` and `390.png`, and `metadata.json` following an existing version's contract. Keep version-specific CSS and JavaScript beside the page when required. Follow the demo PWA guide when adding navigation and install metadata.
 3. Give each design a stable unique `id`, matching `companyId`, `displayTitle`, `summary`, `styles` and explicit numeric `order`. Version labels do not determine sorting; gaps between versions are allowed.
 4. Run the generator. It reads demo metadata, validates paths and references, creates static gallery pages and emits `data/designs.json`. Commit those generated outputs with their sources.
 
@@ -62,6 +70,9 @@ python scripts/build_gallery.py --check
 python -m unittest discover -s tests -p 'test_*.py' -v
 python tests/browser_gallery.py
 python tests/browser_yeos_drinks.py
+python tests/browser_yeos_editions.py
+python demos/heritage/thow-kwang/browser_checks.py
+python tests/browser_company_pwas.py
 python tests/browser_premium_landings.py
 python tests/browser_gallery_layout.py
 python tests/browser_gjh_demos.py
