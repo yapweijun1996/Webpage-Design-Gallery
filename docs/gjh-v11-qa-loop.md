@@ -36,3 +36,10 @@ Tests and draw-call budgets pass while the scene still looks flat and does not m
 5. Desktop and mobile: WASD + mouse; full-screen joystick with Run, Interact, Camera, Map and Bag buttons; no large install.
 
 Every advisor round scores against these five items first, then the per-shop checklist.
+
+## Interaction rules (owner, 2026-11-17)
+1. Every chair must be sittable: all chairs in the mall, including restaurant chairs, rest-area seats and bar stools, support Sit interaction.
+2. Not every object needs interaction: walls, decorations and ordinary light fixtures may stay static models.
+3. Interaction must be meaningful: products support Inspect, doors support Open, chairs support Sit. Do not make every object clickable.
+
+Advisors check these three rules in every round (sit coverage, door open, product inspect, no pointless clickable objects).

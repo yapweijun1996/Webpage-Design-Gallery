@@ -728,3 +728,4 @@ See [docs/gjh-v11-qa-loop.md](docs/gjh-v11-qa-loop.md).
 - [ ] Advisor review of round-2 screenshots against checklist and concept image.
 - [ ] Per-shop rounds, S01 first: change, evidence, advisor review, rework, push, record.
 - [ ] 20-minute SGT progress reports until the loop is finished.
+- [ ] Interaction rules (owner 2026-11-17): audit every chair, stool and bench for Sit support; doors Open; products Inspect; keep walls, decor and ordinary lights static. See docs/gjh-v11-qa-loop.md.
