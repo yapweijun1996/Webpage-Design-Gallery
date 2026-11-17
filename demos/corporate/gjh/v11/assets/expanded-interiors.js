@@ -33,7 +33,7 @@ function displayPlacements(number, heroX, heroZ) {
   return [[heroX, height, heroZ, scale]];
 }
 
-// Furniture is vertex-coloured and merged; model displays are prefetched near a bay.
+// Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
 export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
@@ -72,11 +72,34 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   atlas.width = atlas.height = 2048;
   const atlasContext = atlas.getContext('2d');
   const shops = [], collisionBoxes = [];
-  const models = new Map(), gltfLoader = new GLTFLoader();
+  const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
+  const modelStates = new Map(slots.flatMap(slot => {
+    const number=Number(slot.number);
+    return [...(displayFiles[number] || []).map(file => `./${file}.glb`), ...galleryPlacements[number].map(({file}) => `./${file}`)];
+  }).map(name => [name, 'pending']));
   function loadModel(name) {
     if (!models.has(name)) {
-      models.set(name, gltfLoader.loadAsync(new URL(name, import.meta.url).href)
-        .then(gltf => gltf.scene));
+      modelStates.set(name,'loading');
+      const url = new URL(name, import.meta.url), controller = new AbortController();
+      let timer, abandoned = false;
+      const load = async () => {
+        const response = await fetch(url, {signal:controller.signal});
+        if (!response.ok) throw new Error(`Model request failed: ${response.status}`);
+        const gltf = await gltfLoader.parseAsync(await response.arrayBuffer(), new URL('.',url).href);
+        if (abandoned) {
+          gltf.scene.traverse(node => {
+            if (!node.isMesh) return;
+            node.geometry?.dispose();
+            for (const material of (Array.isArray(node.material) ? node.material : [node.material])) material?.dispose();
+          });
+          throw new Error('Model load timed out');
+        }
+        return gltf.scene;
+      };
+      const deadline = new Promise((_,reject) => {
+        timer=setTimeout(() => { abandoned=true; controller.abort(); reject(new Error('Model load timed out')); },8000);
+      });
+      models.set(name, Promise.race([load(),deadline]).then(scene => { modelStates.set(name,'loaded'); loadedScenes.set(name,scene); return scene; }, error => { modelStates.set(name,'fallback'); throw error; }).finally(() => clearTimeout(timer)));
     }
     return models.get(name);
   }
@@ -285,6 +308,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     }
     // Secondary furnishings belong to the bay, so they remain visible when a
     // visitor looks across adjoining windows and the nearest hero changes.
+    const shopState = {number:String(slot.number), status:'pending', galleryLoaded:0, galleryFailed:0};
     async function loadShop() {
       await Promise.all([
         loadHero?.(),
@@ -295,15 +319,16 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
             model.name = `S${slot.number} gallery: ${file}`;
-            group.add(model);
+            group.add(model); shopState.galleryLoaded++;
           } catch (error) {
+            shopState.galleryFailed++;
             console.warn(`Unavailable shop furnishing: ${file}`, error);
           }
         })
       ]);
     }
     shops.push({group, x:group.position.x, z:group.position.z, display, fallback,
-      isLoaded: () => loaded, loadDisplay: loadShop});
+      isLoaded: () => loaded, loadDisplay: loadShop, state:shopState});
   });
   for (const [wing, parts] of studioParts) {
     const scenery = new T.Mesh(mergeGeometries(parts), material);
@@ -319,24 +344,29 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   for(const part of posterParts) part.dispose();
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
-    if (loading || scheduled || !lastVisitor) return;
-    const candidates = shops.filter(shop => shop.loadDisplay && Math.hypot(lastVisitor.x-shop.x, lastVisitor.z-shop.z) < 25);
+    if (loading || scheduled) return;
+    const candidates = shops.filter(shop => shop.loadDisplay);
     if (!candidates.length) return;
     scheduled = true;
     const run = () => {
       scheduled = false;
-      if (!lastVisitor || document.hidden) return;
-      const next = shops.filter(shop => shop.loadDisplay && Math.hypot(lastVisitor.x-shop.x, lastVisitor.z-shop.z) < 25)
-        .sort((a,b) => Math.hypot(lastVisitor.x-a.x,lastVisitor.z-a.z)-Math.hypot(lastVisitor.x-b.x,lastVisitor.z-b.z))[0];
+      if (document.hidden) return;
+      const next = shops.filter(shop => shop.loadDisplay)
+        .sort((a,b) => lastVisitor ? Math.hypot(lastVisitor.x-a.x,lastVisitor.z-a.z)-Math.hypot(lastVisitor.x-b.x,lastVisitor.z-b.z) : 0)[0];
       if (!next) return;
       loading = true;
-      const load = next.loadDisplay; next.loadDisplay = null;
-      load().finally(() => { loading = false; schedulePrefetch(); });
+      const load = next.loadDisplay; next.loadDisplay = null; next.state.status='loading';
+      load().catch(error => console.warn('Shop preload failed',error)).finally(() => { next.state.status='settled'; loading = false; schedulePrefetch(); });
     };
     if ('requestIdleCallback' in window) window.requestIdleCallback(run, {timeout: 1500});
     else window.setTimeout(run, 100);
   }
-  return {collisionBoxes, update(visitor) {
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) schedulePrefetch(); });
+  schedulePrefetch();
+  return {collisionBoxes, getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
+    return {models:Object.fromEntries(modelStates), shops:shops.map(shop => ({...shop.state})),
+      settled:shops.filter(shop => shop.state.status==='settled').length, total:shops.length};
+  }, update(visitor) {
     lastVisitor = {x:visitor.x, z:visitor.z};
     let nearest = null, nearestDistance = 11*11;
     for (const shop of shops) {

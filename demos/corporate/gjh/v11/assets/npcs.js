@@ -207,7 +207,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     for(const name of ['idle','walk','sit']) { actions[name]=mixer.clipAction(clips[name]); actions[name].setEffectiveWeight(name===(seat?'sit':'idle')?1:0).play(); }
     actions.sit.paused=true; actions.sit.time=Math.max(0,clips.sit.duration-.00001);
     mixer.update(0); facing.quaternion.copy(avatar.quaternion).invert().premultiply(facingOffset); scene.add(visual);
-    visitors.push({visual,facing,avatar,mixer,actions,seat,admitted:false,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,seatTime:0,blockedTime:0});
+    visitors.push({visual,facing,avatar,mixer,actions,seat,admitted:false,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,blockedTime:0});
   }
   function releaseSeat(id) {
     const npc=visitors.find(candidate=>candidate.seat?.id===id);
@@ -224,7 +224,6 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     for(const npc of [...visitors]) {
       const p=npc.visual.position;
       if(visitors.length>limit || Math.abs(player.y-p.y)>3 || distance(p,player)>UNLOAD_DISTANCE || (npc.seat && npc.seat.id===player.seatId)) { remove(npc); continue; }
-      if(npc.seat && (npc.seatTime+=dt)>=18) { remove(npc); seatCooldown=20; continue; }
       if(!npc.seat) {
         npc.delay-=dt;
         if(!npc.target && npc.delay<=0) {

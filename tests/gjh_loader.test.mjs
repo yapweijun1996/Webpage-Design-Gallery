@@ -54,3 +54,17 @@ test('directory dismissal does not manufacture readiness or prevent real complet
   assert.equal(loader.snapshot().ready, true);
   assert.equal(loader.snapshot().dismissed, true);
 });
+
+test('model preparation remains optional and can finish or be skipped', () => {
+  for (const message of ['Preparing 2/10 models','Preparing models; some may be unavailable']) {
+    const loader=createLoaderState();
+    for(const stage of ['physics','scene','models'])loader.complete(stage);
+    loader.prepare(message);
+    assert.equal(loader.snapshot().ready,false);
+    assert.equal(loader.snapshot().preparing,true);
+    assert.equal(loader.snapshot().message,message);
+    loader.complete('frame');
+    assert.equal(loader.snapshot().ready,true);
+    assert.equal(loader.snapshot().preparing,false);
+  }
+});

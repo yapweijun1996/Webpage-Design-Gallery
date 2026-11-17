@@ -58,7 +58,8 @@ function batchFurniture(T, primitives) {
 export async function createFurnishings(T, shadows, expanded = false) {
   const sources = expanded ? {...pilotSources, ...shopSources} : pilotSources;
   const records = {};
-  const pendingByShop = new Map();
+  const pendingByShop = new Map(), detailQueue = [];
+  let detailLoading = false, detailScheduled = false;
   const group = new T.Group();
   group.name = 'Blender furnishings';
   let registerMesh;
@@ -100,6 +101,29 @@ export async function createFurnishings(T, shadows, expanded = false) {
     }
   }
 
+  function scheduleDetails() {
+    if (detailLoading || detailScheduled) return;
+    if (!detailQueue.length && pendingByShop.size) {
+      const [slot,kinds] = pendingByShop.entries().next().value;
+      pendingByShop.delete(slot); detailQueue.push(...kinds);
+    }
+    if (!detailQueue.length) return;
+    detailScheduled = true;
+    const run = () => {
+      detailScheduled = false;
+      if (document.hidden) return;
+      const kind = detailQueue.shift();
+      if (!kind) return;
+      detailLoading = true;
+      load(kind).then(() => mount(kind)).catch(error => { records[kind].status='fallback'; records[kind].reason='unavailable'; console.warn('Furniture preload failed',error); }).finally(() => {
+        detailLoading = false; scheduleDetails();
+      });
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(run, {timeout:1500});
+    else window.setTimeout(run,100);
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleDetails(); });
+
   return {
     place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
       const record = records[kind];
@@ -113,9 +137,8 @@ export async function createFurnishings(T, shadows, expanded = false) {
       const kinds = pendingByShop.get(shopSlot);
       if (!kinds) return;
       pendingByShop.delete(shopSlot);
-      for (const kind of kinds) {
-        void load(kind).then(() => mount(kind));
-      }
+      detailQueue.unshift(...kinds);
+      scheduleDetails();
     },
     finish(scene,onShopLodMesh=()=>{}) {
       registerMesh = onShopLodMesh;
@@ -135,6 +158,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
         });
       }
       scene.add(group);
+      scheduleDetails();
       return Object.freeze(state);
     }
   };

@@ -2,9 +2,10 @@
 <html lang="en" data-gjh-design="v11">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="An independent virtual mall concept featuring New Moon, MILI and GOGO. Walk the courtyard in 3D or browse the complete accessible store directory.">
   <meta name="theme-color" content="#102d26">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>GJH Virtual Mall — Everyday, explored.</title>
@@ -28,6 +29,7 @@
       </div>
       <div class="app-loader-actions">
         <button id="loader-retry" type="button" hidden>Retry 3D mall</button>
+        <button id="loader-enter-now" type="button" hidden>Enter 3D mall now</button>
         <a id="loader-directory" href="#store-list">Browse the store directory</a>
       </div>
       <p class="app-loader-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
@@ -134,7 +136,7 @@
     </section>
 
     <section id="store-list" class="store-list" aria-labelledby="list-title" tabindex="-1">
-      <div class="list-heading"><div class="hero-copy"><p class="eyebrow">GJH virtual mall</p><h1 id="list-title">Everyday, <em>explored.</em></h1><p class="list-intro">Discover our stores and their collections, or step inside the 3D mall.</p><p class="list-summary"><strong>17 stores</strong><span aria-hidden="true"> · </span><strong>14 concept stores</strong><span aria-hidden="true"> · </span><strong>4 products</strong></p><div class="hero-actions"><button id="directory-enter-3d" type="button" hidden>Enter 3D Mall <span aria-hidden="true"><span data-icon="arrow-right"></span></span></button><a id="hero-shop" href="#featured-products">Shop products <span aria-hidden="true"><span data-icon="arrow-up-right"></span></span></a></div></div><div class="mall-preview"><img src="assets/concept-hero.webp" alt="" width="1200" height="614"><span class="mall-preview-caption">Concept illustration</span></div></div>
+      <div class="list-heading"><div class="hero-copy"><p class="eyebrow">GJH virtual mall</p><h1 id="list-title">Everyday, <em>explored.</em></h1><p class="list-intro">Discover our stores and their collections, or step inside the 3D mall.</p><p class="list-summary"><strong>17 stores</strong><span aria-hidden="true"> · </span><strong>14 concept stores</strong><span aria-hidden="true"> · </span><strong>4 products</strong></p><div class="hero-actions"><button id="directory-enter-3d" type="button" hidden>Enter 3D Mall <span aria-hidden="true"><span data-icon="arrow-right"></span></span></button><a id="hero-shop" href="#featured-products">Shop products <span aria-hidden="true"><span data-icon="arrow-up-right"></span></span></a></div><p id="model-preload-status" role="status" aria-live="polite" hidden></p></div><div class="mall-preview"><img src="assets/concept-hero.webp" alt="" width="1200" height="614"><span class="mall-preview-caption">Concept illustration</span></div></div>
       <p class="layout-preview"><a id="layout-preview-link" href="?layout=classic">Classic 3-store view</a> <span id="layout-preview-notice" hidden>— Ground-floor preview: 17 stores open to explore.</span></p>
       <button id="directory-theme-open" class="directory-theme-open" type="button" aria-controls="mall-theme-dialog" hidden>Mall theme settings</button>
       <details id="expanded-facilities-note" class="planned-spaces-directory"><summary>Expanded preview: lift and facilities</summary><p>The lift is in the north-west court of the expanded preview and serves a small upper viewing landing. The directory is west of the entrance, Guest services is east of the entrance, and the featured New Moon collection is beside the west court. The lift is visitor-only. Stow the cart and return held products before riding. Call the lift when needed, then choose Ride after it arrives. The original visitor (v1) stays on the ground floor.</p><p>Guest services is a self-service guide. The facilities reservation is planned and not operating; the north service reserves are closed to visitors. No restroom or staffed service is available in this demo.</p></details>

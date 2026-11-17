@@ -2003,6 +2003,10 @@ function createUI(expanded = false) {
   }
   guideReopen.addEventListener("click", showGuide);
   railGuide?.addEventListener("click", showGuide);
+  document.getElementById("loader-directory").addEventListener("click", () => {
+    if (showing3D)
+      setView(false, true);
+  });
   viewToggle.addEventListener("click", () => setView(!showing3D, true));
   directoryEnter3D.addEventListener("click", () => setView(true, true));
   function visitStore(id) {
@@ -2515,13 +2519,12 @@ function createUI(expanded = false) {
 var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
 var CHOICES = new Set(["auto", "low", "balanced", "detailed"]);
 var qualityPreference = (value) => CHOICES.has(value) ? value : "auto";
-function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, recovered = false }) {
+function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, recovered = false, autoTier = null }) {
   const hint = (value) => Number.isFinite(value) && value > 0;
   const constrained = hint(cores) && cores <= 2 || hint(memory) && memory <= 2;
-  const capable = hint(cores) && cores >= 4 && hint(memory) && memory >= 4;
   const choice = qualityPreference(preference);
-  const tier = recovered ? "low" : choice !== "auto" ? choice : constrained ? "low" : width >= 1000 && capable ? "detailed" : "balanced";
-  const cap = tier === "low" ? 1 : tier === "balanced" && width < 600 ? 1.25 : 2;
+  const tier = recovered ? "low" : choice !== "auto" ? choice : ["low", "balanced", "detailed"].includes(autoTier) ? autoTier : constrained ? "low" : "balanced";
+  const cap = tier === "low" ? 1 : tier === "balanced" && width < 600 ? 1.25 : tier === "balanced" && choice === "auto" && width >= 1000 ? 1.5 : 2;
   return Object.freeze({
     preference: choice,
     tier,
@@ -2530,10 +2533,68 @@ function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, re
     recovered
   });
 }
+function createAdaptiveQuality({ allowDetailed = false } = {}) {
+  const tiers = ["low", "balanced", "detailed"];
+  let last = null, warmUntil = 0, start = 0, count = 0, slow = 0, slowTime = 0, fast = 0, busy = 0, goodWindows = 0, changedAt = -Infinity;
+  function reset() {
+    last = null;
+    start = 0;
+    count = slow = slowTime = fast = busy = goodWindows = 0;
+  }
+  return {
+    reset,
+    sample(now, active, tier, moving = true) {
+      if (!active || !Number.isFinite(now) || !tiers.includes(tier)) {
+        reset();
+        return null;
+      }
+      if (last === null) {
+        last = now;
+        warmUntil = now + 3000;
+        return null;
+      }
+      const elapsed = now - last;
+      last = now;
+      if (elapsed <= 0) {
+        reset();
+        return null;
+      }
+      if (now < warmUntil)
+        return null;
+      if (!count)
+        start = now - elapsed;
+      count++;
+      if (elapsed > 20) {
+        slow++;
+        slowTime += Math.min(elapsed, 4000);
+      }
+      if (elapsed <= 18.5)
+        fast++;
+      if (moving)
+        busy++;
+      if (now - start < 4000 || count < 8)
+        return null;
+      const bad = slow >= 3 && (slow / count >= 0.25 || slowTime / (now - start) >= 0.5), good = fast / count >= 0.9 && busy / count >= 0.5;
+      goodWindows = good ? goodWindows + 1 : 0;
+      count = slow = slowTime = fast = busy = 0;
+      start = 0;
+      const index = tiers.indexOf(tier);
+      const ceiling = allowDetailed ? 2 : 1;
+      const next = bad && index > 0 ? tiers[index - 1] : goodWindows >= 3 && now - changedAt >= 1e4 && index < ceiling ? tiers[index + 1] : null;
+      if (next) {
+        changedAt = now;
+        reset();
+        return next;
+      }
+      return null;
+    }
+  };
+}
 function createGraphicsQuality(onChange) {
   const select = document.getElementById("graphics-quality");
   const status = document.getElementById("graphics-quality-status");
-  let preference = "auto", recovered = false, profile;
+  let preference = "auto", recovered = false, profile, autoTier = null;
+  const adaptive = createAdaptiveQuality();
   try {
     preference = qualityPreference(localStorage.getItem(QUALITY_KEY));
   } catch {}
@@ -2541,6 +2602,8 @@ function createGraphicsQuality(onChange) {
   select.addEventListener("change", () => {
     preference = qualityPreference(select.value);
     recovered = false;
+    autoTier = null;
+    adaptive.reset();
     try {
       localStorage.setItem(QUALITY_KEY, preference);
     } catch {}
@@ -2550,7 +2613,23 @@ function createGraphicsQuality(onChange) {
     recover() {
       recovered = true;
       preference = "low";
+      autoTier = null;
+      adaptive.reset();
       select.value = "low";
+    },
+    resetSampling() {
+      adaptive.reset();
+    },
+    sample(now, active, moving) {
+      if (preference !== "auto" || recovered || !profile) {
+        adaptive.reset();
+        return;
+      }
+      const next = adaptive.sample(now, active, profile.tier, moving);
+      if (next) {
+        autoTier = next;
+        onChange();
+      }
     },
     resolve(width) {
       profile = resolveQuality({
@@ -2559,10 +2638,11 @@ function createGraphicsQuality(onChange) {
         dpr: window.devicePixelRatio,
         cores: navigator.hardwareConcurrency,
         memory: navigator.deviceMemory,
-        recovered
+        recovered,
+        autoTier
       });
       const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-      status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Softer image; less rendering work." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
+      status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Softer image; less rendering work." : "Resolution follows the screen within a fixed limit."}${preference === "auto" && !recovered ? " Auto currently uses up to Balanced; choose Detailed manually." : ""} Downloads and products stay the same.`;
       return profile;
     },
     get state() {
@@ -3098,6 +3178,9 @@ var selectedInteraction = null;
 var interactionDistance = Infinity;
 var windowBlurred = false;
 var interactions;
+var lastPreloadUpdate = -Infinity;
+var initialPreloadStarted = null;
+var preloadSettled = !expanded;
 function hideGuidance() {
   guidance?.hide();
   shelfFocus?.hideNearby();
@@ -3107,6 +3190,7 @@ function hideGuidance() {
 var nearby = null;
 var currentZone = "atrium";
 function clearTransientState(event) {
+  quality.resetSampling();
   hideGuidance();
   player?.clearInput();
   player?.setInput(null);
@@ -3270,6 +3354,7 @@ function heroVisibility(number) {
 }
 var snapshot = () => Object.freeze({
   ...player?.state || {},
+  modelPreload: world?.modelPreload || null,
   mode: modes.current(),
   zone: currentZone,
   nearby,
@@ -3430,10 +3515,37 @@ function render(force = false) {
     return pose;
   }
 }
+function updateModelPreload(now) {
+  if (!expanded || now - lastPreloadUpdate < 1000)
+    return;
+  lastPreloadUpdate = now;
+  const node = document.getElementById("model-preload-status"), state = world?.modelPreload;
+  if (!node || !state)
+    return;
+  const models = Object.values(state.models), furnishings = Object.values(world.furnishings);
+  const visitorLod = player.state.character.lod;
+  const lodStatus = visitorLod ? visitorLod.available ? "loaded" : visitorLod.failed ? "fallback" : "pending" : "loaded";
+  const assets = models.concat(Object.values(state.sceneModels), furnishings.map((item) => item.status), lodStatus);
+  const done = assets.filter((status) => status === "loaded" || status === "fallback").length;
+  const failed = assets.filter((status) => status === "fallback").length;
+  const ready2 = done === assets.length && state.settled === state.total;
+  preloadSettled = ready2;
+  node.hidden = false;
+  const zh = document.documentElement.lang?.startsWith("zh");
+  node.textContent = ready2 ? failed ? zh ? "商店模型准备完成，部分模型不可用。" : "Shop models prepared; some assets are unavailable." : zh ? "商店模型已准备完成，首次显示仍可能需要一些时间。" : "Shop models prepared. First views may still take time to render." : zh ? `正在准备商店模型（${done}/${assets.length}）。您可等待或立即进入。` : `Preparing shop models (${done}/${assets.length}). You can wait or enter now.`;
+  if (initialPreloadStarted !== null && !window.mallLoader?.snapshot().ready) {
+    if (ready2 || now - initialPreloadStarted >= 30000) {
+      initialPreloadStarted = null;
+      window.mallLoader?.complete("frame");
+    } else
+      window.mallLoader?.prepare(node.textContent);
+  }
+}
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden)
     return;
+  updateModelPreload(now);
   const callbackStart = performance.now();
   const pad = readStandardGamepad();
   const consumed = ui.handleGamepad(pad);
@@ -3491,6 +3603,8 @@ function animate(now) {
       pausePerformance();
   } else
     pausePerformance();
+  const movement = player.state.animation;
+  quality.sample(now, advancing && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
   frame = requestAnimationFrame(animate);
 }
 function resume() {
@@ -3613,6 +3727,7 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 canvas.addEventListener("webglcontextlost", (event) => {
+  quality.resetSampling();
   window.mallLoader?.context(true);
   event.preventDefault();
   contextLost = true;
@@ -3654,6 +3769,8 @@ function resize() {
   const width = canvas.clientWidth || (viewportChanged ? innerWidth : renderWidth) || innerWidth;
   const height = canvas.clientHeight || (viewportChanged ? Math.max(1, innerHeight - document.querySelector(".site-header").offsetHeight) : renderHeight) || innerHeight;
   const resized = width !== renderWidth || height !== renderHeight;
+  if (resized || viewportChanged)
+    quality.resetSampling();
   viewportWidth = innerWidth;
   viewportHeight = innerHeight;
   if (!width || !height)
@@ -3710,7 +3827,8 @@ function validateRestoration() {
     frames++;
     ready = true;
     graphicsStatus = "available";
-    window.mallLoader?.complete("frame");
+    if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed)
+      window.mallLoader?.complete("frame");
     window.__sceneFailed = false;
     window.__sceneReady = true;
     mallTheme?.resume();
@@ -3950,7 +4068,11 @@ async function initialize() {
     return;
   if (!renderer.info.render.calls)
     throw new Error("First scene frame unavailable");
-  window.mallLoader?.complete("frame");
+  if (expanded && !window.mallLoader?.snapshot().dismissed) {
+    initialPreloadStarted = performance.now();
+    window.mallLoader?.prepare("Preparing shop models. You can enter now or browse the directory.");
+  } else
+    window.mallLoader?.complete("frame");
   window.__sceneReady = true;
   ui.offerFirstGuide();
   resume();

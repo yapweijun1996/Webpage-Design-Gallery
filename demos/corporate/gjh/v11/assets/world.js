@@ -102,7 +102,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   doorFrameParts.forEach(part=>part.dispose());
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
-  let activeShopSlot=null,activeDeck=false,railingState=null;
+  let activeShopSlot=null,activeDeck=false,railingState=null,interiorModels=null;
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ', rz = 0) {
     const key = `${type}:${material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}${activeDeck?':deck':''}`;
@@ -852,6 +852,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     const shopSigns=await addShopSignAtlas(T,expandedLayout,scene);
     shopSigns.layers.enable(1);
     const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map);
+    interiorModels=interiors;
     for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
       collider(x,y,z,width,height,depth);
       shopObstacles.push({min:{x:x-width/2,y:y-height/2,z:z-depth/2},
@@ -931,7 +932,10 @@ export async function createWorld(T, R, physics, expanded = false) {
     });
     return brandWallPromise;
   }
-  return {scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings:railingState, productAssets: Object.freeze(worldProductAssets)};
+  return {getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+    const preload=interiorModels?.preloadState;
+    return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
+  }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings:railingState, productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

@@ -15,7 +15,7 @@ gallery = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gallery)
 
 
-LOCKED_VIEWPORT = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+ZOOMABLE_VIEWPORT = "width=device-width, initial-scale=1, viewport-fit=cover"
 
 class GalleryTests(unittest.TestCase):
     def test_real_companies_contain_their_own_versions(self):
@@ -101,11 +101,17 @@ class GalleryTests(unittest.TestCase):
         self.assertNotIn('<script>alert("test")</script>', page)
         self.assertIn("&lt;script&gt;", page)
 
-    def test_generated_shell_pages_use_locked_viewport_and_maskable_icon_is_separate(self):
+    def test_pages_allow_zoom_and_maskable_icon_is_separate(self):
         pages = gallery.build_pages(gallery.load_catalog())
+        pages["v11-source.html"] = (ROOT / "demos/corporate/gjh/v11/index.html").read_text(encoding="utf-8")
         for name, page in pages.items():
             if name.endswith(".html"):
-                self.assertIn(f'<meta name="viewport" content="{LOCKED_VIEWPORT}">', page, name)
+                viewport = re.search(r'<meta name="viewport" content="([^"]+)">', page)
+                self.assertIsNotNone(viewport, name)
+                content = viewport.group(1).lower()
+                self.assertEqual(content, ZOOMABLE_VIEWPORT, name)
+                self.assertNotIn("user-scalable=no", content, name)
+                self.assertNotIn("maximum-scale", content, name)
 
         manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
         icons = manifest["icons"]

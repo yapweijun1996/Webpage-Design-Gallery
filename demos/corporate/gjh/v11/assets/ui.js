@@ -527,6 +527,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   guideReopen.addEventListener('click', showGuide);
   railGuide?.addEventListener('click', showGuide);
 
+  document.getElementById('loader-directory').addEventListener('click', () => { if (showing3D) setView(false, true); });
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
   directoryEnter3D.addEventListener('click', () => setView(true, true));
   function visitStore(id) {

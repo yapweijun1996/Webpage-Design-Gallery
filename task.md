@@ -1,5 +1,16 @@
 # GJH V11 Virtual Mall Improvement Plan
 
+## Adaptive quality and model preparation (2026-11-17)
+
+- [x] Prepare current-mall shop models during startup, with bounded waiting, an early-entry choice and directory fallback.
+- [x] Use foreground frame intervals to adapt Auto between Low and Balanced without changing explicit preferences; keep the FPS diagnostics independent.
+- [x] Open the original three shop doors on approach; the other fourteen retain their existing automatic doors.
+- [x] Keep a seated NPC from disappearing solely because its 18-second timer elapsed; distance unloading, draw-budget visibility and player-priority seat release remain separate.
+- [ ] Enable safe automatic Detailed promotion on capable devices after the strict draw-budget gate is met; 60 FPS and a 30 FPS minimum are targets, not guarantees.
+- [ ] Investigate first-use GPU upload and shader compilation stalls, Detailed-mode draw-budget overruns, and mobile S04 framing.
+- [x] Allow browser zoom in the gallery and V11 viewport; Chrome mobile-emulated pinch and Lighthouse viewport audits passed.
+- [ ] Validate zoom and interaction on physical devices; see [the browser review](docs/console-e2e-review.md).
+
 Status: **previous authorized software work and the requested 17-lot visual-concept delivery are complete**. The 2026-11-16 owner decision still defers physical-device acceptance and real/operational brand activation. This task authorizes the limited visual use of supplied brand names and logos on concept storefronts; it does not verify tenancy, current brand relationships, merchandise, claims, or general artwork rights. No unperformed device acceptance or real-world authorization is represented as passed.
 
 ## UX round 1 — P0 + P1 (2026-11-17)

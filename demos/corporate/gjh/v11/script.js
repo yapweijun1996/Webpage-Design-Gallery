@@ -37,9 +37,11 @@ let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeigh
 const quality = createGraphicsQuality(() => resize());
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
+let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
 let nearby = null, currentZone = 'atrium';
 function clearTransientState(event) {
+  quality.resetSampling();
   hideGuidance();
   player?.clearInput();
   player?.setInput(null);
@@ -163,7 +165,7 @@ function heroVisibility(number) {
   return Object.freeze({number:id, hero:project(hero), avatar:project(player.visual),
     loaded:hero.userData.modelReady === true});
 }
-const snapshot = () => Object.freeze({...(player?.state || {}), mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
+const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:world?.modelPreload || null, mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
   elevator:elevator?.state||null, amenities: world?.amenities || null,
   npcs: npcs?.state || null,
@@ -257,9 +259,33 @@ function render(force = false) {
     return pose;
   }
 }
+function updateModelPreload(now) {
+  if (!expanded || now-lastPreloadUpdate < 1000) return;
+  lastPreloadUpdate=now;
+  const node=document.getElementById('model-preload-status'), state=world?.modelPreload;
+  if (!node || !state) return;
+  const models=Object.values(state.models), furnishings=Object.values(world.furnishings);
+  const visitorLod=player.state.character.lod;
+  const lodStatus=visitorLod ? (visitorLod.available?'loaded':visitorLod.failed?'fallback':'pending') : 'loaded';
+  const assets=models.concat(Object.values(state.sceneModels),furnishings.map(item => item.status),lodStatus);
+  const done=assets.filter(status => status==='loaded'||status==='fallback').length;
+  const failed=assets.filter(status => status==='fallback').length;
+  const ready=done===assets.length && state.settled===state.total;
+  preloadSettled=ready;
+  node.hidden=false;
+  const zh=document.documentElement.lang?.startsWith('zh');
+  node.textContent=ready ? (failed ? (zh?'商店模型准备完成，部分模型不可用。':'Shop models prepared; some assets are unavailable.') : (zh?'商店模型已准备完成，首次显示仍可能需要一些时间。':'Shop models prepared. First views may still take time to render.')) :
+    (zh?`正在准备商店模型（${done}/${assets.length}）。您可等待或立即进入。`:`Preparing shop models (${done}/${assets.length}). You can wait or enter now.`);
+  if (initialPreloadStarted !== null && !window.mallLoader?.snapshot().ready) {
+    if (ready || now-initialPreloadStarted >= 30000) {
+      initialPreloadStarted=null; window.mallLoader?.complete('frame');
+    } else window.mallLoader?.prepare(node.textContent);
+  }
+}
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;
+  updateModelPreload(now);
   const callbackStart = performance.now();
   const pad=readStandardGamepad();
   const consumed=ui.handleGamepad(pad);
@@ -303,6 +329,11 @@ function animate(now) {
       }
     } else pausePerformance();
   } else pausePerformance();
+  // Record monitor telemetry before a quality change can resize and render.
+  const movement = player.state.animation;
+  quality.sample(now, advancing && preloadSettled && document.getElementById('app-loader').hidden &&
+    !windowBlurred && document.hasFocus() && !contextLost && !interrupted &&
+    ['explore','cart'].includes(modes.current()), ['walk','run'].includes(movement));
   frame = requestAnimationFrame(animate);
 }
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
@@ -337,6 +368,7 @@ document.addEventListener('visibilitychange', () => {
   else { if (ready) { updateHUD(); render(); } else validateRestoration(); resume(); }
 });
 canvas.addEventListener('webglcontextlost', event => {
+  quality.resetSampling();
   window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
   mallTheme?.suspend();
@@ -368,6 +400,7 @@ function resize() {
   const width = canvas.clientWidth || (viewportChanged ? innerWidth : renderWidth) || innerWidth;
   const height = canvas.clientHeight || (viewportChanged ? Math.max(1, innerHeight - document.querySelector('.site-header').offsetHeight) : renderHeight) || innerHeight;
   const resized = width !== renderWidth || height !== renderHeight;
+  if (resized || viewportChanged) quality.resetSampling();
   viewportWidth = innerWidth; viewportHeight = innerHeight;
   if (!width || !height) return;
   const profile = quality.resolve(width);
@@ -406,7 +439,7 @@ function validateRestoration() {
     if (gl.getError() !== gl.NO_ERROR || renderer.info.render.calls === 0 || !pixel.slice(0, 3).some(Boolean))
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
-    window.mallLoader?.complete('frame');
+    if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed) window.mallLoader?.complete('frame');
     window.__sceneFailed = false; window.__sceneReady = true;
     mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
   } catch {
@@ -551,7 +584,10 @@ async function initialize() {
   render(true);
   if (contextLost || context.isContextLost()) return;
   if (!renderer.info.render.calls) throw new Error('First scene frame unavailable');
-  window.mallLoader?.complete('frame');
+  if (expanded && !window.mallLoader?.snapshot().dismissed) {
+    initialPreloadStarted=performance.now();
+    window.mallLoader?.prepare('Preparing shop models. You can enter now or browse the directory.');
+  } else window.mallLoader?.complete('frame');
   window.__sceneReady = true; ui.offerFirstGuide(); resume();
 }
 initialize().catch(error => {

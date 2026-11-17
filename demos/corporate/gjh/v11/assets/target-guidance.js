@@ -21,8 +21,6 @@ export function createTargetGuidance({canvas, projection}) {
         size = {width: marker.offsetWidth, height: marker.offsetHeight};
       }
       const rect = canvas.getBoundingClientRect();
-      projection.style(marker, 'left', point.x - rect.left);
-      projection.style(marker, 'top', point.y - rect.top);
       // Include the label outline and the complete point ring, centred on the anchor.
       const box = {left: point.x - size.width / 2 - 2, right: point.x + size.width / 2 + 2, top: point.y - size.height - 2, bottom: point.y + 7};
       const inside = box.left >= rect.left + 4 && box.right <= rect.right - 4 && box.top >= rect.top + 4 && box.bottom <= rect.bottom - 4;
@@ -41,6 +39,9 @@ export function createTargetGuidance({canvas, projection}) {
           }
           return box.left < right + 2 && box.right > left - 2 && box.top < bottom + 2 && box.bottom > top - 2;
         });
+      // Read control geometry before moving the marker to avoid forcing layout on each frame.
+      projection.style(marker, 'left', point.x - rect.left);
+      projection.style(marker, 'top', point.y - rect.top);
       projection.visible(marker, inside && !overlap);
     },
   };

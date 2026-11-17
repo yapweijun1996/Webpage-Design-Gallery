@@ -465,15 +465,12 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   lightPool(garden.x, 0.053, garden.z + 1.7, 9, 2.5);
   const chandelier = new T.Group;
   chandelier.name = "Gallery atrium chandelier";
+  chandelier.userData.sourceStatus = "pending";
   chandelier.position.set(10, 5.98, 30.55);
   chandelier.visible = false;
   scene.add(chandelier);
   let requested = false;
   async function loadChandelier() {
-    if (!chandelier.visible) {
-      requested = false;
-      return;
-    }
     const record = await loadStaticAsset(T, {
       file: "atrium-chandelier.glb",
       asset_id: "ASSET_AtriumChandelier",
@@ -488,6 +485,11 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       chandelier.add(mesh);
     }
   }
+  requested = true;
+  if ("requestIdleCallback" in window)
+    window.requestIdleCallback(loadChandelier, { timeout: 1500 });
+  else
+    setTimeout(loadChandelier, 0);
   return function updateChandelier(visitor) {
     const dx = visitor.x - chandelier.position.x, dz = visitor.z - chandelier.position.z;
     chandelier.visible = visitor.y < 5 && dx * dx + dz * dz < 24 * 24;
@@ -1245,7 +1247,8 @@ function batchFurniture(T, primitives) {
 async function createFurnishings(T, shadows, expanded = false) {
   const sources2 = expanded ? { ...pilotSources, ...shopSources } : pilotSources;
   const records = {};
-  const pendingByShop = new Map;
+  const pendingByShop = new Map, detailQueue = [];
+  let detailLoading = false, detailScheduled = false;
   const group = new T.Group;
   group.name = "Blender furnishings";
   let registerMesh;
@@ -1292,6 +1295,43 @@ async function createFurnishings(T, shadows, expanded = false) {
       }
     }
   }
+  function scheduleDetails() {
+    if (detailLoading || detailScheduled)
+      return;
+    if (!detailQueue.length && pendingByShop.size) {
+      const [slot, kinds] = pendingByShop.entries().next().value;
+      pendingByShop.delete(slot);
+      detailQueue.push(...kinds);
+    }
+    if (!detailQueue.length)
+      return;
+    detailScheduled = true;
+    const run = () => {
+      detailScheduled = false;
+      if (document.hidden)
+        return;
+      const kind = detailQueue.shift();
+      if (!kind)
+        return;
+      detailLoading = true;
+      load2(kind).then(() => mount(kind)).catch((error) => {
+        records[kind].status = "fallback";
+        records[kind].reason = "unavailable";
+        console.warn("Furniture preload failed", error);
+      }).finally(() => {
+        detailLoading = false;
+        scheduleDetails();
+      });
+    };
+    if ("requestIdleCallback" in window)
+      window.requestIdleCallback(run, { timeout: 1500 });
+    else
+      window.setTimeout(run, 100);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden)
+      scheduleDetails();
+  });
   return {
     place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
       const record = records[kind];
@@ -1304,9 +1344,8 @@ async function createFurnishings(T, shadows, expanded = false) {
       if (!kinds)
         return;
       pendingByShop.delete(shopSlot);
-      for (const kind of kinds) {
-        load2(kind).then(() => mount(kind));
-      }
+      detailQueue.unshift(...kinds);
+      scheduleDetails();
     },
     finish(scene, onShopLodMesh = () => {}) {
       registerMesh = onShopLodMesh;
@@ -1338,6 +1377,7 @@ async function createFurnishings(T, shadows, expanded = false) {
         });
       }
       scene.add(group);
+      scheduleDetails();
       return Object.freeze(state);
     }
   };
@@ -2626,10 +2666,48 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
   atlas.width = atlas.height = 2048;
   const atlasContext = atlas.getContext("2d");
   const shops = [], collisionBoxes = [];
-  const models = new Map, gltfLoader = new GLTFLoader3;
+  const models = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader3;
+  const modelStates = new Map(slots.flatMap((slot2) => {
+    const number = Number(slot2.number);
+    return [...(displayFiles[number] || []).map((file) => `./${file}.glb`), ...galleryPlacements[number].map(({ file }) => `./${file}`)];
+  }).map((name) => [name, "pending"]));
   function loadModel(name) {
     if (!models.has(name)) {
-      models.set(name, gltfLoader.loadAsync(new URL(name, import.meta.url).href).then((gltf) => gltf.scene));
+      modelStates.set(name, "loading");
+      const url = new URL(name, import.meta.url), controller = new AbortController;
+      let timer, abandoned = false;
+      const load2 = async () => {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok)
+          throw new Error(`Model request failed: ${response.status}`);
+        const gltf = await gltfLoader.parseAsync(await response.arrayBuffer(), new URL(".", url).href);
+        if (abandoned) {
+          gltf.scene.traverse((node) => {
+            if (!node.isMesh)
+              return;
+            node.geometry?.dispose();
+            for (const material2 of Array.isArray(node.material) ? node.material : [node.material])
+              material2?.dispose();
+          });
+          throw new Error("Model load timed out");
+        }
+        return gltf.scene;
+      };
+      const deadline2 = new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          abandoned = true;
+          controller.abort();
+          reject(new Error("Model load timed out"));
+        }, 8000);
+      });
+      models.set(name, Promise.race([load2(), deadline2]).then((scene2) => {
+        modelStates.set(name, "loaded");
+        loadedScenes.set(name, scene2);
+        return scene2;
+      }, (error) => {
+        modelStates.set(name, "fallback");
+        throw error;
+      }).finally(() => clearTimeout(timer)));
     }
     return models.get(name);
   }
@@ -2864,6 +2942,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       const c = Math.abs(Math.cos(yaw)), sn = Math.abs(Math.sin(yaw));
       block(x, y + h2 / 2, z, c * w2 + sn * d, h2, sn * w2 + c * d);
     }
+    const shopState = { number: String(slot2.number), status: "pending", galleryLoaded: 0, galleryFailed: 0 };
     async function loadShop() {
       await Promise.all([
         loadHero?.(),
@@ -2875,7 +2954,9 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             model.scale.setScalar(scale);
             model.name = `S${slot2.number} gallery: ${file}`;
             group.add(model);
+            shopState.galleryLoaded++;
           } catch (error) {
+            shopState.galleryFailed++;
             console.warn(`Unavailable shop furnishing: ${file}`, error);
           }
         })
@@ -2888,7 +2969,8 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       display,
       fallback,
       isLoaded: () => loaded,
-      loadDisplay: loadShop
+      loadDisplay: loadShop,
+      state: shopState
     });
   });
   for (const [wing, parts] of studioParts) {
@@ -2907,23 +2989,25 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     part.dispose();
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
-    if (loading || scheduled || !lastVisitor)
+    if (loading || scheduled)
       return;
-    const candidates = shops.filter((shop) => shop.loadDisplay && Math.hypot(lastVisitor.x - shop.x, lastVisitor.z - shop.z) < 25);
+    const candidates = shops.filter((shop) => shop.loadDisplay);
     if (!candidates.length)
       return;
     scheduled = true;
     const run = () => {
       scheduled = false;
-      if (!lastVisitor || document.hidden)
+      if (document.hidden)
         return;
-      const next = shops.filter((shop) => shop.loadDisplay && Math.hypot(lastVisitor.x - shop.x, lastVisitor.z - shop.z) < 25).sort((a, b) => Math.hypot(lastVisitor.x - a.x, lastVisitor.z - a.z) - Math.hypot(lastVisitor.x - b.x, lastVisitor.z - b.z))[0];
+      const next = shops.filter((shop) => shop.loadDisplay).sort((a, b) => lastVisitor ? Math.hypot(lastVisitor.x - a.x, lastVisitor.z - a.z) - Math.hypot(lastVisitor.x - b.x, lastVisitor.z - b.z) : 0)[0];
       if (!next)
         return;
       loading = true;
       const load2 = next.loadDisplay;
       next.loadDisplay = null;
-      load2().finally(() => {
+      next.state.status = "loading";
+      load2().catch((error) => console.warn("Shop preload failed", error)).finally(() => {
+        next.state.status = "settled";
         loading = false;
         schedulePrefetch();
       });
@@ -2933,7 +3017,21 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     else
       window.setTimeout(run, 100);
   }
-  return { collisionBoxes, update(visitor) {
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden)
+      schedulePrefetch();
+  });
+  schedulePrefetch();
+  return { collisionBoxes, getPreloadedModels() {
+    return [...loadedScenes].map(([name, scene2]) => ({ name: new URL(name, import.meta.url).href, scene: scene2 }));
+  }, get preloadState() {
+    return {
+      models: Object.fromEntries(modelStates),
+      shops: shops.map((shop) => ({ ...shop.state })),
+      settled: shops.filter((shop) => shop.state.status === "settled").length,
+      total: shops.length
+    };
+  }, update(visitor) {
     lastVisitor = { x: visitor.x, z: visitor.z };
     let nearest = null, nearestDistance = 11 * 11;
     for (const shop of shops) {
@@ -3426,7 +3524,7 @@ async function createWorld(T, R, physics, expanded = false) {
     doorFrameParts.forEach((part) => part.dispose());
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
-    let activeShopSlot = null, activeDeck = false, railingState = null;
+    let activeShopSlot = null, activeDeck = false, railingState = null, interiorModels = null;
     const tagShopLod = (mesh) => {
       if (expanded && activeShopSlot !== null) {
         mesh.userData.shopSlot = activeShopSlot;
@@ -4122,6 +4220,7 @@ async function createWorld(T, R, physics, expanded = false) {
       const shopSigns = await addShopSignAtlas(T, expandedLayout, scene);
       shopSigns.layers.enable(1);
       const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials.shellFloor.map);
+      interiorModels = interiors;
       for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
         collider(x, y, z, width, height, depth);
         shopObstacles.push({
@@ -4170,7 +4269,12 @@ async function createWorld(T, R, physics, expanded = false) {
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;
-    return { scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings: railingState, productAssets: Object.freeze(worldProductAssets) };
+    return { getPreloadedModels() {
+      return interiorModels?.getPreloadedModels() || [];
+    }, get modelPreload() {
+      const preload = interiorModels?.preloadState;
+      return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
+    }, scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings: railingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {
     releaseStartupAssetPack();
   }

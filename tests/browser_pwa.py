@@ -95,11 +95,13 @@ def run():
                 page = context.new_page()
                 online_errors = []
                 page.on("pageerror", lambda error: online_errors.append(str(error)))
-                viewport = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+                viewport = "width=device-width, initial-scale=1, viewport-fit=cover"
                 shell_pages = [name for name in gallery.build_pages(catalog) if name.endswith(".html")]
                 for path in shell_pages:
                     page.goto(base + path, wait_until="networkidle")
-                    assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport, path
+                    content = page.locator('meta[name="viewport"]').get_attribute("content")
+                    assert content == viewport, (path, content)
+                    assert 'user-scalable=no' not in content and 'maximum-scale=1' not in content, (path, content)
                 page.goto(base + "index.html", wait_until="networkidle")
                 page.goto(base + "companies/gjh/index.html?review=keep", wait_until="networkidle")
                 page.wait_for_function("() => navigator.serviceWorker.ready.then(r => r.active?.state === 'activated')")

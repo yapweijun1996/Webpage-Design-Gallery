@@ -345,13 +345,12 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   // The ceiling plate meets the underside of the central vault rib. The
   // pendant tips stay 6m above the floor, clear of visitors and the camera.
   const chandelier = new T.Group();
-  chandelier.name='Gallery atrium chandelier';
+  chandelier.name='Gallery atrium chandelier'; chandelier.userData.sourceStatus='pending';
   chandelier.position.set(10,5.98,30.55);
   chandelier.visible=false;
   scene.add(chandelier);
   let requested=false;
   async function loadChandelier() {
-    if (!chandelier.visible) { requested=false; return; }
     const record=await loadStaticAsset(T,{file:'atrium-chandelier.glb',asset_id:'ASSET_AtriumChandelier',
       sha256:'dd38e05584ce57f01a5323951254ef63c47fbea61b57ece525fc0ef5bfe5fb26',
       dimensions_m:[3,2,3],rootExtras:{units:'metres'}},import.meta.url);
@@ -361,6 +360,9 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       mesh.applyMatrix4(primitive.matrix);chandelier.add(mesh);
     }
   }
+  requested=true;
+  if ('requestIdleCallback' in window) window.requestIdleCallback(loadChandelier,{timeout:1500});
+  else setTimeout(loadChandelier,0);
   return function updateChandelier(visitor) {
     const dx=visitor.x-chandelier.position.x,dz=visitor.z-chandelier.position.z;
     chandelier.visible=visitor.y<5 && dx*dx+dz*dz<24*24;

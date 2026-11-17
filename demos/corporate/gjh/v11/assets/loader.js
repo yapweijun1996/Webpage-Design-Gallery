@@ -9,11 +9,11 @@ const messages = [
 ];
 
 export function createLoaderState(onChange = () => {}) {
-  let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false;
+  let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false, preparation = null;
   const snapshot = () => ({completed, total: stages.length, hidden, contextLost, failed, dismissed,
-    ready: completed === stages.length, message: failed || (completed === stages.length ? messages[4] :
+    ready: completed === stages.length, preparing: Boolean(preparation) && completed < stages.length, message: failed || (completed === stages.length ? messages[4] :
       contextLost ? 'Graphics were interrupted. Waiting for recovery…' :
-      hidden ? 'Loading is paused until this tab is visible.' : messages[completed])});
+      hidden ? 'Loading is paused until this tab is visible.' : preparation || messages[completed])});
   const notify = () => { const state = snapshot(); onChange(state); return state; };
   return {
     snapshot,
@@ -21,6 +21,7 @@ export function createLoaderState(onChange = () => {}) {
       if (!failed && stage === stages[completed] && (stage !== 'frame' || (!hidden && !contextLost))) completed++;
       return notify();
     },
+    prepare(value) { preparation = value; return notify(); },
     visibility(value) { hidden = Boolean(value); return notify(); },
     context(value) { contextLost = Boolean(value); return notify(); },
     fail(message) { if (completed < stages.length) failed = message; return notify(); },
@@ -36,6 +37,7 @@ if (typeof document !== 'undefined') {
   const progress = document.getElementById('loader-progress');
   const count = document.getElementById('loader-count');
   const retry = document.getElementById('loader-retry');
+  const enterNow = document.getElementById('loader-enter-now');
   let fadeTimer;
   const state = createLoaderState(value => {
     status.textContent = value.message;
@@ -43,6 +45,7 @@ if (typeof document !== 'undefined') {
     progress.textContent = `${value.completed} of ${value.total} stages`;
     count.textContent = `${value.completed} / ${value.total}`;
     retry.hidden = !value.failed;
+    enterNow.hidden = !value.preparing || Boolean(value.failed);
     if (value.dismissed) {
       clearTimeout(fadeTimer);
       overlay.hidden = true;
@@ -62,6 +65,7 @@ if (typeof document !== 'undefined') {
   state.visibility(document.hidden);
   document.addEventListener('visibilitychange', () => state.visibility(document.hidden));
   retry.addEventListener('click', () => location.reload());
+  enterNow.addEventListener('click', () => state.complete('frame'));
   document.getElementById('loader-directory').addEventListener('click', () => {
     state.dismiss();
     document.getElementById('store-list').focus({preventScroll: true});
