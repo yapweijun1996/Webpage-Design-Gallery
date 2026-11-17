@@ -80,10 +80,13 @@ function initCompanies() {
   }
   restore();
   sort.closest('label').hidden = cards.length < 2;
+  function searchText(text) {
+    return text.trim().toLowerCase().replace(/['‘’]/g, '');
+  }
   function update(reset = true, push = false) {
     if (reset) currentPage = 1;
-    const query = search.value.trim().toLowerCase();
-    const matches = cards.filter((card) => (card.dataset.search + ' ' + card.textContent).toLowerCase().includes(query) && (!category.value || card.dataset.categories.split(' ').includes(category.value)));
+    const query = searchText(search.value);
+    const matches = cards.filter((card) => searchText(card.dataset.search + ' ' + card.textContent).includes(query) && (!category.value || card.dataset.categories.split(' ').includes(category.value)));
     matches.sort((a, b) => sort.value === 'designs' ? Number(b.dataset.count) - Number(a.dataset.count) || a.dataset.name.localeCompare(b.dataset.name) : a.dataset.name.localeCompare(b.dataset.name));
     const pageCount = Math.ceil(matches.length / perPage);
     currentPage = Math.max(1, Math.min(currentPage, pageCount || 1));
@@ -115,6 +118,7 @@ function initCompanies() {
 
 function initCompany() {
   const cards = [...document.querySelectorAll('.design-card')];
+  if (cards.length < 2) return;
   const style = document.querySelector('#style-filter');
   const sort = document.querySelector('#design-sort');
   const selected = new Set();

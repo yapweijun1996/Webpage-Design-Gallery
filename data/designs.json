@@ -309,5 +309,43 @@
       "mobile"
     ],
     "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+  },
+  {
+    "id": "yeos-v1",
+    "companyId": "yeos",
+    "slug": "v1",
+    "version": "v1",
+    "title": "The Drinks Index",
+    "description": "Explore six Singapore drinks by family, flavour and pack format.",
+    "styles": [
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 10,
+    "demoPath": "demos/food-beverage/yeos/v1/index.html",
+    "thumbnail": "demos/food-beverage/yeos/v1/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/food-beverage/yeos/v1/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/food-beverage/yeos/v1/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/food-beverage/yeos/v1/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Yeo Hiap Seng Limited."
   }
 ]

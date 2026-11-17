@@ -13,5 +13,20 @@
     "featuredVersion": "v7",
     "status": "published",
     "officialWebsite": "https://www.gjh.com.sg/"
+  },
+  {
+    "id": "yeos",
+    "slug": "yeos",
+    "name": "Yeo Hiap Seng",
+    "legalName": "Yeo Hiap Seng Limited",
+    "initials": "YHS",
+    "industry": "Food & Beverage",
+    "categories": ["food-beverage"],
+    "location": "Singapore",
+    "description": "Discover Yeo's Singapore drinks, from soya milk to tea.",
+    "demoDirectory": "demos/food-beverage/yeos",
+    "featuredVersion": "v1",
+    "status": "published",
+    "officialWebsite": "https://yeos.com.sg/"
   }
 ]

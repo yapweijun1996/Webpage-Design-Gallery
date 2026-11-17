@@ -90,6 +90,10 @@ def run():
                             if width in (1440, 390):
                                 page.evaluate('window.scrollTo(0,0)')
                                 page.screenshot(path=str(screenshots / f'home-{lang}-{theme}-{width}.png'), full_page=True)
+                            if width == 390 and theme == 'light':
+                                for query in ("Yeo’s", "Yeo's", "yeos"):
+                                    page.locator('#company-search').fill(query)
+                                    assert page.locator('.company-card:visible').get_attribute('data-company') == 'yeos', (lang, query)
                             page.locator('#company-search').fill('not-present')
                             page.wait_for_function('(message)=>document.querySelector(".empty-results h3").textContent === message', arg=packs[lang]['messages']['No matching companies'])
                             page.locator('[data-reset]').click()
@@ -105,11 +109,14 @@ def run():
                 assert page.locator('#theme-select').input_value() == 'dark'
                 select_preference(page, '#language-select', 'zh-Hans')
                 page.locator('#company-search').fill('新加坡')
-                assert page.locator('.company-card:visible').count() == 1
+                assert page.locator('.company-card:visible').count() == 2
+                page.locator('#company-search').fill('杨协成')
+                assert page.locator('.company-card:visible').get_attribute('data-company') == 'yeos'
+                page.locator('#company-search').fill('新加坡')
                 select_preference(page, '#language-select', 'ms')
                 assert page.locator('#company-search').input_value() == '新加坡'
                 page.locator('#company-search').fill('')
-                page.locator('.company-card').click()
+                page.locator('.company-card[data-company="gjh"]').click()
                 page.wait_for_selector('html[data-preferences-ready]')
                 assert page.locator('html').get_attribute('lang') == 'ms'
                 page.locator('input[value="v5"]').check()

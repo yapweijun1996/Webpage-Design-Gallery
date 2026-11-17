@@ -140,7 +140,7 @@ def company_card(company, designs, prefix, categories):
     name = escape(company["name"])
     category_name = ", ".join(categories[c] for c in company["categories"])
     attrs = card_data({"company": company["id"], "name": company["name"],
-                       "search": company["name"] + " " + company["industry"] + " " + company["location"],
+                       "search": " ".join((company["name"], company["slug"], company["industry"], company["location"])),
                        "categories": " ".join(company["categories"]), "count": len(own)})
     return f'''<a class="company-card" href="{prefix}companies/{escape(company['slug'])}/index.html" {attrs}>
       <div class="company-cover"><img src="{prefix}{escape(featured['thumbnail'])}" alt="Design preview for {name}" width="720" height="450" loading="lazy"><span class="cover-badge">DESIGN COLLECTION</span></div>
@@ -148,15 +148,16 @@ def company_card(company, designs, prefix, categories):
       <h3>{name}</h3><p class="card-description">{escape(company['description'])}</p><div class="card-bottom"><span>{plural(len(own), 'design concept')}</span><span class="card-action">Explore designs <span aria-hidden="true">{icon("arrow-right", prefix)}</span></span></div></div></a>'''
 
 
-def design_card(design, company):
+def design_card(design, company, can_compare):
     prefix = "../../"
     query = f"company={escape(company['id'])}&amp;design={escape(design['version'])}"
     title = escape(design["title"])
     attrs = card_data({"design": design["version"], "title": design["title"],
                        "styles": " ".join(design["styles"]), "order": design["order"]})
+    compare_control = f'''<label class="compare-checkbox"><input type="checkbox" value="{escape(design['version'])}">Compare<span class="visually-hidden"> {title}</span></label>''' if can_compare else ""
     return f'''<article class="design-card" {attrs}>
       <a class="design-preview" href="{prefix}designs/index.html?{query}" aria-label="View {title} details"><img src="{prefix}{escape(design['thumbnail'])}" alt="{title} desktop preview" width="720" height="450" loading="lazy"></a>
-      <div class="design-card-copy"><div class="version-row"><span class="version-badge">{escape(design['version'].upper())}</span><label class="compare-checkbox"><input type="checkbox" value="{escape(design['version'])}">Compare<span class="visually-hidden"> {title}</span></label></div>
+      <div class="design-card-copy"><div class="version-row"><span class="version-badge">{escape(design['version'].upper())}</span>{compare_control}</div>
       <h3><a href="{prefix}designs/index.html?{query}">{title}</a></h3><p class="card-description">{escape(design['description'])}</p><div class="card-bottom"><a class="details-link" href="{prefix}designs/index.html?{query}">View details</a><a class="card-action" href="{prefix}{escape(design['demoPath'])}">Open live demo <span aria-hidden="true">{icon("arrow-up-right", prefix)}</span><span class="visually-hidden">: {title}</span></a></div></div></article>'''
 
 
@@ -236,15 +237,31 @@ def build_pages(catalog, release=None):
         filters = '<div class="filter-bar" id="filters"><label class="search-field">Find a company<input id="company-search" type="search" placeholder="Search companies, industries or locations" autocomplete="off"></label><label>Category<select id="category-filter"><option value="">All categories</option>'
         filters += "".join(f'<option value="{escape(c["id"])}">{escape(c["name"])}</option>' for c in catalog["categories"])
         filters += '</select></label><label>Sort by<select id="company-sort"><option value="name">Name A–Z</option><option value="designs">Most designs</option></select></label></div>'
-        content = render("home", prefix=prefix, company_count=len(companies), company_summary=plural(len(companies), "company") if len(companies) == 1 else f"{len(companies)} companies", design_summary=plural(len(designs), "design"), company_filters_before=filters if len(companies) != 1 else "", company_filters_after=filters if len(companies) == 1 else "", company_cards="".join(company_card(c, designs, prefix, category_names) for c in companies))
-        if path != "index.html":
-            content = content.replace("One company. <span>Many creative directions.</span>", "All companies. <span>Find your next direction.</span>")
+        single_company = len(companies) == 1
+        content = render(
+            "home", prefix=prefix, company_count=len(companies), design_summary=plural(len(designs), "design"),
+            heading="One company." if path == "index.html" and single_company else "All companies.",
+            direction="Many creative directions." if path == "index.html" else "Find your next direction.",
+            company_filters_before="" if single_company else filters, company_filters_after=filters if single_company else "",
+            company_cards="".join(company_card(c, designs, prefix, category_names) for c in companies),
+        )
         pages[path] = shell(title="Companies — Webpage Design Gallery", description="Explore independent website design concepts, organized by company.", prefix=prefix, current='aria-current="page"', page_kind="companies", content=content)
     for company in companies:
         own = [d for d in designs if d["companyId"] == company["id"]]
         available_styles = {style for d in own for style in d["styles"]}
         options = "".join(f'<option value="{escape(s["id"])}">{escape(s["name"])}</option>' for s in catalog["styles"] if s["id"] in available_styles)
-        content = render("company", prefix="../../", company_id=escape(company["id"]), company_name=escape(company["name"]), initials=escape(company["initials"]), company_description=escape(company["description"]), industry=escape(company["industry"]), location=escape(company["location"]), design_summary=plural(len(own), "design concept"), official_website=escape(company["officialWebsite"]), design_count=len(own), design_cards="".join(design_card(d, company) for d in own), style_options=options)
+        can_compare = len(own) > 1
+        content = render(
+            "company", prefix="../../", company_id=escape(company["id"]), company_name=escape(company["name"]),
+            initials=escape(company["initials"]), company_description=escape(company["description"]),
+            industry=escape(company["industry"]), location=escape(company["location"]),
+            design_summary=plural(len(own), "design concept"), official_website=escape(company["officialWebsite"]),
+            design_count=len(own), design_cards="".join(design_card(d, company, can_compare) for d in own),
+            collection_title="Explore the designs" if can_compare else "Explore the design",
+            collection_eyebrow='<p class="eyebrow">ONE COMPANY. DIFFERENT PERSPECTIVES.</p>' if can_compare else "",
+            collection_hint='<p>Choose a direction. Make it your own.</p>' if can_compare else "",
+            collection_controls=render("collection-controls", prefix="../../", style_options=options) if can_compare else "",
+        )
         pages[f"companies/{company['slug']}/index.html"] = shell(title=escape(company["name"]) + " — Design collection", description=escape(company["description"]), prefix="../../", current="", page_kind="company", content=content)
     for page in ("design", "compare"):
         path = "designs/index.html" if page == "design" else "compare/index.html"

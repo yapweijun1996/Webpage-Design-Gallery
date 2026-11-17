@@ -18,15 +18,15 @@ SPEC.loader.exec_module(gallery)
 LOCKED_VIEWPORT = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
 
 class GalleryTests(unittest.TestCase):
-    def test_real_company_contains_all_versions(self):
+    def test_real_companies_contain_their_own_versions(self):
         catalog = gallery.load_catalog()
-        versions = [d["version"] for d in catalog["designs"]]
+        versions = [d["version"] for d in catalog["designs"] if d["companyId"] == "gjh"]
         self.assertEqual(versions, ["v1", "v5", "v6", "v7", "v8", "v9", "v10", "v11"])
-        self.assertEqual({d["companyId"] for d in catalog["designs"]}, {"gjh"})
+        self.assertEqual([d["id"] for d in catalog["designs"] if d["companyId"] == "yeos"], ["yeos-v1"])
 
     def test_v8_metadata_exposes_immersive_concept_contract(self):
         catalog = gallery.load_catalog()
-        design = next(item for item in catalog["designs"] if item["version"] == "v8")
+        design = next(item for item in catalog["designs"] if item["id"] == "gjh-v8")
         self.assertEqual(design["id"], "gjh-v8")
         self.assertEqual(design["companyId"], "gjh")
         self.assertIn("heritage", design["styles"])
@@ -37,27 +37,36 @@ class GalleryTests(unittest.TestCase):
     def test_home_only_links_to_company_collections(self):
         page = gallery.build_pages(gallery.load_catalog())["index.html"]
         self.assertIn('href="companies/gjh/index.html"', page)
+        self.assertIn('href="companies/yeos/index.html"', page)
         self.assertNotIn('class="design-card"', page)
         self.assertNotIn('href="demos/', page)
 
     def test_directory_order_matches_inventory_and_company_route_title(self):
-        catalog = copy.deepcopy(gallery.load_catalog())
+        catalog = gallery.load_catalog()
         pages = gallery.build_pages(catalog)
         self.assertIn("All companies.", pages["companies/index.html"])
         page = pages["index.html"]
-        self.assertLess(page.index('class="company-grid"'), page.index('id="company-search"'))
+        self.assertIn("All companies.", page)
+        self.assertLess(page.index('id="company-search"'), page.index('class="company-grid"'))
         self.assertLess(page.index('class="company-cover"'), page.index('class="company-card-copy"'))
         self.assertEqual(page.count('id="company-search"'), 1)
-        second = copy.deepcopy(catalog["companies"][0])
-        second.update(id="second", slug="second", name="Second Company")
-        catalog["companies"].append(second)
-        for design in list(catalog["designs"]):
-            duplicate = copy.deepcopy(design)
-            duplicate.update(id="second-" + design["version"], companyId="second")
-            catalog["designs"].append(duplicate)
+
+        catalog["companies"] = [c for c in catalog["companies"] if c["id"] == "gjh"]
+        catalog["designs"] = [d for d in catalog["designs"] if d["companyId"] == "gjh"]
         page = gallery.build_pages(catalog)["index.html"]
-        self.assertLess(page.index('id="company-search"'), page.index('class="company-grid"'))
+        self.assertIn("One company.", page)
+        self.assertLess(page.index('class="company-grid"'), page.index('id="company-search"'))
         self.assertEqual(page.count('id="company-search"'), 1)
+
+    def test_single_design_collection_links_to_demo_without_comparison_controls(self):
+        pages = gallery.build_pages(gallery.load_catalog())
+        page = pages["companies/yeos/index.html"]
+        self.assertIn('href="../../demos/food-beverage/yeos/v1/index.html"', page)
+        self.assertIn('company=yeos&amp;design=v1', page)
+        self.assertNotIn('id="style-filter"', page)
+        self.assertNotIn('class="compare-checkbox"', page)
+        self.assertNotIn('class="compare-tray"', page)
+        self.assertIn('class="compare-checkbox"', pages["companies/gjh/index.html"])
 
     def test_generation_is_deterministic(self):
         catalog = gallery.load_catalog()

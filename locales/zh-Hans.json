@@ -170,7 +170,13 @@
     "Clear your comparison selections before updating so they are not lost.": "请先清除比较选择，再更新应用，以免丢失选择。",
     "Sort by": "排序方式",
     "Company pages": "公司分页",
-    "Settings": "设置"
+    "Settings": "设置",
+    "Explore the design": "查看设计",
+    "Yeo Hiap Seng": "杨协成",
+    "Discover Yeo's Singapore drinks, from soya milk to tea.": "探索杨协成在新加坡推出的豆奶、茶等饮品。",
+    "The Drinks Index": "饮品索引",
+    "Explore six Singapore drinks by family, flavour and pack format.": "按类别、风味和包装浏览六款新加坡饮品。",
+    "Food & Beverage · Singapore": "食品与饮料 · 新加坡"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "显示 {total} 家匹配公司中的 {shown} 家",

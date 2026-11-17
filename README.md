@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **one company and eight designs**. All concepts are unofficial and do not imply company endorsement.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **two companies and nine designs**. All concepts are unofficial and do not imply company endorsement.
 
 The [Design System SSOT](ds.md) owns shared gallery design and UX contracts, the prioritized UI audit, cross-project reuse boundaries and acceptance criteria. Its version 1.0.0 tracks the executable token/icon registry, gallery adoption and remaining verification. Run `python scripts/check_ssot.py` to check generated artifacts and prevent new design-system debt.
 
@@ -12,7 +12,7 @@ See the [1.1.0 release review](docs/ssot-release-review.md) for the actual verif
 
 The [GJH company profile](demos/corporate/gjh/research/company-profile.md) covers the Singapore company record, trading history, customers and sales channels. The [22-name brand register](docs/gjh-multibrand-directory.md) traces house brands, Singapore trademark records and reported distribution relationships to their sources.
 
-The [next-company recommendation](docs/next-company-demo.md) proposes Thow Kwang Pottery Jungle for a visitor and workshop guide, compares two alternatives, and outlines the first page.
+The [company shortlist](docs/next-company-demo.md) compares three Singapore demo subjects. The [Yeo Hiap Seng collection](companies/yeos/index.html) opens [The Drinks Index](demos/food-beverage/yeos/v1/index.html), an independent guide to six drinks by family, flavour and pack format.
 
 ## Browse
 
@@ -59,6 +59,7 @@ python scripts/check_ssot.py
 python scripts/build_gallery.py --check
 python -m unittest discover -s tests -p 'test_*.py' -v
 python tests/browser_gallery.py
+python tests/browser_yeos_drinks.py
 python tests/browser_gallery_layout.py
 python tests/browser_gjh_demos.py
 python tests/browser_gjh_v9.py

@@ -37,6 +37,8 @@ def run():
     screenshots = ROOT / "docs/screenshots/gallery-v2"
     screenshots.mkdir(parents=True, exist_ok=True)
     evidence = []
+    catalog = gallery.load_catalog()
+    gjh_designs = [d for d in catalog["designs"] if d["companyId"] == "gjh"]
     with tempfile.TemporaryDirectory(prefix="gallery-browser-") as temporary:
         output = Path(temporary) / "Webpage-Design-Gallery"
         gallery.build(output)
@@ -60,9 +62,9 @@ def run():
                     page.goto(base, wait_until="networkidle")
                     page.keyboard.press("Tab")
                     assert page.evaluate("document.activeElement.textContent") == "Skip to content"
-                    assert page.locator(".company-card").count() == 1
+                    assert page.locator(".company-card").count() == len(catalog["companies"])
                     assert page.locator(".design-card").count() == 0
-                    assert page.locator(".company-card").get_attribute("href") == "companies/gjh/index.html"
+                    assert page.locator('.company-card[data-company="gjh"]').get_attribute("href") == "companies/gjh/index.html"
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
                     page.screenshot(path=str(screenshots / f"home-{width}.png"), full_page=True)
                     page.locator("#company-search").fill("not-present")
@@ -75,10 +77,9 @@ def run():
                     page.locator("#category-filter").select_option("retail")
                     assert page.locator(".company-card:visible").count() == 0
                     page.get_by_role("button", name="Clear filters").click()
-                    page.locator(".company-card").click()
+                    page.locator('.company-card[data-company="gjh"]').click()
                     assert page.url.endswith("companies/gjh/index.html")
-                    expected_designs = len(gallery.load_catalog()["designs"])
-                    assert page.locator(".design-card").count() == expected_designs
+                    assert page.locator(".design-card").count() == len(gjh_designs)
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
                     page.screenshot(path=str(screenshots / f"company-{width}.png"), full_page=True)
                     page.select_option("#style-filter", "minimal")
@@ -89,7 +90,7 @@ def run():
                     assert page.locator("#style-filter").input_value() == "minimal"
                     assert page.locator(".design-card:visible").count() == 1
                     page.select_option("#style-filter", "heritage")
-                    heritage_count = sum("heritage" in design["styles"] for design in gallery.load_catalog()["designs"])
+                    heritage_count = sum("heritage" in design["styles"] for design in gjh_designs)
                     assert page.locator(".design-card:visible").count() == heritage_count
                     page.select_option("#style-filter", "")
                     assert page.locator("#compare-selected").get_attribute("aria-disabled") == "true"
@@ -165,6 +166,21 @@ def run():
                 # them from the real service worker tested in browser_pwa.py.
                 context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
                 page = context.new_page()
+                page.goto(base)
+                page.select_option("#category-filter", "food-beverage")
+                page.locator("#company-search").fill("yeos")
+                yeos = page.locator('.company-card:visible')
+                assert yeos.count() == 1 and yeos.get_attribute("data-company") == "yeos"
+                yeos.click()
+                assert page.url.endswith("companies/yeos/index.html")
+                assert page.locator(".design-card").count() == 1
+                assert page.locator(".compare-checkbox, .compare-tray").count() == 0
+                page.locator(".details-link").click()
+                page.get_by_role("heading", name="The Drinks Index").wait_for()
+                assert page.locator('#detail-content a[href*="compare/"]').count() == 0
+                demo = page.get_by_role("link", name="Open live demo")
+                demo.click()
+                assert "/demos/food-beverage/yeos/v1/" in page.url
                 for query in ("company=gjh&left=v5&right=v5", "company=unknown&left=v1&right=v7", "company=gjh&left=v1"):
                     page.goto(base + "compare/index.html?" + query)
                     page.wait_for_selector(".error-state")
@@ -207,8 +223,8 @@ def run():
                 context.close()
                 context = browser.new_context(java_script_enabled=False)
                 page = context.new_page(); page.goto(base)
-                page.locator(".company-card").click()
-                assert page.locator(".design-card").count() == len(gallery.load_catalog()["designs"])
+                page.locator('.company-card[data-company="gjh"]').click()
+                assert page.locator(".design-card").count() == len(gjh_designs)
                 page.locator('.design-card[data-design="v7"] .card-action').click()
                 assert "/demos/corporate/gjh/v7/" in page.url
                 evidence.append({"noJavaScriptBrowseAndOpenDemo": "PASS", "invalidCompareAndDetail": "PASS"})

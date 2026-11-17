@@ -158,7 +158,7 @@ def run():
                 assert page.evaluate("navigator.onLine") is False
                 assert page.evaluate("fetch('network-probe').then(() => false).catch(() => true)")
                 page.reload(wait_until="networkidle")
-                assert page.locator(".design-card").count() == len(catalog["designs"])
+                assert page.locator(".design-card").count() == sum(d["companyId"] == "gjh" for d in catalog["designs"])
                 offline_signal = page.evaluate("""() => ({ online: navigator.onLine,
                     noticeHidden: document.querySelector('#connection-notice').hidden,
                     status: document.querySelector('#app-status').textContent,
@@ -170,7 +170,7 @@ def run():
                 page.goto(base, wait_until="networkidle")
                 page.locator("#company-search").fill("Goh")
                 assert page.locator(".company-card:visible").count() == 1
-                page.locator(".company-card").click()
+                page.locator('.company-card[data-company="gjh"]').click()
                 page.locator('.design-card[data-design="v1"] .card-action').click()
                 page.wait_for_url("**/offline.html")
                 assert page.get_by_role("heading", name="This preview needs a connection.").is_visible()
