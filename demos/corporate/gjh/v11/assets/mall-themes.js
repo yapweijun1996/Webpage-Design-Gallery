@@ -3,11 +3,11 @@
 export const THEME_STORAGE_KEY = 'gjh-v11-mall-theme-v1';
 export const EVERYDAY = Object.freeze({
   id:'everyday', label:'Everyday',
-  materials:Object.freeze({floorTextured:0xffffff,floorFlat:0xc9c2ac,ceiling:0xf0e8d9,ceilingGlow:0xb3a286,ceilingGlowIntensity:.55,
+  materials:Object.freeze({floorTextured:0xd4d0c6,floorFlat:0xaaa79c,ceiling:0xf0e8d9,ceilingGlow:0xb3a286,ceilingGlowIntensity:.55,
     wall:0xc9c4b6,green:0x153c30,ivory:0xe3d6b7,brass:0xb59b62,wood:0x6b4931,oak:0xa28055,timber:0xa48b67,timberAlt:0xa08763,
     glass:0xd7e9df,glassOpacity:.19,glassRoughness:.08,glassMetalness:.08,glow:0xffe7b4,glowEmission:0xffd08a,glowIntensity:1.2,
     liftStone:0xdfd5c4,liftGreen:0x183a30,liftGate:0xb59b62,liftGlassOpacity:.24}),
-  lighting:Object.freeze({sky:0xfff3e2,ground:0x77634b,ambient:1.05,key:0xffd5a0,keyIntensity:2.1,fill:0xf4e4ce,fillIntensity:.45}),
+  lighting:Object.freeze({sky:0xe5eef0,ground:0x665e50,ambient:.72,key:0xffe0bc,keyIntensity:2.6,fill:0xcbdde5,fillIntensity:.4}),
   decorationRefs:Object.freeze([])
 });
 export const LUNAR_NEW_YEAR = Object.freeze({

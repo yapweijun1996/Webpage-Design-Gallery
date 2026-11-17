@@ -2,6 +2,12 @@
 
 The separately developed [local stage 8 report](gjh-v11-stage8-materials-local.md) and its original evidence are retained as historical observations. Later theme and startup integration is documented in [stage 11b](gjh-v11-stage11b-startup.md).
 
+## Current expanded-mall lighting
+
+The expanded mall now uses a lower, cooler hemisphere fill and a stronger angled warm directional key. Short-range, non-shadow-casting shop accents mix a restrained shop color into warm light; at most six are active near the visitor. The darker, slightly cool stone floor tint separates it from the lighter walls in both textured and flat-fallback modes. Seasonal themes retain their own color overrides while inheriting the revised intensity and floor values. Classic global lighting is unchanged; its shop accents also use the revised range and color mix.
+
+These changes reuse the existing lights and materials, add no external assets or geometry, and leave the direct mobile/Low render path and selective desktop bloom unchanged. Visual readability and the 200-call budget require fresh browser verification; historical measurements below do not establish the result for this revision.
+
 Application 1.1.52/build `3ac382081b3b16d2` refines the opt-in expanded preview with subtle stone and wood patterns, warmer existing light sources and coordinated cream stone on the upper landing. The [receipt](evidence/gjh-stage8-materials.json) pins exact source phases, raw evidence and selected before/after images. Current focused/integration checks and independent local acceptance pass; main/CI/Pages/publication remain the release gates. It preserves the three current stores, four products, closed candidate bays and visitor interactions. Theme infrastructure and seasonal decorations belong to later stages.
 
 ## Implementation and reuse

@@ -2561,9 +2561,9 @@ import { setupOriginalTin } from "./assets/original-tin.js";
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
 function createMallAtmosphere(T, renderer, scene, slots) {
   const accents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324, 4689030, 8666691, 7313040, 7831429, 6705273, 8549738, 4954515, 6449514];
-  const warm = new T.Color(16766368);
+  const warm = new T.Color(16766368), interiorWarm = new T.Color(16760184);
   const lights = slots.map((slot2, index) => {
-    const light = new T.PointLight(16766368, 14, 13, 2);
+    const light = new T.PointLight(16766368, 16, 9, 2);
     light.name = `Shop ${String(index + 1).padStart(2, "0")} accent light`;
     light.position.set((slot2.minX + slot2.maxX) / 2, 4.2, (slot2.minZ + slot2.maxZ) / 2);
     light.visible = false;
@@ -2572,9 +2572,9 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     return { light, accent: new T.Color(accents[index]) };
   });
   function applyTheme(theme) {
-    warm.set(theme?.lighting?.key ?? 16766368);
+    warm.set(theme?.lighting?.key ?? 16766368).lerp(interiorWarm, 0.35);
     for (const { light, accent } of lights)
-      light.color.copy(warm).lerp(accent, 0.28);
+      light.color.copy(warm).lerp(accent, 0.16);
   }
   applyTheme(null);
   const nearest = [];

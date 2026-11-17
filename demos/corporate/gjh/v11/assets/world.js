@@ -76,10 +76,11 @@ export async function createWorld(T, R, physics, expanded = false) {
         new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Optional finish timeout')),2000);}),
       ]);
       const natural=module.createNaturalSurfaceTextures(T);
-      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xffffff);materials.shellFloor.roughness=.58;}
+      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xd4d0c6);materials.shellFloor.roughness=.58;}
       if(natural.wood)for(const name of ['wood','oak','timber','timberAlt'])materials[name].map=natural.wood;
     }catch{/* Retain usable solid finishes on module/canvas failure. */}
     finally{clearTimeout(timer);}
+    if(!materials.shellFloor.map) materials.shellFloor.color.set(0xaaa79c);
     materials.shellCeiling.color.set(0xf0e8d9);materials.shellCeiling.emissive.set(0xb3a286);materials.shellCeiling.emissiveIntensity=.55;
     materials.shellWall.color.set(0xc9c4b6);
     materials.glass.color.set(0xd7e9df);materials.glass.opacity=.19;materials.glass.roughness=.08;materials.glass.metalness=.08;
@@ -639,10 +640,10 @@ export async function createWorld(T, R, physics, expanded = false) {
     scene.add(mesh);
     if(batch.shopSlot!==null)shopLodMeshes.push(mesh);
   }
-  const ambient = new T.HemisphereLight(expanded ? 0xfff3e2 : 0xffeee0, expanded ? 0x77634b : 0x6d5b3b, 1.05);scene.add(ambient);
-  const key = new T.DirectionalLight(0xffd5a0, 2.1); key.position.set(-8, 15, 9); key.castShadow = true;
+  const ambient = new T.HemisphereLight(expanded ? 0xe5eef0 : 0xffeee0, expanded ? 0x665e50 : 0x6d5b3b, expanded ? .72 : 1.05);scene.add(ambient);
+  const key = new T.DirectionalLight(expanded ? 0xffe0bc : 0xffd5a0, expanded ? 2.6 : 2.1); key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9])); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
-  const fill = new T.DirectionalLight(expanded ? 0xf4e4ce : 0xe9d8c2, .45); fill.position.set(4, 8, -5); scene.add(fill);
+  const fill = new T.DirectionalLight(expanded ? 0xcbdde5 : 0xe9d8c2, expanded ? .4 : .45); fill.position.set(4, 8, -5); scene.add(fill);
   const applyMallTheme = theme => applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();

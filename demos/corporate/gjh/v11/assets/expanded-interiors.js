@@ -4,13 +4,15 @@ import {GLTFLoader} from '../vendor/GLTFLoader.js';
 // All exports use metres, a floor-centred origin and local +Z as the front.
 const displayFiles = {
   4:['pharmacy-counter'], 5:['pharmacy-counter'], 13:['speaker-soundbar'],
-  14:['tv-demo-table', 'tv-floor-stand', 'tv-wall-mounted'],
+  14:['tv-demo-table', 'tv-floor-stand'],
   15:['electronic-keyboard'], 16:['battery-display-rack'], 17:['cordless-phone-display']
 };
 
-function displayPlacements(number, heroZ, back) {
-  if (number === 14) return [[-1.05, .07, heroZ], [1.05, .07, heroZ], [-2.6, .07, back+.253]];
-  return [[number === 4 || number === 5 ? 1.5 : 1.05, number === 13 || number === 17 ? .99 : .07, heroZ]];
+function displayPlacements(number, heroZ) {
+  if (number === 14) return [[-1.85, .22, heroZ, 1.1], [1.85, .22, heroZ, 1.2]];
+  const height = number === 13 || number === 17 ? 1.09 : number === 15 ? .42 : number === 16 ? .22 : .07;
+  const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 1;
+  return [[1.85, height, heroZ, scale]];
 }
 
 // Furniture is vertex-coloured and merged; model displays load only near a bay.
@@ -89,17 +91,34 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     }
     const structureParts = parts;
     parts = [];
-    heroOffset = number === 13 || number === 17 ? 1.05 : 2.6;
-    // Floor-standing displays replace the pedestal; tabletop products retain it.
-    const heroZ = front-(displayFiles[number] ? .75 : 1.75);
+    heroOffset = 1.85;
+    // Keep the hero in a glazed window, clear of the central door and visitor.
+    const heroZ = front - 1;
     if (number === 13 || number === 17) {
       parts = structureParts;
-      box(0,.47,heroZ,2.1,.9,1.05,green);
-      box(0,.95,heroZ,2.25,.08,1.2,gold);
+      box(0,.52,heroZ,2.1,1,1.05,green);
+      box(0,1.05,heroZ,2.25,.08,1.2,ivory);
       parts = [];
+    } else if (number === 14) {
+      parts = structureParts;
+      for (const x of [-3.7, 0]) {
+        box(x,.14,heroZ,2.2,.14,1.25,green);
+        box(x,.205,heroZ,2.2,.03,1.25,ivory);
+      }
+      parts = [];
+      box(0,.47,heroZ,2.1,.9,1.05,green);
+      box(0,.95,heroZ,2.25,.08,1.2,ivory);
+    } else if (number === 15 || number === 16) {
+      parts = structureParts;
+      const top = number === 15 ? .42 : .22;
+      box(0,(top+.07)/2,heroZ,1.85,top-.07,1.15,green);
+      box(0,top-.025,heroZ,1.85,.05,1.15,ivory);
+      parts = [];
+      box(0,.47,heroZ,2.1,.9,1.05,green);
+      box(0,.95,heroZ,2.25,.08,1.2,ivory);
     } else {
       box(0,.47,heroZ,2.1,.9,1.05,green);
-      box(0,.95,heroZ,2.25,.08,1.2,gold);
+      box(0,.95,heroZ,2.25,.08,1.2,ivory);
     }
     const accent = accents[number];
     if (number >= 7 && number <= 11) {
@@ -138,23 +157,28 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     furnitureParts.forEach(part => part.dispose());
     furniture.name = `S${slot.number} furnishings`;
     group.add(furniture);
-    let loadDisplay;
+    let loadDisplay, display, fallback, loaded = false;
     if (files) {
-      const fallback = new T.Mesh(mergeGeometries(parts), material);
+      fallback = new T.Mesh(mergeGeometries(parts), material);
       parts.forEach(part => part.dispose());
       fallback.name = `S${slot.number} display fallback`;
       group.add(fallback);
+      display = new T.Group();
+      display.visible = false;
+      group.add(display);
       loadDisplay = () => {
-        const placements = displayPlacements(number, heroZ, back);
+        const placements = displayPlacements(number, heroZ);
         Promise.all(files.map(loadModel)).then(scenes => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
-            instance.position.set(...placements[i]);
+            const [x, y, z, scale] = placements[i];
+            instance.position.set(x, y, z);
+            instance.scale.setScalar(scale);
             instance.name = `S${slot.number} ${files[i]}`;
-            group.add(instance);
+            display.add(instance);
           });
-          group.remove(fallback);
-          fallback.geometry.dispose();
+          loaded = true;
+          fallback.visible = !display.visible;
         }).catch(() => {
           // Keep the procedural display if a model is unavailable.
         });
@@ -168,13 +192,25 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     group.add(poster);
     group.visible = false;
     scene.add(group);
-    shops.push({group, x:group.position.x, z:group.position.z, loadDisplay});
+    shops.push({group, x:group.position.x, z:group.position.z, display, fallback,
+      isLoaded: () => loaded, loadDisplay});
   });
   return {update(visitor) {
+    let nearest = null, nearestDistance = 11*11;
     for (const shop of shops) {
-      const dx=visitor.x-shop.x, dz=visitor.z-shop.z;
-      shop.group.visible = Math.abs(visitor.y) < 5 && dx*dx+dz*dz < 17*17;
-      if (shop.group.visible && shop.loadDisplay) {
+      const dx=visitor.x-shop.x, dz=visitor.z-shop.z, distance=dx*dx+dz*dz;
+      shop.group.visible = Math.abs(visitor.y) < 5 && distance < 17*17;
+      if (shop.group.visible && distance < nearestDistance) {
+        nearest = shop;
+        nearestDistance = distance;
+      }
+    }
+    for (const shop of shops) {
+      if (!shop.display) continue;
+      const active = shop === nearest;
+      shop.display.visible = active;
+      shop.fallback.visible = !active || !shop.isLoaded();
+      if (active && shop.loadDisplay) {
         shop.loadDisplay();
         shop.loadDisplay = null;
       }

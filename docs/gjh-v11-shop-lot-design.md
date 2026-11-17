@@ -4,7 +4,7 @@ Independent virtual-mall concept. Slot allocation and brand-kit/product evidence
 
 The expanded layout is default. North storefronts S01–S05 face south; west S06–S11 face east; east S12–S17 face west. Existing runtime geometry, scale and stable IDs stay unchanged. Nearby displays render, while distant stores retain the glazed facade and branded sign. Sign artwork uses one shared 1536×1904 atlas, with higher-resolution logo/text cells and a 0.9 m sign height for the 17 slot labels; it remains one mesh/draw call. Expanded S01–S03 doors stay shut; classic 3-store mode retains its original entry behavior. Keep the New Moon red flagship accent alongside the shared forest-green, ivory, champagne-gold, warm-wood and light-stone palette. Target <=200 draw calls in sampled states.
 
-LOD covers existing S01–S03 interior props and product/shelf instances as well as the new S04–S17 generated displays. Slot-bound meshes use a 12 m radius, generated interiors use 17 m, and instanced display shelves use 18 m. Far stores show the facade/sign only; no interior becomes walkable in the expanded layout.
+LOD covers existing S01–S03 interior props and product/shelf instances as well as the new S04–S17 generated displays. Slot-bound meshes use a 12 m radius, generated interiors use 17 m, and instanced display shelves use 18 m. At most the nearest model-backed display within 11 m is rendered in full; other visible shops retain procedural stand-ins. Far stores show the facade/sign only; no interior becomes walkable in the expanded layout.
 
 | Slot | Brand | Hero product | Evidence | Design idea | Models used / planned | LOD |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -21,7 +21,7 @@ LOD covers existing S01–S03 interior props and product/shelf instances as well
 | S11 | Hormel | Generic canned-food shelf; no specific product | NOT_VERIFIED | Neutral canned-food shelf only. No SPAM or Skippy relationship/product claim; no branded can labels. | Validated GJH M056 shelf; generic unlabelled cans. | Near: one generic shelf bay; far: facade + sign. |
 | S12 | Zeria | Chondro Support 150 Tablets | BRAND_LISTING_VERIFIED | Cool ivory showcase and a plain, unbranded box stand-in; no health-benefit copy. | Local mall glass showcase (PASS local QA); generic generated box. | Near: single box/showcase; far: facade + sign. |
 | S13 | Sony | MDR-E9LP In-Ear Headphone White | BRAND_LISTING_VERIFIED | Charcoal acoustic panel and ivory plinth. | Generic speaker soundbar. | Near: soundbar; far: facade + sign. |
-| S14 | LG | UHD UR75 43 inch 4K Smart TV | BRAND_LISTING_VERIFIED | Stone gallery wall with generic television displays. | TV demo table, floor stand and wall-mounted TV. | Near: TVs; far: facade + sign. |
+| S14 | LG | UHD UR75 43 inch 4K Smart TV | BRAND_LISTING_VERIFIED | Stone gallery wall with generic television displays. | TV demo table and floor stand. | Near: TVs; far: facade + sign. |
 | S15 | Casio | Celviano Grand Hybrid GP-510 Piano | BRAND_LISTING_VERIFIED | Warm timber music gallery. | Generic electronic keyboard, not a GP-510 replica. | Near: instrument; far: facade + sign. |
 | S16 | GP | eTag Smart Locator Tracker White | DETAIL_PAGE_VERIFIED | White modular electronics display. | Generic battery display rack. | Near: rack; far: facade + sign. |
 | S17 | Gigaset | A270 Single Cordless Phone | DETAIL_PAGE_VERIFIED | Graphite/ivory plinth. | Generic cordless phone display. | Near: phone display; far: facade + sign. |
@@ -40,7 +40,7 @@ The New Moon can variants remain the only verified slot-matched product GLBs; th
 
 **NOT FOUND:** an ice-cream cart or upright piano in the upstream model checkout. The watch-display-case has no matching watch shop, and aquarium-tank and koi-fish have no matching aquarium shop. The round-event-platform, arched-gateway-sign and skylight-roof-module have no matching product display in the supplied shop allocation; they are not used.
 
-The new displays sit nearer the glazing, offset from the central visitor. They retain their exported metre scale; the phone remains a small, physically sized tabletop object.
+The displays sit near the glazing in the open bays, offset from the central visitor. Generic models are scaled up to 1.5× their exported metre scale and some use raised platforms; the phone remains a small tabletop object.
 
 ## Stage 5 performance evidence
 

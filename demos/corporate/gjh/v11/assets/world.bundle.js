@@ -1090,15 +1090,17 @@ var displayFiles = {
   4: ["pharmacy-counter"],
   5: ["pharmacy-counter"],
   13: ["speaker-soundbar"],
-  14: ["tv-demo-table", "tv-floor-stand", "tv-wall-mounted"],
+  14: ["tv-demo-table", "tv-floor-stand"],
   15: ["electronic-keyboard"],
   16: ["battery-display-rack"],
   17: ["cordless-phone-display"]
 };
-function displayPlacements(number, heroZ, back) {
+function displayPlacements(number, heroZ) {
   if (number === 14)
-    return [[-1.05, 0.07, heroZ], [1.05, 0.07, heroZ], [-2.6, 0.07, back + 0.253]];
-  return [[number === 4 || number === 5 ? 1.5 : 1.05, number === 13 || number === 17 ? 0.99 : 0.07, heroZ]];
+    return [[-1.85, 0.22, heroZ, 1.1], [1.85, 0.22, heroZ, 1.2]];
+  const height = number === 13 || number === 17 ? 1.09 : number === 15 ? 0.42 : number === 16 ? 0.22 : 0.07;
+  const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 1;
+  return [[1.85, height, heroZ, scale]];
 }
 async function createExpandedInteriors(T, expandedLayout2, scene) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
@@ -1193,16 +1195,33 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     }
     const structureParts = parts;
     parts = [];
-    heroOffset = number === 13 || number === 17 ? 1.05 : 2.6;
-    const heroZ = front - (displayFiles[number] ? 0.75 : 1.75);
+    heroOffset = 1.85;
+    const heroZ = front - 1;
     if (number === 13 || number === 17) {
       parts = structureParts;
-      box(0, 0.47, heroZ, 2.1, 0.9, 1.05, green);
-      box(0, 0.95, heroZ, 2.25, 0.08, 1.2, gold);
+      box(0, 0.52, heroZ, 2.1, 1, 1.05, green);
+      box(0, 1.05, heroZ, 2.25, 0.08, 1.2, ivory);
       parts = [];
+    } else if (number === 14) {
+      parts = structureParts;
+      for (const x of [-3.7, 0]) {
+        box(x, 0.14, heroZ, 2.2, 0.14, 1.25, green);
+        box(x, 0.205, heroZ, 2.2, 0.03, 1.25, ivory);
+      }
+      parts = [];
+      box(0, 0.47, heroZ, 2.1, 0.9, 1.05, green);
+      box(0, 0.95, heroZ, 2.25, 0.08, 1.2, ivory);
+    } else if (number === 15 || number === 16) {
+      parts = structureParts;
+      const top = number === 15 ? 0.42 : 0.22;
+      box(0, (top + 0.07) / 2, heroZ, 1.85, top - 0.07, 1.15, green);
+      box(0, top - 0.025, heroZ, 1.85, 0.05, 1.15, ivory);
+      parts = [];
+      box(0, 0.47, heroZ, 2.1, 0.9, 1.05, green);
+      box(0, 0.95, heroZ, 2.25, 0.08, 1.2, ivory);
     } else {
       box(0, 0.47, heroZ, 2.1, 0.9, 1.05, green);
-      box(0, 0.95, heroZ, 2.25, 0.08, 1.2, gold);
+      box(0, 0.95, heroZ, 2.25, 0.08, 1.2, ivory);
     }
     const accent = accents[number];
     if (number >= 7 && number <= 11) {
@@ -1244,23 +1263,28 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     furnitureParts.forEach((part) => part.dispose());
     furniture.name = `S${slot2.number} furnishings`;
     group.add(furniture);
-    let loadDisplay;
+    let loadDisplay, display, fallback, loaded = false;
     if (files) {
-      const fallback = new T.Mesh(mergeGeometries2(parts), material);
+      fallback = new T.Mesh(mergeGeometries2(parts), material);
       parts.forEach((part) => part.dispose());
       fallback.name = `S${slot2.number} display fallback`;
       group.add(fallback);
+      display = new T.Group;
+      display.visible = false;
+      group.add(display);
       loadDisplay = () => {
-        const placements = displayPlacements(number, heroZ, back);
+        const placements = displayPlacements(number, heroZ);
         Promise.all(files.map(loadModel)).then((scenes) => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
-            instance.position.set(...placements[i]);
+            const [x, y, z, scale] = placements[i];
+            instance.position.set(x, y, z);
+            instance.scale.setScalar(scale);
             instance.name = `S${slot2.number} ${files[i]}`;
-            group.add(instance);
+            display.add(instance);
           });
-          group.remove(fallback);
-          fallback.geometry.dispose();
+          loaded = true;
+          fallback.visible = !display.visible;
         }).catch(() => {});
       };
     }
@@ -1272,13 +1296,33 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     group.add(poster);
     group.visible = false;
     scene.add(group);
-    shops.push({ group, x: group.position.x, z: group.position.z, loadDisplay });
+    shops.push({
+      group,
+      x: group.position.x,
+      z: group.position.z,
+      display,
+      fallback,
+      isLoaded: () => loaded,
+      loadDisplay
+    });
   });
   return { update(visitor) {
+    let nearest = null, nearestDistance = 11 * 11;
     for (const shop of shops) {
-      const dx = visitor.x - shop.x, dz = visitor.z - shop.z;
-      shop.group.visible = Math.abs(visitor.y) < 5 && dx * dx + dz * dz < 17 * 17;
-      if (shop.group.visible && shop.loadDisplay) {
+      const dx = visitor.x - shop.x, dz = visitor.z - shop.z, distance = dx * dx + dz * dz;
+      shop.group.visible = Math.abs(visitor.y) < 5 && distance < 17 * 17;
+      if (shop.group.visible && distance < nearestDistance) {
+        nearest = shop;
+        nearestDistance = distance;
+      }
+    }
+    for (const shop of shops) {
+      if (!shop.display)
+        continue;
+      const active = shop === nearest;
+      shop.display.visible = active;
+      shop.fallback.visible = !active || !shop.isLoaded();
+      if (active && shop.loadDisplay) {
         shop.loadDisplay();
         shop.loadDisplay = null;
       }
@@ -1543,7 +1587,7 @@ async function createWorld(T, R, physics, expanded = false) {
         const natural = module.createNaturalSurfaceTextures(T);
         if (natural.stone) {
           materials.shellFloor.map = natural.stone;
-          materials.shellFloor.color.set(16777215);
+          materials.shellFloor.color.set(13947078);
           materials.shellFloor.roughness = 0.58;
         }
         if (natural.wood)
@@ -1552,6 +1596,8 @@ async function createWorld(T, R, physics, expanded = false) {
       } catch {} finally {
         clearTimeout(timer);
       }
+      if (!materials.shellFloor.map)
+        materials.shellFloor.color.set(11184028);
       materials.shellCeiling.color.set(15788249);
       materials.shellCeiling.emissive.set(11772550);
       materials.shellCeiling.emissiveIntensity = 0.55;
@@ -2125,17 +2171,17 @@ async function createWorld(T, R, physics, expanded = false) {
       if (batch.shopSlot !== null)
         shopLodMeshes.push(mesh);
     }
-    const ambient = new T.HemisphereLight(expanded ? 16774114 : 16772832, expanded ? 7824203 : 7166779, 1.05);
+    const ambient = new T.HemisphereLight(expanded ? 15068912 : 16772832, expanded ? 6708816 : 7166779, expanded ? 0.72 : 1.05);
     scene.add(ambient);
-    const key = new T.DirectionalLight(16766368, 2.1);
-    key.position.set(-8, 15, 9);
+    const key = new T.DirectionalLight(expanded ? 16769212 : 16766368, expanded ? 2.6 : 2.1);
+    key.position.set(...expanded ? [-12, 16, 6] : [-8, 15, 9]);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     Object.assign(key.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 0.5, far: 50 });
     key.shadow.normalBias = 0.05;
     key.shadow.bias = -0.0004;
     scene.add(key);
-    const fill = new T.DirectionalLight(expanded ? 16049358 : 15325378, 0.45);
+    const fill = new T.DirectionalLight(expanded ? 13360613 : 15325378, expanded ? 0.4 : 0.45);
     fill.position.set(4, 8, -5);
     scene.add(fill);
     const applyMallTheme = (theme) => applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill });
