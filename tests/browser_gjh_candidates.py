@@ -1,4 +1,4 @@
-"""Stage6 neutral planned-space parity and native fallback/interaction checks."""
+"""Closed storefront identity parity and native fallback/interaction checks."""
 import argparse,functools,hashlib,http.server,json,os,tempfile,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -7,13 +7,13 @@ BASE=ROOT/'demos/corporate/gjh/v11'
 FILES=[BASE/'assets/expanded-layout.js',BASE/'assets/ui.js',BASE/'index.html',BASE/'style.css',ROOT/'tests/gjh_expanded_layout.test.mjs',Path(__file__)]
 def hashes():return {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in FILES}
 def cards(page):
- return page.locator('[data-planned-space]').evaluate_all('''els=>els.map(e=>({id:e.id,number:e.dataset.plannedNumber,label:e.querySelector('h3').textContent,side:e.dataset.plannedSide,status:e.dataset.plannedStatus,available:e.dataset.plannedAvailable,admission:{brand:e.dataset.plannedBrand,content:e.dataset.plannedContent,rights:e.dataset.plannedRights},location:e.querySelector('[data-planned-field=location]').textContent,actions:e.querySelectorAll('a,button,input,select,textarea,[data-store],[data-product],[data-teleport],[data-inspect],[data-add]').length}))''')
+ return page.locator('[data-planned-space]').evaluate_all('''els=>els.map(e=>({id:e.id,number:e.dataset.plannedNumber,label:e.querySelector('h3').textContent,side:e.dataset.plannedSide,status:e.dataset.plannedStatus,available:e.dataset.plannedAvailable,brand:e.dataset.plannedBrand,location:e.querySelector('[data-planned-field=location]').textContent,actions:e.querySelectorAll('a,button,input,select,textarea,[data-store],[data-product],[data-teleport],[data-inspect],[data-add]').length}))''')
 def check_cards(page,expected):
  rows=cards(page);assert len(rows)==14
  for row,space in zip(rows,expected):
-  assert all(row[key]==space[key] for key in ['id','number','label','side','status','admission']),(row,space)
+  assert all(row[key]==space[key] for key in ['id','number','label','side','status','brand']),(row,space)
   assert row['available']=='false' and space['available'] is False and row['actions']==0
-  assert row['location']==space['side'].capitalize()+' side · Planned · not open'
+  assert row['location']==space['side'].capitalize()+' side · Display only · No entry'
  assert page.locator('[data-store]').count()==3 and page.locator('.product-card').count()==4
  assert page.locator('#planned-spaces-directory [data-store],#planned-spaces-directory [data-product]').count()==0
  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
@@ -42,13 +42,15 @@ def run():
      browser=p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args=['--use-angle=metal','--ignore-gpu-blocklist'])
      expected=None
      for width,height,expanded,dark in [(390,844,False,False),(639,826,False,False),(1440,1000,False,False),(320,740,True,False),(390,844,True,False),(639,826,True,False),(1440,1000,True,False),(320,740,True,True)]:
-      context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',color_scheme='dark' if dark else 'light',service_workers='block');context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+('?layout=expanded' if expanded else ''),wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready&&window.__sceneReady',timeout=90000)
-      expected=page.evaluate('async()=> (await import("./assets/expanded-layout.js")).plannedSpaces')
+      context=browser.new_context(viewport={'width':width,'height':height},has_touch=width<1000,reduced_motion='reduce',color_scheme='dark' if dark else 'light',service_workers='block');context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+('?layout=expanded' if expanded else '?layout=classic'),wait_until='domcontentloaded');page.wait_for_function('()=>window.__mall?.ready&&window.__sceneReady',timeout=90000)
+      slots=page.evaluate('async()=> (await import("./assets/expanded-layout.js")).plannedSpaces')
+      kit=json.loads((BASE/'assets/brand-kit/brand-kit.json').read_text())
+      expected=[dict(slot,brand=kit['S'+slot['number']]['brand'],label=slot['number']+' · '+kit['S'+slot['number']]['brand']) for slot in slots]
       section=page.locator('#planned-spaces-directory');assert section.evaluate('e=>e.open')==expanded
       if expanded:
        assert page.locator('.map-planned[data-space-id]').count()==14
        for space in expected:
-        rect=page.locator(f'.map-planned[data-space-id="{space["id"]}"]');assert rect.get_attribute('data-space-status')==space['status'];assert rect.locator('title').text_content()==f'{space["label"]}: {space["side"].capitalize()} side; planned, not open.';assert rect.get_attribute('tabindex') is None
+        rect=page.locator(f'.map-planned[data-space-id="{space["id"]}"]');assert rect.get_attribute('data-space-status')==space['status'];assert rect.locator('title').text_content()==f'{space["label"]} · {space["side"].capitalize()} side · Display only · No entry';assert rect.get_attribute('tabindex') is None
       else:assert page.locator('.map-planned').count()==0
       # One JS turn isolates command side effects from unrelated autorender ticks.
       rejection=page.evaluate('''ids=>{const pose=()=>({x:__mall.state.x,z:__mall.state.z,frames:__mall.state.frames});const before=pose();const results=ids.map(id=>__mall.teleport(id));return {before,results,after:pose()}}''',[space['id'] for space in expected])
@@ -68,7 +70,7 @@ def run():
        context=browser.new_context(viewport={'width':390,'height':844},java_script_enabled=mode!='no-js',service_workers='block');page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
        if mode=='physics-failure':page.route('**/rapier.mjs',lambda route:route.abort())
        if mode=='webgl-failure':context.add_init_script("const originalContext=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return String(type).includes('webgl')?null:originalContext.call(this,type,...args)}")
-       page.goto(url+('?layout=expanded' if expanded else ''),wait_until='domcontentloaded')
+       page.goto(url+('?layout=expanded' if expanded else '?layout=classic'),wait_until='domcontentloaded')
        if mode in ['physics-failure','webgl-failure']:page.wait_for_function('()=>window.__sceneFailed===true',timeout=90000)
        assert page.locator('#store-list').is_visible();section=page.locator('#planned-spaces-directory')
        if section.get_attribute('open') is None:section.locator('summary').click()

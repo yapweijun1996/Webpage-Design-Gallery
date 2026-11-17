@@ -1,4 +1,4 @@
-"""Verify neutral planned spaces and their map/directory correspondence."""
+"""Verify display-only storefronts and their map/directory correspondence."""
 import functools
 import http.server
 import os
@@ -26,10 +26,10 @@ def run():
                 page.goto(url+'?layout=expanded'); page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert page.evaluate('window.__sceneReady === true')
                 open_map(page)
-                labels = page.locator('.expanded-map-number').all_text_contents()
+                labels = page.locator('#mall-map .expanded-map-number').all_text_contents()
                 assert labels == [f'{i:02d}' for i in range(1,18)], labels
-                assert '14 planned spaces' in page.locator('.floorplan').get_attribute('aria-label')
-                assert page.locator('.map-planned').count() == 14 and page.locator('[data-teleport]').count() == 3
+                assert '14 display-only storefronts' in page.locator('#mall-map .floorplan').get_attribute('aria-label')
+                assert page.locator('#mall-map .map-planned').count() == 14 and page.locator('[data-teleport]').count() == 3
                 if page.locator('#map-close').is_visible(): page.locator('#map-close').click()
                 page.locator('#view-toggle').click()
                 detail = page.locator('#planned-spaces-directory'); assert detail.is_visible()
@@ -38,7 +38,7 @@ def run():
                 assert detail.evaluate('(e)=>e.open')
                 items=detail.locator('li').all_text_contents()
                 assert len(items)==14 and [detail.locator('li').nth(i).get_attribute('data-planned-number') for i in range(14)]==[f'{i:02d}' for i in range(4,18)], items
-                assert all('Planned' in x for x in items)
+                assert all('Display only · No entry' in x for x in items)
                 assert detail.locator('a,button').count()==0
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
                 for ident in ['newmoon','mili','gogo']:

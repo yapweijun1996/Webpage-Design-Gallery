@@ -1,4 +1,6 @@
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {buildWindowStudio} from './window-studios.js';
+import {loadBrandKit} from './shop-signs.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
 // All exports use metres, a floor-centred origin and local +Z as the front.
@@ -15,14 +17,20 @@ function displayPlacements(number, heroX, heroZ) {
   return [[heroX, height, heroZ, scale]];
 }
 
-// Furniture is vertex-coloured and merged; model displays load only near a bay.
+// Furniture is vertex-coloured and merged; model displays are prefetched near a bay.
 // Coordinates inside each bay have the glazed front on local +Z.
 export async function createExpandedInteriors(T, expandedLayout, scene) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const loader = new T.TextureLoader().setCrossOrigin(undefined);
-  const textures = await Promise.all(slots.map(slot => loader.loadAsync(new URL(`./brand-kit/S${slot.number}-hero.webp`, import.meta.url).href)));
+  const [kit, textures] = await Promise.all([
+    loadBrandKit(),
+    Promise.all(slots.map(slot => loader.loadAsync(new URL(`./brand-kit/S${slot.number}-hero.webp`, import.meta.url).href)))
+  ]);
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.78, emissive:0x30281b, emissiveIntensity:.22});
-  const posterGeometry = new T.PlaneGeometry(4, 2.7);
+  const studioParts = [], posterParts = [];
+  const atlas = document.createElement('canvas');
+  atlas.width = atlas.height = 2048;
+  const atlasContext = atlas.getContext('2d');
   const shops = [];
   const models = new Map(), gltfLoader = new GLTFLoader();
   function loadModel(name) {
@@ -32,7 +40,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     }
     return models.get(name);
   }
-  const ivory = 0xeee4d1, green = 0x526e5b, gold = 0xc6a66b, wood = 0x8b674a;
+  const ivory = 0xeee4d1, green = 0x526e5b, gold = 0xc6a66b;
   const accents = {4:0x785a68, 5:0x913f35, 6:0x667887, 7:0x9c4937, 8:0x477aac,
     9:0x294f7c, 10:0x478c86, 11:0x843e43, 12:0x6f9690, 13:0x33383b,
     14:0x665079, 15:0x292725, 16:0x4b9993, 17:0x62696a};
@@ -45,7 +53,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     group.name = `S${slot.number} interior`;
     group.position.set((slot.minX+slot.maxX)/2, 0, (slot.minZ+slot.maxZ)/2);
     group.rotation.y = side === 'west' ? Math.PI/2 : side === 'east' ? -Math.PI/2 : 0;
-    const back = -depth/2 + .18, front = depth/2;
+    const front = depth/2;
     let parts = [];
     let heroOffset = 0;
     function add(geometry, x, y, z, color) {
@@ -57,39 +65,29 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     }
     function box(x,y,z,w,h,d,color) { add(new T.BoxGeometry(w,h,d),x,y,z,color); }
     function cylinder(x,y,z,r,h,color) { add(new T.CylinderGeometry(r,r,h,12),x,y,z,color); }
-    // Architectural backdrop, floor and a warm illuminated picture surround.
-    box(0,2.45,back-.08,width-.35,4.9,.16,ivory);
-    box(0,.035,0,width-.35,.07,depth-.4,0xd6c6a7);
-    box(0,2.9,back+.08,4.3,3,.12,gold);
-    box(0,4.45,back+.16,4.5,.1,.16,0xffe5a7);
-    for (const x of [-2,2]) box(x,4.7,0,.1,.08,depth-1,0xffe5a7);
-    box(0,.17,back+.14,width-.45,.25,.18,green);
-    // Bring category displays forward so their contents read from the arcade.
-    const shelf = back + 2.9;
-    for (const sign of [-1,1]) {
-      const x = sign*(width/2-1.05);
-      box(x,1.3,shelf,1.65,2.6,.72,wood);
-      box(x,1.35,shelf+.38,1.45,2.25,.06,green);
-      if (number >= 13) {
-        box(x,1.36,shelf+.43,1.25,.85,.06,0x23343b);
-        box(x,1.36,shelf+.47,1.08,.68,.03,accents[number]);
-        box(x,.72,shelf+.75,1.5,.12,1.05,gold);
-        box(x,.36,shelf+.75,1.3,.72,.8,wood);
-      } else for (const y of [.55,1.12,1.69,2.26]) {
-        box(x,y,shelf+.51,1.5,.09,.36,gold);
-        for (let i=-1;i<=1;i++) {
-          const px=x+i*.4;
-          if (number >= 7 && number <= 11) {
-            cylinder(px,y+.18,shelf+.52,.15,.27,number===8?0xcba76c:ivory);
-            cylinder(px,y+.33,shelf+.52,.155,.035,accents[number]);
-          } else {
-            box(px,y+.21,shelf+.52,.3,.34,.15,ivory);
-            box(px,y+.23,shelf+.61,.22,.13,.025,accents[number]);
-          }
-        }
+    const leftPane = -(width/4+.4), stageZ = front-1.92;
+    const tools = {
+      box:(x,y,z,w,h,d,c) => box(x+leftPane,y,z+stageZ,w,h,d,c),
+      column:(x,y,z,r,h,c) => cylinder(x+leftPane,y,z+stageZ,r,h,c),
+      disc(x,y,z,r,d,c) {
+        add(new T.CylinderGeometry(r,r,d,24).rotateX(Math.PI/2),x+leftPane,y,z+stageZ,c);
+      },
+      bar(x1,y1,z1,x2,y2,z2,w,c) {
+        const direction = new T.Vector3(x2-x1,y2-y1,z2-z1);
+        const rod = new T.BoxGeometry(w,direction.length(),w);
+        rod.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),direction.normalize()));
+        add(rod,leftPane+(x1+x2)/2,(y1+y2)/2,stageZ+(z1+z2)/2,c);
+      },
+      arch(x,y,z,r,leg,w,c) {
+        for(const side of [-1,1]) tools.box(x+side*r,y+leg/2,z,w,leg,w,c);
+        const curve = new T.TorusGeometry(r,w/2,6,24,Math.PI);
+        add(curve,x+leftPane,y+leg,z+stageZ,c);
       }
-    }
-    const structureParts = parts;
+    };
+    const palette = kit[`S${slot.number}`].palette.map(colour => colour.hex);
+    buildWindowStudio(number, palette, tools, width, -leftPane);
+    group.updateMatrix();
+    for (const part of parts) studioParts.push(part.applyMatrix4(group.matrix));
     parts = [];
     heroOffset = side === 'north' ? 3 : 2.55;
     // The merchandise fixture sits inside a window, clear of the doorway.
@@ -133,11 +131,6 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
       box(0,2.19,heroZ,.73,.07,.36,gold);
     }
     const files = displayFiles[number];
-    const furnitureParts = structureParts;
-    const furniture = new T.Mesh(mergeGeometries(furnitureParts), material);
-    furnitureParts.forEach(part => part.dispose());
-    furniture.name = `S${slot.number} furnishings`;
-    group.add(furniture);
     const hero = new T.Group();
     hero.name = `S${slot.number} hero display`;
     hero.userData.modelReady = !files;
@@ -156,7 +149,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
       hero.add(display);
       loadDisplay = () => {
         const placements = displayPlacements(number, heroOffset, heroZ);
-        Promise.all(files.map(loadModel)).then(scenes => {
+        return Promise.all(files.map(loadModel)).then(scenes => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements[i];
@@ -173,19 +166,57 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
         });
       };
     }
-    const texture = textures[index];
-    texture.colorSpace = T.SRGBColorSpace;
-    const poster = new T.Mesh(posterGeometry, new T.MeshBasicMaterial({map:texture}));
-    poster.name = `S${slot.number} hero image`;
-    poster.position.set(heroOffset,1.8,heroZ-.43);
-    poster.scale.set(.5,.55,1);
-    hero.add(poster);
+    // Keep the right-hand product artwork visible across the concourse as
+    // well. All fourteen panels use one atlas and one draw call.
+    const column = index % 4, row = Math.floor(index / 4);
+    const image = textures[index].image, cell = atlas.width / 4;
+    atlasContext.fillStyle = palette[0];
+    atlasContext.fillRect(column*cell,row*cell,cell,cell);
+    const posterWidth = side === 'north' ? 2.75 : 2.25, posterHeight = 1.85;
+    const aspect = image.width/image.height, panelAspect = posterWidth/posterHeight;
+    const w = cell*Math.min(1,aspect/panelAspect), h = cell*Math.min(1,panelAspect/aspect);
+    atlasContext.drawImage(image,column*cell+(cell-w)/2,row*cell+(cell-h)/2,w,h);
+    textures[index].dispose();
+    const poster = new T.PlaneGeometry(posterWidth,posterHeight);
+    const uv = poster.attributes.uv;
+    for(let i=0;i<uv.count;i++) uv.setXY(i,(column+.004+uv.getX(i)*.992)/4,(3-row+.004+uv.getY(i)*.992)/4);
+    poster.translate(heroOffset,2.16,heroZ-.42).applyMatrix4(group.matrix);
+    posterParts.push(poster);
     group.visible = false;
     scene.add(group);
     shops.push({group, x:group.position.x, z:group.position.z, display, fallback,
       isLoaded: () => loaded, loadDisplay});
   });
+  const scenery = new T.Mesh(mergeGeometries(studioParts), material);
+  scenery.name = 'Concourse window studios';
+  scene.add(scenery);
+  const art = new T.CanvasTexture(atlas);
+  art.colorSpace = T.SRGBColorSpace;
+  const pictures = new T.Mesh(mergeGeometries(posterParts), new T.MeshBasicMaterial({map:art}));
+  pictures.name = 'Concourse window artwork';
+  scene.add(pictures);
+  for(const part of [...studioParts,...posterParts]) part.dispose();
+  let loading = false, scheduled = false, lastVisitor = null;
+  function schedulePrefetch() {
+    if (loading || scheduled || !lastVisitor) return;
+    const candidates = shops.filter(shop => shop.loadDisplay && Math.hypot(lastVisitor.x-shop.x, lastVisitor.z-shop.z) < 25);
+    if (!candidates.length) return;
+    scheduled = true;
+    const run = () => {
+      scheduled = false;
+      if (!lastVisitor || document.hidden) return;
+      const next = shops.filter(shop => shop.loadDisplay && Math.hypot(lastVisitor.x-shop.x, lastVisitor.z-shop.z) < 25)
+        .sort((a,b) => Math.hypot(lastVisitor.x-a.x,lastVisitor.z-a.z)-Math.hypot(lastVisitor.x-b.x,lastVisitor.z-b.z))[0];
+      if (!next) return;
+      loading = true;
+      const load = next.loadDisplay; next.loadDisplay = null;
+      load().finally(() => { loading = false; schedulePrefetch(); });
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(run, {timeout: 1500});
+    else window.setTimeout(run, 100);
+  }
   return {update(visitor) {
+    lastVisitor = {x:visitor.x, z:visitor.z};
     let nearest = null, nearestDistance = 11*11;
     for (const shop of shops) {
       const dx=visitor.x-shop.x, dz=visitor.z-shop.z, distance=dx*dx+dz*dz;
@@ -200,10 +231,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
       const active = shop === nearest;
       shop.display.visible = active;
       shop.fallback.visible = !active || !shop.isLoaded();
-      if (active && shop.loadDisplay) {
-        shop.loadDisplay();
-        shop.loadDisplay = null;
-      }
     }
+    schedulePrefetch();
   }};
 }

@@ -951,11 +951,9 @@ var expandedLayout = Object.freeze({
 var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
   id: `planned-space-${slot2.number}`,
   number: slot2.number,
-  label: `Planned space ${slot2.number}`,
   side: slot2.side,
-  status: "planned",
-  available: false,
-  admission: Object.freeze({ brand: "unassigned", content: "missing", rights: "not-reviewed" })
+  status: "display-only",
+  available: slot2.available
 })));
 var expandedMapPoint = (x, z) => ({
   x: Math.max(0, Math.min(700, (x + 25) * 10)),
@@ -978,39 +976,6 @@ var FEATURE_KIOSK_RECORD = Object.freeze({
 // demos/corporate/gjh/v11/assets/ui.js
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var plannedSideLabels = Object.freeze({ north: "North side", west: "West side", east: "East side" });
-function setupPlannedDirectory(expanded) {
-  const section = document.getElementById("planned-spaces-directory");
-  const list = document.getElementById("planned-spaces-list");
-  if (!section || !list)
-    return;
-  const fragment = document.createDocumentFragment();
-  for (const space of plannedSpaces) {
-    const item = document.createElement("li");
-    item.id = space.id;
-    for (const [key, value] of Object.entries({
-      space: space.id,
-      number: space.number,
-      side: space.side,
-      status: space.status,
-      available: String(space.available),
-      ...space.admission
-    }))
-      item.setAttribute(`data-planned-${key}`, value);
-    const heading = document.createElement("h3");
-    heading.textContent = space.label;
-    const location2 = document.createElement("p");
-    location2.setAttribute("data-planned-field", "location");
-    location2.textContent = `${plannedSideLabels[space.side]} · Planned · not open`;
-    item.append(heading, location2);
-    fragment.append(item);
-  }
-  list.replaceChildren(fragment);
-  const summary = section.querySelector("summary");
-  if (summary)
-    summary.textContent = `Planned spaces in the expanded preview (${plannedSpaces.length})`;
-  if (expanded)
-    section.open = true;
-}
 function createUI(expanded = false) {
   const scene = document.getElementById("scene");
   const experience = document.getElementById("experience");
@@ -1057,7 +1022,7 @@ function createUI(expanded = false) {
   const playerDot = document.getElementById("player-dot");
   const floorplan = document.querySelector(".floorplan"), mapCaption = document.querySelector(".map-caption");
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel = expanded ? `Expanded ground-floor preview: ${expandedLayout.slots.length} numbered spaces, including ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel = expanded ? `Expanded ground-floor preview: ${expandedLayout.slots.length} numbered spaces, including ${spatial.stores.length} open stores and ${plannedSpaces.length} display-only storefronts. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute("aria-label", floorplanLabel);
   const mapCaptionText = [...mapCaption.childNodes].find((n) => n.nodeType === Node.TEXT_NODE && n.textContent.includes("You are here"));
   const inspectPrompt = document.getElementById("inspect-prompt");
@@ -1332,10 +1297,11 @@ function createUI(expanded = false) {
   layoutLink.href = layoutURL.href;
   layoutLink.textContent = expanded ? "Classic 3-store view" : "Return to the expanded mall";
   document.getElementById("layout-preview-notice").hidden = !expanded;
-  document.getElementById("layout-preview-notice").textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} planned spaces.`;
-  setupPlannedDirectory(expanded);
+  document.getElementById("layout-preview-notice").textContent = `— Ground-floor preview: ${spatial.stores.length} open stores and ${plannedSpaces.length} display-only storefronts.`;
+  if (expanded)
+    document.getElementById("planned-spaces-directory").open = true;
   if (expanded) {
-    document.getElementById("layout-preview-notice").textContent = `— Ground-floor preview: 3 open stores and 14 planned spaces. ${new URLSearchParams(location.search).get("visitor") === "v1" ? "The lift is available with Visitor v2." : "The lift serves the small upper viewing level; stow the cart before travel."} Facilities remain planned.`;
+    document.getElementById("layout-preview-notice").textContent = `— Ground-floor preview: 3 open stores and 14 display-only storefronts. ${new URLSearchParams(location.search).get("visitor") === "v1" ? "The lift is available with Visitor v2." : "The lift serves the small upper viewing level; stow the cart before travel."} Facilities remain planned.`;
     const ns = "http://www.w3.org/2000/svg";
     floorplan.setAttribute("viewBox", "0 0 700 600");
     floorplan.setAttribute("preserveAspectRatio", "xMidYMid meet");
@@ -1359,7 +1325,8 @@ function createUI(expanded = false) {
         rect.setAttribute("data-space-id", space.id);
         rect.setAttribute("data-space-status", space.status);
         const title = document.createElementNS(ns, "title");
-        title.textContent = `${space.label}: ${plannedSideLabels[space.side]}; planned, not open.`;
+        const brand = document.getElementById(space.id).dataset.plannedBrand;
+        title.textContent = `${space.number} · ${brand} · ${plannedSideLabels[space.side]} · Display only · No entry`;
         rect.append(title);
         floorplan.insertBefore(rect, playerDot);
       }
@@ -1371,7 +1338,7 @@ function createUI(expanded = false) {
       label.textContent = bay.number;
       floorplan.insertBefore(label, playerDot);
     }
-    document.querySelector(".map-scale").textContent = `${plannedSpaces.length} planned spaces`;
+    document.querySelector(".map-scale").textContent = `${plannedSpaces.length} display-only storefronts`;
   }
   const mapServices = [];
   let servicesLegend = null;

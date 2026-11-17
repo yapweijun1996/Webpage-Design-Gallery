@@ -938,11 +938,9 @@ var expandedLayout = Object.freeze({
 var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
   id: `planned-space-${slot2.number}`,
   number: slot2.number,
-  label: `Planned space ${slot2.number}`,
   side: slot2.side,
-  status: "planned",
-  available: false,
-  admission: Object.freeze({ brand: "unassigned", content: "missing", rights: "not-reviewed" })
+  status: "display-only",
+  available: slot2.available
 })));
 
 // demos/corporate/gjh/v11/assets/atrium-layout.js
@@ -1156,6 +1154,211 @@ function addExpandedStorefronts(T, layout, scene) {
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
 import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+
+// demos/corporate/gjh/v11/assets/window-studios.js
+function buildWindowStudio(number, palette, { box, column, disc, bar, arch }, width, centre) {
+  const [primary, secondary, light] = palette;
+  const brass = 12227676, timber = 10187603, black = 2435888;
+  const backdrop = (colour, floor) => {
+    const bay = width - 0.45, opening = 2.15, wing = (bay - opening) / 2;
+    for (const side of [-1, 1]) {
+      box(centre + side * (opening + wing) / 2, 2.35, -1.05, wing, 4.7, 0.16, colour);
+      box(centre + side * opening / 2, 2.35, -1.7, 0.11, 4.7, 1.44, colour);
+      box(centre + side * bay / 2, 2.35, -0.13, 0.12, 4.7, 2, colour);
+    }
+    box(centre, 2.35, -2.42, opening, 4.7, 0.13, colour);
+    box(centre, 3.68, -2.29, opening - 0.09, 0.075, 0.16, light);
+    box(centre, 0.09, -0.73, bay, 0.18, 3.44, floor);
+    box(centre, 4.61, -0.72, bay, 0.16, 3.4, floor);
+  };
+  const counter = (x, y, z, w, h, d, colour, top) => {
+    box(x, y + h / 2, z, w, h, d, colour);
+    box(x, y + h + 0.035, z, w + 0.12, 0.07, d + 0.09, top);
+  };
+  const bottle = (x, y, z, r, h, body, lid) => {
+    column(x, y + h / 2, z, r, h, body);
+    column(x, y + h + 0.045, z, r * 0.85, 0.09, lid);
+  };
+  switch (number) {
+    case 4: {
+      backdrop(primary, light);
+      arch(0, 0.18, -0.83, 1.33, 2.08, 0.18, light);
+      counter(0, 0.18, 0.13, 2.25, 0.63, 1, secondary, light);
+      for (let i = 0;i < 3; i++) {
+        const x = (i - 1) * 0.6, y = 0.89 + i * 0.14;
+        box(x, y, 0.19, 0.47, 0.15 + i * 0.26, 0.48, light);
+        box(x, y + 0.32 + i * 0.13, 0.18, 0.39, 0.51, 0.12, secondary);
+        disc(x, y + 0.36 + i * 0.13, 0.252, 0.095, 0.03, light);
+      }
+      break;
+    }
+    case 5: {
+      backdrop(secondary, timber);
+      box(0, 1.42, -0.46, 2.65, 2.46, 0.65, primary);
+      for (let row = 0;row < 4; row++)
+        for (let col = 0;col < 4; col++) {
+          const x = (col - 1.5) * 0.61, y = 0.6 + row * 0.52;
+          box(x, y, -0.08, 0.55, 0.45, 0.14, timber);
+          box(x, y + 0.01, 0.015, 0.17, 0.055, 0.07, brass);
+        }
+      for (const x of [-0.75, 0, 0.75])
+        bottle(x, 2.68, -0.48, 0.16, 0.26, light, primary);
+      break;
+    }
+    case 6: {
+      backdrop(secondary, light);
+      for (let i = 0;i < 9; i++)
+        box((i - 4) * 0.32, 2.82, -0.02, 0.32, 0.31, 0.98, i % 2 ? primary : light);
+      for (const x of [-1.36, 1.36])
+        column(x, 1.65, -0.18, 0.055, 2.83, timber);
+      counter(0, 0.18, 0.06, 2.5, 0.86, 0.95, timber, primary);
+      for (let row = 0;row < 3; row++)
+        for (let i = 0;i < 4 - row; i++)
+          box((i - (3 - row) / 2) * 0.47, 1.19 + row * 0.21, 0.16, 0.43, 0.19, 0.39, row % 2 ? light : primary);
+      break;
+    }
+    case 7: {
+      backdrop(primary, light);
+      for (const x of [-1.28, 1.28])
+        box(x, 1.66, -0.19, 0.13, 2.98, 0.61, timber);
+      for (const y of [0.55, 1.53, 2.54]) {
+        box(0, y, -0.15, 2.72, 0.12, 0.78, secondary);
+        for (let i = -2;i <= 2; i++)
+          bottle(i * 0.44, y + 0.06, -0.04, 0.16, 0.33, light, brass);
+      }
+      break;
+    }
+    case 8: {
+      backdrop(primary, secondary);
+      for (let i = -2;i <= 2; i++)
+        disc(i * 0.45, 2.34 + Math.cos(i * 0.5) * 0.3, -0.82, 0.47, 0.09, light);
+      counter(0, 0.18, 0.08, 2.48, 0.67, 1, secondary, light);
+      for (let i = -1;i <= 1; i++) {
+        const rise = i === 0 ? 0.38 : 0.13;
+        column(i * 0.73, 0.91 + rise / 2, 0.08, 0.36, rise, light);
+        bottle(i * 0.73, 0.91 + rise, 0.12, 0.255, 0.47, 12947026, primary);
+      }
+      break;
+    }
+    case 9: {
+      backdrop(primary, light);
+      for (let i = -3;i <= 3; i++) {
+        const angle = i * 0.35;
+        bar(0, 1.67, -0.81, Math.sin(angle) * 1.24, 1.67 + Math.cos(angle) * 1.39, -0.81, 0.075, secondary);
+      }
+      counter(0, 0.18, 0.1, 2.6, 0.77, 0.94, light, secondary);
+      for (let row = 0;row < 3; row++)
+        for (let i = 0;i < 3 - row; i++) {
+          const x = (i - (2 - row) / 2) * 0.66, y = 1.18 + row * 0.35;
+          box(x, y, 0.13, 0.61, 0.32, 0.35, primary);
+          box(x, y + 0.156, 0.13, 0.62, 0.03, 0.37, secondary);
+        }
+      break;
+    }
+    case 10: {
+      backdrop(primary, light);
+      for (let i = -4;i <= 4; i++) {
+        const a = i * 0.3;
+        bar(0, 0.74, -0.79, Math.sin(a) * 1.28, 0.74 + Math.cos(a) * 2.12, -0.79, 0.18, i % 2 ? light : secondary);
+      }
+      column(0, 0.39, 0.02, 1.18, 0.4, light);
+      column(0, 0.69, 0.02, 0.81, 0.22, secondary);
+      bottle(0, 0.8, 0.09, 0.34, 0.43, light, brass);
+      break;
+    }
+    case 11: {
+      backdrop(primary, secondary);
+      for (let i = 0;i < 3; i++) {
+        const x = (i - 1) * 0.77, h = 0.69 + i * 0.57;
+        counter(x, 0.18, 0, 0.68, h, 0.75, secondary, light);
+        for (let j = -1;j <= 1; j++)
+          box(x + j * 0.18, 0.18 + h / 2, 0.39, 0.055, h - 0.1, 0.045, black);
+        bottle(x, h + 0.27, 0.06, 0.21, 0.34, light, secondary);
+      }
+      break;
+    }
+    case 12: {
+      backdrop(light, secondary);
+      arch(0, 0.19, -0.82, 1.34, 1.68, 0.15, primary);
+      arch(0, 0.19, -0.69, 1.06, 1.68, 0.09, secondary);
+      box(0, 1.02, -0.12, 2.48, 0.14, 1.28, primary);
+      box(-0.73, 0.6, -0.22, 0.42, 0.84, 0.74, secondary);
+      for (let i = -1;i <= 1; i++) {
+        box(i * 0.56, 1.42, 0.14, 0.39, 0.64, 0.22, light);
+        box(i * 0.56, 1.5, 0.268, 0.29, 0.13, 0.024, secondary);
+      }
+      break;
+    }
+    case 13: {
+      backdrop(primary, black);
+      for (let i = -6;i <= 6; i++) {
+        const h = 0.38 + 1.45 * Math.abs(Math.cos(i * 0.67));
+        box(i * 0.2, 2.43, -0.85, 0.087, h, 0.1, secondary);
+      }
+      for (const x of [-0.83, 0.83]) {
+        box(x, 0.98, -0.12, 0.66, 1.58, 0.64, black);
+        for (const y of [0.7, 1.33])
+          disc(x, y, 0.225, 0.23, 0.07, secondary);
+      }
+      break;
+    }
+    case 14: {
+      backdrop(light, secondary);
+      for (let i = -1;i <= 1; i++) {
+        const y = 1.99 + i * 0.29;
+        box(i * 0.84, y, -0.28, 0.81, 1.06, 0.14, black);
+        box(i * 0.84, y, -0.195, 0.72, 0.96, 0.035, primary);
+        box(i * 0.84, 1.99, -0.166, 0.72, 0.075, 0.02, secondary);
+        box(i * 0.84, (y - 0.55) / 2, -0.3, 0.075, y - 0.55, 0.12, black);
+      }
+      break;
+    }
+    case 15: {
+      backdrop(secondary, primary);
+      for (let i = -5;i <= 5; i++) {
+        const h = 1.08 + Math.cos(i * 0.43) * 0.85;
+        box(i * 0.23, 3.42 - h / 2, -0.86, 0.14, h, 0.18, timber);
+      }
+      for (const x of [-0.89, 0.89])
+        box(x, 0.68, -0.05, 0.14, 0.97, 0.39, primary);
+      box(0, 1.32, -0.07, 2.38, 0.41, 0.82, primary);
+      for (let i = 0;i < 16; i++) {
+        box((i - 7.5) * 0.13, 1.41, 0.4, 0.12, 0.09, 0.34, light);
+        if (![2, 6].includes(i % 7))
+          box((i - 7) * 0.13, 1.47, 0.33, 0.067, 0.09, 0.16, black);
+      }
+      box(0, 1.76, -0.06, 0.82, 0.43, 0.085, light);
+      break;
+    }
+    case 16: {
+      backdrop(secondary, light);
+      for (let i = -1;i <= 1; i++)
+        for (let j = 0;j < 3; j++)
+          box(i * 0.76, 0.86 + j * 0.76, -0.62, 0.69, 0.69, 0.22, primary);
+      disc(0, 1.65, -0.37, 0.57, 0.12, light);
+      disc(0, 1.65, -0.26, 0.33, 0.12, secondary);
+      counter(0, 0.18, 0.27, 1.8, 0.68, 0.8, primary, light);
+      disc(0, 1.22, 0.31, 0.28, 0.13, primary);
+      break;
+    }
+    case 17: {
+      backdrop(primary, light);
+      for (const r of [0.41, 0.74, 1.07])
+        arch(0, 1.68, -0.82, r, 0.21, 0.062, secondary);
+      for (const x of [-0.68, 0.68]) {
+        column(x, 0.55, 0.05, 0.46, 0.75, secondary);
+        box(x, 1.02, 0.05, 0.55, 0.16, 0.48, black);
+        box(x, 1.43, 0.08, 0.34, 0.83, 0.15, light);
+        box(x, 1.64, 0.171, 0.23, 0.2, 0.03, black);
+        for (let j = 0;j < 3; j++)
+          box(x, 1.44 - j * 0.085, 0.169, 0.21, 0.035, 0.025, secondary);
+      }
+      break;
+    }
+  }
+}
+
+// demos/corporate/gjh/v11/assets/expanded-interiors.js
 import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
 var displayFiles = {
   4: ["pharmacy-counter"],
@@ -1176,9 +1379,15 @@ function displayPlacements(number, heroX, heroZ) {
 async function createExpandedInteriors(T, expandedLayout2, scene) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
   const loader = new T.TextureLoader().setCrossOrigin(undefined);
-  const textures = await Promise.all(slots.map((slot2) => loader.loadAsync(new URL(`./brand-kit/S${slot2.number}-hero.webp`, import.meta.url).href)));
+  const [kit, textures] = await Promise.all([
+    loadBrandKit(),
+    Promise.all(slots.map((slot2) => loader.loadAsync(new URL(`./brand-kit/S${slot2.number}-hero.webp`, import.meta.url).href)))
+  ]);
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.78, emissive: 3155995, emissiveIntensity: 0.22 });
-  const posterGeometry = new T.PlaneGeometry(4, 2.7);
+  const studioParts = [], posterParts = [];
+  const atlas = document.createElement("canvas");
+  atlas.width = atlas.height = 2048;
+  const atlasContext = atlas.getContext("2d");
   const shops = [];
   const models = new Map, gltfLoader = new GLTFLoader3;
   function loadModel(name) {
@@ -1187,7 +1396,7 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     }
     return models.get(name);
   }
-  const ivory = 15656145, green = 5402203, gold = 13018731, wood = 9135946;
+  const ivory = 15656145, green = 5402203, gold = 13018731;
   const accents = {
     4: 7887464,
     5: 9518901,
@@ -1212,7 +1421,7 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
     group.name = `S${slot2.number} interior`;
     group.position.set((slot2.minX + slot2.maxX) / 2, 0, (slot2.minZ + slot2.maxZ) / 2);
     group.rotation.y = side === "west" ? Math.PI / 2 : side === "east" ? -Math.PI / 2 : 0;
-    const back = -depth / 2 + 0.18, front = depth / 2;
+    const front = depth / 2;
     let parts = [];
     let heroOffset = 0;
     function add(geometry, x, y, z, color) {
@@ -1226,45 +1435,37 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
       geometry.setAttribute("color", new T.BufferAttribute(colors, 3));
       parts.push(geometry);
     }
-    function box(x, y, z, w, h, d, color) {
-      add(new T.BoxGeometry(w, h, d), x, y, z, color);
+    function box(x, y, z, w2, h2, d, color) {
+      add(new T.BoxGeometry(w2, h2, d), x, y, z, color);
     }
-    function cylinder(x, y, z, r, h, color) {
-      add(new T.CylinderGeometry(r, r, h, 12), x, y, z, color);
+    function cylinder(x, y, z, r, h2, color) {
+      add(new T.CylinderGeometry(r, r, h2, 12), x, y, z, color);
     }
-    box(0, 2.45, back - 0.08, width - 0.35, 4.9, 0.16, ivory);
-    box(0, 0.035, 0, width - 0.35, 0.07, depth - 0.4, 14075559);
-    box(0, 2.9, back + 0.08, 4.3, 3, 0.12, gold);
-    box(0, 4.45, back + 0.16, 4.5, 0.1, 0.16, 16770471);
-    for (const x of [-2, 2])
-      box(x, 4.7, 0, 0.1, 0.08, depth - 1, 16770471);
-    box(0, 0.17, back + 0.14, width - 0.45, 0.25, 0.18, green);
-    const shelf = back + 2.9;
-    for (const sign of [-1, 1]) {
-      const x = sign * (width / 2 - 1.05);
-      box(x, 1.3, shelf, 1.65, 2.6, 0.72, wood);
-      box(x, 1.35, shelf + 0.38, 1.45, 2.25, 0.06, green);
-      if (number >= 13) {
-        box(x, 1.36, shelf + 0.43, 1.25, 0.85, 0.06, 2307131);
-        box(x, 1.36, shelf + 0.47, 1.08, 0.68, 0.03, accents[number]);
-        box(x, 0.72, shelf + 0.75, 1.5, 0.12, 1.05, gold);
-        box(x, 0.36, shelf + 0.75, 1.3, 0.72, 0.8, wood);
-      } else
-        for (const y of [0.55, 1.12, 1.69, 2.26]) {
-          box(x, y, shelf + 0.51, 1.5, 0.09, 0.36, gold);
-          for (let i = -1;i <= 1; i++) {
-            const px = x + i * 0.4;
-            if (number >= 7 && number <= 11) {
-              cylinder(px, y + 0.18, shelf + 0.52, 0.15, 0.27, number === 8 ? 13346668 : ivory);
-              cylinder(px, y + 0.33, shelf + 0.52, 0.155, 0.035, accents[number]);
-            } else {
-              box(px, y + 0.21, shelf + 0.52, 0.3, 0.34, 0.15, ivory);
-              box(px, y + 0.23, shelf + 0.61, 0.22, 0.13, 0.025, accents[number]);
-            }
-          }
-        }
-    }
-    const structureParts = parts;
+    const leftPane = -(width / 4 + 0.4), stageZ = front - 1.92;
+    const tools = {
+      box: (x, y, z, w2, h2, d, c) => box(x + leftPane, y, z + stageZ, w2, h2, d, c),
+      column: (x, y, z, r, h2, c) => cylinder(x + leftPane, y, z + stageZ, r, h2, c),
+      disc(x, y, z, r, d, c) {
+        add(new T.CylinderGeometry(r, r, d, 24).rotateX(Math.PI / 2), x + leftPane, y, z + stageZ, c);
+      },
+      bar(x1, y1, z1, x2, y2, z2, w2, c) {
+        const direction = new T.Vector3(x2 - x1, y2 - y1, z2 - z1);
+        const rod = new T.BoxGeometry(w2, direction.length(), w2);
+        rod.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0, 1, 0), direction.normalize()));
+        add(rod, leftPane + (x1 + x2) / 2, (y1 + y2) / 2, stageZ + (z1 + z2) / 2, c);
+      },
+      arch(x, y, z, r, leg, w2, c) {
+        for (const side2 of [-1, 1])
+          tools.box(x + side2 * r, y + leg / 2, z, w2, leg, w2, c);
+        const curve = new T.TorusGeometry(r, w2 / 2, 6, 24, Math.PI);
+        add(curve, x + leftPane, y + leg, z + stageZ, c);
+      }
+    };
+    const palette = kit[`S${slot2.number}`].palette.map((colour) => colour.hex);
+    buildWindowStudio(number, palette, tools, width, -leftPane);
+    group.updateMatrix();
+    for (const part of parts)
+      studioParts.push(part.applyMatrix4(group.matrix));
     parts = [];
     heroOffset = side === "north" ? 3 : 2.55;
     const heroZ = front - 1;
@@ -1310,11 +1511,6 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
       box(0, 2.19, heroZ, 0.73, 0.07, 0.36, gold);
     }
     const files = displayFiles[number];
-    const furnitureParts = structureParts;
-    const furniture = new T.Mesh(mergeGeometries2(furnitureParts), material);
-    furnitureParts.forEach((part) => part.dispose());
-    furniture.name = `S${slot2.number} furnishings`;
-    group.add(furniture);
     const hero = new T.Group;
     hero.name = `S${slot2.number} hero display`;
     hero.userData.modelReady = !files;
@@ -1333,7 +1529,7 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
       hero.add(display);
       loadDisplay = () => {
         const placements = displayPlacements(number, heroOffset, heroZ);
-        Promise.all(files.map(loadModel)).then((scenes) => {
+        return Promise.all(files.map(loadModel)).then((scenes) => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements[i];
@@ -1348,13 +1544,21 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
         }).catch(() => {});
       };
     }
-    const texture = textures[index];
-    texture.colorSpace = T.SRGBColorSpace;
-    const poster = new T.Mesh(posterGeometry, new T.MeshBasicMaterial({ map: texture }));
-    poster.name = `S${slot2.number} hero image`;
-    poster.position.set(heroOffset, 1.8, heroZ - 0.43);
-    poster.scale.set(0.5, 0.55, 1);
-    hero.add(poster);
+    const column = index % 4, row = Math.floor(index / 4);
+    const image = textures[index].image, cell = atlas.width / 4;
+    atlasContext.fillStyle = palette[0];
+    atlasContext.fillRect(column * cell, row * cell, cell, cell);
+    const posterWidth = side === "north" ? 2.75 : 2.25, posterHeight = 1.85;
+    const aspect = image.width / image.height, panelAspect = posterWidth / posterHeight;
+    const w = cell * Math.min(1, aspect / panelAspect), h = cell * Math.min(1, panelAspect / aspect);
+    atlasContext.drawImage(image, column * cell + (cell - w) / 2, row * cell + (cell - h) / 2, w, h);
+    textures[index].dispose();
+    const poster = new T.PlaneGeometry(posterWidth, posterHeight);
+    const uv = poster.attributes.uv;
+    for (let i = 0;i < uv.count; i++)
+      uv.setXY(i, (column + 0.004 + uv.getX(i) * 0.992) / 4, (3 - row + 0.004 + uv.getY(i) * 0.992) / 4);
+    poster.translate(heroOffset, 2.16, heroZ - 0.42).applyMatrix4(group.matrix);
+    posterParts.push(poster);
     group.visible = false;
     scene.add(group);
     shops.push({
@@ -1367,7 +1571,46 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
       loadDisplay
     });
   });
+  const scenery = new T.Mesh(mergeGeometries2(studioParts), material);
+  scenery.name = "Concourse window studios";
+  scene.add(scenery);
+  const art = new T.CanvasTexture(atlas);
+  art.colorSpace = T.SRGBColorSpace;
+  const pictures = new T.Mesh(mergeGeometries2(posterParts), new T.MeshBasicMaterial({ map: art }));
+  pictures.name = "Concourse window artwork";
+  scene.add(pictures);
+  for (const part of [...studioParts, ...posterParts])
+    part.dispose();
+  let loading = false, scheduled = false, lastVisitor = null;
+  function schedulePrefetch() {
+    if (loading || scheduled || !lastVisitor)
+      return;
+    const candidates = shops.filter((shop) => shop.loadDisplay && Math.hypot(lastVisitor.x - shop.x, lastVisitor.z - shop.z) < 25);
+    if (!candidates.length)
+      return;
+    scheduled = true;
+    const run = () => {
+      scheduled = false;
+      if (!lastVisitor || document.hidden)
+        return;
+      const next = shops.filter((shop) => shop.loadDisplay && Math.hypot(lastVisitor.x - shop.x, lastVisitor.z - shop.z) < 25).sort((a, b) => Math.hypot(lastVisitor.x - a.x, lastVisitor.z - a.z) - Math.hypot(lastVisitor.x - b.x, lastVisitor.z - b.z))[0];
+      if (!next)
+        return;
+      loading = true;
+      const load2 = next.loadDisplay;
+      next.loadDisplay = null;
+      load2().finally(() => {
+        loading = false;
+        schedulePrefetch();
+      });
+    };
+    if ("requestIdleCallback" in window)
+      window.requestIdleCallback(run, { timeout: 1500 });
+    else
+      window.setTimeout(run, 100);
+  }
   return { update(visitor) {
+    lastVisitor = { x: visitor.x, z: visitor.z };
     let nearest = null, nearestDistance = 11 * 11;
     for (const shop of shops) {
       const dx = visitor.x - shop.x, dz = visitor.z - shop.z, distance = dx * dx + dz * dz;
@@ -1383,11 +1626,8 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
       const active = shop === nearest;
       shop.display.visible = active;
       shop.fallback.visible = !active || !shop.isLoaded();
-      if (active && shop.loadDisplay) {
-        shop.loadDisplay();
-        shop.loadDisplay = null;
-      }
     }
+    schedulePrefetch();
   } };
 }
 
@@ -1662,6 +1902,78 @@ async function createWorld(T, R, physics, expanded = false) {
       cylinder("glow", x, y - 0.08, z, 0.54, 0.035);
       cylinder("dark", x, y + 0.08, z, 0.42, 0.065);
       lightPool(x, 0.052, z, 4.6, 4.6);
+    }, shopBackdrop = function(zone) {
+      const panel = document.createElement("canvas");
+      panel.width = 1024;
+      panel.height = 576;
+      const ctx = panel.getContext("2d");
+      function rectangle(color, x, y, width, height) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, width, height);
+      }
+      function circle(color, x, y, radius) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (zone === "newmoon") {
+        rectangle("#183f3b", 0, 0, 1024, 576);
+        circle("#d8b46c", 512, 203, 126);
+        circle("#204843", 548, 178, 111);
+        for (let row = 0;row < 4; row++) {
+          ctx.strokeStyle = ["#396356", "#67816c", "#b59b65", "#617d66"][row];
+          ctx.lineWidth = row === 2 ? 4 : 8;
+          ctx.beginPath();
+          ctx.moveTo(-16, 151 + row * 22);
+          ctx.bezierCurveTo(160, 54 + row * 22, 284, 380 + row * 22, 490, 330 + row * 22);
+          ctx.bezierCurveTo(720, 310 + row * 22, 820, 98 + row * 22, 1040, 156 + row * 22);
+          ctx.stroke();
+        }
+      } else if (zone === "mili") {
+        rectangle("#ead6af", 0, 0, 1024, 576);
+        for (const centre of [190, 834]) {
+          for (let ring = 0;ring < 3; ring++) {
+            const radius = 132 - 20 * ring, color = ["#a8583e", "#dbaf78", "#c47a50"][ring];
+            circle(color, centre, 258, radius);
+            rectangle(color, centre - radius, 258, radius * 2, 318);
+          }
+        }
+        for (let i = 0;i < 32; i++) {
+          rectangle(i % 2 ? "#ba7852" : "#efd6a6", i * 32, 475, 32, 31);
+          rectangle(i % 2 ? "#efd6a6" : "#ba7852", i * 32, 506, 32, 31);
+        }
+      } else {
+        rectangle("#dbe0b4", 0, 0, 1024, 576);
+        circle("#efaa56", 922, 142, 106);
+        for (const [x, y, angle, color] of [
+          [60, 180, -0.53, "#437b65"],
+          [137, 335, 0.57, "#658d66"],
+          [7, 430, -0.48, "#245e55"],
+          [933, 405, -0.56, "#68966e"],
+          [1032, 274, 0.47, "#316957"]
+        ]) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.moveTo(0, 155);
+          ctx.bezierCurveTo(-98, 62, -81, -82, 0, -153);
+          ctx.bezierCurveTo(81, -62, 85, 74, 0, 155);
+          ctx.fill();
+          ctx.strokeStyle = "#c7cd98";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(0, 154);
+          ctx.lineTo(0, -123);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+      const map = new T.CanvasTexture(panel);
+      map.colorSpace = T.SRGBColorSpace;
+      return mat(16777215, { map, roughness: 0.88 });
     }, updateSigns = function(camera, canvas) {
       const frame = canvas.getBoundingClientRect();
       for (const label of roomSigns) {
@@ -2057,7 +2369,10 @@ async function createWorld(T, R, physics, expanded = false) {
       const wall = zone === "mili" ? "cream" : "green";
       for (let i = 0;i < 18; i++)
         box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
-      box(wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
+      const backdrop = `${zone}Backdrop`;
+      if (expanded)
+        materials[backdrop] = shopBackdrop(zone);
+      box(expanded ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
       for (const side of [-1, 1]) {
         box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
         if (expanded) {
@@ -2088,6 +2403,24 @@ async function createWorld(T, R, physics, expanded = false) {
       }
       activeShopSlot = expanded ? Number(store.number) : null;
       box("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4);
+      if (expanded && zone === "newmoon") {
+        for (const z of [-2.5, -5.4, -8.3]) {
+          box("green", x, 5.63, z, 7.9, 0.12, 2.35);
+          for (const side of [-1, 1]) {
+            box("brass", x + side * 3.85, 5.55, z, 0.06, 0.06, 2.24);
+            box("brass", x, 5.55, z + side * 1.12, 7.75, 0.06, 0.06);
+          }
+        }
+      } else if (expanded && zone === "mili") {
+        for (let z = -1.35;z > -10; z -= 0.78)
+          box("oak", x, 5.55, z, 9.2, 0.28, 0.15);
+      } else if (expanded && zone === "gogo") {
+        for (let z = -1.6;z > -9.3; z -= 0.95) {
+          for (const side of [-1, 1]) {
+            solid("box", "oak", x + side * 2.18, 5.5, z, 4.25, 0.19, 0.1, side * 0.22);
+          }
+        }
+      }
       for (const side of [-1, 1]) {
         box("oak", x + side * 4.665, 0.13, -5.25, 0.055, 0.2, 10.15);
         box("brass", x + side * 4.63, 0.245, -5.25, 0.025, 0.025, 10.15);

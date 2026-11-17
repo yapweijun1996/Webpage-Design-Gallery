@@ -29,16 +29,16 @@ test('seventeen runtime shells match the stage 1 plan under one rigid translatio
 });
 
 const {plannedSpaces} = await import('../demos/corporate/gjh/v11/assets/expanded-layout.js');
+const kit=JSON.parse(readFileSync(new URL('../demos/corporate/gjh/v11/assets/brand-kit/brand-kit.json',import.meta.url),'utf8'));
 const html=readFileSync(new URL('../demos/corporate/gjh/v11/index.html',import.meta.url),'utf8');
 test('fourteen planned records derive only from closed slots and cannot imply reviewed tenants',()=>{
   const closed=expandedLayout.slots.filter(slot=>!slot.available);
   assert.equal(plannedSpaces.length,14);assert.ok(Object.isFrozen(plannedSpaces));
   for(const [index,space] of plannedSpaces.entries()){
     const slot=closed[index];assert.equal(space.id,`planned-space-${slot.number}`);
-    assert.equal(space.number,slot.number);assert.equal(space.label,`Planned space ${slot.number}`);
-    assert.equal(space.side,slot.side);assert.equal(space.status,'planned');assert.equal(space.available,false);
-    assert.deepEqual(space.admission,{brand:'unassigned',content:'missing',rights:'not-reviewed'});
-    assert.ok(Object.isFrozen(space)&&Object.isFrozen(space.admission));
+    assert.equal(space.number,slot.number);
+    assert.equal(space.side,slot.side);assert.equal(space.status,'display-only');assert.equal(space.available,false);
+    assert.ok(Object.isFrozen(space));
   }
   assert.equal(new Set(plannedSpaces.map(space=>space.id)).size,14);
   assert.equal(spatial.stores.length,3);assert.ok(spatial.stores.every(store=>!plannedSpaces.some(space=>space.id===store.id)));
@@ -48,14 +48,14 @@ test('static planned directory matches every canonical field without live catalo
   assert.ok(match);assert.doesNotMatch(match[1],/\bopen(?:\s|=|$)/);
   const body=match[2], items=[...body.matchAll(/<li\b([^>]*)>([\s\S]*?)<\/li>/g)];
   assert.equal(items.length,plannedSpaces.length);
-  assert.ok(body.includes(`Planned spaces in the expanded preview (${plannedSpaces.length})`));
+  assert.ok(body.includes(`Concept storefronts (${plannedSpaces.length})`));
   assert.doesNotMatch(body,/<(?:button|a)\b|\bdata-(?:store|product|teleport|inspect|add)(?:=|-|\s)/);
   const sideLabels={north:'North side',west:'West side',east:'East side'};
   for(const [index,item] of items.entries()){
     const attrs=Object.fromEntries([...item[1].matchAll(/([\w-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
     const space=plannedSpaces[index];assert.equal(attrs.id,space.id);
-    for(const [key,value] of Object.entries({space:space.id,number:space.number,side:space.side,status:space.status,available:String(space.available),...space.admission}))assert.equal(attrs[`data-planned-${key}`],value);
-    assert.equal(item[2].match(/<h3>([^<]*)<\/h3>/)?.[1],space.label);
-    assert.equal(item[2].match(/<p data-planned-field="location">([^<]*)<\/p>/)?.[1],`${sideLabels[space.side]} · Planned · not open`);
+    for(const [key,value] of Object.entries({space:space.id,number:space.number,side:space.side,status:space.status,available:String(space.available),brand:kit[`S${space.number}`].brand}))assert.equal(attrs[`data-planned-${key}`],value);
+    assert.equal(item[2].match(/<h3>([^<]*)<\/h3>/)?.[1],`${space.number} · ${kit[`S${space.number}`].brand}`);
+    assert.equal(item[2].match(/<p data-planned-field="location">([^<]*)<\/p>/)?.[1],`${sideLabels[space.side]} · Display only · No entry`);
   }
 });

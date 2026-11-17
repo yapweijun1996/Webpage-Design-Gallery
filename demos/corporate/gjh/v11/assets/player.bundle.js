@@ -275,11 +275,9 @@ var expandedLayout = Object.freeze({
 var plannedSpaces = Object.freeze(expandedLayout.slots.filter((slot2) => !slot2.available).map((slot2) => Object.freeze({
   id: `planned-space-${slot2.number}`,
   number: slot2.number,
-  label: `Planned space ${slot2.number}`,
   side: slot2.side,
-  status: "planned",
-  available: false,
-  admission: Object.freeze({ brand: "unassigned", content: "missing", rights: "not-reviewed" })
+  status: "display-only",
+  available: slot2.available
 })));
 
 // demos/corporate/gjh/v11/assets/player.js

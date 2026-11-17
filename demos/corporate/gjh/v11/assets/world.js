@@ -400,11 +400,74 @@ export async function createWorld(T, R, physics, expanded = false) {
   collider(directory.x,1.025,directory.z,.96,2.05,.68);
   shadow(directory.x,directory.z,1.2,.9);
   interactables.push({id:'mall-directory',...directory,radius:2.8});
+  // Painted shop finishes share the existing back-wall surface. The art is
+  // architectural ornament, separate from the licensed imagery and displays.
+  function shopBackdrop(zone) {
+    const panel = document.createElement('canvas');
+    panel.width = 1024; panel.height = 576;
+    const ctx = panel.getContext('2d');
+    function rectangle(color, x, y, width, height) {
+      ctx.fillStyle = color; ctx.fillRect(x, y, width, height);
+    }
+    function circle(color, x, y, radius) {
+      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+    }
+    if (zone === 'newmoon') {
+      rectangle('#183f3b', 0, 0, 1024, 576);
+      circle('#d8b46c', 512, 203, 126);
+      circle('#204843', 548, 178, 111);
+      // Layered lacquer waves frame the moon above the abalone display.
+      for (let row = 0; row < 4; row++) {
+        ctx.strokeStyle = ['#396356', '#67816c', '#b59b65', '#617d66'][row];
+        ctx.lineWidth = row === 2 ? 4 : 8;
+        ctx.beginPath(); ctx.moveTo(-16, 151 + row * 22);
+        ctx.bezierCurveTo(160, 54 + row * 22, 284, 380 + row * 22, 490, 330 + row * 22);
+        ctx.bezierCurveTo(720, 310 + row * 22, 820, 98 + row * 22, 1040, 156 + row * 22);
+        ctx.stroke();
+      }
+    } else if (zone === 'mili') {
+      rectangle('#ead6af', 0, 0, 1024, 576);
+      // Brick-red arched bays echo a traditional provision shop.
+      for (const centre of [190, 834]) {
+        for (let ring = 0; ring < 3; ring++) {
+          const radius = 132 - 20 * ring, color = ['#a8583e','#dbaf78','#c47a50'][ring];
+          circle(color, centre, 258, radius);
+          rectangle(color, centre - radius, 258, radius * 2, 318);
+        }
+      }
+      for (let i = 0; i < 32; i++) {
+        rectangle(i % 2 ? '#ba7852' : '#efd6a6', i * 32, 475, 32, 31);
+        rectangle(i % 2 ? '#efd6a6' : '#ba7852', i * 32, 506, 32, 31);
+      }
+    } else {
+      rectangle('#dbe0b4', 0, 0, 1024, 576);
+      circle('#efaa56', 922, 142, 106);
+      // An oversized botanical print behind the GOGO lounge.
+      for (const [x, y, angle, color] of [
+        [60, 180, -.53, '#437b65'], [137, 335, .57, '#658d66'],
+        [7, 430, -.48, '#245e55'], [933, 405, -.56, '#68966e'],
+        [1032, 274, .47, '#316957']
+      ]) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+        ctx.fillStyle = color; ctx.beginPath();
+        ctx.moveTo(0, 155); ctx.bezierCurveTo(-98, 62, -81, -82, 0, -153);
+        ctx.bezierCurveTo(81, -62, 85, 74, 0, 155); ctx.fill();
+        ctx.strokeStyle = '#c7cd98'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 154); ctx.lineTo(0, -123); ctx.stroke();
+        ctx.restore();
+      }
+    }
+    const map = new T.CanvasTexture(panel);
+    map.colorSpace = T.SRGBColorSpace;
+    return mat(0xffffff, {map, roughness:.88});
+  }
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
     const wall = zone === 'mili' ? 'cream' : 'green';
     for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
-    box(wall, x, 2.85, -10.5, 10, 5.7, .25, true);
+    const backdrop = `${zone}Backdrop`;
+    if (expanded) materials[backdrop] = shopBackdrop(zone);
+    box(expanded ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, .25, true);
     for (const side of [-1, 1]) {
       box(wall, x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5, true);
       if (expanded) {
@@ -437,6 +500,25 @@ export async function createWorld(T, R, physics, expanded = false) {
     }
     activeShopSlot=expanded?Number(store.number):null;
     box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
+    if (expanded && zone === 'newmoon') {
+      // Recessed bronze-edged coffers draw the eye along the product aisle.
+      for (const z of [-2.5, -5.4, -8.3]) {
+        box('green', x, 5.63, z, 7.9, .12, 2.35);
+        for (const side of [-1, 1]) {
+          box('brass', x + side * 3.85, 5.55, z, .06, .06, 2.24);
+          box('brass', x, 5.55, z + side * 1.12, 7.75, .06, .06);
+        }
+      }
+    } else if (expanded && zone === 'mili') {
+      for (let z = -1.35; z > -10; z -= .78) box('oak', x, 5.55, z, 9.2, .28, .15);
+    } else if (expanded && zone === 'gogo') {
+      // Narrow angled timber fins make a light pergola over the lounge.
+      for (let z = -1.6; z > -9.3; z -= .95) {
+        for (const side of [-1, 1]) {
+          solid('box', 'oak', x + side * 2.18, 5.5, z, 4.25, .19, .10, side * .22);
+        }
+      }
+    }
     // Layered skirting and cornices add depth without moving the walls or artwork.
     for (const side of [-1, 1]) {
       box('oak', x + side * 4.665, .13, -5.25, .055, .2, 10.15);

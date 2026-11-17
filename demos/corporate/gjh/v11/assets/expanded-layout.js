@@ -22,11 +22,11 @@ export const expandedLayout = Object.freeze({
   loop: Object.freeze([Object.freeze({x:-12,z:3}),Object.freeze({x:32,z:3}),
     Object.freeze({x:32,z:39}),Object.freeze({x:-12,z:39})])
 });
-// Neutral directory metadata shares the closed slot numbers and availability.
+// Slot geometry owns availability. Display names come from the brand kit and
+// are also present in the static directory for visitors without JavaScript.
 export const plannedSpaces = Object.freeze(expandedLayout.slots.filter(slot => !slot.available).map(slot => Object.freeze({
-  id: `planned-space-${slot.number}`, number: slot.number, label: `Planned space ${slot.number}`,
-  side: slot.side, status: 'planned', available: false,
-  admission: Object.freeze({brand: 'unassigned', content: 'missing', rights: 'not-reviewed'})
+  id: `planned-space-${slot.number}`, number: slot.number, side: slot.side,
+  status: 'display-only', available: slot.available
 })));
 
 export const expandedMapPoint = (x,z) => ({
