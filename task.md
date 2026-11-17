@@ -719,3 +719,12 @@ At this historical point the 45-request gate failed at 82; stage 11b later addre
 - [ ] Push to main only after the taste gate passes; confirm Pages deploy and live version.
 - [ ] P1 model requests for the owner's AI agent: grand piano, chilled drinks/ice-cream freezer, ice-cream cart, mullion-free glazed storefront module, canned-food pyramid display.
 - [ ] Physical-device acceptance (deferred); public redistribution terms of the new model licences unspecified.
+
+## 2026-11-17 QA loop (owner-approved)
+See [docs/gjh-v11-qa-loop.md](docs/gjh-v11-qa-loop.md).
+- [x] Decide authority, pass bar, step size, rework cap, advisor roles and release rule (concept image; mood-level pass; one shop per round, S01 first; 5 rounds then downgrade; 5 advisors; push without asking when advisors and manager pass).
+- [ ] Finish round-2 OMP work (visibility, contrast) and use it as the loop's starting point.
+- [ ] Derive per-shop acceptance checklists (S01-S17) from the concept images and store them in KB-MCP.
+- [ ] Advisor review of round-2 screenshots against checklist and concept image.
+- [ ] Per-shop rounds, S01 first: change, evidence, advisor review, rework, push, record.
+- [ ] 20-minute SGT progress reports until the loop is finished.
