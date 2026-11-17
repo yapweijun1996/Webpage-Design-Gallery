@@ -146,11 +146,65 @@ def hero_visibility_gallery(page, width, height):
     return results
 
 
+def detailed_npc_samples(page, view):
+    """Sample actual frames, including world-scene renders rather than post passes."""
+    samples = page.evaluate('''async () => {
+      const {Scene} = await import('./vendor/three.module.min.js');
+      const prototype = Scene.prototype;
+      const ownHook = Object.getOwnPropertyDescriptor(prototype, 'onBeforeRender');
+      const originalHook = prototype.onBeforeRender;
+      const sceneId = __mall.state.graphics.sceneId;
+      let renderer;
+      prototype.onBeforeRender = function (...args) {
+        if (this.uuid === sceneId) renderer = args[0];
+        return originalHook.apply(this, args);
+      };
+      try {
+        __mall.step(17);
+      } finally {
+        if (ownHook) Object.defineProperty(prototype, 'onBeforeRender', ownHook);
+        else delete prototype.onBeforeRender;
+      }
+      if (!renderer) throw Error('World renderer not observed');
+      const originalRender = renderer.render;
+      const samples = [];
+      let renders = 0;
+      renderer.render = function (scene, ...args) {
+        if (scene.uuid === sceneId) renders++;
+        return originalRender.call(this, scene, ...args);
+      };
+      try {
+        for (let i = 0; i < 3; i++) {
+          renders = 0;
+          const state = __mall.step(17);
+          samples.push({renders, frames: state.frames, drawCalls: state.drawCalls,
+                        npcs: state.npcs, tier: state.graphics.quality.tier});
+        }
+      } finally {
+        renderer.render = originalRender;
+      }
+      return samples;
+    }''')
+    for sample in samples:
+        assert sample['tier'] == 'detailed', (view, sample)
+        assert sample['renders'] == 1, (view, sample)
+        assert sample['drawCalls'] <= 200, (view, sample)
+        if view != 'upper-deck':
+            assert sample['npcs']['active'] > 0, (view, sample)
+        assert 0 <= sample['npcs']['visible'] <= sample['npcs']['active'] <= 6, (view, sample)
+    if view == 'atrium':
+        assert any(sample['npcs']['visible'] > 0 for sample in samples), (view, samples)
+    assert all(b['frames'] == a['frames'] + 1 for a, b in zip(samples, samples[1:])), (view, samples)
+    print(json.dumps({'view': view, 'samples': samples}), flush=True)
+    return samples
+
+
 def upper_deck_gallery(page):
     assert page.evaluate('__mall.teleport("atrium")')
     crowded = drive(page, 100)
     assert crowded['npcs']['active'] > 0, crowded['npcs']
     assert crowded['drawCalls'] <= 200, crowded['drawCalls']
+    detailed_npc_samples(page, 'atrium')
     print(json.dumps({'view': 'atrium-with-npcs', 'npcs': crowded['npcs']['active'],
                       'drawCalls': crowded['drawCalls']}), flush=True)
     for point in ((10, 5.5), (-6.4, 5.5), (-6.4, 10)):
@@ -165,6 +219,7 @@ def upper_deck_gallery(page):
     upper = state(page)
     assert upper['brandPlaqueCount'] == 17, upper
     assert upper['drawCalls'] <= 190, upper['drawCalls']
+    detailed_npc_samples(page, 'upper-deck')
     walk_to(page, -6.51, 13.45)
     assert state(page)['nearby'] == 'brand-plaque-S01', state(page)
     story = page.locator('.brand-story-nearby')
@@ -304,6 +359,8 @@ def run(capture=False):
                 try:
                     for query, expected in (('', True), ('?layout=classic', False)):
                         context = browser.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2, reduced_motion='reduce')
+                        if expected:
+                            context.add_init_script("localStorage.setItem('gjh-v11-graphics-quality-v1','detailed')")
                         page = context.new_page()
                         started = time.monotonic()
                         page.goto(base + '/gallery/demos/corporate/gjh/v11/' + query)
@@ -331,6 +388,7 @@ def run(capture=False):
                                 assert opened['drawCalls'] <= 200, (zone, opened['drawCalls'])
                                 assert 'Close' in page.locator('#inspect').inner_text()
                                 if zone == 'mili':
+                                    detailed_npc_samples(page, 'mili-open')
                                     assert opened['npcs']['active'] > 0, opened['npcs']
                                     print(json.dumps({'view': 'mili-open-with-npcs',
                                                       'npcs': opened['npcs']['active'],
@@ -539,6 +597,7 @@ def run(capture=False):
                     # Exercise the default expanded floor separately from classic-layout
                     # regression flows so the deck route always exists.
                     context=browser.new_context(viewport={'width':1440,'height':900})
+                    context.add_init_script("localStorage.setItem('gjh-v11-graphics-quality-v1','detailed')")
                     page=context.new_page(); brand_wall_errors=[]
                     page.on('pageerror',lambda error:brand_wall_errors.append(str(error)))
                     page.on('console',lambda message:brand_wall_errors.append(message.text) if message.type=='error' else None)

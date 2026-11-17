@@ -30,6 +30,8 @@ let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallSt
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
+// Adapt after each submitted frame; reserve room for camera and scene changes.
+let npcRenderBudget = 0;
 const quality = createGraphicsQuality(() => resize());
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
@@ -204,18 +206,14 @@ function render(force = false) {
     world.updateShopLods(player.state);
     atmosphere?.update(player.state);
     world.updateSigns(camera, canvas);
-    const draw=()=>atmosphere.render(camera, expanded && Math.abs(player.state.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000);
+    // The glow path submits the world a second time; use the direct path so a
+    // frame has exactly one world-scene submission.
+    const draw=()=>atmosphere.render(camera, false);
     const renderScene=()=>shelfFocus?.open ? player.renderShelf(draw) : draw();
-    // Measure the actual view before adding ambient visitors. Camera movement,
-    // doors and shop LODs can change the non-NPC draw cost in a single frame.
-    if(npcs?.state.active) {
-      npcs.setVisible(false);
-      renderScene();
-      if(renderer.info.render.calls+npcs.state.drawCalls<=200) {
-        npcs.setVisible(true);
-        renderScene();
-      }
-    } else renderScene();
+    npcs?.setDrawCallBudget(npcRenderBudget);
+    renderScene();
+    if (npcs) npcRenderBudget=Math.max(0,Math.min(npcs.state.limit*npcs.state.callsPerNpc,
+      npcRenderBudget + 180 - renderer.info.render.calls));
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
   }

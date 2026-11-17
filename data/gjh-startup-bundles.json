@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bun": "1.3.11",
-  "builder": "efac4014aa7ba3d68bc4dec14ec0ecd3a9062f3bfd8f18d51187a1dccb3d2aca",
+  "builder": "c40911e8fcec587a8ef8a6545d43332016b4e937f32246bc095291de66ff7539",
   "inputs": {
     "assets/onboarding/action-dialog.js": "caf4788835aee2f7d5dc9b45153fe01df44ec173d1ee1baab98ec70a77f840cc",
     "assets/onboarding/components.js": "9d6c51a1cb901e5b050e1956438efd0a8d920ac0aa5302bbf1dcadc709e2ea9f",
@@ -29,7 +29,6 @@
     "demos/corporate/gjh/v11/assets/lift-layout.js": "542572943abfe85c459a803f9d55f7eb3bb751384c93b855b594cce07fd5bb4e",
     "demos/corporate/gjh/v11/assets/mall-atmosphere.js": "6f3ebdc6f4041b4a14015eb6dc3ec132a47d7efc65d9545d3106381e8fbbb457",
     "demos/corporate/gjh/v11/assets/modes.js": "4cf405da13500774351f2726e37190369688606b551df4ccb8ac795733a35966",
-    "demos/corporate/gjh/v11/assets/npcs.js": "772b8dd4114185273fecf8deeb4d4b343d0755cae30348a55979104ccdc77bdc",
     "demos/corporate/gjh/v11/assets/opaque-batch.js": "1494cb01c1f4dd57c4ce0177c059765db001d329cac066b00213969f111291a6",
     "demos/corporate/gjh/v11/assets/player.js": "ebf8ca4b76cadfca693431e49d030ae963b175d12237c7ec9d75283f8c1a1fa0",
     "demos/corporate/gjh/v11/assets/push-cart.js": "1831da1ddff6f334cfda30a7befdb41ae8881e836e2196b5e97a04ab21dd259e",
@@ -43,10 +42,10 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "06f77543852578d8d3e11de82e8d0e6b9e063b32ac37e5655d986d3229da165d",
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "96222ff8bf80ae990580a9d86491869bd760aefa06f01ad2b2e4f01aeb0df8ee",
     "demos/corporate/gjh/v11/assets/world.js": "e2ebe8125b8762aa0901d218e6467e3a675042d78ebfb2f4ebedccb8f133630a",
-    "demos/corporate/gjh/v11/script.js": "1eb7ac59113e7f4af19adf13f5a87439591c762816de3adaf27772629a71886d"
+    "demos/corporate/gjh/v11/script.js": "2996ec69e8feeba939b101b6934ee4bb8deed35a0975e239e12ccb38d774f2ee"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "59dadb7bb6b489d5582a4321838033ff1730f8fda2ee1a91ded6ed0e7ff40133",
+    "demos/corporate/gjh/v11/script.bundle.js": "0727ed01462610746f919e9d2496203c2c7a80eeabedef6bbfeb135bdaf5beb7",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "7ec90d7e5bc27e4bbad6f29f0271551818f57ac02bd3a30cf926a2e8bdb06730",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "ab0432f40c9705fc34cdabc9d339bca285ac7b7e027513243c892203337bf314",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "74bfe146afc5a6692578031098a2d21bcf842ea48687690543de11453258abb3"

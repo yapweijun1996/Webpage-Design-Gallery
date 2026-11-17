@@ -1,5 +1,7 @@
-// Ambient visitors use the already-loaded player GLTF. No bodies, interaction
-// records, event listeners, or independently owned geometry/materials are created.
+import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+
+// Visitors share clips and materials with the player; merged buffers are owned
+// by this system and shared by its independently animated rigs.
 export const NPC_ROUTES = Object.freeze({
   classic: Object.freeze([[-11,3],[-8,3],[-2,3],[2,3],[8,3],[11,3],[-11,7],[-11,15],[-3,16],[3,16],[11,15],[11,7]]),
   expanded: Object.freeze([[-12,4],[-8,4],[0,4],[10,4],[20,4],[30,4],[32,12],[32,20],[32,32],[30,39],[20,39],[10,39],[0,39],[-10,39],[-12,32],[-12,20],[-12,12]])
@@ -10,11 +12,62 @@ const ignoreRaycast = () => {};
 
 function visibleDrawCalls(root) {
   let count=0;
-  // Count hidden alternatives too: player customization may change between spawns.
-  root.traverse(node=>{
-    if (node.isMesh) count+=Array.isArray(node.material) ? Math.max(1,node.geometry.groups.length) : 1;
-  });
+  function visit(node,visible) {
+    visible=visible && node.visible;
+    if(!visible) return;
+    if(node.isMesh) {
+      const materials=Array.isArray(node.material) ? node.geometry.groups.map(group=>node.material[group.materialIndex]) : [node.material];
+      for(const material of materials) if(material) count+=material.transparent && !material.forceSinglePass ? 2 : 1;
+    }
+    for(const child of node.children) visit(child,visible);
+  }
+  visit(root,true);
   return Math.max(1,count);
+}
+
+// Only combine interchangeable leaf meshes. Keeping the same parent, transform,
+// bind and material avoids baking animated transforms or customization choices.
+function optimizeNpcTemplate(root,clips) {
+  const owned=[], groups=[], targets=new Set(clips.flatMap(clip=>clip.tracks.map(track=>track.name.split('.')[0])).filter(Boolean));
+  root.traverse(node=>{
+    if(!node.isMesh || !node.visible || node.children.length || !node.parent ||
+      Array.isArray(node.material) || !node.material || node.material.transparent ||
+      node.morphTargetInfluences?.length || Object.keys(node.geometry.morphAttributes).length ||
+      node.geometry.groups.length || node.geometry.drawRange.start!==0 || node.geometry.drawRange.count!==Infinity ||
+      targets.has(node.name) || targets.has(node.uuid)) return;
+    const geometry=node.geometry, attrs=Object.keys(geometry.attributes).sort();
+    if(attrs.some(name=>!geometry.attributes[name].isBufferAttribute || geometry.attributes[name].isInstancedBufferAttribute)) return;
+    const matches=other=>{
+      const a=other.geometry;
+      if(other.parent!==node.parent || other.material!==node.material || other.isSkinnedMesh!==node.isSkinnedMesh ||
+        other.renderOrder!==node.renderOrder || other.layers.mask!==node.layers.mask || other.frustumCulled!==node.frustumCulled ||
+        other.castShadow!==node.castShadow || other.receiveShadow!==node.receiveShadow ||
+        !other.matrix.equals(node.matrix) || Boolean(a.index)!==Boolean(geometry.index) ||
+        Object.keys(a.attributes).sort().join(',')!==attrs.join(',')) return false;
+      if(attrs.some(name=>{
+        const x=a.attributes[name],y=geometry.attributes[name];
+        return x.itemSize!==y.itemSize || x.normalized!==y.normalized || x.array.constructor!==y.array.constructor;
+      })) return false;
+      if(node.isSkinnedMesh && (!other.bindMatrix.equals(node.bindMatrix) ||
+        other.bindMode!==node.bindMode || other.skeleton.bones.length!==node.skeleton.bones.length ||
+        other.skeleton.bones.some((bone,i)=>bone!==node.skeleton.bones[i] ||
+          !other.skeleton.boneInverses[i].equals(node.skeleton.boneInverses[i])))) return false;
+      return true;
+    };
+    if(node.matrixAutoUpdate) node.updateMatrix();
+    const group=groups.find(group=>matches(group[0]));
+    if(group) group.push(node); else groups.push([node]);
+  });
+  for(const group of groups) {
+    if(group.length<2) continue;
+    const geometry=mergeGeometries(group.map(node=>node.geometry));
+    if(!geometry) continue;
+    owned.push(geometry);
+    group[0].geometry=geometry;
+    if(group[0].isSkinnedMesh) { group[0].boundingBox=null; group[0].boundingSphere=null; }
+    for(const node of group.slice(1)) node.parent.remove(node);
+  }
+  return owned;
 }
 
 export function npcLimit({tier='balanced',mobile=false,enabled=true}={}) {
@@ -45,12 +98,23 @@ export function cloneNpcRig(source) {
 }
 
 export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=30}) {
-  let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0;
+  let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, lastPlayer=null;
   const visitors=[], routes=NPC_ROUTES[expanded?'expanded':'classic'].map(([x,z])=>({x,y:0,z}));
   const clips=Object.fromEntries(['idle','walk','sit'].map(name=>[name,source?.animations?.find(clip=>clip.name===name)]));
   const available=Boolean(source?.scene && Object.values(clips).every(clip=>clip && clip.duration>0 && clip.tracks.length));
-  const callsPerNpc=available?visibleDrawCalls(source.scene):0;
-  const limitForSettings=()=>available ? Math.min(npcLimit(settings),Math.floor(Math.max(0,Number.isFinite(settings.drawCallBudget)?settings.drawCallBudget:0)/callsPerNpc)) : 0;
+  // Freeze the current geometry and visibility, including the player's current
+  // LOD, so later player LOD or customization switches cannot invalidate batches.
+  const template=available?cloneNpcRig(source.scene):null;
+  if(template) template.visible=true;
+  const ownedGeometry=template?optimizeNpcTemplate(template,Object.values(clips)):[];
+  const callsPerNpc=template?visibleDrawCalls(template):0;
+  const limitForSettings=()=>available ? npcLimit(settings) : 0;
+  function applyVisibility() {
+    const budget=Number.isFinite(settings.drawCallBudget)?Math.max(0,settings.drawCallBudget):0;
+    const count=showing && settings.enabled && callsPerNpc ? Math.floor(budget/callsPerNpc) : 0;
+    const ordered=lastPlayer ? [...visitors].sort((a,b)=>distance(a.visual.position,lastPlayer)-distance(b.visual.position,lastPlayer)) : visitors;
+    ordered.forEach((npc,i)=>{npc.visual.visible=i<count;});
+  }
   const shape=new R.Capsule(.55,.3), rotation={x:0,y:0,z:0,w:1};
   const clear = p => !physics.intersectionWithShape({x:p.x,y:(p.y||0)+.91,z:p.z},rotation,shape,undefined,undefined,playerCollider,playerBody);
   function clearPath(a,b) {
@@ -63,7 +127,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     visitors.splice(visitors.indexOf(npc),1);
   }
   function spawn(point,seat=null) {
-    const avatar=cloneNpcRig(source.scene), visual=new T.Group();
+    const avatar=cloneNpcRig(template), visual=new T.Group();
     avatar.visible=true; avatar.rotation.y=Math.PI; visual.add(avatar); visual.position.set(point.x,point.y||0,point.z);
     visual.rotation.y=seat?.angle||0; avatar.position.y=seat?-.13:0;
     avatar.traverse(node=>{ if(node.isMesh){node.castShadow=false;node.receiveShadow=true;node.raycast=ignoreRaycast;} });
@@ -81,12 +145,13 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
   function releaseSeat(id) {
     const npc=visitors.find(candidate=>candidate.seat?.id===id);
     if(!npc) return false;
-    remove(npc); seatCooldown=20; return true;
+    remove(npc); seatCooldown=20; applyVisibility(); return true;
   }
   function update(dt,player) {
     if(disposed) return;
     const limit=limitForSettings();
     if(!player || !Number.isFinite(player.x) || !Number.isFinite(player.y) || !Number.isFinite(player.z)) return;
+    lastPlayer={x:player.x,z:player.z};
     dt=Number.isFinite(dt)?Math.max(0,Math.min(dt,.1)):0;
     seatCooldown=Math.max(0,seatCooldown-dt);
     for(const npc of [...visitors]) {
@@ -112,7 +177,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       }
       npc.mixer.update(dt);
     }
-    if(!limit || Math.abs(player.y)>3) return;
+    if(!limit || Math.abs(player.y)>3) { applyVisibility(); return; }
     // Seat anchors are from the world's registered seats, not invented furniture.
     // Only ground-floor, accessible and unoccupied seats are eligible.
     const candidates=[];
@@ -135,13 +200,15 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       if(visitors.some(n=>distance(n.visual.position,p)<2.5) || !clear(p)) continue;
       spawn(p);
     }
+    applyVisibility();
   }
   return {
     update, releaseSeat,
-    setVisible(value) { for(const npc of visitors) npc.visual.visible=Boolean(value); },
-    setQuality(next={}) { settings={...settings,...next}; },
-    dispose() { if(disposed)return; disposed=true; for(const npc of [...visitors]) remove(npc); },
+    setVisible(value) { showing=Boolean(value); applyVisibility(); },
+    setDrawCallBudget(value) { settings.drawCallBudget=value; applyVisibility(); },
+    setQuality(next={}) { settings={...settings,...next}; applyVisibility(); },
+    dispose() { if(disposed)return; disposed=true; for(const npc of [...visitors]) remove(npc); for(const geometry of ownedGeometry) geometry.dispose(); },
     get occupiedSeatIds() { return visitors.filter(n=>n.seat).map(n=>n.seat.id); },
-    get state() { return {tier:settings.tier,enabled:settings.enabled,available,limit:limitForSettings(),active:visitors.length,visible:visitors.filter(n=>n.visual.visible).length,drawCalls:visitors.length*callsPerNpc,callsPerNpc,occupiedSeatIds:visitors.filter(n=>n.seat).map(n=>n.seat.id)}; }
+    get state() { const visible=visitors.filter(n=>n.visual.visible).length; return {tier:settings.tier,enabled:settings.enabled,available,limit:limitForSettings(),active:visitors.length,visible,drawCalls:visible*callsPerNpc,callsPerNpc,occupiedSeatIds:visitors.filter(n=>n.seat).map(n=>n.seat.id)}; }
   };
 }
