@@ -765,7 +765,7 @@ function createTutorial({ parent, onDismiss = () => {}, touch = false } = {}) {
   const steps = [
     ["Move around", touch ? "Drag the right joystick to move around the courtyard." : "Use WASD or the arrow keys to walk around the courtyard."],
     ["Look around", touch ? "Drag the open scene to look around. When moving, use a second finger." : "Drag the scene to look around. On a controller, use the right stick."],
-    ["Try an interaction", touch ? "Approach a door, bench or display, then tap its action." : "Approach a door, bench or display, then press F or select its action."]
+    ["Try an interaction", touch ? "Approach a bench or display, then tap its action. Store doors open automatically." : "Approach a bench or display, then press F or select its action. Store doors open automatically."]
   ];
   let announcedStep = null;
   state.subscribe(({ open, active, step }) => {
@@ -2194,21 +2194,6 @@ function createUI(expanded = false) {
         });
     },
     describeInteraction(item) {
-      if (item.kind === "open" && item.door) {
-        const name = `${destinationById.get(item.door.zone)?.label || "Store"} door`;
-        records.set(item.id, { name, action: "door" });
-        return {
-          kind: "open",
-          prompt: () => item.door.targetOpen ? "Close" : "Open",
-          handler: () => {
-            if (dialog.open || bag.open || amenityPanel.dialog.open)
-              return false;
-            item.door.toggle();
-            scene.focus({ preventScroll: true });
-            return true;
-          }
-        };
-      }
       const record = records.get(item.id);
       const kind = item.kind || (record?.action === "seat" ? "sit" : record?.action === "elevator" ? "travel" : record?.action === "map" ? "open" : "inspect");
       const prompt = record?.action === "elevator" ? () => currentElevatorState ? currentElevatorState.calling ? "Calling elevator" : currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0) ? "Call elevator" : `Ride to ${currentZone === "upper" ? "ground floor" : "upper landing"}` : "Change level" : record?.action === "map" ? "Map" : kind === "sit" ? "Sit" : kind === "open" ? "Open" : kind === "travel" ? "Travel" : kind === "pickup" ? "Pick up" : "Inspect";
@@ -2435,11 +2420,6 @@ function createUI(expanded = false) {
         nearbyName.textContent = `Elevator · ${zone === "upper" ? "Upper level" : "Ground floor"}`;
         inspectButton.textContent = action;
         inspectButton.setAttribute("aria-label", action);
-      } else if (nearby && selectedInteraction?.kind === "open" && selectedInteraction.door) {
-        const action = typeof selectedInteraction.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction.prompt;
-        nearbyName.textContent = records.get(nearby).name;
-        inspectButton.textContent = touchGuide.matches ? `Tap ${action}` : `Press F / tap ${action}`;
-        inspectButton.setAttribute("aria-label", `${action} ${records.get(nearby).name}`);
       }
       const iconName = seated || selectedInteraction?.kind === "sit" ? "sit" : selectedInteraction?.kind === "travel" ? "lift" : selectedInteraction?.kind === "open" && selectedInteraction.door ? "door" : selectedInteraction?.kind === "pickup" ? "pick-up" : records.get(nearby)?.action === "map" ? "map-pin" : "quality-inspection";
       if (!interactionIcons.has(iconName))
@@ -2884,6 +2864,11 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   return { update, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
     return state;
   } };
+}
+
+// demos/corporate/gjh/v11/assets/auto-door.js
+function shouldOpenStoreDoor(door, player) {
+  return player.y < 2 && Math.hypot(player.x - door.x, player.z) < (door.targetOpen ? 5.2 : 4.8);
 }
 
 // demos/corporate/gjh/v11/assets/interaction-registry.js
@@ -3404,9 +3389,8 @@ function tick(refreshHud = true) {
       door.advance(p, STEP, reducedMotion2.matches);
       continue;
     }
-    if (expanded && (p.y > 2 || Math.hypot(p.x - door.x, p.z) > 5))
-      door.targetOpen = false;
-    const open = expanded ? door.targetOpen : p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
+    const open = shouldOpenStoreDoor(door, p);
+    door.targetOpen = open;
     door.open = reducedMotion2.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);

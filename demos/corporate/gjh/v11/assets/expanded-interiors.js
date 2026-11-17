@@ -1,5 +1,6 @@
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {buildWindowStudio, shopLamp} from './window-studios.js';
+import {buildLateShopAnchorDetails} from './shop-anchor-details-last.js';
 import {westShopPlacements} from './gallery-west-shops.js';
 import {eastShopPlacements} from './gallery-east-shops.js';
 import {loadBrandKit} from './shop-signs.js';
@@ -34,7 +35,7 @@ function displayPlacements(number, heroX, heroZ) {
 
 // Furniture is vertex-coloured and merged; model displays are prefetched near a bay.
 // Coordinates inside each bay have the glazed front on local +Z.
-export async function createExpandedInteriors(T, expandedLayout, scene) {
+export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const loader = new T.TextureLoader().setCrossOrigin(undefined);
   const [kit, textures] = await Promise.all([
@@ -46,20 +47,25 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
   // Illuminated shelving and lamps share a draw call with the cabinets. A
   // per-vertex mask gives the light strips emission without fourteen lights.
   material.onBeforeCompile = shader => {
+    if (stoneMap) shader.uniforms.shopStone = {value:stoneMap};
     shader.vertexShader = 'attribute float shopGlow; attribute vec3 finishPosition; varying float vShopGlow; varying vec3 vFinishPosition;\n' + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
       '#include <begin_vertex>\nvShopGlow=shopGlow;vFinishPosition=finishPosition;');
-    shader.fragmentShader = 'varying float vShopGlow; varying vec3 vFinishPosition;\n' + shader.fragmentShader;
+    shader.fragmentShader = (stoneMap ? 'uniform sampler2D shopStone;\n' : '') +
+      'varying float vShopGlow; varying vec3 vFinishPosition;\n' + shader.fragmentShader;
     shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `
       #include <color_fragment>
-      if(vShopGlow<-.5){
+      if(vShopGlow < -1.5 && vShopGlow > -2.5){
+        ${stoneMap ? 'diffuseColor.rgb *= texture2D(shopStone, vFinishPosition.xz * vec2(.72,.86)).rgb;' : ''}
+      } else if(vShopGlow < -.5 && vShopGlow > -1.5){
         vec3 p=vFinishPosition;
         float grain=p.y*38.+p.z*2.7+p.x*1.5+1.9*sin(p.x*2.+p.z*1.6)+.65*sin(p.y*8.+p.x*.6);
         float fibre=.5+.5*sin(grain+1.8*sin(grain*.24));
         diffuseColor.rgb*=.88+.15*fibre+.07*sin(p.y*4.+p.z*.5);
       }`);
     shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>',
-      '#include <emissivemap_fragment>\ntotalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);');
+      '#include <emissivemap_fragment>\ntotalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);\n' +
+      'if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;');
   };
   const studioParts = new Map(), posterParts = [];
   const atlas = document.createElement('canvas');
@@ -91,17 +97,17 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     const front = depth/2;
     let parts = [];
     let heroOffset = 0;
-    function add(geometry, x, y, z, color) {
+    function add(geometry, x, y, z, color, finish = color===shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
       geometry.translate(x + heroOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i=0; i<colors.length; i+=3) { colors[i]=c.r; colors[i+1]=c.g; colors[i+2]=c.b; }
       geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
       geometry.setAttribute('finishPosition', geometry.attributes.position.clone());
       geometry.setAttribute('shopGlow', new T.BufferAttribute(
-        new Float32Array(geometry.attributes.position.count).fill(color===shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0), 1));
+        new Float32Array(geometry.attributes.position.count).fill(finish), 1));
       parts.push(geometry);
     }
-    function box(x,y,z,w,h,d,color) { add(new T.BoxGeometry(w,h,d),x,y,z,color); }
+    function box(x,y,z,w,h,d,color,finish) { add(new T.BoxGeometry(w,h,d),x,y,z,color,finish); }
     function cylinder(x,y,z,r,h,color) { add(new T.CylinderGeometry(r,r,h,12),x,y,z,color); }
     function block(x,y,z,w,h,d) {
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
@@ -112,6 +118,15 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     }
     const tools = {
       block,
+      surface(points, triangles, color) {
+        const panel = new T.BufferGeometry();
+        panel.setAttribute('position', new T.Float32BufferAttribute(points.flat(), 3));
+        // Untextured relief panels share the same vertex format as the cabinet batch.
+        panel.setAttribute('uv', new T.BufferAttribute(new Float32Array(points.length * 2), 2));
+        panel.setIndex(triangles);
+        panel.computeVertexNormals();
+        add(panel, 0, 0, 0, color);
+      },
       ellipse(x,y,z,rx,ry,rz,c,turn,lean) {
         add(new T.SphereGeometry(1,10,6).scale(rx,ry,rz).rotateZ(lean).rotateY(turn),x,y,z,c);
       },
@@ -135,6 +150,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene) {
     };
     const palette = kit[`S${slot.number}`].palette.map(colour => colour.hex);
     buildWindowStudio(number, tools, width, depth);
+    buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
     // Cull each wing independently; a view directly into one shop does not
     // submit all its neighbours' shelves behind the camera.

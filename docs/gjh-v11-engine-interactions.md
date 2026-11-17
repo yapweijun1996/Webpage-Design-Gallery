@@ -12,10 +12,10 @@ The third upper-deck bench is at `(-3, 6)`, facing its exit at `(-3, 7.2)` betwe
 
 ## Adding a door
 
-Create the two existing-style kinematic sliding leaves and their bodies, add a door record to `world.doors`, and add a ground-floor `open` interaction with a stable ID, radius and door reference. The HUD derives Open/Close and the handler toggles the target; the fixed-step loop moves both meshes and bodies. Expanded-mode doors close after the visitor leaves. Classic-mode automatic opening is unchanged. Verify clearance on both sides and test opening, passage and closing.
+Create both sliding leaves and their kinematic bodies, and register the door in `world.doors` under its stable store ID. The fixed-step loop checks the visitor’s position, opens the passage on approach from either side and closes it after departure. Move the visual leaves and their colliders together. Use `tests/browser_gjh_auto_doors.py` to verify proximity and clearance, and `tests/browser_gjh_shop_walkthrough.py` to verify entry and exit throughout the expanded mall.
 
 Opaque furniture and trim primitives are merged by placement group before instancing, retaining surface colors and PBR values. Each movable glass leaf shares a merged frame geometry; product shelf meshes are batched by their original materials. The browser suite checks the 200-call limit with each expanded-layout door open at desktop resolution.
 
 ## Static geometry
 
-Walls, ordinary lights and decorations remain static; the fourteen planned storefront doors remain decorative and physically closed. No additional network assets are required. The existing viewport zoom lock and mobile interaction control remain in place.
+Walls, ordinary lights and decorations remain static. The seventeen expanded storefronts and the three classic storefronts have working automatic doors.

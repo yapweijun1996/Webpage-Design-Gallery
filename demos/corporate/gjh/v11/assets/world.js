@@ -1,4 +1,5 @@
 import {buildPublicArchitecture} from './public-architecture.js';
+import {addOriginalShopDetails, drawPlumArrangement} from './shop-anchor-details-first.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createDeckRailings} from './deck-railings.js';
@@ -412,6 +413,7 @@ export async function createWorld(T, R, physics, expanded = false) {
       const recess = ctx.createRadialGradient(490, 241, 22, 512, 272, 152);
       recess.addColorStop(0, '#ddbb88'); recess.addColorStop(1, '#ac8558');
       circle(recess, 512, 272, 152);
+      drawPlumArrangement(ctx);
     } else if (zone === 'gogo') {
       ctx.fillStyle = '#466858'; ctx.beginPath();
       ctx.roundRect(220, 98, 584, 450, [112,112,0,0]); ctx.fill();
@@ -611,9 +613,8 @@ export async function createWorld(T, R, physics, expanded = false) {
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, .05));
       physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, .03), body); leaves.push({group, body, side});
     }
-    const door={zone, x, open:0, targetOpen:false, leaves, toggle(){this.targetOpen=!this.targetOpen;return this.targetOpen;}};
+    const door={zone, x, open:0, targetOpen:false, leaves};
     doors.push(door);
-    if(expanded)interactables.push({id:`${zone}-door`,kind:'open',x,z:0,y:0,floor:0,radius:2.5,door});
     if (expanded && zone === 'newmoon') {
       cylinder('brass', x + 1.8, 4.46, -4, .028, 2.35);
       cylinder('brass', x + 1.8, 3.25, -4, 1.05, .14);
@@ -732,6 +733,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         box('ivory',x+.12,.08,-1.35,.055,.16,.045);box('oak',x+.12,.08,-1.325,.035,.11,.006);
       }
     }
+    if (expanded) addOriginalShopDetails(zone, x, {box, cylinder, solid, collider});
     activeShopSlot=null;
     }
   if (expanded) {
@@ -849,7 +851,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     activeDeck=false;
     const shopSigns=await addShopSignAtlas(T,expandedLayout,scene);
     shopSigns.layers.enable(1);
-    const interiors=await createExpandedInteriors(T,expandedLayout,scene);
+    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map);
     for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
       collider(x,y,z,width,height,depth);
       shopObstacles.push({min:{x:x-width/2,y:y-height/2,z:z-depth/2},

@@ -9,6 +9,18 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   materials.vaultOak.emissiveIntensity=.32;
   const tau = 2 * Math.PI;
 
+  // The masonry above each arch is a silhouette with a real opening. Reuse
+  // one flat-ended extrusion for the arcade, gallery and lift portal.
+  const spandrel = new T.Shape();
+  spandrel.moveTo(-1,0);
+  spandrel.lineTo(-1,1.14);spandrel.lineTo(1,1.14);spandrel.lineTo(1,0);
+  for(let i=1;i<=20;i++){
+    const a=Math.PI*i/20;
+    spandrel.lineTo(Math.cos(a),Math.sin(a));
+  }
+  spandrel.closePath();
+  geometry.archSpandrel=new T.ExtrudeGeometry(spandrel,{depth:1,bevelEnabled:false});
+
   // A continuous barrel vault. The same ellipse drives the curved timber
   // lining, pale transverse ribs and fine concealed strips between bays.
   function arch(center, z, spring, radius, rise, depth, thickness, material) {
@@ -31,7 +43,37 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   for (const x of [1.87,18.13]) {
     box('ivory',x,5.08,33.3,.46,.45,29);
     box('brass',x,4.86,33.3,.47,.075,29);
+    const inward=x<10 ? 1 : -1;
+    const turn=inward*Math.PI/2;
+    // The portal line sits outside the event reservation, on the axis of
+    // each vault rib. The side openings remain walkable at floor level.
+    const piers=[19.05,24.8,30.55,36.3,42.05,47.55];
+    for (let bay=0;bay<piers.length;bay++){
+      const z=piers[bay];
+      box('ivory',x,2.55,z,.76,5.1,.83,true);
+      box('oak',x,.2,z,.79,.39,.88);
+      box('brass',x,.41,z,.79,.035,.88);
+      box('ivory',x,4.78,z,.88,.36,1.03);
+      box('brass',x+inward*.402,2.77,z,.05,.93,.23);
+      box('glow',x+inward*.442,2.77,z,.06,.71,.12);
+      if(bay<piers.length-1) {
+        const span=piers[bay+1]-z;
+        solid('archSpandrel','ivory',x-inward*.34,3.52,z+span/2,span/2,1.36,.53,turn);
+        solid('archSpandrel','green',x+inward*.19,3.50,z+span/2,span/2-.23,1.22,.066,turn);
+      }
+    }
   }
+
+  // The continuous court uses staggered fossil limestone slabs. A primed
+  // 512px original tile keeps mineral veining out of the frame loop.
+  materials.paving=new T.MeshStandardMaterial({color:0xdad3c6,roughness:.39,metalness:.06});
+  const pavingURL=new URL('concourse-limestone.webp',import.meta.url);
+  new T.TextureLoader().load(pavingURL.href,map=>{
+    map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;
+    map.repeat.set(12.5,12);map.anisotropy=4;
+    materials.paving.map=map;materials.paving.needsUpdate=true;
+  },undefined,()=>{});
+  box('paving',10,-.013,24,49.85,.002,47.85);
 
   // A green terrazzo runner with multiscale aggregate, set into the marble.
   const canvas = document.createElement('canvas');
@@ -73,6 +115,14 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
         box('glow',front+inside*.77,5.737,z+dz,.21,.04,.21);
       }
       box('ivory',front+side*.03,2.88,z-3.88,.45,5.76,.35);
+      // Shallow arched window heads sit below the fascia and to either
+      // side of the moving leaves. The storefront sign stays uninterrupted.
+      for(const offset of [-2.48,2.48]){
+        solid('archSpandrel','green',front+inside*.235,3.32,z+offset,
+          1.15,.53,.11,inside*Math.PI/2);
+      }
+      box('ivory',front+inside*.07,.18,z-3.88,.59,.35,.54);
+      box('ivory',front+inside*.11,5.59,z-3.88,.65,.20,.63);
       box('brass',front+inside*.22,2.75,z-3.88,.10,1.03,.19);
       box('glow',front+inside*.284,2.76,z-3.88,.065,.76,.12);
     }
@@ -100,6 +150,17 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     box('green',-3,8.48,z,26.2,.14,.35);
     box('glass',-3,9.55,z,26.2,2.05,.10);
     for(const x of [-15.4,9.4])box('ivory',x,10.7,z,.4,4.85,.48);
+    // The glazed fanlight closes the barrel end above the clerestory.
+    // Sample the actual roof ellipse so every metal mullion meets its rib.
+    box('green',-3,13.14,z,26.1,.14,.14);
+    for(let bay=0;bay<12;bay++){
+      const dx=(bay-5.5)*2.16,edge=Math.abs(dx)+1.08;
+      const h=3.9*Math.sqrt(1-(edge/13.15)**2);
+      box('glass',-3+dx,13.13+h/2,z,2.12,h,.036);
+      if(bay===0) continue;
+      const px=dx-1.08,rise=3.9*Math.sqrt(1-(px/13.15)**2);
+      box('green',-3+px,13.13+rise/2,z,.09,rise,.12);
+    }
   }
 
   // Warm recessed lunettes wrap the two outward-facing sides of the gallery.
@@ -129,11 +190,10 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
         .14,height*.5,.13);
       piece('brass',along,9.91+height,.67,.12,.04,.12);
     }
-    for(let n=0;n<9;n++){
-      const a=(n+.5)*Math.PI/9;
-      // Narrow timber reveals behind the transom catch the overhead light.
-      piece('ivory',(n-4)*.382,12.82+.19*Math.sin(a),.48,.385,.50-.34*Math.sin(a),.24);
-    }
+    // A deep jade reveal under the limestone arch reads from across
+    // the void; square shelves below remain in the display window.
+    solid('archSpandrel','green',x+sn*.465,11.12,z+c*.465,1.74,1.60,.13,turn);
+    solid('archSpandrel','ivory',x+sn*.60,11.12,z+c*.60,1.91,1.75,.17,turn);
   }
   for(let i=0;i<6;i++){
     galleryWindow(-13.85+i*4.3,-3.55,0);
@@ -188,6 +248,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     box('glow',-5.194,1.78,z,.035,.76,.06);
     box('oak',-4.99,5.27,z,.30,3.14,.37);
   }
+  solid('archSpandrel','ivory',-5.14,2.87,10,1.93,.90,.18,-Math.PI/2);
+  solid('archSpandrel','green',-5.31,2.89,10,1.78,.78,.08,-Math.PI/2);
   box('green',-5.01,3.78,10,.33,.36,3.82);
   box('brass',-5.20,3.62,10,.03,.05,3.52);
   box('ivory',-5.02,4.02,10,.36,.19,3.94);
@@ -198,6 +260,16 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     solid('cylinder','oak',x,.61,z,1.05,.12,1.05);
     solid('cylinder','wood',x,.676,z,.79,.02,.79);
     box('wood',x,.30,z,1.40,.60,1.40,true);
+    // A raised inner planting collar leaves a continuous outer timber seat.
+    solid('cylinder','green',x,.73,z,.73,.19,.73);
+    for(let clump=0;clump<8;clump++){
+      const bearing=clump*tau/8, cx=x+.45*Math.sin(bearing),cz=z+.45*Math.cos(bearing);
+      for(let blade=0;blade<9;blade++){
+        const yaw=bearing+blade*tau/9;
+        solid('publicLeaf',leafColors[(clump+blade)%2],cx+.19*Math.sin(yaw),
+          .90+(blade%3)*.04,cz+.19*Math.cos(yaw),.50,1,.88,yaw,-.71,'YXZ');
+      }
+    }
     tree(x,z,4.55);
   }
   // A03's trailing greenery softens the upper clerestory. Planter boxes

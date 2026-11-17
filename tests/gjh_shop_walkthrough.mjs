@@ -12,6 +12,9 @@ export async function walkShop(win, number, onInterior = () => {}) {
   doc.getElementById('map-visit').click();
   if (map.open) doc.getElementById('map-close').click();
   doc.getElementById('scene').focus();
+  // The native details toggle and its mode change settle after the map click.
+  // Begin walking on the next presented frame, just as a visitor would.
+  await new Promise(resolve => win.requestAnimationFrame(resolve));
   const north = number <= 5, west = number >= 6 && number <= 11;
   const yaw = north ? 0 : west ? Math.PI / 2 : -Math.PI / 2;
   const depth = s => north ? -s.z : west ? -15-s.x : s.x-35;
@@ -26,23 +29,21 @@ export async function walkShop(win, number, onInterior = () => {}) {
   function motion(forward,right,ms) {
     mall.setInput({forward,right,yaw,run:false}); return mall.step(ms);
   }
-  function actuateDoor() {
-    const inspect = doc.getElementById('inspect');
-    if (number <= 3 && !inspect.disabled && /open.*door/i.test(inspect.getAttribute('aria-label') || '')) inspect.click();
-  }
   function approach(axis,target,sideways=false) {
     for(let i=0;i<65;i++) {
       const error = target-axis(state());
       if (Math.abs(error)<.2) return;
-      actuateDoor();
       const direction = Math.sign(error);
       motion(sideways?0:direction,sideways?direction:0, Math.min(125,Math.max(34,Math.abs(error)*290)));
     }
     require(false,'could not reach '+target);
   }
   try {
-    actuateDoor();
     motion(0,0,420);
+    require(state().doors[id] > .99, 'door did not open automatically on approach');
+    approach(depth,0);
+    motion(0,0,550);
+    require(state().doors[id] > .99, 'door closed on the visitor in the threshold');
     approach(depth,3.45);
     require(state().zone === id, 'incorrect interior');
     const entered=describe(state()), aisle=along(state());
@@ -60,6 +61,7 @@ export async function walkShop(win, number, onInterior = () => {}) {
     if (number >= 4) approach(depth,3.45);
     approach(along,aisle,true);
     approach(depth,-1.85);
+    require(state().doors[id] > .99, 'door did not open on the way out');
     const exited=describe(state());
     require(exited.zone!==id,'exit still inside');
     return {number,arrival:describe(arrival),entered,browsed,exited};

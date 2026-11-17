@@ -127,6 +127,8 @@ def ux_hud_coverage(browser, url):
         page.mouse.up()
         page.wait_for_function("document.querySelector('#guide-count').textContent==='3/3'")
         assert page.evaluate('__mall.teleport("mili")')
+        assert drive(page, 1000)['doors']['mili'] > .99
+        walk_to(page, -3, -5.6)
         drive(page, 17)
         assert page.locator('#inspect-prompt button').first.is_visible()
         assert 'Nearest:' in page.locator('#nearest-target').inner_text()
@@ -134,7 +136,6 @@ def ux_hud_coverage(browser, url):
         page.keyboard.press('f')
         page.wait_for_function("document.querySelector('#guide-card').hidden")
         drive(page, 1000)
-        assert state(page)['doors']['mili'] > .99
         peak = max(before['drawCalls'], state(page)['drawCalls'])
         assert peak <= 200, peak
         page.reload()
@@ -448,17 +449,11 @@ def npc_budget_coverage(browser, url):
                 rows = [npc_budget_sweep(page, 'atrium')]
                 for zone in ('newmoon', 'mili', 'gogo'):
                     assert page.evaluate('zone=>__mall.teleport(zone)', zone)
-                    closed = drive(page, 17, yaw=0)
-                    assert closed['nearby'] == f'{zone}-door', closed
-                    assert closed['doors'][zone] == 0, closed['doors']
-                    assert 'Open' in page.locator('#inspect').inner_text()
-                    page.locator('#inspect').click()
                     for _ in range(16):
                         opened = drive(page, 75, yaw=0)
                     assert opened['doors'][zone] > .99, opened['doors']
                     rows.append(npc_budget_sweep(page, f'{zone}-open'))
-                    assert 'Close' in page.locator('#inspect').inner_text()
-                    page.locator('#inspect').click()
+                    assert page.evaluate('__mall.teleport("atrium")')
                     for _ in range(16):
                         closed = drive(page, 75, yaw=0)
                     assert closed['doors'][zone] == 0, closed['doors']
@@ -774,16 +769,11 @@ def run(capture=False):
                             dismiss_tutorial(page)
                             for zone in ('newmoon', 'mili', 'gogo'):
                                 assert page.evaluate('zone => __mall.teleport(zone)', zone)
-                                closed = drive(page, 1000)
-                                assert closed['doors'][zone] == 0 and closed['nearby'] == f'{zone}-door', closed
-                                assert 'Open' in page.locator('#inspect').inner_text()
-                                page.locator('#inspect').click()
                                 opened = drive(page, 1000)
                                 print(json.dumps({'door': zone, 'viewport': [1440, 900],
                                                   'drawCalls': opened['drawCalls']}), flush=True)
                                 assert opened['doors'][zone] > .99, opened
                                 assert opened['drawCalls'] <= 200, (zone, opened['drawCalls'])
-                                assert 'Close' in page.locator('#inspect').inner_text()
                                 if zone == 'mili':
                                     assert opened['npcs']['active'] > 0, opened['npcs']
                                     print(json.dumps({'view': 'mili-open-with-npcs',
@@ -800,16 +790,10 @@ def run(capture=False):
                                     assert state(page)['character']['physicalProduct']['phase'] == 'empty', state(page)
                                     assert page.evaluate('__mall.teleport("newmoon")')
                                     drive(page, 1000)
-                                    if state(page)['doors'][zone] < .99:
-                                        page.locator('#inspect').click()
-                                        drive(page, 1000)
                                 inside = drive(page, 1400, forward=1)
                                 assert inside['z'] < -.5, inside
                                 assert inside['drawCalls'] <= 200, (zone, inside['drawCalls'])
-                                assert page.evaluate('zone => __mall.teleport(zone)', zone)
-                                drive(page, 17)
-                                assert state(page)['nearby'] == f'{zone}-door', state(page)
-                                page.locator('#inspect').click()
+                                assert page.evaluate('__mall.teleport("atrium")')
                                 closed = drive(page, 1000)
                                 assert closed['doors'][zone] == 0, closed
                         else:

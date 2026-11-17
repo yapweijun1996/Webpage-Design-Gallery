@@ -40,7 +40,7 @@ Every advisor round scores against these five items first, then the per-shop che
 ## Interaction rules (owner, 2026-11-17)
 1. Every chair must be sittable: all chairs in the mall, including restaurant chairs, rest-area seats and bar stools, support Sit interaction.
 2. Not every object needs interaction: walls, decorations and ordinary light fixtures may stay static models.
-3. Interaction must be meaningful: products support Inspect, doors support Open, chairs support Sit. Do not make every object clickable.
+3. Products support Inspect, storefront doors open on approach and chairs support Sit. Do not make every object clickable.
 
 Advisors check these three rules in every round (sit coverage, door open, product inspect, no pointless clickable objects).
 

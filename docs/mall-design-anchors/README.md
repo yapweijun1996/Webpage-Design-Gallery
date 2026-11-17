@@ -92,6 +92,17 @@ Four public-space anchors and seventeen AI-generated shopfront concepts. Select 
 
 [![Gigaset architectural concept](S17.webp)](S17.webp)
 
+## Interior comparison at the shop entrances
+
+Each sheet pairs the concept with the previous and revised interior at the same camera position. The public-space views follow the main visitor route. Shop cameras sit just inside the entrance, facing the rear wall. The walkthrough opens each door by proximity, pauses in the opening, walks around the fixtures and returns to the arcade.
+
+| Reference and WebGL comparison | Changes visible from the route |
+| --- | --- |
+| [A01–A04 · Public spaces](runtime/interior-A01-A04.webp) | Entrance piers under the timber vault, staggered limestone paving along the arcade, glazed fanlight and arched windows upstairs, lift portal and planting |
+| [S01–S05 · New Moon to Pien Tze Huang](runtime/interior-S01-S05.webp) | Plum-blossom roundel and tasting stools, tiled pantry, tea niches, rose dispensary island, apothecary drawers and lanterns |
+| [S06–S11 · Flying Wheel to Hormel](runtime/interior-S06-S11.webp) | Hanging noodle bundles, lacquered display and tiered chandelier, peanut relief, navy counter, shell displays and a produce market table |
+| [S12–S17 · Zeria to Gigaset](runtime/interior-S12-S17.webp) | Sage wall relief, sunset listening lounge, paired washer display, watch cabinets and piano, cylindrical batteries, phone displays and signal arcs |
+
 ## Inside all seventeen shops
 
 The map takes the player to the public side of each entrance. These captures use the normal third-person camera after the character crosses the threshold and walks around the displays. Each visit ends by walking back through the same door.

@@ -662,12 +662,6 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         handler:()=>teleportListener?.(store.id)});
     },
     describeInteraction(item) {
-      if (item.kind === 'open' && item.door) {
-        const name = `${destinationById.get(item.door.zone)?.label || 'Store'} door`;
-        records.set(item.id, {name, action:'door'});
-        return {kind:'open', prompt:() => item.door.targetOpen ? 'Close' : 'Open',
-          handler:() => { if (dialog.open || bag.open || amenityPanel.dialog.open) return false; item.door.toggle(); scene.focus({preventScroll:true}); return true; }};
-      }
       const record = records.get(item.id);
       const kind = item.kind || (record?.action === 'seat' ? 'sit' : record?.action === 'elevator' ? 'travel' : record?.action === 'map' ? 'open' : 'inspect');
       const prompt = record?.action === 'elevator' ? () => currentElevatorState ? (currentElevatorState.calling ? 'Calling elevator' : currentElevatorState.docked !== (currentZone === 'upper' ? currentElevatorUpper : 0) ? 'Call elevator' : `Ride to ${currentZone === 'upper' ? 'ground floor' : 'upper landing'}`) : 'Change level' : record?.action === 'map' ? 'Map' : kind === 'sit' ? 'Sit' : kind === 'open' ? 'Open' : kind === 'travel' ? 'Travel' : kind === 'pickup' ? 'Pick up' : 'Inspect';
@@ -833,7 +827,6 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       if(seated){nearbyName.textContent=`${seatName||'Bench'} · ${seatPhase==='align'?'Aligning':seatPhase==='sit'?'Sitting down':seatPhase==='stand'?'Standing up':'Seated'}`;inspectButton.textContent=seatPhase==='stand'?'Standing up…':seatPhase==='seated'?'Stand up':'Cancel / stand';inspectButton.setAttribute('aria-label',seatPhase==='seated'?'Stand up from bench':'Cancel sitting and stand');}
       else if(nearby&&selectedInteraction?.kind==='sit'){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=`${records.get(nearby).name} · Sit here`;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`Sit on ${records.get(nearby).name}`);}
       else if(nearby&&selectedInteraction?.kind==='travel'){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=`Elevator · ${zone==='upper'?'Upper level':'Ground floor'}`;inspectButton.textContent=action;inspectButton.setAttribute('aria-label',action);}
-      else if(nearby&&selectedInteraction?.kind==='open'&&selectedInteraction.door){const action=typeof selectedInteraction.prompt==='function'?selectedInteraction.prompt():selectedInteraction.prompt;nearbyName.textContent=records.get(nearby).name;inspectButton.textContent=touchGuide.matches?`Tap ${action}`:`Press F / tap ${action}`;inspectButton.setAttribute('aria-label',`${action} ${records.get(nearby).name}`);}
       const iconName=seated||selectedInteraction?.kind==='sit'?'sit':selectedInteraction?.kind==='travel'?'lift':selectedInteraction?.kind==='open'&&selectedInteraction.door?'door':selectedInteraction?.kind==='pickup'?'pick-up':records.get(nearby)?.action==='map'?'map-pin':'quality-inspection';
       if(!interactionIcons.has(iconName))interactionIcons.set(iconName,icon(iconName,{size:18}));
       const actionIcon=interactionIcons.get(iconName);

@@ -8,6 +8,7 @@ import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
+import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
 import {icon} from './assets/icons.js';
@@ -226,8 +227,8 @@ function tick(refreshHud = true) {
   const p = player.state;
   for (const door of world.doors) {
     if (door.advance) { door.advance(p, STEP, reducedMotion.matches); continue; }
-    if (expanded && (p.y > 2 || Math.hypot(p.x - door.x, p.z) > 5)) door.targetOpen = false;
-    const open = expanded ? door.targetOpen : p.y < 2 && Math.hypot(p.x - door.x, p.z) < 4.8;
+    const open = shouldOpenStoreDoor(door, p);
+    door.targetOpen = open;
     door.open = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);

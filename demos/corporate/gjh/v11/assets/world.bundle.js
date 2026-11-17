@@ -104,6 +104,17 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   materials.vaultOak.emissive.set(10713934);
   materials.vaultOak.emissiveIntensity = 0.32;
   const tau = 2 * Math.PI;
+  const spandrel = new T.Shape;
+  spandrel.moveTo(-1, 0);
+  spandrel.lineTo(-1, 1.14);
+  spandrel.lineTo(1, 1.14);
+  spandrel.lineTo(1, 0);
+  for (let i = 1;i <= 20; i++) {
+    const a = Math.PI * i / 20;
+    spandrel.lineTo(Math.cos(a), Math.sin(a));
+  }
+  spandrel.closePath();
+  geometry.archSpandrel = new T.ExtrudeGeometry(spandrel, { depth: 1, bevelEnabled: false });
   function arch(center, z, spring, radius, rise, depth, thickness, material) {
     const segments = 24;
     for (let i = 0;i < segments; i++) {
@@ -123,7 +134,35 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   for (const x of [1.87, 18.13]) {
     box("ivory", x, 5.08, 33.3, 0.46, 0.45, 29);
     box("brass", x, 4.86, 33.3, 0.47, 0.075, 29);
+    const inward = x < 10 ? 1 : -1;
+    const turn = inward * Math.PI / 2;
+    const piers = [19.05, 24.8, 30.55, 36.3, 42.05, 47.55];
+    for (let bay = 0;bay < piers.length; bay++) {
+      const z = piers[bay];
+      box("ivory", x, 2.55, z, 0.76, 5.1, 0.83, true);
+      box("oak", x, 0.2, z, 0.79, 0.39, 0.88);
+      box("brass", x, 0.41, z, 0.79, 0.035, 0.88);
+      box("ivory", x, 4.78, z, 0.88, 0.36, 1.03);
+      box("brass", x + inward * 0.402, 2.77, z, 0.05, 0.93, 0.23);
+      box("glow", x + inward * 0.442, 2.77, z, 0.06, 0.71, 0.12);
+      if (bay < piers.length - 1) {
+        const span = piers[bay + 1] - z;
+        solid("archSpandrel", "ivory", x - inward * 0.34, 3.52, z + span / 2, span / 2, 1.36, 0.53, turn);
+        solid("archSpandrel", "green", x + inward * 0.19, 3.5, z + span / 2, span / 2 - 0.23, 1.22, 0.066, turn);
+      }
+    }
   }
+  materials.paving = new T.MeshStandardMaterial({ color: 14341062, roughness: 0.39, metalness: 0.06 });
+  const pavingURL = new URL("concourse-limestone.webp", import.meta.url);
+  new T.TextureLoader().load(pavingURL.href, (map) => {
+    map.colorSpace = T.SRGBColorSpace;
+    map.wrapS = map.wrapT = T.RepeatWrapping;
+    map.repeat.set(12.5, 12);
+    map.anisotropy = 4;
+    materials.paving.map = map;
+    materials.paving.needsUpdate = true;
+  }, undefined, () => {});
+  box("paving", 10, -0.013, 24, 49.85, 0.002, 47.85);
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 384;
   const ctx = canvas.getContext("2d");
@@ -172,6 +211,11 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
         box("glow", front + inside * 0.77, 5.737, z + dz, 0.21, 0.04, 0.21);
       }
       box("ivory", front + side * 0.03, 2.88, z - 3.88, 0.45, 5.76, 0.35);
+      for (const offset of [-2.48, 2.48]) {
+        solid("archSpandrel", "green", front + inside * 0.235, 3.32, z + offset, 1.15, 0.53, 0.11, inside * Math.PI / 2);
+      }
+      box("ivory", front + inside * 0.07, 0.18, z - 3.88, 0.59, 0.35, 0.54);
+      box("ivory", front + inside * 0.11, 5.59, z - 3.88, 0.65, 0.2, 0.63);
       box("brass", front + inside * 0.22, 2.75, z - 3.88, 0.1, 1.03, 0.19);
       box("glow", front + inside * 0.284, 2.76, z - 3.88, 0.065, 0.76, 0.12);
     }
@@ -196,6 +240,16 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("glass", -3, 9.55, z, 26.2, 2.05, 0.1);
     for (const x of [-15.4, 9.4])
       box("ivory", x, 10.7, z, 0.4, 4.85, 0.48);
+    box("green", -3, 13.14, z, 26.1, 0.14, 0.14);
+    for (let bay = 0;bay < 12; bay++) {
+      const dx = (bay - 5.5) * 2.16, edge = Math.abs(dx) + 1.08;
+      const h = 3.9 * Math.sqrt(1 - (edge / 13.15) ** 2);
+      box("glass", -3 + dx, 13.13 + h / 2, z, 2.12, h, 0.036);
+      if (bay === 0)
+        continue;
+      const px = dx - 1.08, rise = 3.9 * Math.sqrt(1 - (px / 13.15) ** 2);
+      box("green", -3 + px, 13.13 + rise / 2, z, 0.09, rise, 0.12);
+    }
   }
   function galleryWindow(x, z, turn) {
     const c = Math.cos(turn), sn = Math.sin(turn);
@@ -217,10 +271,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       solid("sphere", "cream", x + c * along + sn * 0.66, 9.88 + height * 0.5, z - sn * along + c * 0.66, 0.14, height * 0.5, 0.13);
       piece("brass", along, 9.91 + height, 0.67, 0.12, 0.04, 0.12);
     }
-    for (let n = 0;n < 9; n++) {
-      const a = (n + 0.5) * Math.PI / 9;
-      piece("ivory", (n - 4) * 0.382, 12.82 + 0.19 * Math.sin(a), 0.48, 0.385, 0.5 - 0.34 * Math.sin(a), 0.24);
-    }
+    solid("archSpandrel", "green", x + sn * 0.465, 11.12, z + c * 0.465, 1.74, 1.6, 0.13, turn);
+    solid("archSpandrel", "ivory", x + sn * 0.6, 11.12, z + c * 0.6, 1.91, 1.75, 0.17, turn);
   }
   for (let i = 0;i < 6; i++) {
     galleryWindow(-13.85 + i * 4.3, -3.55, 0);
@@ -295,6 +347,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("glow", -5.194, 1.78, z, 0.035, 0.76, 0.06);
     box("oak", -4.99, 5.27, z, 0.3, 3.14, 0.37);
   }
+  solid("archSpandrel", "ivory", -5.14, 2.87, 10, 1.93, 0.9, 0.18, -Math.PI / 2);
+  solid("archSpandrel", "green", -5.31, 2.89, 10, 1.78, 0.78, 0.08, -Math.PI / 2);
   box("green", -5.01, 3.78, 10, 0.33, 0.36, 3.82);
   box("brass", -5.2, 3.62, 10, 0.03, 0.05, 3.52);
   box("ivory", -5.02, 4.02, 10, 0.36, 0.19, 3.94);
@@ -304,6 +358,14 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     solid("cylinder", "oak", x, 0.61, z, 1.05, 0.12, 1.05);
     solid("cylinder", "wood", x, 0.676, z, 0.79, 0.02, 0.79);
     box("wood", x, 0.3, z, 1.4, 0.6, 1.4, true);
+    solid("cylinder", "green", x, 0.73, z, 0.73, 0.19, 0.73);
+    for (let clump = 0;clump < 8; clump++) {
+      const bearing = clump * tau / 8, cx = x + 0.45 * Math.sin(bearing), cz = z + 0.45 * Math.cos(bearing);
+      for (let blade = 0;blade < 9; blade++) {
+        const yaw = bearing + blade * tau / 9;
+        solid("publicLeaf", leafColors[(clump + blade) % 2], cx + 0.19 * Math.sin(yaw), 0.9 + blade % 3 * 0.04, cz + 0.19 * Math.cos(yaw), 0.5, 1, 0.88, yaw, -0.71, "YXZ");
+      }
+    }
     tree(x, z, 4.55);
   }
   for (let bay = 0;bay < 5; bay++) {
@@ -437,6 +499,103 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     else
       setTimeout(loadChandelier, 0);
   };
+}
+
+// demos/corporate/gjh/v11/assets/shop-anchor-details-first.js
+function drawPlumArrangement(ctx) {
+  ctx.save();
+  ctx.translate(512, 301);
+  ctx.lineCap = "round";
+  const sprays = [
+    [-7, -4, -48, -57, -106, -66],
+    [-8, -4, -30, -85, -72, -108],
+    [0, -4, 12, -76, 36, -103],
+    [0, -5, 36, -42, 103, -63],
+    [4, -4, 52, -19, 93, -33],
+    [-3, -4, -54, -22, -94, -37]
+  ];
+  for (const [x, y, bx, by, tipX, tipY] of sprays) {
+    ctx.strokeStyle = "#5a3128";
+    ctx.lineWidth = 3.3;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(bx, by, tipX, tipY);
+    ctx.stroke();
+    for (let j = 2;j <= 8; j++) {
+      const t = j / 8, u = 1 - t;
+      const sx = u * u * x + 2 * u * t * bx + t * t * tipX, sy = u * u * y + 2 * u * t * by + t * t * tipY;
+      const ex = sx + (j % 2 ? 7 : -6), ey = sy - 9 - j % 3 * 3;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+      ctx.fillStyle = j % 3 ? "#9d493e" : "#d3856e";
+      ctx.beginPath();
+      ctx.arc(ex, ey, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 3, ey - 3, 2.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.fillStyle = "#e7d7ad";
+  ctx.beginPath();
+  ctx.moveTo(-13, -9);
+  ctx.lineTo(13, -9);
+  ctx.bezierCurveTo(12, 0, 27, 9, 19, 21);
+  ctx.quadraticCurveTo(0, 31, -19, 21);
+  ctx.bezierCurveTo(-27, 9, -12, 0, -13, -9);
+  ctx.fill();
+  ctx.restore();
+}
+function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider }) {
+  if (zone === "newmoon") {
+    for (const z of [-3.29, -4.58]) {
+      const cx = x + 1.49;
+      cylinder("wood", cx, 0.59, z, 0.26, 0.075);
+      cylinder("ivory", cx, 0.67, z, 0.27, 0.095);
+      for (const dx of [-0.16, 0.16])
+        for (const dz of [-0.16, 0.16])
+          box("wood", cx + dx, 0.3, z + dz, 0.048, 0.56, 0.048);
+      for (const dz of [-0.16, 0.16])
+        box("brass", cx, 0.2, z + dz, 0.34, 0.026, 0.027);
+      collider(cx, 0.35, z, 0.54, 0.7, 0.54);
+    }
+  } else if (zone === "mili") {
+    const cx = x - 4.27, z = -5.13;
+    box("wood", cx, 0.56, z, 0.74, 0.94, 6.86);
+    box("oak", cx, 1.07, z, 0.82, 0.1, 6.94);
+    collider(cx, 0.56, z, 0.82, 1.1, 6.94);
+    for (let i = 0;i < 8; i++) {
+      const dz = z + (i - 3.5) * 0.84;
+      box("oak", cx + 0.379, 0.57, dz, 0.035, 0.77, 0.79);
+      box("brass", cx + 0.407, 0.81, dz + 0.23, 0.045, 0.035, 0.23);
+    }
+    box("jadeAlt", x - 4.65, 1.66, z, 0.036, 1.03, 6.73);
+    for (let dz = -3.22;dz <= 3.23; dz += 0.38)
+      box("wood", x - 4.626, 1.66, z + dz, 0.014, 0.99, 0.012);
+    for (const y of [1.34, 1.7, 2.06])
+      box("wood", x - 4.626, y, z, 0.014, 0.013, 6.7);
+  } else if (zone === "gogo") {
+    for (const [i, z] of [-2.1, -4.13, -6.16].entries()) {
+      const wallX = x + 4.6, r = 0.87, crown = 2.75;
+      for (const [material, offset, radius] of [["brass", 0, r], ["ivory", 0.025, r - 0.07]]) {
+        const px = wallX - offset;
+        solid("cylinder", material, px, crown, z, radius, 0.035, radius, 0, 0, "XYZ", Math.PI / 2);
+        box(material, px - 0.004, 2.12, z, 0.04, 1.26, radius * 2);
+      }
+      for (const y of [1.72, 2.42]) {
+        box("oak", wallX - 0.15, y, z, 0.34, 0.068, 1.57);
+        box("glow", wallX - 0.31, y - 0.045, z, 0.026, 0.021, 1.44);
+        for (let j = -2;j <= 2; j++) {
+          const material = (i + j + 3) % 3 === 0 ? "jadeAlt" : j % 2 ? "brass" : "cream";
+          cylinder(material, wallX - 0.16, y + 0.17, z + j * 0.25, 0.086, 0.25);
+          cylinder("oak", wallX - 0.16, y + 0.314, z + j * 0.25, 0.073, 0.037);
+        }
+      }
+    }
+  }
 }
 
 // demos/corporate/gjh/v11/assets/world.js
@@ -1629,7 +1788,7 @@ var finishes = {
   6: [11700828, 12950889, 15390136],
   7: [7745318, 9325877, 11897700],
   8: [15656137, 2177385, 16050643],
-  9: [2570313, 1913422, 12758670],
+  9: [2570313, 1913422, 4673626],
   10: [11322284, 7507064, 15919055],
   11: [7684666, 8929852, 14996662],
   12: [15329754, 11650471, 15526360],
@@ -1649,6 +1808,25 @@ function buildWindowStudio(n, t, width, depth) {
     box(x, 0.18 + h / 2, z, w, h, d, body);
     box(x, 0.21 + h, z, w + 0.09, 0.095, d + 0.09, cap);
   };
+  function ovalCounter(x, z, width2, depth2, height, color) {
+    const radius = depth2 / 2, straight = width2 - depth2;
+    block(x, height / 2 + 0.07, z, width2 + 0.06, height + 0.12, depth2 + 0.06);
+    for (const [y, h, r, finish] of [[0.16, 0.18, radius * 0.95, brass], [height / 2 + 0.13, height - 0.16, radius, color], [height + 0.075, 0.1, radius + 0.025, cream]]) {
+      box(x, y, z, straight, h, 2 * r, finish);
+      for (const end of [-1, 1])
+        column(x + end * straight / 2, y, z, r, h, finish);
+    }
+    return height + 0.125;
+  }
+  function blossomVase(x, y, z, petal) {
+    tapered(x, y + 0.17, z, 0.15, 0.2, 0.32, cream);
+    for (let i = 0;i < 7; i++) {
+      const angle = i * 2.4, dx = Math.cos(angle) * (0.2 + 0.03 * (i % 3)), dz = Math.sin(angle) * 0.17, top = y + 0.66 + i % 3 * 0.12;
+      bar(x, y + 0.26, z, x + dx, top, z + dz, 0.018, walnut);
+      for (let j = 0;j < 3; j++)
+        ellipse(x + dx + (j - 1) * 0.054, top - 0.04 * Math.abs(j - 1), z + dz, 0.066, 0.06, 0.059, petal, angle, 0);
+    }
+  }
   function can(x, y, z, c, r = 0.105, h = 0.24) {
     column(x, y + h / 2, z, r, h, c);
     column(x, y + h + 0.015, z, r * 1.02, 0.03, brass);
@@ -1752,13 +1930,6 @@ function buildWindowStudio(n, t, width, depth) {
     for (const off of [-0.68, 0.68])
       column(x + off * r, (4.11 + y) / 2, z, 0.012, 4.11 - y, brass);
   }
-  function screen(x, y, z, w, h) {
-    box(x, y, z, w, h, 0.1, charcoal);
-    box(x, y, z + 0.06, w - 0.09, h - 0.09, 0.018, 6782625);
-    box(x, y - h * 0.28, z + 0.078, w - 0.1, h * 0.3, 0.018, 5071981);
-    for (const [a, b, e, f] of [[-0.47, -0.12, -0.12, 0.12], [-0.12, 0.12, 0.1, -0.07], [0.1, -0.07, 0.37, 0.05], [0.37, 0.05, 0.46, -0.06]])
-      bar(x + a * w, y + b * h, z + 0.095, x + e * w, y + f * h, z + 0.095, 0.039, 15248796);
-  }
   function sofa(x, z, c) {
     block(x, 0.39, z, 1.66, 0.78, 0.8);
     box(x, 0.35, z, 1.6, 0.34, 0.77, c);
@@ -1771,10 +1942,11 @@ function buildWindowStudio(n, t, width, depth) {
   for (const s of [-1, 1])
     block(s * side, 2.1, mid, 0.13, 4.13, span);
   block(0, 0.041, mid, side * 2, 0.08, span);
-  box(0, 0.041, mid, side * 2, 0.08, span, floor);
+  box(0, 0.041, mid, side * 2, 0.08, span, floor, -2);
   box(0, 2.12, back, side * 2, 4.18, 0.13, wall);
-  box(0, 4.19, mid, side * 2, 0.18, span, cream);
+  box(0, 4.19, mid, side * 2, 0.18, span, cream, -3);
   for (const s of [-1, 1]) {
+    box(s * (side - 0.2), 4.082, mid, 0.4, 0.064, span, pearl, -3);
     box(s * side, 2.1, mid, 0.13, 4.13, span, wall);
     box(s * (side - 0.31), 4.05, mid, 0.065, 0.046, span - 0.6, shopLamp);
     box(s * (side - 0.2), 0.19, mid, 0.15, 0.21, span, base);
@@ -1784,10 +1956,9 @@ function buildWindowStudio(n, t, width, depth) {
   for (const x of [-side * 0.64, 0, side * 0.64])
     for (const z of [back + 1.3, mid + 0.25, front - 1.13])
       column(x, 4.076, z, 0.078, 0.045, shopLamp);
-  for (let z = back + 1;z < front; z += 1.12)
-    box(0, 0.086, z, side * 2 - 0.1, 0.008, 0.014, 11904659);
   if (n < 13 && n !== 10) {
-    sideShelf(-1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
+    if (n !== 5)
+      sideShelf(-1, oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
     sideShelf(1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
   }
   box(0, 3.69, back + 0.46, 3.68, 0.47, 0.27, brass);
@@ -1805,87 +1976,164 @@ function buildWindowStudio(n, t, width, depth) {
   if ([6, 7, 8, 9, 11].includes(n))
     provisionDisplay(windowX, windowZ, n === 6 ? "pack" : n === 8 ? "jar" : "tin");
   switch (n) {
-    case 4:
+    case 4: {
       for (let i = -1;i <= 1; i++)
         shelf(i * 1.86, rear, 1.75, "pack", sage);
-      cabinet(-0.58, island, 2.85, 1.03, 1.27, base, pearl);
-      for (let i = -11;i <= 11; i++)
-        box(-0.58 + i * 0.117, 0.69, island + 0.65, 0.022, 0.89, 0.04, 13409948);
-      for (const x of [-1.19, -0.88, -0.54, 0.22])
-        can(x, 1.33, island, white, 0.12, 0.32);
-      pendant(-0.9, island, 2.9, 0.42, white);
+      const cx = -0.58, top = ovalCounter(cx, island, 2.85, 1.27, 1.16, 12949405);
+      for (let i = -6;i <= 6; i++)
+        box(cx + i * 0.115, 0.68, island + 0.64, 0.028, 0.91, 0.035, 13409948);
+      for (const end of [-1, 1])
+        for (let k = 0;k <= 8; k++) {
+          const a = k * Math.PI / 8;
+          column(cx + end * (0.79 + 0.63 * Math.sin(a)), 0.68, island + 0.63 * Math.cos(a), 0.018, 0.91, 13409948);
+        }
+      for (const x of [-1.17, -0.78])
+        can(x, top, island + 0.18, white, 0.1, 0.24);
+      blossomVase(-0.29, top, island - 0.2, 14000289);
+      for (const x of [-1.5, 0.38]) {
+        column(x, top + 0.21, island + 0.04, 0.032, 0.42, brass);
+        ellipse(x, top + 0.43, island + 0.04, 0.22, 0.17, 0.22, pearl, 0, 0);
+      }
+      pendant(-0.9, island, 3.26, 0.3, white);
       plant(side - 0.96, front - 0.74, 1.6);
       break;
-    case 5:
+    }
+    case 5: {
       for (let s = -1;s <= 1; s++)
         shelf(s * 2.1, rear, 1.88, "tin", 13741441);
-      block(-side + 1.51, 1, mid - 1, 2.13, 2, 0.4);
-      for (let i = 0;i < 5; i++)
-        for (let j = 0;j < 4; j++) {
-          const x = -side + 0.65 + i * 0.43, y = 0.43 + j * 0.4;
-          box(x, y, mid - 1, 0.39, 0.36, 0.35, walnut);
-          disc(x, y, mid - 0.807, 0.043, 0.03, brass);
+      const wallX = -side + 0.25, nicheZ = mid + 0.46;
+      block(wallX + 0.14, 1.52, mid, 0.56, 3.02, span - 0.66);
+      box(wallX, 1.54, mid, 0.32, 2.98, span - 0.66, walnut);
+      const columns = Math.floor((span - 0.8) / 0.63), pitch = (span - 0.8) / columns;
+      for (let i = 0;i < columns; i++)
+        for (let j = 0;j < 5; j++) {
+          const z = back + 0.5 + (i + 0.5) * pitch, y = 0.47 + j * 0.48;
+          if (Math.abs(z - nicheZ) < 1.12 && y > 0.7)
+            continue;
+          box(wallX + 0.175, y, z, 0.08, 0.445, pitch - 0.035, 9132600);
+          ellipse(wallX + 0.237, y, z, 0.035, 0.046, 0.075, brass, 0, 0);
         }
-      cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
-      plant(-0.65, island, 1.8);
-      for (const z of [mid - 1.3, mid + 0.3, mid + 2])
-        pendant(0.22, z, 3.13, 0.37, 15978649);
-      break;
-    case 6:
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.98, rear, 1.85, "pack", 13344615);
-      cabinet(-0.36, island, 2.78, 0.92, 1.26, oak, cream);
-      for (let i = -9;i <= 9; i++) {
-        const x = -0.36 + i * 0.12;
-        box(x, 2.48 + i % 3 * 0.04, island - 0.15, 0.075, 0.94 + i % 4 * 0.04, 0.08, 14859126);
+      ellipse(wallX + 0.22, 1.95, nicheZ, 0.045, 1.07, 1.07, brass, 0, 0);
+      ellipse(wallX + 0.27, 1.95, nicheZ, 0.048, 1, 1, 4928551, 0, 0);
+      for (const y of [1.43, 2.14]) {
+        box(wallX + 0.37, y, nicheZ, 0.34, 0.06, 1.65, oak);
+        for (const dz of [-0.35, 0.34]) {
+          ellipse(wallX + 0.42, y + 0.19, nicheZ + dz, 0.14, 0.17, 0.15, pearl, 0, 0);
+          tapered(wallX + 0.42, y + 0.37, nicheZ + dz, 0.098, 0.08, 0.13, pearl);
+        }
       }
-      box(-0.36, 3.03, island - 0.15, 2.5, 0.095, 0.12, walnut);
+      cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
+      blossomVase(-0.43, 1.2475, island, 9873258);
+      for (const z of [mid - 1.6, mid + 0.12, mid + 1.82]) {
+        bar(0.22, 3.62, z, 0.22, 4.1, z, 0.025, brass);
+        box(0.22, 3.34, z, 0.42, 0.51, 0.42, shopLamp);
+        for (const y of [3.07, 3.6])
+          box(0.22, y, z, 0.48, 0.055, 0.48, walnut);
+        for (const dx of [-0.22, 0.22])
+          for (const dz of [-0.22, 0.22])
+            box(0.22 + dx, 3.34, z + dz, 0.027, 0.51, 0.027, walnut);
+      }
+      break;
+    }
+    case 6: {
+      for (const x of [-2.04, 2.04])
+        shelf(x, rear, 1.7, "pack", 13344615);
+      arch(0, 0.3, rear + 0.18, 1.07, 1.41, 0.15, cream);
+      for (const h of [0.75, 1.45]) {
+        box(0, h, rear + 0.26, 2.13, 0.07, 0.4, oak);
+        for (const x of [-0.69, -0.2, 0.51])
+          tapered(x, h + 0.17, rear + 0.25, 0.16, 0.09, 0.28, pearl);
+      }
+      cabinet(-0.36, island, 2.78, 0.92, 1.26, oak, cream);
+      for (const offset of [-0.84, -0.28, 0.28, 0.84]) {
+        const centre = -0.36 + offset;
+        for (let j = -3;j <= 3; j++) {
+          const h = 0.77 + j % 2 * 0.07 + (offset > 0 ? 0.08 : 0);
+          box(centre + j * 0.043, 3.03 - h / 2, island - 0.15, 0.029, h, 0.04, j % 2 ? 14859126 : 15454102);
+        }
+      }
+      box(-0.36, 3.08, island - 0.15, 2.53, 0.076, 0.11, brass);
+      for (const x of [-1.43, 0.71])
+        bar(x, 3.08, island - 0.15, x, 3.96, island - 0.15, 0.031, brass);
       for (let z = back + 0.8;z < front; z += 1.36)
         box(0, 3.96, z, side * 2, 0.12, 0.15, oak);
       packageRow(-0.36, 1.21, island + 0.29, 7, 0.32, "pack", oak);
       break;
-    case 7:
+    }
+    case 7: {
       for (let i = -1;i <= 1; i++)
         shelf(i * 1.93, rear, 1.79, "tin", 10962482, true);
       for (const x of [-1, 1])
         pendant(x, mid + 1.2, 2.91, 0.34, brass);
-      ringLight(0, mid - 0.38, 0.72, 3.34);
-      ringLight(0, mid - 0.38, 0.45, 3.17);
-      {
-        const top = circleIsland(0, island, 1.14, 0.82, walnut);
-        column(0, top + 0.13, island, 0.72, 0.26, brass);
-        for (let i = -2;i <= 2; i++)
-          can(i * 0.24, top + 0.27, island, 11159096);
+      for (const dx of [-1.85, 0, 1.85])
+        box(dx, 4.015, mid, 0.075, 0.12, span - 0.6, walnut);
+      for (let z = back + 0.83;z < front; z += 1.82)
+        box(0, 4.01, z, side * 2 - 0.45, 0.14, 0.12, walnut);
+      for (const [r, y, count] of [[0.72, 3.43, 20], [0.45, 3.17, 14]]) {
+        ringLight(0, mid - 0.38, r, y);
+        for (let j = 0;j < count; j++) {
+          const a = j * Math.PI * 2 / count;
+          tapered(r * Math.cos(a), y - 0.111, mid - 0.38 + r * Math.sin(a), 0.05, 0.028, 0.21, j % 3 ? pearl : shopLamp);
+        }
       }
+      const top = circleIsland(0, island, 1.14, 0.82, walnut);
+      column(0, top + 0.13, island, 0.72, 0.26, brass);
+      for (let level = 0;level < 3; level++)
+        for (let j = 0;j < 5 - level; j++)
+          can((j - (4 - level) / 2) * 0.24, top + 0.27 + level * 0.269, island, 11159096);
       break;
-    case 8:
+    }
+    case 8: {
       for (let x = -3;x <= 3; x++)
         for (let z = -3;z <= 3; z++)
           if ((x + z) % 2 === 0)
             box(x * 0.79, 0.092, mid + z * 0.79, 0.785, 0.012, 0.785, 2638449);
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.86, rear, 1.62, "tin", 4615323, true);
-      {
-        const top = circleIsland(0, island, 1.08, 0.85, base);
-        for (let i = -2;i <= 2; i++)
-          can(i * 0.28, top, island, 13805164, 0.12, 0.33);
+      for (const x of [-1.96, 1.96])
+        shelf(x, rear, 1.54, "tin", 4615323, true);
+      disc(0, 1.92, rear + 0.13, 1.08, 0.11, base);
+      box(0, 1.17, rear + 0.132, 2.16, 1.5, 0.11, base);
+      arch(0, 0.42, rear + 0.223, 1.08, 1.5, 0.072, brass);
+      for (const [x, y, rx, ry] of [[-0.32, 1.84, 0.39, 0.29], [0.06, 2.01, 0.23, 0.143], [0.38, 2.17, 0.32, 0.22]])
+        ellipse(x, y, rear + 0.25, rx, ry, 0.11, 14197583, 0, 0.37);
+      for (const [x, y] of [[-0.43, 1.8], [-0.22, 1.89], [0.29, 2.13], [0.47, 2.21]]) {
+        bar(x - 0.052, y - 0.07, rear + 0.352, x + 0.052, y + 0.07, rear + 0.352, 0.018, 12094281);
+        bar(x + 0.06, y - 0.05, rear + 0.352, x - 0.06, y + 0.05, rear + 0.352, 0.017, 12094281);
       }
+      const top = circleIsland(0, island, 1.08, 0.85, base);
+      for (let i = 0;i < 32; i++) {
+        const a = i * Math.PI / 16;
+        column(1.07 * Math.cos(a), 0.66, island + 1.07 * Math.sin(a), 0.035, 0.78, 4682138);
+      }
+      for (let i = -2;i <= 2; i++)
+        can(i * 0.28, top, island, 13805164, 0.12, 0.33);
       for (const x of [-1.83, 0, 1.83])
         pendant(x, mid + 0.2, 3.1, 0.45, cream);
       break;
-    case 9:
-      disc(0, 1.68, rear + 0.06, 1.56, 0.13, 14395189);
+    }
+    case 9: {
+      disc(0, 1.63, rear + 0.06, 1.58, 0.13, 14395189);
+      box(0, 0.98, rear + 0.062, 3.16, 1.31, 0.13, 14395189);
       for (let k = 0;k < 3; k++) {
         const w = 2.48 - 0.43 * k;
         box(0, 0.85 + k * 0.52, rear + 0.36, w, 0.08, 0.43, brass);
         packageRow(0, 0.91 + k * 0.52, rear + 0.36, 7 - 2 * k, 0.28, "pack", cream);
       }
-      cabinet(-0.48, island, 2.58, 0.87, 1.13, base, cream);
-      for (const y of [0.28, 0.98])
-        box(-0.48, y, island + 0.59, 2.55, 0.05, 0.04, brass);
-      pendant(-0.5, mid + 0.25, 3, 0.52, brass);
+      const cx = -0.48;
+      ovalCounter(cx, island, 2.58, 1.13, 1.01, base);
+      for (let j = -5;j <= 5; j++)
+        box(cx + j * 0.143, 0.62, island + 0.563, 0.025, 0.74, 0.027, 4281451);
+      for (const x of [-side + 0.88, side - 0.88])
+        box(x, 0.089, mid, 0.027, 0.008, span - 0.55, brass);
+      for (const z of [mid + 0.35, mid - 2.65]) {
+        column(cx, 3.54, z, 0.025, 1.04, brass);
+        for (const [y, r] of [[3.16, 0.52], [3.04, 0.35], [2.95, 0.19]]) {
+          tapered(cx, y, z, r * 0.62, r, 0.1, brass);
+          column(cx, y - 0.054, z, r * 0.89, 0.025, shopLamp);
+        }
+      }
       plant(side - 1.15, rear + 1.31, 1.78);
       break;
+    }
     case 10:
       for (const s of [-1, 1]) {
         const x = s * (side - 1), z = front - 1.5;
@@ -1893,12 +2141,6 @@ function buildWindowStudio(n, t, width, depth) {
         shellFan(x + s * 0.31, 0.56, z + 0.29, 1);
         circleIsland(x, z + 0.05, 0.65, 0.53, base);
         shelf(s * 2.1, rear, 1.58, "tin", sage, true);
-      }
-      for (let i = 0;i < 3; i++) {
-        for (let j = 0;j < 18; j++) {
-          const u = j / 18, v = (j + 1) / 18, y = 0.73 + i * 0.52;
-          bar((u - 0.5) * 3.8, y + 0.23 * Math.sin(u * 8), rear + 0.1, (v - 0.5) * 3.8, y + 0.23 * Math.sin(v * 8), rear + 0.1, 0.048, pearl);
-        }
       }
       {
         const top = circleIsland(0, island, 1.2, 0.79, base);
@@ -1927,15 +2169,8 @@ function buildWindowStudio(n, t, width, depth) {
     case 12:
       for (const x of [-2.2, 2.2])
         shelf(x, rear, 1.43, "pack", base, true);
-      for (let i = 0;i < 3; i++)
-        for (let j = 0;j < 18; j++) {
-          const u = j / 18, v = (j + 1) / 18, y = 1.15 + i * 0.52;
-          bar((u - 0.5) * 3.42, y + 0.28 * Math.sin(u * 7 + i * 0.47), rear + 0.17, (v - 0.5) * 3.42, y + 0.28 * Math.sin(v * 7 + i * 0.47), rear + 0.17, 0.06, shopLamp);
-        }
-      {
-        const top = circleIsland(0, island, 1.1, 0.72, white);
-        packageRow(0, top, island, 5, 0.27, "pack", base);
-      }
+      circleIsland(0, island, 1.1, 0.72, white);
+      packageRow(0.1, 1.18, island + 0.11, 4, 0.23, "pack", base);
       for (const x of [-side + 0.88, side - 0.88])
         plant(x, front - 0.87, 1.64);
       ringLight(0, mid, 1.38, 3.76);
@@ -1943,7 +2178,6 @@ function buildWindowStudio(n, t, width, depth) {
     case 13:
       for (let i = -15;i <= 15; i++)
         box(i * 0.185, 1.95, rear, 0.085, 3.67, 0.12, i % 3 ? walnut : oak);
-      screen(0, 2.14, rear + 0.23, 2.33, 1.34);
       sofa(-1.46, island, 10786692);
       sofa(0.44, mid - 1.66, 7891807);
       circleIsland(0.68, island + 0.48, 0.39, 0.32, walnut);
@@ -1962,10 +2196,8 @@ function buildWindowStudio(n, t, width, depth) {
       }
       break;
     case 14:
-      for (const x of [-1.36, 1.36]) {
+      for (const x of [-1.36, 1.36])
         arch(x, 0.21, rear + 0.11, 1.13, 1.98, 0.12, shopLamp);
-        screen(x, 1.91, rear + 0.3, 1.95, 1.14);
-      }
       sofa(-0.86, mid, cream);
       circleIsland(0.71, island, 0.52, 0.37, oak);
       ringLight(0, mid, 1.38, 3.72);
@@ -1979,8 +2211,6 @@ function buildWindowStudio(n, t, width, depth) {
     case 15:
       for (let i = -17;i <= 17; i++)
         box(i * 0.19, 3.98, mid, 0.078, 0.19, span - 0.28, walnut);
-      for (let i = -15;i <= 15; i++)
-        box(i * 0.19, 1.96, rear, 0.065, 3.61, 0.13, oak);
       cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak);
       block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
       block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
@@ -1995,37 +2225,306 @@ function buildWindowStudio(n, t, width, depth) {
       pendant(-1.36, mid - 1.3, 2.94, 0.26, brass);
       break;
     case 16:
-      for (let i = -2;i <= 2; i++) {
-        const x = i * 1.02;
-        box(x, 1.77, rear, 0.94, 2.78, 0.17, white);
-        for (let j = 0;j < 4; j++)
-          packageRow(x, 0.66 + j * 0.56, rear + 0.15, 3, 0.22, "pack", base);
-      }
-      for (const x of [-1.62, 1.62]) {
+      for (const x of [-1.62, 1.62])
         cabinet(x, island + (x > 0 ? 0.32 : 0), 1.48, 0.78, 0.98, base, white);
-        packageRow(x, 1.09, island + 0.03, 4, 0.25, "pack", white);
-      }
       sideShelf(-1, silver, "pack");
       ringLight(0, mid, 1.14, 3.69);
       plant(side - 0.71, front - 1.08, 1.47);
       break;
     case 17:
-      box(0, 1.99, rear, 4.8, 3.84, 0.2, 4997947);
-      for (const r of [0.63, 0.96, 1.29, 1.62])
-        arch(0, 0.45, rear + 0.16, r, 0.67, 0.055, brass);
       for (const x of [-side + 0.71, side - 0.71])
         shelf(x, rear + 0.24, 0.99, "pack", charcoal);
       {
         const top = circleIsland(0, island, 1.12, 0.85, base);
         for (const x of [-0.54, 0, 0.54]) {
           box(x, top + 0.04, island, 0.25, 0.09, 0.22, charcoal);
-          box(x, top + 0.25, island - 0.02, 0.15, 0.38, 0.077, silver);
+          box(x, top + 0.25, island - 0.02, 0.15, 0.38, 0.077, charcoal);
+          box(x, top + 0.3, island + 0.024, 0.105, 0.12, 0.012, 12308936);
         }
       }
       ringLight(0, mid, 1.24, 3.56);
       ringLight(0, mid, 0.72, 3.75);
       plant(-side + 0.82, front - 0.8, 1.42);
       break;
+  }
+}
+
+// demos/corporate/gjh/v11/assets/shop-anchor-details-last.js
+var brass2 = 13215085;
+var walnut2 = 6701359;
+var ivory = 15985368;
+var graphite = 2632234;
+function profile(t, x, z, width, lower, upper, color, steps = 32) {
+  const points = [], indices = [];
+  for (let i = 0;i <= steps; i++) {
+    const u = i / steps, px = x + (u - 0.5) * width;
+    points.push([px, lower(u), z], [px, upper(u), z]);
+    if (i) {
+      const a = (i - 1) * 2;
+      indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+    }
+  }
+  t.surface(points, indices, color);
+}
+function coastalRelief(t, z, clinical) {
+  const w = clinical ? 3.86 : 3.65, low = 0.54, high = 3.16;
+  t.box(0, (low + high) / 2, z, w + 0.11, high - low + 0.1, 0.11, clinical ? ivory : brass2);
+  t.box(0, (low + high) / 2, z + 0.066, w, high - low, 0.04, clinical ? 14671821 : 11322552);
+  const stone = clinical ? [11978922, 9810576, 8363394] : [7970192, 4488304, 3367767];
+  for (let i = 0;i < 3; i++) {
+    const wave = (u) => 2.57 - i * 0.58 + (0.24 + 0.035 * i) * Math.sin(u * 6.7 + i * 0.7) + 0.15 * Math.sin(u * 10.7 + 0.4 * i);
+    const face = z + 0.096 + i * 0.014;
+    profile(t, 0, face, w, () => low, wave, stone[i]);
+    profile(t, 0, face + 0.003, w, (u) => wave(u) - 0.045, wave, clinical ? shopLamp : 15128250);
+  }
+}
+function television(t, x, y, z, w, h, sunset) {
+  t.box(x, y, z, w, h, 0.075, graphite);
+  const face = z + 0.044, iw = w - 0.055, ih = h - 0.055;
+  const bottom = y - ih / 2, cut = (v) => y + ih * v;
+  t.box(x, y, face, iw, ih, 0.011, sunset ? 4408438 : 2635355);
+  const sky = sunset ? [[75, 81, 132], [222, 147, 150], [255, 206, 145]] : [[49, 68, 111], [136, 124, 155], [239, 175, 152]];
+  for (let i = 0;i < 32; i++) {
+    const v = i / 31, segment = v > 0.5 ? 1 : 0, f = v * 2 - segment;
+    const rgb = sky[segment].map((c, k) => Math.round(c + (sky[segment + 1][k] - c) * f));
+    const tint = rgb[0] << 16 | rgb[1] << 8 | rgb[2];
+    const top = 0.5 - i / 32, lower = 0.5 - (i + 1) / 32;
+    profile(t, x, face + 0.009, iw, () => cut(lower), () => cut(top), tint, 1);
+  }
+  t.disc(x + iw * (sunset ? 0.21 : -0.24), cut(0.065), face + 0.014, ih * 0.078, 0.004, 15976354);
+  const peaks = sunset ? [0, 0.11, 0.3, 0.12, 0.2, 0.05, 0.14, 0.03, 0.08] : [0.12, 0.21, 0.02, 0.12, 0.05, 0.29, 0.14, 0.06, 0.15];
+  const ridge = (u) => {
+    const p = u * (peaks.length - 1), left = Math.min(peaks.length - 2, Math.floor(p));
+    return peaks[left] + (peaks[left + 1] - peaks[left]) * (p - left);
+  };
+  profile(t, x, face + 0.019, iw, () => bottom, (u) => cut(ridge(u) - 0.13), sunset ? 7168120 : 6708345, 24);
+  profile(t, x, face + 0.022, iw, () => bottom, (u) => cut(ridge(1 - u) * 0.73 - 0.27), sunset ? 4537941 : 4277083, 24);
+  profile(t, x, face + 0.025, iw, () => bottom, (u) => cut(0.065 * Math.sin(u * 9 + 0.4) - 0.33), sunset ? 2567227 : 2962763, 18);
+}
+function washerDoor(t, x, y, z, r, color) {
+  const points = [[x, y, z]], indices = [];
+  for (let i = 0;i < 24; i++) {
+    const a = i * Math.PI / 12;
+    points.push([x, y + r * Math.sin(a), z + r * Math.cos(a)]);
+    indices.push(0, i + 1, (i + 1) % 24 + 1);
+  }
+  t.surface(points, indices, color);
+}
+function buildLateShopAnchorDetails(n, t, width, depth) {
+  if (n < 10 || n > 17)
+    return;
+  const { box, column, disc, arch, bar, tapered, ellipse, block } = t;
+  const back = -depth / 2 + 0.64, side = width / 2 - 0.23, island = shopIslandZ;
+  if (n === 10) {
+    coastalRelief(t, back + 0.12, false);
+    for (let i = 0;i < 28; i++) {
+      const a = i * Math.PI / 14;
+      bar(Math.cos(a) * 1.198, 0.25, island + Math.sin(a) * 1.198, Math.cos(a) * 1.198, 0.92, island + Math.sin(a) * 1.198, 0.027, 9547156);
+    }
+    for (const s of [-1, 1]) {
+      const x = s * (side - 0.31);
+      block(x, 1.03, 0, 0.51, 1.89, 4.55);
+      box(x, 0.49, 0, 0.46, 0.78, 4.52, 6720117);
+      box(x, 0.9, 0, 0.53, 0.08, 4.57, ivory);
+      for (const end of [-2.2, 2.2])
+        box(x, 1.55, end, 0.035, 1.36, 0.042, brass2);
+      box(x, 1.42, 0, 0.44, 0.052, 4.44, ivory);
+      box(x, 2.2, 0, 0.46, 0.07, 4.48, brass2);
+      for (const z of [-1.65, -0.55, 0.55, 1.65]) {
+        for (let j = -3;j <= 3; j++) {
+          const a = j * 0.25, h = 0.25 - 0.018 * Math.abs(j);
+          ellipse(x, 1.49 + h * Math.cos(a), z + h * Math.sin(a), 0.078, h, 0.042, j % 2 ? 15391942 : 16772310, Math.PI / 2, a);
+        }
+        ellipse(x - s * 0.088, 1.49, z, 0.098, 0.05, 0.155, 12830637, 0, 0);
+        ellipse(x - s * 0.13, 1.54, z, 0.063, 0.063, 0.063, ivory, 0, 0);
+      }
+    }
+    return;
+  }
+  if (n === 11) {
+    for (let x = -3;x <= 3; x++)
+      for (let z = -4;z <= 4; z++) {
+        const cx = x * 0.91, cz = z * 0.94;
+        t.surface([[cx - 0.07, 0.099, cz], [cx, 0.099, cz + 0.07], [cx + 0.07, 0.099, cz], [cx, 0.099, cz - 0.07]], [0, 1, 2, 0, 2, 3], 6636603);
+      }
+    arch(0, 0.25, back + 0.09, 2.76, 0.65, 0.13, walnut2);
+    for (const x of [-0.88, 0, 0.88]) {
+      box(x, 0.91, island + 0.585, 0.82, 0.24, 0.075, 9132600);
+      box(x, 0.93, island + 0.639, 0.2, 0.035, 0.035, brass2);
+    }
+    for (const x of [-0.76, 0, 0.76]) {
+      for (const h of [0.47, 0.61])
+        box(x, h, island + 0.324, 0.65, 0.058, 0.048, 11633494);
+      for (const dx of [-0.25, 0.25])
+        box(x + dx, 0.43, island + 0.351, 0.046, 0.36, 0.036, walnut2);
+    }
+    for (const [x, z] of [[-0.85, -0.2], [0.69, 0.12]]) {
+      for (let j = 0;j < 5; j++) {
+        const a = j * 2.39;
+        ellipse(x + 0.12 * Math.cos(a), 1.38, island + z + 0.1 * Math.sin(a), 0.085, 0.17, 0.055, j % 2 ? 5601097 : 7903322, a, Math.sin(a) * 0.6);
+      }
+    }
+    return;
+  }
+  if (n === 12) {
+    coastalRelief(t, back + 0.13, true);
+    column(0, 1.05, island, 0.69, 0.17, 11716778);
+    column(0, 1.15, island, 0.67, 0.055, ivory);
+    tapered(-0.4, 1.31, island, 0.13, 0.1, 0.27, 15656394);
+    for (let i = 0;i < 6; i++) {
+      const a = i * 2.4, x = -0.4 + 0.13 * Math.cos(a), z = island + 0.11 * Math.sin(a);
+      bar(-0.4, 1.42, island, x, 1.78 - i % 2 * 0.12, z, 0.016, 6389851);
+      ellipse(x, 1.75 - i % 2 * 0.12, z, 0.065, 0.16, 0.04, 8627576, a, Math.sin(a) * 0.62);
+    }
+    return;
+  }
+  if (n === 13) {
+    television(t, 0, 2.14, back + 0.23, 2.58, 1.45, false);
+    block(0, 1.13, back + 0.3, 2.88, 0.34, 0.6);
+    box(0, 1.08, back + 0.28, 2.86, 0.2, 0.56, graphite);
+    box(0, 1.18, back + 0.28, 2.86, 0.035, 0.58, brass2);
+    box(0, 1.28, back + 0.33, 1.52, 0.12, 0.15, graphite);
+    for (const s of [-1, 1]) {
+      const x = s * (side - 0.12);
+      box(x, 1.78, 0, 0.095, 1.69, 4.8, 3157290);
+      for (let i = 0;i < 12; i++)
+        box(x - s * 0.1, 2.91, -2.2 + i * 0.4, 0.18, 0.53, 0.055, walnut2);
+      box(x - s * 0.12, 2.6, 0, 0.07, 0.05, 4.75, shopLamp);
+      for (let j = -1;j <= 1; j++) {
+        const z = j * 0.92, px = s * (side - 0.72);
+        for (const h of [1.13, 1.31]) {
+          ellipse(px - 0.146 * s, h, z, 0.024, 0.063, 0.062, 6776417, 0, 0);
+        }
+      }
+    }
+    return;
+  }
+  if (n === 14) {
+    television(t, -1.36, 1.91, back + 0.3, 1.95, 1.14, false);
+    television(t, 1.36, 1.91, back + 0.3, 1.95, 1.14, true);
+    const x = side - 0.5;
+    block(x, 0.68, -0.6, 0.78, 1.18, 2.43);
+    box(x, 0.17, -0.6, 0.84, 0.17, 2.52, ivory);
+    for (const z of [-1.19, -0.01]) {
+      box(x, 0.75, z, 0.67, 1.02, 1.05, 10855580);
+      box(x - 0.345, 1.09, z, 0.024, 0.17, 0.98, 14012610);
+      box(x - 0.36, 1.08, z - 0.24, 0.02, 0.073, 0.25, graphite);
+      washerDoor(t, x - 0.35, 0.65, z, 0.364, 6711916);
+      washerDoor(t, x - 0.36, 0.65, z, 0.309, 3094331);
+      washerDoor(t, x - 0.37, 0.65, z, 0.205, 4542036);
+    }
+    tapered(0.71, 0.81, island, 0.11, 0.136, 0.29, 11577230);
+    for (let j = 0;j < 7; j++) {
+      const a = j * 2.4, px = 0.71 + 0.13 * Math.cos(a), pz = island + 0.12 * Math.sin(a), h = 1.01 + j % 3 * 0.055;
+      bar(0.71, 0.93, island, px, h, pz, 0.014, 5728584);
+      ellipse(px, h, pz, 0.068, 0.06, 0.055, j % 2 ? 9521494 : 11757668, 0, 0);
+    }
+    return;
+  }
+  if (n === 15) {
+    const width2 = 5.88;
+    const crest = (u) => 2.78 + 0.24 * Math.sin(u * 8.4 - 0.7) + 0.11 * Math.sin(u * 15 + 0.2);
+    profile(t, 0, back + 0.105, width2, () => 0.72, crest, 5190698);
+    profile(t, 0, back + 0.108, width2, (u) => crest(u) - 0.035, crest, brass2);
+    for (let i = 0;i < 37; i++) {
+      const u = (i + 0.5) / 37, x = (u - 0.5) * width2, top = crest(u) - 0.044;
+      box(x, (top + 0.72) / 2, back + 0.139, 0.051, top - 0.72, 0.06, i % 3 ? walnut2 : 9003846);
+    }
+    const uprightX = side - 0.22, uprightZ = back + 2.28;
+    block(uprightX, 0.81, uprightZ, 0.4, 1.43, 1.88);
+    box(uprightX, 0.91, uprightZ, 0.3, 1.51, 1.84, graphite);
+    box(uprightX - 0.024, 1.67, uprightZ, 0.35, 0.065, 1.9, walnut2);
+    box(uprightX - 0.19, 0.97, uprightZ, 0.2, 0.09, 1.68, walnut2);
+    for (let i = 0;i < 29; i++) {
+      const z = uprightZ + (i - 14) * 0.055;
+      box(uprightX - 0.2, 1.022, z, 0.18, 0.02, 0.05, ivory);
+      if (![2, 6].includes(i % 7))
+        box(uprightX - 0.14, 1.044, z + 0.026, 0.11, 0.026, 0.024, graphite);
+    }
+    const table = -1.05;
+    box(table, 1.22, -0.49, 1.66, 0.1, 0.86, 13020814);
+    for (const offset of [-0.54, -0.18, 0.18, 0.54]) {
+      const x = table + offset;
+      box(x, 1.36, -0.48, 0.23, 0.2, 0.23, 14536636);
+      disc(x, 1.48, -0.35, 0.069, 0.024, brass2);
+      disc(x, 1.48, -0.334, 0.048, 0.012, graphite);
+    }
+    for (const z of [-0.87, -0.1])
+      for (const offset of [-0.8, 0.8])
+        box(table + offset, 1.57, z, 0.022, 0.62, 0.022, brass2);
+    for (const z of [-0.87, -0.1])
+      box(table, 1.87, z, 1.63, 0.026, 0.027, brass2);
+    for (const offset of [-0.8, 0.8])
+      box(table + offset, 1.87, -0.485, 0.027, 0.026, 0.77, brass2);
+    return;
+  }
+  if (n === 16) {
+    for (let i = -1;i <= 1; i++) {
+      const x = i * 1.86;
+      block(x, 1.52, back + 0.25, 1.7, 2.78, 0.55);
+      box(x, 1.65, back + 0.06, 1.7, 2.56, 0.2, 14014661);
+      box(x, 1.75, back + 0.175, 1.54, 2.18, 0.042, ivory);
+      for (const edge of [-0.78, 0.78])
+        box(x + edge, 1.76, back + 0.207, 0.034, 2.21, 0.018, shopLamp);
+      for (const y of [0.65, 1.32, 1.99]) {
+        box(x, y, back + 0.31, 1.52, 0.069, 0.39, 11778709);
+        for (let j = -2;j <= 2; j++) {
+          const px = x + j * 0.235, top = y + 0.39;
+          column(px, y + 0.2, back + 0.32, 0.083, 0.32, 8427828);
+          column(px, top - 0.039, back + 0.32, 0.084, 0.074, graphite);
+          column(px, top + 0.009, back + 0.32, 0.043, 0.031, 12239288);
+        }
+      }
+      box(x, 0.37, back + 0.22, 1.7, 0.38, 0.4, 11320376);
+    }
+    for (const x of [-1.62, 1.62]) {
+      const z = island + (x > 0 ? 0.32 : 0);
+      box(x, 0.3, z + 0.499, 1.45, 0.041, 0.023, shopLamp);
+      box(x, 1.075, z, 1.17, 0.075, 0.42, 13553588);
+      for (const dx of [-0.43, 0, 0.43]) {
+        const px = x + dx;
+        column(px, 1.25, z, 0.082, 0.28, 10991442);
+        column(px, 1.36, z, 0.083, 0.06, graphite);
+        column(px, 1.4, z, 0.045, 0.025, 13488320);
+      }
+    }
+    return;
+  }
+  box(0, 1.99, back, 4.8, 3.84, 0.2, 4604223);
+  for (let i = 0;i < 4; i++) {
+    const r = 0.59 + i * 0.38, start = 0.43, end = Math.PI - 0.43, steps = 34;
+    for (let j = 0;j < steps; j++) {
+      const a = start + (end - start) * j / steps, b = start + (end - start) * (j + 1) / steps;
+      bar(r * Math.cos(a), 1.5 + r * Math.sin(a), back + 0.123, r * Math.cos(b), 1.5 + r * Math.sin(b), back + 0.123, 0.047, i % 2 ? shopLamp : brass2);
+    }
+  }
+  block(0, 1.18, back + 0.39, 3.64, 0.62, 0.59);
+  box(0, 0.96, back + 0.38, 3.58, 0.21, 0.57, 3157292);
+  box(0, 1.07, back + 0.38, 3.61, 0.035, 0.59, brass2);
+  for (const x of [-1.23, -0.62, 0, 0.62, 1.23]) {
+    box(x, 1.14, back + 0.42, 0.26, 0.11, 0.22, graphite);
+    box(x, 1.31, back + 0.43, 0.145, 0.32, 0.091, 6842984);
+    box(x, 1.36, back + 0.486, 0.1, 0.11, 0.015, 11979716);
+  }
+  for (const s of [-1, 1]) {
+    const x = s * (side - 0.18), centre = back + 3.04;
+    block(x, 1.39, centre, 0.34, 2.48, 2.86);
+    box(x, 1.41, centre, 0.15, 2.44, 2.84, 5326395);
+    for (const h of [0.75, 1.52, 2.42]) {
+      box(x - s * 0.12, h, centre, 0.31, 0.058, 2.83, brass2);
+      box(x - s * 0.26, h - 0.035, centre, 0.032, 0.026, 2.74, shopLamp);
+      if (h < 2)
+        for (const offset of [-0.95, -0.34, 0.34, 0.95]) {
+          const z = centre + offset;
+          box(x - s * 0.12, h + 0.077, z, 0.17, 0.1, 0.22, graphite);
+          box(x - s * 0.11, h + 0.22, z, 0.11, 0.28, 0.14, 14865081);
+          box(x - s * 0.176, h + 0.24, z, 0.014, 0.095, 0.095, graphite);
+        }
+    }
+  }
+  for (let k = 0;k < 30; k++) {
+    const a = k * Math.PI / 15;
+    box(1.116 * Math.cos(a), 0.65, island + 1.116 * Math.sin(a), 0.045, 0.72, 0.042, 7234133);
   }
 }
 
@@ -2089,7 +2588,7 @@ function displayPlacements(number, heroX, heroZ) {
   const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 0.7;
   return [[heroX, height, heroZ, scale]];
 }
-async function createExpandedInteriors(T, expandedLayout2, scene) {
+async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
   const loader = new T.TextureLoader().setCrossOrigin(undefined);
   const [kit, textures] = await Promise.all([
@@ -2099,22 +2598,28 @@ async function createExpandedInteriors(T, expandedLayout2, scene) {
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.65 });
   const woodFinishes = new Set([11633494, 6701359, 6898732, 9132600, 11700828, 12950889, 9325877, 6703151, 6309172, 6899253, 11175012]);
   material.onBeforeCompile = (shader) => {
+    if (stoneMap)
+      shader.uniforms.shopStone = { value: stoneMap };
     shader.vertexShader = `attribute float shopGlow; attribute vec3 finishPosition; varying float vShopGlow; varying vec3 vFinishPosition;
 ` + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
 vShopGlow=shopGlow;vFinishPosition=finishPosition;`);
-    shader.fragmentShader = `varying float vShopGlow; varying vec3 vFinishPosition;
+    shader.fragmentShader = (stoneMap ? `uniform sampler2D shopStone;
+` : "") + `varying float vShopGlow; varying vec3 vFinishPosition;
 ` + shader.fragmentShader;
     shader.fragmentShader = shader.fragmentShader.replace("#include <color_fragment>", `
       #include <color_fragment>
-      if(vShopGlow<-.5){
+      if(vShopGlow < -1.5 && vShopGlow > -2.5){
+        ${stoneMap ? "diffuseColor.rgb *= texture2D(shopStone, vFinishPosition.xz * vec2(.72,.86)).rgb;" : ""}
+      } else if(vShopGlow < -.5 && vShopGlow > -1.5){
         vec3 p=vFinishPosition;
         float grain=p.y*38.+p.z*2.7+p.x*1.5+1.9*sin(p.x*2.+p.z*1.6)+.65*sin(p.y*8.+p.x*.6);
         float fibre=.5+.5*sin(grain+1.8*sin(grain*.24));
         diffuseColor.rgb*=.88+.15*fibre+.07*sin(p.y*4.+p.z*.5);
       }`);
     shader.fragmentShader = shader.fragmentShader.replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
-totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
+totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
+` + "if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;");
   };
   const studioParts = new Map, posterParts = [];
   const atlas = document.createElement("canvas");
@@ -2128,7 +2633,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     }
     return models.get(name);
   }
-  const ivory = 15656145, green = 5402203, gold = 13018731;
+  const ivory2 = 15656145, green = 5402203, gold = 13018731;
   const creamStone = (n) => n === 13 || n === 15 || n === 17 ? 5589055 : 15062715;
   const accents = {
     4: 7887464,
@@ -2157,7 +2662,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     const front = depth / 2;
     let parts = [];
     let heroOffset = 0;
-    function add(geometry, x, y, z, color) {
+    function add(geometry, x, y, z, color, finish = color === shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
       geometry.translate(x + heroOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i = 0;i < colors.length; i += 3) {
@@ -2167,11 +2672,11 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
       }
       geometry.setAttribute("color", new T.BufferAttribute(colors, 3));
       geometry.setAttribute("finishPosition", geometry.attributes.position.clone());
-      geometry.setAttribute("shopGlow", new T.BufferAttribute(new Float32Array(geometry.attributes.position.count).fill(color === shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0), 1));
+      geometry.setAttribute("shopGlow", new T.BufferAttribute(new Float32Array(geometry.attributes.position.count).fill(finish), 1));
       parts.push(geometry);
     }
-    function box(x, y, z, w2, h2, d, color) {
-      add(new T.BoxGeometry(w2, h2, d), x, y, z, color);
+    function box(x, y, z, w2, h2, d, color, finish) {
+      add(new T.BoxGeometry(w2, h2, d), x, y, z, color, finish);
     }
     function cylinder(x, y, z, r, h2, color) {
       add(new T.CylinderGeometry(r, r, h2, 12), x, y, z, color);
@@ -2189,6 +2694,14 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     }
     const tools = {
       block,
+      surface(points, triangles, color) {
+        const panel = new T.BufferGeometry;
+        panel.setAttribute("position", new T.Float32BufferAttribute(points.flat(), 3));
+        panel.setAttribute("uv", new T.BufferAttribute(new Float32Array(points.length * 2), 2));
+        panel.setIndex(triangles);
+        panel.computeVertexNormals();
+        add(panel, 0, 0, 0, color);
+      },
       ellipse(x, y, z, rx, ry, rz, c, turn, lean) {
         add(new T.SphereGeometry(1, 10, 6).scale(rx, ry, rz).rotateZ(lean).rotateY(turn), x, y, z, c);
       },
@@ -2218,6 +2731,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     };
     const palette = kit[`S${slot2.number}`].palette.map((colour) => colour.hex);
     buildWindowStudio(number, tools, width, depth);
+    buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
     if (!studioParts.has(side))
       studioParts.set(side, []);
@@ -2234,7 +2748,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
     box(0, 2.875, heroZ - 0.46, 2.02, 0.022, 0.065, shopLamp);
     if (!displayFiles[number] || number === 13 || number === 17) {
       box(0, 0.47, heroZ, 2.1, 0.9, 1.05, number === 8 ? 2177385 : creamStone(number));
-      box(0, 0.95, heroZ, 2.2, 0.08, 1.15, ivory);
+      box(0, 0.95, heroZ, 2.2, 0.08, 1.15, ivory2);
     }
     const fixtureParts = parts;
     parts = [];
@@ -2243,7 +2757,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
       for (let row2 = 0;row2 < 3; row2++)
         for (let i = 0;i < 5 - row2; i++) {
           const x = (i - (4 - row2) / 2) * 0.24, y = 1.13 + row2 * 0.24;
-          cylinder(x, y, heroZ, 0.108, 0.215, number === 8 ? 13081445 : row2 % 2 ? ivory : accent);
+          cylinder(x, y, heroZ, 0.108, 0.215, number === 8 ? 13081445 : row2 % 2 ? ivory2 : accent);
           cylinder(x, y + 0.115, heroZ, 0.111, 0.025, number === 8 ? accent : gold);
         }
     } else if (number === 14) {
@@ -2252,7 +2766,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
       box(0, 1.1, heroZ, 0.12, 0.19, 0.2, 3422266);
     } else if (number === 15) {
       box(0, 1.38, heroZ, 1.85, 0.74, 0.65, 2630946);
-      box(0, 1.78, heroZ + 0.18, 1.72, 0.07, 0.37, ivory);
+      box(0, 1.78, heroZ + 0.18, 1.72, 0.07, 0.37, ivory2);
       for (let i = -6;i <= 6; i++)
         box(i * 0.125, 1.83, heroZ + 0.09, 0.045, 0.05, 0.17, 2500134);
     } else if (number === 13) {
@@ -2262,16 +2776,16 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);`);
       box(0.39, 1.58, heroZ, 0.12, 0.46, 0.2, accent);
     } else if (number === 17) {
       box(0, 1.12, heroZ, 0.8, 0.24, 0.6, accent);
-      box(0, 1.59, heroZ, 0.35, 0.83, 0.19, ivory);
+      box(0, 1.59, heroZ, 0.35, 0.83, 0.19, ivory2);
       box(0, 1.73, heroZ + 0.11, 0.22, 0.2, 0.025, accent);
       for (let i = -1;i <= 1; i++)
         for (let j = 0;j < 3; j++)
           box(i * 0.07, 1.52 - j * 0.08, heroZ + 0.11, 0.035, 0.035, 0.02, accent);
     } else if (number === 16) {
-      cylinder(0, 1.5, heroZ, 0.35, 0.19, ivory);
+      cylinder(0, 1.5, heroZ, 0.35, 0.19, ivory2);
       cylinder(0, 1.61, heroZ, 0.16, 0.035, accent);
     } else {
-      box(0, 1.57, heroZ, 0.73, 1.18, 0.35, ivory);
+      box(0, 1.57, heroZ, 0.73, 1.18, 0.35, ivory2);
       box(0, 1.59, heroZ + 0.19, 0.56, 0.46, 0.03, accent);
       box(0, 2.19, heroZ, 0.73, 0.07, 0.36, gold);
     }
@@ -2727,9 +3241,9 @@ async function createWorld(T, R, physics, expanded = false) {
         ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
       }
-      const walnut2 = zone === "newmoon";
-      rectangle(walnut2 ? "#684632" : zone === "mili" ? "#a77c53" : "#eadcc3", 0, 0, 1024, 576);
-      if (walnut2) {
+      const walnut3 = zone === "newmoon";
+      rectangle(walnut3 ? "#684632" : zone === "mili" ? "#a77c53" : "#eadcc3", 0, 0, 1024, 576);
+      if (walnut3) {
         for (let x = 0;x < 1024; x += 14)
           rectangle("#60412e", x, 0, 2, 576);
         circle("#d7ad73", 512, 272, 159);
@@ -2737,6 +3251,7 @@ async function createWorld(T, R, physics, expanded = false) {
         recess.addColorStop(0, "#ddbb88");
         recess.addColorStop(1, "#ac8558");
         circle(recess, 512, 272, 152);
+        drawPlumArrangement(ctx);
       } else if (zone === "gogo") {
         ctx.fillStyle = "#466858";
         ctx.beginPath();
@@ -2744,7 +3259,7 @@ async function createWorld(T, R, physics, expanded = false) {
         ctx.fill();
       }
       for (const x of [24, 782]) {
-        ctx.fillStyle = walnut2 ? "#42251e" : "#735239";
+        ctx.fillStyle = walnut3 ? "#42251e" : "#735239";
         ctx.beginPath();
         ctx.roundRect(x, 84, 218, 398, zone === "mili" ? 4 : [65, 65, 0, 0]);
         ctx.fill();
@@ -2757,7 +3272,7 @@ async function createWorld(T, R, physics, expanded = false) {
           rectangle(wash, x + 13, y + 15, 192, 84);
           for (let k = 0;k < 6; k++) {
             const ox = x + 22 + 29 * k, h = 20 + (k + shelf) % 3 * 7;
-            ctx.fillStyle = walnut2 ? "#753f31" : ["#b7894c", "#e1cdaa", "#927754"][k % 3];
+            ctx.fillStyle = walnut3 ? "#753f31" : ["#b7894c", "#e1cdaa", "#927754"][k % 3];
             ctx.beginPath();
             ctx.roundRect(ox, y + 94 - h, 17, h, 4);
             ctx.fill();
@@ -3331,13 +3846,8 @@ async function createWorld(T, R, physics, expanded = false) {
         physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
         leaves.push({ group, body, side });
       }
-      const door = { zone, x, open: 0, targetOpen: false, leaves, toggle() {
-        this.targetOpen = !this.targetOpen;
-        return this.targetOpen;
-      } };
+      const door = { zone, x, open: 0, targetOpen: false, leaves };
       doors.push(door);
-      if (expanded)
-        interactables.push({ id: `${zone}-door`, kind: "open", x, z: 0, y: 0, floor: 0, radius: 2.5, door });
       if (expanded && zone === "newmoon") {
         cylinder("brass", x + 1.8, 4.46, -4, 0.028, 2.35);
         cylinder("brass", x + 1.8, 3.25, -4, 1.05, 0.14);
@@ -3485,6 +3995,8 @@ async function createWorld(T, R, physics, expanded = false) {
           box("oak", x + 0.12, 0.08, -1.325, 0.035, 0.11, 0.006);
         }
       }
+      if (expanded)
+        addOriginalShopDetails(zone, x, { box, cylinder, solid, collider });
       activeShopSlot = null;
     }
     if (expanded) {
@@ -3609,7 +4121,7 @@ async function createWorld(T, R, physics, expanded = false) {
       activeDeck = false;
       const shopSigns = await addShopSignAtlas(T, expandedLayout, scene);
       shopSigns.layers.enable(1);
-      const interiors = await createExpandedInteriors(T, expandedLayout, scene);
+      const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials.shellFloor.map);
       for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
         collider(x, y, z, width, height, depth);
         shopObstacles.push({
