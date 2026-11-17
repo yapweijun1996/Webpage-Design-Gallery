@@ -243,6 +243,7 @@ function animate(now) {
 }
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message, terminal = true) {
+  if (terminal) window.mallLoader?.fail(message);
   if (terminal) { fatal = true; graphicsStatus = 'failed'; }
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
@@ -271,6 +272,7 @@ document.addEventListener('visibilitychange', () => {
   else { if (ready) { updateHUD(); render(); } else validateRestoration(); resume(); }
 });
 canvas.addEventListener('webglcontextlost', event => {
+  window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
   mallTheme?.suspend();
   player?.interruptGraphics(); elevator?.interrupt?.();
@@ -278,6 +280,7 @@ canvas.addEventListener('webglcontextlost', event => {
   fallback(fatal ? 'The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D.' : 'The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.', false);
 });
 canvas.addEventListener('webglcontextrestored', () => {
+  window.mallLoader?.context(false);
   contextLost = false;
   // Our listener predates Three r170's At handler. Its synchronous St rebuild
   // replaces renderer.info/shadowMap. A microtask can run between native event
@@ -335,6 +338,7 @@ function validateRestoration() {
     if (gl.getError() !== gl.NO_ERROR || renderer.info.render.calls === 0 || !pixel.slice(0, 3).some(Boolean))
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
+    window.mallLoader?.complete('frame');
     window.__sceneFailed = false; window.__sceneReady = true;
     mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
   } catch {
@@ -342,6 +346,8 @@ function validateRestoration() {
   }
 }
 async function initialize() {
+  // Allow the initial overlay to paint before expensive module and scene work.
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const context = canvas.getContext('webgl2', {antialias: true, alpha: false, powerPreference: 'high-performance'});
   if (!context) { fallback(expanded?'WebGL is unavailable. The 17-store mall plan and verified products remain in the accessible directory below.':'WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.'); return; }
   const T = await import('./vendor/three.module.min.js');
@@ -354,7 +360,13 @@ async function initialize() {
   try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
+  window.mallLoader?.complete('physics');
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded);
+  const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans]
+    .flatMap(group => Object.values(group || {}));
+  if (world.productAssets?.shelf) assetRecords.push(world.productAssets.shelf);
+  document.getElementById('loader-asset-notice').hidden = !assetRecords.some(record => record?.status === 'fallback');
+  window.mallLoader?.complete('scene');
   atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds));
   try { if (!contextLost && !context.isContextLost()) atmosphere.restoreEnvironment(); } catch { /* Keep the mall usable without reflections. */ }
   if (expanded) {
@@ -454,12 +466,25 @@ async function initialize() {
   });
   ui.onBagChange(value => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
   player.teleport(expanded ? 'entry' : 'atrium'); updateHUD();
+  window.mallLoader?.complete('models');
   initialized = true;
   new ResizeObserver(resize).observe(canvas);
+  // A hidden tab cannot supply a visible first frame. Resume only when visible.
+  while (document.hidden) await new Promise(resolve => {
+    const visible = () => { if (!document.hidden) { document.removeEventListener('visibilitychange', visible); resolve(); } };
+    document.addEventListener('visibilitychange', visible);
+  });
   if (interrupted) { validateRestoration(); return; }
   resize();
-  ready = true; graphicsStatus = 'available'; ui.show3D(); resize();
-  for (let i = 0; i < 5; i++) tick(); render(); window.__sceneReady = true; ui.offerFirstGuide(); resume();
+  ready = true; graphicsStatus = 'available';
+  if (window.mallLoader?.snapshot().dismissed) document.getElementById('store-list').dispatchEvent(new Event('pointerdown'));
+  ui.show3D(); resize();
+  for (let i = 0; i < 5; i++) tick();
+  render(true);
+  if (contextLost || context.isContextLost()) return;
+  if (!renderer.info.render.calls) throw new Error('First scene frame unavailable');
+  window.mallLoader?.complete('frame');
+  window.__sceneReady = true; ui.offerFirstGuide(); resume();
 }
 initialize().catch(error => {
   console.error('3D mall initialization failed:', error);

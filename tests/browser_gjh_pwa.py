@@ -60,6 +60,8 @@ def run():
                 assert page.evaluate("fetch('pwa.js?offline-test=1').then(() => false).catch(() => true)")
                 assert page.locator('#mall-connection-notice').is_visible()
                 assert page.evaluate("fetch('manifest.webmanifest').then(r => r.ok)")
+                for resource in ('style.bundle.css', 'assets/loader.js', 'assets/gjh-loader-mark.svg'):
+                    assert page.evaluate("(name) => fetch(name).then(r => r.ok)", resource), resource
                 page.reload(wait_until='domcontentloaded')
                 assert page.get_by_role('heading', name='Let’s reconnect.').is_visible()
                 assert page.evaluate("sessionStorage.getItem('gjh-v11-demo-bag-v1')") == saved

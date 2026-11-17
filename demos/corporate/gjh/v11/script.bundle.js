@@ -3647,6 +3647,8 @@ function resume() {
   }
 }
 function fallback(message, terminal = true) {
+  if (terminal)
+    window.mallLoader?.fail(message);
   if (terminal) {
     fatal = true;
     graphicsStatus = "failed";
@@ -3754,6 +3756,7 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 canvas.addEventListener("webglcontextlost", (event) => {
+  window.mallLoader?.context(true);
   event.preventDefault();
   contextLost = true;
   interrupted = true;
@@ -3767,6 +3770,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   fallback(fatal ? "The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D." : "The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.", false);
 });
 canvas.addEventListener("webglcontextrestored", () => {
+  window.mallLoader?.context(false);
   contextLost = false;
   const epoch = losses;
   setTimeout(() => {
@@ -3847,6 +3851,7 @@ function validateRestoration() {
     frames++;
     ready = true;
     graphicsStatus = "available";
+    window.mallLoader?.complete("frame");
     window.__sceneFailed = false;
     window.__sceneReady = true;
     mallTheme?.resume();
@@ -3858,6 +3863,7 @@ function validateRestoration() {
   }
 }
 async function initialize() {
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const context = canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "high-performance" });
   if (!context) {
     fallback(expanded ? "WebGL is unavailable. The 17-store mall plan and verified products remain in the accessible directory below." : "WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.");
@@ -3881,8 +3887,14 @@ async function initialize() {
   }
   physics = new R.World({ x: 0, y: -24, z: 0 });
   physics.timestep = STEP;
+  window.mallLoader?.complete("physics");
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded);
+  const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
+  if (world.productAssets?.shelf)
+    assetRecords.push(world.productAssets.shelf);
+  document.getElementById("loader-asset-notice").hidden = !assetRecords.some((record) => record?.status === "fallback");
+  window.mallLoader?.complete("scene");
   atmosphere = createMallAtmosphere(T, renderer, world.scene, expanded ? expandedLayout.slots : spatial.stores.map((store) => store.bounds));
   try {
     if (!contextLost && !context.isContextLost())
@@ -4048,8 +4060,19 @@ async function initialize() {
   ui.onBagChange((value) => player.setBagCount(Object.values(value).reduce((total, quantity) => total + quantity, 0)));
   player.teleport(expanded ? "entry" : "atrium");
   updateHUD();
+  window.mallLoader?.complete("models");
   initialized = true;
   new ResizeObserver(resize).observe(canvas);
+  while (document.hidden)
+    await new Promise((resolve) => {
+      const visible = () => {
+        if (!document.hidden) {
+          document.removeEventListener("visibilitychange", visible);
+          resolve();
+        }
+      };
+      document.addEventListener("visibilitychange", visible);
+    });
   if (interrupted) {
     validateRestoration();
     return;
@@ -4057,11 +4080,18 @@ async function initialize() {
   resize();
   ready = true;
   graphicsStatus = "available";
+  if (window.mallLoader?.snapshot().dismissed)
+    document.getElementById("store-list").dispatchEvent(new Event("pointerdown"));
   ui.show3D();
   resize();
   for (let i = 0;i < 5; i++)
     tick();
-  render();
+  render(true);
+  if (contextLost || context.isContextLost())
+    return;
+  if (!renderer.info.render.calls)
+    throw new Error("First scene frame unavailable");
+  window.mallLoader?.complete("frame");
   window.__sceneReady = true;
   ui.offerFirstGuide();
   resume();

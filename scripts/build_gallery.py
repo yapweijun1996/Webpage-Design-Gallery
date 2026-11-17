@@ -264,7 +264,8 @@ def pwa_outputs(pages, catalog, release):
     worker = (ROOT / "templates/gallery/sw.js").read_text(encoding="utf-8")
     worker = worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(entries, indent=2))
     mall_root = ROOT / "demos/corporate/gjh/v11"
-    mall_paths = ("offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png")
+    mall_paths = ("offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png",
+                  "style.bundle.css", "assets/loader.js", "assets/gjh-loader-mark.svg")
     mall_entries = [{"path": name, "sha256": hashlib.sha256(source_bytes(mall_root / name)).hexdigest()} for name in mall_paths]
     mall_worker = (ROOT / "templates/gallery/gjh-v11-sw.js").read_text(encoding="utf-8")
     mall_worker = mall_worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(mall_entries, indent=2))

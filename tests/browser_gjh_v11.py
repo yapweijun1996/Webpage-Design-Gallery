@@ -19,10 +19,23 @@ ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / 'demos/corporate/gjh/v11'
 ARGS = ['--use-angle=' + os.environ.get('GALLERY_WEBGL_BACKEND', 'swiftshader'), '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
 
+# This texture is awaited by createWorld and is not a decorative-only asset.
+# Hold it at the HTTP server so screenshots capture a genuinely incomplete load.
+LOADER_TEXTURE = '/gallery/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg'
+loader_request = threading.Event()
+loader_release = threading.Event()
+hold_loader_texture = False
+
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
+
+    def do_GET(self):
+        if self.path.split('?')[0] == LOADER_TEXTURE and hold_loader_texture:
+            loader_request.set()
+            loader_release.wait(90)
+        super().do_GET()
 
     def copyfile(self, source, outputfile):
         try:
@@ -285,6 +298,83 @@ def room_signs(page):
                         and sign['top'] < rect['bottom'] + 8 and sign['bottom'] > rect['top'] - 8), (sign, rect)
 
 
+def loader_coverage(browser, url):
+    """Capture a real stalled startup and recover from a required texture failure."""
+    global hold_loader_texture
+    output = Path.home() / 'omp-tasks/out'
+    output.mkdir(parents=True, exist_ok=True)
+    captures = []
+    for width, height in ((1440, 900), (390, 844)):
+        loader_request.clear()
+        loader_release.clear()
+        hold_loader_texture = True
+        context = browser.new_context(viewport={'width': width, 'height': height},
+                                      device_scale_factor=2, has_touch=width < 1000,
+                                      service_workers='block')
+        try:
+            page = context.new_page()
+            page.goto(url, wait_until='domcontentloaded', timeout=90000)
+            page.locator('#app-loader').wait_for(state='visible', timeout=90000)
+            assert loader_request.wait(90), 'Required startup texture was not requested'
+            assert not page.evaluate('Boolean(window.__sceneReady || window.__sceneFailed)')
+            assert page.locator('#loader-status').is_visible()
+            assert page.locator('#loader-progress').evaluate("el => el.tagName === 'PROGRESS'")
+            assert page.locator('#loader-progress').is_visible()
+            page.evaluate('''() => {
+              const loader = document.querySelector('#app-loader');
+              window.__loaderHiddenBeforeReady = false;
+              new MutationObserver(() => {
+                if ((loader.hidden || getComputedStyle(loader).display === 'none' ||
+                     getComputedStyle(loader).visibility === 'hidden') && !window.__sceneReady)
+                  window.__loaderHiddenBeforeReady = true;
+              }).observe(loader, {attributes:true, attributeFilter:['hidden','style','class']});
+            }''')
+            capture = output / f'gjh-v11-loader-mid-load-{width}.png'
+            page.screenshot(path=str(capture))
+            captures.append(str(capture))
+            hold_loader_texture = False
+            loader_release.set()
+            page.wait_for_function('window.__sceneReady === true || window.__sceneFailed === true', timeout=90000)
+            assert page.evaluate('window.__sceneReady === true && window.__mall?.ready === true')
+            page.locator('#app-loader').wait_for(state='hidden', timeout=90000)
+            assert not page.evaluate('window.__loaderHiddenBeforeReady')
+        finally:
+            hold_loader_texture = False
+            loader_release.set()
+            context.close()
+
+    context = browser.new_context(viewport={'width': 1440, 'height': 900},
+                                  service_workers='block')
+    try:
+        page = context.new_page()
+        failures = []
+        def fail_texture(route):
+            failures.append(route.request.url)
+            route.fulfill(status=503, body='Startup texture unavailable')
+        pattern = '**/assets/mili-brand-cover.jpg*'
+        page.route(pattern, fail_texture)
+        page.goto(url, wait_until='domcontentloaded', timeout=90000)
+        page.wait_for_function('window.__sceneFailed === true', timeout=90000)
+        assert failures, 'Required startup texture was not intercepted'
+        assert not page.evaluate('Boolean(window.__sceneReady || window.__mall?.ready)')
+        assert page.locator('#app-loader').is_visible()
+        assert page.locator('#loader-status').is_visible()
+        assert page.locator('#loader-directory').is_visible()
+        assert page.locator('#loader-directory').evaluate("el => el.tagName === 'A' && !!el.getAttribute('href')")
+        retry = page.locator('#loader-retry')
+        assert retry.is_visible() and retry.is_enabled()
+        page.unroute(pattern, fail_texture)
+        retry.click()
+        page.wait_for_function('window.__sceneReady === true && window.__mall?.ready === true', timeout=90000)
+        page.locator('#app-loader').wait_for(state='hidden', timeout=90000)
+        calls = state(page)['drawCalls']
+        assert 0 < calls <= 200, calls
+        return {'midLoadScreenshots': captures, 'failedRequests': len(failures),
+                'retryDrawCalls': calls}
+    finally:
+        context.close()
+
+
 def run(capture=False):
     spec = importlib.util.spec_from_file_location('gallery', ROOT / 'scripts/build_gallery.py')
     gallery = importlib.util.module_from_spec(spec); spec.loader.exec_module(gallery)
@@ -302,6 +392,7 @@ def run(capture=False):
             with sync_playwright() as p:
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
                 try:
+                    evidence.append({'loader': loader_coverage(browser, url)})
                     for query, expected in (('', True), ('?layout=classic', False)):
                         context = browser.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=2, reduced_motion='reduce')
                         page = context.new_page()

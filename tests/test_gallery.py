@@ -134,7 +134,8 @@ class GalleryTests(unittest.TestCase):
             mall_worker = (mall / "pwa-sw.js").read_text()
             mall_entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", mall_worker, re.S).group(1))
             self.assertEqual({entry["path"] for entry in mall_entries}, {
-                "offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png"})
+                "offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png",
+                "style.bundle.css", "assets/loader.js", "assets/gjh-loader-mark.svg"})
             self.assertLessEqual(sum((mall / entry["path"]).stat().st_size for entry in mall_entries), 256 * 1024)
             for entry in mall_entries:
                 self.assertEqual(hashlib.sha256((mall / entry["path"]).read_bytes()).hexdigest(), entry["sha256"])
