@@ -732,3 +732,8 @@ See [docs/gjh-v11-qa-loop.md](docs/gjh-v11-qa-loop.md).
 - [ ] Vision upgrade (owner 2026-11-17): Singapore-Malaysia Virtual World. Phases P0 mall quality, P1 multi-floor and enterable shops, P2 district streaming architecture, P3 Singapore districts, P4 Malaysia districts. See docs/gjh-v11-qa-loop.md. Open: enterable interiors supersede the glazed-only decision.
 - [x] Model inventory for the Singapore-Malaysia world: docs/sg-my-world-model-inventory.md (names only, quality not verified).
 - [ ] Goal and engine (owner 2026-11-17): goal.md created. Modular 3D World Engine on Three.js (reusable behaviors Sit/Inspect/Open/Pick Up with seat anchors, world streaming, shared camera/movement/collision). Next: write the engine design (interaction registry, seat-anchor spec, streaming chunks) and audit what v11 already has before extracting modules (P2).
+
+## 2026-11-17 release log
+- [x] Pushed to main (a05c0bb, Pages deploy green, live bundle verified): new model displays (S04/S05, S13-S17), tiered lighting, interaction registry, seat anchors (upper-deck benches sittable except one overlapping the lift shaft was moved), shop-door Open, goal.md, QA loop docs, model inventory. Owner chose to push all although the terra visual advisor scored the mall 4/10 FAIL.
+- [ ] Visual quality is still below the concept (flat mood, small hero displays); waits for P1 models: glazed storefront module, chilled freezer, grand piano, ice-cream cart, canned-food pyramid.
+- [ ] Next engine steps: Pick Up and Travel through the registry, shoes in character customisation, NPCs, escalator, district streaming (P2).
