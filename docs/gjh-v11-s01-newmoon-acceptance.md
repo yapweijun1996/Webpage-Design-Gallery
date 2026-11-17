@@ -80,3 +80,18 @@ P1 chilled freezer and mullion-free glazed storefront remain unavailable and are
 The feature tins and decorative boxes are not inspectable; B2 remains Partial. Door opening was captured, but B3–B4 and sections D–F were not independently reviewed in this round. HUD changes are outside this round. Captures and the before/after comparison are stored under `~/omp-tasks/out/s01r3-*`; these scores are not independent advisor approval.
 
 The first full Round 3 browser run returned RC=1: the initial centered fixture blocked the automated rear-shelf approach. The fixture was moved right to clear that route; the full rerun returned RC=0. The build and check, Node tests (one optional Studio checkout test skipped), gallery unittest and SSOT check passed. The browser log's maximum sampled draw call count was 193. Capture samples at atrium/entrance/door-open/inside were 156/150/160/168 at 1440 and 77/85/85/92 at 390.
+
+### Round 4 — implementer visual assessment
+
+| Item | Score | Evidence and remaining defect |
+|---|---|---|
+| A1 fascia | Partial | The inset wordmark is legible at both entrances, but the main fascia is cropped by the new top HUD, especially at 390. The HUD was not changed. |
+| A2 glazing | Partial | Side-window midrails were removed; door frames and the room sign still cross the view. P1 glazing remains outstanding. |
+| A3 shelves | Partial | Red backs, accent strips and larger illustrative side boxes add contrast; rear cans still read as small rows. |
+| A4 hero | Partial | The pyramid is 1.59 times larger and centered in the view; its cream-and-gold fixture and backdrop are not clearly legible from the entrance, and the mobile tutorial covers the lower display. |
+| A5 counter | Pass | The red cash-wrap remains visible; its lower part is obscured by the mobile tutorial. |
+| A6 greenery | Pass | The entrance plant remains present, although outside the mobile crop. |
+| A7 light | Partial | Illuminated side-shelf strips add warmth; bright, flat floor areas remain. |
+| A8 material | Partial | Timber and gold panelling breaks up the side wall; pale floor and walls remain prominent. |
+
+Build/check, Node tests (one optional Studio checkout test skipped), gallery unittest, SSOT and the full browser suite passed; browser RC=0 and maximum sampled draw calls were 195. Entrance/open/inside capture samples were 140/140/170 at 1440 and 86/86/93 at 390. The new tutorial was left visible in the captures; `~/omp-tasks/out/s01r4-compare.jpg` compares them with the concept and round 3. The supplied `shopcheck.py` only visits S04 and later, so the S01 captures used the same Playwright/Chrome setup with the prior round's S01 itinerary instead. No independent advisor review or physical-device performance measurement was performed. Decorative hero tins remain non-interactive; B2 remains Partial.

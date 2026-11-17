@@ -396,7 +396,7 @@ export async function createWorld(T, R, physics, expanded = false) {
           box(frame, x + side * 3.55 + edge * 1.15, 2.65, .1, zone === 'newmoon' ? .045 : .11, 5.05, .18);
           box('brass', x + side * 3.55, 2.6 + edge * 2.49, .12, 2.3, .06, .16);
         }
-        box('brass', x + side * 3.55, 2.58, .12, 2.3, .035, .12);
+        if (zone !== 'newmoon') box('brass', x + side * 3.55, 2.58, .12, 2.3, .035, .12);
       } else {
         // Keep the original facade and collision in the reversible legacy view.
         for (const face of [-1, 1]) {
@@ -521,13 +521,20 @@ export async function createWorld(T, R, physics, expanded = false) {
       box('brass', x + 2.5, 1.48, -4.12, .38, .35, .025);
       box('dark', x + 2.5, 1.48, -4.10, .33, .29, .025);
       // Side-wall merchandise is decorative and shares the existing instanced batches.
+      for (const z of [-8.9, -6.5, -4.1, -1.7]) {
+        box('oak', x + 4.66, 2.75, z, .035, 4.6, 2.24);
+        box('ivory', x + 4.635, 2.75, z, .025, 4.35, 2.02);
+        box('brass', x + 4.61, 4.91, z, .025, .025, 2.02);
+      }
       for (const z of [-7.8, -5.3, -2.8]) {
+        box('newMoonRed', x + 4.58, 2.45, z, .05, 2.7, 2.2);
         for (const y of [1.35, 2.05, 2.75, 3.45]) {
           box('oak', x + 4.38, y, z, .48, .09, 2.15);
           box('brass', x + 4.12, y + .03, z, .025, .05, 2.15);
+          box('glow', x + 4.10, y + .10, z, .025, .025, 2.05);
           for (let i = 0; i < 7; i++) {
             const pz = z - .84 + i * .28;
-            box(i === 3 ? 'newMoonRed' : i % 2 ? 'ivory' : 'cream', x + 4.31, y + .22, pz, .28, .36, .22);
+            box(i % 3 === 0 ? 'newMoonRed' : i % 2 ? 'ivory' : 'cream', x + 4.31, y + .24, pz, .28, .40, .25);
             box('brass', x + 4.16, y + .22, pz, .025, .06, .19);
           }
         }

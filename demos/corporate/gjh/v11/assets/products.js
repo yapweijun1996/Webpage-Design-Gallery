@@ -149,20 +149,23 @@ function batchShelf(T, primitives) {
 const heroFixture = Object.freeze({x: -9.35, z: -5.7, width: 1.5, depth: .8, height: .78});
 
 function addDisplayTrim(T, scene, brass, shopLodInstances) {
-  const redParts = [], goldParts = [];
+  const redParts = [], goldParts = [], creamParts = [];
   for (const x of shelfXs) for (const y of shelfTops) {
     redParts.push([x, y + .19, -9.49, shelfBounds.x - .12, .36, .035]);
     goldParts.push([x, y - .018, -8.955, shelfBounds.x - .12, .036, .035]);
   }
   const {x, z, width, depth, height} = heroFixture;
-  redParts.push([x, height / 2, z, width, height, depth]);
-  redParts.push([x, height + .12, z - .16, 1.04, .24, .48]);
+  creamParts.push([x, height / 2, z, width, height, depth],
+    [x, height + .12, z - .16, 1.25, .24, .48],
+    [x, 1.65, z - .45, 1.8, 1.8, .06]);
+  goldParts.push([x, 1.65, z - .49, 1.9, 1.9, .035]);
   goldParts.push([x, height + .025, z, width + .08, .05, depth + .08],
     [x, height + .255, z - .16, 1.1, .03, .52],
     [x, .055, z, width + .04, .07, depth + .04]);
   const geometry = new T.BoxGeometry(1, 1, 1);
   const red = new T.MeshStandardMaterial({color: 0x8f1621, roughness: .48});
-  for (const [parts, material] of [[redParts, red], [goldParts, brass]]) {
+  const cream = new T.MeshStandardMaterial({color: 0xd9bd87, roughness: .72, emissive: 0x33230f});
+  for (const [parts, material] of [[redParts, red], [goldParts, brass], [creamParts, cream]]) {
     const mesh = new T.InstancedMesh(geometry, material, parts.length);
     parts.forEach(([px, py, pz, sx, sy, sz], index) => {
       const matrix = new T.Matrix4().compose(new T.Vector3(px, py, pz), new T.Quaternion(), new T.Vector3(sx, sy, sz));
@@ -215,10 +218,10 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     const shelfPlacements=placements.slice();
     for(const item of showcase.filter(item=>item.id===`new-moon-${sku}-front`))placements.push(new T.Vector3(...item.position));
     // A stepped pyramid uses the same product primitives as the shelf stock.
-    const heroStart = placements.length, count = 5 - productIndex, factor = 2.45;
+    const heroStart = placements.length, count = 5 - productIndex, factor = 3.9;
     for (let i = 0; i < count; i++) {
       const offset = i - (count - 1) / 2;
-      const position = new T.Vector3(heroFixture.x + offset * .205, heroFixture.height + .05 + productIndex * canBounds.y * factor, heroFixture.z + .08);
+      const position = new T.Vector3(heroFixture.x + offset * .32, heroFixture.height + .05 + productIndex * canBounds.y * factor, heroFixture.z + .08);
       position.displayScale = factor;
       position.displayRotation = -offset * .08;
       placements.push(position);
