@@ -102,7 +102,11 @@ function fallbackCan(T, scene, textures, brass, sku, placements) {
   }
   const label = new T.InstancedMesh(new T.CylinderGeometry(.974, .974, 512 / 594, 24, 1, true, -Math.PI / 2, Math.PI), new T.MeshStandardMaterial({map: new T.CanvasTexture(canvas), roughness: .65}), placements.length);
   const matrix = new T.Matrix4(), scale = new T.Vector3(canBounds.x / 2, canBounds.y, canBounds.z / 2);
-  placements.forEach((placement, index) => { matrix.compose(placement.clone().add(new T.Vector3(0, canBounds.y / 2, 0)), new T.Quaternion(), scale); body.setMatrixAt(index, matrix); label.setMatrixAt(index, matrix); });
+  placements.forEach((placement, index) => {
+    const factor = placement.displayScale || 1, rotation = placement.displayRotation || 0;
+    matrix.compose(placement.clone().add(new T.Vector3(0, canBounds.y * factor / 2, 0)), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), rotation), scale.clone().multiplyScalar(factor));
+    body.setMatrixAt(index, matrix); label.setMatrixAt(index, matrix);
+  });
   body.castShadow = body.receiveShadow = label.castShadow = label.receiveShadow = true; scene.add(body, label);
 }
 
@@ -141,8 +145,35 @@ function batchShelf(T, primitives) {
   return result;
 }
 
-export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null) {
+// One small, non-interactive fixture leaves the entry and the counter approach clear.
+const heroFixture = Object.freeze({x: -12.2, z: -3.55, width: 1.35, depth: .68, height: .84});
+
+function addDisplayTrim(T, scene, brass, shopLodInstances) {
+  const redParts = [], goldParts = [];
+  for (const x of shelfXs) for (const y of shelfTops) {
+    redParts.push([x, y + .19, -9.49, shelfBounds.x - .12, .36, .035]);
+    goldParts.push([x, y - .018, -8.955, shelfBounds.x - .12, .036, .035]);
+  }
+  const {x, z, width, depth, height} = heroFixture;
+  redParts.push([x, height / 2, z, width, height, depth]);
+  goldParts.push([x, height + .025, z, width + .08, .05, depth + .08],
+    [x, .055, z, width + .04, .07, depth + .04]);
+  const geometry = new T.BoxGeometry(1, 1, 1);
+  const red = new T.MeshStandardMaterial({color: 0x8f1621, roughness: .48});
+  for (const [parts, material] of [[redParts, red], [goldParts, brass]]) {
+    const mesh = new T.InstancedMesh(geometry, material, parts.length);
+    parts.forEach(([px, py, pz, sx, sy, sz], index) => {
+      const matrix = new T.Matrix4().compose(new T.Vector3(px, py, pz), new T.Quaternion(), new T.Vector3(sx, sy, sz));
+      mesh.setMatrixAt(index, matrix);
+      shopLodInstances.push({mesh, index, matrix, x: px, z: pz, visible: null});
+    });
+    mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
+  }
+}
+
+export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[]) {
   const shopLodInstances=[],hiddenShopLodMatrix=new T.Matrix4().makeScale(0,0,0);
+  addDisplayTrim(T, scene, brass, shopLodInstances);
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
   const sourceShelfPrimitives=shelfRecord.primitives.length;
   if(shelfRecord.status==='loaded')shelfRecord.primitives=batchShelf(T,shelfRecord.primitives);
@@ -181,15 +212,24 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, productZ));
     const shelfPlacements=placements.slice();
     for(const item of showcase.filter(item=>item.id===`new-moon-${sku}-front`))placements.push(new T.Vector3(...item.position));
-    if(heroCan && sku==='nz-425g')placements.push(new T.Vector3(...heroCan));
+    // A stepped pyramid uses the same product primitives as the shelf stock.
+    const heroStart = placements.length, count = 5 - productIndex, factor = 2.45;
+    for (let i = 0; i < count; i++) {
+      const offset = i - (count - 1) / 2;
+      const position = new T.Vector3(heroFixture.x + offset * .205, heroFixture.height + .05 + productIndex * canBounds.y * factor, heroFixture.z + .08);
+      position.displayScale = factor;
+      position.displayRotation = -offset * .08;
+      placements.push(position);
+    }
     const batches = [];
     stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, batches, reserved:false});
     if (record.status === 'loaded') for (const primitive of record.primitives) {
       const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
       placements.forEach((position, index) => {
-        const matrix = new T.Matrix4(); matrix.compose(position, new T.Quaternion(), new T.Vector3(1, 1, 1));
+        const factor = position.displayScale || 1;
+        const matrix = new T.Matrix4(); matrix.compose(position, new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), position.displayRotation || 0), new T.Vector3(factor, factor, factor));
         const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix);mesh.setMatrixAt(index,instance);
-        if(index<shelfPlacements.length||heroCan&&sku==='nz-425g'&&index===placements.length-1)shopLodInstances.push({mesh,index,matrix:instance,x:position.x,z:position.z,visible:null});
+        if(index<shelfPlacements.length||index>=heroStart)shopLodInstances.push({mesh,index,matrix:instance,x:position.x,z:position.z,visible:null});
       });
       mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh); batches.push(mesh);
     } else fallbackCan(T, scene, textures, brass, sku, placements);
@@ -215,7 +255,8 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     for(const primitive of record.primitives){const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);group.add(mesh);}
     // Geometry/materials are shared with the shelf: never dispose on gesture completion.
     return group;
-  }, interactables, colliders: shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})), assets: Object.freeze({
+  }, interactables, colliders: [...shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})),
+    {x: heroFixture.x, y: heroFixture.height / 2, z: heroFixture.z, sx: heroFixture.width + .08, sy: heroFixture.height + .05, sz: heroFixture.depth + .08}], assets: Object.freeze({
     shelf: Object.freeze({model:interiorPilot ? shelf.asset_id : 'GJH-M056', assetId:interiorPilot ? shelf.asset_id : null, lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4+displayShelves.length, primitives: sourceShelfPrimitives, dimensions: shelfRecord.size}),
     cans: Object.freeze(Object.fromEntries(canRecords.map((record, index) => {
       const x = shelfXs[index];

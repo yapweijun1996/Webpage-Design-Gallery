@@ -2036,7 +2036,7 @@ async function createWorld(T, R, physics, expanded = false) {
         box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
       box(zone === "newmoon" ? "newMoonRed" : wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
       for (const side of [-1, 1]) {
-        box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
+        box(zone === "newmoon" ? "ivory" : wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
         if (expanded) {
           const frame = zone === "mili" ? "oak" : zone === "gogo" ? "jadeAlt" : "green";
           box("glass", x + side * 3.55, 2.6, 0, 2.4, 5.2, 0.12, true);
@@ -2083,7 +2083,8 @@ async function createWorld(T, R, physics, expanded = false) {
                 box("brass", x + side * 4.57, 3.02, z, 0.09, 0.94, 0.25);
                 box("glow", x + side * 4.49, 3.02, z, 0.075, 0.67, 0.16);
               }
-              lightPool(x + side * 4.585, 3.18, z, 2.1, 2.8, -side * Math.PI / 2, 0);
+              if (zone !== "newmoon")
+                lightPool(x + side * 4.585, 3.18, z, 2.1, 2.8, -side * Math.PI / 2, 0);
             }
           }
       }
@@ -2094,7 +2095,8 @@ async function createWorld(T, R, physics, expanded = false) {
       for (const side of [-1, 1]) {
         box("brass", x + side * 3.08, 3.8, -10.25, 0.28, 0.94, 0.1);
         box("glow", x + side * 3.08, 3.8, -10.17, 0.17, 0.68, 0.075);
-        lightPool(x + side * 3.08, 3.96, -10.18, 2.5, 2.6, 0, 0);
+        if (zone !== "newmoon")
+          lightPool(x + side * 3.08, 3.96, -10.18, 2.5, 2.6, 0, 0);
       }
       const rugX = x + (zone === "newmoon" ? -0.35 : 0);
       const rugZ = zone === "newmoon" ? -5.1 : -5.9;
@@ -2117,8 +2119,12 @@ async function createWorld(T, R, physics, expanded = false) {
       const logo = zone === "newmoon" ? "new-moon-logo.svg" : `${zone}-logo.jpg`;
       if (zone === "newmoon" && expanded) {
         activeShopSlot = null;
-        art(logo, x, 4.72, 0.31, 5.2);
-        box("glow", x, 5.36, 0.31, 5.4, 0.025, 0.045);
+        art(logo, x, 4.72, 0.31, 3.5);
+        box("glow", x, 5.12, 0.31, 3.7, 0.025, 0.045);
+        box("newMoonRed", x + 0.9, 3.05, -3.45, 3.05, 0.6, 0.08);
+        box("brass", x + 0.9, 2.73, -3.39, 3.1, 0.035, 0.06);
+        art(logo, x + 0.9, 3.05, -3.4, 2.8);
+        box("glow", x + 0.9, 3.31, -3.38, 3, 0.025, 0.045);
         activeShopSlot = Number(store.number);
       } else {
         if (!furnishings.place("storeSign", x, 0.28, 1, 1, 4.065, null, activeShopSlot)) {
@@ -2175,7 +2181,7 @@ async function createWorld(T, R, physics, expanded = false) {
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
-        const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
+        const productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, []);
         shopLodUpdates.push(productDisplay.updateShopLods);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)

@@ -42,3 +42,24 @@ Scoring: each item is Pass / Partial / Fail with a named defect. Items marked [P
 - build `--check`, Node tests, unittest, SSOT, full browser suite run by the manager (RC=0), draw calls <= 200.
 - 1440 and 390 screenshots viewed by the manager, side by side with the concept panel.
 - Advisor scores recorded per section A-F; push only when no Fail remains in A1, A3, A4, B1, B2 and C1, or the gap is recorded.
+
+## Round log
+
+Round 1 scores below are the worker's recorded after-scores; the visual advisor separately rated A5 and A8 Partial and rejected shipment (mood 4/10). Round 2 scores are the implementer's assessment of the supplied captures, not independent advisor approval.
+
+| Item | Round 1 | Round 2 | Remaining gap |
+|---|---|---|---|
+| A1 fascia | Partial | Partial | Atrium fascia remains visible, but its entrance view is HUD-cropped; a lower inset wordmark provides a second view. |
+| A2 glazing | Partial | Partial | Heavy mullions remain; P1 glazing module required. |
+| A3 shelves | Partial | Partial | Red/gold trim and real can instances added; native-size rows remain small from the entrance. |
+| A4 hero | Fail | Partial | Enlarged tins on a plinth are visible from the atrium, but are clipped at the mobile entrance edge. |
+| A5 counter | Pass | Pass | Worker assessment; advisor found its cash-wrap appearance unconvincing. |
+| A6 greenery | Partial | Partial | Plant remains inside rather than beside entrance. |
+| A7 light | Partial | Partial | Wall pools reduced and fascia strips retained; warm glow and wall detail still need visual review. |
+| A8 material | Pass | Pass | Worker assessment; advisor found glazing visually flat. |
+| B1 door | Pass | Pass | Door opens in the capture. |
+| B2 products | Partial | Partial | Shelf inspection was exercised in round 1; feature tins are decorative and do not support Inspect. |
+| B3 seats | Partial | Partial | Shop seat coverage not independently exercised in these captures. |
+| B4 dead targets | Partial | Partial | Feature tins are not highlighted; full target audit not independently exercised. |
+
+P1 chilled freezer and mullion-free glazed storefront remain unavailable and are not simulated. Round 1 sampled maxima: desktop 168, mobile 89 draw calls. Round 2 sampled atrium/entrance/door-open/inside: desktop 149/153/153/171, mobile 80/84/84/90. These are sampled maxima, not proof for every scene state. The single round 2 browser suite returned RC=1 when the first fixture placement blocked shelf approach; the fixture was moved left afterward and a focused desktop door/shelf Inspect, 3D rotation and Add to Bag check passed. The full browser suite was not rerun. Physical-device performance and independent round 2 advisor and manager approval are NOT FOUND.
