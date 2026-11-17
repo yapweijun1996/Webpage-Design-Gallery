@@ -3,7 +3,7 @@ import {loadStaticAsset} from './static-asset.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 
-const sources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf')));
+const pilotSources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf')));
 
 // These pinned, texture-free surfaces are opaque and non-emissive. Merge them
 // once while retaining their PBR values and per-shop visibility.
@@ -28,13 +28,17 @@ function batchFurniture(T, primitives) {
   return [{geometry:mesh.geometry,material:mesh.material,matrix:new T.Matrix4()}];
 }
 
-export async function createFurnishings(T, shadows) {
+export async function createFurnishings(T, shadows, expanded = false) {
+  const sources = expanded ? {...pilotSources, barStool: {
+    asset_id:'ASSET_MallBarStool', file:'gogo-bar-stool.glb',
+    sha256:"c4546f8de005aef723c7fd2a175e0b6544b26277792c985eb85d8ffe2aa4b3b3", dimensions_m:[.48,1.04,.48], rootExtras:{units:'metres'}
+  }} : pilotSources;
   const records = {};
   await Promise.all(Object.entries(sources).map(async ([kind, definition]) => {
     const record = records[kind] = {status: 'fallback', reason: null, primitives: [], placements: []};
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
     record.sourcePrimitiveCount=record.primitives.length;
-    if(record.status==='loaded'&&['bench','planter','coffeeTable','storeSign','wallLight'].includes(kind)){
+    if(record.status==='loaded'&&['bench','planter','coffeeTable','storeSign','wallLight','barStool'].includes(kind)){
       const opaque=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()===0);
       const emissive=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()!==0);
       if(opaque.length>1)record.primitives=[...batchFurniture(T,opaque),...emissive];

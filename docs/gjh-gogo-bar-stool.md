@@ -1,0 +1,5 @@
+# GOGO counter seating
+
+Three fixed stools along the GOGO counter use the owner's [Mall Bar Stool](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/a87117622ed25efc5f804c9ee6ed0171e4946cf7/models/mall-bar-stool), Shopping Mall 019. Original procedural geometry and materials by the Blender-3D-Gallery project. The source license authorizes reuse in the owner's projects. No external meshes or textures were used.
+
+The source export, `exports/optimized.glb` (SHA-256 `2f0c87ba633c833cf0ab622603c7fff1728a98f05a71be5eb07b6c5848cc756e`), supplies all 5,544 triangles. The local `gogo-bar-stool.glb` (SHA-256 `c4546f8de005aef723c7fd2a175e0b6544b26277792c985eb85d8ffe2aa4b3b3`) preserves the mesh and its resting pose, omits the swivel clip, and changes the graphite frame and teal cushion to brushed brass and salmon upholstery to match the shop reference. Native dimensions are 0.48 × 1.04 × 0.48 metres. The seats face the counter and share a single instanced opaque batch. The collision envelopes and procedural fallback remain active if the optional GLB fails validation.

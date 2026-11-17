@@ -87,19 +87,33 @@ export function createElevatorV2(T,R,physics,scene,expanded=false) {
     fixed('rail',slabX,L.upper+.04,z,length,.08,.12);
     for(const x of [slab.minX+1.5,slabX,slab.maxX-1.5])fixed('rail',x,L.upper+.55,z,.1,1.1,.1);
   }
-  const deckGlass=new T.Mesh(mergeGeometries(deckGlassParts),new T.MeshStandardMaterial({color:0xc9e2d9,transparent:true,opacity:.22,roughness:.12,metalness:.08,depthWrite:false,side:T.DoubleSide}));
-  deckGlass.name='Upper deck glass balustrade';deckGlass.userData.deckLod=true;scene.add(deckGlass);
+  // Glass at the upper shaft edge keeps the planted court visible. The fixed
+  // collider and camera bounds retain the full original height and thickness.
+  function shaftGuard(floor,x,z,width,depth) {
+    if(floor===0){fixed('rail',x,guardHeight/2,z,width,guardHeight,depth);return;}
+    deckGuard(x,floor+guardHeight/2,z,width,guardHeight,depth);
+    for(const y of [.07,guardHeight])staticParts.push(geometry('rail',x,floor+y,z,width,.065,depth));
+    const alongX=width>depth,length=alongX?width:depth;
+    for(const offset of [-.46,.46])staticParts.push(geometry('rail',x+(alongX?offset*length:0),floor+guardHeight/2,
+      z+(alongX?0:offset*length),.055,guardHeight,.055));
+  }
   for(const floor of floors){
-    fixed('rail',shaft.maxX,floor+guardHeight/2,shaftZ,wallThickness,guardHeight,sz);
-    for(const z of [shaft.minZ,shaft.maxZ])fixed('rail',shaftX,floor+guardHeight/2,z,sx,guardHeight,wallThickness);
-    for(const [minZ,maxZ] of [[shaft.minZ,t.minZ],[t.maxZ,shaft.maxZ]])fixed('rail',shaft.minX,floor+guardHeight/2,(minZ+maxZ)/2,wallThickness,guardHeight,maxZ-minZ);
+    shaftGuard(floor,shaft.maxX,shaftZ,wallThickness,sz);
+    for(const z of [shaft.minZ,shaft.maxZ])shaftGuard(floor,shaftX,z,sx,wallThickness);
+    for(const [minZ,maxZ] of [[shaft.minZ,t.minZ],[t.maxZ,shaft.maxZ]])shaftGuard(floor,shaft.minX,(minZ+maxZ)/2,wallThickness,maxZ-minZ);
     const gateShape=[shaft.minX,floor+guardHeight/2,doorwayZ,wallThickness,guardHeight,doorwayDepth];
-    const gateMesh=opaqueBatch(T,[geometry('rail',...gateShape)],false);gateMesh.name=`Lift gate ${floor}`;scene.add(gateMesh);
+    const gateParts=floor===0?[geometry('rail',...gateShape)]:[
+      ...[.07,.56,guardHeight].map(y=>geometry('rail',shaft.minX,floor+y,doorwayZ,wallThickness,.065,doorwayDepth)),
+      ...[-.47,.47].map(end=>geometry('rail',shaft.minX,floor+guardHeight/2,doorwayZ+end*doorwayDepth,.07,guardHeight,.07))
+    ];
+    const gateMesh=opaqueBatch(T,gateParts,false);gateMesh.name=`Lift gate ${floor}`;scene.add(gateMesh);
     gates.push({floor,mesh:gateMesh,collider:collider(...gateShape)});
     const thresholdShape=[(t.minX+t.maxX)/2,floor-.04,doorwayZ,t.maxX-t.minX,.08,doorwayDepth];
     const thresholdMesh=opaqueBatch(T,[geometry('stone',...thresholdShape)],false);thresholdMesh.name=`Lift threshold ${floor}`;scene.add(thresholdMesh);
     thresholds.push({floor,mesh:thresholdMesh,collider:collider(...thresholdShape)});
   }
+  const deckGlass=new T.Mesh(mergeGeometries(deckGlassParts),new T.MeshStandardMaterial({color:0xc9e2d9,transparent:true,opacity:.22,roughness:.12,metalness:.08,depthWrite:false,side:T.DoubleSide}));
+  deckGlass.name='Upper deck glass balustrade';deckGlass.userData.deckLod=true;scene.add(deckGlass);
   const fixedMesh=opaqueBatch(T,staticParts,false);fixedMesh.name='Expanded lift landing and guards';scene.add(fixedMesh);
   const cw=L.cabin.width,cd=L.cabin.depth;
   const cabinBoxes=[{kind:'stone',x:0,y:-.04,z:0,size:[cw,.08,cd]},

@@ -1,188 +1,271 @@
-// Window scenery is baked into a shared mesh. Dimensions are metres in a bay-local
-// frame centred behind the left pane, with positive Z toward the visitor.
-export function buildWindowStudio(number, palette, {box, column, disc, bar, arch}, width, centre) {
-  const [primary, secondary, light] = palette;
-  const brass = 0xba945c, timber = 0x9b7353, black = 0x252b30;
-  const backdrop = (colour, floor) => {
-    const bay = width - .45, opening = 2.15, wing = (bay-opening)/2;
-    // Return the walls into a deep central niche, so the front door has a
-    // sightline past both displays. The canopy and reveal catch the overhead light.
-    for (const side of [-1,1]) {
-      box(centre+side*(opening+wing)/2, 2.35, -1.05, wing, 4.7, .16, colour);
-      box(centre+side*opening/2, 2.35, -1.7, .11, 4.7, 1.44, colour);
-      box(centre+side*bay/2, 2.35, -.13, .12, 4.7, 2, colour);
-    }
-    box(centre, 2.35, -2.42, opening, 4.7, .13, colour);
-    box(centre, 3.68, -2.29, opening-.09, .075, .16, light);
-    box(centre, .09, -.73, bay, .18, 3.44, floor);
-    box(centre, 4.61, -.72, bay, .16, 3.4, floor);
+// Scaled architectural studies of the fourteen display-only shopfront references.
+// Positive Z faces the arcade. Every bay keeps a clear sightline to its rear wall.
+const cream=0xf3e5cd, pearl=0xfff3df, brass=0xcaa15b, oak=0xb18356, walnut=0x66412f;
+const sage=0x76846a, charcoal=0x2d3032, silver=0xc4c3bd, white=0xf7f4e9;
+export const shopLamp = 0xffe6a7;
+const finishes = {
+  4:[0xe2cfad,0xa77d82,0xf0dfc7],5:[0x69442c,0x8b5a38,0xe3c79c],
+  6:[0xb28a5c,0xc59d69,0xead5b8],7:[0x762f26,0x8e4d35,0xb58b64],
+  8:[0xeee4c9,0x213969,0xf4e9d3],9:[0x273849,0x1d324e,0xc2ae8e],
+  10:[0xacc3ac,0x728c78,0xf2e7cf],11:[0x75423a,0x88423c,0xe4d4b6],
+  12:[0xe9e9da,0xb1c5a7,0xece9d8],13:[0x66482f,0x363637,0xae9f87],
+  14:[0xe3cfb5,0xccb394,0xeee4d7],15:[0x604534,0x694635,0x9c7e61],
+  16:[0xf1f1de,0xb1c02f,0xf1efdf],17:[0xaa8464,0x433c39,0xdcc5a8]
+};
+
+export function buildWindowStudio(n, t, width, depth) {
+  const {box, column, disc, bar, arch, ring, ellipse, tapered} = t;
+  const [wall, base, floor] = finishes[n];
+  const back=-depth/2+.38, front=depth/2-.18, side=width/2-.23, span=front-back, mid=(front+back)/2;
+  const cabinet = (x,z,w,h,d,body,cap) => {
+    box(x,.12,z,w-.1,.23,d-.1,brass);
+    box(x,.18+h/2,z,w,h,d,body);
+    box(x,.21+h,z,w+.09,.095,d+.09,cap);
   };
-  const counter = (x,y,z,w,h,d,colour,top) => {
-    box(x,y+h/2,z,w,h,d,colour);
-    box(x,y+h+.035,z,w+.12,.07,d+.09,top);
-  };
-  const bottle = (x,y,z,r,h,body,lid) => {
-    column(x,y+h/2,z,r,h,body);
-    column(x,y+h+.045,z,r*.85,.09,lid);
-  };
-  switch (number) {
-    case 4: { // Sage dispensary: a rounded niche and a stepped patch-pack display.
-      backdrop(primary,light);
-      arch(0,.18,-.83,1.33,2.08,.18,light);
-      counter(0,.18,.13,2.25,.63,1.0,secondary,light);
-      for (let i=0;i<3;i++) {
-        const x=(i-1)*.6, y=.89+i*.14;
-        box(x,y,.19,.47,.15+i*.26,.48,light);
-        box(x,y+.32+i*.13,.18,.39,.51,.12,secondary);
-        disc(x,y+.36+i*.13,.252,.095,.03,light);
+  function can(x,y,z,c,r=.105,h=.24) {
+    column(x,y+h/2,z,r,h,c); column(x,y+h+.015,z,r*1.02,.03,brass);
+  }
+  function provisionDisplay(x,z,kind) {
+    const checker=kind==='jar', c=checker?0x263e70:base;
+    cabinet(x,z,1.45,.49,.81,c,cream);
+    if(checker)for(let row=0;row<2;row++)for(let j=0;j<6;j++)if((j+row)%2)
+      box(x+(j-2.5)*.22,.33+row*.22,z+.416,.215,.215,.023,white);
+    for(let tier=0;tier<3;tier++){
+      const count=4-tier, h=.79+tier*.235;
+      for(let i=0;i<count;i++){
+        const px=x+(i-(count-1)/2)*.249;
+        if(kind==='pack')box(px,h+.11,z,.222,.22,.21,i%2?cream:oak);
+        else can(px,h,z,i%3?c:0xc6a16f,.114,.20);
       }
-      break;
     }
-    case 5: { // Apothecary specimen cabinet with timber pigeonholes and brass pulls.
-      backdrop(secondary,timber);
-      box(0,1.42,-.46,2.65,2.46,.65,primary);
-      for (let row=0;row<4;row++) for(let col=0;col<4;col++) {
-        const x=(col-1.5)*.61,y=.6+row*.52;
-        box(x,y,-.08,.55,.45,.14,timber);
-        box(x,y+.01,.015,.17,.055,.07,brass);
+  }
+  function shellFan(x,y,z,size) {
+    // Overlapping, cupped nacre lobes make a continuous shell silhouette.
+    for(let i=-5;i<=5;i++){
+      const angle=i*.178, height=size*(1-.19*Math.abs(i)/5);
+      const radius=.49*height;
+      ellipse(x+Math.sin(angle)*radius,y+Math.cos(angle)*radius,z-.035*Math.abs(i),
+        .16*size,height*.53,.095*size,i%2?0xebdbc8:pearl,0,-angle);
+    }
+  }
+  function packageRow(x,y,z,count,step,kind,c) {
+    for(let j=0;j<count;j++) {
+      const px=x+(j-(count-1)/2)*step;
+      if(kind==='tin') can(px,y,z,j%3===0?cream:c);
+      else {
+        const h=kind==='pack'?.31:.24;
+        box(px,y+h/2,z,.18,h,.13,j%3===0?pearl:c);
+        box(px,y+h*.43,z+.071,.14,.035,.018,j%3===0?c:cream);
       }
-      for(const x of [-.75,0,.75]) bottle(x,2.68,-.48,.16,.26,light,primary);
-      break;
     }
-    case 6: { // A pantry stall with a striped valance and stacks of noodle packets.
-      backdrop(secondary,light);
-      for (let i=0;i<9;i++) box((i-4)*.32,2.82,-.02,.32,.31,.98,i%2?primary:light);
-      for(const x of [-1.36,1.36]) column(x,1.65,-.18,.055,2.83,timber);
-      counter(0,.18,.06,2.5,.86,.95,timber,primary);
-      for(let row=0;row<3;row++) for(let i=0;i<4-row;i++)
-        box((i-(3-row)/2)*.47,1.19+row*.21,.16,.43,.19,.39,row%2?light:primary);
-      break;
+  }
+  function shelf(x,z,w,kind='tin',c=base,arched=false) {
+    const frame = n>=12 ? silver : brass;
+    box(x,1.62,z,w,3.18,.12,wall);
+    for(const s of [-1,1]) box(x+s*(w/2-.045),1.62,z+.21,.065,3.16,.48,frame);
+    if(arched) arch(x,1.88,z+.17,w*.46,.66,.07,frame);
+    for(const h of [.61,1.34,2.07,2.8]) {
+      box(x,h,z+.23,w,.085,.50,oak);
+      box(x,h-.04,z+.46,w-.05,.035,.035,shopLamp);
+      packageRow(x,h+.05,z+.28,Math.floor(w/.27),.25,kind,c);
     }
-    case 7: { // An open jade market hutch framing a pyramid of preserved-food tins.
-      backdrop(primary,light);
-      for(const x of [-1.28,1.28]) box(x,1.66,-.19,.13,2.98,.61,timber);
-      for(const y of [.55,1.53,2.54]) {
-        box(0,y,-.15,2.72,.12,.78,secondary);
-        for(let i=-2;i<=2;i++) bottle(i*.44,y+.06,-.04,.16,.33,light,brass);
+  }
+  function sideShelf(s,c=oak,kind='tin') {
+    const x=s*(side-.29);
+    box(x,1.58,mid, .15,3.02,span-.7,wall);
+    for(let row=0;row<4;row++) {
+      const y=.55+row*.66;
+      box(x-s*.18,y,mid,.49,.095,span-.82,c);
+      box(x-s*.42,y-.035,mid,.025,.025,span-.9,shopLamp);
+      // Merchandise is evenly grouped into bays with gaps between collections.
+      for(let i=0;i<9;i++) {
+        const z=back+.81+i*(span-1.66)/8;
+        if(kind==='tin') can(x-s*.19,y+.05,z,i%3?cream:base,.10,.21);
+        else box(x-s*.19,y+.19,z,.14,.28,.20,i%3?white:base);
       }
-      break;
     }
-    case 8: { // A blue enamel pantry with a large scalloped biscuit-coloured medallion.
-      backdrop(primary,secondary);
-      for(let i=-2;i<=2;i++) disc(i*.45,2.34+Math.cos(i*.5)*.3,-.82,.47,.09,light);
-      counter(0,.18,.08,2.48,.67,1,secondary,light);
-      for(let i=-1;i<=1;i++) {
-        const rise=i===0?.38:.13;
-        column(i*.73,.91+rise/2,.08,.36,rise,light);
-        bottle(i*.73,.91+rise,.12,.255,.47,0xc58e52,primary);
-      }
-      break;
+    for(const z of [back+.4,mid,front-.41]) box(x-s*.26,1.61,z,.08,3.15,.07,brass);
+  }
+  function pendant(x,z,y,r,c=brass) {
+    column(x,(4.09+y)/2,z,.022,4.09-y,brass);
+    tapered(x,y,z,r*.46,r,.27,c);column(x,y-.137,z,r*.89,.035,shopLamp);
+  }
+  function plant(x,z,h) {
+    const y=.46;
+    tapered(x,y/2+.09,z,.23,.17,y,cream);
+    for(let k=0;k<6;k++){
+      const a=k*2.39,r=.26+(k%2)*.09,dx=Math.cos(a)*r,dz=Math.sin(a)*r,top=h-(k%3)*.18;
+      bar(x,y,z,x+dx,top,z+dz,.026,0x536a44);
+      ellipse(x+dx,top,z+dz,.12,.29,.08,k%2?0x64804b:0x91a35f,a,dx);
     }
-    case 9: { // A navy diner counter: yellow sunburst and square tins in a stepped stack.
-      backdrop(primary,light);
-      for(let i=-3;i<=3;i++) {
-        const angle=i*.35;
-        bar(0,1.67,-.81,Math.sin(angle)*1.24,1.67+Math.cos(angle)*1.39,-.81,.075,secondary);
+  }
+  function circleIsland(x,z,r,h,c) {
+    column(x,.16,z,r*.89,.18,brass); column(x,.22+h/2,z,r,h,c);
+    column(x,.25+h,z,r*1.03,.1,cream);
+    return h+.31;
+  }
+  function ringLight(x,z,r,y) {
+    ring(x,y,z,r,.036,shopLamp);
+    for(const off of [-.68,.68]) column(x+off*r,(4.11+y)/2,z,.012,4.11-y,brass);
+  }
+  function screen(x,y,z,w,h) {
+    box(x,y,z,w,h,.10,charcoal);
+    // A landscape of receding coloured ridge lines reads as a lit TV from the arcade.
+    box(x,y,z+.06,w-.09,h-.09,.018,0x677ea1);
+    box(x,y-h*.28,z+.078,w-.1,h*.3,.018,0x4d646d);
+    for(const [a,b,e,f] of [[-.47,-.12,-.12,.12],[-.12,.12,.1,-.07],[.1,-.07,.37,.05],[.37,.05,.46,-.06]])
+      bar(x+a*w,y+b*h,z+.095,x+e*w,y+f*h,z+.095,.039,0xe8ad9c);
+  }
+  function sofa(x,z,c) {
+    box(x,.35,z,1.6,.34,.77,c);box(x,.59,z-.32,1.61,.47,.19,c);
+    for(const k of [-1,1])box(x+k*.75,.52,z,.16,.32,.71,c);
+  }
+  // Floors, side walls and a separate ceiling create real depth when the
+  // visitor walks obliquely past the glazing. Aligned reveals frame each view.
+  box(0,.041,mid,side*2,.08,span,floor);
+  box(0,2.12,back,side*2,4.18,.13,wall);
+  box(0,4.19,mid,side*2,.18,span,cream);
+  for(const s of [-1,1]) {
+    box(s*side,2.10,mid,.13,4.13,span,wall);
+    box(s*(side-.31),4.05,mid,.065,.046,span-.6,shopLamp);
+    box(s*(side-.2),.19,mid,.15,.21,span,base);
+  }
+  for(const z of [back+.38,front-.46]) box(0,4.04,z,width-.9,.045,.08,shopLamp);
+  for(const x of [-side*.64,0,side*.64])for(const z of [back+1.3,mid+.25,front-1.13])
+    column(x,4.076,z,.078,.045,shopLamp);
+  for(let z=back+1;z<front;z+=1.12)box(0,.086,z,side*2-.1,.008,.014,0xb5a693);
+  if(n<13 && n!==10) {
+    sideShelf(-1,n===5?walnut:oak,n===4||n===6||n===12?'pack':'tin');
+    sideShelf(1,n===5?walnut:oak,n===4||n===6||n===12?'pack':'tin');
+  }
+  const rear=back+.26, island=mid+1.23;
+  const windowX=-side+1.1,windowZ=front-.94;
+  if([6,7,8,9,11].includes(n)) provisionDisplay(windowX,windowZ,n===6?'pack':n===8?'jar':'tin');
+  switch(n) {
+    case 4: // Borsch Med: dusty rose fluted counter, white bottles and sage dispensary wall.
+      for(let i=-1;i<=1;i++)shelf(i*1.86,rear,1.75,'pack',sage);
+      cabinet(-.58,island,2.85,1.03,1.27,base,pearl);
+      for(let i=-11;i<=11;i++)box(-.58+i*.117,.69,island+.65,.022,.89,.04,0xcc9e9c);
+      for(const x of [-1.19,-.88,-.54,.22])can(x,1.33,island,white,.12,.32);
+      pendant(-.9,island,2.9,.42,white); plant(side-.96,front-.74,1.6); break;
+    case 5: // Pien Tze Huang: dark timber apothecary, specimen drawers and paper lanterns.
+      for(let s=-1;s<=1;s++)shelf(s*2.1,rear,1.88,'tin',0xd1ad81);
+      for(let i=0;i<5;i++)for(let j=0;j<4;j++){
+        const x=-side+.65+i*.43,y=.43+j*.40;
+        box(x,y,mid-1,.39,.36,.35,walnut);disc(x,y,mid-.807,.043,.03,brass);
       }
-      counter(0,.18,.1,2.6,.77,.94,light,secondary);
-      for(let row=0;row<3;row++) for(let i=0;i<3-row;i++) {
-        const x=(i-(2-row)/2)*.66,y=1.18+row*.35;
-        box(x,y,.13,.61,.32,.35,primary);
-        box(x,y+.156,.13,.62,.03,.37,secondary);
+      cabinet(0,island,2.5,.99,1.24,walnut,oak);plant(-.65,island,1.8);
+      for(const z of [mid-1.3,mid+.3,mid+2])pendant(.22,z,3.13,.37,0xf3d099);break;
+    case 6: // Flying Wheel: wood transoms and a bank of hanging dried noodles.
+      for(let i=-1;i<=1;i++)shelf(i*1.98,rear,1.85,'pack',0xcb9f67);
+      cabinet(-.36,island,2.78,.92,1.26,oak,cream);
+      for(let i=-9;i<=9;i++){
+        const x=-.36+i*.12;
+        box(x,2.48+(i%3)*.04,island-.15,.075,.94+(i%4)*.04,.08,0xe2bb76);
       }
+      box(-.36,3.03,island-.15,2.5,.095,.12,walnut);
+      for(let z=back+.8;z<front;z+=1.36)box(0,3.96,z,side*2,.12,.15,oak);
+      packageRow(-.36,1.21,island+.29,7,.32,'pack',oak); break;
+    case 7: // Gu Long: lacquer-red arched provision cases and brass tiers.
+      for(let i=-1;i<=1;i++)shelf(i*1.93,rear,1.79,'tin',0xa74632,true);
+      for(const x of [-1,1])pendant(x,mid+1.2,2.91,.34,brass);
+      ringLight(0,mid-.38,.72,3.34);ringLight(0,mid-.38,.45,3.17);
+      {const top=circleIsland(0,island,1.14,.82,walnut);
+       column(0,top+.13,island,.72,.26,brass);
+       for(let i=-2;i<=2;i++)can(i*.24,top+.27,island,0xaa4638);}
       break;
-    }
-    case 10: { // A pearl shell fan and concentric display dais for the seafood window.
-      backdrop(primary,light);
-      for(let i=-4;i<=4;i++) {
-        const a=i*.30;
-        bar(0,.74,-.79,Math.sin(a)*1.28,.74+Math.cos(a)*2.12,-.79,.18,i%2?light:secondary);
+    case 8: // Skippy: checkerboard floor, cobalt fluting, cream niches and domed lights.
+      for(let x=-3;x<=3;x++)for(let z=-3;z<=3;z++)if((x+z)%2===0)
+        box(x*.79,.092,mid+z*.79,.785,.012,.785,0x284271);
+      for(let i=-1;i<=1;i++)shelf(i*1.86,rear,1.62,'tin',0x466c9b,true);
+      {const top=circleIsland(0,island,1.08,.85,base);for(let i=-2;i<=2;i++)can(i*.28,top,island,0xd2a66c,.12,.33);}
+      for(const x of [-1.83,0,1.83])pendant(x,mid+.2,3.1,.45,cream);break;
+    case 9: // SPAM: golden sun-shaped niche in navy, striped yellow trim and a curved counter.
+      disc(0,1.68,rear+.06,1.56,.13,0xdba735);
+      for(let k=0;k<3;k++){const w=2.48-.43*k;box(0,.85+k*.52,rear+.36,w,.08,.43,brass);packageRow(0,.91+k*.52,rear+.36,7-2*k,.28,'pack',cream);}
+      cabinet(-.48,island,2.58,.87,1.13,base,cream);
+      for(const y of [.28,.98])box(-.48,y,island+.59,2.55,.05,.04,brass);
+      pendant(-.5,mid+.25,3,.52,brass);plant(side-1.15,rear+1.31,1.78);break;
+    case 10: // California Mexico: pearl shell fans, green stone and tiered seafood islands.
+      for(const s of [-1,1]) {
+        const x=s*(side-1),z=front-1.5;
+        shellFan(x,.62,z,1.97);
+        shellFan(x+s*.31,.56,z+.29,1.0);
+        circleIsland(x,z+.05,.65,.53,base);
+        shelf(s*2.1,rear,1.58,'tin',sage,true);
       }
-      column(0,.39,.02,1.18,.4,light); column(0,.69,.02,.81,.22,secondary);
-      bottle(0,.80,.09,.34,.43,light,brass);
-      break;
-    }
-    case 11: { // An industrial pantry: asymmetric steel uprights, open crates and tins.
-      backdrop(primary,secondary);
       for(let i=0;i<3;i++) {
-        const x=(i-1)*.77,h=.69+i*.57;
-        counter(x,.18,.0,.68,h,.75,secondary,light);
-        for(let j=-1;j<=1;j++) box(x+j*.18,.18+h/2,.39,.055,h-.1,.045,black);
-        bottle(x,h+.27,.06,.21,.34,light,secondary);
+        for(let j=0;j<18;j++){
+          const u=j/18,v=(j+1)/18,y=.73+i*.52;
+          bar((u-.5)*3.8,y+.23*Math.sin(u*8),rear+.1,(v-.5)*3.8,y+.23*Math.sin(v*8),rear+.1,.048,pearl);
+        }
+      }
+      {const top=circleIsland(0,island,1.2,.79,base);for(let j=-2;j<=2;j++)can(j*.28,top,island,cream);}
+      for(let i=0;i<7;i++)pendant(Math.sin(i*2.4)*.56,mid+Math.cos(i*2.4)*.46,2.93+i*.09,.15,pearl);break;
+    case 11: // Hormel: a working pantry table, open produce crates and burgundy can shelves.
+      for(let i=-1;i<=1;i++)shelf(i*1.83,rear,1.73,'tin',0x8a3e3e);
+      for(const x of [-1.21,1.21])for(const dz of [-.46,.46])box(x,.60,island+dz,.14,1.05,.14,walnut);
+      box(0,1.08,island,2.74,.17,1.24,oak);
+      for(const x of [-.75,0,.75]){
+        box(x,.39,island,.64,.46,.62,oak);
+        for(let j=-1;j<=1;j++)ellipse(x+j*.17,1.27,island,.10,.12,.10,j%2?sage:0xab5d41,0,0);
+      }
+      pendant(-.69,mid,3,.38,base);pendant(.69,mid,3,.38,base);break;
+    case 12: // Zeria: light mint shelving, layered white islands and a planted clinical interior.
+      for(const x of [-2.2,2.2])shelf(x,rear,1.43,'pack',base,true);
+      for(let i=0;i<3;i++) for(let j=0;j<18;j++){
+        const u=j/18,v=(j+1)/18,y=1.15+i*.52;
+        bar((u-.5)*3.42,y+.28*Math.sin(u*7+i*.47),rear+.17,(v-.5)*3.42,y+.28*Math.sin(v*7+i*.47),rear+.17,.06,shopLamp);
+      }
+      {const top=circleIsland(0,island,1.10,.72,white);packageRow(0,top,island,5,.27,'pack',base);}
+      for(const x of [-side+.88,side-.88])plant(x,front-.87,1.64);
+      ringLight(0,mid,1.38,3.76);break;
+    case 13: // Sony: slatted timber listening lounge, dark screen and contrasting upholstered seating.
+      for(let i=-15;i<=15;i++)box(i*.185,1.95,rear,.085,3.67,.12,i%3?walnut:oak);
+      screen(0,2.14,rear+.23,2.33,1.34);sofa(-.99,island,0xa49784);sofa(1.02,mid-.45,0x786b5f);
+      circleIsland(.68,island+.48,.39,.32,walnut);
+      for(const x of [-2.5,2.5]){box(x,1.09,rear+.58,.43,1.99,.44,charcoal);for(const y of [.72,1.41])disc(x,y,rear+.826,.135,.036,silver);}
+      ringLight(0,mid+.06,1.12,3.69);plant(-side+.7,front-.85,1.53);
+      for(const s of [-1,1]) {
+        cabinet(s*(side-.65),mid,.65,.72,2.8,walnut,base);
+        for(let i=0;i<3;i++) box(s*(side-.72),1.19,mid+(i-1)*.92,.28,.48,.30,charcoal);
       }
       break;
-    }
-    case 12: { // Cool clinical gallery: a nested arch above a cantilevered sample ledge.
-      backdrop(light,secondary);
-      arch(0,.19,-.82,1.34,1.68,.15,primary);
-      arch(0,.19,-.69,1.06,1.68,.09,secondary);
-      box(0,1.02,-.12,2.48,.14,1.28,primary);
-      box(-.73,.60,-.22,.42,.84,.74,secondary);
-      for(let i=-1;i<=1;i++) {
-        box(i*.56,1.42,.14,.39,.64,.22,light);
-        box(i*.56,1.5,.268,.29,.13,.024,secondary);
+    case 14: // LG: side-by-side picture walls, ivory sofa, satin appliances and a halo light.
+      for(const x of [-1.36,1.36]){arch(x,.21,rear+.11,1.13,1.98,.12,shopLamp);screen(x,1.91,rear+.3,1.95,1.14);}
+      sofa(-.86,mid,cream);circleIsland(.71,island,.52,.37,oak);ringLight(0,mid,1.38,3.72);
+      for(const x of [-side+.61,-side+1.30]){
+        box(x,1.24,mid+1,.61,2.23,.64,silver);box(x,1.44,mid+1.34,.49,.035,.04,charcoal);
       }
-      break;
-    }
-    case 13: { // Acoustic listening room with a radial soundwave and two speaker towers.
-      backdrop(primary,black);
-      for(let i=-6;i<=6;i++) {
-        const h=.38+1.45*Math.abs(Math.cos(i*.67));
-        box(i*.20,2.43,-.85,.087,h,.1,secondary);
+      plant(-side+.81,front-.85,1.61);break;
+    case 15: // Casio: walnut slatted ceiling, instrument gallery and bench.
+      for(let i=-17;i<=17;i++)box(i*.19,3.98,mid,.078,.19,span-.28,walnut);
+      for(let i=-15;i<=15;i++)box(i*.19,1.96,rear,.065,3.61,.13,oak);
+      cabinet(-1.05,mid-.59,1.78,.9,1.11,walnut,oak);
+      for(const x of [.46,1.73])box(x,.51,mid+.53,.13,.84,.13,charcoal);
+      box(1.1,1.1,mid+.47,1.63,.36,.72,charcoal);
+      for(let i=0;i<19;i++)box(.38+i*.08,1.2,mid+.89,.074,.05,.25,pearl);
+      box(1.10,.61,mid+1.56,.99,.16,.49,charcoal);
+      for(const x of [.74,1.46])box(x,.33,mid+1.56,.08,.48,.36,walnut);
+      pendant(-1.36,mid-1.3,2.94,.26,brass);break;
+    case 16: // GP: white modular product wall, lime base cabinets and stepped demonstration tables.
+      for(let i=-2;i<=2;i++){
+        const x=i*1.02;
+        box(x,1.77,rear, .94,2.78,.17,white);
+        for(let j=0;j<4;j++)packageRow(x,.66+j*.56,rear+.15,3,.22,'pack',base);
       }
-      for(const x of [-.83,.83]) {
-        box(x,.98,-.12,.66,1.58,.64,black);
-        for(const y of [.7,1.33]) disc(x,y,.225,.23,.07,secondary);
+      for(const x of [-1.31,.87]){
+        cabinet(x,island+(x>0?.32:0),1.48,.78,.98,base,white);
+        packageRow(x,1.09,island+.03,4,.25,'pack',white);
       }
-      break;
-    }
-    case 14: { // A tiered cinema installation with a continuous violet horizon across three screens.
-      backdrop(light,secondary);
-      for(let i=-1;i<=1;i++) {
-        const y=1.99+i*.29;
-        box(i*.84,y,-.28,.81,1.06,.14,black);
-        box(i*.84,y,-.195,.72,.96,.035,primary);
-        box(i*.84,1.99,-.166,.72,.075,.02,secondary);
-        box(i*.84,(y-.55)/2,-.3,.075,y-.55,.12,black);
-      }
-      break;
-    }
-    case 15: { // Walnut recital room: organ-like battens and an open music stand over piano keys.
-      backdrop(secondary,primary);
-      for(let i=-5;i<=5;i++) {
-        const h=1.08+Math.cos(i*.43)*.85;
-        box(i*.23,3.42-h/2,-.86,.14,h,.18,timber);
-      }
-      for(const x of [-.89,.89]) box(x,.68,-.05,.14,.97,.39,primary);
-      box(0,1.32,-.07,2.38,.41,.82,primary);
-      for(let i=0;i<16;i++) {
-        box((i-7.5)*.13,1.41,.40,.12,.09,.34,light);
-        if(![2,6].includes(i%7)) box((i-7.0)*.13,1.47,.33,.067,.09,.16,black);
-      }
-      box(0,1.76,-.06,.82,.43,.085,light);
-      break;
-    }
-    case 16: { // A modular charger wall with a locator puck in a lime bullseye.
-      backdrop(secondary,light);
-      for(let i=-1;i<=1;i++) for(let j=0;j<3;j++)
-        box(i*.76,.86+j*.76,-.62,.69,.69,.22,primary);
-      disc(0,1.65,-.37,.57,.12,light);
-      disc(0,1.65,-.26,.33,.12,secondary);
-      counter(0,.18,.27,1.8,.68,.8,primary,light);
-      disc(.0,1.22,.31,.28,.13,primary);
-      break;
-    }
-    case 17: { // Communications atelier: signal rings and a pair of handset docking stations.
-      backdrop(primary,light);
-      for (const r of [.41,.74,1.07]) arch(0,1.68,-.82,r,.21,.062,secondary);
-      for(const x of [-.68,.68]) {
-        column(x,.55,.05,.46,.75,secondary);
-        box(x,1.02,.05,.55,.16,.48,black);
-        box(x,1.43,.08,.34,.83,.15,light);
-        box(x,1.64,.171,.23,.2,.03,black);
-        for(let j=0;j<3;j++) box(x,1.44-j*.085,.169,.21,.035,.025,secondary);
-      }
-      break;
-    }
+      sideShelf(-1,silver,'pack');ringLight(0,mid,1.14,3.69);plant(side-.71,front-1.08,1.47);break;
+    case 17: // Gigaset: nested signal arcs, a dark round island and illuminated phone docks.
+      box(0,1.99,rear,4.8,3.84,.20,0x4c433b);
+      for(const r of [.63,.96,1.29,1.62])arch(0,.45,rear+.16,r,.67,.055,brass);
+      for(const x of [-side+.71,side-.71])shelf(x,rear+.24,.99,'pack',charcoal);
+      {const top=circleIsland(0,island,1.12,.85,base);for(const x of [-.54,0,.54]){
+        box(x,top+.04,island,.25,.09,.22,charcoal);box(x,top+.25,island-.02,.15,.38,.077,silver);
+      }}
+      ringLight(0,mid,1.24,3.56);ringLight(0,mid,.72,3.75);plant(-side+.82,front-.8,1.42);break;
   }
 }

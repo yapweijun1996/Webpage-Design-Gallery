@@ -94,4 +94,15 @@ Four public-space anchors and seventeen AI-generated shopfront concepts. Select 
 
 ## Runtime views
 
-[Three open shop interiors](open-stores.jpg) · [Fourteen concept windows](display-windows.jpg)
+Each sheet pairs the design reference with the original and revised WebGL views at the same camera position. Open stores also have player-height captures taken from the arcade.
+
+| Area | Comparison | Features to inspect |
+| --- | --- | --- |
+| Entrance, retail arcade, upper gallery, wayfinding court | [A01–A04](runtime/comparison-1.jpg) | Timber vault and floor runner, shop lighting, glazed upper landing, planted lift approach and freestanding directory |
+| New Moon, MILI, GOGO, Borsch Med, Pien Tze Huang | [S01–S05](runtime/comparison-2.jpg) | Glass cases, pantry shelving, drinks counter with stools, rose dispensary counter, apothecary drawers and lanterns |
+| Flying Wheel, Gu Long, Skippy, SPAM, California Mexico, Hormel | [S06–S11](runtime/comparison-3.jpg) | Hanging noodle display, lacquered cases, checkerboard, tin displays, shell relief, market table |
+| Zeria, Sony, LG, Casio, GP, Gigaset | [S12–S17](runtime/comparison-4.jpg) | Contour lighting, listening lounge, appliance showroom, keyboard and bench, battery display, telephone showroom |
+
+[Three open stores](runtime/open-stores-comparison.jpg) · [GOGO stools in the walkthrough](runtime/S03-bar-stools.webp) · [Directory model provenance](../gjh-public-architecture.md) · [Stool model provenance](../gjh-gogo-bar-stool.md)
+
+S01–S03 are enterable. S04–S17 are display-only rooms viewed from the concourse. Real-time materials simplify reflections, foliage and packaging. Casio features an electronic keyboard in the instrument display.

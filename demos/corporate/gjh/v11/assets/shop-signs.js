@@ -35,19 +35,32 @@ export async function addShopSignAtlas(T, layout, scene) {
   ]);
   LOGOS.forEach((_, index) => {
     const name = kit[`S${String(index + 1).padStart(2, '0')}`].brand;
+    const bay = layout.slots[index];
+    const faceWidth = bay.side === 'north' ? 8.6 : 6.8;
+    // Paint in the physical fascia's aspect ratio before packing the atlas.
+    // Otherwise the shorter side bays squeeze letters into narrow vertical bars.
+    const logicalWidth = rowHeight * faceWidth / 1.18;
+    const finishes = {7:'#632b21', 8:'#193565', 9:'#182f4d', 11:'#613232'};
     const y = index * rowHeight;
-    context.fillStyle = '#09271d'; context.fillRect(0, y, width, rowHeight);
-    context.strokeStyle = '#d0b36e'; context.lineWidth = 5; context.strokeRect(4, y + 4, width - 8, rowHeight - 8);
+    context.save();
+    context.translate(0, y);
+    context.scale(width / logicalWidth, 1);
+    context.fillStyle = finishes[index + 1] || '#19362d';
+    context.fillRect(0, 0, logicalWidth, rowHeight);
+    context.strokeStyle = '#b79c63'; context.lineWidth = 1.5;
+    context.strokeRect(4, 5, logicalWidth - 8, rowHeight - 10);
     const logo = logos[index];
     if (logo) {
-      const maxLogoWidth = 270, maxLogoHeight = 90;
-      const scale = Math.min(maxLogoWidth / logo.width, maxLogoHeight / logo.height);
-      const logoWidth = logo.width * scale, logoHeight = logo.height * scale;
-      context.drawImage(logo, 18 + (maxLogoWidth - logoWidth) / 2, y + (rowHeight - logoHeight) / 2, logoWidth, logoHeight);
+      const scale = Math.min(65 / logo.width, 32 / logo.height);
+      const w = logo.width * scale, h = logo.height * scale;
+      context.drawImage(logo, 18 + (65-w)/2, (rowHeight-h)/2, w, h);
     }
-    context.fillStyle = '#fff9e9'; context.font = 'bold 72px Arial';
-    context.textAlign = 'left'; context.textBaseline = 'middle';
-    context.fillText(name, 315, y + rowHeight / 2, width - 340);
+    const heritage = [1,2,4,5,6,7,10,11,12].includes(index+1);
+    context.fillStyle = index === 8 ? '#ffca49' : '#f6e7c7';
+    context.font = heritage ? '54px Georgia, serif' : '600 49px Arial, sans-serif';
+    context.textAlign = 'center'; context.textBaseline = 'middle';
+    context.fillText(name, logicalWidth / 2, rowHeight * .52, logicalWidth - 185);
+    context.restore();
   });
   const texture = new T.CanvasTexture(canvas);
   texture.colorSpace = T.SRGBColorSpace;

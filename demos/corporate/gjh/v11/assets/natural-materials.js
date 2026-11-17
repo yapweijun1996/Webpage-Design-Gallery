@@ -16,25 +16,25 @@ export function createNaturalSurfaceTextures(T, makeCanvas = () => document.crea
   }
   try {
     const stone = canvas(), sc = stone.context;
-    sc.fillStyle = '#eadccb'; sc.fillRect(0, 0, 256, 256);
-    // Broad, translucent bands suggest a baked sheen without reflection passes.
-    for (let i = 0; i < 16; i++) {
-      sc.fillStyle = `rgba(255,250,239,${.13 * (1 - Math.abs(i - 7.5) / 8)})`;
-      sc.fillRect(i * 16, 0, 16, 256);
+    sc.fillStyle = '#e1d9cc'; sc.fillRect(0, 0, 256, 256);
+    // Mineral flecks and cloudy veins share one tile across the arcade.
+    let seed = 37;
+    function sample() {
+      seed = (1664525 * seed + 1013904223) >>> 0;
+      return seed / 4294967296;
     }
-    // Veins remain understated so repeated two-metre slabs read as stone,
-    // rather than a high-contrast wallpaper or artificial checkerboard.
-    for (let i = 0; i < 10; i++) {
-      const y = 14 + i * 27;
-      sc.strokeStyle = i % 3 === 0 ? 'rgba(111,103,88,.075)' : 'rgba(255,255,255,.15)';
-      sc.lineWidth = i % 3 === 0 ? 1.4 : .7;
-      sc.beginPath(); sc.moveTo(-10, y);
-      sc.bezierCurveTo(65, y-14+(i%3)*5, 160, y+15-(i%4)*4, 266, y-8); sc.stroke();
+    for (let i = 0; i < 3400; i++) {
+      const x = sample() * 256, y = sample() * 256, size = .4 + sample() * 2.1;
+      sc.fillStyle = i % 3 ? 'rgba(91,86,72,.115)' : 'rgba(255,255,251,.5)';
+      sc.fillRect(x, y, size, size * .56);
     }
-    for (let i = 0; i < 220; i++) {
-      const x = (i * 73 + 19) % 256, y = (i * 137 + 11) % 256;
-      sc.fillStyle = i % 2 ? 'rgba(120,108,92,.05)' : 'rgba(255,255,255,.11)';
-      sc.fillRect(x, y, 1, 1);
+    for (let i = 0; i < 8; i++) {
+      const y = i * 34, phase = sample() * 38 - 19;
+      for (const [width, color] of [[6, 'rgba(143,126,103,.055)'],[1.1, 'rgba(126,114,96,.14)']]) {
+        sc.strokeStyle = color; sc.lineWidth = width;
+        sc.beginPath(); sc.moveTo(0, y);
+        sc.bezierCurveTo(86,y+phase,175,y-phase,256,y); sc.stroke();
+      }
     }
     sc.strokeStyle = 'rgba(102,91,75,.22)'; sc.lineWidth = 1;
     sc.strokeRect(.5, .5, 255, 255);

@@ -9,7 +9,7 @@ export function addExpandedStorefronts(T, layout, scene) {
     brass: {material: new T.MeshStandardMaterial({color: 0xc9a55e, metalness: .65, roughness: .38}), matrices: []},
     accent: {material: new T.MeshStandardMaterial({color: 0xffffff, roughness: .58}), matrices: [], slots: []},
     glass: {material: new T.MeshStandardMaterial({color: 0xb9d9d0, metalness: .05, roughness: .18,
-      transparent: true, opacity: .23, depthWrite: false}), matrices: []}
+      transparent: true, opacity: .065, depthWrite: false}), matrices: []}
   };
   const transform = new T.Object3D();
   for (const bay of layout.slots) {
@@ -43,22 +43,22 @@ export function addExpandedStorefronts(T, layout, scene) {
     box('brass', 0, 5.48, .21, width, .055, .08);
     // A projecting colour strip and coloured door jambs give each bay a
     // distinctive silhouette without adding per-store materials or meshes.
-    box('accent', 0, 5.55, .24, width, .14, .42);
-    box('accent', 0, 3.9, .22, 2.65, .13, .12);
+    box('brass', 0, 5.55, .24, width, .055, .29);
+    box('brass', 0, 3.94, .22, 2.65, .055, .08);
     for (const side of [-1, 1]) {
       box('glass', side * windowCenter, 2.17, 0, windowWidth, 3.35, .06);
       box('frame', side * windowCenter, .25, .07, windowWidth, .5, .22);
       box('brass', side * windowCenter, .51, .2, windowWidth, .045, .05);
       box('frame', side * (width / 2 - .07), 2.02, .08, .14, 4.04, .24);
       box('frame', side * 1.3, 2.02, .08, .12, 4.04, .24);
-      box('accent', side * 1.3, 2.02, .22, .09, 3.72, .06);
+      box('brass', side * 1.3, 2.02, .22, .035, 3.72, .04);
       // Alternate slim and broad end markers to distinguish adjacent bays.
       box('accent', side * (width / 2 - .35), 3.69, .22, number % 2 ? .18 : .38, .32, .08);
-      box('brass', side * windowCenter, 2.4, .12, windowWidth, .035, .05);
+
       // Two glazed, closed leaves keep a recognisable doorway in every bay.
       box('glass', side * .64, 1.97, .025, 1.2, 3.86, .06);
       box('frame', side * .64, .12, .09, 1.2, .24, .18);
-      box('frame', side * .04, 2, .1, .08, 4, .18);
+      box('brass', side * .019, 2, .1, .022, 4, .035);
       box('brass', side * .18, 1.16, .21, .045, .55, .06);
     }
     box('frame', 0, 4, .08, width, .16, .24);

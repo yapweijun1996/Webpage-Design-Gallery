@@ -1,3 +1,4 @@
+import {buildPublicArchitecture} from './public-architecture.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createDeckRailings} from './deck-railings.js';
@@ -37,7 +38,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
 export async function createWorld(T, R, physics, expanded = false) {
   try {
-  const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
+  const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   const ceilingObstacles=[];
@@ -52,7 +53,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   }
   const seats=[], seatPlacements=createSeatPlacements(expanded);
   const scene = new T.Scene();
-  scene.background = new T.Color(0x192e32);
+  scene.background = new T.Color(expanded ? 0xbad5dc : 0x192e32);
   scene.fog = new T.Fog(0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
   const mat = (color, extra = {}) => new T.MeshStandardMaterial({color, roughness: .72, ...extra});
   const materials = {
@@ -102,10 +103,10 @@ export async function createWorld(T, R, physics, expanded = false) {
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
   let activeShopSlot=null,activeDeck=false,railingState=null;
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
-  function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ') {
+  function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ', rz = 0) {
     const key = `${type}:${material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}${activeDeck?':deck':''}`;
     if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: materials[material], transforms: [],shopSlot:activeShopSlot,deckLod:activeDeck});
-    position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, 0, order); quaternion.setFromEuler(euler);
+    position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, rz, order); quaternion.setFromEuler(euler);
     matrix.compose(position, quaternion, scale); batches.get(key).transforms.push(matrix.clone());
   }
   function collider(x, y, z, sx, sy, sz) {
@@ -235,16 +236,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
-    // A suspended oak canopy frames the entry promenade. Stepped blade
-    // depths form a shallow vault, with concealed lighting at either edge.
-    for (const z of [28, 35, 42]) {
-      box('wood', 10, 8.2, z, 11.4, .38, 2.7);
-      for (let i = -9; i <= 9; i++) {
-        const depth = .22 + .5 * (i / 9) ** 2;
-        box('oak', 10 + i * .6, 8.02 - depth / 2, z, .16, depth, 2.64);
-      }
-      for (const x of [4.5, 15.5]) box('glow', x, 7.86, z, .06, .06, 2.64);
-    }
+    buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden:atriumLayout.garden});
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
@@ -412,49 +404,34 @@ export async function createWorld(T, R, physics, expanded = false) {
     function circle(color, x, y, radius) {
       ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
     }
-    if (zone === 'newmoon') {
-      rectangle('#183f3b', 0, 0, 1024, 576);
-      circle('#d8b46c', 512, 203, 126);
-      circle('#204843', 548, 178, 111);
-      // Layered lacquer waves frame the moon above the abalone display.
-      for (let row = 0; row < 4; row++) {
-        ctx.strokeStyle = ['#396356', '#67816c', '#b59b65', '#617d66'][row];
-        ctx.lineWidth = row === 2 ? 4 : 8;
-        ctx.beginPath(); ctx.moveTo(-16, 151 + row * 22);
-        ctx.bezierCurveTo(160, 54 + row * 22, 284, 380 + row * 22, 490, 330 + row * 22);
-        ctx.bezierCurveTo(720, 310 + row * 22, 820, 98 + row * 22, 1040, 156 + row * 22);
-        ctx.stroke();
-      }
-    } else if (zone === 'mili') {
-      rectangle('#ead6af', 0, 0, 1024, 576);
-      // Brick-red arched bays echo a traditional provision shop.
-      for (const centre of [190, 834]) {
-        for (let ring = 0; ring < 3; ring++) {
-          const radius = 132 - 20 * ring, color = ['#a8583e','#dbaf78','#c47a50'][ring];
-          circle(color, centre, 258, radius);
-          rectangle(color, centre - radius, 258, radius * 2, 318);
+    const walnut = zone === 'newmoon';
+    rectangle(walnut ? '#684632' : zone === 'mili' ? '#a77c53' : '#eadcc3', 0, 0, 1024, 576);
+    if (walnut) {
+      for (let x = 0; x < 1024; x += 14) rectangle('#60412e', x, 0, 2, 576);
+      circle('#d7ad73', 512, 272, 159);
+      const recess = ctx.createRadialGradient(490, 241, 22, 512, 272, 152);
+      recess.addColorStop(0, '#ddbb88'); recess.addColorStop(1, '#ac8558');
+      circle(recess, 512, 272, 152);
+    } else if (zone === 'gogo') {
+      ctx.fillStyle = '#466858'; ctx.beginPath();
+      ctx.roundRect(220, 98, 584, 450, [112,112,0,0]); ctx.fill();
+    }
+    // Backlit recessed cabinetry flanks the central display.
+    for (const x of [24, 782]) {
+      ctx.fillStyle = walnut ? '#42251e' : '#735239'; ctx.beginPath();
+      ctx.roundRect(x, 84, 218, 398, zone === 'mili' ? 4 : [65,65,0,0]); ctx.fill();
+      for (let shelf = 0; shelf < 3; shelf++) {
+        const y = 114 + shelf * 107;
+        const wash = ctx.createLinearGradient(0, y, 0, y + 90);
+        wash.addColorStop(0,'#edcb87'); wash.addColorStop(.25,'#ad8250'); wash.addColorStop(1,'#78583e');
+        rectangle(wash, x + 13, y + 15, 192, 84);
+        for (let k = 0; k < 6; k++) {
+          const ox = x + 22 + 29*k, h = 20 + ((k+shelf)%3)*7;
+          ctx.fillStyle = walnut ? '#753f31' : ['#b7894c','#e1cdaa','#927754'][k%3];
+          ctx.beginPath(); ctx.roundRect(ox,y+94-h,17,h,4); ctx.fill();
+          rectangle('#e4cc99',ox+2,y+91-h,13,4);
         }
-      }
-      for (let i = 0; i < 32; i++) {
-        rectangle(i % 2 ? '#ba7852' : '#efd6a6', i * 32, 475, 32, 31);
-        rectangle(i % 2 ? '#efd6a6' : '#ba7852', i * 32, 506, 32, 31);
-      }
-    } else {
-      rectangle('#dbe0b4', 0, 0, 1024, 576);
-      circle('#efaa56', 922, 142, 106);
-      // An oversized botanical print behind the GOGO lounge.
-      for (const [x, y, angle, color] of [
-        [60, 180, -.53, '#437b65'], [137, 335, .57, '#658d66'],
-        [7, 430, -.48, '#245e55'], [933, 405, -.56, '#68966e'],
-        [1032, 274, .47, '#316957']
-      ]) {
-        ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
-        ctx.fillStyle = color; ctx.beginPath();
-        ctx.moveTo(0, 155); ctx.bezierCurveTo(-98, 62, -81, -82, 0, -153);
-        ctx.bezierCurveTo(81, -62, 85, 74, 0, 155); ctx.fill();
-        ctx.strokeStyle = '#c7cd98'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 154); ctx.lineTo(0, -123); ctx.stroke();
-        ctx.restore();
+        rectangle('#cfac77', x + 9, y + 98, 200, 5);
       }
     }
     const map = new T.CanvasTexture(panel);
@@ -463,8 +440,10 @@ export async function createWorld(T, R, physics, expanded = false) {
   }
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
-    const wall = zone === 'mili' ? 'cream' : 'green';
-    for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
+    const wall = expanded ? (zone === 'newmoon' ? 'wood' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
+    if (expanded) {
+      box('shellFloor', x, .012, -5.1, 9.55, .025, 10.25);
+    } else for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     const backdrop = `${zone}Backdrop`;
     if (expanded) materials[backdrop] = shopBackdrop(zone);
     box(expanded ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, .25, true);
@@ -503,19 +482,60 @@ export async function createWorld(T, R, physics, expanded = false) {
     if (expanded && zone === 'newmoon') {
       // Recessed bronze-edged coffers draw the eye along the product aisle.
       for (const z of [-2.5, -5.4, -8.3]) {
-        box('green', x, 5.63, z, 7.9, .12, 2.35);
+        box('ivory', x, 5.63, z, 7.9, .12, 2.35);
         for (const side of [-1, 1]) {
           box('brass', x + side * 3.85, 5.55, z, .06, .06, 2.24);
           box('brass', x, 5.55, z + side * 1.12, 7.75, .06, .06);
         }
       }
     } else if (expanded && zone === 'mili') {
-      for (let z = -1.35; z > -10; z -= .78) box('oak', x, 5.55, z, 9.2, .28, .15);
+      box('brass', x, 4.83, -5.5, .62, 1.66, .64);
+      box('brass', x, 3.93, -5.5, 1.85, .21, 1.2);
+      box('glow', x, 3.81, -5.5, 1.71, .03, 1.06);
     } else if (expanded && zone === 'gogo') {
       // Narrow angled timber fins make a light pergola over the lounge.
       for (let z = -1.6; z > -9.3; z -= .95) {
-        for (const side of [-1, 1]) {
-          solid('box', 'oak', x + side * 2.18, 5.5, z, 4.25, .19, .10, side * .22);
+        box('oak', x - 2.56, 5.5, z, 3.8, .19, .35);
+      }
+    }
+    if (expanded) {
+      // Window displays face the arcade; keep the full sliding-door opening clear.
+      for (const side of [-1,1]) {
+        const bx=x+3.57*side, bz=-.66;
+        if (zone === 'newmoon' || (zone === 'mili' && side < 0)) {
+          const casing=zone==='newmoon'?'wood':'oak';
+          box(casing,bx,1.98,bz-.32,1.96,3.45,.09);
+          for (const edge of [-1,1]) box(casing,bx+edge*.96,1.98,bz,.075,3.45,.68);
+          collider(bx,1.98,bz,2.0,3.46,.7);
+          for (const y of [.63,1.40,2.17,2.94]) {
+            box(casing,bx,y,bz,1.95,.07,.7);
+            box('glow',bx,y-.05,bz+.3,1.84,.025,.035);
+            for(const dx of [-.51,0,.51]) {
+              // Unlabelled ceramics and glassware form the window still life.
+              cylinder(zone==='newmoon'?'brass':'cream',bx+dx,y+.19,bz+.11,.14,.29);
+              cylinder(zone==='newmoon'?'wood':'cream',bx+dx,y+.36,bz+.11,.095,.075);
+            }
+          }
+        } else {
+          box('brass',bx,.12,bz,1.6,.18,.90);
+          box('shellFloor',bx,.41,bz,1.62,.44,.91);
+          collider(bx,.32,bz,1.62,.64,.92);
+          for(const dx of [-.38,.29]) {
+            cylinder('pot',bx+dx,.84,bz,.22,.40);
+            for(const [offset,height] of [[-.16,1.38],[.10,1.60],[.22,1.32]]) {
+              sphere('leaf',bx+dx+offset,height,bz,.21,.54,.14);
+            }
+          }
+        }
+      }
+      if(zone==='mili') {
+        // Open oak pantry shelves continue down the side wall.
+        for(const z of [-2.75,-5.05,-7.35]) {
+          for(const y of [1.35,2.17,3.0]) {
+            box('oak',x-4.45,y,z,.45,.085,2.15);
+            box('glow',x-4.24,y-.055,z,.025,.024,2.07);
+            for(const dz of [-.72,-.23,.23,.72]) cylinder('cream',x-4.43,y+.18,z+dz,.14,.265);
+          }
         }
       }
     }
@@ -552,31 +572,33 @@ export async function createWorld(T, R, physics, expanded = false) {
       lightPool(x + side * 3.08, 3.96, -10.18, 2.5, 2.6, 0, 0);
     }
     // Flat woven fields sit above the timber; no raised collision or blocked thresholds.
-    const rugX = x + (zone === 'newmoon' ? -.35 : 0);
-    const rugZ = zone === 'newmoon' ? -5.1 : -5.9;
-    const rugWidth = zone === 'newmoon' ? 5.2 : 6.8, rugDepth = zone === 'newmoon' ? 5.4 : 4.8;
-    box('oak', rugX, .025, rugZ, rugWidth, .012, rugDepth);
-    box(zone === 'gogo' ? 'rugSage' : 'rugSand', rugX, .034, rugZ, rugWidth - .14, .006, rugDepth - .14);
-    for (const side of [-1, 1]) {
-      box('timber', rugX + side * (rugWidth / 2 - .19), .04, rugZ, .025, .004, rugDepth - .35);
-      box('timber', rugX, .04, rugZ + side * (rugDepth / 2 - .19), rugWidth - .35, .004, .025);
-      for (const end of [-1, 1]) {
-        const cornerX = rugX + side * (rugWidth / 2 - .43), cornerZ = rugZ + end * (rugDepth / 2 - .43);
-        solid('box', 'oak', cornerX, .041, cornerZ, .16, .004, .16, Math.PI / 4);
+    if (!expanded) {
+      const rugX = x + (zone === 'newmoon' ? -.35 : 0);
+      const rugZ = zone === 'newmoon' ? -5.1 : -5.9;
+      const rugWidth = zone === 'newmoon' ? 5.2 : 6.8, rugDepth = zone === 'newmoon' ? 5.4 : 4.8;
+      box('oak', rugX, .025, rugZ, rugWidth, .012, rugDepth);
+      box(zone === 'gogo' ? 'rugSage' : 'rugSand', rugX, .034, rugZ, rugWidth - .14, .006, rugDepth - .14);
+      for (const side of [-1, 1]) {
+        box('timber', rugX + side * (rugWidth / 2 - .19), .04, rugZ, .025, .004, rugDepth - .35);
+        box('timber', rugX, .04, rugZ + side * (rugDepth / 2 - .19), rugWidth - .35, .004, .025);
+        for (const end of [-1, 1]) {
+          const cornerX = rugX + side * (rugWidth / 2 - .43), cornerZ = rugZ + end * (rugDepth / 2 - .43);
+          solid('box', 'oak', cornerX, .041, cornerZ, .16, .004, .16, Math.PI / 4);
+        }
       }
-    }
-    for (let i = 0; i < 14; i++) for (const end of [-1, 1]) {
-      box('timber', rugX + (i - 6.5) * (rugWidth - .6) / 13, .034, rugZ + end * (rugDepth / 2 + .045), .035, .006, .12);
+      for (let i = 0; i < 14; i++) for (const end of [-1, 1]) {
+        box('timber', rugX + (i - 6.5) * (rugWidth - .6) / 13, .034, rugZ + end * (rugDepth / 2 + .045), .035, .006, .12);
+      }
     }
     box('brass', x, .03, .25, 4.7, .025, .7);
     const logo = zone === 'newmoon' ? 'new-moon-logo.svg' : `${zone}-logo.jpg`;
-    if (!furnishings.place('storeSign', x, .28, 1, 1, 4.065, null, activeShopSlot)) {
+    if (!expanded && !furnishings.place('storeSign', x, .28, 1, 1, 4.065, null, activeShopSlot)) {
       box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05);
     }
-    art(logo, x, 4.67, .4, 2.2);
-    box('glow', x, 5.36, .36, 2.42, .025, .045);
+    if (!expanded) art(logo, x, 4.67, .4, 2.2);
+    if (!expanded) box('glow', x, 5.36, .36, 2.42, .025, .045);
     box('brass', x, 4.02, .29, 9.3, .025, .04);
-    const label = sign(`${store.number}  /  ${store.label.toUpperCase()}`, x, 3.5, .38, 3.9, .48, true, 80);
+    const label = sign(`${store.number}  /  ${store.label.toUpperCase()}`, x, expanded ? 4.07 : 3.5, .38, expanded ? 1.9 : 3.9, expanded ? .14 : .48, true, 80);
     roomSigns.push({zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0});
     // Two independently kinematic glass leaves slide clear of the walking capsule.
     const leaves = [];
@@ -590,7 +612,13 @@ export async function createWorld(T, R, physics, expanded = false) {
     const door={zone, x, open:0, targetOpen:false, leaves, toggle(){this.targetOpen=!this.targetOpen;return this.targetOpen;}};
     doors.push(door);
     if(expanded)interactables.push({id:`${zone}-door`,kind:'open',x,z:0,y:0,floor:0,radius:2.5,door});
-    pendant(x, -4, 4.2); pendant(x, -8, 4.2);
+    if (expanded && zone === 'newmoon') {
+      cylinder('brass', x + 1.8, 4.46, -4, .028, 2.35);
+      cylinder('brass', x + 1.8, 3.25, -4, 1.05, .14);
+      cylinder('glow', x + 1.8, 3.17, -4, 1.01, .04);
+    } else if (expanded && zone === 'gogo') {
+      for (const z of [-2.1,-3.7,-5.3]) pendant(x+2.7, z, 3.35);
+    } else if (!expanded) { pendant(x, -4, 4.2); pendant(x, -8, 4.2); }
     const light = new T.PointLight(zone === 'gogo' ? 0xcce9c2 : 0xffdfa9, 45, 15, 2); light.position.set(x, 4.5, -6); scene.add(light);
     box('brass', x, .22, -10.32, 9.3, .045, .04);
     if (zone === 'newmoon') {
@@ -599,10 +627,19 @@ export async function createWorld(T, R, physics, expanded = false) {
       const cover = art('new-moon-brand-cover.jpg', x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
       box('brass', x - 4.665, 2.8, -5.8, .035, cover.scale.y + .14, 3.74);
       box('oak', x - 4.67, 2.8, -5.8, .04, cover.scale.y + .28, 3.88);
-      box('green', x + 2.8, .55, -4, 2.1, 1.1, 1.25, true); box('cream', x + 2.8, 1.15, -4, 2.2, .12, 1.4);
-      for (let i = 0; i < 9; i++) box('brass', x + 1.9 + i * .22, .56, -3.35, .025, 1, .025);
-      box('brass', x + 2.8, 1.08, -3.285, 2.17, .045, .03);
-      box('brass', x + 2.8, .09, -3.36, 2.1, .08, .03);
+      if (expanded) {
+        // Rounded stone sampling island with a continuous brass plinth.
+        for (const [material, y, height, radius] of [['brass',.085,.17,.76],['shellFloor',.63,.96,.78],['ivory',1.14,.09,.80]]) {
+          box(material, x+2.65, y, -4, radius*2, height, 2);
+          for (const end of [-1,1]) cylinder(material,x+2.65,y,-4+end,radius,height);
+        }
+        collider(x+2.65,.57,-4,1.56,1.14,3.30);
+      } else {
+        box('green', x + 2.8, .55, -4, 2.1, 1.1, 1.25, true); box('cream', x + 2.8, 1.15, -4, 2.2, .12, 1.4);
+        for (let i = 0; i < 9; i++) box('brass', x + 1.9 + i * .22, .56, -3.35, .025, 1, .025);
+        box('brass', x + 2.8, 1.08, -3.285, 2.17, .045, .03);
+        box('brass', x + 2.8, .09, -3.36, 2.1, .08, .03);
+      }
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
       const {addProducts} = await import('./products.js');
@@ -625,15 +662,39 @@ export async function createWorld(T, R, physics, expanded = false) {
       interactables.push({id: zone, x, z: -9, radius: 2.5});
       // Store seating faces the natural route from the entrance, not the rear wall.
       for (const placement of seatPlacements.filter(item=>item.group===zone)) bench(placement);
-      if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
+      if (expanded && zone === 'mili') {
+        box('jadeAlt',x,.57,-5.5,1.7,1.12,2.55);
+        box('brass',x,.095,-5.5,1.72,.15,2.57);
+        for(let dx=-.8;dx<=.85;dx+=.2) box('courtStone',x+dx,.6,-4.218,.012,.96,.015);
+        for(let y=.22;y<1.13;y+=.2) box('courtStone',x,y,-4.218,1.68,.014,.015);
+        box('shellFloor',x,1.16,-5.5,1.82,.12,2.69);
+        collider(x,.57,-5.5,1.72,1.14,2.55);
+      } else if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
         cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
         cylinder('brass', x, .853, -5.5, .805, .025);
       }
       collider(x, .4375, -5.5, 1.61, .875, 1.61);
-      cylinder('pot', x, .99, -5.5, .115, .24);
-      sphere('foliage', x, 1.2, -5.5, .2, .23, .18);
+      cylinder('pot', x, expanded && zone==='mili' ? 1.34 : .99, -5.5, .115, .24);
+      sphere('foliage', x, expanded && zone==='mili' ? 1.55 : 1.2, -5.5, .2, .23, .18);
       plant(x - 3.8, -8.8, 1.15); plant(x + 3.8, -8.8, 1.15); plant(x + 3.8, -2.5);
       if (zone === 'gogo') {
+        if (expanded) {
+          const cx = x+3.15, cz = -2.40;
+          box('water',cx,.59,cz,1.55,1.16,3.25);
+          box('brass',cx,.10,cz,1.57,.16,3.29);
+          box('cream',cx,1.2,cz,1.67,.12,3.4);
+          collider(cx,.59,cz,1.55,1.18,3.25);
+          for(let dz=-1.55;dz<1.61;dz+=.10) box('jadeAlt',cx-.79,.65,cz+dz,.045,.88,.045);
+          for(let dx=-.73;dx<.77;dx+=.10) box('jadeAlt',cx+dx,.65,cz+1.64,.045,.88,.045);
+          for(const dz of [-1,0,1]) {
+            if (!furnishings.place('barStool',cx-1.22,cz+dz,1,1,0,Math.PI/2,activeShopSlot)) {
+              cylinder('brass',cx-1.22,.36,cz+dz,.042,.65);
+              cylinder('brass',cx-1.22,.06,cz+dz,.23,.065);
+              cylinder('seat',cx-1.22,.72,cz+dz,.22,.12);
+            }
+            collider(cx-1.22,.52,cz+dz,.48,1.04,.48);
+          }
+        }
         for (let z = -9.5; z < -2; z += .38) box('oak', x - 4.61, 2.6, z, .08, 4.7, .055);
         for (const dx of [-2, 0, 2]) {
           cylinder('pot', x + dx, .3, -9.2, .28, .6); cylinder('brass', x + dx, .6, -9.2, .29, .035);
@@ -809,7 +870,9 @@ export async function createWorld(T, R, physics, expanded = false) {
     for(const mesh of shopLodMeshes){
       const bay=shopBays.get(mesh.userData.shopSlot);
       if(!bay)continue;
-      const x=(bay.minX+bay.maxX)/2,z=(bay.minZ+bay.maxZ)/2;
+      const x=(bay.minX+bay.maxX)/2;
+      // The three occupied stores are visible through their north arcade doors.
+      const z=bay.available ? Math.min(bay.maxZ,Math.max(bay.minZ,visitor.z)) : (bay.minZ+bay.maxZ)/2;
       mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.z-z)<shopDistance;
       mesh.visible=mesh.userData.shopLodNear;
     }
