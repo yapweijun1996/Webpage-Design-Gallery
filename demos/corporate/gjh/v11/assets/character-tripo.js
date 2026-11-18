@@ -252,7 +252,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity) {
       setSeated(value) { seatWeight = value ? 1 : 0; },
       startCollection: unavailable,
       cancelCollection() { stopEmote(); queuedEmote = null; transfer.cancel(); },
-      pickProduct: transfer.pick, returnProduct: transfer.putBack, resetProduct: transfer.reset,
+      pickProduct: transfer.pick, returnProduct: transfer.putBack, bagProduct: transfer.putInBag, resetProduct: transfer.reset,
       customize: unavailable,
       dispose() {
         if (disposed) return;

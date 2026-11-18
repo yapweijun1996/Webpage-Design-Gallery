@@ -2,6 +2,7 @@ import {createCharacter} from './character.js';
 import {spatial, courtyardArrival} from './spatial.js';
 import {liftLayout} from './lift-layout.js';
 import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
+import {isShelfInReach} from './visitor-v2-contact.js';
 
 export function playerCameraFraming(model, expanded, width, height) {
   const tripo = model === 'gjh-tripo-visitor', mobile = width < 600;
@@ -285,7 +286,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function cartCapability() {
     if(expanded&&body.translation().y-.875>liftLayout.upper/2)return {allowed:false,disabled:true,sceneDisabled:true,reasonCode:'upper-landing',reason:'The upper landing is visitor-only. Return to the ground floor before using the cart.'};
     if(elevatorTravel)return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'elevator-travel',reason:'Wait for the elevator to stop.'};
-    if(character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'held-product',reason:'Return the held product to its shelf before using the cart.'};
+    if(character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'held-product',reason:'Return the held product to its shelf or add it to your bag before using the cart.'};
     if(seated)return {allowed:false,disabled:true,sceneDisabled:false,reasonCode:'seated',reason:'Stand up before using the cart.'};
     return {allowed:Boolean(character.state.cart.available),disabled:!character.state.cart.available,sceneDisabled:!character.state.cart.available,reasonCode:character.state.cart.available?null:'unavailable',reason:character.state.cart.available?null:'The 3D cart is unavailable. Your bag selection is unchanged.'};
   }
@@ -334,8 +335,12 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (elevatorTravel) return false;
     const destination = zone === 'atrium' ? (expanded ? expandedLayout.courtyardArrival : courtyardArrival) : expanded && zone === 'entry' ? expandedLayout.entrance : expanded ? expandedStoreArrival(zone) : spatial.arrival(zone);
     if (!destination) return false;
-    productApproach=null;productHome=null;character.resetProduct?.();setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
+    productApproach=null;
+    const carryingProduct=character.state.physicalProduct?.held;
+    if(!carryingProduct){productHome=null;character.resetProduct?.();}
+    setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
     const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = destination.yaw || 0; pitch = .1; visual.rotation.y = yaw; clearInput();
+    if(carryingProduct){sync();character.update('idle',0);}
     // Update broad-phase query positions before spring-arm obstruction tests.
     physics.step(); updateCamera(0, true); return true;
   }
@@ -392,8 +397,18 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       if(ok){productHome=home;if(reduced){moveSeat({x:home.x,y:.91,z:home.z});visual.rotation.y=0;sync();character.update('idle',0);}else productApproach={from:{...from},to:home,elapsed:0};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);}return ok;
     },
     returnProduct: ()=>{
-      const from=body.translation();if(!productHome||character.state.physicalProduct?.phase!=='held'||productApproach||Math.hypot(from.x-productHome.x,from.z-productHome.z)>productHome.radius||!clearPath(from,{x:productHome.x,y:.91,z:productHome.z}))return false;
+      const from=body.translation();
+      if(!productHome||!character.state.physicalProduct?.held||productApproach||
+        !isShelfInReach({x:from.x,y:from.y-.875,z:from.z},productHome)||
+        !clearPath(from,{x:productHome.x,y:.91,z:productHome.z}))return false;
       if(reduceSeatMotion()){moveSeat({x:productHome.x,y:.91,z:productHome.z});visual.rotation.y=0;sync();character.returnProduct();character.update('idle',0);}else productApproach={from:{...from},to:productHome,elapsed:0,returning:true};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);return true;
+    },
+    bagProduct(id){
+      if(productApproach||!character.bagProduct?.(id,reduceSeatMotion()))return false;
+      productHome=null;clearInput();injected=null;
+      if(actionView?.kind==='product')restoreActionView();
+      character.update('idle',0);
+      return true;
     },
     customize: changes => character.customize?.(changes),
     setPaused: fn => { isPaused = fn; },

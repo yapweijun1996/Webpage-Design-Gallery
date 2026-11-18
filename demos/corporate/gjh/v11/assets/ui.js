@@ -55,6 +55,7 @@ export function createUI(expanded = false) {
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.trim());
   const inspectPrompt = document.getElementById('inspect-prompt');
   const inspectButton = document.getElementById('inspect');
+  const nearbyCard = inspectPrompt.querySelector('.nearby-card');
   const nearbyName = document.getElementById('nearby-name');
   const nearbyDistance = document.getElementById('nearby-distance');
   const nearbyStory=document.createElement('p');nearbyStory.className='brand-story-nearby';nearbyStory.hidden=true;nearbyStory.setAttribute('role','status');nearbyStory.setAttribute('aria-live','polite');
@@ -102,11 +103,12 @@ export function createUI(expanded = false) {
   const touchGuide = matchMedia('(pointer: coarse)');
   let unsubscribeInteractions = null, lastGamepadButtons = [], gamepadDirectionAt = 0;
   let modeListener = null, shelfFocus = null;
+  let holdingProduct = false;
   const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open || externalPaused || document.getElementById('original-tin-dialog').open,
     bagOpen: document.getElementById('bag-dialog').open, shelfOpen: Boolean(shelfFocus?.open),
     panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || (compactMap.matches && (help.open || mallMap.open))});
   function syncTutorialSuspension(signals) {
-    tutorial.setActive(available && showing3D && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen &&
+    tutorial.setActive(available && showing3D && !holdingProduct && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen &&
       !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
   }
   const notifyMode = () => {
@@ -378,7 +380,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     return cart;
   }
   function cartReason(state){return state.capability?.reasonCode==='held-product'?heldInstruction(state):state.capability?.reason;}
-  function heldInstruction(state){return `Return ${records.get(state.heldProduct)?.compactName||'the held product'} to its New Moon shelf first.`;}
+  function productName(id){return records.get(id)?.compactName||'New Moon product';}
+  function heldInstruction(state){return `Return ${productName(state.heldProduct)} to its original New Moon shelf or add it to your bag first.`;}
   function toggleCart(){const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){const message=cartReason(state)|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
     if(next){setView(true);bag.closeTo(scene);}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';
@@ -486,7 +489,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   }
   const interactionHandlers = {
     amenity: id => openAmenity(id),
-    elevator: () => {const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator, return held products and stow the cart before travelling.');scene.focus({preventScroll:true});return ok;},
+    elevator: () => {const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator. Return held products to their shelves or add them to your bag, and stow the cart before travelling.');scene.focus({preventScroll:true});return ok;},
     seat: id => {const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';nearbyName.textContent=seatNotice;announce(seatNotice);}scene.focus({preventScroll:true});return ok;},
     map: () => {const opened=openMap();if (opened) announce(expanded?'The directory kiosk shows the expanded mall map.':'The kiosk screen is decorative. Use this three-store map to choose an entrance.');return opened;},
   };
@@ -701,6 +704,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     },
     shelfChanged: notifyMode,
     addToBag(id) { bag.change(id, 1); },
+    addHeldProductToBag:bag.addHeldProduct,
+    productName,
     projectMode(mode) {
       contextNavigation.update({mode, available, destination: showing3D ? 'home' : 'shops',
         host: bag.open ? document.getElementById('context-navigation-bag') : undefined});
@@ -774,7 +779,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null,elevatorState=null,elevatorUpper=7.2 }) {
+    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false,seatPhase='idle',seatName=null,elevatorState=null,elevatorUpper=7.2,hasHeldProduct=false }) {
       tutorial.reportPose({x,z,yaw});
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
@@ -799,7 +804,6 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       if (next !== nearby) {
         nearby = next;seatNotice=null;
         document.body.classList.toggle('is-nearby', Boolean(nearby));
-        inspectPrompt.hidden = !nearby;
         const product = nearby && records.get(nearby);
         const image = document.getElementById('nearby-image');
         const isShelf = Boolean(product?.image && nearby.startsWith('new-moon-'));
@@ -811,9 +815,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         nearbyStory.textContent=isBrandStory?product.story:'';
         nearbyStory.hidden=!isBrandStory;
         inspectPrompt.classList.toggle('has-brand-story',isBrandStory);
-        const identity = inspectPrompt.querySelector('.nearby-card');
-        if (isShelf) { identity.setAttribute('role', 'group'); identity.setAttribute('aria-label', product.name); }
-        else { identity.removeAttribute('role'); identity.removeAttribute('aria-label'); }
+        if (isShelf) { nearbyCard.setAttribute('role', 'group'); nearbyCard.setAttribute('aria-label', product.name); }
+        else { nearbyCard.removeAttribute('role'); nearbyCard.removeAttribute('aria-label'); }
         const record=product;
         const amenityAction=nearby==='service-desk'?'Get help':nearby?.startsWith('wayfinding-')?'Choose a store':nearby==='featured-showcase'?'View collection':null;
         const isMap = record?.action === 'map';
@@ -843,8 +846,12 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       const cart=updateCartControls();
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
       if(nearby&&records.get(nearby).action==='seat'&&cart.active){nearbyName.textContent='Stow your cart from Bag before sitting';inspectButton.disabled=true;}else inspectButton.disabled=seatPhase==='stand';
+      if(holdingProduct&&!hasHeldProduct)seatNotice=null;
       if(seatNotice)nearbyName.textContent=seatNotice;
-      inspectPrompt.hidden = (!nearby && !seated) || collectionActive;
+      inspectButton.hidden=!nearby&&!seated;
+      nearbyCard.hidden=inspectButton.hidden;
+      holdingProduct=hasHeldProduct;
+      inspectPrompt.hidden = (!nearby && !seated && !holdingProduct) || collectionActive;
       notifyMode();
     },
     handleGamepad(pad) {

@@ -293,6 +293,7 @@ function createContactSolver(T, root) {
   return { solve, solveTwoBone };
 }
 function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHand"), facing = avatar.parent) {
+  const bagDuration = 0.45;
   const point = new T.Vector3, offset = new T.Vector3, shelfPoint = new T.Vector3, rotation = new T.Quaternion, ownerRotation = new T.Quaternion;
   let item = null, phase = "empty", elapsed = 0, start = null;
   function worldHand() {
@@ -337,8 +338,17 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
       elapsed = 0;
       return true;
     },
+    putInBag(id, reduced) {
+      if (phase !== "held" || item.id !== id)
+        return false;
+      phase = "bag";
+      elapsed = 0;
+      if (reduced)
+        reset();
+      return true;
+    },
     cancel() {
-      if (phase === "pickup") {
+      if (phase === "pickup" || phase === "bag") {
         reset();
       } else if (phase === "return") {
         phase = "held";
@@ -350,6 +360,12 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
     reachTarget(out) {
       if (!item || phase === "held")
         return;
+      if (phase === "bag") {
+        const ease = T.MathUtils.smoothstep(elapsed, 0, 0.3);
+        (facing ?? avatar.parent).getWorldQuaternion(rotation);
+        out.add(offset.set(0, -0.28 * ease, 0.14 * ease).applyQuaternion(rotation));
+        return;
+      }
       const t = Math.max(0, Math.min(1, elapsed / 0.9)), reach = phase === "pickup" ? Math.min(1, t / 0.3) * (1 - Math.max(0, (t - 0.3) / 0.7)) : Math.min(1, t / 0.7);
       shelfPoint.copy(item.origin);
       shelfPoint.y += 0.06;
@@ -362,6 +378,17 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
       elapsed += dt;
       if (phase === "held") {
         hold();
+        return;
+      }
+      if (phase === "bag") {
+        if (reduced || elapsed >= bagDuration) {
+          reset();
+          return;
+        }
+        hold();
+        const drop = T.MathUtils.smoothstep(elapsed, 0.25, bagDuration);
+        item.prop.position.y -= 0.12 * drop;
+        item.prop.scale.setScalar(1 - drop);
         return;
       }
       const t = reduced ? 1 : Math.max(0, Math.min(1, elapsed / 0.9));
@@ -381,7 +408,7 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
       return phase;
     },
     get state() {
-      return { phase, id: item?.id || null, active: phase === "pickup" || phase === "return", held: phase === "held" };
+      return { phase, id: item?.id || null, active: phase !== "empty" && phase !== "held", held: phase === "held" };
     }
   };
 }
@@ -692,9 +719,10 @@ async function createCharacterV2(T, createLocomotionContinuity) {
     cancelCollection() {
       transfer.cancel();
     },
-    pickProduct: (token) => transfer.pick(token),
-    returnProduct: () => transfer.putBack(),
-    resetProduct: () => transfer.reset(),
+    pickProduct: transfer.pick,
+    returnProduct: transfer.putBack,
+    bagProduct: transfer.putInBag,
+    resetProduct: transfer.reset,
     customize: customization.apply,
     get animation() {
       return animation === "push" ? "walk" : animation;

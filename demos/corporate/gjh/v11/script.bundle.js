@@ -1133,6 +1133,12 @@ function createBagStore(ids, storage = null) {
       quantities.delete(id);
     publish();
   }
+  function add(id, prepare) {
+    if (!allowed.has(id) || quantities.get(id) === 9 || !prepare(id))
+      return false;
+    change(id, 1);
+    return true;
+  }
   function publish() {
     const value = snapshot();
     try {
@@ -1140,7 +1146,7 @@ function createBagStore(ids, storage = null) {
     } catch {}
     listeners.forEach((listener) => listener(value));
   }
-  return { snapshot, change, remove(id) {
+  return { snapshot, change, add, remove(id) {
     if (allowed.has(id)) {
       quantities.delete(id);
       publish();
@@ -1236,6 +1242,7 @@ function setupDemoBag() {
   });
   close.addEventListener("click", () => dialog.close());
   dialog.addEventListener("close", () => {
+    status.classList.add("sr-only");
     const target = returnFocus;
     returnFocus = open;
     (target instanceof HTMLElement && target.isConnected && !target.closest("[hidden]") ? target : open).focus({ preventScroll: true });
@@ -1252,14 +1259,22 @@ function setupDemoBag() {
     }
   });
   collect.addEventListener("click", () => {
-    if (!current || !document.querySelector("#product-dialog").open || (store.snapshot()[current] || 0) >= 9)
-      return;
-    const id = current;
-    if (collectListener?.(id)) {
-      store.change(id, 1);
-    }
+    if (current && collectListener && document.querySelector("#product-dialog").open)
+      store.add(current, collectListener);
   });
-  return { change: store.change, snapshot: store.snapshot, closeTo(target) {
+  function addHeldProduct(id, prepare, message) {
+    if (store.add(id, prepare)) {
+      status.textContent = message;
+      return true;
+    }
+    if (store.snapshot()[id] === 9) {
+      status.textContent = "Your bag has 9 of this product. Remove one to make room, then try Add to bag again.";
+      status.classList.remove("sr-only");
+      open.click();
+    }
+    return false;
+  }
+  return { change: store.change, snapshot: store.snapshot, addHeldProduct, closeTo(target) {
     returnFocus = target;
     dialog.close();
   }, configureCollect(test, listener) {
@@ -1348,6 +1363,7 @@ function createUI(expanded = false) {
   const mapCaptionText = [...mapCaption.childNodes].find((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
   const inspectPrompt = document.getElementById("inspect-prompt");
   const inspectButton = document.getElementById("inspect");
+  const nearbyCard = inspectPrompt.querySelector(".nearby-card");
   const nearbyName = document.getElementById("nearby-name");
   const nearbyDistance = document.getElementById("nearby-distance");
   const nearbyStory = document.createElement("p");
@@ -1414,6 +1430,7 @@ function createUI(expanded = false) {
   const touchGuide = matchMedia("(pointer: coarse)");
   let unsubscribeInteractions = null, lastGamepadButtons = [], gamepadDirectionAt = 0;
   let modeListener = null, shelfFocus = null;
+  let holdingProduct = false;
   const modeSignals = () => ({
     productOpen: document.getElementById("product-dialog").open || externalPaused || document.getElementById("original-tin-dialog").open,
     bagOpen: document.getElementById("bag-dialog").open,
@@ -1421,7 +1438,7 @@ function createUI(expanded = false) {
     panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || compactMap.matches && (help.open || mallMap.open)
   });
   function syncTutorialSuspension(signals) {
-    tutorial.setActive(available && showing3D && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen && !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
+    tutorial.setActive(available && showing3D && !holdingProduct && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen && !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
   }
   const notifyMode = () => {
     const signals = modeSignals();
@@ -1783,8 +1800,11 @@ function createUI(expanded = false) {
   function cartReason(state) {
     return state.capability?.reasonCode === "held-product" ? heldInstruction(state) : state.capability?.reason;
   }
+  function productName(id) {
+    return records.get(id)?.compactName || "New Moon product";
+  }
   function heldInstruction(state) {
-    return `Return ${records.get(state.heldProduct)?.compactName || "the held product"} to its New Moon shelf first.`;
+    return `Return ${productName(state.heldProduct)} to its original New Moon shelf or add it to your bag first.`;
   }
   function toggleCart() {
     const state = cartState();
@@ -1952,7 +1972,7 @@ function createUI(expanded = false) {
     elevator: () => {
       const calling = currentElevatorState && currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0);
       const ok = elevatorListener?.();
-      announce(ok ? calling ? "Elevator called. Wait here, then choose Ride when it arrives." : "Elevator travelling to the other level." : "Wait for the elevator, return held products and stow the cart before travelling.");
+      announce(ok ? calling ? "Elevator called. Wait here, then choose Ride when it arrives." : "Elevator travelling to the other level." : "Wait for the elevator. Return held products to their shelves or add them to your bag, and stow the cart before travelling.");
       scene.focus({ preventScroll: true });
       return ok;
     },
@@ -2258,6 +2278,8 @@ function createUI(expanded = false) {
     addToBag(id) {
       bag.change(id, 1);
     },
+    addHeldProductToBag: bag.addHeldProduct,
+    productName,
     projectMode(mode) {
       contextNavigation.update({
         mode,
@@ -2351,7 +2373,7 @@ function createUI(expanded = false) {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2 }) {
+    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2, hasHeldProduct = false }) {
       tutorial.reportPose({ x, z, yaw });
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
@@ -2385,7 +2407,6 @@ function createUI(expanded = false) {
         nearby = next;
         seatNotice = null;
         document.body.classList.toggle("is-nearby", Boolean(nearby));
-        inspectPrompt.hidden = !nearby;
         const product = nearby && records.get(nearby);
         const image = document.getElementById("nearby-image");
         const isShelf = Boolean(product?.image && nearby.startsWith("new-moon-"));
@@ -2398,13 +2419,12 @@ function createUI(expanded = false) {
         nearbyStory.textContent = isBrandStory ? product.story : "";
         nearbyStory.hidden = !isBrandStory;
         inspectPrompt.classList.toggle("has-brand-story", isBrandStory);
-        const identity = inspectPrompt.querySelector(".nearby-card");
         if (isShelf) {
-          identity.setAttribute("role", "group");
-          identity.setAttribute("aria-label", product.name);
+          nearbyCard.setAttribute("role", "group");
+          nearbyCard.setAttribute("aria-label", product.name);
         } else {
-          identity.removeAttribute("role");
-          identity.removeAttribute("aria-label");
+          nearbyCard.removeAttribute("role");
+          nearbyCard.removeAttribute("aria-label");
         }
         const record = product;
         const amenityAction = nearby === "service-desk" ? "Get help" : nearby?.startsWith("wayfinding-") ? "Choose a store" : nearby === "featured-showcase" ? "View collection" : null;
@@ -2458,9 +2478,14 @@ function createUI(expanded = false) {
         inspectButton.disabled = true;
       } else
         inspectButton.disabled = seatPhase === "stand";
+      if (holdingProduct && !hasHeldProduct)
+        seatNotice = null;
       if (seatNotice)
         nearbyName.textContent = seatNotice;
-      inspectPrompt.hidden = !nearby && !seated || collectionActive;
+      inspectButton.hidden = !nearby && !seated;
+      nearbyCard.hidden = inspectButton.hidden;
+      holdingProduct = hasHeldProduct;
+      inspectPrompt.hidden = !nearby && !seated && !holdingProduct || collectionActive;
       notifyMode();
     },
     handleGamepad(pad) {
@@ -3628,7 +3653,7 @@ function updateHUD() {
   nearby = selectedInteraction?.id || null;
   productControl?.update(p, nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper });
+  ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper, hasHeldProduct: Boolean(productControl && p.character.physicalProduct.held) });
 }
 function canPlayEmote() {
   return ready && !document.hidden && !windowBlurred && !modes.paused() && startupOverlay.hidden && document.body.classList.contains("is-3d");
@@ -4211,7 +4236,10 @@ async function initialize() {
   if (player.state.character.physicalProduct) {
     try {
       const { installPhysicalProductControl } = await import("./assets/visitor-v2-product-ui.js");
-      productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions);
+      productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions, ui, () => {
+        updateHUD();
+        render();
+      });
     } catch {}
   }
   if (player.npcSource) {

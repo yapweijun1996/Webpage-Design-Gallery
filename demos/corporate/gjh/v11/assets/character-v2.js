@@ -98,7 +98,7 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
     setSeatProgress(value) { seatWeight = Math.max(0, Math.min(1, value)); },
     setSeated(value) { seatWeight = value ? 1 : 0; },
     startCollection() { return false; }, cancelCollection() {transfer.cancel();},
-    pickProduct: token=>transfer.pick(token), returnProduct:()=>transfer.putBack(), resetProduct:()=>transfer.reset(),
+    pickProduct:transfer.pick, returnProduct:transfer.putBack, bagProduct:transfer.putInBag, resetProduct:transfer.reset,
     customize: customization.apply,
     get animation() { return animation === 'push' ? 'walk' : animation; },
     get state() {

@@ -319,6 +319,11 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
 }));
 var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
 
+// demos/corporate/gjh/v11/assets/visitor-v2-contact.js
+function isShelfInReach({ x, y, z }, approach) {
+  return Math.abs(y) <= 0.5 && Math.hypot(x - approach.x, z - approach.z) <= approach.radius;
+}
+
 // demos/corporate/gjh/v11/assets/player.js
 function playerCameraFraming(model, expanded, width, height) {
   const tripo = model === "gjh-tripo-visitor", mobile = width < 600;
@@ -749,7 +754,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (elevatorTravel)
       return { allowed: false, disabled: false, sceneDisabled: false, reasonCode: "elevator-travel", reason: "Wait for the elevator to stop." };
     if (character.state.physicalProduct && character.state.physicalProduct.phase !== "empty")
-      return { allowed: false, disabled: false, sceneDisabled: false, reasonCode: "held-product", reason: "Return the held product to its shelf before using the cart." };
+      return { allowed: false, disabled: false, sceneDisabled: false, reasonCode: "held-product", reason: "Return the held product to its shelf or add it to your bag before using the cart." };
     if (seated)
       return { allowed: false, disabled: true, sceneDisabled: false, reasonCode: "seated", reason: "Stand up before using the cart." };
     return { allowed: Boolean(character.state.cart.available), disabled: !character.state.cart.available, sceneDisabled: !character.state.cart.available, reasonCode: character.state.cart.available ? null : "unavailable", reason: character.state.cart.available ? null : "The 3D cart is unavailable. Your bag selection is unchanged." };
@@ -903,8 +908,11 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (!destination)
       return false;
     productApproach = null;
-    productHome = null;
-    character.resetProduct?.();
+    const carryingProduct = character.state.physicalProduct?.held;
+    if (!carryingProduct) {
+      productHome = null;
+      character.resetProduct?.();
+    }
     setCart(false);
     restoreActionView();
     seated = false;
@@ -920,6 +928,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     pitch = 0.1;
     visual.rotation.y = yaw;
     clearInput();
+    if (carryingProduct) {
+      sync();
+      character.update("idle", 0);
+    }
     physics.step();
     updateCamera(0, true);
     return true;
@@ -1040,7 +1052,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     },
     returnProduct: () => {
       const from = body.translation();
-      if (!productHome || character.state.physicalProduct?.phase !== "held" || productApproach || Math.hypot(from.x - productHome.x, from.z - productHome.z) > productHome.radius || !clearPath(from, { x: productHome.x, y: 0.91, z: productHome.z }))
+      if (!productHome || !character.state.physicalProduct?.held || productApproach || !isShelfInReach({ x: from.x, y: from.y - 0.875, z: from.z }, productHome) || !clearPath(from, { x: productHome.x, y: 0.91, z: productHome.z }))
         return false;
       if (reduceSeatMotion()) {
         moveSeat({ x: productHome.x, y: 0.91, z: productHome.z });
@@ -1053,6 +1065,17 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       clearInput();
       injected = null;
       beginActionView("product", -Math.PI / 2 + 0.5);
+      return true;
+    },
+    bagProduct(id) {
+      if (productApproach || !character.bagProduct?.(id, reduceSeatMotion()))
+        return false;
+      productHome = null;
+      clearInput();
+      injected = null;
+      if (actionView?.kind === "product")
+        restoreActionView();
+      character.update("idle", 0);
       return true;
     },
     customize: (changes) => character.customize?.(changes),

@@ -1999,6 +1999,11 @@ body.is-3d .product-dialog :is(button,a):focus-visible{outline-color:var(--gjh-c
 .has-physical-product #nearby-name,.has-physical-product p{grid-column:1/-1}
 .has-physical-product p{font-size:var(--font-size-xs);line-height:1.4;margin:0;white-space:normal}
 .has-physical-product button{width:100%;min-width:0;min-height:44px;white-space:normal}
+.inspect-prompt.is-holding-product :is(#held-product-add,#held-product-return){min-width:44px;min-height:44px;font-size:var(--font-size-xs);padding:4px 8px}
+#held-product-add{background:var(--gold);color:var(--green);border-color:var(--gold);font-weight:700}
+.is-holding-product:has(#held-product-return[hidden]) #held-product-add{grid-column:1/-1}
+#inspect-prompt.is-holding-product :is(.nearby-card,#inspect){grid-column:1/-1;grid-row:auto}
+#inspect-prompt.is-holding-product #inspect{width:100%;max-width:none;background:transparent;color:var(--paper);border-color:var(--line)}
 
 /* One contextual component moves between the viewport and native modal footers. */
 .context-navigation-global{position:fixed;left:max(var(--space-2),env(safe-area-inset-left));right:max(var(--space-2),env(safe-area-inset-right));bottom:env(safe-area-inset-bottom);max-width:680px;margin-inline:auto;z-index:var(--gjh-layer-site-header)}
@@ -2431,6 +2436,7 @@ div.mini-map-heading>span:last-child{margin-left:auto}
   .mall-overlay .mall-map{position:fixed;top:116px;left:12px;right:12px;bottom:auto;width:auto;max-height:calc(100dvh - 140px)}
   .mall-overlay .map-content{margin:0}
   .mall-overlay .interaction-hud{top:62px;left:12px;transform:none;width:calc(100% - 118px)}
+  .mall-overlay:has(#mall-tools[open]) .interaction-hud:has(#held-product-status:not([hidden])){width:calc(100% - 144px)}
   .mall-overlay .interaction-hud .inspect-prompt{padding:8px}
   .control-bar{bottom:28px;gap:10px;padding:8px 10px;max-width:calc(100% - 24px);font-size:var(--font-size-xs)}
   .control-bar small{display:none}

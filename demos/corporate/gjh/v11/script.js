@@ -232,7 +232,7 @@ function updateHUD() {
   nearby = selectedInteraction?.id || null;
   productControl?.update(p,nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
+  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper,hasHeldProduct:Boolean(productControl&&p.character.physicalProduct.held)});
 }
 function canPlayEmote() {
   return ready && !document.hidden && !windowBlurred && !modes.paused() &&
@@ -589,7 +589,10 @@ async function initialize() {
   if (player.state.character.physicalProduct) {
     try {
       const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
-      productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions);
+      productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions,ui,()=>{
+        updateHUD();
+        render();
+      });
     } catch { /* Physical product handling is optional. */ }
   }
   if (player.npcSource) {
