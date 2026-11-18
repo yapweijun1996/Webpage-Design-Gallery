@@ -2,11 +2,19 @@
   const {T,options,system} = window.npcTest;
   const {scene,R,physics,playerCollider,playerBody,seats} = options;
   const shape = new R.Capsule(.55,.3);
-  const visitors = () => scene.children.filter(root => root.isGroup && root.layers.mask === 4 && root.getObjectByName('Head'));
+  const visitors = () => scene.children.filter(root => root.isGroup && root.layers.mask === 4);
   const seatAt = p => seats.find(seat => system.occupiedSeatIds.includes(seat.id) && Math.hypot(seat.x-p.x,seat.z-p.z)<.01);
   // The skinned smile is in front of the head bone in the real visitor GLB.
   // Read the deformed vertices: a scene root's +Z alone cannot establish facing.
   function forward(visual) {
+    const tripo = visual.getObjectByName('tripo_node_1c818c0d');
+    if (tripo) {
+      // The Mixamo hips define the forward direction of the posed body.
+      const left = tripo.skeleton.getBoneByName('mixamorigLeftUpLeg');
+      const right = tripo.skeleton.getBoneByName('mixamorigRightUpLeg');
+      return left.getWorldPosition(new T.Vector3()).sub(right.getWorldPosition(new T.Vector3()))
+        .cross(T.Object3D.DEFAULT_UP).normalize();
+    }
     let smile;
     visual.traverse(node => { if (node.isSkinnedMesh && node.material.name === 'Warm smile') smile=node; });
     const count=smile.geometry.attributes.position.count;

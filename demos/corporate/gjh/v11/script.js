@@ -260,7 +260,7 @@ function tick(refreshHud = true) {
       leaf.body.setNextKinematicTranslation({x, y: 1.8, z: .05});
     }
   }
-  elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state); player.updateCamera(STEP); if (refreshHud) updateHUD();
+  elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state,reducedMotion.matches); player.updateCamera(STEP); if (refreshHud) updateHUD();
   greetOnArrival();
 }
 function render(force = false) {
@@ -483,6 +483,9 @@ async function installNpcs(T, R, source) {
     else {
       npcs = system;
       npcs.setQuality({mobile:innerWidth<1000,tier:quality.state?.tier||'balanced'});
+      void firstFrame.then(() => {
+        if (!pageEnded && !fatal) return system.loadBoy();
+      });
     }
   } catch { /* NPCs are optional. */ }
 }

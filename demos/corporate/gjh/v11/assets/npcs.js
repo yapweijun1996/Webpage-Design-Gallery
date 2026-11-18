@@ -1,5 +1,6 @@
 import {DoubleSide,PropertyBinding} from '../vendor/three.module.min.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {loadTripoNpc} from './npc-tripo.js';
 import {createVisitorCustomization} from './visitor-v2-customization.js';
 import {disposeVisitorScene, loadVisitorGLTF} from './visitor-gltf.js';
 
@@ -9,6 +10,11 @@ export const NPC_ROUTES = Object.freeze({
   expanded: Object.freeze([[-12,4],[-8,4],[0,4],[10,4],[20,4],[30,4],[32,12],[32,20],[32,32],[30,39],[20,39],[10,39],[0,39],[-10,39],[-12,32],[-12,20],[-12,12]])
 });
 const LOAD_DISTANCE = 18, UNLOAD_DISTANCE = 22, PLAYER_CLEARANCE = 1.6;
+const BOY_SCALE = 1.6, BOY_FLOOR_OFFSET = .035, BOY_SEAT_OFFSET = .29;
+const BOY_LOD_FAR = 12, BOY_LOD_NEAR = 10;
+const CLIP_NAMES = ['idle','walk','sit'];
+const DESKTOP_LIMITS = {low:2,balanced:4,detailed:6};
+const MOBILE_LIMITS = {low:1,balanced:2,detailed:3};
 const distance = (a,b) => Math.hypot(a.x-b.x,a.z-b.z);
 const ignoreRaycast = () => {};
 
@@ -133,13 +139,17 @@ function mergeVisitorColours(T,root,protectedNodes) {
 
 export function npcLimit({tier='balanced',mobile=false,enabled=true}={}) {
   if (!enabled) return 0;
-  const limits = mobile ? {low:1,balanced:2,detailed:3} : {low:2,balanced:4,detailed:6};
+  const limits = mobile ? MOBILE_LIMITS : DESKTOP_LIMITS;
   return limits[tier] ?? limits.balanced;
 }
 
 // Pure current-frame admission: cuts never wait; growth needs eight consecutive
 // safe measurements and four spare calls beyond the next visitor's full cost.
-export function nextNpcAdmission(previous={}, {nonNpcCalls,callsPerNpc,limit=0,active=limit,drawCallBudget=200,advance=true}={}) {
+export function nextNpcAdmission(previous={}, options={}) {
+  return updateAdmission(previous, options, {});
+}
+
+function updateAdmission(previous, {nonNpcCalls,callsPerNpc,limit=0,active=limit,drawCallBudget=200,advance=true}, output) {
   const known=Number.isFinite(nonNpcCalls) && nonNpcCalls>=0;
   const allowance=Number.isFinite(drawCallBudget)?Math.max(0,drawCallBudget):0;
   const headroom=known?Math.max(0,Math.min(200-Math.ceil(nonNpcCalls),allowance)):0;
@@ -150,7 +160,13 @@ export function nextNpcAdmission(previous={}, {nonNpcCalls,callsPerNpc,limit=0,a
   let admitted=Math.min(before,capacity),safeFrames=previous.safeFrames||0;
   if(!known || admitted<before || admitted>=capacity || headroom<(admitted+1)*cost+4) safeFrames=0;
   else if(advance && ++safeFrames>=8) { admitted++; safeFrames=0; }
-  return {admitted,safeFrames,capacity,headroom,budgetKnown:known,nonNpcCalls:known?Math.ceil(nonNpcCalls):null};
+  output.admitted=admitted;
+  output.safeFrames=safeFrames;
+  output.capacity=capacity;
+  output.headroom=headroom;
+  output.budgetKnown=known;
+  output.nonNpcCalls=known?Math.ceil(nonNpcCalls):null;
+  return output;
 }
 
 // Equivalent to SkeletonUtils.clone for a self-contained glTF hierarchy: bones
@@ -192,12 +208,16 @@ export async function loadNpcSystem(T, options) {
 }
 
 export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource}) {
-  let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, lastPlayer=null;
+  let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, hasPlayer=false;
   let admission=nextNpcAdmission();
+  const admissionOptions={}, lastPlayer={x:0,z:0}, nextPosition={x:0,z:0};
+  const seatPoint={x:0,y:0,z:0};
+  let boy=null, boyNpc=null, boyLoad=null, boyController=null, placeLoadedBoy=false;
   // Expanded arcade waypoints are up to twelve metres apart.
   const maxLeg = expanded ? 12.5 : 9;
   const visitors=[], routes=NPC_ROUTES[expanded?'expanded':'classic'].map(([x,z])=>({x,y:0,z}));
-  const clips=Object.fromEntries(['idle','walk','sit'].map(name=>[name,source?.animations?.find(clip=>clip.name===name)]));
+  const nearby=new Array(routes.length);
+  const clips=Object.fromEntries(CLIP_NAMES.map(name=>[name,source?.animations?.find(clip=>clip.name===name)]));
   const available=Boolean(source?.scene && Object.values(clips).every(clip=>clip && clip.duration>0 && clip.tracks.length));
   const template=available?cloneNpcRig(source.scene):null;
   const templateSkeletons=new Set();
@@ -220,8 +240,21 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     const compact=mergeVisitorColours(T,template,protectedNodes);
     ownedGeometry.push(...compact.geometries);ownedMaterials=compact.materials;
   }
-  const callsPerNpc=template?visibleDrawCalls(template):0;
+  const visitorCalls=template?visibleDrawCalls(template):0;
+  let callsPerNpc=visitorCalls;
   const limitForSettings=()=>available && !disposed ? npcLimit(settings) : 0;
+  async function loadBoy(loader=loadTripoNpc) {
+    if (!limitForSettings() || boyLoad) return boyLoad;
+    boyController=new AbortController();
+    boyLoad=Promise.resolve().then(()=>loader(boyController.signal)).then(asset=>{
+      if (!asset) return;
+      if (disposed) { asset.dispose(); return; }
+      callsPerNpc=Math.max(callsPerNpc,visibleDrawCalls(asset.scene));
+      boy=asset;
+      placeLoadedBoy=true;
+    }).catch(()=>{ /* The existing visitor rig stays in service if the boy cannot load. */ });
+    return boyLoad;
+  }
   function applyVisibility() {
     // Change membership only when a slot opens or closes. Crossing another
     // visitor's distance must not cause either avatar to blink out of view.
@@ -233,7 +266,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       let choice = null, best = add ? Infinity : -Infinity;
       for (const npc of visitors) {
         if (npc.admitted === add) continue;
-        const d = lastPlayer ? distance(npc.visual.position,lastPlayer) : 0;
+        const d = hasPlayer ? distance(npc.visual.position,lastPlayer) : 0;
         if (add ? d < best : d > best) { best=d; choice=npc; }
       }
       choice.admitted=add;
@@ -243,58 +276,136 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     return showing ? target : 0;
   }
   function measure(nonNpcCalls,advance) {
-    admission=nextNpcAdmission(admission,{nonNpcCalls,callsPerNpc,limit:limitForSettings(),active:visitors.length,drawCallBudget:settings.drawCallBudget,advance});
+    admissionOptions.nonNpcCalls=nonNpcCalls;
+    admissionOptions.callsPerNpc=callsPerNpc;
+    admissionOptions.limit=limitForSettings();
+    admissionOptions.active=visitors.length;
+    admissionOptions.drawCallBudget=settings.drawCallBudget;
+    admissionOptions.advance=advance;
+    updateAdmission(admission,admissionOptions,admission);
     return applyVisibility();
   }
   const shape=new R.Capsule(.55,.3), rotation={x:0,y:0,z:0,w:1}, facingOffset=new T.Quaternion().setFromAxisAngle(T.Object3D.DEFAULT_UP,Math.PI);
-  const clear = p => !physics.intersectionWithShape({x:p.x,y:(p.y||0)+.91,z:p.z},rotation,shape,undefined,undefined,playerCollider,playerBody);
+  const clearancePoint={x:0,y:0,z:0};
+  function clear(x,y,z) {
+    clearancePoint.x=x; clearancePoint.y=y+.91; clearancePoint.z=z;
+    return !physics.intersectionWithShape(clearancePoint,rotation,shape,undefined,undefined,playerCollider,playerBody);
+  }
   function clearPath(a,b) {
     const steps=Math.max(1,Math.ceil(distance(a,b)/.3));
-    for(let i=0;i<=steps;i++) { const t=i/steps; if(!clear({x:a.x+(b.x-a.x)*t,y:a.y,z:a.z+(b.z-a.z)*t})) return false; }
+    for(let i=0;i<=steps;i++) {
+      const t=i/steps;
+      if(!clear(a.x+(b.x-a.x)*t,a.y,a.z+(b.z-a.z)*t)) return false;
+    }
     return true;
   }
-  function remove(npc) {
-    scene.remove(npc.visual); npc.mixer.stopAllAction(); npc.mixer.uncacheRoot(npc.avatar);
+  function disposeRig(npc) {
+    npc.facing.remove(npc.avatar);
+    npc.mixer.stopAllAction(); npc.mixer.uncacheRoot(npc.avatar);
     const skeletons=new Set();
     npc.avatar.traverse(node=>{if(node.isSkinnedMesh) skeletons.add(node.skeleton);});
     for(const skeleton of skeletons) skeleton.dispose();
+  }
+  function remove(npc) {
+    scene.remove(npc.visual); disposeRig(npc);
+    if (npc===boyNpc) boyNpc=null;
     visitors.splice(visitors.indexOf(npc),1);
   }
   function clearVisitors() {
-    for (const npc of [...visitors]) remove(npc);
+    while (visitors.length) remove(visitors[visitors.length-1]);
   }
-  function spawn(point,seat=null) {
-    const avatar=cloneNpcRig(template), visual=new T.Group(), facing=new T.Group();
-    // Animation tracks can overwrite the glTF root quaternion; keep the facing offset outside the rig.
-    avatar.visible=true; facing.add(avatar); visual.add(facing); visual.position.set(point.x,point.y||0,point.z);
-    visual.rotation.y=seat?.angle||0; avatar.position.y=seat?-.13:0;
-    visual.layers.set(2); facing.layers.set(2);
+  function makeRig(npc, asset) {
+    const avatar=cloneNpcRig(asset?.scene || template);
+    const animationClips=asset?.clips || clips;
+    avatar.visible=true;
+    if (asset) {
+      avatar.scale.multiplyScalar(BOY_SCALE);
+      avatar.position.y=npc.seat ? BOY_SEAT_OFFSET : BOY_FLOOR_OFFSET;
+    } else avatar.position.y=npc.seat ? -.13 : 0;
     avatar.traverse(node=>{
       node.layers.set(2);
       if(node.isMesh){node.castShadow=false;node.receiveShadow=true;node.raycast=ignoreRaycast;}
     });
-    visual.visible=false;
     const mixer=new T.AnimationMixer(avatar), actions={};
-    for(const name of ['idle','walk','sit']) { actions[name]=mixer.clipAction(clips[name]); actions[name].setEffectiveWeight(name===(seat?'sit':'idle')?1:0).play(); }
-    actions.sit.paused=true; actions.sit.time=Math.max(0,clips.sit.duration-.00001);
-    mixer.update(0); facing.quaternion.copy(avatar.quaternion).invert().premultiply(facingOffset); scene.add(visual);
-    visitors.push({visual,facing,avatar,mixer,actions,seat,admitted:false,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,blockedTime:0});
+    for(const name of CLIP_NAMES) {
+      actions[name]=mixer.clipAction(animationClips[name]);
+      actions[name].setEffectiveWeight(name===npc.mode?1:0).play();
+    }
+    actions.sit.paused=true;
+    actions.sit.time=Math.max(0,animationClips.sit.duration-.00001);
+    mixer.update(0);
+    const mesh=asset ? avatar.getObjectByName(asset.meshName) : null;
+    return {avatar,mixer,actions,mesh,highGeometry:mesh?.geometry};
+  }
+  function mountRig(npc, rig) {
+    Object.assign(npc,rig);
+    npc.facing.add(npc.avatar);
+    // Keep the offset outside the animated root. The route wrapper faces -Z;
+    // the boy's toes, hips and walk displacement establish asset forward +Z.
+    npc.facing.quaternion.copy(npc.avatar.quaternion).invert().premultiply(facingOffset);
+  }
+  function spawn(point,seat=null) {
+    const visual=new T.Group(), facing=new T.Group();
+    visual.add(facing); visual.position.set(point.x,point.y,point.z);
+    visual.rotation.y=seat?.angle||0;
+    visual.layers.set(2); facing.layers.set(2); visual.visible=false;
+    const npc={visual,facing,seat,admitted:false,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,blockedTime:0};
+    mountRig(npc,makeRig(npc,null));
+    scene.add(visual);
+    visitors.push(npc);
+  }
+  function placeBoy(first) {
+    if (!boy || boyNpc || first >= visitors.length) return;
+    let choice=visitors[first];
+    for (let i=first; i<visitors.length; i++) {
+      if (!visitors[i].seat) { choice=visitors[i]; break; }
+    }
+    let rig;
+    try { rig=makeRig(choice,boy); }
+    catch {
+      boy.dispose(); boy=null; placeLoadedBoy=false;
+      callsPerNpc=visitorCalls;
+      return;
+    }
+    disposeRig(choice);
+    mountRig(choice,rig);
+    boyNpc=choice;
+    placeLoadedBoy=false;
+  }
+  function updateBoy(npc, player, reducedMotion) {
+    npc.actions.idle.paused=reducedMotion;
+    if (reducedMotion) npc.actions.idle.time=0;
+    if (!boy.lowGeometry) return;
+    const mesh=npc.mesh, low=mesh.geometry===boy.lowGeometry, d=distance(npc.visual.position,player);
+    const useLow=low ? d>BOY_LOD_NEAR : d>BOY_LOD_FAR;
+    if (useLow!==low) mesh.geometry=useLow ? boy.lowGeometry : npc.highGeometry;
   }
   function releaseSeat(id) {
     const npc=visitors.find(candidate=>candidate.seat?.id===id);
     if(!npc) return false;
     remove(npc); seatCooldown=20; measure(admission.nonNpcCalls,false); return true;
   }
-  function update(dt,player) {
+  function occupied(id) {
+    for (const npc of visitors) if (npc.seat?.id===id) return true;
+    return false;
+  }
+  function tooClose(point, clearance, except=null) {
+    for (const npc of visitors) if (npc!==except && distance(point,npc.visual.position)<clearance) return true;
+    return false;
+  }
+  function update(dt,player,reducedMotion=false) {
     if(disposed) return;
     const limit=limitForSettings();
     if(!player || !Number.isFinite(player.x) || !Number.isFinite(player.y) || !Number.isFinite(player.z)) return;
-    lastPlayer={x:player.x,z:player.z};
+    lastPlayer.x=player.x; lastPlayer.z=player.z; hasPlayer=true;
     dt=Number.isFinite(dt)?Math.max(0,Math.min(dt,.1)):0;
     seatCooldown=Math.max(0,seatCooldown-dt);
-    for(const npc of [...visitors]) {
+    const blend=1-Math.exp(-10*dt);
+    for(let i=0;i<visitors.length;) {
+      const npc=visitors[i];
       const p=npc.visual.position;
       if(visitors.length>limit || Math.abs(player.y-p.y)>3 || distance(p,player)>UNLOAD_DISTANCE || (npc.seat && npc.seat.id===player.seatId)) { remove(npc); continue; }
+      i++;
       if(!npc.seat) {
         npc.delay-=dt;
         if(!npc.target && npc.delay<=0) {
@@ -306,50 +417,66 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
         }
         if(npc.target) {
           const d=distance(p,npc.target), step=Math.min(d,dt*.7);
-          const next={x:p.x+(npc.target.x-p.x)*step/d,y:p.y,z:p.z+(npc.target.z-p.z)*step/d};
-          if(distance(next,player)<PLAYER_CLEARANCE+0.4 || visitors.some(other=>other!==npc && distance(next,other.visual.position)<1.2) || !clear(next)) {
+          const fraction=d>0?step/d:0;
+          const dx=npc.target.x-p.x,dz=npc.target.z-p.z;
+          nextPosition.x=p.x+dx*fraction; nextPosition.z=p.z+dz*fraction;
+          if(distance(nextPosition,player)<PLAYER_CLEARANCE+0.4 || tooClose(nextPosition,1.2,npc) || !clear(nextPosition.x,p.y,nextPosition.z)) {
             npc.mode='idle';
             // A moving visitor or player may block a route indefinitely; retry another route.
             if ((npc.blockedTime+=dt)>=2) { npc.target=null; npc.delay=1; npc.blockedTime=0; }
-          } else { p.x=next.x; p.z=next.z; npc.blockedTime=0; npc.visual.rotation.y=Math.atan2(-npc.target.x+p.x,-npc.target.z+p.z); npc.mode='walk'; }
+          } else { p.x=nextPosition.x; p.z=nextPosition.z; npc.blockedTime=0; npc.visual.rotation.y=Math.atan2(-dx,-dz); npc.mode='walk'; }
           if(d<=step+.001) { npc.target=null; npc.delay=2+(serial++%4); npc.mode='idle'; }
         }
       }
-      const blend=1-Math.exp(-10*dt);
-      for(const [name,action] of Object.entries(npc.actions)) {
+      for(const name of CLIP_NAMES) {
+        const action=npc.actions[name];
         const target=name===npc.mode?1:0;
         action.setEffectiveWeight(action.getEffectiveWeight()+(target-action.getEffectiveWeight())*blend);
       }
+      if (npc===boyNpc) updateBoy(npc,player,reducedMotion);
       npc.mixer.update(dt);
       npc.facing.quaternion.copy(npc.avatar.quaternion).invert().premultiply(facingOffset);
     }
     if(!limit || Math.abs(player.y)>3) { measure(admission.nonNpcCalls,false); return; }
+    const first=placeLoadedBoy ? 0 : visitors.length;
     // Seat anchors are from the world's registered seats, not invented furniture.
     // Only ground-floor, accessible and unoccupied seats are eligible.
-    const candidates=[];
-    for(const seat of seats) {
-      if(seatCooldown>0 || seat.accessible===false || seat.floor!==0 || seat.id===player.seatId || visitors.some(n=>n.seat?.id===seat.id)) continue;
-      const p={x:seat.x,y:seat.y,z:seat.z};
-      if(distance(p,player)>=PLAYER_CLEARANCE+1 && distance(p,player)<=LOAD_DISTANCE && clear({x:seat.exitX,y:seat.floor,z:seat.exitZ})) candidates.push({p,seat});
-    }
-    // Seat at most one third of the budget; the remainder stays mobile.
     const seatedLimit=Math.max(1,Math.floor(limit/3));
-    let seated=visitors.filter(n=>n.seat).length;
-    for(const {p,seat} of candidates) {
-      if(visitors.length>=limit || seated>=seatedLimit) break;
-      if(visitors.some(n=>distance(n.visual.position,p)<2)) continue;
-      spawn(p,seat); seated++;
+    if (visitors.length<limit && seatCooldown===0) {
+      let seated=0;
+      for (const npc of visitors) if (npc.seat) seated++;
+      for(const seat of seats) {
+        if(visitors.length>=limit || seated>=seatedLimit) break;
+        if(seat.accessible===false || seat.floor!==0 || seat.id===player.seatId || occupied(seat.id)) continue;
+        seatPoint.x=seat.x; seatPoint.y=seat.y||0; seatPoint.z=seat.z;
+        const d=distance(seatPoint,player);
+        if(d<PLAYER_CLEARANCE+1 || d>LOAD_DISTANCE || tooClose(seatPoint,2) || !clear(seat.exitX,seat.floor,seat.exitZ)) continue;
+        spawn(seatPoint,seat); seated++;
+      }
     }
-    const nearby=routes.filter(p=>distance(p,player)>=PLAYER_CLEARANCE+1 && distance(p,player)<=LOAD_DISTANCE).sort((a,b)=>distance(a,player)-distance(b,player));
-    for(const p of nearby) {
-      if(visitors.length>=limit) break;
-      if(visitors.some(n=>distance(n.visual.position,p)<2.5) || !clear(p)) continue;
-      spawn(p);
+    if (visitors.length<limit) {
+      let count=0;
+      for (const route of routes) {
+        const d=distance(route,player);
+        if(d<PLAYER_CLEARANCE+1 || d>LOAD_DISTANCE) continue;
+        let i=count++;
+        while(i>0 && distance(nearby[i-1],player)>d) { nearby[i]=nearby[i-1]; i--; }
+        nearby[i]=route;
+      }
+      for(let i=0; i<count && visitors.length<limit; i++) {
+        const p=nearby[i];
+        if(tooClose(p,2.5) || !clear(p.x,p.y,p.z)) continue;
+        spawn(p);
+      }
+    }
+    if (boy && !boyNpc) {
+      placeBoy(first);
+      if (boyNpc) updateBoy(boyNpc,player,reducedMotion);
     }
     measure(admission.nonNpcCalls,false);
   }
   return {
-    update, releaseSeat, clearVisitors,
+    update, releaseSeat, clearVisitors, loadBoy,
     admit(nonNpcCalls) { showing=true; return measure(nonNpcCalls,true); },
     setVisible(value) { showing=Boolean(value); applyVisibility(); },
     setDrawCallBudget(value) { settings.drawCallBudget=value; measure(admission.nonNpcCalls,false); },
@@ -357,7 +484,9 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     dispose() {
       if(disposed)return;
       disposed=true;
+      boyController?.abort();
       clearVisitors();
+      boy?.dispose(); boy=null;
       for(const geometry of ownedGeometry) geometry.dispose();
       for(const material of ownedMaterials) material.dispose();
       for(const skeleton of templateSkeletons) skeleton.dispose();

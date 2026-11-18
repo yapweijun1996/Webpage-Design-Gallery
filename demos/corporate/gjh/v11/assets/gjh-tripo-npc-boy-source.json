@@ -1,0 +1,15 @@
+{
+  "title": "Tripo Animated Character",
+  "sourceUrl": "https://yapweijun1996.github.io/Blender-3D-Gallery/?page=models&theme=People+%26+Characters&model=tripo-convert-1c818c0d",
+  "originalFilename": "character-BHLr7sEV.glb",
+  "rawSha256": "9be21905d15e24b4486fed6815282272bb0df54890e1e3910644f9e73730e595",
+  "ownership": "Original asset from the owner's Blender 3D Gallery.",
+  "originalClips": ["run", "sit"],
+  "clips": ["idle", "walk", "run", "sit", "wave", "nod"],
+  "runtimeFiles": ["gjh-tripo-npc-boy.glb", "gjh-tripo-npc-boy-lod1.glb"],
+  "notes": [
+    "The SHA-256 identifies the raw development copy before replacement with the optimized export.",
+    "The optimized exports retain the same 65-joint Mixamo skeleton. Idle, walk, wave and nod were retargeted from the owner's girl visitor by joint name and shipped in the high-detail GLB.",
+    "The mall uses idle, walk and sit. It removes the walk clip's net horizontal root motion so collision-checked routes own travel."
+  ]
+}

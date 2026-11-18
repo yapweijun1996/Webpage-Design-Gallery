@@ -3663,7 +3663,7 @@ function tick(refreshHud = true) {
   player.update(STEP);
   physics.step();
   player.sync();
-  npcs?.update(STEP, player.state);
+  npcs?.update(STEP, player.state, reducedMotion2.matches);
   player.updateCamera(STEP);
   if (refreshHud)
     updateHUD();
@@ -4042,6 +4042,10 @@ async function installNpcs(T, R, source) {
     else {
       npcs = system;
       npcs.setQuality({ mobile: innerWidth < 1000, tier: quality.state?.tier || "balanced" });
+      firstFrame.then(() => {
+        if (!pageEnded && !fatal)
+          return system.loadBoy();
+      });
     }
   } catch {}
 }

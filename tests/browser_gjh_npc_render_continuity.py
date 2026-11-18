@@ -37,7 +37,7 @@ def run():
                   const {scene,seats}=npcTest.options,system=npcTest.system;
                   __mall.teleport('mili'); __mall.setInput({forward:0}); __mall.step(500);
                   for(let i=0;i<64;i++)__mall.step(17);
-                  const sitters=()=>scene.children.filter(root=>root.isGroup && root.layers.mask===4 && root.getObjectByName('Head'));
+                  const sitters=()=>scene.children.filter(root=>root.isGroup && root.layers.mask===4);
                   const seatAt=p=>seats.find(seat=>system.occupiedSeatIds.includes(seat.id) && Math.hypot(seat.x-p.x,seat.z-p.z)<.01);
                   const sitter=sitters().find(root=>seatAt(root.position) && root.visible);
                   if(!sitter)return {found:false,state:__mall.state.npcs,budget:__mall.state.renderBudget};

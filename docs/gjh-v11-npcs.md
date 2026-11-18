@@ -1,6 +1,14 @@
 # GJH v11 ambient NPCs
 
-The ambient system reuses the already loaded v2 chibi visitor scene and idle, walk and sit clips. Each visitor has its own skeleton and mixer. Compatible opaque leaf meshes with identical transforms, bindings and materials are merged once into a frozen NPC template; merged buffers are shared by visitors and disposed with the system. Other geometries, materials, textures and clips remain shared with the player. Animated mesh targets, transparent parts and incompatible bindings are not merged. No model downloads, physics bodies, interactions, raycasts or prompts are added. NPCs yield to the player and keep their distance from one another.
+The standard crowd uses the V2 chibi scene and its idle, walk and sit clips. The mall shares the loaded V2 player's assets or loads a separate V2 rig when the Tripo visitor is the player. Each NPC has its own skeleton and mixer. Compatible opaque leaf meshes with identical transforms, bindings and materials are merged once into a frozen NPC template. Animated targets, transparent parts and incompatible bindings stay separate. NPCs have no colliders, raycasts or prompts. They yield to the player and keep their distance from one another.
+
+## Tripo boy
+
+The optional [Tripo boy](../demos/corporate/gjh/v11/assets/gjh-tripo-npc-boy-source.json) uses one slot in the existing crowd. The mall requests the optimized local GLBs after the first scene frame when NPCs are enabled. Once the boy is ready, one existing visitor can change appearance in place. Later placements use a newly spawned visitor, with walkway spawns preferred and registered seats eligible. A missing model or any missing required clip leaves the standard crowd in service. Missing or incompatible LOD1 geometry keeps the high-detail boy in service.
+
+The GLBs use a 65-joint Mixamo skeleton, with 6,313 triangles at high detail and 2,630 at LOD1. The boy is scaled uniformly by 1.6. His native +Z forward axis maps to the NPC wrapper's -Z axis, which points along the active route or toward the bench approach. The walk clip's net horizontal hip displacement is removed while retaining sway and lift. The seated model holds the final `sit` pose and uses a mesh offset calibrated for the ground-floor bench. With reduced motion, the boy holds his neutral idle pose and keeps the walking and seated behavior. The asset also contains `run`, `wave` and `nod` for which the ambient system has no behavior.
+
+LOD1 starts beyond 12 m from the player and high detail returns at 10 m. The same mesh instance, high-detail material and texture, skeleton and mixer are used across both levels. The NPC system owns the parsed resources and releases them on teardown. Run `node --test tests/gjh_npc_tripo.test.mjs` for selection, tier and render caps, fallback, animation, LOD and disposal. Use the browser facing and continuity checks for live colliders and rendering. Check the boy's fit on the bench visually.
 
 ## Policy
 
@@ -10,7 +18,7 @@ The ambient system reuses the already loaded v2 chibi visitor scene and idle, wa
 | Balanced | 4 | 2 |
 | Detailed | 6 | 3 |
 
-These are simulation ceilings, not guaranteed visible populations. `enabled:false` and `?npcs=off` disable visitors. Missing v2 source or clips also disables them without a download. NPCs never cast shadows; they reuse the current world's lighting and shadow maps.
+These are simulation ceilings, not guaranteed visible populations. `enabled:false` and `?npcs=off` disable the crowd. A failed V2 load or missing required V2 clips leaves the crowd unavailable. NPCs receive the current world's lighting and shadows without casting their own.
 
 Admission uses **this frame's measured non-NPC cost**, not the previous camera view. The host first hides NPCs and renders the mall once. Desktop Detailed retains main's full-resolution base, quarter-resolution selective glow and final composite, under the same expanded/ground-floor/width conditions. Glow is measured before admission and its single composite draw is reserved. Unknown headroom hides every NPC.
 
@@ -18,9 +26,9 @@ For measured non-NPC cost `B` (including the composite reservation), conservativ
 
 Admitted visitors render through exclusive layer 2 into the existing base color/depth, with clearing and shadow updates disabled. This resubmits **only NPC geometry**, not the mall. Direct rendering uses one mall submission plus an optional NPC submission. Bloom uses base + selective glow + optional NPC + composite; NPCs off use exactly main's three submissions. Frame counters accumulate all submissions rather than reporting only the last render.
 
-Visitors are created within 18 m of the player and removed past 22 m, on a different floor, or within the player's personal space. Route candidates are authored for each mall layout; the actual world physics is queried for clearance at spawn, along the candidate segment, and during movement. Blocked candidates are skipped. NPCs do not travel to upper floors. Accessible registered ground-floor seats may be occupied only when their approach is clear and the player is not using them. A seated visitor leaves after 18 seconds, followed by a seating cooldown, allowing walking even when the rendering budget admits only one visitor.
+Visitors are created within 18 m of the player and removed past 22 m, on a different floor, or when the simulation tier cuts the population. Route candidates are authored for each mall layout. The system checks world physics at spawn, along the candidate segment and during movement. Blocked candidates are skipped. Accessible registered ground-floor seats may be occupied when their approach is clear and the player is not using them. An occupant can stay in the seat until culled or displaced by the player. Budget-hidden visitors retain their simulated positions and seat claims.
 
-`state.callsPerNpc` counts every potentially visible material pass of the frozen template, including double-sided transparency, without relying on frustum culling. Actual submitted NPC cost may be lower when visitors are offscreen. Simulation continues at the tier ceiling while budget-hidden; upper-floor visitors are removed under the existing ground-floor-only policy.
+`state.callsPerNpc` uses the larger of the templates' potentially visible material-pass costs, including double-sided transparency. Actual submitted NPC cost can be lower for the textured boy or when visitors are offscreen. Simulation continues at the tier ceiling while budget-hidden. Upper-floor visitors are removed under the ground-floor-only policy.
 
 ## Adding a visitor route
 
@@ -28,11 +36,11 @@ Add a ground-floor waypoint to `NPC_ROUTES` in `assets/npcs.js` for the applicab
 
 ## Host contract
 
-When V2 is the player, pass the loaded V2 GLTF from `player.npcSource` to `createNpcSystem`. With the Tripo player, `loadNpcSystem` loads a separate V2 source after the first frame unless `?npcs=off` is set. NPCs are optional if the V2 source fails. V1 has no NPC source. Call `update(dt, player.state)` each simulation tick. Before player sitting, call `releaseSeat(id)` and pass `player.state.seatId` so the player's seat takes precedence. Apply partial settings with `setQuality({tier, mobile, enabled, drawCallBudget})`. `setDrawCallBudget(value)` changes the extra NPC-only allowance within the 200 total cap. Call `dispose()` on teardown.
+When V2 is the player, pass the loaded V2 GLTF from `player.npcSource` to `createNpcSystem`. With the Tripo player, `loadNpcSystem` loads a separate V2 source after the first successful frame unless `?npcs=off` is set. V1 has no NPC source. After the crowd is installed and the first successful frame has rendered, call `loadBoy()` for either supported player. Call `update(dt, player.state, reducedMotion)` each simulation tick. Before the player sits, call `releaseSeat(id)` and pass `player.state.seatId` so the player's seat takes precedence. Apply partial settings with `setQuality({tier, mobile, enabled, drawCallBudget})`. `setDrawCallBudget(value)` sets the extra NPC-only allowance within the 200 total cap. Call `dispose()` on teardown.
 
 `createMallAtmosphere.render(camera, bloomEnabled, npcs)` owns the frame protocol: `setVisible(false)`, mall/glow measurement, `admit(nonNpcCalls)`, isolated NPC submission, composite. `setVisible` only hides/restores the current admission; it does not advance hysteresis. `nextNpcAdmission(previous, options)` is the pure policy used by Node tests. NPC `state` reports tier, availability, simulation limit/active, admitted/visible, conservative draw calls, per-NPC cost, capacity, headroom, safe-frame streak and occupied seats. `window.__mall.state.renderBudget` exposes measured non-NPC/NPC/total calls, admission, Bloom use and submission count.
 
-The NPC system never owns or disposes the shared player assets. Scene physics and the player's collision controller remain authoritative; NPCs do not obstruct movement or sitting.
+The NPC system disposes its merged buffers, cloned skeletons, separately loaded V2 source and Tripo boy resources. The player still owns the V2 assets shared through `player.npcSource`. Scene physics and the player's collision controller govern movement and seat use.
 
 ## Tuning
 

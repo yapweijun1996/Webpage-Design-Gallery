@@ -112,7 +112,7 @@ The mall browser check uses SwiftShader by default. Set `GALLERY_WEBGL_BACKEND=m
 
 Essential scene textures retry twice after a failed request, without navigating away. If all attempts fail, initialization reports the asset name in the console and retains the accessible directory. The startup retry browser check covers both temporary and persistent failures.
 
-Seated NPCs no longer disappear on an 18-second timer. They can still leave the scene when the player moves away, render-budget admission changes, or the player requests their seat.
+The ambient crowd can include one Tripo boy within the existing graphics-tier NPC limit. He reuses the mall's routes, bench rules and render admission. The standard crowd remains available if the optional boy asset cannot load. See [NPC behavior, asset provenance and verification](../../../../docs/gjh-v11-npcs.md).
 
 The initial loader prepares current-mall shop models and scene furnishings, with deduplication, bounded waits and per-asset failure reporting. Available procedural stand-ins remain in use when their models fail. Visitors may enter early or use the directory; after the overall wait limit, incomplete assets continue preparing without a false ready claim. The status describes downloaded and parsed models, not GPU upload or shader compilation. Separate product-preview contexts remain on demand. Cached models retain distance-based visibility, and preload can increase startup transfer and memory use.
 
