@@ -1,7 +1,7 @@
 import {loadStaticAsset} from './static-asset.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden, prepareModel = () => {}}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -293,6 +293,20 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   }
   // This original gallery fixture is a static sign beside the actual lift.
   // Optional loading never delays the first interactive frame.
+  async function mountStaticModel(record, destination, fallback) {
+    if (record.status === 'loaded') {
+      const model = new T.Group();
+      for (const primitive of record.primitives) {
+        const mesh = new T.Mesh(primitive.geometry, primitive.material);
+        mesh.applyMatrix4(primitive.matrix);
+        model.add(mesh);
+      }
+      await prepareModel(model);
+      if (fallback) destination.remove(fallback);
+      destination.add(...model.children);
+    }
+    destination.userData.sourceStatus = record.status;
+  }
   const totem = new T.Group();
   totem.name='Gallery lift directory standee';totem.position.set(-6.1,0,13.75);
   totem.rotation.y=-Math.PI*.34;totem.scale.setScalar(1.16);scene.add(totem);
@@ -301,15 +315,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   fallback.position.y=.95;fallback.scale.set(.87,1.9,.18);totem.add(fallback);
   loadStaticAsset(T,{file:'mall-directory-standee.glb',asset_id:'ASSET_MallDirectoryStandee',
     sha256:'639fd4bb992d9453326c04dc936f727d870368fcee8a0cacc651d9a8cf59b4e6',dimensions_m:[.90,1.90,.35],rootExtras:{units:'metres'}},import.meta.url)
-    .then(record=>{
-      totem.userData.sourceStatus=record.status;
-      if(record.status!=='loaded')return;
-      totem.remove(fallback);
-      for(const primitive of record.primitives){
-        const mesh=new T.Mesh(primitive.geometry,primitive.material);
-        mesh.applyMatrix4(primitive.matrix);totem.add(mesh);
-      }
-    });
+    .then(record => mountStaticModel(record, totem, fallback));
   // The directory tablet and its base are inside the closed planter footprint.
   const tabletX=12.85,tabletZ=17.16;
   box('ivory',tabletX,1.69,tabletZ,1.15,2.4,.22);
@@ -354,11 +360,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     const record=await loadStaticAsset(T,{file:'atrium-chandelier.glb',asset_id:'ASSET_AtriumChandelier',
       sha256:'dd38e05584ce57f01a5323951254ef63c47fbea61b57ece525fc0ef5bfe5fb26',
       dimensions_m:[3,2,3],rootExtras:{units:'metres'}},import.meta.url);
-    chandelier.userData.sourceStatus=record.status;
-    for(const primitive of record.primitives){
-      const mesh=new T.Mesh(primitive.geometry,primitive.material);
-      mesh.applyMatrix4(primitive.matrix);chandelier.add(mesh);
-    }
+    await mountStaticModel(record, chandelier);
   }
   requested=true;
   if ('requestIdleCallback' in window) window.requestIdleCallback(loadChandelier,{timeout:1500});

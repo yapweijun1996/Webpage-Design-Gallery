@@ -62,7 +62,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
   let detailLoading = false, detailScheduled = false;
   const group = new T.Group();
   group.name = 'Blender furnishings';
-  let registerMesh;
+  let registerMesh, prepareModel;
   async function load(kind) {
     const definition = sources[kind], record = records[kind];
     record.status = 'loading';
@@ -79,9 +79,9 @@ export async function createFurnishings(T, shadows, expanded = false) {
     if (!Object.hasOwn(shopSources, kind) || kind === 'barStool') return load(kind);
   }));
 
-  function mount(kind) {
+  function mount(kind, prewarm) {
     const record = records[kind];
-    const placementsBySlot=new Map();
+    const placementsBySlot=new Map(), meshes=[];
     for(const placement of record.placements){
       if(!placementsBySlot.has(placement.shopSlot))placementsBySlot.set(placement.shopSlot,[]);
       placementsBySlot.get(placement.shopSlot).push(placement);
@@ -95,10 +95,21 @@ export async function createFurnishings(T, shadows, expanded = false) {
         mesh.castShadow = shadows && !['wallLight', 'storeSign'].includes(kind); mesh.receiveShadow = true;
         mesh.computeBoundingSphere();
         if(shopSlot===-1)mesh.userData.deckLod=true;
-        else if(shopSlot!==null){mesh.userData.shopSlot=shopSlot;registerMesh(mesh);}
-        group.add(mesh);
+        else if(shopSlot!==null)mesh.userData.shopSlot=shopSlot;
+        meshes.push(mesh);
       }
     }
+    const attach = () => {
+      for (const mesh of meshes) {
+        if (mesh.userData.shopSlot !== undefined) registerMesh(mesh);
+        group.add(mesh);
+      }
+    };
+    if (prewarm && meshes.length) {
+      const staging = new T.Group().add(...meshes);
+      return prewarm(staging).then(attach);
+    }
+    attach();
   }
 
   function scheduleDetails() {
@@ -115,7 +126,12 @@ export async function createFurnishings(T, shadows, expanded = false) {
       const kind = detailQueue.shift();
       if (!kind) return;
       detailLoading = true;
-      load(kind).then(() => mount(kind)).catch(error => { records[kind].status='fallback'; records[kind].reason='unavailable'; console.warn('Furniture preload failed',error); }).finally(() => {
+      load(kind).then(async () => {
+        if (records[kind].status !== 'loaded') return;
+        records[kind].status = 'loading';
+        await mount(kind, prepareModel);
+        records[kind].status = 'loaded';
+      }).catch(error => { records[kind].status='fallback'; records[kind].reason='unavailable'; console.warn('Furniture preload failed',error); }).finally(() => {
         detailLoading = false; scheduleDetails();
       });
     };
@@ -140,8 +156,9 @@ export async function createFurnishings(T, shadows, expanded = false) {
       detailQueue.unshift(...kinds);
       scheduleDetails();
     },
-    finish(scene,onShopLodMesh=()=>{}) {
+    finish(scene,onShopLodMesh=()=>{},prewarm) {
       registerMesh = onShopLodMesh;
+      prepareModel = prewarm;
       const state = {};
       for (const [kind, record] of Object.entries(records)) {
         if (record.status === 'pending') {

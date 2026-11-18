@@ -8,6 +8,7 @@ import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
+import {createModelWarmup} from './assets/model-warmup.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
@@ -33,6 +34,8 @@ let three;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
+let releaseModelWarmup;
+const firstFrame = new Promise(resolve => { releaseModelWarmup = resolve; });
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
 const quality = createGraphicsQuality(() => resize());
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
@@ -339,7 +342,7 @@ function animate(now) {
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
-  if (terminal) { fatal = true; graphicsStatus = 'failed'; }
+  if (terminal) { fatal = true; graphicsStatus = 'failed'; releaseModelWarmup(); }
   pausePerformance();
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
@@ -447,6 +450,7 @@ function validateRestoration() {
     if (gl.getError() !== gl.NO_ERROR || renderer.info.render.calls === 0 || !pixel.slice(0, 3).some(Boolean))
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
+    releaseModelWarmup();
     if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed) window.mallLoader?.complete('frame');
     window.__sceneFailed = false; window.__sceneReady = true;
     mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
@@ -470,7 +474,8 @@ async function initialize() {
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
   window.mallLoader?.complete('physics');
-  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded);
+  const warmModel = createModelWarmup(T, renderer, firstFrame, () => ready && !fatal && !contextLost);
+  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded, warmModel);
   const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans]
     .flatMap(group => Object.values(group || {}));
   if (world.productAssets?.shelf) assetRecords.push(world.productAssets.shelf);
@@ -592,6 +597,7 @@ async function initialize() {
   render(true);
   if (contextLost || context.isContextLost()) return;
   if (!renderer.info.render.calls) throw new Error('First scene frame unavailable');
+  releaseModelWarmup();
   if (expanded && !window.mallLoader?.snapshot().dismissed) {
     initialPreloadStarted=performance.now();
     window.mallLoader?.prepare('Preparing shop models. You can enter now or browse the directory.');

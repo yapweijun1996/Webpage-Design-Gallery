@@ -35,7 +35,7 @@ function displayPlacements(number, heroX, heroZ) {
 
 // Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
-export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap) {
+export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const loader = new T.TextureLoader().setCrossOrigin(undefined);
   const [kit, textures] = await Promise.all([
@@ -246,10 +246,9 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     if (files) {
       display = new T.Group();
       display.visible = false;
-      hero.add(display);
       loadDisplay = () => {
         const placements = displayPlacements(number, heroOffset, heroZ);
-        return Promise.all(files.map(name => loadModel(`./${name}.glb`))).then(scenes => {
+        return Promise.all(files.map(name => loadModel(`./${name}.glb`))).then(async scenes => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements[i];
@@ -258,6 +257,9 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             instance.name = `S${slot.number} ${files[i]}`;
             display.add(instance);
           });
+          // The LOD controller can select this display before it finishes loading.
+          await prepareModel(display);
+          hero.add(display);
           loaded = true;
           hero.userData.modelReady = true;
           fallback.visible = !display.visible;
@@ -319,6 +321,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
             model.name = `S${slot.number} gallery: ${file}`;
+            await prepareModel(model);
             group.add(model); shopState.galleryLoaded++;
           } catch (error) {
             shopState.galleryFailed++;

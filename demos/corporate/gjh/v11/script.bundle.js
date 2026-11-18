@@ -2538,6 +2538,8 @@ var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
 var CHOICES = new Set(["auto", "low", "balanced", "detailed"]);
 var MOBILE_FPS_FLOOR = 24;
 var MOBILE_CADENCE_SLACK_MS = 1000 / 60 + 1;
+var STALL_MS = 200;
+var STALL_RECOVERY_FRAMES = 2;
 var qualityPreference = (value) => CHOICES.has(value) ? value : "auto";
 function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, recovered = false, autoTier = null }) {
   const hint = (value) => Number.isFinite(value) && value > 0;
@@ -2555,14 +2557,15 @@ function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, re
 }
 function createAdaptiveQuality({ allowDetailed = false } = {}) {
   const tiers = ["low", "balanced", "detailed"];
-  let last = null, warmUntil = 0, start = 0, count = 0, slow = 0, slowTime = 0, longest = 0, fast = 0, busy = 0, goodWindows = 0;
+  let last = null, warmUntil = 0, duration = 0, count = 0, slow = 0, slowTime = 0, longest = 0, fast = 0, busy = 0, goodWindows = 0;
   let changedAt = -Infinity, detailedFailures = 0, detailedRetryAt = -Infinity;
-  let trialStart = 0, trialCount = 0, trialSlow = 0, trialSlowTime = 0, trialLongest = 0;
+  let trialDuration = 0, trialCount = 0, trialSlow = 0, trialSlowTime = 0, trialLongest = 0;
+  let recoveryFrames = 0, clusteredStalls = 0, stallStart = 0;
   function reset() {
     last = null;
-    start = 0;
-    count = slow = slowTime = longest = fast = busy = goodWindows = trialCount = trialSlow = trialSlowTime = trialLongest = 0;
-    trialStart = 0;
+    duration = count = slow = slowTime = longest = fast = busy = goodWindows = 0;
+    trialDuration = trialCount = trialSlow = trialSlowTime = trialLongest = 0;
+    recoveryFrames = clusteredStalls = stallStart = 0;
   }
   function backoffDetailed(now) {
     detailedFailures++;
@@ -2586,49 +2589,63 @@ function createAdaptiveQuality({ allowDetailed = false } = {}) {
         reset();
         return null;
       }
+      if (elapsed >= STALL_MS) {
+        if (!clusteredStalls)
+          stallStart = now - elapsed;
+        clusteredStalls++;
+        recoveryFrames = STALL_RECOVERY_FRAMES;
+        if (clusteredStalls >= 4 && now - stallStart >= 4000 && now >= warmUntil && tier !== "low") {
+          if (tier === "detailed")
+            backoffDetailed(now);
+          changedAt = now;
+          reset();
+          return tiers[tiers.indexOf(tier) - 1];
+        }
+        return null;
+      }
+      if (recoveryFrames > 0) {
+        recoveryFrames--;
+        return null;
+      }
+      clusteredStalls = 0;
       if (allowDetailed && tier === "detailed") {
-        if (!trialCount)
-          trialStart = now - elapsed;
+        trialDuration += elapsed;
         trialCount++;
         trialLongest = Math.max(trialLongest, elapsed);
         if (elapsed > (mobile ? 1000 / MOBILE_FPS_FLOOR : 30)) {
           trialSlow++;
-          trialSlowTime += Math.min(elapsed, 1500);
+          trialSlowTime += elapsed;
         }
-        const trialDuration = now - trialStart;
         if (mobile ? trialDuration >= 1000 && (trialCount >= 24 || trialDuration >= 3000) : trialDuration >= 750) {
-          const trialBad = mobile ? (trialCount - 1) * 1000 / (now - trialStart - trialLongest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : trialSlow / trialCount >= 0.2 || trialSlowTime / (now - trialStart) >= 0.5;
+          const trialBad = mobile ? (trialCount - 1) * 1000 / (trialDuration - trialLongest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : trialSlow / trialCount >= 0.2 || trialSlowTime / trialDuration >= 0.5;
           if (trialSlow >= 3 && trialBad) {
             backoffDetailed(now);
             changedAt = now;
             reset();
             return "balanced";
           }
-          trialStart = 0;
-          trialCount = trialSlow = trialSlowTime = trialLongest = 0;
+          trialDuration = trialCount = trialSlow = trialSlowTime = trialLongest = 0;
         }
       }
       if (now < warmUntil)
         return null;
-      if (!count)
-        start = now - elapsed;
+      duration += elapsed;
       count++;
       longest = Math.max(longest, elapsed);
       if (elapsed > (mobile ? 1000 / MOBILE_FPS_FLOOR : 20)) {
         slow++;
-        slowTime += Math.min(elapsed, 4000);
+        slowTime += elapsed;
       }
       if (elapsed <= 18.5)
         fast++;
       if (moving)
         busy++;
-      if (now - start < 4000 || count < 8)
+      if (duration < 4000 || count < 8)
         return null;
-      const bad = slow >= 3 && (mobile ? (count - 1) * 1000 / (now - start - longest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : slow / count >= 0.25 || slowTime / (now - start) >= 0.5);
+      const bad = slow >= 3 && (mobile ? (count - 1) * 1000 / (duration - longest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : slow / count >= 0.25 || slowTime / duration >= 0.5);
       const good = fast / count >= 0.9 && busy / count >= 0.5;
       goodWindows = good ? goodWindows + 1 : 0;
-      count = slow = slowTime = longest = fast = busy = 0;
-      start = 0;
+      duration = count = slow = slowTime = longest = fast = busy = 0;
       const index = tiers.indexOf(tier);
       const ceiling = allowDetailed ? 2 : 1;
       const next = bad && index > 0 ? tiers[index - 1] : goodWindows >= 3 && now - changedAt >= 1e4 && index < ceiling && (tier !== "balanced" || now >= detailedRetryAt) ? tiers[index + 1] : null;
@@ -3006,6 +3023,80 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   } };
 }
 
+// demos/corporate/gjh/v11/assets/model-warmup.js
+function createModelWarmup(T, renderer, firstFrame, canWarm) {
+  let pending = firstFrame;
+  const camera = new T.PerspectiveCamera;
+  camera.position.z = 1;
+  function warm(model, scene) {
+    if (!canWarm() || document.hidden || renderer.getContext().isContextLost())
+      return;
+    const staging = new T.Scene;
+    staging.fog = scene.fog;
+    staging.environment = scene.environment;
+    const target = new T.WebGLRenderTarget(1, 1);
+    const previousTarget = renderer.getRenderTarget();
+    const toneMapping = renderer.toneMapping;
+    const shadows = renderer.shadowMap;
+    const { autoUpdate, needsUpdate } = shadows;
+    const renderInfo = renderer.info.render;
+    const { calls, triangles, points, lines } = renderInfo;
+    const visible = model.visible;
+    const culled = [];
+    try {
+      for (const light of scene.children)
+        if (light.isLight && light.visible)
+          staging.add(light.clone());
+      staging.add(model);
+      model.visible = true;
+      renderer.compile?.(staging, camera);
+      model.traverseVisible((mesh) => {
+        if (!mesh.isMesh || !mesh.frustumCulled)
+          return;
+        culled.push(mesh);
+        mesh.frustumCulled = false;
+      });
+      shadows.autoUpdate = shadows.needsUpdate = false;
+      renderer.setRenderTarget(target);
+      renderer.render(staging, camera);
+    } finally {
+      for (const mesh of culled)
+        mesh.frustumCulled = true;
+      model.visible = visible;
+      staging.clear();
+      renderer.toneMapping = toneMapping;
+      shadows.autoUpdate = autoUpdate;
+      shadows.needsUpdate = needsUpdate;
+      Object.assign(renderInfo, { calls, triangles, points, lines });
+      try {
+        renderer.setRenderTarget(previousTarget);
+      } finally {
+        target.dispose();
+      }
+    }
+  }
+  return (model, scene) => {
+    pending = pending.then(() => new Promise((resolve) => {
+      if (!canWarm() || document.hidden) {
+        resolve();
+        return;
+      }
+      const run = () => {
+        try {
+          warm(model, scene);
+        } catch {} finally {
+          resolve();
+        }
+      };
+      if (typeof window.requestIdleCallback === "function")
+        window.requestIdleCallback(run, { timeout: 1500 });
+      else
+        window.setTimeout(run, 100);
+    })).catch(() => {});
+    return pending;
+  };
+}
+
 // demos/corporate/gjh/v11/assets/auto-door.js
 function shouldOpenStoreDoor(door, player) {
   return player.y < 2 && Math.hypot(player.x - door.x, player.z) < (door.targetOpen ? 5.2 : 4.8);
@@ -3229,6 +3320,10 @@ var contextWaiter;
 var graphicsStatus = "initializing";
 var losses = 0;
 var validations = 0;
+var releaseModelWarmup;
+var firstFrame = new Promise((resolve) => {
+  releaseModelWarmup = resolve;
+});
 var renderWidth = 0;
 var renderHeight = 0;
 var viewportWidth = innerWidth;
@@ -3680,6 +3775,7 @@ function fallback(message, terminal = true) {
   if (terminal) {
     fatal = true;
     graphicsStatus = "failed";
+    releaseModelWarmup();
   }
   pausePerformance();
   hideGuidance();
@@ -3892,6 +3988,7 @@ function validateRestoration() {
     frames++;
     ready = true;
     graphicsStatus = "available";
+    releaseModelWarmup();
     if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed)
       window.mallLoader?.complete("frame");
     window.__sceneFailed = false;
@@ -3930,8 +4027,9 @@ async function initialize() {
   physics = new R.World({ x: 0, y: -24, z: 0 });
   physics.timestep = STEP;
   window.mallLoader?.complete("physics");
+  const warmModel = createModelWarmup(T, renderer, firstFrame, () => ready && !fatal && !contextLost);
   const { createWorld } = await import("./assets/world.bundle.js");
-  world = await createWorld(T, R, physics, expanded);
+  world = await createWorld(T, R, physics, expanded, warmModel);
   const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)
     assetRecords.push(world.productAssets.shelf);
@@ -4133,6 +4231,7 @@ async function initialize() {
     return;
   if (!renderer.info.render.calls)
     throw new Error("First scene frame unavailable");
+  releaseModelWarmup();
   if (expanded && !window.mallLoader?.snapshot().dismissed) {
     initialPreloadStarted = performance.now();
     window.mallLoader?.prepare("Preparing shop models. You can enter now or browse the directory.");

@@ -4,6 +4,8 @@ const CHOICES = new Set(['auto', 'low', 'balanced', 'detailed']);
 const MOBILE_FPS_FLOOR = 24;
 // One 60 Hz refresh plus 1ms covers phase and timer rounding per window.
 const MOBILE_CADENCE_SLACK_MS = 1000/60 + 1;
+const STALL_MS = 200;
+const STALL_RECOVERY_FRAMES = 2;
 export const qualityPreference = value => CHOICES.has(value) ? value : 'auto';
 
 export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memory, recovered = false, autoTier = null}) {
@@ -21,10 +23,16 @@ export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memo
 // movement; four-second windows and a cooldown prevent transient flapping.
 export function createAdaptiveQuality({allowDetailed=false}={}) {
   const tiers=['low','balanced','detailed'];
-  let last=null, warmUntil=0, start=0, count=0, slow=0, slowTime=0, longest=0, fast=0, busy=0, goodWindows=0;
+  let last=null, warmUntil=0, duration=0, count=0, slow=0, slowTime=0, longest=0, fast=0, busy=0, goodWindows=0;
   let changedAt=-Infinity, detailedFailures=0, detailedRetryAt=-Infinity;
-  let trialStart=0, trialCount=0, trialSlow=0, trialSlowTime=0, trialLongest=0;
-  function reset() { last=null; start=0; count=slow=slowTime=longest=fast=busy=goodWindows=trialCount=trialSlow=trialSlowTime=trialLongest=0; trialStart=0; }
+  let trialDuration=0, trialCount=0, trialSlow=0, trialSlowTime=0, trialLongest=0;
+  let recoveryFrames=0, clusteredStalls=0, stallStart=0;
+  function reset() {
+    last=null;
+    duration=count=slow=slowTime=longest=fast=busy=goodWindows=0;
+    trialDuration=trialCount=trialSlow=trialSlowTime=trialLongest=0;
+    recoveryFrames=clusteredStalls=stallStart=0;
+  }
   function backoffDetailed(now) {
     detailedFailures++;
     detailedRetryAt=now+30000*2**Math.min(detailedFailures-1,2);
@@ -35,39 +43,52 @@ export function createAdaptiveQuality({allowDetailed=false}={}) {
       if (!active || !Number.isFinite(now) || !tiers.includes(tier)) { reset(); return null; }
       if (last===null) { last=now; warmUntil=now+3000; return null; }
       const elapsed=now-last; last=now;
-      // Explicit lifecycle interruptions reset the sampler; a long foreground
-      // frame remains evidence, but cannot trigger a downgrade by itself.
       if (elapsed<=0) { reset(); return null; }
+      if (elapsed>=STALL_MS) {
+        if (!clusteredStalls) stallStart=now-elapsed;
+        clusteredStalls++;
+        recoveryFrames=STALL_RECOVERY_FRAMES;
+        // A run of stalls without recovery is itself a sustained failure.
+        // Individual stalls and catch-up frames stay out of both cadence windows.
+        if (clusteredStalls>=4 && now-stallStart>=4000 && now>=warmUntil && tier!=='low') {
+          if (tier==='detailed') backoffDetailed(now);
+          changedAt=now; reset(); return tiers[tiers.indexOf(tier)-1];
+        }
+        return null;
+      }
+      if (recoveryFrames>0) { recoveryFrames--; return null; }
+      clusteredStalls=0;
       // A mobile trial tolerates 24 FPS. Average cadence handles the jitter
-      // around 41.67ms; three slow frames prevent a single stall rollback.
+      // around 41.67ms.
       if (allowDetailed && tier==='detailed') {
-        if (!trialCount) trialStart=now-elapsed;
+        trialDuration+=elapsed;
         trialCount++;
         trialLongest=Math.max(trialLongest,elapsed);
-        if (elapsed>(mobile ? 1000/MOBILE_FPS_FLOOR : 30)) { trialSlow++; trialSlowTime+=Math.min(elapsed,1500); }
+        if (elapsed>(mobile ? 1000/MOBILE_FPS_FLOOR : 30)) { trialSlow++; trialSlowTime+=elapsed; }
         // A full second of samples avoids mistaking an uneven 24 FPS phase
         // for a sustained deficit. Very slow trials still terminate in 3s.
-        const trialDuration=now-trialStart;
         if (mobile ? trialDuration>=1000 && (trialCount>=24 || trialDuration>=3000) : trialDuration>=750) {
-          const trialBad=mobile ? (trialCount-1)*1000/(now-trialStart-trialLongest-MOBILE_CADENCE_SLACK_MS)<MOBILE_FPS_FLOOR :
-            trialSlow/trialCount>=.2 || trialSlowTime/(now-trialStart)>=.5;
+          const trialBad=mobile ? (trialCount-1)*1000/(trialDuration-trialLongest-MOBILE_CADENCE_SLACK_MS)<MOBILE_FPS_FLOOR :
+            trialSlow/trialCount>=.2 || trialSlowTime/trialDuration>=.5;
           if (trialSlow>=3 && trialBad) {
             backoffDetailed(now);
             changedAt=now; reset(); return 'balanced';
           }
-          trialStart=0; trialCount=trialSlow=trialSlowTime=trialLongest=0;
+          trialDuration=trialCount=trialSlow=trialSlowTime=trialLongest=0;
         }
       }
       if (now<warmUntil) return null;
-      if (!count) start=now-elapsed;
-      count++; longest=Math.max(longest,elapsed); if (elapsed>(mobile ? 1000/MOBILE_FPS_FLOOR : 20)) { slow++; slowTime+=Math.min(elapsed,4000); } if (elapsed<=18.5) fast++; if (moving) busy++;
-      if (now-start<4000 || count<8) return null;
-      // Drop one longest sample from mobile cadence so an isolated stall does
-      // not downgrade otherwise sustainable near-24 FPS rendering.
-      const bad=slow>=3 && (mobile ? (count-1)*1000/(now-start-longest-MOBILE_CADENCE_SLACK_MS)<MOBILE_FPS_FLOOR : slow/count>=.25 || slowTime/(now-start)>=.5);
+      duration+=elapsed;
+      count++; longest=Math.max(longest,elapsed);
+      if (elapsed>(mobile ? 1000/MOBILE_FPS_FLOOR : 20)) { slow++; slowTime+=elapsed; }
+      if (elapsed<=18.5) fast++;
+      if (moving) busy++;
+      if (duration<4000 || count<8) return null;
+      // Mobile cadence also tolerates a single missed refresh near 24 FPS.
+      const bad=slow>=3 && (mobile ? (count-1)*1000/(duration-longest-MOBILE_CADENCE_SLACK_MS)<MOBILE_FPS_FLOOR : slow/count>=.25 || slowTime/duration>=.5);
       const good=fast/count>=.9 && busy/count>=.5;
       goodWindows=good?goodWindows+1:0;
-      count=slow=slowTime=longest=fast=busy=0; start=0;
+      duration=count=slow=slowTime=longest=fast=busy=0;
       const index=tiers.indexOf(tier);
       const ceiling=allowDetailed?2:1;
       const next=bad&&index>0?tiers[index-1]:goodWindows>=3&&now-changedAt>=10000&&index<ceiling&&(tier!=='balanced'||now>=detailedRetryAt)?tiers[index+1]:null;

@@ -100,7 +100,29 @@ test('stationary load may downgrade but cannot alone establish upgrade headroom'
   assert.equal(tier,'low');
 });
 
-test('repeated long foreground stalls count as slow but one isolated stall cannot downgrade', () => {
+test('isolated first-view stalls and their catch-up frames do not downgrade Auto', () => {
+  const frame = 1000/75;
+  const intervals = [...Array(300).fill(frame), 240, ...Array(23).fill(frame), 2427, 53, ...Array(400).fill(frame)];
+  for (const initial of ['balanced', 'detailed']) {
+    const controller = createAdaptiveQuality({allowDetailed:true});
+    let now = 0;
+    for (const interval of intervals) {
+      now += interval;
+      assert.equal(controller.sample(now, true, initial, false), null, `${initial} at ${now}ms`);
+    }
+  }
+});
+
+test('sustained 34ms frames still downgrade balanced Auto after a stall', () => {
+  const controller = createAdaptiveQuality({allowDetailed:true});
+  const normal = sampleFor(controller, 'balanced', 1000/75, 4000);
+  assert.equal(controller.sample(normal.now + 2427, true, 'balanced'), null);
+  const slow = sampleFor(controller, 'balanced', 34, 6000, normal.now + 2427);
+  assert.equal(slow.tier, 'low');
+  assert.equal(slow.changes.length, 1);
+});
+
+test('a sustained run of foreground stalls downgrades but one isolated stall does not', () => {
   let now=0,tier='balanced'; const repeated=createAdaptiveQuality();
   for(let i=0;i<60;i++) { now+=(i%3===2?1200:1000/60); tier=repeated.sample(now,true,tier,true)||tier; }
   assert.equal(tier,'low');

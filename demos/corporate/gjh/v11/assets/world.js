@@ -37,7 +37,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 }
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, expanded = false) {
+export async function createWorld(T, R, physics, expanded = false, warmModel) {
   try {
   const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
   let shellState = null;
@@ -54,6 +54,7 @@ export async function createWorld(T, R, physics, expanded = false) {
   }
   const seats=[], seatPlacements=createSeatPlacements(expanded);
   const scene = new T.Scene();
+  const prepareModel = warmModel && (model => warmModel(model, scene));
   scene.background = new T.Color(expanded ? 0xbad5dc : 0x192e32);
   scene.fog = new T.Fog(0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
   const mat = (color, extra = {}) => new T.MeshStandardMaterial({color, roughness: .72, ...extra});
@@ -261,7 +262,7 @@ export async function createWorld(T, R, physics, expanded = false) {
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
-    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden:atriumLayout.garden}));
+    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden:atriumLayout.garden, prepareModel}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
@@ -875,7 +876,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     activeDeck=false;
     const shopSigns=await addShopSignAtlas(T,expandedLayout,scene);
     shopSigns.layers.enable(1);
-    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map);
+    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel);
     interiorModels=interiors;
     for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
       collider(x,y,z,width,height,depth);
@@ -951,7 +952,7 @@ export async function createWorld(T, R, physics, expanded = false) {
     for(const update of shopLodUpdates)update(visitor);
   }
   interactables.push(...seats.map(seat=>({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,floor:seat.floor,radius:seat.clearance.interactionRadius,seat})));
-  const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh));
+  const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh),prepareModel);
   const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
