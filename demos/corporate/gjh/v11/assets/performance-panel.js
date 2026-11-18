@@ -27,8 +27,10 @@ function drawHistory(history, line, peakLabel) {
 
 export function createPerformancePanel({snapshot, report = snapshot}) {
   const panel = document.getElementById('performance-panel');
-  const toggle = document.getElementById('performance-visible');
+  const toggle = document.getElementById('show-fps');
   const counter = document.getElementById('performance-fps');
+  const corner = document.getElementById('fps-corner');
+  const cornerValue = corner.querySelector('span');
   const summary = panel.querySelector('summary');
   const fields = panel.querySelectorAll('[data-performance]');
   const line = document.getElementById('performance-line'), peak = document.getElementById('performance-peak');
@@ -64,11 +66,10 @@ export function createPerformancePanel({snapshot, report = snapshot}) {
     }));
   }
 
-  try { toggle.checked = localStorage.getItem(visibilityKey) !== 'false'; } catch { /* Session-only preference. */ }
-  panel.hidden = !toggle.checked;
+  try { toggle.checked = localStorage.getItem(visibilityKey) === 'true'; } catch { /* Session-only preference. */ }
+  corner.hidden = !toggle.checked;
   toggle.addEventListener('change', () => {
-    panel.hidden = !toggle.checked;
-    if (panel.hidden) panel.open = false;
+    corner.hidden = !toggle.checked;
     try { localStorage.setItem(visibilityKey, String(toggle.checked)); } catch { /* Storage unavailable. */ }
   });
 
@@ -109,13 +110,14 @@ export function createPerformancePanel({snapshot, report = snapshot}) {
   });
   return {
     update(sample) {
-      if (panel.hidden) return;
       const value = Number.isFinite(sample?.fps) ? String(Math.round(sample.fps)) : '—';
       if (counter.textContent !== value) counter.textContent = value;
+      if (cornerValue.textContent !== value) cornerValue.textContent = value;
       if (panel.open) renderDetails(snapshot());
     },
     reset() {
-      counter.textContent = '—';
+      if (counter.textContent !== '—') counter.textContent = '—';
+      if (cornerValue.textContent !== '—') cornerValue.textContent = '—';
       if (panel.open) renderDetails(null);
     }
   };

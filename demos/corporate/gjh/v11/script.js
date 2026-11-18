@@ -12,15 +12,19 @@ import {createModelWarmup} from './assets/model-warmup.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
+import {createMallHud} from './assets/hud-coordinator.js';
+import {storeDestinations} from './assets/store-destinations.js';
 import {icon} from './assets/icons.js';
-document.querySelectorAll('[data-icon]').forEach(slot => slot.replaceWith(icon(slot.dataset.icon, {size: 18})));
+for (const slot of document.querySelectorAll('[data-icon]')) {
+  const svg = icon(slot.dataset.icon, {size: 18});
+  if (slot.id) slot.append(svg);
+  else slot.replaceWith(svg);
+}
 for (const [selector, name, size] of [
   ['#mall-map > summary', 'map-pin', 22],
-  ['#header-map', 'map-pin', 18],
   ['#keyboard-help > summary', 'help-circle', 18],
   ['#mall-theme-open', 'theme', 18],
   ['#directory-theme-open', 'theme', 18],
-  ['#run-toggle', 'run', 20],
 ]) {
   document.querySelector(selector).prepend(icon(name, {size}));
 }
@@ -48,6 +52,7 @@ let nearby = null, currentZone = 'atrium';
 function clearTransientState(event) {
   quality.resetSampling();
   hideGuidance();
+  mallHud.suspend();
   player?.clearInput();
   player?.setInput(null);
   // Overlays suspend the collection/action camera. Real interruptions cancel the
@@ -59,6 +64,11 @@ function clearTransientState(event) {
 const modes = createModes({onCleanup: clearTransientState,
   onEnter(mode) { document.body.dataset.mode = mode; }});
 const ui = createUI(expanded), canvas = document.querySelector('#scene');
+const destinations = storeDestinations(expanded).map(store => ({
+  ...store, arrival: expanded ? expandedStoreArrival(store.id) : store.arrival,
+}));
+const mallHud = createMallHud({destinations, scene: canvas, announce: ui.announce,
+  subscribeBag: ui.onBagChange, subscribeInspect: ui.onProductInspect});
 const performanceMonitor = createPerformanceMonitor();
 performanceMonitor.setEnabled(true);
 let measuringFrames = false, lastMetricsUpdate = -Infinity;
@@ -86,8 +96,11 @@ function pausePerformance() {
 spatialHud = createSpatialHud({expanded});
 const spatialTargetName = document.getElementById('nearby-name');
 const spatialInspectButton = document.getElementById('inspect');
+let lastSpatialSample = -Infinity;
 function updateSpatialHud() {
-  if (!player) return;
+  const now = performance.now();
+  if (!player || now - lastSpatialSample < 100) return;
+  lastSpatialSample = now;
   const p = player.state;
   spatialHud.update({position:p, zone:currentZone, interaction:selectedInteraction,
     distance:interactionDistance, targetLabel:spatialTargetName.textContent,
@@ -219,6 +232,19 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
     render(); return snapshot();
   }
 }), writable: false});
+let lastProductPresentation = '';
+function updateProductPresentation(p) {
+  if (!productControl) return;
+  const product = p.character.physicalProduct;
+  const pickup = interactions.get('pickup', nearby);
+  const withinReach = pickup && Math.hypot(p.x - pickup.x, p.z - pickup.z) <= pickup.radius;
+  const presentation = [nearby, product.phase, product.id, product.active, p.productApproaching,
+    p.seated, p.pushing, p.elevatorTravel, withinReach, modes.paused()].join('/');
+  if (presentation !== lastProductPresentation) {
+    lastProductPresentation = presentation;
+    productControl.update(p, nearby);
+  }
+}
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
@@ -230,7 +256,7 @@ function updateHUD() {
   const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  productControl?.update(p,nearby);
+  updateProductPresentation(p);
   shelfFocus?.setNearby(nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
 }
@@ -263,15 +289,31 @@ function tick(refreshHud = true) {
   elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state,reducedMotion.matches); player.updateCamera(STEP); if (refreshHud) updateHUD();
   greetOnArrival();
 }
+let lastGuidanceSample = -Infinity, projectedTarget = null;
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
     const pose = player.state;
+    const matrix = camera.matrixWorld.elements;
+    const now = performance.now();
+    mallHud.update({position: pose, zone: currentZone, travelling: pose.elevatorTravel,
+      enabled: !windowBlurred && !modes.paused() && document.body.classList.contains('is-3d') && startupOverlay.hidden,
+      now, forward: {x: -matrix[8], z: -matrix[10]}});
     const guiding = !windowBlurred && ['explore', 'cart'].includes(modes.current()) && !pose.character.collection.active;
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
-    shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused(), Boolean(label));
-    guidance?.update(selectedInteraction, label, camera, Boolean(label));
+    const target = label && selectedInteraction.id;
+    if (target !== projectedTarget) {
+      shelfFocus?.hideNearby();
+      guidance?.hide();
+      projectedTarget = target;
+    }
+    if (shelfFocus?.open) shelfFocus.update(camera, true, false);
+    else if (label && (quality.state?.tier !== 'low' || now - lastGuidanceSample >= 100)) {
+      lastGuidanceSample = now;
+      shelfFocus?.update(camera, true, true);
+      guidance?.update(selectedInteraction, label, camera, true);
+    }
     world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
@@ -589,7 +631,9 @@ async function initialize() {
   if (player.state.character.physicalProduct) {
     try {
       const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
+      const previousChildren = new Set(document.getElementById('inspect-prompt').children);
       productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions);
+      mallHud.connectProductActions(previousChildren);
     } catch { /* Physical product handling is optional. */ }
   }
   if (player.npcSource) {

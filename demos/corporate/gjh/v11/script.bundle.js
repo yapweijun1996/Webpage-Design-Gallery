@@ -384,8 +384,10 @@ function drawHistory(history, line, peakLabel) {
 }
 function createPerformancePanel({ snapshot, report = snapshot }) {
   const panel = document.getElementById("performance-panel");
-  const toggle = document.getElementById("performance-visible");
+  const toggle = document.getElementById("show-fps");
   const counter = document.getElementById("performance-fps");
+  const corner = document.getElementById("fps-corner");
+  const cornerValue = corner.querySelector("span");
   const summary = panel.querySelector("summary");
   const fields = panel.querySelectorAll("[data-performance]");
   const line = document.getElementById("performance-line"), peak = document.getElementById("performance-peak");
@@ -419,13 +421,11 @@ function createPerformancePanel({ snapshot, report = snapshot }) {
     }));
   }
   try {
-    toggle.checked = localStorage.getItem(visibilityKey) !== "false";
+    toggle.checked = localStorage.getItem(visibilityKey) === "true";
   } catch {}
-  panel.hidden = !toggle.checked;
+  corner.hidden = !toggle.checked;
   toggle.addEventListener("change", () => {
-    panel.hidden = !toggle.checked;
-    if (panel.hidden)
-      panel.open = false;
+    corner.hidden = !toggle.checked;
     try {
       localStorage.setItem(visibilityKey, String(toggle.checked));
     } catch {}
@@ -470,16 +470,19 @@ function createPerformancePanel({ snapshot, report = snapshot }) {
   });
   return {
     update(sample) {
-      if (panel.hidden)
-        return;
       const value = Number.isFinite(sample?.fps) ? String(Math.round(sample.fps)) : "—";
       if (counter.textContent !== value)
         counter.textContent = value;
+      if (cornerValue.textContent !== value)
+        cornerValue.textContent = value;
       if (panel.open)
         renderDetails(snapshot());
     },
     reset() {
-      counter.textContent = "—";
+      if (counter.textContent !== "—")
+        counter.textContent = "—";
+      if (cornerValue.textContent !== "—")
+        cornerValue.textContent = "—";
       if (panel.open)
         renderDetails(null);
     }
@@ -1327,7 +1330,13 @@ function createUI(expanded = false) {
       directoryTouched = true;
     }, { once: true });
   const headerMap = document.getElementById("header-map");
+  const locationMap = document.getElementById("location-map");
   const locationName = document.getElementById("location-name");
+  const mapOpeners = [headerMap, locationMap];
+  function updateLocation(label) {
+    locationName.textContent = label;
+    locationMap.title = `${label} — open mall map`;
+  }
   const status = document.getElementById("mall-status");
   const fallbackMessage = document.getElementById("fallback-message");
   const recovery = document.getElementById("graphics-recovery");
@@ -1341,6 +1350,16 @@ function createUI(expanded = false) {
       setView(true, true);
   });
   const playerDot = document.getElementById("player-dot");
+  let mapX, mapZ;
+  function updateMapDot() {
+    if (!Number.isFinite(mapX) || !Number.isFinite(mapZ))
+      return;
+    const point = expanded ? expandedMapPoint(mapX, mapZ) : mapPoint(mapX, mapZ);
+    if (playerDot.getAttribute("cx") !== String(point.x))
+      playerDot.setAttribute("cx", point.x);
+    if (playerDot.getAttribute("cy") !== String(point.y))
+      playerDot.setAttribute("cy", point.y);
+  }
   const floorplan = document.querySelector(".floorplan"), mapCaption = document.querySelector(".map-caption");
   const [west, centre, east] = spatial.stores;
   const floorplanLabel = expanded ? `Ground floor: ${destinations.length} stores open to explore. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
@@ -1348,13 +1367,32 @@ function createUI(expanded = false) {
   const mapCaptionText = [...mapCaption.childNodes].find((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
   const inspectPrompt = document.getElementById("inspect-prompt");
   const inspectButton = document.getElementById("inspect");
+  const inspectVerb = document.getElementById("inspect-verb");
+  const hudText = new WeakMap;
+  const hudLabels = new WeakMap;
+  function setHudText(node, value) {
+    if (hudText.get(node) !== value) {
+      hudText.set(node, value);
+      node.textContent = value;
+    }
+  }
+  function setHudAttribute(node, name, value) {
+    let attributes = hudLabels.get(node);
+    if (!attributes) {
+      attributes = new Map;
+      hudLabels.set(node, attributes);
+    }
+    if (attributes.get(name) !== value) {
+      attributes.set(name, value);
+      node.setAttribute(name, value);
+    }
+  }
+  const labelInspect = (value) => setHudAttribute(inspectButton, "aria-label", value);
   const nearbyName = document.getElementById("nearby-name");
   const nearbyDistance = document.getElementById("nearby-distance");
   const nearbyStory = document.createElement("p");
   nearbyStory.className = "brand-story-nearby";
   nearbyStory.hidden = true;
-  nearbyStory.setAttribute("role", "status");
-  nearbyStory.setAttribute("aria-live", "polite");
   inspectPrompt.append(nearbyStory);
   const help = document.getElementById("keyboard-help");
   const mallMap = document.getElementById("mall-map");
@@ -1393,9 +1431,25 @@ function createUI(expanded = false) {
   const guideReopen = document.getElementById("guide-reopen");
   const toolsMenu = document.getElementById("mall-tools");
   const toolsSummary = toolsMenu.querySelector("summary");
+  const objectives = document.getElementById("hud-objectives");
+  const toolNotices = [document.getElementById("graphics-quality-status"), help.querySelector("[data-mall-check-status]")];
+  const toolStatus = new MutationObserver((records2) => {
+    if (!toolsMenu.open || !help.open)
+      return;
+    const last = records2.at(-1).target.textContent.trim();
+    if (last)
+      announce(last);
+  });
+  toolNotices.forEach((notice) => toolStatus.observe(notice, { childList: true, characterData: true, subtree: true }));
   toolsMenu.addEventListener("toggle", () => {
     if (!toolsMenu.open)
       help.open = false;
+    else
+      objectives.open = false;
+  });
+  objectives.addEventListener("toggle", () => {
+    if (objectives.open)
+      toolsMenu.open = false;
   });
   document.addEventListener("pointerdown", (event) => {
     if (toolsMenu.open && !toolsMenu.contains(event.target) && !event.target.closest("dialog[open]"))
@@ -1404,6 +1458,7 @@ function createUI(expanded = false) {
   toolsMenu.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !help.open && toolsMenu.open) {
       event.preventDefault();
+      event.stopPropagation();
       toolsMenu.open = false;
       toolsSummary.focus();
     }
@@ -1411,7 +1466,6 @@ function createUI(expanded = false) {
   const railGuide = document.getElementById("rail-guide");
   for (const entry of [guideReopen, railGuide])
     entry?.setAttribute("aria-controls", "guide-card");
-  const touchGuide = matchMedia("(pointer: coarse)");
   let unsubscribeInteractions = null, lastGamepadButtons = [], gamepadDirectionAt = 0;
   let modeListener = null, shelfFocus = null;
   const modeSignals = () => ({
@@ -1439,14 +1493,23 @@ function createUI(expanded = false) {
   function canUsePanels() {
     return available && showing3D && !dialog.open && !bag.open && !amenityPanel.dialog.open && !themeDialog.open && !externalPaused && !document.hidden;
   }
-  function openMap() {
+  function syncMapButtons() {
+    for (const button2 of mapOpeners) {
+      const expanded2 = String(mallMap.open);
+      if (button2.getAttribute("aria-expanded") !== expanded2)
+        button2.setAttribute("aria-expanded", expanded2);
+    }
+  }
+  function openMap(opener = headerMap) {
     if (!canUsePanels())
       return false;
     shelfFocus?.close({ focus: false });
     help.open = false;
-    mapReturnFocus = headerMap;
+    toolsMenu.open = false;
+    mapReturnFocus = opener;
     mallMap.open = true;
-    headerMap.setAttribute("aria-expanded", "true");
+    updateMapDot();
+    syncMapButtons();
     updateCompactPanels();
     focusMap();
     return true;
@@ -1455,10 +1518,10 @@ function createUI(expanded = false) {
     if (!canUsePanels())
       return;
     mallMap.open = false;
-    headerMap.setAttribute("aria-expanded", "false");
+    syncMapButtons();
     updateCompactPanels();
     notifyMode();
-    (compactMap.matches ? headerMap : scene).focus({ preventScroll: true });
+    mapReturnFocus.focus({ preventScroll: true });
   }
   function openHelp() {
     if (!canUsePanels())
@@ -1522,7 +1585,9 @@ function createUI(expanded = false) {
   });
   document.getElementById("map-close").addEventListener("click", closeMap);
   function updateViewToggle() {
-    viewToggle.textContent = showing3D ? "Store Directory" : "Enter 3D Mall";
+    document.getElementById("view-toggle-label").textContent = showing3D ? "Store Directory" : "Enter 3D Mall";
+    document.getElementById("view-toggle-icon").replaceChildren(icon(showing3D ? "menu" : "door", { size: 18 }));
+    viewToggle.title = showing3D ? "Store Directory" : "Enter 3D Mall";
     viewToggle.setAttribute("aria-label", showing3D ? "Switch to the accessible store directory" : "Switch to the 3D virtual mall");
   }
   const resetMap = () => {
@@ -1534,7 +1599,7 @@ function createUI(expanded = false) {
     resetMap();
     updateViewToggle();
     headerMap.hidden = !showing3D;
-    headerMap.setAttribute("aria-expanded", String(mallMap.open));
+    syncMapButtons();
     updateCompactPanels();
     if (showing3D && (active === headerMap && headerMap.hidden || mallMap.contains(active) && !mallMap.open && active !== mallMap.querySelector("summary"))) {
       if (shelfFocus?.open)
@@ -1547,28 +1612,46 @@ function createUI(expanded = false) {
   mallMap.addEventListener("toggle", () => {
     if (compactMap.matches && mallMap.open)
       help.open = false;
-    headerMap.setAttribute("aria-expanded", String(mallMap.open));
+    syncMapButtons();
     updateCompactPanels();
     notifyMode();
   });
   help.addEventListener("toggle", () => {
     if (compactMap.matches && help.open)
       mallMap.open = false;
-    headerMap.setAttribute("aria-expanded", String(mallMap.open));
+    syncMapButtons();
     updateCompactPanels();
     notifyMode();
   });
-  headerMap.addEventListener("click", () => {
-    if (headerMap.hidden || !canUsePanels())
-      return;
-    if (mallMap.open)
-      closeMap();
-    else
-      openMap();
-  });
+  for (const button2 of mapOpeners)
+    button2.addEventListener("click", () => {
+      if (button2.hidden || !canUsePanels())
+        return;
+      if (mallMap.open)
+        closeMap();
+      else
+        openMap(button2);
+    });
   const dialog = document.getElementById("product-dialog");
   const newMoonPreview = setupNewMoonPreview();
   const bag = setupDemoBag();
+  const bagButton = document.getElementById("bag-open");
+  const bagLabel = document.createElement("span"), bagCount = document.createElement("span");
+  bagLabel.className = "hud-nav-label";
+  bagLabel.textContent = "Bag";
+  bagCount.className = "hud-bag-count";
+  bagCount.setAttribute("aria-hidden", "true");
+  function projectBagCount(items) {
+    const count = Object.values(items).reduce((sum, count2) => sum + count2, 0);
+    setHudText(bagCount, String(count));
+    if (bagCount.parentNode !== bagButton) {
+      for (const node of [...bagButton.childNodes])
+        if (node.nodeType === Node.TEXT_NODE)
+          node.remove();
+      bagButton.append(bagLabel, bagCount);
+    }
+  }
+  bag.subscribe(projectBagCount);
   const bagDialog = document.getElementById("bag-dialog");
   const listTitle = document.getElementById("list-title");
   const contextNavigation = createContextNavigation({
@@ -1749,24 +1832,33 @@ function createUI(expanded = false) {
   const cartControls = document.querySelector("#cart-controls"), cartToggle = document.querySelector("#cart-toggle"), cartStatus = document.querySelector("#cart-status");
   const sceneCart = document.querySelector("#scene-cart");
   const cartIcon = icon("cart", { size: 18 });
+  sceneCart.setAttribute("aria-describedby", "cart-status");
   const interactionIcons = new Map;
   function updateCartControls() {
     const cart = cartState();
     const recoverFocus = !cart.available && bag.open && cartControls.contains(document.activeElement);
-    cartControls.hidden = !cart.available;
-    cartToggle.textContent = cart.active ? "Stow cart" : "Use cart in 3D";
-    cartToggle.disabled = !cart.available || !cart.active && cart.capability?.disabled === true;
-    sceneCart.hidden = !cart.available || !showing3D || compactMap.matches && (mallMap.open || help.open);
+    const hideCart = !cart.available || !showing3D || compactMap.matches && (mallMap.open || help.open);
+    if (cartControls.hidden === cart.available)
+      cartControls.hidden = !cart.available;
+    if (sceneCart.hidden !== hideCart)
+      sceneCart.hidden = hideCart;
+    setHudText(cartToggle, cart.active ? "Stow cart" : "Use cart in 3D");
+    const disabled = !cart.available || !cart.active && cart.capability?.disabled === true;
+    if (cartToggle.disabled !== disabled)
+      cartToggle.disabled = disabled;
     const cartLabel = cart.active ? "Stow Cart" : "Shopping Cart";
-    if (sceneCart.textContent !== cartLabel)
-      sceneCart.textContent = cartLabel;
+    setHudText(sceneCart, cartLabel);
     if (sceneCart.firstChild !== cartIcon)
       sceneCart.prepend(cartIcon);
-    sceneCart.setAttribute("aria-pressed", String(cart.active));
-    sceneCart.disabled = !cart.available || !cart.active && cart.capability?.sceneDisabled === true;
-    sceneCart.title = `${cartReason(cart) ? `${cartReason(cart)} ` : ""}Demo shopping cart. No orders are created.`;
-    sceneCart.setAttribute("aria-label", `${cartLabel}. Demo shopping cart; no orders are created.${cartReason(cart) ? ` ${cartReason(cart)}` : ""}`);
-    sceneCart.setAttribute("aria-describedby", "cart-status");
+    const pressed = String(cart.active);
+    if (sceneCart.getAttribute("aria-pressed") !== pressed)
+      sceneCart.setAttribute("aria-pressed", pressed);
+    const sceneDisabled = !cart.available || !cart.active && cart.capability?.sceneDisabled === true;
+    if (sceneCart.disabled !== sceneDisabled)
+      sceneCart.disabled = sceneDisabled;
+    const reason = cartReason(cart);
+    setHudAttribute(sceneCart, "title", `${reason ? `${reason} ` : ""}Demo shopping cart. No orders are created.`);
+    setHudAttribute(sceneCart, "aria-label", `${cartLabel}. Demo shopping cart; no orders are created.${reason ? ` ${reason}` : ""}`);
     if (previousCartAvailable !== cart.available || previousCartMode !== cart.active || previousCartSeated !== cart.seated || previousHeldProduct !== cart.heldProduct || previousElevatorTravel !== cart.elevatorTravel || previousCartReason !== cart.capability?.reason) {
       cartStatus.textContent = cartReason(cart) && !cart.active ? cartReason(cart) : !cart.available ? "The 3D cart is unavailable. Your bag selection is unchanged." : cart.heldProduct ? heldInstruction(cart) : cart.elevatorTravel ? "Wait for the elevator to stop." : cart.seated ? "Stand up before using the cart." : cart.active ? "Cart active. Slower walking with a wide turning clearance; stow before sitting." : "Cart stowed. Bag selection unchanged. Use an open area; narrow aisles may require stowing.";
       previousCartAvailable = cart.available;
@@ -1824,13 +1916,13 @@ function createUI(expanded = false) {
   let externalPaused = false;
   let nearby = null;
   let interactionRegistry = null, selectedInteraction = null;
-  let returnFocus = null;
+  let returnFocus = null, productInspectListener = null;
   let teleportListener = null;
   let viewListener = null;
   document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape" || !showing3D || !compactMap.matches || dialog.open || bag.open || amenityPanel.dialog.open)
+    if (event.key !== "Escape" || !showing3D || document.querySelector("dialog[open]"))
       return;
-    const panel = help.open ? help : mallMap.open ? mallMap : null;
+    const panel = mallMap.open ? mallMap : help.open && toolsMenu.open ? help : null;
     if (panel) {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -1927,20 +2019,24 @@ function createUI(expanded = false) {
     amenityPanel.close("view-change");
     showing3D = next;
     mallMap.open = false;
-    locationName.textContent = next ? zones[currentZone] : "The store directory";
+    updateLocation(next ? zones[currentZone] : "The store directory");
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle("is-3d", next);
     toolsMenu.open = false;
     const assetNotice = document.getElementById("loader-asset-notice");
-    if (next)
+    if (next) {
+      assetNotice.removeAttribute("role");
       document.getElementById("controls-copy").append(assetNotice);
-    else
+    } else {
+      assetNotice.setAttribute("role", "status");
       document.querySelector(".site-header").after(assetNotice);
+    }
     updateViewToggle();
     help.open = false;
-    headerMap.hidden = !next;
-    headerMap.setAttribute("aria-expanded", String(next && mallMap.open));
+    for (const button2 of mapOpeners)
+      button2.hidden = !next;
+    syncMapButtons();
     if (moveFocus)
       (next ? scene : document.getElementById("list-title")).focus({ preventScroll: true });
     announce(next ? `3D mall open. Location: ${zones[currentZone]}. Open Help for controls.` : expanded ? "Store directory open. Explore all 17 stores and four featured products." : "Store directory open. All three stores and verified product images are available below.");
@@ -1961,7 +2057,7 @@ function createUI(expanded = false) {
       seatNotice = null;
       if (!ok) {
         seatNotice = cartState().heldProduct ? heldInstruction(cartState()) : "Seat path blocked. Approach the clear front of the bench.";
-        nearbyName.textContent = seatNotice;
+        setHudText(nearbyName, seatNotice);
         announce(seatNotice);
       }
       scene.focus({ preventScroll: true });
@@ -1997,8 +2093,12 @@ function createUI(expanded = false) {
     productKind.textContent = record.kind;
     productDescription.textContent = record.description;
     bag.select(id);
+    projectBagCount(bag.snapshot());
+    returnFocus = document.activeElement;
     dialog.showModal();
     newMoonPreview.open(id);
+    if (id.startsWith("new-moon-"))
+      productInspectListener?.(id);
     closeButton.focus({ preventScroll: true });
     notifyMode();
     return true;
@@ -2111,7 +2211,7 @@ function createUI(expanded = false) {
       seatNotice = null;
       if (!seatListener?.(false)) {
         seatNotice = "Exit blocked. Use the map to leave safely.";
-        nearbyName.textContent = seatNotice;
+        setHudText(nearbyName, seatNotice);
         announce("Exit blocked. Use the map to leave safely.");
       }
       scene.focus({ preventScroll: true });
@@ -2122,12 +2222,17 @@ function createUI(expanded = false) {
   dialog.addEventListener("close", () => {
     const target = returnFocus;
     returnFocus = null;
-    if (target instanceof HTMLElement && target.isConnected && !target.closest("[hidden]")) {
+    notifyMode();
+    if (target instanceof HTMLElement && target.isConnected && target.getClientRects().length) {
       target.focus({ preventScroll: true });
     } else {
       (showing3D ? scene : listTitle).focus({ preventScroll: true });
+      if (target === inspectButton && showing3D)
+        requestAnimationFrame(() => {
+          if (document.activeElement === scene && inspectButton.getClientRects().length)
+            inspectButton.focus({ preventScroll: true });
+        });
     }
-    notifyMode();
   });
   dialog.addEventListener("keydown", (event) => {
     if (event.key !== "Tab")
@@ -2327,7 +2432,7 @@ function createUI(expanded = false) {
     },
     fallback(message) {
       const active = document.activeElement;
-      const recoverFocus = showing3D && (experience.contains(active) || themeDialog.contains(active) || dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle);
+      const recoverFocus = showing3D && (experience.contains(active) || themeDialog.contains(active) || dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle || mapOpeners.includes(active));
       if (themeDialog.open)
         themeDialog.close("fallback");
       guideReopen.hidden = true;
@@ -2362,7 +2467,7 @@ function createUI(expanded = false) {
         if (mapCaptionText)
           mapCaptionText.textContent = upper ? " Ground floor map " : "You are here";
         if (showing3D) {
-          locationName.textContent = zones[zone];
+          updateLocation(zones[zone]);
           announce(`Location: ${zones[zone]}.`);
         }
         for (const button2 of mapButtons) {
@@ -2372,11 +2477,10 @@ function createUI(expanded = false) {
             button2.removeAttribute("aria-current");
         }
       }
-      if (Number.isFinite(x) && Number.isFinite(z)) {
-        const point = expanded ? expandedMapPoint(x, z) : mapPoint(x, z);
-        playerDot.setAttribute("cx", String(point.x));
-        playerDot.setAttribute("cy", String(point.y));
-      }
+      mapX = x;
+      mapZ = z;
+      if (mallMap.open)
+        updateMapDot();
       currentElevatorState = elevatorState;
       currentElevatorUpper = elevatorUpper;
       selectedInteraction = interaction;
@@ -2393,7 +2497,7 @@ function createUI(expanded = false) {
         image.hidden = !isShelf;
         if (isShelf)
           image.src = product.image;
-        nearbyName.textContent = isShelf ? product.compactName : product?.action === "brand-story" ? `${product.brand} · ${product.tagline}` : product?.name || "";
+        setHudText(nearbyName, isShelf ? product.compactName : product?.action === "brand-story" ? `${product.brand} · ${product.tagline}` : product?.name || "");
         const isBrandStory = product?.action === "brand-story";
         nearbyStory.textContent = isBrandStory ? product.story : "";
         nearbyStory.hidden = !isBrandStory;
@@ -2409,39 +2513,33 @@ function createUI(expanded = false) {
         const record = product;
         const amenityAction = nearby === "service-desk" ? "Get help" : nearby?.startsWith("wayfinding-") ? "Choose a store" : nearby === "featured-showcase" ? "View collection" : null;
         const isMap = record?.action === "map";
-        const touchOnly = matchMedia("(pointer: coarse)").matches;
-        const prompt = typeof selectedInteraction?.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction?.prompt || "Inspect";
-        inspectButton.textContent = isMap ? touchOnly ? `Tap to open ${prompt.toLowerCase()}` : `Press F / tap ${prompt}` : touchOnly ? `Tap ${prompt}` : `Press F / tap ${prompt}`;
-        if (isShelf)
-          inspectButton.textContent = "Inspect";
-        if (isBrandStory)
-          inspectButton.textContent = touchOnly ? "Tap story" : "Press F / tap story";
-        inspectButton.setAttribute("aria-label", isBrandStory ? `Read the ${record.brand} brand story` : isMap ? expanded ? "Open the expanded mall map from the directory kiosk" : "Open the three-store map from the directory kiosk" : nearby ? `Inspect ${records.get(nearby).name}` : "Inspect nearby display");
-        if (amenityAction) {
-          inspectButton.textContent = touchGuide.matches ? amenityAction : `Press F / ${amenityAction.toLowerCase()}`;
-          inspectButton.setAttribute("aria-label", `${amenityAction}: ${record.name}`);
-        }
-        if (nearby && showing3D) {
-          const name = product.action === "elevator" ? `Elevator · ${zone === "upper" ? "Upper level" : "Ground floor"}` : product.name;
-          announce(`${name}. Nearby interaction selected.`);
-        }
+        const verb = isBrandStory ? "Story" : amenityAction || selectedInteraction?.prompt || "Inspect";
+        setHudText(inspectVerb, typeof verb === "function" ? verb() : verb);
+        labelInspect(isBrandStory ? `Read the ${record.brand} brand story` : isMap ? expanded ? "Open the expanded mall map from the directory kiosk" : "Open the three-store map from the directory kiosk" : amenityAction ? `${amenityAction}: ${record.name}` : nearby ? `Inspect ${record.name}` : "Inspect nearby display");
       }
       seated = isSeated;
       document.body.classList.toggle("is-seated", seated);
+      const cart = updateCartControls();
+      const cartBlocksSeat = nearby && records.get(nearby).action === "seat" && cart.active;
       if (seated) {
-        nearbyName.textContent = `${seatName || "Bench"} · ${seatPhase === "align" ? "Aligning" : seatPhase === "sit" ? "Sitting down" : seatPhase === "stand" ? "Standing up" : "Seated"}`;
-        inspectButton.textContent = seatPhase === "stand" ? "Standing up…" : seatPhase === "seated" ? "Stand up" : "Cancel / stand";
-        inspectButton.setAttribute("aria-label", seatPhase === "seated" ? "Stand up from bench" : "Cancel sitting and stand");
+        const pose = seatPhase === "align" ? "Aligning" : seatPhase === "sit" ? "Sitting down" : seatPhase === "stand" ? "Standing up" : "Seated";
+        setHudText(nearbyName, `${seatName || "Bench"} · ${pose}`);
+        setHudText(inspectVerb, "Stand");
+        labelInspect(seatPhase === "seated" ? "Stand up from bench" : "Cancel sitting and stand");
       } else if (nearby && selectedInteraction?.kind === "sit") {
-        const action = typeof selectedInteraction.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction.prompt;
-        nearbyName.textContent = `${records.get(nearby).name} · Sit here`;
-        inspectButton.textContent = touchGuide.matches ? `Tap ${action}` : `Press F / tap ${action}`;
-        inspectButton.setAttribute("aria-label", `Sit on ${records.get(nearby).name}`);
+        setHudText(nearbyName, seatNotice || (cartBlocksSeat ? "Stow your cart from Bag before sitting" : `${records.get(nearby).name} · Sit here`));
+        setHudText(inspectVerb, "Sit");
+        labelInspect(`Sit on ${records.get(nearby).name}`);
       } else if (nearby && selectedInteraction?.kind === "travel") {
+        const prompt = selectedInteraction.prompt;
+        const action = typeof prompt === "function" ? prompt() : prompt;
+        setHudText(nearbyName, zone === "upper" ? "Elevator · Upper level" : "Elevator · Ground floor");
+        setHudText(inspectVerb, action.startsWith("Ride") ? "Ride" : action.startsWith("Call elevator") ? "Call" : "Travel");
+        labelInspect(action);
+      } else if (nearby && selectedInteraction?.door) {
         const action = typeof selectedInteraction.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction.prompt;
-        nearbyName.textContent = `Elevator · ${zone === "upper" ? "Upper level" : "Ground floor"}`;
-        inspectButton.textContent = action;
-        inspectButton.setAttribute("aria-label", action);
+        setHudText(inspectVerb, action);
+        labelInspect(`${action} ${records.get(nearby).name}`);
       }
       const iconName = seated || selectedInteraction?.kind === "sit" ? "sit" : selectedInteraction?.kind === "travel" ? "lift" : selectedInteraction?.kind === "open" && selectedInteraction.door ? "door" : selectedInteraction?.kind === "pickup" ? "pick-up" : records.get(nearby)?.action === "map" ? "map-pin" : "quality-inspection";
       if (!interactionIcons.has(iconName))
@@ -2451,16 +2549,15 @@ function createUI(expanded = false) {
         inspectButton.querySelector("svg")?.remove();
         inspectButton.prepend(actionIcon);
       }
-      const cart = updateCartControls();
       document.body.classList.toggle("is-pushing", Boolean(cart.active));
-      if (nearby && records.get(nearby).action === "seat" && cart.active) {
-        nearbyName.textContent = "Stow your cart from Bag before sitting";
-        inspectButton.disabled = true;
-      } else
-        inspectButton.disabled = seatPhase === "stand";
+      const disabled = Boolean(cartBlocksSeat || seatPhase === "stand");
+      if (inspectButton.disabled !== disabled)
+        inspectButton.disabled = disabled;
       if (seatNotice)
-        nearbyName.textContent = seatNotice;
-      inspectPrompt.hidden = !nearby && !seated || collectionActive;
+        setHudText(nearbyName, seatNotice);
+      const promptHidden = !nearby && !seated || collectionActive;
+      if (inspectPrompt.hidden !== promptHidden)
+        inspectPrompt.hidden = promptHidden;
       notifyMode();
     },
     handleGamepad(pad) {
@@ -2523,6 +2620,10 @@ function createUI(expanded = false) {
     onBagChange(listener) {
       return bag.subscribe(listener);
     },
+    onProductInspect(listener) {
+      productInspectListener = listener;
+    },
+    announce,
     onTeleport(listener) {
       teleportListener = listener;
     },
@@ -3276,15 +3377,258 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
   };
 }
 
+// demos/corporate/gjh/v11/assets/hud-coordinator.js
+var priority = ["held", "interaction", "nearby", "quest"];
+var goalKeys = ["visit", "inspect", "bag"];
+var goalTargets = [3, 1, 1];
+var goalHints = ["Walk into three different stores", "Inspect a product at New Moon", "Add a product to the demo bag"];
+var bearings = ["Ahead", "Ahead right", "Right", "Behind right", "Behind", "Behind left", "Left", "Ahead left"];
+function createContextQueue() {
+  const sources = new Map;
+  return {
+    set(source, value) {
+      if (value)
+        sources.set(source, value);
+      else
+        sources.delete(source);
+    },
+    current() {
+      const kind = priority.find((source) => sources.has(source));
+      return kind ? { kind, value: sources.get(kind) } : null;
+    }
+  };
+}
+function createObjectiveTracker(storeIds, initialBag = {}) {
+  const stores = new Set(storeIds), visited = new Set;
+  let inspected = false, added = false, bag = initialBag;
+  return {
+    visit(id) {
+      if (stores.has(id) && visited.size < goalTargets[0])
+        visited.add(id);
+    },
+    inspect() {
+      inspected = true;
+    },
+    bag(next) {
+      added ||= Object.keys(next).some((id) => next[id] > (bag[id] ?? 0));
+      bag = next;
+    },
+    progress() {
+      return [visited.size, Number(inspected), Number(added)];
+    }
+  };
+}
+function nearbyStore(position, forward, destinations, currentStore, range = 20) {
+  let target = null, distance = range;
+  for (const store of destinations) {
+    if (store.id === currentStore || !store.available || !store.arrival)
+      continue;
+    const dx = store.arrival.x - position.x, dz = store.arrival.z - position.z;
+    const metres = Math.hypot(dx, dz);
+    if (!Number.isFinite(metres) || metres > distance || target && metres === distance)
+      continue;
+    const validHeading = Math.hypot(forward.x, forward.z) > 0.000001 && metres > 0.15;
+    const angle = Math.atan2(dx * -forward.z + dz * forward.x, dx * forward.x + dz * forward.z);
+    const sector = validHeading ? (Math.round(angle / (Math.PI / 4)) + 8) % 8 : null;
+    distance = metres;
+    target = { id: store.id, label: store.label, metres: Math.round(metres), sector };
+  }
+  return target;
+}
+function createMallHud({ destinations, announce, scene, subscribeBag, subscribeInspect }) {
+  const byId = (id) => document.getElementById(id);
+  const context = byId("hud-context"), held = byId("held-product-status"), hint = byId("hud-context-hint");
+  const hintText = byId("hud-context-text"), arrow = byId("hud-nearby-arrow"), direction = byId("hud-nearby-direction");
+  const prompt = byId("inspect-prompt"), nearbyName = byId("nearby-name"), inspect = byId("inspect");
+  const more = byId("hud-more-actions"), joystick = byId("joystick");
+  const total = byId("hud-objective-total"), toast = byId("hud-objective-toast");
+  const dots = [...document.querySelectorAll(".hud-objective-dots i")];
+  const progressLabels = goalKeys.map((key) => document.querySelector(`[data-hud-progress="${key}"]`));
+  const queue = createContextQueue();
+  const stores = destinations.filter((store) => store.available).map((store) => store.id);
+  const textSources = new WeakMap;
+  let tracker, objectiveState = "", completionPending = false, toastTimeout;
+  let actionSource, lastSample = -Infinity, lastAnnouncement = "", lastZone, active = false;
+  function text(node, value) {
+    if (textSources.get(node) === value)
+      return;
+    textSources.set(node, value);
+    node.textContent = value;
+  }
+  function hide(node, value) {
+    if (node.hidden !== value)
+      node.hidden = value;
+  }
+  function setMore(open, restore = false) {
+    prompt.classList.toggle("hud-actions-open", open);
+    more.setAttribute("aria-expanded", String(open));
+    if (restore && !more.hidden)
+      more.focus({ preventScroll: true });
+  }
+  more.addEventListener("click", () => setMore(more.getAttribute("aria-expanded") !== "true"));
+  document.addEventListener("pointerdown", (event) => {
+    if (!prompt.contains(event.target) && !event.target.closest("dialog[open]") && prompt.classList.contains("hud-actions-open"))
+      setMore(false);
+  });
+  prompt.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && prompt.classList.contains("hud-actions-open")) {
+      event.stopPropagation();
+      setMore(false, true);
+    }
+  });
+  subscribeInspect(() => {
+    tracker.inspect();
+    updateGoals();
+  });
+  subscribeBag((items) => {
+    if (!tracker)
+      tracker = createObjectiveTracker(stores, items);
+    else
+      tracker.bag(items);
+    updateGoals();
+  });
+  scene.addEventListener("pointerdown", function firstMove(event) {
+    if (event.pointerType !== "touch" || event.button !== 0 || !active || joystick.closest(".is-seated") || joystick.closest(".is-panel-open"))
+      return;
+    const bounds = joystick.getBoundingClientRect();
+    const onStick = event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+    if (!onStick && !byId("fullscreen-joystick").checked)
+      return;
+    joystick.classList.add("has-moved");
+    scene.removeEventListener("pointerdown", firstMove);
+  }, true);
+  function updateGoals() {
+    const progress = tracker.progress(), state = progress.join("/");
+    if (objectiveState === state)
+      return;
+    objectiveState = state;
+    let completed = 0;
+    progress.forEach((value, index) => {
+      const done = value === goalTargets[index];
+      completed += Number(done);
+      dots[index].classList.toggle("is-complete", done);
+      text(progressLabels[index], `${value} / ${goalTargets[index]}`);
+    });
+    text(total, `${completed} of 3 objectives complete`);
+    const nextGoal = progress.findIndex((value, i) => value < goalTargets[i]);
+    if (nextGoal === -1)
+      completionPending = true;
+    queue.set("quest", goalHints[nextGoal]);
+  }
+  function render() {
+    const selected = queue.current();
+    hide(context, !active || !selected);
+    if (!active)
+      return;
+    if (!selected) {
+      if (completionPending)
+        showCompletion();
+      return;
+    }
+    if (context.dataset.context !== selected.kind)
+      context.dataset.context = selected.kind;
+    const isNearby = selected.kind === "nearby";
+    const sector = isNearby ? selected.value.sector : null;
+    const showArrow = sector !== null;
+    hide(hint, !isNearby && selected.kind !== "quest");
+    hide(arrow, !showArrow);
+    hide(direction, !showArrow);
+    if (isNearby)
+      text(hintText, `${selected.value.label} · ${selected.value.metres} m`);
+    if (selected.kind === "quest")
+      text(hintText, selected.value);
+    if (showArrow) {
+      const angle = `rotate(${sector * 45}deg)`;
+      if (arrow.style.transform !== angle)
+        arrow.style.transform = angle;
+      text(direction, bearings[sector]);
+    }
+    const message = selected.kind === "held" ? held.textContent : selected.kind === "interaction" ? nearbyName.textContent : "";
+    if (message && lastAnnouncement !== message)
+      announce(message);
+    lastAnnouncement = message;
+    if (completionPending)
+      showCompletion();
+  }
+  function showCompletion() {
+    completionPending = false;
+    const message = "All mall objectives complete!";
+    text(toast, message);
+    hide(toast, false);
+    announce(message);
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => hide(toast, true), 4200);
+  }
+  return {
+    connectProductActions(previousChildren) {
+      const controls = [...prompt.children].filter((node) => !previousChildren.has(node));
+      actionSource = controls.find((node) => node.matches("button"));
+      if (actionSource)
+        actionSource.classList.add("hud-control", "hud-product-action");
+      for (const node of controls.filter((node2) => node2.matches('p[role="status"]'))) {
+        node.removeAttribute("role");
+        node.removeAttribute("aria-live");
+        if (node.id && actionSource)
+          actionSource.setAttribute("aria-describedby", node.id);
+        else if (actionSource) {
+          node.id = "hud-product-note";
+          actionSource.setAttribute("aria-describedby", node.id);
+        }
+        node.classList.add("sr-only");
+      }
+    },
+    update({ position, zone, enabled, travelling, now, forward }) {
+      active = enabled;
+      if (active && lastZone !== zone) {
+        lastZone = zone;
+        tracker.visit(zone);
+        updateGoals();
+      }
+      const canInteract = !prompt.hidden;
+      const usePhysical = Boolean(canInteract && actionSource && !actionSource.hidden && !actionSource.disabled);
+      const secondary = Boolean(usePhysical && !inspect.disabled);
+      if (inspect.classList.contains("hud-alternate-action") !== secondary) {
+        inspect.classList.toggle("hud-alternate-action", secondary);
+        setMore(secondary && document.activeElement === inspect);
+        if (!secondary && document.activeElement === more) {
+          (canInteract && !inspect.disabled ? inspect : scene).focus({ preventScroll: true });
+        }
+      }
+      hide(more, !secondary);
+      if (actionSource && actionSource.classList.contains("hud-unavailable-action") === usePhysical) {
+        actionSource.classList.toggle("hud-unavailable-action", !usePhysical);
+      }
+      queue.set("held", !held.hidden);
+      queue.set("interaction", canInteract);
+      if (!active || zone === "upper" || travelling || canInteract || !held.hidden) {
+        queue.set("nearby", null);
+      } else if (now - lastSample >= 100) {
+        lastSample = now;
+        queue.set("nearby", nearbyStore(position, forward, destinations, zone));
+      }
+      render();
+    },
+    suspend() {
+      active = false;
+      hide(context, true);
+      lastAnnouncement = "";
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/script.js
-document.querySelectorAll("[data-icon]").forEach((slot2) => slot2.replaceWith(icon(slot2.dataset.icon, { size: 18 })));
+for (const slot2 of document.querySelectorAll("[data-icon]")) {
+  const svg = icon(slot2.dataset.icon, { size: 18 });
+  if (slot2.id)
+    slot2.append(svg);
+  else
+    slot2.replaceWith(svg);
+}
 for (const [selector, name, size] of [
   ["#mall-map > summary", "map-pin", 22],
-  ["#header-map", "map-pin", 18],
   ["#keyboard-help > summary", "help-circle", 18],
   ["#mall-theme-open", "theme", 18],
-  ["#directory-theme-open", "theme", 18],
-  ["#run-toggle", "run", 20]
+  ["#directory-theme-open", "theme", 18]
 ]) {
   document.querySelector(selector).prepend(icon(name, { size }));
 }
@@ -3351,6 +3695,7 @@ var currentZone = "atrium";
 function clearTransientState(event) {
   quality.resetSampling();
   hideGuidance();
+  mallHud.suspend();
   player?.clearInput();
   player?.setInput(null);
   const interaction = player?.state;
@@ -3368,6 +3713,17 @@ var modes = createModes({
 });
 var ui = createUI(expanded);
 var canvas = document.querySelector("#scene");
+var destinations = storeDestinations(expanded).map((store) => ({
+  ...store,
+  arrival: expanded ? expandedStoreArrival(store.id) : store.arrival
+}));
+var mallHud = createMallHud({
+  destinations,
+  scene: canvas,
+  announce: ui.announce,
+  subscribeBag: ui.onBagChange,
+  subscribeInspect: ui.onProductInspect
+});
 var performanceMonitor = createPerformanceMonitor();
 performanceMonitor.setEnabled(true);
 var measuringFrames = false;
@@ -3398,9 +3754,12 @@ function pausePerformance() {
 spatialHud = createSpatialHud({ expanded });
 var spatialTargetName = document.getElementById("nearby-name");
 var spatialInspectButton = document.getElementById("inspect");
+var lastSpatialSample = -Infinity;
 function updateSpatialHud() {
-  if (!player)
+  const now = performance.now();
+  if (!player || now - lastSpatialSample < 100)
     return;
+  lastSpatialSample = now;
   const p = player.state;
   spatialHud.update({
     position: p,
@@ -3611,6 +3970,30 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
     return snapshot();
   }
 }), writable: false });
+var lastProductPresentation = "";
+function updateProductPresentation(p) {
+  if (!productControl)
+    return;
+  const product = p.character.physicalProduct;
+  const pickup = interactions.get("pickup", nearby);
+  const withinReach = pickup && Math.hypot(p.x - pickup.x, p.z - pickup.z) <= pickup.radius;
+  const presentation = [
+    nearby,
+    product.phase,
+    product.id,
+    product.active,
+    p.productApproaching,
+    p.seated,
+    p.pushing,
+    p.elevatorTravel,
+    withinReach,
+    modes.paused()
+  ].join("/");
+  if (presentation !== lastProductPresentation) {
+    lastProductPresentation = presentation;
+    productControl.update(p, nearby);
+  }
+}
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
@@ -3626,7 +4009,7 @@ function updateHUD() {
   selectedInteraction = selection.item;
   interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  productControl?.update(p, nearby);
+  updateProductPresentation(p);
   shelfFocus?.setNearby(nearby);
   ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper });
 }
@@ -3670,15 +4053,38 @@ function tick(refreshHud = true) {
     updateHUD();
   greetOnArrival();
 }
+var lastGuidanceSample = -Infinity;
+var projectedTarget = null;
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === "shelf")) {
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
     const pose = player.state;
+    const matrix = camera.matrixWorld.elements;
+    const now = performance.now();
+    mallHud.update({
+      position: pose,
+      zone: currentZone,
+      travelling: pose.elevatorTravel,
+      enabled: !windowBlurred && !modes.paused() && document.body.classList.contains("is-3d") && startupOverlay.hidden,
+      now,
+      forward: { x: -matrix[8], z: -matrix[10] }
+    });
     const guiding = !windowBlurred && ["explore", "cart"].includes(modes.current()) && !pose.character.collection.active;
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
-    shelfFocus?.update(camera, modes.current() === "shelf" || !modes.paused(), Boolean(label));
-    guidance?.update(selectedInteraction, label, camera, Boolean(label));
+    const target = label && selectedInteraction.id;
+    if (target !== projectedTarget) {
+      shelfFocus?.hideNearby();
+      guidance?.hide();
+      projectedTarget = target;
+    }
+    if (shelfFocus?.open)
+      shelfFocus.update(camera, true, false);
+    else if (label && (quality.state?.tier !== "low" || now - lastGuidanceSample >= 100)) {
+      lastGuidanceSample = now;
+      shelfFocus?.update(camera, true, true);
+      guidance?.update(selectedInteraction, label, camera, true);
+    }
     world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
@@ -4211,7 +4617,9 @@ async function initialize() {
   if (player.state.character.physicalProduct) {
     try {
       const { installPhysicalProductControl } = await import("./assets/visitor-v2-product-ui.js");
+      const previousChildren = new Set(document.getElementById("inspect-prompt").children);
       productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions);
+      mallHud.connectProductActions(previousChildren);
     } catch {}
   }
   if (player.npcSource) {

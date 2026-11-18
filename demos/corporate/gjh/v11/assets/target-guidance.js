@@ -3,7 +3,7 @@ export function createTargetGuidance({canvas, projection}) {
   const marker = document.querySelector('#interaction-point');
   const name = marker.querySelector('span');
   const action = marker.querySelector('small');
-  let size = null;
+  let size = null, previousLabel, previousAction, previousLanguage;
   const touchOnly = matchMedia('(pointer: coarse)');
   function hide() { projection.visible(marker, false); }
   return {
@@ -14,9 +14,14 @@ export function createTargetGuidance({canvas, projection}) {
       const point = projection.point({x: item.x, y: item.y ?? 0, z: item.z}, camera);
       if (!point) { hide(); return; }
       const actionLabel = touchOnly.matches ? 'Tap' : 'Press F';
-      if (name.textContent !== label || action.textContent !== actionLabel || !size) {
-        name.textContent = label;
-        action.textContent = actionLabel;
+      const language = document.documentElement.lang;
+      const changed = label !== previousLabel || actionLabel !== previousAction || language !== previousLanguage;
+      if (changed || !size) {
+        if (label !== previousLabel) name.textContent = label;
+        if (actionLabel !== previousAction) action.textContent = actionLabel;
+        previousLabel = label;
+        previousAction = actionLabel;
+        previousLanguage = language;
         projection.visible(marker, true);
         size = {width: marker.offsetWidth, height: marker.offsetHeight};
       }
@@ -25,7 +30,7 @@ export function createTargetGuidance({canvas, projection}) {
       const box = {left: point.x - size.width / 2 - 2, right: point.x + size.width / 2 + 2, top: point.y - size.height - 2, bottom: point.y + 7};
       const inside = box.left >= rect.left + 4 && box.right <= rect.right - 4 && box.top >= rect.top + 4 && box.bottom <= rect.bottom - 4;
       // Native controls and disclosures keep their full hit areas and focus rings.
-      const overlap = [...document.querySelectorAll('.site-header, .inspect-prompt, .keyboard-help, .mall-map, .joystick, .run-toggle, .scene-disclaimer, .scene-tools, .held-product-status')]
+      const overlap = [...document.querySelectorAll('.site-header, #hud-context, #hud-objectives, #mall-tools, #mall-tools[open] .mall-tools-content, .mall-map, .joystick, .run-toggle, #fps-corner')]
         .filter(e => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
         .some(e => {
           const r = e.getBoundingClientRect();
