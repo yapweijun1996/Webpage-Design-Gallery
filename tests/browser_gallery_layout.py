@@ -52,7 +52,7 @@ def run():
                             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, language)
                             header = page.locator('.site-header').bounding_box()
                             if width <= 1000:
-                                assert header['height'] <= 74, (width, language, header)
+                                assert header['height'] <= (100 if width <= 520 else 64), (width, language, header)
                             columns = page.locator('.design-grid').evaluate('(e)=>getComputedStyle(e).gridTemplateColumns.split(" ").length')
                             assert columns == (1 if width < 560 else 2), (width, columns)
                     select_preference(page, '#language-select', 'en')

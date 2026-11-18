@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-14T16:50:49.213853+00:00",
+  "capturedAt": "2026-11-18T02:41:35.428902+00:00",
   "cases": [
     {
       "width": 320,
@@ -7,7 +7,7 @@
       "themes": 2,
       "firstCard": {
         "x": 22,
-        "y": 694.03125,
+        "y": 924.296875,
         "width": 276,
         "height": 423.28125
       },
@@ -20,7 +20,7 @@
       "themes": 2,
       "firstCard": {
         "x": 22,
-        "y": 639.65625,
+        "y": 910.765625,
         "width": 346,
         "height": 400.1875
       },
@@ -33,7 +33,7 @@
       "themes": 2,
       "firstCard": {
         "x": 22,
-        "y": 596.671875,
+        "y": 872.359375,
         "width": 515,
         "height": 400.1875
       },
@@ -46,7 +46,7 @@
       "themes": 2,
       "firstCard": {
         "x": 22,
-        "y": 596.671875,
+        "y": 872.734375,
         "width": 250,
         "height": 398.28125
       },
@@ -59,7 +59,7 @@
       "themes": 2,
       "firstCard": {
         "x": 22,
-        "y": 572.875,
+        "y": 878.1875,
         "width": 289.5,
         "height": 422.96875
       },
@@ -72,7 +72,7 @@
       "themes": 2,
       "firstCard": {
         "x": 22,
-        "y": 572.875,
+        "y": 882.265625,
         "width": 295,
         "height": 426.40625
       },
@@ -85,7 +85,7 @@
       "themes": 2,
       "firstCard": {
         "x": 40,
-        "y": 583.859375,
+        "y": 763.328125,
         "width": 277.5,
         "height": 415.46875
       },
@@ -98,7 +98,7 @@
       "themes": 2,
       "firstCard": {
         "x": 120,
-        "y": 652.421875,
+        "y": 806.515625,
         "width": 592,
         "height": 588.9375
       },
@@ -109,5 +109,5 @@
   "limitations": [
     "Headless Chrome; no physical devices, Safari or screen-reader acceptance."
   ],
-  "browserVersion": "157.0.8103.51"
+  "browserVersion": "158.0.8127.37"
 }
