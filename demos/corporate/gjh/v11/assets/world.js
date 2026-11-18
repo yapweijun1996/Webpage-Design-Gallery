@@ -170,6 +170,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     return tagShopLod(mesh);
   }
   const roomSigns = [];
+  let signage;
   function sign(text, x, y, z, width, height = .4, framed = false, fontSize = 42) {
     const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 128;
     const context = canvas.getContext('2d');
@@ -761,7 +762,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     activeShopSlot=null;
     }
   if (expanded) {
-    const slide = addExpandedStorefronts(T,expandedLayout,scene);
+    signage=await addShopSignAtlas(T,expandedLayout,scene);
+    const slide = addExpandedStorefronts(T,expandedLayout,scene,signage.configs);
     for (const bay of expandedLayout.slots.slice(3)) {
       const {x,z,alongX,alongZ,normalX,normalZ}=shopEntrance(bay);
       const width = normalZ ? bay.maxX-bay.minX : bay.maxZ-bay.minZ;
@@ -873,8 +875,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     for(const [x,z] of [[-9,4],[3,4],[-9,16],[3,16]])deckRailings.place('post',x,z);
     railingState=deckRailings?.finish(scene)||null;
     activeDeck=false;
-    const shopSigns=await addShopSignAtlas(T,expandedLayout,scene);
-    shopSigns.layers.enable(1);
     const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel);
     interiorModels=interiors;
     for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
@@ -908,7 +908,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();
   const signHUD = ['.site-header', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));
-  function updateSigns(camera, canvas) {
+  function updateSigns(camera, canvas, tier, reducedMotion) {
+    signage?.update(camera,tier,reducedMotion,performance.now());
     const frame = canvas.getBoundingClientRect();
     for (const label of roomSigns) {
       const mesh = label.mesh;
@@ -966,7 +967,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     });
     return brandWallPromise;
   }
-  return {getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings:railingState, productAssets: Object.freeze(worldProductAssets)};

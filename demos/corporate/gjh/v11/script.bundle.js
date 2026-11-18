@@ -3375,6 +3375,7 @@ var lastMetricsUpdate = -Infinity;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
+    signage: world?.signage?.report() ?? { signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, tier: quality.state?.tier ?? "low" },
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
@@ -3681,7 +3682,7 @@ function render(force = false) {
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
     world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
-    world.updateSigns(camera, canvas);
+    world.updateSigns(camera, canvas, quality.state?.tier, reducedMotion2);
     const draw = () => atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === "detailed" && renderWidth >= 1000, npcs);
     if (shelfFocus?.open)
       player.renderShelf(draw);
@@ -3993,7 +3994,7 @@ function validateRestoration() {
     atmosphere?.update(player.state);
     world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier);
     player.camera.updateMatrixWorld();
-    world.updateSigns(player.camera, canvas);
+    world.updateSigns(player.camera, canvas, quality.state?.tier, reducedMotion2);
     renderer.render(world.scene, player.camera);
     const pixel = new Uint8Array(4);
     gl.readPixels(Math.floor(gl.drawingBufferWidth / 2), Math.floor(gl.drawingBufferHeight / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);

@@ -3,7 +3,6 @@ import {buildWindowStudio, shopLamp} from './window-studios.js';
 import {buildLateShopAnchorDetails} from './shop-anchor-details-last.js';
 import {westShopPlacements} from './gallery-west-shops.js';
 import {eastShopPlacements} from './gallery-east-shops.js';
-import {loadBrandKit} from './shop-signs.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
 // All exports use metres, a floor-centred origin and local +Z as the front.
@@ -37,11 +36,6 @@ function displayPlacements(number, heroX, heroZ) {
 // Coordinates inside each bay have the glazed front on local +Z.
 export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
-  const loader = new T.TextureLoader().setCrossOrigin(undefined);
-  const [kit, textures] = await Promise.all([
-    loadBrandKit(),
-    Promise.all(slots.map(slot => loader.loadAsync(new URL(`./brand-kit/S${slot.number}-hero.webp`, import.meta.url).href)))
-  ]);
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.65});
   const woodFinishes = new Set([0xb18356,0x66412f,0x69442c,0x8b5a38,0xb28a5c,0xc59d69,0x8e4d35,0x66482f,0x604534,0x694635,0xaa8464]);
   // Illuminated shelving and lamps share a draw call with the cabinets. A
@@ -67,10 +61,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       '#include <emissivemap_fragment>\ntotalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);\n' +
       'if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;');
   };
-  const studioParts = new Map(), posterParts = [];
-  const atlas = document.createElement('canvas');
-  atlas.width = atlas.height = 2048;
-  const atlasContext = atlas.getContext('2d');
+  const studioParts = new Map();
   const shops = [], collisionBoxes = [];
   const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
   const modelStates = new Map(slots.flatMap(slot => {
@@ -109,7 +100,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     9:0x294f7c, 10:0x478c86, 11:0x843e43, 12:0x6f9690, 13:0x33383b,
     14:0x665079, 15:0x292725, 16:0x4b9993, 17:0x62696a};
 
-  slots.forEach((slot, index) => {
+  slots.forEach(slot => {
     const number = Number(slot.number), side = slot.side;
     const width = side === 'north' ? slot.maxX-slot.minX : slot.maxZ-slot.minZ;
     const depth = side === 'north' ? slot.maxZ-slot.minZ : slot.maxX-slot.minX;
@@ -171,7 +162,6 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         add(curve,x,y+leg,z,c);
       }
     };
-    const palette = kit[`S${slot.number}`].palette.map(colour => colour.hex);
     buildWindowStudio(number, tools, width, depth);
     buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
@@ -268,35 +258,6 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         });
       };
     }
-    // Keep the right-hand product artwork visible across the concourse as
-    // well. All fourteen panels use one atlas and one draw call.
-    const column = index % 4, row = Math.floor(index / 4);
-    const image = textures[index].image, cell = atlas.width / 4;
-    atlasContext.fillStyle = palette[0];
-    atlasContext.fillRect(column*cell,row*cell,cell,cell);
-    const posterWidth = .68, posterHeight = .51;
-    const aspect = image.width/image.height, panelAspect = posterWidth/posterHeight;
-    const photoHeight = cell*.80, bandHeight = cell-photoHeight;
-    const w = cell*Math.min(1,aspect/panelAspect), h = photoHeight*Math.min(1,panelAspect/aspect);
-    atlasContext.drawImage(image,column*cell+(cell-w)/2,row*cell+(photoHeight-h)/2,w,h);
-    textures[index].dispose();
-    const bandY=row*cell+photoHeight;
-    const signColours={7:'#732b27',8:'#213967',9:'#172b45',11:'#723433'};
-    atlasContext.fillStyle=signColours[number] || '#183c30';
-    atlasContext.fillRect(column*cell,bandY,cell,bandHeight);
-    atlasContext.font=number>=13?'600 57px Arial':'bold 60px Georgia';
-    atlasContext.textAlign='center'; atlasContext.textBaseline='middle';
-    atlasContext.fillStyle=number===9?'#ffd161':'#fff0d0';
-    atlasContext.fillText(kit[`S${slot.number}`].brand,column*cell+cell/2,bandY+bandHeight*.51,cell-32);
-    const tileBottom=(3-row)/4, bandTop=tileBottom+.2/4;
-    function atlasPanel(w,h,x,y,z,v0,v1) {
-      const panel=new T.PlaneGeometry(w,h), uv=panel.attributes.uv;
-      for(let i=0;i<uv.count;i++) uv.setXY(i,(column+.005+uv.getX(i)*.99)/4,v0+(v1-v0)*uv.getY(i));
-      panel.translate(x,y,z).applyMatrix4(group.matrix);
-      posterParts.push(panel);
-    }
-    atlasPanel(posterWidth,posterHeight,heroOffset-.61,.42,heroZ+.56,bandTop+.001,tileBottom+.249);
-    atlasPanel(3.63,.415,0,3.69,-front+.98,tileBottom+.001,bandTop-.001);
     group.visible = false;
     scene.add(group);
     const loadHero = loadDisplay;
@@ -339,12 +300,6 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     scene.add(scenery);
     for (const part of parts) part.dispose();
   }
-  const art = new T.CanvasTexture(atlas);
-  art.colorSpace = T.SRGBColorSpace;
-  const pictures = new T.Mesh(mergeGeometries(posterParts), new T.MeshBasicMaterial({map:art}));
-  pictures.name = 'Concourse window artwork';
-  scene.add(pictures);
-  for(const part of posterParts) part.dispose();
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
     if (loading || scheduled) return;

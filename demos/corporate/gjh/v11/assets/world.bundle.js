@@ -601,7 +601,7 @@ function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider }) {
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/lift-layout.js
 var freeze = (value) => {
@@ -1659,220 +1659,15 @@ var atriumLayout = Object.freeze({
   event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
 });
 
-// demos/corporate/gjh/v11/assets/shop-signs.js
-var LOGOS = [
-  "S01-new-moon.webp",
-  "S02-mili.webp",
-  "S03-gogo.webp",
-  "S04-borsch-med.webp",
-  "S05-pien-tze-huang.webp",
-  "S06-flying-wheel.webp",
-  "S07-gu-long.webp",
-  "S08-skippy.webp",
-  "S09-spam.webp",
-  "S10-california-mexico.webp",
-  "S11-hormel.webp",
-  "S12-zeria.webp",
-  "S13-sony.webp",
-  "S14-lg.webp",
-  "S15-casio.webp",
-  "S16-gp.webp",
-  "S17-gigaset.webp"
-];
-var SLOT_COUNT = LOGOS.length;
-var brandKitPromise;
-function loadBrandKit() {
-  if (!brandKitPromise)
-    brandKitPromise = fetch(new URL("./brand-kit/brand-kit.json", import.meta.url)).then((response) => {
-      if (!response.ok)
-        throw new Error("Brand-kit metadata unavailable");
-      return response.json();
-    });
-  return brandKitPromise;
-}
-function loadImage(url) {
-  return new Promise((resolve) => {
-    const image = new Image;
-    image.onload = () => resolve(image);
-    image.onerror = () => resolve(null);
-    image.src = url;
-  });
-}
-async function addShopSignAtlas(T, layout, scene) {
-  const width = 1536, rowHeight = 112;
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = rowHeight * SLOT_COUNT;
-  const context = canvas.getContext("2d");
-  const [kit, logos] = await Promise.all([
-    loadBrandKit(),
-    Promise.all(LOGOS.map((file) => loadImage(new URL(`./brands/${file}`, import.meta.url).href)))
-  ]);
-  LOGOS.forEach((_, index) => {
-    const name = kit[`S${String(index + 1).padStart(2, "0")}`].brand;
-    const bay = layout.slots[index];
-    const faceWidth = bay.side === "north" ? 8.6 : 6.8;
-    const logicalWidth = rowHeight * faceWidth / 1.18;
-    const finishes = { 7: "#632b21", 8: "#193565", 9: "#182f4d", 11: "#613232" };
-    const y = index * rowHeight;
-    context.save();
-    context.translate(0, y);
-    context.scale(width / logicalWidth, 1);
-    context.fillStyle = finishes[index + 1] || "#19362d";
-    context.fillRect(0, 0, logicalWidth, rowHeight);
-    context.strokeStyle = "#b79c63";
-    context.lineWidth = 1.5;
-    context.strokeRect(4, 5, logicalWidth - 8, rowHeight - 10);
-    const logo = logos[index];
-    if (logo) {
-      const scale = Math.min(65 / logo.width, 32 / logo.height);
-      const w = logo.width * scale, h = logo.height * scale;
-      context.drawImage(logo, 18 + (65 - w) / 2, (rowHeight - h) / 2, w, h);
-    }
-    const heritage = [1, 2, 4, 5, 6, 7, 10, 11, 12].includes(index + 1);
-    context.fillStyle = index === 8 ? "#ffca49" : "#f6e7c7";
-    context.font = heritage ? "54px Georgia, serif" : "600 49px Arial, sans-serif";
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillText(name, logicalWidth / 2, rowHeight * 0.52, logicalWidth - 185);
-    context.restore();
-  });
-  const texture = new T.CanvasTexture(canvas);
-  texture.colorSpace = T.SRGBColorSpace;
-  const positions = [], uvs = [], indices = [];
-  layout.slots.forEach((bay) => {
-    const index = Number(bay.number) - 1;
-    const x = bay.side === "north" ? (bay.minX + bay.maxX) / 2 : bay.side === "west" ? bay.maxX + 0.27 : bay.minX - 0.27;
-    const z = bay.side === "north" ? Number(bay.number) <= 3 ? 0.48 : 0.26 : (bay.minZ + bay.maxZ) / 2;
-    const angle = bay.side === "north" ? 0 : bay.side === "west" ? Math.PI / 2 : -Math.PI / 2;
-    const widthOnWall = bay.side === "north" ? 8.6 : 6.8;
-    const height = 1.18, cos = Math.cos(angle), sin = Math.sin(angle);
-    for (const [dx, dy] of [
-      [-widthOnWall / 2, -height / 2],
-      [widthOnWall / 2, -height / 2],
-      [widthOnWall / 2, height / 2],
-      [-widthOnWall / 2, height / 2]
-    ]) {
-      positions.push(x + dx * cos, 4.75 + dy, z - dx * sin);
-    }
-    const bottom = 1 - (index + 1) / SLOT_COUNT, top = 1 - index / SLOT_COUNT;
-    uvs.push(0, bottom, 1, bottom, 1, top, 0, top);
-    const vertex = positions.length / 3 - 4;
-    indices.push(vertex, vertex + 1, vertex + 2, vertex, vertex + 2, vertex + 3);
-  });
-  const geometry = new T.BufferGeometry;
-  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
-  geometry.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
-  geometry.setIndex(indices);
-  geometry.computeBoundingSphere();
-  const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide }));
-  mesh.name = "Expanded branded shop signs";
-  scene.add(mesh);
-  return mesh;
-}
-
-// demos/corporate/gjh/v11/assets/expanded-storefronts.js
-function addExpandedStorefronts(T, layout, scene) {
-  const geometry = new T.BoxGeometry(1, 1, 1);
-  const batches = {
-    frame: { material: new T.MeshStandardMaterial({ color: 1656373, roughness: 0.66 }), matrices: [] },
-    brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.65, roughness: 0.38 }), matrices: [] },
-    accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
-    glass: { material: new T.MeshStandardMaterial({
-      color: 12179920,
-      metalness: 0.05,
-      roughness: 0.18,
-      transparent: true,
-      opacity: 0.065,
-      depthWrite: false
-    }), matrices: [] }
-  };
-  const transform = new T.Object3D;
-  const slidingParts = new Map;
-  for (const bay of layout.slots) {
-    const number = Number(bay.number);
-    const { x, z, alongX: cos, normalX: sin, yaw: angle } = shopEntrance(bay);
-    const width = (bay.side === "north" ? bay.maxX - bay.minX : bay.maxZ - bay.minZ) - 0.6;
-    const box = (kind, along, y, depth, w, h, d, leaf = 0) => {
-      transform.position.set(x + along * cos + depth * sin, y, z - along * sin + depth * cos);
-      transform.rotation.set(0, angle, 0);
-      transform.scale.set(w, h, d);
-      transform.updateMatrix();
-      batches[kind].matrices.push(transform.matrix.clone());
-      if (leaf) {
-        if (!slidingParts.has(bay.number))
-          slidingParts.set(bay.number, []);
-        slidingParts.get(bay.number).push({ kind, index: batches[kind].matrices.length - 1, dx: leaf * cos, dz: -leaf * sin });
-      }
-      if (kind === "accent")
-        batches.accent.slots.push(bay.number);
-    };
-    if (number <= 3) {
-      box("accent", 0, 5.55, 0.32, width, 0.14, 0.24);
-      for (const side of [-1, 1]) {
-        box("accent", side * 2.47, 1.95, 0.21, 0.12, 3.7, 0.08);
-      }
-      continue;
-    }
-    const windowWidth = (width - 2.7) / 2;
-    const windowCenter = 1.3 + windowWidth / 2;
-    box("frame", 0, 4.75, 0, width, 1.5, 0.36);
-    box("brass", 0, 4.02, 0.21, width, 0.055, 0.08);
-    box("brass", 0, 5.48, 0.21, width, 0.055, 0.08);
-    box("brass", 0, 5.55, 0.24, width, 0.055, 0.29);
-    box("brass", 0, 3.94, 0.22, 2.65, 0.055, 0.08);
-    for (const side of [-1, 1]) {
-      box("glass", side * windowCenter, 2.17, 0, windowWidth, 3.35, 0.06);
-      box("frame", side * windowCenter, 0.25, 0.07, windowWidth, 0.5, 0.22);
-      box("brass", side * windowCenter, 0.51, 0.2, windowWidth, 0.045, 0.05);
-      box("frame", side * (width / 2 - 0.07), 2.02, 0.08, 0.14, 4.04, 0.24);
-      box("frame", side * 1.3, 2.02, 0.08, 0.12, 4.04, 0.24);
-      box("brass", side * 1.3, 2.02, 0.22, 0.035, 3.72, 0.04);
-      box("accent", side * (width / 2 - 0.35), 3.69, 0.22, number % 2 ? 0.18 : 0.38, 0.32, 0.08);
-      box("glass", side * 0.64, 1.97, 0.025, 1.2, 3.86, 0.06, side);
-      box("frame", side * 0.64, 0.12, 0.09, 1.2, 0.24, 0.18, side);
-      box("brass", side * 0.019, 2, 0.1, 0.022, 4, 0.035, side);
-      box("brass", side * 0.18, 1.16, 0.21, 0.045, 0.55, 0.06, side);
-    }
-    box("frame", 0, 4, 0.08, width, 0.16, 0.24);
-  }
-  const meshes = {};
-  for (const [kind, batch] of Object.entries(batches)) {
-    if (!batch.matrices.length)
-      continue;
-    const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
-    batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
-    if (batch.slots) {
-      const paletteIndex = [0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1];
-      loadBrandKit().then((kit) => {
-        const color = new T.Color;
-        batch.slots.forEach((slot2, index) => {
-          color.set(kit[`S${slot2}`].palette[paletteIndex[Number(slot2) - 1]].hex);
-          mesh.setColorAt(index, color);
-        });
-        mesh.instanceColor.needsUpdate = true;
-      }).catch((error) => console.warn("Storefront accent colours unavailable:", error));
-    }
-    mesh.name = `Expanded storefront ${kind}`;
-    mesh.receiveShadow = kind !== "glass";
-    mesh.computeBoundingSphere();
-    scene.add(mesh);
-    meshes[kind] = mesh;
-  }
-  const moved = new T.Matrix4;
-  return function slide(number, travel) {
-    for (const { kind, index, dx, dz } of slidingParts.get(number)) {
-      moved.copy(batches[kind].matrices[index]);
-      moved.elements[12] += dx * travel;
-      moved.elements[14] += dz * travel;
-      meshes[kind].setMatrixAt(index, moved);
-      meshes[kind].instanceMatrix.needsUpdate = true;
-    }
-  };
-}
-
-// demos/corporate/gjh/v11/assets/expanded-interiors.js
-import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
+// demos/corporate/gjh/v11/assets/gallery-east-shops.js
+var eastShopPlacements = {
+  12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
+  13: [{ file: "gallery-assets/headphone-display-stand.glb", position: [-2.45, 0.081, 3.05], yaw: 0.18, scale: 1.2 }],
+  14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.081, 2.58], yaw: 0.08, scale: 1.03 }],
+  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 }],
+  16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.081, 2.81], yaw: 0.12, scale: 0.96 }],
+  17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-2.22, 0.081, 2.22], yaw: 1.5, scale: 0.86 }]
+};
 
 // demos/corporate/gjh/v11/assets/window-studios.js
 var cream = 15984077;
@@ -2353,6 +2148,1290 @@ function buildWindowStudio(n, t, width, depth) {
   }
 }
 
+// demos/corporate/gjh/v11/assets/gallery-west-shops.js
+var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
+  file: `gallery-assets/${name}.glb`,
+  position: [x, y, z],
+  yaw,
+  scale
+});
+var westShopPlacements = {
+  4: [fixture("mosquito-patch-pack", -1.57, 1.2875, shopIslandZ + 0.29)],
+  5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
+  6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
+  7: [fixture("stacked-can-pyramid", -1.56, 0.081, 2.65, -0.07, 0.88)],
+  8: [fixture("peanut-butter-jar-stand", -2.52, 0.081, 4.57, 0.015)],
+  9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
+  10: [fixture("abalone-gift-box-display", -0.55, 1.09, shopIslandZ + 0.42)],
+  11: [fixture("food-display-cabinet", -1.61, 0.081, 2.74, -0.12)]
+};
+
+// demos/corporate/gjh/v11/assets/signage/atlas-layout.js
+var slotCapacity = 24;
+var atlasSize = 2048;
+function atlasCells(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= slotCapacity)
+    throw RangeError("Sign atlas holds 24 lots");
+  const x = index % 2 * 1024, row = Math.floor(index / 2) * 112;
+  return {
+    fascia: { x: x + 3, y: row + 3, w: 861, h: 106 },
+    blade: { x: x + 870, y: row + 3, w: 150, h: 106 },
+    poster: { x: index % 8 * 256 + 3, y: 1344 + Math.floor(index / 8) * 232 + 3, w: 250, h: 226 }
+  };
+}
+function plateRect(blade) {
+  return { x: blade.x + blade.w * 0.3, y: blade.y + blade.h * 0.729, w: blade.w * 0.4, h: blade.h * 0.19 };
+}
+
+// demos/corporate/gjh/v11/assets/signage/tokens.js
+var swatch = Object.freeze({
+  green: "#163b30",
+  brass: "#c6a568",
+  cream: "#fff0cf",
+  gold: "#ffd688",
+  black: "#171c22",
+  gunmetal: "#373d43",
+  blue: "#77cfff",
+  silver: "#c6cccf",
+  walnut: "#513728",
+  leaf: "#718154",
+  ivory: "#eee4d5",
+  charcoal: "#332e32",
+  rose: "#653e4f",
+  blush: "#ffced4",
+  burgundy: "#652e30",
+  navy: "#182f50",
+  enamel: "#fff9ed",
+  shadow: "#201a16",
+  highlight: "#fff6dc"
+});
+var pbr = (baseColorFactor, metallicFactor, roughnessFactor, emissiveFactor = [0, 0, 0]) => ({ baseColorFactor: [...baseColorFactor, 1], metallicFactor, roughnessFactor, emissiveFactor });
+var materials = Object.freeze({
+  brass_trim: pbr([0.56, 0.38, 0.14], 0.78, 0.3),
+  lacquer_fascia: pbr([0.025, 0.075, 0.05], 0.22, 0.26),
+  timber_slat: pbr([0.2, 0.105, 0.058], 0, 0.64),
+  emissive_letter: pbr([0.96, 0.84, 0.6], 0.22, 0.32, [0.36, 0.25, 0.12]),
+  glass_panel: pbr([0.47, 0.57, 0.53], 0.12, 0.16),
+  brushed_black: pbr([0.028, 0.031, 0.035], 0.69, 0.47),
+  gunmetal: pbr([0.09, 0.1, 0.11], 0.72, 0.38),
+  gold_disc: pbr([0.77, 0.48, 0.12], 0.84, 0.25),
+  silver_ring: pbr([0.55, 0.58, 0.6], 0.86, 0.24)
+});
+
+// demos/corporate/gjh/v11/assets/signage/presets.js
+function preset(fascia, trim, letter, glow, finish, backlight, typography, width, height) {
+  return {
+    palette: { fascia, trim, letter, glow, accent: trim },
+    finish,
+    backlight,
+    typography,
+    limits: { width, height, depth: [0.012, 0.06] }
+  };
+}
+var presets = Object.freeze({
+  "t1-classic": preset(swatch.green, swatch.brass, swatch.cream, swatch.gold, "lacquer", "halo", "heritage", [4, 8], [1, 1.5]),
+  "t2-fashion": preset(swatch.charcoal, swatch.silver, swatch.cream, swatch.cream, "matte", "underglow", "editorial", [4, 8], [1, 1.5]),
+  "t3-cafe": preset(swatch.walnut, swatch.brass, swatch.cream, swatch.gold, "timber-slat", "halo", "heritage", [3, 8], [1.3, 1.5]),
+  "t4-tech": preset(swatch.black, swatch.gunmetal, swatch.enamel, swatch.blue, "glass", "neon-line", "modern", [3, 8], [1, 1.5]),
+  "t5-book": preset(swatch.green, swatch.brass, swatch.cream, swatch.gold, "matte", "underglow", "heritage", [3, 8], [1.2, 1.5]),
+  "t6-beauty": preset(swatch.rose, swatch.brass, swatch.enamel, swatch.blush, "lacquer", "halo", "editorial", [3, 8], [1.2, 1.5]),
+  "t7-home": preset(swatch.walnut, swatch.brass, swatch.cream, swatch.gold, "stone", "underglow", "heritage", [3, 8], [1.1, 1.5]),
+  "t8-kids": preset(swatch.ivory, swatch.brass, swatch.charcoal, swatch.blush, "lacquer", "underglow", "modern", [3, 8], [1.1, 1.5]),
+  "heritage-red": preset(swatch.burgundy, swatch.brass, swatch.cream, swatch.gold, "lacquer", "halo", "heritage", [4, 8], [1, 1.5]),
+  midnight: preset(swatch.navy, swatch.silver, swatch.enamel, swatch.blue, "matte", "neon-line", "modern", [3, 8], [1, 1.5])
+});
+
+// demos/corporate/gjh/v11/assets/signage/config.js
+var store = (preset2, options = {}) => ({ preset: preset2, ...options });
+var stores = Object.freeze({
+  S01: store("t1-classic", { relief: true, logoModule: "sign_logo3d_new_moon", logoRegion: [0, 0, 0.172, 1] }),
+  S02: store("t3-cafe", { relief: true, logoModule: "sign_logo3d_mili" }),
+  S03: store("t8-kids", { letterInk: "dark" }),
+  S04: store("t6-beauty", { carrier: true, letterInk: "pale", inkRegion: [0, 0, 1, 0.64] }),
+  S05: store("heritage-red", { caption: true }),
+  S06: store("t5-book", { carrier: true, letterInk: "all", inkRegion: [0.45, 0, 0.55, 1] }),
+  S07: store("heritage-red", { caption: true, carrier: true }),
+  S08: store("midnight", { letterInk: "red" }),
+  S09: store("midnight", { caption: true }),
+  S10: store("t7-home", { caption: true }),
+  S11: store("heritage-red", { caption: true }),
+  S12: store("t5-book", { caption: true, carrier: true }),
+  S13: store("t4-tech", { carrier: true, letterInk: "dark" }),
+  S14: store("t6-beauty", { carrier: true, letterInk: "all", inkRegion: [0.52, 0, 0.48, 1] }),
+  S15: store("t2-fashion", { carrier: true, letterInk: "all" }),
+  S16: store("t4-tech", { letterInk: "pale" }),
+  S17: store("t2-fashion", { letterInk: "all" })
+});
+function luminance(hex) {
+  const [r, g, b] = hex.slice(1).match(/../g).map((pair) => parseInt(pair, 16) / 255).map((v) => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrast(a, b) {
+  const x = luminance(a), y = luminance(b);
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+}
+var options = {
+  lockup: ["logo-left", "logo-top", "wordmark-only", "monogram"],
+  typography: ["heritage", "editorial", "modern"],
+  backlight: ["halo", "underglow", "neon-line", "none"],
+  finish: ["lacquer", "matte", "timber-slat", "stone", "glass"]
+};
+function bayWidth(bay) {
+  return bay.side === "north" ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
+}
+function fasciaBand(bay) {
+  if (Number(bay.number) <= 3)
+    return { bottom: 4.15, top: 5.475, clearance: 0 };
+  return { bottom: 4.02, top: 5.48, clearance: 0.1 };
+}
+function tint(base, accent) {
+  const channels = [1, 3, 5].map((i) => Math.round(0.84 * parseInt(base.slice(i, i + 2), 16) + 0.16 * parseInt(accent.slice(i, i + 2), 16)));
+  return "#" + channels.map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+function resolveConfig(id, settings, bay, kit, receipts) {
+  const presetId = settings?.preset ?? "t1-classic";
+  if (!settings || !Object.hasOwn(presets, presetId))
+    throw Error("Invalid signage preset: " + id);
+  const slot2 = Number(bay.number);
+  if (!/^S\d{2}$/.test(id) || id !== "S" + bay.number || slot2 < 1 || slot2 > slotCapacity || !kit[id])
+    throw Error("Invalid signage slot: " + id);
+  const preset2 = presets[presetId];
+  const { limits } = preset2;
+  const span = bayWidth(bay);
+  const band = fasciaBand(bay);
+  const size = { width: Math.min(limits.width[1], span - 0.65), height: band.top - band.bottom - band.clearance, depth: 0.04, ...settings.size };
+  for (const [key, [min, max]] of Object.entries(limits)) {
+    if (!Number.isFinite(size[key]) || size[key] < min || size[key] > max)
+      throw Error(id + " invalid " + key);
+  }
+  if (size.width > span - 0.4 || size.height > band.top - band.bottom || !Number.isFinite(span))
+    throw Error(id + " sign exceeds its bay");
+  const accent = kit[id].palette[0].hex;
+  const fascia = tint(preset2.palette.fascia, accent);
+  const config = {
+    preset: "t1-classic",
+    lockup: "logo-left",
+    brand: kit[id].brand,
+    logo: id,
+    poster: id,
+    blade: true,
+    pulse: true,
+    relief: false,
+    carrier: false,
+    caption: false,
+    lodDistance: 16,
+    ...preset2,
+    ...settings,
+    id,
+    size,
+    palette: { ...preset2.palette, fascia, accent, ...settings.palette }
+  };
+  if (typeof config.brand !== "string" || !config.brand.trim())
+    throw Error(id + " missing brand");
+  for (const [key, allowed] of Object.entries(options)) {
+    if (!allowed.includes(config[key]))
+      throw Error(id + " invalid " + key);
+  }
+  for (const key of ["blade", "pulse", "relief", "caption", "carrier"])
+    if (typeof config[key] !== "boolean")
+      throw Error(id + " invalid " + key);
+  if (!(Number.isFinite(config.lodDistance) && config.lodDistance > 0))
+    throw Error(id + " invalid LOD distance");
+  if (!Object.values(config.palette).every((v) => /^#[0-9a-f]{6}$/i.test(v)) || contrast(config.palette.letter, config.palette.fascia) < 4.5)
+    throw Error(id + " invalid palette or letter contrast");
+  if (config.logo !== null && config.logo !== id)
+    throw Error(id + " invalid logo ID");
+  if (config.poster !== null && config.poster !== id)
+    throw Error(id + " invalid poster ID");
+  if (config.logoModule && (!config.relief || !/^sign_logo3d_[a-z0-9_]+$/.test(config.logoModule)))
+    throw Error(id + " invalid relief module");
+  if (config.letterInk && !["all", "red", "dark", "pale"].includes(config.letterInk))
+    throw Error(id + " invalid letter ink");
+  for (const r of [config.logoRegion, config.inkRegion]) {
+    if (!r)
+      continue;
+    if (!Array.isArray(r) || r.length !== 4 || !r.every(Number.isFinite) || r[0] < 0 || r[1] < 0 || r[2] <= 0 || r[3] <= 0 || r[0] + r[2] > 1 || r[1] + r[3] > 1)
+      throw Error(id + " invalid logo region");
+  }
+  const receipt = receipts[config.logo];
+  config.logoFile = receipt?.status === "found" && receipt.file?.startsWith(id + "-") && /^S\d{2}-[a-z0-9-]+\.webp$/.test(receipt.file) ? receipt.file : null;
+  if (!config.logoFile)
+    config.lockup = "wordmark-only";
+  return config;
+}
+function selectSignLod(tier, distance, inFrustum, cutoff) {
+  if (!inFrustum)
+    return "culled";
+  return distance <= cutoff && ["balanced", "detailed"].includes(tier) ? tier : "baked";
+}
+
+// demos/corporate/gjh/v11/assets/icons.js
+var registry = Object.freeze({
+  "arrow-down": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 5v14M18 13l-6 6-6-6"/>
+</svg>
+`,
+  "arrow-down-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 5 19 19M7 19h12V7"/>
+</svg>
+`,
+  "arrow-left": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M19 12H5M11 6l-6 6 6 6"/>
+</svg>
+`,
+  "arrow-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 12h14M13 6l6 6-6 6"/>
+</svg>
+`,
+  "arrow-up": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 19V5M6 11l6-6 6 6"/>
+</svg>
+`,
+  "arrow-up-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 19 19 5M7 5h12v12"/>
+</svg>
+`,
+  camera: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2ZM18 10h.01"/>
+  <circle cx="12" cy="14" r="4"/>
+</svg>
+`,
+  cart: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M3 3.9h1.9l2.34 10.55a2 2 0 0 0 1.95 1.55h7.32a2 2 0 0 0 1.94-1.51L20.5 7.9H5.79"/>
+  <circle cx="10" cy="19.9" r="1.7"/>
+  <circle cx="17" cy="19.9" r="1.7"/>
+</svg>
+`,
+  check: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m4 12 5 5L20 6"/>
+</svg>
+`,
+  "chevron-down": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m5 9 7 7 7-7"/>
+</svg>
+`,
+  "chevron-left": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m15 5-7 7 7 7"/>
+</svg>
+`,
+  "chevron-right": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m9 5 7 7-7 7"/>
+</svg>
+`,
+  "chevron-up": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m5 15 7-7 7 7"/>
+</svg>
+`,
+  close: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m6 6 12 12M18 6 6 18"/>
+</svg>
+`,
+  door: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4 21h16M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M8.5 21V6h7v15M13 13h.01"/>
+</svg>
+`,
+  download: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>
+</svg>
+`,
+  eye: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M2.75 12C4.95 7.7 8.05 5.5 12 5.5s7.05 2.2 9.25 6.5c-2.2 4.3-5.3 6.5-9.25 6.5S4.95 16.3 2.75 12Z"/>
+  <circle cx="12" cy="12" r="2.9"/>
+</svg>
+`,
+  "help-circle": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="12" cy="12" r="9.25"/>
+  <path d="M9.1 9.15a2.9 2.9 0 0 1 5.65.95c0 1.9-2.85 2.85-2.85 2.85"/>
+  <path d="M12 16.9h.01"/>
+</svg>
+`,
+  info: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="12" cy="12" r="9.25"/>
+  <path d="M12 11v5M12 7.8h.01"/>
+</svg>
+`,
+  keyboard: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="2" y="6" width="20" height="12" rx="2"/>
+  <path d="M5 9h.01M8.5 9h.01M12 9h.01M15.5 9h.01M19 9h.01M5 12h.01M8.5 12h.01M12 12h.01M15.5 12h.01M19 12h.01M7 15h10"/>
+</svg>
+`,
+  lift: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="4" y="6" width="16" height="15" rx="1"/>
+  <path d="M12 6v15M8 3l1.5-1.5L11 3M13 2l1.5 1.5L16 2M9.5 12v3M14.5 12v3"/>
+</svg>
+`,
+  "map-pin": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M19.5 10.1c0 4.6-5.1 9.4-6.83 10.87a1.03 1.03 0 0 1-1.34 0C9.6 19.5 4.5 14.7 4.5 10.1a7.5 7.5 0 0 1 15 0Z"/>
+  <circle cx="12" cy="10.1" r="2.75"/>
+</svg>
+`,
+  menu: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4 6h16M4 12h16M4 18h16"/>
+</svg>
+`,
+  minus: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 12h14"/>
+</svg>
+`,
+  mouse: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="7" y="3" width="10" height="18" rx="5"/>
+  <path d="M12 3v6M7 9h10"/>
+</svg>
+`,
+  move: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>
+</svg>
+`,
+  "pick-up": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M8 4h8v6H8zM12 4v2M3 17l3-2h4l2 1h4a1.5 1.5 0 0 1 0 3h-5M3 20h12l5-2.5a1.4 1.4 0 0 0-1.25-2.5L16 16"/>
+</svg>
+`,
+  plus: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 5v14M5 12h14"/>
+</svg>
+`,
+  "quality-inspection": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m3 6.5 6-3 6 3-6 3zM3 6.5v9l6 3 3-1.5M15 6.5v4M9 9.5v9"/>
+  <circle cx="17" cy="16" r="3.5"/>
+  <path d="m19.5 18.5 2 2M15.5 16l1 1 2-2"/>
+</svg>
+`,
+  refresh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M4.5 8a8 8 0 0 1 13-2L20 9M20 4v5h-5"/>
+  <path d="M19.5 16a8 8 0 0 1-13 2L4 15M4 20v-5h5"/>
+</svg>
+`,
+  run: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="15.5" cy="4" r="1.75"/>
+  <path d="m9 9 3-2 3 1 1.5 3 2.5 1M12 7l-2 5 3 2-1 3.5M10 12l-2.5 3-3 1M13 14l3 2 1 4M7.5 15 6 20"/>
+</svg>
+`,
+  search: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="10.5" cy="10.5" r="6.75"/>
+  <path d="m20.5 20.5-5.23-5.23"/>
+</svg>
+`,
+  "shopping-bag": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M5 7h14l2 14H3zM8 8V6a4 4 0 0 1 8 0v2"/>
+</svg>
+`,
+  sit: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="10" cy="4" r="1.75"/>
+  <path d="M9.5 7.5v5l3 2h3l1.5 5M9.5 8l3 2 2.5.5M7 10v5a2 2 0 0 0 2 2h5M7 17v3m7-3v3"/>
+</svg>
+`,
+  smartphone: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="7" y="2" width="10" height="20" rx="2"/>
+  <path d="M10 5h4M11 19h2"/>
+</svg>
+`,
+  theme: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="12" cy="12" r="5"/>
+  <path d="M12 7v10M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+</svg>
+`
+});
+
+// demos/corporate/gjh/v11/assets/signage/atlas.js
+function canvas(w, h) {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  return c;
+}
+function image(url) {
+  return new Promise((resolve) => {
+    const img = new Image;
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+function trimLogo(img) {
+  const scale = Math.min(1, 768 / img.width, 512 / img.height);
+  const c = canvas(Math.max(1, Math.round(img.width * scale)), Math.max(1, Math.round(img.height * scale)));
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0, c.width, c.height);
+  const { width: w, height: h } = c, pixels = ctx.getImageData(0, 0, w, h), a = pixels.data;
+  const queue = new Int32Array(w * h), visited = new Uint8Array(w * h);
+  let end = 0;
+  function visit(i) {
+    if (visited[i])
+      return;
+    visited[i] = 1;
+    const p = i * 4;
+    if (a[p + 3] < 12 || Math.min(a[p], a[p + 1], a[p + 2]) >= 244) {
+      a[p + 3] = 0;
+      queue[end++] = i;
+    }
+  }
+  for (let x = 0;x < w; x++) {
+    visit(x);
+    visit((h - 1) * w + x);
+  }
+  for (let y = 0;y < h; y++) {
+    visit(y * w);
+    visit(y * w + w - 1);
+  }
+  for (let j = 0;j < end; j++) {
+    const i = queue[j];
+    if (i % w)
+      visit(i - 1);
+    if (i % w < w - 1)
+      visit(i + 1);
+    if (i >= w)
+      visit(i - w);
+    if (i + w < w * h)
+      visit(i + w);
+  }
+  let left = w, top = h, right = -1, bottom = -1;
+  for (let y = 0;y < h; y++)
+    for (let x = 0;x < w; x++)
+      if (a[(y * w + x) * 4 + 3] > 24) {
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+      }
+  if (right < left)
+    return null;
+  ctx.putImageData(pixels, 0, 0);
+  const cropped = canvas(right - left + 1, bottom - top + 1);
+  cropped.getContext("2d").drawImage(c, -left, -top);
+  return cropped;
+}
+function contained(image2, x, y, w, h) {
+  const k = Math.min(w / image2.width, h / image2.height);
+  return { x: x + (w - image2.width * k) / 2, y: y + (h - image2.height * k) / 2, w: image2.width * k, h: image2.height * k };
+}
+function draw(ctx, img, r) {
+  ctx.drawImage(img, r.x, r.y, r.w, r.h);
+}
+function finish(ctx, w, h, c) {
+  const p = c.palette;
+  ctx.fillStyle = p.fascia;
+  ctx.fillRect(0, 0, w, h);
+  if (c.finish === "timber-slat") {
+    for (let x = 0;x < w; x += h * 0.155) {
+      ctx.fillStyle = "rgba(0,0,0,.30)";
+      ctx.fillRect(x, 0, 2, h);
+      ctx.fillStyle = "rgba(255,216,150,.18)";
+      ctx.fillRect(x + 2, 0, 1, h);
+    }
+  } else if (c.finish === "stone") {
+    ctx.strokeStyle = "rgba(255,240,209,.09)";
+    for (let i = 0;i < 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * w / 5 - h * 0.8, h);
+      ctx.bezierCurveTo(i * w / 5, h * 0.7, i * w / 5 - h * 0.18, h * 0.5, i * w / 5 + h * 0.5, 0);
+      ctx.stroke();
+    }
+  }
+  const sheen = ctx.createLinearGradient(0, 0, c.finish === "glass" ? w * 0.3 : 0, h);
+  const gloss = { matte: 0.08, stone: 0.13, "timber-slat": 0.16, lacquer: 0.27, glass: 0.34 }[c.finish];
+  sheen.addColorStop(0, `rgba(255,238,204,${gloss})`);
+  sheen.addColorStop(0.38, "rgba(255,238,204,0)");
+  sheen.addColorStop(1, "rgba(0,0,0,.20)");
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, w, h);
+  if (c.preset === "t3-cafe") {
+    for (const side of [-1, 1]) {
+      ctx.save();
+      ctx.translate(side < 0 ? h * 0.13 : w - h * 0.13, 0);
+      ctx.scale(-side, 1);
+      ctx.strokeStyle = swatch.leaf;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(h * 0.08, h * 0.24, h * 0.01, h * 0.57);
+      ctx.stroke();
+      for (let i = 0;i < 5; i++) {
+        ctx.fillStyle = i % 2 ? swatch.leaf : p.accent;
+        ctx.beginPath();
+        ctx.ellipse(h * (i % 2 ? 0.06 : 0.015), h * (0.06 + i * 0.094), h * 0.022, h * 0.049, i % 2 ? 0.65 : -0.65, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+  ctx.strokeStyle = p.trim;
+  ctx.lineWidth = Math.max(1, h * 0.013);
+  ctx.strokeRect(h * 0.036, h * 0.036, w - h * 0.072, h * 0.928);
+  ctx.save();
+  if (c.backlight !== "none") {
+    ctx.shadowColor = p.glow;
+    ctx.shadowBlur = h * 0.06;
+    ctx.fillStyle = c.backlight === "neon-line" ? p.glow : p.trim;
+    ctx.fillRect(h * 0.07, h * 0.926, w - h * 0.14, h * 0.019);
+  }
+  ctx.restore();
+  for (const u of [0.17, 0.5, 0.83]) {
+    const pool = ctx.createRadialGradient(w * u, 0, 0, w * u, 0, h * 0.46);
+    pool.addColorStop(0, "rgba(255,221,162,.20)");
+    pool.addColorStop(1, "rgba(255,221,162,0)");
+    ctx.fillStyle = pool;
+    ctx.fillRect(w * u - h * 0.46, 0, h * 0.92, h * 0.46);
+    ctx.fillStyle = swatch.highlight;
+    ctx.beginPath();
+    ctx.ellipse(w * u, h * 0.056, h * 0.026, h * 0.009, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = p.accent;
+  ctx.fillRect(w * 0.055, h * 0.91, w * 0.12, h * 0.014);
+}
+function letterMask(mark, config) {
+  const { width: w, height: h } = mark;
+  const c = canvas(w, h), ctx = c.getContext("2d");
+  ctx.drawImage(mark, 0, 0);
+  const pixels = ctx.getImageData(0, 0, w, h), a = pixels.data;
+  const [u, v, rw, rh] = config.inkRegion ?? [0, 0, 1, 1];
+  for (let y = 0;y < h; y++)
+    for (let x = 0;x < w; x++) {
+      const i = 4 * (y * w + x), r = a[i], g = a[i + 1], b = a[i + 2];
+      const keep = x / w >= u && x / w < u + rw && y / h >= v && y / h < v + rh && (config.letterInk === "all" || config.letterInk === "dark" && Math.max(r, g, b) < 150 || config.letterInk === "red" && r > g * 1.35 + 25 && r > b * 1.2 || config.letterInk === "pale" && r > 190 && g > 175);
+      if (!keep)
+        a[i + 3] = 0;
+    }
+  ctx.putImageData(pixels, 0, 0);
+  return c;
+}
+function lockup(ctx, w, h, c, logo, door, blade = false) {
+  const mask = canvas(w, h), ink = mask.getContext("2d");
+  const fallback = !logo || c.lockup === "wordmark-only";
+  const mark = fallback ? door : logo;
+  const relief = canvas(w, h), reliefCtx = relief.getContext("2d");
+  const caption = fallback || c.caption && c.lockup !== "monogram" && !blade;
+  const stacked = c.lockup === "logo-top" || blade && fallback;
+  const top = h * 0.1, usable = h * (blade ? 0.58 : 0.8);
+  let labelX = w / 2, labelY = top + usable * 0.52, labelW = w * 0.88;
+  let markBounds = null;
+  if (mark) {
+    let box = { x: w * 0.065, y: top, w: w * 0.87, h: usable };
+    if (caption) {
+      if (stacked) {
+        box = { x: w * 0.08, y: top, w: w * 0.84, h: usable * 0.44 };
+        labelY = top + usable * 0.74;
+      } else {
+        box = { x: w * 0.065, y: top, w: w * (fallback ? 0.115 : 0.28), h: usable };
+        labelX = w * (fallback ? 0.57 : 0.655);
+        labelW = w * (fallback ? 0.72 : 0.57);
+      }
+    }
+    const r = contained(mark, box.x, box.y, box.w, box.h);
+    if (!fallback)
+      markBounds = [r.x / w, r.y / h, r.w / w, r.h / h];
+    if (c.carrier && !fallback) {
+      const edge = h * 0.33, foil = ctx.createLinearGradient(r.x - edge, 0, r.x + r.w + edge, 0);
+      const stop = edge / (r.w + 2 * edge);
+      foil.addColorStop(0, "rgba(248,233,202,0)");
+      foil.addColorStop(stop, swatch.enamel);
+      foil.addColorStop(1 - stop, swatch.enamel);
+      foil.addColorStop(1, "rgba(248,233,202,0)");
+      ctx.fillStyle = foil;
+      ctx.fillRect(r.x - edge, h * 0.075, r.w + 2 * edge, h * (blade ? 0.62 : 0.82));
+    }
+    draw(ink, mark, r);
+    if (!blade && !fallback) {
+      if (c.relief)
+        draw(reliefCtx, mark, r);
+      else if (c.letterInk)
+        draw(reliefCtx, letterMask(mark, c), r);
+    }
+  }
+  if (caption) {
+    const font = c.typography === "modern" ? "600 SIZEpx Arial, sans-serif" : c.typography === "editorial" ? "500 SIZEpx Georgia, serif" : "bold SIZEpx Georgia, serif";
+    for (const layer of [ink, reliefCtx]) {
+      let size = Math.round(usable * (stacked ? 0.49 : 0.82));
+      layer.font = font.replace("SIZE", String(size));
+      const words = c.brand.split(/\s+/);
+      const lines = !blade && words.length === 2 && layer.measureText(c.brand).width > labelW * 1.55 ? words : [c.brand];
+      const maxWidth = Math.max(...lines.map((line) => layer.measureText(line).width));
+      size *= Math.min(1, labelW / maxWidth, lines.length > 1 ? 0.55 : 1);
+      layer.font = font.replace("SIZE", String(size));
+      layer.textAlign = "center";
+      layer.textBaseline = "middle";
+      layer.fillStyle = c.palette.letter;
+      lines.forEach((line, i) => layer.fillText(line, labelX, labelY + (i - (lines.length - 1) / 2) * size));
+    }
+  }
+  ctx.save();
+  if (c.backlight === "halo") {
+    ctx.shadowColor = c.palette.glow;
+    ctx.shadowBlur = h * 0.052;
+  }
+  ctx.drawImage(mask, 0, h * 0.016);
+  ctx.restore();
+  ctx.drawImage(mask, 0, 0);
+  if (blade) {
+    const plate = plateRect({ x: 0, y: 0, w, h });
+    ctx.fillStyle = c.palette.fascia;
+    ctx.fillRect(plate.x, plate.y, plate.w, plate.h);
+    ctx.strokeStyle = c.palette.trim;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(plate.x, plate.y, plate.w, plate.h);
+    ctx.fillStyle = c.palette.letter;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "600 " + Math.round(h * 0.16) + "px Arial";
+    ctx.fillText(c.id, w / 2, plate.y + plate.h * 0.53);
+  }
+  return { mask, relief, markBounds };
+}
+function paintPoster(ctx, c, img, r) {
+  ctx.save();
+  ctx.translate(r.x, r.y);
+  ctx.fillStyle = c.palette.trim;
+  ctx.fillRect(0, 0, r.w, r.h);
+  ctx.fillStyle = swatch.enamel;
+  ctx.fillRect(3, 3, r.w - 6, r.h - 6);
+  if (img)
+    draw(ctx, img, contained(img, 5, 5, r.w - 10, r.h - 10));
+  else {
+    ctx.fillStyle = swatch.charcoal;
+    ctx.font = "bold 24px Georgia";
+    ctx.textAlign = "center";
+    ctx.fillText(c.brand, r.w / 2, r.h / 2, r.w - 16);
+  }
+  ctx.restore();
+}
+async function bakeAtlas(configs, assetBase) {
+  const sheet = canvas(atlasSize, atlasSize), ctx = sheet.getContext("2d", { willReadFrequently: true });
+  const tiles = new Map;
+  const neutral = await image("data:image/svg+xml;charset=utf-8," + encodeURIComponent(registry.door.replace("currentColor", swatch.brass)));
+  await Promise.all(configs.map(async (c) => {
+    const [src, poster] = await Promise.all([
+      c.logoFile ? image(new URL(c.id === "S01" ? "new-moon-logo.svg" : "brands/" + c.logoFile, assetBase)) : null,
+      c.poster ? image(new URL("brand-kit/" + c.poster + "-hero.webp", assetBase)) : null
+    ]);
+    const logo = src && trimLogo(src), cells = atlasCells(Number(c.id.slice(1)) - 1);
+    const masks = {};
+    for (const kind of ["fascia", "blade"]) {
+      const r = cells[kind], h = r.h, w = kind === "blade" ? r.w : Math.round(h * c.size.width / c.size.height);
+      const face = canvas(w, h), painter = face.getContext("2d");
+      finish(painter, w, h, c);
+      const { mask, relief, markBounds } = lockup(painter, w, h, c, logo, neutral, kind === "blade");
+      draw(ctx, face, r);
+      if (kind === "fascia") {
+        const pixels = ctx.getImageData(r.x, r.y, r.w, h), aux = canvas(r.w, h), auxCtx = aux.getContext("2d");
+        auxCtx.drawImage(mask, 0, 0, r.w, h);
+        const alpha = auxCtx.getImageData(0, 0, r.w, h).data;
+        for (let i = 3;i < alpha.length; i += 4)
+          pixels.data[i] = 128 + (alpha[i] >> 1);
+        ctx.putImageData(pixels, r.x, r.y);
+        const mh = 40, mw = Math.round(w / h * mh), small = canvas(mw, mh), smallCtx = small.getContext("2d");
+        smallCtx.drawImage(relief, 0, 0, mw, mh);
+        masks.width = mw;
+        masks.height = mh;
+        masks.markBounds = markBounds;
+        const rgba = smallCtx.getImageData(0, 0, mw, mh).data;
+        masks.ink = Uint8Array.from({ length: mw * mh }, (_, i) => rgba[4 * i + 3] > 127 ? 1 : 0);
+      }
+    }
+    paintPoster(ctx, c, poster, cells.poster);
+    tiles.set(c.id, { cells, mask: masks });
+  }));
+  return { sheet, tiles };
+}
+
+// demos/corporate/gjh/v11/assets/shop-sign-vendor.js
+import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
+import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
+
+// demos/corporate/gjh/v11/assets/signage/builder.js
+function uvRect(r) {
+  return [
+    (r.x + 0.5) / atlasSize,
+    1 - (r.y + r.h - 0.5) / atlasSize,
+    (r.x + r.w - 0.5) / atlasSize,
+    1 - (r.y + 0.5) / atlasSize
+  ];
+}
+function createShopSign(T, config, bay) {
+  const group = new T.Group, entrance = shopEntrance(bay), anchor = Number(bay.number) <= 3;
+  group.name = "Store sign " + config.id;
+  group.position.set(entrance.x, 0, entrance.z);
+  group.rotation.y = entrance.yaw;
+  const cells = atlasCells(Number(bay.number) - 1);
+  const { width, height, depth } = config.size, band = fasciaBand(bay);
+  const z = (anchor ? 0.44 : 0.23) + depth, y = (band.top + band.bottom) / 2;
+  const bladeX = -width / 2 + 0.24, bladeY = y - 0.78, bladeDepth = 0.94;
+  const positions = [], uvs = [], indices = [];
+  function panel(x, y2, z2, w, h, yaw, cell) {
+    const start = positions.length / 3, cs = Math.cos(yaw), sn = Math.sin(yaw);
+    for (const [u, v] of [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]])
+      positions.push(x + w * u * cs, y2 + h * v, z2 - w * u * sn);
+    const [l, b, r, t] = uvRect(cell);
+    uvs.push(l, b, r, b, r, t, l, t);
+    indices.push(start, start + 1, start + 2, start, start + 2, start + 3);
+  }
+  panel(0, y, z, width, height, 0, cells.fascia);
+  if (config.blade) {
+    for (const side of [-1, 1])
+      panel(bladeX + side * 0.012, bladeY, z + bladeDepth / 2, bladeDepth, 0.69, side * Math.PI / 2, cells.blade);
+  }
+  panel(width / 2 - 0.32, 3.7, z, 0.6, 0.2, 0, plateRect(cells.blade));
+  const span = bayWidth(bay);
+  if (config.poster) {
+    if (anchor) {
+      panel(-span * 0.359, 2.15, 0.24, 1.52, 1.32, 0, cells.poster);
+    } else {
+      panel(-span / 2 + 0.98, bay.posterHeight ?? 2.46, -0.09, 1.24, 1.08, 0, cells.poster);
+      const heroX = bay.side === "north" ? 3 : 2.55;
+      panel(heroX - 0.61, 0.42, -0.44, 0.68, 0.51, 0, cells.poster);
+    }
+  }
+  if (!anchor) {
+    const roomDepth = bay.side === "north" ? bay.maxZ - bay.minZ : bay.maxX - bay.minX;
+    panel(0, 3.69, -roomDepth + 0.98, 3.63, 0.415, 0, cells.fascia);
+  }
+  const geometry = new T.BufferGeometry;
+  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  group.add(new T.Mesh(geometry, config.faceMaterial));
+  group.userData.mount = { y, z, depth, bladeX, bladeY, bladeDepth };
+  group.updateMatrixWorld();
+  return group;
+}
+function letterGeometry(T, mask, config, mount, cell) {
+  const { width: n, height: m, ink } = mask;
+  if (!ink.some(Boolean))
+    return null;
+  const p = [], uv = [], idx = [], [left, bottom, right, top] = uvRect(cell);
+  function quad(points) {
+    const start = p.length / 3;
+    for (const [x, y, d] of points) {
+      p.push((x / n - 0.5) * config.size.width, mount.y + (0.5 - y / m) * config.size.height, mount.z + d);
+      uv.push(left + (right - left) * x / n, top + (bottom - top) * y / m);
+    }
+    idx.push(start, start + 1, start + 2, start, start + 2, start + 3);
+  }
+  const bevel = 0.018, base = 0.001;
+  function wall(x, y, ex, ey) {
+    quad([[x, y, base], [ex, ey, base], [ex, ey, bevel], [x, y, bevel]]);
+  }
+  function run(y, condition, handle) {
+    for (let x = 0;x < n; ) {
+      if (!condition(x)) {
+        x++;
+        continue;
+      }
+      const start = x++;
+      while (x < n && condition(x))
+        x++;
+      handle(start, x, y);
+    }
+  }
+  for (let y = 0;y < m; y++) {
+    const row = y * n;
+    run(y, (x) => ink[row + x], (a, b) => {
+      quad([[a, y + 1, bevel], [b, y + 1, bevel], [b, y, bevel], [a, y, bevel]]);
+      wall(a, y, a, y + 1);
+      wall(b, y + 1, b, y);
+    });
+    run(y, (x) => ink[row + x] && !ink[row - n + x], (a, b) => wall(b, y, a, y));
+    run(y, (x) => ink[row + x] && !ink[row + n + x], (a, b) => wall(a, y + 1, b, y + 1));
+  }
+  const g = new T.BufferGeometry;
+  g.setAttribute("position", new T.Float32BufferAttribute(p, 3));
+  g.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+// demos/corporate/gjh/v11/assets/signage/hardware.js
+function buildHardware(T, modules, detailed, capacity) {
+  const vertices = [], normals = [], colors = [], pbr2 = [], emission = [], anchors = [];
+  const baseW = 7, baseH = 1.36;
+  const cube = new T.BoxGeometry, lamp = new T.CylinderGeometry(0.5, 0.5, 1, 10);
+  function part(id, x, y, z, w, h, d, ax, ay, stretch, blade, fallback, rotation = 0) {
+    const module = modules.get(id), pieces = [];
+    if (module) {
+      module.traverse((mesh2) => {
+        if (mesh2.isMesh)
+          pieces.push({ g: mesh2.geometry.clone().applyMatrix4(mesh2.matrixWorld), mat: mesh2.material.name });
+      });
+    }
+    if (!pieces.length)
+      pieces.push({ g: (id === "sign_downlight" ? lamp : cube).clone(), mat: fallback });
+    const bounds = new T.Box3;
+    for (const { g: g2 } of pieces) {
+      if (module && id === "sign_blade_bracket")
+        g2.rotateY(-Math.PI / 2);
+      g2.rotateZ(rotation);
+      g2.computeBoundingBox();
+      bounds.union(g2.boundingBox);
+    }
+    const centre = bounds.getCenter(new T.Vector3), size = bounds.getSize(new T.Vector3);
+    for (const { g: g2, mat: mat2 } of pieces) {
+      const geom = g2.index ? g2.toNonIndexed() : g2;
+      geom.translate(-centre.x, -centre.y, -centre.z);
+      geom.scale(w / (size.x || 1), h / (size.y || 1), d / (size.z || 1));
+      if (!geom.attributes.normal)
+        geom.computeVertexNormals();
+      const spec = materials[mat2] ?? materials[fallback];
+      const position = geom.attributes.position, normal = geom.attributes.normal;
+      for (let i = 0;i < position.count; i++) {
+        const vx = position.getX(i), vy = position.getY(i);
+        vertices.push(x + vx, y + vy, z + position.getZ(i));
+        normals.push(normal.getX(i), normal.getY(i), normal.getZ(i));
+        colors.push(...spec.baseColorFactor.slice(0, 3));
+        pbr2.push(spec.metallicFactor, spec.roughnessFactor, 0);
+        emission.push(...spec.emissiveFactor);
+        anchors.push(stretch === "width" || stretch === "both" ? vx / w : ax, stretch === "height" || stretch === "both" ? vy / h : ay, blade ? 1 : 0);
+      }
+      geom.dispose();
+      if (geom !== g2)
+        g2.dispose();
+    }
+  }
+  const corner = 0.09;
+  for (const side of [-1, 1]) {
+    part("sign_frame_edge_h", 0, side * (baseH / 2 - 0.022), 0.018, baseW - 2 * corner, 0.032, 0.029, 0, side / 2, "width", false, "brass_trim");
+    part("sign_frame_edge_v", side * (baseW / 2 - 0.022), 0, 0.018, 0.032, baseH - 2 * corner, 0.029, side / 2, 0, "height", false, "brass_trim");
+    for (const end of [-1, 1])
+      part("sign_frame_corner", side * (baseW / 2 - corner / 2), end * (baseH / 2 - corner / 2), 0.018, corner, corner, 0.036, side / 2, end / 2, null, false, "brass_trim", side < 0 ? end < 0 ? 0 : -Math.PI / 2 : end < 0 ? Math.PI / 2 : Math.PI);
+  }
+  part("sign_blade_bracket", -baseW / 2 + 0.24, -0.427, 0.46, 0.042, 0.055, 0.94, -0.5, 0, null, true, "brass_trim");
+  if (modules.has("sign_backplate"))
+    part("sign_backplate", 0, 0, -0.031, baseW, baseH, 0.06, 0, 0, "both", false, "lacquer_fascia");
+  if (detailed)
+    for (const a of [-0.33, 0, 0.33])
+      part("sign_downlight", a * baseW, baseH / 2 - 0.062, 0.035, 0.1, 0.038, 0.06, a, 0.5, null, false, "emissive_letter");
+  cube.dispose();
+  lamp.dispose();
+  const g = new T.BufferGeometry;
+  for (const [name, values] of Object.entries({ position: vertices, normal: normals, color: colors, signAnchor: anchors, signFinish: pbr2, signEmission: emission }))
+    g.setAttribute(name, new T.Float32BufferAttribute(values, 3));
+  const dimensions = new T.InstancedBufferAttribute(new Float32Array(capacity * 3), 3);
+  g.setAttribute("signSize", dimensions);
+  const mat = new T.MeshStandardMaterial({ vertexColors: true, metalness: 1, roughness: 1 });
+  mat.onBeforeCompile = (shader) => {
+    shader.vertexShader = `attribute vec3 signAnchor, signFinish, signSize, signEmission; varying vec3 vFinish, vSignEmission;
+` + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+      transformed.xy += signAnchor.xy * signSize.xy;
+      if(signAnchor.z > .5 && signSize.z < .5) transformed = vec3(0.);
+      vFinish=signFinish;vSignEmission=signEmission;`);
+    shader.fragmentShader = `varying vec3 vFinish, vSignEmission;
+` + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
+metalnessFactor *= vFinish.x;`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
+roughnessFactor *= vFinish.y;`).replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+totalEmissiveRadiance += vSignEmission;`);
+  };
+  const mesh = new T.InstancedMesh(g, mat, capacity);
+  mesh.frustumCulled = false;
+  mesh.count = 0;
+  mesh.name = "Instanced sign hardware";
+  return { mesh, set(index, sign) {
+    mesh.setMatrixAt(index, sign.hardwareMatrix);
+    dimensions.setXYZ(index, sign.config.size.width - baseW, sign.config.size.height - baseH, Number(sign.config.blade));
+  }, commit(count) {
+    mesh.count = count;
+    mesh.visible = count > 0;
+    mesh.instanceMatrix.needsUpdate = true;
+    dimensions.needsUpdate = true;
+  } };
+}
+
+// demos/corporate/gjh/v11/assets/signage/models.js
+var modelFiles = Object.freeze([]);
+var moduleIds = Object.freeze([
+  "sign_frame_corner",
+  "sign_frame_edge_h",
+  "sign_frame_edge_v",
+  "sign_backplate",
+  "sign_downlight",
+  "sign_blade_bracket"
+]);
+async function loadModules(assetBase, files = modelFiles, loader = new GLTFLoader3) {
+  const modules = new Map;
+  await Promise.all([...new Set(files)].map(async (file) => {
+    if (!/^[a-zA-Z0-9_-]+\.glb$/.test(file))
+      return;
+    try {
+      const url = new URL("signage/models/" + file, assetBase);
+      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (!response.ok)
+        return;
+      const { scene } = await loader.parseAsync(await response.arrayBuffer(), url.href.slice(0, url.href.lastIndexOf("/") + 1));
+      scene.updateMatrixWorld(true);
+      scene.traverse((node) => {
+        if (moduleIds.includes(node.name) || /^sign_logo3d_[a-z0-9_]+$/.test(node.name))
+          modules.set(node.name, node);
+      });
+    } catch {}
+  }));
+  return modules;
+}
+
+// demos/corporate/gjh/v11/assets/signage/runtime.js
+function nearFaceMaterial(T, texture, pulse) {
+  const material = new T.MeshBasicMaterial({ map: texture, toneMapped: false });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.signPulse = pulse;
+    shader.vertexShader = `attribute vec4 signRange; attribute float signPulseEnabled; varying vec2 vSignEffect;
+` + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+      vSignEffect=vec2(float(distance(cameraPosition,signRange.xyz)<signRange.w),signPulseEnabled);`);
+    shader.fragmentShader = `uniform float signPulse; varying vec2 vSignEffect;
+` + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace("#include <opaque_fragment>", `
+      if(vSignEffect.x>.5){
+        float ink=texture2D(map,vMapUv).a;
+        float bevel=ink-texture2D(map,vMapUv+vec2(-1.,1.)/${atlasSize.toFixed(1)}).a;
+        outgoingLight *= 1.+bevel*.55+max(0.,2.*ink-1.)*(vec3(.065)+vec3(1.,.8,.5)*vSignEffect.y*signPulse);
+      }
+      #include <opaque_fragment>`);
+  };
+  return material;
+}
+function modelRelief(T, sign, module, mask, cell) {
+  const meshes = [], bounds = new T.Box3;
+  module.traverse((node) => {
+    if (!node.isMesh)
+      return;
+    const geo = node.geometry.clone().applyMatrix4(node.matrixWorld);
+    geo.computeBoundingBox();
+    bounds.union(geo.boundingBox);
+    meshes.push(geo);
+  });
+  if (!meshes.length)
+    return null;
+  const { config, mount } = sign, { width: n, height: m } = mask;
+  const [mx, my, mw, mh] = mask.markBounds;
+  const x0 = mx * n, x1 = (mx + mw) * n, y0 = my * m, y1 = (my + mh) * m;
+  const [u, v, w, h] = config.logoRegion ?? [0, 0, 1, 1];
+  const x = (x0 + (x1 - x0) * (u + w / 2)) / n, y = (y0 + (y1 - y0) * (v + h / 2)) / m;
+  const size = bounds.getSize(new T.Vector3), centre = bounds.getCenter(new T.Vector3);
+  const scale = Math.min(config.size.width * (x1 - x0) * w / n / size.x, config.size.height * (y1 - y0) * h / m / size.y);
+  const [left, bottom, right, top] = uvRect(cell);
+  const pieces = meshes.map((g) => {
+    const geometry = g.index ? g.toNonIndexed() : g;
+    geometry.translate(-centre.x, -centre.y, -bounds.min.z);
+    geometry.scale(scale, scale, Math.min(scale, 0.04 / (size.z || 1)));
+    geometry.translate((x - 0.5) * config.size.width, mount.y + (0.5 - y) * config.size.height, mount.z + 0.002);
+    const pos = geometry.attributes.position, uv = [];
+    for (let i = 0;i < pos.count; i++) {
+      uv.push(left + (right - left) * (0.5 + pos.getX(i) / config.size.width), bottom + (top - bottom) * (0.5 + (pos.getY(i) - mount.y) / config.size.height));
+    }
+    for (const key of Object.keys(geometry.attributes))
+      if (key !== "position" && key !== "normal")
+        geometry.deleteAttribute(key);
+    geometry.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
+    if (!geometry.attributes.normal)
+      geometry.computeVertexNormals();
+    if (g !== geometry)
+      g.dispose();
+    return geometry;
+  });
+  const merged = mergeGeometries3(pieces);
+  pieces.forEach((g) => g.dispose());
+  const remaining = mask.ink.slice();
+  for (let j = Math.floor(y0 + (y1 - y0) * v);j < y0 + (y1 - y0) * (v + h); j++)
+    remaining.fill(0, j * n + Math.floor(x0 + (x1 - x0) * u), j * n + Math.ceil(x0 + (x1 - x0) * (u + w)));
+  return { geometry: merged, remaining };
+}
+function buildRelief(T, signs, tiles, modules, texture) {
+  const pieces = [], ranges = [], source = [];
+  let offset = 0;
+  for (const sign of signs) {
+    const { mask, cells } = tiles.get(sign.config.id);
+    const imported = mask.markBounds && modules.get(sign.config.logoModule);
+    const model = imported && modelRelief(T, sign, imported, mask, cells.fascia);
+    const lettering = letterGeometry(T, model ? { ...mask, ink: model.remaining } : mask, sign.config, sign.mount, cells.fascia);
+    const start = source.length;
+    for (const g of [model?.geometry, lettering]) {
+      if (!g)
+        continue;
+      const count = g.attributes.position.count;
+      for (let i = 0;i < (g.index?.count ?? count); i++)
+        source.push(offset + (g.index ? g.index.getX(i) : i));
+      offset += count;
+      g.setIndex(null);
+      g.applyMatrix4(sign.matrix);
+      pieces.push(g);
+    }
+    ranges.push([start, source.length]);
+  }
+  if (!pieces.length)
+    return null;
+  const geo = mergeGeometries3(pieces);
+  pieces.forEach((g) => g.dispose());
+  const Index = offset > 65535 ? Uint32Array : Uint16Array;
+  const original = new Index(source), index = new T.BufferAttribute(new Index(source.length), 1);
+  index.setUsage(T.DynamicDrawUsage);
+  geo.setIndex(index);
+  geo.setDrawRange(0, 0);
+  const mat = new T.MeshStandardMaterial({
+    map: texture,
+    color: 5919044,
+    emissive: 16777215,
+    emissiveMap: texture,
+    emissiveIntensity: 0.78,
+    roughness: 0.35,
+    metalness: 0.24,
+    toneMapped: false
+  });
+  const mesh = new T.Mesh(geo, mat);
+  mesh.frustumCulled = false;
+  mesh.name = "Near sign letter relief";
+  return { mesh, select(visible) {
+    let count = 0;
+    for (const i of visible) {
+      const [a, b] = ranges[i];
+      index.array.set(original.subarray(a, b), count);
+      count += b - a;
+    }
+    index.needsUpdate = true;
+    geo.setDrawRange(0, count);
+    mesh.visible = count > 0;
+  } };
+}
+function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
+  const texture = new T.CanvasTexture(bake.sheet);
+  texture.colorSpace = T.SRGBColorSpace;
+  texture.anisotropy = 2;
+  const flat = new T.MeshBasicMaterial({ map: texture, toneMapped: false }), pulse = { value: 0 };
+  const embossed = nearFaceMaterial(T, texture, pulse);
+  const pieces = [], signs = [];
+  configs.forEach((config, index) => {
+    const group = createShopSign(T, { ...config, faceMaterial: flat }, bays[index]);
+    const matrix = group.matrixWorld, mount = group.userData.mount;
+    const centre = new T.Vector3(0, mount.y, mount.z).applyMatrix4(matrix);
+    const hardwareMatrix = matrix.clone().multiply(new T.Matrix4().makeTranslation(0, mount.y, mount.z));
+    const geo = group.children[0].geometry.applyMatrix4(matrix), n = geo.attributes.position.count;
+    const ranges = new Float32Array(n * 4), pulses = new Float32Array(n);
+    for (let i = 0;i < 4; i++) {
+      ranges.set([centre.x, centre.y, centre.z, config.lodDistance], 4 * i);
+      pulses[i] = Number(config.pulse && config.backlight !== "none");
+    }
+    geo.setAttribute("signRange", new T.Float32BufferAttribute(ranges, 4));
+    geo.setAttribute("signPulseEnabled", new T.Float32BufferAttribute(pulses, 1));
+    pieces.push(geo);
+    signs.push({ config, matrix, mount, hardwareMatrix, centre, sphere: new T.Sphere(centre, config.size.width / 2 + 0.6) });
+  });
+  const faces = new T.Mesh(mergeGeometries3(pieces), flat);
+  pieces.forEach((g) => g.dispose());
+  faces.name = "Expanded branded shop signs";
+  faces.layers.enable(1);
+  scene.add(faces);
+  const frustum = new T.Frustum, view = new T.Matrix4, eye = new T.Vector3, near = [];
+  let tier = "low", signature = -1, hardware = null, relief = null, modules = new Map, moduleTask;
+  let calls = 0, tris = 0;
+  function measure(mesh) {
+    let beforeCalls = 0, beforeTriangles = 0;
+    mesh.onBeforeRender = (renderer) => {
+      beforeCalls = renderer.info.render.calls;
+      beforeTriangles = renderer.info.render.triangles;
+    };
+    mesh.onAfterRender = (renderer) => {
+      calls += renderer.info.render.calls - beforeCalls;
+      tris += renderer.info.render.triangles - beforeTriangles;
+    };
+  }
+  measure(faces);
+  function discard(pool) {
+    if (!pool)
+      return;
+    scene.remove(pool.mesh);
+    pool.mesh.geometry.dispose();
+    pool.mesh.material.dispose();
+    pool.mesh.dispose?.();
+  }
+  function rebuild(next) {
+    discard(hardware);
+    discard(relief);
+    hardware = relief = null;
+    faces.material = next === "low" ? flat : embossed;
+    if (next !== "low") {
+      hardware = buildHardware(T, modules, next === "detailed", signs.length);
+      if (next === "detailed")
+        relief = buildRelief(T, signs, bake.tiles, modules, texture);
+      for (const pool of [hardware, relief])
+        if (pool) {
+          pool.mesh.visible = false;
+          measure(pool.mesh);
+          scene.add(pool.mesh);
+        }
+    }
+    tier = next;
+    signature = -1;
+  }
+  return { update(camera, requestedTier, reducedMotion, now) {
+    calls = tris = 0;
+    const next = ["balanced", "detailed"].includes(requestedTier) ? requestedTier : "low";
+    if (tier !== next)
+      rebuild(next);
+    if (next === "low")
+      return;
+    if (modelFiles.length && !moduleTask) {
+      moduleTask = loadModules(assetBase).then((loaded) => {
+        if (loaded.size) {
+          modules = loaded;
+          rebuild(tier);
+        }
+      });
+    }
+    frustum.setFromProjectionMatrix(view.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    eye.setFromMatrixPosition(camera.matrixWorld);
+    let bits = 0;
+    near.length = 0;
+    for (let i = 0;i < signs.length; i++) {
+      const s = signs[i];
+      if (!frustum.intersectsSphere(s.sphere))
+        continue;
+      if (selectSignLod(tier, s.centre.distanceTo(eye), true, s.config.lodDistance) === "baked")
+        continue;
+      near.push(i);
+      bits |= 1 << i;
+    }
+    pulse.value = near.length && !reducedMotion?.matches ? 0.024 * Math.sin(now * 0.0012) : 0;
+    if (bits === signature)
+      return;
+    signature = bits;
+    near.forEach((i, n) => hardware.set(n, signs[i]));
+    hardware.commit(near.length);
+    relief?.select(near);
+  }, report() {
+    const pixels = texture.image.width * texture.image.height;
+    return { signs: signs.length, drawCalls: calls, triangles: tris, textureMB: +(pixels * 4 * 4 / 3 / 1048576).toFixed(2), tier };
+  } };
+}
+
+// demos/corporate/gjh/v11/assets/shop-signs.js
+var assetBase = new URL("./", import.meta.url);
+async function readJson(path) {
+  const response = await fetch(new URL(path, assetBase));
+  if (!response.ok)
+    throw Error("Unavailable shop artwork manifest: " + path);
+  return response.json();
+}
+function mountGraphics(bay) {
+  const n = Number(bay.number), x = -bayWidth(bay) / 2 + 0.98;
+  const fixtures = eastShopPlacements[n] ?? westShopPlacements[n];
+  if (!fixtures)
+    return bay;
+  const aboveDisplay = fixtures.some(({ position }) => Math.abs(position[0] - x) < 1.1);
+  return { ...bay, posterHeight: aboveDisplay ? 2.94 : 2.46 };
+}
+async function addShopSignAtlas(T, layout, scene) {
+  const [kit, receipts] = await Promise.all([readJson("brand-kit/brand-kit.json"), readJson("brands/logo-sources.json").catch(() => ({}))]);
+  const bays = layout.slots.map(mountGraphics);
+  const configs = bays.map((bay) => {
+    const id = "S" + bay.number;
+    return resolveConfig(id, stores[id], bay, kit, receipts);
+  });
+  const bake = await bakeAtlas(configs, assetBase);
+  return {
+    ...createSignageSystem(T, scene, configs, bays, bake, assetBase),
+    configs: new Map(configs.map((config) => [config.id, config]))
+  };
+}
+
+// demos/corporate/gjh/v11/assets/expanded-storefronts.js
+function addExpandedStorefronts(T, layout, scene, signs) {
+  const geometry = new T.BoxGeometry(1, 1, 1);
+  const batches = {
+    frame: { material: new T.MeshStandardMaterial({ color: 1656373, roughness: 0.66 }), matrices: [] },
+    brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.65, roughness: 0.38 }), matrices: [] },
+    accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
+    glass: { material: new T.MeshStandardMaterial({
+      color: 12179920,
+      metalness: 0.05,
+      roughness: 0.18,
+      transparent: true,
+      opacity: 0.065,
+      depthWrite: false
+    }), matrices: [] }
+  };
+  const transform = new T.Object3D;
+  const slidingParts = new Map;
+  for (const bay of layout.slots) {
+    const number = Number(bay.number);
+    const { x, z, alongX: cos, normalX: sin, yaw: angle } = shopEntrance(bay);
+    const width = (bay.side === "north" ? bay.maxX - bay.minX : bay.maxZ - bay.minZ) - 0.6;
+    const box = (kind, along, y, depth, w, h, d, leaf = 0) => {
+      transform.position.set(x + along * cos + depth * sin, y, z - along * sin + depth * cos);
+      transform.rotation.set(0, angle, 0);
+      transform.scale.set(w, h, d);
+      transform.updateMatrix();
+      batches[kind].matrices.push(transform.matrix.clone());
+      if (leaf) {
+        if (!slidingParts.has(bay.number))
+          slidingParts.set(bay.number, []);
+        slidingParts.get(bay.number).push({ kind, index: batches[kind].matrices.length - 1, dx: leaf * cos, dz: -leaf * sin });
+      }
+      if (kind === "accent")
+        batches.accent.slots.push(bay.number);
+    };
+    if (number <= 3) {
+      box("accent", 0, 5.55, 0.32, width, 0.14, 0.24);
+      for (const side of [-1, 1]) {
+        box("accent", side * 2.47, 1.95, 0.21, 0.12, 3.7, 0.08);
+      }
+      continue;
+    }
+    const windowWidth = (width - 2.7) / 2;
+    const windowCenter = 1.3 + windowWidth / 2;
+    box("frame", 0, 4.75, 0, width, 1.5, 0.36);
+    const band = fasciaBand(bay);
+    box("brass", 0, band.bottom, 0.21, width, 0.055, 0.08);
+    box("brass", 0, band.top, 0.21, width, 0.055, 0.08);
+    box("brass", 0, 5.55, 0.24, width, 0.055, 0.29);
+    box("brass", 0, 3.94, 0.22, 2.65, 0.055, 0.08);
+    for (const side of [-1, 1]) {
+      box("glass", side * windowCenter, 2.17, 0, windowWidth, 3.35, 0.06);
+      box("frame", side * windowCenter, 0.25, 0.07, windowWidth, 0.5, 0.22);
+      box("brass", side * windowCenter, 0.51, 0.2, windowWidth, 0.045, 0.05);
+      box("frame", side * (width / 2 - 0.07), 2.02, 0.08, 0.14, 4.04, 0.24);
+      box("frame", side * 1.3, 2.02, 0.08, 0.12, 4.04, 0.24);
+      box("brass", side * 1.3, 2.02, 0.22, 0.035, 3.72, 0.04);
+      box("accent", side * (width / 2 - 0.35), 3.69, 0.22, number % 2 ? 0.18 : 0.38, 0.32, 0.08);
+      box("glass", side * 0.64, 1.97, 0.025, 1.2, 3.86, 0.06, side);
+      box("frame", side * 0.64, 0.12, 0.09, 1.2, 0.24, 0.18, side);
+      box("brass", side * 0.019, 2, 0.1, 0.022, 4, 0.035, side);
+      box("brass", side * 0.18, 1.16, 0.21, 0.045, 0.55, 0.06, side);
+    }
+    box("frame", 0, 4, 0.08, width, 0.16, 0.24);
+  }
+  const meshes = {};
+  for (const [kind, batch] of Object.entries(batches)) {
+    if (!batch.matrices.length)
+      continue;
+    const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
+    batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
+    if (batch.slots) {
+      const color = new T.Color;
+      batch.slots.forEach((slot2, index) => {
+        mesh.setColorAt(index, color.set(signs.get("S" + slot2).palette.accent));
+      });
+      mesh.instanceColor.needsUpdate = true;
+    }
+    mesh.name = `Expanded storefront ${kind}`;
+    mesh.receiveShadow = kind !== "glass";
+    mesh.computeBoundingSphere();
+    scene.add(mesh);
+    meshes[kind] = mesh;
+  }
+  const moved = new T.Matrix4;
+  return function slide(number, travel) {
+    for (const { kind, index, dx, dz } of slidingParts.get(number)) {
+      moved.copy(batches[kind].matrices[index]);
+      moved.elements[12] += dx * travel;
+      moved.elements[14] += dz * travel;
+      meshes[kind].setMatrixAt(index, moved);
+      meshes[kind].instanceMatrix.needsUpdate = true;
+    }
+  };
+}
+
+// demos/corporate/gjh/v11/assets/expanded-interiors.js
+import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
+
 // demos/corporate/gjh/v11/assets/shop-anchor-details-last.js
 var brass2 = 13215085;
 var walnut2 = 6701359;
@@ -2391,9 +3470,9 @@ function television(t, x, y, z, w, h, sunset) {
   for (let i = 0;i < 32; i++) {
     const v = i / 31, segment = v > 0.5 ? 1 : 0, f = v * 2 - segment;
     const rgb = sky[segment].map((c, k) => Math.round(c + (sky[segment + 1][k] - c) * f));
-    const tint = rgb[0] << 16 | rgb[1] << 8 | rgb[2];
+    const tint2 = rgb[0] << 16 | rgb[1] << 8 | rgb[2];
     const top = 0.5 - i / 32, lower = 0.5 - (i + 1) / 32;
-    profile(t, x, face + 0.009, iw, () => cut(lower), () => cut(top), tint, 1);
+    profile(t, x, face + 0.009, iw, () => cut(lower), () => cut(top), tint2, 1);
   }
   t.disc(x + iw * (sunset ? 0.21 : -0.24), cut(0.065), face + 0.014, ih * 0.078, 0.004, 15976354);
   const peaks = sunset ? [0, 0.11, 0.3, 0.12, 0.2, 0.05, 0.14, 0.03, 0.08] : [0.12, 0.21, 0.02, 0.12, 0.05, 0.29, 0.14, 0.06, 0.15];
@@ -2632,36 +3711,8 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
   }
 }
 
-// demos/corporate/gjh/v11/assets/gallery-west-shops.js
-var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
-  file: `gallery-assets/${name}.glb`,
-  position: [x, y, z],
-  yaw,
-  scale
-});
-var westShopPlacements = {
-  4: [fixture("mosquito-patch-pack", -1.57, 1.2875, shopIslandZ + 0.29)],
-  5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
-  6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
-  7: [fixture("stacked-can-pyramid", -1.56, 0.081, 2.65, -0.07, 0.88)],
-  8: [fixture("peanut-butter-jar-stand", -2.52, 0.081, 4.57, 0.015)],
-  9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
-  10: [fixture("abalone-gift-box-display", -0.55, 1.09, shopIslandZ + 0.42)],
-  11: [fixture("food-display-cabinet", -1.61, 0.081, 2.74, -0.12)]
-};
-
-// demos/corporate/gjh/v11/assets/gallery-east-shops.js
-var eastShopPlacements = {
-  12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
-  13: [{ file: "gallery-assets/headphone-display-stand.glb", position: [-2.45, 0.081, 3.05], yaw: 0.18, scale: 1.2 }],
-  14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.081, 2.58], yaw: 0.08, scale: 1.03 }],
-  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 }],
-  16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.081, 2.81], yaw: 0.12, scale: 0.96 }],
-  17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-2.22, 0.081, 2.22], yaw: 1.5, scale: 0.86 }]
-};
-
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
-import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
+import { GLTFLoader as GLTFLoader4 } from "../vendor/GLTFLoader.js";
 var displayFiles = {
   4: ["pharmacy-counter"],
   5: ["pharmacy-counter"],
@@ -2694,11 +3745,6 @@ function displayPlacements(number, heroX, heroZ) {
 }
 async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
-  const loader = new T.TextureLoader().setCrossOrigin(undefined);
-  const [kit, textures] = await Promise.all([
-    loadBrandKit(),
-    Promise.all(slots.map((slot2) => loader.loadAsync(new URL(`./brand-kit/S${slot2.number}-hero.webp`, import.meta.url).href)))
-  ]);
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.65 });
   const woodFinishes = new Set([11633494, 6701359, 6898732, 9132600, 11700828, 12950889, 9325877, 6703151, 6309172, 6899253, 11175012]);
   material.onBeforeCompile = (shader) => {
@@ -2725,12 +3771,9 @@ vShopGlow=shopGlow;vFinishPosition=finishPosition;`);
 totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
 ` + "if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;");
   };
-  const studioParts = new Map, posterParts = [];
-  const atlas = document.createElement("canvas");
-  atlas.width = atlas.height = 2048;
-  const atlasContext = atlas.getContext("2d");
+  const studioParts = new Map;
   const shops = [], collisionBoxes = [];
-  const models = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader3;
+  const models = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader4;
   const modelStates = new Map(slots.flatMap((slot2) => {
     const number = Number(slot2.number);
     return [...(displayFiles[number] || []).map((file) => `./${file}.glb`), ...galleryPlacements[number].map(({ file }) => `./${file}`)];
@@ -2793,7 +3836,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     16: 4954515,
     17: 6449514
   };
-  slots.forEach((slot2, index) => {
+  slots.forEach((slot2) => {
     const number = Number(slot2.number), side = slot2.side;
     const width = side === "north" ? slot2.maxX - slot2.minX : slot2.maxZ - slot2.minZ;
     const depth = side === "north" ? slot2.maxZ - slot2.minZ : slot2.maxX - slot2.minX;
@@ -2804,7 +3847,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     const front = depth / 2;
     let parts = [];
     let heroOffset = 0;
-    function add(geometry, x, y, z, color, finish = color === shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
+    function add(geometry, x, y, z, color, finish2 = color === shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
       geometry.translate(x + heroOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i = 0;i < colors.length; i += 3) {
@@ -2814,24 +3857,24 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       }
       geometry.setAttribute("color", new T.BufferAttribute(colors, 3));
       geometry.setAttribute("finishPosition", geometry.attributes.position.clone());
-      geometry.setAttribute("shopGlow", new T.BufferAttribute(new Float32Array(geometry.attributes.position.count).fill(finish), 1));
+      geometry.setAttribute("shopGlow", new T.BufferAttribute(new Float32Array(geometry.attributes.position.count).fill(finish2), 1));
       parts.push(geometry);
     }
-    function box(x, y, z, w2, h2, d, color, finish) {
-      add(new T.BoxGeometry(w2, h2, d), x, y, z, color, finish);
+    function box(x, y, z, w, h, d, color, finish2) {
+      add(new T.BoxGeometry(w, h, d), x, y, z, color, finish2);
     }
-    function cylinder(x, y, z, r, h2, color) {
-      add(new T.CylinderGeometry(r, r, h2, 12), x, y, z, color);
+    function cylinder(x, y, z, r, h, color) {
+      add(new T.CylinderGeometry(r, r, h, 12), x, y, z, color);
     }
-    function block(x, y, z, w2, h2, d) {
+    function block(x, y, z, w, h, d) {
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
       collisionBoxes.push({
         x: group.position.x + x * c + z * sn,
         y,
         z: group.position.z - x * sn + z * c,
-        width: w2 * Math.abs(c) + d * Math.abs(sn),
-        height: h2,
-        depth: w2 * Math.abs(sn) + d * Math.abs(c)
+        width: w * Math.abs(c) + d * Math.abs(sn),
+        height: h,
+        depth: w * Math.abs(sn) + d * Math.abs(c)
       });
     }
     const tools = {
@@ -2847,31 +3890,30 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       ellipse(x, y, z, rx, ry, rz, c, turn, lean) {
         add(new T.SphereGeometry(1, 10, 6).scale(rx, ry, rz).rotateZ(lean).rotateY(turn), x, y, z, c);
       },
-      tapered(x, y, z, rt, rb, h2, c) {
-        add(new T.CylinderGeometry(rt, rb, h2, 16), x, y, z, c);
+      tapered(x, y, z, rt, rb, h, c) {
+        add(new T.CylinderGeometry(rt, rb, h, 16), x, y, z, c);
       },
-      ring(x, y, z, r, w2, c) {
-        add(new T.TorusGeometry(r, w2, 6, 40).rotateX(Math.PI / 2), x, y, z, c);
+      ring(x, y, z, r, w, c) {
+        add(new T.TorusGeometry(r, w, 6, 40).rotateX(Math.PI / 2), x, y, z, c);
       },
       box,
       column: cylinder,
       disc(x, y, z, r, d, c) {
         add(new T.CylinderGeometry(r, r, d, 24).rotateX(Math.PI / 2), x, y, z, c);
       },
-      bar(x1, y1, z1, x2, y2, z2, w2, c) {
+      bar(x1, y1, z1, x2, y2, z2, w, c) {
         const direction = new T.Vector3(x2 - x1, y2 - y1, z2 - z1);
-        const rod = new T.BoxGeometry(w2, direction.length(), w2);
+        const rod = new T.BoxGeometry(w, direction.length(), w);
         rod.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0, 1, 0), direction.normalize()));
         add(rod, (x1 + x2) / 2, (y1 + y2) / 2, (z1 + z2) / 2, c);
       },
-      arch(x, y, z, r, leg, w2, c) {
+      arch(x, y, z, r, leg, w, c) {
         for (const side2 of [-1, 1])
-          tools.box(x + side2 * r, y + leg / 2, z, w2, leg, w2, c);
-        const curve = new T.TorusGeometry(r, w2 / 2, 6, 24, Math.PI);
+          tools.box(x + side2 * r, y + leg / 2, z, w, leg, w, c);
+        const curve = new T.TorusGeometry(r, w / 2, 6, 24, Math.PI);
         add(curve, x, y + leg, z, c);
       }
     };
-    const palette = kit[`S${slot2.number}`].palette.map((colour) => colour.hex);
     buildWindowStudio(number, tools, width, depth);
     buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
@@ -2896,10 +3938,10 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     parts = [];
     const accent = accents[number];
     if (number >= 7 && number <= 11) {
-      for (let row2 = 0;row2 < 3; row2++)
-        for (let i = 0;i < 5 - row2; i++) {
-          const x = (i - (4 - row2) / 2) * 0.24, y = 1.13 + row2 * 0.24;
-          cylinder(x, y, heroZ, 0.108, 0.215, number === 8 ? 13081445 : row2 % 2 ? ivory2 : accent);
+      for (let row = 0;row < 3; row++)
+        for (let i = 0;i < 5 - row; i++) {
+          const x = (i - (4 - row) / 2) * 0.24, y = 1.13 + row * 0.24;
+          cylinder(x, y, heroZ, 0.108, 0.215, number === 8 ? 13081445 : row % 2 ? ivory2 : accent);
           cylinder(x, y + 0.115, heroZ, 0.111, 0.025, number === 8 ? accent : gold);
         }
     } else if (number === 14) {
@@ -2935,12 +3977,12 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     const hero = new T.Group;
     hero.name = `S${slot2.number} hero display`;
     hero.userData.modelReady = !files;
-    const fixture2 = new T.Mesh(mergeGeometries3(fixtureParts), material);
+    const fixture2 = new T.Mesh(mergeGeometries4(fixtureParts), material);
     fixtureParts.forEach((part) => part.dispose());
     hero.add(fixture2);
     group.add(hero);
     let loadDisplay, display, loaded = false;
-    const fallback = new T.Mesh(mergeGeometries3(parts), material);
+    const fallback = new T.Mesh(mergeGeometries4(parts), material);
     parts.forEach((part) => part.dispose());
     fallback.name = `S${slot2.number} display fallback`;
     hero.add(fallback);
@@ -2966,35 +4008,6 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         }).catch(() => {});
       };
     }
-    const column = index % 4, row = Math.floor(index / 4);
-    const image = textures[index].image, cell = atlas.width / 4;
-    atlasContext.fillStyle = palette[0];
-    atlasContext.fillRect(column * cell, row * cell, cell, cell);
-    const posterWidth = 0.68, posterHeight = 0.51;
-    const aspect = image.width / image.height, panelAspect = posterWidth / posterHeight;
-    const photoHeight = cell * 0.8, bandHeight = cell - photoHeight;
-    const w = cell * Math.min(1, aspect / panelAspect), h = photoHeight * Math.min(1, panelAspect / aspect);
-    atlasContext.drawImage(image, column * cell + (cell - w) / 2, row * cell + (photoHeight - h) / 2, w, h);
-    textures[index].dispose();
-    const bandY = row * cell + photoHeight;
-    const signColours = { 7: "#732b27", 8: "#213967", 9: "#172b45", 11: "#723433" };
-    atlasContext.fillStyle = signColours[number] || "#183c30";
-    atlasContext.fillRect(column * cell, bandY, cell, bandHeight);
-    atlasContext.font = number >= 13 ? "600 57px Arial" : "bold 60px Georgia";
-    atlasContext.textAlign = "center";
-    atlasContext.textBaseline = "middle";
-    atlasContext.fillStyle = number === 9 ? "#ffd161" : "#fff0d0";
-    atlasContext.fillText(kit[`S${slot2.number}`].brand, column * cell + cell / 2, bandY + bandHeight * 0.51, cell - 32);
-    const tileBottom = (3 - row) / 4, bandTop = tileBottom + 0.2 / 4;
-    function atlasPanel(w2, h2, x, y, z, v0, v1) {
-      const panel = new T.PlaneGeometry(w2, h2), uv = panel.attributes.uv;
-      for (let i = 0;i < uv.count; i++)
-        uv.setXY(i, (column + 0.005 + uv.getX(i) * 0.99) / 4, v0 + (v1 - v0) * uv.getY(i));
-      panel.translate(x, y, z).applyMatrix4(group.matrix);
-      posterParts.push(panel);
-    }
-    atlasPanel(posterWidth, posterHeight, heroOffset - 0.61, 0.42, heroZ + 0.56, bandTop + 0.001, tileBottom + 0.249);
-    atlasPanel(3.63, 0.415, 0, 3.69, -front + 0.98, tileBottom + 0.001, bandTop - 0.001);
     group.visible = false;
     scene.add(group);
     const loadHero = loadDisplay;
@@ -3003,9 +4016,9 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       const size = floorModelSize[file.split("/").pop().replace(/\.glb$/, "")];
       if (!size)
         continue;
-      const [w2, h2, d] = size.map((value) => value * scale);
+      const [w, h, d] = size.map((value) => value * scale);
       const c = Math.abs(Math.cos(yaw)), sn = Math.abs(Math.sin(yaw));
-      block(x, y + h2 / 2, z, c * w2 + sn * d, h2, sn * w2 + c * d);
+      block(x, y + h / 2, z, c * w + sn * d, h, sn * w + c * d);
     }
     const shopState = { number: String(slot2.number), status: "pending", galleryLoaded: 0, galleryFailed: 0 };
     async function loadShop() {
@@ -3040,19 +4053,12 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     });
   });
   for (const [wing, parts] of studioParts) {
-    const scenery = new T.Mesh(mergeGeometries3(parts), material);
+    const scenery = new T.Mesh(mergeGeometries4(parts), material);
     scenery.name = `Concourse window studios: ${wing}`;
     scene.add(scenery);
     for (const part of parts)
       part.dispose();
   }
-  const art = new T.CanvasTexture(atlas);
-  art.colorSpace = T.SRGBColorSpace;
-  const pictures = new T.Mesh(mergeGeometries3(posterParts), new T.MeshBasicMaterial({ map: art }));
-  pictures.name = "Concourse window artwork";
-  scene.add(pictures);
-  for (const part of posterParts)
-    part.dispose();
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
     if (loading || scheduled)
@@ -3167,10 +4173,10 @@ function createSeatPlacements(expanded) {
     add("atrium", -7.8, 13, -1);
     add("atrium", 7.8, 13, -1);
   }
-  for (const store of spatial.stores.filter((store2) => store2.id !== "newmoon")) {
-    const x = storeCenterX(store);
-    add(store.id, x - 3, -6.8, -1);
-    add(store.id, x + 3, -6.8, -1);
+  for (const store2 of spatial.stores.filter((store3) => store3.id !== "newmoon")) {
+    const x = storeCenterX(store2);
+    add(store2.id, x - 3, -6.8, -1);
+    add(store2.id, x + 3, -6.8, -1);
   }
   if (expanded) {
     add("deck", -6.1, 8.8, 1, "Upper deck bench 1", liftLayout.upper);
@@ -3237,7 +4243,7 @@ function addFeatureKiosk({ x, z, box, cylinder, sign }) {
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-function applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill }) {
+function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
     return false;
   const { materials: m, lighting: l } = theme;
@@ -3246,20 +4252,20 @@ function applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill 
   const scalars = ["ceilingGlowIntensity", "glassOpacity", "glassRoughness", "glassMetalness", "glowIntensity"];
   if (colors.some((k) => !Number.isInteger(m[k]) || m[k] < 0 || m[k] > 16777215) || lightColors.some((k) => !Number.isInteger(l[k]) || l[k] < 0 || l[k] > 16777215) || scalars.some((k) => !Number.isFinite(m[k]) || m[k] < 0 || m[k] > 3) || ["ambient", "keyIntensity", "fillIntensity"].some((k) => !Number.isFinite(l[k]) || l[k] < 0 || l[k] > 5) || ["glassOpacity", "glassRoughness", "glassMetalness"].some((k) => m[k] > 1))
     return false;
-  materials.shellFloor.color.set(materials.shellFloor.map ? m.floorTextured : m.floorFlat);
-  materials.shellCeiling.color.set(m.ceiling);
-  materials.shellCeiling.emissive.set(m.ceilingGlow);
-  materials.shellCeiling.emissiveIntensity = m.ceilingGlowIntensity;
-  materials.shellWall.color.set(m.wall);
+  materials2.shellFloor.color.set(materials2.shellFloor.map ? m.floorTextured : m.floorFlat);
+  materials2.shellCeiling.color.set(m.ceiling);
+  materials2.shellCeiling.emissive.set(m.ceilingGlow);
+  materials2.shellCeiling.emissiveIntensity = m.ceilingGlowIntensity;
+  materials2.shellWall.color.set(m.wall);
   for (const role of ["green", "ivory", "brass", "wood", "oak", "timber", "timberAlt"])
-    materials[role].color.set(m[role]);
-  materials.glass.color.set(m.glass);
-  materials.glass.opacity = m.glassOpacity;
-  materials.glass.roughness = m.glassRoughness;
-  materials.glass.metalness = m.glassMetalness;
-  materials.glow.color.set(m.glow);
-  materials.glow.emissive.set(m.glowEmission);
-  materials.glow.emissiveIntensity = m.glowIntensity;
+    materials2[role].color.set(m[role]);
+  materials2.glass.color.set(m.glass);
+  materials2.glass.opacity = m.glassOpacity;
+  materials2.glass.roughness = m.glassRoughness;
+  materials2.glass.metalness = m.glassMetalness;
+  materials2.glow.color.set(m.glow);
+  materials2.glow.emissive.set(m.glowEmission);
+  materials2.glow.emissiveIntensity = m.glowIntensity;
   ambient.color.set(l.sky);
   ambient.groundColor.set(l.ground);
   ambient.intensity = l.ambient;
@@ -3288,13 +4294,13 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         mesh.instanceColor.needsUpdate = true;
       }
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
-      const finish = finishForRole.get(material);
-      const key2 = `${type}:${finish || material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
+      const finish2 = finishForRole.get(material);
+      const key2 = `${type}:${finish2 || material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
       if (!batches.has(key2))
-        batches.set(key2, { geometry: geometry[type], material: finish ? finishMaterials[finish] : materials[material], transforms: [], shopSlot: activeShopSlot, deckLod: activeDeck, colours: finish ? [] : null });
+        batches.set(key2, { geometry: geometry[type], material: finish2 ? finishMaterials[finish2] : materials2[material], transforms: [], shopSlot: activeShopSlot, deckLod: activeDeck, colours: finish2 ? [] : null });
       const batch = batches.get(key2);
-      if (finish)
-        batch.colours.push(materials[material].color);
+      if (finish2)
+        batch.colours.push(materials2[material].color);
       position.set(x, y, z);
       scale.set(sx, sy, sz);
       euler.set(rx, ry, rz, order);
@@ -3316,10 +4322,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       scene.add(mesh);
       return tagShopLod(mesh);
     }, sign = function(text, x, y, z, width, height = 0.4, framed = false, fontSize = 42) {
-      const canvas = document.createElement("canvas");
-      canvas.width = 1024;
-      canvas.height = 128;
-      const context = canvas.getContext("2d");
+      const canvas2 = document.createElement("canvas");
+      canvas2.width = 1024;
+      canvas2.height = 128;
+      const context = canvas2.getContext("2d");
       if (framed) {
         context.fillStyle = "#17372e";
         context.fillRect(0, 0, 1024, 128);
@@ -3332,7 +4338,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.fillText(text, 512, 64);
-      const texture = new T.CanvasTexture(canvas);
+      const texture = new T.CanvasTexture(canvas2);
       texture.colorSpace = T.SRGBColorSpace;
       const mesh = new T.Mesh(plane, new T.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false }));
       mesh.position.set(x, y, z);
@@ -3457,8 +4463,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const map = new T.CanvasTexture(panel);
       map.colorSpace = T.SRGBColorSpace;
       return mat(16777215, { map, roughness: 0.88 });
-    }, updateSigns = function(camera, canvas) {
-      const frame = canvas.getBoundingClientRect();
+    }, updateSigns = function(camera, canvas2, tier, reducedMotion) {
+      signage?.update(camera, tier, reducedMotion, performance.now());
+      const frame = canvas2.getBoundingClientRect();
       for (const label of roomSigns) {
         const mesh = label.mesh;
         label.left = label.top = Infinity;
@@ -3530,7 +4537,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     scene.background = new T.Color(expanded ? 12244444 : 1650226);
     scene.fog = new T.Fog(12037532, expanded ? 75 : 40, expanded ? 155 : 100);
     const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
-    const materials = {
+    const materials2 = {
       jade: mat(2181182, { roughness: 0.24, metalness: 0.22 }),
       jadeAlt: mat(2378818, { roughness: 0.28, metalness: 0.18 }),
       courtStone: mat(4810331, { roughness: 0.32, metalness: 0.16 }),
@@ -3567,26 +4574,26 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         ]);
         const natural = module.createNaturalSurfaceTextures(T);
         if (natural.stone) {
-          materials.shellFloor.map = natural.stone;
-          materials.shellFloor.color.set(15260614);
-          materials.shellFloor.roughness = 0.38;
+          materials2.shellFloor.map = natural.stone;
+          materials2.shellFloor.color.set(15260614);
+          materials2.shellFloor.roughness = 0.38;
         }
         if (natural.wood)
           for (const name of ["wood", "oak", "timber", "timberAlt"])
-            materials[name].map = natural.wood;
+            materials2[name].map = natural.wood;
       } catch {} finally {
         clearTimeout(timer);
       }
-      if (!materials.shellFloor.map)
-        materials.shellFloor.color.set(14338222);
-      materials.shellCeiling.color.set(15788249);
-      materials.shellCeiling.emissive.set(11772550);
-      materials.shellCeiling.emissiveIntensity = 0.55;
-      materials.shellWall.color.set(13223094);
-      materials.glass.color.set(14150111);
-      materials.glass.opacity = 0.19;
-      materials.glass.roughness = 0.08;
-      materials.glass.metalness = 0.08;
+      if (!materials2.shellFloor.map)
+        materials2.shellFloor.color.set(14338222);
+      materials2.shellCeiling.color.set(15788249);
+      materials2.shellCeiling.emissive.set(11772550);
+      materials2.shellCeiling.emissiveIntensity = 0.55;
+      materials2.shellWall.color.set(13223094);
+      materials2.glass.color.set(14150111);
+      materials2.glass.opacity = 0.19;
+      materials2.glass.roughness = 0.08;
+      materials2.glass.metalness = 0.08;
     }
     const geometry = {
       box: new T.BoxGeometry(1, 1, 1),
@@ -3598,21 +4605,21 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     };
     const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
     doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
-    const doorFrameGeometry = mergeGeometries4(doorFrameParts);
+    const doorFrameGeometry = mergeGeometries5(doorFrameParts);
     doorFrameParts.forEach((part) => part.dispose());
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const finishForRole = new Map;
     const finishMaterials = {}, colourBatches = [];
     if (expanded) {
-      for (const [finish, roles] of Object.entries({
+      for (const [finish2, roles] of Object.entries({
         matte: ["green", "dark", "ivory", "cream", "foliage", "leaf", "pot", "seat"],
         woodGrain: ["wood", "oak", "timber", "timberAlt"]
       })) {
-        const base = materials[roles[0]].clone();
+        const base = materials2[roles[0]].clone();
         base.color.set(16777215);
-        finishMaterials[finish] = base;
+        finishMaterials[finish2] = base;
         for (const role of roles)
-          finishForRole.set(role, finish);
+          finishForRole.set(role, finish2);
       }
     }
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
@@ -3649,6 +4656,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     }));
     const plane = geometry.plane;
     const roomSigns = [];
+    let signage;
     const shadowCanvas = document.createElement("canvas");
     shadowCanvas.width = shadowCanvas.height = 64;
     const shadowContext = shadowCanvas.getContext("2d"), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -3658,7 +4666,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     shadowContext.fillStyle = gradient;
     shadowContext.fillRect(0, 0, 64, 64);
     const contact = new T.MeshBasicMaterial({ map: new T.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false });
-    materials.contact = contact;
+    materials2.contact = contact;
     const poolCanvas = document.createElement("canvas");
     poolCanvas.width = poolCanvas.height = 64;
     const poolContext = poolCanvas.getContext("2d"), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -3669,7 +4677,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     poolContext.fillRect(0, 0, 64, 64);
     const poolTexture = new T.CanvasTexture(poolCanvas);
     poolTexture.colorSpace = T.SRGBColorSpace;
-    materials.lightPool = new T.MeshBasicMaterial({ map: poolTexture, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
+    materials2.lightPool = new T.MeshBasicMaterial({ map: poolTexture, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
     if (expanded) {
       box("dark", 10, -0.22, 18, 70, 0.4, 60, true);
       box("shellFloor", 10, -0.035, 18, 70, 0.04, 60);
@@ -3683,7 +4691,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden: atriumLayout.garden, prepareModel }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, garden: atriumLayout.garden, prepareModel }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -3859,8 +4867,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     collider(directory.x, 1.025, directory.z, 0.96, 2.05, 0.68);
     shadow(directory.x, directory.z, 1.2, 0.9);
     interactables.push({ id: "mall-directory", ...directory, radius: 2.8 });
-    for (const store of spatial.stores) {
-      const zone = store.id, x = storeCenterX(store);
+    for (const store2 of spatial.stores) {
+      const zone = store2.id, x = storeCenterX(store2);
       const wall = expanded ? zone === "newmoon" ? "wood" : "cream" : zone === "mili" ? "cream" : "green";
       if (expanded) {
         box("shellFloor", x, 0.012, -5.1, 9.55, 0.025, 10.25);
@@ -3869,7 +4877,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
       const backdrop = `${zone}Backdrop`;
       if (expanded)
-        materials[backdrop] = shopBackdrop(zone);
+        materials2[backdrop] = shopBackdrop(zone);
       box(expanded ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
       for (const side of [-1, 1]) {
         box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
@@ -3900,7 +4908,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
       }
       box("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4);
-      activeShopSlot = expanded ? Number(store.number) : null;
+      activeShopSlot = expanded ? Number(store2.number) : null;
       if (expanded && zone === "newmoon") {
         for (const z of [-2.5, -5.4, -8.3]) {
           box("ivory", x, 5.63, z, 7.9, 0.12, 2.35);
@@ -4021,17 +5029,17 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (!expanded)
         box("glow", x, 5.36, 0.36, 2.42, 0.025, 0.045);
       box("brass", x, 4.02, 0.29, 9.3, 0.025, 0.04);
-      const label = sign(`${store.number}  /  ${store.label.toUpperCase()}`, x, expanded ? 4.07 : 3.5, 0.38, expanded ? 1.9 : 3.9, expanded ? 0.14 : 0.48, true, 80);
+      const label = sign(`${store2.number}  /  ${store2.label.toUpperCase()}`, x, expanded ? 4.07 : 3.5, 0.38, expanded ? 1.9 : 3.9, expanded ? 0.14 : 0.48, true, 80);
       roomSigns.push({ zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0 });
       const leaves = [];
       for (const side of [-1, 1]) {
         const group = new T.Group;
         group.position.set(x + side * 1.16, 1.8, 0.05);
         scene.add(group);
-        const glass = new T.Mesh(geometry.box, materials.glass);
+        const glass = new T.Mesh(geometry.box, materials2.glass);
         glass.scale.set(2.25, 3.5, 0.06);
         group.add(glass);
-        group.add(new T.Mesh(doorFrameGeometry, materials.brass));
+        group.add(new T.Mesh(doorFrameGeometry, materials2.brass));
         const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, 0.05));
         physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
         leaves.push({ group, body, side });
@@ -4083,7 +5091,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
-        productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
+        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
           collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -4194,7 +5202,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         for (const r of panels)
           lightPool((r.minX + r.maxX) / 2, 0.052, (r.minZ + r.maxZ) / 2, width > depth ? r.maxX - r.minX : 4.5, width > depth ? 4.5 : r.maxZ - r.minZ);
       };
-      const slide = addExpandedStorefronts(T, expandedLayout, scene);
+      signage = await addShopSignAtlas(T, expandedLayout, scene);
+      const slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs);
       for (const bay of expandedLayout.slots.slice(3)) {
         const { x, z, alongX, alongZ, normalX, normalZ } = shopEntrance(bay);
         const width = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
@@ -4308,9 +5317,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         deckRailings.place("post", x, z);
       railingState = deckRailings?.finish(scene) || null;
       activeDeck = false;
-      const shopSigns = await addShopSignAtlas(T, expandedLayout, scene);
-      shopSigns.layers.enable(1);
-      const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials.shellFloor.map, prepareModel);
+      const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel);
       interiorModels = interiors;
       for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
         collider(x, y, z, width, height, depth);
@@ -4329,11 +5336,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         colourBatches.push({ mesh, colours: batch.colours });
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
       mesh.castShadow = false;
-      mesh.receiveShadow = batch.material !== materials.lightPool;
+      mesh.receiveShadow = batch.material !== materials2.lightPool;
       mesh.computeBoundingSphere();
       mesh.userData.shopSlot = batch.shopSlot;
       mesh.userData.deckLod = batch.deckLod;
-      if (batch.material === materials.glow)
+      if (batch.material === materials2.glow)
         mesh.layers.enable(1);
       scene.add(mesh);
       if (batch.shopSlot !== null)
@@ -4354,7 +5361,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     scene.add(fill);
     refreshInstanceColours();
     const applyMallTheme = (theme) => {
-      const applied = applyMallThemeToWorld(theme, { expanded, materials, ambient, key, fill });
+      const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill });
       if (applied)
         refreshInstanceColours();
       return applied;
@@ -4368,7 +5375,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;
-    return { getPreloadedModels() {
+    return { signage, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;

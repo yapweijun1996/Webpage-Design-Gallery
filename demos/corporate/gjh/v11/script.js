@@ -65,6 +65,7 @@ let measuringFrames = false, lastMetricsUpdate = -Infinity;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
+    signage: world?.signage?.report() ?? {signs:0,drawCalls:0,triangles:0,textureMB:0,tier:quality.state?.tier??'low'},
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
@@ -274,7 +275,7 @@ function render(force = false) {
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
     world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
-    world.updateSigns(camera, canvas);
+    world.updateSigns(camera, canvas, quality.state?.tier, reducedMotion);
     const draw=()=>atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
     frames++;
@@ -453,7 +454,7 @@ function validateRestoration() {
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
     world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier);
-    player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas);
+    player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas, quality.state?.tier, reducedMotion);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
     // No physics tick or UI transition is needed for this offscreen validation.
