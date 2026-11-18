@@ -5,6 +5,7 @@ import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {GLTFLoader} from '../demos/corporate/gjh/v11/vendor/GLTFLoader.js';
 import {createLocomotionContinuity, createSelectedVisitor} from '../demos/corporate/gjh/v11/assets/character.js';
 import {createCharacterTripo, mapTripoClips, normalizeTripoHeight} from '../demos/corporate/gjh/v11/assets/character-tripo.js';
+import {createCharacterV2} from '../demos/corporate/gjh/v11/assets/character-v2.js';
 import {playerCameraFraming} from '../demos/corporate/gjh/v11/assets/player.js';
 
 const names = ['idle', 'walk', 'run', 'wave', 'nod', 'jump', 'dance'];
@@ -18,12 +19,15 @@ function sourceClips() {
 
 const tripoAssets = new URL('../demos/corporate/gjh/v11/assets/', import.meta.url);
 
-async function withTripoAssets(run) {
-  const files = ['gjh-tripo-visitor.glb', 'gjh-tripo-visitor-lod1.glb'];
+async function withVisitorAssets(run, factory = createCharacterTripo) {
+  const files = factory === createCharacterV2 ? ['gjh-mall-visitor-v2.glb', 'gjh-mall-visitor-v2-lod1.glb'] : ['gjh-tripo-visitor.glb', 'gjh-tripo-visitor-lod1.glb'];
   const data = new Map(await Promise.all(files.map(async file => [file, await readFile(new URL(file, tripoAssets))])));
   const globals = {
+    location: {search: ''},
+    ProgressEvent: globalThis.ProgressEvent ?? class extends Event {},
     fetch: async url => {
-      const bytes = data.get(new URL(url).pathname.split('/').at(-1));
+      const file = new URL(url.url ?? url).pathname.split('/').at(-1);
+      const bytes = file === 'startup-assets.pack' ? await readFile(new URL(file, tripoAssets)) : data.get(file);
       return bytes ? new Response(bytes) : new Response(null, {status: 404});
     },
     matchMedia: () => ({matches: false}),
@@ -35,10 +39,10 @@ async function withTripoAssets(run) {
   Object.assign(globalThis, globals);
   let character;
   try {
-    character = await createCharacterTripo(T, createLocomotionContinuity);
+    character = await factory(T, createLocomotionContinuity);
     await run(character, data);
   } finally {
-    character?.dispose();
+    character?.dispose?.();
     for (const [key, descriptor] of Object.entries(original)) {
       if (descriptor) Object.defineProperty(globalThis, key, descriptor);
       else delete globalThis[key];
@@ -60,7 +64,7 @@ function parseGLB(bytes) {
 }
 
 test('Tripo entrance framing clears the idle visitor at desktop and portrait sizes', async t => {
-  await withTripoAssets(async character => {
+  await withVisitorAssets(async character => {
     const mesh = character.visual.getObjectByProperty('isSkinnedMesh', true);
     character.visual.position.y = .015;
     for (const [width, height, header, maxHeight] of [[1440, 900, 83, 38], [390, 844, 56, 45]]) {
@@ -104,7 +108,7 @@ test('visitor v2 keeps its existing expanded and classic camera settings', () =>
 });
 
 test('the authored sit reaches a stable seated pose with both boots on the floor', async t => {
-  await withTripoAssets(async character => {
+  await withVisitorAssets(async character => {
     const {scene: bench} = await parseGLB(await readFile(new URL('gjh-lounge-bench.glb', tripoAssets)));
     bench.scale.y = .8;
     bench.position.z = .23;
@@ -156,8 +160,159 @@ test('the authored sit reaches a stable seated pose with both boots on the floor
   });
 });
 
+// Use the shipped can and animated skin. The product pivot is at its base.
+async function shelfCan(character, knuckle = 'RightHandMiddle1') {
+  const {addProducts} = await import('../demos/corporate/gjh/v11/assets/products.js');
+  const scene = new T.Scene(), shelf = new T.Group();
+  scene.add(character.visual, shelf);
+  const display = await addProducts(T, shelf, new Map(), new T.MeshStandardMaterial());
+  const id = 'new-moon-nz-425g-front', token = display.reserveProduct(id);
+  const {prop, origin} = token;
+  // Rotate the owner about the facing's home position to exercise world/local conversion.
+  shelf.rotation.y = .6;
+  shelf.position.copy(origin).sub(origin.clone().applyQuaternion(shelf.quaternion));
+  const home = prop.getWorldPosition(new T.Vector3());
+  const center = prop.worldToLocal(new T.Box3().setFromObject(prop).getCenter(new T.Vector3()));
+  const releasedAt = new T.Vector3();
+  const release = token.release;
+  token.release = () => { prop.getWorldPosition(releasedAt); release(); };
+  assert.equal(character.pickProduct(token), true);
+  for (let frame = 0; frame < 60; frame++) character.update('idle', 1 / 60);
+  assert.equal(character.productPhase, 'held');
+  const skin = character.visual.getObjectByProperty('isSkinnedMesh', true);
+  const bone = suffix => skin.skeleton.bones.find(joint => joint.name.endsWith(suffix));
+  const pos = object => object.getWorldPosition(new T.Vector3());
+  const palm = () => pos(bone('RightHand')).lerp(pos(bone(knuckle)), .65);
+  const canCenter = () => prop.localToWorld(center.clone());
+  function checkGrip() {
+    const gap = palm().distanceTo(canCenter());
+    assert.ok(gap < .065, `can centre is ${gap.toFixed(4)} m from the palm`);
+    const up = new T.Vector3(0, 1, 0).applyQuaternion(prop.getWorldQuaternion(new T.Quaternion()));
+    assert.ok(up.y > .9999, 'can stays upright');
+  }
+  return {checkGrip, canCenter, home, releasedAt, id, prop, skin};
+}
+
+test('the carried can follows the rendered palm through locomotion, LOD switches and a wave', async () => {
+  await withVisitorAssets(async character => {
+    const {checkGrip, canCenter, skin, prop} = await shelfCan(character);
+    // At the normal rear camera bearing, the can must be visible past the hair and arm.
+    const framing = playerCameraFraming(character.state.model, true, 393, 611);
+    const rear = new T.Vector3(0, 1.24 + framing.height + framing.distance * Math.sin(.1), framing.distance * Math.cos(.1));
+    character.visual.updateMatrixWorld(true);
+    skin.computeBoundingSphere();
+    const ray = new T.Raycaster(rear, canCenter().sub(rear).normalize());
+    assert.ok(prop.children.includes(ray.intersectObjects([skin, prop], true)[0]?.object));
+    const camera = new T.PerspectiveCamera();
+    camera.position.z = 15;
+    character.updateLOD(camera);
+    for (let i = 0; i < 100 && !character.state.lod.available; i++) await new Promise(r => setTimeout(r, 10));
+    for (const [motion, level] of [['walk', 1], ['run', 0]]) {
+      camera.position.z = character.visual.position.z + (level ? 15 : 4);
+      character.updateLOD(camera);
+      assert.equal(character.state.lod.level, level);
+      for (let i = 0; i < 12; i++) {
+        character.update(motion, 1 / 60);
+        // Player turning and Rapier position sync happen after the character update.
+        character.visual.rotation.y += .12;
+        character.visual.translateZ(motion === 'run' ? -.125 : -.044);
+        checkGrip();
+      }
+    }
+    character.update('idle', .25);
+    assert.equal(character.emote('wave'), true);
+    const before = canCenter();
+    for (let i = 0; i < 50; i++) {
+      character.update('idle', 1 / 60);
+      checkGrip();
+    }
+    assert.ok(canCenter().y > before.y + .12, 'the can rose with the waving hand');
+  });
+});
+
+test('the first-person palm and can share the lower part of the portrait view', async () => {
+  await withVisitorAssets(async character => {
+    const {canCenter, checkGrip, id, skin} = await shelfCan(character);
+    character.setCameraOccluded(true, true);
+    const camera = new T.PerspectiveCamera(57.5, 393 / 611, .08, 100);
+    camera.position.y = 1.55;
+    camera.rotation.x = -.1;
+    camera.updateMatrixWorld();
+    function checkFraming() {
+      const ndc = canCenter().project(camera);
+      assert.ok(Math.abs(ndc.x) < .96 && ndc.y > -1 && ndc.y < -.35 && Math.abs(ndc.z) < 1,
+        `can centre NDC ${ndc.toArray().map(n => n.toFixed(3))}`);
+    }
+    checkFraming(); // A manual view toggle renders before the next physics tick.
+    for (const motion of ['walk', 'run']) {
+      for (let i = 0; i < 60; i++) {
+        character.update(motion, 1 / 60);
+        checkFraming();
+      }
+    }
+    const visibleSkins = () => {
+      const skins = [];
+      character.visual.traverseVisible(node => { if (node.isSkinnedMesh) skins.push(node); });
+      return skins;
+    };
+    const [arm] = visibleSkins();
+    assert.ok(arm && arm.skeleton === skin.skeleton && arm.geometry.index.count > 0 &&
+      arm.geometry.index.count < skin.geometry.index.count);
+    character.visual.updateMatrixWorld(true);
+    const vertex = arm.geometry.index.getX(0);
+    const skinnedVertex = mesh => mesh.getVertexPosition(vertex, new T.Vector3()).applyMatrix4(mesh.matrixWorld);
+    assert.ok(skinnedVertex(arm).distanceTo(skinnedVertex(skin)) < 1e-5);
+    checkGrip();
+    assert.equal(character.bagProduct(id, false), true);
+    for (let i = 0; i < 22; i++) {
+      character.update('idle', 1 / 60);
+      checkGrip();
+    }
+    character.update('idle', .2);
+    assert.equal(character.productPhase, 'empty');
+    assert.equal(visibleSkins().length, 0);
+  });
+});
+
+test('Visitor v2 carries with its own hand rig in both views', async () => {
+  await withVisitorAssets(async character => {
+    const {checkGrip, canCenter} = await shelfCan(character, 'RightFinger1');
+    character.setCameraOccluded(true, true);
+    const camera = new T.PerspectiveCamera(57.5, 393 / 611, .08, 100);
+    camera.position.y = 1.55;
+    camera.rotation.x = -.1;
+    camera.updateMatrixWorld();
+    for (const motion of ['idle', 'walk', 'run']) {
+      character.update(motion, 1 / 60);
+      checkGrip();
+      const {x, y, z} = canCenter().project(camera);
+      assert.ok(Math.abs(x) < 1 && y > -1 && y < -.35 && Math.abs(z) < 1);
+    }
+    character.setCameraOccluded(false, false);
+    character.update('walk', 1 / 60);
+    character.visual.translateZ(-.12);
+    checkGrip();
+    character.resetProduct();
+  }, createCharacterV2);
+});
+
+test('return reaches with the can and releases at the original shelf position', async () => {
+  await withVisitorAssets(async character => {
+    character.visual.position.set(-13.42, .035, -8.635);
+    const {checkGrip, releasedAt, home} = await shelfCan(character);
+    assert.equal(character.returnProduct(), true);
+    for (let i = 0; i < 25; i++) {
+      character.update('idle', 1 / 60);
+      checkGrip();
+    }
+    for (let i = 0; i < 32; i++) character.update('idle', 1 / 60);
+    assert.equal(character.productPhase, 'empty');
+    assert.ok(releasedAt.distanceTo(home) < 1e-6);
+  });
+});
+
 test('the real animation-free LOD1 follows the LOD0 skeleton and switches back', async () => {
-  await withTripoAssets(async (character, data) => {
+  await withVisitorAssets(async (character, data) => {
     const mesh = character.visual.getObjectByProperty('isSkinnedMesh', true);
     const skeleton = mesh.skeleton, highGeometry = mesh.geometry, highMaterial = mesh.material;
     const {scene, animations} = await parseGLB(data.get('gjh-tripo-visitor-lod1.glb'));
@@ -201,7 +356,7 @@ test('the real animation-free LOD1 follows the LOD0 skeleton and switches back',
 });
 
 test('a manual emote can queue while the camera-facing arrival wave plays', async () => {
-  await withTripoAssets(async character => {
+  await withVisitorAssets(async character => {
     const placement = character.visual.children[0];
     const mesh = character.visual.getObjectByProperty('isSkinnedMesh', true);
     const hand = mesh.skeleton.bones.find(bone => bone.name.endsWith('RightHand'));

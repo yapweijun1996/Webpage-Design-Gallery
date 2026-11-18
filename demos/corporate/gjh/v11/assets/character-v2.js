@@ -1,3 +1,4 @@
+import {createFirstPersonHand} from './visitor-carry-hand.js';
 import {createVisitorLOD} from './visitor-v2-lod.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {createVisitorCustomization} from './visitor-v2-customization.js';
@@ -24,7 +25,10 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   avatar.traverse(node => { if (node.isMesh) { node.castShadow = !shadowDetail.has(node.name); node.receiveShadow = true; } });
   const visual = new T.Group(); visual.add(avatar);
   const cart = await createPushCart(T, avatar, visual, {prepareModel});
-  const solver=createContactSolver(T,avatar), transfer=createProductTransfer(T,avatar);
+  const solver = createContactSolver(T, avatar);
+  const wrist = avatar.getObjectByName('RightHand'), skin = avatar.getObjectByName('V2_body_Warm_peach_skin');
+  const transfer = createProductTransfer(T, avatar, wrist, visual, new T.Vector3(0, -.03, .045),
+    createFirstPersonHand(T, visual, skin, wrist));
   const contacts={hands:[],feet:[]};
   avatar.updateWorldMatrix(true,true);
   const footRest=Object.fromEntries(['Left','Right'].map(side=>[side,avatar.getObjectByName(side+'Foot').getWorldQuaternion(new T.Quaternion())]));
@@ -43,6 +47,14 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const resolveLocomotion = createLocomotionContinuity();
   let animation = 'idle', seatWeight = 0, pushing = false, count = 0;
+  function updateProduct(dt) {
+    if (transfer.firstPerson) targetPoint.set(-.10, 1.36, -.45);
+    else targetPoint.set(-.30, 1.08, -.32);
+    visual.localToWorld(targetPoint);
+    transfer.reachTarget(targetPoint);
+    solver.solve(['RightShoulder','RightElbow','RightHand'], targetPoint);
+    transfer.update(dt, reducedMotion.matches);
+  }
   function update(actual, dt, requested = actual, sprintRate = 1) {
     actions.run.setEffectiveTimeScale(sprintRate);
     const movement = resolveLocomotion(actual, requested, dt);
@@ -82,17 +94,16 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
         foot.quaternion.copy(foot.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(visual.getWorldQuaternion(new T.Quaternion())).multiply(footRest[side]));
       }
     }
-    if(transfer.state.phase!=='empty'){
-      visual.localToWorld(targetPoint.set(-.30,1.08,-.32));
-      transfer.reachTarget(targetPoint);
-      solver.solve(['RightShoulder','RightElbow','RightHand'],targetPoint);
-    }
-    transfer.update(dt,reducedMotion.matches);
+    if (transfer.phase !== 'empty') updateProduct(dt);
   }
   update('idle', 0);
   return {
     visual, npcSource:gltf, update, updateLOD:camera=>lod.update(camera),
-    setCameraOccluded(value){avatar.visible=!value;},
+    setCameraOccluded(value, firstPerson) {
+      avatar.visible = !value;
+      transfer.setFirstPerson(firstPerson);
+      if (transfer.phase === 'held') updateProduct(0);
+    },
     setBagCount(value) { count = Math.max(0, Number(value) || 0); cart.setCount(count); },
     setCart(value) { pushing = Boolean(value) && cart.set(value); if (!value) cart.set(false); return !value || pushing; },
     setSeatProgress(value) { seatWeight = Math.max(0, Math.min(1, value)); },

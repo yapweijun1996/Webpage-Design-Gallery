@@ -40,63 +40,109 @@ export function isShelfInReach({x,y,z}, approach) {
 }
 
 /** One cosmetic shelf facing is reserved during each physical transfer. */
-export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('RightHand'), facing = avatar.parent) {
-  const bagDuration=.45;
-  const point=new T.Vector3(),offset=new T.Vector3(),shelfPoint=new T.Vector3(),rotation=new T.Quaternion(),ownerRotation=new T.Quaternion();
-  let item=null,phase='empty',elapsed=0,start=null;
-  function worldHand(){avatar.updateWorldMatrix(true,true);hand.getWorldPosition(point);return point;}
-  function worldCarry(){worldHand();(facing??avatar.parent).getWorldQuaternion(rotation);return point.add(offset.set(0,-.05,-.06).applyQuaternion(rotation));}
-  function hold(){
-    // A can stays upright in the palm, rather than inheriting the wrist's
-    // authored local axes and disappearing inside the forearm.
-    worldCarry();
-    item.prop.position.copy(item.owner.worldToLocal(point));
-    item.prop.quaternion.copy(item.owner.getWorldQuaternion(ownerRotation).invert().multiply(rotation));
+export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('RightHand'), facing = avatar.parent,
+  grip = new T.Vector3(), showHand = () => {}) {
+  const bagDuration = .45;
+  const point = new T.Vector3(), offset = new T.Vector3(), shelfPoint = new T.Vector3();
+  const rotation = new T.Quaternion(), shelfRotation = new T.Quaternion(), carryRotation = new T.Quaternion();
+  const bagScale = new T.Vector3();
+  let item = null, phase = 'empty', elapsed = 0, centerHeight = 0, firstPerson = false;
+
+  function presentHand() { showHand(firstPerson && (phase === 'held' || phase === 'bag')); }
+  function worldCarry() {
+    // grip marks the can centre in bone space. The product GLB pivots at its base.
+    hand.localToWorld(point.copy(grip));
+    point.y -= centerHeight;
+    return point;
   }
-  function reset(){item?.release();item=null;phase='empty';elapsed=0;}
+  function hold() {
+    if (item.prop.parent !== facing) facing.attach(item.prop);
+    item.prop.position.copy(facing.worldToLocal(worldCarry()));
+    item.prop.quaternion.identity(); // Facing turns only about world Y.
+  }
+  function reset() {
+    item?.release();
+    item = null;
+    phase = 'empty';
+    elapsed = 0;
+    presentHand();
+  }
   return {
-    pick(token){if(item||!token)return false;item=token;phase='pickup';elapsed=-(token.approachDelay||0);start=token.prop.position.clone();token.owner=token.prop.parent;return true;},
-    putBack(){if(phase!=='held')return false;worldHand();item.owner.attach(item.prop);start=item.prop.position.clone();phase='return';elapsed=0;return true;},
-    putInBag(id,reduced){
-      if(phase!=='held'||item.id!==id)return false;
-      phase='bag';elapsed=0;
-      if(reduced)reset();
+    get firstPerson() { return firstPerson; },
+    setFirstPerson(value) { firstPerson = value; presentHand(); },
+    pick(token) {
+      if (item || !token) return false;
+      item = token;
+      item.owner = item.prop.parent;
+      shelfRotation.copy(item.prop.quaternion);
+      centerHeight = (item.centerY ?? 0) * item.prop.getWorldScale(offset).y;
+      phase = 'pickup';
+      elapsed = -(token.approachDelay || 0);
       return true;
     },
-    cancel(){if(phase==='pickup'||phase==='bag'){reset();}else if(phase==='return'){phase='held';elapsed=0;hold();}},
+    putBack() {
+      if (phase !== 'held') return false;
+      item.owner.attach(item.prop);
+      phase = 'return';
+      elapsed = 0;
+      presentHand();
+      return true;
+    },
+    putInBag(id, reduced) {
+      if (phase !== 'held' || item.id !== id) return false;
+      phase = 'bag';
+      elapsed = 0;
+      bagScale.copy(item.prop.scale);
+      if (reduced) reset();
+      return true;
+    },
+    cancel() {
+      if (phase === 'pickup' || phase === 'bag') reset();
+      else if (phase === 'return') { phase = 'held'; elapsed = 0; hold(); presentHand(); }
+    },
     reset,
-    reachTarget(out){
-      if(!item||phase==='held')return;
-      if(phase==='bag'){
-        const ease=T.MathUtils.smoothstep(elapsed,0,.3);
-        (facing??avatar.parent).getWorldQuaternion(rotation);
-        out.add(offset.set(0,-.28*ease,.14*ease).applyQuaternion(rotation));
+    reachTarget(out) {
+      if (!item || phase === 'held') return;
+      if (phase === 'bag') {
+        const ease = T.MathUtils.smoothstep(elapsed, 0, .3);
+        facing.getWorldQuaternion(rotation);
+        out.add(offset.set(0, -.28*ease, .14*ease).applyQuaternion(rotation));
         return;
       }
-      const t=Math.max(0,Math.min(1,elapsed/.9)),reach=phase==='pickup'?Math.min(1,t/.3)*(1-Math.max(0,(t-.3)/.7)):Math.min(1,t/.7);
-      shelfPoint.copy(item.origin);shelfPoint.y+=.06;shelfPoint.z+=.04;
-      out.lerp(item.owner.localToWorld(shelfPoint),reach);
+      const t = T.MathUtils.clamp(elapsed / .9, 0, 1);
+      const reach = phase === 'pickup' ? Math.min(1, t/.3)*(1-Math.max(0, (t-.3)/.7)) : Math.min(1, t/.7);
+      shelfPoint.copy(item.origin);
+      shelfPoint.y += .06;
+      shelfPoint.z += .04;
+      out.lerp(item.owner.localToWorld(shelfPoint), reach);
     },
-    update(dt,reduced){
-      if(!item)return;
-      elapsed+=dt;
-      if(phase==='held'){hold();return;}
-      if(phase==='bag'){
-        if(reduced||elapsed>=bagDuration){reset();return;}
+    update(dt, reduced) {
+      if (!item) return;
+      elapsed += dt;
+      if (phase === 'held') { hold(); return; }
+      if (phase === 'bag') {
+        if (reduced || elapsed >= bagDuration) { reset(); return; }
         hold();
-        const drop=T.MathUtils.smoothstep(elapsed,.25,bagDuration);
-        item.prop.position.y-=.12*drop;
-        item.prop.scale.setScalar(1-drop);
+        const drop = T.MathUtils.smoothstep(elapsed, .25, bagDuration);
+        item.prop.scale.copy(bagScale).multiplyScalar(1 - drop);
+        // Shrink about the grip, settling the last 15 mm into the lowered hand.
+        item.prop.position.y += ((item.centerY ?? 0) * bagScale.y - .015) * drop;
         return;
       }
-      const t=reduced?1:Math.max(0,Math.min(1,elapsed/.9));
-      // Reach first, then lift; reverse the transfer before releasing the stock.
-      const travel=phase==='pickup'?Math.max(0,(t-.3)/.7):t,e=travel*travel*(3-2*travel);
-      const target=phase==='pickup'?worldCarry():item.origin;
-      item.prop.position.lerpVectors(start,target,e);
-      if(t===1){if(phase==='return')reset();else{phase='held';hold();}}
+      const t = reduced ? 1 : T.MathUtils.clamp(elapsed / .9, 0, 1);
+      // Exchange at full reach. While carrying, the live palm owns the pose.
+      const contact = phase === 'pickup' ? T.MathUtils.smoothstep(t, .3, .45) :
+        1 - T.MathUtils.smoothstep(t, .7, 1);
+      const localGrip = item.owner.worldToLocal(worldCarry());
+      item.prop.position.lerpVectors(item.origin, localGrip, contact);
+      item.owner.getWorldQuaternion(carryRotation).invert().multiply(facing.getWorldQuaternion(rotation));
+      item.prop.quaternion.slerpQuaternions(shelfRotation, carryRotation, contact);
+      if (t === 1) {
+        if (phase === 'return') reset();
+        else { phase = 'held'; hold(); presentHand(); }
+      }
     },
-    get phase(){return phase;},
-    get state(){return {phase,id:item?.id||null,active:phase!=='empty'&&phase!=='held',held:phase==='held'};}
+    get phase() { return phase; },
+    get state() { return {phase, id:item?.id || null, active:phase !== 'empty' && phase !== 'held', held:phase === 'held'}; }
   };
 }

@@ -235,7 +235,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     const prop = new T.Group(); prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
     for (const primitive of entry.record.primitives) {const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);prop.add(mesh);}
     scene.add(prop); let released=false;
-    return {id, prop, approach:shelves.find(s=>s.id===id).pickup, origin:entry.placements[index].clone(), release() {
+    return {id, prop, centerY:canBounds.y/2, approach:shelves.find(s=>s.id===id).pickup, origin:entry.placements[index].clone(), release() {
       if(released)return; released=true; prop.removeFromParent(); entry.reserved=false;
       entry.lod.setReserved(-1);
     }};

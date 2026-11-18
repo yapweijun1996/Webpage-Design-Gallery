@@ -966,11 +966,11 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     camera.updateProjectionMatrix();
   }
   function presentView(mode, occluded, required) {
-    if (cameraOccluded !== occluded) {
-      cameraOccluded = occluded;
-      character.setCameraOccluded(occluded);
-    }
     const firstPerson = mode === "first-person";
+    if (cameraOccluded !== occluded || renderedMode !== mode) {
+      cameraOccluded = occluded;
+      character.setCameraOccluded(occluded, firstPerson);
+    }
     contact.visible = !firstPerson;
     const presentation = firstPerson ? mode : occluded ? "close" : mode;
     if (canvas.dataset.cameraView !== presentation)
@@ -986,6 +986,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const required = chaseRequired(), mode = view.mode(required), firstPerson = mode === "first-person";
     const zoom = view.zoom(required), immediate = instant || reducedMotion.matches;
     if (firstPerson) {
+      if (character.productPhase === "held")
+        visual.rotation.y = yaw;
       eyeFov = easeCameraValue(eyeFov, firstPersonFov(zoom), dt, immediate || !eyeFovInitialized);
       eyeFovInitialized = true;
       projectCamera(true);
