@@ -3,6 +3,7 @@ import argparse
 from functools import partial
 from html.parser import HTMLParser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import json
 import os
 from pathlib import Path
 from threading import Thread
@@ -31,23 +32,32 @@ class RelatedLinks(HTMLParser):
 
 def check(browser, base):
     atlas = urljoin(base, "style-atlas/index.html")
+    references = {
+        path.parent.name: json.loads(path.read_text(encoding="utf-8"))
+        for path in (ROOT / "docs/landing-atlas").glob("*/directions.json")
+    }
+    total = sum(map(len, references.values()))
+    alternates = sum(entry["kind"] == "alternate" for entries in references.values() for entry in entries)
+    # Full-page studies and their head metadata links were introduced after the original audit.
+    full_page_studies = {"gjh-v20", "gjh-v21"}
     with browser.new_context(viewport={"width": 1440, "height": 900}) as context:
         page = context.new_page()
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(atlas)
         cards = page.locator("article[data-kind]")
-        expect(cards).to_have_count(60)
-        expect(page.locator("article[data-kind=primary]")).to_have_count(46)
-        expect(page.locator("article[data-kind=alternate]")).to_have_count(14)
-        for company in ("gjh", "yeos", "thow-kwang"):
-            expect(page.locator(f"#{company} article")).to_have_count(20)
+        expect(cards).to_have_count(total)
+        expect(page.locator("article[data-kind=primary]")).to_have_count(total - alternates)
+        expect(page.locator("article[data-kind=alternate]")).to_have_count(alternates)
+        for company, entries in references.items():
+            expect(page.locator(f"#{company} article")).to_have_count(len(entries))
         sizes = page.locator(".art img").evaluate_all("""async imgs => {
           imgs.forEach(img => img.loading = 'eager');
           await Promise.all(imgs.map(img => img.decode()));
-          return imgs.map(img=>[img.naturalWidth,img.naturalHeight]);
+          return imgs.map(img=>[img.closest('article').id,img.naturalWidth,img.naturalHeight]);
         }""")
-        assert all(w >= 800 and h >= 500 and w > h for w, h in sizes), sizes
+        assert all(w >= 800 and h >= 500 and (w > h or anchor in full_page_studies)
+                   for anchor, w, h in sizes), sizes
         expect(page.locator("article[data-kind=alternate] details a")).to_have_count(0)
         primary = page.locator("article[data-kind=primary]").evaluate_all("""articles => articles.map(article => [
           article.id, article.querySelector('.actions a').href, article.querySelector('details a')?.href
@@ -55,21 +65,24 @@ def check(browser, base):
         for anchor, demo, audit in primary:
             company, version = anchor.rsplit("-", 1)
             evidence = Path("docs", "landing-atlas", company, "audit", version + ".webp")
-            assert (ROOT / evidence).is_file(), evidence
-            expected = "https://github.com/yapweijun1996/Webpage-Design-Gallery/blob/main/" + evidence.as_posix()
-            assert audit == expected, (anchor, audit)
+            if (ROOT / evidence).is_file():
+                expected = "https://github.com/yapweijun1996/Webpage-Design-Gallery/blob/main/" + evidence.as_posix()
+                assert audit == expected, (anchor, audit)
+            else:
+                assert anchor in full_page_studies and audit is None, (evidence, audit)
             response = context.request.get(demo)
             assert response.ok, (demo, response.status)
             related = RelatedLinks()
             related.feed(response.text())
-            for tag in ("link", "a"):
+            tags = ("link",) if anchor in full_page_studies else ("link", "a")
+            for tag in tags:
                 assert urljoin(demo, related.urls[tag]) == atlas + "#" + anchor, (tag, demo, related.urls)
         select = page.get_by_label("Show", exact=True)
         select.select_option("alternate")
-        expect(page.locator("article:visible")).to_have_count(14)
+        expect(page.locator("article:visible")).to_have_count(alternates)
         page.evaluate("location.hash='thow-kwang-v1'")
         expect(page.locator("#thow-kwang-v1")).to_be_visible()
-        expect(page.locator("article:visible")).to_have_count(60)
+        expect(page.locator("article:visible")).to_have_count(total)
         for width in (320, 390, 768, 1440):
             page.set_viewport_size({"width": width, "height": 900})
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
@@ -90,10 +103,11 @@ def check(browser, base):
     with browser.new_context(java_script_enabled=False) as context:
         page = context.new_page()
         page.goto(atlas + "#yeos-v1")
-        expect(page.locator("article:visible")).to_have_count(60)
+        expect(page.locator("article:visible")).to_have_count(total)
         page.locator("#yeos-v1 summary").press("Enter")
         expect(page.locator("#yeos-v1 figure")).to_be_visible()
-    print("PASS: 60 full-size references, 46 bidirectional demo links and audit sheets, 14 alternates, filters, keyboard, no-script and four widths.")
+    print(f"PASS: {total} references, {total - alternates} primary demo links, {alternates} alternates, "
+          "filters, keyboard, no-script and four widths.")
 
 
 def main():

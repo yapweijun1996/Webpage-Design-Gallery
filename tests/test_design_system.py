@@ -89,13 +89,15 @@ class DesignSystemTests(unittest.TestCase):
 
     def test_all_version_themes_are_isolated_and_complete(self):
         registry = json.loads((self.root / "design-system/themes.json").read_text())
-        self.assertEqual(set(registry["themes"]), {"v1", *(f"v{number}" for number in range(5, 21))})
+        self.assertEqual(set(registry["themes"]), {"v1", *(f"v{number}" for number in range(5, 22))})
         css = builder.render_themes(self.root)
         for version in registry["themes"]:
             self.assertIn(f'html[data-gjh-design="{version}"]', css)
         outputs = builder.outputs(self.root)
-        self.assertNotIn('html[data-gjh-design="v20"]', outputs["assets/gjh-themes.css"])
-        self.assertIn('html[data-gjh-design="v20"]', outputs[builder.DEMO_THEME_OUTPUTS["v20"]])
+        for version, path in builder.DEMO_THEME_OUTPUTS.items():
+            selector = f'html[data-gjh-design="{version}"]'
+            self.assertNotIn(selector, outputs["assets/gjh-themes.css"])
+            self.assertIn(selector, outputs[path])
         self.assertEqual(registry["themes"]["v1"]["tokens"]["accent"], "#d31b47")
         self.assertEqual(registry["themes"]["v7"]["tokens"]["paper"], "#252124")
 

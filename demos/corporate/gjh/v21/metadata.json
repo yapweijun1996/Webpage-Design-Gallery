@@ -1,0 +1,17 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Product Exhibition",
+  "version": "v21",
+  "designStyle": "Brand-first corporate exhibition with a ruled logo strip, a paper-stage product hero and ink-plum actions.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v21/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v21",
+  "companyId": "gjh",
+  "displayTitle": "Product Exhibition",
+  "summary": "Browse food and beverage, lifestyle and healthcare brands, and prepare a sales enquiry.",
+  "styles": ["corporate"],
+  "order": 180
+}

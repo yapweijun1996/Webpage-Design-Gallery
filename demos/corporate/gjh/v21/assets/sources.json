@@ -1,0 +1,203 @@
+{
+  "assets": [
+    {
+      "file": "borsch-med-logo.webp",
+      "kind": "brand-logo",
+      "dimensions": [
+        144,
+        54
+      ],
+      "sha256": "2cab195a45e8d980a23f578b5f185f674df6eb10957832c8275741c5c7635cb2",
+      "bytes": 2538,
+      "source": "assets/companies/gjh/official/borsch-med-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/06/bm-brand2.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#borsch-med-logo",
+      "sourceSha256": "1135d2beb38992b84dd12a898789532c2679eddc772eb1396dd6e60b0e8d4d07"
+    },
+    {
+      "file": "borsch-med-quality.webp",
+      "kind": "brand-photo",
+      "dimensions": [
+        500,
+        240
+      ],
+      "sha256": "9d5f99f0f1e0b1d573f2d830d486e792a3bf6a8e2afd5f2809cccd1fbb412052",
+      "bytes": 18058,
+      "source": "demos/corporate/gjh/v8/assets/borsch-med-quality.png",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2023/06/1.png",
+      "sourceReceipt": "demos/corporate/gjh/v8/assets/sources.json#borsch-med-quality",
+      "sourceSha256": "a986af32b846bffa763c8b1ff0bf919a7a12a42348bb9016494127ba8bf5cd2e"
+    },
+    {
+      "file": "gjh-history-composite.webp",
+      "kind": "historical-composite",
+      "dimensions": [
+        550,
+        240
+      ],
+      "sha256": "358260e8c20c38fbc42ff3eebcaaf6dc3867aa3a9670ff6df070bab8ff709fce",
+      "bytes": 17756,
+      "source": "assets/companies/gjh/official/gjh-history-composite.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gjh-history-composite",
+      "sourceSha256": "89a674fd19460ffae08b7863193e0d7fec80e83101a5c865a98e3ebf1bfd00c6"
+    },
+    {
+      "file": "gjh-logo.webp",
+      "kind": "company-logo",
+      "dimensions": [
+        167,
+        73
+      ],
+      "sha256": "277ff28fc547219821ffb89f2222e4d644f94d6cec639a0ae79953ce97bc262d",
+      "bytes": 4562,
+      "source": "assets/companies/gjh/official/gjh-logo.png",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gjh-corporate-logo",
+      "sourceSha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50"
+    },
+    {
+      "file": "gogo-brand-cover.webp",
+      "kind": "brand-photo",
+      "dimensions": [
+        438,
+        207
+      ],
+      "sha256": "8cd001261f86c83095458ff565f922e66bf037c8d705d82bba5e4014379e0091",
+      "bytes": 9760,
+      "source": "assets/companies/gjh/official/gogo-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gogo-brand-cover",
+      "sourceSha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380"
+    },
+    {
+      "file": "gogo-logo.webp",
+      "kind": "brand-logo",
+      "dimensions": [
+        150,
+        50
+      ],
+      "sha256": "5696dc538967e71b2ca515452beb0216320ce42e0c81aa547af95275a6dc2851",
+      "bytes": 2156,
+      "source": "assets/companies/gjh/official/gogo-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gogo-logo",
+      "sourceSha256": "51c2d3354c7271e1c92e34f8bf0509b60d055eda4b3e29b44eede70edd373a77"
+    },
+    {
+      "file": "mall-atrium.webp",
+      "kind": "AI-generated concept",
+      "dimensions": [
+        880,
+        660
+      ],
+      "sha256": "5b2841ae77522bc17b375280d9d971d3b2f6ef900e5c1896297802ef0aae6757",
+      "bytes": 46544,
+      "source": "Built-in ImageGen",
+      "original": "01a1ed16-9144-7dc1-92aa-708f0584b577/exec-d6e6a5cb-4aaa-4882-8589-5984599aef9d.png",
+      "sourceSha256": "cbb3bffc529dc1917c691ef47223003f128a4848eca4a8e7a0c7f679b4dc27db",
+      "sourceReceipt": "docs/gjh-v21/design-notes.md#imagegen-production",
+      "description": "Fictional two-level monochrome retail atrium."
+    },
+    {
+      "file": "mili-brand-cover.webp",
+      "kind": "brand-photo",
+      "dimensions": [
+        500,
+        237
+      ],
+      "sha256": "4b2368d0c00001e4dc9c388e484259f5993d88ea275f028f2b23fd375c3fe761",
+      "bytes": 19810,
+      "source": "assets/companies/gjh/official/mili-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#mili-brand-cover",
+      "sourceSha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39"
+    },
+    {
+      "file": "mili-logo.webp",
+      "kind": "brand-logo",
+      "dimensions": [
+        110,
+        68
+      ],
+      "sha256": "79ae467e1b813d13ac795dc69275a96b687423986b1965fc28b9652b381dcaca",
+      "bytes": 2874,
+      "source": "assets/companies/gjh/official/mili-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#mili-logo",
+      "sourceSha256": "842f5793ddd4da0c51d2a35d210f273c9c082742f10a1a2465b66f5de454ab9d"
+    },
+    {
+      "file": "new-moon-brand-cover.webp",
+      "kind": "brand-photo",
+      "dimensions": [
+        438,
+        204
+      ],
+      "sha256": "2f74be89ce637723d7880f2e145a5fe5fc3415197dfe57249c9a807fda62697a",
+      "bytes": 14268,
+      "source": "assets/companies/gjh/official/new-moon-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-nm.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-brand-cover",
+      "sourceSha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8"
+    },
+    {
+      "file": "new-moon-logo.webp",
+      "kind": "brand-logo",
+      "dimensions": [
+        208,
+        43
+      ],
+      "sha256": "ffc29bae8868c337db5cb61fa1073ae4107da1a7e62dd48ec8b591b19942f1cd",
+      "bytes": 8696,
+      "source": "demos/corporate/gjh/v11/assets/brands/S01-new-moon.webp",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/brands/logo-sources.json#S01",
+      "sourceSha256": "88de0bf10408644131758f9ae5075b9748389b59586bd1614e2a54229ad5e8cc"
+    },
+    {
+      "file": "new-moon-nz-425g-front.webp",
+      "kind": "product-front",
+      "dimensions": [
+        286,
+        460
+      ],
+      "sha256": "ced392d3b9bfbbae038510cd32822f627a4672ef151768bdff19ab887ad0bfd9",
+      "bytes": 25654,
+      "source": "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-nz-425g-front",
+      "sourceSha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082"
+    },
+    {
+      "file": "paper-stage.webp",
+      "kind": "AI-generated concept",
+      "dimensions": [
+        960,
+        720
+      ],
+      "sha256": "170bcd327ea5ab1aa164b2b2af5d82d62d325a8ca3748a80e46d93bd31850144",
+      "bytes": 24318,
+      "source": "Built-in ImageGen",
+      "original": "01a1ed16-9144-7dc1-92aa-708f0584b577/exec-9a977cfa-2379-4a5c-84e2-0c4e42f03749.png",
+      "sourceSha256": "d659d5b881e17e783eb87367cd8644b02f35a556d78cf7f365452af40d5928e6",
+      "sourceReceipt": "docs/gjh-v21/design-notes.md#imagegen-production",
+      "description": "Pleated grey paper and an empty circular studio plinth."
+    },
+    {
+      "file": "sony-logo.webp",
+      "kind": "brand-logo",
+      "dimensions": [
+        200,
+        52
+      ],
+      "sha256": "99dcc2565ce3547ebd4b3ae26ef0d4a0ae7a46371b8848a8a2a29125fedae1e3",
+      "bytes": 2298,
+      "source": "demos/corporate/gjh/v8/assets/sony-brand.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/sony-brand.jpg",
+      "sourceReceipt": "demos/corporate/gjh/v8/assets/sources.json#sony-brand-tile",
+      "sourceSha256": "04d91758c7c5f3d3f67f9805de932e405d612e395ffda5a928eb2d0ce3be60dd"
+    }
+  ],
+  "editorialNote": "Official artwork is copied, cropped or resized and encoded as WebP. Both AI scenes are separate originals and are labelled on the landing page. Official asset receipts identify project use and provenance. Current packaging and separate publication approval remain unverified."
+}

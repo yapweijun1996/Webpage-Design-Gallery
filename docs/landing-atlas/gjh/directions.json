@@ -119,6 +119,13 @@
     "detail": "Open New Moon from the first screen, then prepare an enquiry for the featured product.", "items": ["Food & Beverage", "Lifestyle", "Healthcare"]
   },
   {
+    "key": "product-exhibition", "version": "v21", "kind": "primary", "style": "Product exhibition",
+    "headline": "Explore Goh Joo Hin's Brands", "action": "Explore Our Brands", "image": "demos/corporate/gjh/v21/assets/paper-stage.webp",
+    "composition": "split", "background": "#eeeef0", "ink": "#202024", "accent": "#623d78",
+    "notes": "A ruled strip of brand marks leads to the official New Moon packshot on a sculpted paper stage. Alternating pale bands give the brand tiles, featured product and sales enquiry their own space.",
+    "detail": "Open New Moon from the brand strip or prepare a sales enquiry for the featured 425g pack.", "items": ["Food & Beverage", "Lifestyle", "Healthcare"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

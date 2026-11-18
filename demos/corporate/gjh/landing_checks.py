@@ -5,6 +5,7 @@ import functools
 import http.server
 import io
 import os
+import re
 import threading
 from pathlib import Path
 
@@ -13,7 +14,7 @@ from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[3]
 DEMOS = Path(__file__).resolve().parent
-VERSIONS = [1, *range(5, 21)]
+VERSIONS = [1, *range(5, 22)]
 VIEWPORTS = {1440: 900, 768: 1024, 390: 844, 320: 740}
 EXTERNAL = {
     5: ('.hero-covers a', 'https://www.gjh.com.sg/newmoon/'),
@@ -27,6 +28,7 @@ INTERNAL = {
     12: ('.table-index a', '#at-table-newmoon'),
     17: ('.menu-bookmarks a', '#supper'),
     20: ('.shortcut-list a[href="#featured-product"]', '#featured-product'),
+    21: ('.shortcut-list a[href="#brand-new-moon"]', '#brand-new-moon'),
 }
 
 
@@ -64,19 +66,40 @@ def journey(page, version):
         expect(page.get_by_role('heading', name='Brand site')).to_be_visible()
     elif version in INTERNAL:
         selector, target = INTERNAL[version]
-        if version == 20:
+        if version in (20, 21):
             expect(page.locator('h1')).to_have_count(1)
             if page.viewport_size['width'] == 390:
-                expect(page.locator('.shortcuts')).to_be_in_viewport()
+                strip_selector = '.shortcuts' if version == 20 else '.brand-strip'
+                expect(page.locator(strip_selector)).to_be_in_viewport()
                 expect(page.locator(selector)).to_be_in_viewport(ratio=1)
-            if page.viewport_size['width'] == 1440:
+            if page.viewport_size['width'] == 1440 or (
+                version == 21 and page.viewport_size['width'] == 390
+            ):
                 for action in page.locator('.hero-actions a').all():
                     expect(action).to_be_in_viewport(ratio=1)
         activate(page, selector)
         page.wait_for_url('**/' + target)
         expect(page.locator(target)).to_be_in_viewport()
-        if version == 20:
-            portfolio_enquiry(page)
+        if version == 21:
+            expect(page.locator('#brand-new-moon-heading')).to_be_focused()
+            expect(page.locator(target).get_by_role('link', name='View Brand, New Moon')).to_have_attribute(
+                'href', 'https://www.gjh.com.sg/newmoon/')
+            if page.viewport_size['width'] <= 390:
+                controls = page.locator('main :is(a, button, input, textarea):visible, '
+                                        '.page-header :is(a, summary):visible, .page-footer a:visible')
+                assert controls.evaluate_all("""nodes => nodes.every(node => {
+                  const {width, height} = node.getBoundingClientRect();
+                  return width >= 44 && height >= 44;
+                })""")
+                trigger = page.locator('#mobile-menu summary')
+                trigger.press('Enter')
+                menu_contact = page.locator('#mobile-menu').get_by_role('link', name='Contact')
+                expect(menu_contact).to_be_visible()
+                menu_contact.press('Escape')
+                expect(trigger).to_be_focused()
+                expect(menu_contact).to_be_hidden()
+        if version in (20, 21):
+            portfolio_enquiry(page, version)
     elif version == 8:
         expect(page.locator('.epoch-index')).to_be_in_viewport(ratio=1)
         activate(page, '.epoch-index a[href="#chapter-2004"]')
@@ -135,7 +158,7 @@ def journey(page, version):
         expect(page.locator('#brief-result')).to_be_hidden()
 
 
-def portfolio_enquiry(page):
+def portfolio_enquiry(page, version):
     product = 'New Moon Premium Wild Caught New Zealand Abalone 425g'
     featured = page.locator('#featured-product')
     expect(featured.get_by_role('heading')).to_have_text(product)
@@ -163,9 +186,13 @@ def portfolio_enquiry(page):
 
     page.get_by_role('button', name='Lifestyle', exact=True).click()
     expect(page.locator('.brand-card[data-category]:visible')).to_have_count(1)
+    if version == 21:
+        expect(page.locator('#brand-status')).to_have_text('1 brand shown.')
     page.locator('.shortcut-list').get_by_role('link', name='MILI', exact=True).click()
-    expect(page.locator('#brand-mili')).to_be_focused()
-    expect(page.get_by_role('button', name='Food & Beverage')).to_have_attribute('aria-pressed', 'true')
+    focus_target = '#brand-mili-heading' if version == 21 else '#brand-mili'
+    active_filter = 'All' if version == 21 else 'Food & Beverage'
+    expect(page.locator(focus_target)).to_be_focused()
+    expect(page.get_by_role('button', name=active_filter, exact=True)).to_have_attribute('aria-pressed', 'true')
     page.locator('#brand-mili').get_by_role('link', name='Enquire about MILI').click()
     expect(page.locator('#enquiry-brand')).to_have_value('MILI')
     expect(page.locator('#enquiry-product')).to_have_value('')
@@ -175,17 +202,43 @@ def portfolio_enquiry(page):
     assert page.evaluate("!performance.getEntriesByType('resource').some(entry => entry.name.includes('/v11/'))")
 
 
-def portfolio_without_javascript(browser, url):
+def portfolio_without_javascript(browser, url, version):
     with browser.new_context(viewport={'width': 390, 'height': 844}, java_script_enabled=False) as context:
         page = context.new_page()
         page.goto(url, wait_until='domcontentloaded')
         expect(page.locator('.brand-card[data-category]:visible')).to_have_count(5)
-        page.locator(INTERNAL[20][0]).click()
-        expect(page.locator(INTERNAL[20][1])).to_be_in_viewport()
+        page.locator(INTERNAL[version][0]).click()
+        expect(page.locator(INTERNAL[version][1])).to_be_in_viewport()
+        if version == 21:
+            menu = page.locator('#mobile-menu summary')
+            menu.click()
+            expect(page.locator('#mobile-menu').get_by_role('link', name='Contact')).to_be_visible()
+            menu.click()
+            expect(page.get_by_role('button', name='Copy Enquiry Details')).to_be_hidden()
         page.get_by_role('link', name='Enquire About This Product').click()
         expect(page.get_by_role('link', name='Open Official Contact')).to_have_attribute(
             'href', 'https://www.gjhglobal.com/contact-us/')
         expect(page.get_by_role('link', name='Open Official Contact')).to_be_in_viewport()
+
+
+def exhibition_iframe(browser, origin):
+    with browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='block') as context:
+        page = context.new_page()
+        page.goto(f'{origin}/compare/index.html?company=gjh&left=v20&right=v21')
+        frame = page.frame_locator('iframe[title="Product Exhibition live demo"]')
+        frame.locator('#featured-product [data-enquire]').click()
+        expect(frame.locator('#enquiry-brand')).to_have_value('New Moon')
+        copy = frame.get_by_role('button', name='Copy Enquiry Details')
+        copy.evaluate("""() => Object.defineProperty(navigator, 'clipboard', {
+          value: {writeText: () => Promise.reject(new DOMException('Permission denied', 'NotAllowedError'))}
+        })""")
+        copy.click()
+        draft = frame.locator('#enquiry-draft')
+        expect(draft).to_have_attribute('readonly', '')
+        expect(draft).to_have_value(re.compile(r'Product: New Moon Premium Wild Caught New Zealand Abalone 425g'))
+        frame.get_by_role('button', name='Select All').click()
+        expect(draft).to_be_focused()
+        assert draft.evaluate('field => field.selectionStart === 0 && field.selectionEnd === field.value.length')
 
 
 def capture_preview(page, version, width):
@@ -223,8 +276,9 @@ def run(versions, capture):
             channel='chrome', executable_path=os.environ.get('GALLERY_CHROME'),
             args=['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         try:
+            origin = f'http://127.0.0.1:{server.server_port}'
             for version in versions:
-                url = f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v{version}/'
+                url = f'{origin}/demos/corporate/gjh/v{version}/'
                 widths = dict(VIEWPORTS)
                 if capture and version in (1, 5, 6, 7):
                     widths[375] = 812
@@ -234,6 +288,8 @@ def run(versions, capture):
                         page = context.new_page()
                         errors = []
                         page.on('pageerror', lambda error: errors.append(str(error)))
+                        if version == 21:
+                            page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
                         page.goto(url, wait_until='domcontentloaded')
                         page.evaluate('document.fonts.ready')
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (version, width)
@@ -242,9 +298,12 @@ def run(versions, capture):
                         journey(page, version)
                         assert not errors, (version, width, errors)
                         print(f'V{version} {width}px PASS', flush=True)
-                if version == 20:
-                    portfolio_without_javascript(browser, url)
-                    print('V20 390px without JavaScript PASS', flush=True)
+                if version in (20, 21):
+                    portfolio_without_javascript(browser, url, version)
+                    print(f'V{version} 390px without JavaScript PASS', flush=True)
+                if version == 21:
+                    exhibition_iframe(browser, origin)
+                    print('V21 gallery iframe clipboard fallback PASS', flush=True)
         finally:
             browser.close()
             server.shutdown()

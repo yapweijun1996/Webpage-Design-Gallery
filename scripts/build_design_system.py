@@ -8,7 +8,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN_NAME = re.compile(r"[a-z][a-z0-9-]*\Z")
-DEMO_THEME_OUTPUTS = {"v20": "demos/corporate/gjh/v20/assets/theme.css"}
+DEMO_THEME_OUTPUTS = {
+    "v20": "demos/corporate/gjh/v20/assets/theme.css",
+    "v21": "demos/corporate/gjh/v21/assets/theme.css",
+}
 
 
 def read_tokens(root=ROOT):
