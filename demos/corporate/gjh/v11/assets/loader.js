@@ -36,14 +36,33 @@ if (typeof document !== 'undefined') {
   const status = document.getElementById('loader-status');
   const progress = document.getElementById('loader-progress');
   const count = document.getElementById('loader-count');
+  const steps = [...document.querySelectorAll('.app-loader-steps li')];
   const retry = document.getElementById('loader-retry');
   const enterNow = document.getElementById('loader-enter-now');
-  let fadeTimer;
+  const fill = document.getElementById('loader-fill');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let fadeTimer, shown = 0, goal = 0, stageStart = performance.now(), raf = 0, last = {completed: 0, total: stages.length};
+  // Milestones are real, so the fill eases toward the next one and creeps up to 90% of the gap while it works.
+  // It never claims a stage before the stage completes.
+  function frame(now) {
+    raf = 0;
+    const {completed, total, failed, hidden: paused} = last;
+    const ready = completed === total;
+    const creep = ready || failed || reduced.matches ? 0 : 0.9 * (1 - Math.exp(-(now - stageStart) / 5000));
+    goal = Math.min(100, (completed + creep) / total * 100);
+    shown = reduced.matches ? goal : shown + (goal - shown) * 0.12;
+    if (Math.abs(goal - shown) < 0.05) shown = goal;
+    fill.style.width = `${shown.toFixed(2)}%`;
+    if (!overlay.hidden && !paused && !failed && (shown !== goal || !ready)) raf = requestAnimationFrame(frame);
+  }
+  const drive = value => { if (value.completed !== last.completed) stageStart = performance.now(); last = value; if (!raf) raf = requestAnimationFrame(frame); };
   const state = createLoaderState(value => {
     status.textContent = value.message;
     progress.value = value.completed;
     progress.textContent = `${value.completed} of ${value.total} stages`;
     count.textContent = `${value.completed} / ${value.total}`;
+    drive(value);
+    steps.forEach((step, index) => { step.dataset.state = index < value.completed ? 'done' : index === value.completed && !value.failed ? 'current' : 'todo'; });
     retry.hidden = !value.failed;
     enterNow.hidden = !value.preparing || Boolean(value.failed);
     if (value.dismissed) {

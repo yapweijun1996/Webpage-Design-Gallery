@@ -37,12 +37,14 @@
       <h2>Everyday, <em>explored.</em></h2>
       <div class="app-loader-progress">
         <div class="app-loader-progress-head"><strong id="loader-status" role="status" aria-live="polite">Preparing the mall…</strong><span id="loader-count" aria-hidden="true">0 / 4</span></div>
+        <div class="app-loader-bar" aria-hidden="true"><i id="loader-fill"></i></div>
         <progress id="loader-progress" aria-label="Mall startup stages completed" value="0" max="4">0 of 4 stages</progress>
+        <ol class="app-loader-steps" aria-hidden="true"><li data-stage="physics">Engine</li><li data-stage="scene">Scene</li><li data-stage="models">Models</li><li data-stage="frame">First view</li></ol>
       </div>
       <div class="app-loader-actions">
         <button id="loader-retry" type="button" hidden>Retry 3D mall</button>
         <button id="loader-enter-now" type="button" hidden>Enter 3D mall now</button>
-        <a id="loader-directory" href="#store-list">Browse the store directory</a>
+        <a id="loader-directory" href="#store-list">Browse the store directory <span data-icon="arrow-right" aria-hidden="true"></span></a>
       </div>
       <p class="app-loader-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
     </div>
