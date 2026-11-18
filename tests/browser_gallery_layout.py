@@ -51,8 +51,12 @@ def run():
                                 assert summary.evaluate('(e)=>document.activeElement===e')
                             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, language)
                             header = page.locator('.site-header').bounding_box()
+                            mobile_header = width <= 559
+                            identity = brand.bounding_box()
+                            nav = page.locator('.header-inner nav').bounding_box()
+                            assert (nav['y'] >= identity['y'] + identity['height']) == mobile_header, (width, language, identity, nav)
                             if width <= 1000:
-                                assert header['height'] <= (100 if width <= 520 else 64), (width, language, header)
+                                assert header['height'] <= (100 if mobile_header else 64), (width, language, header)
                             columns = page.locator('.design-grid').evaluate('(e)=>getComputedStyle(e).gridTemplateColumns.split(" ").length')
                             assert columns == (1 if width < 560 else 2), (width, columns)
                     select_preference(page, '#language-select', 'en')

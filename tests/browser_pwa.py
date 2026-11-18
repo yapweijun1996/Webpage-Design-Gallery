@@ -126,7 +126,7 @@ def run():
                     page.evaluate("document.activeElement.blur(); scrollTo(0, 0)")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
                     open_settings(page)
-                    assert page.locator("#check-update").bounding_box()["height"] >= (44 if width <= 520 else 36)
+                    assert page.locator("#check-update").bounding_box()["height"] >= (44 if width <= 559 else 36)
                     assert page.locator('meta[name="viewport"]').get_attribute("content") == viewport
                     for event_name in ("gesturestart", "gesturechange"):
                         event = page.evaluate("""name => {

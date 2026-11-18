@@ -19,8 +19,6 @@ h1, h2, h3, p { margin-top: 0; }
 .header-inner {
   --header-control-size: var(--space-9);
   --header-gutter: var(--layout-gutter);
-  --header-inset-start: max(var(--header-gutter), env(safe-area-inset-left, 0px));
-  --header-inset-end: max(var(--header-gutter), env(safe-area-inset-right, 0px));
   position: relative;
   display: grid;
   grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
@@ -30,7 +28,8 @@ h1, h2, h3, p { margin-top: 0; }
   max-width: var(--layout-content);
   min-height: calc(var(--space-16) - 1px);
   margin-inline: auto;
-  padding-inline: var(--header-inset-start) var(--header-inset-end);
+  padding-left: max(var(--header-gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--header-gutter), env(safe-area-inset-right, 0px));
 }
 .site-identity { grid-area: brand; justify-self: start; display: flex; align-items: center; gap: var(--space-3); min-height: var(--size-control); font-size: var(--font-size-base); line-height: 1.2; font-weight: var(--font-weight-bold); letter-spacing: -.025em; }
 .identity-second { display: block; font-size: var(--font-size-xs); font-weight: var(--font-weight-normal); letter-spacing: normal; color: var(--muted); margin-top: 2px; }
@@ -72,8 +71,8 @@ h1, h2, h3, p { margin-top: 0; }
   .settings-panel {
     position: absolute;
     inset-block-start: calc(100% + var(--space-2));
-    inset-inline-end: var(--header-inset-end);
-    width: min(280px, calc(100% - var(--header-inset-start) - var(--header-inset-end)));
+    right: max(var(--header-gutter), env(safe-area-inset-right, 0px));
+    width: min(280px, calc(100% - max(var(--header-gutter), env(safe-area-inset-left, 0px)) - max(var(--header-gutter), env(safe-area-inset-right, 0px))));
     max-height: 70dvh;
     overflow: auto;
     flex-direction: column;
@@ -90,7 +89,7 @@ h1, h2, h3, p { margin-top: 0; }
 @media (max-width: 650px) {
   .header-inner { --header-gutter: var(--layout-mobile-gutter); gap: var(--space-2); }
 }
-@media (max-width: 520px) {
+@media (max-width: 559px) {
   .header-inner { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand settings" "nav nav"; row-gap: 0; padding-block: var(--space-1); }
   .site-identity { gap: var(--space-2); }
 }
