@@ -530,53 +530,6 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
 }
 
 // demos/corporate/gjh/v11/assets/shop-anchor-details-first.js
-function drawPlumArrangement(ctx) {
-  ctx.save();
-  ctx.translate(512, 301);
-  ctx.lineCap = "round";
-  const sprays = [
-    [-7, -4, -48, -57, -106, -66],
-    [-8, -4, -30, -85, -72, -108],
-    [0, -4, 12, -76, 36, -103],
-    [0, -5, 36, -42, 103, -63],
-    [4, -4, 52, -19, 93, -33],
-    [-3, -4, -54, -22, -94, -37]
-  ];
-  for (const [x, y, bx, by, tipX, tipY] of sprays) {
-    ctx.strokeStyle = "#5a3128";
-    ctx.lineWidth = 3.3;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.quadraticCurveTo(bx, by, tipX, tipY);
-    ctx.stroke();
-    for (let j = 2;j <= 8; j++) {
-      const t = j / 8, u = 1 - t;
-      const sx = u * u * x + 2 * u * t * bx + t * t * tipX, sy = u * u * y + 2 * u * t * by + t * t * tipY;
-      const ex = sx + (j % 2 ? 7 : -6), ey = sy - 9 - j % 3 * 3;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(ex, ey);
-      ctx.stroke();
-      ctx.fillStyle = j % 3 ? "#9d493e" : "#d3856e";
-      ctx.beginPath();
-      ctx.arc(ex, ey, 4.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(ex + 3, ey - 3, 2.6, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  ctx.fillStyle = "#e7d7ad";
-  ctx.beginPath();
-  ctx.moveTo(-13, -9);
-  ctx.lineTo(13, -9);
-  ctx.bezierCurveTo(12, 0, 27, 9, 19, 21);
-  ctx.quadraticCurveTo(0, 31, -19, 21);
-  ctx.bezierCurveTo(-27, 9, -12, 0, -13, -9);
-  ctx.fill();
-  ctx.restore();
-}
 function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider }) {
   if (zone === "newmoon") {
     for (const z of [-3.29, -4.58]) {
@@ -1679,489 +1632,6 @@ var eastShopPlacements = {
   17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-2.22, 0.081, 2.22], yaw: 1.5, scale: 0.86 }]
 };
 
-// demos/corporate/gjh/v11/assets/window-studios.js
-var cream = 15984077;
-var pearl = 16774111;
-var brass = 13279579;
-var oak = 11633494;
-var walnut = 6701359;
-var sage = 7767146;
-var charcoal = 2961458;
-var silver = 12895165;
-var white = 16250089;
-var shopIslandZ = -0.63;
-var shopLamp = 16770727;
-var finishes = {
-  4: [14864301, 10976642, 15785927],
-  5: [6898732, 9132600, 14927772],
-  6: [11700828, 12950889, 15390136],
-  7: [7745318, 9325877, 11897700],
-  8: [15656137, 2177385, 16050643],
-  9: [2570313, 1913422, 4673626],
-  10: [11322284, 7507064, 15919055],
-  11: [7684666, 8929852, 14996662],
-  12: [15329754, 11650471, 15526360],
-  13: [6703151, 3552823, 11444103],
-  14: [14929845, 13415316, 15656151],
-  15: [6309172, 6899253, 10255969],
-  16: [15856094, 11649071, 15855583],
-  17: [11175012, 4406329, 14468520]
-};
-function buildWindowStudio(n, t, width, depth) {
-  const { box, column, disc, bar, arch, ring, ellipse, tapered, block } = t;
-  const [wall, base, floor] = finishes[n];
-  const back = -depth / 2 + 0.38, front = depth / 2 - 0.18, side = width / 2 - 0.23, span = front - back, mid = (front + back) / 2;
-  const cabinet = (x, z, w, h, d, body, cap) => {
-    block(x, (h + 0.26) / 2, z, w + 0.09, h + 0.26, d + 0.09);
-    box(x, 0.12, z, w - 0.1, 0.23, d - 0.1, brass);
-    box(x, 0.18 + h / 2, z, w, h, d, body);
-    box(x, 0.21 + h, z, w + 0.09, 0.095, d + 0.09, cap);
-  };
-  function ovalCounter(x, z, width2, depth2, height, color) {
-    const radius = depth2 / 2, straight = width2 - depth2;
-    block(x, height / 2 + 0.07, z, width2 + 0.06, height + 0.12, depth2 + 0.06);
-    for (const [y, h, r, finish] of [[0.16, 0.18, radius * 0.95, brass], [height / 2 + 0.13, height - 0.16, radius, color], [height + 0.075, 0.1, radius + 0.025, cream]]) {
-      box(x, y, z, straight, h, 2 * r, finish);
-      for (const end of [-1, 1])
-        column(x + end * straight / 2, y, z, r, h, finish);
-    }
-    return height + 0.125;
-  }
-  function blossomVase(x, y, z, petal) {
-    tapered(x, y + 0.17, z, 0.15, 0.2, 0.32, cream);
-    for (let i = 0;i < 7; i++) {
-      const angle = i * 2.4, dx = Math.cos(angle) * (0.2 + 0.03 * (i % 3)), dz = Math.sin(angle) * 0.17, top = y + 0.66 + i % 3 * 0.12;
-      bar(x, y + 0.26, z, x + dx, top, z + dz, 0.018, walnut);
-      for (let j = 0;j < 3; j++)
-        ellipse(x + dx + (j - 1) * 0.054, top - 0.04 * Math.abs(j - 1), z + dz, 0.066, 0.06, 0.059, petal, angle, 0);
-    }
-  }
-  function can(x, y, z, c, r = 0.105, h = 0.24) {
-    column(x, y + h / 2, z, r, h, c);
-    column(x, y + h + 0.015, z, r * 1.02, 0.03, brass);
-  }
-  function provisionDisplay(x, z, kind) {
-    const checker = kind === "jar", c = checker ? 2506352 : base;
-    cabinet(x, z, 1.45, 0.49, 0.81, c, cream);
-    if (checker) {
-      for (let row = 0;row < 2; row++)
-        for (let j = 0;j < 6; j++)
-          if ((j + row) % 2)
-            box(x + (j - 2.5) * 0.22, 0.33 + row * 0.22, z + 0.416, 0.215, 0.215, 0.023, white);
-    }
-    for (let tier = 0;tier < 3; tier++) {
-      const count = 4 - tier, h = 0.79 + tier * 0.235;
-      for (let i = 0;i < count; i++) {
-        const px = x + (i - (count - 1) / 2) * 0.249;
-        if (kind === "pack")
-          box(px, h + 0.11, z, 0.222, 0.22, 0.21, i % 2 ? cream : oak);
-        else
-          can(px, h, z, i % 3 ? c : 13017455, 0.114, 0.2);
-      }
-    }
-  }
-  function shellFan(x, y, z, size) {
-    for (let i = -5;i <= 5; i++) {
-      const angle = i * 0.178, height = size * (1 - 0.19 * Math.abs(i) / 5);
-      const radius = 0.49 * height;
-      ellipse(x + Math.sin(angle) * radius, y + Math.cos(angle) * radius, z - 0.035 * Math.abs(i), 0.16 * size, height * 0.53, 0.095 * size, i % 2 ? 15457224 : pearl, 0, -angle);
-    }
-  }
-  function packageRow(x, y, z, count, step, kind, c) {
-    for (let j = 0;j < count; j++) {
-      const px = x + (j - (count - 1) / 2) * step;
-      if (kind === "tin")
-        can(px, y, z, j % 3 === 0 ? cream : c);
-      else {
-        const h = kind === "pack" ? 0.31 : 0.24;
-        box(px, y + h / 2, z, 0.18, h, 0.13, j % 3 === 0 ? pearl : c);
-        box(px, y + h * 0.43, z + 0.071, 0.14, 0.035, 0.018, j % 3 === 0 ? c : cream);
-      }
-    }
-  }
-  function shelf(x, z, w, kind = "tin", c = base, arched = false) {
-    block(x, 1.62, z + 0.2, w, 3.18, 0.57);
-    const frame = n >= 12 ? silver : brass;
-    box(x, 1.62, z, w, 3.18, 0.12, wall);
-    for (const s of [-1, 1])
-      box(x + s * (w / 2 - 0.045), 1.62, z + 0.21, 0.065, 3.16, 0.48, frame);
-    if (arched)
-      arch(x, 1.88, z + 0.17, w * 0.46, 0.66, 0.07, frame);
-    for (const h of [0.61, 1.34, 2.07, 2.8]) {
-      box(x, h, z + 0.23, w, 0.085, 0.5, oak);
-      box(x, h - 0.04, z + 0.46, w - 0.05, 0.035, 0.035, shopLamp);
-      packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind, c);
-    }
-  }
-  function sideShelf(s, c = oak, kind = "tin") {
-    const x = s * (side - 0.29);
-    block(x - s * 0.18, 1.59, mid, 0.5, 3.13, span - 0.7);
-    box(x, 1.58, mid, 0.15, 3.02, span - 0.7, wall);
-    for (let row = 0;row < 4; row++) {
-      const y = 0.55 + row * 0.66;
-      box(x - s * 0.18, y, mid, 0.49, 0.095, span - 0.82, c);
-      box(x - s * 0.42, y - 0.035, mid, 0.025, 0.025, span - 0.9, shopLamp);
-      for (let i = 0;i < 9; i++) {
-        const z = back + 0.81 + i * (span - 1.66) / 8;
-        if (kind === "tin")
-          can(x - s * 0.19, y + 0.05, z, i % 3 ? cream : base, 0.1, 0.21);
-        else
-          box(x - s * 0.19, y + 0.19, z, 0.14, 0.28, 0.2, i % 3 ? white : base);
-      }
-    }
-    for (const z of [back + 0.4, mid, front - 0.41])
-      box(x - s * 0.26, 1.61, z, 0.08, 3.15, 0.07, brass);
-  }
-  function pendant(x, z, y, r, c = brass) {
-    column(x, (4.09 + y) / 2, z, 0.022, 4.09 - y, brass);
-    tapered(x, y, z, r * 0.46, r, 0.27, c);
-    column(x, y - 0.137, z, r * 0.89, 0.035, shopLamp);
-  }
-  function plant(x, z, h) {
-    const y = 0.46;
-    block(x, 0.35, z, 0.49, 0.65, 0.49);
-    tapered(x, y / 2 + 0.09, z, 0.23, 0.17, y, cream);
-    for (let k = 0;k < 6; k++) {
-      const a = k * 2.39, r = 0.26 + k % 2 * 0.09, dx = Math.cos(a) * r, dz = Math.sin(a) * r, top = h - k % 3 * 0.18;
-      bar(x, y, z, x + dx, top, z + dz, 0.026, 5466692);
-      ellipse(x + dx, top, z + dz, 0.12, 0.29, 0.08, k % 2 ? 6586443 : 9544543, a, dx);
-    }
-  }
-  function circleIsland(x, z, r, h, c) {
-    block(x, (h + 0.3) / 2, z, r * 2.06, h + 0.3, r * 2.06);
-    column(x, 0.16, z, r * 0.89, 0.18, brass);
-    column(x, 0.22 + h / 2, z, r, h, c);
-    column(x, 0.25 + h, z, r * 1.03, 0.1, cream);
-    return h + 0.31;
-  }
-  function ringLight(x, z, r, y) {
-    ring(x, y, z, r, 0.036, shopLamp);
-    for (const off of [-0.68, 0.68])
-      column(x + off * r, (4.11 + y) / 2, z, 0.012, 4.11 - y, brass);
-  }
-  function sofa(x, z, c) {
-    block(x, 0.39, z, 1.66, 0.78, 0.8);
-    box(x, 0.35, z, 1.6, 0.34, 0.77, c);
-    box(x, 0.59, z - 0.32, 1.61, 0.47, 0.19, c);
-    for (const k of [-1, 1])
-      box(x + k * 0.75, 0.52, z, 0.16, 0.32, 0.71, c);
-  }
-  block(0, 2.12, back, side * 2, 4.18, 0.13);
-  block(0, 4.19, mid, side * 2, 0.18, span);
-  for (const s of [-1, 1])
-    block(s * side, 2.1, mid, 0.13, 4.13, span);
-  block(0, 0.041, mid, side * 2, 0.08, span);
-  box(0, 0.041, mid, side * 2, 0.08, span, floor, -2);
-  box(0, 2.12, back, side * 2, 4.18, 0.13, wall);
-  box(0, 4.19, mid, side * 2, 0.18, span, cream, -3);
-  const pilasterSide = shopEntrance(expandedLayout.slots[n - 1]).normalX;
-  const { inset, depth: pierDepth } = atriumLayout.arcadePilaster;
-  const pilasterBack = depth / 2 - inset - pierDepth / 2;
-  for (const s of [-1, 1]) {
-    box(s * (side - 0.2), 4.082, mid, 0.4, 0.064, span, pearl, -3);
-    const wallEnd = s === pilasterSide ? pilasterBack : front;
-    box(s * side, 2.1, (back + wallEnd) / 2, 0.13, 4.13, wallEnd - back, wall);
-    box(s * (side - 0.31), 4.05, mid, 0.065, 0.046, span - 0.6, shopLamp);
-    box(s * (side - 0.2), 0.19, mid, 0.15, 0.21, span, base);
-  }
-  for (const z of [back + 0.38, front - 0.46])
-    box(0, 4.04, z, width - 0.9, 0.045, 0.08, shopLamp);
-  for (const x of [-side * 0.64, 0, side * 0.64])
-    for (const z of [back + 1.3, mid + 0.25, front - 1.13])
-      column(x, 4.076, z, 0.078, 0.045, shopLamp);
-  if (n < 13 && n !== 10) {
-    if (n !== 5)
-      sideShelf(-1, oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
-    sideShelf(1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
-  }
-  box(0, 3.69, back + 0.46, 3.68, 0.47, 0.27, brass);
-  const exitZ = front - 0.04;
-  box(0, 3.78, exitZ, 0.67, 0.29, 0.07, 1662791);
-  for (const x of [-0.165, 0.165])
-    box(x, 3.78, exitZ - 0.044, 0.026, 0.207, 0.016, pearl);
-  box(0, 3.885, exitZ - 0.044, 0.35, 0.022, 0.016, pearl);
-  disc(0.045, 3.826, exitZ - 0.06, 0.03, 0.018, pearl);
-  bar(0.02, 3.794, exitZ - 0.059, -0.015, 3.74, exitZ - 0.059, 0.034, pearl);
-  bar(-0.008, 3.75, exitZ - 0.06, 0.045, 3.7, exitZ - 0.06, 0.024, pearl);
-  bar(-0.008, 3.75, exitZ - 0.06, -0.074, 3.717, exitZ - 0.06, 0.024, pearl);
-  const rear = back + 0.26, island = shopIslandZ;
-  const windowX = -side + 1.1, windowZ = front - 0.94;
-  if ([6, 7, 8, 9, 11].includes(n))
-    provisionDisplay(windowX, windowZ, n === 6 ? "pack" : n === 8 ? "jar" : "tin");
-  switch (n) {
-    case 4: {
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.86, rear, 1.75, "pack", sage);
-      const cx = -0.58, top = ovalCounter(cx, island, 2.85, 1.27, 1.16, 12949405);
-      for (let i = -6;i <= 6; i++)
-        box(cx + i * 0.115, 0.68, island + 0.64, 0.028, 0.91, 0.035, 13409948);
-      for (const end of [-1, 1])
-        for (let k = 0;k <= 8; k++) {
-          const a = k * Math.PI / 8;
-          column(cx + end * (0.79 + 0.63 * Math.sin(a)), 0.68, island + 0.63 * Math.cos(a), 0.018, 0.91, 13409948);
-        }
-      for (const x of [-1.17, -0.78])
-        can(x, top, island + 0.18, white, 0.1, 0.24);
-      blossomVase(-0.29, top, island - 0.2, 14000289);
-      for (const x of [-1.5, 0.38]) {
-        column(x, top + 0.21, island + 0.04, 0.032, 0.42, brass);
-        ellipse(x, top + 0.43, island + 0.04, 0.22, 0.17, 0.22, pearl, 0, 0);
-      }
-      pendant(-0.9, island, 3.26, 0.3, white);
-      plant(side - 0.96, front - 0.74, 1.6);
-      break;
-    }
-    case 5: {
-      for (let s = -1;s <= 1; s++)
-        shelf(s * 2.1, rear, 1.88, "tin", 13741441);
-      const wallX = -side + 0.25, nicheZ = mid + 0.46;
-      block(wallX + 0.14, 1.52, mid, 0.56, 3.02, span - 0.66);
-      box(wallX, 1.54, mid, 0.32, 2.98, span - 0.66, walnut);
-      const columns = Math.floor((span - 0.8) / 0.63), pitch = (span - 0.8) / columns;
-      for (let i = 0;i < columns; i++)
-        for (let j = 0;j < 5; j++) {
-          const z = back + 0.5 + (i + 0.5) * pitch, y = 0.47 + j * 0.48;
-          if (Math.abs(z - nicheZ) < 1.12 && y > 0.7)
-            continue;
-          box(wallX + 0.175, y, z, 0.08, 0.445, pitch - 0.035, 9132600);
-          ellipse(wallX + 0.237, y, z, 0.035, 0.046, 0.075, brass, 0, 0);
-        }
-      ellipse(wallX + 0.22, 1.95, nicheZ, 0.045, 1.07, 1.07, brass, 0, 0);
-      ellipse(wallX + 0.27, 1.95, nicheZ, 0.048, 1, 1, 4928551, 0, 0);
-      for (const y of [1.43, 2.14]) {
-        box(wallX + 0.37, y, nicheZ, 0.34, 0.06, 1.65, oak);
-        for (const dz of [-0.35, 0.34]) {
-          ellipse(wallX + 0.42, y + 0.19, nicheZ + dz, 0.14, 0.17, 0.15, pearl, 0, 0);
-          tapered(wallX + 0.42, y + 0.37, nicheZ + dz, 0.098, 0.08, 0.13, pearl);
-        }
-      }
-      cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
-      blossomVase(-0.43, 1.2475, island, 9873258);
-      for (const z of [mid - 1.6, mid + 0.12, mid + 1.82]) {
-        bar(0.22, 3.62, z, 0.22, 4.1, z, 0.025, brass);
-        box(0.22, 3.34, z, 0.42, 0.51, 0.42, shopLamp);
-        for (const y of [3.07, 3.6])
-          box(0.22, y, z, 0.48, 0.055, 0.48, walnut);
-        for (const dx of [-0.22, 0.22])
-          for (const dz of [-0.22, 0.22])
-            box(0.22 + dx, 3.34, z + dz, 0.027, 0.51, 0.027, walnut);
-      }
-      break;
-    }
-    case 6: {
-      for (const x of [-2.04, 2.04])
-        shelf(x, rear, 1.7, "pack", 13344615);
-      arch(0, 0.3, rear + 0.18, 1.07, 1.41, 0.15, cream);
-      for (const h of [0.75, 1.45]) {
-        box(0, h, rear + 0.26, 2.13, 0.07, 0.4, oak);
-        for (const x of [-0.69, -0.2, 0.51])
-          tapered(x, h + 0.17, rear + 0.25, 0.16, 0.09, 0.28, pearl);
-      }
-      cabinet(-0.36, island, 2.78, 0.92, 1.26, oak, cream);
-      for (const offset of [-0.84, -0.28, 0.28, 0.84]) {
-        const centre = -0.36 + offset;
-        for (let j = -3;j <= 3; j++) {
-          const h = 0.77 + j % 2 * 0.07 + (offset > 0 ? 0.08 : 0);
-          box(centre + j * 0.043, 3.03 - h / 2, island - 0.15, 0.029, h, 0.04, j % 2 ? 14859126 : 15454102);
-        }
-      }
-      box(-0.36, 3.08, island - 0.15, 2.53, 0.076, 0.11, brass);
-      for (const x of [-1.43, 0.71])
-        bar(x, 3.08, island - 0.15, x, 3.96, island - 0.15, 0.031, brass);
-      for (let z = back + 0.8;z < front; z += 1.36)
-        box(0, 3.96, z, side * 2, 0.12, 0.15, oak);
-      packageRow(-0.36, 1.21, island + 0.29, 7, 0.32, "pack", oak);
-      break;
-    }
-    case 7: {
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.93, rear, 1.79, "tin", 10962482, true);
-      for (const x of [-1, 1])
-        pendant(x, mid + 1.2, 2.91, 0.34, brass);
-      for (const dx of [-1.85, 0, 1.85])
-        box(dx, 4.015, mid, 0.075, 0.12, span - 0.6, walnut);
-      for (let z = back + 0.83;z < front; z += 1.82)
-        box(0, 4.01, z, side * 2 - 0.45, 0.14, 0.12, walnut);
-      for (const [r, y, count] of [[0.72, 3.43, 20], [0.45, 3.17, 14]]) {
-        ringLight(0, mid - 0.38, r, y);
-        for (let j = 0;j < count; j++) {
-          const a = j * Math.PI * 2 / count;
-          tapered(r * Math.cos(a), y - 0.111, mid - 0.38 + r * Math.sin(a), 0.05, 0.028, 0.21, j % 3 ? pearl : shopLamp);
-        }
-      }
-      const top = circleIsland(0, island, 1.14, 0.82, walnut);
-      column(0, top + 0.13, island, 0.72, 0.26, brass);
-      for (let level = 0;level < 3; level++)
-        for (let j = 0;j < 5 - level; j++)
-          can((j - (4 - level) / 2) * 0.24, top + 0.27 + level * 0.269, island, 11159096);
-      break;
-    }
-    case 8: {
-      for (let x = -3;x <= 3; x++)
-        for (let z = -3;z <= 3; z++)
-          if ((x + z) % 2 === 0)
-            box(x * 0.79, 0.092, mid + z * 0.79, 0.785, 0.012, 0.785, 2638449);
-      for (const x of [-1.96, 1.96])
-        shelf(x, rear, 1.54, "tin", 4615323, true);
-      disc(0, 1.92, rear + 0.13, 1.08, 0.11, base);
-      box(0, 1.17, rear + 0.132, 2.16, 1.5, 0.11, base);
-      arch(0, 0.42, rear + 0.223, 1.08, 1.5, 0.072, brass);
-      for (const [x, y, rx, ry] of [[-0.32, 1.84, 0.39, 0.29], [0.06, 2.01, 0.23, 0.143], [0.38, 2.17, 0.32, 0.22]])
-        ellipse(x, y, rear + 0.25, rx, ry, 0.11, 14197583, 0, 0.37);
-      for (const [x, y] of [[-0.43, 1.8], [-0.22, 1.89], [0.29, 2.13], [0.47, 2.21]]) {
-        bar(x - 0.052, y - 0.07, rear + 0.352, x + 0.052, y + 0.07, rear + 0.352, 0.018, 12094281);
-        bar(x + 0.06, y - 0.05, rear + 0.352, x - 0.06, y + 0.05, rear + 0.352, 0.017, 12094281);
-      }
-      const top = circleIsland(0, island, 1.08, 0.85, base);
-      for (let i = 0;i < 32; i++) {
-        const a = i * Math.PI / 16;
-        column(1.07 * Math.cos(a), 0.66, island + 1.07 * Math.sin(a), 0.035, 0.78, 4682138);
-      }
-      for (let i = -2;i <= 2; i++)
-        can(i * 0.28, top, island, 13805164, 0.12, 0.33);
-      for (const x of [-1.83, 0, 1.83])
-        pendant(x, mid + 0.2, 3.1, 0.45, cream);
-      break;
-    }
-    case 9: {
-      disc(0, 1.63, rear + 0.06, 1.58, 0.13, 14395189);
-      box(0, 0.98, rear + 0.062, 3.16, 1.31, 0.13, 14395189);
-      for (let k = 0;k < 3; k++) {
-        const w = 2.48 - 0.43 * k;
-        box(0, 0.85 + k * 0.52, rear + 0.36, w, 0.08, 0.43, brass);
-        packageRow(0, 0.91 + k * 0.52, rear + 0.36, 7 - 2 * k, 0.28, "pack", cream);
-      }
-      const cx = -0.48;
-      ovalCounter(cx, island, 2.58, 1.13, 1.01, base);
-      for (let j = -5;j <= 5; j++)
-        box(cx + j * 0.143, 0.62, island + 0.563, 0.025, 0.74, 0.027, 4281451);
-      for (const x of [-side + 0.88, side - 0.88])
-        box(x, 0.089, mid, 0.027, 0.008, span - 0.55, brass);
-      for (const z of [mid + 0.35, mid - 2.65]) {
-        column(cx, 3.54, z, 0.025, 1.04, brass);
-        for (const [y, r] of [[3.16, 0.52], [3.04, 0.35], [2.95, 0.19]]) {
-          tapered(cx, y, z, r * 0.62, r, 0.1, brass);
-          column(cx, y - 0.054, z, r * 0.89, 0.025, shopLamp);
-        }
-      }
-      plant(side - 1.15, rear + 1.31, 1.78);
-      break;
-    }
-    case 10:
-      for (const s of [-1, 1]) {
-        const x = s * (side - 1), z = front - 1.5;
-        shellFan(x, 0.62, z, 1.97);
-        shellFan(x + s * 0.31, 0.56, z + 0.29, 1);
-        circleIsland(x, z + 0.05, 0.65, 0.53, base);
-        shelf(s * 2.1, rear, 1.58, "tin", sage, true);
-      }
-      {
-        const top = circleIsland(0, island, 1.2, 0.79, base);
-        for (let j = -2;j <= 2; j++)
-          can(j * 0.28, top, island, cream);
-      }
-      for (let i = 0;i < 7; i++)
-        pendant(Math.sin(i * 2.4) * 0.56, mid + Math.cos(i * 2.4) * 0.46, 2.93 + i * 0.09, 0.15, pearl);
-      break;
-    case 11:
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.83, rear, 1.73, "tin", 9059902);
-      block(0, 0.58, island, 2.74, 1.16, 1.24);
-      for (const x of [-1.21, 1.21])
-        for (const dz of [-0.46, 0.46])
-          box(x, 0.6, island + dz, 0.14, 1.05, 0.14, walnut);
-      box(0, 1.08, island, 2.74, 0.17, 1.24, oak);
-      for (const x of [-0.75, 0, 0.75]) {
-        box(x, 0.39, island, 0.64, 0.46, 0.62, oak);
-        for (let j = -1;j <= 1; j++)
-          ellipse(x + j * 0.17, 1.27, island, 0.1, 0.12, 0.1, j % 2 ? sage : 11230529, 0, 0);
-      }
-      pendant(-0.69, mid, 3, 0.38, base);
-      pendant(0.69, mid, 3, 0.38, base);
-      break;
-    case 12:
-      for (const x of [-2.2, 2.2])
-        shelf(x, rear, 1.43, "pack", base, true);
-      circleIsland(0, island, 1.1, 0.72, white);
-      packageRow(0.1, 1.18, island + 0.11, 4, 0.23, "pack", base);
-      for (const x of [-side + 0.88, side - 0.88])
-        plant(x, front - 0.87, 1.64);
-      ringLight(0, mid, 1.38, 3.76);
-      break;
-    case 13:
-      for (let i = -15;i <= 15; i++)
-        box(i * 0.185, 1.95, rear, 0.085, 3.67, 0.12, i % 3 ? walnut : oak);
-      sofa(-1.46, island, 10786692);
-      sofa(0.44, mid - 1.66, 7891807);
-      circleIsland(0.68, island + 0.48, 0.39, 0.32, walnut);
-      for (const x of [-2.5, 2.5]) {
-        block(x, 1.09, rear + 0.58, 0.46, 1.99, 0.5);
-        box(x, 1.09, rear + 0.58, 0.43, 1.99, 0.44, charcoal);
-        for (const y of [0.72, 1.41])
-          disc(x, y, rear + 0.826, 0.135, 0.036, silver);
-      }
-      ringLight(0, mid + 0.06, 1.12, 3.69);
-      plant(-side + 0.7, front - 0.85, 1.53);
-      for (const s of [-1, 1]) {
-        cabinet(s * (side - 0.65), mid, 0.65, 0.72, 2.8, walnut, base);
-        for (let i = 0;i < 3; i++)
-          box(s * (side - 0.72), 1.19, mid + (i - 1) * 0.92, 0.28, 0.48, 0.3, charcoal);
-      }
-      break;
-    case 14:
-      for (const x of [-1.36, 1.36])
-        arch(x, 0.21, rear + 0.11, 1.13, 1.98, 0.12, shopLamp);
-      sofa(-0.86, mid, cream);
-      circleIsland(0.71, island, 0.52, 0.37, oak);
-      ringLight(0, mid, 1.38, 3.72);
-      for (const x of [-side + 0.61, -side + 1.3]) {
-        block(x, 1.24, mid + 1, 0.62, 2.23, 0.66);
-        box(x, 1.24, mid + 1, 0.61, 2.23, 0.64, silver);
-        box(x, 1.44, mid + 1.34, 0.49, 0.035, 0.04, charcoal);
-      }
-      plant(-side + 0.81, front - 0.85, 1.61);
-      break;
-    case 15:
-      for (let i = -17;i <= 17; i++)
-        box(i * 0.19, 3.98, mid, 0.078, 0.19, span - 0.28, walnut);
-      cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak);
-      block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
-      block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
-      for (const x of [0.46, 1.73])
-        box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
-      box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
-      for (let i = 0;i < 19; i++)
-        box(0.38 + i * 0.08, 1.2, mid - 0.51, 0.074, 0.05, 0.25, pearl);
-      box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
-      for (const x of [0.74, 1.46])
-        box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
-      pendant(-1.36, mid - 1.3, 2.94, 0.26, brass);
-      break;
-    case 16:
-      for (const x of [-1.62, 1.62])
-        cabinet(x, island + (x > 0 ? 0.32 : 0), 1.48, 0.78, 0.98, base, white);
-      sideShelf(-1, silver, "pack");
-      ringLight(0, mid, 1.14, 3.69);
-      plant(side - 0.71, front - 1.08, 1.47);
-      break;
-    case 17:
-      for (const x of [-side + 0.71, side - 0.71])
-        shelf(x, rear + 0.24, 0.99, "pack", charcoal);
-      {
-        const top = circleIsland(0, island, 1.12, 0.85, base);
-        for (const x of [-0.54, 0, 0.54]) {
-          box(x, top + 0.04, island, 0.25, 0.09, 0.22, charcoal);
-          box(x, top + 0.25, island - 0.02, 0.15, 0.38, 0.077, charcoal);
-          box(x, top + 0.3, island + 0.024, 0.105, 0.12, 0.012, 12308936);
-        }
-      }
-      ringLight(0, mid, 1.24, 3.56);
-      ringLight(0, mid, 0.72, 3.75);
-      plant(-side + 0.82, front - 0.8, 1.42);
-      break;
-  }
-}
-
 // demos/corporate/gjh/v11/assets/gallery-west-shops.js
 var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
   file: `gallery-assets/${name}.glb`,
@@ -2170,13 +1640,13 @@ var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
   scale
 });
 var westShopPlacements = {
-  4: [fixture("mosquito-patch-pack", -1.57, 1.2875, shopIslandZ + 0.29)],
+  4: [fixture("mosquito-patch-pack", -3.97, 1.081, -1.8, 0, 0.7)],
   5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
   6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
   7: [fixture("stacked-can-pyramid", -1.56, 0.081, 2.65, -0.07, 0.88)],
   8: [fixture("peanut-butter-jar-stand", -2.52, 0.081, 4.57, 0.015)],
   9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
-  10: [fixture("abalone-gift-box-display", -0.55, 1.09, shopIslandZ + 0.42)],
+  10: [fixture("abalone-gift-box-display", -2.99, 1.081, -1.8, 0, 0.6)],
   11: [fixture("food-display-cabinet", -1.61, 0.081, 2.74, -0.12)]
 };
 
@@ -3437,7 +2907,7 @@ function nearFaceMaterial(T, texture, pulse) {
   };
   return material;
 }
-function modelRelief(T, sign, module, mask, finishes2) {
+function modelRelief(T, sign, module, mask, finishes) {
   const meshes = [], bounds = new T.Box3;
   module.traverse((node) => {
     if (!node.isMesh)
@@ -3462,8 +2932,8 @@ function modelRelief(T, sign, module, mask, finishes2) {
     geometry.scale(scale, scale, Math.min(scale, 0.04 / (size.z || 1)));
     geometry.translate((x - 0.5) * config.size.width, mount.y + (0.5 - y) * config.size.height, mount.z + 0.002);
     const count = geometry.attributes.position.count;
-    const index = finishes2.indexOf(material);
-    const finish2 = index < 0 ? finishes2.push(material) : index + 1;
+    const index = finishes.indexOf(material);
+    const finish2 = index < 0 ? finishes.push(material) : index + 1;
     geometry.setAttribute("signSolid", new T.Uint8BufferAttribute(new Uint8Array(count).fill(finish2), 1));
     geometry.setAttribute("uv", new T.Float32BufferAttribute(new Float32Array(count * 2), 2));
     if (!geometry.attributes.normal)
@@ -3479,7 +2949,7 @@ function modelRelief(T, sign, module, mask, finishes2) {
     remaining.fill(0, j * n + Math.floor(x0 + (x1 - x0) * u), j * n + Math.ceil(x0 + (x1 - x0) * (u + w)));
   return { geometry: merged, remaining };
 }
-function reliefMaterial(T, texture, finishes2) {
+function reliefMaterial(T, texture, finishes) {
   const mat = new T.MeshStandardMaterial({
     map: texture,
     color: 5919044,
@@ -3490,14 +2960,14 @@ function reliefMaterial(T, texture, finishes2) {
     metalness: 0.24,
     toneMapped: false
   });
-  if (!finishes2.length)
+  if (!finishes.length)
     return mat;
-  mat.customProgramCacheKey = () => "sign-relief-" + finishes2.length;
+  mat.customProgramCacheKey = () => "sign-relief-" + finishes.length;
   mat.onBeforeCompile = (shader) => {
-    const count = finishes2.length;
-    shader.uniforms.solidBase = { value: finishes2.map((m) => m.color) };
-    shader.uniforms.solidEmission = { value: finishes2.map((m) => m.emissive.clone().multiplyScalar(m.emissiveIntensity)) };
-    shader.uniforms.solidPbr = { value: finishes2.map((m) => new T.Vector2(m.metalness, m.roughness)) };
+    const count = finishes.length;
+    shader.uniforms.solidBase = { value: finishes.map((m) => m.color) };
+    shader.uniforms.solidEmission = { value: finishes.map((m) => m.emissive.clone().multiplyScalar(m.emissiveIntensity)) };
+    shader.uniforms.solidPbr = { value: finishes.map((m) => new T.Vector2(m.metalness, m.roughness)) };
     shader.vertexShader = `attribute float signSolid; varying float vSolid;
 ` + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
@@ -3514,12 +2984,12 @@ if(solid>=0) totalEmissiveRadiance=solidEmission[solid];`);
   return mat;
 }
 function buildRelief(T, signs, tiles, modules, texture, detailed) {
-  const pieces = [], ranges = [], source = [], finishes2 = [];
+  const pieces = [], ranges = [], source = [], finishes = [];
   let offset = 0;
   for (const sign of signs) {
     const { mask, cells } = tiles.get(sign.config.id);
     const imported = mask.markBounds && modules.get(sign.config.logoModule);
-    const model = imported && modelRelief(T, sign, imported, mask, finishes2);
+    const model = imported && modelRelief(T, sign, imported, mask, finishes);
     const lettering = detailed && letterGeometry(T, model ? { ...mask, ink: model.remaining } : mask, sign.config, sign.mount, cells.fascia);
     if (lettering)
       lettering.setAttribute("signSolid", new T.Uint8BufferAttribute(lettering.attributes.position.count, 1));
@@ -3546,7 +3016,7 @@ function buildRelief(T, signs, tiles, modules, texture, detailed) {
   index.setUsage(T.DynamicDrawUsage);
   geo.setIndex(index);
   geo.setDrawRange(0, 0);
-  const mat = reliefMaterial(T, texture, finishes2);
+  const mat = reliefMaterial(T, texture, finishes);
   const mesh = new T.Mesh(geo, mat);
   mesh.frustumCulled = false;
   mesh.name = "Near sign letter relief";
@@ -3813,6 +3283,495 @@ function addExpandedStorefronts(T, layout, scene, signs) {
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
 import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
 
+// demos/corporate/gjh/v11/assets/window-studios.js
+var cream = 15984077;
+var pearl = 16774111;
+var brass = 13279579;
+var oak = 11633494;
+var walnut = 6701359;
+var sage = 7767146;
+var charcoal = 2961458;
+var silver = 12895165;
+var white = 16250089;
+var shopIslandZ = -0.63;
+var shopLamp = 16770727;
+var finishes = {
+  4: [14864301, 10976642, 15785927],
+  5: [6898732, 9132600, 14927772],
+  6: [11700828, 12950889, 15390136],
+  7: [7745318, 9325877, 11897700],
+  8: [15656137, 2177385, 16050643],
+  9: [2570313, 1913422, 4673626],
+  10: [11322284, 7507064, 15919055],
+  11: [7684666, 8929852, 14996662],
+  12: [15329754, 11650471, 15526360],
+  13: [6703151, 3552823, 11444103],
+  14: [14929845, 13415316, 15656151],
+  15: [6309172, 6899253, 10255969],
+  16: [15856094, 11649071, 15855583],
+  17: [11175012, 4406329, 14468520]
+};
+function buildWindowStudio(n, t, width, depth, floorColour) {
+  const { box, column, disc, bar, arch, ring, ellipse, tapered, block } = t;
+  const [wall, base, floor] = finishes[n];
+  const back = -depth / 2 + 0.38, front = depth / 2 - 0.18, side = width / 2 - 0.23, span = front - back, mid = (front + back) / 2;
+  const replace = t.replaceDisplay ?? ((build) => build());
+  const cabinet = (x, z, w, h, d, body, cap) => {
+    block(x, (h + 0.26) / 2, z, w + 0.09, h + 0.26, d + 0.09);
+    box(x, 0.12, z, w - 0.1, 0.23, d - 0.1, brass);
+    box(x, 0.18 + h / 2, z, w, h, d, body);
+    box(x, 0.21 + h, z, w + 0.09, 0.095, d + 0.09, cap);
+  };
+  function ovalCounter(x, z, width2, depth2, height, color) {
+    const radius = depth2 / 2, straight = width2 - depth2;
+    block(x, height / 2 + 0.07, z, width2 + 0.06, height + 0.12, depth2 + 0.06);
+    for (const [y, h, r, finish2] of [[0.16, 0.18, radius * 0.95, brass], [height / 2 + 0.13, height - 0.16, radius, color], [height + 0.075, 0.1, radius + 0.025, cream]]) {
+      box(x, y, z, straight, h, 2 * r, finish2);
+      for (const end of [-1, 1])
+        column(x + end * straight / 2, y, z, r, h, finish2);
+    }
+    return height + 0.125;
+  }
+  function blossomVase(x, y, z, petal) {
+    tapered(x, y + 0.17, z, 0.15, 0.2, 0.32, cream);
+    for (let i = 0;i < 7; i++) {
+      const angle = i * 2.4, dx = Math.cos(angle) * (0.2 + 0.03 * (i % 3)), dz = Math.sin(angle) * 0.17, top = y + 0.66 + i % 3 * 0.12;
+      bar(x, y + 0.26, z, x + dx, top, z + dz, 0.018, walnut);
+      for (let j = 0;j < 3; j++)
+        ellipse(x + dx + (j - 1) * 0.054, top - 0.04 * Math.abs(j - 1), z + dz, 0.066, 0.06, 0.059, petal, angle, 0);
+    }
+  }
+  function can(x, y, z, c, r = 0.105, h = 0.24) {
+    column(x, y + h / 2, z, r, h, c);
+    column(x, y + h + 0.015, z, r * 1.02, 0.03, brass);
+  }
+  function provisionDisplay(x, z, kind) {
+    const checker = kind === "jar", c = checker ? 2506352 : base;
+    cabinet(x, z, 1.45, 0.49, 0.81, c, cream);
+    if (checker) {
+      for (let row = 0;row < 2; row++)
+        for (let j = 0;j < 6; j++)
+          if ((j + row) % 2)
+            box(x + (j - 2.5) * 0.22, 0.33 + row * 0.22, z + 0.416, 0.215, 0.215, 0.023, white);
+    }
+    for (let tier = 0;tier < 3; tier++) {
+      const count = 4 - tier, h = 0.79 + tier * 0.235;
+      for (let i = 0;i < count; i++) {
+        const px = x + (i - (count - 1) / 2) * 0.249;
+        if (kind === "pack")
+          box(px, h + 0.11, z, 0.222, 0.22, 0.21, i % 2 ? cream : oak);
+        else
+          can(px, h, z, i % 3 ? c : 13017455, 0.114, 0.2);
+      }
+    }
+  }
+  function shellFan(x, y, z, size) {
+    for (let i = -5;i <= 5; i++) {
+      const angle = i * 0.178, height = size * (1 - 0.19 * Math.abs(i) / 5);
+      const radius = 0.49 * height;
+      ellipse(x + Math.sin(angle) * radius, y + Math.cos(angle) * radius, z - 0.035 * Math.abs(i), 0.16 * size, height * 0.53, 0.095 * size, i % 2 ? 15457224 : pearl, 0, -angle);
+    }
+  }
+  function packageRow(x, y, z, count, step, kind, c) {
+    for (let j = 0;j < count; j++) {
+      const px = x + (j - (count - 1) / 2) * step;
+      if (kind === "tin")
+        can(px, y, z, j % 3 === 0 ? cream : c);
+      else {
+        const h = kind === "pack" ? 0.31 : 0.24;
+        box(px, y + h / 2, z, 0.18, h, 0.13, j % 3 === 0 ? pearl : c);
+        box(px, y + h * 0.43, z + 0.071, 0.14, 0.035, 0.018, j % 3 === 0 ? c : cream);
+      }
+    }
+  }
+  function shelf(x, z, w, kind = "tin", c = base, arched = false) {
+    block(x, 1.62, z + 0.2, w, 3.18, 0.57);
+    const frame = n >= 12 ? silver : brass;
+    box(x, 1.62, z, w, 3.18, 0.12, wall);
+    for (const s of [-1, 1])
+      box(x + s * (w / 2 - 0.045), 1.62, z + 0.21, 0.065, 3.16, 0.48, frame);
+    if (arched)
+      arch(x, 1.88, z + 0.17, w * 0.46, 0.66, 0.07, frame);
+    for (const h of [0.61, 1.34, 2.07, 2.8]) {
+      box(x, h, z + 0.23, w, 0.085, 0.5, oak);
+      box(x, h - 0.04, z + 0.46, w - 0.05, 0.035, 0.035, shopLamp);
+      packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind, c);
+    }
+  }
+  function sideShelf(s, c = oak, kind = "tin") {
+    const x = s * (side - 0.29);
+    block(x - s * 0.18, 1.59, mid, 0.5, 3.13, span - 0.7);
+    box(x, 1.58, mid, 0.15, 3.02, span - 0.7, wall);
+    for (let row = 0;row < 4; row++) {
+      const y = 0.55 + row * 0.66;
+      box(x - s * 0.18, y, mid, 0.49, 0.095, span - 0.82, c);
+      box(x - s * 0.42, y - 0.035, mid, 0.025, 0.025, span - 0.9, shopLamp);
+      for (let i = 0;i < 9; i++) {
+        const z = back + 0.81 + i * (span - 1.66) / 8;
+        if (kind === "tin")
+          can(x - s * 0.19, y + 0.05, z, i % 3 ? cream : base, 0.1, 0.21);
+        else
+          box(x - s * 0.19, y + 0.19, z, 0.14, 0.28, 0.2, i % 3 ? white : base);
+      }
+    }
+    for (const z of [back + 0.4, mid, front - 0.41])
+      box(x - s * 0.26, 1.61, z, 0.08, 3.15, 0.07, brass);
+  }
+  function pendant(x, z, y, r, c = brass) {
+    column(x, (4.09 + y) / 2, z, 0.022, 4.09 - y, brass);
+    tapered(x, y, z, r * 0.46, r, 0.27, c);
+    column(x, y - 0.137, z, r * 0.89, 0.035, shopLamp);
+  }
+  function plant(x, z, h) {
+    const y = 0.46;
+    block(x, 0.35, z, 0.49, 0.65, 0.49);
+    tapered(x, y / 2 + 0.09, z, 0.23, 0.17, y, cream);
+    for (let k = 0;k < 6; k++) {
+      const a = k * 2.39, r = 0.26 + k % 2 * 0.09, dx = Math.cos(a) * r, dz = Math.sin(a) * r, top = h - k % 3 * 0.18;
+      bar(x, y, z, x + dx, top, z + dz, 0.026, 5466692);
+      ellipse(x + dx, top, z + dz, 0.12, 0.29, 0.08, k % 2 ? 6586443 : 9544543, a, dx);
+    }
+  }
+  function circleIsland(x, z, r, h, c) {
+    block(x, (h + 0.3) / 2, z, r * 2.06, h + 0.3, r * 2.06);
+    column(x, 0.16, z, r * 0.89, 0.18, brass);
+    column(x, 0.22 + h / 2, z, r, h, c);
+    column(x, 0.25 + h, z, r * 1.03, 0.1, cream);
+    return h + 0.31;
+  }
+  function ringLight(x, z, r, y) {
+    ring(x, y, z, r, 0.036, shopLamp);
+    for (const off of [-0.68, 0.68])
+      column(x + off * r, (4.11 + y) / 2, z, 0.012, 4.11 - y, brass);
+  }
+  function sofa(x, z, c) {
+    block(x, 0.39, z, 1.66, 0.78, 0.8);
+    box(x, 0.35, z, 1.6, 0.34, 0.77, c);
+    box(x, 0.59, z - 0.32, 1.61, 0.47, 0.19, c);
+    for (const k of [-1, 1])
+      box(x + k * 0.75, 0.52, z, 0.16, 0.32, 0.71, c);
+  }
+  block(0, 2.12, back, side * 2, 4.18, 0.13);
+  block(0, 4.19, mid, side * 2, 0.18, span);
+  for (const s of [-1, 1])
+    block(s * side, 2.1, mid, 0.13, 4.13, span);
+  block(0, 0.041, mid, side * 2, 0.08, span);
+  box(0, 0.041, mid, side * 2, 0.08, span, floorColour ?? floor, -2);
+  box(0, 2.12, back, side * 2, 4.18, 0.13, wall);
+  box(0, 4.19, mid, side * 2, 0.18, span, cream, -3);
+  const pilasterSide = shopEntrance(expandedLayout.slots[n - 1]).normalX;
+  const { inset, depth: pierDepth } = atriumLayout.arcadePilaster;
+  const pilasterBack = depth / 2 - inset - pierDepth / 2;
+  for (const s of [-1, 1]) {
+    box(s * (side - 0.2), 4.082, mid, 0.4, 0.064, span, pearl, -3);
+    const wallEnd = s === pilasterSide ? pilasterBack : front;
+    box(s * side, 2.1, (back + wallEnd) / 2, 0.13, 4.13, wallEnd - back, wall);
+    box(s * (side - 0.31), 4.05, mid, 0.065, 0.046, span - 0.6, shopLamp);
+    box(s * (side - 0.2), 0.19, mid, 0.15, 0.21, span, base);
+  }
+  for (const z of [back + 0.38, front - 0.46])
+    box(0, 4.04, z, width - 0.9, 0.045, 0.08, shopLamp);
+  for (const x of [-side * 0.64, 0, side * 0.64])
+    for (const z of [back + 1.3, mid + 0.25, front - 1.13])
+      column(x, 4.076, z, 0.078, 0.045, shopLamp);
+  if (n < 13 && n !== 10) {
+    if (n !== 5)
+      sideShelf(-1, oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
+    sideShelf(1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
+  }
+  box(0, 3.69, back + 0.46, 3.68, 0.47, 0.27, brass);
+  const exitZ = front - 0.04;
+  box(0, 3.78, exitZ, 0.67, 0.29, 0.07, 1662791);
+  for (const x of [-0.165, 0.165])
+    box(x, 3.78, exitZ - 0.044, 0.026, 0.207, 0.016, pearl);
+  box(0, 3.885, exitZ - 0.044, 0.35, 0.022, 0.016, pearl);
+  disc(0.045, 3.826, exitZ - 0.06, 0.03, 0.018, pearl);
+  bar(0.02, 3.794, exitZ - 0.059, -0.015, 3.74, exitZ - 0.059, 0.034, pearl);
+  bar(-0.008, 3.75, exitZ - 0.06, 0.045, 3.7, exitZ - 0.06, 0.024, pearl);
+  bar(-0.008, 3.75, exitZ - 0.06, -0.074, 3.717, exitZ - 0.06, 0.024, pearl);
+  const rear = back + 0.26, island = shopIslandZ;
+  const windowX = -side + 1.1, windowZ = front - 0.94;
+  if ([6, 7, 8, 9, 11].includes(n))
+    provisionDisplay(windowX, windowZ, n === 6 ? "pack" : n === 8 ? "jar" : "tin");
+  switch (n) {
+    case 4: {
+      for (let i = -1;i <= 1; i++)
+        shelf(i * 1.86, rear, 1.75, "pack", sage);
+      replace(() => {
+        const cx = -0.58, top = ovalCounter(cx, island, 2.85, 1.27, 1.16, 12949405);
+        for (let i = -6;i <= 6; i++)
+          box(cx + i * 0.115, 0.68, island + 0.64, 0.028, 0.91, 0.035, 13409948);
+        for (const end of [-1, 1])
+          for (let k = 0;k <= 8; k++) {
+            const a = k * Math.PI / 8;
+            column(cx + end * (0.79 + 0.63 * Math.sin(a)), 0.68, island + 0.63 * Math.cos(a), 0.018, 0.91, 13409948);
+          }
+        for (const x of [-1.17, -0.78])
+          can(x, top, island + 0.18, white, 0.1, 0.24);
+        blossomVase(-0.29, top, island - 0.2, 14000289);
+        for (const x of [-1.5, 0.38]) {
+          column(x, top + 0.21, island + 0.04, 0.032, 0.42, brass);
+          ellipse(x, top + 0.43, island + 0.04, 0.22, 0.17, 0.22, pearl, 0, 0);
+        }
+      }, sage);
+      pendant(-0.9, island, 3.26, 0.3, white);
+      plant(side - 0.96, front - 0.74, 1.6);
+      break;
+    }
+    case 5: {
+      for (let s = -1;s <= 1; s++)
+        shelf(s * 2.1, rear, 1.88, "tin", 13741441);
+      const wallX = -side + 0.25, nicheZ = mid + 0.46;
+      block(wallX + 0.14, 1.52, mid, 0.56, 3.02, span - 0.66);
+      box(wallX, 1.54, mid, 0.32, 2.98, span - 0.66, walnut);
+      const columns = Math.floor((span - 0.8) / 0.63), pitch = (span - 0.8) / columns;
+      for (let i = 0;i < columns; i++)
+        for (let j = 0;j < 5; j++) {
+          const z = back + 0.5 + (i + 0.5) * pitch, y = 0.47 + j * 0.48;
+          if (Math.abs(z - nicheZ) < 1.12 && y > 0.7)
+            continue;
+          box(wallX + 0.175, y, z, 0.08, 0.445, pitch - 0.035, 9132600);
+          ellipse(wallX + 0.237, y, z, 0.035, 0.046, 0.075, brass, 0, 0);
+        }
+      ellipse(wallX + 0.22, 1.95, nicheZ, 0.045, 1.07, 1.07, brass, 0, 0);
+      ellipse(wallX + 0.27, 1.95, nicheZ, 0.048, 1, 1, 4928551, 0, 0);
+      for (const y of [1.43, 2.14]) {
+        box(wallX + 0.37, y, nicheZ, 0.34, 0.06, 1.65, oak);
+        for (const dz of [-0.35, 0.34]) {
+          ellipse(wallX + 0.42, y + 0.19, nicheZ + dz, 0.14, 0.17, 0.15, pearl, 0, 0);
+          tapered(wallX + 0.42, y + 0.37, nicheZ + dz, 0.098, 0.08, 0.13, pearl);
+        }
+      }
+      cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
+      blossomVase(-0.43, 1.2475, island, 9873258);
+      for (const z of [mid - 1.6, mid + 0.12, mid + 1.82]) {
+        bar(0.22, 3.62, z, 0.22, 4.1, z, 0.025, brass);
+        box(0.22, 3.34, z, 0.42, 0.51, 0.42, shopLamp);
+        for (const y of [3.07, 3.6])
+          box(0.22, y, z, 0.48, 0.055, 0.48, walnut);
+        for (const dx of [-0.22, 0.22])
+          for (const dz of [-0.22, 0.22])
+            box(0.22 + dx, 3.34, z + dz, 0.027, 0.51, 0.027, walnut);
+      }
+      break;
+    }
+    case 6: {
+      for (const x of [-2.04, 2.04])
+        shelf(x, rear, 1.7, "pack", 13344615);
+      arch(0, 0.3, rear + 0.18, 1.07, 1.41, 0.15, cream);
+      for (const h of [0.75, 1.45]) {
+        box(0, h, rear + 0.26, 2.13, 0.07, 0.4, oak);
+        for (const x of [-0.69, -0.2, 0.51])
+          tapered(x, h + 0.17, rear + 0.25, 0.16, 0.09, 0.28, pearl);
+      }
+      replace(() => {
+        cabinet(-0.36, island, 2.78, 0.92, 1.26, oak, cream);
+        for (const offset of [-0.84, -0.28, 0.28, 0.84]) {
+          const centre = -0.36 + offset;
+          for (let j = -3;j <= 3; j++) {
+            const h = 0.77 + j % 2 * 0.07 + (offset > 0 ? 0.08 : 0);
+            box(centre + j * 0.043, 3.03 - h / 2, island - 0.15, 0.029, h, 0.04, j % 2 ? 14859126 : 15454102);
+          }
+        }
+        box(-0.36, 3.08, island - 0.15, 2.53, 0.076, 0.11, brass);
+        for (const x of [-1.43, 0.71])
+          bar(x, 3.08, island - 0.15, x, 3.96, island - 0.15, 0.031, brass);
+      }, oak);
+      for (let z = back + 0.8;z < front; z += 1.36)
+        box(0, 3.96, z, side * 2, 0.12, 0.15, oak);
+      break;
+    }
+    case 7: {
+      for (let i = -1;i <= 1; i++)
+        shelf(i * 1.93, rear, 1.79, "tin", 10962482, true);
+      for (const x of [-1, 1])
+        pendant(x, mid + 1.2, 2.91, 0.34, brass);
+      for (const dx of [-1.85, 0, 1.85])
+        box(dx, 4.015, mid, 0.075, 0.12, span - 0.6, walnut);
+      for (let z = back + 0.83;z < front; z += 1.82)
+        box(0, 4.01, z, side * 2 - 0.45, 0.14, 0.12, walnut);
+      for (const [r, y, count] of [[0.72, 3.43, 20], [0.45, 3.17, 14]]) {
+        ringLight(0, mid - 0.38, r, y);
+        for (let j = 0;j < count; j++) {
+          const a = j * Math.PI * 2 / count;
+          tapered(r * Math.cos(a), y - 0.111, mid - 0.38 + r * Math.sin(a), 0.05, 0.028, 0.21, j % 3 ? pearl : shopLamp);
+        }
+      }
+      replace(() => {
+        const top = circleIsland(0, island, 1.14, 0.82, walnut);
+        column(0, top + 0.13, island, 0.72, 0.26, brass);
+        for (let level = 0;level < 3; level++)
+          for (let j = 0;j < 5 - level; j++)
+            can((j - (4 - level) / 2) * 0.24, top + 0.27 + level * 0.269, island, 11159096);
+      }, base);
+      break;
+    }
+    case 8: {
+      for (const x of [-1.96, 1.96])
+        shelf(x, rear, 1.54, "tin", 4615323, true);
+      disc(0, 1.92, rear + 0.13, 1.08, 0.11, base);
+      box(0, 1.17, rear + 0.132, 2.16, 1.5, 0.11, base);
+      arch(0, 0.42, rear + 0.223, 1.08, 1.5, 0.072, brass);
+      for (const [x, y, rx, ry] of [[-0.32, 1.84, 0.39, 0.29], [0.06, 2.01, 0.23, 0.143], [0.38, 2.17, 0.32, 0.22]])
+        ellipse(x, y, rear + 0.25, rx, ry, 0.11, 14197583, 0, 0.37);
+      for (const [x, y] of [[-0.43, 1.8], [-0.22, 1.89], [0.29, 2.13], [0.47, 2.21]]) {
+        bar(x - 0.052, y - 0.07, rear + 0.352, x + 0.052, y + 0.07, rear + 0.352, 0.018, 12094281);
+        bar(x + 0.06, y - 0.05, rear + 0.352, x - 0.06, y + 0.05, rear + 0.352, 0.017, 12094281);
+      }
+      replace(() => {
+        const top = circleIsland(0, island, 1.08, 0.85, base);
+        for (let i = 0;i < 32; i++) {
+          const a = i * Math.PI / 16;
+          column(1.07 * Math.cos(a), 0.66, island + 1.07 * Math.sin(a), 0.035, 0.78, 4682138);
+        }
+        for (let i = -2;i <= 2; i++)
+          can(i * 0.28, top, island, 13805164, 0.12, 0.33);
+      }, base);
+      for (const x of [-1.83, 0, 1.83])
+        pendant(x, mid + 0.2, 3.1, 0.45, cream);
+      break;
+    }
+    case 9: {
+      disc(0, 1.63, rear + 0.06, 1.58, 0.13, 14395189);
+      box(0, 0.98, rear + 0.062, 3.16, 1.31, 0.13, 14395189);
+      for (let k = 0;k < 3; k++) {
+        const w = 2.48 - 0.43 * k;
+        box(0, 0.85 + k * 0.52, rear + 0.36, w, 0.08, 0.43, brass);
+        packageRow(0, 0.91 + k * 0.52, rear + 0.36, 7 - 2 * k, 0.28, "pack", cream);
+      }
+      const cx = -0.48;
+      replace(() => {
+        ovalCounter(cx, island, 2.58, 1.13, 1.01, base);
+        for (let j = -5;j <= 5; j++)
+          box(cx + j * 0.143, 0.62, island + 0.563, 0.025, 0.74, 0.027, 4281451);
+      }, base);
+      for (const z of [mid + 0.35, mid - 2.65]) {
+        column(cx, 3.54, z, 0.025, 1.04, brass);
+        for (const [y, r] of [[3.16, 0.52], [3.04, 0.35], [2.95, 0.19]]) {
+          tapered(cx, y, z, r * 0.62, r, 0.1, brass);
+          column(cx, y - 0.054, z, r * 0.89, 0.025, shopLamp);
+        }
+      }
+      plant(side - 1.15, rear + 1.31, 1.78);
+      break;
+    }
+    case 10:
+      for (const s of [-1, 1]) {
+        const x = s * (side - 1), z = front - 1.5;
+        shellFan(x, 0.62, z, 1.97);
+        shellFan(x + s * 0.31, 0.56, z + 0.29, 1);
+        circleIsland(x, z + 0.05, 0.65, 0.53, base);
+        shelf(s * 2.1, rear, 1.58, "tin", sage, true);
+      }
+      replace(() => circleIsland(0, island, 1.2, 0.79, base), base);
+      for (let i = 0;i < 7; i++)
+        pendant(Math.sin(i * 2.4) * 0.56, mid + Math.cos(i * 2.4) * 0.46, 2.93 + i * 0.09, 0.15, pearl);
+      break;
+    case 11:
+      for (let i = -1;i <= 1; i++)
+        shelf(i * 1.83, rear, 1.73, "tin", 9059902);
+      replace(() => {
+        block(0, 0.58, island, 2.74, 1.16, 1.24);
+        for (const x of [-1.21, 1.21])
+          for (const dz of [-0.46, 0.46])
+            box(x, 0.6, island + dz, 0.14, 1.05, 0.14, walnut);
+        box(0, 1.08, island, 2.74, 0.17, 1.24, oak);
+        for (const x of [-0.75, 0, 0.75]) {
+          box(x, 0.39, island, 0.64, 0.46, 0.62, oak);
+          for (let j = -1;j <= 1; j++)
+            ellipse(x + j * 0.17, 1.27, island, 0.1, 0.12, 0.1, j % 2 ? sage : 11230529, 0, 0);
+        }
+      }, base);
+      pendant(-0.69, mid, 3, 0.38, base);
+      pendant(0.69, mid, 3, 0.38, base);
+      break;
+    case 12:
+      for (const x of [-2.2, 2.2])
+        shelf(x, rear, 1.43, "pack", base, true);
+      replace(() => {
+        circleIsland(0, island, 1.1, 0.72, white);
+        packageRow(0.1, 1.18, island + 0.11, 4, 0.23, "pack", base);
+      }, base);
+      for (const x of [-side + 0.88, side - 0.88])
+        plant(x, front - 0.87, 1.64);
+      ringLight(0, mid, 1.38, 3.76);
+      break;
+    case 13:
+      for (let i = -15;i <= 15; i++)
+        box(i * 0.185, 1.95, rear, 0.085, 3.67, 0.12, i % 3 ? walnut : oak);
+      replace(() => {
+        sofa(-1.46, island, 10786692);
+        sofa(0.44, mid - 1.66, 7891807);
+      }, charcoal);
+      circleIsland(0.68, island + 0.48, 0.39, 0.32, walnut);
+      for (const x of [-2.5, 2.5]) {
+        block(x, 1.09, rear + 0.58, 0.46, 1.99, 0.5);
+        box(x, 1.09, rear + 0.58, 0.43, 1.99, 0.44, charcoal);
+        for (const y of [0.72, 1.41])
+          disc(x, y, rear + 0.826, 0.135, 0.036, silver);
+      }
+      ringLight(0, mid + 0.06, 1.12, 3.69);
+      plant(-side + 0.7, front - 0.85, 1.53);
+      for (const s of [-1, 1]) {
+        cabinet(s * (side - 0.65), mid, 0.65, 0.72, 2.8, walnut, base);
+        for (let i = 0;i < 3; i++)
+          box(s * (side - 0.72), 1.19, mid + (i - 1) * 0.92, 0.28, 0.48, 0.3, charcoal);
+      }
+      break;
+    case 14:
+      for (const x of [-1.36, 1.36])
+        arch(x, 0.21, rear + 0.11, 1.13, 1.98, 0.12, shopLamp);
+      sofa(-0.86, mid, cream);
+      circleIsland(0.71, island, 0.52, 0.37, oak);
+      ringLight(0, mid, 1.38, 3.72);
+      for (const x of [-side + 0.61, -side + 1.3]) {
+        block(x, 1.24, mid + 1, 0.62, 2.23, 0.66);
+        box(x, 1.24, mid + 1, 0.61, 2.23, 0.64, silver);
+        box(x, 1.44, mid + 1.34, 0.49, 0.035, 0.04, charcoal);
+      }
+      plant(-side + 0.81, front - 0.85, 1.61);
+      break;
+    case 15:
+      for (let i = -17;i <= 17; i++)
+        box(i * 0.19, 3.98, mid, 0.078, 0.19, span - 0.28, walnut);
+      replace(() => cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak), walnut);
+      block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
+      block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
+      for (const x of [0.46, 1.73])
+        box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
+      box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
+      for (let i = 0;i < 19; i++)
+        box(0.38 + i * 0.08, 1.2, mid - 0.51, 0.074, 0.05, 0.25, pearl);
+      box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
+      for (const x of [0.74, 1.46])
+        box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
+      pendant(-1.36, mid - 1.3, 2.94, 0.26, brass);
+      break;
+    case 16:
+      replace(() => cabinet(-1.62, island, 1.48, 0.78, 0.98, base, white), base);
+      cabinet(1.62, island + 0.32, 1.48, 0.78, 0.98, base, white);
+      sideShelf(-1, silver, "pack");
+      ringLight(0, mid, 1.14, 3.69);
+      plant(side - 0.71, front - 1.08, 1.47);
+      break;
+    case 17:
+      for (const x of [-side + 0.71, side - 0.71])
+        shelf(x, rear + 0.24, 0.99, "pack", charcoal);
+      {
+        const top = circleIsland(0, island, 1.12, 0.85, base);
+        for (const x of [-0.54, 0, 0.54]) {
+          box(x, top + 0.04, island, 0.25, 0.09, 0.22, charcoal);
+          box(x, top + 0.25, island - 0.02, 0.15, 0.38, 0.077, charcoal);
+          box(x, top + 0.3, island + 0.024, 0.105, 0.12, 0.012, 12308936);
+        }
+      }
+      ringLight(0, mid, 1.24, 3.56);
+      ringLight(0, mid, 0.72, 3.75);
+      plant(-side + 0.82, front - 0.8, 1.42);
+      break;
+  }
+}
+
 // demos/corporate/gjh/v11/assets/shop-anchor-details-last.js
 var brass2 = 13215085;
 var walnut2 = 6701359;
@@ -3881,10 +3840,6 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
   const back = -depth / 2 + 0.64, side = width / 2 - 0.23, island = shopIslandZ;
   if (n === 10) {
     coastalRelief(t, back + 0.12, false);
-    for (let i = 0;i < 28; i++) {
-      const a = i * Math.PI / 14;
-      bar(Math.cos(a) * 1.198, 0.25, island + Math.sin(a) * 1.198, Math.cos(a) * 1.198, 0.92, island + Math.sin(a) * 1.198, 0.027, 9547156);
-    }
     for (const s of [-1, 1]) {
       const x = s * (side - 0.31);
       block(x, 1.03, 0, 0.51, 1.89, 4.55);
@@ -3906,44 +3861,14 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
     return;
   }
   if (n === 11) {
-    for (let x = -3;x <= 3; x++)
-      for (let z = -4;z <= 4; z++) {
-        const cx = x * 0.91, cz = z * 0.94;
-        t.surface([[cx - 0.07, 0.099, cz], [cx, 0.099, cz + 0.07], [cx + 0.07, 0.099, cz], [cx, 0.099, cz - 0.07]], [0, 1, 2, 0, 2, 3], 6636603);
-      }
     arch(0, 0.25, back + 0.09, 2.76, 0.65, 0.13, walnut2);
-    for (const x of [-0.88, 0, 0.88]) {
-      box(x, 0.91, island + 0.585, 0.82, 0.24, 0.075, 9132600);
-      box(x, 0.93, island + 0.639, 0.2, 0.035, 0.035, brass2);
-    }
-    for (const x of [-0.76, 0, 0.76]) {
-      for (const h of [0.47, 0.61])
-        box(x, h, island + 0.324, 0.65, 0.058, 0.048, 11633494);
-      for (const dx of [-0.25, 0.25])
-        box(x + dx, 0.43, island + 0.351, 0.046, 0.36, 0.036, walnut2);
-    }
-    for (const [x, z] of [[-0.85, -0.2], [0.69, 0.12]]) {
-      for (let j = 0;j < 5; j++) {
-        const a = j * 2.39;
-        ellipse(x + 0.12 * Math.cos(a), 1.38, island + z + 0.1 * Math.sin(a), 0.085, 0.17, 0.055, j % 2 ? 5601097 : 7903322, a, Math.sin(a) * 0.6);
-      }
-    }
     return;
   }
   if (n === 12) {
     coastalRelief(t, back + 0.13, true);
-    column(0, 1.05, island, 0.69, 0.17, 11716778);
-    column(0, 1.15, island, 0.67, 0.055, ivory);
-    tapered(-0.4, 1.31, island, 0.13, 0.1, 0.27, 15656394);
-    for (let i = 0;i < 6; i++) {
-      const a = i * 2.4, x = -0.4 + 0.13 * Math.cos(a), z = island + 0.11 * Math.sin(a);
-      bar(-0.4, 1.42, island, x, 1.78 - i % 2 * 0.12, z, 0.016, 6389851);
-      ellipse(x, 1.75 - i % 2 * 0.12, z, 0.065, 0.16, 0.04, 8627576, a, Math.sin(a) * 0.62);
-    }
     return;
   }
   if (n === 13) {
-    television(t, 0, 2.14, back + 0.23, 2.58, 1.45, false);
     block(0, 1.13, back + 0.3, 2.88, 0.34, 0.6);
     box(0, 1.08, back + 0.28, 2.86, 0.2, 0.56, graphite);
     box(0, 1.18, back + 0.28, 2.86, 0.035, 0.58, brass2);
@@ -3964,7 +3889,6 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
     return;
   }
   if (n === 14) {
-    television(t, -1.36, 1.91, back + 0.3, 1.95, 1.14, false);
     television(t, 1.36, 1.91, back + 0.3, 1.95, 1.14, true);
     const x = side - 0.5;
     block(x, 0.68, -0.6, 0.78, 1.18, 2.43);
@@ -4005,21 +3929,6 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
       if (![2, 6].includes(i % 7))
         box(uprightX - 0.14, 1.044, z + 0.026, 0.11, 0.026, 0.024, graphite);
     }
-    const table = -1.05;
-    box(table, 1.22, -0.49, 1.66, 0.1, 0.86, 13020814);
-    for (const offset of [-0.54, -0.18, 0.18, 0.54]) {
-      const x = table + offset;
-      box(x, 1.36, -0.48, 0.23, 0.2, 0.23, 14536636);
-      disc(x, 1.48, -0.35, 0.069, 0.024, brass2);
-      disc(x, 1.48, -0.334, 0.048, 0.012, graphite);
-    }
-    for (const z of [-0.87, -0.1])
-      for (const offset of [-0.8, 0.8])
-        box(table + offset, 1.57, z, 0.022, 0.62, 0.022, brass2);
-    for (const z of [-0.87, -0.1])
-      box(table, 1.87, z, 1.63, 0.026, 0.027, brass2);
-    for (const offset of [-0.8, 0.8])
-      box(table + offset, 1.87, -0.485, 0.027, 0.026, 0.77, brass2);
     return;
   }
   if (n === 16) {
@@ -4041,7 +3950,7 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
       }
       box(x, 0.37, back + 0.22, 1.7, 0.38, 0.4, 11320376);
     }
-    for (const x of [-1.62, 1.62]) {
+    for (const x of [1.62]) {
       const z = island + (x > 0 ? 0.32 : 0);
       box(x, 0.3, z + 0.499, 1.45, 0.041, 0.023, shopLamp);
       box(x, 1.075, z, 1.17, 0.075, 0.42, 13553588);
@@ -4090,6 +3999,516 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
     const a = k * Math.PI / 15;
     box(1.116 * Math.cos(a), 0.65, island + 1.116 * Math.sin(a), 0.045, 0.72, 0.042, 7234133);
   }
+}
+
+// demos/corporate/gjh/v11/assets/interiors/layout.js
+var layouts = {
+  S01: {
+    brand: "New Moon",
+    style: "Collector’s pantry",
+    concept: "A walnut collector’s cabinet opens above four working seafood shelves like the leaves of a folding screen.",
+    signature_family: "folding collector-cabinet leaves",
+    frame: { world_origin_m: [-10, 0, -6], yaw_world_deg: 0, lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, threshold_local_xz_m: [0, 6], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [] },
+    palette: [{ material: "smoked walnut", hex: "#513527" }, { material: "brushed brass", hex: "#B59A68" }, { material: "pearl linen", hex: "#F2EFE8" }, { material: "oxblood lacquer", hex: "#833E36" }],
+    accent_kelvin: 2850,
+    lighting: [0, 4.75, -2.81],
+    anchor: { asset_id: "collector-triptych", position_m: [0, 2.47, -3.46], yaw_deg: 0, envelope_whd_m: [3.95, 2.3, 0.7] },
+    floor: { treatment: "A navy woven runner widens at the four shelf pickup points; twin brass threads lead back to the door.", position_m: [0, 0.0245, -0.1], yaw_deg: 0, field_width_depth_m: [8.05, 6.35], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "runner", colours: [2, "#354154", 1] },
+    routes: [[[0, 2.55], [0, -2.635]], [[-3.42, -2.635], [3.84, -2.635]]],
+    pickups: [[-3.42, -2.635], [-1, -2.635], [1.42, -2.635], [3.84, -2.635]],
+    capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "folding collector-cabinet leaves", viewport_css_px: [393, 612], planned_evidence_stem: "S01-entrance" },
+    props: [
+      { name: "Four active collection cabinets", socket: "shelves", position_m: [-3.63, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.4, 2.4, 0.55], count: 4, instance_positions_m: [[-3.63, 0, -3.25], [-1.21, 0, -3.25], [1.21, 0, -3.25], [3.63, 0, -3.25]], kind: "retain" },
+      { name: "Tea kettle at stone island", socket: "kettle", position_m: [2.8, 1.185, 1.45], yaw_deg: -26, envelope_whd_m: [0.41, 0.36, 0.28], count: 1, kind: "retain" },
+      { name: "Three tasting cups", socket: "cups", position_m: [2.3, 1.185, 2.54], yaw_deg: 0, envelope_whd_m: [0.156, 0.088, 0.156], count: 3, instance_positions_m: [[2.3, 1.185, 2.54], [2.8, 1.185, 2.73], [2.36, 1.185, 1.95]], kind: "retain" },
+      { name: "Two walnut tasting stools", socket: "stools1", position_m: [1.49, 0.025, 2.71], yaw_deg: 0, envelope_whd_m: [0.54, 0.7, 0.54], count: 2, instance_positions_m: [[1.49, 0.025, 2.71], [1.49, 0.025, 1.42]], kind: "retain" },
+      { name: "Amber globe over tea service", socket: "pend1", position_m: [2.65, 3.37, 2], yaw_deg: 0, envelope_whd_m: [0.65, 0.7, 0.65], count: 1, kind: "retain" },
+      { name: "Orchid at the entry-side return", socket: "plant1", position_m: [-3.6, 0.025, 3.7], yaw_deg: 0, envelope_whd_m: [1, 1.48, 0.96], count: 1, kind: "retain" },
+      { name: "Brass reading sconce at the rear-left leaf", socket: "rearLights", position_m: [-3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13], count: 1, kind: "retain" },
+      { name: "Linen-framed official NZ front photograph", socket: "photo1", position_m: [-2.64, 0.025, 2.32], yaw_deg: 12, envelope_whd_m: [0.76, 1.54, 0.48], count: 1, kind: "photo" }
+    ]
+  },
+  S02: {
+    brand: "MILI",
+    style: "Open noodle kitchen",
+    concept: "A low lacquer pass and a broad copper extraction hood frame the preparation of a bowl, with condiments within reach of the cook.",
+    signature_family: "suspended cookline extraction hood",
+    frame: { world_origin_m: [0, 0, -6], yaw_world_deg: 0, lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, threshold_local_xz_m: [0, 6], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [{ centre_local_m: [-3, -0.7999999999999998], exit_local_m: [-3, 0.40000000000000036], id: "bench-seat-5", radius: 0.3 }, { centre_local_m: [3, -0.7999999999999998], exit_local_m: [3, 0.40000000000000036], id: "bench-seat-6", radius: 0.3 }] },
+    palette: [{ material: "red-brown lacquer", hex: "#833D2D" }, { material: "moss tile", hex: "#49634B" }, { material: "bone ceramic", hex: "#F1E9D7" }, { material: "brushed copper", hex: "#AA7151" }],
+    accent_kelvin: 3050,
+    lighting: [0, 4.75, 1.15],
+    anchor: { asset_id: "hawker-stall-exhaust-hood", position_m: [0, 2.38, 0.5], yaw_deg: 0, envelope_whd_m: [2.65, 1.35, 1.4] },
+    floor: { treatment: "Cream quarry tile through the aisle, with a moss border turning around the island and terminating before both seat exits.", position_m: [0, 0.0245, 0.5], yaw_deg: 0, field_width_depth_m: [5.85, 5.45], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "tile", colours: [2, 2, 1] },
+    routes: [[[0, 2.55], [-1.32, 2.55]], [[-1.32, 2.55], [-1.32, -2.42]], [[-1.32, 0.4], [-3, 0.4]], [[-1.32, -2.42], [0, -2.42]], [[0, 2.55], [1.32, 2.55]], [[1.32, 2.55], [1.32, -2.42]], [[1.32, 0.4], [3, 0.4]], [[1.32, -2.42], [0, -2.42]], [[0, -2.42], [0, -3]]],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "suspended cookline extraction hood", viewport_css_px: [393, 612], planned_evidence_stem: "S02-entrance" },
+    props: [
+      { name: "Lacquer island base with counter", socket: "cookbase", position_m: [0, 0.025, 0.5], yaw_deg: 0, envelope_whd_m: [1.72, 1.14, 2.55], count: 1, kind: "retain" },
+      { name: "Recessed noodle boiler", socket: "boiler", position_m: [0, 1.165, 0.3], yaw_deg: 0, envelope_whd_m: [0.85, 0.72, 0.88], count: 1, kind: "boiler" },
+      { name: "Condiments on oak pantry shelf", socket: "miliwall", position_m: [-4.43, 3.0425, 3.25], yaw_deg: 90, envelope_whd_m: [0.9, 1.1, 0.35], count: 1, kind: "retain" },
+      { name: "Chopsticks on the opposite pass corner", socket: "chop", position_m: [-0.53, 1.165, 1.31], yaw_deg: 0, envelope_whd_m: [0.22, 0.3, 0.21], count: 1, kind: "chopsticks" },
+      { name: "Serving plate on the counter", socket: "plate", position_m: [0.45, 1.165, 0.98], yaw_deg: 0, envelope_whd_m: [0.32, 0.05, 0.32], count: 1, kind: "plate" },
+      { name: "Two existing seat and stand points", socket: "seats", position_m: [-3, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85], count: 2, instance_positions_m: [[-3, 0, -0.8], [3, 0, -0.8]], kind: "retain" },
+      { name: "Warm ceramic wall lights", socket: "rearLights", position_m: [-3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13], count: 2, instance_positions_m: [[-3.08, 3.32, -4.04], [3.08, 3.32, -4.04]], kind: "retain" },
+      { name: "Rear kitchen herb-garden planter", socket: "plant2", position_m: [-3.8, 0.025, -2.8], yaw_deg: 0, envelope_whd_m: [0.7, 1.3, 0.7], count: 1, kind: "retain" }
+    ]
+  },
+  S03: {
+    brand: "GOGO",
+    style: "Potong garden bar",
+    concept: "A scalloped parasol and compact ice-cream cart bring a street-side frozen-treat bar indoors.",
+    signature_family: "three-wheel potong parasol carts",
+    frame: { world_origin_m: [10, 0, -6], yaw_world_deg: 0, lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, threshold_local_xz_m: [0, 6], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [{ centre_local_m: [-3, -0.7999999999999998], exit_local_m: [-3, 0.40000000000000036], id: "bench-seat-7", radius: 0.3 }, { centre_local_m: [3, -0.7999999999999998], exit_local_m: [3, 0.40000000000000036], id: "bench-seat-8", radius: 0.3 }] },
+    palette: [{ material: "citrus enamel", hex: "#E7863B" }, { material: "lagoon tile", hex: "#2E7C7A" }, { material: "coconut terrazzo", hex: "#F5F0E5" }, { material: "leaf green", hex: "#4F7047" }],
+    accent_kelvin: 3900,
+    lighting: [-2.35, 4.75, 2.7],
+    anchor: { asset_id: "ice-cream-cart-potong", position_m: [-2.35, 0.025, 2.05], yaw_deg: 12, envelope_whd_m: [2, 2.6, 1.25] },
+    floor: { treatment: "Broad curved terrazzo bands sweep from the left wheel to the right bar; a coconut-coloured centre stays open.", position_m: [0.18, 0.0245, 2.28], yaw_deg: 0, field_width_depth_m: [7.35, 4.2], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "sweep", colours: [2, 2, 1] },
+    routes: [[[0, 2.55], [0, -3]], [[-3, 0.4], [3, 0.4]]],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "three-wheel potong parasol carts", viewport_css_px: [393, 612], planned_evidence_stem: "S03-entrance" },
+    props: [
+      { name: "Twin dispenser on the right bar", socket: "drink", position_m: [3.15, 1.26, 3.53], yaw_deg: -90, envelope_whd_m: [0.74, 0.76, 0.54], count: 1, kind: "dispenser" },
+      { name: "Lagoon-tiled bar carcass", socket: "gbar", position_m: [3.15, 0.025, 3.6], yaw_deg: -90, envelope_whd_m: [3.25, 1.235, 1.55], count: 1, kind: "retain" },
+      { name: "Three stools facing the counter", socket: "stools3", position_m: [1.93, 0.025, 2.6], yaw_deg: 90, envelope_whd_m: [0.48, 1.04, 0.48], count: 3, instance_positions_m: [[1.93, 0.025, 2.6], [1.93, 0.025, 3.6], [1.93, 0.025, 4.6]], kind: "retain" },
+      { name: "Twin lounge benches with existing sit actions", socket: "seats", position_m: [-3, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85], count: 2, instance_positions_m: [[-3, 0, -0.8], [3, 0, -0.8]], kind: "retain" },
+      { name: "Coconut globe above the bar", socket: "pend3", position_m: [2.7, 3.4, 2.3], yaw_deg: 0, envelope_whd_m: [0.6, 0.5, 0.6], count: 1, kind: "retain" },
+      { name: "White cold chest in the rear-left bay", socket: "cold", position_m: [-2.8, 0.025, -3.19], yaw_deg: 0, envelope_whd_m: [1.35, 1.1, 0.74], count: 1, kind: "chest" },
+      { name: "Ferns in the rear planter bed", socket: "fern3", position_m: [3.78, 0.025, -3.1], yaw_deg: 0, envelope_whd_m: [0.81, 1.07, 0.73], count: 1, kind: "retain" },
+      { name: "Citrus tray at counter end", socket: "tray3", position_m: [3.16, 1.26, 4.58], yaw_deg: -90, envelope_whd_m: [0.36, 0.03, 0.27], count: 1, kind: "tray" }
+    ]
+  },
+  S04: {
+    brand: "Borsch Med",
+    style: "Patch library",
+    concept: "A sage sample counter opens into an oversized folding folio whose white leaves hold plain patch cards.",
+    signature_family: "fan-fold patch sample folios",
+    frame: { world_origin_m: [20, 0, -6], yaw_world_deg: 0, lot_width_depth_m: [10, 12], actual_room_depth_m: 11.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 6], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55], [2.1, 2.55], [2.1, -1.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "porcelain", hex: "#F8F7F1" }, { material: "powder sage", hex: "#63745D" }, { material: "plum felt", hex: "#6B4A55" }, { material: "pale ash", hex: "#CFBEA7" }],
+    accent_kelvin: 4200,
+    lighting: [-0.48, 3.85, 0.02],
+    anchor: { asset_id: "patch-folio", position_m: [-0.48, 0.081, -0.63], yaw_deg: 7, envelope_whd_m: [2.38, 2.35, 1.12] },
+    floor: { treatment: "A pill-shaped sage terrazzo field surrounds the folio; a plum stitching line turns along its visitor side.", position_m: [-0.48, 0.081, -0.63], yaw_deg: 7, field_width_depth_m: [4.72, 3.32], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "pill", colours: [0, 1, 2] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [2.1, -1.4000000000000004], expected_signature: "fan-fold patch sample folios", viewport_css_px: [393, 612], planned_evidence_stem: "S04-entrance" },
+    props: [
+      { name: "Unlabelled patch samples on folio shelf", socket: "sample", position_m: [-0.48, 1.15, -0.51], yaw_deg: 7, envelope_whd_m: [0.66, 0.43, 0.41], count: 1, kind: "samples" },
+      { name: "Sage service counter in left rear bay", socket: "leftrear", position_m: [-3.97, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "counter" },
+      { name: "Shallow ivory wall cabinet", socket: "rightwall", position_m: [4.17, 1.88, -1.1], yaw_deg: -90, envelope_whd_m: [1.48, 0.85, 0.25], count: 1, kind: "cabinet" },
+      { name: "Matte entrance-side dispenser", socket: "leftfront", position_m: [-3.49, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "dispenser" },
+      { name: "Plum ceramic orchid pot", socket: "backright", position_m: [2.63, 0.081, -4.58], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "plant" },
+      { name: "Diffuse white counter light", socket: "ceiling", position_m: [-0.48, 3.3, -0.63], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "light" },
+      { name: "Blank paper swatch easel", socket: "leftmid", position_m: [-4.010000000000001, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "easel" },
+      { name: "Wall washer over the samples", socket: "lightwall", position_m: [4.17, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" }
+    ]
+  },
+  S05: {
+    brand: "Pien Tze Huang",
+    style: "Herbal counting house",
+    concept: "A bank of stepped dark-wood drawers opens around a single pale porcelain bowl in a quiet apothecary.",
+    signature_family: "stepped specimen-drawer banks",
+    frame: { world_origin_m: [30, 0, -6], yaw_world_deg: 0, lot_width_depth_m: [10, 12], actual_room_depth_m: 11.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 6], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55], [2.1, 2.55], [2.1, -1.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "ink-stained elm", hex: "#352C28" }, { material: "warm parchment", hex: "#E9DDBF" }, { material: "cinnabar", hex: "#9E3F35" }, { material: "aged copper", hex: "#A87249" }],
+    accent_kelvin: 2650,
+    lighting: [0, 3.85, -3.73],
+    anchor: { asset_id: "specimen-drawers", position_m: [0, 0.081, -4.38], yaw_deg: 0, envelope_whd_m: [4.2, 2.98, 1.05] },
+    floor: { treatment: "Inset a parchment-coloured woven reed field in dark boards with a narrow cinnabar seam at the drawer face.", position_m: [0, 0.081, -2.6], yaw_deg: 0, field_width_depth_m: [6.95, 4.55], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "reed", colours: [0, 1, 2] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [2.1, -1.4000000000000004], expected_signature: "stepped specimen-drawer banks", viewport_css_px: [393, 612], planned_evidence_stem: "S05-entrance" },
+    props: [
+      { name: "Single pale bowl and saucer in drawer niche", socket: "bowl", position_m: [0, 1.36, -4.15], yaw_deg: 0, envelope_whd_m: [0.32, 0.22, 0.28], count: 1, kind: "bowl" },
+      { name: "Unmarked cartons on a parchment stand", socket: "leftfront", position_m: [-3.49, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "stand" },
+      { name: "Dark-framed specimen vitrine", socket: "leftmid", position_m: [-4.010000000000001, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "case" },
+      { name: "Parchment lantern at the consultation end", socket: "ceiling", position_m: [0, 3.3, -4.38], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "lantern" },
+      { name: "Cinnabar planter", socket: "backright", position_m: [2.63, 0.081, -4.58], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "plant" },
+      { name: "Wooden receiving chest below side return", socket: "backleft", position_m: [-2.58, 0.081, -4.58], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63], count: 1, kind: "chest" },
+      { name: "Aged brass reading light", socket: "lightwall", position_m: [4.17, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" },
+      { name: "Closed sample cabinet on the right wall", socket: "rightwall", position_m: [4.17, 1.88, -1.1], yaw_deg: -90, envelope_whd_m: [1.48, 0.85, 0.25], count: 1, kind: "cabinet" }
+    ]
+  },
+  S06: {
+    brand: "Flying Wheel",
+    style: "Air-drying workshop",
+    concept: "Golden noodle ribbons hang at different lengths from a freestanding timber loom, against a quiet slate wall.",
+    signature_family: "ban mee drying combs",
+    frame: { world_origin_m: [-20, 0, 4], yaw_world_deg: 90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "pale beech", hex: "#D7BB87" }, { material: "wheat", hex: "#C6A66C" }, { material: "slate-blue casein", hex: "#536777" }, { material: "rice paper", hex: "#F0E9D9" }],
+    accent_kelvin: 3300,
+    lighting: [-0.65, 3.85, -0.18],
+    anchor: { asset_id: "noodle-loom", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, envelope_whd_m: [2.45, 2.96, 1.05] },
+    floor: { treatment: "Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, field_width_depth_m: [4.55, 4.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "planks", colours: [2, 0, 3] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "ban mee drying combs", viewport_css_px: [393, 612], planned_evidence_stem: "S06-entrance" },
+    props: [
+      { name: "Plain noodle bags on a hook rack", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "rack" },
+      { name: "Brushed preparation sideboard", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "counter" },
+      { name: "Pale wooden drying tray on sideboard", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "tray" },
+      { name: "Utensil holder on sideboard", socket: "onleft2", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34], count: 1, kind: "utensils" },
+      { name: "Slatted flour crate", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "crate" },
+      { name: "Cylindrical work lamp", socket: "ceiling", position_m: [-0.65, 3.3, -0.83], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "light" },
+      { name: "Woven-colour basket by the rear wall", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "basket" },
+      { name: "Raking lamp above the comb", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" }
+    ]
+  },
+  S07: {
+    brand: "Gu Long",
+    style: "Banquet provision hall",
+    concept: "A stepped pyramid of plain tins on a jade serving drum sits beneath one red lantern, like a banquet centrepiece.",
+    signature_family: "banquet tin pyramids",
+    frame: { world_origin_m: [-20, 0, 12], yaw_world_deg: 90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "oxblood lacquer", hex: "#742E29" }, { material: "jade glaze", hex: "#4F6E5A" }, { material: "rice silk", hex: "#EFE4D0" }, { material: "patinated bronze", hex: "#9A794D" }],
+    accent_kelvin: 2750,
+    lighting: [-0.55, 3.85, -0.2],
+    anchor: { asset_id: "stacked-can-pyramid", position_m: [-0.55, 0.48, -0.85], yaw_deg: -8, envelope_whd_m: [1.65, 2.45, 1.65] },
+    floor: { treatment: "An octagonal jade inset under the drum breaks into a border of brick-red tiles along the walk.", position_m: [-0.55, 0.081, -0.85], yaw_deg: -8, field_width_depth_m: [3.65, 3.65], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "octagon", colours: [0, 1, 0] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "banquet tin pyramids", viewport_css_px: [393, 612], planned_evidence_stem: "S07-entrance" },
+    props: [
+      { name: "Low jade serving drum under tin pyramid", socket: "drum", position_m: [-0.55, 0.081, -0.85], yaw_deg: -8, envelope_whd_m: [1.84, 0.399, 1.84], count: 1, kind: "drum" },
+      { name: "Silk banquet lantern above the drum", socket: "ceiling", position_m: [-0.55, 3.3, -0.85], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "lantern" },
+      { name: "Lacquer provision shelf", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "rack" },
+      { name: "Stack of serving platters on shelf", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "plates" },
+      { name: "Bronze-coloured condiment tray", socket: "onleft2", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34], count: 1, kind: "tray" },
+      { name: "Hand basket in left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "basket" },
+      { name: "Red-glazed corner planter", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "plant" },
+      { name: "Jade shelf washer", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" }
+    ]
+  },
+  S08: {
+    brand: "Skippy",
+    style: "Breakfast stand",
+    concept: "A tall stand of plain peanut-butter jars fronts a striped breakfast booth with toast trays at serving height.",
+    signature_family: "peanut-jar breakfast stands",
+    frame: { world_origin_m: [-20, 0, 20], yaw_world_deg: 90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "sky-blue enamel", hex: "#70A9D4" }, { material: "navy canvas", hex: "#1D3A64" }, { material: "peanut maple", hex: "#E8D1A3" }, { material: "butter yellow", hex: "#F4CB69" }],
+    accent_kelvin: 3650,
+    lighting: [-0.58, 3.85, -0.11],
+    anchor: { asset_id: "peanut-butter-jar-stand", position_m: [-0.58, 0.58, -0.76], yaw_deg: 0, envelope_whd_m: [1.65, 2.15, 1.05] },
+    floor: { treatment: "A navy-and-cream gingham field folds around the breakfast counter, with a plain band at the threshold.", position_m: [-0.42, 0.081, -0.5], yaw_deg: 0, field_width_depth_m: [4.48, 5.68], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "gingham", colours: [0, 2, 1] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "peanut-jar breakfast stands", viewport_css_px: [393, 612], planned_evidence_stem: "S08-entrance" },
+    props: [
+      { name: "Blue enamel jar-stand base", socket: "jarbase", position_m: [-0.58, 0.081, -0.76], yaw_deg: 0, envelope_whd_m: [1.76, 0.499, 1.17], count: 1, kind: "plinth" },
+      { name: "Toast and timber service rack on sideboard", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "rack-small" },
+      { name: "Maple breakfast sideboard", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "counter" },
+      { name: "Small second display at the window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "retain" },
+      { name: "Single sky-blue breakfast chair", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "chair" },
+      { name: "Butter-yellow breakfast light", socket: "ceiling", position_m: [-0.58, 3.3, -0.76], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "lantern" },
+      { name: "Picnic basket in the rear corner", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "basket" },
+      { name: "Cream breakfast tray on sideboard", socket: "onleft2", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34], count: 1, kind: "tray" }
+    ]
+  },
+  S09: {
+    brand: "SPAM",
+    style: "Canning-line grocer",
+    concept: "A stopped tinning conveyor with a yellow return wheel leads the eye diagonally across a navy machine-room counter.",
+    signature_family: "tinning-line rollers",
+    frame: { world_origin_m: [-20, 0, 28], yaw_world_deg: 90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [1.7, 1.5499999999999998], [1.7, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "blue-black steel", hex: "#173B68" }, { material: "tinplate", hex: "#B5C0C1" }, { material: "ochre enamel", hex: "#E4B63F" }, { material: "rubber", hex: "#303639" }],
+    accent_kelvin: 3450,
+    lighting: [-0.72, 3.85, -0.45],
+    anchor: { asset_id: "conveyor-belt", position_m: [-0.72, 0.081, -1.1], yaw_deg: 12, envelope_whd_m: [2.65, 1.6, 1.02] },
+    floor: { treatment: "Two parallel steel inlays trace the belt ends in a charcoal rubber field; keep the public path plain.", position_m: [-0.72, 0.081, -1.1], yaw_deg: 12, field_width_depth_m: [4.65, 3.24], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "tracks", colours: [0, 3, 1] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [1.7, -2.4000000000000004], expected_signature: "tinning-line rollers", viewport_css_px: [393, 612], planned_evidence_stem: "S09-entrance" },
+    props: [
+      { name: "Abstract tin stack at the belt intake", socket: "backleft", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63], count: 1, kind: "tins" },
+      { name: "Tool station with folded-metal top", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "counter" },
+      { name: "Scanner parked on the tool station", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "scanner" },
+      { name: "Unmarked mechanical till on the tool station", socket: "onleft2", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34], count: 1, kind: "till" },
+      { name: "Navy steel rack at left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "rack" },
+      { name: "Deep enamel task lamp", socket: "ceiling", position_m: [-0.72, 3.3, -1.1], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "light" },
+      { name: "Low ochre metal drawer unit", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "chest" },
+      { name: "Light on the return wheel", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" }
+    ]
+  },
+  S10: {
+    brand: "California Mexico",
+    style: "Coastal gift market",
+    concept: "A deep, open scallop shell cradles a generic seafood gift display against pale sand-coloured plaster.",
+    signature_family: "open nacre shell cradles",
+    frame: { world_origin_m: [-20, 0, 36], yaw_world_deg: 90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "shell limestone", hex: "#F0EAE0" }, { material: "sea-glass teal", hex: "#2C7776" }, { material: "coral ceramic", hex: "#C65B46" }, { material: "oiled teak", hex: "#956847" }],
+    accent_kelvin: 3550,
+    lighting: [-0.45, 3.85, -0.75],
+    anchor: { asset_id: "nacre-cradle", position_m: [-0.45, 0.081, -1.4], yaw_deg: -7, envelope_whd_m: [2.6, 2.62, 1.24] },
+    floor: { treatment: "Flow from a chalk-white sand field to a scalloped teal band around the gift display.", position_m: [-0.45, 0.081, -1.4], yaw_deg: -7, field_width_depth_m: [5.25, 4.25], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "scallop", colours: [1, 0, 1] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "open nacre shell cradles", viewport_css_px: [393, 612], planned_evidence_stem: "S10-entrance" },
+    props: [
+      { name: "Neutral gift boxes on inner shell ledge", socket: "sample", position_m: [-0.45, 1.15, -1.2799999999999998], yaw_deg: -7, envelope_whd_m: [0.66, 0.43, 0.41], count: 1, kind: "samples" },
+      { name: "Sea-glass display cabinet", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "case" },
+      { name: "Pearl-coloured serving dish inside cabinet", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "plate" },
+      { name: "Open gift basket in the left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "basket" },
+      { name: "Coral glazed planter in the back corner", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "plant" },
+      { name: "Pearl pendant over the cradle", socket: "ceiling", position_m: [-0.45, 3.3, -1.4], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "lantern" },
+      { name: "Low teak shipping crate", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "crate" },
+      { name: "Teal shell-rib washer", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" }
+    ]
+  },
+  S11: {
+    brand: "Hormel",
+    style: "Provision packing room",
+    concept: "An open packing bench, kraft rolls and nested slatted crates make this a working stockroom for generic tinned goods.",
+    signature_family: "parcel-wrapping benches",
+    frame: { world_origin_m: [-20, 0, 44], yaw_world_deg: 90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "kraft board", hex: "#BE9062" }, { material: "burgundy steel", hex: "#843E43" }, { material: "zinc", hex: "#767976" }, { material: "cream paper", hex: "#EEE7D9" }],
+    accent_kelvin: 3150,
+    lighting: [-0.56, 3.85, -0.4],
+    anchor: { asset_id: "packing-station", position_m: [-0.56, 0.081, -1.05], yaw_deg: 0, envelope_whd_m: [2.62, 2.15, 1.12] },
+    floor: { treatment: "Worn end-grain blocks form a rectangular loading mat with a burgundy perimeter and zinc doorway strip.", position_m: [-0.56, 0.081, -1.05], yaw_deg: 0, field_width_depth_m: [4.8, 3.72], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "blocks", colours: [2, 0, 1] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "parcel-wrapping benches", viewport_css_px: [393, 612], planned_evidence_stem: "S11-entrance" },
+    props: [
+      { name: "Slatted receiving crate at working end", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "crate" },
+      { name: "Low pallet in the left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "pallet" },
+      { name: "Burgundy dispatch shelving", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "rack" },
+      { name: "Blank packing tray on bench", socket: "sample", position_m: [-0.56, 1.15, -0.93], yaw_deg: 0, envelope_whd_m: [0.66, 0.43, 0.41], count: 1, kind: "tray" },
+      { name: "Wire returns basket", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "basket" },
+      { name: "Long zinc task light above packing bench", socket: "ceiling", position_m: [-0.56, 3.3, -1.05], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "light" },
+      { name: "Countertop packing scale on shelf", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "scale" },
+      { name: "Short pantry rack on rear return", socket: "backleft", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63], count: 1, kind: "rack" }
+    ]
+  },
+  S12: {
+    brand: "Zeria",
+    style: "Quiet dispensary",
+    concept: "Offset frosted index fins rise behind a low white supplement display, casting blue-green shadows between the layers.",
+    signature_family: "frosted dispensary index fins",
+    frame: { world_origin_m: [40, 0, 4], yaw_world_deg: -90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "opal resin", hex: "#F1F3F1" }, { material: "seafoam", hex: "#B6D2C8" }, { material: "indigo slate", hex: "#3C4A66" }, { material: "anodised teal", hex: "#6F9690" }],
+    accent_kelvin: 4650,
+    lighting: [-0.52, 3.85, -0.55],
+    anchor: { asset_id: "opal-index", position_m: [-0.52, 0.081, -1.2], yaw_deg: -5, envelope_whd_m: [2.55, 2.46, 1.05] },
+    floor: { treatment: "Pale resin flooring carries three quiet indigo arcs around the sample station and a matte seafoam browsing zone.", position_m: [-0.52, 0.081, -1.2], yaw_deg: -5, field_width_depth_m: [4.93, 4.48], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "arcs", colours: [0, 1, 2] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "frosted dispensary index fins", viewport_css_px: [393, 612], planned_evidence_stem: "S12-entrance" },
+    props: [
+      { name: "Plain carton stand beside the glazing", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "stand" },
+      { name: "White drawer cabinet in the alcove", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "cabinet" },
+      { name: "Opal sample tray on central ledge", socket: "sample", position_m: [-0.52, 1.15, -1.08], yaw_deg: -5, envelope_whd_m: [0.66, 0.43, 0.41], count: 1, kind: "tray" },
+      { name: "Mint supply trolley parked off aisle", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "trolley" },
+      { name: "White stone orchid pot", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "plant" },
+      { name: "Cool inspection bar above fins", socket: "ceiling", position_m: [-0.52, 3.3, -1.2], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "light" },
+      { name: "Side fin washer", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" },
+      { name: "Recessed blank material-sample easel", socket: "backleft", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63], count: 1, kind: "easel" }
+    ]
+  },
+  S13: {
+    brand: "Sony",
+    style: "Listening studio",
+    concept: "Backlit headphone silhouettes turn a charcoal felt listening bar into a dark, close-focus audio showroom.",
+    signature_family: "suspended headphone hooks",
+    frame: { world_origin_m: [40, 0, 12], yaw_world_deg: -90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "charcoal felt", hex: "#292B2D" }, { material: "black glass", hex: "#14171C" }, { material: "bead-blasted silver", hex: "#BFC3C5" }, { material: "ice blue", hex: "#A6D7EB" }],
+    accent_kelvin: 4100,
+    lighting: [-0.64, 3.85, -0.4],
+    anchor: { asset_id: "headphone-display-stand", position_m: [-0.64, 0.43, -1.05], yaw_deg: 8, envelope_whd_m: [1.12, 2.6, 0.75] },
+    floor: { treatment: "A charcoal felt ellipse interrupts the black rubber floor and points its long axis toward the listening bar.", position_m: [-0.64, 0.081, -1.05], yaw_deg: 8, field_width_depth_m: [4.08, 4.38], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "felt", colours: [1, 0, 2] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "suspended headphone hooks", viewport_css_px: [393, 612], planned_evidence_stem: "S13-entrance" },
+    props: [
+      { name: "Oval dark plinth for headphone rack", socket: "audiofoot", position_m: [-0.64, 0.081, -1.05], yaw_deg: 8, envelope_whd_m: [1.38, 0.349, 1.07], count: 1, kind: "plinth" },
+      { name: "Slim soundbar on the left console", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "soundbar" },
+      { name: "Black listening console", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "counter" },
+      { name: "Felt listening chair behind the console", socket: "backleft", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63], count: 1, kind: "chair" },
+      { name: "Second short headphone stand at window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "retain" },
+      { name: "Small silver spotlight raking the hooks", socket: "ceiling", position_m: [-0.64, 3.48, -1.05], yaw_deg: 0, envelope_whd_m: [1.18, 0.42, 0.68], count: 1, kind: "spot" },
+      { name: "Ribbed felt acoustic baffle", socket: "baffle", position_m: [-0.64, 0.081, -1.99], yaw_deg: 0, envelope_whd_m: [2.55, 2.96, 0.2], count: 1, kind: "baffle" },
+      { name: "Silver slit of light along the side wall", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" }
+    ]
+  },
+  S14: {
+    brand: "LG",
+    style: "Living picture gallery",
+    concept: "Two offset picture planes frame an ivory upholstered living room like a bright domestic cinema.",
+    signature_family: "staggered picture-window screens",
+    frame: { world_origin_m: [40, 0, 20], yaw_world_deg: -90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "gallery white", hex: "#F5F3EF" }, { material: "satin aluminium", hex: "#BEC1C2" }, { material: "aubergine velvet", hex: "#5B3F7A" }, { material: "blush limestone", hex: "#DBBEB1" }],
+    accent_kelvin: 4000,
+    lighting: [-0.62, 3.85, -3.34],
+    anchor: { asset_id: "tv-wall-mounted", position_m: [-0.62, 1.03, -3.99], yaw_deg: 0, envelope_whd_m: [3.65, 2.08, 0.3] },
+    floor: { treatment: "Use a large aubergine wool rectangle beneath the sofa and a pale polished perimeter for the gallery walk.", position_m: [-2.02, 0.081, 0.29], yaw_deg: 0, field_width_depth_m: [3.05, 3.95], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "wool", colours: [0, 2, 3] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "staggered picture-window screens", viewport_css_px: [393, 612], planned_evidence_stem: "S14-entrance" },
+    props: [
+      { name: "Second smaller floor screen angled toward main screen", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "screen" },
+      { name: "Ivory sofa in left browsing alcove", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "sofa" },
+      { name: "Low console below the screen", socket: "underTV", position_m: [-0.62, 0.081, -3.8600000000000003], yaw_deg: 0, envelope_whd_m: [2.8, 0.72, 0.55], count: 1, kind: "console" },
+      { name: "Small velvet ottoman in left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "ottoman" },
+      { name: "Satin domestic appliance at back left", socket: "backleft", position_m: [-2.96, 0.081, -3.58], yaw_deg: 0, envelope_whd_m: [0.7, 1.72, 0.58], count: 1, kind: "cabinet" },
+      { name: "Grazing light across screen reveals", socket: "ceiling", position_m: [-0.62, 3.3, -3.99], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "light" },
+      { name: "Small domestic arrangement at sofa end", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "plant" },
+      { name: "Soft gallery wall light", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" }
+    ]
+  },
+  S15: {
+    brand: "Casio",
+    style: "Chamber recital room",
+    concept: "A raised piano lid cuts a diagonal against walnut concert slats, with a shallow ivory-lit stage under the instrument.",
+    signature_family: "raised baby-grand lids",
+    frame: { world_origin_m: [40, 0, 28], yaw_world_deg: -90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.8, 1.5499999999999998], [2.8, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "piano lacquer", hex: "#202123" }, { material: "oiled walnut", hex: "#76543D" }, { material: "key ivory", hex: "#F1EDE2" }, { material: "oxblood wool", hex: "#723F46" }],
+    accent_kelvin: 2900,
+    lighting: [-1.05, 3.85, -0.37],
+    anchor: { asset_id: "grand-piano", position_m: [-1.05, 0.081, -1.02], yaw_deg: -22, envelope_whd_m: [1.95, 2.38, 2.75] },
+    floor: { treatment: "An oval walnut marquetry field and an ivory stage outline gather the instrument and bench.", position_m: [-1.05, 0.081, -1.02], yaw_deg: -22, field_width_depth_m: [3.55, 4.05], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "stage", colours: [3, 1, 2] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.8, -2.4000000000000004], expected_signature: "raised baby-grand lids", viewport_css_px: [393, 612], planned_evidence_stem: "S15-entrance" },
+    props: [
+      { name: "Practice keyboard at left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "keyboard" },
+      { name: "Warm stage special above lid", socket: "ceiling", position_m: [-1.05, 3.3, -1.02], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "spot" },
+      { name: "Walnut acoustic screen behind instrument", socket: "pianoback", position_m: [-0.64, 0.081, -3.76], yaw_deg: -2, envelope_whd_m: [2.52, 2.72, 0.28], count: 1, kind: "baffle" },
+      { name: "Small amber lamp over practice area", socket: "frontpend", position_m: [-2.5, 3.15, 2.88], yaw_deg: 0, envelope_whd_m: [0.44, 0.66, 0.44], count: 1, kind: "lantern" },
+      { name: "Empty glass object case with ivory stage samples", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "case" },
+      { name: "Keybed side light", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" },
+      { name: "Small recital flower arrangement", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "plant" },
+      { name: "Single audience chair beside the rear wall", socket: "backleft", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63], count: 1, kind: "chair" }
+    ]
+  },
+  S16: {
+    brand: "GP",
+    style: "Locator workshop",
+    concept: "A perforated teal tool board holds a family of oversized empty eyelets above a small tracker demonstration bench.",
+    signature_family: "overscale locator eyelet rails",
+    frame: { world_origin_m: [40, 0, 36], yaw_world_deg: -90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [0, 1.5499999999999998], [0, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "powder white", hex: "#F4F5F2" }, { material: "anodised teal", hex: "#3D8C8A" }, { material: "lime polymer", hex: "#B7C94A" }, { material: "graphite rubber", hex: "#363C3D" }],
+    accent_kelvin: 4900,
+    lighting: [-1.56, 3.85, -0.63],
+    anchor: { asset_id: "eyelet-rail", position_m: [-1.56, 0.081, -1.28], yaw_deg: 5, envelope_whd_m: [1.65, 2.55, 0.9] },
+    floor: { treatment: "White anti-static tile with a teal service lane and three lime indexing marks points to the rail.", position_m: [-0.25, 0.081, -0.12], yaw_deg: 0, field_width_depth_m: [5.25, 6.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "lane", colours: [0, 1, 2] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [0, -2.4000000000000004], expected_signature: "overscale locator eyelet rails", viewport_css_px: [393, 612], planned_evidence_stem: "S16-entrance" },
+    props: [
+      { name: "Cell display in left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "retain" },
+      { name: "White modular accessories shelving", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "rack" },
+      { name: "Neutral rear test desk", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.98, 1.05, 0.64], count: 1, kind: "counter" },
+      { name: "Generic static display on rear desk", socket: "onright", position_m: [2.63, 1.131, -3.68], yaw_deg: 0, envelope_whd_m: [0.59, 0.48, 0.3], count: 1, kind: "screen" },
+      { name: "Lime polymer tool bin", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "crate" },
+      { name: "Bench inspection strip", socket: "ceiling", position_m: [-1.56, 3.3, -1.28], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "light" },
+      { name: "Pegboard edge light", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" },
+      { name: "Handheld bench scanner on left shelf", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "scanner" }
+    ]
+  },
+  S17: {
+    brand: "Gigaset",
+    style: "Domestic telephone bureau",
+    concept: "A gabled felt telephone alcove frames a small real-scale cordless handset at the end of a warm domestic corridor.",
+    signature_family: "gable-roof handset niches",
+    frame: { world_origin_m: [40, 0, 44], yaw_world_deg: -90, lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, threshold_local_xz_m: [0, 5], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [] },
+    palette: [{ material: "graphite felt", hex: "#4A4D50" }, { material: "satin nickel", hex: "#B8BBBD" }, { material: "chalk", hex: "#F5F4EF" }, { material: "apricot cork", hex: "#D99E74" }],
+    accent_kelvin: 3200,
+    lighting: [-0.55, 3.85, -2.3],
+    anchor: { asset_id: "telephone-alcove", position_m: [-0.55, 0.081, -2.95], yaw_deg: -5, envelope_whd_m: [2.15, 2.86, 1.25] },
+    floor: { treatment: "A cork runner widens into a threshold-shaped wool inset beneath the phone alcove.", position_m: [0, 0.081, -0.2], yaw_deg: 0, field_width_depth_m: [4.68, 6.72], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "cork", colours: [2, 3, 0] },
+    routes: [],
+    pickups: [],
+    capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "gable-roof handset niches", viewport_css_px: [393, 612], planned_evidence_stem: "S17-entrance" },
+    props: [
+      { name: "Real-scale generic handset in the alcove", socket: "handset", position_m: [-0.55, 1.09, -2.77], yaw_deg: -5, envelope_whd_m: [0.34, 0.42, 0.32], count: 1, kind: "handset" },
+      { name: "Small domestic writing desk", socket: "leftrear", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8], count: 1, kind: "counter" },
+      { name: "Second unbranded dock on writing desk", socket: "onleft", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38], count: 1, kind: "handset" },
+      { name: "Cork-coloured waiting seat in left window", socket: "leftfront", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82], count: 1, kind: "retain" },
+      { name: "Domestic pendant above desk", socket: "ceiling", position_m: [-0.55, 3.3, -2.95], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68], count: 1, kind: "lantern" },
+      { name: "Correspondence drawer cabinet", socket: "leftmid", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65], count: 1, kind: "cabinet" },
+      { name: "Gable reading lamp", socket: "lightwall", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2], count: 1, kind: "sconce" },
+      { name: "Chalk planter at end of runner", socket: "backright", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64], count: 1, kind: "plant" }
+    ]
+  }
+};
+
+// demos/corporate/gjh/v11/assets/interiors/config.js
+var fixtureBytes = {
+  S01: { low: 41552, balanced: 97576, detailed: 133608 },
+  S02: { low: 38936, balanced: 56428 },
+  S03: { low: 57460, balanced: 150476 },
+  S04: { low: 26892, balanced: 75300, detailed: 103268 },
+  S05: { low: 45516, balanced: 133736, detailed: 145484 },
+  S06: { low: 52960, balanced: 111984, detailed: 182128 },
+  S07: { low: 42456, balanced: 162152 },
+  S08: { low: 60780, balanced: 111012 },
+  S09: { low: 22728, balanced: 50592 },
+  S10: { low: 49888, balanced: 91528, detailed: 160204 },
+  S11: { low: 29088, balanced: 63544 },
+  S12: { low: 30636, balanced: 75168, detailed: 91240 },
+  S13: { low: 55696, balanced: 163820 },
+  S14: { low: 34300, balanced: 53492 },
+  S15: { low: 68504, balanced: 186224 },
+  S16: { low: 59820, balanced: 107836, detailed: 123736 },
+  S17: { low: 28284, balanced: 66384, detailed: 80676 }
+};
+var solidProps = new Set([
+  "photo",
+  "chest",
+  "counter",
+  "dispenser",
+  "plant",
+  "easel",
+  "stand",
+  "case",
+  "rack",
+  "crate",
+  "basket",
+  "drum",
+  "plinth",
+  "chair",
+  "tins",
+  "pallet",
+  "cabinet",
+  "trolley",
+  "baffle",
+  "screen",
+  "sofa",
+  "console",
+  "ottoman",
+  "keyboard"
+]);
+var interiorTiers = ["low", "balanced", "detailed"];
+var radians = (degrees) => degrees * Math.PI / 180;
+function collisionFor({ position_m, yaw_deg, envelope_whd_m }) {
+  const [x, y, z] = position_m, [, h] = envelope_whd_m;
+  return { center: [x, y + h / 2, z], size: envelope_whd_m, yaw: yaw_deg };
+}
+var interiorStores = Object.fromEntries(Object.entries(layouts).map(([id, layout]) => {
+  const files = Object.fromEntries(Object.entries(fixtureBytes[id]).map(([tier, bytes]) => [tier, {
+    file: `${id.toLowerCase()}-${layout.anchor.asset_id}-${tier}.glb`,
+    tier,
+    bytes
+  }]));
+  const colliders = ["S01", "S02"].includes(id) ? [] : [collisionFor(layout.anchor)];
+  for (const prop of layout.props) {
+    const [, , depth] = prop.envelope_whd_m;
+    if (!solidProps.has(prop.kind) || prop.position_m[1] > 0.1 || depth < 0.1)
+      continue;
+    for (const position_m of prop.instance_positions_m ?? [prop.position_m]) {
+      colliders.push(collisionFor({ ...prop, position_m }));
+    }
+  }
+  return [id, { ...layout, id, files, colliders }];
+}));
+function interiorFloorColour(store2) {
+  return store2.palette[store2.floor.colours[0]].hex;
+}
+function interiorAsset(store2, tier) {
+  return store2.files[tier] ?? (tier === "detailed" ? store2.files.balanced : store2.files.low);
+}
+function worldInteriorBox(store2, box) {
+  const [x, y, z] = box.center, [ox, oy, oz] = store2.frame.world_origin_m;
+  const a = radians(store2.frame.yaw_world_deg), c = Math.cos(a), s = Math.sin(a);
+  return { center: [ox + x * c + z * s, oy + y, oz - x * s + z * c], size: box.size, yaw: a + radians(box.yaw) };
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
@@ -4227,8 +4646,12 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     group.rotation.y = side === "west" ? Math.PI / 2 : side === "east" ? -Math.PI / 2 : 0;
     const front = depth / 2;
     let parts = [];
-    let heroOffset = 0;
+    let heroOffset = 0, replaced = null;
     function add(geometry, x, y, z, color, finish2 = color === shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
+      if (replaced) {
+        geometry.dispose();
+        return;
+      }
       geometry.translate(x + heroOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i = 0;i < colors.length; i += 3) {
@@ -4248,6 +4671,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       add(new T.CylinderGeometry(r, r, h, 12), x, y, z, color);
     }
     function block(x, y, z, w, h, d) {
+      replaced?.push([x, z, w, d]);
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
       collisionBoxes.push({
         x: group.position.x + x * c + z * sn,
@@ -4260,6 +4684,14 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     const tools = {
       block,
+      replaceDisplay(build, finish2) {
+        replaced = [];
+        build();
+        const footprints = replaced;
+        replaced = null;
+        for (const [x, z, w, d] of footprints)
+          box(x, 0.096, z, w, 0.022, d, finish2);
+      },
       surface(points, triangles, color) {
         const panel = new T.BufferGeometry;
         panel.setAttribute("position", new T.Float32BufferAttribute(points.flat(), 3));
@@ -4295,7 +4727,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         add(curve, x, y + leg, z, c);
       }
     };
-    buildWindowStudio(number, tools, width, depth);
+    buildWindowStudio(number, tools, width, depth, interiorFloorColour(interiorStores["S" + slot2.number]));
     buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
     if (!studioParts.has(side))
@@ -4504,6 +4936,625 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     schedulePrefetch();
   } };
+}
+
+// demos/corporate/gjh/v11/assets/interiors/surfaces.js
+function floorPolygon(xCount, zCount, colourAt, put) {
+  for (let row = 0;row < zCount; row++)
+    for (let column = 0;column < xCount; column++) {
+      const x = column / xCount - 0.5, z = row / zCount - 0.5;
+      const u = x + 1 / xCount, v = z + 1 / zCount;
+      const colour = colourAt(column, row);
+      put([[x, z], [x, v], [u, v], [u, z]], colour);
+    }
+}
+function radialFloor(steps, radiusAt, rings, put) {
+  let inner = 0;
+  for (const [outer, colour] of rings) {
+    for (let i = 0;i < steps; i++) {
+      const a = 2 * Math.PI * i / steps, b = 2 * Math.PI * (i + 1) / steps;
+      const point2 = (phase, r) => [Math.cos(phase) * r * radiusAt(phase) / 2, Math.sin(phase) * r * radiusAt(phase) / 2];
+      put(inner ? [point2(a, inner), point2(a, outer), point2(b, outer), point2(b, inner)].reverse() : [[0, 0], point2(b, outer), point2(a, outer)], colour);
+    }
+    inner = outer;
+  }
+}
+function floorFinish(T, store2) {
+  const floor = store2.floor, [width, depth] = floor.field_width_depth_m;
+  const [x, y, z] = floor.position_m, a = radians(floor.yaw_deg), c = Math.cos(a), s = Math.sin(a);
+  const palette = store2.palette.map((entry) => entry.hex);
+  const [, field, edge] = floor.colours.map((value) => palette[value] ?? value);
+  const color = new T.Color(field), trim = new T.Color(edge);
+  const tint2 = color.clone().lerp(trim, 0.33), dark = color.clone().multiplyScalar(0.78);
+  const light = color.clone().lerp(new T.Color("#F4EBDD"), 0.19);
+  const positions = [], colours = [];
+  function put(points, finish2) {
+    for (let i = 1;i < points.length - 1; i++)
+      for (const [u, v] of [points[0], points[i], points[i + 1]]) {
+        positions.push(x + c * u * width + s * v * depth, y + 0.004, z - s * u * width + c * v * depth);
+        colours.push(finish2.r, finish2.g, finish2.b);
+      }
+  }
+  const rect = (left, back, right, front, finish2) => put([[left, back], [left, front], [right, front], [right, back]], finish2);
+  function matGrid(columns, rows, pattern, border = 0.035) {
+    rect(-0.5, -0.5, 0.5, -0.5 + border, trim);
+    rect(-0.5, 0.5 - border, 0.5, 0.5, trim);
+    rect(-0.5, -0.5 + border, -0.5 + border, 0.5 - border, trim);
+    rect(0.5 - border, -0.5 + border, 0.5, 0.5 - border, trim);
+    floorPolygon(columns, rows, pattern, (points, finish2) => put(points.map(([u, v]) => [u * (1 - 2 * border), v * (1 - 2 * border)]), finish2));
+  }
+  switch (floor.pattern) {
+    case "runner":
+      matGrid(7, 1, (i) => i === 1 || i === 5 ? tint2 : color, 0.022);
+      break;
+    case "tile":
+      matGrid(9, 8, (i, j) => (i + j) % 3 === 0 ? light : (i + j) % 3 === 1 ? dark : color);
+      break;
+    case "reed":
+      matGrid(13, 1, (i) => i % 3 === 0 ? tint2 : color, 0.022);
+      break;
+    case "planks":
+      matGrid(1, 14, (i, j) => [color, tint2, light, dark][j % 4], 0.02);
+      break;
+    case "gingham":
+      matGrid(8, 10, (i, j) => i % 2 && j % 2 ? trim : (i + j) % 2 ? tint2 : color, 0.026);
+      break;
+    case "tracks":
+      matGrid(9, 1, (i) => i === 2 || i === 6 ? trim : i === 3 || i === 5 ? tint2 : color, 0.04);
+      break;
+    case "blocks":
+      matGrid(11, 9, (i, j) => [color, tint2, light, dark][(17 * i + 7 * j + i * j) % 4], 0.037);
+      break;
+    case "wool":
+      matGrid(7, 1, (i) => i % 2 === 0 ? color : dark, 0.033);
+      break;
+    case "lane":
+      matGrid(9, 7, (i, j) => i === 4 && j % 2 === 0 ? trim : i >= 3 && i <= 5 ? tint2 : light);
+      break;
+    case "cork": {
+      const points = [[-0.5, -0.5], [-0.5, 0.11], [-0.27, 0.25], [-0.27, 0.5], [0.27, 0.5], [0.27, 0.25], [0.5, 0.11], [0.5, -0.5]];
+      for (let i = 0;i < points.length; i++) {
+        const p = points[i], q = points[(i + 1) % points.length];
+        put([p, q, q.map((v) => v * 0.94), p.map((v) => v * 0.94)], trim);
+      }
+      const [, , a2, b, c2, d] = points.map(([u, v]) => [u * 0.94, v * 0.94]);
+      const edge2 = 0.5 * 0.94, shoulder = 0.11 * 0.94;
+      rect(-edge2, -edge2, edge2, shoulder, color);
+      put([[-edge2, shoulder], a2, d, [edge2, shoulder]], tint2);
+      put([a2, b, c2, d], light);
+      break;
+    }
+    case "octagon":
+      radialFloor(8, () => 1, [[0.86, color], [0.94, trim], [1, tint2]], put);
+      break;
+    case "pill":
+      radialFloor(24, (t) => 1 + 0.08 * Math.cos(2 * t), [[0.88, color], [0.91, trim], [0.95, tint2]], put);
+      break;
+    case "sweep":
+      radialFloor(24, (t) => 1 + 0.14 * Math.sin(2 * t), [[0.52, color], [0.63, tint2], [0.76, trim], [0.88, light], [0.94, trim]], put);
+      break;
+    case "scallop":
+      radialFloor(36, (t) => 0.96 + 0.06 * Math.cos(t * 9), [[0.82, color], [0.94, trim], [1, tint2]], put);
+      break;
+    case "arcs":
+      radialFloor(24, () => 1, [[0.62, color], [0.65, trim], [0.76, color], [0.79, trim], [0.91, color], [0.94, trim], [1, light]], put);
+      break;
+    case "felt":
+      radialFloor(24, () => 1, [[0.91, color], [0.93, tint2], [1, dark]], put);
+      break;
+    case "stage":
+      radialFloor(24, () => 1, [[0.74, color], [0.78, tint2], [0.91, color], [0.95, trim], [1, color]], put);
+      break;
+  }
+  const geometry = new T.BufferGeometry;
+  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new T.Float32BufferAttribute(colours, 3));
+  geometry.computeVertexNormals();
+  return geometry;
+}
+function kelvinColour(T, kelvin) {
+  const x = kelvin / 100;
+  const clamp = (value) => Math.max(0, Math.min(255, value)) / 255;
+  return new T.Color().setRGB(1, clamp(99.4708 * Math.log(x) - 161.1196), clamp(138.5177 * Math.log(x - 10) - 305.0448), T.SRGBColorSpace);
+}
+
+// demos/corporate/gjh/v11/assets/interiors/decoration.js
+function merged(parts) {
+  if (!parts.length)
+    return null;
+  const result = mergeGeometries3(parts);
+  for (const geometry of parts)
+    geometry.dispose();
+  return result;
+}
+function addColour(T, geometry, colour) {
+  const colors = new Float32Array(3 * geometry.attributes.position.count);
+  for (let i = 0;i < colors.length; i += 3)
+    colour.toArray(colors, i);
+  geometry.setAttribute("color", new T.BufferAttribute(colors, 3));
+  return geometry;
+}
+function interiorMaterials(T) {
+  return {
+    opaque: new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.78 }),
+    glow: new T.MeshBasicMaterial({ vertexColors: true, toneMapped: false })
+  };
+}
+function buildInteriorDecoration(T, store2, materials2, detail = 0) {
+  const [dominant, secondary, pale, accent] = store2.palette.map(({ hex }) => new T.Color(hex));
+  const warm = kelvinColour(T, store2.accent_kelvin);
+  const opaque = [], glow = [];
+  const body = dominant.clone().lerp(secondary, 0.37);
+  const edge = pale.clone().lerp(accent, 0.52);
+  const [lotWidth, lotDepth] = store2.frame.lot_width_depth_m;
+  const back = lotDepth / 2 - store2.frame.actual_room_depth_m;
+  const ceiling = Number(store2.id.slice(1)) <= 3 ? 5.45 : 3.96;
+  let origin = [0, 0, 0], yaw = 0;
+  function piece(geometry, x, y, z, colour, emits) {
+    let g = geometry.index ? geometry.toNonIndexed() : geometry;
+    if (g !== geometry)
+      geometry.dispose();
+    g.deleteAttribute("uv");
+    g.translate(x, y, z).rotateY(yaw).translate(...origin);
+    (emits ? glow : opaque).push(addColour(T, g, colour));
+  }
+  const box = (x, y, z, w, h, d, c = body, emits = false) => piece(new T.BoxGeometry(w, h, d), x, y, z, c, emits);
+  const cylinder = (x, y, z, r, h, c = edge, round = 8) => piece(new T.CylinderGeometry(r, r, h, round), x, y, z, c, false);
+  function fixture2(prop, position) {
+    const { kind } = prop;
+    if (kind === "retain")
+      return;
+    origin = position;
+    yaw = radians(prop.yaw_deg);
+    const [w, h, d] = prop.envelope_whd_m;
+    const slab = (y, height, c) => box(0, y, 0, w, height, d, c);
+    const front = d / 2;
+    if (detail) {
+      if (!["counter", "rack", "cabinet", "case", "console", "easel"].includes(kind))
+        return;
+      if (detail === 1) {
+        for (let i = -1;i <= 1; i++) {
+          box(i * w * 0.24, h * 0.82, front - 0.075, w * 0.17, h * 0.16, 0.065, i === 0 ? pale : secondary);
+        }
+      } else {
+        for (let i = -1;i <= 1; i++)
+          box(i * w * 0.24, h * 0.82, front - 0.034, w * 0.11, 0.014, 0.009, accent);
+      }
+      return;
+    }
+    switch (kind) {
+      case "photo":
+        slab(0.075, 0.15, secondary);
+        box(0, h * 0.5, -0.1, 0.07, h * 0.87, 0.09, body);
+        box(0, h - 0.4, 0, w, 0.8, 0.1, edge);
+        break;
+      case "light":
+      case "sconce":
+      case "spot":
+      case "lantern": {
+        const pendant = kind !== "sconce";
+        box(0, h * 0.48, 0, w * 0.9, h * 0.83, d * 0.87, body);
+        box(0, h * 0.38, d * 0.44, w * 0.79, h * 0.56, 0.025, warm, true);
+        if (pendant && position[1] + h + 0.04 < ceiling) {
+          const drop = ceiling - position[1] - h;
+          box(0, h + drop / 2, 0, 0.034, drop, 0.034, accent);
+          box(0, 0.024, 0, w * 0.79, 0.018, d * 0.68, warm, true);
+        }
+        break;
+      }
+      case "plant":
+        cylinder(0, h * 0.18, 0, Math.min(w, d) * 0.43, h * 0.36, secondary);
+        for (let i = 0;i < 6; i++) {
+          const angle = i * 2.4, leaf = new T.SphereGeometry(1, 6, 4).scale(w * 0.11, h * 0.32, d * 0.13).rotateZ(0.62).rotateY(angle);
+          piece(leaf, Math.cos(angle) * w * 0.22, h * (0.58 + i % 3 * 0.06), Math.sin(angle) * d * 0.23, new T.Color(i % 2 ? "#47634C" : "#788157"));
+        }
+        break;
+      case "baffle":
+        slab(h * 0.49, h * 0.98, dominant);
+        for (let i = -4;i <= 4; i++)
+          box(i * w * 0.1, h * 0.51, d * 0.48, w * 0.025, h * 0.91, 0.024, secondary);
+        break;
+      case "counter":
+      case "console":
+      case "chest":
+      case "cabinet":
+      case "trolley":
+      case "crate":
+      case "pallet":
+        box(0, h * 0.48, 0, w * 0.95, h * 0.85, d * 0.92, body);
+        slab(h * 0.96, h * 0.08, edge);
+        for (let i = -1;i <= 1; i++)
+          box(i * w * 0.28, h * 0.57, d * 0.472, w * 0.16, 0.031, 0.028, accent);
+        break;
+      case "rack":
+      case "case":
+      case "easel":
+      case "stand":
+        for (const side of [-1, 1])
+          box(side * w * 0.467, h / 2, 0, w * 0.066, h, d, body);
+        box(0, h / 2, -d * 0.42, w * 0.87, h, d * 0.14, secondary);
+        for (const level of [0.15, 0.48, 0.81])
+          slab(h * level, 0.05, edge);
+        break;
+      case "sofa":
+      case "chair":
+      case "ottoman":
+        slab(h * 0.34, h * 0.31, secondary);
+        if (kind !== "ottoman")
+          box(0, h * 0.66, -d * 0.34, w, h * 0.67, d * 0.32, pale);
+        for (const x of [-0.39, 0.39])
+          for (const z of [-0.34, 0.34])
+            box(x * w, h * 0.12, z * d, 0.07, h * 0.24, 0.07, body);
+        break;
+      case "screen":
+      case "keyboard":
+        slab(h * 0.12, h * 0.24, body);
+        box(0, h * 0.62, 0, w, h * 0.76, d * 0.43, dominant);
+        box(0, h * 0.61, d * 0.23, w * 0.92, h * 0.64, 0.018, secondary);
+        if (kind === "keyboard")
+          for (let i = -5;i <= 5; i++)
+            box(i * w * 0.075, h * 0.85, d * 0.24, w * 0.063, 0.018, d * 0.3, pale);
+        break;
+      case "plinth":
+      case "drum":
+      case "basket":
+        cylinder(0, h * 0.45, 0, Math.min(w, d) * 0.48, h * 0.89, body, 12);
+        cylinder(0, h * 0.95, 0, Math.min(w, d) * 0.5, h * 0.1, secondary, 12);
+        break;
+      case "plate":
+      case "plates":
+      case "bowl":
+        cylinder(0, h * 0.16, 0, Math.min(w, d) * 0.47, h * 0.24, pale);
+        cylinder(0, h * 0.46, 0, Math.min(w, d) * 0.37, h * 0.4, edge);
+        if (kind === "plates")
+          cylinder(0, h * 0.81, 0, Math.min(w, d) * 0.45, h * 0.23, pale);
+        break;
+      case "dispenser":
+      case "boiler":
+        slab(h * 0.21, h * 0.42, secondary);
+        for (const x of [-0.25, 0.25]) {
+          cylinder(x * w, h * 0.66, 0, Math.min(w * 0.22, d * 0.41), h * 0.61, edge);
+          box(x * w, h * 0.37, d * 0.23, w * 0.08, h * 0.08, d * 0.2, accent);
+        }
+        break;
+      case "tray":
+      case "samples":
+      case "rack-small":
+      case "tins":
+        slab(h * 0.11, h * 0.22, body);
+        for (let i = -1;i <= 1; i++)
+          box(i * w * 0.29, h * 0.51, 0, w * 0.25, h * 0.72, d * 0.73, i === 0 ? edge : secondary);
+        break;
+      case "utensils":
+      case "chopsticks":
+        cylinder(0, h * 0.27, 0, Math.min(w, d) * 0.4, h * 0.54, secondary);
+        for (let i = -1;i <= 1; i++)
+          box(i * w * 0.22, h * 0.59, 0, 0.015, h * 0.79, 0.015, edge);
+        break;
+      case "soundbar":
+      case "scanner":
+      case "scale":
+      case "till":
+      case "handset":
+        slab(h * 0.14, h * 0.28, body);
+        box(0, h * 0.57, -d * 0.12, w * 0.78, h * 0.67, d * 0.58, secondary);
+        box(0, h * 0.66, d * 0.182, w * 0.51, h * 0.21, 0.015, pale);
+        break;
+    }
+  }
+  if (!detail) {
+    opaque.push(floorFinish(T, store2));
+    if (store2.id === "S01" || store2.id === "S14") {
+      const [x, y, z] = store2.anchor.position_m;
+      const distance = z - back - 0.22;
+      for (const offset of [-0.64, 0.64])
+        box(x + offset, y + 1, back + 0.12 + distance / 2, 0.15, 0.24, distance, body);
+    }
+    if (store2.id === "S02") {
+      const [x, y, z] = store2.anchor.position_m, top = y + store2.anchor.envelope_whd_m[1];
+      for (const offset of [-0.45, 0.45])
+        box(x + offset, (ceiling + top) / 2, z, 0.065, ceiling - top, 0.065, accent);
+    }
+    const [lx, ly, lz] = store2.lighting;
+    const high = Math.min(ly, ceiling - 0.13), width = Math.min(lotWidth - 1.2, store2.anchor.envelope_whd_m[0] + 0.35);
+    box(lx, high + 0.06, lz, width, 0.11, 0.16, body);
+    box(lx, high, lz + 0.027, width * 0.94, 0.018, 0.09, warm, true);
+    for (const side of [-1, 1]) {
+      const x = side * (lotWidth / 2 - 0.51), z = back + 0.16;
+      box(x, 2.22, z, 0.22, 3.68, 0.16, body);
+      box(x - side * 0.155, 2.72, z + 0.04, 0.035, 2.49, 0.12, edge);
+    }
+    for (const side of [-1, 1]) {
+      const x = side * (lotWidth / 2 - 0.86);
+      box(x, ceiling, 0, 0.16, 0.09, lotDepth - 2.1, secondary);
+      box(x, ceiling - 0.052, 0, 0.04, 0.012, lotDepth - 2.25, warm, true);
+    }
+  }
+  for (const prop of store2.props) {
+    for (const position of prop.instance_positions_m ?? [prop.position_m])
+      fixture2(prop, position);
+  }
+  if (detail) {
+    origin = [0, 0, 0];
+    yaw = 0;
+    const [x, y, z] = store2.lighting, high = Math.min(y, ceiling - 0.13);
+    for (const side of [-1, 1]) {
+      const offset = side * (store2.anchor.envelope_whd_m[0] / 2 + 0.1);
+      if (detail === 1)
+        box(x + offset, high + 0.026, z, 0.045, 0.057, 0.18, edge);
+      else
+        box(x + offset, high + 0.026, z + 0.097, 0.021, 0.034, 0.012, warm, true);
+    }
+  }
+  const group = new T.Group;
+  for (const [parts, material] of [[opaque, materials2.opaque], [glow, materials2.glow]]) {
+    const geometry = merged(parts);
+    if (geometry)
+      group.add(new T.Mesh(geometry, material));
+  }
+  return group;
+}
+
+// demos/corporate/gjh/v11/assets/interiors/models.js
+function mergeInteriorAnchor(T, scene) {
+  scene.updateMatrixWorld(true);
+  const batches = new Map;
+  scene.traverse((mesh) => {
+    if (!mesh.isMesh)
+      return;
+    if (!batches.has(mesh.material))
+      batches.set(mesh.material, []);
+    batches.get(mesh.material).push(mesh);
+  });
+  const anchor = new T.Group;
+  for (const [material, meshes] of batches) {
+    const parts = meshes.map((mesh) => mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
+    const geometry = mergeGeometries3(parts);
+    for (const part of parts)
+      part.dispose();
+    if (!geometry) {
+      for (const mesh of meshes) {
+        const copy = new T.Mesh(mesh.geometry, material);
+        mesh.matrixWorld.decompose(copy.position, copy.quaternion, copy.scale);
+        anchor.add(copy);
+      }
+    } else {
+      anchor.add(new T.Mesh(geometry, material));
+      for (const mesh of meshes)
+        mesh.geometry.dispose();
+    }
+  }
+  if (!anchor.children.length)
+    throw new Error("Empty interior fixture");
+  return anchor;
+}
+function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
+  return async function load2(asset, signal) {
+    const url = new URL("interiors/" + asset.file, assetBase2);
+    const controller = new AbortController;
+    const abort = () => controller.abort();
+    if (signal.aborted)
+      abort();
+    else
+      signal.addEventListener("abort", abort, { once: true });
+    const timer = setTimeout(abort, 8000);
+    let buffer;
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok)
+        throw new Error(`Interior fixture request failed: ${response.status}`);
+      buffer = await response.arrayBuffer();
+      if (buffer.byteLength !== asset.bytes)
+        throw new Error("Interior fixture size mismatch");
+    } finally {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", abort);
+    }
+    const { scene } = await loader.parseAsync(buffer, new URL(".", url).href);
+    return mergeInteriorAnchor(T, scene);
+  };
+}
+function disposeInteriorModel(model) {
+  if (!model)
+    return;
+  const materials2 = new Set, maps = new Set;
+  model.traverse((mesh) => {
+    if (!mesh.isMesh)
+      return;
+    mesh.geometry.dispose();
+    materials2.add(mesh.material);
+  });
+  for (const material of materials2) {
+    for (const value of Object.values(material))
+      if (value?.isTexture)
+        maps.add(value);
+    material.dispose();
+  }
+  for (const map of maps) {
+    map.dispose();
+    map.image?.close?.();
+  }
+}
+
+// demos/corporate/gjh/v11/assets/interiors/warmup.js
+function prepareInteriorKit(prepareModel, model, priority, signal) {
+  return prepareModel(model, { priority, signal });
+}
+
+// demos/corporate/gjh/v11/assets/interiors/runtime.js
+var emptyInteriorReport = (tier) => ({ tier, shops: 0, drawCalls: 0, triangles: 0, modelsLoaded: 0, bytes: 0 });
+function createInteriorKit(T, scene, {
+  assetBase: assetBase2,
+  packshot,
+  prepareModel,
+  registerCollider,
+  loadModel = createInteriorModelLoader(T, assetBase2),
+  schedule = (run) => {
+    if (typeof requestIdleCallback === "function")
+      requestIdleCallback(run, { timeout: 500 });
+    else
+      setTimeout(run, 0);
+  }
+}) {
+  const materials2 = interiorMaterials(T);
+  const stores2 = Object.values(interiorStores);
+  const cache = new Map, failed = new Map;
+  const lifecycle = new AbortController;
+  const report = emptyInteriorReport("low"), renderedShops = new Set;
+  let queued = false, loading = false, drawing = false;
+  function measure(root, id) {
+    root.traverse((mesh) => {
+      if (!mesh.isMesh)
+        return;
+      let calls, triangles;
+      mesh.onBeforeRender = (renderer) => {
+        if (!drawing)
+          return;
+        ({ calls, triangles } = renderer.info.render);
+      };
+      mesh.onAfterRender = (renderer) => {
+        if (!drawing)
+          return;
+        report.drawCalls += renderer.info.render.calls - calls;
+        report.triangles += renderer.info.render.triangles - triangles;
+        renderedShops.add(id);
+      };
+    });
+  }
+  const shops = stores2.map((store2) => {
+    const group = new T.Group;
+    group.name = `${store2.id} ${store2.style}`;
+    group.position.set(...store2.frame.world_origin_m);
+    group.rotation.y = radians(store2.frame.yaw_world_deg);
+    const base = buildInteriorDecoration(T, store2, materials2);
+    if (store2.id === "S01" && packshot) {
+      const photo = new T.MeshBasicMaterial({ map: packshot, toneMapped: false });
+      const panel = (width, x2, y2, z2, yaw = 0) => {
+        const mesh = new T.Mesh(new T.PlaneGeometry(width, width), photo);
+        mesh.position.set(x2, y2, z2);
+        mesh.rotation.y = yaw;
+        base.add(mesh);
+      };
+      const [x, y, z] = store2.anchor.position_m;
+      panel(1.51, x, y + 1.1, z + 0.006);
+      const stand = store2.props.find((prop) => prop.kind === "photo");
+      const [sx, sy, sz] = stand.position_m, a = radians(stand.yaw_deg);
+      panel(0.69, sx + 0.053 * Math.sin(a), sy + stand.envelope_whd_m[1] - 0.4, sz + 0.053 * Math.cos(a), a);
+    }
+    measure(base, store2.id);
+    group.add(base);
+    for (const box of store2.colliders)
+      registerCollider(worldInteriorBox(store2, box));
+    group.visible = false;
+    scene.add(group);
+    return { store: store2, group, distance: Infinity, model: null, layers: [] };
+  });
+  function choose(shop) {
+    const asset = interiorAsset(shop.store, report.tier);
+    const model = cache.get(asset.file) ?? (report.tier === "detailed" ? cache.get(shop.store.files.balanced.file) : undefined) ?? cache.get(shop.store.files.low.file);
+    if (shop.model)
+      shop.model.visible = false;
+    if (model)
+      model.visible = true;
+    shop.model = model;
+    shop.layers.forEach((layer, i) => {
+      layer.visible = i < interiorTiers.indexOf(report.tier);
+    });
+  }
+  function nextRequest() {
+    const detail = interiorTiers.indexOf(report.tier);
+    const now = Date.now();
+    let next;
+    for (const shop of shops) {
+      if (!shop.group.visible || next && shop.distance >= next.shop.distance)
+        continue;
+      const asset = interiorAsset(shop.store, report.tier);
+      if (cache.has(asset.file) && shop.layers.length >= detail || (failed.get(asset.file) ?? 0) > now)
+        continue;
+      next = { shop, asset };
+    }
+    return next;
+  }
+  function prefetch() {
+    if (!prepareModel || queued || loading || !nextRequest() || lifecycle.signal.aborted)
+      return;
+    queued = true;
+    schedule(async () => {
+      queued = false;
+      if (globalThis.document?.hidden || lifecycle.signal.aborted)
+        return;
+      const request = nextRequest();
+      if (!request)
+        return;
+      const { shop, asset } = request;
+      const detail = interiorTiers.indexOf(report.tier);
+      loading = true;
+      let model;
+      const layers = [];
+      try {
+        if (!cache.has(asset.file)) {
+          model = await loadModel(asset, lifecycle.signal);
+          if (lifecycle.signal.aborted) {
+            disposeInteriorModel(model);
+            return;
+          }
+          model.name = `${shop.store.id} ${shop.store.anchor.asset_id} (${asset.tier})`;
+          model.position.set(...shop.store.anchor.position_m);
+          model.rotation.y = radians(shop.store.anchor.yaw_deg);
+          model.visible = false;
+        }
+        for (let i = shop.layers.length;i < detail; i++)
+          layers.push(buildInteriorDecoration(T, shop.store, materials2, i + 1));
+        const roots = model ? [model, ...layers] : layers;
+        const kit = new T.Group;
+        kit.add(...roots);
+        const priority = () => shop.distance + (interiorAsset(shop.store, report.tier) === asset ? -24 : 40);
+        await prepareInteriorKit(prepareModel, kit, priority, lifecycle.signal);
+        for (const root of roots)
+          measure(root, shop.store.id);
+        shop.group.add(...roots);
+        shop.layers.push(...layers);
+        if (model) {
+          cache.set(asset.file, model);
+          report.modelsLoaded++;
+          report.bytes += asset.bytes;
+        }
+        choose(shop);
+      } catch {
+        disposeInteriorModel(model);
+        for (const layer of layers)
+          layer.traverse((mesh) => mesh.geometry?.dispose());
+        failed.set(asset.file, Date.now() + 15000);
+      } finally {
+        loading = false;
+        prefetch();
+      }
+    });
+  }
+  return {
+    update(position, tier) {
+      report.tier = interiorTiers.includes(tier) ? tier : "low";
+      for (const shop of shops) {
+        shop.distance = Math.hypot(position.x - shop.group.position.x, position.z - shop.group.position.z);
+        shop.group.visible = Math.abs(position.y) < 4 && shop.distance < 12.5;
+        choose(shop);
+      }
+      prefetch();
+    },
+    beginFrame() {
+      report.drawCalls = report.triangles = 0;
+      renderedShops.clear();
+      drawing = true;
+    },
+    endFrame() {
+      drawing = false;
+      report.shops = renderedShops.size;
+    },
+    report: () => ({ ...report }),
+    dispose() {
+      lifecycle.abort();
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/assets/world.js
@@ -4805,31 +5856,15 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         ctx.fillStyle = color;
         ctx.fillRect(x, y, width, height);
       }
-      function circle(color, x, y, radius) {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      const walnut3 = zone === "newmoon";
-      rectangle(walnut3 ? "#684632" : zone === "mili" ? "#a77c53" : "#eadcc3", 0, 0, 1024, 576);
-      if (walnut3) {
-        for (let x = 0;x < 1024; x += 14)
-          rectangle("#60412e", x, 0, 2, 576);
-        circle("#d7ad73", 512, 272, 159);
-        const recess = ctx.createRadialGradient(490, 241, 22, 512, 272, 152);
-        recess.addColorStop(0, "#ddbb88");
-        recess.addColorStop(1, "#ac8558");
-        circle(recess, 512, 272, 152);
-        drawPlumArrangement(ctx);
-      } else if (zone === "gogo") {
+      rectangle(zone === "mili" ? "#a77c53" : "#eadcc3", 0, 0, 1024, 576);
+      if (zone === "gogo") {
         ctx.fillStyle = "#466858";
         ctx.beginPath();
         ctx.roundRect(220, 98, 584, 450, [112, 112, 0, 0]);
         ctx.fill();
       }
       for (const x of [24, 782]) {
-        ctx.fillStyle = walnut3 ? "#42251e" : "#735239";
+        ctx.fillStyle = "#735239";
         ctx.beginPath();
         ctx.roundRect(x, 84, 218, 398, zone === "mili" ? 4 : [65, 65, 0, 0]);
         ctx.fill();
@@ -4842,7 +5877,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           rectangle(wash, x + 13, y + 15, 192, 84);
           for (let k = 0;k < 6; k++) {
             const ox = x + 22 + 29 * k, h = 20 + (k + shelf) % 3 * 7;
-            ctx.fillStyle = walnut3 ? "#753f31" : ["#b7894c", "#e1cdaa", "#927754"][k % 3];
+            ctx.fillStyle = ["#b7894c", "#e1cdaa", "#927754"][k % 3];
             ctx.beginPath();
             ctx.roundRect(ox, y + 94 - h, 17, h, 4);
             ctx.fill();
@@ -4886,6 +5921,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         return;
       uploadVisitor = visitor;
       productDisplay?.updateShopLods(visitor, tier);
+      interiorKit.update(visitor, tier);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
         const bay = shopBays.get(mesh.userData.shopSlot);
@@ -5068,7 +6104,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     }));
     const plane = geometry.plane;
     const roomSigns = [];
-    let signage;
+    let signage, interiorKit;
     const shadowCanvas = document.createElement("canvas");
     shadowCanvas.width = shadowCanvas.height = 64;
     const shadowContext = shadowCanvas.getContext("2d"), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -5283,14 +6319,17 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const zone = store2.id, x = storeCenterX(store2);
       const wall = expanded ? zone === "newmoon" ? "wood" : "cream" : zone === "mili" ? "cream" : "green";
       if (expanded) {
-        box("shellFloor", x, 0.012, -5.1, 9.55, 0.025, 10.25);
+        const floor = `${zone}Floor`;
+        materials2[floor] = materials2.shellFloor.clone();
+        materials2[floor].color.set(interiorFloorColour(interiorStores["S" + store2.number]));
+        box(floor, x, 0.012, -5.1, 9.55, 0.025, 10.25);
       } else
         for (let i = 0;i < 18; i++)
           box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
       const backdrop = `${zone}Backdrop`;
-      if (expanded)
+      if (expanded && zone !== "newmoon")
         materials2[backdrop] = shopBackdrop(zone);
-      box(expanded ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
+      box(materials2[backdrop] ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
       for (const side of [-1, 1]) {
         box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
         if (expanded) {
@@ -5329,10 +6368,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
             box("brass", x, 5.55, z + side * 1.12, 7.75, 0.06, 0.06);
           }
         }
-      } else if (expanded && zone === "mili") {
-        box("brass", x, 4.83, -5.5, 0.62, 1.66, 0.64);
-        box("brass", x, 3.93, -5.5, 1.85, 0.21, 1.2);
-        box("glow", x, 3.81, -5.5, 1.71, 0.03, 1.06);
       } else if (expanded && zone === "gogo") {
         for (let z = -1.6;z > -9.3; z -= 0.95) {
           box("oak", x - 2.56, 5.5, z, 3.8, 0.19, 0.35);
@@ -5367,7 +6402,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
             }
           }
         }
-        if (zone === "mili") {
+        if (!expanded && zone === "mili") {
           for (const z of [-2.75, -5.05, -7.35]) {
             for (const y of [1.35, 2.17, 3]) {
               box("oak", x - 4.45, y, z, 0.45, 0.085, 2.15);
@@ -5506,11 +6541,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
         const firstProduct = scene.children.length;
-<<<<<<< HEAD
-        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
-=======
-        productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], sampleCan);
->>>>>>> origin/main
+        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], sampleCan);
         queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter((mesh) => mesh.isMesh));
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
@@ -5601,11 +6632,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
               box("oak", x + side * 3.32 + dx, 1.965, -10.25, 0.045, 1.6, 0.075);
           }
         }
-        if (zone === "mili") {
+        if (!expanded && zone === "mili") {
           cylinder("green", x, 0.25, -1.35, 0.075, 0.34);
           cylinder("oak", x, 0.45, -1.35, 0.038, 0.09);
           cylinder("brass", x, 0.505, -1.35, 0.04, 0.025);
-        } else if (zone === "gogo") {
+        } else if (!expanded && zone === "gogo") {
           cylinder("cream", x - 0.11, 0.07, -1.35, 0.034, 0.14);
           cylinder("brass", x - 0.11, 0.144, -1.35, 0.035, 0.012);
           box("ivory", x + 0.12, 0.08, -1.35, 0.055, 0.16, 0.045);
@@ -5747,6 +6778,17 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         });
       }
       shopLodUpdates.push(interiors.update);
+      interiorKit = createInteriorKit(T, scene, {
+        assetBase: new URL(".", import.meta.url),
+        packshot: textures.get("new-moon-nz-425g-front.jpg"),
+        prepareModel,
+        registerCollider({ center: [x, y, z], size: [w, h, d], yaw }) {
+          physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
+          const c = Math.abs(Math.cos(yaw)), s = Math.abs(Math.sin(yaw));
+          const dx = (w * c + d * s) / 2, dz = (w * s + d * c) / 2;
+          shopObstacles.push({ min: { x: x - dx, y: y - h / 2, z: z - dz }, max: { x: x + dx, y: y + h / 2, z: z + dz } });
+        }
+      });
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
     interactables.push(...amenities.interactables);
@@ -5813,7 +6855,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;
-    return { signage, getPreloadedModels() {
+    return { signage, interiors: interiorKit, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;

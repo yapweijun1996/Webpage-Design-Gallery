@@ -1,30 +1,3 @@
-// S01's painted roundel is part of the existing rear-wall texture.
-export function drawPlumArrangement(ctx) {
-  ctx.save();
-  ctx.translate(512, 301);
-  ctx.lineCap = 'round';
-  const sprays = [
-    [-7, -4, -48, -57, -106, -66], [-8, -4, -30, -85, -72, -108],
-    [0, -4, 12, -76, 36, -103], [0, -5, 36, -42, 103, -63],
-    [4, -4, 52, -19, 93, -33], [-3, -4, -54, -22, -94, -37]
-  ];
-  for (const [x, y, bx, by, tipX, tipY] of sprays) {
-    ctx.strokeStyle = '#5a3128'; ctx.lineWidth = 3.3; ctx.beginPath();
-    ctx.moveTo(x, y); ctx.quadraticCurveTo(bx, by, tipX, tipY); ctx.stroke();
-    for (let j = 2; j <= 8; j++) {
-      const t = j / 8, u = 1-t;
-      const sx = u*u*x + 2*u*t*bx + t*t*tipX, sy = u*u*y + 2*u*t*by + t*t*tipY;
-      const ex = sx + (j%2 ? 7 : -6), ey = sy - 9 - (j%3)*3;
-      ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
-      ctx.fillStyle = j%3 ? '#9d493e' : '#d3856e'; ctx.beginPath(); ctx.arc(ex, ey, 4.2, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(ex+3, ey-3, 2.6, 0, Math.PI*2); ctx.fill();
-    }
-  }
-  ctx.fillStyle = '#e7d7ad'; ctx.beginPath(); ctx.moveTo(-13,-9); ctx.lineTo(13,-9);
-  ctx.bezierCurveTo(12,0,27,9,19,21); ctx.quadraticCurveTo(0,31,-19,21);
-  ctx.bezierCurveTo(-27,9,-12,0,-13,-9); ctx.fill(); ctx.restore();
-}
-
 export function addOriginalShopDetails(zone, x, {box, cylinder, solid, collider}) {
   if (zone === 'newmoon') {
     // Two low tasting stools sit along the open edge of the stone island.

@@ -1,5 +1,5 @@
 import {buildPublicArchitecture} from './public-architecture.js';
-import {addOriginalShopDetails, drawPlumArrangement} from './shop-anchor-details-first.js';
+import {addOriginalShopDetails} from './shop-anchor-details-first.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {createDeckRailings} from './deck-railings.js';
@@ -12,6 +12,8 @@ import {atriumLayout} from './atrium-layout.js';
 import {addShopSignAtlas} from './shop-signs.js';
 import {addExpandedStorefronts} from './expanded-storefronts.js';
 import {createExpandedInteriors} from './expanded-interiors.js';
+import {createInteriorKit} from './interiors/runtime.js';
+import {interiorFloorColour,interiorStores} from './interiors/config.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {createSeatPlacements, createSeatAnchor} from './seat-placements.js';
@@ -192,7 +194,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     return tagShopLod(mesh);
   }
   const roomSigns = [];
-  let signage;
+  let signage, interiorKit;
   function sign(text, x, y, z, width, height = .4, framed = false, fontSize = 42) {
     const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 128;
     const context = canvas.getContext('2d');
@@ -451,25 +453,14 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     function rectangle(color, x, y, width, height) {
       ctx.fillStyle = color; ctx.fillRect(x, y, width, height);
     }
-    function circle(color, x, y, radius) {
-      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
-    }
-    const walnut = zone === 'newmoon';
-    rectangle(walnut ? '#684632' : zone === 'mili' ? '#a77c53' : '#eadcc3', 0, 0, 1024, 576);
-    if (walnut) {
-      for (let x = 0; x < 1024; x += 14) rectangle('#60412e', x, 0, 2, 576);
-      circle('#d7ad73', 512, 272, 159);
-      const recess = ctx.createRadialGradient(490, 241, 22, 512, 272, 152);
-      recess.addColorStop(0, '#ddbb88'); recess.addColorStop(1, '#ac8558');
-      circle(recess, 512, 272, 152);
-      drawPlumArrangement(ctx);
-    } else if (zone === 'gogo') {
+    rectangle(zone === 'mili' ? '#a77c53' : '#eadcc3', 0, 0, 1024, 576);
+    if (zone === 'gogo') {
       ctx.fillStyle = '#466858'; ctx.beginPath();
       ctx.roundRect(220, 98, 584, 450, [112,112,0,0]); ctx.fill();
     }
     // Backlit recessed cabinetry flanks the central display.
     for (const x of [24, 782]) {
-      ctx.fillStyle = walnut ? '#42251e' : '#735239'; ctx.beginPath();
+      ctx.fillStyle = '#735239'; ctx.beginPath();
       ctx.roundRect(x, 84, 218, 398, zone === 'mili' ? 4 : [65,65,0,0]); ctx.fill();
       for (let shelf = 0; shelf < 3; shelf++) {
         const y = 114 + shelf * 107;
@@ -478,7 +469,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         rectangle(wash, x + 13, y + 15, 192, 84);
         for (let k = 0; k < 6; k++) {
           const ox = x + 22 + 29*k, h = 20 + ((k+shelf)%3)*7;
-          ctx.fillStyle = walnut ? '#753f31' : ['#b7894c','#e1cdaa','#927754'][k%3];
+          ctx.fillStyle = ['#b7894c','#e1cdaa','#927754'][k%3];
           ctx.beginPath(); ctx.roundRect(ox,y+94-h,17,h,4); ctx.fill();
           rectangle('#e4cc99',ox+2,y+91-h,13,4);
         }
@@ -493,11 +484,14 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     const zone = store.id, x = storeCenterX(store);
     const wall = expanded ? (zone === 'newmoon' ? 'wood' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
     if (expanded) {
-      box('shellFloor', x, .012, -5.1, 9.55, .025, 10.25);
+      const floor = `${zone}Floor`;
+      materials[floor] = materials.shellFloor.clone();
+      materials[floor].color.set(interiorFloorColour(interiorStores['S'+store.number]));
+      box(floor, x, .012, -5.1, 9.55, .025, 10.25);
     } else for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     const backdrop = `${zone}Backdrop`;
-    if (expanded) materials[backdrop] = shopBackdrop(zone);
-    box(expanded ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, .25, true);
+    if (expanded && zone !== 'newmoon') materials[backdrop] = shopBackdrop(zone);
+    box(materials[backdrop] ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, .25, true);
     for (const side of [-1, 1]) {
       box(wall, x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5, true);
       if (expanded) {
@@ -539,10 +533,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
           box('brass', x, 5.55, z + side * 1.12, 7.75, .06, .06);
         }
       }
-    } else if (expanded && zone === 'mili') {
-      box('brass', x, 4.83, -5.5, .62, 1.66, .64);
-      box('brass', x, 3.93, -5.5, 1.85, .21, 1.2);
-      box('glow', x, 3.81, -5.5, 1.71, .03, 1.06);
     } else if (expanded && zone === 'gogo') {
       // Narrow angled timber fins make a light pergola over the lounge.
       for (let z = -1.6; z > -9.3; z -= .95) {
@@ -579,7 +569,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
           }
         }
       }
-      if(zone==='mili') {
+      if(!expanded && zone==='mili') {
         // Open oak pantry shelves continue down the side wall.
         for(const z of [-2.75,-5.05,-7.35]) {
           for(const y of [1.35,2.17,3.0]) {
@@ -778,10 +768,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
           for (const dx of [-.8, .8]) box('oak', x + side * 3.32 + dx, 1.965, -10.25, .045, 1.6, .075);
         }
       }
-      if(zone==='mili') {
+      if(!expanded && zone==='mili') {
         // Generic pack forms avoid inventing package artwork or exact dimensions.
         cylinder('green',x,.25,-1.35,.075,.34);cylinder('oak',x,.45,-1.35,.038,.09);cylinder('brass',x,.505,-1.35,.04,.025);
-      } else if(zone==='gogo') {
+      } else if(!expanded && zone==='gogo') {
         cylinder('cream',x-.11,.07,-1.35,.034,.14);cylinder('brass',x-.11,.144,-1.35,.035,.012);
         box('ivory',x+.12,.08,-1.35,.055,.16,.045);box('oak',x+.12,.08,-1.325,.035,.11,.006);
       }
@@ -911,6 +901,16 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         max:{x:x+width/2,y:y+height/2,z:z+depth/2}});
     }
     shopLodUpdates.push(interiors.update);
+    interiorKit = createInteriorKit(T, scene, {
+      assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'),
+      prepareModel, registerCollider({center:[x,y,z],size:[w,h,d],yaw}) {
+        physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
+          .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
+        const c = Math.abs(Math.cos(yaw)), s = Math.abs(Math.sin(yaw));
+        const dx = (w*c+d*s)/2, dz = (w*s+d*c)/2;
+        shopObstacles.push({min:{x:x-dx,y:y-h/2,z:z-dz},max:{x:x+dx,y:y+h/2,z:z+dz}});
+      }
+    });
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);
@@ -971,6 +971,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     if(!expanded)return;
     uploadVisitor = visitor;
     productDisplay?.updateShopLods(visitor, tier);
+    interiorKit.update(visitor,tier);
     const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
     for(const mesh of shopLodMeshes){
       const bay=shopBays.get(mesh.userData.shopSlot);
@@ -1013,7 +1014,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     });
     return brandWallPromise;
   }
-  return {signage, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, interiors:interiorKit, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings:railingState, productAssets: Object.freeze(worldProductAssets)};

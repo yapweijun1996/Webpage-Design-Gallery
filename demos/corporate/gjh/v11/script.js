@@ -79,6 +79,7 @@ function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
     signage: world?.signage?.report() ?? {modelsLoaded:0,signs:0,drawCalls:0,triangles:0,textureMB:0,tier:quality.state?.tier??'low'},
+    interiors: world?.interiors?.report() ?? {tier:quality.state?.tier??'low',shops:0,drawCalls:0,triangles:0,modelsLoaded:0,bytes:0},
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
@@ -312,7 +313,12 @@ function render(force = false) {
     world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas, quality.state?.tier, reducedMotion);
-    const draw=()=>atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
+    const draw=()=>{
+      world.interiors?.beginFrame();
+      try {
+        atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
+      } finally { world.interiors?.endFrame(); }
+    };
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
@@ -750,5 +756,5 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
-  pageEnded = true; warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); modelWarmup?.dispose();
+  pageEnded = true; warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
 }});
