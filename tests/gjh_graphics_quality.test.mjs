@@ -167,6 +167,7 @@ test('manual preferences and recovered mode never adapt or rewrite storage', () 
     assert.equal(quality.state.tier,'balanced'); assert.equal(callbacks,0); assert.equal(writes,0);
     for(let now=20000;now<28000;now+=1000/30) quality.sample(now,true,true);
     assert.equal(quality.state.tier,'low'); assert.equal(saved,'auto'); assert.equal(writes,0); assert.equal(callbacks,1);
+    assert.match(status.textContent,/Auto: Low.*skips drawing distant shelf stock/);
     select.value='detailed'; listener(); assert.equal(saved,'detailed'); assert.equal(writes,1);
     assert.match(status.textContent,/Detailed/);
     for(let now=28000;now<68000;now+=1000/30) quality.sample(now,true,true);
@@ -276,7 +277,7 @@ test('production detects width and coarse-pointer mobile mode only when resolvin
     Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null,setItem(){}}});
     quality=createGraphicsQuality(()=>quality.resolve(width));quality.resolve(width);
     for(let now=0;now<10000;now+=40)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'balanced');
+    assert.equal(quality.state.tier,'low', 'phones stay on Low in Auto');
     assert.equal(queryCount,1);
     coarse.matches=false; width=1440; quality.resolve(width);
     for(let now=10000;now<18000;now+=40)quality.sample(now,true,true);
@@ -307,9 +308,17 @@ test('650px width uses mobile policy without a coarse pointer', () => {
     Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null,setItem(){}}});
     quality=createGraphicsQuality(()=>quality.resolve(width));quality.resolve(width);
     for(let now=0;now<10000;now+=40)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'balanced');
+    assert.equal(quality.state.tier,'low', 'phones stay on Low in Auto');
     width=651;quality.resolve(width);
     for(let now=10000;now<18000;now+=40)quality.sample(now,true,true);
     assert.equal(quality.state.tier,'low');
   } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
+});
+
+test('Auto on a phone stays on Low, while an explicit choice still applies', () => {
+  assert.equal(resolveQuality({preference:'auto',width:393,dpr:3,mobile:true}).tier,'low');
+  assert.equal(resolveQuality({preference:'auto',width:393,dpr:3,mobile:true,autoTier:'balanced'}).tier,'low');
+  assert.equal(resolveQuality({preference:'auto',width:393,dpr:3,mobile:true}).pixelRatio,1);
+  assert.equal(resolveQuality({preference:'balanced',width:393,dpr:3,mobile:true}).tier,'balanced');
+  assert.equal(resolveQuality({preference:'auto',width:1440,dpr:2}).tier,'balanced');
 });

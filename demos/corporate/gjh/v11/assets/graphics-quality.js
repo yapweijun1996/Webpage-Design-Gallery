@@ -8,12 +8,13 @@ const STALL_MS = 200;
 const STALL_RECOVERY_FRAMES = 2;
 export const qualityPreference = value => CHOICES.has(value) ? value : 'auto';
 
-export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memory, recovered = false, autoTier = null}) {
+export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memory, recovered = false, autoTier = null, mobile = false}) {
   const hint = value => Number.isFinite(value) && value > 0;
   const constrained = (hint(cores) && cores <= 2) || (hint(memory) && memory <= 2);
   const choice = qualityPreference(preference);
   // CPU/RAM hints do not establish GPU capacity; Auto starts conservatively.
-  const tier = recovered ? 'low' : choice !== 'auto' ? choice : ['low','balanced','detailed'].includes(autoTier) ? autoTier : constrained ? 'low' : 'balanced';
+  // Phones stay on Low in Auto: a 30 FPS lock was measured on Balanced. Choosing Balanced or Detailed still works.
+  const tier = recovered ? 'low' : choice !== 'auto' ? choice : mobile ? 'low' : ['low','balanced','detailed'].includes(autoTier) ? autoTier : constrained ? 'low' : 'balanced';
   const cap = tier === 'low' ? 1 : tier === 'balanced' && width < 600 ? 1.25 : tier === 'balanced' && choice === 'auto' && width >= 1000 ? 1.5 : 2;
   return Object.freeze({preference: choice, tier, pixelRatio: Math.min(hint(dpr) ? dpr : 1, cap),
     shadows: tier === 'detailed' && width >= 1000, recovered});
@@ -121,7 +122,7 @@ export function createGraphicsQuality(onChange) {
     recover() { recovered = true; preference = 'low'; autoTier=null; adaptive.reset(); select.value = 'low'; },
     resetSampling() { adaptive.reset(); },
     sample(now, active, moving) {
-      if (preference!=='auto' || recovered || !profile) { adaptive.reset(); return; }
+      if (preference!=='auto' || recovered || mobile || !profile) { adaptive.reset(); return; }
       const next=adaptive.sample(now,active,profile.tier,moving,mobile);
       if (next) { autoTier=next; onChange(); }
     },
@@ -130,9 +131,9 @@ export function createGraphicsQuality(onChange) {
       if (mobile !== null && mobile !== nextMobile) adaptive.reset();
       mobile = nextMobile;
       profile = resolveQuality({preference, width, dpr: window.devicePixelRatio,
-        cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory, recovered, autoTier});
+        cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory, recovered, autoTier, mobile});
       const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-      status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Softer image; less rendering work.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
+      status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
       return profile;
     },
     get state() { return profile; },

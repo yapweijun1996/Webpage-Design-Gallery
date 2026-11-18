@@ -3482,10 +3482,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           }
         mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
-    }, updateShopLods = function(visitor, shadows = true) {
+    }, updateShopLods = function(visitor, shadows = true, tier) {
       productDisplay?.setShadows(shadows);
       if (!expanded)
         return;
+      productDisplay?.updateShopLods(visitor, tier);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
         const bay = shopBays.get(mesh.userData.shopSlot);
@@ -4083,7 +4084,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
         productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
-        shopLodUpdates.push(productDisplay.updateShopLods);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
           collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);

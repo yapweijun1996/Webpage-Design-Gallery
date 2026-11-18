@@ -272,7 +272,7 @@ function render(force = false) {
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     shelfFocus?.update(camera, modes.current() === 'shelf' || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
-    world.updateShopLods(pose, renderer.shadowMap.enabled);
+    world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
     const draw=()=>atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
@@ -452,6 +452,7 @@ function validateRestoration() {
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier);
     player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.

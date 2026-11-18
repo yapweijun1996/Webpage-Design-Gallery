@@ -2541,11 +2541,11 @@ var MOBILE_CADENCE_SLACK_MS = 1000 / 60 + 1;
 var STALL_MS = 200;
 var STALL_RECOVERY_FRAMES = 2;
 var qualityPreference = (value) => CHOICES.has(value) ? value : "auto";
-function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, recovered = false, autoTier = null }) {
+function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, recovered = false, autoTier = null, mobile = false }) {
   const hint = (value) => Number.isFinite(value) && value > 0;
   const constrained = hint(cores) && cores <= 2 || hint(memory) && memory <= 2;
   const choice = qualityPreference(preference);
-  const tier = recovered ? "low" : choice !== "auto" ? choice : ["low", "balanced", "detailed"].includes(autoTier) ? autoTier : constrained ? "low" : "balanced";
+  const tier = recovered ? "low" : choice !== "auto" ? choice : mobile ? "low" : ["low", "balanced", "detailed"].includes(autoTier) ? autoTier : constrained ? "low" : "balanced";
   const cap = tier === "low" ? 1 : tier === "balanced" && width < 600 ? 1.25 : tier === "balanced" && choice === "auto" && width >= 1000 ? 1.5 : 2;
   return Object.freeze({
     preference: choice,
@@ -2694,7 +2694,7 @@ function createGraphicsQuality(onChange) {
       adaptive.reset();
     },
     sample(now, active, moving) {
-      if (preference !== "auto" || recovered || !profile) {
+      if (preference !== "auto" || recovered || mobile || !profile) {
         adaptive.reset();
         return;
       }
@@ -2716,10 +2716,11 @@ function createGraphicsQuality(onChange) {
         cores: navigator.hardwareConcurrency,
         memory: navigator.deviceMemory,
         recovered,
-        autoTier
+        autoTier,
+        mobile
       });
       const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-      status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Softer image; less rendering work." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
+      status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
       return profile;
     },
     get state() {
@@ -3678,7 +3679,7 @@ function render(force = false) {
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     shelfFocus?.update(camera, modes.current() === "shelf" || !modes.paused(), Boolean(label));
     guidance?.update(selectedInteraction, label, camera, Boolean(label));
-    world.updateShopLods(pose, renderer.shadowMap.enabled);
+    world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas);
     const draw = () => atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === "detailed" && renderWidth >= 1000, npcs);
@@ -3990,6 +3991,7 @@ function validateRestoration() {
       throw new Error("Theme restoration failed");
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier);
     player.camera.updateMatrixWorld();
     world.updateSigns(player.camera, canvas);
     renderer.render(world.scene, player.camera);

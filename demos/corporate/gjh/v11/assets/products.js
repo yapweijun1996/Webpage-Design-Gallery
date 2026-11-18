@@ -2,6 +2,7 @@ import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {fetchStartupAsset} from './startup-asset-pack.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
+import {createProductDisplayLod} from './product-display-lod.js';
 
 // Replaceable candidate configuration; this is not a claim that future generic cans are this SKU set.
 export const NEW_MOON_CANS = Object.freeze([
@@ -157,7 +158,7 @@ function shelfShadowGeometry(primitives) {
 }
 
 export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null) {
-  const shopLodInstances=[],hiddenShopLodMatrix=new T.Matrix4().makeScale(0,0,0);
+  const displayLods = [];
   let shadowMesh = null;
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
   const sourceShelfPrimitives=shelfRecord.primitives.length;
@@ -171,7 +172,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
       ...shelfXs.map(x => ({x, z: -9.25, rotation: shelfRotation})),
       ...displayShelves,
     ];
-    for (const primitive of [...shelfRecord.primitives, shadow]) {
+    const meshes = [...shelfRecord.primitives, shadow].map(primitive => {
       const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
       if (primitive.shadowOnly) {
         mesh.name = 'Product shelf shadow';
@@ -184,24 +185,13 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
           new T.Vector3(1, 1, 1)
         ).multiply(primitive.matrix);
         mesh.setMatrixAt(index, matrix);
-        shopLodInstances.push({mesh, index, matrix, x, z, visible: null});
       });
       mesh.castShadow = Boolean(primitive.shadowOnly);
       mesh.receiveShadow = !primitive.shadowOnly;
       scene.add(mesh);
-    }
-  }
-  function updateShopLods(visitor) {
-    for(const item of shopLodInstances){
-      const visible=Math.hypot(visitor.x-item.x,visitor.z-item.z)<18;
-      if(item.visible===visible)continue;
-      item.visible=visible;
-      meshSet(item.mesh,item.index,item.matrix,visible);
-    }
-  }
-  function meshSet(mesh,index,matrix,visible){
-    mesh.setMatrixAt(index,visible?matrix:hiddenShopLodMatrix);
-    mesh.instanceMatrix.needsUpdate=true;
+      return mesh;
+    });
+    displayLods.push(createProductDisplayLod(T, meshes, placements));
   }
   const interactables = [], stock = new Map();
   // The same bounds own collision, focus framing and the projected whole-shelf target.
@@ -214,34 +204,40 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, productZ));
     const shelfPlacements=placements.slice();
     for(const item of showcase.filter(item=>item.id===`new-moon-${sku}-front`))placements.push(new T.Vector3(...item.position));
+    const showcaseEnd = placements.length;
     if(heroCan && sku==='nz-425g')placements.push(new T.Vector3(...heroCan));
-    const batches = [];
-    stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, batches, reserved:false});
-    if (record.status === 'loaded') for (const primitive of record.primitives) {
-      const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
-      placements.forEach((position, index) => {
-        const matrix = new T.Matrix4(); matrix.compose(position, new T.Quaternion(), new T.Vector3(1, 1, 1));
-        const instance=new T.Matrix4().multiplyMatrices(matrix,primitive.matrix);mesh.setMatrixAt(index,instance);
-        if(index<shelfPlacements.length||heroCan&&sku==='nz-425g'&&index===placements.length-1)shopLodInstances.push({mesh,index,matrix:instance,x:position.x,z:position.z,visible:null});
+    if (record.status === 'loaded') {
+      const meshes = record.primitives.map(primitive => {
+        const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
+        placements.forEach((position, index) => {
+          const matrix = new T.Matrix4().makeTranslation(position.x, position.y, position.z);
+          mesh.setMatrixAt(index, matrix.multiply(primitive.matrix));
+        });
+        // Small shelf products receive shadows without casting their own.
+        mesh.castShadow = false; mesh.receiveShadow = true; scene.add(mesh);
+        return mesh;
       });
-      // Small shelf products receive the shelf's shadows; omitting their
-      // individual shadow passes keeps the shelves and visitor casting.
-      mesh.castShadow = false; mesh.receiveShadow = true; scene.add(mesh); batches.push(mesh);
+      const lod = createProductDisplayLod(T, meshes, placements.map(({x, z}, index) =>
+        ({x, z, alwaysVisible: index >= shelfPlacements.length && index < showcaseEnd})));
+      displayLods.push(lod);
+      stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, lod, reserved:false});
     } else fallbackCan(T, scene, textures, brass, sku, placements);
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  return {displayedProducts:showcase.length,updateShopLods,setShadows(enabled) { if (shadowMesh) shadowMesh.visible = enabled; }, shelfPositions:shelfXs, shelves, reserveProduct(id) {
+  return {displayedProducts:showcase.length,
+    updateShopLods(visitor, tier) { for (const lod of displayLods) lod.update(visitor, tier); },
+    setShadows(enabled) { if (shadowMesh) shadowMesh.visible = enabled; }, shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);
-    if (!entry || entry.reserved || entry.record.status !== 'loaded') return null;
+    if (!entry || entry.reserved) return null;
     entry.reserved = true;
-    const index = reserveIndex, matrices = entry.batches.map(mesh => { const m = new T.Matrix4(); mesh.getMatrixAt(index,m); return m; });
-    entry.batches.forEach(mesh => { mesh.setMatrixAt(index,new T.Matrix4().makeScale(0,0,0)); mesh.instanceMatrix.needsUpdate=true; });
+    const index = reserveIndex;
+    entry.lod.setReserved(index);
     const prop = new T.Group(); prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
     for (const primitive of entry.record.primitives) {const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);prop.add(mesh);}
     scene.add(prop); let released=false;
     return {id, prop, approach:shelves.find(s=>s.id===id).pickup, origin:entry.placements[index].clone(), release() {
       if(released)return; released=true; prop.removeFromParent(); entry.reserved=false;
-      entry.batches.forEach((mesh,i)=>{mesh.setMatrixAt(index,matrices[i]);mesh.instanceMatrix.needsUpdate=true;});
+      entry.lod.setReserved(-1);
     }};
   }, createCollectProp(id) {
     const index=cans.findIndex(item => `new-moon-${item.sku}-front`===id), record=canRecords[index];
