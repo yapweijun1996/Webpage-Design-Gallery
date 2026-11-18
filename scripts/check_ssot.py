@@ -46,7 +46,8 @@ def css_paths(root=ROOT):
     # The mall bundle is checked against its source stylesheets by the gallery
     # generator; scanning it again would count generated copies as new debt.
     generated = {root / "assets/tokens.css", root / "assets/gjh-themes.css",
-                 root / "demos/corporate/gjh/v11/style.bundle.css"}
+                 root / "demos/corporate/gjh/v11/style.bundle.css",
+                 *(root / path for path in design_system.DEMO_THEME_OUTPUTS.values())}
     return sorted(path for path in paths if "vendor" not in path.parts and path not in generated)
 
 

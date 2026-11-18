@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN_NAME = re.compile(r"[a-z][a-z0-9-]*\Z")
+DEMO_THEME_OUTPUTS = {"v20": "demos/corporate/gjh/v20/assets/theme.css"}
 
 
 def read_tokens(root=ROOT):
@@ -99,7 +100,7 @@ def render_icons(root=ROOT):
     return "\n".join([*lines, "</svg>", ""])
 
 
-def render_themes(root=ROOT):
+def render_themes(root=ROOT, include_version=lambda version: True):
     registry = json.loads((root / "design-system/themes.json").read_text())
     data, foundation = read_tokens(root)
     if registry["version"] != data["version"]:
@@ -108,6 +109,8 @@ def render_themes(root=ROOT):
     for version, theme in registry["themes"].items():
         if not re.fullmatch(r"v[1-9][0-9]*", version):
             raise ValueError(f"Invalid theme identity: {version}")
+        if not include_version(version):
+            continue
         groups = [(None, None, theme["tokens"])] + [(entry["condition"], entry.get("selector"), entry["tokens"]) for entry in theme["overrides"]]
         for condition, selector, values in groups:
             if condition and not re.fullmatch(r"@media\s*\((?:max|min)-width\s*:\s*\d+px\)", condition):
@@ -134,7 +137,9 @@ def render_themes(root=ROOT):
 
 def outputs(root=ROOT):
     return {"assets/tokens.css": render_tokens(root), "assets/icons.svg": render_icons(root),
-            "assets/gjh-themes.css": render_themes(root)}
+            "assets/gjh-themes.css": render_themes(root, lambda version: version not in DEMO_THEME_OUTPUTS),
+            **{path: render_themes(root, lambda version: version == edition)
+               for edition, path in DEMO_THEME_OUTPUTS.items()}}
 
 
 def build(root=ROOT, check=False):

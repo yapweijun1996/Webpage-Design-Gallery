@@ -1,0 +1,139 @@
+{
+  "assets": [
+    {
+      "file": "gjh-logo.png",
+      "kind": "company-logo",
+      "source": "assets/companies/gjh/official/gjh-logo.png",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gjh-corporate-logo",
+      "sourceSha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "dimensions": [
+        167,
+        73
+      ],
+      "sha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "bytes": 14860
+    },
+    {
+      "file": "new-moon-nz-425g-front.webp",
+      "kind": "product-front",
+      "source": "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-nz-425g-front",
+      "sourceSha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "885bbc9485d3b2aed3784f88a53f6820a389d3eeb14bfd90dc77fcb36b7b9fca",
+      "bytes": 24492
+    },
+    {
+      "file": "mili-brand-cover.webp",
+      "kind": "brand-photo",
+      "source": "assets/companies/gjh/official/mili-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2023/07/brand-cover-mili2.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#mili-brand-cover",
+      "sourceSha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "dimensions": [
+        280,
+        280
+      ],
+      "sha256": "878b1d44a6ce9de81b1788d5a419b4891c6a812f052eb499993b7e4cbcb3915b",
+      "bytes": 15494
+    },
+    {
+      "file": "gogo-brand-cover.webp",
+      "kind": "brand-photo",
+      "source": "assets/companies/gjh/official/gogo-brand-cover.jpg",
+      "sourceUrl": "https://www.gjh.com.sg/wp-content/uploads/2022/07/brand-cover-gogo-1.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gogo-brand-cover",
+      "sourceSha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "dimensions": [
+        280,
+        280
+      ],
+      "sha256": "a9d8080fab7fd0a40aed5e596aecef8b77f2fa795f61665a8a86a9ca837e631e",
+      "bytes": 11308
+    },
+    {
+      "file": "borsch-med-logo.webp",
+      "kind": "brand-logo",
+      "source": "assets/companies/gjh/official/borsch-med-logo.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/06/bm-brand2.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#borsch-med-logo",
+      "sourceSha256": "1135d2beb38992b84dd12a898789532c2679eddc772eb1396dd6e60b0e8d4d07",
+      "dimensions": [
+        319,
+        170
+      ],
+      "sha256": "48afe25cf4ef86daafadcf8bb26571e994fa696e7c119d30a67d11586fb1942e",
+      "bytes": 4524
+    },
+    {
+      "file": "family-lifestyle.webp",
+      "kind": "lifestyle-photo",
+      "source": "assets/companies/gjh/official/family-lifestyle.jpg",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/family-banner.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gjh-family-lifestyle",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "dimensions": [
+        1024,
+        454
+      ],
+      "sha256": "8b7ed6db45637ab60c85a9bd1bfcfe88462fc92b0f96e1eb15c871ca7d40bd87",
+      "bytes": 42870
+    },
+    {
+      "file": "S01-new-moon.webp",
+      "kind": "brand-logo",
+      "source": "demos/corporate/gjh/v11/assets/brands/S01-new-moon.webp",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/brands/logo-sources.json#S01",
+      "dimensions": [
+        256,
+        53
+      ],
+      "sha256": "88de0bf10408644131758f9ae5075b9748389b59586bd1614e2a54229ad5e8cc",
+      "bytes": 15200
+    },
+    {
+      "file": "S13-sony.webp",
+      "kind": "brand-logo",
+      "source": "demos/corporate/gjh/v11/assets/brands/S13-sony.webp",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/sony-brand.jpg",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/brands/logo-sources.json#S13",
+      "dimensions": [
+        256,
+        136
+      ],
+      "sha256": "83c79531be536419929a11c92d3c12ef8922d2b6a603a2800ed03d287b66b18c",
+      "bytes": 1602
+    },
+    {
+      "file": "blue-studio.webp",
+      "kind": "AI-generated concept",
+      "source": "Built-in ImageGen",
+      "prompt": "Use case: product-mockup. Generate a standalone landscape decorative backdrop for a Goh Joo Hin website hero, following the pale-blue photographic product stage in the provided Direction B visual anchors as a style reference only. An empty cool light-blue product photography studio, large industrial window along the left edge, a few low broad blue steps near the window, a broad rectangular sky-blue display plinth center-right in the lower third. Soft diagonal sunlight and window-shaped shadows fall across a matte blue wall and floor. Realistic architectural studio photography, restrained shades of powder blue and slate blue, horizontal framing about 3:2. Keep the middle of the scene quiet for a separate real packshot in a white card to be layered in HTML. Generate the empty scene only. No cans, products, props, packaging, logos, words, badges, type, screenshots or user interface.",
+      "dimensions": [
+        1104,
+        736
+      ],
+      "sha256": "3f69329db8bd8700d642feeab7fb741550945da065ca8f100aa117656e24b1f0",
+      "bytes": 20478
+    },
+    {
+      "file": "mall-concept.webp",
+      "kind": "AI-generated concept",
+      "source": "Built-in ImageGen",
+      "prompt": "Use case: stylized-concept. Generate a standalone landscape website thumbnail for the optional Virtual Mall Concept, following the warm atrium miniature in the supplied Direction B anchors as a style reference. Photorealistic architectural concept rendering of a bright contemporary Singapore retail atrium, with an indoor tree and natural planters in the foreground, curved warm timber mezzanines, broad gently curving staircase on the right and sunny skylight. Cream stone floors, warm gold light, green foliage. Legible simple composition at thumbnail size and when cropped to a square on mobile. Empty public interior. No signage, text, brands, logos, people, screenshots or user interface.",
+      "dimensions": [
+        480,
+        270
+      ],
+      "sha256": "e66ecf3e98e38d87f6ff17746681be49ed2c9e0a95053b0d63bca85b921ba9f2",
+      "bytes": 35054
+    }
+  ],
+  "editorialNote": "Official images are unchanged or resized and encoded as WebP. The studio and mall are individually generated decorative scenes."
+}

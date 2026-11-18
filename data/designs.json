@@ -622,6 +622,44 @@
     "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
   },
   {
+    "id": "gjh-v20",
+    "companyId": "gjh",
+    "slug": "v20",
+    "version": "v20",
+    "title": "Brand Portfolio",
+    "description": "Browse food and beverage, lifestyle and healthcare brands, and prepare a sales enquiry.",
+    "styles": [
+      "corporate"
+    ],
+    "status": "concept",
+    "order": 170,
+    "demoPath": "demos/corporate/gjh/v20/index.html",
+    "thumbnail": "demos/corporate/gjh/v20/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v20/screenshots/1440.png",
+        "width": 1440,
+        "height": 2790
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v20/screenshots/768.png",
+        "width": 768,
+        "height": 3536
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v20/screenshots/390.png",
+        "width": 390,
+        "height": 3536
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

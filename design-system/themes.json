@@ -1336,6 +1336,38 @@
       },
       "overrides": []
     },
+    "v20": {
+      "tokens": {
+        "portfolio-ice": "#f7fafc",
+        "portfolio-tint": "#e7efff",
+        "portfolio-navy": "#101f34",
+        "portfolio-blue": "#1749c6",
+        "portfolio-slate": "#3c526b",
+        "portfolio-control": "#6f829b",
+        "portfolio-border": "#d7e2f2",
+        "portfolio-display": "\"Avenir Next\", Avenir, \"Helvetica Neue\", Arial, sans-serif",
+        "portfolio-body": "\"Helvetica Neue\", Arial, sans-serif",
+        "portfolio-frame": "1248px",
+        "portfolio-gutter": "clamp(20px, 6.6667vw, 96px)",
+        "portfolio-hero-type": "clamp(40px, 5vw, 72px)",
+        "portfolio-section-type": "clamp(32px, 3.6vw, 52px)",
+        "portfolio-feature-type": "clamp(28px, 3vw, 42px)",
+        "portfolio-card-type": "clamp(20px, 2vw, 28px)",
+        "portfolio-lead-type": "clamp(16px, 1.5vw, 22px)"
+      },
+      "overrides": [
+        {
+          "condition": "@media (max-width: 800px)",
+          "tokens": {
+            "portfolio-hero-type": "clamp(34px, 11.03vw, 43px)",
+            "portfolio-section-type": "var(--font-size-3xl)",
+            "portfolio-feature-type": "var(--font-size-2xl)",
+            "portfolio-card-type": "var(--font-size-lg)",
+            "portfolio-lead-type": "var(--font-size-base)"
+          }
+        }
+      ]
+    },
     "v19": {
       "tokens": {
         "paper": "var(--palette-editorial-paper)",

@@ -112,6 +112,13 @@
     "detail": "Add a retail setting to give your introduction a practical starting point.", "items": ["Independent shop", "Grocery retail", "Online retail"]
   },
   {
+    "key": "modern-brand-portfolio", "version": "v20", "kind": "primary", "style": "Modern brand portfolio",
+    "headline": "Explore Goh Joo Hin's Brands", "action": "Explore Our Brands", "image": "demos/corporate/gjh/v20/assets/blue-studio.webp",
+    "composition": "split", "background": "#e7efff", "ink": "#101f34", "accent": "#1749c6",
+    "notes": "Direction B sets the official New Moon packshot on a cool blue studio stage. Brand shortcuts and category cards lead to official sources and an editable sales enquiry.",
+    "detail": "Open New Moon from the first screen, then prepare an enquiry for the featured product.", "items": ["Food & Beverage", "Lifestyle", "Healthcare"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

@@ -1,0 +1,17 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Brand Portfolio",
+  "version": "v20",
+  "designStyle": "Modern corporate portfolio with a blue studio hero and a category-led brand directory.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v20/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v20",
+  "companyId": "gjh",
+  "displayTitle": "Brand Portfolio",
+  "summary": "Browse food and beverage, lifestyle and healthcare brands, and prepare a sales enquiry.",
+  "styles": ["corporate"],
+  "order": 170
+}
