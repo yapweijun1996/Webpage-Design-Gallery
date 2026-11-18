@@ -1,4 +1,5 @@
 import {loadStaticAsset} from './static-asset.js';
+import {atriumLayout} from './atrium-layout.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
 export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden, prepareModel = () => {}}) {
@@ -102,6 +103,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
 
   // Recessed arcade lights and stone pilasters sit against the closed shop
   // fronts. Keep the walkable aisle, threshold openings and signage clear.
+  const {arcadePilaster} = atriumLayout;
   for(const side of [-1,1]){
     const front=side<0?-15:35;
     const inside=-side;
@@ -114,7 +116,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
         box('brass',front+inside*.77,5.78,z+dz,.31,.06,.31);
         box('glow',front+inside*.77,5.737,z+dz,.21,.04,.21);
       }
-      box('ivory',front+side*.03,2.88,z-3.88,.45,5.76,.35);
+      box('ivory',front+side*arcadePilaster.inset,2.88,z-3.88,arcadePilaster.depth,5.76,.35);
       // Shallow arched window heads sit below the fascia and to either
       // side of the moving leaves. The storefront sign stays uninterrupted.
       for(const offset of [-2.48,2.48]){

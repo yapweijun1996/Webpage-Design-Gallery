@@ -96,6 +96,23 @@ async function loadStaticAsset(T, definition, baseURL) {
   return record;
 }
 
+// demos/corporate/gjh/v11/assets/atrium-layout.js
+var point = (x, z) => Object.freeze({ x, z });
+var lounge = (id, x) => Object.freeze({
+  id,
+  x,
+  z: 24,
+  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
+  table: point(x, 24.5),
+  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
+});
+var atriumLayout = Object.freeze({
+  arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
+  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
+  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
+  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
+});
+
 // demos/corporate/gjh/v11/assets/public-architecture.js
 function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden, prepareModel = () => {} }) {
   const timber = "vaultOak";
@@ -118,11 +135,11 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   function arch(center, z, spring, radius, rise, depth, thickness, material) {
     const segments = 24;
     for (let i = 0;i < segments; i++) {
-      const point = (n) => {
+      const point2 = (n) => {
         const a = Math.PI * (n / segments - 0.5);
         return [center + Math.sin(a) * radius, spring + Math.cos(a) * rise];
       };
-      const [x0, y0] = point(i), [x1, y1] = point(i + 1);
+      const [x0, y0] = point2(i), [x1, y1] = point2(i + 1);
       solid("box", material, (x0 + x1) / 2, (y0 + y1) / 2, z, Math.hypot(x1 - x0, y1 - y0) + 0.018, thickness, depth, 0, 0, "XYZ", Math.atan2(y1 - y0, x1 - x0));
     }
   }
@@ -198,6 +215,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("ivory", x, 0.004, 33, 0.12, 0.012, 29.6);
     box("brass", x, 0.013, 33, 0.025, 0.008, 29.6);
   }
+  const { arcadePilaster } = atriumLayout;
   for (const side of [-1, 1]) {
     const front = side < 0 ? -15 : 35;
     const inside = -side;
@@ -210,7 +228,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
         box("brass", front + inside * 0.77, 5.78, z + dz, 0.31, 0.06, 0.31);
         box("glow", front + inside * 0.77, 5.737, z + dz, 0.21, 0.04, 0.21);
       }
-      box("ivory", front + side * 0.03, 2.88, z - 3.88, 0.45, 5.76, 0.35);
+      box("ivory", front + side * arcadePilaster.inset, 2.88, z - 3.88, arcadePilaster.depth, 5.76, 0.35);
       for (const offset of [-2.48, 2.48]) {
         solid("archSpandrel", "green", front + inside * 0.235, 3.32, z + offset, 1.15, 0.53, 0.11, inside * Math.PI / 2);
       }
@@ -339,8 +357,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     }
   };
   tree(garden.x - 0.8, garden.z, 5.9);
-  for (const lounge of [-4, 24])
-    tree(lounge - 2.35, 27, 4.2);
+  for (const lounge2 of [-4, 24])
+    tree(lounge2 - 2.35, 27, 4.2);
   for (const z of [8.37, 11.63]) {
     box("ivory", -4.99, 1.87, z, 0.31, 3.74, 0.46);
     box("brass", -5.16, 1.74, z, 0.055, 2.2, 0.13);
@@ -1483,8 +1501,8 @@ async function createShell(T) {
             }
           } else {
             for (const component of definition.components) {
-              const point = new T.Vector3(...component.position).applyMatrix4(placement);
-              solid("box", component.material, point.x, point.y, point.z, ...component.size, angle);
+              const point2 = new T.Vector3(...component.position).applyMatrix4(placement);
+              solid("box", component.material, point2.x, point2.y, point2.z, ...component.size, angle);
             }
           }
         }
@@ -1642,22 +1660,6 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
   const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
   return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
 }));
-
-// demos/corporate/gjh/v11/assets/atrium-layout.js
-var point = (x, z) => Object.freeze({ x, z });
-var lounge = (id, x) => Object.freeze({
-  id,
-  x,
-  z: 24,
-  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
-  table: point(x, 24.5),
-  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
-});
-var atriumLayout = Object.freeze({
-  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
-  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
-});
 
 // demos/corporate/gjh/v11/assets/shop-signs.js
 var LOGOS = [
@@ -2049,9 +2051,13 @@ function buildWindowStudio(n, t, width, depth) {
   box(0, 0.041, mid, side * 2, 0.08, span, floor, -2);
   box(0, 2.12, back, side * 2, 4.18, 0.13, wall);
   box(0, 4.19, mid, side * 2, 0.18, span, cream, -3);
+  const pilasterSide = shopEntrance(expandedLayout.slots[n - 1]).normalX;
+  const { inset, depth: pierDepth } = atriumLayout.arcadePilaster;
+  const pilasterBack = depth / 2 - inset - pierDepth / 2;
   for (const s of [-1, 1]) {
     box(s * (side - 0.2), 4.082, mid, 0.4, 0.064, span, pearl, -3);
-    box(s * side, 2.1, mid, 0.13, 4.13, span, wall);
+    const wallEnd = s === pilasterSide ? pilasterBack : front;
+    box(s * side, 2.1, (back + wallEnd) / 2, 0.13, 4.13, wallEnd - back, wall);
     box(s * (side - 0.31), 4.05, mid, 0.065, 0.046, span - 0.6, shopLamp);
     box(s * (side - 0.2), 0.19, mid, 0.15, 0.21, span, base);
   }
