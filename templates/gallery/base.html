@@ -63,7 +63,11 @@
             </label>
             <span id="preferences-status" class="visually-hidden" role="status"></span>
           </div>
-          <button type="button" id="check-update" hidden>Check updates</button>
+          <button type="button" id="check-update" aria-describedby="check-update-description" hidden>
+            <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="${prefix}assets/icons.svg#info"></use></svg>
+            <span>Check updates</span>
+          </button>
+          <span id="check-update-description" hidden>Checks for a verified Gallery release.</span>
         </div>
       </details>
     </div>
