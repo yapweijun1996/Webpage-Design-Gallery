@@ -18,6 +18,7 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
   applyTheme(null);
   // Reuse the same small candidate array and keep no more than six lights active.
   const nearest = [];
+  const accentLimit = Math.min(6,lights.length);
   function update(position) {
     nearest.length = 0;
     for (const entry of lights) {
@@ -27,7 +28,19 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
       if (entry.distance < 24*24 && Math.abs(position.y) < 6) nearest.push(entry);
     }
     nearest.sort((a,b)=>a.distance-b.distance);
-    for (let i=0;i<Math.min(6,nearest.length);i++) nearest[i].light.visible=true;
+    for (let i=0;i<Math.min(accentLimit,nearest.length);i++) nearest[i].light.visible=true;
+  }
+
+  // Three keys programs by light type/count. Enumerate the policy's full
+  // range rather than assuming a camera route visits every count.
+  function lightVariants(sceneLights) {
+    const accents=new Set(lights.map(entry=>entry.light));
+    const fixed=sceneLights.filter(light=>{
+      if(accents.has(light))return false;
+      for(let node=light;node;node=node.parent)if(!node.visible)return false;
+      return true;
+    });
+    return Array.from({length:accentLimit+1},(_,n)=>[...fixed,...lights.slice(0,n).map(entry=>entry.light)]);
   }
 
   let environment = null;
@@ -82,6 +95,30 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
     postScene=new T.Scene(); postCamera=new T.Camera();
     quad=new T.Mesh(new T.PlaneGeometry(2,2),composite); quad.frustumCulled=false; postScene.add(quad);
   }
+  function sizePost(width,height) {
+    initPost();
+    base.setSize(width,height);
+    glow.setSize(Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4)));
+    composite.uniforms.texel.value.set(1/glow.width,1/glow.height);
+  }
+  function* preparePost(width,height,screenPixel) {
+    sizePost(width,height);
+    for(const target of [base,glow]) {
+      renderer.initRenderTarget(target);
+      yield;
+    }
+    renderer.compile(postScene,postCamera);
+    const program=renderer.properties.get(composite).currentProgram;
+    if(renderer.extensions.has('KHR_parallel_shader_compile'))while(!program.isReady())yield false;
+    const box=renderer.getScissor(new T.Vector4()), test=renderer.getScissorTest();
+    try {
+      const size=screenPixel();
+      renderer.setScissor(0,0,size,size);renderer.setScissorTest(true);
+      renderer.render(postScene,postCamera);
+    } finally {
+      renderer.setScissor(box);renderer.setScissorTest(test);
+    }
+  }
   const state={bloom:false,nonNpcCalls:0,npcCalls:0,admitted:0,totalCalls:0,submissions:0};
   function renderVisitors(camera,npcs,reservedCalls) {
     state.nonNpcCalls=renderer.info.render.calls+reservedCalls;
@@ -115,10 +152,8 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
         renderer.render(scene,camera); state.submissions++;
         renderVisitors(camera,npcs,0);
       } else {
-        initPost();
         const size=renderer.getDrawingBufferSize(bufferSize);
-        base.setSize(size.x,size.y); glow.setSize(Math.max(1,Math.floor(size.x/4)),Math.max(1,Math.floor(size.y/4)));
-        composite.uniforms.texel.value.set(1/glow.width,1/glow.height);
+        sizePost(size.x,size.y);
         renderer.setRenderTarget(base); renderer.render(scene,camera); state.submissions++;
         renderer.shadowMap.autoUpdate=false;
         camera.layers.set(1); scene.background=null; renderer.setClearColor(0x000000,0);
@@ -136,5 +171,5 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.setRenderTarget(target); renderer.info.autoReset=autoReset; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
     }
   }
-  return {update,applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
+  return {update,lightVariants,preparePost,applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
 }

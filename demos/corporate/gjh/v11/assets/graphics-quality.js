@@ -118,6 +118,12 @@ export function createGraphicsQuality(onChange) {
     try { localStorage.setItem(QUALITY_KEY, preference); } catch { /* The selection still applies to this page. */ }
     onChange();
   });
+  function apply(next) {
+    profile=next;
+    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
+    status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
+    return profile;
+  }
   return {
     recover() { recovered = true; preference = 'low'; autoTier=null; adaptive.reset(); select.value = 'low'; },
     resetSampling() { adaptive.reset(); },
@@ -126,16 +132,15 @@ export function createGraphicsQuality(onChange) {
       const next=adaptive.sample(now,active,profile.tier,moving,mobile);
       if (next) { autoTier=next; onChange(); }
     },
-    resolve(width) {
+    resolve(width, defer=false) {
       const nextMobile = width <= 650 || Boolean(coarsePointer?.matches);
       if (mobile !== null && mobile !== nextMobile) adaptive.reset();
       mobile = nextMobile;
-      profile = resolveQuality({preference, width, dpr: window.devicePixelRatio,
+      const next = resolveQuality({preference, width, dpr: window.devicePixelRatio,
         cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory, recovered, autoTier, mobile});
-      const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-      status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
-      return profile;
+      return defer ? next : apply(next);
     },
+    apply,
     get state() { return profile; },
   };
 }

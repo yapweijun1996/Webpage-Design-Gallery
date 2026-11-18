@@ -3,7 +3,30 @@ import {spatial, courtyardArrival} from './spatial.js';
 import {expandedLayout, shopEntrance} from './expanded-layout.js';
 
 export function createWarmReport() {
-  return {ms:0, probes:0, programs:0, textures:0, skipped:false, reason:'pending'};
+  return {ms:0, probes:0, programs:0, textures:0, lightVariants:0, shadowCasters:0, skipped:false, reason:'pending'};
+}
+
+// One owner for manual, adaptive and viewport-triggered tier requests. A
+// superseded iterator is closed before another can publish staged objects.
+export function createTierQueue(enqueue) {
+  let pending;
+  function cancel() {
+    pending?.controller.abort();
+    pending = null;
+  }
+  function request(key, makeWork) {
+    if (pending?.key === key) return pending.promise;
+    cancel();
+    const controller = new AbortController();
+    const promise = enqueue(makeWork, {signal:controller.signal}).catch(error => {
+      if (error.name !== 'AbortError') throw error;
+    }).finally(() => {
+      if (pending?.controller === controller) pending = null;
+    });
+    pending = {key, controller, promise};
+    return promise;
+  }
+  return {request, cancel, get pending() { return Boolean(pending); }};
 }
 
 // The mall's RAF drives the iterator. A separate timer also bounds a driver
@@ -63,7 +86,7 @@ export function createWarmRunner(work, report, {
   };
 }
 
-export function mallProbePoses(expanded, elevator) {
+export function mallProbePoses(expanded, elevator, chase) {
   const atrium = expanded ? expandedLayout.atrium : courtyardArrival;
   const poses = [{...atrium, y:0, yaw:0}];
   if (expanded) {
@@ -77,6 +100,13 @@ export function mallProbePoses(expanded, elevator) {
   }
   const deck = elevator ?? (expanded ? expandedLayout.lift : null);
   if (deck) poses.push({x:deck.x, z:deck.z, y:deck.upper, yaw:0});
+  if (expanded && chase) {
+    // The entry-facing eye probe misses both side aisles and the spring-arm
+    // view after the northbound 2.5-second walk away from the arrival.
+    for (const [advance,yaw] of [[0,Math.PI/2],[0,-Math.PI/2],[6.6,0]]) {
+      poses.push({x:atrium.x,z:atrium.z-advance,y:0,yaw,chase});
+    }
+  }
   return poses;
 }
 
@@ -84,7 +114,8 @@ export function mallProbePoses(expanded, elevator) {
 // viewport on the real canvas exercises its output color space and MSAA under
 // the opaque loader. Detailed ground-floor passes use the linear target too.
 export function* prepareScene({T, renderer, scene, camera, expanded, elevator, detailed,
-  updateLights, initTexture}, report) {
+  updateLights, lightVariants, initTexture, alternatesFor, shadows=renderer.shadowMap.enabled, extra=[], exclude=[], screenPixel=()=>1,
+  prepared=new WeakSet(), programs=new Set(), chase}, report) {
   const probe = camera.clone(false), staging = new T.Scene(), meshes = [], lights = [];
   const frustum = new T.Frustum(), viewProjection = new T.Matrix4();
   staging.matrixWorldAutoUpdate = false;
@@ -94,17 +125,27 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
   staging.fog = scene.fog;
   const textures = new Set();
   for (const texture of [scene.environment, scene.background]) if (texture?.isTexture) textures.add(texture);
-  const stack = [scene];
+  const stack = [scene, ...extra], excluded = new Set(exclude);
   while (stack.length) {
     const node = stack.pop();
+    if (excluded.has(node)) continue;
+    excluded.add(node);
     stack.push(...node.children);
-    if (node.isLight) lights.push(node);
+    if (node.isLight) {
+      lights.push(node);
+      if (node.map?.isTexture) textures.add(node.map);
+    }
     if (node.isMesh || node.isLine || node.isPoints || node.isSprite) {
+      const alternates=alternatesFor?.(node);
+      if(alternates)stack.push(...alternates.filter(other=>other.geometry!==node.geometry || other.material!==node.material));
+      if(prepared.has(node))continue;
+      prepared.add(node);
       meshes.push(node);
-      for (const texture of meshTextures(node)) textures.add(texture);
+      for (const texture of meshTextures(node,shadows)) textures.add(texture);
     }
     yield;
   }
+  if (!meshes.length) return;
   for (const texture of textures) {
     initTexture(texture);
     report.textures++;
@@ -114,7 +155,7 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
   const gl = renderer.getContext(), parallel = renderer.extensions.has('KHR_parallel_shader_compile');
   const target = detailed ? new T.WebGLRenderTarget(1, 1) : null;
   const viewport = new T.Vector4(), scissor = new T.Vector4();
-  const variants = new Set(), programs = new Set();
+  const variants = new Map();
   let fence;
   function probeLights(pose) {
     const previous = lights.map(light => light.visible);
@@ -129,14 +170,15 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
     }
   }
 
-  function submit(batch, activeLights, output, compile) {
+  function submit(batch, activeLights, output, compile, depth=false, fullView=false) {
     const objects = [...activeLights, ...batch];
     const saved = objects.map(node => [node.visible, node.frustumCulled, node.layers.mask, node.children]);
     const instanceCounts = new Map();
-    const hiddenMaterials = new Set();
+    const hiddenMaterials = new Set(), drawRanges = new Map();
     const previous = renderer.getRenderTarget(), face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
-    const scissorTest = renderer.getScissorTest(), autoClear = renderer.autoClear;
-    const shadows = renderer.shadowMap, shadowAuto = shadows.autoUpdate, shadowNeeds = shadows.needsUpdate;
+    const scissorTest = renderer.getScissorTest(), autoClear = renderer.autoClear, sortObjects=renderer.sortObjects;
+    const shadowMap = renderer.shadowMap;
+    const shadowEnabled = shadowMap.enabled, shadowAuto = shadowMap.autoUpdate, shadowNeeds = shadowMap.needsUpdate;
     const info = renderer.info.render, {calls, triangles, points, lines} = info;
     renderer.getViewport(viewport);
     renderer.getScissor(scissor);
@@ -150,10 +192,16 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
         node.layers.mask = 1;
       }
       for (const mesh of batch) {
-        if (!compile && mesh.isInstancedMesh) {
-          // The full instance buffer uploads even for one instance. Three can
-          // cache bounds during render sorting, so compute them at full count.
-          if (!mesh.boundingSphere) mesh.computeBoundingSphere();
+        const geometry = mesh.geometry;
+        if (!compile && !fullView && geometry && !drawRanges.has(geometry)) {
+          // Even a hidden LOD with an empty draw range needs a real draw.
+          // Preserve access to every group on multi-material geometry.
+          const {start,count} = geometry.drawRange;
+          drawRanges.set(geometry, [start,count]);
+          geometry.setDrawRange(0, geometry.groups.length ? Infinity : 6);
+        }
+        if (!compile && !fullView && mesh.isInstancedMesh) {
+          // Upload the full instance buffer while submitting one placement.
           instanceCounts.set(mesh, mesh.count);
           mesh.count = Math.min(1, mesh.instanceMatrix.count);
         }
@@ -165,11 +213,14 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       renderer.setRenderTarget(output);
       if (!output) {
         renderer.setViewport(0, 0, 1, 1);
-        renderer.setScissor(0, 0, 1, 1);
+        const size=screenPixel();
+        renderer.setScissor(0, 0, size, size);
         renderer.setScissorTest(true);
       }
-      shadows.autoUpdate = shadows.needsUpdate = false;
+      if (shadows !== undefined) shadowMap.enabled = shadows;
+      shadowMap.autoUpdate = shadowMap.needsUpdate = depth;
       renderer.autoClear = true;
+      renderer.sortObjects = false; // Never cache bounds at the temporary instance count.
       if (compile) {
         for (const material of renderer.compile(staging, probe)) {
           // A shared material can have instanced, skinned and two-sided variants.
@@ -184,9 +235,12 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       });
       for (const material of hiddenMaterials) material.visible = false;
       for (const [mesh, count] of instanceCounts) mesh.count = count;
+      for (const [geometry,range] of drawRanges) geometry.setDrawRange(...range);
       renderer.autoClear = autoClear;
-      shadows.autoUpdate = shadowAuto;
-      shadows.needsUpdate = shadowNeeds;
+      renderer.sortObjects = sortObjects;
+      if (shadows !== undefined) shadowMap.enabled = shadowEnabled;
+      shadowMap.autoUpdate = shadowAuto;
+      shadowMap.needsUpdate = shadowNeeds;
       Object.assign(info, {calls, triangles, points, lines});
       renderer.setViewport(viewport);
       renderer.setScissor(scissor);
@@ -199,73 +253,98 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
   // from their own pose, but only a new shader configuration needs a full sweep.
   function variantKey(activeLights, output) {
     return (output ? 'linear:' : 'screen:') +
-      activeLights.map(light => light.type + Number(light.castShadow)).sort().join(',');
+      activeLights.map(light => light.type + Number(light.castShadow) + Number(Boolean(light.map))).sort().join(',');
   }
-  function* pass(activeLights, output, candidates) {
-    if (!candidates.length) return;
-    const key = variantKey(activeLights, output);
-    const fresh = !variants.has(key);
-    variants.add(key);
-    const batchSize = 12;
-    if (!fresh) {
-      const visible = [];
-      for (const mesh of candidates) {
-        if (mesh.isSprite ? frustum.intersectsSprite(mesh) : frustum.intersectsObject(mesh)) visible.push(mesh);
-        if (visible.length === batchSize) break;
-        yield;
-      }
-      candidates = visible.length ? visible : candidates.slice(0, 1);
-    }
-    const count = candidates.length;
-    if (fresh) {
-      for (let i = 0; i < count; i += batchSize) {
-        submit(candidates.slice(i, i + batchSize), activeLights, output, true);
-        yield;
-      }
-      if (parallel) {
-        const pending = [...programs];
-        while (pending.length) {
-          if (pending.at(-1).isReady()) pending.pop();
-          else yield false;
-        }
-      }
-    }
-    for (let i = 0; i < count; i += batchSize) {
-      submit(candidates.slice(i, i + batchSize), activeLights, output, false);
-      yield;
-    }
+  const visits=[];
+  const glow=detailed ? meshes.filter(mesh=>mesh.layers.isEnabled(1)) : [];
+  const batchSize=12;
+  function addPass(pose, active, output, candidates, layer='main', probeVisit=false) {
+    if(!candidates.length)return;
+    const key=layer+variantKey(active,output);
+    const fresh=!variants.has(key);
+    const pass={pose,active,output,candidates,fresh};
+    if(fresh)variants.set(key,pass);
+    if(fresh || probeVisit)visits.push(pass);
+  }
+  function addPose(pose,onlyNew=false) {
+    const active=probeLights(pose), main=active.filter(light=>light.layers.isEnabled(0));
+    const output=detailed && pose.y===0 ? target : null;
+    if(onlyNew && variants.has('main'+variantKey(main,output)))return;
+    addPass(pose,main,output,meshes,'main',true);
+    if(output)addPass(pose,active.filter(light=>light.layers.isEnabled(1)),target,glow,'glow');
+    visits.push({endPose:true});
+  }
+  function position(pose) {
+    const arm=pose.chase?.distance ?? 0;
+    probe.position.set(pose.x+Math.sin(pose.yaw)*arm,pose.y+(pose.chase?.height ?? 1.65),pose.z+Math.cos(pose.yaw)*arm);
+    probe.rotation.set(pose.chase?.pitch ?? 0,pose.yaw,0,'YXZ');
+    probe.updateMatrixWorld();
+    frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(probe.projectionMatrix,probe.matrixWorldInverse));
   }
 
   try {
     probe.layers.set(0);
-    const poses = mallProbePoses(expanded, elevator);
-    const glow = detailed ? meshes.filter(mesh => mesh.layers.isEnabled(1)) : [];
-    function* drawPose(pose, onlyNewVariant = false) {
-      const active = probeLights(pose);
-      const mainLights = active.filter(light => light.layers.isEnabled(0));
-      const output = detailed && pose.y === 0 ? target : null;
-      if (onlyNewVariant && variants.has(variantKey(mainLights, output))) return;
-      probe.position.set(pose.x, pose.y + 1.65, pose.z);
-      probe.rotation.set(0, pose.yaw, 0);
-      probe.updateMatrixWorld();
-      frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(probe.projectionMatrix, probe.matrixWorldInverse));
-      yield* pass(mainLights, output, meshes);
-      if (output && glow.length) yield* pass(active.filter(light => light.layers.isEnabled(1)), target, glow);
-      report.probes++;
-    }
-    for (const pose of poses) yield* drawPose(pose);
-    if (expanded) {
-      // The middle of an arcade can have a light count none of its doors has.
-      // Sample the walk in metre increments and submit only missing variants.
-      const {entrance, atrium} = expandedLayout;
-      for (const end of [atrium, ...spatial.stores.map(store => store.arrival)]) {
-        const distance = Math.ceil(Math.hypot(end.x - entrance.x, end.z - entrance.z));
-        for (let i = 1; i < distance; i++) {
-          yield* drawPose({x:entrance.x + (end.x - entrance.x) * i / distance,
-            z:entrance.z + (end.z - entrance.z) * i / distance, y:0, yaw:0}, true);
+    const poses=mallProbePoses(expanded,elevator,chase);
+    for(const pose of poses)addPose(pose);
+    if(lightVariants){
+      for(const active of lightVariants(lights)){
+        const main=active.filter(light=>light.layers.isEnabled(0));
+        for(const output of detailed ? [target,null] : [null]) {
+          addPass(poses[0],main,output,meshes);
+          const npcLights=active.filter(light=>light.layers.isEnabled(2));
+          if(variantKey(npcLights,output)!==variantKey(main,output))
+            addPass(poses[0],npcLights,output,meshes.filter(mesh=>mesh.layers.isEnabled(2)),'npc');
+        }
+        if(detailed)addPass(poses[0],active.filter(light=>light.layers.isEnabled(1)),target,glow,'glow');
+      }
+    } else if(expanded){
+      const {entrance,atrium}=expandedLayout;
+      for(const end of [atrium,...spatial.stores.map(store=>store.arrival)]){
+        const distance=Math.ceil(Math.hypot(end.x-entrance.x,end.z-entrance.z));
+        for(let i=1;i<distance;i++){
+          addPose({x:entrance.x+(end.x-entrance.x)*i/distance,z:entrance.z+(end.z-entrance.z)*i/distance,y:0,yaw:0},true);
           yield;
         }
       }
+    }
+    report.lightVariants=Math.max(report.lightVariants,variants.size);
+    // Submit all independent links before waiting on the driver once.
+    for(const {active,output,candidates} of variants.values()){
+      for(let i=0;i<candidates.length;i+=batchSize){
+        submit(candidates.slice(i,i+batchSize),active,output,true);
+        yield;
+      }
+    }
+    if(parallel)for(const program of programs)while(!program.isReady())yield false;
+    if(shadows){
+      const active=probeLights(poses[0]).filter(light=>light.layers.isEnabled(0));
+      const casters=meshes.filter(mesh=>mesh.castShadow);
+      // r170 selects its own instanced/skinned depth and distance materials.
+      // A real shadow pass also allocates the light's retained shadow target.
+      for(let i=0;i<casters.length;i+=6){
+        const batch=casters.slice(i,i+6);
+        submit(batch,active,detailed?target:null,false,true);
+        report.shadowCasters+=batch.length;
+        yield;
+      }
+    }
+    let completedPoses=0;
+    for(const visit of visits){
+      if(visit.endPose){report.probes=Math.max(report.probes,++completedPoses);continue;}
+      const {pose,active,output,fresh,candidates}=visit;
+      position(pose);
+      let batch=[];
+      const fullView=Boolean(pose.chase);
+      for(const mesh of candidates){
+        if(fresh || !mesh.frustumCulled || (mesh.isSprite?frustum.intersectsSprite(mesh):frustum.intersectsObject(mesh)))batch.push(mesh);
+        if(batch.length===batchSize){
+          submit(batch,active,output,false,false,fullView);
+          batch=[];
+          yield;
+          if(!fresh && !fullView)break;
+        }
+      }
+      if(batch.length){submit(batch,active,output,false,false,fullView);yield;}
     }
     // rAF and renderer.render only establish CPU submission. Wait without
     // blocking the UI for commands already queued on the actual WebGL2 driver.

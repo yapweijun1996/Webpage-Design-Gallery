@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
-import {createWarmReport, createWarmRunner, mallProbePoses, prepareScene} from '../demos/corporate/gjh/v11/assets/scene-warmup.js';
+import {createWarmReport, createWarmRunner, createTierQueue, mallProbePoses, prepareScene} from '../demos/corporate/gjh/v11/assets/scene-warmup.js';
+import {createModelWarmup} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
 import {createLoaderState} from '../demos/corporate/gjh/v11/assets/loader.js';
 import {expandedLayout, shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 
@@ -84,6 +85,10 @@ test('context loss between steps prevents further submission', () => {
 test('probe poses use every live entrance, the atrium and the active upper deck', () => {
   const poses = mallProbePoses(true);
   assert.equal(poses.length, 20);
+  const chase={height:3,distance:5,pitch:-.2};
+  const atriumViews=mallProbePoses(true,undefined,chase).slice(20);
+  assert.equal(atriumViews.length,3);
+  assert.ok(atriumViews.every(pose=>pose.chase===chase && pose.y===0));
   assert.deepEqual(poses[0], {...expandedLayout.atrium, y:0, yaw:0});
   assert.deepEqual(poses[1], {...expandedLayout.entrance, y:0, yaw:0});
   for (const [i, slot] of expandedLayout.slots.entries()) {
@@ -97,7 +102,7 @@ test('probe poses use every live entrance, the atrium and the active upper deck'
   assert.equal(mallProbePoses(false, {x:0, z:16, upper:7.2}).length, 5);
 });
 
-function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly = false) {
+function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly = false, stagingOptions={}) {
   const scene = new T.Scene(), group = new T.Group(), camera = new T.PerspectiveCamera();
   const map = new T.Texture(), uniform = new T.Texture(), environment = new T.Texture();
   const a = new T.MeshStandardMaterial({map, emissiveMap:map});
@@ -105,6 +110,7 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
   const instances = new T.InstancedMesh(new T.BoxGeometry(), [a,b], 3);
   const child = new T.Mesh(new T.BoxGeometry(), a), point = new T.PointLight();
   const ambient = new T.AmbientLight();
+  instances.castShadow=true;
   group.add(instances); instances.add(child); scene.add(group, point, ambient);
   scene.environment = environment;
   instances.visible = group.visible = b.visible = point.visible = false;
@@ -124,7 +130,7 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
   };
   const renderer = {
     extensions:{has:() => parallel}, properties:{get:() => ({programs:new Map([['key',program]])})},
-    autoClear:false, shadowMap:{autoUpdate:true, needsUpdate:true}, info:{render:{calls:7, triangles:8, lines:0, points:0}},
+    autoClear:false, shadowMap:{enabled:false,autoUpdate:true, needsUpdate:true}, info:{render:{calls:7, triangles:8, lines:0, points:0}},
     getContext:() => gl, getRenderTarget:() => target, getActiveCubeFace:() => face, getActiveMipmapLevel:() => mip,
     getViewport:v => v.copy(viewport), getScissor:v => v.copy(scissor), getScissorTest:() => testScissor,
     setScissorTest:v => { testScissor = v; },
@@ -147,12 +153,12 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
         assert.equal(instances.count, 1);
         assert.equal(b.visible, true);
       }
-      draws.push({objects:staging.children.slice(), pose:probe.position.toArray(), linear:Boolean(target)});
+      draws.push({objects:staging.children.slice(), pose:probe.position.toArray(), linear:Boolean(target), depth:renderer.shadowMap.needsUpdate, shadows:renderer.shadowMap.enabled});
       if (failDraw) throw Error('injected draw failure');
     }
   };
   const work = prepareScene({T, renderer, scene, camera, expanded:true, detailed,
-    initTexture:t => textures.push(t), updateLights:pose => {
+    ...stagingOptions,initTexture:t => textures.push(t), updateLights:pose => {
       point.visible = corridorOnly ? pose.z > 15 && pose.z < 18 : pose.z < 30;
     }}, report);
   function restored() {
@@ -164,7 +170,7 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
     assert.equal(instances.count, 3);
     assert.equal(child.parent, instances);
     assert.equal(renderer.autoClear, false);
-    assert.deepEqual(renderer.shadowMap, {autoUpdate:true, needsUpdate:true});
+    assert.deepEqual(renderer.shadowMap, {autoUpdate:true, needsUpdate:true, enabled:false});
     assert.deepEqual([target,face,mip,testScissor], [originalTarget,2,1,false]);
     assert.deepEqual(viewport.toArray(), [0,0,393,612]);
     assert.deepEqual(scissor.toArray(), [2,3,4,5]);
@@ -222,4 +228,50 @@ test('a corridor-only lighting variant draws without the parallel compile extens
   f.signal();
   assert.equal(f.work.next().done, true);
   f.restored();
+});
+
+test('manual and Auto targets share one sliced job and only the latest ready target commits',async()=>{
+  const uploader=createModelWarmup(T,{getContext:()=>({isContextLost:()=>false})});
+  const queue=createTierQueue(uploader.enqueueSweep);
+  let active='low', linked=false;
+  const closed=[], submitted=[];
+  function* warm(tier) {
+    try {
+      submitted.push(tier);
+      while(!linked)yield false;
+      active=tier;
+    } finally {closed.push(tier);}
+  }
+  const first=queue.request('balanced',()=>warm('balanced'));
+  assert.equal(queue.request('balanced',()=>assert.fail('duplicate job')),first);
+  uploader.runFrame(false);assert.deepEqual(submitted,[]);
+  uploader.runFrame(true);assert.equal(active,'low');
+  const next=queue.request('detailed',()=>warm('detailed'));
+  await first;assert.deepEqual(closed,['balanced']);assert.equal(queue.pending,true);
+  uploader.runFrame(true);assert.equal(active,'low');
+  linked=true;uploader.runFrame(false);assert.equal(active,'low');
+  uploader.runFrame(true);uploader.runFrame(true);await next;
+  assert.equal(active,'detailed');assert.equal(queue.pending,false);
+  assert.deepEqual(submitted,['balanced','detailed']);
+  assert.deepEqual(uploader.report().pendingUploads,0);
+  const interrupted=queue.request('low',()=>warm('low'));
+  queue.cancel();await interrupted;
+  assert.equal(active,'detailed');assert.equal(uploader.report().lateAdditions,0);
+  uploader.dispose();
+});
+
+test('shadow and light policy warm detached tier meshes before the fence, even for counts absent at the doors',()=>{
+  const map=new T.Texture(), staged=new T.Mesh(new T.BoxGeometry(),new T.MeshStandardMaterial({map}));
+  const lights=[new T.PointLight(),new T.PointLight(),new T.PointLight()];
+  const f=sceneFixture(false,false,true,false,{shadows:true,extra:[staged],
+    lightVariants:sceneLights=>[[...sceneLights,...lights]]});
+  f.link();
+  while(!f.fence)f.work.next();
+  assert.ok(f.textures.includes(map));
+  assert.ok(f.draws.some(draw=>draw.depth && draw.shadows && draw.objects.includes(f.instances)));
+  assert.ok(f.draws.some(draw=>draw.objects.includes(staged) && lights.every(light=>draw.objects.includes(light))));
+  assert.equal(f.report.shadowCasters,1);
+  assert.equal(staged.parent,null);
+  f.restored();
+  f.signal();assert.equal(f.work.next().done,true);
 });

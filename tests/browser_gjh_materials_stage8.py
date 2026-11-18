@@ -1,5 +1,5 @@
 """Matched expanded-mall material screenshots, resources, and fallback."""
-from gjh_startup_test_helpers import mall_entry_url
+from gjh_startup_test_helpers import mall_entry_url, wait_for_quality
 import argparse,functools,http.server,json,os,threading,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -25,6 +25,7 @@ def run():
      page.locator('#keyboard-help>summary').click()
      for tier in ['low','balanced','detailed','auto']:
       page.locator('#graphics-quality').select_option(tier)
+      wait_for_quality(page,tier)
       if tier!='auto':assert page.evaluate('__mall.state.graphics.quality.tier')==tier
      page.locator('#keyboard-help>summary').click()
     def capture(label):

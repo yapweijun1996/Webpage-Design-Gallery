@@ -91,35 +91,51 @@ test('unknown tiers, distance threshold and off-screen signs select the baked or
   }
 });
 
-test('real Three batches compact visible detail, drop far relief and account for renderer counters',t=>{
+async function stageTier(system,tier){
+  const work=system.prepareTier(tier);
+  for(let step=work.next();;step=work.next()){
+    if(step.done)return step.value;
+    if(step.value===false)await new Promise(resolve=>setImmediate(resolve));
+  }
+}
+
+test('real Three batches compact visible detail, drop far relief and account for renderer counters',async t=>{
   t.mock.method(globalThis,'fetch',async()=>new Response(null,{status:404}));
   const configs=bays.map((_,i)=>setup(i)), scene=new T.Scene();
   const mask={width:3,height:2,ink:Uint8Array.of(1,0,1,1,1,1)};
-  const bake={sheet:{width:atlasSize,height:atlasSize},tiles:new Map(configs.map((c,i)=>[c.id,{cells:atlasCells(i),mask}]))};
+  const bake={lowSheet:{width:1024,height:1024},sheet:{width:atlasSize,height:atlasSize},tiles:new Map(configs.map((c,i)=>[c.id,{cells:atlasCells(i),mask}]))};
   const system=createSignageSystem(T,scene,configs,bays,bake,base);
   const camera=new T.PerspectiveCamera(58,393/612,.08,100);
   const reduced={matches:true};
   camera.position.set(-10,3,10);camera.lookAt(-10,4.78,0);camera.updateMatrixWorld();
-  system.update(camera,'low',reduced,1000);
-  assert.equal(scene.children.length,1);assert.equal(system.report().textureMB,21.33);
+  system.update(camera,reduced,1000);
+  assert.equal(scene.children.length,1);assert.equal(system.report().textureMB,5.33);
   const [faces]=scene.children;
   const renderer={info:{render:{calls:17,triangles:200}}};
   faces.onBeforeRender(renderer);renderer.info.render.calls++;renderer.info.render.triangles+=226;faces.onAfterRender(renderer);
-  assert.deepEqual(system.report(),{modelsLoaded:0,signs:17,drawCalls:1,triangles:226,textureMB:21.33,tier:'low'});
-  system.update(camera,'balanced',reduced,1100);
+  const {phoneProof,...costs}=system.report();
+  assert.deepEqual(phoneProof.glyphs.S04,{previousCssPx:6,activeAtlasCssPx:13});
+  assert.deepEqual(costs,{modelsLoaded:0,signs:17,drawCalls:1,triangles:226,previousTextureMB:21.33,atlasPx:1024,textureMB:5.33,tier:'low'});
+  system.activate(await stageTier(system,'balanced'));
+  system.update(camera,reduced,1100);
   assert.equal(scene.children.length,3);assert.ok(scene.children[1].isInstancedMesh);
   assert.ok(scene.children[1].count>0 && scene.children[1].count<17);
+  const frameBatch=scene.children[1];
+  assert.equal(frameBatch.instanceMatrix.usage,T.DynamicDrawUsage);
+  assert.deepEqual(frameBatch.instanceMatrix.updateRanges,[{start:0,count:frameBatch.count*16}]);
   const shader={uniforms:{},vertexShader:T.ShaderLib.basic.vertexShader,fragmentShader:T.ShaderLib.basic.fragmentShader};
-  faces.material.onBeforeCompile(shader);
+  scene.children[0].material.onBeforeCompile(shader);
   assert.equal(shader.uniforms.signPulse.value,0);
-  system.update(camera,'balanced',{matches:false},1200);assert.notEqual(shader.uniforms.signPulse.value,0);
-  system.update(camera,'detailed',reduced,1300);
+  system.update(camera,{matches:false},1200);assert.notEqual(shader.uniforms.signPulse.value,0);
+  system.activate(await stageTier(system,'detailed'));
+  system.update(camera,reduced,1300);
   assert.ok(scene.getObjectByName('Near sign letter relief').geometry.drawRange.count>0);assert.equal(shader.uniforms.signPulse.value,0);
   camera.lookAt(-10,3,40);camera.position.z=60;camera.lookAt(-10,3,90);camera.updateMatrixWorld();
-  system.update(camera,'detailed',reduced,1400);
+  system.update(camera,reduced,1400);
   assert.equal(scene.children.filter(m=>m.visible).length,1);
   assert.equal(scene.children[1].count,0);assert.equal(scene.getObjectByName('Near sign letter relief').geometry.drawRange.count,0);
-  system.update(camera,'invalid',reduced,1500);
+  system.activate(await stageTier(system,'invalid'));
+  system.update(camera,reduced,1500);
   assert.equal(scene.children.length,1);assert.equal(system.report().tier,'low');
 });
 
@@ -179,18 +195,19 @@ test('cold Low, tier recovery during loading, authored crescent and café ends u
   const requests=localModels(t);
   const configs=[setup(0),setup(1)],scene=new T.Scene();
   const mask={width:4,height:4,ink:new Uint8Array(16).fill(1),markBounds:[.2,.1,.6,.8]};
-  const bake={sheet:{width:atlasSize,height:atlasSize},tiles:new Map(configs.map((c,i)=>[c.id,{cells:atlasCells(i),mask}]))};
+  const bake={lowSheet:{width:1024,height:1024},sheet:{width:atlasSize,height:atlasSize},tiles:new Map(configs.map((c,i)=>[c.id,{cells:atlasCells(i),mask}]))};
   const system=createSignageSystem(T,scene,configs,bays,bake,base);
   const camera=new T.PerspectiveCamera(58,1,.08,100);
   function approach(bay){
     const e=shopEntrance(bay);
     camera.position.set(e.x+8*e.normalX,3,e.z+8*e.normalZ);camera.lookAt(e.x,4.78,e.z);camera.updateMatrixWorld();
   }
-  const update=tier=>system.update(camera,tier,{matches:true},0);
-  approach(bays[0]);update('low');assert.deepEqual(requests,[]);
-  const pending=update('balanced');update('low');await pending;
+  const update=async tier=>{system.activate(await stageTier(system,tier));system.update(camera,{matches:true},0);};
+  approach(bays[0]);await update('low');assert.deepEqual(requests,[]);
+  const pending=stageTier(system,'balanced');await update('low');
+  system.discard(await pending);
   assert.equal(system.report().tier,'low');assert.equal(scene.children.length,1);
-  update('balanced');
+  await update('balanced');
   assert.equal(system.report().modelsLoaded,10);
   const crescent=scene.getObjectByName('Near sign letter relief');
   assert.equal(crescent.geometry.drawRange.count/3,tris('sign_logo3d_new_moon'));
@@ -201,10 +218,10 @@ test('cold Low, tier recovery during loading, authored crescent and café ends u
   const pbr=shader.uniforms.solidPbr.value[0];
   assert.ok(Math.abs(pbr.x-finish.metallic)<1e-5 && Math.abs(pbr.y-finish.roughness)<1e-5);
   assert.equal(shader.uniforms.solidBase.value[0].getHexString(),finish.color.slice(1).toLowerCase());
-  approach(bays[1]);update('detailed');
+  approach(bays[1]);await update('detailed');
   const ends=scene.getObjectByName('Instanced sign end trim');
   assert.ok(ends.isInstancedMesh);assert.equal(ends.count,2);
   assert.ok(scene.getObjectByName('Near sign letter relief').geometry.drawRange.count>0);
-  update('low');assert.equal(scene.children.length,1);
-  update('balanced');assert.deepEqual(requests.sort(),[...modelFiles].sort());
+  await update('low');assert.equal(scene.children.length,1);
+  await update('balanced');assert.deepEqual(requests.sort(),[...modelFiles].sort());
 });

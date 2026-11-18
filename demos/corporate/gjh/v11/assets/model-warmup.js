@@ -8,7 +8,7 @@ export function createUploadScheduler({now = () => performance.now(), budgetMs =
     if (index < 0) return;
     jobs.splice(index, 1);
     job.signal?.removeEventListener('abort', job.cancel);
-    if (error) job.reject(error);
+    if (error) { job.iterator?.return?.(); job.reject(error); }
     else {
       if (job.late) lateAdditions++;
       job.resolve();
@@ -52,7 +52,7 @@ export function createUploadScheduler({now = () => performance.now(), budgetMs =
   }
 
   return {enqueue, runFrame,
-    invalidate() { for (const job of jobs) job.iterator = null; },
+    invalidate() { for (const job of jobs) { job.iterator?.return?.(); job.iterator = null; } },
     dispose() { closed = true; while (jobs.length) jobs[0].cancel(); },
     report() { return {lateAdditions, maxFrameUploadMs, pendingUploads:jobs.length}; }};
 }
@@ -67,9 +67,14 @@ function materialTextures(material) {
   return textures;
 }
 
-export function meshTextures(mesh) {
+export function meshTextures(mesh, shadows=false) {
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   const textures = materials.flatMap(materialTextures);
+  if (shadows && mesh.castShadow) {
+    for (const material of [mesh.customDepthMaterial,mesh.customDistanceMaterial]) {
+      if (material) textures.push(...materialTextures(material));
+    }
+  }
   if (mesh.isSkinnedMesh && mesh.skeleton) {
     if (!mesh.skeleton.boneTexture) mesh.skeleton.computeBoneTexture();
     textures.push(mesh.skeleton.boneTexture);
@@ -81,6 +86,8 @@ export function meshTextures(mesh) {
 export function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap();
+  const alternateBindings = new WeakMap(), pendingBatches=new Set();
+  let arrivalRevision=0;
   const camera = new T.PerspectiveCamera();
   camera.position.z = 1;
   const staging = new T.Scene();
@@ -165,7 +172,7 @@ export function createModelWarmup(T, renderer) {
     yield () => withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
   }
 
-  function prepare(root, scene, {hide = false, linear = () => false, ...options} = {}) {
+  function prepare(root, scene, {hide = false, linear = () => false, alternates = [], ...options} = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse(mesh => {
@@ -173,6 +180,8 @@ export function createModelWarmup(T, renderer) {
       });
     }
     if (!meshes.length) return Promise.resolve();
+    pendingBatches.add(meshes);
+    arrivalRevision++;
     if (hide) for (const {mesh} of meshes) mesh.layers.mask = 0;
     return scheduler.enqueue(function* () {
       for (const {mesh, mask} of meshes) {
@@ -183,12 +192,42 @@ export function createModelWarmup(T, renderer) {
         yield* prepareMesh(mesh, scene, mask, false);
         if (linear()) yield* prepareMesh(mesh, scene, mask, true);
       }
-    }, options).finally(() => {
+    }, options).then(() => {
+      // LOD swaps replace geometry/material on the same live mesh; traversal
+      // alone can only see one binding. Keep both with the owner's lifetime.
+      for (const [owner,alternate] of alternates) {
+        alternateBindings.set(owner,[owner.clone(false),alternate]);
+      }
+    }).finally(() => {
+      pendingBatches.delete(meshes);
       if (hide) for (const {mesh, mask} of meshes) mesh.layers.mask = mask;
     });
   }
 
-  return {prepare, initTexture, report:scheduler.report,
+  // Tiny inventory steps share a slice. GPU waits always release the RAF.
+  // Closing this adapter also closes the underlying sweep and its GPU fence.
+  function enqueueSweep(makeWork, options) {
+    return scheduler.enqueue(function* () {
+      const work=makeWork();
+      let done=false;
+      try {
+        while(!done) yield () => {
+          const start=performance.now();
+          do {
+            const step=work.next();
+            done=step.done;
+            if(done || step.value===false)break;
+          } while(performance.now()-start<1.5);
+          return false;
+        };
+      } finally {work.return();}
+    },{late:false,...options});
+  }
+
+  return {prepare, initTexture, enqueueSweep, alternatesFor:mesh=>alternateBindings.get(mesh),
+    get arrivalRevision(){return arrivalRevision;},
+    pendingMeshes:()=>Array.from(pendingBatches).flatMap(batch=>batch.map(entry=>entry.mesh)),
+    report:scheduler.report,
     runFrame(canRun) { return scheduler.runFrame(canRun && !renderer.getContext().isContextLost()); },
     invalidate() { initialized = new WeakMap(); scheduler.invalidate(); },
     dispose() { scheduler.dispose(); target.dispose(); }};

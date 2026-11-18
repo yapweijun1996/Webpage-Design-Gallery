@@ -1,5 +1,5 @@
 """Expanded-only procedural finishes: matched poses, quality, faults and late import."""
-from gjh_startup_test_helpers import mall_entry_url
+from gjh_startup_test_helpers import mall_entry_url, wait_for_quality
 import argparse,functools,hashlib,http.server,json,os,tempfile,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -24,7 +24,7 @@ def boot(browser,url,w,h,preference='auto',failure=None,instrument=None):
  elif failure=='late':c.route('**/natural-materials.js',lambda route:pending.append(route))
  elif instrument:c.route('**/natural-materials.js',lambda route:route.fulfill(status=200,content_type='text/javascript',body=instrument))
  page=c.new_page();errors=[];console=[];page.on('console',lambda m:console.append({'type':m.type,'text':m.text,'url':m.location.get('url','')}) if m.type in ['warning','error'] else None);page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append(r.url));page.goto(mall_entry_url(url),wait_until='domcontentloaded');page.wait_for_function('window.__sceneReady===true',timeout=90000)
- page.locator('#keyboard-help > summary').click();page.locator('#graphics-quality').select_option(preference);page.locator('#keyboard-help > summary').click();step(page)
+ page.locator('#keyboard-help > summary').click();page.locator('#graphics-quality').select_option(preference);wait_for_quality(page,preference);page.locator('#keyboard-help > summary').click();step(page)
  return c,page,errors,requests,pending,console
 
 def console_result(messages,mode=None):
@@ -55,7 +55,7 @@ def run():
      if w==390 and args.group!='early':
       row['qualities']=[]
       for quality in ['low','balanced','detailed','auto']:
-       page.locator('#keyboard-help > summary').click();page.locator('#graphics-quality').select_option(quality);page.locator('#keyboard-help > summary').click();s=step(page,100);assert s['graphics']['quality']['preference']==quality;assert s['drawCalls']<=200;row['qualities'].append(s['graphics']['quality'])
+       page.locator('#keyboard-help > summary').click();page.locator('#graphics-quality').select_option(quality);wait_for_quality(page,quality);page.locator('#keyboard-help > summary').click();s=step(page,100);assert s['graphics']['quality']['preference']==quality;assert s['drawCalls']<=200;row['qualities'].append(s['graphics']['quality'])
      assert len([u for u in requests if u.endswith('/natural-materials.js')])==1
      assert page.locator('[data-store]').count()==3 and page.locator('[data-product]').count()==4 and page.locator('[data-space-id]').count()==14
      row['console']=console_result(console);row['network']=page.evaluate('''()=>{const a=performance.getEntriesByType('resource');return {requests:a.length,encoded:a.reduce((n,x)=>n+x.encodedBodySize,0),decoded:a.reduce((n,x)=>n+x.decodedBodySize,0)}}''');assert not errors and state(page)['illegalCount']==0;save(out/'report.json',r);print('MATERIALS PASS',w,preference,flush=True);c.close()

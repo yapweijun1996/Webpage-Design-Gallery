@@ -7,21 +7,21 @@ const store = (preset, options = {}) => ({preset, ...options});
 export const stores = Object.freeze({
   // The yellow crescent occupies (6,5)–(102,134) in the trimmed 675 × 139 SVG.
   S01:store('t1-classic',{relief:true,logoModule:'sign_logo3d_new_moon',logoRegion:[6/675,5/139,96/675,129/139]}),
-  S02:store('t3-cafe',{relief:true}),
+  S02:store('t3-cafe',{relief:true,fasciaInkHeight:.88}),
   S03:store('t8-kids',{letterInk:'dark'}),
-  S04:store('t6-beauty',{carrier:true,letterInk:'pale',inkRegion:[0,0,1,.64]}),
-  S05:store('heritage-red',{caption:true}),
+  S04:store('t6-beauty',{carrier:true,caption:true,letterInk:'pale',inkRegion:[0,0,1,.64]}),
+  S05:store('heritage-red',{caption:true,captionLogoWidth:.14}),
   S06:store('t5-book',{carrier:true,letterInk:'all',inkRegion:[.45,0,.55,1]}),
   S07:store('heritage-red',{caption:true,carrier:true}),
   S08:store('midnight',{letterInk:'red'}),
   S09:store('midnight',{caption:true}),
-  S10:store('t7-home',{caption:true}),
+  S10:store('t7-home',{caption:true,fasciaInkHeight:.92}),
   S11:store('heritage-red',{caption:true}),
   S12:store('t5-book',{caption:true,carrier:true}),
   S13:store('t4-tech',{carrier:true,letterInk:'dark'}),
   S14:store('t6-beauty',{carrier:true,letterInk:'all',inkRegion:[.52,0,.48,1]}),
   S15:store('t2-fashion',{carrier:true,letterInk:'all'}),
-  S16:store('t4-tech',{letterInk:'pale'}),
+  S16:store('t4-tech',{caption:true,captionText:'GP Batteries',letterInk:'pale'}),
   S17:store('t2-fashion',{letterInk:'all'})
 });
 
@@ -71,8 +71,11 @@ export function resolveConfig(id, settings, bay, kit, receipts) {
   const accent=kit[id].palette[0].hex;
   const fascia=tint(preset.palette.fascia,accent);
   const config = {preset:'t1-classic', lockup:'logo-left', brand:kit[id].brand, logo:id, poster:id,
-    blade:true, pulse:true, relief:false, carrier:false, caption:false, lodDistance:16, ...preset, ...settings, id, size,
+    fasciaInkHeight:.80, captionLogoWidth:.28, blade:true, pulse:true, relief:false, carrier:false, caption:false, lodDistance:16, ...preset, ...settings, id, size,
     palette:{...preset.palette, fascia,accent, ...settings.palette}};
+  if (!(config.captionLogoWidth>=.12 && config.captionLogoWidth<=.30)) throw Error(id+' invalid caption logo width');
+  if (!(config.fasciaInkHeight>=.5 && config.fasciaInkHeight<=.92)) throw Error(id+' invalid ink height');
+  if (config.captionText!==undefined && (typeof config.captionText!=='string' || !config.captionText.trim())) throw Error(id+' invalid caption');
   if (typeof config.brand !== 'string' || !config.brand.trim()) throw Error(id+' missing brand');
   for (const [key,allowed] of Object.entries(options)) {
     if (!allowed.includes(config[key])) throw Error(id+' invalid '+key);

@@ -1,5 +1,11 @@
 export const slotCapacity = 24;
 export const atlasSize = 2048;
+export const lowAtlasSize = 1024;
+
+// RGBA8, including the complete mip chain down to 1x1.
+export function atlasMiB(size) {
+  return +((4 * size * size - 1) / 3 * 4 / 1048576).toFixed(2);
+}
 export function atlasCells(index) {
   if (!Number.isInteger(index) || index<0 || index>=slotCapacity) throw RangeError('Sign atlas holds 24 lots');
   // Three rows of posters below twelve sign rows. Gutters isolate level-zero sampling.

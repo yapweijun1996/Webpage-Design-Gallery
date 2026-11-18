@@ -10,6 +10,9 @@ test('shop lighting tracks the nearest bays, floor and theme', () => {
   const lights = scene.children.filter(object => object.isPointLight);
   atmosphere.update({x:0,y:0,z:0});
   assert.deepEqual(lights.map(light => light.visible), [true,true,true,true,true,true,false,false]);
+  const variants=atmosphere.lightVariants(lights);
+  assert.deepEqual(variants.map(set=>set.length),[0,1,2,3,4,5,6]);
+  assert.equal(lights.filter(light=>light.visible).length,6);
   const original = lights[0].color.clone();
   atmosphere.applyTheme({lighting:{key:0x4466cc}});
   assert.notDeepEqual(lights[0].color.toArray(), original.toArray());

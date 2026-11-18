@@ -1,7 +1,7 @@
 import {registry} from '../icons.js';
 import {swatch as s} from './tokens.js';
 
-import {atlasSize,atlasCells,plateRect} from './atlas-layout.js';
+import {atlasSize,lowAtlasSize,atlasCells,plateRect} from './atlas-layout.js';
 function canvas(w,h) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
@@ -138,7 +138,7 @@ function lockup(ctx,w,h,c,logo,door,blade=false) {
   const relief=canvas(w,h), reliefCtx=relief.getContext('2d');
   const caption=fallback || (c.caption && c.lockup!=='monogram' && !blade);
   const stacked=c.lockup==='logo-top' || (blade && fallback);
-  const top=h*.10, usable=h*(blade?.58:.80);
+  const usable=h*(blade?.58:c.fasciaInkHeight), top=blade?h*.10:(h-usable)/2;
   let labelX=w/2,labelY=top+usable*.52,labelW=w*.88;
   let markBounds=null;
   if(mark){
@@ -148,8 +148,9 @@ function lockup(ctx,w,h,c,logo,door,blade=false) {
         box={x:w*.08,y:top,w:w*.84,h:usable*.44};
         labelY=top+usable*.74;
       } else {
-        box={x:w*.065,y:top,w:w*(fallback?.115:.28),h:usable};
-        labelX=w*(fallback?.57:.655);labelW=w*(fallback?.72:.57);
+        box={x:w*.065,y:top,w:w*(fallback?.115:c.captionLogoWidth),h:usable};
+        labelW=w*(fallback?.72:.85-c.captionLogoWidth);
+        labelX=fallback?w*.57:w*.94-labelW/2;
       }
     }
     const r=contained(mark,box.x,box.y,box.w,box.h);
@@ -172,16 +173,36 @@ function lockup(ctx,w,h,c,logo,door,blade=false) {
   if(caption){
     const font=c.typography==='modern'?'600 SIZEpx Arial, sans-serif':
       c.typography==='editorial'?'500 SIZEpx Georgia, serif':'bold SIZEpx Georgia, serif';
-    for(const layer of [ink,reliefCtx]){
-      let size=Math.round(usable*(stacked?.49:.82));
-      layer.font=font.replace('SIZE',String(size));
-      const words=c.brand.split(/\s+/);
-      const lines=!blade && words.length===2 && layer.measureText(c.brand).width>labelW*1.55 ? words : [c.brand];
-      const maxWidth=Math.max(...lines.map(line=>layer.measureText(line).width));
-      size*=Math.min(1,labelW/maxWidth,lines.length>1?.55:1);
-      layer.font=font.replace('SIZE',String(size));
-      layer.textAlign='center';layer.textBaseline='middle';layer.fillStyle=c.palette.letter;
-      lines.forEach((line,i)=>layer.fillText(line,labelX,labelY+(i-(lines.length-1)/2)*size));
+    // An official letter-ink relief already supplies the raised name. Its
+    // legibility caption stays on the baked face at every distance.
+    const layers=c.letterInk && !fallback ? [ink] : [ink,reliefCtx];
+    for(const layer of layers){
+      const name=c.captionText??c.brand;
+      const words=name.split(/\s+/);
+      const candidates=[[name]];
+      if(!blade && !stacked)for(let i=1;i<words.length;i++)
+        candidates.push([words.slice(0,i).join(' '),words.slice(i).join(' ')]);
+      // Fit actual ink, including descenders, to the available panel. Long
+      // names can use two tightly spaced lines without shrinking both to fit
+      // the width of the unbroken name.
+      layer.font=font.replace('SIZE','100');
+      const height=usable*(stacked?.44:.95);
+      let best;
+      for(const lines of candidates){
+        const metrics=lines.map(line=>layer.measureText(line));
+        const ascent=Math.max(...metrics.map(m=>m.actualBoundingBoxAscent));
+        const descent=Math.max(...metrics.map(m=>m.actualBoundingBoxDescent));
+        const leading=ascent+descent+6;
+        const inkHeight=ascent+descent+leading*(lines.length-1);
+        const scale=Math.min(labelW/Math.max(...metrics.map(m=>m.width)),height/inkHeight,
+          usable*(stacked?.49:.82)/100);
+        if(!best || scale>best.scale)best={lines,ascent,inkHeight,leading,scale};
+      }
+      const {lines,ascent,inkHeight,leading,scale}=best;
+      layer.font=font.replace('SIZE',String(100*scale));
+      layer.textAlign='center';layer.textBaseline='alphabetic';layer.fillStyle=c.palette.letter;
+      const baseline=labelY+(ascent-inkHeight/2)*scale;
+      lines.forEach((line,i)=>layer.fillText(line,labelX,baseline+i*leading*scale));
     }
   }
   ctx.save();
@@ -239,5 +260,8 @@ export async function bakeAtlas(configs,assetBase) {
     paintPoster(ctx,c,poster,cells.poster);
     tiles.set(c.id,{cells,mask:masks});
   }));
-  return {sheet,tiles};
+  const lowSheet=canvas(lowAtlasSize,lowAtlasSize), low=lowSheet.getContext('2d');
+  low.imageSmoothingQuality='high';
+  low.drawImage(sheet,0,0,lowAtlasSize,lowAtlasSize);
+  return {sheet,lowSheet,tiles};
 }

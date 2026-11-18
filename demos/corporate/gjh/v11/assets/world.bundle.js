@@ -2183,6 +2183,10 @@ var westShopPlacements = {
 // demos/corporate/gjh/v11/assets/signage/atlas-layout.js
 var slotCapacity = 24;
 var atlasSize = 2048;
+var lowAtlasSize = 1024;
+function atlasMiB(size) {
+  return +((4 * size * size - 1) / 3 * 4 / 1048576).toFixed(2);
+}
 function atlasCells(index) {
   if (!Number.isInteger(index) || index < 0 || index >= slotCapacity)
     throw RangeError("Sign atlas holds 24 lots");
@@ -2551,21 +2555,21 @@ var presets = Object.freeze({
 var store = (preset2, options = {}) => ({ preset: preset2, ...options });
 var stores = Object.freeze({
   S01: store("t1-classic", { relief: true, logoModule: "sign_logo3d_new_moon", logoRegion: [6 / 675, 5 / 139, 96 / 675, 129 / 139] }),
-  S02: store("t3-cafe", { relief: true }),
+  S02: store("t3-cafe", { relief: true, fasciaInkHeight: 0.88 }),
   S03: store("t8-kids", { letterInk: "dark" }),
-  S04: store("t6-beauty", { carrier: true, letterInk: "pale", inkRegion: [0, 0, 1, 0.64] }),
-  S05: store("heritage-red", { caption: true }),
+  S04: store("t6-beauty", { carrier: true, caption: true, letterInk: "pale", inkRegion: [0, 0, 1, 0.64] }),
+  S05: store("heritage-red", { caption: true, captionLogoWidth: 0.14 }),
   S06: store("t5-book", { carrier: true, letterInk: "all", inkRegion: [0.45, 0, 0.55, 1] }),
   S07: store("heritage-red", { caption: true, carrier: true }),
   S08: store("midnight", { letterInk: "red" }),
   S09: store("midnight", { caption: true }),
-  S10: store("t7-home", { caption: true }),
+  S10: store("t7-home", { caption: true, fasciaInkHeight: 0.92 }),
   S11: store("heritage-red", { caption: true }),
   S12: store("t5-book", { caption: true, carrier: true }),
   S13: store("t4-tech", { carrier: true, letterInk: "dark" }),
   S14: store("t6-beauty", { carrier: true, letterInk: "all", inkRegion: [0.52, 0, 0.48, 1] }),
   S15: store("t2-fashion", { carrier: true, letterInk: "all" }),
-  S16: store("t4-tech", { letterInk: "pale" }),
+  S16: store("t4-tech", { caption: true, captionText: "GP Batteries", letterInk: "pale" }),
   S17: store("t2-fashion", { letterInk: "all" })
 });
 function luminance(hex) {
@@ -2620,6 +2624,8 @@ function resolveConfig(id, settings, bay, kit, receipts) {
     brand: kit[id].brand,
     logo: id,
     poster: id,
+    fasciaInkHeight: 0.8,
+    captionLogoWidth: 0.28,
     blade: true,
     pulse: true,
     relief: false,
@@ -2632,6 +2638,12 @@ function resolveConfig(id, settings, bay, kit, receipts) {
     size,
     palette: { ...preset2.palette, fascia, accent, ...settings.palette }
   };
+  if (!(config.captionLogoWidth >= 0.12 && config.captionLogoWidth <= 0.3))
+    throw Error(id + " invalid caption logo width");
+  if (!(config.fasciaInkHeight >= 0.5 && config.fasciaInkHeight <= 0.92))
+    throw Error(id + " invalid ink height");
+  if (config.captionText !== undefined && (typeof config.captionText !== "string" || !config.captionText.trim()))
+    throw Error(id + " invalid caption");
   if (typeof config.brand !== "string" || !config.brand.trim())
     throw Error(id + " missing brand");
   for (const [key, allowed] of Object.entries(options)) {
@@ -3008,7 +3020,7 @@ function lockup(ctx, w, h, c, logo, door, blade = false) {
   const relief = canvas(w, h), reliefCtx = relief.getContext("2d");
   const caption = fallback || c.caption && c.lockup !== "monogram" && !blade;
   const stacked = c.lockup === "logo-top" || blade && fallback;
-  const top = h * 0.1, usable = h * (blade ? 0.58 : 0.8);
+  const usable = h * (blade ? 0.58 : c.fasciaInkHeight), top = blade ? h * 0.1 : (h - usable) / 2;
   let labelX = w / 2, labelY = top + usable * 0.52, labelW = w * 0.88;
   let markBounds = null;
   if (mark) {
@@ -3018,9 +3030,9 @@ function lockup(ctx, w, h, c, logo, door, blade = false) {
         box = { x: w * 0.08, y: top, w: w * 0.84, h: usable * 0.44 };
         labelY = top + usable * 0.74;
       } else {
-        box = { x: w * 0.065, y: top, w: w * (fallback ? 0.115 : 0.28), h: usable };
-        labelX = w * (fallback ? 0.57 : 0.655);
-        labelW = w * (fallback ? 0.72 : 0.57);
+        box = { x: w * 0.065, y: top, w: w * (fallback ? 0.115 : c.captionLogoWidth), h: usable };
+        labelW = w * (fallback ? 0.72 : 0.85 - c.captionLogoWidth);
+        labelX = fallback ? w * 0.57 : w * 0.94 - labelW / 2;
       }
     }
     const r = contained(mark, box.x, box.y, box.w, box.h);
@@ -3046,18 +3058,34 @@ function lockup(ctx, w, h, c, logo, door, blade = false) {
   }
   if (caption) {
     const font = c.typography === "modern" ? "600 SIZEpx Arial, sans-serif" : c.typography === "editorial" ? "500 SIZEpx Georgia, serif" : "bold SIZEpx Georgia, serif";
-    for (const layer of [ink, reliefCtx]) {
-      let size = Math.round(usable * (stacked ? 0.49 : 0.82));
-      layer.font = font.replace("SIZE", String(size));
-      const words = c.brand.split(/\s+/);
-      const lines = !blade && words.length === 2 && layer.measureText(c.brand).width > labelW * 1.55 ? words : [c.brand];
-      const maxWidth = Math.max(...lines.map((line) => layer.measureText(line).width));
-      size *= Math.min(1, labelW / maxWidth, lines.length > 1 ? 0.55 : 1);
-      layer.font = font.replace("SIZE", String(size));
+    const layers = c.letterInk && !fallback ? [ink] : [ink, reliefCtx];
+    for (const layer of layers) {
+      const name = c.captionText ?? c.brand;
+      const words = name.split(/\s+/);
+      const candidates = [[name]];
+      if (!blade && !stacked)
+        for (let i = 1;i < words.length; i++)
+          candidates.push([words.slice(0, i).join(" "), words.slice(i).join(" ")]);
+      layer.font = font.replace("SIZE", "100");
+      const height = usable * (stacked ? 0.44 : 0.95);
+      let best;
+      for (const lines2 of candidates) {
+        const metrics = lines2.map((line) => layer.measureText(line));
+        const ascent2 = Math.max(...metrics.map((m) => m.actualBoundingBoxAscent));
+        const descent = Math.max(...metrics.map((m) => m.actualBoundingBoxDescent));
+        const leading2 = ascent2 + descent + 6;
+        const inkHeight2 = ascent2 + descent + leading2 * (lines2.length - 1);
+        const scale2 = Math.min(labelW / Math.max(...metrics.map((m) => m.width)), height / inkHeight2, usable * (stacked ? 0.49 : 0.82) / 100);
+        if (!best || scale2 > best.scale)
+          best = { lines: lines2, ascent: ascent2, inkHeight: inkHeight2, leading: leading2, scale: scale2 };
+      }
+      const { lines, ascent, inkHeight, leading, scale } = best;
+      layer.font = font.replace("SIZE", String(100 * scale));
       layer.textAlign = "center";
-      layer.textBaseline = "middle";
+      layer.textBaseline = "alphabetic";
       layer.fillStyle = c.palette.letter;
-      lines.forEach((line, i) => layer.fillText(line, labelX, labelY + (i - (lines.length - 1) / 2) * size));
+      const baseline = labelY + (ascent - inkHeight / 2) * scale;
+      lines.forEach((line, i) => layer.fillText(line, labelX, baseline + i * leading * scale));
     }
   }
   ctx.save();
@@ -3136,7 +3164,10 @@ async function bakeAtlas(configs, assetBase) {
     paintPoster(ctx, c, poster, cells.poster);
     tiles.set(c.id, { cells, mask: masks });
   }));
-  return { sheet, tiles };
+  const lowSheet = canvas(lowAtlasSize, lowAtlasSize), low = lowSheet.getContext("2d");
+  low.imageSmoothingQuality = "high";
+  low.drawImage(sheet, 0, 0, lowAtlasSize, lowAtlasSize);
+  return { sheet, lowSheet, tiles };
 }
 
 // demos/corporate/gjh/v11/assets/shop-sign-vendor.js
@@ -3305,6 +3336,7 @@ function buildBatch(T, modules, capacity, name, assemble) {
   for (const [attribute, values] of Object.entries({ position: vertices, normal: normals, color: colors, signAnchor: anchors, signFinish: pbr, signEmission: emission }))
     g.setAttribute(attribute, new T.Float32BufferAttribute(values, 3));
   const dimensions = new T.InstancedBufferAttribute(new Float32Array(capacity * 4), 4);
+  dimensions.setUsage(T.DynamicDrawUsage);
   g.setAttribute("signSize", dimensions);
   const mat = new T.MeshStandardMaterial({ vertexColors: true, metalness: 1, roughness: 1 });
   mat.onBeforeCompile = (shader) => {
@@ -3322,6 +3354,7 @@ roughnessFactor *= vFinish.y;`).replace("#include <emissivemap_fragment>", `#inc
 totalEmissiveRadiance += vSignEmission;`);
   };
   const mesh = new T.InstancedMesh(g, mat, capacity);
+  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
   mesh.frustumCulled = false;
   mesh.count = 0;
   mesh.name = name;
@@ -3331,8 +3364,13 @@ totalEmissiveRadiance += vSignEmission;`);
   }, commit(count) {
     mesh.count = count;
     mesh.visible = count > 0;
-    mesh.instanceMatrix.needsUpdate = true;
-    dimensions.needsUpdate = true;
+    for (const attribute of [mesh.instanceMatrix, dimensions]) {
+      attribute.clearUpdateRanges();
+      if (count) {
+        attribute.addUpdateRange(0, count * attribute.itemSize);
+        attribute.needsUpdate = true;
+      }
+    }
   } };
 }
 function buildHardware(T, modules, detailed, capacity) {
@@ -3414,6 +3452,35 @@ async function loadModules(assetBase, files = modelFiles, loader = new GLTFLoade
     } catch {}
   }));
   return modules;
+}
+
+// demos/corporate/gjh/v11/assets/signage/phone-proof.js
+var samples = [
+  ["S01", 17, 17, 17],
+  ["S02", 10, 12, 12],
+  ["S03", 16, 16, 16],
+  ["S04", 6, 13, 12],
+  ["S05", 8, 11, 11],
+  ["S06", 12, 12, 12],
+  ["S07", 13, 13, 13],
+  ["S08", 15, 15, 15],
+  ["S09", 19, 19, 19],
+  ["S10", 7, 12, 12],
+  ["S11", 14, 13, 13],
+  ["S12", 13, 13, 13],
+  ["S13", 28, 28, 27],
+  ["S14", 19, 20, 20],
+  ["S15", 24, 24, 24],
+  ["S16", 7, 11, 11],
+  ["S17", 17, 17, 17]
+];
+function phoneProof(tier) {
+  return {
+    canvasCssPx: [393, 550],
+    distanceM: 12,
+    verticalFovDeg: 77.876,
+    glyphs: Object.fromEntries(samples.map(([id, previous, low, full]) => [id, { previousCssPx: previous, activeAtlasCssPx: tier === "low" ? low : full }]))
+  };
 }
 
 // demos/corporate/gjh/v11/assets/signage/runtime.js
@@ -3513,7 +3580,7 @@ if(solid>=0) totalEmissiveRadiance=solidEmission[solid];`);
   };
   return mat;
 }
-function buildRelief(T, signs, tiles, modules, texture, detailed) {
+function* buildRelief(T, signs, tiles, modules, texture, detailed) {
   const pieces = [], ranges = [], source = [], finishes2 = [];
   let offset = 0;
   for (const sign of signs) {
@@ -3536,6 +3603,7 @@ function buildRelief(T, signs, tiles, modules, texture, detailed) {
       pieces.push(g);
     }
     ranges.push([start, source.length]);
+    yield;
   }
   if (!pieces.length)
     return null;
@@ -3557,17 +3625,27 @@ function buildRelief(T, signs, tiles, modules, texture, detailed) {
       index.array.set(original.subarray(a, b), count);
       count += b - a;
     }
-    index.needsUpdate = true;
+    index.clearUpdateRanges();
+    if (count) {
+      index.addUpdateRange(0, count);
+      index.needsUpdate = true;
+    }
     geo.setDrawRange(0, count);
     mesh.visible = count > 0;
   } };
 }
 function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
-  const texture = new T.CanvasTexture(bake.sheet);
-  texture.colorSpace = T.SRGBColorSpace;
-  texture.anisotropy = 2;
-  const flat = new T.MeshBasicMaterial({ map: texture, toneMapped: false }), pulse = { value: 0 };
-  const embossed = nearFaceMaterial(T, texture, pulse);
+  const pulse = { value: 0 };
+  function atlas(canvas2) {
+    const texture = new T.CanvasTexture(canvas2);
+    texture.colorSpace = T.SRGBColorSpace;
+    texture.generateMipmaps = true;
+    texture.minFilter = T.LinearMipmapLinearFilter;
+    texture.anisotropy = 2;
+    return texture;
+  }
+  const lowTexture = atlas(bake.lowSheet), fullTexture = atlas(bake.sheet);
+  const flat = new T.MeshBasicMaterial({ map: lowTexture, toneMapped: false });
   const pieces = [], signs = [];
   configs.forEach((config, index) => {
     const group = createShopSign(T, { ...config, faceMaterial: flat }, bays[index]);
@@ -3592,7 +3670,8 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
   faces.layers.enable(1);
   scene.add(faces);
   const frustum = new T.Frustum, view = new T.Matrix4, eye = new T.Vector3, near = [];
-  let tier = "low", signature = -1, hardware = null, endTrim = null, relief = null, modules = new Map, appliedModules, moduleTask;
+  const low = { tier: "low", faces, meshes: [faces] };
+  let active = low, signature = -1, modules = null, moduleTask;
   let calls = 0, tris = 0;
   function measure(mesh) {
     let beforeCalls = 0, beforeTriangles = 0;
@@ -3606,81 +3685,148 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     };
   }
   measure(faces);
-  function discard(pool) {
-    if (!pool)
+  function release(stage, keep) {
+    if (!stage || stage === keep)
       return;
-    scene.remove(pool.mesh);
-    pool.mesh.geometry.dispose();
-    pool.mesh.material.dispose();
-    pool.mesh.dispose?.();
-  }
-  function rebuild(next) {
-    discard(hardware);
-    discard(endTrim);
-    discard(relief);
-    hardware = endTrim = relief = null;
-    appliedModules = modules;
-    faces.material = next === "low" ? flat : embossed;
-    if (next !== "low") {
-      hardware = buildHardware(T, modules, next === "detailed", signs.length);
-      if (signs.some((s) => s.hasEndTrim))
-        endTrim = buildEndTrim(T, modules, signs.length);
-      relief = buildRelief(T, signs, bake.tiles, modules, texture, next === "detailed");
-      for (const pool of [hardware, endTrim, relief])
-        if (pool) {
-          pool.mesh.visible = false;
-          measure(pool.mesh);
-          scene.add(pool.mesh);
-        }
+    const texture = stage.faces.material.map;
+    if (texture !== keep.faces.material.map) {
+      texture.dispose();
+      texture.needsUpdate = true;
     }
-    tier = next;
-    signature = -1;
-  }
-  return { update(camera, requestedTier, reducedMotion, now) {
-    calls = tris = 0;
-    const next = ["balanced", "detailed"].includes(requestedTier) ? requestedTier : "low";
-    if (tier !== next || next !== "low" && appliedModules !== modules)
-      rebuild(next);
-    if (next === "low")
+    if (stage === low)
       return;
-    moduleTask ??= loadModules(assetBase).then((loaded) => {
-      if (loaded.size)
-        modules = loaded;
-    });
-    frustum.setFromProjectionMatrix(view.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-    eye.setFromMatrixPosition(camera.matrixWorld);
-    let bits = 0;
-    near.length = 0;
-    for (let i = 0;i < signs.length; i++) {
-      const s = signs[i];
-      if (!frustum.intersectsSphere(s.sphere))
-        continue;
-      if (selectSignLod(tier, s.centre.distanceTo(eye), true, s.config.lodDistance) === "baked")
-        continue;
-      near.push(i);
-      bits |= 1 << i;
-    }
-    pulse.value = near.length && !reducedMotion?.matches ? 0.024 * Math.sin(now * 0.0012) : 0;
-    if (bits === signature)
-      return moduleTask;
-    signature = bits;
-    near.forEach((i, n) => hardware.set(n, signs[i]));
-    hardware.commit(near.length);
-    let ends = 0;
-    for (const i of near) {
-      const sign = signs[i];
-      if (sign.hasEndTrim) {
-        endTrim.set(ends++, sign, -1);
-        endTrim.set(ends++, sign, 1);
+    for (const pool of [stage.hardware, stage.endTrim, stage.relief])
+      if (pool) {
+        pool.mesh.geometry.dispose();
+        pool.mesh.material.dispose();
+        pool.mesh.dispose?.();
       }
+    stage.faces.material.dispose();
+  }
+  function activate(stage) {
+    if (stage === active)
+      return;
+    scene.remove(...active.meshes);
+    release(active, stage);
+    active = stage;
+    signature = -1;
+    scene.add(...stage.meshes);
+  }
+  function* prepareTier(tier) {
+    if (tier !== "balanced" && tier !== "detailed")
+      tier = "low";
+    if (tier === active.tier)
+      return active;
+    if (tier === "low")
+      return low;
+    moduleTask ??= loadModules(assetBase).then((loaded) => {
+      modules = loaded;
+    }, () => {
+      modules = new Map;
+    });
+    while (!modules)
+      yield false;
+    const texture = fullTexture, face = new T.Mesh(faces.geometry, nearFaceMaterial(T, texture, pulse));
+    face.name = faces.name;
+    face.layers.mask = faces.layers.mask;
+    measure(face);
+    const stage = { tier, faces: face, meshes: [face] };
+    let complete = false;
+    try {
+      const detailed = tier === "detailed";
+      stage.hardware = buildHardware(T, modules, detailed, signs.length);
+      signs.forEach((sign, i) => stage.hardware.set(i, sign));
+      stage.hardware.commit(signs.length);
+      yield;
+      const ends = signs.filter((sign) => sign.hasEndTrim);
+      if (ends.length) {
+        stage.endTrim = buildEndTrim(T, modules, signs.length);
+        ends.forEach((sign, i) => {
+          stage.endTrim.set(i * 2, sign, -1);
+          stage.endTrim.set(i * 2 + 1, sign, 1);
+        });
+        stage.endTrim.commit(ends.length * 2);
+        yield;
+      }
+      stage.relief = yield* buildRelief(T, signs, bake.tiles, modules, texture, detailed);
+      stage.relief?.select(signs.map((_, i) => i));
+      for (const pool of [stage.hardware, stage.endTrim, stage.relief])
+        if (pool) {
+          measure(pool.mesh);
+          stage.meshes.push(pool.mesh);
+        }
+      complete = true;
+      return stage;
+    } finally {
+      if (!complete)
+        release(stage, active);
     }
-    endTrim?.commit(ends);
-    relief?.select(near);
-    return moduleTask;
-  }, report() {
-    const pixels = texture.image.width * texture.image.height;
-    return { modelsLoaded: modules.size, signs: signs.length, drawCalls: calls, triangles: tris, textureMB: +(pixels * 4 * 4 / 3 / 1048576).toFixed(2), tier };
-  } };
+  }
+  return {
+    prepareTier,
+    activate,
+    discard(stage) {
+      release(stage, active);
+    },
+    activeMeshes() {
+      return active.meshes;
+    },
+    getTier() {
+      return active.tier;
+    },
+    recover() {
+      activate(low);
+    },
+    update(camera, reducedMotion, now) {
+      calls = tris = 0;
+      const { tier, hardware, endTrim, relief } = active;
+      if (tier === "low")
+        return;
+      frustum.setFromProjectionMatrix(view.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+      eye.setFromMatrixPosition(camera.matrixWorld);
+      let bits = 0;
+      near.length = 0;
+      for (let i = 0;i < signs.length; i++) {
+        const s = signs[i];
+        if (!frustum.intersectsSphere(s.sphere))
+          continue;
+        if (selectSignLod(tier, s.centre.distanceTo(eye), true, s.config.lodDistance) === "baked")
+          continue;
+        near.push(i);
+        bits |= 1 << i;
+      }
+      pulse.value = near.length && !reducedMotion?.matches ? 0.024 * Math.sin(now * 0.0012) : 0;
+      if (bits === signature)
+        return;
+      signature = bits;
+      near.forEach((i, n) => hardware.set(n, signs[i]));
+      hardware.commit(near.length);
+      let ends = 0;
+      for (const i of near) {
+        const sign = signs[i];
+        if (sign.hasEndTrim) {
+          endTrim.set(ends++, sign, -1);
+          endTrim.set(ends++, sign, 1);
+        }
+      }
+      endTrim?.commit(ends);
+      relief?.select(near);
+    },
+    report() {
+      const atlasPx = active.faces.material.map.image.width;
+      return {
+        modelsLoaded: modules?.size ?? 0,
+        signs: signs.length,
+        drawCalls: calls,
+        triangles: tris,
+        phoneProof: phoneProof(active.tier),
+        previousTextureMB: atlasMiB(atlasSize),
+        atlasPx,
+        textureMB: atlasMiB(atlasPx),
+        tier: active.tier
+      };
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/assets/shop-signs.js
@@ -4854,8 +5000,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const map = new T.CanvasTexture(panel);
       map.colorSpace = T.SRGBColorSpace;
       return mat(16777215, { map, roughness: 0.88 });
-    }, updateSigns = function(camera, canvas2, tier, reducedMotion) {
-      signage?.update(camera, tier, reducedMotion, performance.now());
+    }, updateSigns = function(camera, canvas2, reducedMotion) {
+      signage?.update(camera, reducedMotion, performance.now());
       const frame = canvas2.getBoundingClientRect();
       for (const label of roomSigns) {
         const mesh = label.mesh;
@@ -5506,11 +5652,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
         const firstProduct = scene.children.length;
-<<<<<<< HEAD
-        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
-=======
-        productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], sampleCan);
->>>>>>> origin/main
+        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], sampleCan);
         queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter((mesh) => mesh.isMesh));
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)

@@ -2,7 +2,7 @@
 
 The expanded mall has one configurable sign for each of its 17 occupied bays. Its fascia, projecting double-faced blade, number plate and lit hero graphic share one colour atlas. The three north anchors keep their HUD-tracked room names. The other fourteen stores also reuse the atlas on their existing product stands and rear brass plaques. The upper-deck story gallery and Classic layout have their own presentation.
 
-The two columns below show the baked fascia faces at the approximate CSS size of a 12 m frontal approach on a 393 px phone. Rows follow slot order, left to right.
+The archived 2048px fascia proof below uses the former 58° reference projection. The current phone projection and proof appear in the name-size measurements. Rows follow slot order, left to right.
 
 ![Seventeen official shop lockups on their configured fascia finishes](evidence/gjh-v11-signage-fascias.png)
 
@@ -28,7 +28,7 @@ S05: store('heritage-red', {
 | `logo`, `poster` | Own slot ID or null. Logo paths require a matching found receipt. Missing or undecodable artwork uses a neutral wordmark treatment. |
 | `preset`, `palette` | T1 Classic by default. Override individual `fascia`, `trim`, `letter`, `glow`, `accent` tokens as six-digit display-sRGB hex. The kit's first accent tints the preset surround. Letter/fascia contrast must reach 4.5:1. |
 | `lockup` | `logo-left`, `logo-top`, `wordmark-only` or `monogram`. The full official mark is centred when it includes a legible name. Monogram uses supplied artwork. |
-| `caption`, `carrier` | Add the Latin name where the source name is absent or tiny. A brushed light inlay supports dark official ink. |
+| `caption`, `captionText`, `captionLogoWidth`, `fasciaInkHeight`, `carrier` | Add the Latin name where the source name is absent or tiny. Optional caption text expands the short brand name. The side mark occupies 12–30% of the panel width and fascia ink uses 50–92% of its height. A brushed light inlay supports dark official ink. |
 | `typography` | `heritage`, `editorial`, `modern`. Platform serif or sans faces. Long names fit proportionally or wrap. No font download. |
 | `finish`, `backlight` | `lacquer`, `matte`, `timber-slat`, `stone`, `glass`. Lighting modes are `halo`, `underglow`, `neon-line`, `none`. |
 | `blade`, `pulse` | Booleans, default true. Blade faces have independent front winding. The optional near glow respects the live reduced-motion preference. |
@@ -62,29 +62,59 @@ New Moon retains the colours and crescent of its official SVG. MILI retains its 
 
 `createShopSign(T, config, bay)` builds one local Three group from the resolved config and bay. The scene adapter supplies the shared face material, places the group on the aisle normal and merges its fixed faces. East and west furnishing placements determine window-poster mounting heights. The sign group registers no lights, colliders or interactions.
 
-The 2048² RGBA atlas reserves fascia, blade and poster charts with gutters. Fascia alpha carries the raised-ink mask. Low draws the baked charts in one batch and requests zero signage models. Entering Balanced or Detailed starts one lazy request per GLB. The scene continues using procedural fittings while the kit loads. A failed file keeps its own fallback. A late completion after recovery to Low only fills the model cache.
+A single set of chart coordinates covers fascias, blades and posters. The bake keeps a full 2048² canvas and a filtered 1024² CPU copy. Cold Low uploads only the smaller copy and requests zero kit files. Balanced and Detailed use the full sheet with alpha-masked embossing. Both use trilinear mip filtering down to 1×1 and request 2× anisotropy for oblique aisle views (clamped by Three to the driver limit).
+
+The warm stage reads the kit manifest on the two higher tiers, awaits its GLBs and builds the final instance and lettering buffers off-scene. Missing fittings use their procedural sockets. View changes compact prepared instances and indices to the nearby stores. The dynamic buffers upload only the selected prefix. Runtime tier changes use the same staging and commit after the GPU fence. The previous atlas is disposed when its size is no longer active. A switch can temporarily have both sizes resident. Corrupt or unavailable models can reduce the reported model count.
 
 Nearby signs share an instanced frame, rails, backplate, blade panel and bracket. Timber and ivy use instanced end fittings on MILI. Both near tiers fit the authored crescent to the yellow path in the official New Moon artwork. Detailed adds downlights and mask-derived lettering. Outside the configured radius only the baked faces remain. No sign adds a light or render target. [Model and socket contract](../demos/corporate/gjh/v11/assets/signage/models/README.md)
 
 ### Measured tier costs
 
-The CPU probe baked the local store artwork and parsed the delivered GLBs through the mall's vendored Three.js loader. Each tier started cold and sampled all 17 stores from 12 m, at both 393×550 and 1440×817 with a fixed 58° vertical FOV. Both viewport runs produced the maxima below. Batches count visible main-pass submissions. Triangles include instance multiplicity, reverse ivy faces and the selected lettering index range. Texture memory is the nominal RGBA8 atlas allocation with mipmaps.
+The CPU probe baked the local store artwork and parsed the delivered GLBs through the mall's vendored Three.js loader. Each tier started cold and sampled all 17 stores from 12 m, at both 393×550 and 1440×817 using the default expanded Tripo chase-camera FOV for each viewport. Both viewport runs produced the maxima below. Batches count visible main-pass submissions. Triangles include instance multiplicity, reverse ivy faces and the selected lettering index range. Texture memory is the nominal RGBA8 atlas allocation with mipmaps.
 
-| Tier | Signs | Main-pass draws, peak | Submitted triangles, peak | Atlas MiB | Models loaded |
+| Tier | Signs | Main-pass draws, peak | Submitted triangles, peak | Previous → current atlas MiB | Models loaded |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Low | 17 | 1 | 226 | 21.33 | 0 |
-| Balanced | 17 | 4 | 8,032 | 21.33 | 10 |
-| Detailed | 17 | 4 | 14,490 | 21.33 | 10 |
+| Low | 17 | 1 | 226 | 21.33 → 5.33 | 0 |
+| Balanced | 17 | 4 | 8,032 | 21.33 → 21.33 | 10 |
+| Detailed | 17 | 4 | 14,528 | 21.33 → 21.33 | 10 |
 
-The previous two-batch fascia and window sheets at `844b971` used 36.21 MiB. The combined Low atlas saves 14.88 MiB. The ten GLBs transfer 141,076 bytes and contain 2,374 source triangles. Repeated placements account for the higher submission counts. Desktop bloom can add one face draw and 226 triangles. Renderer counters, GPU allocation and frame time require the headed run.
+Low saves 16.00 MiB (75%) against the immediately preceding build. Its nominal 5.33 MiB is 5.87 MiB below the owner's approximately 11.2 MiB iPhone reference. The figures include RGBA8 mip levels and exclude CPU canvases, driver overhead and transient allocations. The updated Detailed frontage peaks at 14,528 submitted triangles, up 38 from 14,490. The ten GLBs transfer 141,076 bytes and contain 2,374 source triangles. Repeated placements account for the higher submission counts. Desktop bloom can add one face draw and 226 triangles. Renderer counters, GPU allocation and frame time require the headed run.
 
-Repeat the probe with `SIGNAGE_CANVAS` set to an installed `@napi-rs/canvas` directory and run `node tests/measure_gjh_signage.mjs`. An optional PNG path writes the fascia size proof. The probe checks requested filenames and loaded model count for each tier before printing its results.
+Repeat the probe with `SIGNAGE_CANVAS` set to an installed `@napi-rs/canvas` directory and run `node tests/measure_gjh_signage.mjs`. An optional PNG path writes the fascia size proof. The probe checks requested filenames, loaded model counts, mipmapped allocation and the 10 CSS px minimum for each Low fascia.
+
+### Name size at 12 m
+
+The CPU probe calls the production `playerCameraFraming` for the default Tripo visitor, expanded mall and a 393 × 550 CSS px portrait canvas. Its vertical FOV is **77.876°**, giving **28.36 CSS px/m** at 12 m. Each face is projected straight-on at that distance. The table counts ink rows for the indicated glyph, using cap height for capitals. The baseline rescales the archived proof to the same projection. Values are approximate and subject to platform font rasterization.
+
+S04 and S16 retain their full official marks beside larger Latin captions. S05 allocates more width to its name, S10 fits two lines using measured ink bounds, and S02 uses more of its fascia height. All 17 Low samples reach 11 CSS px or more.
+
+![Low fascia faces at 12 m with the default portrait chase camera](evidence/gjh-v11-signage-low-12m.png)
+
+| Store | Glyph | Previous CSS px | Low CSS px |
+| --- | --- | ---: | ---: |
+| S01 New Moon | e | 17 | 17 |
+| S02 MILI | m | 10 | 12 |
+| S03 GOGO | O | 16 | 16 |
+| S04 Borsch Med | o | 6 | 13 |
+| S05 Pien Tze Huang | e | 8 | 11 |
+| S06 Flying Wheel | W | 12 | 12 |
+| S07 Gu Long | u | 13 | 13 |
+| S08 Skippy | S | 15 | 15 |
+| S09 SPAM | S | 19 | 19 |
+| S10 California Mexico | a | 7 | 12 |
+| S11 Hormel | o | 14 | 13 |
+| S12 Zeria | e | 13 | 13 |
+| S13 Sony | O | 28 | 28 |
+| S14 LG | G | 19 | 20 |
+| S15 Casio | A | 24 | 24 |
+| S16 GP Batteries | e | 7 | 11 |
+| S17 Gigaset | a | 17 | 17 |
 
 ### Release and diagnostics
 
 The Pages artifact includes `assets/signage/**`. The world bundle tracks the JS sources and imported model manifest. The v11 offline shell precaches the tokens, manifest, preset data and SVG motifs. Both shell precaches and the startup model pack exclude signage GLBs. A clean-output publish test compares every signage file with its source and verifies the offline hashes.
 
-`window.__mall.performanceReport().signage` exposes `tier`, `signs`, `drawCalls`, `triangles`, `textureMB` and `modelsLoaded`. The draw counters accumulate the signage renderer callbacks for the last frame, including post-processing passes that draw signs. `modelsLoaded` counts successfully parsed modules retained in this scene. After returning to Low it can still read 10 while the scene draws only baked signs. Classic and pre-initialization reports expose the same fields with zero signage costs.
+`window.__mall.performanceReport().signage` exposes `tier`, `signs`, `drawCalls`, `triangles`, `atlasPx`, `previousTextureMB`, `textureMB` and `modelsLoaded`. The `phoneProof` field contains the reference projection and per-store previous/current glyph heights from the macOS CPU proof. It is null outside expanded signage. The draw counters accumulate the signage renderer callbacks for the last frame, including post-processing passes that draw signs. `modelsLoaded` counts successfully parsed modules retained in this scene. After returning to Low it can still read 10 while the scene draws only baked signs. Classic and pre-initialization reports expose the same fields with zero signage costs.
 
 ## Manager acceptance in headed Chrome
 
@@ -98,6 +128,6 @@ At **393×612** and **1440×900**, capture each view in Low, Balanced and Detail
 | New Moon | Include the full crescent and wordmark, green lacquer, brass keyline and the stocked interior. Inspect the shelf and open/close the existing HUD. |
 | Side bay | Approach S13 Sony obliquely, then head-on. Include the lit blue line, both sides of its blade, window poster and interior merchandise. S10 is the long-name check. |
 
-For the phone legibility check use a 12 m frontal view first. With the player's 58° vertical FOV and a 550 CSS px canvas, 0.242 m projects to 10 CSS px. In the offline size proof, the coloured body of the New Moon “e” occupies about 25 px, the core stroke band of MILI's “m” about 12 px and the lowercase “a” in California about 11 px. These are image measurements before scene lighting, HUD overlap, antialiasing and oblique viewing. Verify the smallest name glyphs at native CSS size on the manager's captures.
+Check the 12 m frontal view at native CSS size on the phone, followed by oblique approaches. Compare scene lighting, HUD overlap and antialiasing with the per-store CPU measurements above.
 
-Read whole-scene figures and frame cadence alongside the signage counters in the FPS report. Check the +2 whole-scene draw-call ceiling against the baseline at matched settings, the +6 MiB Low growth ceiling and the 60 FPS phone target during a walk and turn. Check reduced motion while standing near a sign, then repeat after a graphics recovery to Low. Real-device FPS, driver memory and headed screenshots are pending.
+Read whole-scene cadence alongside the signage counters. Check the +2 whole-scene draw-call ceiling at matched settings, the 11.2 MiB Low atlas budget and the 60 FPS phone target during a walk and turn. Repeat after graphics recovery to Low. Headed frame timing, physical iPhone readability and driver memory remain unverified.

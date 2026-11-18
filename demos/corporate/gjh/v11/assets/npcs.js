@@ -395,7 +395,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     const upload=new AbortController();
     choice.upload=upload;
     preparingBoy=choice;
-    void prepareModel(meshes,{signal:upload.signal}).then(()=>{
+    void prepareModel(meshes,{signal:upload.signal,alternates:boy.lowGeometry?[[rig.mesh,meshes[1]]]:[]}).then(()=>{
       if (visitors.includes(choice)) mount();
       else disposeRig(rig);
     },()=>disposeRig(rig)).finally(()=>{preparingBoy=null;});

@@ -45,7 +45,7 @@ export function createVisitorLOD(T,avatar,{
           if(swapMaterial)proxy.material=lowMaterial;
           return proxy;
         });
-        await prepareModel(meshes,{signal:upload.signal});
+        await prepareModel(meshes,{signal:upload.signal,alternates:parts.map((part,i)=>[part.mesh,meshes[i]])});
       }
       if(disposed)return;
       available=true;

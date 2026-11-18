@@ -49,6 +49,7 @@ function buildBatch(T,modules,capacity,name,assemble) {
   for(const [attribute,values] of Object.entries({position:vertices,normal:normals,color:colors,signAnchor:anchors,signFinish:pbr,signEmission:emission}))
     g.setAttribute(attribute,new T.Float32BufferAttribute(values,3));
   const dimensions=new T.InstancedBufferAttribute(new Float32Array(capacity*4),4);
+  dimensions.setUsage(T.DynamicDrawUsage);
   g.setAttribute('signSize',dimensions);
   const mat=new T.MeshStandardMaterial({vertexColors:true,metalness:1,roughness:1});
   mat.onBeforeCompile=shader=>{
@@ -63,13 +64,20 @@ function buildBatch(T,modules,capacity,name,assemble) {
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance += vSignEmission;');
   };
   const mesh=new T.InstancedMesh(g,mat,capacity);
+  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
   mesh.frustumCulled=false;mesh.count=0;mesh.name=name;
   return {mesh,setInstance(index,matrix,dw,dh,first,second){
     mesh.setMatrixAt(index,matrix);
     dimensions.setXYZW(index,dw,dh,Number(first),Number(second));
   },commit(count){
     mesh.count=count;mesh.visible=count>0;
-    mesh.instanceMatrix.needsUpdate=true;dimensions.needsUpdate=true;
+    for(const attribute of [mesh.instanceMatrix,dimensions]){
+      attribute.clearUpdateRanges();
+      if(count){
+        attribute.addUpdateRange(0,count*attribute.itemSize);
+        attribute.needsUpdate=true;
+      }
+    }
   }};
 }
 

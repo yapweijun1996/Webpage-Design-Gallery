@@ -2812,6 +2812,12 @@ function createGraphicsQuality(onChange) {
     } catch {}
     onChange();
   });
+  function apply(next) {
+    profile = next;
+    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
+    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
+    return profile;
+  }
   return {
     recover() {
       recovered = true;
@@ -2834,12 +2840,12 @@ function createGraphicsQuality(onChange) {
         onChange();
       }
     },
-    resolve(width) {
+    resolve(width, defer = false) {
       const nextMobile = width <= 650 || Boolean(coarsePointer?.matches);
       if (mobile !== null && mobile !== nextMobile)
         adaptive.reset();
       mobile = nextMobile;
-      profile = resolveQuality({
+      const next = resolveQuality({
         preference,
         width,
         dpr: window.devicePixelRatio,
@@ -2849,10 +2855,9 @@ function createGraphicsQuality(onChange) {
         autoTier,
         mobile
       });
-      const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-      status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
-      return profile;
+      return defer ? next : apply(next);
     },
+    apply,
     get state() {
       return profile;
     }
@@ -2989,6 +2994,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   }
   applyTheme(null);
   const nearest = [];
+  const accentLimit = Math.min(6, lights.length);
   function update(position) {
     nearest.length = 0;
     for (const entry of lights) {
@@ -2999,8 +3005,20 @@ function createMallAtmosphere(T, renderer, scene, slots) {
         nearest.push(entry);
     }
     nearest.sort((a, b) => a.distance - b.distance);
-    for (let i = 0;i < Math.min(6, nearest.length); i++)
+    for (let i = 0;i < Math.min(accentLimit, nearest.length); i++)
       nearest[i].light.visible = true;
+  }
+  function lightVariants(sceneLights) {
+    const accents2 = new Set(lights.map((entry) => entry.light));
+    const fixed = sceneLights.filter((light) => {
+      if (accents2.has(light))
+        return false;
+      for (let node = light;node; node = node.parent)
+        if (!node.visible)
+          return false;
+      return true;
+    });
+    return Array.from({ length: accentLimit + 1 }, (_, n) => [...fixed, ...lights.slice(0, n).map((entry) => entry.light)]);
   }
   let environment = null;
   function releaseEnvironment() {
@@ -3075,6 +3093,34 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     quad.frustumCulled = false;
     postScene.add(quad);
   }
+  function sizePost(width, height) {
+    initPost();
+    base.setSize(width, height);
+    glow.setSize(Math.max(1, Math.floor(width / 4)), Math.max(1, Math.floor(height / 4)));
+    composite.uniforms.texel.value.set(1 / glow.width, 1 / glow.height);
+  }
+  function* preparePost(width, height, screenPixel) {
+    sizePost(width, height);
+    for (const target of [base, glow]) {
+      renderer.initRenderTarget(target);
+      yield;
+    }
+    renderer.compile(postScene, postCamera);
+    const program = renderer.properties.get(composite).currentProgram;
+    if (renderer.extensions.has("KHR_parallel_shader_compile"))
+      while (!program.isReady())
+        yield false;
+    const box = renderer.getScissor(new T.Vector4), test = renderer.getScissorTest();
+    try {
+      const size = screenPixel();
+      renderer.setScissor(0, 0, size, size);
+      renderer.setScissorTest(true);
+      renderer.render(postScene, postCamera);
+    } finally {
+      renderer.setScissor(box);
+      renderer.setScissorTest(test);
+    }
+  }
   const state = { bloom: false, nonNpcCalls: 0, npcCalls: 0, admitted: 0, totalCalls: 0, submissions: 0 };
   function renderVisitors(camera, npcs, reservedCalls) {
     state.nonNpcCalls = renderer.info.render.calls + reservedCalls;
@@ -3115,11 +3161,8 @@ function createMallAtmosphere(T, renderer, scene, slots) {
         state.submissions++;
         renderVisitors(camera, npcs, 0);
       } else {
-        initPost();
         const size = renderer.getDrawingBufferSize(bufferSize);
-        base.setSize(size.x, size.y);
-        glow.setSize(Math.max(1, Math.floor(size.x / 4)), Math.max(1, Math.floor(size.y / 4)));
-        composite.uniforms.texel.value.set(1 / glow.width, 1 / glow.height);
+        sizePost(size.x, size.y);
         renderer.setRenderTarget(base);
         renderer.render(scene, camera);
         state.submissions++;
@@ -3149,7 +3192,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.shadowMap.autoUpdate = shadowAutoUpdate;
     }
   }
-  return { update, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
+  return { update, lightVariants, preparePost, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
     return state;
   } };
 }
@@ -3164,9 +3207,10 @@ function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, ma
       return;
     jobs.splice(index, 1);
     job.signal?.removeEventListener("abort", job.cancel);
-    if (error)
+    if (error) {
+      job.iterator?.return?.();
       job.reject(error);
-    else {
+    } else {
       if (job.late)
         lateAdditions++;
       job.resolve();
@@ -3219,8 +3263,10 @@ function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, ma
     enqueue,
     runFrame,
     invalidate() {
-      for (const job of jobs)
+      for (const job of jobs) {
+        job.iterator?.return?.();
         job.iterator = null;
+      }
     },
     dispose() {
       closed = true;
@@ -3242,9 +3288,15 @@ function materialTextures(material) {
   }
   return textures;
 }
-function meshTextures(mesh) {
+function meshTextures(mesh, shadows = false) {
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   const textures = materials.flatMap(materialTextures);
+  if (shadows && mesh.castShadow) {
+    for (const material of [mesh.customDepthMaterial, mesh.customDistanceMaterial]) {
+      if (material)
+        textures.push(...materialTextures(material));
+    }
+  }
   if (mesh.isSkinnedMesh && mesh.skeleton) {
     if (!mesh.skeleton.boneTexture)
       mesh.skeleton.computeBoneTexture();
@@ -3257,6 +3309,8 @@ function meshTextures(mesh) {
 function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap;
+  const alternateBindings = new WeakMap, pendingBatches = new Set;
+  let arrivalRevision = 0;
   const camera = new T.PerspectiveCamera;
   camera.position.z = 1;
   const staging = new T.Scene;
@@ -3334,7 +3388,7 @@ function createModelWarmup(T, renderer) {
       yield () => false;
     yield () => withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
   }
-  function prepare(root, scene, { hide = false, linear = () => false, ...options } = {}) {
+  function prepare(root, scene, { hide = false, linear = () => false, alternates = [], ...options } = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse((mesh) => {
@@ -3344,6 +3398,8 @@ function createModelWarmup(T, renderer) {
     }
     if (!meshes.length)
       return Promise.resolve();
+    pendingBatches.add(meshes);
+    arrivalRevision++;
     if (hide)
       for (const { mesh } of meshes)
         mesh.layers.mask = 0;
@@ -3358,15 +3414,47 @@ function createModelWarmup(T, renderer) {
         if (linear())
           yield* prepareMesh(mesh, scene, mask, true);
       }
-    }, options).finally(() => {
+    }, options).then(() => {
+      for (const [owner, alternate] of alternates) {
+        alternateBindings.set(owner, [owner.clone(false), alternate]);
+      }
+    }).finally(() => {
+      pendingBatches.delete(meshes);
       if (hide)
         for (const { mesh, mask } of meshes)
           mesh.layers.mask = mask;
     });
   }
+  function enqueueSweep(makeWork, options) {
+    return scheduler.enqueue(function* () {
+      const work = makeWork();
+      let done = false;
+      try {
+        while (!done)
+          yield () => {
+            const start = performance.now();
+            do {
+              const step = work.next();
+              done = step.done;
+              if (done || step.value === false)
+                break;
+            } while (performance.now() - start < 1.5);
+            return false;
+          };
+      } finally {
+        work.return();
+      }
+    }, { late: false, ...options });
+  }
   return {
     prepare,
     initTexture,
+    enqueueSweep,
+    alternatesFor: (mesh) => alternateBindings.get(mesh),
+    get arrivalRevision() {
+      return arrivalRevision;
+    },
+    pendingMeshes: () => Array.from(pendingBatches).flatMap((batch) => batch.map((entry) => entry.mesh)),
     report: scheduler.report,
     runFrame(canRun) {
       return scheduler.runFrame(canRun && !renderer.getContext().isContextLost());
@@ -3384,7 +3472,32 @@ function createModelWarmup(T, renderer) {
 
 // demos/corporate/gjh/v11/assets/scene-warmup.js
 function createWarmReport() {
-  return { ms: 0, probes: 0, programs: 0, textures: 0, skipped: false, reason: "pending" };
+  return { ms: 0, probes: 0, programs: 0, textures: 0, lightVariants: 0, shadowCasters: 0, skipped: false, reason: "pending" };
+}
+function createTierQueue(enqueue) {
+  let pending;
+  function cancel() {
+    pending?.controller.abort();
+    pending = null;
+  }
+  function request(key, makeWork) {
+    if (pending?.key === key)
+      return pending.promise;
+    cancel();
+    const controller = new AbortController;
+    const promise = enqueue(makeWork, { signal: controller.signal }).catch((error) => {
+      if (error.name !== "AbortError")
+        throw error;
+    }).finally(() => {
+      if (pending?.controller === controller)
+        pending = null;
+    });
+    pending = { key, controller, promise };
+    return promise;
+  }
+  return { request, cancel, get pending() {
+    return Boolean(pending);
+  } };
 }
 function createWarmRunner(work, report, {
   budgetMs,
@@ -3461,7 +3574,7 @@ function createWarmRunner(work, report, {
     }
   };
 }
-function mallProbePoses(expanded, elevator) {
+function mallProbePoses(expanded, elevator, chase) {
   const atrium = expanded ? expandedLayout.atrium : courtyardArrival;
   const poses = [{ ...atrium, y: 0, yaw: 0 }];
   if (expanded) {
@@ -3477,6 +3590,11 @@ function mallProbePoses(expanded, elevator) {
   const deck = elevator ?? (expanded ? expandedLayout.lift : null);
   if (deck)
     poses.push({ x: deck.x, z: deck.z, y: deck.upper, yaw: 0 });
+  if (expanded && chase) {
+    for (const [advance, yaw] of [[0, Math.PI / 2], [0, -Math.PI / 2], [6.6, 0]]) {
+      poses.push({ x: atrium.x, z: atrium.z - advance, y: 0, yaw, chase });
+    }
+  }
   return poses;
 }
 function* prepareScene({
@@ -3488,7 +3606,16 @@ function* prepareScene({
   elevator,
   detailed,
   updateLights,
-  initTexture
+  lightVariants,
+  initTexture,
+  alternatesFor,
+  shadows = renderer.shadowMap.enabled,
+  extra = [],
+  exclude = [],
+  screenPixel = () => 1,
+  prepared = new WeakSet,
+  programs = new Set,
+  chase
 }, report) {
   const probe = camera.clone(false), staging = new T.Scene, meshes = [], lights = [];
   const frustum = new T.Frustum, viewProjection = new T.Matrix4;
@@ -3501,19 +3628,33 @@ function* prepareScene({
   for (const texture of [scene.environment, scene.background])
     if (texture?.isTexture)
       textures.add(texture);
-  const stack = [scene];
+  const stack = [scene, ...extra], excluded = new Set(exclude);
   while (stack.length) {
     const node = stack.pop();
+    if (excluded.has(node))
+      continue;
+    excluded.add(node);
     stack.push(...node.children);
-    if (node.isLight)
+    if (node.isLight) {
       lights.push(node);
+      if (node.map?.isTexture)
+        textures.add(node.map);
+    }
     if (node.isMesh || node.isLine || node.isPoints || node.isSprite) {
+      const alternates = alternatesFor?.(node);
+      if (alternates)
+        stack.push(...alternates.filter((other) => other.geometry !== node.geometry || other.material !== node.material));
+      if (prepared.has(node))
+        continue;
+      prepared.add(node);
       meshes.push(node);
-      for (const texture of meshTextures(node))
+      for (const texture of meshTextures(node, shadows))
         textures.add(texture);
     }
     yield;
   }
+  if (!meshes.length)
+    return;
   for (const texture of textures) {
     initTexture(texture);
     report.textures++;
@@ -3522,7 +3663,7 @@ function* prepareScene({
   const gl = renderer.getContext(), parallel = renderer.extensions.has("KHR_parallel_shader_compile");
   const target = detailed ? new T.WebGLRenderTarget(1, 1) : null;
   const viewport = new T.Vector4, scissor = new T.Vector4;
-  const variants = new Set, programs = new Set;
+  const variants = new Map;
   let fence;
   function probeLights(pose) {
     const previous = lights.map((light) => light.visible);
@@ -3540,14 +3681,15 @@ function* prepareScene({
       });
     }
   }
-  function submit(batch, activeLights, output, compile) {
+  function submit(batch, activeLights, output, compile, depth = false, fullView = false) {
     const objects = [...activeLights, ...batch];
     const saved = objects.map((node) => [node.visible, node.frustumCulled, node.layers.mask, node.children]);
     const instanceCounts = new Map;
-    const hiddenMaterials = new Set;
+    const hiddenMaterials = new Set, drawRanges = new Map;
     const previous = renderer.getRenderTarget(), face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
-    const scissorTest = renderer.getScissorTest(), autoClear = renderer.autoClear;
-    const shadows = renderer.shadowMap, shadowAuto = shadows.autoUpdate, shadowNeeds = shadows.needsUpdate;
+    const scissorTest = renderer.getScissorTest(), autoClear = renderer.autoClear, sortObjects = renderer.sortObjects;
+    const shadowMap = renderer.shadowMap;
+    const { enabled: shadowEnabled, autoUpdate: shadowAuto, needsUpdate: shadowNeeds } = shadowMap;
     const info = renderer.info.render, { calls, triangles, points, lines } = info;
     renderer.getViewport(viewport);
     renderer.getScissor(scissor);
@@ -3560,9 +3702,13 @@ function* prepareScene({
         node.layers.mask = 1;
       }
       for (const mesh of batch) {
-        if (!compile && mesh.isInstancedMesh) {
-          if (!mesh.boundingSphere)
-            mesh.computeBoundingSphere();
+        const geometry = mesh.geometry;
+        if (!compile && !fullView && geometry && !drawRanges.has(geometry)) {
+          const { start, count } = geometry.drawRange;
+          drawRanges.set(geometry, [start, count]);
+          geometry.setDrawRange(0, geometry.groups.length ? Infinity : 6);
+        }
+        if (!compile && !fullView && mesh.isInstancedMesh) {
           instanceCounts.set(mesh, mesh.count);
           mesh.count = Math.min(1, mesh.instanceMatrix.count);
         }
@@ -3577,11 +3723,15 @@ function* prepareScene({
       renderer.setRenderTarget(output);
       if (!output) {
         renderer.setViewport(0, 0, 1, 1);
-        renderer.setScissor(0, 0, 1, 1);
+        const size = screenPixel();
+        renderer.setScissor(0, 0, size, size);
         renderer.setScissorTest(true);
       }
-      shadows.autoUpdate = shadows.needsUpdate = false;
+      if (shadows !== undefined)
+        shadowMap.enabled = shadows;
+      shadowMap.autoUpdate = shadowMap.needsUpdate = depth;
       renderer.autoClear = true;
+      renderer.sortObjects = false;
       if (compile) {
         for (const material of renderer.compile(staging, probe)) {
           for (const program of renderer.properties.get(material).programs.values())
@@ -3599,9 +3749,14 @@ function* prepareScene({
         material.visible = false;
       for (const [mesh, count] of instanceCounts)
         mesh.count = count;
+      for (const [geometry, range] of drawRanges)
+        geometry.setDrawRange(...range);
       renderer.autoClear = autoClear;
-      shadows.autoUpdate = shadowAuto;
-      shadows.needsUpdate = shadowNeeds;
+      renderer.sortObjects = sortObjects;
+      if (shadows !== undefined)
+        shadowMap.enabled = shadowEnabled;
+      shadowMap.autoUpdate = shadowAuto;
+      shadowMap.needsUpdate = shadowNeeds;
       Object.assign(info, { calls, triangles, points, lines });
       renderer.setViewport(viewport);
       renderer.setScissor(scissor);
@@ -3610,81 +3765,111 @@ function* prepareScene({
     }
   }
   function variantKey(activeLights, output) {
-    return (output ? "linear:" : "screen:") + activeLights.map((light) => light.type + Number(light.castShadow)).sort().join(",");
+    return (output ? "linear:" : "screen:") + activeLights.map((light) => light.type + Number(light.castShadow) + Number(Boolean(light.map))).sort().join(",");
   }
-  function* pass(activeLights, output, candidates) {
+  const visits = [];
+  const glow = detailed ? meshes.filter((mesh) => mesh.layers.isEnabled(1)) : [];
+  const batchSize = 12;
+  function addPass(pose, active, output, candidates, layer = "main", probeVisit = false) {
     if (!candidates.length)
       return;
-    const key = variantKey(activeLights, output);
+    const key = layer + variantKey(active, output);
     const fresh = !variants.has(key);
-    variants.add(key);
-    const batchSize = 12;
-    if (!fresh) {
-      const visible = [];
-      for (const mesh of candidates) {
-        if (mesh.isSprite ? frustum.intersectsSprite(mesh) : frustum.intersectsObject(mesh))
-          visible.push(mesh);
-        if (visible.length === batchSize)
-          break;
-        yield;
-      }
-      candidates = visible.length ? visible : candidates.slice(0, 1);
-    }
-    const count = candidates.length;
-    if (fresh) {
-      for (let i = 0;i < count; i += batchSize) {
-        submit(candidates.slice(i, i + batchSize), activeLights, output, true);
-        yield;
-      }
-      if (parallel) {
-        const pending = [...programs];
-        while (pending.length) {
-          if (pending.at(-1).isReady())
-            pending.pop();
-          else
-            yield false;
-        }
-      }
-    }
-    for (let i = 0;i < count; i += batchSize) {
-      submit(candidates.slice(i, i + batchSize), activeLights, output, false);
-      yield;
-    }
+    const pass = { pose, active, output, candidates, fresh };
+    if (fresh)
+      variants.set(key, pass);
+    if (fresh || probeVisit)
+      visits.push(pass);
+  }
+  function addPose(pose, onlyNew = false) {
+    const active = probeLights(pose), main = active.filter((light) => light.layers.isEnabled(0));
+    const output = detailed && pose.y === 0 ? target : null;
+    if (onlyNew && variants.has("main" + variantKey(main, output)))
+      return;
+    addPass(pose, main, output, meshes, "main", true);
+    if (output)
+      addPass(pose, active.filter((light) => light.layers.isEnabled(1)), target, glow, "glow");
+    visits.push({ endPose: true });
+  }
+  function position(pose) {
+    const arm = pose.chase?.distance ?? 0;
+    probe.position.set(pose.x + Math.sin(pose.yaw) * arm, pose.y + (pose.chase?.height ?? 1.65), pose.z + Math.cos(pose.yaw) * arm);
+    probe.rotation.set(pose.chase?.pitch ?? 0, pose.yaw, 0, "YXZ");
+    probe.updateMatrixWorld();
+    frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(probe.projectionMatrix, probe.matrixWorldInverse));
   }
   try {
     probe.layers.set(0);
-    const poses = mallProbePoses(expanded, elevator);
-    const glow = detailed ? meshes.filter((mesh) => mesh.layers.isEnabled(1)) : [];
-    function* drawPose(pose, onlyNewVariant = false) {
-      const active = probeLights(pose);
-      const mainLights = active.filter((light) => light.layers.isEnabled(0));
-      const output = detailed && pose.y === 0 ? target : null;
-      if (onlyNewVariant && variants.has(variantKey(mainLights, output)))
-        return;
-      probe.position.set(pose.x, pose.y + 1.65, pose.z);
-      probe.rotation.set(0, pose.yaw, 0);
-      probe.updateMatrixWorld();
-      frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(probe.projectionMatrix, probe.matrixWorldInverse));
-      yield* pass(mainLights, output, meshes);
-      if (output && glow.length)
-        yield* pass(active.filter((light) => light.layers.isEnabled(1)), target, glow);
-      report.probes++;
-    }
+    const poses = mallProbePoses(expanded, elevator, chase);
     for (const pose of poses)
-      yield* drawPose(pose);
-    if (expanded) {
+      addPose(pose);
+    if (lightVariants) {
+      for (const active of lightVariants(lights)) {
+        const main = active.filter((light) => light.layers.isEnabled(0));
+        for (const output of detailed ? [target, null] : [null]) {
+          addPass(poses[0], main, output, meshes);
+          const npcLights = active.filter((light) => light.layers.isEnabled(2));
+          if (variantKey(npcLights, output) !== variantKey(main, output))
+            addPass(poses[0], npcLights, output, meshes.filter((mesh) => mesh.layers.isEnabled(2)), "npc");
+        }
+        if (detailed)
+          addPass(poses[0], active.filter((light) => light.layers.isEnabled(1)), target, glow, "glow");
+      }
+    } else if (expanded) {
       const { entrance, atrium } = expandedLayout;
       for (const end of [atrium, ...spatial.stores.map((store) => store.arrival)]) {
         const distance = Math.ceil(Math.hypot(end.x - entrance.x, end.z - entrance.z));
         for (let i = 1;i < distance; i++) {
-          yield* drawPose({
-            x: entrance.x + (end.x - entrance.x) * i / distance,
-            z: entrance.z + (end.z - entrance.z) * i / distance,
-            y: 0,
-            yaw: 0
-          }, true);
+          addPose({ x: entrance.x + (end.x - entrance.x) * i / distance, z: entrance.z + (end.z - entrance.z) * i / distance, y: 0, yaw: 0 }, true);
           yield;
         }
+      }
+    }
+    report.lightVariants = Math.max(report.lightVariants, variants.size);
+    for (const { active, output, candidates } of variants.values()) {
+      for (let i = 0;i < candidates.length; i += batchSize) {
+        submit(candidates.slice(i, i + batchSize), active, output, true);
+        yield;
+      }
+    }
+    if (parallel)
+      for (const program of programs)
+        while (!program.isReady())
+          yield false;
+    if (shadows) {
+      const active = probeLights(poses[0]).filter((light) => light.layers.isEnabled(0));
+      const casters = meshes.filter((mesh) => mesh.castShadow);
+      for (let i = 0;i < casters.length; i += 6) {
+        const batch = casters.slice(i, i + 6);
+        submit(batch, active, detailed ? target : null, false, true);
+        report.shadowCasters += batch.length;
+        yield;
+      }
+    }
+    let completedPoses = 0;
+    for (const visit of visits) {
+      if (visit.endPose) {
+        report.probes = Math.max(report.probes, ++completedPoses);
+        continue;
+      }
+      const { pose, active, output, fresh, candidates } = visit;
+      position(pose);
+      let batch = [];
+      const fullView = Boolean(pose.chase);
+      for (const mesh of candidates) {
+        if (fresh || !mesh.frustumCulled || (mesh.isSprite ? frustum.intersectsSprite(mesh) : frustum.intersectsObject(mesh)))
+          batch.push(mesh);
+        if (batch.length === batchSize) {
+          submit(batch, active, output, false, false, fullView);
+          batch = [];
+          yield;
+          if (!fresh && !fullView)
+            break;
+        }
+      }
+      if (batch.length) {
+        submit(batch, active, output, false, false, fullView);
+        yield;
       }
     }
     fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
@@ -4150,6 +4335,8 @@ var accumulator = 0;
 var frames = 0;
 var three;
 var modelWarmup;
+var tierQueue;
+var requestedProfile;
 var warmRunner = null;
 var warmReport = createWarmReport();
 var productControl = null;
@@ -4232,7 +4419,7 @@ var lastMetricsUpdate = -Infinity;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
-    signage: world?.signage?.report() ?? { modelsLoaded: 0, signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, tier: quality.state?.tier ?? "low" },
+    signage: world?.signage?.report() ?? { modelsLoaded: 0, signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, previousTextureMB: 0, atlasPx: 0, phoneProof: null, tier: quality.state?.tier ?? "low" },
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
@@ -4571,7 +4758,7 @@ function render(force = false) {
     }
     world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
-    world.updateSigns(camera, canvas, quality.state?.tier, reducedMotion2);
+    world.updateSigns(camera, canvas, reducedMotion2);
     const draw = () => atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === "detailed" && renderWidth >= 1000, npcs);
     if (shelfFocus?.open)
       player.renderShelf(draw);
@@ -4608,6 +4795,73 @@ function updateModelPreload(now) {
       window.mallLoader?.prepare(node.textContent);
   }
 }
+function* prepareTier(profile, report) {
+  const screenPixel = () => !startupOverlay.hidden || !manual && !modes.paused() ? 1 : 0;
+  const signs = world.signage;
+  let stage;
+  try {
+    if (signs)
+      stage = yield* signs.prepareTier(profile.tier);
+    const replacing = stage && stage.meshes !== signs.activeMeshes();
+    const detailed = expanded && profile.shadows;
+    if (detailed)
+      yield* atmosphere.preparePost(Math.floor(renderWidth * profile.pixelRatio), Math.floor(renderHeight * profile.pixelRatio), screenPixel);
+    const prepared = new WeakSet, programs = new Set;
+    const { camera, state } = player, direction = camera.getWorldDirection(new three.Vector3);
+    const chase = profile.tier === "low" ? null : {
+      distance: Math.hypot(camera.position.x - state.x, camera.position.z - state.z),
+      height: camera.position.y - state.y,
+      pitch: Math.asin(direction.y)
+    };
+    let revision;
+    do {
+      revision = modelWarmup.arrivalRevision;
+      const extra = modelWarmup.pendingMeshes();
+      if (replacing)
+        extra.push(...stage.meshes);
+      yield* prepareScene({
+        T: three,
+        renderer,
+        scene: world.scene,
+        camera: player.camera,
+        expanded,
+        elevator,
+        shadows: profile.shadows,
+        detailed,
+        screenPixel,
+        extra,
+        prepared,
+        programs,
+        chase,
+        exclude: replacing ? signs.activeMeshes() : [],
+        updateLights: atmosphere.update,
+        lightVariants: atmosphere.lightVariants,
+        initTexture: modelWarmup.initTexture,
+        alternatesFor: modelWarmup.alternatesFor
+      }, report);
+    } while (revision !== modelWarmup.arrivalRevision);
+    if (stage)
+      signs.activate(stage);
+    applyProfile(profile);
+  } finally {
+    if (stage)
+      signs.discard(stage);
+  }
+}
+function scheduleTier() {
+  const profile = requestedProfile, active = quality.state;
+  if (!profile || !ready || contextLost || pageEnded)
+    return;
+  if (profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier)) {
+    tierQueue.cancel();
+    applyProfile(profile);
+    return;
+  }
+  const key = [profile.tier, profile.shadows, profile.pixelRatio, profile.preference, renderWidth, renderHeight].join("/");
+  tierQueue.request(key, () => prepareTier(profile, createWarmReport())).catch((error) => {
+    console.warn("Mall graphics tier preparation interrupted", error);
+  });
+}
 function advanceStartupWarm() {
   const loader = window.mallLoader;
   if (!loader || loader.ready || contextLost || restorePending || pageEnded)
@@ -4624,6 +4878,7 @@ function advanceStartupWarm() {
     warmReport.skipped = true;
     warmReport.reason = loader.skipSignal.reason;
     loader.complete("warm");
+    scheduleTier();
     return false;
   }
   if (warmRunner)
@@ -4632,25 +4887,17 @@ function advanceStartupWarm() {
     const tier = quality.state.tier;
     warmReport = createWarmReport();
     warmReport.reason = "running";
-    const work = prepareScene({
-      T: three,
-      renderer,
-      scene: world.scene,
-      camera: player.camera,
-      expanded,
-      elevator,
-      detailed: expanded && tier === "detailed" && renderWidth >= 1000,
-      updateLights: atmosphere.update,
-      initTexture: modelWarmup.initTexture
-    }, warmReport);
+    const work = prepareTier(requestedProfile, warmReport);
     warmRunner = createWarmRunner(work, warmReport, {
       budgetMs: tier === "low" ? 8 : tier === "balanced" ? 10 : 12,
       signal: loader.skipSignal,
       lost: () => renderer.getContext().isContextLost(),
       onFinish(result) {
         warmRunner = null;
-        if (result.reason !== "context-loss" && !pageEnded && !fatal)
+        if (result.reason !== "context-loss" && !pageEnded && !fatal) {
           loader.complete("warm");
+          scheduleTier();
+        }
       }
     });
   }
@@ -4707,15 +4954,16 @@ function animate(now) {
       if (steps)
         updateHUD();
     }
+    const simulationEnd = performance.now();
+    const uploadMs = warmModels(player.state);
     const renderStart = performance.now();
     const pose = render();
     const renderEnd = performance.now();
-    const uploadMs = warmModels(pose ?? player.state);
     const end = performance.now();
     if (!windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
-        simulationMs: renderStart - simulationStart,
+        simulationMs: simulationEnd - simulationStart,
         renderMs: renderEnd - renderStart,
         uploadMs,
         callbackMs: end - callbackStart,
@@ -4738,7 +4986,7 @@ function animate(now) {
     warmModels(player.state);
   }
   const movement = player.state.animation;
-  quality.sample(now, advancing && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
+  quality.sample(now, advancing && !tierQueue?.pending && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
   frame = requestAnimationFrame(animate);
 }
 function resume() {
@@ -4872,6 +5120,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   restorePending = true;
   losses++;
   warmRunner?.stop("context-loss");
+  tierQueue?.cancel();
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   atmosphere?.releaseEnvironment();
@@ -4914,15 +5163,6 @@ function resize() {
   viewportHeight = innerHeight;
   if (!width || !height)
     return;
-  const profile = quality.resolve(width);
-  npcs?.setQuality({ tier: profile.tier, mobile: width < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
-  if (!contextLost) {
-    if (resized || renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
-      renderer.setPixelRatio(profile.pixelRatio);
-      renderer.setSize(width, height, false);
-    }
-    renderer.shadowMap.enabled = profile.shadows;
-  }
   if (resized) {
     renderWidth = width;
     renderHeight = height;
@@ -4932,7 +5172,26 @@ function resize() {
     else
       player.updateCamera(0, true);
   }
+  requestedProfile = quality.resolve(width, true);
+  if (!ready || !quality.state || !window.mallLoader?.ready && !startupOverlay.hidden) {
+    if (!warmRunner)
+      applyProfile(requestedProfile);
+  } else {
+    applyProfile(quality.state);
+    scheduleTier();
+  }
   render();
+}
+function applyProfile(profile) {
+  const width = renderWidth, height = renderHeight;
+  quality.apply(profile);
+  npcs?.setQuality({ tier: profile.tier, mobile: width < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
+  if (!contextLost) {
+    if (renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
+      renderer.setDrawingBufferSize(width, height, profile.pixelRatio);
+    }
+    renderer.shadowMap.enabled = profile.shadows;
+  }
 }
 function validateRestoration() {
   if (!initialized || fatal || contextLost || restorePending || !interrupted || ready || document.hidden)
@@ -4940,6 +5199,7 @@ function validateRestoration() {
   graphicsStatus = "validating";
   try {
     quality.recover();
+    world.signage?.recover();
     resize();
     const gl = renderer.getContext();
     if (gl.isContextLost())
@@ -4953,7 +5213,7 @@ function validateRestoration() {
     atmosphere?.update(player.state);
     world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier);
     player.camera.updateMatrixWorld();
-    world.updateSigns(player.camera, canvas, quality.state?.tier, reducedMotion2);
+    world.updateSigns(player.camera, canvas, reducedMotion2);
     renderer.render(world.scene, player.camera);
     const pixel = new Uint8Array(4);
     gl.readPixels(Math.floor(gl.drawingBufferWidth / 2), Math.floor(gl.drawingBufferHeight / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
@@ -5037,6 +5297,7 @@ async function initialize() {
   physics.timestep = STEP;
   window.mallLoader?.complete("physics");
   modelWarmup = createModelWarmup(T, renderer);
+  tierQueue = createTierQueue(modelWarmup.enqueueSweep);
   const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
     linear: () => expanded && quality.state?.tier === "detailed" && renderWidth >= 1000,
     ...options
@@ -5282,6 +5543,7 @@ if (document.body.dataset.entryMode !== "directory")
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
     pageEnded = true;
+    tierQueue?.cancel();
     warmRunner?.stop("pagehide");
     mallTheme?.destroy();
     npcs?.dispose();

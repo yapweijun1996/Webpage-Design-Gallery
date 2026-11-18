@@ -9,7 +9,7 @@ import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createModelWarmup} from './assets/model-warmup.js';
-import {createWarmReport, createWarmRunner, prepareScene} from './assets/scene-warmup.js';
+import {createWarmReport, createWarmRunner, createTierQueue, prepareScene} from './assets/scene-warmup.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
@@ -38,7 +38,7 @@ const startupOverlay = document.getElementById('app-loader');
 let greetedOnArrival = false, pageEnded = false;
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let three;
-let modelWarmup;
+let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmReport = createWarmReport();
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
@@ -78,7 +78,7 @@ let measuringFrames = false, lastMetricsUpdate = -Infinity;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
-    signage: world?.signage?.report() ?? {modelsLoaded:0,signs:0,drawCalls:0,triangles:0,textureMB:0,tier:quality.state?.tier??'low'},
+    signage: world?.signage?.report() ?? {modelsLoaded:0,signs:0,drawCalls:0,triangles:0,textureMB:0,previousTextureMB:0,atlasPx:0,phoneProof:null,tier:quality.state?.tier??'low'},
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
@@ -311,7 +311,7 @@ function render(force = false) {
     }
     world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
     atmosphere?.update(pose);
-    world.updateSigns(camera, canvas, quality.state?.tier, reducedMotion);
+    world.updateSigns(camera, canvas, reducedMotion);
     const draw=()=>atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
     frames++;
@@ -342,6 +342,55 @@ function updateModelPreload(now) {
     } else window.mallLoader?.prepare(node.textContent);
   }
 }
+function* prepareTier(profile, report) {
+  const screenPixel=()=>!startupOverlay.hidden || (!manual && !modes.paused()) ? 1 : 0;
+  const signs=world.signage;
+  let stage;
+  try {
+    if(signs)stage=yield* signs.prepareTier(profile.tier);
+    const replacing=stage && stage.meshes!==signs.activeMeshes();
+    const detailed=expanded && profile.shadows;
+    if(detailed)yield* atmosphere.preparePost(Math.floor(renderWidth*profile.pixelRatio),
+      Math.floor(renderHeight*profile.pixelRatio),screenPixel);
+    const prepared=new WeakSet(), programs=new Set();
+    const {camera,state}=player, direction=camera.getWorldDirection(new three.Vector3());
+    const chase=profile.tier==='low' ? null : {
+      distance:Math.hypot(camera.position.x-state.x,camera.position.z-state.z),
+      height:camera.position.y-state.y, pitch:Math.asin(direction.y)
+    };
+    let revision;
+    do {
+      revision=modelWarmup.arrivalRevision;
+      const extra=modelWarmup.pendingMeshes();
+      if(replacing)extra.push(...stage.meshes);
+      yield* prepareScene({
+        T:three, renderer, scene:world.scene, camera:player.camera, expanded, elevator,
+        shadows:profile.shadows, detailed, screenPixel, extra, prepared, programs, chase,
+        exclude:replacing ? signs.activeMeshes() : [], updateLights:atmosphere.update,
+        lightVariants:atmosphere.lightVariants, initTexture:modelWarmup.initTexture,
+        alternatesFor:modelWarmup.alternatesFor
+      }, report);
+      // Models can arrive while a runtime sweep yields to a walking frame.
+      // Fence just the new bindings before publishing the requested tier.
+    } while (revision!==modelWarmup.arrivalRevision);
+    if(stage)signs.activate(stage);
+    applyProfile(profile);
+  } finally { if(stage)signs.discard(stage); }
+}
+function scheduleTier() {
+  const profile=requestedProfile, active=quality.state;
+  if(!profile || !ready || contextLost || pageEnded)return;
+  if(profile.tier===active.tier && profile.shadows===active.shadows &&
+     (!world.signage || world.signage.getTier()===profile.tier)){
+    tierQueue.cancel();
+    applyProfile(profile);
+    return;
+  }
+  const key=[profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
+  void tierQueue.request(key,()=>prepareTier(profile,createWarmReport())).catch(error=>{
+    console.warn('Mall graphics tier preparation interrupted',error);
+  });
+}
 function advanceStartupWarm() {
   const loader = window.mallLoader;
   if (!loader || loader.ready || contextLost || restorePending || pageEnded) return false;
@@ -353,6 +402,7 @@ function advanceStartupWarm() {
     warmReport.skipped = true;
     warmReport.reason = loader.skipSignal.reason;
     loader.complete('warm');
+    scheduleTier();
     return false;
   }
   if (warmRunner) warmRunner.runFrame();
@@ -360,16 +410,16 @@ function advanceStartupWarm() {
     const tier = quality.state.tier;
     warmReport = createWarmReport();
     warmReport.reason = 'running';
-    const work = prepareScene({T:three, renderer, scene:world.scene, camera:player.camera,
-      expanded, elevator, detailed:expanded && tier === 'detailed' && renderWidth >= 1000,
-      updateLights:atmosphere.update, initTexture:modelWarmup.initTexture}, warmReport);
+    const work = prepareTier(requestedProfile,warmReport);
     warmRunner = createWarmRunner(work, warmReport, {
       budgetMs:tier === 'low' ? 8 : tier === 'balanced' ? 10 : 12,
       signal:loader.skipSignal,
       lost:() => renderer.getContext().isContextLost(),
       onFinish(result) {
         warmRunner = null;
-        if (result.reason !== 'context-loss' && !pageEnded && !fatal) loader.complete('warm');
+        if (result.reason !== 'context-loss' && !pageEnded && !fatal) {
+          loader.complete('warm');scheduleTier();
+        }
       }
     });
   }
@@ -420,15 +470,18 @@ function animate(now) {
       // the final HUD state can be presented on this browser frame.
       if (steps) updateHUD();
     }
+    // Tier preparation can exercise one real screen pixel. The live scene
+    // covers it in this same animation callback, before presentation.
+    const simulationEnd = performance.now();
+    const uploadMs = warmModels(player.state);
     const renderStart = performance.now();
     const pose = render();
     const renderEnd = performance.now();
-    const uploadMs = warmModels(pose ?? player.state);
     const end = performance.now();
     if (!windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
-        simulationMs: renderStart - simulationStart, renderMs: renderEnd - renderStart, uploadMs,
+        simulationMs: simulationEnd - simulationStart, renderMs: renderEnd - renderStart, uploadMs,
         callbackMs: end - callbackStart, steps, zone: currentZone, x: pose?.x, z: pose?.z, tier: quality.state?.tier,
         width: canvas.width, height: canvas.height
       });
@@ -443,7 +496,7 @@ function animate(now) {
   }
   // Record monitor telemetry before a quality change can resize and render.
   const movement = player.state.animation;
-  quality.sample(now, advancing && preloadSettled && document.getElementById('app-loader').hidden &&
+  quality.sample(now, advancing && !tierQueue?.pending && preloadSettled && document.getElementById('app-loader').hidden &&
     !windowBlurred && document.hasFocus() && !contextLost && !interrupted &&
     ['explore','cart'].includes(modes.current()), ['walk','run'].includes(movement));
   frame = requestAnimationFrame(animate);
@@ -485,6 +538,7 @@ canvas.addEventListener('webglcontextlost', event => {
   window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
   warmRunner?.stop('context-loss');
+  tierQueue?.cancel();
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   // Retire the reflection target and NPC bone textures against their original context.
@@ -518,26 +572,36 @@ function resize() {
   if (resized || viewportChanged) quality.resetSampling();
   viewportWidth = innerWidth; viewportHeight = innerHeight;
   if (!width || !height) return;
-  const profile = quality.resolve(width);
-  npcs?.setQuality({tier:profile.tier,mobile:width<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
-  if (!contextLost) {
-    if (resized || renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
-      renderer.setPixelRatio(profile.pixelRatio); renderer.setSize(width, height, false);
-    }
-    renderer.shadowMap.enabled = profile.shadows;
-  }
   if (resized) {
     renderWidth = width; renderHeight = height;
     player.resizeCamera(width, height);
     if (shelfFocus?.open) shelfFocus.resize(); else player.updateCamera(0, true);
   }
+  requestedProfile=quality.resolve(width,true);
+  if(!ready || !quality.state || (!window.mallLoader?.ready && !startupOverlay.hidden)) {
+    if(!warmRunner)applyProfile(requestedProfile);
+  } else {
+    applyProfile(quality.state);
+    scheduleTier();
+  }
   render();
+}
+function applyProfile(profile) {
+  const width=renderWidth, height=renderHeight;
+  quality.apply(profile);
+  npcs?.setQuality({tier:profile.tier,mobile:width<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
+  if (!contextLost) {
+    if (renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
+      renderer.setDrawingBufferSize(width,height,profile.pixelRatio);
+    }
+    renderer.shadowMap.enabled = profile.shadows;
+  }
 }
 function validateRestoration() {
   if (!initialized || fatal || contextLost || restorePending || !interrupted || ready || document.hidden) return;
   graphicsStatus = 'validating';
   try {
-    quality.recover(); resize();
+    quality.recover(); world.signage?.recover(); resize();
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
     try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
@@ -545,7 +609,7 @@ function validateRestoration() {
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
     world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier);
-    player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas, quality.state?.tier, reducedMotion);
+    player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas, reducedMotion);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
     // No physics tick or UI transition is needed for this offscreen validation.
@@ -598,6 +662,7 @@ async function initialize() {
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
   window.mallLoader?.complete('physics');
   modelWarmup = createModelWarmup(T, renderer);
+  tierQueue = createTierQueue(modelWarmup.enqueueSweep);
   const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
     linear: () => expanded && quality.state?.tier === 'detailed' && renderWidth >= 1000, ...options
   });
@@ -750,5 +815,5 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
-  pageEnded = true; warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); modelWarmup?.dispose();
+  pageEnded = true; tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); modelWarmup?.dispose();
 }});

@@ -3,7 +3,8 @@ import {createShopSign,letterGeometry} from './builder.js';
 import {selectSignLod} from './config.js';
 import {buildHardware,buildEndTrim} from './hardware.js';
 import {loadModules} from './models.js';
-import {atlasSize} from './atlas-layout.js';
+import {phoneProof} from './phone-proof.js';
+import {atlasSize,atlasMiB} from './atlas-layout.js';
 
 function nearFaceMaterial(T,texture,pulse) {
   // The same atlas alpha channel supplies a height/emission mask. The flat
@@ -90,7 +91,7 @@ function reliefMaterial(T,texture,finishes){
   return mat;
 }
 
-function buildRelief(T,signs,tiles,modules,texture,detailed){
+function* buildRelief(T,signs,tiles,modules,texture,detailed){
   const pieces=[],ranges=[],source=[],finishes=[];
   let offset=0;
   for(const sign of signs){
@@ -107,6 +108,7 @@ function buildRelief(T,signs,tiles,modules,texture,detailed){
       offset+=count;g.setIndex(null);g.applyMatrix4(sign.matrix);pieces.push(g);
     }
     ranges.push([start,source.length]);
+    yield;
   }
   if(!pieces.length)return null;
   const geo=mergeGeometries(pieces);pieces.forEach(g=>g.dispose());
@@ -118,15 +120,27 @@ function buildRelief(T,signs,tiles,modules,texture,detailed){
   return {mesh,select(visible){
     let count=0;
     for(const i of visible){const [a,b]=ranges[i];index.array.set(original.subarray(a,b),count);count+=b-a;}
-    index.needsUpdate=true;geo.setDrawRange(0,count);mesh.visible=count>0;
+    index.clearUpdateRanges();
+    if(count){
+      index.addUpdateRange(0,count);
+      index.needsUpdate=true;
+    }
+    geo.setDrawRange(0,count);mesh.visible=count>0;
   }};
 }
 
 export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
-  const texture=new T.CanvasTexture(bake.sheet);texture.colorSpace=T.SRGBColorSpace;
-  texture.anisotropy=2;
-  const flat=new T.MeshBasicMaterial({map:texture,toneMapped:false}),pulse={value:0};
-  const embossed=nearFaceMaterial(T,texture,pulse);
+  const pulse={value:0};
+  function atlas(canvas) {
+    const texture=new T.CanvasTexture(canvas);
+    texture.colorSpace=T.SRGBColorSpace;
+    texture.generateMipmaps=true;
+    texture.minFilter=T.LinearMipmapLinearFilter;
+    texture.anisotropy=2;
+    return texture;
+  }
+  const lowTexture=atlas(bake.lowSheet), fullTexture=atlas(bake.sheet);
+  const flat=new T.MeshBasicMaterial({map:lowTexture,toneMapped:false});
   const pieces=[],signs=[];
   configs.forEach((config,index)=>{
     const group=createShopSign(T,{...config,faceMaterial:flat},bays[index]);
@@ -147,7 +161,8 @@ export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
   const faces=new T.Mesh(mergeGeometries(pieces),flat);pieces.forEach(g=>g.dispose());
   faces.name='Expanded branded shop signs';faces.layers.enable(1);scene.add(faces);
   const frustum=new T.Frustum(),view=new T.Matrix4(),eye=new T.Vector3(),near=[];
-  let tier='low',signature=-1,hardware=null,endTrim=null,relief=null,modules=new Map(),appliedModules,moduleTask;
+  const low={tier:'low',faces,meshes:[faces]};
+  let active=low,signature=-1,modules=null,moduleTask;
   let calls=0,tris=0;
   function measure(mesh){
     let beforeCalls=0,beforeTriangles=0;
@@ -161,30 +176,66 @@ export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
     };
   }
   measure(faces);
-  function discard(pool){
-    if(!pool)return;
-    scene.remove(pool.mesh);pool.mesh.geometry.dispose();pool.mesh.material.dispose();
-    pool.mesh.dispose?.();
-  }
-  function rebuild(next){
-    discard(hardware);discard(endTrim);discard(relief);hardware=endTrim=relief=null;
-    appliedModules=modules;
-    faces.material=next==='low'?flat:embossed;
-    if(next!=='low'){
-      hardware=buildHardware(T,modules,next==='detailed',signs.length);
-      if(signs.some(s=>s.hasEndTrim))
-        endTrim=buildEndTrim(T,modules,signs.length);
-      relief=buildRelief(T,signs,bake.tiles,modules,texture,next==='detailed');
-      for(const pool of [hardware,endTrim,relief])if(pool){pool.mesh.visible=false;measure(pool.mesh);scene.add(pool.mesh);}
+  function release(stage, keep) {
+    if (!stage || stage===keep) return;
+    const texture=stage.faces.material.map;
+    if(texture!==keep.faces.material.map){
+      texture.dispose();
+      texture.needsUpdate=true;
     }
-    tier=next;signature=-1;
+    if(stage===low)return;
+    for(const pool of [stage.hardware,stage.endTrim,stage.relief])if(pool){
+      pool.mesh.geometry.dispose();pool.mesh.material.dispose();pool.mesh.dispose?.();
+    }
+    stage.faces.material.dispose();
   }
-  return {update(camera,requestedTier,reducedMotion,now){
+  function activate(stage) {
+    if(stage===active)return;
+    scene.remove(...active.meshes);
+    release(active,stage);
+    active=stage;signature=-1;
+    scene.add(...stage.meshes);
+  }
+  // Build the exact drawable pools off-scene. The owner commits only after
+  // their buffers, programs and textures pass the same fence as the mall.
+  function* prepareTier(tier) {
+    if(tier!=='balanced' && tier!=='detailed')tier='low';
+    if(tier===active.tier)return active;
+    if(tier==='low')return low;
+    moduleTask??=loadModules(assetBase).then(loaded=>{modules=loaded;},()=>{modules=new Map();});
+    while(!modules)yield false;
+    const texture=fullTexture, face=new T.Mesh(faces.geometry,nearFaceMaterial(T,texture,pulse));
+    face.name=faces.name;face.layers.mask=faces.layers.mask;measure(face);
+    const stage={tier,faces:face,meshes:[face]};
+    let complete=false;
+    try {
+      const detailed=tier==='detailed';
+      stage.hardware=buildHardware(T,modules,detailed,signs.length);
+      signs.forEach((sign,i)=>stage.hardware.set(i,sign));
+      stage.hardware.commit(signs.length);
+      yield;
+      const ends=signs.filter(sign=>sign.hasEndTrim);
+      if(ends.length){
+        stage.endTrim=buildEndTrim(T,modules,signs.length);
+        ends.forEach((sign,i)=>{stage.endTrim.set(i*2,sign,-1);stage.endTrim.set(i*2+1,sign,1);});
+        stage.endTrim.commit(ends.length*2);
+        yield;
+      }
+      stage.relief=yield* buildRelief(T,signs,bake.tiles,modules,texture,detailed);
+      stage.relief?.select(signs.map((_,i)=>i));
+      for(const pool of [stage.hardware,stage.endTrim,stage.relief])if(pool){
+        measure(pool.mesh);stage.meshes.push(pool.mesh);
+      }
+      complete=true;
+      return stage;
+    } finally { if(!complete)release(stage,active); }
+  }
+  return {prepareTier,activate,discard(stage){release(stage,active);},
+    activeMeshes(){return active.meshes;}, getTier(){return active.tier;}, recover(){activate(low);},
+    update(camera,reducedMotion,now){
     calls=tris=0;
-    const next=['balanced','detailed'].includes(requestedTier)?requestedTier:'low';
-    if(tier!==next || (next!=='low' && appliedModules!==modules))rebuild(next);
-    if(next==='low')return;
-    moduleTask??=loadModules(assetBase).then(loaded=>{if(loaded.size)modules=loaded;});
+    const {tier,hardware,endTrim,relief}=active;
+    if(tier==='low')return;
     frustum.setFromProjectionMatrix(view.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
     eye.setFromMatrixPosition(camera.matrixWorld);
     let bits=0;near.length=0;
@@ -195,7 +246,7 @@ export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
       near.push(i);bits|=1<<i;
     }
     pulse.value=near.length && !reducedMotion?.matches ? .024*Math.sin(now*.0012):0;
-    if(bits===signature)return moduleTask;
+    if(bits===signature)return;
     signature=bits;
     near.forEach((i,n)=>hardware.set(n,signs[i]));hardware.commit(near.length);
     let ends=0;
@@ -207,9 +258,9 @@ export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
     }
     endTrim?.commit(ends);
     relief?.select(near);
-    return moduleTask;
   },report(){
-    const pixels=texture.image.width*texture.image.height;
-    return {modelsLoaded:modules.size,signs:signs.length,drawCalls:calls,triangles:tris,textureMB:+(pixels*4*4/3/1048576).toFixed(2),tier};
+    const atlasPx=active.faces.material.map.image.width;
+    return {modelsLoaded:modules?.size??0,signs:signs.length,drawCalls:calls,triangles:tris,
+      phoneProof:phoneProof(active.tier),previousTextureMB:atlasMiB(atlasSize),atlasPx,textureMB:atlasMiB(atlasPx),tier:active.tier};
   }};
 }
