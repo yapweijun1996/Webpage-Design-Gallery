@@ -27,3 +27,35 @@ Walk from entry through the atrium into MILI and New Moon with Low selected, col
 - Frame records include `uploadMs` separately from `renderMs`. The upload slice contributes to `callbackMs`. `geometries` and `textures` can increase during a background slice, including before the corresponding asset is visible.
 
 The acceptance target is no frame over 50 ms attributable to an asset appearing along the walk. The timings measure CPU submission, and the headed Chrome walk and physical iPhone result require live verification.
+
+## First visits to already resident geometry
+
+The owner observed a 130–180 ms frame gap on first visiting the Floor 01 atrium, with about 2 ms spent submitting that frame. The existing late-asset queue did not change the isolated gap in the supplied comparison. The GPU stage addresses first draws of objects already in the scene. Attribution of the original gap to a particular driver operation remains unverified.
+
+After the first frame and the existing optional model wait, the loader enters its fifth milestone, **Preparing the mall details…**. First view and Details share the fourth stepper column. The startup scene uses the same mesh and texture inventory on Low, Balanced and Detailed. Their foreground slice budgets are 8, 10 and 12 ms respectively. A single synchronous driver call can overrun a slice. The loader's six-second foreground watchdog also runs while waiting for shader linking or GPU completion. Hiding the tab suspends work and the deadline. A loss discards the old work, and validated restoration starts a fresh sweep if startup is still pending. Enter now and directory dismissal release the wait.
+
+Probe cameras use the layout's atrium and store arrivals, plus the expanded entry and the upper deck when present. The expanded route has 20 required poses. The probes do not teleport the visitor or trigger shop downloads. Batches compile with the pose's active lights, including shader variants for different numbers of point lights. The renderer initializes unique textures, submits the actual objects with culling disabled, and polls a WebGL2 fence. The real framebuffer receives only a one-pixel viewport under the opaque overlay. Detailed desktop also prepares its linear target and selective glow variants. Visibility, layer masks, child arrays, instance counts, shadow updates, viewport, scissor and render target are restored between batches.
+
+`window.__mall.performanceReport().warm` contains foreground elapsed `ms`, completed camera `probes`, distinct Three.js `programs` encountered during compilation, unique scene `textures` prepared (including previously initialized textures), and `skipped`. The `reason` field distinguishes completion, timeout, early entry, directory dismissal and interrupted work. First-frame readiness can precede the loader closing while optional models and GPU work are in progress.
+
+### Manager's three-run acceptance on macOS
+
+From this worktree's root in one terminal, serve the actual rebuilt site.
+
+```sh
+python3 -m http.server 8811 --bind 127.0.0.1
+```
+
+In a second terminal at the same root, activate the manager's existing Python environment with Playwright. Keep headed Chrome in the foreground and leave the loader to finish. Each invocation launches a fresh process and browser context with ANGLE Metal, 393 × 612 CSS pixels, DPR 3 and mobile touch emulation.
+
+```sh
+export GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+python3 -c 'from playwright.sync_api import sync_playwright'
+result=0
+for run in 1 2 3; do
+  python3 docs/walk_probe.py "cold-$run" || result=1
+done
+test "$result" -eq 0
+```
+
+The probe timestamps the loader's actual hide, samples the first 1.5 seconds and walks entry → atrium → MILI → New Moon → GOGO → atrium. It uses normal W-key input because the `setInput()` hook switches to manual simulation. It verifies movement, foreground sampling and overlap between successive five-second histories. Each output line includes the entire run's nearest-rank p99 in milliseconds, maximum interval, slow frames and warm telemetry. Keep all three lines. Every run must report Low, at least 20 completed poses, completed GPU work and zero intervals ≥ 50 ms. A missing sample window, interrupted warm-up or timeout fails the probe. Physical iPhone timing requires a separate device walk.

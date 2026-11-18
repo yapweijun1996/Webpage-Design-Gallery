@@ -9,6 +9,7 @@ import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createModelWarmup} from './assets/model-warmup.js';
+import {createWarmReport, createWarmRunner, prepareScene} from './assets/scene-warmup.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
@@ -34,6 +35,7 @@ let greetedOnArrival = false, pageEnded = false;
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let three;
 let modelWarmup;
+let warmRunner = null, warmReport = createWarmReport();
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
@@ -71,6 +73,7 @@ function performanceReport() {
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
     layout: expanded ? 'expanded' : 'classic',
     uploads: modelWarmup?.report() ?? {lateAdditions:0, maxFrameUploadMs:0, pendingUploads:0},
+    warm: {...warmReport},
     viewport: {width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio()},
     graphics: {tier: quality.state?.tier, contextLosses: losses, restorations: validations}
   };
@@ -305,9 +308,42 @@ function updateModelPreload(now) {
     (zh?`正在准备商店模型（${done}/${assets.length}）。您可等待或立即进入。`:`Preparing shop models (${done}/${assets.length}). You can wait or enter now.`);
   if (initialPreloadStarted !== null && !window.mallLoader?.snapshot().ready) {
     if (ready || now-initialPreloadStarted >= 30000) {
-      initialPreloadStarted=null; window.mallLoader?.complete('frame');
+      initialPreloadStarted=null;
     } else window.mallLoader?.prepare(node.textContent);
   }
+}
+function advanceStartupWarm() {
+  const loader = window.mallLoader;
+  if (!loader || loader.ready || contextLost || restorePending || pageEnded) return false;
+  if (loader.skipSignal.aborted) initialPreloadStarted = null;
+  if (initialPreloadStarted !== null) return false;
+  if (loader.snapshot().stage === 'frame') loader.complete('frame');
+  if (loader.snapshot().stage !== 'warm') return false;
+  if (loader.skipSignal.aborted) {
+    warmReport.skipped = true;
+    warmReport.reason = loader.skipSignal.reason;
+    loader.complete('warm');
+    return false;
+  }
+  if (warmRunner) warmRunner.runFrame();
+  else {
+    const tier = quality.state.tier;
+    warmReport = createWarmReport();
+    warmReport.reason = 'running';
+    const work = prepareScene({T:three, renderer, scene:world.scene, camera:player.camera,
+      expanded, elevator, detailed:expanded && tier === 'detailed' && renderWidth >= 1000,
+      updateLights:atmosphere.update, initTexture:modelWarmup.initTexture}, warmReport);
+    warmRunner = createWarmRunner(work, warmReport, {
+      budgetMs:tier === 'low' ? 8 : tier === 'balanced' ? 10 : 12,
+      signal:loader.skipSignal,
+      lost:() => renderer.getContext().isContextLost(),
+      onFinish(result) {
+        warmRunner = null;
+        if (result.reason !== 'context-loss' && !pageEnded && !fatal) loader.complete('warm');
+      }
+    });
+  }
+  return true;
 }
 function warmModels(pose) {
   if (!pose || document.hidden || contextLost || restorePending || pageEnded) return 0;
@@ -321,6 +357,12 @@ function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;
   updateModelPreload(now);
+  if (advanceStartupWarm()) {
+    last = now;
+    accumulator = 0;
+    frame = requestAnimationFrame(animate);
+    return;
+  }
   const callbackStart = performance.now();
   const pad=readStandardGamepad();
   const consumed=ui.handleGamepad(pad);
@@ -353,7 +395,7 @@ function animate(now) {
     const renderEnd = performance.now();
     const uploadMs = warmModels(pose ?? player.state);
     const end = performance.now();
-    if (!windowBlurred) {
+    if (!windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
         simulationMs: renderStart - simulationStart, renderMs: renderEnd - renderStart, uploadMs,
@@ -404,6 +446,7 @@ window.addEventListener('blur', () => { windowBlurred = true; pausePerformance()
 window.addEventListener('focus', () => { windowBlurred = false; if (ready) { updateHUD(); render(); } });
 window.addEventListener('resize', () => { modes.interrupt('viewport resize'); resize(); });
 document.addEventListener('visibilitychange', () => {
+  warmRunner?.visibility(document.hidden);
   if (document.hidden) { pausePerformance();mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
   else { if (ready) { updateHUD(); render(); } else validateRestoration(); resume(); }
 });
@@ -411,6 +454,7 @@ canvas.addEventListener('webglcontextlost', event => {
   quality.resetSampling();
   window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
+  warmRunner?.stop('context-loss');
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   // Retire the reflection target and NPC bone textures against their original context.
@@ -482,7 +526,6 @@ function validateRestoration() {
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
     markFirstFrame();
-    if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed) window.mallLoader?.complete('frame');
     window.__sceneFailed = false; window.__sceneReady = true;
     mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
   } catch {
@@ -667,7 +710,7 @@ async function initialize() {
   if (expanded && !window.mallLoader?.snapshot().dismissed) {
     initialPreloadStarted=performance.now();
     window.mallLoader?.prepare('Preparing shop models. You can enter now or browse the directory.');
-  } else window.mallLoader?.complete('frame');
+  }
   window.__sceneReady = true; ui.offerFirstGuide(); resume();
 }
 // The directory mounts its controls above without downloading physics, models or a WebGL world.
@@ -676,5 +719,5 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
-  pageEnded = true; mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); modelWarmup?.dispose();
+  pageEnded = true; warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); modelWarmup?.dispose();
 }});
