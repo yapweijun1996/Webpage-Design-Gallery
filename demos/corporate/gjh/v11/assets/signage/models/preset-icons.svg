@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="monoline-outline" viewBox="0 0 48 48">
+    <path d="M19 14a5 5 0 1 1 7.7 4.2Q24 20 24 23L6 34a3 3 0 0 0 1.5 5.5h33a3 3 0 0 0 1.5-5.5L24 23" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="steam-cup" viewBox="0 0 48 48">
+    <path d="M7 20h28v6a12 12 0 0 1-12 12h-4A12 12 0 0 1 7 26zm28 2h4a5 5 0 0 1 0 10h-5M5 42h34M14 15c5-4-3-6 1-10m7 10c5-4-3-6 1-10m7 10c5-4-3-6 1-10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="monitor-outline" viewBox="0 0 48 48">
+    <rect x="5" y="8" width="38" height="25" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M20 33v7m8-7v7m-13 0h18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="gold-book-outline" viewBox="0 0 48 48">
+    <path d="M24 13C18 8 12 7 5 9v26c8-1.5 14 0 19 5 5-5 11-6.5 19-5V9c-7-2-13-1-19 4v27" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="lotus-outline" viewBox="0 0 48 48">
+    <path d="M24 34c-10-10-8-19 0-28 8 9 10 18 0 28Zm0 0C12 32 7 24 8 15c5 0 9 2 11 5m5 14c12-2 17-10 16-19-5 0-9 2-11 5M8 25l-4 1c1 8 9 14 20 12 11 2 19-4 20-12l-4-1" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="house-outline" viewBox="0 0 48 48">
+    <path d="m4 23 20-16 20 16M9 19v21h30V19M20 40V28h8v12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="bear-outline" viewBox="0 0 48 48">
+    <path d="M10 19a6.5 6.5 0 1 1 8-8m12 0a6.5 6.5 0 1 1 8 8M24 10c10 0 17 7 17 16 0 8-6 14-17 14S7 34 7 26c0-9 7-16 17-16Zm-3 19q3 3 6 0m-3 2v2m-5 0q3 4 5 0 2 4 5 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="17" cy="25" r="1.5" fill="currentColor"/>
+    <circle cx="31" cy="25" r="1.5" fill="currentColor"/>
+  </symbol>
+</svg>

@@ -1,31 +1,54 @@
 // Each unit is a completed startup milestone, not an estimate of bytes or time.
-const stages = ['physics', 'scene', 'models', 'frame'];
+const stages = ['physics', 'scene', 'models', 'frame', 'warm'];
+// mall-language.js owns the selected language and publishes it on <html>.
+const details = {
+  en:['Preparing the mall details…', 'Details'],
+  'zh-Hans':['正在准备商场细节…', '细节'],
+  ms:['Menyediakan butiran pusat beli-belah…', 'Butiran']
+};
 const messages = [
   'Starting the physics engine…',
   'Building the mall scene…',
   'Preparing the visitor and models…',
   'Rendering the first scene…',
+  details.en[0],
   'The mall is ready.'
 ];
 
+export function loaderLabels(state, language) {
+  const [status, step] = details[language] ?? details.en;
+  return {
+    status:state.message === details.en[0] ? status : state.message,
+    lastStep:state.stage === 'warm' || state.ready ? step : null
+  };
+}
+
 export function createLoaderState(onChange = () => {}) {
   let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false, preparation = null;
+  const skip = new AbortController();
   const snapshot = () => ({completed, total: stages.length, hidden, contextLost, failed, dismissed,
-    ready: completed === stages.length, preparing: Boolean(preparation) && completed < stages.length, message: failed || (completed === stages.length ? messages[4] :
+    stage: stages[completed], ready: completed === stages.length,
+    preparing: (Boolean(preparation) || stages[completed] === 'warm') && completed < stages.length,
+    message: failed || (completed === stages.length ? messages.at(-1) :
       contextLost ? 'Graphics were interrupted. Waiting for recovery…' :
       hidden ? 'Loading is paused until this tab is visible.' : preparation || messages[completed])});
   const notify = () => { const state = snapshot(); onChange(state); return state; };
   return {
-    snapshot,
+    snapshot, skipSignal:skip.signal,
+    get ready() { return completed === stages.length; },
     complete(stage) {
-      if (!failed && stage === stages[completed] && (stage !== 'frame' || (!hidden && !contextLost))) completed++;
+      if (!failed && stage === stages[completed] && (!['frame','warm'].includes(stage) || (!hidden && !contextLost))) {
+        completed++;
+        preparation = null;
+      }
       return notify();
     },
+    enterNow() { if (snapshot().preparing && !failed) skip.abort('enter-now'); },
     prepare(value) { preparation = value; return notify(); },
     visibility(value) { hidden = Boolean(value); return notify(); },
     context(value) { contextLost = Boolean(value); return notify(); },
     fail(message) { if (completed < stages.length) failed = message; return notify(); },
-    dismiss() { dismissed = true; return notify(); }
+    dismiss() { dismissed = true; skip.abort('directory'); return notify(); }
   };
 }
 
@@ -56,13 +79,22 @@ if (typeof document !== 'undefined') {
     if (!overlay.hidden && !paused && !failed && (shown !== goal || !ready)) raf = requestAnimationFrame(frame);
   }
   const drive = value => { if (value.completed !== last.completed) stageStart = performance.now(); last = value; if (!raf) raf = requestAnimationFrame(frame); };
+  const firstView = steps.at(-1);
+  function renderText(value) {
+    const labels = loaderLabels(value, document.documentElement.lang);
+    status.textContent = labels.status;
+    if (labels.lastStep) firstView.textContent = labels.lastStep;
+  }
   const state = createLoaderState(value => {
-    status.textContent = value.message;
+    renderText(value);
+    progress.max = value.total;
     progress.value = value.completed;
     progress.textContent = `${value.completed} of ${value.total} stages`;
     count.textContent = `${value.completed} / ${value.total}`;
     drive(value);
-    steps.forEach((step, index) => { step.dataset.state = index < value.completed ? 'done' : index === value.completed && !value.failed ? 'current' : 'todo'; });
+    // First view and Details share the last column on narrow screens.
+    const segment = value.ready ? steps.length : Math.min(value.completed, steps.length - 1);
+    steps.forEach((step, index) => { step.dataset.state = index < segment ? 'done' : index === segment && !value.failed ? 'current' : 'todo'; });
     retry.hidden = !value.failed;
     enterNow.hidden = !value.preparing || Boolean(value.failed);
     if (value.dismissed) {
@@ -82,14 +114,20 @@ if (typeof document !== 'undefined') {
     }
   });
   state.visibility(document.hidden);
+  new MutationObserver(() => renderText(state.snapshot())).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', () => state.visibility(document.hidden));
   retry.addEventListener('click', () => location.reload());
-  enterNow.addEventListener('click', () => state.complete('frame'));
+  enterNow.addEventListener('click', () => state.enterNow());
   document.getElementById('loader-directory').addEventListener('click', () => {
     state.dismiss();
     document.getElementById('store-list').focus({preventScroll: true});
   });
   window.mallLoader = state;
+  // The 3D mall is a game surface: block text selection and the touch long-press callout, but keep form fields usable.
+  const experienceRoot = document.getElementById('experience');
+  const isField = event => Boolean((event.target.parentElement || event.target).closest?.('input,textarea,select,[contenteditable]'));
+  experienceRoot?.addEventListener('selectstart', event => { if (!isField(event)) event.preventDefault(); });
+  experienceRoot?.addEventListener('contextmenu', event => { if (matchMedia('(pointer: coarse)').matches && !isField(event)) event.preventDefault(); });
   const entrance = document.getElementById('mall-arrivals');
   document.documentElement.classList.add('mall-routing');
   let entryMode = 'arrivals';

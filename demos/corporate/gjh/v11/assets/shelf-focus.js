@@ -1,5 +1,5 @@
 /** Shelf owns presentation only. modes.js owns pause; products.js owns all bounds/assets. */
-export function createShelfFocus({T, canvas, normalCamera, shelves, projection, onChange, onDetails, onAdd, onRestore}) {
+export function createShelfFocus({T, canvas, normalCamera, getFramingFov, shelves, projection, onChange, onDetails, onAdd, onRestore}) {
   const dialog = document.querySelector('#shelf-dialog'), stage = dialog.querySelector('.shelf-stage');
   const target = document.querySelector('#shelf-target'), title = document.querySelector('#shelf-title');
   const note = document.querySelector('#shelf-status'), add = document.querySelector('#shelf-add');
@@ -25,11 +25,12 @@ export function createShelfFocus({T, canvas, normalCamera, shelves, projection, 
     const scene = canvas.getBoundingClientRect();
     Object.assign(dialog.style, {left: `${scene.left}px`, top: `${scene.top}px`, width: `${scene.width}px`, height: `${scene.height}px`});
     const area = stage.getBoundingClientRect(), {min, max} = session.shelf;
-    const layout = [scene.x, scene.y, scene.width, scene.height, area.x, area.y, area.width, area.height, normalCamera.fov].join(',');
+    const fov = getFramingFov();
+    const layout = [scene.x, scene.y, scene.width, scene.height, area.x, area.y, area.width, area.height, fov].join(',');
     if (session.layout === layout) return;
     session.layout = layout;
     const center = new T.Vector3((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
-    camera.aspect = scene.width / scene.height; camera.fov = normalCamera.fov;
+    camera.aspect = scene.width / scene.height; camera.fov = fov;
     const tangent = Math.tan(camera.fov * Math.PI / 360);
     // Fit the entire depth-inclusive box, leaving room for the complete focus ring.
     const distance = Math.max((max.y - min.y) * scene.height / (Math.max(1, area.height - 32) * 2 * tangent),

@@ -1,0 +1,293 @@
+{
+  "version": 1,
+  "coordinates": {
+    "unit": "metre",
+    "up": "+Y",
+    "front": "+Z",
+    "origin": "bottom-centre-back"
+  },
+  "nominalFasciaMetres": [
+    1.0,
+    0.6,
+    0.06
+  ],
+  "frame": {
+    "cornerMetres": 0.06,
+    "railWidthMetres": 0.034,
+    "backplateDepthMetres": 0.035
+  },
+  "materialLibrary": {
+    "brass_trim": {
+      "color": "#D9A354",
+      "metallic": 0.88,
+      "roughness": 0.33
+    },
+    "lacquer_fascia": {
+      "color": "#142E27",
+      "metallic": 0.12,
+      "roughness": 0.34
+    },
+    "timber_slat": {
+      "color": "#5D3928",
+      "metallic": 0,
+      "roughness": 0.51
+    },
+    "emissive_letter": {
+      "color": "#FFE3A3",
+      "metallic": 0.22,
+      "roughness": 0.34,
+      "emission": 0.85
+    },
+    "glass_panel": {
+      "color": "#DCEAE1",
+      "metallic": 0,
+      "roughness": 0.19
+    },
+    "brushed_black_metal": {
+      "color": "#28282C",
+      "metallic": 0.74,
+      "roughness": 0.43
+    },
+    "brass_plate": {
+      "color": "#C69C63",
+      "metallic": 0.77,
+      "roughness": 0.45
+    },
+    "gunmetal": {
+      "color": "#202733",
+      "metallic": 0.72,
+      "roughness": 0.38
+    },
+    "gold_disc": {
+      "color": "#D79F36",
+      "metallic": 0.89,
+      "roughness": 0.27
+    },
+    "silver_ring": {
+      "color": "#D4D9DB",
+      "metallic": 0.9,
+      "roughness": 0.31
+    },
+    "neon_blue": {
+      "color": "#7AD5FF",
+      "metallic": 0.08,
+      "roughness": 0.29,
+      "emission": 0.95
+    },
+    "rose_lacquer": {
+      "color": "#78394C",
+      "metallic": 0.12,
+      "roughness": 0.36
+    },
+    "chocolate_lacquer": {
+      "color": "#3E2C27",
+      "metallic": 0.07,
+      "roughness": 0.42
+    },
+    "pastel_enamel": {
+      "color": "#F0DCE8",
+      "metallic": 0.05,
+      "roughness": 0.46
+    },
+    "ivy_leaf": {
+      "color": "#587446",
+      "metallic": 0,
+      "roughness": 0.64,
+      "doubleSided": true
+    }
+  },
+  "budgets": {
+    "triangles": 20000,
+    "bytes": 300000,
+    "textures": 0
+  },
+  "totals": {
+    "assets": 10,
+    "tris": 2374,
+    "bytes": 141076,
+    "textures": 0
+  },
+  "assets": [
+    {
+      "name": "sign_frame_corner",
+      "file": "sign_frame_corner.glb",
+      "bytes": 4948,
+      "tris": 64,
+      "materials": [
+        "brushed_black_metal",
+        "brass_trim"
+      ],
+      "sizeMetres": [
+        0.06,
+        0.06,
+        0.046
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "cc330a19e402321e5cd2b54722e2b09bff0865d35d45c2e4e39515ce84cb9e24",
+      "provenance": "Original procedural lower-left mitred corner."
+    },
+    {
+      "name": "sign_frame_edge_h",
+      "file": "sign_frame_edge_h.glb",
+      "bytes": 3832,
+      "tris": 40,
+      "materials": [
+        "brushed_black_metal",
+        "brass_trim"
+      ],
+      "sizeMetres": [
+        0.88,
+        0.034,
+        0.046
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "6d18dbdd3eeb5ad1ee8f1e449254fe302de15717beaac7f4ca2cc8cd266faf35",
+      "provenance": "Original procedural horizontal rail."
+    },
+    {
+      "name": "sign_frame_edge_v",
+      "file": "sign_frame_edge_v.glb",
+      "bytes": 3916,
+      "tris": 40,
+      "materials": [
+        "brushed_black_metal",
+        "brass_trim"
+      ],
+      "sizeMetres": [
+        0.034,
+        0.48,
+        0.046
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "9b60a0fba1020fd5096ed3b34c20e2c1c97a30643f7577e59cf14001bf7b012f",
+      "provenance": "Original procedural vertical rail."
+    },
+    {
+      "name": "sign_backplate",
+      "file": "sign_backplate.glb",
+      "bytes": 5656,
+      "tris": 92,
+      "materials": [
+        "lacquer_fascia"
+      ],
+      "sizeMetres": [
+        1.0,
+        0.6,
+        0.035
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "25cf8715f0044466a173202b6a61cffa1d3490f96c95eee90f29f555fbf961f5",
+      "provenance": "Original procedural lacquer fascia."
+    },
+    {
+      "name": "sign_downlight",
+      "file": "sign_downlight.glb",
+      "bytes": 13984,
+      "tris": 244,
+      "materials": [
+        "gunmetal",
+        "gold_disc",
+        "emissive_letter"
+      ],
+      "sizeMetres": [
+        0.12,
+        0.054,
+        0.054
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "c4578700c11611f51ff57195ca7bf290576410ff0dde3a46afdd4fabd1a020c0",
+      "provenance": "Original procedural linear housing and downward-facing emitter."
+    },
+    {
+      "name": "sign_blade_bracket",
+      "file": "sign_blade_bracket.glb",
+      "bytes": 20240,
+      "tris": 368,
+      "materials": [
+        "gunmetal",
+        "silver_ring"
+      ],
+      "sizeMetres": [
+        0.16,
+        0.105,
+        0.06
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "a8f829d87ffe64f6f11f38c49bbb857ce574bb632b00f305077b54a62778e52c",
+      "provenance": "Original procedural mounting plate and blade arm."
+    },
+    {
+      "name": "sign_blade_panel",
+      "file": "sign_blade_panel.glb",
+      "bytes": 25644,
+      "tris": 460,
+      "materials": [
+        "brass_plate",
+        "lacquer_fascia",
+        "glass_panel"
+      ],
+      "sizeMetres": [
+        0.38,
+        0.43,
+        0.043
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "2743ee6c6d16b5ace7135f29c7986175eff3c8fd0936b136f5df5092c641a6ee",
+      "provenance": "Original procedural two-sided blade blank with inset label faces."
+    },
+    {
+      "name": "sign_timber_slat",
+      "file": "sign_timber_slat.glb",
+      "bytes": 5672,
+      "tris": 92,
+      "materials": [
+        "timber_slat"
+      ],
+      "sizeMetres": [
+        0.09,
+        0.6,
+        0.02
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "0fccc7350ed7172412feb7970d311f0bf28e84215e9b1338bc98df618ffcd96c",
+      "provenance": "Original procedural caf\u00e9 slat to repeat across the backplate."
+    },
+    {
+      "name": "sign_logo3d_new_moon",
+      "file": "sign_logo3d_new_moon.glb",
+      "bytes": 23124,
+      "tris": 470,
+      "materials": [
+        "emissive_letter"
+      ],
+      "sizeMetres": [
+        0.231913,
+        0.31,
+        0.017
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "ebdecaacc9eb49c6bf157d9d3fbf63359edf6125de54feaf7881bbac2abe4541",
+      "provenance": "Yellow crescent component traced from the official New Moon SVG.",
+      "sourceArtwork": "demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+      "sourceArtworkSha256": "af9bd8b7edd2ccd793fd66c478c199431fc6f4f853702f10854d3243bbff70f5"
+    },
+    {
+      "name": "sign_ivy_swag",
+      "file": "sign_ivy_swag.glb",
+      "bytes": 34060,
+      "tris": 504,
+      "materials": [
+        "ivy_leaf",
+        "timber_slat"
+      ],
+      "sizeMetres": [
+        0.7,
+        0.2,
+        0.052
+      ],
+      "sourceScript": "scripts/build_signage_kit.py",
+      "sha256": "f37df041ab63efccced3f58ed44e007c277581c6a42dcbf8a8bdf5c5cdf3b6d1",
+      "provenance": "Original procedural climbing stems and folded ivy leaves."
+    }
+  ]
+}

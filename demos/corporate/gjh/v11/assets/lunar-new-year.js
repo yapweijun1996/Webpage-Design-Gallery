@@ -86,6 +86,6 @@ export function prepareLunarDecor(T, scene, theme, {signal}={}) {
     const bannerGeometry=ownGeometry(new T.PlaneGeometry(LUNAR_DECOR_LAYOUT.banner.width,LUNAR_DECOR_LAYOUT.banner.height));
     const banner=new T.Mesh(bannerGeometry,bannerMaterial);banner.position.set(LUNAR_DECOR_LAYOUT.banner.x,LUNAR_DECOR_LAYOUT.banner.y,LUNAR_DECOR_LAYOUT.banner.z);group.add(banner);
     if(signal?.aborted)throw new Error('Theme preparation cancelled');
-    return {value:theme,mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
+    return {value:theme,group,mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
   } catch(error) {dispose();throw error;}
 }

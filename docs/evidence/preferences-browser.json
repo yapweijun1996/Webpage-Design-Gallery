@@ -2,13 +2,13 @@
   "standard": "pwa:product-standard",
   "profile": "CONTENT",
   "build": {
-    "version": "1.1.30",
-    "build": "ae3c4cadd8db777b"
+    "version": "1.4.0",
+    "build": "faeda88c3f48a2e6"
   },
-  "timestamp": "2026-11-14T16:19:25.531369+00:00",
+  "timestamp": "2026-11-18T14:58:48.657376+00:00",
   "os": "macOS-27.2-arm64-arm-64bit-Mach-O",
   "browser": "Chromium",
-  "browser_version": "157.0.8103.51",
+  "browser_version": "158.0.8127.37",
   "status": "PASS",
   "checks": [
     "24 responsive language/theme combinations, localized empty state, controls and text/control contrast",

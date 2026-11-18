@@ -1,5 +1,34 @@
 # GJH V11 Virtual Mall Improvement Plan
 
+## Mobile performance, controls and signage programme (2026-11-18)
+
+Owner device: iPhone, 393 px wide. Owner priorities: no lag on the phone, premium look, shop signage and interiors that read as real brands. Verification rule: judge from real browser screenshots and the walk probe (`docs/walk_probe.py`), not from agent summaries. Checklist: [taste engine checklist](docs/ui-ux/taste-engine-checklist.md).
+
+Shipped to `main`:
+
+- [x] Loader redesign: stage stepper, easing progress bar, tidy actions (3d1037a).
+- [x] Low tier really reduces triangles (about 64 percent less near the entry) and phones default to Low in Auto (844b971). Balanced locked an iPhone at 30 FPS; Low runs 60 FPS.
+- [x] Add a held product to the bag from any shelf (56f0b6b).
+- [x] Remove the west-gallery z-fighting wall flicker by deleting coplanar faces (8a7c38f). Astra judged better than Sol on this bounded task (n=1).
+- [x] Upload late-loaded assets in per-frame slices (b9bc07d).
+- [x] First-person view (V) and zoom (wheel, pinch, +/-, Tools buttons) (5395a57).
+- [x] Warm the whole mall in the loading screen: five-stage loader, 20 probe poses, 6 s cap (79e0213). Three cold walks in headed Chrome: zero frames at or above 50 ms, previously five to six frames of 116-199 ms.
+- [x] UI/UX Taste Engine checklist, `tests/ui_audit.py`, gallery home audit (5341610).
+- [x] Prevent text selection and the touch callout inside the 3D mall.
+
+In progress or queued (each verified in headed Chrome before push):
+
+- [ ] HUD redesign: slim top bar, three HUD layers, one bottom context card, unified 56 px controls, session-only objectives and a nearby-store chip (Codex is merging it with first person and Add to bag).
+- [ ] Shop signage system and GLB asset kit: 17 configured stores, eight style presets, 10 GLBs (2,374 triangles). Needs integration, plus adding `assets/signage/` to the release publisher.
+- [ ] Gallery home fixes G-01 to G-06 and G-08 from the audit.
+- [ ] Held can renders on the floor in front of the visitor instead of in the hand. Reproduced on 844b971 as well, so it predates today's changes; Tripo visitor hand placement.
+- [ ] Interior design for the 17 brand stores: stronger anchors (focal pieces), more models, filled floors (see the questions answered in this file's next update).
+- [ ] Atmosphere pass: warm cove lighting and glossy floor (desktop stronger, phone minimal).
+- [ ] Measure frame times and loader wait on the physical iPhone after the warm-up release.
+
+Rejected or retired: GJH landing v20, v21, v23, v24, v25 (ImageGen collage mockups, owner verdict "no taste"). v22 is the approved landing bar.
+
+
 ## Lighthouse and rendering follow-up (2026-11-18)
 
 - [x] Match the gallery home link’s accessible name to the visible label in all three languages.

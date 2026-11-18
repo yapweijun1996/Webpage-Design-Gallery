@@ -34,20 +34,20 @@ async function createSelectedVisitor(selection, { tripo, v2, v1 }) {
     return v2();
   }
 }
-function createCharacter(T) {
+function createCharacter(T, prepareModel) {
   return createSelectedVisitor(new URLSearchParams(location.search).get("visitor"), {
     async tripo() {
       const { createCharacterTripo } = await import("./character-tripo.js");
-      return createCharacterTripo(T, createLocomotionContinuity);
+      return createCharacterTripo(T, createLocomotionContinuity, prepareModel);
     },
     async v2() {
       const { createCharacterV2 } = await import("./character-v2.bundle.js");
-      return createCharacterV2(T, createLocomotionContinuity);
+      return createCharacterV2(T, createLocomotionContinuity, prepareModel);
     },
-    v1: () => createCharacterV1(T)
+    v1: () => createCharacterV1(T, prepareModel)
   });
 }
-async function createCharacterV1(T) {
+async function createCharacterV1(T, prepareModel) {
   const [{ GLTFLoader }, { createPushCart }, { createSeatedPose }, { createCollectionGesture }, { createCarryBag }] = await Promise.all([
     import("../vendor/GLTFLoader.js"),
     import("./push-cart.js"),
@@ -76,7 +76,7 @@ async function createCharacterV1(T) {
   const seated = createSeatedPose(avatar);
   const visual = new T.Group;
   visual.add(avatar);
-  const cart = await createPushCart(T, avatar, visual);
+  const cart = await createPushCart(T, avatar, visual, { prepareModel });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const clips = Object.freeze({ idle: "idle", walk: "walk", run: "sprint" });
   const mixer = new T.AnimationMixer(avatar);
@@ -150,6 +150,9 @@ async function createCharacterV1(T) {
     cancelCollection: collection.cancel,
     get animation() {
       return animation;
+    },
+    get seatWeight() {
+      return seated.weight;
     },
     get state() {
       return Object.freeze({
@@ -319,7 +322,81 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
 }));
 var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
 
+// demos/corporate/gjh/v11/assets/visitor-v2-contact.js
+function isShelfInReach({ x, y, z }, approach) {
+  return Math.abs(y) <= 0.5 && Math.hypot(x - approach.x, z - approach.z) <= approach.radius;
+}
+
+// demos/corporate/gjh/v11/assets/camera-controller.js
+var MIN_DISTANCE = 1;
+var MAX_DISTANCE = 11;
+var NARROW_FOV = 40;
+var WIDE_FOV = 75;
+function clampZoom(value) {
+  return Number.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
+}
+function chaseDistance(neutral, zoom) {
+  const value = clampZoom(zoom);
+  return neutral - value * (value < 0 ? MAX_DISTANCE - neutral : neutral - MIN_DISTANCE);
+}
+function firstPersonFov(zoom) {
+  return WIDE_FOV - (clampZoom(zoom) + 1) * (WIDE_FOV - NARROW_FOV) / 2;
+}
+function easeCameraValue(current, target, dt, immediate = false) {
+  if (immediate || Math.abs(target - current) < 0.0001)
+    return target;
+  return current + (target - current) * -Math.expm1(-6 * Math.max(0, dt));
+}
+function createCameraController(getStorage = () => globalThis.sessionStorage) {
+  const key = "gjh.v11.cameraZoom";
+  let chaseZoom = 0, eyeZoom = 0, firstPerson = false;
+  try {
+    const saved = JSON.parse(getStorage().getItem(key));
+    chaseZoom = clampZoom(saved?.chase);
+    eyeZoom = clampZoom(saved?.eye);
+  } catch {}
+  return {
+    get firstPerson() {
+      return firstPerson;
+    },
+    mode(chaseRequired = false) {
+      return firstPerson && !chaseRequired ? "first-person" : "third-person";
+    },
+    zoom(chaseRequired = false) {
+      return chaseRequired ? 0 : firstPerson ? eyeZoom : chaseZoom;
+    },
+    toggle(chaseRequired = false) {
+      if (chaseRequired)
+        return false;
+      firstPerson = !firstPerson;
+      return true;
+    },
+    adjust(delta, chaseRequired = false) {
+      if (chaseRequired || !Number.isFinite(delta))
+        return false;
+      const previous = firstPerson ? eyeZoom : chaseZoom;
+      const next = clampZoom(previous + delta);
+      if (next === previous)
+        return false;
+      if (firstPerson)
+        eyeZoom = next;
+      else
+        chaseZoom = next;
+      try {
+        getStorage().setItem(key, JSON.stringify({ chase: chaseZoom, eye: eyeZoom }));
+      } catch {}
+      return true;
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/player.js
+var CAMERA_AXES = ["x", "y", "z"];
+var CAMERA_LIFTS = [1.1, 2.2];
+var ZOOM_STEP = 0.2;
+var CHASE_NEAR = 0.08;
+var EYE_HEIGHT = 1.55;
+var EYE_CLEARANCE = 0.16;
 function playerCameraFraming(model, expanded, width, height) {
   const tripo = model === "gjh-tripo-visitor", mobile = width < 600;
   let fov = mobile ? 68 : tripo ? 64 : 58;
@@ -334,8 +411,8 @@ function playerCameraFraming(model, expanded, width, height) {
     lookAhead: tripo ? 1.7 : 0
   };
 }
-async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
-  const character = await createCharacter(T);
+async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel) {
+  const character = await createCharacter(T, prepareModel);
   const model = character.state.model;
   const visual = character.visual;
   scene.add(visual);
@@ -352,13 +429,16 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set;
   let vertical = 0, runToggle = true, stickX = 0, stickY = 0, injected = null;
-  let seated = false, pushing = false, elevatorTravel = null;
+  let seated = false, pushing = false, elevatorTravel = null, cartEyePitch = null;
   const walkingShape = new R.Capsule(0.55, 0.3), cartShape = new R.Cylinder(0.85, 1.4);
   let seat = null, seatPhase = "idle", seatTime = 0, seatFrom = null, seatStartAngle = 0, seatStartWeight = 0;
-  const reduceSeatMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let yaw = 0, pitch = 0.1, drag = null, stickPointer = null, stickOrigin = null;
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const reduceSeatMotion = () => reducedMotion.matches;
+  let yaw = 0, pitch = 0.1, drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
   let actionView = null, cameraDistance = null, cameraOccluded = false, productApproach = null, productHome = null;
-  const camera = new T.PerspectiveCamera(58, 1, 0.08, 100);
+  const view = createCameraController();
+  const camera = new T.PerspectiveCamera(58, 1, CHASE_NEAR, 100);
+  let renderedMode = "third-person", eyeFov = firstPersonFov(0), eyeFovInitialized = false;
   const target = new T.Vector3, desired = new T.Vector3, offset = new T.Vector3, direction = new T.Vector3, safe = new T.Vector3;
   const sightline = new T.Vector3;
   let framing = playerCameraFraming(model, expanded, canvas.clientWidth, canvas.clientHeight);
@@ -367,22 +447,89 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   let cameraLift = 0, cameraClearance = 0, cameraRadius = 0.22;
   const movement = { x: 0, y: 0, z: 0 }, next = { x: 0, y: 0, z: 0 };
   const joystick = document.querySelector("#joystick"), thumb = joystick.querySelector(".joystick-thumb"), runButton = document.querySelector("#run-toggle");
+  const cameraControls = document.querySelector("#camera-controls");
+  const zoomIn = document.querySelector("#camera-zoom-in"), zoomOut = document.querySelector("#camera-zoom-out");
+  const viewToggle = document.querySelector("#camera-view-toggle");
   let isPaused = () => false;
+  const chaseRequired = () => Boolean(actionView || seated || pushing || elevatorTravel);
+  const cameraMode = () => view.mode(chaseRequired());
+  function clampPitch(value) {
+    return cameraMode() === "first-person" ? T.MathUtils.clamp(value, -1.45, 1.45) : T.MathUtils.clamp(value, -0.08, 0.9);
+  }
+  function toggleView() {
+    if (isPaused() || !view.toggle(chaseRequired()))
+      return;
+    pitch = clampPitch(pitch);
+    updateCamera(0);
+  }
+  function adjustZoom(delta) {
+    if (isPaused() || !view.adjust(delta, chaseRequired()))
+      return;
+    if (reducedMotion.matches)
+      updateCamera(0, true);
+  }
+  zoomIn.addEventListener("click", () => adjustZoom(ZOOM_STEP));
+  zoomOut.addEventListener("click", () => adjustZoom(-ZOOM_STEP));
+  viewToggle.addEventListener("click", toggleView);
+  cameraControls.addEventListener("click", (event) => {
+    if (event.detail > 0 && event.target.closest("button"))
+      canvas.focus({ preventScroll: true });
+  });
+  canvas.addEventListener("wheel", (event) => {
+    if (isPaused() || chaseRequired() || event.metaKey)
+      return;
+    const multiplier = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? canvas.clientHeight : 1;
+    if (!event.deltaY)
+      return;
+    event.preventDefault();
+    adjustZoom(T.MathUtils.clamp(-event.deltaY * multiplier * (event.ctrlKey ? 0.01 : 0.0025), -0.5, 0.5));
+  }, { passive: false });
+  let trackpadScale = 0;
+  canvas.addEventListener("gesturestart", (event) => {
+    if (isPaused() || chaseRequired() || stick || drag?.touch || pinch)
+      return;
+    event.preventDefault();
+    trackpadScale = 1;
+  }, { passive: false });
+  canvas.addEventListener("gesturechange", (event) => {
+    if (!trackpadScale || isPaused() || chaseRequired() || !Number.isFinite(event.scale) || event.scale <= 0)
+      return;
+    event.preventDefault();
+    adjustZoom(Math.log(event.scale / trackpadScale));
+    trackpadScale = event.scale;
+  }, { passive: false });
+  canvas.addEventListener("gestureend", () => {
+    trackpadScale = 0;
+  });
   const resetStick = () => {
     stickX = stickY = 0;
-    stickPointer = null;
+    stick = null;
     stickOrigin = null;
     thumb.style.transform = "";
     joystick.classList.remove("is-floating");
   };
+  function takePinch() {
+    clearTimeout(pinchTimer);
+    pinchTimer = 0;
+    const previous = pinch;
+    pinch = null;
+    return previous;
+  }
+  function releaseCapture(id) {
+    if (id != null && canvas.hasPointerCapture(id))
+      canvas.releasePointerCapture(id);
+  }
   const clearInput = () => {
-    const ids = [stickPointer, drag?.id];
+    const pair = takePinch(), dragId = drag?.id, stickId = stick?.id;
     keys.clear();
     drag = null;
-    resetStick();
-    for (const id of ids)
-      if (id != null && canvas.hasPointerCapture(id))
-        canvas.releasePointerCapture(id);
+    trackpadScale = 0;
+    if (stick)
+      resetStick();
+    releaseCapture(dragId);
+    releaseCapture(stickId);
+    releaseCapture(pair?.first.id);
+    releaseCapture(pair?.second.id);
   };
   window.addEventListener("blur", clearInput);
   window.addEventListener("resize", clearInput);
@@ -399,7 +546,24 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       clearInput();
       return;
     }
-    if (isPaused() || event.target !== canvas && event.target !== document.body)
+    if (isPaused() || event.defaultPrevented)
+      return;
+    const sceneFocused = event.target === canvas || event.target === document.body;
+    if (sceneFocused || cameraControls.contains(event.target)) {
+      if (event.code === "KeyV") {
+        event.preventDefault();
+        if (!event.repeat)
+          toggleView();
+        return;
+      }
+      const zoomInKey = event.key === "+" || event.key === "=" || event.code === "NumpadAdd";
+      if (zoomInKey || event.key === "-" || event.code === "NumpadSubtract") {
+        event.preventDefault();
+        adjustZoom(zoomInKey ? ZOOM_STEP : -ZOOM_STEP);
+        return;
+      }
+    }
+    if (!sceneFocused)
       return;
     if (["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight"].includes(event.code)) {
       if (event.target === canvas || event.target === document.body)
@@ -424,23 +588,88 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     runToggle = !runToggle;
     runButton.setAttribute("aria-pressed", String(runToggle));
   });
-  function dragStick(event) {
+  function dragStick() {
     if (!stickOrigin)
       return;
-    const dx = event.clientX - stickOrigin.x, dy = event.clientY - stickOrigin.y;
+    const dx = stick.x - stickOrigin.x, dy = stick.y - stickOrigin.y;
     const distance = Math.hypot(dx, dy), strength = Math.min(1, Math.max(0, (distance - 8) / 30));
+    if (strength)
+      stick.pinchEligible = false;
     stickX = distance ? dx / distance * strength : 0;
     stickY = distance ? -dy / distance * strength : 0;
     thumb.style.transform = `translate(${stickX * 18}px, ${-stickY * 18}px)`;
+  }
+  function look(dx, dy) {
+    if (!dx && !dy)
+      return;
+    if (actionView)
+      actionView.settled = true;
+    yaw -= dx * 0.005;
+    pitch = clampPitch(pitch + dy * 0.004);
+  }
+  function beginPinch(first, second, pending) {
+    const dx = second.x - first.x, dy = second.y - first.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    pinch = {
+      first,
+      second,
+      distance,
+      pending,
+      axisX: dx / distance,
+      axisY: dy / distance,
+      firstX: first.x,
+      firstY: first.y,
+      secondX: second.x,
+      secondY: second.y
+    };
+    if (!pending)
+      drag = null;
+  }
+  function retainStickAndLook() {
+    const pair = takePinch();
+    stick.pinchEligible = false;
+    dragStick();
+    look(drag.x - pair.secondX, drag.y - pair.secondY);
+  }
+  function movePinch(point, event) {
+    point.x = event.clientX;
+    point.y = event.clientY;
+    if (pinch.pending) {
+      const { first, second, firstX, firstY, secondX, secondY, axisX, axisY } = pinch;
+      const firstDx = first.x - firstX, firstDy = first.y - firstY;
+      const secondDx = second.x - secondX, secondDy = second.y - secondY;
+      const a = firstDx * axisX + firstDy * axisY, b = secondDx * axisX + secondDy * axisY;
+      if (Math.abs(a) >= 6 && Math.abs(b) >= 6 && a * b < 0) {
+        clearTimeout(pinchTimer);
+        pinchTimer = 0;
+        pinch.pending = false;
+        resetStick();
+        drag = null;
+      } else {
+        if (Math.abs(a) >= 6 && Math.abs(b) >= 6 || Math.abs(firstDx * axisY - firstDy * axisX) >= 12 || Math.abs(secondDx * axisY - secondDy * axisX) >= 12)
+          retainStickAndLook();
+        else if (!pinchTimer)
+          pinchTimer = setTimeout(retainStickAndLook, 90);
+        return;
+      }
+    }
+    const distance = Math.max(1, Math.hypot(pinch.first.x - pinch.second.x, pinch.first.y - pinch.second.y));
+    adjustZoom(Math.log(distance / pinch.distance));
+    pinch.distance = distance;
   }
   canvas.addEventListener("pointerdown", (event) => {
     if (isPaused() || event.button !== 0)
       return;
     if (event.pointerType === "touch") {
-      const box = joystick.getBoundingClientRect();
-      const onPad = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
-      if (stickPointer === null && (onPad || fullScreenControl.checked)) {
-        stickPointer = event.pointerId;
+      trackpadScale = 0;
+      if (pinch)
+        return;
+      const box = stick?.pad ?? joystick.getBoundingClientRect();
+      const onPad = box.width > 0 && event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
+      const point = { id: event.pointerId, x: event.clientX, y: event.clientY, touch: true, pinchEligible: !onPad };
+      if (!stick && (onPad || fullScreenControl.checked)) {
+        stick = point;
+        stick.pad = box;
         if (fullScreenControl.checked) {
           stickOrigin = { x: event.clientX, y: event.clientY };
           const bounds = canvas.getBoundingClientRect();
@@ -450,9 +679,13 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
         } else {
           stickOrigin = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
         }
-        dragStick(event);
+        dragStick();
       } else if (!drag) {
-        drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+        drag = point;
+        if (stick?.pinchEligible && fullScreenControl.checked && !onPad && !chaseRequired())
+          beginPinch(stick, drag, true);
+      } else if (!stick && drag.touch && !onPad && !chaseRequired()) {
+        beginPinch(drag, point, false);
       } else
         return;
       canvas.focus({ preventScroll: true });
@@ -467,21 +700,39 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   canvas.addEventListener("pointermove", (event) => {
     if (isPaused())
       return;
-    if (event.pointerId === stickPointer) {
-      dragStick(event);
+    if (pinch?.first.id === event.pointerId) {
+      movePinch(pinch.first, event);
+      return;
+    }
+    if (pinch?.second.id === event.pointerId) {
+      movePinch(pinch.second, event);
+      return;
+    }
+    if (stick?.id === event.pointerId) {
+      stick.x = event.clientX;
+      stick.y = event.clientY;
+      dragStick();
       return;
     }
     if (!drag || drag.id !== event.pointerId)
       return;
-    if (actionView)
-      actionView.settled = true;
-    yaw -= (event.clientX - drag.x) * 0.005;
-    pitch = T.MathUtils.clamp(pitch + (event.clientY - drag.y) * 0.004, -0.08, 0.9);
+    look(event.clientX - drag.x, event.clientY - drag.y);
     drag.x = event.clientX;
     drag.y = event.clientY;
   });
   function releasePointer(event) {
-    if (event.pointerId === stickPointer)
+    if (pinch && (pinch.first.id === event.pointerId || pinch.second.id === event.pointerId)) {
+      if (pinch.pending) {
+        if (event.type === "pointerup")
+          retainStickAndLook();
+        else
+          takePinch();
+      } else {
+        const { first, second } = takePinch();
+        drag = event.pointerId === first.id ? second : first;
+      }
+    }
+    if (event.pointerId === stick?.id)
       resetStick();
     if (event.pointerId === drag?.id)
       drag = null;
@@ -490,7 +741,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     canvas.addEventListener(type, releasePointer);
   function beginActionView(kind, targetYaw) {
     const previous = actionView?.previous || { yaw, pitch };
-    actionView = { kind, previous, fromYaw: yaw, fromPitch: pitch, targetYaw, elapsed: 0, settled: false };
+    actionView = { kind, previous, fromYaw: yaw, fromPitch: T.MathUtils.clamp(pitch, -0.08, 0.9), targetYaw, elapsed: 0, settled: false };
     if (reduceSeatMotion()) {
       yaw = targetYaw;
       pitch = 0.1;
@@ -582,6 +833,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
           elevatorTravel = null;
           capsule.setEnabled(true);
           vertical = 0;
+          if (view.firstPerson)
+            restoreActionView();
         }
       }
       return;
@@ -589,7 +842,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     updateActionView(dt);
     if (gamepad) {
       yaw -= gamepad.lookX * 1.9 * dt;
-      pitch = T.MathUtils.clamp(pitch + gamepad.lookY * 1.4 * dt, -0.08, 0.9);
+      pitch = clampPitch(pitch + gamepad.lookY * 1.4 * dt);
     }
     if (seated) {
       updateSeat(dt);
@@ -609,21 +862,23 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       }
       return;
     }
-    if (character.state.physicalProduct?.active) {
+    if (character.productPhase === "pickup" || character.productPhase === "return") {
       character.update("idle", dt);
+      if (view.firstPerson && actionView?.kind === "product" && (character.productPhase === "held" || character.productPhase === "empty"))
+        restoreActionView();
       return;
     }
     const forward = injected?.forward ?? (keys.has("KeyW") || keys.has("ArrowUp") ? 1 : 0) - (keys.has("KeyS") || keys.has("ArrowDown") ? 1 : 0) + stickY + (gamepad?.forward || 0);
     const right = injected?.right ?? (keys.has("KeyD") || keys.has("ArrowRight") ? 1 : 0) - (keys.has("KeyA") || keys.has("ArrowLeft") ? 1 : 0) + stickX + (gamepad?.right || 0);
     if (actionView?.kind === "product") {
-      if (Math.hypot(forward, right) > 0.1 || character.state.physicalProduct.phase === "empty")
+      if (view.firstPerson || Math.hypot(forward, right) > 0.1 || character.productPhase === "empty")
         restoreActionView();
     }
     if (actionView?.kind === "collection" && Math.hypot(forward, right) > 0.1)
       cancelCollection();
     if (actionView?.kind === "elevator" && Math.hypot(forward, right) > 0.1)
       restoreActionView();
-    const running = !pushing && (injected?.run ?? (stickPointer !== null && runToggle || keys.has("ShiftLeft") || keys.has("ShiftRight")));
+    const running = !pushing && (injected?.run ?? (stick !== null && runToggle || keys.has("ShiftLeft") || keys.has("ShiftRight")));
     const turning = (keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0);
     yaw += turning * (110 * Math.PI / 180) * dt;
     const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 7.5 : 2.65;
@@ -643,10 +898,13 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const state = walking ? running ? "run" : "walk" : "idle";
     const requested = Math.hypot(forward, right) > 0.001 ? running ? "run" : "walk" : "idle";
     const sprintRate = running && dt > 0 ? Math.min(speed, distance / dt) / 5 : 1;
+    const firstPerson = cameraMode() === "first-person";
+    if (firstPerson)
+      visual.rotation.y = yaw;
     character.update(state, dt, requested, sprintRate);
     if (actionView?.kind === "collection" && !character.state.collection.active)
       restoreActionView();
-    if (walking || turning) {
+    if (!firstPerson && (walking || turning)) {
       const angle = walking ? Math.atan2(-dx, -dz) : yaw, delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
       visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
     }
@@ -667,7 +925,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     let clearance = hit ? Math.max(0, hit.time_of_impact - 0.02) : length;
     for (const box of cameraObstacles) {
       let near = 0, far = length;
-      for (const axis of ["x", "y", "z"]) {
+      for (const axis of CAMERA_AXES) {
         const min = box.min[axis] - cameraRadius, max = box.max[axis] + cameraRadius;
         if (Math.abs(direction[axis]) < 0.00000001) {
           if (origin[axis] < min || origin[axis] > max) {
@@ -696,24 +954,65 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   function resizeCamera(width, height) {
     framing = playerCameraFraming(model, expanded, width, height);
     camera.aspect = width / height;
-    camera.fov = framing.fov;
+    projectCamera(renderedMode === "first-person", true);
+  }
+  function projectCamera(firstPerson, resized = false) {
+    const fov = firstPerson ? eyeFov : framing.fov;
+    const near = firstPerson ? Math.min(CHASE_NEAR, EYE_CLEARANCE / Math.hypot(1, Math.tan(fov * Math.PI / 360) * Math.hypot(1, camera.aspect))) : CHASE_NEAR;
+    if (!resized && camera.fov === fov && camera.near === near)
+      return;
+    camera.fov = fov;
+    camera.near = near;
     camera.updateProjectionMatrix();
+  }
+  function presentView(mode, occluded, required) {
+    if (cameraOccluded !== occluded) {
+      cameraOccluded = occluded;
+      character.setCameraOccluded(occluded);
+    }
+    const firstPerson = mode === "first-person";
+    contact.visible = !firstPerson;
+    const presentation = firstPerson ? mode : occluded ? "close" : mode;
+    if (canvas.dataset.cameraView !== presentation)
+      canvas.dataset.cameraView = presentation;
+    if (viewToggle.disabled !== required)
+      viewToggle.disabled = zoomIn.disabled = zoomOut.disabled = required;
+    if (renderedMode !== mode)
+      viewToggle.setAttribute("aria-pressed", String(firstPerson));
+    renderedMode = mode;
   }
   function updateCamera(dt, instant = false) {
     sync();
+    const required = chaseRequired(), mode = view.mode(required), firstPerson = mode === "first-person";
+    const zoom = view.zoom(required), immediate = instant || reducedMotion.matches;
+    if (firstPerson) {
+      eyeFov = easeCameraValue(eyeFov, firstPersonFov(zoom), dt, immediate || !eyeFovInitialized);
+      eyeFovInitialized = true;
+      projectCamera(true);
+      camera.position.copy(visual.position);
+      camera.position.y += EYE_HEIGHT;
+      const cosPitch = Math.cos(pitch);
+      sightline.set(-Math.sin(yaw) * cosPitch, -Math.sin(pitch), -Math.cos(yaw) * cosPitch).add(camera.position);
+      camera.lookAt(sightline);
+      cameraLift = cameraClearance = 0;
+      cameraRadius = EYE_CLEARANCE;
+      presentView(mode, true, required);
+      return;
+    }
+    projectCamera(false);
     target.copy(visual.position);
-    target.y += 1.24 - 0.34 * (character.state.seatWeight || 0);
-    const normalDistance = framing.distance;
-    const requestedDistance = actionView ? 3 : normalDistance;
-    const immediate = instant || reduceSeatMotion();
-    cameraDistance = immediate ? requestedDistance : T.MathUtils.lerp(cameraDistance ?? normalDistance, requestedDistance, 1 - Math.exp(-6 * dt));
+    target.y += 1.24 - 0.34 * character.seatWeight;
+    const requestedDistance = actionView ? 3 : chaseDistance(framing.distance, zoom);
+    const changedMode = renderedMode !== mode;
+    cameraDistance = easeCameraValue(cameraDistance ?? requestedDistance, requestedDistance, dt, immediate || changedMode);
     cameraRadius = Math.max(0.22, camera.near * Math.tan(camera.fov * Math.PI / 360) * Math.hypot(1, camera.aspect) + 0.08);
     cameraBall.radius = cameraRadius;
     offset.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(cameraDistance);
-    const orbitHeight = actionView ? 0 : framing.height;
+    const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
+    const orbitHeight = actionView ? 0 : framing.height * closeFraming;
     let lift = 0, length = cameraCandidate(orbitHeight, desired);
-    if (length < (cameraLift ? 2.4 : 2))
-      for (const height of [1.1, 2.2]) {
+    if (length < Math.min(cameraDistance - 0.05, cameraLift ? 2.4 : 2))
+      for (const height of CAMERA_LIFTS) {
         const available = cameraCandidate(orbitHeight + height, probe);
         if (available > length + 0.25) {
           lift = height;
@@ -726,21 +1025,19 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     cameraLift = lift;
     anchor.copy(target);
     anchor.y += orbitHeight + lift;
-    safe.copy(camera.position).lerp(desired, immediate ? 1 : 1 - Math.exp(-12 * dt));
+    safe.copy(camera.position).lerp(desired, immediate || changedMode ? 1 : 1 - Math.exp(-12 * dt));
     const allowed = sweepCamera(anchor, safe);
     safe.copy(anchor).addScaledVector(direction, allowed);
     if (allowed < 0.9 && length >= 2)
       safe.copy(desired);
-    const lookAhead = actionView ? 0 : framing.lookAhead;
+    const lookAhead = actionView ? 0 : framing.lookAhead * closeFraming;
     sightline.copy(target);
     sightline.x -= Math.sin(yaw) * lookAhead;
     sightline.z -= Math.cos(yaw) * lookAhead;
     camera.position.copy(safe);
     camera.lookAt(sightline);
     cameraClearance = camera.position.distanceTo(target);
-    cameraOccluded = cameraClearance < (cameraOccluded ? 1.45 : 1.15);
-    character.setCameraOccluded(cameraOccluded);
-    canvas.dataset.cameraView = cameraOccluded ? "close" : "third-person";
+    presentView(mode, cameraClearance < (cameraOccluded && !changedMode ? 1.45 : 1.15), required);
     character.updateLOD?.(camera);
   }
   function cartCapability() {
@@ -749,7 +1046,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (elevatorTravel)
       return { allowed: false, disabled: false, sceneDisabled: false, reasonCode: "elevator-travel", reason: "Wait for the elevator to stop." };
     if (character.state.physicalProduct && character.state.physicalProduct.phase !== "empty")
-      return { allowed: false, disabled: false, sceneDisabled: false, reasonCode: "held-product", reason: "Return the held product to its shelf before using the cart." };
+      return { allowed: false, disabled: false, sceneDisabled: false, reasonCode: "held-product", reason: "Return the held product to its shelf or add it to your bag before using the cart." };
     if (seated)
       return { allowed: false, disabled: true, sceneDisabled: false, reasonCode: "seated", reason: "Stand up before using the cart." };
     return { allowed: Boolean(character.state.cart.available), disabled: !character.state.cart.available, sceneDisabled: !character.state.cart.available, reasonCode: character.state.cart.available ? null : "unavailable", reason: character.state.cart.available ? null : "The 3D cart is unavailable. Your bag selection is unchanged." };
@@ -761,6 +1058,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       return false;
     if (!value) {
       pushing = false;
+      if (cartEyePitch !== null) {
+        pitch = cartEyePitch;
+        cartEyePitch = null;
+      }
       character.setCart(false);
       capsule.setShape(walkingShape);
       controller.enableAutostep(0.2, 0.28, true);
@@ -775,6 +1076,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const p = body.translation();
     if (physics.intersectionWithShape(p, { x: 0, y: 0, z: 0, w: 1 }, cartShape, undefined, undefined, capsule, body))
       return false;
+    if (view.firstPerson) {
+      cartEyePitch = pitch;
+      pitch = T.MathUtils.clamp(pitch, -0.08, 0.9);
+    }
     pushing = true;
     capsule.setShape(cartShape);
     controller.disableAutostep();
@@ -903,8 +1208,11 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (!destination)
       return false;
     productApproach = null;
-    productHome = null;
-    character.resetProduct?.();
+    const carryingProduct = character.state.physicalProduct?.held;
+    if (!carryingProduct) {
+      productHome = null;
+      character.resetProduct?.();
+    }
     setCart(false);
     restoreActionView();
     seated = false;
@@ -920,6 +1228,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     pitch = 0.1;
     visual.rotation.y = yaw;
     clearInput();
+    if (carryingProduct) {
+      sync();
+      character.update("idle", 0);
+    }
     physics.step();
     updateCamera(0, true);
     return true;
@@ -1040,7 +1352,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     },
     returnProduct: () => {
       const from = body.translation();
-      if (!productHome || character.state.physicalProduct?.phase !== "held" || productApproach || Math.hypot(from.x - productHome.x, from.z - productHome.z) > productHome.radius || !clearPath(from, { x: productHome.x, y: 0.91, z: productHome.z }))
+      if (!productHome || !character.state.physicalProduct?.held || productApproach || !isShelfInReach({ x: from.x, y: from.y - 0.875, z: from.z }, productHome) || !clearPath(from, { x: productHome.x, y: 0.91, z: productHome.z }))
         return false;
       if (reduceSeatMotion()) {
         moveSeat({ x: productHome.x, y: 0.91, z: productHome.z });
@@ -1055,6 +1367,17 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       beginActionView("product", -Math.PI / 2 + 0.5);
       return true;
     },
+    bagProduct(id) {
+      if (productApproach || !character.bagProduct?.(id, reduceSeatMotion()))
+        return false;
+      productHome = null;
+      clearInput();
+      injected = null;
+      if (actionView?.kind === "product")
+        restoreActionView();
+      character.update("idle", 0);
+      return true;
+    },
     customize: (changes) => character.customize?.(changes),
     setPaused: (fn) => {
       isPaused = fn;
@@ -1067,7 +1390,18 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       if (Number.isFinite(input?.yaw))
         yaw = input.yaw;
       if (Number.isFinite(input?.pitch))
-        pitch = T.MathUtils.clamp(input.pitch, -0.08, 0.9);
+        pitch = clampPitch(input.pitch);
+    },
+    get chaseFov() {
+      return framing.fov;
+    },
+    refreshCameraMode() {
+      if (renderedMode !== cameraMode() || viewToggle.disabled !== chaseRequired())
+        updateCamera(0);
+    },
+    cameraState(shelfOpen) {
+      const required = Boolean(shelfOpen || chaseRequired());
+      return { mode: view.mode(required), zoom: view.zoom(required) };
     },
     get state() {
       const p = body.translation();

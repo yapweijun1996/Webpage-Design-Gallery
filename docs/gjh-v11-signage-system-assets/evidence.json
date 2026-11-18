@@ -1,0 +1,38 @@
+{
+  "blender": "5.1.2",
+  "renderer": "Cycles CPU, AgX, 24 samples with denoising",
+  "lineupFasciaMetres": [
+    6.0,
+    0.9,
+    0.055
+  ],
+  "letteringProjectionEstimate": {
+    "viewportCssPx": [
+      393,
+      852
+    ],
+    "xHeightMetres": 0.365,
+    "xHeightCssPxByDistanceMetres": {
+      "6": 21.75,
+      "9": 14.5,
+      "12": 10.87,
+      "15": 8.7
+    }
+  },
+  "glbSha256": {
+    "sign_frame_corner.glb": "cc330a19e402321e5cd2b54722e2b09bff0865d35d45c2e4e39515ce84cb9e24",
+    "sign_frame_edge_h.glb": "6d18dbdd3eeb5ad1ee8f1e449254fe302de15717beaac7f4ca2cc8cd266faf35",
+    "sign_frame_edge_v.glb": "9b60a0fba1020fd5096ed3b34c20e2c1c97a30643f7577e59cf14001bf7b012f",
+    "sign_backplate.glb": "25cf8715f0044466a173202b6a61cffa1d3490f96c95eee90f29f555fbf961f5",
+    "sign_downlight.glb": "c4578700c11611f51ff57195ca7bf290576410ff0dde3a46afdd4fabd1a020c0",
+    "sign_blade_bracket.glb": "a8f829d87ffe64f6f11f38c49bbb857ce574bb632b00f305077b54a62778e52c",
+    "sign_blade_panel.glb": "2743ee6c6d16b5ace7135f29c7986175eff3c8fd0936b136f5df5092c641a6ee",
+    "sign_timber_slat.glb": "0fccc7350ed7172412feb7970d311f0bf28e84215e9b1338bc98df618ffcd96c",
+    "sign_logo3d_new_moon.glb": "ebdecaacc9eb49c6bf157d9d3fbf63359edf6125de54feaf7881bbac2abe4541",
+    "sign_ivy_swag.glb": "f37df041ab63efccced3f58ed44e007c277581c6a42dcbf8a8bdf5c5cdf3b6d1"
+  },
+  "pngSha256": {
+    "kit-lineup.png": "54e25edbedc0295a9598025098eed61f8c0e8813aaa8ab9824859968335c1e86",
+    "new-moon-relief.png": "c0244a5d140218888af78abf359a5b3284a58f999a0765e4cd7f2156be6b4f71"
+  }
+}

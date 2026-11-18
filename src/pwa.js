@@ -7,6 +7,17 @@ const current = {
   build: document.querySelector('meta[name="app-build"]').content,
 };
 const checkButton = document.querySelector('#check-update');
+const checkLabel = checkButton.querySelector('span');
+const checkIcon = checkButton.querySelector('use');
+const checkLabels = {
+  idle: 'Check updates',
+  checking: 'Checking…',
+  current: 'Up to date',
+  available: 'Update available',
+  publishing: 'Publishing…',
+  failed: 'Check failed',
+  offline: 'Offline',
+};
 const applyButton = document.querySelector('#apply-update');
 const notice = document.querySelector('#update-notice');
 const status = document.querySelector('#app-status');
@@ -19,10 +30,18 @@ let registration;
 let target;
 let applying = false;
 let checking = false;
+let checkResult = 'idle';
 let lastCheck = 0;
 let activationTimeout;
 let installPrompt;
 const label = (release) => 'v' + release.version + ' · ' + release.build.slice(0, 8);
+
+function renderCheckState() {
+  const state = checking ? 'checking' : target ? 'available' : checkResult;
+  const icon = state === 'available' ? 'arrow-down' : 'info';
+  checkLabel.textContent = checkLabels[state];
+  checkIcon.setAttribute('href', new URL('assets/icons.svg#' + icon, root).href);
+}
 
 function workerVersion(worker) {
   return new Promise((resolve, reject) => {
@@ -43,6 +62,7 @@ async function offerUpdate(worker) {
     const release = await workerVersion(worker);
     if (release.build === current.build) return;
     target = release;
+    renderCheckState();
     document.querySelector('#update-message').textContent = 'New version ready: ' + label(release) + '. This page stays open until you choose to update.';
     applyButton.textContent = 'Update to ' + label(release);
     window.dispatchEvent(new Event('wdg:updateavailable'));
@@ -50,6 +70,8 @@ async function offerUpdate(worker) {
     chrome.classList.remove('is-hidden');
     status.textContent = 'Update available · ' + label(current) + ' to ' + label(release);
   } catch {
+    checkResult = 'failed';
+    renderCheckState();
     status.textContent = 'An update was detected, but its version is unavailable. Check again shortly.';
   }
 }
@@ -72,7 +94,7 @@ async function checkUpdates(manual = false) {
   if (!registration || checking || applying) return;
   if (!manual && Date.now() - lastCheck < 10 * 60 * 1000) return;
   checking = true; lastCheck = Date.now(); checkButton.disabled = true;
-  checkButton.textContent = 'Checking…';
+  renderCheckState();
   if (manual) status.textContent = 'Checking for a verified release…';
   try {
     await registration.update();
@@ -83,15 +105,19 @@ async function checkUpdates(manual = false) {
     const response = await fetch(new URL('version.json?check=' + Date.now(), root), { cache: 'no-store' });
     if (!response.ok) throw new Error('Release information unavailable');
     const latest = await response.json();
-    status.textContent = latest.build === current.build
+    const upToDate = latest.build === current.build;
+    checkResult = upToDate ? 'current' : 'publishing';
+    status.textContent = upToDate
       ? 'Up to date · ' + label(current)
       : 'A new release is publishing. Its files are not ready yet; check again shortly.';
   } catch {
+    checkResult = navigator.onLine ? 'failed' : 'offline';
     status.textContent = navigator.onLine
       ? 'The update could not be verified. Your current version is safe; try again shortly.'
       : 'Offline · Reconnect to check for updates. Current version: ' + label(current);
   } finally {
-    checking = false; checkButton.disabled = false; checkButton.textContent = 'Check updates';
+    checking = false; checkButton.disabled = false;
+    renderCheckState();
   }
 }
 
@@ -139,7 +165,11 @@ closeButton.addEventListener('click', () => { dialog.close(); applyButton.focus(
 
 function connectionState() {
   document.querySelector('#connection-notice').hidden = navigator.onLine;
-  if (!navigator.onLine) status.textContent = 'Offline · Saved company browsing is available.';
+  if (!navigator.onLine) {
+    checkResult = 'offline';
+    renderCheckState();
+    status.textContent = 'Offline · Saved company browsing is available.';
+  }
 }
 window.addEventListener('online', () => { connectionState(); checkUpdates(true); });
 window.addEventListener('offline', connectionState);

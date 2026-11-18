@@ -23,12 +23,13 @@ test('correlates callback duration, render workload and context, even on first f
   const monitor = createPerformanceMonitor();
   monitor.setEnabled(true);
   const info = {render:{calls:132,triangles:270000},memory:{geometries:61,textures:22}};
-  const detail = {simulationMs:32,renderMs:27,callbackMs:65,steps:4,zone:'gogo',tier:'low',x:-8.25,z:3.5,width:640,height:480};
+  const detail = {simulationMs:32,renderMs:27,uploadMs:3.5,callbackMs:65,steps:4,zone:'gogo',tier:'low',x:-8.25,z:3.5,width:640,height:480};
   monitor.frame(1000,info,detail);
   monitor.frame(1016,info,detail);
   const report = monitor.snapshot();
   assert.equal(report.slowFrames[0].frameMs,null);
   assert.equal(report.slowFrames[1].reason,'busy-callback');
+  assert.equal(report.slowFrames[1].uploadMs,3.5);
   assert.equal(report.history[0].drawCalls,132);
   for (const [key,value] of Object.entries(detail)) assert.equal(report.history[0][key],value);
   assert.deepEqual(report.seconds,[{at:1000,samples:1,maxMs:16,maxCallbackMs:65,

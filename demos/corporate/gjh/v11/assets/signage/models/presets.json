@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "unit": "metre",
+  "materialLibrary": "manifest.json#materialLibrary",
+  "storeSource": "demos/corporate/gjh/v11/assets/brand-kit/brand-kit.json",
+  "artworkSource": "demos/corporate/gjh/v11/assets/brands/logo-sources.json",
+  "unbrandedIconSprite": "preset-icons.svg",
+  "lettering": {"minContrast": 4.5, "targetXHeightMetres": 0.365, "referenceViewportCssPx": [393, 852], "referenceDistanceMetres": 12},
+  "presets": {
+    "t1-classic": {
+      "width": [4.0, 8.0], "height": [0.60, 1.20], "depth": [0.04, 0.06],
+      "fascia": "lacquer_fascia", "trim": "brass_trim", "housing": "brushed_black_metal",
+      "letterColors": ["#FFF0CC"], "typography": "serif", "iconMotif": "official-crescent",
+      "downlights": true, "accentModules": [], "storeSlots": ["S01", "S07", "S10"],
+      "reliefBySlot": {"S01": "sign_logo3d_new_moon"}
+    },
+    "t2-fashion": {
+      "width": [2.4, 8.0], "height": [0.60, 1.20], "depth": [0.035, 0.06],
+      "fascia": "brushed_black_metal", "trim": "brass_plate", "housing": "brushed_black_metal",
+      "letterColors": ["#F9E8D0"], "typography": "serif-caps", "iconMotif": "monoline-outline",
+      "downlights": true, "accentModules": [], "storeSlots": []
+    },
+    "t3-cafe": {
+      "width": [1.5, 6.0], "height": [0.60, 1.30], "depth": [0.045, 0.06],
+      "fascia": "timber_slat", "trim": "brass_trim", "housing": "gunmetal",
+      "letterColors": ["#FFF1D3"], "typography": "serif", "iconMotif": "steam-cup",
+      "downlights": true, "accentModules": ["sign_timber_slat", "sign_ivy_swag"], "storeSlots": ["S02", "S06"]
+    },
+    "t4-tech": {
+      "width": [0.6, 3.0], "height": [0.60, 1.20], "depth": [0.035, 0.06],
+      "fascia": "gunmetal", "trim": "neon_blue", "housing": "brushed_black_metal",
+      "letterColors": ["#EAF6FF"], "typography": "sans", "iconMotif": "monitor-outline",
+      "downlights": false, "accentModules": [], "storeSlots": ["S13", "S15", "S16", "S17"]
+    },
+    "t5-book": {
+      "width": [0.6, 2.2], "height": [0.60, 1.20], "depth": [0.035, 0.06],
+      "fascia": "lacquer_fascia", "trim": "brass_trim", "housing": "brushed_black_metal",
+      "letterColors": ["#FFEDB3"], "typography": "serif", "iconMotif": "gold-book-outline",
+      "downlights": true, "accentModules": [], "storeSlots": []
+    },
+    "t6-beauty": {
+      "width": [0.6, 3.0], "height": [0.60, 1.20], "depth": [0.035, 0.06],
+      "fascia": "rose_lacquer", "fasciaGradient": ["#592839", "#8B465A"], "trim": "brass_plate", "housing": "gunmetal",
+      "letterColors": ["#FFF0E5"], "typography": "serif", "iconMotif": "lotus-outline",
+      "downlights": true, "accentModules": [], "storeSlots": ["S04", "S05", "S12"]
+    },
+    "t7-home": {
+      "width": [0.6, 2.0], "height": [0.60, 1.20], "depth": [0.035, 0.06],
+      "fascia": "chocolate_lacquer", "trim": "brass_trim", "housing": "brushed_black_metal",
+      "letterColors": ["#FFF0D4"], "typography": "serif", "iconMotif": "house-outline",
+      "downlights": true, "accentModules": [], "storeSlots": ["S09", "S11", "S14"]
+    },
+    "t8-kids": {
+      "width": [1.8, 4.0], "height": [0.60, 1.20], "depth": [0.035, 0.06],
+      "fascia": "pastel_enamel", "trim": "brass_plate", "housing": "gunmetal",
+      "letterColors": ["#732749", "#275555", "#383E82", "#754112"], "typography": "rounded-sans", "iconMotif": "bear-outline",
+      "downlights": true, "accentModules": [], "storeSlots": ["S03", "S08"]
+    }
+  }
+}

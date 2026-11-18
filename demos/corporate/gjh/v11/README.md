@@ -24,6 +24,8 @@ Approach a verified can display or MILI/GOGO brand panel, then press F or tap In
 
 New Moon product details automatically open an unofficial interactive 3D preview. Drag to rotate, use the mouse wheel or a two-finger pinch to zoom, and use arrow keys, +/− and R for keyboard rotation, zoom and reset. If loading or WebGL fails, the official packshot remains visible; close and reopen the detail to retry. MILI and GOGO retain their official artwork viewers.
 
+With Tripo or Visitor v2, choose **Pick up product** within reach of a New Moon shelf. **Add to bag** follows the held can throughout the mall, including after map travel, and adds one of that product to the demo bag. The visitor lowers the can in a short gesture. Reduced motion clears the hand immediately. The original shelf's facing is restored as a reusable display, consistent with the demo bag's cosmetic stock. **Return to shelf** is available within reach of the original shelf. Either action frees your hands for seats, the cart and the elevator. If your bag has nine of the product, it opens so you can make room.
+
 ## Shared current-store spatial data
 
 The existing three storefronts use [assets/spatial.js](assets/spatial.js) for stable IDs, numbers, labels, nominal bounds and arrival anchors. The world, player, map and live directory consume these records; static directory HTML remains available without JavaScript. The records describe the current scene, not the proposed 17-store expansion. See the [stage 2 spatial pilot](../../../../docs/gjh-v11-stage2-spatial-pilot.md) for contracts, fallback behavior, evidence and remaining work.
