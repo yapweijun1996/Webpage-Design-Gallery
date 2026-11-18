@@ -3242,6 +3242,18 @@ function materialTextures(material) {
   }
   return textures;
 }
+function meshTextures(mesh) {
+  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  const textures = materials.flatMap(materialTextures);
+  if (mesh.isSkinnedMesh && mesh.skeleton) {
+    if (!mesh.skeleton.boneTexture)
+      mesh.skeleton.computeBoneTexture();
+    textures.push(mesh.skeleton.boneTexture);
+  }
+  if (mesh.morphTexture)
+    textures.push(mesh.morphTexture);
+  return textures;
+}
 function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap;
@@ -3251,6 +3263,12 @@ function createModelWarmup(T, renderer) {
   staging.matrixWorldAutoUpdate = false;
   const target = new T.WebGLRenderTarget(1, 1);
   const scissor = new T.Vector4;
+  function initTexture(texture) {
+    if (initialized.get(texture) === texture.version)
+      return;
+    renderer.initTexture(texture);
+    initialized.set(texture, texture.version);
+  }
   function withMesh(mesh, scene, mask, linear, work) {
     const { visible, frustumCulled, children, count } = mesh;
     const layers = mesh.layers.mask;
@@ -3331,21 +3349,10 @@ function createModelWarmup(T, renderer) {
         mesh.layers.mask = 0;
     return scheduler.enqueue(function* () {
       for (const { mesh, mask } of meshes) {
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        const textures = materials.flatMap(materialTextures);
-        if (mesh.isSkinnedMesh && mesh.skeleton) {
-          mesh.skeleton.boneTexture ??= mesh.skeleton.computeBoneTexture().boneTexture;
-          textures.push(mesh.skeleton.boneTexture);
-        }
-        if (mesh.morphTexture)
-          textures.push(mesh.morphTexture);
-        for (const texture of new Set(textures)) {
+        for (const texture of new Set(meshTextures(mesh))) {
           if (initialized.get(texture) === texture.version)
             continue;
-          yield () => {
-            renderer.initTexture(texture);
-            initialized.set(texture, texture.version);
-          };
+          yield () => initTexture(texture);
         }
         yield* prepareMesh(mesh, scene, mask, false);
         if (linear())
@@ -3359,6 +3366,7 @@ function createModelWarmup(T, renderer) {
   }
   return {
     prepare,
+    initTexture,
     report: scheduler.report,
     runFrame(canRun) {
       return scheduler.runFrame(canRun && !renderer.getContext().isContextLost());
@@ -3372,6 +3380,329 @@ function createModelWarmup(T, renderer) {
       target.dispose();
     }
   };
+}
+
+// demos/corporate/gjh/v11/assets/scene-warmup.js
+function createWarmReport() {
+  return { ms: 0, probes: 0, programs: 0, textures: 0, skipped: false, reason: "pending" };
+}
+function createWarmRunner(work, report, {
+  budgetMs,
+  onFinish,
+  lost,
+  signal,
+  now = () => performance.now(),
+  setTimer = setTimeout,
+  clearTimer = clearTimeout
+}) {
+  let started = now(), elapsed = 0, timer, finished = false;
+  const duration = () => elapsed + (started === null ? 0 : now() - started);
+  function stop(reason) {
+    if (finished)
+      return;
+    finished = true;
+    clearTimer(timer);
+    signal?.removeEventListener("abort", skip);
+    report.ms = Math.round(duration());
+    report.reason = reason;
+    report.skipped = reason !== "complete";
+    try {
+      work.return();
+    } finally {
+      onFinish(report);
+    }
+  }
+  function arm() {
+    timer = setTimer(() => stop(lost() ? "context-loss" : "timeout"), 6000 - elapsed);
+  }
+  function skip() {
+    stop(signal.reason);
+  }
+  if (signal?.aborted)
+    skip();
+  else {
+    arm();
+    signal?.addEventListener("abort", skip, { once: true });
+  }
+  return {
+    stop,
+    visibility(hidden) {
+      if (finished || hidden === (started === null))
+        return;
+      if (hidden) {
+        elapsed = duration();
+        started = null;
+        clearTimer(timer);
+      } else {
+        started = now();
+        arm();
+      }
+    },
+    runFrame() {
+      if (finished || started === null)
+        return;
+      const sliceStart = now();
+      try {
+        do {
+          if (lost())
+            return stop("context-loss");
+          if (duration() >= 6000)
+            return stop("timeout");
+          const step = work.next();
+          if (step.done)
+            return stop(duration() >= 6000 ? "timeout" : "complete");
+          if (step.value === false)
+            return;
+        } while (now() - sliceStart < budgetMs);
+      } catch (error) {
+        console.warn("Mall detail preparation interrupted", error);
+        stop("error");
+      }
+    }
+  };
+}
+function mallProbePoses(expanded, elevator) {
+  const atrium = expanded ? expandedLayout.atrium : courtyardArrival;
+  const poses = [{ ...atrium, y: 0, yaw: 0 }];
+  if (expanded) {
+    poses.push({ ...expandedLayout.entrance, y: 0, yaw: 0 });
+    for (const slot2 of expandedLayout.slots) {
+      const door = shopEntrance(slot2);
+      poses.push({ x: door.x + 2.4 * door.normalX, z: door.z + 2.4 * door.normalZ, y: 0, yaw: door.yaw });
+    }
+  } else {
+    for (const store of spatial.stores)
+      poses.push({ ...store.arrival, y: 0, yaw: 0 });
+  }
+  const deck = elevator ?? (expanded ? expandedLayout.lift : null);
+  if (deck)
+    poses.push({ x: deck.x, z: deck.z, y: deck.upper, yaw: 0 });
+  return poses;
+}
+function* prepareScene({
+  T,
+  renderer,
+  scene,
+  camera,
+  expanded,
+  elevator,
+  detailed,
+  updateLights,
+  initTexture
+}, report) {
+  const probe = camera.clone(false), staging = new T.Scene, meshes = [], lights = [];
+  const frustum = new T.Frustum, viewProjection = new T.Matrix4;
+  staging.matrixWorldAutoUpdate = false;
+  staging.environment = scene.environment;
+  staging.environmentIntensity = scene.environmentIntensity;
+  staging.environmentRotation.copy(scene.environmentRotation);
+  staging.fog = scene.fog;
+  const textures = new Set;
+  for (const texture of [scene.environment, scene.background])
+    if (texture?.isTexture)
+      textures.add(texture);
+  const stack = [scene];
+  while (stack.length) {
+    const node = stack.pop();
+    stack.push(...node.children);
+    if (node.isLight)
+      lights.push(node);
+    if (node.isMesh || node.isLine || node.isPoints || node.isSprite) {
+      meshes.push(node);
+      for (const texture of meshTextures(node))
+        textures.add(texture);
+    }
+    yield;
+  }
+  for (const texture of textures) {
+    initTexture(texture);
+    report.textures++;
+    yield;
+  }
+  const gl = renderer.getContext(), parallel = renderer.extensions.has("KHR_parallel_shader_compile");
+  const target = detailed ? new T.WebGLRenderTarget(1, 1) : null;
+  const viewport = new T.Vector4, scissor = new T.Vector4;
+  const variants = new Set, programs = new Set;
+  let fence;
+  function probeLights(pose) {
+    const previous = lights.map((light) => light.visible);
+    try {
+      updateLights(pose);
+      return lights.filter((light) => {
+        for (let node = light;node; node = node.parent)
+          if (!node.visible)
+            return false;
+        return true;
+      });
+    } finally {
+      lights.forEach((light, i) => {
+        light.visible = previous[i];
+      });
+    }
+  }
+  function submit(batch, activeLights, output, compile) {
+    const objects = [...activeLights, ...batch];
+    const saved = objects.map((node) => [node.visible, node.frustumCulled, node.layers.mask, node.children]);
+    const instanceCounts = new Map;
+    const hiddenMaterials = new Set;
+    const previous = renderer.getRenderTarget(), face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
+    const scissorTest = renderer.getScissorTest(), autoClear = renderer.autoClear;
+    const shadows = renderer.shadowMap, shadowAuto = shadows.autoUpdate, shadowNeeds = shadows.needsUpdate;
+    const info = renderer.info.render, { calls, triangles, points, lines } = info;
+    renderer.getViewport(viewport);
+    renderer.getScissor(scissor);
+    try {
+      for (const node of objects) {
+        node.updateWorldMatrix(true, false);
+        node.children = [];
+        node.visible = true;
+        node.frustumCulled = false;
+        node.layers.mask = 1;
+      }
+      for (const mesh of batch) {
+        if (!compile && mesh.isInstancedMesh) {
+          if (!mesh.boundingSphere)
+            mesh.computeBoundingSphere();
+          instanceCounts.set(mesh, mesh.count);
+          mesh.count = Math.min(1, mesh.instanceMatrix.count);
+        }
+        for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+          if (!mat.visible) {
+            hiddenMaterials.add(mat);
+            mat.visible = true;
+          }
+        }
+      }
+      staging.children = objects;
+      renderer.setRenderTarget(output);
+      if (!output) {
+        renderer.setViewport(0, 0, 1, 1);
+        renderer.setScissor(0, 0, 1, 1);
+        renderer.setScissorTest(true);
+      }
+      shadows.autoUpdate = shadows.needsUpdate = false;
+      renderer.autoClear = true;
+      if (compile) {
+        for (const material of renderer.compile(staging, probe)) {
+          for (const program of renderer.properties.get(material).programs.values())
+            programs.add(program);
+        }
+        report.programs = programs.size;
+      } else
+        renderer.render(staging, probe);
+    } finally {
+      staging.children = [];
+      objects.forEach((node, i) => {
+        [node.visible, node.frustumCulled, node.layers.mask, node.children] = saved[i];
+      });
+      for (const material of hiddenMaterials)
+        material.visible = false;
+      for (const [mesh, count] of instanceCounts)
+        mesh.count = count;
+      renderer.autoClear = autoClear;
+      shadows.autoUpdate = shadowAuto;
+      shadows.needsUpdate = shadowNeeds;
+      Object.assign(info, { calls, triangles, points, lines });
+      renderer.setViewport(viewport);
+      renderer.setScissor(scissor);
+      renderer.setScissorTest(scissorTest);
+      renderer.setRenderTarget(previous, face, mip);
+    }
+  }
+  function variantKey(activeLights, output) {
+    return (output ? "linear:" : "screen:") + activeLights.map((light) => light.type + Number(light.castShadow)).sort().join(",");
+  }
+  function* pass(activeLights, output, candidates) {
+    if (!candidates.length)
+      return;
+    const key = variantKey(activeLights, output);
+    const fresh = !variants.has(key);
+    variants.add(key);
+    const batchSize = 12;
+    if (!fresh) {
+      const visible = [];
+      for (const mesh of candidates) {
+        if (mesh.isSprite ? frustum.intersectsSprite(mesh) : frustum.intersectsObject(mesh))
+          visible.push(mesh);
+        if (visible.length === batchSize)
+          break;
+        yield;
+      }
+      candidates = visible.length ? visible : candidates.slice(0, 1);
+    }
+    const count = candidates.length;
+    if (fresh) {
+      for (let i = 0;i < count; i += batchSize) {
+        submit(candidates.slice(i, i + batchSize), activeLights, output, true);
+        yield;
+      }
+      if (parallel) {
+        const pending = [...programs];
+        while (pending.length) {
+          if (pending.at(-1).isReady())
+            pending.pop();
+          else
+            yield false;
+        }
+      }
+    }
+    for (let i = 0;i < count; i += batchSize) {
+      submit(candidates.slice(i, i + batchSize), activeLights, output, false);
+      yield;
+    }
+  }
+  try {
+    probe.layers.set(0);
+    const poses = mallProbePoses(expanded, elevator);
+    const glow = detailed ? meshes.filter((mesh) => mesh.layers.isEnabled(1)) : [];
+    function* drawPose(pose, onlyNewVariant = false) {
+      const active = probeLights(pose);
+      const mainLights = active.filter((light) => light.layers.isEnabled(0));
+      const output = detailed && pose.y === 0 ? target : null;
+      if (onlyNewVariant && variants.has(variantKey(mainLights, output)))
+        return;
+      probe.position.set(pose.x, pose.y + 1.65, pose.z);
+      probe.rotation.set(0, pose.yaw, 0);
+      probe.updateMatrixWorld();
+      frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(probe.projectionMatrix, probe.matrixWorldInverse));
+      yield* pass(mainLights, output, meshes);
+      if (output && glow.length)
+        yield* pass(active.filter((light) => light.layers.isEnabled(1)), target, glow);
+      report.probes++;
+    }
+    for (const pose of poses)
+      yield* drawPose(pose);
+    if (expanded) {
+      const { entrance, atrium } = expandedLayout;
+      for (const end of [atrium, ...spatial.stores.map((store) => store.arrival)]) {
+        const distance = Math.ceil(Math.hypot(end.x - entrance.x, end.z - entrance.z));
+        for (let i = 1;i < distance; i++) {
+          yield* drawPose({
+            x: entrance.x + (end.x - entrance.x) * i / distance,
+            z: entrance.z + (end.z - entrance.z) * i / distance,
+            y: 0,
+            yaw: 0
+          }, true);
+          yield;
+        }
+      }
+    }
+    fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+    if (!fence)
+      throw new Error("Unable to fence mall detail uploads");
+    gl.flush();
+    let status;
+    do {
+      yield false;
+      status = gl.clientWaitSync(fence, 0, 0);
+    } while (status === gl.TIMEOUT_EXPIRED);
+    if (status === gl.WAIT_FAILED)
+      throw new Error("Mall detail GPU fence failed");
+  } finally {
+    if (fence && !gl.isContextLost())
+      gl.deleteSync(fence);
+    target?.dispose();
+  }
 }
 
 // demos/corporate/gjh/v11/assets/auto-door.js
@@ -3819,6 +4150,8 @@ var accumulator = 0;
 var frames = 0;
 var three;
 var modelWarmup;
+var warmRunner = null;
+var warmReport = createWarmReport();
 var productControl = null;
 var shelfFocus = null;
 var guidance = null;
@@ -3904,6 +4237,7 @@ function performanceReport() {
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
     uploads: modelWarmup?.report() ?? { lateAdditions: 0, maxFrameUploadMs: 0, pendingUploads: 0 },
+    warm: { ...warmReport },
     viewport: { width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio() },
     graphics: { tier: quality.state?.tier, contextLosses: losses, restorations: validations }
   };
@@ -4269,10 +4603,57 @@ function updateModelPreload(now) {
   if (initialPreloadStarted !== null && !window.mallLoader?.snapshot().ready) {
     if (ready2 || now - initialPreloadStarted >= 30000) {
       initialPreloadStarted = null;
-      window.mallLoader?.complete("frame");
     } else
       window.mallLoader?.prepare(node.textContent);
   }
+}
+function advanceStartupWarm() {
+  const loader = window.mallLoader;
+  if (!loader || loader.ready || contextLost || restorePending || pageEnded)
+    return false;
+  if (loader.skipSignal.aborted)
+    initialPreloadStarted = null;
+  if (initialPreloadStarted !== null)
+    return false;
+  if (loader.snapshot().stage === "frame")
+    loader.complete("frame");
+  if (loader.snapshot().stage !== "warm")
+    return false;
+  if (loader.skipSignal.aborted) {
+    warmReport.skipped = true;
+    warmReport.reason = loader.skipSignal.reason;
+    loader.complete("warm");
+    return false;
+  }
+  if (warmRunner)
+    warmRunner.runFrame();
+  else {
+    const tier = quality.state.tier;
+    warmReport = createWarmReport();
+    warmReport.reason = "running";
+    const work = prepareScene({
+      T: three,
+      renderer,
+      scene: world.scene,
+      camera: player.camera,
+      expanded,
+      elevator,
+      detailed: expanded && tier === "detailed" && renderWidth >= 1000,
+      updateLights: atmosphere.update,
+      initTexture: modelWarmup.initTexture
+    }, warmReport);
+    warmRunner = createWarmRunner(work, warmReport, {
+      budgetMs: tier === "low" ? 8 : tier === "balanced" ? 10 : 12,
+      signal: loader.skipSignal,
+      lost: () => renderer.getContext().isContextLost(),
+      onFinish(result) {
+        warmRunner = null;
+        if (result.reason !== "context-loss" && !pageEnded && !fatal)
+          loader.complete("warm");
+      }
+    });
+  }
+  return true;
 }
 function warmModels(pose) {
   if (!pose || document.hidden || contextLost || restorePending || pageEnded)
@@ -4287,6 +4668,12 @@ function animate(now) {
   if (!ready || document.hidden)
     return;
   updateModelPreload(now);
+  if (advanceStartupWarm()) {
+    last = now;
+    accumulator = 0;
+    frame = requestAnimationFrame(animate);
+    return;
+  }
   const callbackStart = performance.now();
   const pad = readStandardGamepad();
   const consumed = ui.handleGamepad(pad);
@@ -4324,7 +4711,7 @@ function animate(now) {
     const renderEnd = performance.now();
     const uploadMs = warmModels(pose ?? player.state);
     const end = performance.now();
-    if (!windowBlurred) {
+    if (!windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
         simulationMs: renderStart - simulationStart,
@@ -4457,6 +4844,7 @@ window.addEventListener("resize", () => {
   resize();
 });
 document.addEventListener("visibilitychange", () => {
+  warmRunner?.visibility(document.hidden);
   if (document.hidden) {
     pausePerformance();
     mallTheme?.cancel();
@@ -4482,6 +4870,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   interrupted = true;
   restorePending = true;
   losses++;
+  warmRunner?.stop("context-loss");
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   atmosphere?.releaseEnvironment();
@@ -4576,8 +4965,6 @@ function validateRestoration() {
     ready = true;
     graphicsStatus = "available";
     markFirstFrame();
-    if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed)
-      window.mallLoader?.complete("frame");
     window.__sceneFailed = false;
     window.__sceneReady = true;
     mallTheme?.resume();
@@ -4881,8 +5268,7 @@ async function initialize() {
   if (expanded && !window.mallLoader?.snapshot().dismissed) {
     initialPreloadStarted = performance.now();
     window.mallLoader?.prepare("Preparing shop models. You can enter now or browse the directory.");
-  } else
-    window.mallLoader?.complete("frame");
+  }
   window.__sceneReady = true;
   ui.offerFirstGuide();
   resume();
@@ -4895,6 +5281,7 @@ if (document.body.dataset.entryMode !== "directory")
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
     pageEnded = true;
+    warmRunner?.stop("pagehide");
     mallTheme?.destroy();
     npcs?.dispose();
     player?.dispose?.();

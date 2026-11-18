@@ -67,6 +67,17 @@ function materialTextures(material) {
   return textures;
 }
 
+export function meshTextures(mesh) {
+  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  const textures = materials.flatMap(materialTextures);
+  if (mesh.isSkinnedMesh && mesh.skeleton) {
+    if (!mesh.skeleton.boneTexture) mesh.skeleton.computeBoneTexture();
+    textures.push(mesh.skeleton.boneTexture);
+  }
+  if (mesh.morphTexture) textures.push(mesh.morphTexture);
+  return textures;
+}
+
 export function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap();
@@ -76,6 +87,12 @@ export function createModelWarmup(T, renderer) {
   staging.matrixWorldAutoUpdate = false;
   const target = new T.WebGLRenderTarget(1, 1);
   const scissor = new T.Vector4();
+
+  function initTexture(texture) {
+    if (initialized.get(texture) === texture.version) return;
+    renderer.initTexture(texture);
+    initialized.set(texture, texture.version);
+  }
 
   function withMesh(mesh, scene, mask, linear, work) {
     const {visible, frustumCulled, children, count} = mesh;
@@ -159,19 +176,9 @@ export function createModelWarmup(T, renderer) {
     if (hide) for (const {mesh} of meshes) mesh.layers.mask = 0;
     return scheduler.enqueue(function* () {
       for (const {mesh, mask} of meshes) {
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        const textures = materials.flatMap(materialTextures);
-        if (mesh.isSkinnedMesh && mesh.skeleton) {
-          mesh.skeleton.boneTexture ??= mesh.skeleton.computeBoneTexture().boneTexture;
-          textures.push(mesh.skeleton.boneTexture);
-        }
-        if (mesh.morphTexture) textures.push(mesh.morphTexture);
-        for (const texture of new Set(textures)) {
+        for (const texture of new Set(meshTextures(mesh))) {
           if (initialized.get(texture) === texture.version) continue;
-          yield () => {
-            renderer.initTexture(texture);
-            initialized.set(texture, texture.version);
-          };
+          yield () => initTexture(texture);
         }
         yield* prepareMesh(mesh, scene, mask, false);
         if (linear()) yield* prepareMesh(mesh, scene, mask, true);
@@ -181,7 +188,7 @@ export function createModelWarmup(T, renderer) {
     });
   }
 
-  return {prepare, report:scheduler.report,
+  return {prepare, initTexture, report:scheduler.report,
     runFrame(canRun) { return scheduler.runFrame(canRun && !renderer.getContext().isContextLost()); },
     invalidate() { initialized = new WeakMap(); scheduler.invalidate(); },
     dispose() { scheduler.dispose(); target.dispose(); }};
