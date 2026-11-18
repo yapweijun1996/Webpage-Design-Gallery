@@ -1,6 +1,7 @@
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {buildWindowStudio, shopLamp} from './window-studios.js';
 import {buildLateShopAnchorDetails} from './shop-anchor-details-last.js';
+import {interiorFloorColour,interiorStores} from './interiors/config.js';
 import {westShopPlacements} from './gallery-west-shops.js';
 import {eastShopPlacements} from './gallery-east-shops.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
@@ -110,8 +111,9 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     group.rotation.y = side === 'west' ? Math.PI/2 : side === 'east' ? -Math.PI/2 : 0;
     const front = depth/2;
     let parts = [];
-    let heroOffset = 0;
+    let heroOffset = 0, replaced = null;
     function add(geometry, x, y, z, color, finish = color===shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
+      if (replaced) { geometry.dispose(); return; }
       geometry.translate(x + heroOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i=0; i<colors.length; i+=3) { colors[i]=c.r; colors[i+1]=c.g; colors[i+2]=c.b; }
@@ -124,6 +126,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     function box(x,y,z,w,h,d,color,finish) { add(new T.BoxGeometry(w,h,d),x,y,z,color,finish); }
     function cylinder(x,y,z,r,h,color) { add(new T.CylinderGeometry(r,r,h,12),x,y,z,color); }
     function block(x,y,z,w,h,d) {
+      replaced?.push([x,z,w,d]);
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
       collisionBoxes.push({
         x:group.position.x+x*c+z*sn, y, z:group.position.z-x*sn+z*c,
@@ -132,6 +135,15 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     }
     const tools = {
       block,
+      replaceDisplay(build, finish) {
+        // Architectural fit-out takes over the display. Keep the exact legacy
+        // solids and mark their footprints until the new fixture is ready.
+        replaced = [];
+        build();
+        const footprints = replaced;
+        replaced = null;
+        for (const [x,z,w,d] of footprints) box(x,.096,z,w,.022,d,finish);
+      },
       surface(points, triangles, color) {
         const panel = new T.BufferGeometry();
         panel.setAttribute('position', new T.Float32BufferAttribute(points.flat(), 3));
@@ -162,7 +174,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         add(curve,x,y+leg,z,c);
       }
     };
-    buildWindowStudio(number, tools, width, depth);
+    buildWindowStudio(number, tools, width, depth, interiorFloorColour(interiorStores['S'+slot.number]));
     buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
     // Cull each wing independently; a view directly into one shop does not

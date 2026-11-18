@@ -19,6 +19,7 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
   // Reuse the same small candidate array and keep no more than six lights active.
   const nearest = [];
   const accentLimit = Math.min(6,lights.length);
+  const interiorWarmLights = {accents:lights.map(entry => entry.light), limit:accentLimit};
   function update(position) {
     nearest.length = 0;
     for (const entry of lights) {
@@ -34,7 +35,7 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
   // Three keys programs by light type/count. Enumerate the policy's full
   // range rather than assuming a camera route visits every count.
   function lightVariants(sceneLights) {
-    const accents=new Set(lights.map(entry=>entry.light));
+    const accents=new Set(interiorWarmLights.accents);
     const fixed=sceneLights.filter(light=>{
       if(accents.has(light))return false;
       for(let node=light;node;node=node.parent)if(!node.visible)return false;
@@ -171,5 +172,5 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.setRenderTarget(target); renderer.info.autoReset=autoReset; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
     }
   }
-  return {update,lightVariants,preparePost,applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
+  return {update,lightVariants,interiorWarmLights,preparePost,applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
 }

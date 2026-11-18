@@ -19,10 +19,11 @@ const finishes = {
   16:[0xf1f1de,0xb1c02f,0xf1efdf],17:[0xaa8464,0x433c39,0xdcc5a8]
 };
 
-export function buildWindowStudio(n, t, width, depth) {
+export function buildWindowStudio(n, t, width, depth, floorColour) {
   const {box, column, disc, bar, arch, ring, ellipse, tapered, block} = t;
   const [wall, base, floor] = finishes[n];
   const back=-depth/2+.38, front=depth/2-.18, side=width/2-.23, span=front-back, mid=(front+back)/2;
+  const replace = t.replaceDisplay ?? (build => build());
   const cabinet = (x,z,w,h,d,body,cap) => {
     block(x,(h+.26)/2,z,w+.09,h+.26,d+.09);
     box(x,.12,z,w-.1,.23,d-.1,brass);
@@ -148,7 +149,7 @@ export function buildWindowStudio(n, t, width, depth) {
   for(const s of [-1,1]) block(s*side,2.10,mid,.13,4.13,span);
   block(0,.041,mid,side*2,.08,span);
   // Floor slabs sample the arcade's existing mineral tile at shop scale.
-  box(0,.041,mid,side*2,.08,span,floor,-2);
+  box(0,.041,mid,side*2,.08,span,floorColour ?? floor,-2);
   box(0,2.12,back,side*2,4.18,.13,wall);
   // Bounced cove light keeps the underside of the plaster ceiling legible.
   box(0,4.19,mid,side*2,.18,span,cream,-3);
@@ -188,18 +189,20 @@ export function buildWindowStudio(n, t, width, depth) {
   switch(n) {
     case 4: { // Borsch Med: a dusty rose oval counter, flowers and shaded countertop lamps.
       for(let i=-1;i<=1;i++)shelf(i*1.86,rear,1.75,'pack',sage);
-      const cx=-.58, top=ovalCounter(cx,island,2.85,1.27,1.16,0xc5979d);
-      for(let i=-6;i<=6;i++)box(cx+i*.115,.68,island+.64,.028,.91,.035,0xcc9e9c);
-      for(const end of [-1,1])for(let k=0;k<=8;k++){
-        const a=k*Math.PI/8;
-        column(cx+end*(.79+.63*Math.sin(a)),.68,island+.63*Math.cos(a),.018,.91,0xcc9e9c);
-      }
-      for(const x of [-1.17,-.78])can(x,top,island+.18,white,.10,.24);
-      blossomVase(-.29,top,island-.20,0xd5a0a1);
-      for(const x of [-1.50,.38]){
-        column(x,top+.21,island+.04,.032,.42,brass);
-        ellipse(x,top+.43,island+.04,.22,.17,.22,pearl,0,0);
-      }
+      replace(() => {
+        const cx=-.58, top=ovalCounter(cx,island,2.85,1.27,1.16,0xc5979d);
+        for(let i=-6;i<=6;i++)box(cx+i*.115,.68,island+.64,.028,.91,.035,0xcc9e9c);
+        for(const end of [-1,1])for(let k=0;k<=8;k++){
+          const a=k*Math.PI/8;
+          column(cx+end*(.79+.63*Math.sin(a)),.68,island+.63*Math.cos(a),.018,.91,0xcc9e9c);
+        }
+        for(const x of [-1.17,-.78])can(x,top,island+.18,white,.10,.24);
+        blossomVase(-.29,top,island-.20,0xd5a0a1);
+        for(const x of [-1.50,.38]){
+          column(x,top+.21,island+.04,.032,.42,brass);
+          ellipse(x,top+.43,island+.04,.22,.17,.22,pearl,0,0);
+        }
+      }, sage);
       pendant(-.9,island,3.26,.30,white); plant(side-.96,front-.74,1.6); break;
     }
     case 5: { // Timber apothecary drawers wrap around a circular porcelain niche.
@@ -239,18 +242,20 @@ export function buildWindowStudio(n, t, width, depth) {
         box(0,h,rear+.26,2.13,.07,.40,oak);
         for(const x of [-.69,-.20,.51])tapered(x,h+.17,rear+.25,.16,.09,.28,pearl);
       }
-      cabinet(-.36,island,2.78,.92,1.26,oak,cream);
-      for(const offset of [-.84,-.28,.28,.84]) {
-        const centre=-.36+offset;
-        for(let j=-3;j<=3;j++){
-          const h=.77+(j%2)*.07+(offset>0?.08:0);
-          box(centre+j*.043,3.03-h/2,island-.15,.029,h,.04,j%2?0xe2bb76:0xebcf96);
+      replace(() => {
+        cabinet(-.36,island,2.78,.92,1.26,oak,cream);
+        for(const offset of [-.84,-.28,.28,.84]) {
+          const centre=-.36+offset;
+          for(let j=-3;j<=3;j++){
+            const h=.77+(j%2)*.07+(offset>0?.08:0);
+            box(centre+j*.043,3.03-h/2,island-.15,.029,h,.04,j%2?0xe2bb76:0xebcf96);
+          }
         }
-      }
-      box(-.36,3.08,island-.15,2.53,.076,.11,brass);
-      for(const x of [-1.43,.71])bar(x,3.08,island-.15,x,3.96,island-.15,.031,brass);
+        box(-.36,3.08,island-.15,2.53,.076,.11,brass);
+        for(const x of [-1.43,.71])bar(x,3.08,island-.15,x,3.96,island-.15,.031,brass);
+      }, oak);
       for(let z=back+.8;z<front;z+=1.36)box(0,3.96,z,side*2,.12,.15,oak);
-      packageRow(-.36,1.21,island+.29,7,.32,'pack',oak); break;
+      break;
     }
     case 7: { // Gu Long's coffered ceiling and two-tier beaded chandelier frame its lacquer displays.
       for(let i=-1;i<=1;i++)shelf(i*1.93,rear,1.79,'tin',0xa74632,true);
@@ -264,14 +269,14 @@ export function buildWindowStudio(n, t, width, depth) {
           tapered(r*Math.cos(a),y-.111,mid-.38+r*Math.sin(a),.050,.028,.21,j%3?pearl:shopLamp);
         }
       }
-      const top=circleIsland(0,island,1.14,.82,walnut);
-      column(0,top+.13,island,.72,.26,brass);
-      for(let level=0;level<3;level++)for(let j=0;j<5-level;j++)can((j-(4-level)/2)*.24,top+.27+level*.269,island,0xaa4638);
+      replace(() => {
+        const top=circleIsland(0,island,1.14,.82,walnut);
+        column(0,top+.13,island,.72,.26,brass);
+        for(let level=0;level<3;level++)for(let j=0;j<5-level;j++)can((j-(4-level)/2)*.24,top+.27+level*.269,island,0xaa4638);
+      }, base);
       break;
     }
     case 8: { // A gold peanut in a blue arched niche is the focal point above Skippy's jar display.
-      for(let x=-3;x<=3;x++)for(let z=-3;z<=3;z++)if((x+z)%2===0)
-        box(x*.79,.092,mid+z*.79,.785,.012,.785,0x284271);
       for(const x of [-1.96,1.96])shelf(x,rear,1.54,'tin',0x466c9b,true);
       disc(0,1.92,rear+.13,1.08,.11,base);box(0,1.17,rear+.132,2.16,1.50,.11,base);
       arch(0,.42,rear+.223,1.08,1.50,.072,brass);
@@ -281,11 +286,13 @@ export function buildWindowStudio(n, t, width, depth) {
         bar(x-.052,y-.07,rear+.352,x+.052,y+.07,rear+.352,.018,0xb88b49);
         bar(x+.06,y-.05,rear+.352,x-.06,y+.05,rear+.352,.017,0xb88b49);
       }
-      const top=circleIsland(0,island,1.08,.85,base);
-      for(let i=0;i<32;i++){
-        const a=i*Math.PI/16;column(1.07*Math.cos(a),.66,island+1.07*Math.sin(a),.035,.78,0x47719a);
-      }
-      for(let i=-2;i<=2;i++)can(i*.28,top,island,0xd2a66c,.12,.33);
+      replace(() => {
+        const top=circleIsland(0,island,1.08,.85,base);
+        for(let i=0;i<32;i++){
+          const a=i*Math.PI/16;column(1.07*Math.cos(a),.66,island+1.07*Math.sin(a),.035,.78,0x47719a);
+        }
+        for(let i=-2;i<=2;i++)can(i*.28,top,island,0xd2a66c,.12,.33);
+      }, base);
       for(const x of [-1.83,0,1.83])pendant(x,mid+.2,3.1,.45,cream);break;
     }
     case 9: { // A navy terrazzo floor, lit ochre niche and rounded ribbed counter.
@@ -295,9 +302,11 @@ export function buildWindowStudio(n, t, width, depth) {
         const w=2.48-.43*k;box(0,.85+k*.52,rear+.36,w,.08,.43,brass);
         packageRow(0,.91+k*.52,rear+.36,7-2*k,.28,'pack',cream);
       }
-      const cx=-.48;ovalCounter(cx,island,2.58,1.13,1.01,base);
-      for(let j=-5;j<=5;j++)box(cx+j*.143,.62,island+.563,.025,.74,.027,0x41546b);
-      for(const x of [-side+.88,side-.88])box(x,.089,mid,.027,.008,span-.55,brass);
+      const cx=-.48;
+      replace(() => {
+        ovalCounter(cx,island,2.58,1.13,1.01,base);
+        for(let j=-5;j<=5;j++)box(cx+j*.143,.62,island+.563,.025,.74,.027,0x41546b);
+      }, base);
       for(const z of [mid+.35,mid-2.65]){
         column(cx,3.54,z,.025,1.04,brass);
         for(const [y,r] of [[3.16,.52],[3.04,.35],[2.95,.19]]){
@@ -314,27 +323,31 @@ export function buildWindowStudio(n, t, width, depth) {
         circleIsland(x,z+.05,.65,.53,base);
         shelf(s*2.1,rear,1.58,'tin',sage,true);
       }
-      {const top=circleIsland(0,island,1.2,.79,base);for(let j=-2;j<=2;j++)can(j*.28,top,island,cream);}
+      replace(() => circleIsland(0,island,1.2,.79,base),base);
       for(let i=0;i<7;i++)pendant(Math.sin(i*2.4)*.56,mid+Math.cos(i*2.4)*.46,2.93+i*.09,.15,pearl);break;
     case 11: // Hormel: a working pantry table, open produce crates and burgundy can shelves.
       for(let i=-1;i<=1;i++)shelf(i*1.83,rear,1.73,'tin',0x8a3e3e);
-      block(0,.58,island,2.74,1.16,1.24);
-      for(const x of [-1.21,1.21])for(const dz of [-.46,.46])box(x,.60,island+dz,.14,1.05,.14,walnut);
-      box(0,1.08,island,2.74,.17,1.24,oak);
-      for(const x of [-.75,0,.75]){
-        box(x,.39,island,.64,.46,.62,oak);
-        for(let j=-1;j<=1;j++)ellipse(x+j*.17,1.27,island,.10,.12,.10,j%2?sage:0xab5d41,0,0);
-      }
+      replace(() => {
+        block(0,.58,island,2.74,1.16,1.24);
+        for(const x of [-1.21,1.21])for(const dz of [-.46,.46])box(x,.60,island+dz,.14,1.05,.14,walnut);
+        box(0,1.08,island,2.74,.17,1.24,oak);
+        for(const x of [-.75,0,.75]){
+          box(x,.39,island,.64,.46,.62,oak);
+          for(let j=-1;j<=1;j++)ellipse(x+j*.17,1.27,island,.10,.12,.10,j%2?sage:0xab5d41,0,0);
+        }
+      }, base);
       pendant(-.69,mid,3,.38,base);pendant(.69,mid,3,.38,base);break;
     case 12: // Zeria: light mint shelving, layered white islands and a planted clinical interior.
       for(const x of [-2.2,2.2])shelf(x,rear,1.43,'pack',base,true);
-      circleIsland(0,island,1.10,.72,white);
-      packageRow(.10,1.18,island+.11,4,.23,'pack',base);
+      replace(() => {
+        circleIsland(0,island,1.10,.72,white);
+        packageRow(.10,1.18,island+.11,4,.23,'pack',base);
+      }, base);
       for(const x of [-side+.88,side-.88])plant(x,front-.87,1.64);
       ringLight(0,mid,1.38,3.76);break;
     case 13: // Sony: slatted timber listening lounge, dark screen and contrasting upholstered seating.
       for(let i=-15;i<=15;i++)box(i*.185,1.95,rear,.085,3.67,.12,i%3?walnut:oak);
-      sofa(-1.46,island,0xa49784);sofa(.44,mid-1.66,0x786b5f);
+      replace(() => { sofa(-1.46,island,0xa49784); sofa(.44,mid-1.66,0x786b5f); },charcoal);
       circleIsland(.68,island+.48,.39,.32,walnut);
       for(const x of [-2.5,2.5]){block(x,1.09,rear+.58,.46,1.99,.5);box(x,1.09,rear+.58,.43,1.99,.44,charcoal);for(const y of [.72,1.41])disc(x,y,rear+.826,.135,.036,silver);}
       ringLight(0,mid+.06,1.12,3.69);plant(-side+.7,front-.85,1.53);
@@ -353,7 +366,7 @@ export function buildWindowStudio(n, t, width, depth) {
       plant(-side+.81,front-.85,1.61);break;
     case 15: // Casio: walnut slatted ceiling, instrument gallery and bench.
       for(let i=-17;i<=17;i++)box(i*.19,3.98,mid,.078,.19,span-.28,walnut);
-      cabinet(-1.05,mid-.59,1.78,.9,1.11,walnut,oak);
+      replace(() => cabinet(-1.05,mid-.59,1.78,.9,1.11,walnut,oak),walnut);
       block(1.1,.65,mid-.9,1.64,1.29,.92);
       block(1.10,.34,mid+.16,1.01,.70,.50);
       for(const x of [.46,1.73])box(x,.51,mid-.87,.13,.84,.13,charcoal);
@@ -363,7 +376,8 @@ export function buildWindowStudio(n, t, width, depth) {
       for(const x of [.74,1.46])box(x,.33,mid+.16,.08,.48,.36,walnut);
       pendant(-1.36,mid-1.3,2.94,.26,brass);break;
     case 16: // GP: white modular product wall, lime base cabinets and stepped demonstration tables.
-      for(const x of [-1.62,1.62]) cabinet(x,island+(x>0?.32:0),1.48,.78,.98,base,white);
+      replace(() => cabinet(-1.62,island,1.48,.78,.98,base,white),base);
+      cabinet(1.62,island+.32,1.48,.78,.98,base,white);
       sideShelf(-1,silver,'pack');ringLight(0,mid,1.14,3.69);plant(side-.71,front-1.08,1.47);break;
     case 17: // Gigaset: nested signal arcs, a dark round island and illuminated phone docks.
       for(const x of [-side+.71,side-.71])shelf(x,rear+.24,.99,'pack',charcoal);

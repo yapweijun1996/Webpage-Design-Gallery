@@ -9,7 +9,8 @@ import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createModelWarmup} from './assets/model-warmup.js';
-import {createWarmReport, createWarmRunner, createTierQueue, prepareScene} from './assets/scene-warmup.js';
+import {createWarmReport, createWarmRunner, createTierQueue, prepareTier} from './assets/scene-warmup.js';
+import {emptyInteriorReport} from './assets/interiors/warmup.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
@@ -79,6 +80,7 @@ function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
     signage: world?.signage?.report() ?? {modelsLoaded:0,signs:0,drawCalls:0,triangles:0,textureMB:0,previousTextureMB:0,atlasPx:0,phoneProof:null,tier:quality.state?.tier??'low'},
+    interiors: world?.interiors?.report() ?? emptyInteriorReport(quality.state?.tier ?? 'low'),
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
@@ -309,10 +311,21 @@ function render(force = false) {
       shelfFocus?.update(camera, true, true);
       guidance?.update(selectedInteraction, label, camera, true);
     }
-    world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
+    const tier = quality.state?.tier;
+    const detailed = expanded && quality.state?.shadows && renderWidth >= 1000;
+    // Retain the direct pass until the Detailed interiors have their linear
+    // programs. A downgrade can use the already warmed direct pass immediately.
+    const detailedReady = detailed && world.interiors?.activeTier === 'detailed';
+    if (expanded) renderer.shadowMap.enabled = detailedReady;
+    world.updateShopLods(pose, renderer.shadowMap.enabled, tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas, reducedMotion);
-    const draw=()=>atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
+    const draw=()=>{
+      world.interiors?.beginFrame();
+      try {
+        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs);
+      } finally { world.interiors?.endFrame(); }
+    };
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
@@ -342,52 +355,24 @@ function updateModelPreload(now) {
     } else window.mallLoader?.prepare(node.textContent);
   }
 }
-function* prepareTier(profile, report) {
-  const screenPixel=()=>!startupOverlay.hidden || (!manual && !modes.paused()) ? 1 : 0;
-  const signs=world.signage;
-  let stage;
-  try {
-    if(signs)stage=yield* signs.prepareTier(profile.tier);
-    const replacing=stage && stage.meshes!==signs.activeMeshes();
-    const detailed=expanded && profile.shadows;
-    if(detailed)yield* atmosphere.preparePost(Math.floor(renderWidth*profile.pixelRatio),
-      Math.floor(renderHeight*profile.pixelRatio),screenPixel);
-    const prepared=new WeakSet(), programs=new Set();
-    const {camera,state}=player, direction=camera.getWorldDirection(new three.Vector3());
-    const chase=profile.tier==='low' ? null : {
-      distance:Math.hypot(camera.position.x-state.x,camera.position.z-state.z),
-      height:camera.position.y-state.y, pitch:Math.asin(direction.y)
-    };
-    let revision;
-    do {
-      revision=modelWarmup.arrivalRevision;
-      const extra=modelWarmup.pendingMeshes();
-      if(replacing)extra.push(...stage.meshes);
-      yield* prepareScene({
-        T:three, renderer, scene:world.scene, camera:player.camera, expanded, elevator,
-        shadows:profile.shadows, detailed, screenPixel, extra, prepared, programs, chase,
-        exclude:replacing ? signs.activeMeshes() : [], updateLights:atmosphere.update,
-        lightVariants:atmosphere.lightVariants, initTexture:modelWarmup.initTexture,
-        alternatesFor:modelWarmup.alternatesFor
-      }, report);
-      // Models can arrive while a runtime sweep yields to a walking frame.
-      // Fence just the new bindings before publishing the requested tier.
-    } while (revision!==modelWarmup.arrivalRevision);
-    if(stage)signs.activate(stage);
-    applyProfile(profile);
-  } finally { if(stage)signs.discard(stage); }
+function tierWork(profile, report) {
+  const screenPixel = () => !startupOverlay.hidden || (!manual && !modes.paused()) ? 1 : 0;
+  return prepareTier({T:three, renderer, world, player, expanded, elevator, atmosphere, modelWarmup,
+    width:renderWidth, height:renderHeight, screenPixel, applyProfile}, profile, report);
 }
 function scheduleTier() {
   const profile=requestedProfile, active=quality.state;
   if(!profile || !ready || contextLost || pageEnded)return;
   if(profile.tier===active.tier && profile.shadows===active.shadows &&
-     (!world.signage || world.signage.getTier()===profile.tier)){
+     (!world.signage || world.signage.getTier()===profile.tier) &&
+     (!world.interiors || world.interiors.activeTier===profile.tier)){
     tierQueue.cancel();
+    world.interiors?.setTier(profile.tier);
     applyProfile(profile);
     return;
   }
   const key=[profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
-  void tierQueue.request(key,()=>prepareTier(profile,createWarmReport())).catch(error=>{
+  void tierQueue.request(key,()=>tierWork(profile,createWarmReport())).catch(error=>{
     console.warn('Mall graphics tier preparation interrupted',error);
   });
 }
@@ -398,31 +383,28 @@ function advanceStartupWarm() {
   if (initialPreloadStarted !== null) return false;
   if (loader.snapshot().stage === 'frame') loader.complete('frame');
   if (loader.snapshot().stage !== 'warm') return false;
-  if (loader.skipSignal.aborted) {
-    warmReport.skipped = true;
-    warmReport.reason = loader.skipSignal.reason;
-    loader.complete('warm');
-    scheduleTier();
-    return false;
-  }
-  if (warmRunner) warmRunner.runFrame();
-  else {
-    const tier = quality.state.tier;
+  if (!warmRunner) {
+    const {tier} = requestedProfile;
     warmReport = createWarmReport();
     warmReport.reason = 'running';
-    const work = prepareTier(requestedProfile,warmReport);
-    warmRunner = createWarmRunner(work, warmReport, {
+    const runner = createWarmRunner(tierWork(requestedProfile,warmReport), warmReport, {
       budgetMs:tier === 'low' ? 8 : tier === 'balanced' ? 10 : 12,
       signal:loader.skipSignal,
       lost:() => renderer.getContext().isContextLost(),
       onFinish(result) {
         warmRunner = null;
         if (result.reason !== 'context-loss' && !pageEnded && !fatal) {
-          loader.complete('warm');scheduleTier();
+          loader.complete('warm');
+          if (loader.ready) scheduleTier();
         }
       }
     });
+    // An earlier Enter now or directory action closes the runner synchronously.
+    if (loader.skipSignal.aborted) return false;
+    warmRunner = runner;
   }
+  warmRunner.runFrame();
+  if (warmRunner) warmModels(player.state);
   return true;
 }
 function warmModels(pose) {
@@ -430,8 +412,11 @@ function warmModels(pose) {
   const {physicalProduct, collection} = pose.character;
   const stableSeat = pose.seatPhase === 'idle' || pose.seatPhase === 'seated';
   const stableProduct = !physicalProduct || ['empty','held'].includes(physicalProduct.phase);
-  return modelWarmup.runFrame(stableSeat && stableProduct && !pose.elevatorTravel &&
-    !pose.productApproaching && !collection.active);
+  if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active) return 0;
+  const started = performance.now();
+  world.interiors?.runFrame();
+  modelWarmup.runFrame(true);
+  return performance.now() - started;
 }
 function animate(now) {
   frame = 0;
@@ -504,7 +489,7 @@ function animate(now) {
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
-  if (terminal) { fatal = true; graphicsStatus = 'failed'; modelWarmup?.dispose(); markFirstFrame(); }
+  if (terminal) { fatal = true; graphicsStatus = 'failed'; world?.interiors?.dispose(); modelWarmup?.dispose(); markFirstFrame(); }
   pausePerformance();
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
@@ -539,6 +524,7 @@ canvas.addEventListener('webglcontextlost', event => {
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
   warmRunner?.stop('context-loss');
   tierQueue?.cancel();
+  world?.interiors?.invalidate();
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   // Retire the reflection target and NPC bone textures against their original context.
@@ -578,7 +564,7 @@ function resize() {
     if (shelfFocus?.open) shelfFocus.resize(); else player.updateCamera(0, true);
   }
   requestedProfile=quality.resolve(width,true);
-  if(!ready || !quality.state || (!window.mallLoader?.ready && !startupOverlay.hidden)) {
+  if(!ready || !quality.state || !window.mallLoader?.ready) {
     if(!warmRunner)applyProfile(requestedProfile);
   } else {
     applyProfile(quality.state);
@@ -619,6 +605,7 @@ function validateRestoration() {
     if (gl.getError() !== gl.NO_ERROR || renderer.info.render.calls === 0 || !pixel.slice(0, 3).some(Boolean))
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
+    if (window.mallLoader?.ready) scheduleTier();
     markFirstFrame();
     window.__sceneFailed = false; window.__sceneReady = true;
     mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
@@ -815,5 +802,5 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
-  pageEnded = true; tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); modelWarmup?.dispose();
+  pageEnded = true; tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
 }});

@@ -1,4 +1,5 @@
 import {meshTextures} from './model-warmup.js';
+import {registerInteriorWarmup} from './interiors/warmup.js';
 import {spatial, courtyardArrival} from './spatial.js';
 import {expandedLayout, shopEntrance} from './expanded-layout.js';
 
@@ -18,7 +19,10 @@ export function createTierQueue(enqueue) {
     if (pending?.key === key) return pending.promise;
     cancel();
     const controller = new AbortController();
-    const promise = enqueue(makeWork, {signal:controller.signal}).catch(error => {
+    // Retarget nearest-first interior downloads immediately, even when an old
+    // room's upload would otherwise take priority over the new sweep.
+    const work = makeWork();
+    const promise = enqueue(() => work, {signal:controller.signal}).catch(error => {
       if (error.name !== 'AbortError') throw error;
     }).finally(() => {
       if (pending?.controller === controller) pending = null;
@@ -27,6 +31,59 @@ export function createTierQueue(enqueue) {
     return promise;
   }
   return {request, cancel, get pending() { return Boolean(pending); }};
+}
+
+// Registration is eager so even an already-dismissed loader starts the room
+// queue. Closing the sweep releases its sign stage and leaves room RAFs running.
+export function prepareTier({T, renderer, world, player, expanded, elevator, atmosphere,
+  modelWarmup, width, height, screenPixel, applyProfile}, profile, report) {
+  const {scene, signage, interiors} = world;
+  const {tier, shadows} = profile;
+  let interiorsReady = false, interiorError;
+  void registerInteriorWarmup(interiors, {T, renderer, scene, lights:atmosphere.interiorWarmLights, tier},
+    {deferActivation:true}).then(() => { interiorsReady = true; }, error => { interiorError = error; });
+
+  return sweep();
+  function* sweep() {
+    let stage;
+    try {
+      if (signage) stage = yield* signage.prepareTier(tier);
+      const replacing = stage && stage.meshes !== signage.activeMeshes();
+      // The room installer fences the exact selected layers and lighting. A
+      // scene traversal would also warm cached rooms from inactive tiers.
+      const exclude = [...(interiors?.groups ?? [])];
+      if (replacing) exclude.push(...signage.activeMeshes());
+      const detailed = expanded && shadows;
+      if (detailed) yield* atmosphere.preparePost(Math.floor(width*profile.pixelRatio),
+        Math.floor(height*profile.pixelRatio),screenPixel);
+      const prepared = new WeakSet(), programs = new Set();
+      const {camera,state} = player, direction = camera.getWorldDirection(new T.Vector3());
+      const chase = tier === 'low' ? null : {
+        distance:Math.hypot(camera.position.x-state.x,camera.position.z-state.z),
+        height:camera.position.y-state.y, pitch:Math.asin(direction.y)
+      };
+      let revision;
+      do {
+        revision = modelWarmup.arrivalRevision;
+        const extra = modelWarmup.pendingMeshes();
+        if (replacing) extra.push(...stage.meshes);
+        yield* prepareScene({T, renderer, scene, camera, expanded, elevator, shadows, detailed,
+          screenPixel, extra, exclude, prepared, programs, chase, updateLights:atmosphere.update,
+          lightVariants:atmosphere.lightVariants, initTexture:modelWarmup.initTexture,
+          alternatesFor:modelWarmup.alternatesFor}, report);
+        while (!interiorsReady) {
+          if (interiorError) throw interiorError;
+          yield false;
+        }
+        // Other models can arrive while either GPU fence is pending.
+      } while (revision !== modelWarmup.arrivalRevision);
+      if (interiors && !interiors.activateTier(tier)) throw new Error('Interior tier was superseded');
+      if (stage) signage.activate(stage);
+      applyProfile(profile);
+    } finally {
+      if (stage) signage.discard(stage);
+    }
+  }
 }
 
 // The mall's RAF drives the iterator. A separate timer also bounds a driver

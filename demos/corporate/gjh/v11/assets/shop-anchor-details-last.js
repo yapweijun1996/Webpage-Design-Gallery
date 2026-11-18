@@ -72,11 +72,6 @@ export function buildLateShopAnchorDetails(n, t, width, depth) {
 
   if (n === 10) {
     coastalRelief(t,back+.12,false);
-    // Display fan plinths and the central island share fine vertical brass flutes.
-    for (let i=0; i<28; i++) {
-      const a=i*Math.PI/14;
-      bar(Math.cos(a)*1.198,.25,island+Math.sin(a)*1.198,Math.cos(a)*1.198,.92,island+Math.sin(a)*1.198,.027,0x91ad94);
-    }
     for (const s of [-1,1]) {
       const x=s*(side-.31);
       block(x,1.03,0,.51,1.89,4.55);
@@ -99,44 +94,16 @@ export function buildLateShopAnchorDetails(n, t, width, depth) {
   }
 
   if (n === 11) {
-    // Small dark inlays repeat along the aisle of the reference's cream market floor.
-    for (let x=-3; x<=3; x++) for(let z=-4; z<=4; z++) {
-      const cx=x*.91, cz=z*.94;
-      t.surface([[cx-.07,.099,cz],[cx,.099,cz+.07],[cx+.07,.099,cz],[cx,.099,cz-.07]],[0,1,2,0,2,3],0x65443b);
-    }
     arch(0,.25,back+.09,2.76,.65,.13,walnut);
-    for(const x of [-.88,0,.88]) {
-      box(x,.91,island+.585,.82,.24,.075,0x8b5a38);
-      box(x,.93,island+.639,.20,.035,.035,brass);
-    }
-    for(const x of [-.76,0,.76]) {
-      for(const h of [.47,.61]) box(x,h,island+.324,.65,.058,.048,0xb18356);
-      for(const dx of [-.25,.25]) box(x+dx,.43,island+.351,.046,.36,.036,walnut);
-    }
-    for(const [x,z] of [[-.85,-.2],[.69,.12]]) {
-      for(let j=0;j<5;j++) {
-        const a=j*2.39;
-        ellipse(x+.12*Math.cos(a),1.38,island+z+.10*Math.sin(a),.085,.17,.055,j%2?0x557749:0x78985a,a,Math.sin(a)*.60);
-      }
-    }
     return;
   }
 
   if (n === 12) {
     coastalRelief(t,back+.13,true);
-    column(0,1.05,island,.69,.17,0xb2c8aa);
-    column(0,1.15,island,.67,.055,ivory);
-    tapered(-.4,1.31,island,.13,.10,.27,0xeee5ca);
-    for(let i=0;i<6;i++) {
-      const a=i*2.4, x=-.4+.13*Math.cos(a), z=island+.11*Math.sin(a);
-      bar(-.4,1.42,island,x,1.78-(i%2)*.12,z,.016,0x61805b);
-      ellipse(x,1.75-(i%2)*.12,z,.065,.16,.04,0x83a578,a,Math.sin(a)*.62);
-    }
     return;
   }
 
   if (n === 13) {
-    television(t,0,2.14,back+.23,2.58,1.45,false);
     block(0,1.13,back+.30,2.88,.34,.60);
     box(0,1.08,back+.28,2.86,.20,.56,graphite);
     box(0,1.18,back+.28,2.86,.035,.58,brass);
@@ -157,7 +124,6 @@ export function buildLateShopAnchorDetails(n, t, width, depth) {
   }
 
   if (n === 14) {
-    television(t,-1.36,1.91,back+.3,1.95,1.14,false);
     television(t,1.36,1.91,back+.3,1.95,1.14,true);
     const x=side-.50;
     block(x,.68,-.60,.78,1.18,2.43);
@@ -200,17 +166,6 @@ export function buildLateShopAnchorDetails(n, t, width, depth) {
       box(uprightX-.20,1.022,z,.18,.02,.050,ivory);
       if (![2,6].includes(i%7)) box(uprightX-.14,1.044,z+.026,.11,.026,.024,graphite);
     }
-    const table=-1.05;
-    box(table,1.22,-.49,1.66,.10,.86,0xc6ae8e);
-    for(const offset of [-.54,-.18,.18,.54]) {
-      const x=table+offset;
-      box(x,1.36,-.48,.23,.20,.23,0xddcfbc);
-      disc(x,1.48,-.35,.069,.024,brass);
-      disc(x,1.48,-.334,.048,.012,graphite);
-    }
-    for(const z of [-.87,-.10]) for(const offset of [-.80,.80]) box(table+offset,1.57,z,.022,.62,.022,brass);
-    for(const z of [-.87,-.10]) box(table,1.87,z,1.63,.026,.027,brass);
-    for(const offset of [-.80,.80]) box(table+offset,1.87,-.485,.027,.026,.77,brass);
     return;
   }
 
@@ -232,7 +187,7 @@ export function buildLateShopAnchorDetails(n, t, width, depth) {
       }
       box(x,.37,back+.22,1.70,.38,.40,0xacbc38);
     }
-    for(const x of [-1.62,1.62]) {
+    for(const x of [1.62]) {
       const z=island+(x>0?.32:0);
       box(x,.30,z+.499,1.45,.041,.023,shopLamp);
       box(x,1.075,z,1.17,.075,.42,0xcecfb4);

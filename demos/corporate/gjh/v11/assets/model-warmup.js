@@ -172,7 +172,7 @@ export function createModelWarmup(T, renderer) {
     yield () => withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
   }
 
-  function prepare(root, scene, {hide = false, linear = () => false, alternates = [], ...options} = {}) {
+  function prepare(root, scene, {hide = false, linear = () => false, alternates = [], includeInSceneSweep = true, ...options} = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse(mesh => {
@@ -180,8 +180,10 @@ export function createModelWarmup(T, renderer) {
       });
     }
     if (!meshes.length) return Promise.resolve();
-    pendingBatches.add(meshes);
-    arrivalRevision++;
+    if (includeInSceneSweep) {
+      pendingBatches.add(meshes);
+      arrivalRevision++;
+    }
     if (hide) for (const {mesh} of meshes) mesh.layers.mask = 0;
     return scheduler.enqueue(function* () {
       for (const {mesh, mask} of meshes) {
