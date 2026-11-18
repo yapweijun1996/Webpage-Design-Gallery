@@ -1,3 +1,6 @@
+import {atriumLayout} from './atrium-layout.js';
+import {expandedLayout, shopEntrance} from './expanded-layout.js';
+
 // Walkable rooms based on the fourteen shopfront references.
 // Positive Z faces the arcade. Every bay keeps a clear sightline to its rear wall.
 const cream=0xf3e5cd, pearl=0xfff3df, brass=0xcaa15b, oak=0xb18356, walnut=0x66412f;
@@ -149,9 +152,15 @@ export function buildWindowStudio(n, t, width, depth) {
   box(0,2.12,back,side*2,4.18,.13,wall);
   // Bounced cove light keeps the underside of the plaster ceiling legible.
   box(0,4.19,mid,side*2,.18,span,cream,-3);
+  // The north jamb is local +X in the west wing and -X in the east wing.
+  // Its pilaster already fills the last section of the wall, including the exposed face.
+  const pilasterSide = shopEntrance(expandedLayout.slots[n-1]).normalX;
+  const {inset, depth: pierDepth} = atriumLayout.arcadePilaster;
+  const pilasterBack = depth/2 - inset - pierDepth/2;
   for(const s of [-1,1]) {
     box(s*(side-.20),4.082,mid,.40,.064,span,pearl,-3);
-    box(s*side,2.10,mid,.13,4.13,span,wall);
+    const wallEnd = s === pilasterSide ? pilasterBack : front;
+    box(s*side,2.10,(back+wallEnd)/2,.13,4.13,wallEnd-back,wall);
     box(s*(side-.31),4.05,mid,.065,.046,span-.6,shopLamp);
     box(s*(side-.2),.19,mid,.15,.21,span,base);
   }

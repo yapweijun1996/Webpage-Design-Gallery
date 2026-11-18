@@ -15,12 +15,17 @@ export function createBagStore(ids, storage = null) {
     if (next) quantities.set(id, next); else quantities.delete(id);
     publish();
   }
+  function add(id, prepare) {
+    if (!allowed.has(id) || quantities.get(id) === 9 || !prepare(id)) return false;
+    change(id, 1);
+    return true;
+  }
   function publish() {
     const value = snapshot();
     try { storage?.setItem(key, JSON.stringify(value)); } catch { /* Memory-only fallback. */ }
     listeners.forEach(listener => listener(value));
   }
-  return {snapshot, change, remove(id) { if (allowed.has(id)) { quantities.delete(id); publish(); } }, clear() { quantities.clear(); publish(); }, subscribe(listener) { listeners.add(listener); listener(snapshot()); return () => listeners.delete(listener); }};
+  return {snapshot, change, add, remove(id) { if (allowed.has(id)) { quantities.delete(id); publish(); } }, clear() { quantities.clear(); publish(); }, subscribe(listener) { listeners.add(listener); listener(snapshot()); return () => listeners.delete(listener); }};
 }
 
 export function setupDemoBag() {
@@ -56,11 +61,21 @@ export function setupDemoBag() {
   open.addEventListener('click',()=>{dialog.showModal();measureHeader();close.focus({preventScroll:true});});
   close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>{
     // Restore focus once, after the native close event, including scene handoffs.
+    status.classList.add('sr-only');
     const target=returnFocus;returnFocus=open;
     (target instanceof HTMLElement&&target.isConnected&&!target.closest('[hidden]')?target:open).focus({preventScroll:true});
   });
   clear.addEventListener('click',()=>{store.clear();status.textContent='Demo bag cleared.';close.focus({preventScroll:true});});
   add.addEventListener('click',()=>{if(current){store.change(current,1);note.textContent=`Added to demo bag. ${store.snapshot()[current]} of this item. No order created.`;}});
-  collect.addEventListener('click',()=>{if(!current||!document.querySelector('#product-dialog').open||(store.snapshot()[current]||0)>=9)return;const id=current;if(collectListener?.(id)){store.change(id,1);}});
-  return {change:store.change, snapshot:store.snapshot, closeTo(target){returnFocus=target;dialog.close();}, configureCollect(test,listener){canCollect=test;collectListener=listener;}, subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
+  collect.addEventListener('click',()=>{if(current&&collectListener&&document.querySelector('#product-dialog').open)store.add(current,collectListener);});
+  function addHeldProduct(id, prepare, message) {
+    if (store.add(id, prepare)) { status.textContent=message; return true; }
+    if (store.snapshot()[id] === 9) {
+      status.textContent='Your bag has 9 of this product. Remove one to make room, then try Add to bag again.';
+      status.classList.remove('sr-only');
+      open.click();
+    }
+    return false;
+  }
+  return {change:store.change, snapshot:store.snapshot, addHeldProduct, closeTo(target){returnFocus=target;dialog.close();}, configureCollect(test,listener){canCollect=test;collectListener=listener;}, subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
 }

@@ -207,12 +207,12 @@ export async function loadNpcSystem(T, options) {
   }
 }
 
-export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource}) {
+export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, hasPlayer=false;
   let admission=nextNpcAdmission();
   const admissionOptions={}, lastPlayer={x:0,z:0}, nextPosition={x:0,z:0};
   const seatPoint={x:0,y:0,z:0};
-  let boy=null, boyNpc=null, boyLoad=null, boyController=null, placeLoadedBoy=false;
+  let boy=null, boyNpc=null, boyLoad=null, boyController=null, placeLoadedBoy=false, preparingBoy=null;
   // Expanded arcade waypoints are up to twelve metres apart.
   const maxLeg = expanded ? 12.5 : 9;
   const visitors=[], routes=NPC_ROUTES[expanded?'expanded':'classic'].map(([x,z])=>({x,y:0,z}));
@@ -258,14 +258,17 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
   function applyVisibility() {
     // Change membership only when a slot opens or closes. Crossing another
     // visitor's distance must not cause either avatar to blink out of view.
-    const target = Math.min(visitors.length,admission.admitted);
-    let count = 0;
-    for (const npc of visitors) if (npc.admitted) count++;
+    let count = 0, readyCount = 0;
+    for (const npc of visitors) {
+      if (npc.admitted) count++;
+      if (npc.gpuReady) readyCount++;
+    }
+    const target = Math.min(readyCount,admission.admitted);
     while (count !== target) {
       const add = count < target;
       let choice = null, best = add ? Infinity : -Infinity;
       for (const npc of visitors) {
-        if (npc.admitted === add) continue;
+        if (!npc.gpuReady || npc.admitted === add) continue;
         const d = hasPlayer ? distance(npc.visual.position,lastPlayer) : 0;
         if (add ? d < best : d > best) { best=d; choice=npc; }
       }
@@ -279,7 +282,8 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     admissionOptions.nonNpcCalls=nonNpcCalls;
     admissionOptions.callsPerNpc=callsPerNpc;
     admissionOptions.limit=limitForSettings();
-    admissionOptions.active=visitors.length;
+    admissionOptions.active=0;
+    for (const npc of visitors) if (npc.gpuReady) admissionOptions.active++;
     admissionOptions.drawCallBudget=settings.drawCallBudget;
     admissionOptions.advance=advance;
     updateAdmission(admission,admissionOptions,admission);
@@ -299,14 +303,15 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     }
     return true;
   }
-  function disposeRig(npc) {
-    npc.facing.remove(npc.avatar);
-    npc.mixer.stopAllAction(); npc.mixer.uncacheRoot(npc.avatar);
+  function disposeRig({avatar,mixer}) {
+    avatar.removeFromParent();
+    mixer.stopAllAction(); mixer.uncacheRoot(avatar);
     const skeletons=new Set();
-    npc.avatar.traverse(node=>{if(node.isSkinnedMesh) skeletons.add(node.skeleton);});
+    avatar.traverse(node=>{if(node.isSkinnedMesh) skeletons.add(node.skeleton);});
     for(const skeleton of skeletons) skeleton.dispose();
   }
   function remove(npc) {
+    npc.upload?.abort();
     scene.remove(npc.visual); disposeRig(npc);
     if (npc===boyNpc) boyNpc=null;
     visitors.splice(visitors.indexOf(npc),1);
@@ -349,17 +354,24 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     visual.add(facing); visual.position.set(point.x,point.y,point.z);
     visual.rotation.y=seat?.angle||0;
     visual.layers.set(2); facing.layers.set(2); visual.visible=false;
-    const npc={visual,facing,seat,admitted:false,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,blockedTime:0};
+    const npc={visual,facing,seat,admitted:false,gpuReady:!prepareModel,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,blockedTime:0};
     mountRig(npc,makeRig(npc,null));
     scene.add(visual);
     visitors.push(npc);
+    if (prepareModel) {
+      npc.upload=new AbortController();
+      void prepareModel(npc.avatar,{signal:npc.upload.signal}).then(()=>{
+        npc.gpuReady=true;
+      },()=>{
+        if (visitors.includes(npc)) remove(npc);
+      });
+    }
   }
   function placeBoy(first) {
-    if (!boy || boyNpc || first >= visitors.length) return;
-    let choice=visitors[first];
-    for (let i=first; i<visitors.length; i++) {
-      if (!visitors[i].seat) { choice=visitors[i]; break; }
-    }
+    if (!boy || boyNpc || preparingBoy) return;
+    const candidates=visitors.slice(first).filter(npc=>npc.gpuReady);
+    const choice=candidates.find(npc=>!npc.seat) || candidates[0];
+    if (!choice) return;
     let rig;
     try { rig=makeRig(choice,boy); }
     catch {
@@ -367,10 +379,26 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       callsPerNpc=visitorCalls;
       return;
     }
-    disposeRig(choice);
-    mountRig(choice,rig);
-    boyNpc=choice;
-    placeLoadedBoy=false;
+    const mount=()=>{
+      disposeRig(choice);
+      mountRig(choice,rig);
+      boyNpc=choice;
+      placeLoadedBoy=false;
+    };
+    if (!prepareModel) { mount(); return; }
+    const meshes=[rig.avatar];
+    if (boy.lowGeometry) {
+      const proxy=rig.mesh.clone(false);
+      proxy.geometry=boy.lowGeometry;
+      meshes.push(proxy);
+    }
+    const upload=new AbortController();
+    choice.upload=upload;
+    preparingBoy=choice;
+    void prepareModel(meshes,{signal:upload.signal}).then(()=>{
+      if (visitors.includes(choice)) mount();
+      else disposeRig(rig);
+    },()=>disposeRig(rig)).finally(()=>{preparingBoy=null;});
   }
   function updateBoy(npc, player, reducedMotion) {
     npc.actions.idle.paused=reducedMotion;

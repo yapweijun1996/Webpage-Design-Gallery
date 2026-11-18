@@ -96,6 +96,6 @@ export function prepareChristmasDecor(T,scene,theme,{signal}={}) {
     const banner=new T.Mesh(geometry(new T.PlaneGeometry(CHRISTMAS_DECOR_LAYOUT.banner.width,CHRISTMAS_DECOR_LAYOUT.banner.height)),material(new T.MeshBasicMaterial({map:texture,side:T.DoubleSide})));
     banner.position.set(CHRISTMAS_DECOR_LAYOUT.banner.x,CHRISTMAS_DECOR_LAYOUT.banner.y,CHRISTMAS_DECOR_LAYOUT.banner.z);group.add(banner);
     if(signal?.aborted)throw new Error('Theme preparation cancelled');
-    return {value:theme,mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
+    return {value:theme,group,mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
   } catch(error) {dispose();throw error;}
 }

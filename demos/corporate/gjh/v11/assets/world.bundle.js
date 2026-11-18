@@ -96,8 +96,25 @@ async function loadStaticAsset(T, definition, baseURL) {
   return record;
 }
 
+// demos/corporate/gjh/v11/assets/atrium-layout.js
+var point = (x, z) => Object.freeze({ x, z });
+var lounge = (id, x) => Object.freeze({
+  id,
+  x,
+  z: 24,
+  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
+  table: point(x, 24.5),
+  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
+});
+var atriumLayout = Object.freeze({
+  arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
+  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
+  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
+  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
+});
+
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden, prepareModel = () => {} }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden, prepareModel, setPavingMap }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -118,11 +135,11 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   function arch(center, z, spring, radius, rise, depth, thickness, material) {
     const segments = 24;
     for (let i = 0;i < segments; i++) {
-      const point = (n) => {
+      const point2 = (n) => {
         const a = Math.PI * (n / segments - 0.5);
         return [center + Math.sin(a) * radius, spring + Math.cos(a) * rise];
       };
-      const [x0, y0] = point(i), [x1, y1] = point(i + 1);
+      const [x0, y0] = point2(i), [x1, y1] = point2(i + 1);
       solid("box", material, (x0 + x1) / 2, (y0 + y1) / 2, z, Math.hypot(x1 - x0, y1 - y0) + 0.018, thickness, depth, 0, 0, "XYZ", Math.atan2(y1 - y0, x1 - x0));
     }
   }
@@ -159,8 +176,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     map.wrapS = map.wrapT = T.RepeatWrapping;
     map.repeat.set(12.5, 12);
     map.anisotropy = 4;
-    materials.paving.map = map;
-    materials.paving.needsUpdate = true;
+    setPavingMap(map);
   }, undefined, () => {});
   box("paving", 10, -0.013, 24, 49.85, 0.002, 47.85);
   const canvas = document.createElement("canvas");
@@ -198,6 +214,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("ivory", x, 0.004, 33, 0.12, 0.012, 29.6);
     box("brass", x, 0.013, 33, 0.025, 0.008, 29.6);
   }
+  const { arcadePilaster } = atriumLayout;
   for (const side of [-1, 1]) {
     const front = side < 0 ? -15 : 35;
     const inside = -side;
@@ -210,7 +227,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
         box("brass", front + inside * 0.77, 5.78, z + dz, 0.31, 0.06, 0.31);
         box("glow", front + inside * 0.77, 5.737, z + dz, 0.21, 0.04, 0.21);
       }
-      box("ivory", front + side * 0.03, 2.88, z - 3.88, 0.45, 5.76, 0.35);
+      box("ivory", front + side * arcadePilaster.inset, 2.88, z - 3.88, arcadePilaster.depth, 5.76, 0.35);
       for (const offset of [-2.48, 2.48]) {
         solid("archSpandrel", "green", front + inside * 0.235, 3.32, z + offset, 1.15, 0.53, 0.11, inside * Math.PI / 2);
       }
@@ -339,8 +356,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     }
   };
   tree(garden.x - 0.8, garden.z, 5.9);
-  for (const lounge of [-4, 24])
-    tree(lounge - 2.35, 27, 4.2);
+  for (const lounge2 of [-4, 24])
+    tree(lounge2 - 2.35, 27, 4.2);
   for (const z of [8.37, 11.63]) {
     box("ivory", -4.99, 1.87, z, 0.31, 3.74, 0.46);
     box("brass", -5.16, 1.74, z, 0.055, 2.2, 0.13);
@@ -392,7 +409,16 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
         mesh.applyMatrix4(primitive.matrix);
         model.add(mesh);
       }
-      await prepareModel(model);
+      try {
+        await prepareModel?.(model);
+      } catch {
+        for (const { geometry: geometry2, material } of record.primitives) {
+          geometry2.dispose();
+          material.dispose();
+        }
+        destination.userData.sourceStatus = "fallback";
+        return;
+      }
       if (fallback2)
         destination.remove(fallback2);
       destination.add(...model.children);
@@ -1483,8 +1509,8 @@ async function createShell(T) {
             }
           } else {
             for (const component of definition.components) {
-              const point = new T.Vector3(...component.position).applyMatrix4(placement);
-              solid("box", component.material, point.x, point.y, point.z, ...component.size, angle);
+              const point2 = new T.Vector3(...component.position).applyMatrix4(placement);
+              solid("box", component.material, point2.x, point2.y, point2.z, ...component.size, angle);
             }
           }
         }
@@ -1642,22 +1668,6 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
   const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
   return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
 }));
-
-// demos/corporate/gjh/v11/assets/atrium-layout.js
-var point = (x, z) => Object.freeze({ x, z });
-var lounge = (id, x) => Object.freeze({
-  id,
-  x,
-  z: 24,
-  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
-  table: point(x, 24.5),
-  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
-});
-var atriumLayout = Object.freeze({
-  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
-  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
-});
 
 // demos/corporate/gjh/v11/assets/shop-signs.js
 var LOGOS = [
@@ -2049,9 +2059,13 @@ function buildWindowStudio(n, t, width, depth) {
   box(0, 0.041, mid, side * 2, 0.08, span, floor, -2);
   box(0, 2.12, back, side * 2, 4.18, 0.13, wall);
   box(0, 4.19, mid, side * 2, 0.18, span, cream, -3);
+  const pilasterSide = shopEntrance(expandedLayout.slots[n - 1]).normalX;
+  const { inset, depth: pierDepth } = atriumLayout.arcadePilaster;
+  const pilasterBack = depth / 2 - inset - pierDepth / 2;
   for (const s of [-1, 1]) {
     box(s * (side - 0.2), 4.082, mid, 0.4, 0.064, span, pearl, -3);
-    box(s * side, 2.1, mid, 0.13, 4.13, span, wall);
+    const wallEnd = s === pilasterSide ? pilasterBack : front;
+    box(s * side, 2.1, (back + wallEnd) / 2, 0.13, 4.13, wallEnd - back, wall);
     box(s * (side - 0.31), 4.05, mid, 0.065, 0.046, span - 0.6, shopLamp);
     box(s * (side - 0.2), 0.19, mid, 0.15, 0.21, span, base);
   }
@@ -3287,6 +3301,12 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         colours.forEach((colour, index) => mesh.setColorAt(index, colour));
         mesh.instanceColor.needsUpdate = true;
       }
+    }, queueShopUpload = function(slot2, ...meshes) {
+      if (!expanded || !prepareModel)
+        return;
+      if (!shopUploads.has(slot2))
+        shopUploads.set(slot2, []);
+      shopUploads.get(slot2).push(...meshes);
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
       const finish = finishForRole.get(material);
       const key2 = `${type}:${finish || material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
@@ -3314,6 +3334,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       mesh.rotation.y = ry;
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
+      if (activeShopSlot !== null)
+        queueShopUpload(activeShopSlot, mesh);
       return tagShopLod(mesh);
     }, sign = function(text, x, y, z, width, height = 0.4, framed = false, fontSize = 42) {
       const canvas = document.createElement("canvas");
@@ -3338,6 +3360,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       mesh.position.set(x, y, z);
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
+      if (activeShopSlot !== null)
+        queueShopUpload(activeShopSlot, mesh);
       return tagShopLod(mesh);
     }, shadow = function(x, z, w, d) {
       if (!expanded) {
@@ -3486,6 +3510,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       productDisplay?.setShadows(shadows);
       if (!expanded)
         return;
+      uploadVisitor = visitor;
       productDisplay?.updateShopLods(visitor, tier);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
@@ -3514,8 +3539,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (!expanded)
         return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
       if (!brandWallPromise)
-        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper)).then((result) => {
+        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper, prepareModel)).then((result) => {
           interactables.push(...result.interactables);
+          deckLodMeshes?.push(result.mesh);
           return result;
         });
       return brandWallPromise;
@@ -3526,7 +3552,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const ceilingObstacles = [], shopObstacles = [];
     const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
-    const prepareModel = warmModel && ((model) => warmModel(model, scene));
+    const prepareModel = warmModel && ((model, options) => warmModel(model, scene, options));
     scene.background = new T.Color(expanded ? 12244444 : 1650226);
     scene.fog = new T.Fog(12037532, expanded ? 75 : 40, expanded ? 155 : 100);
     const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
@@ -3616,6 +3642,25 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       }
     }
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
+    const shopUploads = new Map;
+    let uploadVisitor, pavingMesh, mappedPaving;
+    async function setPavingMap(map) {
+      const material = materials.paving.clone();
+      material.map = map;
+      const sample = new T.InstancedMesh(geometry.box, material, 1);
+      try {
+        await prepareModel?.(sample);
+        mappedPaving = material;
+        if (pavingMesh)
+          pavingMesh.material = material;
+        materials.paving.dispose();
+      } catch {
+        map.dispose();
+        material.dispose();
+      } finally {
+        sample.dispose();
+      }
+    }
     let activeShopSlot = null, activeDeck = false, railingState = null, interiorModels = null, productDisplay = null;
     const tagShopLod = (mesh) => {
       if (expanded && activeShopSlot !== null) {
@@ -3683,7 +3728,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden: atriumLayout.garden, prepareModel }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden: atriumLayout.garden, prepareModel, setPavingMap }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -4083,7 +4128,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
+        const firstProduct = scene.children.length;
         productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
+        queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter((mesh) => mesh.isMesh));
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
           collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -4325,6 +4372,15 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     interactables.push(...amenities.interactables);
     for (const batch of batches.values()) {
       const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
+      if (batch.material === materials.paving) {
+        pavingMesh = mesh;
+        if (mappedPaving)
+          mesh.material = mappedPaving;
+      }
+      for (const store of spatial.stores) {
+        if (batch.material === materials[`${store.id}Backdrop`])
+          queueShopUpload(Number(store.number), mesh);
+      }
       if (batch.colours)
         colourBatches.push({ mesh, colours: batch.colours });
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
@@ -4364,7 +4420,16 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
     let deckLodMeshes = null;
     interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
+    const firstFurnishing = shopLodMeshes.length;
     const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh), prepareModel);
+    for (const mesh of shopLodMeshes.slice(firstFurnishing))
+      queueShopUpload(mesh.userData.shopSlot, mesh);
+    for (const [slot2, meshes] of shopUploads) {
+      const bay = shopBays.get(slot2);
+      const x = (bay.minX + bay.maxX) / 2;
+      const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
+      prepareModel(meshes, { hide: true, late: false, priority }).catch(() => {});
+    }
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;

@@ -5,11 +5,11 @@ import {createContactSolver,createProductTransfer} from './visitor-v2-contact.js
 import {createPushCart} from './push-cart.js';
 
 // Skinned v2 adapter; v1 remains available through the explicit visitor=v1 URL.
-export async function createCharacterV2(T, createLocomotionContinuity) {
+export async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
   const model = 'gjh-mall-visitor-v2';
   const gltf = await new GLTFLoader().loadAsync(new URL(`./${model}.glb`, import.meta.url).href);
   const avatar = gltf.scene;
-  const lod=createVisitorLOD(T,avatar);
+  const lod=createVisitorLOD(T,avatar,{prepareModel});
   const customization = createVisitorCustomization(avatar);
   const bounds = new T.Box3().setFromObject(avatar);
   const nativeHeight = bounds.max.y - bounds.min.y;
@@ -23,7 +23,7 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
     'V2_body_Warm_smile', 'V2_watch_Glasses_and_eyes']);
   avatar.traverse(node => { if (node.isMesh) { node.castShadow = !shadowDetail.has(node.name); node.receiveShadow = true; } });
   const visual = new T.Group(); visual.add(avatar);
-  const cart = await createPushCart(T, avatar, visual);
+  const cart = await createPushCart(T, avatar, visual, {prepareModel});
   const solver=createContactSolver(T,avatar), transfer=createProductTransfer(T,avatar);
   const contacts={hands:[],feet:[]};
   avatar.updateWorldMatrix(true,true);
@@ -98,9 +98,11 @@ export async function createCharacterV2(T, createLocomotionContinuity) {
     setSeatProgress(value) { seatWeight = Math.max(0, Math.min(1, value)); },
     setSeated(value) { seatWeight = value ? 1 : 0; },
     startCollection() { return false; }, cancelCollection() {transfer.cancel();},
-    pickProduct: token=>transfer.pick(token), returnProduct:()=>transfer.putBack(), resetProduct:()=>transfer.reset(),
+    pickProduct:transfer.pick, returnProduct:transfer.putBack, bagProduct:transfer.putInBag, resetProduct:transfer.reset,
     customize: customization.apply,
     get animation() { return animation === 'push' ? 'walk' : animation; },
+    get seatWeight() { return seatWeight; },
+    get productPhase() { return transfer.phase; },
     get state() {
       return {model, asset: `assets/${model}.glb`, nativeHeight, scale: 1, clips, lod:lod.state, cart: {...cart.state,mode:'contact-ik',ik:true,wheelMotion:'distance-driven',wheelPhysics:false},
         seated: seatWeight > 0, seatWeight, carrying: {available: false, visible: false, count},

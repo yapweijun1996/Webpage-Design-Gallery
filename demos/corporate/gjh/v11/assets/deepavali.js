@@ -91,6 +91,6 @@ export function prepareDeepavaliDecor(T,scene,theme,{signal}={}) {
     const banner=new T.Mesh(geometry(new T.PlaneGeometry(DEEPAVALI_DECOR_LAYOUT.banner.width,DEEPAVALI_DECOR_LAYOUT.banner.height)),material(new T.MeshBasicMaterial({map:bannerTexture,side:T.DoubleSide})));
     banner.position.set(DEEPAVALI_DECOR_LAYOUT.banner.x,DEEPAVALI_DECOR_LAYOUT.banner.y,DEEPAVALI_DECOR_LAYOUT.banner.z);group.add(banner);
     if(signal?.aborted)throw new Error('Theme preparation cancelled');
-    return {value:theme,mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
+    return {value:theme,group,mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
   } catch(error) {dispose();throw error;}
 }

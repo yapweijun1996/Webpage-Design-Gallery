@@ -53,7 +53,8 @@ async function loadVisitorGLTF(url) {
 // demos/corporate/gjh/v11/assets/visitor-v2-lod.js
 function createVisitorLOD(T, avatar, {
   url = new URL("./gjh-mall-visitor-v2-lod1.glb", import.meta.url),
-  swapMaterial = false
+  swapMaterial = false,
+  prepareModel
 } = {}) {
   const parts = [], position = new T.Vector3;
   avatar.traverse((mesh) => {
@@ -62,6 +63,7 @@ function createVisitorLOD(T, avatar, {
   });
   let loading = null, level = 0, failed = false, distance = 0, attempts = 0, retryAt = 0, available = false, disposed = false;
   let lowScene = null;
+  const upload = new AbortController;
   const matricesMatch = (a, b) => a.elements.every((value, i) => Math.abs(value - b.elements[i]) < 0.0001);
   function releaseLow() {
     for (const part of parts) {
@@ -107,6 +109,18 @@ function createVisitorLOD(T, avatar, {
         if (!lowScene)
           disposeVisitorScene(gltf.scene);
       }
+      if (prepareModel) {
+        const meshes = parts.map(({ mesh, low, lowMaterial }) => {
+          const proxy = mesh.clone(false);
+          proxy.geometry = low;
+          if (swapMaterial)
+            proxy.material = lowMaterial;
+          return proxy;
+        });
+        await prepareModel(meshes, { signal: upload.signal });
+      }
+      if (disposed)
+        return;
       available = true;
     } catch {
       if (!disposed) {
@@ -149,6 +163,7 @@ function createVisitorLOD(T, avatar, {
     },
     dispose() {
       disposed = true;
+      upload.abort();
       switchLevel(0);
       releaseLow();
       available = false;
@@ -293,6 +308,7 @@ function createContactSolver(T, root) {
   return { solve, solveTwoBone };
 }
 function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHand"), facing = avatar.parent) {
+  const bagDuration = 0.45;
   const point = new T.Vector3, offset = new T.Vector3, shelfPoint = new T.Vector3, rotation = new T.Quaternion, ownerRotation = new T.Quaternion;
   let item = null, phase = "empty", elapsed = 0, start = null;
   function worldHand() {
@@ -337,8 +353,17 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
       elapsed = 0;
       return true;
     },
+    putInBag(id, reduced) {
+      if (phase !== "held" || item.id !== id)
+        return false;
+      phase = "bag";
+      elapsed = 0;
+      if (reduced)
+        reset();
+      return true;
+    },
     cancel() {
-      if (phase === "pickup") {
+      if (phase === "pickup" || phase === "bag") {
         reset();
       } else if (phase === "return") {
         phase = "held";
@@ -350,6 +375,12 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
     reachTarget(out) {
       if (!item || phase === "held")
         return;
+      if (phase === "bag") {
+        const ease = T.MathUtils.smoothstep(elapsed, 0, 0.3);
+        (facing ?? avatar.parent).getWorldQuaternion(rotation);
+        out.add(offset.set(0, -0.28 * ease, 0.14 * ease).applyQuaternion(rotation));
+        return;
+      }
       const t = Math.max(0, Math.min(1, elapsed / 0.9)), reach = phase === "pickup" ? Math.min(1, t / 0.3) * (1 - Math.max(0, (t - 0.3) / 0.7)) : Math.min(1, t / 0.7);
       shelfPoint.copy(item.origin);
       shelfPoint.y += 0.06;
@@ -362,6 +393,17 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
       elapsed += dt;
       if (phase === "held") {
         hold();
+        return;
+      }
+      if (phase === "bag") {
+        if (reduced || elapsed >= bagDuration) {
+          reset();
+          return;
+        }
+        hold();
+        const drop = T.MathUtils.smoothstep(elapsed, 0.25, bagDuration);
+        item.prop.position.y -= 0.12 * drop;
+        item.prop.scale.setScalar(1 - drop);
         return;
       }
       const t = reduced ? 1 : Math.max(0, Math.min(1, elapsed / 0.9));
@@ -381,7 +423,7 @@ function createProductTransfer(T, avatar, hand = avatar.getObjectByName("RightHa
       return phase;
     },
     get state() {
-      return { phase, id: item?.id || null, active: phase === "pickup" || phase === "return", held: phase === "held" };
+      return { phase, id: item?.id || null, active: phase !== "empty" && phase !== "held", held: phase === "held" };
     }
   };
 }
@@ -484,8 +526,8 @@ function batchCart(T, cart) {
   geometries.forEach((geometry) => geometry.dispose());
   materials.forEach((material) => material.dispose());
 }
-async function createPushCart(T, avatar, visual, { fixedPose = true } = {}) {
-  let active = false, count = 0, saved = null;
+async function createPushCart(T, avatar, visual, { fixedPose = true, prepareModel } = {}) {
+  let active = false, count = 0, saved = null, available = !prepareModel;
   const joints = fixedPose ? ["LeftShoulder", "LeftElbow", "RightShoulder", "RightElbow"].map((n) => avatar.getObjectByName(n)) : [];
   const abort = new AbortController, timer = setTimeout(() => abort.abort(), 8000);
   let cart;
@@ -528,6 +570,10 @@ async function createPushCart(T, avatar, visual, { fixedPose = true } = {}) {
   parcel.position.set(0, 0.57, 0.08);
   parcel.visible = false;
   cart.add(parcel);
+  if (prepareModel)
+    prepareModel(cart, { late: !fixedPose }).then(() => {
+      available = true;
+    }, () => {});
   function restore() {
     if (saved) {
       joints.forEach((n, i) => n.quaternion.copy(saved[i]));
@@ -535,6 +581,8 @@ async function createPushCart(T, avatar, visual, { fixedPose = true } = {}) {
     }
   }
   return { set(value) {
+    if (value && !available)
+      return false;
     restore();
     active = Boolean(value);
     cart.visible = active;
@@ -551,16 +599,16 @@ async function createPushCart(T, avatar, visual, { fixedPose = true } = {}) {
     joints[1].rotation.set(-0.95, 0, 0);
     joints[3].rotation.set(-0.95, 0, 0);
   }, get state() {
-    return { available: true, active, count, mode: "simplified-push", wheelPhysics: false, ik: false };
+    return { available, active, count, mode: "simplified-push", wheelPhysics: false, ik: false };
   } };
 }
 
 // demos/corporate/gjh/v11/assets/character-v2.js
-async function createCharacterV2(T, createLocomotionContinuity) {
+async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
   const model = "gjh-mall-visitor-v2";
   const gltf = await new GLTFLoader3().loadAsync(new URL(`./${model}.glb`, import.meta.url).href);
   const avatar = gltf.scene;
-  const lod = createVisitorLOD(T, avatar);
+  const lod = createVisitorLOD(T, avatar, { prepareModel });
   const customization = createVisitorCustomization(avatar);
   const bounds = new T.Box3().setFromObject(avatar);
   const nativeHeight = bounds.max.y - bounds.min.y;
@@ -582,7 +630,7 @@ async function createCharacterV2(T, createLocomotionContinuity) {
   });
   const visual = new T.Group;
   visual.add(avatar);
-  const cart = await createPushCart(T, avatar, visual);
+  const cart = await createPushCart(T, avatar, visual, { prepareModel });
   const solver = createContactSolver(T, avatar), transfer = createProductTransfer(T, avatar);
   const contacts = { hands: [], feet: [] };
   avatar.updateWorldMatrix(true, true);
@@ -692,12 +740,19 @@ async function createCharacterV2(T, createLocomotionContinuity) {
     cancelCollection() {
       transfer.cancel();
     },
-    pickProduct: (token) => transfer.pick(token),
-    returnProduct: () => transfer.putBack(),
-    resetProduct: () => transfer.reset(),
+    pickProduct: transfer.pick,
+    returnProduct: transfer.putBack,
+    bagProduct: transfer.putInBag,
+    resetProduct: transfer.reset,
     customize: customization.apply,
     get animation() {
       return animation === "push" ? "walk" : animation;
+    },
+    get seatWeight() {
+      return seatWeight;
+    },
+    get productPhase() {
+      return transfer.phase;
     },
     get state() {
       return {

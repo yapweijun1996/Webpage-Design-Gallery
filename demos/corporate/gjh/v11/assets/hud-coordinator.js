@@ -63,7 +63,7 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
   const stores = destinations.filter(store => store.available).map(store => store.id);
   const textSources = new WeakMap();
   let tracker, objectiveState = '', completionPending = false, toastTimeout;
-  let actionSource, lastSample = -Infinity, lastAnnouncement = '', lastZone, active = false;
+  let pickupAction, lastSample = -Infinity, lastAnnouncement = '', lastZone, active = false;
   function text(node, value) {
     // Keep the source stable when the page's language observer translates it.
     if (textSources.get(node) === value) return;
@@ -166,20 +166,14 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
   }
 
   return {
-    connectProductActions(previousChildren) {
-      const controls = [...prompt.children].filter(node => !previousChildren.has(node));
-      actionSource = controls.find(node => node.matches('button'));
-      if (actionSource) actionSource.classList.add('hud-control', 'hud-product-action');
-      for (const node of controls.filter(node => node.matches('p[role="status"]'))) {
-        node.removeAttribute('role');
-        node.removeAttribute('aria-live');
-        if (node.id && actionSource) actionSource.setAttribute('aria-describedby', node.id);
-        else if (actionSource) {
-          node.id = 'hud-product-note';
-          actionSource.setAttribute('aria-describedby', node.id);
-        }
-        node.classList.add('sr-only');
-      }
+    connectProductActions({pickup, add, putBack, notice}) {
+      pickupAction = pickup;
+      pickup.classList.add('hud-control', 'hud-pickup-action');
+      for (const action of [add, putBack]) action.classList.add('hud-control', 'hud-held-action');
+      notice.removeAttribute('role');
+      notice.id = 'hud-product-note';
+      notice.classList.add('sr-only');
+      pickup.setAttribute('aria-describedby', notice.id);
     },
     update({position, zone, enabled, travelling, now, forward}) {
       active = enabled;
@@ -188,9 +182,10 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
         tracker.visit(zone);
         updateGoals();
       }
-      const canInteract = !prompt.hidden;
-      const usePhysical = Boolean(canInteract && actionSource && !actionSource.hidden && !actionSource.disabled);
-      const secondary = Boolean(usePhysical && !inspect.disabled);
+      const showHeld = !held.hidden;
+      const canInteract = !showHeld && !prompt.hidden;
+      const usePhysical = Boolean(canInteract && pickupAction && !pickupAction.hidden && !pickupAction.disabled);
+      const secondary = usePhysical && !inspect.hidden && !inspect.disabled;
       if (inspect.classList.contains('hud-alternate-action') !== secondary) {
         inspect.classList.toggle('hud-alternate-action', secondary);
         setMore(secondary && document.activeElement === inspect);
@@ -199,12 +194,10 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
         }
       }
       hide(more, !secondary);
-      if (actionSource && actionSource.classList.contains('hud-unavailable-action') === usePhysical) {
-        actionSource.classList.toggle('hud-unavailable-action', !usePhysical);
-      }
-      queue.set('held', !held.hidden);
+      pickupAction?.classList.toggle('hud-unavailable-action', !usePhysical);
+      queue.set('held', showHeld);
       queue.set('interaction', canInteract);
-      if (!active || zone === 'upper' || travelling || canInteract || !held.hidden) {
+      if (!active || zone === 'upper' || travelling || canInteract || showHeld) {
         queue.set('nearby', null);
       } else if (now - lastSample >= 100) {
         lastSample = now;

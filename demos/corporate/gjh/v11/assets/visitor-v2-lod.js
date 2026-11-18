@@ -2,7 +2,7 @@ import {disposeVisitorScene,loadVisitorGLTF} from './visitor-gltf.js';
 
 /** Both levels share the live skeleton and mixer. V2 keeps its customized material. */
 export function createVisitorLOD(T,avatar,{
-  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false
+  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false, prepareModel
 }={}) {
   const parts=[],position=new T.Vector3();
   avatar.traverse(mesh=>{
@@ -10,6 +10,7 @@ export function createVisitorLOD(T,avatar,{
   });
   let loading=null,level=0,failed=false,distance=0,attempts=0,retryAt=0,available=false,disposed=false;
   let lowScene=null;
+  const upload=new AbortController();
   const matricesMatch=(a,b)=>a.elements.every((value,i)=>Math.abs(value-b.elements[i])<.0001);
   function releaseLow(){
     for(const part of parts){if(!swapMaterial)part.low?.dispose();part.low=null;part.lowMaterial=null;}
@@ -37,6 +38,16 @@ export function createVisitorLOD(T,avatar,{
         }
         if(swapMaterial)lowScene=gltf.scene;
       }finally{if(!lowScene)disposeVisitorScene(gltf.scene);}
+      if(prepareModel){
+        const meshes=parts.map(({mesh,low,lowMaterial})=>{
+          const proxy=mesh.clone(false);
+          proxy.geometry=low;
+          if(swapMaterial)proxy.material=lowMaterial;
+          return proxy;
+        });
+        await prepareModel(meshes,{signal:upload.signal});
+      }
+      if(disposed)return;
       available=true;
     }catch{if(!disposed){failed=true;retryAt=performance.now()+30000;}releaseLow();}
   }
@@ -59,6 +70,6 @@ export function createVisitorLOD(T,avatar,{
     distance=camera.position.distanceTo(avatar.getWorldPosition(position));
     if(distance>10)ensure();
     switchLevel(available && (level===0?distance>11:distance>9)?1:0);
-  },dispose(){disposed=true;switchLevel(0);releaseLow();available=false;},
+  },dispose(){disposed=true;upload.abort();switchLevel(0);releaseLow();available=false;},
   get state(){return {level,distance,available,failed};}};
 }

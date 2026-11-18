@@ -8,6 +8,8 @@ const lounge = (id,x) => Object.freeze({
   planters:Object.freeze([point(x-2.35,27),point(x+2.35,27)])
 });
 export const atriumLayout = Object.freeze({
+  // The pier straddles the shopfront. The adjoining studio wall ends at its back face.
+  arcadePilaster:Object.freeze({inset:.03,depth:.45}),
   garden:Object.freeze({x:10,z:16,width:8,depth:3,height:.48}),
   lounges:Object.freeze([lounge('west',-4),lounge('east',24)]),
   // Reserved for a future removable installation; no stage 4 object occupies it.

@@ -37,11 +37,12 @@ const startupOverlay = document.getElementById('app-loader');
 let greetedOnArrival = false, pageEnded = false;
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let three;
+let modelWarmup;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
-let releaseModelWarmup;
-const firstFrame = new Promise(resolve => { releaseModelWarmup = resolve; });
+let markFirstFrame;
+const firstFrame = new Promise(resolve => { markFirstFrame = resolve; });
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
 const quality = createGraphicsQuality(() => resize());
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
@@ -79,6 +80,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
     layout: expanded ? 'expanded' : 'classic',
+    uploads: modelWarmup?.report() ?? {lateAdditions:0, maxFrameUploadMs:0, pendingUploads:0},
     viewport: {width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio()},
     graphics: {tier: quality.state?.tier, contextLosses: losses, restorations: validations}
   };
@@ -214,6 +216,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
   },
   get ready() { return ready; }, get state() { return snapshot(); },
   get mode() { return modes.current(); },
+  get camera() { return player ? Object.freeze(player.cameraState(shelfFocus?.open)) : null; },
   heroVisibility(number) { return heroVisibility(number); },
   teleport(zone) { if (!ready || !player.teleport(zone)) return false; updateHUD(); render(); return true; },
   setInput(input) {
@@ -232,33 +235,20 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
     render(); return snapshot();
   }
 }), writable: false});
-let lastProductPresentation = '';
-function updateProductPresentation(p) {
-  if (!productControl) return;
-  const product = p.character.physicalProduct;
-  const pickup = interactions.get('pickup', nearby);
-  const withinReach = pickup && Math.hypot(p.x - pickup.x, p.z - pickup.z) <= pickup.radius;
-  const presentation = [nearby, product.phase, product.id, product.active, p.productApproaching,
-    p.seated, p.pushing, p.elevatorTravel, withinReach, modes.paused()].join('/');
-  if (presentation !== lastProductPresentation) {
-    lastProductPresentation = presentation;
-    productControl.update(p, nearby);
-  }
-}
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if(expanded&&currentZone==='upper'&&!brandWallStarted){
     brandWallStarted=true;
-    world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();render();})
+    world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();})
       .catch(error=>console.error('Upper deck brand wall could not load:',error));
   }
   const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  updateProductPresentation(p);
+  productControl?.update(p, nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
+  ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper,hasHeldProduct:Boolean(productControl&&p.character.physicalProduct.held)});
 }
 function canPlayEmote() {
   return ready && !document.hidden && !windowBlurred && !modes.paused() &&
@@ -292,6 +282,7 @@ function tick(refreshHud = true) {
 let lastGuidanceSample = -Infinity, projectedTarget = null;
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
+    if (!shelfFocus?.open) player.refreshCameraMode();
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
     const pose = player.state;
@@ -347,6 +338,14 @@ function updateModelPreload(now) {
     } else window.mallLoader?.prepare(node.textContent);
   }
 }
+function warmModels(pose) {
+  if (!pose || document.hidden || contextLost || restorePending || pageEnded) return 0;
+  const {physicalProduct, collection} = pose.character;
+  const stableSeat = pose.seatPhase === 'idle' || pose.seatPhase === 'seated';
+  const stableProduct = !physicalProduct || ['empty','held'].includes(physicalProduct.phase);
+  return modelWarmup.runFrame(stableSeat && stableProduct && !pose.elevatorTravel &&
+    !pose.productApproaching && !collection.active);
+}
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;
@@ -380,11 +379,13 @@ function animate(now) {
     }
     const renderStart = performance.now();
     const pose = render();
+    const renderEnd = performance.now();
+    const uploadMs = warmModels(pose ?? player.state);
     const end = performance.now();
     if (!windowBlurred) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
-        simulationMs: renderStart - simulationStart, renderMs: end - renderStart,
+        simulationMs: renderStart - simulationStart, renderMs: renderEnd - renderStart, uploadMs,
         callbackMs: end - callbackStart, steps, zone: currentZone, x: pose?.x, z: pose?.z, tier: quality.state?.tier,
         width: canvas.width, height: canvas.height
       });
@@ -393,7 +394,10 @@ function animate(now) {
         lastMetricsUpdate = now;
       }
     } else pausePerformance();
-  } else pausePerformance();
+  } else {
+    pausePerformance();
+    warmModels(player.state);
+  }
   // Record monitor telemetry before a quality change can resize and render.
   const movement = player.state.animation;
   quality.sample(now, advancing && preloadSettled && document.getElementById('app-loader').hidden &&
@@ -404,7 +408,7 @@ function animate(now) {
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
-  if (terminal) { fatal = true; graphicsStatus = 'failed'; releaseModelWarmup(); }
+  if (terminal) { fatal = true; graphicsStatus = 'failed'; modelWarmup?.dispose(); markFirstFrame(); }
   pausePerformance();
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
@@ -436,6 +440,7 @@ canvas.addEventListener('webglcontextlost', event => {
   quality.resetSampling();
   window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
+  modelWarmup?.invalidate();
   mallTheme?.suspend();
   // Retire the reflection target and NPC bone textures against their original context.
   atmosphere?.releaseEnvironment();
@@ -505,7 +510,7 @@ function validateRestoration() {
     if (gl.getError() !== gl.NO_ERROR || renderer.info.render.calls === 0 || !pixel.slice(0, 3).some(Boolean))
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
-    releaseModelWarmup();
+    markFirstFrame();
     if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed) window.mallLoader?.complete('frame');
     window.__sceneFailed = false; window.__sceneReady = true;
     mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
@@ -513,14 +518,14 @@ function validateRestoration() {
     fallback('The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.');
   }
 }
-async function installNpcs(T, R, source) {
+async function installNpcs(T, R, prepareModel, source) {
   if (pageEnded || fatal) return;
   const enabled = new URLSearchParams(location.search).get('npcs') !== 'off';
   if (!source && !enabled) return;
   try {
     const {createNpcSystem, loadNpcSystem} = await import('./assets/npcs.js');
     const options = {scene:world.scene,seats:world.seats,physics,R,playerCollider:player.capsule,
-      playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled};
+      playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled,prepareModel};
     const system = source ? createNpcSystem(T, {...options, source}) : await loadNpcSystem(T, options);
     if (pageEnded || fatal) system.dispose();
     else {
@@ -548,8 +553,12 @@ async function initialize() {
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
   window.mallLoader?.complete('physics');
-  const warmModel = createModelWarmup(T, renderer, firstFrame, () => ready && !fatal && !contextLost);
+  modelWarmup = createModelWarmup(T, renderer);
+  const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
+    linear: () => expanded && quality.state?.tier === 'detailed' && renderWidth >= 1000, ...options
+  });
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded, warmModel);
+  const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans]
     .flatMap(group => Object.values(group || {}));
   if (world.productAssets?.shelf) assetRecords.push(world.productAssets.shelf);
@@ -595,7 +604,12 @@ async function initialize() {
         if(!definition || signal.aborted)throw new Error('Theme unavailable');
         const pack=await loadSeasonalModule(definition);
         if(signal.aborted)throw new Error('Theme preparation cancelled');
-        return pack[definition.prepare](T,world.scene,theme,{signal});
+        const stage=pack[definition.prepare](T,world.scene,theme,{signal});
+        if (ready) {
+          try { await prepareModel(stage.group, {signal}); }
+          catch (error) { stage.dispose(); throw error; }
+        }
+        return stage;
       },commit(next,previous,stage){
         try { if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');atmosphere.applyTheme(next);stage?.mount?.();render(); }
         catch(error) { world.applyMallTheme(previous);elevator?.applyMallTheme?.(previous);atmosphere.applyTheme(previous);throw error; }
@@ -614,15 +628,15 @@ async function initialize() {
     world.cameraObstacles.push(...(elevator.cameraObstacles||[]));
   }
   if(mallTheme && !contextLost && !interrupted) await mallTheme.restore();
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded);
-  if (player.npcSource) await installNpcs(T, R, player.npcSource);
-  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R));
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded,prepareModel);
+  if (player.npcSource) await installNpcs(T, R, prepareModel, player.npcSource);
+  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareModel));
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
   guidance = createTargetGuidance({canvas, projection});
   const {createShelfFocus} = await import('./assets/shelf-focus.js');
-  shelfFocus = createShelfFocus({T, canvas, normalCamera: player.camera, shelves: world.shelves, projection,
+  shelfFocus = createShelfFocus({T, canvas, normalCamera: player.camera, getFramingFov: () => player.chaseFov, shelves: world.shelves, projection,
     onChange: () => { syncMode(); render(); }, onDetails: ui.inspect, onAdd: ui.addToBag,
     onRestore: resized => { if (resized) player.updateCamera(0, true); }});
   ui.setShelfFocus(shelfFocus);
@@ -631,9 +645,11 @@ async function initialize() {
   if (player.state.character.physicalProduct) {
     try {
       const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
-      const previousChildren = new Set(document.getElementById('inspect-prompt').children);
-      productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions);
-      mallHud.connectProductActions(previousChildren);
+      productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions,ui,()=>{
+        updateHUD();
+        render();
+      });
+      mallHud.connectProductActions(productControl.actions);
     } catch { /* Physical product handling is optional. */ }
   }
   if (player.npcSource) {
@@ -677,7 +693,7 @@ async function initialize() {
   render(true);
   if (contextLost || context.isContextLost()) return;
   if (!renderer.info.render.calls) throw new Error('First scene frame unavailable');
-  releaseModelWarmup();
+  markFirstFrame();
   if (expanded && !window.mallLoader?.snapshot().dismissed) {
     initialPreloadStarted=performance.now();
     window.mallLoader?.prepare('Preparing shop models. You can enter now or browse the directory.');
@@ -690,5 +706,5 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
-  pageEnded = true; mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.();
+  pageEnded = true; mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); modelWarmup?.dispose();
 }});

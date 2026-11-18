@@ -61,6 +61,7 @@ function copyFields(record, frameMs, info, detail) {
   record.textures = metric(info?.memory?.textures);
   record.simulationMs = metric(detail?.simulationMs);
   record.renderMs = metric(detail?.renderMs);
+  record.uploadMs = metric(detail?.uploadMs);
   record.callbackMs = metric(detail?.callbackMs);
   record.steps = metric(detail?.steps);
   record.zone = detail?.zone ?? null;
@@ -1136,6 +1137,12 @@ function createBagStore(ids, storage = null) {
       quantities.delete(id);
     publish();
   }
+  function add(id, prepare) {
+    if (!allowed.has(id) || quantities.get(id) === 9 || !prepare(id))
+      return false;
+    change(id, 1);
+    return true;
+  }
   function publish() {
     const value = snapshot();
     try {
@@ -1143,7 +1150,7 @@ function createBagStore(ids, storage = null) {
     } catch {}
     listeners.forEach((listener) => listener(value));
   }
-  return { snapshot, change, remove(id) {
+  return { snapshot, change, add, remove(id) {
     if (allowed.has(id)) {
       quantities.delete(id);
       publish();
@@ -1239,6 +1246,7 @@ function setupDemoBag() {
   });
   close.addEventListener("click", () => dialog.close());
   dialog.addEventListener("close", () => {
+    status.classList.add("sr-only");
     const target = returnFocus;
     returnFocus = open;
     (target instanceof HTMLElement && target.isConnected && !target.closest("[hidden]") ? target : open).focus({ preventScroll: true });
@@ -1255,14 +1263,22 @@ function setupDemoBag() {
     }
   });
   collect.addEventListener("click", () => {
-    if (!current || !document.querySelector("#product-dialog").open || (store.snapshot()[current] || 0) >= 9)
-      return;
-    const id = current;
-    if (collectListener?.(id)) {
-      store.change(id, 1);
-    }
+    if (current && collectListener && document.querySelector("#product-dialog").open)
+      store.add(current, collectListener);
   });
-  return { change: store.change, snapshot: store.snapshot, closeTo(target) {
+  function addHeldProduct(id, prepare, message) {
+    if (store.add(id, prepare)) {
+      status.textContent = message;
+      return true;
+    }
+    if (store.snapshot()[id] === 9) {
+      status.textContent = "Your bag has 9 of this product. Remove one to make room, then try Add to bag again.";
+      status.classList.remove("sr-only");
+      open.click();
+    }
+    return false;
+  }
+  return { change: store.change, snapshot: store.snapshot, addHeldProduct, closeTo(target) {
     returnFocus = target;
     dialog.close();
   }, configureCollect(test, listener) {
@@ -1367,6 +1383,7 @@ function createUI(expanded = false) {
   const mapCaptionText = [...mapCaption.childNodes].find((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
   const inspectPrompt = document.getElementById("inspect-prompt");
   const inspectButton = document.getElementById("inspect");
+  const nearbyCard = inspectPrompt.querySelector(".nearby-card");
   const inspectVerb = document.getElementById("inspect-verb");
   const hudText = new WeakMap;
   const hudLabels = new WeakMap;
@@ -1468,6 +1485,7 @@ function createUI(expanded = false) {
     entry?.setAttribute("aria-controls", "guide-card");
   let unsubscribeInteractions = null, lastGamepadButtons = [], gamepadDirectionAt = 0;
   let modeListener = null, shelfFocus = null;
+  let holdingProduct = false;
   const modeSignals = () => ({
     productOpen: document.getElementById("product-dialog").open || externalPaused || document.getElementById("original-tin-dialog").open,
     bagOpen: document.getElementById("bag-dialog").open,
@@ -1475,7 +1493,7 @@ function createUI(expanded = false) {
     panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || compactMap.matches && (help.open || mallMap.open)
   });
   function syncTutorialSuspension(signals) {
-    tutorial.setActive(available && showing3D && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen && !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
+    tutorial.setActive(available && showing3D && !holdingProduct && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen && !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
   }
   const notifyMode = () => {
     const signals = modeSignals();
@@ -1875,8 +1893,11 @@ function createUI(expanded = false) {
   function cartReason(state) {
     return state.capability?.reasonCode === "held-product" ? heldInstruction(state) : state.capability?.reason;
   }
+  function productName(id) {
+    return records.get(id)?.compactName || "New Moon product";
+  }
   function heldInstruction(state) {
-    return `Return ${records.get(state.heldProduct)?.compactName || "the held product"} to its New Moon shelf first.`;
+    return `Return ${productName(state.heldProduct)} to its original New Moon shelf or add it to your bag first.`;
   }
   function toggleCart() {
     const state = cartState();
@@ -2048,7 +2069,7 @@ function createUI(expanded = false) {
     elevator: () => {
       const calling = currentElevatorState && currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0);
       const ok = elevatorListener?.();
-      announce(ok ? calling ? "Elevator called. Wait here, then choose Ride when it arrives." : "Elevator travelling to the other level." : "Wait for the elevator, return held products and stow the cart before travelling.");
+      announce(ok ? calling ? "Elevator called. Wait here, then choose Ride when it arrives." : "Elevator travelling to the other level." : "Wait for the elevator. Return held products to their shelves or add them to your bag, and stow the cart before travelling.");
       scene.focus({ preventScroll: true });
       return ok;
     },
@@ -2363,6 +2384,8 @@ function createUI(expanded = false) {
     addToBag(id) {
       bag.change(id, 1);
     },
+    addHeldProductToBag: bag.addHeldProduct,
+    productName,
     projectMode(mode) {
       contextNavigation.update({
         mode,
@@ -2456,7 +2479,7 @@ function createUI(expanded = false) {
       fallbackMessage.hidden = false;
       announce(fallbackMessage.textContent);
     },
-    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2 }) {
+    update({ zone, x, z, yaw, nearby: nextNearby, interaction = null, collectionActive = false, isSeated = false, seatPhase = "idle", seatName = null, elevatorState = null, elevatorUpper = 7.2, hasHeldProduct = false }) {
       tutorial.reportPose({ x, z, yaw });
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
@@ -2489,7 +2512,6 @@ function createUI(expanded = false) {
         nearby = next;
         seatNotice = null;
         document.body.classList.toggle("is-nearby", Boolean(nearby));
-        inspectPrompt.hidden = !nearby;
         const product = nearby && records.get(nearby);
         const image = document.getElementById("nearby-image");
         const isShelf = Boolean(product?.image && nearby.startsWith("new-moon-"));
@@ -2502,13 +2524,12 @@ function createUI(expanded = false) {
         nearbyStory.textContent = isBrandStory ? product.story : "";
         nearbyStory.hidden = !isBrandStory;
         inspectPrompt.classList.toggle("has-brand-story", isBrandStory);
-        const identity = inspectPrompt.querySelector(".nearby-card");
         if (isShelf) {
-          identity.setAttribute("role", "group");
-          identity.setAttribute("aria-label", product.name);
+          nearbyCard.setAttribute("role", "group");
+          nearbyCard.setAttribute("aria-label", product.name);
         } else {
-          identity.removeAttribute("role");
-          identity.removeAttribute("aria-label");
+          nearbyCard.removeAttribute("role");
+          nearbyCard.removeAttribute("aria-label");
         }
         const record = product;
         const amenityAction = nearby === "service-desk" ? "Get help" : nearby?.startsWith("wayfinding-") ? "Choose a store" : nearby === "featured-showcase" ? "View collection" : null;
@@ -2553,9 +2574,17 @@ function createUI(expanded = false) {
       const disabled = Boolean(cartBlocksSeat || seatPhase === "stand");
       if (inspectButton.disabled !== disabled)
         inspectButton.disabled = disabled;
+      if (holdingProduct && !hasHeldProduct)
+        seatNotice = null;
       if (seatNotice)
         setHudText(nearbyName, seatNotice);
-      const promptHidden = !nearby && !seated || collectionActive;
+      const inspectHidden = !nearby && !seated;
+      if (inspectButton.hidden !== inspectHidden)
+        inspectButton.hidden = inspectHidden;
+      if (nearbyCard.hidden !== inspectHidden)
+        nearbyCard.hidden = inspectHidden;
+      holdingProduct = hasHeldProduct;
+      const promptHidden = inspectHidden && !holdingProduct || collectionActive;
       if (inspectPrompt.hidden !== promptHidden)
         inspectPrompt.hidden = promptHidden;
       notifyMode();
@@ -3126,76 +3155,222 @@ function createMallAtmosphere(T, renderer, scene, slots) {
 }
 
 // demos/corporate/gjh/v11/assets/model-warmup.js
-function createModelWarmup(T, renderer, firstFrame, canWarm) {
-  let pending = firstFrame;
-  const camera = new T.PerspectiveCamera;
-  camera.position.z = 1;
-  function warm(model, scene) {
-    if (!canWarm() || document.hidden || renderer.getContext().isContextLost())
+function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, maxSteps = 2 } = {}) {
+  const jobs = [];
+  let maxFrameUploadMs = 0, lateAdditions = 0, closed = false;
+  function settle(job, error) {
+    const index = jobs.indexOf(job);
+    if (index < 0)
       return;
-    const staging = new T.Scene;
-    staging.fog = scene.fog;
-    staging.environment = scene.environment;
-    const target = new T.WebGLRenderTarget(1, 1);
-    const previousTarget = renderer.getRenderTarget();
-    const toneMapping = renderer.toneMapping;
-    const shadows = renderer.shadowMap;
-    const { autoUpdate, needsUpdate } = shadows;
-    const renderInfo = renderer.info.render;
-    const { calls, triangles, points, lines } = renderInfo;
-    const visible = model.visible;
-    const culled = [];
-    try {
-      for (const light of scene.children)
-        if (light.isLight && light.visible)
-          staging.add(light.clone());
-      staging.add(model);
-      model.visible = true;
-      renderer.compile?.(staging, camera);
-      model.traverseVisible((mesh) => {
-        if (!mesh.isMesh || !mesh.frustumCulled)
-          return;
-        culled.push(mesh);
-        mesh.frustumCulled = false;
-      });
-      shadows.autoUpdate = shadows.needsUpdate = false;
-      renderer.setRenderTarget(target);
-      renderer.render(staging, camera);
-    } finally {
-      for (const mesh of culled)
-        mesh.frustumCulled = true;
-      model.visible = visible;
-      staging.clear();
-      renderer.toneMapping = toneMapping;
-      shadows.autoUpdate = autoUpdate;
-      shadows.needsUpdate = needsUpdate;
-      Object.assign(renderInfo, { calls, triangles, points, lines });
-      try {
-        renderer.setRenderTarget(previousTarget);
-      } finally {
-        target.dispose();
-      }
+    jobs.splice(index, 1);
+    job.signal?.removeEventListener("abort", job.cancel);
+    if (error)
+      job.reject(error);
+    else {
+      if (job.late)
+        lateAdditions++;
+      job.resolve();
     }
   }
-  return (model, scene) => {
-    pending = pending.then(() => new Promise((resolve) => {
-      if (!canWarm() || document.hidden) {
-        resolve();
-        return;
-      }
-      const run = () => {
-        try {
-          warm(model, scene);
-        } catch {} finally {
-          resolve();
+  function enqueue(makeSteps, { priority = () => 0, signal, late = true } = {}) {
+    if (closed || signal?.aborted)
+      return Promise.reject(new DOMException("Upload cancelled", "AbortError"));
+    return new Promise((resolve, reject) => {
+      const job = { makeSteps, priority, signal, late, resolve, reject, iterator: null };
+      job.cancel = () => settle(job, new DOMException("Upload cancelled", "AbortError"));
+      jobs.push(job);
+      signal?.addEventListener("abort", job.cancel, { once: true });
+    });
+  }
+  function runFrame(canRun) {
+    if (!canRun || !jobs.length)
+      return 0;
+    const start = now();
+    let steps = 0;
+    while (jobs.length && steps < maxSteps && now() - start < budgetMs) {
+      let job = jobs[0], priority = job.priority();
+      for (let i = 1;i < jobs.length; i++) {
+        const candidate = jobs[i];
+        const rank = candidate.priority();
+        if (rank < priority) {
+          job = candidate;
+          priority = rank;
         }
-      };
-      if (typeof window.requestIdleCallback === "function")
-        window.requestIdleCallback(run, { timeout: 1500 });
-      else
-        window.setTimeout(run, 100);
-    })).catch(() => {});
-    return pending;
+      }
+      try {
+        job.iterator ??= job.makeSteps();
+        const step = job.iterator.next();
+        if (step.done)
+          settle(job);
+        else {
+          steps++;
+          if (step.value() === false)
+            break;
+        }
+      } catch (error) {
+        settle(job, error);
+      }
+    }
+    const elapsed = now() - start;
+    maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
+    return elapsed;
+  }
+  return {
+    enqueue,
+    runFrame,
+    invalidate() {
+      for (const job of jobs)
+        job.iterator = null;
+    },
+    dispose() {
+      closed = true;
+      while (jobs.length)
+        jobs[0].cancel();
+    },
+    report() {
+      return { lateAdditions, maxFrameUploadMs, pendingUploads: jobs.length };
+    }
+  };
+}
+function materialTextures(material) {
+  const textures = Object.values(material).filter((value) => value?.isTexture);
+  for (const { value } of Object.values(material.uniforms ?? {})) {
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry?.isTexture)
+        textures.push(entry);
+    }
+  }
+  return textures;
+}
+function createModelWarmup(T, renderer) {
+  const scheduler = createUploadScheduler();
+  let initialized = new WeakMap;
+  const camera = new T.PerspectiveCamera;
+  camera.position.z = 1;
+  const staging = new T.Scene;
+  staging.matrixWorldAutoUpdate = false;
+  const target = new T.WebGLRenderTarget(1, 1);
+  const scissor = new T.Vector4;
+  function withMesh(mesh, scene, mask, linear, work) {
+    const { visible, frustumCulled, children, count } = mesh;
+    const layers = mesh.layers.mask;
+    const previousTarget = renderer.getRenderTarget();
+    const activeFace = renderer.getActiveCubeFace(), activeMip = renderer.getActiveMipmapLevel();
+    const scissorTest = renderer.getScissorTest();
+    const { autoClear, toneMapping } = renderer, autoReset = renderer.info.autoReset;
+    const shadows = renderer.shadowMap, { autoUpdate, needsUpdate } = shadows;
+    const { calls, triangles, points, lines } = renderer.info.render;
+    renderer.getScissor(scissor);
+    try {
+      staging.fog = scene.fog;
+      staging.environment = scene.environment;
+      staging.environmentIntensity = scene.environmentIntensity;
+      staging.children = scene.children.filter((node) => node.isLight && node.visible);
+      staging.children.push(mesh);
+      mesh.children = [];
+      mesh.layers.mask = mask;
+      mesh.visible = true;
+      mesh.frustumCulled = false;
+      if (mesh.isInstancedMesh)
+        mesh.count = Math.min(1, count);
+      camera.layers.mask = mask & 1 ? 1 : mask;
+      mesh.updateWorldMatrix(true, false);
+      renderer.autoClear = false;
+      renderer.info.autoReset = false;
+      shadows.autoUpdate = shadows.needsUpdate = false;
+      renderer.setRenderTarget(linear ? target : null);
+      if (!linear) {
+        renderer.setScissor(0, 0, 0, 0);
+        renderer.setScissorTest(true);
+      }
+      return work();
+    } finally {
+      mesh.visible = visible;
+      mesh.frustumCulled = frustumCulled;
+      mesh.children = children;
+      mesh.layers.mask = layers;
+      if (mesh.isInstancedMesh)
+        mesh.count = count;
+      staging.children = [];
+      renderer.autoClear = autoClear;
+      renderer.toneMapping = toneMapping;
+      renderer.info.autoReset = autoReset;
+      Object.assign(renderer.info.render, { calls, triangles, points, lines });
+      shadows.autoUpdate = autoUpdate;
+      shadows.needsUpdate = needsUpdate;
+      renderer.setScissor(scissor);
+      renderer.setScissorTest(scissorTest);
+      renderer.setRenderTarget(previousTarget, activeFace, activeMip);
+    }
+  }
+  function* prepareMesh(mesh, scene, mask, linear) {
+    let programs;
+    yield () => {
+      const materials = withMesh(mesh, scene, mask, linear, () => renderer.compile(staging, camera));
+      if (renderer.extensions?.has("KHR_parallel_shader_compile")) {
+        programs = [...materials].map((material) => renderer.properties.get(material).currentProgram);
+      }
+      return false;
+    };
+    while (programs?.some((program) => !program.isReady()))
+      yield () => false;
+    yield () => withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
+  }
+  function prepare(root, scene, { hide = false, linear = () => false, ...options } = {}) {
+    const meshes = [];
+    for (const model of Array.isArray(root) ? root : [root]) {
+      model.traverse((mesh) => {
+        if (mesh.isMesh || mesh.isLine || mesh.isPoints)
+          meshes.push({ mesh, mask: mesh.layers.mask });
+      });
+    }
+    if (!meshes.length)
+      return Promise.resolve();
+    if (hide)
+      for (const { mesh } of meshes)
+        mesh.layers.mask = 0;
+    return scheduler.enqueue(function* () {
+      for (const { mesh, mask } of meshes) {
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const textures = materials.flatMap(materialTextures);
+        if (mesh.isSkinnedMesh && mesh.skeleton) {
+          mesh.skeleton.boneTexture ??= mesh.skeleton.computeBoneTexture().boneTexture;
+          textures.push(mesh.skeleton.boneTexture);
+        }
+        if (mesh.morphTexture)
+          textures.push(mesh.morphTexture);
+        for (const texture of new Set(textures)) {
+          if (initialized.get(texture) === texture.version)
+            continue;
+          yield () => {
+            renderer.initTexture(texture);
+            initialized.set(texture, texture.version);
+          };
+        }
+        yield* prepareMesh(mesh, scene, mask, false);
+        if (linear())
+          yield* prepareMesh(mesh, scene, mask, true);
+      }
+    }, options).finally(() => {
+      if (hide)
+        for (const { mesh, mask } of meshes)
+          mesh.layers.mask = mask;
+    });
+  }
+  return {
+    prepare,
+    report: scheduler.report,
+    runFrame(canRun) {
+      return scheduler.runFrame(canRun && !renderer.getContext().isContextLost());
+    },
+    invalidate() {
+      initialized = new WeakMap;
+      scheduler.invalidate();
+    },
+    dispose() {
+      scheduler.dispose();
+      target.dispose();
+    }
   };
 }
 
@@ -3448,7 +3623,7 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
   const stores = destinations.filter((store) => store.available).map((store) => store.id);
   const textSources = new WeakMap;
   let tracker, objectiveState = "", completionPending = false, toastTimeout;
-  let actionSource, lastSample = -Infinity, lastAnnouncement = "", lastZone, active = false;
+  let pickupAction, lastSample = -Infinity, lastAnnouncement = "", lastZone, active = false;
   function text(node, value) {
     if (textSources.get(node) === value)
       return;
@@ -3560,22 +3735,15 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
     toastTimeout = setTimeout(() => hide(toast, true), 4200);
   }
   return {
-    connectProductActions(previousChildren) {
-      const controls = [...prompt.children].filter((node) => !previousChildren.has(node));
-      actionSource = controls.find((node) => node.matches("button"));
-      if (actionSource)
-        actionSource.classList.add("hud-control", "hud-product-action");
-      for (const node of controls.filter((node2) => node2.matches('p[role="status"]'))) {
-        node.removeAttribute("role");
-        node.removeAttribute("aria-live");
-        if (node.id && actionSource)
-          actionSource.setAttribute("aria-describedby", node.id);
-        else if (actionSource) {
-          node.id = "hud-product-note";
-          actionSource.setAttribute("aria-describedby", node.id);
-        }
-        node.classList.add("sr-only");
-      }
+    connectProductActions({ pickup, add, putBack, notice }) {
+      pickupAction = pickup;
+      pickup.classList.add("hud-control", "hud-pickup-action");
+      for (const action of [add, putBack])
+        action.classList.add("hud-control", "hud-held-action");
+      notice.removeAttribute("role");
+      notice.id = "hud-product-note";
+      notice.classList.add("sr-only");
+      pickup.setAttribute("aria-describedby", notice.id);
     },
     update({ position, zone, enabled, travelling, now, forward }) {
       active = enabled;
@@ -3584,9 +3752,10 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
         tracker.visit(zone);
         updateGoals();
       }
-      const canInteract = !prompt.hidden;
-      const usePhysical = Boolean(canInteract && actionSource && !actionSource.hidden && !actionSource.disabled);
-      const secondary = Boolean(usePhysical && !inspect.disabled);
+      const showHeld = !held.hidden;
+      const canInteract = !showHeld && !prompt.hidden;
+      const usePhysical = Boolean(canInteract && pickupAction && !pickupAction.hidden && !pickupAction.disabled);
+      const secondary = usePhysical && !inspect.hidden && !inspect.disabled;
       if (inspect.classList.contains("hud-alternate-action") !== secondary) {
         inspect.classList.toggle("hud-alternate-action", secondary);
         setMore(secondary && document.activeElement === inspect);
@@ -3595,12 +3764,10 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
         }
       }
       hide(more, !secondary);
-      if (actionSource && actionSource.classList.contains("hud-unavailable-action") === usePhysical) {
-        actionSource.classList.toggle("hud-unavailable-action", !usePhysical);
-      }
-      queue.set("held", !held.hidden);
+      pickupAction?.classList.toggle("hud-unavailable-action", !usePhysical);
+      queue.set("held", showHeld);
       queue.set("interaction", canInteract);
-      if (!active || zone === "upper" || travelling || canInteract || !held.hidden) {
+      if (!active || zone === "upper" || travelling || canInteract || showHeld) {
         queue.set("nearby", null);
       } else if (now - lastSample >= 100) {
         lastSample = now;
@@ -3651,6 +3818,7 @@ var last = 0;
 var accumulator = 0;
 var frames = 0;
 var three;
+var modelWarmup;
 var productControl = null;
 var shelfFocus = null;
 var guidance = null;
@@ -3668,9 +3836,9 @@ var contextWaiter;
 var graphicsStatus = "initializing";
 var losses = 0;
 var validations = 0;
-var releaseModelWarmup;
+var markFirstFrame;
 var firstFrame = new Promise((resolve) => {
-  releaseModelWarmup = resolve;
+  markFirstFrame = resolve;
 });
 var renderWidth = 0;
 var renderHeight = 0;
@@ -3735,6 +3903,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
+    uploads: modelWarmup?.report() ?? { lateAdditions: 0, maxFrameUploadMs: 0, pendingUploads: 0 },
     viewport: { width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio() },
     graphics: { tier: quality.state?.tier, contextLosses: losses, restorations: validations }
   };
@@ -3938,6 +4107,9 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   get mode() {
     return modes.current();
   },
+  get camera() {
+    return player ? Object.freeze(player.cameraState(shelfFocus?.open)) : null;
+  },
   heroVisibility(number) {
     return heroVisibility(number);
   },
@@ -3970,30 +4142,6 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
     return snapshot();
   }
 }), writable: false });
-var lastProductPresentation = "";
-function updateProductPresentation(p) {
-  if (!productControl)
-    return;
-  const product = p.character.physicalProduct;
-  const pickup = interactions.get("pickup", nearby);
-  const withinReach = pickup && Math.hypot(p.x - pickup.x, p.z - pickup.z) <= pickup.radius;
-  const presentation = [
-    nearby,
-    product.phase,
-    product.id,
-    product.active,
-    p.productApproaching,
-    p.seated,
-    p.pushing,
-    p.elevatorTravel,
-    withinReach,
-    modes.paused()
-  ].join("/");
-  if (presentation !== lastProductPresentation) {
-    lastProductPresentation = presentation;
-    productControl.update(p, nearby);
-  }
-}
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
@@ -4002,16 +4150,15 @@ function updateHUD() {
     world.ensureBrandWall().then(({ records }) => {
       ui.setBrandStories(records);
       updateHUD();
-      render();
     }).catch((error) => console.error("Upper deck brand wall could not load:", error));
   }
   const selection = interactions.nearest(p, { travelling: Boolean(p.elevatorTravel), player: p });
   selectedInteraction = selection.item;
   interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  updateProductPresentation(p);
+  productControl?.update(p, nearby);
   shelfFocus?.setNearby(nearby);
-  ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper });
+  ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper, hasHeldProduct: Boolean(productControl && p.character.physicalProduct.held) });
 }
 function canPlayEmote() {
   return ready && !document.hidden && !windowBlurred && !modes.paused() && startupOverlay.hidden && document.body.classList.contains("is-3d");
@@ -4057,6 +4204,8 @@ var lastGuidanceSample = -Infinity;
 var projectedTarget = null;
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === "shelf")) {
+    if (!shelfFocus?.open)
+      player.refreshCameraMode();
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
     const pose = player.state;
@@ -4125,6 +4274,14 @@ function updateModelPreload(now) {
       window.mallLoader?.prepare(node.textContent);
   }
 }
+function warmModels(pose) {
+  if (!pose || document.hidden || contextLost || restorePending || pageEnded)
+    return 0;
+  const { physicalProduct, collection } = pose.character;
+  const stableSeat = pose.seatPhase === "idle" || pose.seatPhase === "seated";
+  const stableProduct = !physicalProduct || ["empty", "held"].includes(physicalProduct.phase);
+  return modelWarmup.runFrame(stableSeat && stableProduct && !pose.elevatorTravel && !pose.productApproaching && !collection.active);
+}
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden)
@@ -4164,12 +4321,15 @@ function animate(now) {
     }
     const renderStart = performance.now();
     const pose = render();
+    const renderEnd = performance.now();
+    const uploadMs = warmModels(pose ?? player.state);
     const end = performance.now();
     if (!windowBlurred) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
         simulationMs: renderStart - simulationStart,
-        renderMs: end - renderStart,
+        renderMs: renderEnd - renderStart,
+        uploadMs,
         callbackMs: end - callbackStart,
         steps,
         zone: currentZone,
@@ -4185,8 +4345,10 @@ function animate(now) {
       }
     } else
       pausePerformance();
-  } else
+  } else {
     pausePerformance();
+    warmModels(player.state);
+  }
   const movement = player.state.animation;
   quality.sample(now, advancing && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
   frame = requestAnimationFrame(animate);
@@ -4204,7 +4366,8 @@ function fallback(message, terminal = true) {
   if (terminal) {
     fatal = true;
     graphicsStatus = "failed";
-    releaseModelWarmup();
+    modelWarmup?.dispose();
+    markFirstFrame();
   }
   pausePerformance();
   hideGuidance();
@@ -4319,6 +4482,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   interrupted = true;
   restorePending = true;
   losses++;
+  modelWarmup?.invalidate();
   mallTheme?.suspend();
   atmosphere?.releaseEnvironment();
   npcs?.clearVisitors();
@@ -4411,7 +4575,7 @@ function validateRestoration() {
     frames++;
     ready = true;
     graphicsStatus = "available";
-    releaseModelWarmup();
+    markFirstFrame();
     if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed)
       window.mallLoader?.complete("frame");
     window.__sceneFailed = false;
@@ -4424,7 +4588,7 @@ function validateRestoration() {
     fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.");
   }
 }
-async function installNpcs(T, R, source) {
+async function installNpcs(T, R, prepareModel, source) {
   if (pageEnded || fatal)
     return;
   const enabled = new URLSearchParams(location.search).get("npcs") !== "off";
@@ -4442,7 +4606,8 @@ async function installNpcs(T, R, source) {
       expanded,
       mobile: innerWidth < 1000,
       tier: quality.state?.tier || "balanced",
-      enabled
+      enabled,
+      prepareModel
     };
     const system = source ? createNpcSystem(T, { ...options, source }) : await loadNpcSystem(T, options);
     if (pageEnded || fatal)
@@ -4483,9 +4648,14 @@ async function initialize() {
   physics = new R.World({ x: 0, y: -24, z: 0 });
   physics.timestep = STEP;
   window.mallLoader?.complete("physics");
-  const warmModel = createModelWarmup(T, renderer, firstFrame, () => ready && !fatal && !contextLost);
+  modelWarmup = createModelWarmup(T, renderer);
+  const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
+    linear: () => expanded && quality.state?.tier === "detailed" && renderWidth >= 1000,
+    ...options
+  });
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded, warmModel);
+  const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)
     assetRecords.push(world.productAssets.shelf);
@@ -4544,7 +4714,16 @@ async function initialize() {
         const pack = await loadSeasonalModule(definition);
         if (signal.aborted)
           throw new Error("Theme preparation cancelled");
-        return pack[definition.prepare](T, world.scene, theme, { signal });
+        const stage = pack[definition.prepare](T, world.scene, theme, { signal });
+        if (ready) {
+          try {
+            await prepareModel(stage.group, { signal });
+          } catch (error) {
+            stage.dispose();
+            throw error;
+          }
+        }
+        return stage;
       }, commit(next, previous, stage) {
         try {
           if (!world.applyMallTheme(next) || elevator?.applyMallTheme && !elevator.applyMallTheme(next))
@@ -4584,11 +4763,11 @@ async function initialize() {
   if (mallTheme && !contextLost && !interrupted)
     await mallTheme.restore();
   const { createPlayer } = await import("./assets/player.bundle.js");
-  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded);
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareModel);
   if (player.npcSource)
-    await installNpcs(T, R, player.npcSource);
+    await installNpcs(T, R, prepareModel, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")
-    firstFrame.then(() => installNpcs(T, R));
+    firstFrame.then(() => installNpcs(T, R, prepareModel));
   const { createDOMProjection } = await import("./assets/dom-projection.js");
   const projection = createDOMProjection(T, canvas);
   const { createTargetGuidance } = await import("./assets/target-guidance.js");
@@ -4598,6 +4777,7 @@ async function initialize() {
     T,
     canvas,
     normalCamera: player.camera,
+    getFramingFov: () => player.chaseFov,
     shelves: world.shelves,
     projection,
     onChange: () => {
@@ -4617,9 +4797,11 @@ async function initialize() {
   if (player.state.character.physicalProduct) {
     try {
       const { installPhysicalProductControl } = await import("./assets/visitor-v2-product-ui.js");
-      const previousChildren = new Set(document.getElementById("inspect-prompt").children);
-      productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions);
-      mallHud.connectProductActions(previousChildren);
+      productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions, ui, () => {
+        updateHUD();
+        render();
+      });
+      mallHud.connectProductActions(productControl.actions);
     } catch {}
   }
   if (player.npcSource) {
@@ -4695,7 +4877,7 @@ async function initialize() {
     return;
   if (!renderer.info.render.calls)
     throw new Error("First scene frame unavailable");
-  releaseModelWarmup();
+  markFirstFrame();
   if (expanded && !window.mallLoader?.snapshot().dismissed) {
     initialPreloadStarted = performance.now();
     window.mallLoader?.prepare("Preparing shop models. You can enter now or browse the directory.");
@@ -4716,5 +4898,6 @@ window.addEventListener("pagehide", (event) => {
     mallTheme?.destroy();
     npcs?.dispose();
     player?.dispose?.();
+    modelWarmup?.dispose();
   }
 });
