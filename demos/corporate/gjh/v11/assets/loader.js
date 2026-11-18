@@ -123,6 +123,11 @@ if (typeof document !== 'undefined') {
     document.getElementById('store-list').focus({preventScroll: true});
   });
   window.mallLoader = state;
+  // The 3D mall is a game surface: block text selection and the touch long-press callout, but keep form fields usable.
+  const experienceRoot = document.getElementById('experience');
+  const isField = event => Boolean((event.target.parentElement || event.target).closest?.('input,textarea,select,[contenteditable]'));
+  experienceRoot?.addEventListener('selectstart', event => { if (!isField(event)) event.preventDefault(); });
+  experienceRoot?.addEventListener('contextmenu', event => { if (matchMedia('(pointer: coarse)').matches && !isField(event)) event.preventDefault(); });
   const entrance = document.getElementById('mall-arrivals');
   document.documentElement.classList.add('mall-routing');
   let entryMode = 'arrivals';
