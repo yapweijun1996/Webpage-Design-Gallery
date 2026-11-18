@@ -14,6 +14,7 @@ import {
 import {buildInteriorDecoration,interiorMaterials} from '../demos/corporate/gjh/v11/assets/interiors/decoration.js';
 import {floorFinish} from '../demos/corporate/gjh/v11/assets/interiors/surfaces.js';
 import {createInteriorKit} from '../demos/corporate/gjh/v11/assets/interiors/runtime.js';
+import {registerInteriorWarmup} from '../demos/corporate/gjh/v11/assets/interiors/warmup.js';
 import {createInteriorModelLoader,disposeInteriorModel} from '../demos/corporate/gjh/v11/assets/interiors/models.js';
 
 const assets = new URL('../demos/corporate/gjh/v11/assets/',import.meta.url);
@@ -238,13 +239,13 @@ test('the rotated collider matches the Rapier cuboid', async t => {
   physics.free();
 });
 
-test('lazy kits warm one shop at a time before mounting, including shared Balanced/Detailed files', async () => {
-  const scene = new T.Scene(), queue = [], requests = [], pending = [], colliders = [];
+test('warm registration installs all rooms, reprioritizes remaining work and commits tier changes together', async () => {
+  const scene = new T.Scene(), requests = [], pending = [], colliders = [];
   const modelsByFile = new Map();
+  let clock = 0;
   const runtime = createInteriorKit(T,scene,{
-    schedule:run=>queue.push(run),
+    now:()=>clock,
     registerCollider:box=>colliders.push(box),
-    prepareModel:model=>new Promise(resolve=>pending.push({model,resolve})),
     async loadModel({file}) {
       requests.push(file);
       const model = new T.Group();
@@ -253,46 +254,89 @@ test('lazy kits warm one shop at a time before mounting, including shared Balanc
       return model;
     }
   });
+  const createInstaller = () => ({
+    prepare: (roots,options) => new Promise(resolve => pending.push({roots,options,resolve})),
+    runFrame: () => 0,
+    dispose() {}
+  });
   const go = (store,tier) => {
     const [x,y,z] = store.frame.world_origin_m;
-    runtime.update({x,y,z},tier);
+    runtime.update({x,y,z});
+    runtime.setTier(tier);
   };
-  const start = async () => {
-    const work = queue.shift()();
+  const frame = async () => {
+    clock += 16;
+    runtime.runFrame();
     await Promise.resolve();
-    return {work,upload:pending.shift()};
+    return pending.shift();
   };
+  const complete = async upload => {
+    upload.resolve();
+    await Promise.resolve();
+  };
+  const finishAll = async remaining => {
+    for (let i=0; i<remaining; i++) await complete(await frame());
+  };
+
   assert.equal(colliders.length,stores.reduce((n,store)=>n+store.colliders.length,0));
-  assert.deepEqual(requests,[]);
   const store = interiorStores.S02;
   go(store,'low');
-  assert.equal(queue.length,1);
-  const low = await start();
+  assert.equal(await frame(),undefined);
+  assert.deepEqual(requests,[]);
+  const lowReady = runtime.prepare('low',createInstaller);
+  const low = await frame();
   assert.equal(requests[0],store.files.low.file);
   const first = modelsByFile.get(requests[0]);
+  assert(low.roots.includes(first));
   assert(!scene.getObjectById(first.id));
-  go(store,'balanced');
-  assert.equal(queue.length,0);
-  low.upload.resolve();
-  await low.work;
-  assert(first.visible);
-  const balanced = await start();
-  assert.equal(requests[1],store.files.balanced.file);
-  const second = modelsByFile.get(requests[1]);
-  assert(!scene.getObjectById(second.id));
-  balanced.upload.resolve();
-  await balanced.work;
-  assert(!first.visible && second.visible);
-  go(store,'detailed');
-  const detailed = await start();
-  assert(detailed.upload.model.children.length>0);
-  assert.equal(requests.length,2,'Detailed prepares its own trim using the mounted Balanced GLB');
-  detailed.upload.resolve();
-  await detailed.work;
+  assert.equal(runtime.report().preinstalled.shops,0);
+  go(interiorStores.S17,'low');
+  const second = await frame();
+  assert.equal(requests[1],interiorStores.S17.files.low.file);
+  assert(second.options.priority() < low.options.priority());
+  await complete(second);
+  await complete(low);
+  assert.equal(runtime.report().preinstalled.shops,2);
+  assert.equal(first.parent.visible,false);
   go(store,'low');
-  assert(first.visible && !second.visible);
-  assert.equal(runtime.report().bytes,store.files.low.bytes+store.files.balanced.bytes);
-  assert.equal(runtime.report().modelsLoaded,2);
+  assert(first.parent.visible);
+  await finishAll(15);
+  assert.deepEqual(await lowReady,{shops:17,ms:272});
+  assert.equal(runtime.report().modelsLoaded,17);
+  assert.equal(requests.length,17);
+  go(interiorStores.S01,'low');
+  assert.equal(await frame(),undefined);
+
+  go(store,'balanced');
+  const balanced = await frame();
+  assert.equal(requests.at(-1),store.files.balanced.file);
+  const upgraded = modelsByFile.get(requests.at(-1));
+  assert(!scene.getObjectById(upgraded.id));
+  await complete(balanced);
+  assert.equal(runtime.report().tier,'low');
+  assert(first.visible);
+  assert(!upgraded.visible);
+  await finishAll(16);
+  assert.equal(runtime.report().tier,'balanced');
+  assert(!first.visible);
+  assert(upgraded.visible);
+  assert.equal(runtime.report().modelsLoaded,34);
+
+  go(store,'detailed');
+  const detailed = await frame();
+  assert(detailed.roots.includes(upgraded));
+  assert.equal(requests.length,34);
+  await complete(detailed);
+  assert.equal(runtime.report().tier,'balanced');
+  await finishAll(16);
+  assert.equal(runtime.report().tier,'detailed');
+  assert.equal(runtime.report().preinstalled.shops,17);
+  assert.equal(runtime.report().modelsLoaded,42);
+
+  go(store,'low');
+  assert(first.visible);
+  assert(!upgraded.visible);
+  assert.equal(await frame(),undefined);
   runtime.beginFrame();
   const fakeRenderer = {info:{render:{calls:5,triangles:600}}};
   first.children[0].onBeforeRender(fakeRenderer);
@@ -300,9 +344,76 @@ test('lazy kits warm one shop at a time before mounting, including shared Balanc
   fakeRenderer.info.render.triangles+=12;
   first.children[0].onAfterRender(fakeRenderer);
   runtime.endFrame();
-  assert.deepEqual(runtime.report(),{tier:'low',shops:1,drawCalls:1,triangles:12,modelsLoaded:2,
-    bytes:store.files.low.bytes+store.files.balanced.bytes});
+  assert.deepEqual(runtime.report(),{tier:'low',shops:1,drawCalls:1,triangles:12,modelsLoaded:42,
+    bytes:manifest.assets.reduce((sum,asset)=>sum+asset.bytes,0),preinstalled:{shops:17,ms:0}});
+
+  runtime.invalidate();
+  go(store,'low');
+  assert(!first.parent.visible);
+  const restored = await frame();
+  assert(restored.roots.includes(first));
+  assert.equal(requests.length,42);
+  await complete(restored);
+  assert(first.parent.visible);
   runtime.dispose();
+});
+
+test('registration waits for the shared upload, all lighting variants and the GPU fence', async t => {
+  const scene = new T.Scene(), accent = new T.PointLight(), fixed = new T.DirectionalLight();
+  fixed.castShadow = true;
+  scene.add(accent,fixed);
+  const compiled = new Set();
+  let target = null, uploadRelease, firstFence = false, deleted = 0;
+  const gl = {
+    SYNC_GPU_COMMANDS_COMPLETE:1, TIMEOUT_EXPIRED:2, CONDITION_SATISFIED:3, WAIT_FAILED:4,
+    isContextLost:()=>false, flush() {},
+    fenceSync:()=>({}), clientWaitSync:()=>firstFence ? 3 : 2, deleteSync() { deleted++; }
+  };
+  const renderer = {
+    shadowMap:{enabled:false}, extensions:{has:()=>false}, getContext:()=>gl,
+    getRenderTarget:()=>target, getActiveCubeFace:()=>0, getActiveMipmapLevel:()=>0,
+    setRenderTarget(value) { target = value; },
+    compile(geometry, camera, lighting) {
+      if (geometry.children.some(root=>root.name.startsWith('S09 '))) {
+        compiled.add([Boolean(target),this.shadowMap.enabled,lighting.children.length].join('/'));
+      }
+      return new Set();
+    }
+  };
+  const runtime = createInteriorKit(T,scene,{
+    registerCollider() {},
+    prepareModel(roots,{linear,late}) {
+      assert(linear());
+      assert.equal(late,false);
+      if (roots.some(root=>root.name.startsWith('S09 '))) return new Promise(resolve=>{ uploadRelease = resolve; });
+      return Promise.resolve();
+    },
+    async loadModel() {
+      const model = new T.Group();
+      model.add(new T.Mesh(new T.BoxGeometry(),new T.MeshStandardMaterial()));
+      return model;
+    }
+  });
+  t.after(()=>runtime.dispose());
+  const [x,y,z] = interiorStores.S09.frame.world_origin_m;
+  runtime.update({x,y,z});
+  const done = registerInteriorWarmup(runtime,{T,renderer,scene,tier:'detailed',lights:{accents:[accent],limit:1}});
+  const frame = async () => { runtime.runFrame(); await new Promise(resolve=>setImmediate(resolve)); };
+  for (let i=0; i<12; i++) await frame();
+  assert.deepEqual([...compiled].sort(),['false/false/1','false/false/2','true/true/1','true/true/2']);
+  assert.equal(target,null);
+  assert.equal(renderer.shadowMap.enabled,false);
+  const room = scene.children.find(group=>group.name.startsWith('S09 '));
+  assert.equal(room.visible,false);
+
+  uploadRelease();
+  for (let i=0; i<4; i++) await frame();
+  assert.equal(room.visible,false);
+  firstFence = true;
+  for (let i=0; i<150; i++) await frame();
+  assert.equal((await done).shops,17);
+  assert.equal(deleted,17);
+  assert(room.visible);
 });
 
 test('studio substitution retains the exact authored collision boxes', async t => {

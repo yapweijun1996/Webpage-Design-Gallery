@@ -5377,40 +5377,37 @@ function disposeInteriorModel(model) {
 }
 
 // demos/corporate/gjh/v11/assets/interiors/warmup.js
-function prepareInteriorKit(prepareModel, model, priority, signal) {
-  return prepareModel(model, { priority, signal });
-}
+var emptyInteriorReport = (tier) => ({
+  tier,
+  shops: 0,
+  drawCalls: 0,
+  triangles: 0,
+  modelsLoaded: 0,
+  bytes: 0,
+  preinstalled: { shops: 0, ms: 0 }
+});
 
 // demos/corporate/gjh/v11/assets/interiors/runtime.js
-var emptyInteriorReport = (tier) => ({ tier, shops: 0, drawCalls: 0, triangles: 0, modelsLoaded: 0, bytes: 0 });
 function createInteriorKit(T, scene, {
   assetBase: assetBase2,
   packshot,
   prepareModel,
   registerCollider,
   loadModel = createInteriorModelLoader(T, assetBase2),
-  schedule = (run) => {
-    if (typeof requestIdleCallback === "function")
-      requestIdleCallback(run, { timeout: 500 });
-    else
-      setTimeout(run, 0);
-  }
+  now = () => performance.now()
 }) {
   const materials2 = interiorMaterials(T);
-  const stores2 = Object.values(interiorStores);
-  const cache = new Map, failed = new Map;
-  const lifecycle = new AbortController;
   const report = emptyInteriorReport("low"), renderedShops = new Set;
-  let queued = false, loading = false, drawing = false;
+  let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
   function measure(root, id) {
     root.traverse((mesh) => {
       if (!mesh.isMesh)
         return;
+      mesh.geometry.computeBoundingSphere();
       let calls, triangles;
       mesh.onBeforeRender = (renderer) => {
-        if (!drawing)
-          return;
-        ({ calls, triangles } = renderer.info.render);
+        if (drawing)
+          ({ calls, triangles } = renderer.info.render);
       };
       mesh.onAfterRender = (renderer) => {
         if (!drawing)
@@ -5421,125 +5418,181 @@ function createInteriorKit(T, scene, {
       };
     });
   }
-  const shops = stores2.map((store2) => {
+  function decoration(store2, detail) {
+    const base = buildInteriorDecoration(T, store2, materials2, detail);
+    if (detail || store2.id !== "S01" || !packshot)
+      return base;
+    const photo = new T.MeshBasicMaterial({ map: packshot, toneMapped: false });
+    const panel = (width, x2, y2, z2, yaw = 0) => {
+      const mesh = new T.Mesh(new T.PlaneGeometry(width, width), photo);
+      mesh.position.set(x2, y2, z2);
+      mesh.rotation.y = yaw;
+      base.add(mesh);
+    };
+    const [x, y, z] = store2.anchor.position_m;
+    panel(1.51, x, y + 1.1, z + 0.006);
+    const stand = store2.props.find((prop) => prop.kind === "photo");
+    const [sx, sy, sz] = stand.position_m, a = radians(stand.yaw_deg);
+    panel(0.69, sx + 0.053 * Math.sin(a), sy + stand.envelope_whd_m[1] - 0.4, sz + 0.053 * Math.cos(a), a);
+    return base;
+  }
+  const shops = Object.values(interiorStores).map((store2) => {
     const group = new T.Group;
     group.name = `${store2.id} ${store2.style}`;
     group.position.set(...store2.frame.world_origin_m);
     group.rotation.y = radians(store2.frame.yaw_world_deg);
-    const base = buildInteriorDecoration(T, store2, materials2);
-    if (store2.id === "S01" && packshot) {
-      const photo = new T.MeshBasicMaterial({ map: packshot, toneMapped: false });
-      const panel = (width, x2, y2, z2, yaw = 0) => {
-        const mesh = new T.Mesh(new T.PlaneGeometry(width, width), photo);
-        mesh.position.set(x2, y2, z2);
-        mesh.rotation.y = yaw;
-        base.add(mesh);
-      };
-      const [x, y, z] = store2.anchor.position_m;
-      panel(1.51, x, y + 1.1, z + 0.006);
-      const stand = store2.props.find((prop) => prop.kind === "photo");
-      const [sx, sy, sz] = stand.position_m, a = radians(stand.yaw_deg);
-      panel(0.69, sx + 0.053 * Math.sin(a), sy + stand.envelope_whd_m[1] - 0.4, sz + 0.053 * Math.cos(a), a);
-    }
-    measure(base, store2.id);
-    group.add(base);
     for (const box of store2.colliders)
       registerCollider(worldInteriorBox(store2, box));
     group.visible = false;
     scene.add(group);
-    return { store: store2, group, distance: Infinity, model: null, layers: [] };
+    return { store: store2, group, distance: Infinity, near: false, models: new Map, layers: [], ready: new Map, shown: null };
   });
-  function choose(shop) {
-    const asset = interiorAsset(shop.store, report.tier);
-    const model = cache.get(asset.file) ?? (report.tier === "detailed" ? cache.get(shop.store.files.balanced.file) : undefined) ?? cache.get(shop.store.files.low.file);
-    if (shop.model)
-      shop.model.visible = false;
-    if (model)
-      model.visible = true;
-    shop.model = model;
-    shop.layers.forEach((layer, i) => {
-      layer.visible = i < interiorTiers.indexOf(report.tier);
-    });
+  function show(shop, roots) {
+    for (const root of shop.shown ?? [])
+      root.visible = false;
+    for (const root of roots)
+      root.visible = true;
+    shop.shown = roots;
+    shop.group.visible = shop.near;
   }
-  function nextRequest() {
-    const detail = interiorTiers.indexOf(report.tier);
-    const now = Date.now();
-    let next;
-    for (const shop of shops) {
-      if (!shop.group.visible || next && shop.distance >= next.shop.distance)
-        continue;
-      const asset = interiorAsset(shop.store, report.tier);
-      if (cache.has(asset.file) && shop.layers.length >= detail || (failed.get(asset.file) ?? 0) > now)
-        continue;
-      next = { shop, asset };
-    }
-    return next;
-  }
-  function prefetch() {
-    if (!prepareModel || queued || loading || !nextRequest() || lifecycle.signal.aborted)
+  function finish2(job) {
+    if (job.remaining)
       return;
-    queued = true;
-    schedule(async () => {
-      queued = false;
-      if (globalThis.document?.hidden || lifecycle.signal.aborted)
-        return;
-      const request = nextRequest();
-      if (!request)
-        return;
-      const { shop, asset } = request;
-      const detail = interiorTiers.indexOf(report.tier);
-      loading = true;
-      let model;
-      const layers = [];
+    const { tier } = job;
+    const complete = report.preinstalled.shops === shops.length;
+    if (complete) {
+      activeTier = tier;
+      for (const shop of shops) {
+        show(shop, shop.ready.get(tier));
+      }
+      report.tier = tier;
+    }
+    job.retryAt = complete ? Infinity : now() + 15000;
+    job.resolve({ ...report.preinstalled });
+  }
+  function start(tier) {
+    initialTier ??= tier;
+    if (request) {
+      request.controller.abort();
+      request.resolve({ ...report.preinstalled });
+    }
+    const controller = new AbortController, started = now();
+    const waiting = shops.filter((shop) => !shop.ready.has(tier));
+    report.preinstalled = { shops: shops.length - waiting.length, ms: 0 };
+    const job = { tier, controller, started, waiting, remaining: waiting.length, retryAt: Infinity };
+    job.done = new Promise((resolve) => {
+      job.resolve = resolve;
+    });
+    request = job;
+    finish2(job);
+    return job;
+  }
+  function awaitLatest(job) {
+    return job.done.then((result) => request && request !== job ? awaitLatest(request) : result);
+  }
+  async function stage(shop, job) {
+    const { tier, controller: { signal } } = job;
+    const asset = interiorAsset(shop.store, tier), detail = interiorTiers.indexOf(tier);
+    const priority = () => shop.distance - 200;
+    let model = shop.models.get(asset.file), freshModel;
+    const freshLayers = [];
+    try {
       try {
-        if (!cache.has(asset.file)) {
-          model = await loadModel(asset, lifecycle.signal);
-          if (lifecycle.signal.aborted) {
-            disposeInteriorModel(model);
-            return;
-          }
+        if (!model)
+          freshModel = model = await loadModel(asset, signal);
+        if (signal.aborted)
+          return;
+        if (freshModel) {
           model.name = `${shop.store.id} ${shop.store.anchor.asset_id} (${asset.tier})`;
           model.position.set(...shop.store.anchor.position_m);
           model.rotation.y = radians(shop.store.anchor.yaw_deg);
-          model.visible = false;
         }
-        for (let i = shop.layers.length;i < detail; i++)
-          layers.push(buildInteriorDecoration(T, shop.store, materials2, i + 1));
-        const roots = model ? [model, ...layers] : layers;
-        const kit = new T.Group;
-        kit.add(...roots);
-        const priority = () => shop.distance + (interiorAsset(shop.store, report.tier) === asset ? -24 : 40);
-        await prepareInteriorKit(prepareModel, kit, priority, lifecycle.signal);
-        for (const root of roots)
-          measure(root, shop.store.id);
-        shop.group.add(...roots);
-        shop.layers.push(...layers);
-        if (model) {
-          cache.set(asset.file, model);
-          report.modelsLoaded++;
-          report.bytes += asset.bytes;
-        }
-        choose(shop);
       } catch {
-        disposeInteriorModel(model);
-        for (const layer of layers)
-          layer.traverse((mesh) => mesh.geometry?.dispose());
-        failed.set(asset.file, Date.now() + 15000);
+        if (signal.aborted)
+          return;
       } finally {
-        loading = false;
-        prefetch();
+        decoding = false;
       }
-    });
+      for (let i = shop.layers.length;i <= detail; i++)
+        freshLayers.push(decoration(shop.store, i));
+      const fresh = [...freshLayers, ...freshModel ? [freshModel] : []];
+      for (const root of fresh)
+        measure(root, shop.store.id);
+      const roots = [...shop.layers.slice(0, detail + 1), ...freshLayers, ...model ? [model] : []];
+      await installer.prepare(roots, { tier, priority, signal, prepareModel });
+      if (signal.aborted)
+        return;
+      for (const root of fresh) {
+        root.visible = false;
+        shop.group.add(root);
+      }
+      shop.layers.push(...freshLayers);
+      if (freshModel) {
+        shop.models.set(asset.file, freshModel);
+        report.modelsLoaded++;
+        report.bytes += asset.bytes;
+      }
+      freshModel = undefined;
+      freshLayers.length = 0;
+      if (model) {
+        shop.ready.set(tier, roots);
+        report.preinstalled.shops++;
+      }
+      if (!activeTier && tier === initialTier) {
+        report.tier = tier;
+        show(shop, roots);
+      }
+    } catch {} finally {
+      disposeInteriorModel(freshModel);
+      for (const layer of freshLayers)
+        layer.traverse((mesh) => {
+          mesh.geometry?.dispose();
+          if (mesh.material?.map === packshot && packshot)
+            mesh.material.dispose();
+        });
+      if (!signal.aborted) {
+        job.remaining--;
+        report.preinstalled.ms = Math.round(now() - job.started);
+        finish2(job);
+      }
+    }
   }
   return {
-    update(position, tier) {
-      report.tier = interiorTiers.includes(tier) ? tier : "low";
+    prepare(tier, createInstaller) {
+      installer ??= createInstaller();
+      return awaitLatest(request?.tier === tier ? request : start(tier));
+    },
+    setTier(tier) {
+      const target = interiorTiers.includes(tier) ? tier : "low";
+      if (installer && !disposed && request?.tier !== target)
+        start(target);
+    },
+    update(position) {
       for (const shop of shops) {
         shop.distance = Math.hypot(position.x - shop.group.position.x, position.z - shop.group.position.z);
-        shop.group.visible = Math.abs(position.y) < 4 && shop.distance < 12.5;
-        choose(shop);
+        shop.near = Math.abs(position.y) < 4 && shop.distance < 12.5;
+        shop.group.visible = shop.shown !== null && shop.near;
       }
-      prefetch();
+    },
+    runFrame() {
+      if (!request || disposed)
+        return 0;
+      if (now() >= request.retryAt)
+        start(request.tier);
+      const { waiting } = request;
+      if (!decoding && waiting.length) {
+        let nearest = 0;
+        for (let i = 1;i < waiting.length; i++)
+          if (waiting[i].distance < waiting[nearest].distance)
+            nearest = i;
+        const [shop] = waiting.splice(nearest, 1);
+        decoding = true;
+        stage(shop, request);
+      }
+      return installer.runFrame();
+    },
+    get activeTier() {
+      return activeTier;
     },
     beginFrame() {
       report.drawCalls = report.triangles = 0;
@@ -5550,9 +5603,23 @@ function createInteriorKit(T, scene, {
       drawing = false;
       report.shops = renderedShops.size;
     },
-    report: () => ({ ...report }),
+    report: () => ({ ...report, preinstalled: { ...report.preinstalled } }),
+    invalidate() {
+      request?.controller.abort();
+      request?.resolve({ ...report.preinstalled });
+      request = initialTier = activeTier = undefined;
+      report.preinstalled = { shops: 0, ms: 0 };
+      for (const shop of shops) {
+        shop.ready.clear();
+        shop.shown = null;
+        shop.group.visible = false;
+      }
+    },
     dispose() {
-      lifecycle.abort();
+      disposed = true;
+      request?.controller.abort();
+      request?.resolve({ ...report.preinstalled });
+      installer?.dispose();
     }
   };
 }
@@ -5921,7 +5988,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         return;
       uploadVisitor = visitor;
       productDisplay?.updateShopLods(visitor, tier);
-      interiorKit.update(visitor, tier);
+      interiorKit.update(visitor);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
         const bay = shopBays.get(mesh.userData.shopSlot);

@@ -971,7 +971,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     if(!expanded)return;
     uploadVisitor = visitor;
     productDisplay?.updateShopLods(visitor, tier);
-    interiorKit.update(visitor,tier);
+    interiorKit.update(visitor);
     const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
     for(const mesh of shopLodMeshes){
       const bay=shopBays.get(mesh.userData.shopSlot);

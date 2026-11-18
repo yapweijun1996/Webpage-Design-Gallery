@@ -10,6 +10,7 @@ import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/ex
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, prepareScene} from './assets/scene-warmup.js';
+import {emptyInteriorReport,registerInteriorWarmup} from './assets/interiors/warmup.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
@@ -79,7 +80,7 @@ function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
     signage: world?.signage?.report() ?? {modelsLoaded:0,signs:0,drawCalls:0,triangles:0,textureMB:0,tier:quality.state?.tier??'low'},
-    interiors: world?.interiors?.report() ?? {tier:quality.state?.tier??'low',shops:0,drawCalls:0,triangles:0,modelsLoaded:0,bytes:0},
+    interiors: world?.interiors?.report() ?? emptyInteriorReport(quality.state?.tier ?? 'low'),
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
@@ -310,13 +311,19 @@ function render(force = false) {
       shelfFocus?.update(camera, true, true);
       guidance?.update(selectedInteraction, label, camera, true);
     }
-    world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
+    const tier = quality.state?.tier;
+    const detailed = expanded && tier === 'detailed' && renderWidth >= 1000;
+    // Retain the direct pass until the Detailed interiors have their linear
+    // programs. A downgrade can use the already warmed direct pass immediately.
+    const detailedReady = detailed && world.interiors?.activeTier === 'detailed';
+    if (expanded) renderer.shadowMap.enabled = detailedReady;
+    world.updateShopLods(pose, renderer.shadowMap.enabled, tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas, quality.state?.tier, reducedMotion);
     const draw=()=>{
       world.interiors?.beginFrame();
       try {
-        atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === 'detailed' && renderWidth >= 1000, npcs);
+        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs);
       } finally { world.interiors?.endFrame(); }
     };
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
@@ -355,21 +362,29 @@ function advanceStartupWarm() {
   if (initialPreloadStarted !== null) return false;
   if (loader.snapshot().stage === 'frame') loader.complete('frame');
   if (loader.snapshot().stage !== 'warm') return false;
-  if (loader.skipSignal.aborted) {
-    warmReport.skipped = true;
-    warmReport.reason = loader.skipSignal.reason;
-    loader.complete('warm');
-    return false;
-  }
-  if (warmRunner) warmRunner.runFrame();
-  else {
+  if (!warmRunner) {
     const tier = quality.state.tier;
+    let interiorsReady = false;
+    const interiors = registerInteriorWarmup(world.interiors, {
+      T:three,renderer,scene:world.scene,lights:atmosphere.interiorWarmLights,tier
+    });
+    void interiors.then(() => { interiorsReady = true; });
+    if (loader.skipSignal.aborted) {
+      warmReport.skipped = true;
+      warmReport.reason = loader.skipSignal.reason;
+      loader.complete('warm');
+      return false;
+    }
     warmReport = createWarmReport();
     warmReport.reason = 'running';
-    const work = prepareScene({T:three, renderer, scene:world.scene, camera:player.camera,
+    const sceneWork = prepareScene({T:three, renderer, scene:world.scene, camera:player.camera,
       expanded, elevator, detailed:expanded && tier === 'detailed' && renderWidth >= 1000,
       updateLights:atmosphere.update, initTexture:modelWarmup.initTexture}, warmReport);
-    warmRunner = createWarmRunner(work, warmReport, {
+    function* work() {
+      yield* sceneWork;
+      while (!interiorsReady) yield false;
+    }
+    warmRunner = createWarmRunner(work(), warmReport, {
       budgetMs:tier === 'low' ? 8 : tier === 'balanced' ? 10 : 12,
       signal:loader.skipSignal,
       lost:() => renderer.getContext().isContextLost(),
@@ -379,6 +394,16 @@ function advanceStartupWarm() {
       }
     });
   }
+  // Scene warm-up needs the final profile even when live rendering is still
+  // waiting for the Detailed interior set.
+  const shadows = renderer.shadowMap.enabled;
+  try {
+    renderer.shadowMap.enabled = quality.state.shadows;
+    warmRunner.runFrame();
+  } finally {
+    renderer.shadowMap.enabled = shadows;
+  }
+  if (warmRunner) warmModels(player.state);
   return true;
 }
 function warmModels(pose) {
@@ -386,8 +411,11 @@ function warmModels(pose) {
   const {physicalProduct, collection} = pose.character;
   const stableSeat = pose.seatPhase === 'idle' || pose.seatPhase === 'seated';
   const stableProduct = !physicalProduct || ['empty','held'].includes(physicalProduct.phase);
-  return modelWarmup.runFrame(stableSeat && stableProduct && !pose.elevatorTravel &&
-    !pose.productApproaching && !collection.active);
+  if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active) return 0;
+  const started = performance.now();
+  world.interiors?.runFrame();
+  modelWarmup.runFrame(true);
+  return performance.now() - started;
 }
 function animate(now) {
   frame = 0;
@@ -457,7 +485,7 @@ function animate(now) {
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
-  if (terminal) { fatal = true; graphicsStatus = 'failed'; modelWarmup?.dispose(); markFirstFrame(); }
+  if (terminal) { fatal = true; graphicsStatus = 'failed'; world?.interiors?.dispose(); modelWarmup?.dispose(); markFirstFrame(); }
   pausePerformance();
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
@@ -491,6 +519,7 @@ canvas.addEventListener('webglcontextlost', event => {
   window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
   warmRunner?.stop('context-loss');
+  world?.interiors?.invalidate();
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   // Retire the reflection target and NPC bone textures against their original context.
@@ -525,12 +554,13 @@ function resize() {
   viewportWidth = innerWidth; viewportHeight = innerHeight;
   if (!width || !height) return;
   const profile = quality.resolve(width);
+  world.interiors?.setTier(profile.tier);
   npcs?.setQuality({tier:profile.tier,mobile:width<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
   if (!contextLost) {
     if (resized || renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
       renderer.setPixelRatio(profile.pixelRatio); renderer.setSize(width, height, false);
     }
-    renderer.shadowMap.enabled = profile.shadows;
+    if (!expanded) renderer.shadowMap.enabled = profile.shadows;
   }
   if (resized) {
     renderWidth = width; renderHeight = height;

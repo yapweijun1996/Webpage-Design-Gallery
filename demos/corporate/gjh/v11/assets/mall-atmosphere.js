@@ -17,7 +17,7 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
   }
   applyTheme(null);
   // Reuse the same small candidate array and keep no more than six lights active.
-  const nearest = [];
+  const nearest = [], lightLimit = 6;
   function update(position) {
     nearest.length = 0;
     for (const entry of lights) {
@@ -27,7 +27,7 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
       if (entry.distance < 24*24 && Math.abs(position.y) < 6) nearest.push(entry);
     }
     nearest.sort((a,b)=>a.distance-b.distance);
-    for (let i=0;i<Math.min(6,nearest.length);i++) nearest[i].light.visible=true;
+    for (let i=0;i<Math.min(lightLimit,nearest.length);i++) nearest[i].light.visible=true;
   }
 
   let environment = null;
@@ -136,5 +136,5 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.setRenderTarget(target); renderer.info.autoReset=autoReset; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
     }
   }
-  return {update,applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
+  return {update,interiorWarmLights:{accents:lights.map(({light}) => light),limit:lightLimit},applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
 }

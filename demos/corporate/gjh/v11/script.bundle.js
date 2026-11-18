@@ -2988,7 +2988,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       light.color.copy(warm).lerp(accent, 0.08);
   }
   applyTheme(null);
-  const nearest = [];
+  const nearest = [], lightLimit = 6;
   function update(position) {
     nearest.length = 0;
     for (const entry of lights) {
@@ -2999,7 +2999,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
         nearest.push(entry);
     }
     nearest.sort((a, b) => a.distance - b.distance);
-    for (let i = 0;i < Math.min(6, nearest.length); i++)
+    for (let i = 0;i < Math.min(lightLimit, nearest.length); i++)
       nearest[i].light.visible = true;
   }
   let environment = null;
@@ -3149,7 +3149,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.shadowMap.autoUpdate = shadowAutoUpdate;
     }
   }
-  return { update, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
+  return { update, interiorWarmLights: { accents: lights.map(({ light }) => light), limit: lightLimit }, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
     return state;
   } };
 }
@@ -3705,6 +3705,108 @@ function* prepareScene({
   }
 }
 
+// demos/corporate/gjh/v11/assets/interiors/warmup.js
+var emptyInteriorReport = (tier) => ({
+  tier,
+  shops: 0,
+  drawCalls: 0,
+  triangles: 0,
+  modelsLoaded: 0,
+  bytes: 0,
+  preinstalled: { shops: 0, ms: 0 }
+});
+function registerInteriorWarmup(interiors, { T, renderer, scene, lights, tier }) {
+  return interiors?.prepare(tier, () => createInstaller(T, renderer, scene, lights)) ?? Promise.resolve();
+}
+function createInstaller(T, renderer, scene, { accents, limit }) {
+  const queue = createUploadScheduler({ budgetMs: 2 });
+  const staging = new T.Scene, lighting = new T.Scene, camera = new T.PerspectiveCamera;
+  const target = new T.WebGLRenderTarget(1, 1);
+  const accentSet = new Set(accents);
+  const fixed = scene.children.filter((node) => node.isLight && !accentSet.has(node)).map((light) => light.clone());
+  const variable = accents.slice(0, limit).map((light) => {
+    const copy = light.clone();
+    copy.visible = true;
+    return copy;
+  });
+  function compile(roots, count, linear, programs) {
+    const previous = renderer.getRenderTarget(), shadows = renderer.shadowMap.enabled;
+    const face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
+    try {
+      staging.children = roots;
+      lighting.children = [...fixed, ...variable.slice(0, count)];
+      lighting.environment = scene.environment;
+      lighting.fog = scene.fog;
+      renderer.shadowMap.enabled = linear;
+      renderer.setRenderTarget(linear ? target : null);
+      const materials = renderer.compile(staging, camera, lighting);
+      if (renderer.extensions.has("KHR_parallel_shader_compile")) {
+        for (const material of materials)
+          programs.add(renderer.properties.get(material).currentProgram);
+      }
+    } finally {
+      staging.children = lighting.children = [];
+      renderer.shadowMap.enabled = shadows;
+      renderer.setRenderTarget(previous, face, mip);
+    }
+  }
+  async function prepare(roots, { tier, priority, signal, prepareModel }) {
+    const linear = () => tier === "detailed";
+    const options = { priority, signal, late: false };
+    const results = await Promise.allSettled([
+      prepareModel(roots, { ...options, linear }),
+      queue.enqueue(function* () {
+        const programs = new Set;
+        for (const output of linear() ? [false, true] : [false]) {
+          for (let count = 0;count <= variable.length; count++)
+            yield () => compile(roots, count, output, programs);
+        }
+        for (const program of programs)
+          while (!program.isReady())
+            yield () => false;
+      }, options)
+    ]);
+    for (const result of results)
+      if (result.status === "rejected")
+        throw result.reason;
+    const gl = renderer.getContext();
+    let fence;
+    try {
+      await queue.enqueue(function* () {
+        yield () => {
+          fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+          if (!fence)
+            throw new Error("Unable to fence interior kit uploads");
+          gl.flush();
+          return false;
+        };
+        let status;
+        do {
+          yield () => {
+            status = gl.clientWaitSync(fence, 0, 0);
+            return status !== gl.TIMEOUT_EXPIRED;
+          };
+        } while (status === gl.TIMEOUT_EXPIRED);
+        if (status === gl.WAIT_FAILED)
+          throw new Error("Interior kit GPU fence failed");
+      }, options);
+    } finally {
+      if (fence && !gl.isContextLost())
+        gl.deleteSync(fence);
+    }
+  }
+  return {
+    prepare,
+    runFrame() {
+      return queue.runFrame(!renderer.getContext().isContextLost());
+    },
+    dispose() {
+      queue.dispose();
+      target.dispose();
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/auto-door.js
 function shouldOpenStoreDoor(door, player) {
   return player.y < 2 && Math.hypot(player.x - door.x, player.z) < (door.targetOpen ? 5.2 : 4.8);
@@ -4233,7 +4335,7 @@ function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
     signage: world?.signage?.report() ?? { modelsLoaded: 0, signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, tier: quality.state?.tier ?? "low" },
-    interiors: world?.interiors?.report() ?? { tier: quality.state?.tier ?? "low", shops: 0, drawCalls: 0, triangles: 0, modelsLoaded: 0, bytes: 0 },
+    interiors: world?.interiors?.report() ?? emptyInteriorReport(quality.state?.tier ?? "low"),
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
@@ -4570,13 +4672,18 @@ function render(force = false) {
       shelfFocus?.update(camera, true, true);
       guidance?.update(selectedInteraction, label, camera, true);
     }
-    world.updateShopLods(pose, renderer.shadowMap.enabled, quality.state?.tier);
+    const tier = quality.state?.tier;
+    const detailed = expanded && tier === "detailed" && renderWidth >= 1000;
+    const detailedReady = detailed && world.interiors?.activeTier === "detailed";
+    if (expanded)
+      renderer.shadowMap.enabled = detailedReady;
+    world.updateShopLods(pose, renderer.shadowMap.enabled, tier);
     atmosphere?.update(pose);
     world.updateSigns(camera, canvas, quality.state?.tier, reducedMotion2);
     const draw = () => {
       world.interiors?.beginFrame();
       try {
-        atmosphere.render(camera, expanded && Math.abs(pose.y) < 5 && quality.state?.tier === "detailed" && renderWidth >= 1000, npcs);
+        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs);
       } finally {
         world.interiors?.endFrame();
       }
@@ -4628,19 +4735,28 @@ function advanceStartupWarm() {
     loader.complete("frame");
   if (loader.snapshot().stage !== "warm")
     return false;
-  if (loader.skipSignal.aborted) {
-    warmReport.skipped = true;
-    warmReport.reason = loader.skipSignal.reason;
-    loader.complete("warm");
-    return false;
-  }
-  if (warmRunner)
-    warmRunner.runFrame();
-  else {
+  if (!warmRunner) {
     const tier = quality.state.tier;
+    let interiorsReady = false;
+    const interiors = registerInteriorWarmup(world.interiors, {
+      T: three,
+      renderer,
+      scene: world.scene,
+      lights: atmosphere.interiorWarmLights,
+      tier
+    });
+    interiors.then(() => {
+      interiorsReady = true;
+    });
+    if (loader.skipSignal.aborted) {
+      warmReport.skipped = true;
+      warmReport.reason = loader.skipSignal.reason;
+      loader.complete("warm");
+      return false;
+    }
     warmReport = createWarmReport();
     warmReport.reason = "running";
-    const work = prepareScene({
+    const sceneWork = prepareScene({
       T: three,
       renderer,
       scene: world.scene,
@@ -4651,7 +4767,12 @@ function advanceStartupWarm() {
       updateLights: atmosphere.update,
       initTexture: modelWarmup.initTexture
     }, warmReport);
-    warmRunner = createWarmRunner(work, warmReport, {
+    function* work() {
+      yield* sceneWork;
+      while (!interiorsReady)
+        yield false;
+    }
+    warmRunner = createWarmRunner(work(), warmReport, {
       budgetMs: tier === "low" ? 8 : tier === "balanced" ? 10 : 12,
       signal: loader.skipSignal,
       lost: () => renderer.getContext().isContextLost(),
@@ -4662,6 +4783,15 @@ function advanceStartupWarm() {
       }
     });
   }
+  const shadows = renderer.shadowMap.enabled;
+  try {
+    renderer.shadowMap.enabled = quality.state.shadows;
+    warmRunner.runFrame();
+  } finally {
+    renderer.shadowMap.enabled = shadows;
+  }
+  if (warmRunner)
+    warmModels(player.state);
   return true;
 }
 function warmModels(pose) {
@@ -4670,7 +4800,12 @@ function warmModels(pose) {
   const { physicalProduct, collection } = pose.character;
   const stableSeat = pose.seatPhase === "idle" || pose.seatPhase === "seated";
   const stableProduct = !physicalProduct || ["empty", "held"].includes(physicalProduct.phase);
-  return modelWarmup.runFrame(stableSeat && stableProduct && !pose.elevatorTravel && !pose.productApproaching && !collection.active);
+  if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active)
+    return 0;
+  const started = performance.now();
+  world.interiors?.runFrame();
+  modelWarmup.runFrame(true);
+  return performance.now() - started;
 }
 function animate(now) {
   frame = 0;
@@ -4762,6 +4897,7 @@ function fallback(message, terminal = true) {
   if (terminal) {
     fatal = true;
     graphicsStatus = "failed";
+    world?.interiors?.dispose();
     modelWarmup?.dispose();
     markFirstFrame();
   }
@@ -4880,6 +5016,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   restorePending = true;
   losses++;
   warmRunner?.stop("context-loss");
+  world?.interiors?.invalidate();
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   atmosphere?.releaseEnvironment();
@@ -4923,13 +5060,15 @@ function resize() {
   if (!width || !height)
     return;
   const profile = quality.resolve(width);
+  world.interiors?.setTier(profile.tier);
   npcs?.setQuality({ tier: profile.tier, mobile: width < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
   if (!contextLost) {
     if (resized || renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
       renderer.setPixelRatio(profile.pixelRatio);
       renderer.setSize(width, height, false);
     }
-    renderer.shadowMap.enabled = profile.shadows;
+    if (!expanded)
+      renderer.shadowMap.enabled = profile.shadows;
   }
   if (resized) {
     renderWidth = width;
