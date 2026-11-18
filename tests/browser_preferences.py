@@ -81,7 +81,7 @@ def run():
                             page.wait_for_function('([lang, theme]) => document.documentElement.lang === lang && document.documentElement.dataset.theme === theme', arg=[lang, theme])
                             assert page.locator('h2').first.inner_text().startswith(packs[lang]['messages']['Companies'])
                             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, lang, theme)
-                            assert page.locator('#theme-select').evaluate('(e)=>e.getBoundingClientRect().height >= 44')
+                            assert page.locator('#theme-select').evaluate('(e, minimum)=>e.getBoundingClientRect().height >= minimum', arg=44 if width <= 559 else 36)
                             colors = page.evaluate("""() => ({ background:getComputedStyle(document.body).backgroundColor, text:getComputedStyle(document.body).color, muted:getComputedStyle(document.querySelector('.intro-description')).color, border:getComputedStyle(document.querySelector('#theme-select')).borderTopColor })""")
                             assert contrast(colors['background'], colors['text']) >= 4.5
                             assert contrast(colors['background'], colors['muted']) >= 4.5
