@@ -678,6 +678,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       const cover = art('new-moon-brand-cover.jpg', x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
       box('brass', x - 4.665, 2.8, -5.8, .035, cover.scale.y + .14, 3.74);
       box('oak', x - 4.67, 2.8, -5.8, .04, cover.scale.y + .28, 3.88);
+      let sampleCan = null;
       if (expanded) {
         // Rounded stone sampling island with a continuous brass plinth.
         for (const [material, y, height, radius] of [['brass',.085,.17,.76],['shellFloor',.63,.96,.78],['ivory',1.14,.09,.80]]) {
@@ -686,6 +687,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         }
         collider(x+2.65,.57,-4,1.56,1.14,3.30);
         const top = 1.185;
+        sampleCan = [x+2.65, top, -3.05];
         furnishings.place('teaKettle',x+2.8,-4.55,1,1,top,-.45,activeShopSlot);
         for (const [dx,dz] of [[-.35,.54],[.15,.73],[-.29,-.05]]) {
           furnishings.place('teaCup',x+2.65+dx,-4+dz,1,1,top,.2,activeShopSlot);
@@ -701,7 +703,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       const {addProducts} = await import('./products.js');
       const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
       const firstProduct = scene.children.length;
-      productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],expanded?[-10,0,-1.25]:null);
+      productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],sampleCan);
       // These GLBs were awaited during startup, but the shelf is out of the entry view.
       queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter(mesh => mesh.isMesh));
       interactables.push(...productDisplay.interactables);

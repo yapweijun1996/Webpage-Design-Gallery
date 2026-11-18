@@ -29,6 +29,11 @@ export function createTripoPoses(T, mesh, visual, authoredSeat) {
   const bootRotations = legs.map(([, , foot]) => foot.getWorldQuaternion(new T.Quaternion()));
   const bootHeights = legs.map(([, , foot]) => foot.getWorldPosition(new T.Vector3()).y);
   const originalRotations = bones.map(bone => bone.quaternion.clone());
+  const palmBasis = new T.Matrix4();
+  const [upper, forearm, hand, knuckle] = arms[1], clavicle = upper.parent;
+  const carryJoints = [upper, forearm, hand];
+  if (clavicle.name.endsWith('Shoulder')) carryJoints.push(clavicle);
+  const carryBase = carryJoints.map(joint => originalRotations[bones.indexOf(joint)]);
   let seatHip, seatRotations, posed = false;
   if (!authoredSeat) {
     // Fallback for exports without a sit clip.
@@ -101,7 +106,29 @@ export function createTripoPoses(T, mesh, visual, authoredSeat) {
   }
 
   return {
-    rightHand: arms[1][2],
+    rightHand: hand,
+    middleKnuckle: knuckle,
+    gripProduct(target, pole, palm, eyeView, waveWeight) {
+      if (waveWeight === 1) return;
+      if (eyeView && carryJoints.includes(clavicle)) {
+        // Lift the shoulder with the arm to keep the grip within elbow reach.
+        aim(clavicle, upper, target);
+        clavicle.quaternion.slerp(carryBase.at(-1), .35);
+      }
+      bendLimb(upper, forearm, hand, target, pole);
+      // Local +Y runs along the fingers. Roll the palm (-X) upward under the can.
+      direction.copy(palm).sub(hand.getWorldPosition(origin)).normalize();
+      bend.set(0, -1, 0).cross(direction);
+      if (bend.lengthSq() > 1e-8) {
+        bend.normalize();
+        from.crossVectors(direction, bend);
+        rotation.setFromRotationMatrix(palmBasis.makeBasis(from, direction, bend));
+        hand.quaternion.copy(hand.parent.getWorldQuaternion(parentRotation).invert().multiply(rotation));
+      }
+      if (waveWeight > 0) {
+        carryJoints.forEach((bone, i) => bone.quaternion.slerp(carryBase[i], waveWeight));
+      }
+    },
     restore,
     save() {
       originalHip.copy(hips.position);

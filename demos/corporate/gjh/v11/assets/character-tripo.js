@@ -1,3 +1,4 @@
+import {createFirstPersonHand} from './visitor-carry-hand.js';
 import {createTripoPoses} from './character-tripo-pose.js';
 import {createPushCart} from './push-cart.js';
 import {disposeVisitorScene, loadVisitorGLTF} from './visitor-gltf.js';
@@ -111,7 +112,11 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       sitAction.setEffectiveWeight(0).play();
       sitAction.paused = true;
     }
-    const transfer = createProductTransfer(T, avatar, poses.rightHand, visual);
+    const wrist = poses.rightHand;
+    // Tripo's knuckles lie along local +Y and the inside of the palm faces -X.
+    const grip = poses.middleKnuckle.position.clone().multiplyScalar(.65);
+    grip.x -= .060 / scale;
+    const transfer = createProductTransfer(T, avatar, wrist, visual, grip, createFirstPersonHand(T, visual, mesh, wrist));
     lod = createVisitorLOD(T, placement, {
       url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareModel
     });
@@ -148,15 +153,31 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       arrivalWave = arrival;
       emoteAction = actions[name].reset().setEffectiveWeight(0).play();
     }
-    const canEmote = () => !disposed && !reducedMotion.matches && animation === 'idle' &&
-      seatWeight === 0 && !pushing && transfer.phase === 'empty';
+    const canEmote = (name, arrival) => !disposed && !reducedMotion.matches && animation === 'idle' &&
+      seatWeight === 0 && !pushing && (transfer.phase === 'empty' || (transfer.phase === 'held' && name === 'wave' && !arrival));
     function emote(name, {arrival = false} = {}) {
-      if (!canEmote() || !emotes.includes(name)) return false;
+      if (!canEmote(name, arrival) || !emotes.includes(name)) return false;
       if (emoteAction) {
         if (queuedEmote || arrival) return false;
         queuedEmote = name;
       } else startEmote(name, arrival);
       return true;
+    }
+    function updateProduct(dt, waveWeight = 0) {
+      const eye = transfer.firstPerson;
+      if (eye) {
+        target.set(.065, 1.285, -.39);
+        palm.set(.065, 1.415, -.55);
+      } else {
+        target.set(.40, 1.01, -.18);
+        palm.set(.52, 1.01, -.25);
+      }
+      visual.localToWorld(target);
+      transfer.reachTarget(target);
+      visual.localToWorld(pole.set(.40, .70, -.20));
+      visual.localToWorld(palm);
+      poses.gripProduct(target, pole, palm.lerp(target, .3), eye, waveWeight);
+      transfer.update(dt, reducedMotion.matches);
     }
     function update(actual, dt, requested = actual, sprintRate = 1) {
       if (disposed) return;
@@ -170,7 +191,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       if (emoteAction) {
         emoteTime += dt;
         const remaining = clips[emoteName].duration - emoteTime;
-        if (!canEmote() || requested !== 'idle') {
+        if (!canEmote(emoteName, arrivalWave) || requested !== 'idle') {
           stopEmote();
           queuedEmote = null;
         } else if (remaining <= 0) {
@@ -212,14 +233,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
         if (sitAction) poses.groundBoots(sitBlend);
         else poses.sit(seatWeight);
       }
-      if (transfer.phase !== 'empty') {
-        visual.localToWorld(target.set(.28, 1.06, -.30));
-        transfer.reachTarget(target);
-        visual.localToWorld(pole.set(.40, .70, -.20));
-        visual.localToWorld(palm.set(.28, 1.02, -.40));
-        poses.grip(1, target, pole, palm.lerp(target, .3));
-        transfer.update(dt, reducedMotion.matches);
-      }
+      if (transfer.phase !== 'empty') updateProduct(dt, emoteWeight);
       if (!pushing) { hasPrevious = false; return; }
       for (let i = 0; i < 2; i++) {
         const x = i === 0 ? -.20 : .20;
@@ -239,7 +253,16 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
 
     return {
       visual, emote, update, updateLOD: lod.update,
-      setCameraOccluded(value) { placement.visible = !value; },
+      setCameraOccluded(value, firstPerson) {
+        placement.visible = !value;
+        transfer.setFirstPerson(firstPerson);
+        // A view toggle can render immediately, without another simulation tick.
+        if (transfer.phase === 'held' && !emoteAction) {
+          poses.restore();
+          poses.save();
+          updateProduct(0);
+        }
+      },
       get seatWeight() { return seatWeight; },
       get productPhase() { return transfer.phase; },
       setBagCount(value) { count = Math.max(0, Number(value) || 0); cart?.setCount(count); },
