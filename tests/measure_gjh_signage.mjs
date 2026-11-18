@@ -1,5 +1,6 @@
 // Optional CPU inspection using an already available Canvas 2D implementation.
 // SIGNAGE_CANVAS points to @napi-rs/canvas. No browser, GL context or server.
+import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {readFileSync,writeFileSync} from 'node:fs';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
@@ -20,17 +21,25 @@ const json=p=>JSON.parse(readFileSync(new URL(p,base)));
 const kit=json('brand-kit/brand-kit.json'),logos=json('brands/logo-sources.json');
 const bays=expandedLayout.slots;
 const configs=bays.map(b=>resolveConfig('S'+b.number,stores['S'+b.number],b,kit,logos));
-const bake=await bakeAtlas(configs,base),scene=new T.Scene();
-const system=createSignageSystem(T,scene,configs,bays,bake,base);
+const bake=await bakeAtlas(configs,base);
+const expectedFiles=json('signage/models/manifest.json').assets.map(a=>a.file);
+const requests=[];
+globalThis.fetch=async url=>{
+  requests.push(url.href);
+  return new Response(readFileSync(url));
+};
 
 for(const [width,height] of [[393,550],[1440,817]]){
   const camera=new T.PerspectiveCamera(58,width/height,.08,100);
   for(const tier of ['low','balanced','detailed']){
+    const scene=new T.Scene(),system=createSignageSystem(T,scene,configs,bays,bake,base);
+    requests.length=0;
     let peakTriangles=0,peakBatches=0;
     for(const bay of bays){
       const e=shopEntrance(bay);
       camera.position.set(e.x+12*e.normalX,2.3,e.z+12*e.normalZ);
       camera.lookAt(e.x,4.78,e.z);camera.updateMatrixWorld();
+      await system.update(camera,tier,{matches:true},0);
       system.update(camera,tier,{matches:true},0);
       const visible=scene.children.filter(mesh=>mesh.visible);
       const triangles=visible.reduce((sum,mesh)=>{
@@ -39,7 +48,11 @@ for(const [width,height] of [[393,550],[1440,817]]){
       },0);
       peakTriangles=Math.max(peakTriangles,triangles);peakBatches=Math.max(peakBatches,visible.length);
     }
-    console.log({width,height,tier,peakBatches,peakTriangles,textureMiB:system.report().textureMB});
+    const {modelsLoaded,textureMB,signs}=system.report();
+    const expected=tier==='low'?[]:expectedFiles.map(f=>new URL('signage/models/'+f,base).href);
+    assert.deepEqual([...requests].sort(),expected.sort());
+    assert.equal(modelsLoaded,expected.length);
+    console.log({width,height,tier,signs,peakBatches,peakTriangles,textureMiB:textureMB,modelsLoaded});
   }
 }
 

@@ -1,33 +1,47 @@
-# GJH modular sign assets
+# GJH v11 signage model contract
 
-Author in Blender 5.x and export plain, self-contained glTF 2.0 binary files here. The system currently ships procedural hardware and artwork-derived letter relief. Register each delivered filename once in `modelFiles` in [models.js](../models.js). A file can carry several named modules. The loader fetches registered files on the first Balanced or Detailed view. Low makes zero model requests. Missing files or missing module IDs fall back independently.
+[manifest.json](manifest.json) describes the GLBs and the shared material finish library. [presets.json](presets.json) defines eight styles, allowable dimensions and assignments keyed by the existing `S01`–`S17` brand slots. See the [build and evidence notes](../../../../../../../docs/gjh-v11-signage-assets.md) for reproduction and validation.
 
 ## Coordinates and assembly
 
-Work in metres. glTF +Y is up and the visible face points along +Z. The mounting wall is at z = 0. Put the file origin at the bottom centre of the back plane. A complete nominal panel is 1.0 m wide by 0.6 m high and at most 0.06 m deep. Individual fittings fit inside that envelope at their own physical dimensions. A library may lay fittings out on the nominal panel. Keep every vertex on or in front of the mounting plane. The test evaluates transformed vertices with a 1 mm tolerance. glTF supplies the default unit and axes. If present, asset extras `metersPerUnit`, `upAxis` and `frontAxis` must be 1, `+Y` and `+Z`.
+Each plain glTF 2.0 binary has one identity-transform mesh node named after its file, starting with `sign_`. Units are metres. +Y is up and +Z faces visitors. The local origin is at the bottom centre of the rear bounds. Vertex bounds satisfy `minY = minZ = 0` and `minX = −maxX`. At zero rotation the module mounts against the `z = 0` plane. [Khronos glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units)
 
-Prefix every node with `sign_`. Give each replaceable module one unique node ID across the inventory. Its child meshes can carry multiple material primitives. Orient trim profiles in the panel plane. The runtime preserves module-local pieces, sizes them to their sockets and instances the assembled hardware across nearby stores.
+The standard fascia starts at **1.00 × 0.60 m**. Its backplate is 35 mm thick. The base frame reaches 46 mm in front of the wall, leaving room for a 17 mm relief mounted on the backplate within the 60 mm envelope.
 
-| Module ID | Socket |
+For a fascia of width `W` and height `H`, use the following local positions and rotations about +Z. Coordinates use the fascia's bottom-centre-back origin. Let `C = 0.06 m` be the corner size and `R = 0.034 m` the outer rail width, as recorded in the manifest.
+
+| Part | Position `(X, Y)` | Rotation | Scaling in the face plane |
+| --- | --- | --- | --- |
+| Backplate | `(0, 0)` | 0° | `X = W / 1.0`, `Y = H / 0.6` |
+| Bottom-left corner | `(-W/2+C/2, 0)` | 0° | Native |
+| Bottom-right corner | `(W/2, C/2)` | 90° | Native |
+| Top-right corner | `(W/2-C/2, H)` | 180° | Native |
+| Top-left corner | `(-W/2, H-C/2)` | 270° | Native |
+| Bottom and top rails | `(0, 0)` and `(0, H)` | 0°, 180° | `X = (W-2C) / 0.88` |
+| Left and right rails | `(-W/2+R/2, C)` and `(W/2-R/2, H-C)` | 0°, 180° | `Y = (H-2C) / 0.48` |
+
+Keep corners at native size and scale straight pieces along their run only. The end profiles match, so straight pieces may also be tiled end to end with one fitted segment. Place the frame, rails and backplate at `Z = 0`. Adjust the whole assembly's Z scale around that plane if the mounting envelope requires it. The blade plate is two-sided. Its local +Z face is the front. Rotate a blade assembly at the wall mount to direct its faces along the arcade.
+
+## Runtime sockets
+
+The manifest registers all ten filenames and node IDs. A fresh Low view makes zero GLB requests. The first Balanced or Detailed update starts one fetch per registered file. Each successfully parsed module stays available across tier changes. A missing or undecodable file leaves its own procedural fitting in place. [Loader](../models.js) · [Hardware assembly](../hardware.js)
+
+| Node ID | Close-range placement |
 | --- | --- |
-| `sign_backplate` | Full panel behind the shared artwork face |
-| `sign_frame_corner` | Bottom-left 90° corner, rotated at the other three corners |
-| `sign_frame_edge_h` | Horizontal rail between corner pieces |
-| `sign_frame_edge_v` | Vertical rail between corner pieces |
-| `sign_blade_bracket` | Wall-mounted arm reaching toward the concourse |
-| `sign_downlight` | Small recessed fitting along the upper rail |
-| `sign_logo3d_<brand>` | Opt-in Detailed anchor relief, fitted proportionally to the registered artwork region |
+| `sign_backplate` | Lacquer support with its front 1 mm behind the atlas face. |
+| `sign_frame_corner` | Four native mitres with quarter-turn rotations as above. |
+| `sign_frame_edge_h`, `sign_frame_edge_v` | Stretch along the run between mitres. The upper and right profiles rotate 180°. |
+| `sign_blade_bracket` | Local −X mounting end against the wall, with the arm turned toward the aisle. |
+| `sign_blade_panel` | Turned 90° about Y with an atlas decal just outside each face. Both decals keep their outward winding. |
+| `sign_downlight` | Three downward emitters along the upper rail in Detailed. |
+| `sign_timber_slat` | Three vertical slats at each end of a timber fascia, clear of the central mark. |
+| `sign_ivy_swag` | Hangs from each end of the café fascia above the timber. Its folded leaves render on both sides. |
+| `sign_logo3d_new_moon` | Raised crescent fitted proportionally to the yellow path in S01's trimmed official SVG, in both near tiers. |
 
-The installed bracket projects into the aisle. Its authored module still obeys the common asset depth limit. Author its long axis horizontally and the mounting end at local -X. The runtime turns this axis toward the aisle. Rails stretch lengthwise; corner radii, rail thickness and light sizes stay fixed. Keep unrelated replaceable module nodes as siblings.
+The shared material library in the manifest defines sRGB authoring colours, roughness, metallic factors, emission strength and sidedness. glTF stores linear RGB. The loader shares imported materials by name across files. The hardware template packs their canonical factors into vertex attributes and instances the assembly across nearby bays. The two café ends share an instanced ornament template. The crescent keeps its imported finish in the near relief batch. The kit adds zero textures, lights or decoders.
 
-## Materials and artwork
+The kit presets specify eight design samples, dimensions and decorative motifs. The live mall keeps its existing bay dimensions, style assignments, approved logos and atlas artwork. It uses the baked fascia, blades and posters at distance in every tier. Detailed adds hardware downlights and extruded lettering. Missing crescent art uses the existing ink treatment for the tier. [Kit presets](presets.json) · [Unbranded motifs](preset-icons.svg) · [Live store configuration](../config.js)
 
-The PBR metallic-roughness factors in [tokens.js](../tokens.js) are authoritative, in linear glTF colour space. Use a single material for each named class per file. The classes are `brass_trim`, `lacquer_fascia`, `timber_slat`, `emissive_letter`, `glass_panel`, `brushed_black`, `gunmetal`, `gold_disc` and `silver_ring`. Hardware packs their colour, emission, roughness and metalness into one shared instanced draw. Sign and poster images are supplied by the shared runtime atlas. Use factor-only materials on the modular solid parts.
+## Verify and publish
 
-Use the local GLTFLoader and uncompressed triangle primitives. Vendor has no Draco, KTX2 or meshopt decoder. Retain provenance for every branded relief. The New Moon socket covers the crescent of the official SVG; the rest of its lockup stays registered to the same atlas projection. Add a model only with an identifiable source silhouette and matching dimensions.
-
-## Acceptance
-
-Run `node --test tests/gjh_signage_models.test.mjs tests/gjh_signage.test.mjs` at repository root. The validator enumerates every GLB in this directory, parses the actual binary geometry through the vendored loader, checks transformed bounds, winding, names and material factors, and rejects duplicate module IDs across files. The invalid-contract tests also run against in-memory geometry when the directory has no GLBs.
-
-Verify the file at its published URL under `v11/assets/signage/models/`. The current gallery publisher enumerates selected asset subdirectories. Delivery of the first GLB requires including this directory in its publish list. Record bytes, triangles, draw calls and views before/after loading the asset in the full mall. [System and review procedure](../../../../../../../docs/gjh-v11-signage-system.md)
+Run `python3 scripts/validate_signage_glb.py` and `node --test tests/gjh_signage_models.test.mjs tests/gjh_signage.test.mjs` from the repository root. The release build copies the entire signage directory. The v11 offline shell precaches the manifest, preset definitions, icon sprite and colour tokens. All ten GLBs remain outside the shell precaches and startup model pack. [Tier measurements and headed checks](../../../../../../../docs/gjh-v11-signage-system.md)

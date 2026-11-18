@@ -5,8 +5,9 @@ import {presets} from './presets.js';
 // "caption" is for artwork without a legible Latin store name.
 const store = (preset, options = {}) => ({preset, ...options});
 export const stores = Object.freeze({
-  S01:store('t1-classic',{relief:true,logoModule:'sign_logo3d_new_moon',logoRegion:[0,0,.172,1]}),
-  S02:store('t3-cafe',{relief:true,logoModule:'sign_logo3d_mili'}),
+  // The yellow crescent occupies (6,5)–(102,134) in the trimmed 675 × 139 SVG.
+  S01:store('t1-classic',{relief:true,logoModule:'sign_logo3d_new_moon',logoRegion:[6/675,5/139,96/675,129/139]}),
+  S02:store('t3-cafe',{relief:true}),
   S03:store('t8-kids',{letterInk:'dark'}),
   S04:store('t6-beauty',{carrier:true,letterInk:'pale',inkRegion:[0,0,1,.64]}),
   S05:store('heritage-red',{caption:true}),

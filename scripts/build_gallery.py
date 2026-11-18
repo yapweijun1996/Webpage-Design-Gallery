@@ -252,7 +252,7 @@ def runtime_resources(catalog):
         resources.update(directory / name for name in ("style.css", "script.js") if (ROOT / directory / name).is_file())
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
-        for nested in ("brand-kit", "brands", "gallery-assets"):
+        for nested in ("brand-kit", "brands", "gallery-assets", "signage"):
             resources.update(path.relative_to(ROOT) for path in (assets / nested).rglob("*") if path.is_file())
         vendor = ROOT / directory / "vendor"
         if vendor.is_dir():
@@ -337,6 +337,9 @@ def pwa_outputs(pages, catalog, release):
     mall_root = ROOT / "demos/corporate/gjh/v11"
     mall_paths = ("offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png",
                   "style.bundle.css", "assets/loader.js", "assets/gjh-loader-mark.svg")
+    # The offline shell can serve the small kit descriptors. Meshes remain lazy.
+    mall_paths += ("assets/signage/tokens.js", "assets/signage/models/manifest.json",
+                   "assets/signage/models/presets.json", "assets/signage/models/preset-icons.svg")
     mall_entries = [{"path": name, "sha256": hashlib.sha256(source_bytes(mall_root / name)).hexdigest()} for name in mall_paths]
     mall_worker = (ROOT / "templates/gallery/gjh-v11-sw.js").read_text(encoding="utf-8")
     mall_worker = mall_worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(mall_entries, indent=2))

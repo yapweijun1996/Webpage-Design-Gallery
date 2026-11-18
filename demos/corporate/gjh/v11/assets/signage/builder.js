@@ -2,6 +2,9 @@ import {shopEntrance} from '../expanded-layout.js';
 import {atlasCells,atlasSize,plateRect} from './atlas-layout.js';
 import {bayWidth,fasciaBand} from './config.js';
 
+// Shared dimensions for the two atlas decals and their projecting hardware socket.
+export const bladeSocket = Object.freeze({inset:.24, drop:.78, reach:.94, height:.69, thickness:.043});
+
 export function uvRect(r) {
   return [(r.x+.5)/atlasSize,1-(r.y+r.h-.5)/atlasSize,
     (r.x+r.w-.5)/atlasSize,1-(r.y+.5)/atlasSize];
@@ -17,7 +20,7 @@ export function createShopSign(T,config,bay) {
   const cells=atlasCells(Number(bay.number)-1);
   const {width,height,depth}=config.size, band=fasciaBand(bay);
   const z=(anchor?.44:.23)+depth, y=(band.top+band.bottom)/2;
-  const bladeX=-width/2+.24, bladeY=y-.78, bladeDepth=.94;
+  const bladeX=-width/2+bladeSocket.inset, bladeY=y-bladeSocket.drop, bladeDepth=bladeSocket.reach;
   const positions=[],uvs=[],indices=[];
   function panel(x,y,z,w,h,yaw,cell){
     const start=positions.length/3, cs=Math.cos(yaw),sn=Math.sin(yaw);
@@ -30,8 +33,8 @@ export function createShopSign(T,config,bay) {
   panel(0,y,z,width,height,0,cells.fascia);
   if(config.blade){
     // Separate outward-facing winding keeps the lettering legible from either end.
-    for(const side of [-1,1])panel(bladeX+side*.012,bladeY,z+bladeDepth/2,
-      bladeDepth,.69,side*Math.PI/2,cells.blade);
+    for(const side of [-1,1])panel(bladeX+side*(bladeSocket.thickness/2+.001),bladeY,z+bladeDepth/2,
+      bladeDepth-.05,bladeSocket.height-.045,side*Math.PI/2,cells.blade);
   }
   // Permanent number plate on the fixed pier also serves stores with no blade.
   panel(width/2-.32,3.7,z,.60,.20,0,plateRect(cells.blade));

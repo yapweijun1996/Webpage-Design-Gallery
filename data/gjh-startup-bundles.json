@@ -48,13 +48,14 @@
     "demos/corporate/gjh/v11/assets/shop-signs.js": "654b17499094c6cea9f84b173a7eeef98aca9947771b229db8c5e36073b71f70",
     "demos/corporate/gjh/v11/assets/signage/atlas-layout.js": "3d37457df4c2453fd8af723a69fd52997c81a4cea8cd7ca72be281491f2c5a19",
     "demos/corporate/gjh/v11/assets/signage/atlas.js": "14a8a4821daf07b2935e22e6cb34ac6acb4583be398a551a20a2a6f1a31b87ef",
-    "demos/corporate/gjh/v11/assets/signage/builder.js": "c2d53234da728dfc249c47b0361ce33598e17776ca2ef1e6302b276c583be2eb",
-    "demos/corporate/gjh/v11/assets/signage/config.js": "f8e72542c47084a8163c28cdc493685505ac89c83fb4947a7e08d89b2487003c",
-    "demos/corporate/gjh/v11/assets/signage/hardware.js": "c722ffe51bd4879c76ca345674af847f6166565a3b2ed1c3b4bb87eef8ccc3c3",
-    "demos/corporate/gjh/v11/assets/signage/models.js": "5268a639dce4e1bc1ea72cd8e430ab403140bbedca495521aad63e674d5bec2e",
+    "demos/corporate/gjh/v11/assets/signage/builder.js": "b214e72800bf8e74936b9598867116da459e66214621005de33019f21227e98a",
+    "demos/corporate/gjh/v11/assets/signage/config.js": "0d4a33d0fd8d978b30f4c9aa562f558d964ced56d25ab276abbcca161be9b5db",
+    "demos/corporate/gjh/v11/assets/signage/hardware.js": "35e1d8a1c127cc78afc7426244cb553ad14d954561648b6a56f1edffeac5f0bb",
+    "demos/corporate/gjh/v11/assets/signage/models.js": "ccce95c6c3022c7de45f3ac8ad6e0e895fc47cdd38f63eda25893d7407e26583",
+    "demos/corporate/gjh/v11/assets/signage/models/manifest.json": "656328f4632261ada4db2af5b7e776d12a6f61de1b3c95884c75721fdb592a79",
     "demos/corporate/gjh/v11/assets/signage/presets.js": "f9c9be0dde67696a94dacb63366da811a8780c42615e367ac56e73384477376f",
-    "demos/corporate/gjh/v11/assets/signage/runtime.js": "409e3bb8f6b67c74067453ac04dcf2f412e6629b6641c4c737bc9fbccf949a82",
-    "demos/corporate/gjh/v11/assets/signage/tokens.js": "516350a85e53128c907284e9e64c69422d02c710c4d9999c4556b2dc0b1655bf",
+    "demos/corporate/gjh/v11/assets/signage/runtime.js": "7d1c40fb0211e5047ce804e9768b2922c08a8d9fb84b825706955b712e7cf3d1",
+    "demos/corporate/gjh/v11/assets/signage/tokens.js": "f6ac2f924ad3468de45112b8493747d2b1db5ccf82fba5626d44502ac1481352",
     "demos/corporate/gjh/v11/assets/spatial.js": "7cafcdf06b91dec11675ce25601e42fd30b618a80abfde7ef13024d8fb1d6b25",
     "demos/corporate/gjh/v11/assets/static-asset.js": "ea70b7e7becf1c3cb60b820e97ae2a8725597b176de67b4eca8d796e5ab56f37",
     "demos/corporate/gjh/v11/assets/store-destinations.js": "b5c8aa850caee6d56995cddf8855c5497cf8a288cab157edc783b1175c69f0f3",
@@ -67,11 +68,11 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "b62ee6c1843295d1f68777ab92bfcf467d3af1989020c9841ff30c79f9d637fd",
     "demos/corporate/gjh/v11/assets/window-studios.js": "11c31879f8b1d14e3fdff5af59cfb45f4fb54db46419eaa4e9ef1e9a652e4fe5",
     "demos/corporate/gjh/v11/assets/world.js": "4ef2c76b25be57f31611d5f23d5b82506dc980549f87a58ce31ef1f9675625f5",
-    "demos/corporate/gjh/v11/script.js": "45701850eb2e37477d51a0fcba816c05005675d6be1121794dd7d61354f6d8d4"
+    "demos/corporate/gjh/v11/script.js": "44c558fb0ab09f17707bfd7b4525b7003ed54406716c7acac4065afd2b8e0546"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "4145af22d2c0fe9304922f3b19496b5628cc0948a68700e88068a0eed6f48db4",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "985ccf4281e7ee578fe1b836158b7c99bc622498b295b601d8e0ca5d9177b787",
+    "demos/corporate/gjh/v11/script.bundle.js": "1c706cbf8db2bf03b6dc0457acbe99cb0517ef6ae69732813c8299ad73fa43fa",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "93c3fbad3008943e8212ad6a87975f4c2c9d4cd6660138d0324eb63ec4b033e4",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "808ed2c402a779bbb66c4c5c2c036c5a86c6f21a7539a8b208f22220f29342f3",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "154611ab3bc5d1c5c3270101376715c3f298ded579379bd481202eecc6511dbd"
   }

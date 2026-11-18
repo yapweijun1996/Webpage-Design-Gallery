@@ -4232,7 +4232,7 @@ var lastMetricsUpdate = -Infinity;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
-    signage: world?.signage?.report() ?? { signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, tier: quality.state?.tier ?? "low" },
+    signage: world?.signage?.report() ?? { modelsLoaded: 0, signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, tier: quality.state?.tier ?? "low" },
     capturedAt: new Date().toISOString(),
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,

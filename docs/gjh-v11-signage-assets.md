@@ -84,6 +84,6 @@ At 393 × 852 CSS px, the expanded portrait camera's 100° vertical FOV gives a 
 
 ## UNVERIFIED
 
-- Live 393 px phone readability, oblique views, tier transitions, baked far-plane sharpness, real-scene draw calls, frame time and GPU memory. The parallel runtime job owns the sign assembly and distance tiers.
-- Pages delivery. The current gallery publisher includes the mall index in a clean output build and omits `assets/signage/` because its nested-asset list has no signage entry. The integration must include the runtime files under `models/` in its publishing change.
+- Live phone readability, oblique views, visual tier transitions, baked far-plane sharpness, renderer draw calls, frame time and GPU memory. CPU geometry counts and the tier integration checks are recorded in the [signage system](gjh-v11-signage-system.md).
+- Public Pages URLs after deployment. The local release publisher now ships the signage tree and checks it byte-for-byte in a clean output directory.
 - `browser_gallery.py`, `browser_gjh_demos.py` and `browser_pwa.py` reached local HTTP server startup with the existing Playwright and Pillow environment. The sandbox denied the `127.0.0.1` bind before browser launch. Asset parsing with the project's loader and offline Blender previews ran independently.

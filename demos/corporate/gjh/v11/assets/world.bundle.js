@@ -2196,6 +2196,300 @@ function atlasCells(index) {
 function plateRect(blade) {
   return { x: blade.x + blade.w * 0.3, y: blade.y + blade.h * 0.729, w: blade.w * 0.4, h: blade.h * 0.19 };
 }
+// demos/corporate/gjh/v11/assets/signage/models/manifest.json
+var manifest_default = {
+  version: 1,
+  coordinates: {
+    unit: "metre",
+    up: "+Y",
+    front: "+Z",
+    origin: "bottom-centre-back"
+  },
+  nominalFasciaMetres: [
+    1,
+    0.6,
+    0.06
+  ],
+  frame: {
+    cornerMetres: 0.06,
+    railWidthMetres: 0.034,
+    backplateDepthMetres: 0.035
+  },
+  materialLibrary: {
+    brass_trim: {
+      color: "#D9A354",
+      metallic: 0.88,
+      roughness: 0.33
+    },
+    lacquer_fascia: {
+      color: "#142E27",
+      metallic: 0.12,
+      roughness: 0.34
+    },
+    timber_slat: {
+      color: "#5D3928",
+      metallic: 0,
+      roughness: 0.51
+    },
+    emissive_letter: {
+      color: "#FFE3A3",
+      metallic: 0.22,
+      roughness: 0.34,
+      emission: 0.85
+    },
+    glass_panel: {
+      color: "#DCEAE1",
+      metallic: 0,
+      roughness: 0.19
+    },
+    brushed_black_metal: {
+      color: "#28282C",
+      metallic: 0.74,
+      roughness: 0.43
+    },
+    brass_plate: {
+      color: "#C69C63",
+      metallic: 0.77,
+      roughness: 0.45
+    },
+    gunmetal: {
+      color: "#202733",
+      metallic: 0.72,
+      roughness: 0.38
+    },
+    gold_disc: {
+      color: "#D79F36",
+      metallic: 0.89,
+      roughness: 0.27
+    },
+    silver_ring: {
+      color: "#D4D9DB",
+      metallic: 0.9,
+      roughness: 0.31
+    },
+    neon_blue: {
+      color: "#7AD5FF",
+      metallic: 0.08,
+      roughness: 0.29,
+      emission: 0.95
+    },
+    rose_lacquer: {
+      color: "#78394C",
+      metallic: 0.12,
+      roughness: 0.36
+    },
+    chocolate_lacquer: {
+      color: "#3E2C27",
+      metallic: 0.07,
+      roughness: 0.42
+    },
+    pastel_enamel: {
+      color: "#F0DCE8",
+      metallic: 0.05,
+      roughness: 0.46
+    },
+    ivy_leaf: {
+      color: "#587446",
+      metallic: 0,
+      roughness: 0.64,
+      doubleSided: true
+    }
+  },
+  budgets: {
+    triangles: 20000,
+    bytes: 300000,
+    textures: 0
+  },
+  totals: {
+    assets: 10,
+    tris: 2374,
+    bytes: 141076,
+    textures: 0
+  },
+  assets: [
+    {
+      name: "sign_frame_corner",
+      file: "sign_frame_corner.glb",
+      bytes: 4948,
+      tris: 64,
+      materials: [
+        "brushed_black_metal",
+        "brass_trim"
+      ],
+      sizeMetres: [
+        0.06,
+        0.06,
+        0.046
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "cc330a19e402321e5cd2b54722e2b09bff0865d35d45c2e4e39515ce84cb9e24",
+      provenance: "Original procedural lower-left mitred corner."
+    },
+    {
+      name: "sign_frame_edge_h",
+      file: "sign_frame_edge_h.glb",
+      bytes: 3832,
+      tris: 40,
+      materials: [
+        "brushed_black_metal",
+        "brass_trim"
+      ],
+      sizeMetres: [
+        0.88,
+        0.034,
+        0.046
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "6d18dbdd3eeb5ad1ee8f1e449254fe302de15717beaac7f4ca2cc8cd266faf35",
+      provenance: "Original procedural horizontal rail."
+    },
+    {
+      name: "sign_frame_edge_v",
+      file: "sign_frame_edge_v.glb",
+      bytes: 3916,
+      tris: 40,
+      materials: [
+        "brushed_black_metal",
+        "brass_trim"
+      ],
+      sizeMetres: [
+        0.034,
+        0.48,
+        0.046
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "9b60a0fba1020fd5096ed3b34c20e2c1c97a30643f7577e59cf14001bf7b012f",
+      provenance: "Original procedural vertical rail."
+    },
+    {
+      name: "sign_backplate",
+      file: "sign_backplate.glb",
+      bytes: 5656,
+      tris: 92,
+      materials: [
+        "lacquer_fascia"
+      ],
+      sizeMetres: [
+        1,
+        0.6,
+        0.035
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "25cf8715f0044466a173202b6a61cffa1d3490f96c95eee90f29f555fbf961f5",
+      provenance: "Original procedural lacquer fascia."
+    },
+    {
+      name: "sign_downlight",
+      file: "sign_downlight.glb",
+      bytes: 13984,
+      tris: 244,
+      materials: [
+        "gunmetal",
+        "gold_disc",
+        "emissive_letter"
+      ],
+      sizeMetres: [
+        0.12,
+        0.054,
+        0.054
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "c4578700c11611f51ff57195ca7bf290576410ff0dde3a46afdd4fabd1a020c0",
+      provenance: "Original procedural linear housing and downward-facing emitter."
+    },
+    {
+      name: "sign_blade_bracket",
+      file: "sign_blade_bracket.glb",
+      bytes: 20240,
+      tris: 368,
+      materials: [
+        "gunmetal",
+        "silver_ring"
+      ],
+      sizeMetres: [
+        0.16,
+        0.105,
+        0.06
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "a8f829d87ffe64f6f11f38c49bbb857ce574bb632b00f305077b54a62778e52c",
+      provenance: "Original procedural mounting plate and blade arm."
+    },
+    {
+      name: "sign_blade_panel",
+      file: "sign_blade_panel.glb",
+      bytes: 25644,
+      tris: 460,
+      materials: [
+        "brass_plate",
+        "lacquer_fascia",
+        "glass_panel"
+      ],
+      sizeMetres: [
+        0.38,
+        0.43,
+        0.043
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "2743ee6c6d16b5ace7135f29c7986175eff3c8fd0936b136f5df5092c641a6ee",
+      provenance: "Original procedural two-sided blade blank with inset label faces."
+    },
+    {
+      name: "sign_timber_slat",
+      file: "sign_timber_slat.glb",
+      bytes: 5672,
+      tris: 92,
+      materials: [
+        "timber_slat"
+      ],
+      sizeMetres: [
+        0.09,
+        0.6,
+        0.02
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "0fccc7350ed7172412feb7970d311f0bf28e84215e9b1338bc98df618ffcd96c",
+      provenance: "Original procedural café slat to repeat across the backplate."
+    },
+    {
+      name: "sign_logo3d_new_moon",
+      file: "sign_logo3d_new_moon.glb",
+      bytes: 23124,
+      tris: 470,
+      materials: [
+        "emissive_letter"
+      ],
+      sizeMetres: [
+        0.231913,
+        0.31,
+        0.017
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "ebdecaacc9eb49c6bf157d9d3fbf63359edf6125de54feaf7881bbac2abe4541",
+      provenance: "Yellow crescent component traced from the official New Moon SVG.",
+      sourceArtwork: "demos/corporate/gjh/v11/assets/new-moon-logo.svg",
+      sourceArtworkSha256: "af9bd8b7edd2ccd793fd66c478c199431fc6f4f853702f10854d3243bbff70f5"
+    },
+    {
+      name: "sign_ivy_swag",
+      file: "sign_ivy_swag.glb",
+      bytes: 34060,
+      tris: 504,
+      materials: [
+        "ivy_leaf",
+        "timber_slat"
+      ],
+      sizeMetres: [
+        0.7,
+        0.2,
+        0.052
+      ],
+      sourceScript: "scripts/build_signage_kit.py",
+      sha256: "f37df041ab63efccced3f58ed44e007c277581c6a42dcbf8a8bdf5c5cdf3b6d1",
+      provenance: "Original procedural climbing stems and folded ivy leaves."
+    }
+  ]
+};
 
 // demos/corporate/gjh/v11/assets/signage/tokens.js
 var swatch = Object.freeze({
@@ -2219,18 +2513,16 @@ var swatch = Object.freeze({
   shadow: "#201a16",
   highlight: "#fff6dc"
 });
-var pbr = (baseColorFactor, metallicFactor, roughnessFactor, emissiveFactor = [0, 0, 0]) => ({ baseColorFactor: [...baseColorFactor, 1], metallicFactor, roughnessFactor, emissiveFactor });
-var materials = Object.freeze({
-  brass_trim: pbr([0.56, 0.38, 0.14], 0.78, 0.3),
-  lacquer_fascia: pbr([0.025, 0.075, 0.05], 0.22, 0.26),
-  timber_slat: pbr([0.2, 0.105, 0.058], 0, 0.64),
-  emissive_letter: pbr([0.96, 0.84, 0.6], 0.22, 0.32, [0.36, 0.25, 0.12]),
-  glass_panel: pbr([0.47, 0.57, 0.53], 0.12, 0.16),
-  brushed_black: pbr([0.028, 0.031, 0.035], 0.69, 0.47),
-  gunmetal: pbr([0.09, 0.1, 0.11], 0.72, 0.38),
-  gold_disc: pbr([0.77, 0.48, 0.12], 0.84, 0.25),
-  silver_ring: pbr([0.55, 0.58, 0.6], 0.86, 0.24)
-});
+var materials = Object.freeze(Object.fromEntries(Object.entries(manifest_default.materialLibrary).map(([name, finish]) => {
+  const rgb = finish.color.slice(1).match(/../g).map((pair) => parseInt(pair, 16) / 255).map((v) => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return [name, {
+    baseColorFactor: [...rgb, 1],
+    metallicFactor: finish.metallic,
+    roughnessFactor: finish.roughness,
+    emissiveFactor: rgb.map((v) => v * (finish.emission ?? 0)),
+    doubleSided: finish.doubleSided ?? false
+  }];
+})));
 
 // demos/corporate/gjh/v11/assets/signage/presets.js
 function preset(fascia, trim, letter, glow, finish, backlight, typography, width, height) {
@@ -2258,8 +2550,8 @@ var presets = Object.freeze({
 // demos/corporate/gjh/v11/assets/signage/config.js
 var store = (preset2, options = {}) => ({ preset: preset2, ...options });
 var stores = Object.freeze({
-  S01: store("t1-classic", { relief: true, logoModule: "sign_logo3d_new_moon", logoRegion: [0, 0, 0.172, 1] }),
-  S02: store("t3-cafe", { relief: true, logoModule: "sign_logo3d_mili" }),
+  S01: store("t1-classic", { relief: true, logoModule: "sign_logo3d_new_moon", logoRegion: [6 / 675, 5 / 139, 96 / 675, 129 / 139] }),
+  S02: store("t3-cafe", { relief: true }),
   S03: store("t8-kids", { letterInk: "dark" }),
   S04: store("t6-beauty", { carrier: true, letterInk: "pale", inkRegion: [0, 0, 1, 0.64] }),
   S05: store("heritage-red", { caption: true }),
@@ -2852,6 +3144,7 @@ import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUti
 import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
 
 // demos/corporate/gjh/v11/assets/signage/builder.js
+var bladeSocket = Object.freeze({ inset: 0.24, drop: 0.78, reach: 0.94, height: 0.69, thickness: 0.043 });
 function uvRect(r) {
   return [
     (r.x + 0.5) / atlasSize,
@@ -2868,7 +3161,7 @@ function createShopSign(T, config, bay) {
   const cells = atlasCells(Number(bay.number) - 1);
   const { width, height, depth } = config.size, band = fasciaBand(bay);
   const z = (anchor ? 0.44 : 0.23) + depth, y = (band.top + band.bottom) / 2;
-  const bladeX = -width / 2 + 0.24, bladeY = y - 0.78, bladeDepth = 0.94;
+  const bladeX = -width / 2 + bladeSocket.inset, bladeY = y - bladeSocket.drop, bladeDepth = bladeSocket.reach;
   const positions = [], uvs = [], indices = [];
   function panel(x, y2, z2, w, h, yaw, cell) {
     const start = positions.length / 3, cs = Math.cos(yaw), sn = Math.sin(yaw);
@@ -2881,7 +3174,7 @@ function createShopSign(T, config, bay) {
   panel(0, y, z, width, height, 0, cells.fascia);
   if (config.blade) {
     for (const side of [-1, 1])
-      panel(bladeX + side * 0.012, bladeY, z + bladeDepth / 2, bladeDepth, 0.69, side * Math.PI / 2, cells.blade);
+      panel(bladeX + side * (bladeSocket.thickness / 2 + 0.001), bladeY, z + bladeDepth / 2, bladeDepth - 0.05, bladeSocket.height - 0.045, side * Math.PI / 2, cells.blade);
   }
   panel(width / 2 - 0.32, 3.7, z, 0.6, 0.2, 0, plateRect(cells.blade));
   const span = bayWidth(bay);
@@ -2956,78 +3249,70 @@ function letterGeometry(T, mask, config, mount, cell) {
 }
 
 // demos/corporate/gjh/v11/assets/signage/hardware.js
-function buildHardware(T, modules, detailed, capacity) {
-  const vertices = [], normals = [], colors = [], pbr2 = [], emission = [], anchors = [];
-  const baseW = 7, baseH = 1.36;
+var baseW = 7;
+var baseH = 1.36;
+var { cornerMetres: corner, railWidthMetres: rail, backplateDepthMetres: plateDepth } = manifest_default.frame;
+var sizes = new Map(manifest_default.assets.map((asset) => [asset.name, asset.sizeMetres]));
+function buildBatch(T, modules, capacity, name, assemble) {
+  const vertices = [], normals = [], colors = [], pbr = [], emission = [], anchors = [];
   const cube = new T.BoxGeometry, lamp = new T.CylinderGeometry(0.5, 0.5, 1, 10);
-  function part(id, x, y, z, w, h, d, ax, ay, stretch, blade, fallback, rotation = 0) {
-    const module = modules.get(id), pieces = [];
-    if (module) {
-      module.traverse((mesh2) => {
-        if (mesh2.isMesh)
-          pieces.push({ g: mesh2.geometry.clone().applyMatrix4(mesh2.matrixWorld), mat: mesh2.material.name });
-      });
-    }
+  const leaf = new T.OctahedronGeometry(0.5);
+  function part(id, centre, target, anchor, stretch, finish2, { roll = 0, yaw = 0, flag = 0, fallback = cube } = {}) {
+    const pieces = [], bounds = new T.Box3;
+    modules.get(id)?.traverse((node) => {
+      if (node.isMesh)
+        pieces.push({ g: node.geometry.clone().applyMatrix4(node.matrixWorld), finish: node.material.name });
+    });
     if (!pieces.length)
-      pieces.push({ g: (id === "sign_downlight" ? lamp : cube).clone(), mat: fallback });
-    const bounds = new T.Box3;
+      pieces.push({ g: fallback.clone(), finish: finish2 });
     for (const { g: g2 } of pieces) {
-      if (module && id === "sign_blade_bracket")
-        g2.rotateY(-Math.PI / 2);
-      g2.rotateZ(rotation);
+      g2.rotateY(yaw);
+      g2.rotateZ(roll);
       g2.computeBoundingBox();
       bounds.union(g2.boundingBox);
     }
-    const centre = bounds.getCenter(new T.Vector3), size = bounds.getSize(new T.Vector3);
-    for (const { g: g2, mat: mat2 } of pieces) {
-      const geom = g2.index ? g2.toNonIndexed() : g2;
-      geom.translate(-centre.x, -centre.y, -centre.z);
-      geom.scale(w / (size.x || 1), h / (size.y || 1), d / (size.z || 1));
-      if (!geom.attributes.normal)
-        geom.computeVertexNormals();
-      const spec = materials[mat2] ?? materials[fallback];
-      const position = geom.attributes.position, normal = geom.attributes.normal;
-      for (let i = 0;i < position.count; i++) {
-        const vx = position.getX(i), vy = position.getY(i);
-        vertices.push(x + vx, y + vy, z + position.getZ(i));
-        normals.push(normal.getX(i), normal.getY(i), normal.getZ(i));
+    const mid = bounds.getCenter(new T.Vector3), size = bounds.getSize(new T.Vector3);
+    for (const piece of pieces) {
+      let vertex = function(i, normalSign) {
+        const x = position.getX(i), y = position.getY(i);
+        vertices.push(centre[0] + x, centre[1] + y, centre[2] + position.getZ(i));
+        normals.push(normalSign * normal.getX(i), normalSign * normal.getY(i), normalSign * normal.getZ(i));
         colors.push(...spec.baseColorFactor.slice(0, 3));
-        pbr2.push(spec.metallicFactor, spec.roughnessFactor, 0);
+        pbr.push(spec.metallicFactor, spec.roughnessFactor, 0);
         emission.push(...spec.emissiveFactor);
-        anchors.push(stretch === "width" || stretch === "both" ? vx / w : ax, stretch === "height" || stretch === "both" ? vy / h : ay, blade ? 1 : 0);
-      }
-      geom.dispose();
-      if (geom !== g2)
-        g2.dispose();
+        anchors.push(stretch.includes("x") ? x / target[0] : anchor[0], stretch.includes("y") ? y / target[1] : anchor[1], flag);
+      };
+      const g2 = piece.g.index ? piece.g.toNonIndexed() : piece.g;
+      g2.translate(-mid.x, -mid.y, -mid.z);
+      g2.scale(target[0] / size.x, target[1] / size.y, target[2] / size.z);
+      const position = g2.attributes.position, normal = g2.attributes.normal;
+      const spec = materials[piece.finish];
+      for (let i = 0;i < position.count; i++)
+        vertex(i, 1);
+      if (spec.doubleSided)
+        for (let i = position.count - 1;i >= 0; i--)
+          vertex(i, -1);
+      g2.dispose();
+      if (g2 !== piece.g)
+        piece.g.dispose();
     }
   }
-  const corner = 0.09;
-  for (const side of [-1, 1]) {
-    part("sign_frame_edge_h", 0, side * (baseH / 2 - 0.022), 0.018, baseW - 2 * corner, 0.032, 0.029, 0, side / 2, "width", false, "brass_trim");
-    part("sign_frame_edge_v", side * (baseW / 2 - 0.022), 0, 0.018, 0.032, baseH - 2 * corner, 0.029, side / 2, 0, "height", false, "brass_trim");
-    for (const end of [-1, 1])
-      part("sign_frame_corner", side * (baseW / 2 - corner / 2), end * (baseH / 2 - corner / 2), 0.018, corner, corner, 0.036, side / 2, end / 2, null, false, "brass_trim", side < 0 ? end < 0 ? 0 : -Math.PI / 2 : end < 0 ? Math.PI / 2 : Math.PI);
-  }
-  part("sign_blade_bracket", -baseW / 2 + 0.24, -0.427, 0.46, 0.042, 0.055, 0.94, -0.5, 0, null, true, "brass_trim");
-  if (modules.has("sign_backplate"))
-    part("sign_backplate", 0, 0, -0.031, baseW, baseH, 0.06, 0, 0, "both", false, "lacquer_fascia");
-  if (detailed)
-    for (const a of [-0.33, 0, 0.33])
-      part("sign_downlight", a * baseW, baseH / 2 - 0.062, 0.035, 0.1, 0.038, 0.06, a, 0.5, null, false, "emissive_letter");
+  assemble(part, { lamp, leaf });
   cube.dispose();
   lamp.dispose();
+  leaf.dispose();
   const g = new T.BufferGeometry;
-  for (const [name, values] of Object.entries({ position: vertices, normal: normals, color: colors, signAnchor: anchors, signFinish: pbr2, signEmission: emission }))
-    g.setAttribute(name, new T.Float32BufferAttribute(values, 3));
-  const dimensions = new T.InstancedBufferAttribute(new Float32Array(capacity * 3), 3);
+  for (const [attribute, values] of Object.entries({ position: vertices, normal: normals, color: colors, signAnchor: anchors, signFinish: pbr, signEmission: emission }))
+    g.setAttribute(attribute, new T.Float32BufferAttribute(values, 3));
+  const dimensions = new T.InstancedBufferAttribute(new Float32Array(capacity * 4), 4);
   g.setAttribute("signSize", dimensions);
   const mat = new T.MeshStandardMaterial({ vertexColors: true, metalness: 1, roughness: 1 });
   mat.onBeforeCompile = (shader) => {
-    shader.vertexShader = `attribute vec3 signAnchor, signFinish, signSize, signEmission; varying vec3 vFinish, vSignEmission;
+    shader.vertexShader = `attribute vec3 signAnchor, signFinish, signEmission; attribute vec4 signSize; varying vec3 vFinish, vSignEmission;
 ` + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
       transformed.xy += signAnchor.xy * signSize.xy;
-      if(signAnchor.z > .5 && signSize.z < .5) transformed = vec3(0.);
+      if ((signAnchor.z == 1. && signSize.z < .5) || (signAnchor.z == 2. && signSize.w < .5)) transformed = vec3(0.);
       vFinish=signFinish;vSignEmission=signEmission;`);
     shader.fragmentShader = `varying vec3 vFinish, vSignEmission;
 ` + shader.fragmentShader;
@@ -3039,10 +3324,10 @@ totalEmissiveRadiance += vSignEmission;`);
   const mesh = new T.InstancedMesh(g, mat, capacity);
   mesh.frustumCulled = false;
   mesh.count = 0;
-  mesh.name = "Instanced sign hardware";
-  return { mesh, set(index, sign) {
-    mesh.setMatrixAt(index, sign.hardwareMatrix);
-    dimensions.setXYZ(index, sign.config.size.width - baseW, sign.config.size.height - baseH, Number(sign.config.blade));
+  mesh.name = name;
+  return { mesh, setInstance(index, matrix, dw, dh, first, second) {
+    mesh.setMatrixAt(index, matrix);
+    dimensions.setXYZW(index, dw, dh, Number(first), Number(second));
   }, commit(count) {
     mesh.count = count;
     mesh.visible = count > 0;
@@ -3050,33 +3335,82 @@ totalEmissiveRadiance += vSignEmission;`);
     dimensions.needsUpdate = true;
   } };
 }
+function buildHardware(T, modules, detailed, capacity) {
+  const batch = buildBatch(T, modules, capacity, "Instanced sign hardware", (part, { lamp }) => {
+    const back = -plateDepth - 0.001, trimDepth = sizes.get("sign_frame_corner")[2];
+    const z = back + trimDepth / 2;
+    part("sign_backplate", [0, 0, back + plateDepth / 2], [baseW, baseH, plateDepth], [0, 0], "xy", "lacquer_fascia");
+    for (const side of [-1, 1]) {
+      part("sign_frame_edge_h", [0, side * (baseH - rail) / 2, z], [baseW - 2 * corner, rail, trimDepth], [0, side / 2], "x", "brass_trim", { roll: side === 1 ? Math.PI : 0 });
+      part("sign_frame_edge_v", [side * (baseW - rail) / 2, 0, z], [rail, baseH - 2 * corner, trimDepth], [side / 2, 0], "y", "brass_trim", { roll: side === 1 ? Math.PI : 0 });
+      for (const end of [-1, 1]) {
+        const roll = side < 0 ? end < 0 ? 0 : -Math.PI / 2 : end < 0 ? Math.PI / 2 : Math.PI;
+        part("sign_frame_corner", [side * (baseW - corner) / 2, end * (baseH - corner) / 2, z], [corner, corner, trimDepth], [side / 2, end / 2], "", "brass_trim", { roll });
+      }
+    }
+    const { inset, drop, reach, height, thickness } = bladeSocket;
+    const x = -baseW / 2 + inset, blade = { yaw: -Math.PI / 2, flag: 1 };
+    part("sign_blade_panel", [x, -drop, reach / 2], [thickness, height, reach], [-0.5, 0], "", "brass_plate", blade);
+    const [, armH, armD] = sizes.get("sign_blade_bracket");
+    part("sign_blade_bracket", [x, -drop + height / 2 + armH * 0.1, reach / 2], [armD, armH, reach], [-0.5, 0], "", "gunmetal", blade);
+    const light = sizes.get("sign_downlight");
+    if (detailed)
+      for (const a of [-0.33, 0, 0.33])
+        part("sign_downlight", [a * baseW, (baseH - light[1]) / 2, light[2] / 2], light, [a, 0.5], "", "emissive_letter", { fallback: lamp });
+  });
+  return { ...batch, set(index, { config, hardwareMatrix }) {
+    batch.setInstance(index, hardwareMatrix, config.size.width - baseW, config.size.height - baseH, config.blade, false);
+  } };
+}
+function buildEndTrim(T, modules, capacity) {
+  const batch = buildBatch(T, modules, capacity * 2, "Instanced sign end trim", (part, { leaf }) => {
+    for (const x of [-0.102, 0, 0.102])
+      part("sign_timber_slat", [x, 0, 0.012], [0.09, baseH - 0.14, 0.02], [0, 0], "y", "timber_slat", { flag: 1 });
+    const top = baseH / 2 - 0.08;
+    if (modules.has("sign_ivy_swag")) {
+      const [w, h, d] = sizes.get("sign_ivy_swag");
+      part("sign_ivy_swag", [0, top - w / 2, 0.024 + d / 2], [h, w, d], [0, 0.5], "", "ivy_leaf", { roll: -Math.PI / 2, flag: 2 });
+    } else {
+      part(null, [0, top - 0.29, 0.031], [0.012, 0.58, 0.012], [0, 0.5], "", "timber_slat", { flag: 2 });
+      for (let i = 0;i < 5; i++)
+        part(null, [0.035 * (i % 2 ? 1 : -1), top - 0.09 - i * 0.1, 0.04], [0.085, 0.12, 0.02], [0, 0.5], "", "ivy_leaf", { flag: 2, fallback: leaf });
+    }
+  });
+  const matrix = new T.Matrix4;
+  return { ...batch, set(index, { config, hardwareMatrix }, side) {
+    matrix.makeTranslation(side * (config.size.width / 2 - 0.23), 0, 0).premultiply(hardwareMatrix);
+    batch.setInstance(index, matrix, 0, config.size.height - baseH, config.finish === "timber-slat", config.preset === "t3-cafe");
+  } };
+}
 
 // demos/corporate/gjh/v11/assets/signage/models.js
-var modelFiles = Object.freeze([]);
-var moduleIds = Object.freeze([
-  "sign_frame_corner",
-  "sign_frame_edge_h",
-  "sign_frame_edge_v",
-  "sign_backplate",
-  "sign_downlight",
-  "sign_blade_bracket"
-]);
+var moduleIds = Object.freeze(manifest_default.assets.map((asset) => asset.name));
+var modelFiles = Object.freeze(manifest_default.assets.map((asset) => asset.file));
 async function loadModules(assetBase, files = modelFiles, loader = new GLTFLoader3) {
-  const modules = new Map;
+  const modules = new Map, materials2 = new Map;
   await Promise.all([...new Set(files)].map(async (file) => {
-    if (!/^[a-zA-Z0-9_-]+\.glb$/.test(file))
+    if (!modelFiles.includes(file))
       return;
     try {
       const url = new URL("signage/models/" + file, assetBase);
       const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
       if (!response.ok)
         return;
-      const { scene } = await loader.parseAsync(await response.arrayBuffer(), url.href.slice(0, url.href.lastIndexOf("/") + 1));
-      scene.updateMatrixWorld(true);
-      scene.traverse((node) => {
-        if (moduleIds.includes(node.name) || /^sign_logo3d_[a-z0-9_]+$/.test(node.name))
-          modules.set(node.name, node);
+      const { scene } = await loader.parseAsync(await response.arrayBuffer(), new URL(".", url).href);
+      const id = file.slice(0, -4);
+      const module = scene.getObjectByName(id);
+      if (!module)
+        return;
+      module.updateMatrixWorld(true);
+      module.traverse((mesh) => {
+        if (!mesh.isMesh)
+          return;
+        const material = mesh.material;
+        if (!materials2.has(material.name))
+          materials2.set(material.name, material);
+        mesh.material = materials2.get(material.name);
       });
+      modules.set(id, module);
     } catch {}
   }));
   return modules;
@@ -3103,7 +3437,7 @@ function nearFaceMaterial(T, texture, pulse) {
   };
   return material;
 }
-function modelRelief(T, sign, module, mask, cell) {
+function modelRelief(T, sign, module, mask, finishes2) {
   const meshes = [], bounds = new T.Box3;
   module.traverse((node) => {
     if (!node.isMesh)
@@ -3111,7 +3445,7 @@ function modelRelief(T, sign, module, mask, cell) {
     const geo = node.geometry.clone().applyMatrix4(node.matrixWorld);
     geo.computeBoundingBox();
     bounds.union(geo.boundingBox);
-    meshes.push(geo);
+    meshes.push({ geo, material: node.material });
   });
   if (!meshes.length)
     return null;
@@ -3122,20 +3456,16 @@ function modelRelief(T, sign, module, mask, cell) {
   const x = (x0 + (x1 - x0) * (u + w / 2)) / n, y = (y0 + (y1 - y0) * (v + h / 2)) / m;
   const size = bounds.getSize(new T.Vector3), centre = bounds.getCenter(new T.Vector3);
   const scale = Math.min(config.size.width * (x1 - x0) * w / n / size.x, config.size.height * (y1 - y0) * h / m / size.y);
-  const [left, bottom, right, top] = uvRect(cell);
-  const pieces = meshes.map((g) => {
+  const pieces = meshes.map(({ geo: g, material }) => {
     const geometry = g.index ? g.toNonIndexed() : g;
     geometry.translate(-centre.x, -centre.y, -bounds.min.z);
     geometry.scale(scale, scale, Math.min(scale, 0.04 / (size.z || 1)));
     geometry.translate((x - 0.5) * config.size.width, mount.y + (0.5 - y) * config.size.height, mount.z + 0.002);
-    const pos = geometry.attributes.position, uv = [];
-    for (let i = 0;i < pos.count; i++) {
-      uv.push(left + (right - left) * (0.5 + pos.getX(i) / config.size.width), bottom + (top - bottom) * (0.5 + (pos.getY(i) - mount.y) / config.size.height));
-    }
-    for (const key of Object.keys(geometry.attributes))
-      if (key !== "position" && key !== "normal")
-        geometry.deleteAttribute(key);
-    geometry.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
+    const count = geometry.attributes.position.count;
+    const index = finishes2.indexOf(material);
+    const finish2 = index < 0 ? finishes2.push(material) : index + 1;
+    geometry.setAttribute("signSolid", new T.Uint8BufferAttribute(new Uint8Array(count).fill(finish2), 1));
+    geometry.setAttribute("uv", new T.Float32BufferAttribute(new Float32Array(count * 2), 2));
     if (!geometry.attributes.normal)
       geometry.computeVertexNormals();
     if (g !== geometry)
@@ -3149,14 +3479,50 @@ function modelRelief(T, sign, module, mask, cell) {
     remaining.fill(0, j * n + Math.floor(x0 + (x1 - x0) * u), j * n + Math.ceil(x0 + (x1 - x0) * (u + w)));
   return { geometry: merged, remaining };
 }
-function buildRelief(T, signs, tiles, modules, texture) {
-  const pieces = [], ranges = [], source = [];
+function reliefMaterial(T, texture, finishes2) {
+  const mat = new T.MeshStandardMaterial({
+    map: texture,
+    color: 5919044,
+    emissive: 16777215,
+    emissiveMap: texture,
+    emissiveIntensity: 0.78,
+    roughness: 0.35,
+    metalness: 0.24,
+    toneMapped: false
+  });
+  if (!finishes2.length)
+    return mat;
+  mat.customProgramCacheKey = () => "sign-relief-" + finishes2.length;
+  mat.onBeforeCompile = (shader) => {
+    const count = finishes2.length;
+    shader.uniforms.solidBase = { value: finishes2.map((m) => m.color) };
+    shader.uniforms.solidEmission = { value: finishes2.map((m) => m.emissive.clone().multiplyScalar(m.emissiveIntensity)) };
+    shader.uniforms.solidPbr = { value: finishes2.map((m) => new T.Vector2(m.metalness, m.roughness)) };
+    shader.vertexShader = `attribute float signSolid; varying float vSolid;
+` + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+vSolid=signSolid;`);
+    shader.fragmentShader = `varying float vSolid; uniform vec3 solidBase[${count}],solidEmission[${count}];
+      uniform vec2 solidPbr[${count}];
+` + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace("#include <map_fragment>", `#include <map_fragment>
+int solid=int(vSolid+.5)-1; if(solid>=0) diffuseColor=vec4(solidBase[solid],1.);`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
+if(solid>=0) roughnessFactor=solidPbr[solid].y;`).replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
+if(solid>=0) metalnessFactor=solidPbr[solid].x;`).replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+if(solid>=0) totalEmissiveRadiance=solidEmission[solid];`);
+  };
+  return mat;
+}
+function buildRelief(T, signs, tiles, modules, texture, detailed) {
+  const pieces = [], ranges = [], source = [], finishes2 = [];
   let offset = 0;
   for (const sign of signs) {
     const { mask, cells } = tiles.get(sign.config.id);
     const imported = mask.markBounds && modules.get(sign.config.logoModule);
-    const model = imported && modelRelief(T, sign, imported, mask, cells.fascia);
-    const lettering = letterGeometry(T, model ? { ...mask, ink: model.remaining } : mask, sign.config, sign.mount, cells.fascia);
+    const model = imported && modelRelief(T, sign, imported, mask, finishes2);
+    const lettering = detailed && letterGeometry(T, model ? { ...mask, ink: model.remaining } : mask, sign.config, sign.mount, cells.fascia);
+    if (lettering)
+      lettering.setAttribute("signSolid", new T.Uint8BufferAttribute(lettering.attributes.position.count, 1));
     const start = source.length;
     for (const g of [model?.geometry, lettering]) {
       if (!g)
@@ -3180,16 +3546,7 @@ function buildRelief(T, signs, tiles, modules, texture) {
   index.setUsage(T.DynamicDrawUsage);
   geo.setIndex(index);
   geo.setDrawRange(0, 0);
-  const mat = new T.MeshStandardMaterial({
-    map: texture,
-    color: 5919044,
-    emissive: 16777215,
-    emissiveMap: texture,
-    emissiveIntensity: 0.78,
-    roughness: 0.35,
-    metalness: 0.24,
-    toneMapped: false
-  });
+  const mat = reliefMaterial(T, texture, finishes2);
   const mesh = new T.Mesh(geo, mat);
   mesh.frustumCulled = false;
   mesh.name = "Near sign letter relief";
@@ -3226,7 +3583,8 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     geo.setAttribute("signRange", new T.Float32BufferAttribute(ranges, 4));
     geo.setAttribute("signPulseEnabled", new T.Float32BufferAttribute(pulses, 1));
     pieces.push(geo);
-    signs.push({ config, matrix, mount, hardwareMatrix, centre, sphere: new T.Sphere(centre, config.size.width / 2 + 0.6) });
+    const hasEndTrim = config.finish === "timber-slat" || config.preset === "t3-cafe";
+    signs.push({ config, matrix, mount, hardwareMatrix, centre, hasEndTrim, sphere: new T.Sphere(centre, config.size.width / 2 + 0.6) });
   });
   const faces = new T.Mesh(mergeGeometries3(pieces), flat);
   pieces.forEach((g) => g.dispose());
@@ -3234,7 +3592,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
   faces.layers.enable(1);
   scene.add(faces);
   const frustum = new T.Frustum, view = new T.Matrix4, eye = new T.Vector3, near = [];
-  let tier = "low", signature = -1, hardware = null, relief = null, modules = new Map, moduleTask;
+  let tier = "low", signature = -1, hardware = null, endTrim = null, relief = null, modules = new Map, appliedModules, moduleTask;
   let calls = 0, tris = 0;
   function measure(mesh) {
     let beforeCalls = 0, beforeTriangles = 0;
@@ -3258,14 +3616,17 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
   }
   function rebuild(next) {
     discard(hardware);
+    discard(endTrim);
     discard(relief);
-    hardware = relief = null;
+    hardware = endTrim = relief = null;
+    appliedModules = modules;
     faces.material = next === "low" ? flat : embossed;
     if (next !== "low") {
       hardware = buildHardware(T, modules, next === "detailed", signs.length);
-      if (next === "detailed")
-        relief = buildRelief(T, signs, bake.tiles, modules, texture);
-      for (const pool of [hardware, relief])
+      if (signs.some((s) => s.hasEndTrim))
+        endTrim = buildEndTrim(T, modules, signs.length);
+      relief = buildRelief(T, signs, bake.tiles, modules, texture, next === "detailed");
+      for (const pool of [hardware, endTrim, relief])
         if (pool) {
           pool.mesh.visible = false;
           measure(pool.mesh);
@@ -3278,18 +3639,14 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
   return { update(camera, requestedTier, reducedMotion, now) {
     calls = tris = 0;
     const next = ["balanced", "detailed"].includes(requestedTier) ? requestedTier : "low";
-    if (tier !== next)
+    if (tier !== next || next !== "low" && appliedModules !== modules)
       rebuild(next);
     if (next === "low")
       return;
-    if (modelFiles.length && !moduleTask) {
-      moduleTask = loadModules(assetBase).then((loaded) => {
-        if (loaded.size) {
-          modules = loaded;
-          rebuild(tier);
-        }
-      });
-    }
+    moduleTask ??= loadModules(assetBase).then((loaded) => {
+      if (loaded.size)
+        modules = loaded;
+    });
     frustum.setFromProjectionMatrix(view.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
     eye.setFromMatrixPosition(camera.matrixWorld);
     let bits = 0;
@@ -3305,14 +3662,24 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     }
     pulse.value = near.length && !reducedMotion?.matches ? 0.024 * Math.sin(now * 0.0012) : 0;
     if (bits === signature)
-      return;
+      return moduleTask;
     signature = bits;
     near.forEach((i, n) => hardware.set(n, signs[i]));
     hardware.commit(near.length);
+    let ends = 0;
+    for (const i of near) {
+      const sign = signs[i];
+      if (sign.hasEndTrim) {
+        endTrim.set(ends++, sign, -1);
+        endTrim.set(ends++, sign, 1);
+      }
+    }
+    endTrim?.commit(ends);
     relief?.select(near);
+    return moduleTask;
   }, report() {
     const pixels = texture.image.width * texture.image.height;
-    return { signs: signs.length, drawCalls: calls, triangles: tris, textureMB: +(pixels * 4 * 4 / 3 / 1048576).toFixed(2), tier };
+    return { modelsLoaded: modules.size, signs: signs.length, drawCalls: calls, triangles: tris, textureMB: +(pixels * 4 * 4 / 3 / 1048576).toFixed(2), tier };
   } };
 }
 

@@ -175,11 +175,21 @@ class GalleryTests(unittest.TestCase):
                 self.assertIn(artwork, cached)
                 self.assertTrue((output / artwork).is_file())
             mall = output / "demos/corporate/gjh/v11"
+            signage = Path("demos/corporate/gjh/v11/assets/signage")
+            for source in (ROOT / signage).rglob("*"):
+                if source.is_file():
+                    name = source.relative_to(ROOT)
+                    self.assertEqual((output / name).read_bytes(), source.read_bytes(), name)
+                    self.assertNotIn(name.as_posix(), cached)
+            startup_models = json.loads((ROOT / "data/gjh-startup-assets.json").read_text())
+            self.assertFalse(any(name.startswith("signage/") for name in startup_models))
             mall_worker = (mall / "pwa-sw.js").read_text()
             mall_entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", mall_worker, re.S).group(1))
             self.assertEqual({entry["path"] for entry in mall_entries}, {
                 "offline.html", "manifest.webmanifest", "assets/mall-icon-192.png", "assets/mall-icon-512.png",
-                "style.bundle.css", "assets/loader.js", "assets/gjh-loader-mark.svg"})
+                "style.bundle.css", "assets/loader.js", "assets/gjh-loader-mark.svg",
+                "assets/signage/tokens.js", "assets/signage/models/manifest.json",
+                "assets/signage/models/presets.json", "assets/signage/models/preset-icons.svg"})
             self.assertLessEqual(sum((mall / entry["path"]).stat().st_size for entry in mall_entries), 256 * 1024)
             for entry in mall_entries:
                 self.assertEqual(hashlib.sha256((mall / entry["path"]).read_bytes()).hexdigest(), entry["sha256"])
