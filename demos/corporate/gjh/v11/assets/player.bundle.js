@@ -34,20 +34,20 @@ async function createSelectedVisitor(selection, { tripo, v2, v1 }) {
     return v2();
   }
 }
-function createCharacter(T) {
+function createCharacter(T, prepareModel) {
   return createSelectedVisitor(new URLSearchParams(location.search).get("visitor"), {
     async tripo() {
       const { createCharacterTripo } = await import("./character-tripo.js");
-      return createCharacterTripo(T, createLocomotionContinuity);
+      return createCharacterTripo(T, createLocomotionContinuity, prepareModel);
     },
     async v2() {
       const { createCharacterV2 } = await import("./character-v2.bundle.js");
-      return createCharacterV2(T, createLocomotionContinuity);
+      return createCharacterV2(T, createLocomotionContinuity, prepareModel);
     },
-    v1: () => createCharacterV1(T)
+    v1: () => createCharacterV1(T, prepareModel)
   });
 }
-async function createCharacterV1(T) {
+async function createCharacterV1(T, prepareModel) {
   const [{ GLTFLoader }, { createPushCart }, { createSeatedPose }, { createCollectionGesture }, { createCarryBag }] = await Promise.all([
     import("../vendor/GLTFLoader.js"),
     import("./push-cart.js"),
@@ -76,7 +76,7 @@ async function createCharacterV1(T) {
   const seated = createSeatedPose(avatar);
   const visual = new T.Group;
   visual.add(avatar);
-  const cart = await createPushCart(T, avatar, visual);
+  const cart = await createPushCart(T, avatar, visual, { prepareModel });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const clips = Object.freeze({ idle: "idle", walk: "walk", run: "sprint" });
   const mixer = new T.AnimationMixer(avatar);
@@ -339,8 +339,8 @@ function playerCameraFraming(model, expanded, width, height) {
     lookAhead: tripo ? 1.7 : 0
   };
 }
-async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
-  const character = await createCharacter(T);
+async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel) {
+  const character = await createCharacter(T, prepareModel);
   const model = character.state.model;
   const visual = character.visual;
   scene.add(visual);

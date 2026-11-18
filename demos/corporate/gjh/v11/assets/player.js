@@ -19,8 +19,8 @@ export function playerCameraFraming(model, expanded, width, height) {
   };
 }
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
-  const character = await createCharacter(T);
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel) {
+  const character = await createCharacter(T, prepareModel);
   const model = character.state.model;
   const visual = character.visual;
   scene.add(visual);

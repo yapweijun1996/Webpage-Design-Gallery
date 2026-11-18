@@ -2,7 +2,7 @@ import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden, prepareModel = () => {}}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden, prepareModel, setPavingMap}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -72,7 +72,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   new T.TextureLoader().load(pavingURL.href,map=>{
     map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;
     map.repeat.set(12.5,12);map.anisotropy=4;
-    materials.paving.map=map;materials.paving.needsUpdate=true;
+    void setPavingMap(map);
   },undefined,()=>{});
   box('paving',10,-.013,24,49.85,.002,47.85);
 
@@ -303,7 +303,12 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
         mesh.applyMatrix4(primitive.matrix);
         model.add(mesh);
       }
-      await prepareModel(model);
+      try { await prepareModel?.(model); }
+      catch {
+        for (const {geometry, material} of record.primitives) { geometry.dispose(); material.dispose(); }
+        destination.userData.sourceStatus = 'fallback';
+        return;
+      }
       if (fallback) destination.remove(fallback);
       destination.add(...model.children);
     }

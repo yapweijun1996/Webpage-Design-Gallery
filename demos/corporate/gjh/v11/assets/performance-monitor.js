@@ -42,6 +42,7 @@ function copyFields(record, frameMs, info, detail) {
   record.textures = metric(info?.memory?.textures);
   record.simulationMs = metric(detail?.simulationMs);
   record.renderMs = metric(detail?.renderMs);
+  record.uploadMs = metric(detail?.uploadMs);
   record.callbackMs = metric(detail?.callbackMs);
   record.steps = metric(detail?.steps);
   record.zone = detail?.zone ?? null;

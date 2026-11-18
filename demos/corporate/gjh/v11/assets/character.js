@@ -26,21 +26,21 @@ export async function createSelectedVisitor(selection, {tripo, v2, v1}) {
   }
 }
 
-export function createCharacter(T) {
+export function createCharacter(T, prepareModel) {
   return createSelectedVisitor(new URLSearchParams(location.search).get('visitor'), {
     async tripo() {
       const {createCharacterTripo} = await import('./character-tripo.js');
-      return createCharacterTripo(T, createLocomotionContinuity);
+      return createCharacterTripo(T, createLocomotionContinuity, prepareModel);
     },
     async v2() {
       const {createCharacterV2} = await import('./character-v2.js');
-      return createCharacterV2(T, createLocomotionContinuity);
+      return createCharacterV2(T, createLocomotionContinuity, prepareModel);
     },
-    v1: () => createCharacterV1(T)
+    v1: () => createCharacterV1(T, prepareModel)
   });
 }
 
-async function createCharacterV1(T) {
+async function createCharacterV1(T, prepareModel) {
   const [{GLTFLoader}, {createPushCart}, {createSeatedPose}, {createCollectionGesture}, {createCarryBag}] = await Promise.all([
     import('../vendor/GLTFLoader.js'), import('./push-cart.js'), import('./seated-pose.js'),
     import('./collection-gesture.js'), import('./carry-bag.js')
@@ -67,7 +67,7 @@ async function createCharacterV1(T) {
   const seated = createSeatedPose(avatar);
   const visual = new T.Group();
   visual.add(avatar);
-  const cart=await createPushCart(T,avatar,visual);
+  const cart=await createPushCart(T,avatar,visual,{prepareModel});
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clips = Object.freeze({idle: 'idle', walk: 'walk', run: 'sprint'});
   const mixer = new T.AnimationMixer(avatar);

@@ -61,6 +61,7 @@ function copyFields(record, frameMs, info, detail) {
   record.textures = metric(info?.memory?.textures);
   record.simulationMs = metric(detail?.simulationMs);
   record.renderMs = metric(detail?.renderMs);
+  record.uploadMs = metric(detail?.uploadMs);
   record.callbackMs = metric(detail?.callbackMs);
   record.steps = metric(detail?.steps);
   record.zone = detail?.zone ?? null;
@@ -3050,76 +3051,222 @@ function createMallAtmosphere(T, renderer, scene, slots) {
 }
 
 // demos/corporate/gjh/v11/assets/model-warmup.js
-function createModelWarmup(T, renderer, firstFrame, canWarm) {
-  let pending = firstFrame;
-  const camera = new T.PerspectiveCamera;
-  camera.position.z = 1;
-  function warm(model, scene) {
-    if (!canWarm() || document.hidden || renderer.getContext().isContextLost())
+function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, maxSteps = 2 } = {}) {
+  const jobs = [];
+  let maxFrameUploadMs = 0, lateAdditions = 0, closed = false;
+  function settle(job, error) {
+    const index = jobs.indexOf(job);
+    if (index < 0)
       return;
-    const staging = new T.Scene;
-    staging.fog = scene.fog;
-    staging.environment = scene.environment;
-    const target = new T.WebGLRenderTarget(1, 1);
-    const previousTarget = renderer.getRenderTarget();
-    const toneMapping = renderer.toneMapping;
-    const shadows = renderer.shadowMap;
-    const { autoUpdate, needsUpdate } = shadows;
-    const renderInfo = renderer.info.render;
-    const { calls, triangles, points, lines } = renderInfo;
-    const visible = model.visible;
-    const culled = [];
-    try {
-      for (const light of scene.children)
-        if (light.isLight && light.visible)
-          staging.add(light.clone());
-      staging.add(model);
-      model.visible = true;
-      renderer.compile?.(staging, camera);
-      model.traverseVisible((mesh) => {
-        if (!mesh.isMesh || !mesh.frustumCulled)
-          return;
-        culled.push(mesh);
-        mesh.frustumCulled = false;
-      });
-      shadows.autoUpdate = shadows.needsUpdate = false;
-      renderer.setRenderTarget(target);
-      renderer.render(staging, camera);
-    } finally {
-      for (const mesh of culled)
-        mesh.frustumCulled = true;
-      model.visible = visible;
-      staging.clear();
-      renderer.toneMapping = toneMapping;
-      shadows.autoUpdate = autoUpdate;
-      shadows.needsUpdate = needsUpdate;
-      Object.assign(renderInfo, { calls, triangles, points, lines });
-      try {
-        renderer.setRenderTarget(previousTarget);
-      } finally {
-        target.dispose();
-      }
+    jobs.splice(index, 1);
+    job.signal?.removeEventListener("abort", job.cancel);
+    if (error)
+      job.reject(error);
+    else {
+      if (job.late)
+        lateAdditions++;
+      job.resolve();
     }
   }
-  return (model, scene) => {
-    pending = pending.then(() => new Promise((resolve) => {
-      if (!canWarm() || document.hidden) {
-        resolve();
-        return;
-      }
-      const run = () => {
-        try {
-          warm(model, scene);
-        } catch {} finally {
-          resolve();
+  function enqueue(makeSteps, { priority = () => 0, signal, late = true } = {}) {
+    if (closed || signal?.aborted)
+      return Promise.reject(new DOMException("Upload cancelled", "AbortError"));
+    return new Promise((resolve, reject) => {
+      const job = { makeSteps, priority, signal, late, resolve, reject, iterator: null };
+      job.cancel = () => settle(job, new DOMException("Upload cancelled", "AbortError"));
+      jobs.push(job);
+      signal?.addEventListener("abort", job.cancel, { once: true });
+    });
+  }
+  function runFrame(canRun) {
+    if (!canRun || !jobs.length)
+      return 0;
+    const start = now();
+    let steps = 0;
+    while (jobs.length && steps < maxSteps && now() - start < budgetMs) {
+      let job = jobs[0], priority = job.priority();
+      for (let i = 1;i < jobs.length; i++) {
+        const candidate = jobs[i];
+        const rank = candidate.priority();
+        if (rank < priority) {
+          job = candidate;
+          priority = rank;
         }
-      };
-      if (typeof window.requestIdleCallback === "function")
-        window.requestIdleCallback(run, { timeout: 1500 });
-      else
-        window.setTimeout(run, 100);
-    })).catch(() => {});
-    return pending;
+      }
+      try {
+        job.iterator ??= job.makeSteps();
+        const step = job.iterator.next();
+        if (step.done)
+          settle(job);
+        else {
+          steps++;
+          if (step.value() === false)
+            break;
+        }
+      } catch (error) {
+        settle(job, error);
+      }
+    }
+    const elapsed = now() - start;
+    maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
+    return elapsed;
+  }
+  return {
+    enqueue,
+    runFrame,
+    invalidate() {
+      for (const job of jobs)
+        job.iterator = null;
+    },
+    dispose() {
+      closed = true;
+      while (jobs.length)
+        jobs[0].cancel();
+    },
+    report() {
+      return { lateAdditions, maxFrameUploadMs, pendingUploads: jobs.length };
+    }
+  };
+}
+function materialTextures(material) {
+  const textures = Object.values(material).filter((value) => value?.isTexture);
+  for (const { value } of Object.values(material.uniforms ?? {})) {
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry?.isTexture)
+        textures.push(entry);
+    }
+  }
+  return textures;
+}
+function createModelWarmup(T, renderer) {
+  const scheduler = createUploadScheduler();
+  let initialized = new WeakMap;
+  const camera = new T.PerspectiveCamera;
+  camera.position.z = 1;
+  const staging = new T.Scene;
+  staging.matrixWorldAutoUpdate = false;
+  const target = new T.WebGLRenderTarget(1, 1);
+  const scissor = new T.Vector4;
+  function withMesh(mesh, scene, mask, linear, work) {
+    const { visible, frustumCulled, children, count } = mesh;
+    const layers = mesh.layers.mask;
+    const previousTarget = renderer.getRenderTarget();
+    const activeFace = renderer.getActiveCubeFace(), activeMip = renderer.getActiveMipmapLevel();
+    const scissorTest = renderer.getScissorTest();
+    const { autoClear, toneMapping } = renderer, autoReset = renderer.info.autoReset;
+    const shadows = renderer.shadowMap, { autoUpdate, needsUpdate } = shadows;
+    const { calls, triangles, points, lines } = renderer.info.render;
+    renderer.getScissor(scissor);
+    try {
+      staging.fog = scene.fog;
+      staging.environment = scene.environment;
+      staging.environmentIntensity = scene.environmentIntensity;
+      staging.children = scene.children.filter((node) => node.isLight && node.visible);
+      staging.children.push(mesh);
+      mesh.children = [];
+      mesh.layers.mask = mask;
+      mesh.visible = true;
+      mesh.frustumCulled = false;
+      if (mesh.isInstancedMesh)
+        mesh.count = Math.min(1, count);
+      camera.layers.mask = mask & 1 ? 1 : mask;
+      mesh.updateWorldMatrix(true, false);
+      renderer.autoClear = false;
+      renderer.info.autoReset = false;
+      shadows.autoUpdate = shadows.needsUpdate = false;
+      renderer.setRenderTarget(linear ? target : null);
+      if (!linear) {
+        renderer.setScissor(0, 0, 0, 0);
+        renderer.setScissorTest(true);
+      }
+      return work();
+    } finally {
+      mesh.visible = visible;
+      mesh.frustumCulled = frustumCulled;
+      mesh.children = children;
+      mesh.layers.mask = layers;
+      if (mesh.isInstancedMesh)
+        mesh.count = count;
+      staging.children = [];
+      renderer.autoClear = autoClear;
+      renderer.toneMapping = toneMapping;
+      renderer.info.autoReset = autoReset;
+      Object.assign(renderer.info.render, { calls, triangles, points, lines });
+      shadows.autoUpdate = autoUpdate;
+      shadows.needsUpdate = needsUpdate;
+      renderer.setScissor(scissor);
+      renderer.setScissorTest(scissorTest);
+      renderer.setRenderTarget(previousTarget, activeFace, activeMip);
+    }
+  }
+  function* prepareMesh(mesh, scene, mask, linear) {
+    let programs;
+    yield () => {
+      const materials = withMesh(mesh, scene, mask, linear, () => renderer.compile(staging, camera));
+      if (renderer.extensions?.has("KHR_parallel_shader_compile")) {
+        programs = [...materials].map((material) => renderer.properties.get(material).currentProgram);
+      }
+      return false;
+    };
+    while (programs?.some((program) => !program.isReady()))
+      yield () => false;
+    yield () => withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
+  }
+  function prepare(root, scene, { hide = false, linear = () => false, ...options } = {}) {
+    const meshes = [];
+    for (const model of Array.isArray(root) ? root : [root]) {
+      model.traverse((mesh) => {
+        if (mesh.isMesh || mesh.isLine || mesh.isPoints)
+          meshes.push({ mesh, mask: mesh.layers.mask });
+      });
+    }
+    if (!meshes.length)
+      return Promise.resolve();
+    if (hide)
+      for (const { mesh } of meshes)
+        mesh.layers.mask = 0;
+    return scheduler.enqueue(function* () {
+      for (const { mesh, mask } of meshes) {
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const textures = materials.flatMap(materialTextures);
+        if (mesh.isSkinnedMesh && mesh.skeleton) {
+          mesh.skeleton.boneTexture ??= mesh.skeleton.computeBoneTexture().boneTexture;
+          textures.push(mesh.skeleton.boneTexture);
+        }
+        if (mesh.morphTexture)
+          textures.push(mesh.morphTexture);
+        for (const texture of new Set(textures)) {
+          if (initialized.get(texture) === texture.version)
+            continue;
+          yield () => {
+            renderer.initTexture(texture);
+            initialized.set(texture, texture.version);
+          };
+        }
+        yield* prepareMesh(mesh, scene, mask, false);
+        if (linear())
+          yield* prepareMesh(mesh, scene, mask, true);
+      }
+    }, options).finally(() => {
+      if (hide)
+        for (const { mesh, mask } of meshes)
+          mesh.layers.mask = mask;
+    });
+  }
+  return {
+    prepare,
+    report: scheduler.report,
+    runFrame(canRun) {
+      return scheduler.runFrame(canRun && !renderer.getContext().isContextLost());
+    },
+    invalidate() {
+      initialized = new WeakMap;
+      scheduler.invalidate();
+    },
+    dispose() {
+      scheduler.dispose();
+      target.dispose();
+    }
   };
 }
 
@@ -3332,6 +3479,7 @@ var last = 0;
 var accumulator = 0;
 var frames = 0;
 var three;
+var modelWarmup;
 var productControl = null;
 var shelfFocus = null;
 var guidance = null;
@@ -3349,9 +3497,9 @@ var contextWaiter;
 var graphicsStatus = "initializing";
 var losses = 0;
 var validations = 0;
-var releaseModelWarmup;
+var markFirstFrame;
 var firstFrame = new Promise((resolve) => {
-  releaseModelWarmup = resolve;
+  markFirstFrame = resolve;
 });
 var renderWidth = 0;
 var renderHeight = 0;
@@ -3404,6 +3552,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
+    uploads: modelWarmup?.report() ?? { lateAdditions: 0, maxFrameUploadMs: 0, pendingUploads: 0 },
     viewport: { width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio() },
     graphics: { tier: quality.state?.tier, contextLosses: losses, restorations: validations }
   };
@@ -3644,7 +3793,6 @@ function updateHUD() {
     world.ensureBrandWall().then(({ records }) => {
       ui.setBrandStories(records);
       updateHUD();
-      render();
     }).catch((error) => console.error("Upper deck brand wall could not load:", error));
   }
   const selection = interactions.nearest(p, { travelling: Boolean(p.elevatorTravel), player: p });
@@ -3744,6 +3892,14 @@ function updateModelPreload(now) {
       window.mallLoader?.prepare(node.textContent);
   }
 }
+function warmModels(pose) {
+  if (!pose || document.hidden || contextLost || restorePending || pageEnded)
+    return 0;
+  const { physicalProduct, collection } = pose.character;
+  const stableSeat = pose.seatPhase === "idle" || pose.seatPhase === "seated";
+  const stableProduct = !physicalProduct || ["empty", "held"].includes(physicalProduct.phase);
+  return modelWarmup.runFrame(stableSeat && stableProduct && !pose.elevatorTravel && !pose.productApproaching && !collection.active);
+}
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden)
@@ -3783,12 +3939,15 @@ function animate(now) {
     }
     const renderStart = performance.now();
     const pose = render();
+    const renderEnd = performance.now();
+    const uploadMs = warmModels(pose ?? player.state);
     const end = performance.now();
     if (!windowBlurred) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
         simulationMs: renderStart - simulationStart,
-        renderMs: end - renderStart,
+        renderMs: renderEnd - renderStart,
+        uploadMs,
         callbackMs: end - callbackStart,
         steps,
         zone: currentZone,
@@ -3804,8 +3963,10 @@ function animate(now) {
       }
     } else
       pausePerformance();
-  } else
+  } else {
     pausePerformance();
+    warmModels(player.state);
+  }
   const movement = player.state.animation;
   quality.sample(now, advancing && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
   frame = requestAnimationFrame(animate);
@@ -3823,7 +3984,8 @@ function fallback(message, terminal = true) {
   if (terminal) {
     fatal = true;
     graphicsStatus = "failed";
-    releaseModelWarmup();
+    modelWarmup?.dispose();
+    markFirstFrame();
   }
   pausePerformance();
   hideGuidance();
@@ -3938,6 +4100,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   interrupted = true;
   restorePending = true;
   losses++;
+  modelWarmup?.invalidate();
   mallTheme?.suspend();
   atmosphere?.releaseEnvironment();
   npcs?.clearVisitors();
@@ -4030,7 +4193,7 @@ function validateRestoration() {
     frames++;
     ready = true;
     graphicsStatus = "available";
-    releaseModelWarmup();
+    markFirstFrame();
     if (initialPreloadStarted === null || window.mallLoader?.snapshot().dismissed)
       window.mallLoader?.complete("frame");
     window.__sceneFailed = false;
@@ -4043,7 +4206,7 @@ function validateRestoration() {
     fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.");
   }
 }
-async function installNpcs(T, R, source) {
+async function installNpcs(T, R, prepareModel, source) {
   if (pageEnded || fatal)
     return;
   const enabled = new URLSearchParams(location.search).get("npcs") !== "off";
@@ -4061,7 +4224,8 @@ async function installNpcs(T, R, source) {
       expanded,
       mobile: innerWidth < 1000,
       tier: quality.state?.tier || "balanced",
-      enabled
+      enabled,
+      prepareModel
     };
     const system = source ? createNpcSystem(T, { ...options, source }) : await loadNpcSystem(T, options);
     if (pageEnded || fatal)
@@ -4102,9 +4266,14 @@ async function initialize() {
   physics = new R.World({ x: 0, y: -24, z: 0 });
   physics.timestep = STEP;
   window.mallLoader?.complete("physics");
-  const warmModel = createModelWarmup(T, renderer, firstFrame, () => ready && !fatal && !contextLost);
+  modelWarmup = createModelWarmup(T, renderer);
+  const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
+    linear: () => expanded && quality.state?.tier === "detailed" && renderWidth >= 1000,
+    ...options
+  });
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded, warmModel);
+  const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)
     assetRecords.push(world.productAssets.shelf);
@@ -4163,7 +4332,16 @@ async function initialize() {
         const pack = await loadSeasonalModule(definition);
         if (signal.aborted)
           throw new Error("Theme preparation cancelled");
-        return pack[definition.prepare](T, world.scene, theme, { signal });
+        const stage = pack[definition.prepare](T, world.scene, theme, { signal });
+        if (ready) {
+          try {
+            await prepareModel(stage.group, { signal });
+          } catch (error) {
+            stage.dispose();
+            throw error;
+          }
+        }
+        return stage;
       }, commit(next, previous, stage) {
         try {
           if (!world.applyMallTheme(next) || elevator?.applyMallTheme && !elevator.applyMallTheme(next))
@@ -4203,11 +4381,11 @@ async function initialize() {
   if (mallTheme && !contextLost && !interrupted)
     await mallTheme.restore();
   const { createPlayer } = await import("./assets/player.bundle.js");
-  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded);
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareModel);
   if (player.npcSource)
-    await installNpcs(T, R, player.npcSource);
+    await installNpcs(T, R, prepareModel, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")
-    firstFrame.then(() => installNpcs(T, R));
+    firstFrame.then(() => installNpcs(T, R, prepareModel));
   const { createDOMProjection } = await import("./assets/dom-projection.js");
   const projection = createDOMProjection(T, canvas);
   const { createTargetGuidance } = await import("./assets/target-guidance.js");
@@ -4315,7 +4493,7 @@ async function initialize() {
     return;
   if (!renderer.info.render.calls)
     throw new Error("First scene frame unavailable");
-  releaseModelWarmup();
+  markFirstFrame();
   if (expanded && !window.mallLoader?.snapshot().dismissed) {
     initialPreloadStarted = performance.now();
     window.mallLoader?.prepare("Preparing shop models. You can enter now or browse the directory.");
@@ -4336,5 +4514,6 @@ window.addEventListener("pagehide", (event) => {
     mallTheme?.destroy();
     npcs?.dispose();
     player?.dispose?.();
+    modelWarmup?.dispose();
   }
 });

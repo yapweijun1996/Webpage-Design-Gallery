@@ -67,7 +67,7 @@ function createSitClip(T, source, hips, placement) {
   return clip;
 }
 
-export async function createCharacterTripo(T, createLocomotionContinuity) {
+export async function createCharacterTripo(T, createLocomotionContinuity, prepareModel) {
   const gltf = await loadVisitorGLTF(new URL(`./${model}.glb`, import.meta.url));
   const avatar = gltf.scene;
   let mesh, meshCount = 0, mixer, lod;
@@ -113,7 +113,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity) {
     }
     const transfer = createProductTransfer(T, avatar, poses.rightHand, visual);
     lod = createVisitorLOD(T, placement, {
-      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true
+      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareModel
     });
 
     const resolveLocomotion = createLocomotionContinuity();
@@ -124,7 +124,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity) {
     let cart, prop, pushing = false, hasPrevious = false, disposed = false, count = 0;
     let animation = 'idle', seatWeight = 0, emoteName = null, emoteTime = 0;
     let emoteAction = null, queuedEmote = null, arrivalWave = false;
-    void createPushCart(T, avatar, visual, {fixedPose: false}).then(result => {
+    void createPushCart(T, avatar, visual, {fixedPose: false, prepareModel}).then(result => {
       prop = visual.getObjectByName('DemoPushCart');
       if (disposed) {
         if (prop) { disposeVisitorScene(prop); prop.removeFromParent(); }
@@ -242,7 +242,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity) {
       setCameraOccluded(value) { placement.visible = !value; },
       setBagCount(value) { count = Math.max(0, Number(value) || 0); cart?.setCount(count); },
       setCart(value) {
-        if (value && (!cart || seatWeight > 0)) return false;
+        if (value && (!cart?.state.available || seatWeight > 0)) return false;
         pushing = Boolean(value);
         cart?.set(pushing);
         if (!pushing) hasPrevious = false;

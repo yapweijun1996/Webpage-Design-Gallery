@@ -114,7 +114,7 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden, prepareModel = () => {} }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden, prepareModel, setPavingMap }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -176,8 +176,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     map.wrapS = map.wrapT = T.RepeatWrapping;
     map.repeat.set(12.5, 12);
     map.anisotropy = 4;
-    materials.paving.map = map;
-    materials.paving.needsUpdate = true;
+    setPavingMap(map);
   }, undefined, () => {});
   box("paving", 10, -0.013, 24, 49.85, 0.002, 47.85);
   const canvas = document.createElement("canvas");
@@ -410,7 +409,16 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
         mesh.applyMatrix4(primitive.matrix);
         model.add(mesh);
       }
-      await prepareModel(model);
+      try {
+        await prepareModel?.(model);
+      } catch {
+        for (const { geometry: geometry2, material } of record.primitives) {
+          geometry2.dispose();
+          material.dispose();
+        }
+        destination.userData.sourceStatus = "fallback";
+        return;
+      }
       if (fallback2)
         destination.remove(fallback2);
       destination.add(...model.children);
@@ -3293,6 +3301,12 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         colours.forEach((colour, index) => mesh.setColorAt(index, colour));
         mesh.instanceColor.needsUpdate = true;
       }
+    }, queueShopUpload = function(slot2, ...meshes) {
+      if (!expanded || !prepareModel)
+        return;
+      if (!shopUploads.has(slot2))
+        shopUploads.set(slot2, []);
+      shopUploads.get(slot2).push(...meshes);
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
       const finish = finishForRole.get(material);
       const key2 = `${type}:${finish || material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
@@ -3320,6 +3334,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       mesh.rotation.y = ry;
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
+      if (activeShopSlot !== null)
+        queueShopUpload(activeShopSlot, mesh);
       return tagShopLod(mesh);
     }, sign = function(text, x, y, z, width, height = 0.4, framed = false, fontSize = 42) {
       const canvas = document.createElement("canvas");
@@ -3344,6 +3360,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       mesh.position.set(x, y, z);
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
+      if (activeShopSlot !== null)
+        queueShopUpload(activeShopSlot, mesh);
       return tagShopLod(mesh);
     }, shadow = function(x, z, w, d) {
       if (!expanded) {
@@ -3492,6 +3510,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       productDisplay?.setShadows(shadows);
       if (!expanded)
         return;
+      uploadVisitor = visitor;
       productDisplay?.updateShopLods(visitor, tier);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
@@ -3520,8 +3539,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (!expanded)
         return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
       if (!brandWallPromise)
-        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper)).then((result) => {
+        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper, prepareModel)).then((result) => {
           interactables.push(...result.interactables);
+          deckLodMeshes?.push(result.mesh);
           return result;
         });
       return brandWallPromise;
@@ -3532,7 +3552,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const ceilingObstacles = [], shopObstacles = [];
     const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
-    const prepareModel = warmModel && ((model) => warmModel(model, scene));
+    const prepareModel = warmModel && ((model, options) => warmModel(model, scene, options));
     scene.background = new T.Color(expanded ? 12244444 : 1650226);
     scene.fog = new T.Fog(12037532, expanded ? 75 : 40, expanded ? 155 : 100);
     const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
@@ -3622,6 +3642,25 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       }
     }
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
+    const shopUploads = new Map;
+    let uploadVisitor, pavingMesh, mappedPaving;
+    async function setPavingMap(map) {
+      const material = materials.paving.clone();
+      material.map = map;
+      const sample = new T.InstancedMesh(geometry.box, material, 1);
+      try {
+        await prepareModel?.(sample);
+        mappedPaving = material;
+        if (pavingMesh)
+          pavingMesh.material = material;
+        materials.paving.dispose();
+      } catch {
+        map.dispose();
+        material.dispose();
+      } finally {
+        sample.dispose();
+      }
+    }
     let activeShopSlot = null, activeDeck = false, railingState = null, interiorModels = null, productDisplay = null;
     const tagShopLod = (mesh) => {
       if (expanded && activeShopSlot !== null) {
@@ -3689,7 +3728,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden: atriumLayout.garden, prepareModel }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden: atriumLayout.garden, prepareModel, setPavingMap }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -4089,7 +4128,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
+        const firstProduct = scene.children.length;
         productDisplay = await addProducts(T, scene, textures, materials.brass, displayProducts, [], expanded ? [-10, 0, -1.25] : null);
+        queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter((mesh) => mesh.isMesh));
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
           collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
@@ -4331,6 +4372,15 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     interactables.push(...amenities.interactables);
     for (const batch of batches.values()) {
       const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
+      if (batch.material === materials.paving) {
+        pavingMesh = mesh;
+        if (mappedPaving)
+          mesh.material = mappedPaving;
+      }
+      for (const store of spatial.stores) {
+        if (batch.material === materials[`${store.id}Backdrop`])
+          queueShopUpload(Number(store.number), mesh);
+      }
       if (batch.colours)
         colourBatches.push({ mesh, colours: batch.colours });
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
@@ -4370,7 +4420,16 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
     let deckLodMeshes = null;
     interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
+    const firstFurnishing = shopLodMeshes.length;
     const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh), prepareModel);
+    for (const mesh of shopLodMeshes.slice(firstFurnishing))
+      queueShopUpload(mesh.userData.shopSlot, mesh);
+    for (const [slot2, meshes] of shopUploads) {
+      const bay = shopBays.get(slot2);
+      const x = (bay.minX + bay.maxX) / 2;
+      const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
+      prepareModel(meshes, { hide: true, late: false, priority }).catch(() => {});
+    }
     const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
     let brandWallPromise = null;
