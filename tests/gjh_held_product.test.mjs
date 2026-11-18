@@ -107,13 +107,16 @@ test('pickup uses the selected shelf and return requires the original shelf in r
   assert.equal(pickup.disabled, true);
   mall.pick();
   mall.move(au, 4);
+  assert.equal(putBack.hidden, true);
   assert.equal(putBack.disabled, true);
   putBack.click();
   assert.equal(mall.transfer.phase, 'held');
   assert.match(mall.heldStatus, /Holding New Zealand Abalone 425g.*original New Moon shelf/);
   mall.move(nz, 0, 7.2);
+  assert.equal(putBack.hidden, true);
   assert.equal(putBack.disabled, true);
   mall.move(nz, 0);
+  assert.equal(putBack.hidden, false);
   assert.equal(putBack.disabled, false);
   putBack.click();
   assert.equal(mall.transfer.phase, 'return');

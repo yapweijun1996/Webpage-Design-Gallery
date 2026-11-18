@@ -694,12 +694,6 @@ div.mini-map-heading>span:last-child{margin-left:auto}
 .ux-tutorial-actions{display:flex;justify-content:space-between;gap:8px}
 #guide-next{background:var(--gold);color:var(--green);border-color:var(--gold)}
 .ux-tutorial button:disabled{opacity:.45}
-@media(max-width:650px){
-  .ux-tutorial{left:12px;right:auto;bottom:86px;width:min(330px,calc(100% - 24px));max-height:calc(100dvh - 230px);overflow:auto}
-}
-@media(max-height:560px) and (orientation:landscape){
-  .ux-tutorial{left:12px;right:auto;bottom:86px;width:280px;max-height:calc(100dvh - 180px);overflow:auto}
-}
 .mall-language-picker{display:grid;gap:var(--space-2);margin-block:var(--space-2);font:inherit}
 .mall-language-picker select,#mall-scene-check{min-height:44px;max-width:100%;font:inherit;color:var(--green);background:var(--paper)}
 #mall-scene-check{padding-inline:var(--space-3);cursor:pointer}
@@ -744,6 +738,8 @@ html[data-gjh-design="v11"] body.is-3d{
   --hud-gutter-left:max(var(--space-2),env(safe-area-inset-left));
   --hud-gutter-right:max(var(--space-2),env(safe-area-inset-right));
   --hud-gutter-bottom:max(var(--space-1),env(safe-area-inset-bottom));
+  --hud-context-bottom:var(--hud-gutter-bottom);
+  --hud-context-top:calc(var(--size-control) + var(--space-2) + var(--space-2));
 }
 .is-3d .site-header{
   height:var(--gjh-header-size);
@@ -878,12 +874,16 @@ body.is-3d .hud-rail .keyboard-help #controls-copy,.hud-rail .performance-detail
 body.is-3d .mall-overlay .mall-map .map-content{margin:0;max-height:none;overflow:visible}
 .is-3d .mall-overlay:has(.mall-map[open]) :is(.hud-rail,.scene-readouts){visibility:hidden}
 
-/* Single bottom slot. Its action disclosure widens the row without stacking it. */
+/* The compact tutorial shares the context slot's safe bounds and scrolls above it. */
+body.is-3d .mall-overlay #hud-context-stack{
+  position:absolute;inset:auto var(--hud-gutter-right) var(--hud-context-bottom) var(--hud-gutter-left);
+  max-height:calc(100% - var(--hud-context-top) - var(--hud-context-bottom));
+  display:flex;flex-direction:column-reverse;align-items:flex-start;gap:var(--space-2);
+}
 body.is-3d .mall-overlay #hud-context{
-  position:absolute;top:auto;left:var(--hud-gutter-left);bottom:var(--hud-gutter-bottom);
-  display:flex;align-items:center;gap:var(--space-1);
-  width:max-content;max-width:min(27rem,calc(100% - var(--hud-gutter-left) - var(--hud-gutter-right)));
-  margin:0;padding:0;transform:none;border-radius:var(--radius-md);
+  display:flex;flex:none;align-items:center;gap:var(--space-1);
+  width:max-content;max-width:min(27rem,100%);
+  margin:0;padding:0;border-radius:var(--radius-md);
   pointer-events:auto;
 }
 body.is-3d .mall-overlay #hud-context:is([data-context="held"],[data-context="interaction"]){
@@ -901,10 +901,10 @@ body.is-3d .mall-overlay #hud-context .inspect-prompt{
   display:flex;justify-content:flex-start;min-width:0;gap:var(--space-1);padding-inline-end:var(--space-1);
 }
 body.is-3d .mall-overlay #hud-context[data-context="held"]{
-  padding-inline-end:var(--space-2);
+  flex-direction:column;align-items:stretch;padding:var(--space-2);
 }
-body.is-3d .mall-overlay #hud-context[data-context="held"]:not(:has(.hud-held-action:not([hidden]))){
-  padding-block:var(--space-2);
+body.is-3d .mall-overlay #hud-context[data-context="held"] .inspect-prompt{
+  flex-wrap:wrap;justify-content:flex-start;
 }
 body.is-3d .mall-overlay #hud-context[data-context="held"] #inspect-prompt:not(:has(.hud-held-action:not([hidden]))),
 body.is-3d .mall-overlay #hud-context[data-context="held"] :is(.nearby-card,#inspect){
@@ -946,11 +946,13 @@ body.is-3d .mall-overlay :is(.hud-control,#camera-tools button):is(:active,[aria
   background:var(--gold);color:var(--green);
 }
 body.is-3d .mall-overlay :is(.hud-control,#camera-tools button):disabled{cursor:default;border-style:dashed}
-body.is-3d .mall-overlay #camera-tools #camera-view-toggle,
-body.is-3d .mall-overlay #hud-context .hud-held-action{
+body.is-3d .mall-overlay #camera-tools #camera-view-toggle{
   width:auto;max-width:none;padding-inline:var(--space-2);
 }
-body.is-3d .mall-overlay #hud-context .hud-held-action{max-width:6rem}
+body.is-3d .mall-overlay #hud-context .hud-held-action{
+  flex:0 1 auto;width:auto;min-width:min(var(--size-control),100%);max-width:100%;
+  height:auto;min-height:var(--size-control);padding-inline:var(--space-2);
+}
 body.is-3d .mall-overlay #hud-context #held-product-add:enabled{background:var(--gold);color:var(--green)}
 body.is-3d :is(.site-header,.mall-overlay) :is(button,summary,input,select):focus-visible{
   outline:2px solid var(--gjh-color-body-is-3d-button-focus-visible);outline-offset:2px;
@@ -985,20 +987,12 @@ body.is-3d :is(.site-header,.mall-overlay) :is(.hud-control,#camera-tools button
     left:clamp(var(--hud-gutter-left),var(--stick-left),calc(100% - var(--hud-stick-size) - var(--hud-gutter-right)));
     top:clamp(var(--space-2),var(--stick-top),calc(100% - var(--hud-stick-size) - var(--hud-gutter-bottom)));
   }
-  body.is-3d .mall-overlay #hud-context{
-    bottom:calc(var(--hud-gutter-bottom) + var(--hud-control-size) + var(--space-1));
-    max-width:min(24rem,calc(100% - var(--hud-gutter-left) - var(--hud-stick-size) - var(--hud-gutter-right) - var(--space-2)));
-  }
-  body.is-3d .mall-overlay #hud-context[data-context="held"]{
-    max-width:min(27rem,calc(100% - var(--hud-gutter-left) - var(--hud-gutter-right)));
-  }
 }
-@media(max-height:560px) and (orientation:landscape){
-  body.is-3d .mall-overlay #hud-context{
-    bottom:var(--hud-gutter-bottom);left:calc(var(--hud-gutter-left) + var(--hud-control-size) + var(--space-1));
-    max-width:min(37vw,calc(100% - var(--hud-stick-size) - var(--hud-control-size) - var(--hud-gutter-left) - var(--hud-gutter-right)));
+@media(pointer:coarse),(max-width:650px),(max-height:560px) and (orientation:landscape){
+  html[data-gjh-design="v11"] body.is-3d{
+    --hud-context-bottom:calc(var(--hud-gutter-bottom) + max(var(--hud-stick-size),var(--hud-control-size)) + var(--space-2));
   }
-  body.is-3d .mall-overlay #hud-context[data-context="held"]{
-    max-width:min(27rem,calc(100% - var(--hud-stick-size) - var(--hud-control-size) - var(--hud-gutter-left) - var(--hud-gutter-right) - var(--space-2)));
+  body.is-3d .mall-overlay #guide-card{
+    position:static;width:330px;max-width:calc(100% - var(--space-2));min-height:0;overflow:auto;
   }
 }

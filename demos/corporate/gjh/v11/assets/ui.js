@@ -90,7 +90,7 @@ export function createUI(expanded = false) {
   inspectPrompt.append(nearbyStory);
   const help = document.getElementById('keyboard-help');
   const mallMap = document.getElementById('mall-map');
-  const tutorial = createTutorial({parent: experience, touch: matchMedia('(pointer: coarse)').matches,
+  const tutorial = createTutorial({parent: document.getElementById('hud-context-stack'), touch: matchMedia('(pointer: coarse)').matches,
     onDismiss: () => { if (showing3D) scene.focus({preventScroll: true}); },
     onBrowseProducts: () => {
       storeFilter = 'all';

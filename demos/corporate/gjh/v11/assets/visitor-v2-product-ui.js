@@ -79,15 +79,14 @@ export function installPhysicalProductControl(player, world, paused, interaction
     const showPickup=p.phase==='empty'&&Boolean(shelf)&&!s.seated&&!s.pushing&&!s.elevatorTravel;
     const showConfirmation=p.phase==='bag'||(p.phase==='empty'&&performance.now()<confirmationUntil);
     const returnAvailable=canReturn(s), addAvailable=canAdd(s), pickupAvailable=canPickUp(s,inReach);
-    const showReturn=p.held&&(Boolean(shelf)||returnAvailable);
-    const presentation=[p.phase,p.id,Boolean(s.productApproaching),showPickup,showReturn,
+    const presentation=[p.phase,p.id,Boolean(s.productApproaching),showPickup,
       inReach,returnAvailable,addAvailable,pickupAvailable,showConfirmation].join('/');
     if(presentation===previousPresentation)return;
     previousPresentation=presentation;
 
     add.hidden=!p.held;
     add.disabled=!addAvailable;
-    putBack.hidden=!showReturn;
+    putBack.hidden=!returnAvailable;
     putBack.disabled=!returnAvailable;
     pickup.hidden=!showPickup;
     pickup.disabled=!pickupAvailable;

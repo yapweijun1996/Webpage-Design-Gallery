@@ -142,10 +142,12 @@
           <span id="control-interact" hidden><span class="desktop-control"><kbd>F</kbd> - Interact</span><span class="touch-control">Tap Interact</span></span>
         </div>
         <div class="mall-intro"><p class="eyebrow">A little closer to goodness</p><h2>Everyday, <em>explored.</em></h2><p>17 stores. One open invitation.</p></div>
-        <div class="interaction-hud" id="hud-context" hidden>
-        <p id="held-product-status" class="held-product-status" hidden></p>
-        <p id="hud-context-hint" class="hud-context-chip" hidden><span id="hud-nearby-arrow" data-icon="arrow-up" aria-hidden="true" hidden></span><span id="hud-context-text"></span><span id="hud-nearby-direction" class="sr-only" hidden></span></p>
-        <div class="inspect-prompt" id="inspect-prompt" hidden><div class="nearby-card"><img id="nearby-image" alt="" width="26" height="26" hidden><span id="nearby-name"></span><span id="nearby-distance" aria-describedby="interaction-distance-description" hidden></span></div><button id="hud-more-actions" type="button" aria-label="More actions" title="More actions" aria-expanded="false" aria-controls="inspect" hidden><span data-icon="menu" aria-hidden="true"></span></button><button id="inspect" class="hud-control" type="button" aria-describedby="interaction-distance-description"><span id="inspect-verb">Inspect</span></button></div>
+        <div id="hud-context-stack">
+          <div class="interaction-hud" id="hud-context" hidden>
+            <p id="held-product-status" class="held-product-status" hidden></p>
+            <p id="hud-context-hint" class="hud-context-chip" hidden><span id="hud-nearby-arrow" data-icon="arrow-up" aria-hidden="true" hidden></span><span id="hud-context-text"></span><span id="hud-nearby-direction" class="sr-only" hidden></span></p>
+            <div class="inspect-prompt" id="inspect-prompt" hidden><div class="nearby-card"><img id="nearby-image" alt="" width="26" height="26" hidden><span id="nearby-name"></span><span id="nearby-distance" aria-describedby="interaction-distance-description" hidden></span></div><button id="hud-more-actions" type="button" aria-label="More actions" title="More actions" aria-expanded="false" aria-controls="inspect" hidden><span data-icon="menu" aria-hidden="true"></span></button><button id="inspect" class="hud-control" type="button" aria-describedby="interaction-distance-description"><span id="inspect-verb">Inspect</span></button></div>
+          </div>
         </div>
         <div id="nearby-shelf-outline" class="nearby-shelf-outline" aria-hidden="true" hidden></div>
         <div id="interaction-point" class="interaction-point" aria-hidden="true" hidden><span></span><small>Press F</small></div>

@@ -1414,7 +1414,7 @@ function createUI(expanded = false) {
   const help = document.getElementById("keyboard-help");
   const mallMap = document.getElementById("mall-map");
   const tutorial = createTutorial({
-    parent: experience,
+    parent: document.getElementById("hud-context-stack"),
     touch: matchMedia("(pointer: coarse)").matches,
     onDismiss: () => {
       if (showing3D)
