@@ -36,11 +36,11 @@ export function createContactSolver(T, root) {
 }
 
 /** One shelf reservation owns a product until return or explicit reset. */
-export function createProductTransfer(T, avatar) {
-  const hand=avatar.getObjectByName('RightHand'), point=new T.Vector3(),offset=new T.Vector3(),rotation=new T.Quaternion(),ownerRotation=new T.Quaternion();
+export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('RightHand'), facing = avatar.parent) {
+  const point=new T.Vector3(),offset=new T.Vector3(),shelfPoint=new T.Vector3(),rotation=new T.Quaternion(),ownerRotation=new T.Quaternion();
   let item=null,phase='empty',elapsed=0,start=null;
   function worldHand(){avatar.updateWorldMatrix(true,true);hand.getWorldPosition(point);return point;}
-  function worldCarry(){worldHand();avatar.parent.getWorldQuaternion(rotation);return point.add(offset.set(0,-.05,-.06).applyQuaternion(rotation));}
+  function worldCarry(){worldHand();(facing??avatar.parent).getWorldQuaternion(rotation);return point.add(offset.set(0,-.05,-.06).applyQuaternion(rotation));}
   function hold(){
     // A can stays upright in the palm, rather than inheriting the wrist's
     // authored local axes and disappearing inside the forearm.
@@ -57,7 +57,8 @@ export function createProductTransfer(T, avatar) {
     reachTarget(out){
       if(!item||phase==='held')return;
       const t=Math.max(0,Math.min(1,elapsed/.9)),reach=phase==='pickup'?Math.min(1,t/.3)*(1-Math.max(0,(t-.3)/.7)):Math.min(1,t/.7);
-      out.lerp(item.owner.localToWorld(item.origin.clone().add(new T.Vector3(0,.06,.04))),reach);
+      shelfPoint.copy(item.origin);shelfPoint.y+=.06;shelfPoint.z+=.04;
+      out.lerp(item.owner.localToWorld(shelfPoint),reach);
     },
     update(dt,reduced){if(!item)return;elapsed+=dt;if(phase==='held'){hold();return;}const t=reduced?1:Math.max(0,Math.min(1,elapsed/.9));
       // Reach first, then lift; reverse the transfer before releasing the stock.
@@ -66,6 +67,7 @@ export function createProductTransfer(T, avatar) {
       item.prop.position.lerpVectors(start,target,e);
       if(t===1){if(phase==='return')reset();else{phase='held';hold();}}
     },
+    get phase(){return phase;},
     get state(){return {phase,id:item?.id||null,active:phase==='pickup'||phase==='return',held:phase==='held'};}
   };
 }

@@ -77,7 +77,7 @@ def run():
                     has_touch=width < 1000, reduced_motion='reduce', service_workers='block')
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
-                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience',
+                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?visitor=v2#experience',
                           timeout=60000)
                 page.wait_for_function('__mall?.ready && __sceneReady', timeout=60000)
                 page.add_script_tag(path=str(args.axe_script))
@@ -258,7 +258,7 @@ def run():
                 page.locator('#cart-toggle').click()
                 page.locator('#bag-close').click()
                 page.wait_for_function('document.activeElement.id === "bag-open"')
-                # Exercise the default Visitor v2 controls through actual shelf actions.
+                # Exercise Visitor v2 controls through actual shelf actions.
                 assert page.evaluate('__mall.teleport("newmoon")')
                 move(page, -10, -2.6, 2.65)
                 move(page, -10, -7.4, 2.65)

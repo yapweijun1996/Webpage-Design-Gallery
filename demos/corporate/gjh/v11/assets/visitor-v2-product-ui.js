@@ -1,5 +1,5 @@
 export function installPhysicalProductControl(player,world,paused,interactions) {
-  document.querySelector('#visitor-motion-help').textContent='Visitor v2 reaches for physical shelf products and uses hand/foot contact adjustment. Pick up and return use a side close-up. The held-item status names the return shelf; return the item before using Cart, a seat or the elevator. Close walls temporarily hide the visitor to keep the view clear.';
+  document.querySelector('#visitor-motion-help').textContent='Pick up and return use a side close-up. The held-item status names the return shelf. Return the item before using Cart, a seat or the elevator. Close walls temporarily hide the visitor to keep the view clear.';
   document.querySelector('#bag-description').textContent='Session-only demo selections. No payment or order. Physical products picked from a shelf are carried separately and must be returned to the same shelf before sitting, using a cart or travelling in the elevator.';
   document.querySelector('.collection-note').textContent='Bag selections are separate from physical shelf products. In the 3D aisle, use Pick up product and Return to shelf.';
   const prompt=document.querySelector('#inspect-prompt'),button=document.createElement('button'),notice=document.createElement('p');

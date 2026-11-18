@@ -67,10 +67,10 @@ function batchCart(T, cart) {
   geometries.forEach(geometry => geometry.dispose()); materials.forEach(material => material.dispose());
 }
 
-/** Optional owner-authored prop. A fixed pushing pose, not IK or wheel physics. */
-export async function createPushCart(T, avatar, visual) {
+/** Optional owner-authored prop. Callers with their own IK can skip the fixed pose. */
+export async function createPushCart(T, avatar, visual, {fixedPose = true} = {}) {
   let active=false, count=0, saved=null;
-  const joints=['LeftShoulder','LeftElbow','RightShoulder','RightElbow'].map(n=>avatar.getObjectByName(n));
+  const joints=fixedPose?['LeftShoulder','LeftElbow','RightShoulder','RightElbow'].map(n=>avatar.getObjectByName(n)):[];
   const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),8000);
   let cart;
   try {
@@ -91,5 +91,5 @@ export async function createPushCart(T, avatar, visual) {
   const parcel=new T.Mesh(new T.BoxGeometry(.23,.28,.22),new T.MeshStandardMaterial({color:0xb48751,roughness:1}));
   parcel.name='SelectionIndicator';parcel.position.set(0,.57,.08);parcel.visible=false;cart.add(parcel);
   function restore(){if(saved){joints.forEach((n,i)=>n.quaternion.copy(saved[i]));saved=null;}}
-  return {set(value){restore();active=Boolean(value);cart.visible=active;return true;},setCount(value){count=value;parcel.visible=count>0;},restore,apply(){if(!active)return;saved=joints.map(n=>n.quaternion.clone());joints[0].rotation.set(-1.05,0,0);joints[2].rotation.set(-1.05,0,0);joints[1].rotation.set(-.95,0,0);joints[3].rotation.set(-.95,0,0);},get state(){return {available:true,active,count,mode:'simplified-push',wheelPhysics:false,ik:false};}};
+  return {set(value){restore();active=Boolean(value);cart.visible=active;return true;},setCount(value){count=value;parcel.visible=count>0;},restore,apply(){if(!active||!fixedPose)return;saved=joints.map(n=>n.quaternion.clone());joints[0].rotation.set(-1.05,0,0);joints[2].rotation.set(-1.05,0,0);joints[1].rotation.set(-.95,0,0);joints[3].rotation.set(-.95,0,0);},get state(){return {available:true,active,count,mode:'simplified-push',wheelPhysics:false,ik:false};}};
 }

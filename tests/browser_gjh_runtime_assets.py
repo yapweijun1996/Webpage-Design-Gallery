@@ -1,4 +1,4 @@
-"""Check split physics loading, its fallback, and V1/V2 module selection."""
+"""Check split physics loading, its fallback, and visitor selection."""
 from gjh_startup_test_helpers import mall_entry_url
 import functools
 import http.server
@@ -28,22 +28,32 @@ def run():
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=['--use-angle=metal'])
-            for query in ('', '?visitor=v1'):
+            for query, expected_model, block_tripo in (
+                ('', 'gjh-tripo-visitor', False),
+                ('?visitor=v2', 'gjh-mall-visitor-v2', False),
+                ('?visitor=v1', 'gjh-mall-visitor', False),
+                ('', 'gjh-mall-visitor-v2', True),
+            ):
                 context = browser.new_context(reduced_motion='reduce', service_workers='block')
                 context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')")
                 page = context.new_page()
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
+                if block_tripo:
+                    page.route('**/gjh-tripo-visitor.glb', lambda route: route.abort())
                 page.goto(mall_entry_url(base + query))
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert page.evaluate('window.__sceneReady === true')
+                assert page.evaluate('__mall.state.character.model') == expected_model
                 paths = page.evaluate("performance.getEntriesByType('resource').map(e=>new URL(e.name).pathname)")
                 assert any(path.endswith('/rapier_bg.wasm') for path in paths), paths
                 v1_modules = ('/seated-pose.js', '/collection-gesture.js', '/carry-bag.js')
-                assert all(any(path.endswith(name) for path in paths) == bool(query) for name in v1_modules), paths
+                assert all(any(path.endswith(name) for path in paths) == (query == '?visitor=v1') for name in v1_modules), paths
+                assert page.locator('.visitor-v2-controls select').count() == (7 if expected_model == 'gjh-mall-visitor-v2' else 0)
+                assert page.evaluate("!__mall.emote('wave')"), 'Reduced motion must suppress emotes'
                 assert not errors, errors
-                print(f'PASS {query or "visitor=v2"}: physics loaded and visitor modules scoped', flush=True)
-                if not query:
+                print(f'PASS {expected_model}: physics loaded and visitor modules scoped', flush=True)
+                if expected_model == 'gjh-tripo-visitor':
                     colours = page.evaluate('''async () => {
                       const T=await import('./vendor/three.module.min.js');
                       const {createElevatorV2}=await import('./assets/elevator-v2.js');

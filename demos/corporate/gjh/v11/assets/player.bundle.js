@@ -23,11 +23,31 @@ function createLocomotionContinuity() {
     return grace > 0 ? requested : "idle";
   };
 }
-async function createCharacter(T) {
-  if (new URLSearchParams(location.search).get("visitor") !== "v1") {
-    const { createCharacterV2 } = await import("./character-v2.bundle.js");
-    return createCharacterV2(T, createLocomotionContinuity);
+async function createSelectedVisitor(selection, { tripo, v2, v1 }) {
+  if (selection === "v1")
+    return v1();
+  if (selection === "v2")
+    return v2();
+  try {
+    return await tripo();
+  } catch {
+    return v2();
   }
+}
+function createCharacter(T) {
+  return createSelectedVisitor(new URLSearchParams(location.search).get("visitor"), {
+    async tripo() {
+      const { createCharacterTripo } = await import("./character-tripo.js");
+      return createCharacterTripo(T, createLocomotionContinuity);
+    },
+    async v2() {
+      const { createCharacterV2 } = await import("./character-v2.bundle.js");
+      return createCharacterV2(T, createLocomotionContinuity);
+    },
+    v1: () => createCharacterV1(T)
+  });
+}
+async function createCharacterV1(T) {
   const [{ GLTFLoader }, { createPushCart }, { createSeatedPose }, { createCollectionGesture }, { createCarryBag }] = await Promise.all([
     import("../vendor/GLTFLoader.js"),
     import("./push-cart.js"),
@@ -300,8 +320,23 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
 var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
 
 // demos/corporate/gjh/v11/assets/player.js
+function playerCameraFraming(model, expanded, width, height) {
+  const tripo = model === "gjh-tripo-visitor", mobile = width < 600;
+  let fov = mobile ? 68 : tripo ? 64 : 58;
+  if (expanded && mobile && width < height) {
+    const portraitFov = 2 * Math.atan(Math.tan(Math.PI / 6) * height / width) * 180 / Math.PI;
+    fov = Math.min(100, Math.max(fov, portraitFov));
+  }
+  return {
+    fov,
+    distance: expanded ? mobile ? 5 : 5.2 : mobile ? 5.5 : 6.5,
+    height: tripo ? 1.65 : 0,
+    lookAhead: tripo ? 1.7 : 0
+  };
+}
 async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
   const character = await createCharacter(T);
+  const model = character.state.model;
   const visual = character.visual;
   scene.add(visual);
   const contact = new T.Mesh(contactPlane, contactMaterial);
@@ -325,6 +360,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   let actionView = null, cameraDistance = null, cameraOccluded = false, productApproach = null, productHome = null;
   const camera = new T.PerspectiveCamera(58, 1, 0.08, 100);
   const target = new T.Vector3, desired = new T.Vector3, offset = new T.Vector3, direction = new T.Vector3, safe = new T.Vector3;
+  const sightline = new T.Vector3;
+  let framing = playerCameraFraming(model, expanded, canvas.clientWidth, canvas.clientHeight);
   const cameraBall = new R.Ball(0.22), cameraRotation = { x: 0, y: 0, z: 0, w: 1 };
   const anchor = new T.Vector3, probe = new T.Vector3;
   let cameraLift = 0, cameraClearance = 0, cameraRadius = 0.22;
@@ -656,21 +693,28 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     out.copy(anchor).addScaledVector(direction, length);
     return length;
   }
+  function resizeCamera(width, height) {
+    framing = playerCameraFraming(model, expanded, width, height);
+    camera.aspect = width / height;
+    camera.fov = framing.fov;
+    camera.updateProjectionMatrix();
+  }
   function updateCamera(dt, instant = false) {
     sync();
     target.copy(visual.position);
     target.y += 1.24 - 0.34 * (character.state.seatWeight || 0);
-    const normalDistance = expanded ? canvas.clientWidth < 600 ? 5 : 5.2 : canvas.clientWidth < 600 ? 5.5 : 6.5;
+    const normalDistance = framing.distance;
     const requestedDistance = actionView ? 3 : normalDistance;
     const immediate = instant || reduceSeatMotion();
     cameraDistance = immediate ? requestedDistance : T.MathUtils.lerp(cameraDistance ?? normalDistance, requestedDistance, 1 - Math.exp(-6 * dt));
     cameraRadius = Math.max(0.22, camera.near * Math.tan(camera.fov * Math.PI / 360) * Math.hypot(1, camera.aspect) + 0.08);
     cameraBall.radius = cameraRadius;
     offset.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(cameraDistance);
-    let lift = 0, length = cameraCandidate(0, desired);
+    const orbitHeight = actionView ? 0 : framing.height;
+    let lift = 0, length = cameraCandidate(orbitHeight, desired);
     if (length < (cameraLift ? 2.4 : 2))
       for (const height of [1.1, 2.2]) {
-        const available = cameraCandidate(height, probe);
+        const available = cameraCandidate(orbitHeight + height, probe);
         if (available > length + 0.25) {
           lift = height;
           length = available;
@@ -681,14 +725,18 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       }
     cameraLift = lift;
     anchor.copy(target);
-    anchor.y += lift;
+    anchor.y += orbitHeight + lift;
     safe.copy(camera.position).lerp(desired, immediate ? 1 : 1 - Math.exp(-12 * dt));
     const allowed = sweepCamera(anchor, safe);
     safe.copy(anchor).addScaledVector(direction, allowed);
     if (allowed < 0.9 && length >= 2)
       safe.copy(desired);
+    const lookAhead = actionView ? 0 : framing.lookAhead;
+    sightline.copy(target);
+    sightline.x -= Math.sin(yaw) * lookAhead;
+    sightline.z -= Math.cos(yaw) * lookAhead;
     camera.position.copy(safe);
-    camera.lookAt(target);
+    camera.lookAt(sightline);
     cameraClearance = camera.position.distanceTo(target);
     cameraOccluded = cameraClearance < (cameraOccluded ? 1.45 : 1.15);
     character.setCameraOccluded(cameraOccluded);
@@ -951,12 +999,15 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     update,
     sync,
     updateCamera,
+    resizeCamera,
     teleport,
     useElevator,
     clearInput,
     setBagCount: character.setBagCount,
     startCollection,
     cancelCollection,
+    emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
+    dispose: character.dispose,
     renderShelf(draw) {
       const visible = visual.visible, contactVisible = contact.visible;
       visual.visible = contact.visible = false;
@@ -1025,5 +1076,6 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   };
 }
 export {
+  playerCameraFraming,
   createPlayer
 };

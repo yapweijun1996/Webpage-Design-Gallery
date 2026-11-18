@@ -3,8 +3,24 @@ import {spatial, courtyardArrival} from './spatial.js';
 import {liftLayout} from './lift-layout.js';
 import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
 
+export function playerCameraFraming(model, expanded, width, height) {
+  const tripo = model === 'gjh-tripo-visitor', mobile = width < 600;
+  let fov = mobile ? 68 : tripo ? 64 : 58;
+  if (expanded && mobile && width < height) {
+    const portraitFov = 2 * Math.atan(Math.tan(Math.PI / 6) * height / width) * 180 / Math.PI;
+    fov = Math.min(100, Math.max(fov, portraitFov));
+  }
+  return {
+    fov,
+    distance: expanded ? (mobile ? 5 : 5.2) : (mobile ? 5.5 : 6.5),
+    height: tripo ? 1.65 : 0,
+    lookAhead: tripo ? 1.7 : 0
+  };
+}
+
 export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false) {
   const character = await createCharacter(T);
+  const model = character.state.model;
   const visual = character.visual;
   scene.add(visual);
   const contact = new T.Mesh(contactPlane, contactMaterial);
@@ -24,6 +40,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let actionView=null,cameraDistance=null,cameraOccluded=false,productApproach=null,productHome=null;
   const camera = new T.PerspectiveCamera(58, 1, .08, 100);
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
+  const sightline = new T.Vector3();
+  let framing = playerCameraFraming(model, expanded, canvas.clientWidth, canvas.clientHeight);
   const cameraBall=new R.Ball(.22),cameraRotation={x:0,y:0,z:0,w:1};
   const anchor=new T.Vector3(),probe=new T.Vector3();
   let cameraLift=0,cameraClearance=0,cameraRadius=.22;
@@ -221,9 +239,15 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     anchor.copy(target);anchor.y+=lift;out.copy(anchor).add(offset);
     const length=sweepCamera(anchor,out);out.copy(anchor).addScaledVector(direction,length);return length;
   }
+  function resizeCamera(width, height) {
+    framing = playerCameraFraming(model, expanded, width, height);
+    camera.aspect = width / height;
+    camera.fov = framing.fov;
+    camera.updateProjectionMatrix();
+  }
   function updateCamera(dt, instant = false) {
     sync();target.copy(visual.position);target.y+=1.24-.34*(character.state.seatWeight||0);
-    const normalDistance=expanded ? (canvas.clientWidth<600?5:5.2) : (canvas.clientWidth<600?5.5:6.5);
+    const normalDistance=framing.distance;
     const requestedDistance=actionView?3:normalDistance;
     const immediate=instant||reduceSeatMotion();
     cameraDistance=immediate?requestedDistance:T.MathUtils.lerp(cameraDistance??normalDistance,requestedDistance,1-Math.exp(-6*dt));
@@ -231,19 +255,25 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     cameraRadius=Math.max(.22,camera.near*Math.tan(camera.fov*Math.PI/360)*Math.hypot(1,camera.aspect)+.08);
     cameraBall.radius=cameraRadius;
     offset.set(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)).multiplyScalar(cameraDistance);
-    let lift=0,length=cameraCandidate(0,desired);
+    // Lift the orbit pivot so the Tripo visitor leaves the entrance sightline
+    // clear even when the glass wall limits the available spring-arm distance.
+    const orbitHeight=actionView?0:framing.height;
+    let lift=0,length=cameraCandidate(orbitHeight,desired);
     // Prefer the requested bearing; lift above furniture rather than entering the visitor.
     if(length<(cameraLift?2.4:2))for(const height of [1.1,2.2]){
-      const available=cameraCandidate(height,probe);
+      const available=cameraCandidate(orbitHeight+height,probe);
       if(available>length+.25){lift=height;length=available;desired.copy(probe);}
       if(length>=2.4)break;
     }
-    cameraLift=lift;anchor.copy(target);anchor.y+=lift;
+    cameraLift=lift;anchor.copy(target);anchor.y+=orbitHeight+lift;
     safe.copy(camera.position).lerp(desired,immediate?1:1-Math.exp(-12*dt));
     const allowed=sweepCamera(anchor,safe);safe.copy(anchor).addScaledVector(direction,allowed);
     // A newly blocked interpolation must contract immediately to a known clear candidate.
     if(allowed<.9&&length>=2)safe.copy(desired);
-    camera.position.copy(safe);camera.lookAt(target);
+    const lookAhead=actionView?0:framing.lookAhead;
+    sightline.copy(target);
+    sightline.x-=Math.sin(yaw)*lookAhead;sightline.z-=Math.cos(yaw)*lookAhead;
+    camera.position.copy(safe);camera.lookAt(sightline);
     cameraClearance=camera.position.distanceTo(target);
     // In a genuinely enclosed corner no third-person view fits. Hide only the local
     // presentation until clearance returns; never change collision or gameplay ownership.
@@ -345,7 +375,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     capsule.setEnabled(true); vertical = 0; clearInput(); injected = null;
     restoreActionView(); sync(); updateCamera(0, true);
   }
-  return {body, capsule, camera, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, updateCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  return {body, capsule, camera, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, updateCamera, resizeCamera, teleport, useElevator, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+    emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
+    dispose: character.dispose,
     renderShelf(draw) {
       // The visitor can stand directly in front of the selected shelf. Exclude
       // only that presentation during the draw; retain all authored/gameplay state.

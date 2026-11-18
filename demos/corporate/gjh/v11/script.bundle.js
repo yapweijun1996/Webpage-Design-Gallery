@@ -3291,6 +3291,9 @@ document.querySelector("#interaction-point").append(icon("map-pin", { size: 18 }
 var expanded = new URLSearchParams(location.search).get("layout") !== "classic";
 document.body.classList.toggle("is-expanded", expanded);
 var reducedMotion2 = matchMedia("(prefers-reduced-motion: reduce)");
+var startupOverlay = document.getElementById("app-loader");
+var greetedOnArrival = false;
+var pageEnded = false;
 var ready = false;
 var player;
 var world;
@@ -3560,6 +3563,12 @@ var snapshot = () => Object.freeze({
 });
 Object.defineProperty(window, "__mall", { value: Object.freeze({
   performanceReport,
+  emote(name) {
+    if (!canPlayEmote())
+      return false;
+    greetOnArrival();
+    return player.emote(name);
+  },
   get ready() {
     return ready;
   },
@@ -3620,6 +3629,18 @@ function updateHUD() {
   shelfFocus?.setNearby(nearby);
   ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper });
 }
+function canPlayEmote() {
+  return ready && !document.hidden && !windowBlurred && !modes.paused() && startupOverlay.hidden && document.body.classList.contains("is-3d");
+}
+function greetOnArrival() {
+  if (greetedOnArrival || !canPlayEmote())
+    return;
+  if (player.state.character.model !== "gjh-tripo-visitor" || reducedMotion2.matches) {
+    greetedOnArrival = true;
+  } else if (!player.state.cameraOccluded) {
+    greetedOnArrival = player.emote("wave", { arrival: true });
+  }
+}
 function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred)
     return;
@@ -3646,6 +3667,7 @@ function tick(refreshHud = true) {
   player.updateCamera(STEP);
   if (refreshHud)
     updateHUD();
+  greetOnArrival();
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === "shelf")) {
@@ -3943,14 +3965,7 @@ function resize() {
   if (resized) {
     renderWidth = width;
     renderHeight = height;
-    const camera = player.camera;
-    camera.aspect = width / height;
-    camera.fov = width < 600 ? 68 : 58;
-    if (expanded && width < 600 && width < height) {
-      const portraitFov = 2 * Math.atan(Math.tan(Math.PI / 6) / camera.aspect) * 180 / Math.PI;
-      camera.fov = Math.min(100, Math.max(camera.fov, portraitFov));
-    }
-    camera.updateProjectionMatrix();
+    player.resizeCamera(width, height);
     if (shelfFocus?.open)
       shelfFocus.resize();
     else
@@ -4000,6 +4015,35 @@ function validateRestoration() {
   } catch {
     fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.");
   }
+}
+async function installNpcs(T, R, source) {
+  if (pageEnded || fatal)
+    return;
+  const enabled = new URLSearchParams(location.search).get("npcs") !== "off";
+  if (!source && !enabled)
+    return;
+  try {
+    const { createNpcSystem, loadNpcSystem } = await import("./assets/npcs.js");
+    const options = {
+      scene: world.scene,
+      seats: world.seats,
+      physics,
+      R,
+      playerCollider: player.capsule,
+      playerBody: player.body,
+      expanded,
+      mobile: innerWidth < 1000,
+      tier: quality.state?.tier || "balanced",
+      enabled
+    };
+    const system = source ? createNpcSystem(T, { ...options, source }) : await loadNpcSystem(T, options);
+    if (pageEnded || fatal)
+      system.dispose();
+    else {
+      npcs = system;
+      npcs.setQuality({ mobile: innerWidth < 1000, tier: quality.state?.tier || "balanced" });
+    }
+  } catch {}
 }
 async function initialize() {
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -4129,10 +4173,10 @@ async function initialize() {
     await mallTheme.restore();
   const { createPlayer } = await import("./assets/player.bundle.js");
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded);
-  if (player.npcSource) {
-    const { createNpcSystem } = await import("./assets/npcs.js");
-    npcs = createNpcSystem(T, { scene: world.scene, source: player.npcSource, seats: world.seats, physics, R, playerCollider: player.capsule, playerBody: player.body, expanded, mobile: innerWidth < 1000, tier: quality.state?.tier || "balanced", enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
-  }
+  if (player.npcSource)
+    await installNpcs(T, R, player.npcSource);
+  else if (player.state.character.model === "gjh-tripo-visitor")
+    firstFrame.then(() => installNpcs(T, R));
   const { createDOMProjection } = await import("./assets/dom-projection.js");
   const projection = createDOMProjection(T, canvas);
   const { createTargetGuidance } = await import("./assets/target-guidance.js");
@@ -4158,14 +4202,20 @@ async function initialize() {
   ui.setShelfFocus(shelfFocus);
   interactions = createInteractionRegistry(world.interactables, (item) => ui.describeInteraction(item));
   ui.setInteractionRegistry(interactions);
-  if (elevator) {
-    const { installPhysicalProductControl } = await import("./assets/visitor-v2-product-ui.js");
-    productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions);
-    const { installVisitorV2Controls } = await import("./assets/visitor-v2-controls.js");
-    installVisitorV2Controls(document.querySelector("#controls-copy"), (changes) => {
-      player.customize(changes);
-      render();
-    });
+  if (player.state.character.physicalProduct) {
+    try {
+      const { installPhysicalProductControl } = await import("./assets/visitor-v2-product-ui.js");
+      productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions);
+    } catch {}
+  }
+  if (player.npcSource) {
+    try {
+      const { installVisitorV2Controls } = await import("./assets/visitor-v2-controls.js");
+      installVisitorV2Controls(document.querySelector("#controls-copy"), (changes) => {
+        player.customize(changes);
+        render();
+      });
+    } catch {}
   }
   if (elevator)
     ui.setElevator(() => {
@@ -4248,7 +4298,9 @@ if (document.body.dataset.entryMode !== "directory")
   });
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
+    pageEnded = true;
     mallTheme?.destroy();
     npcs?.dispose();
+    player?.dispose?.();
   }
 });

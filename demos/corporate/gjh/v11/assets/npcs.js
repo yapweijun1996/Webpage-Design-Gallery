@@ -1,8 +1,9 @@
 import {DoubleSide,PropertyBinding} from '../vendor/three.module.min.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {createVisitorCustomization} from './visitor-v2-customization.js';
+import {disposeVisitorScene, loadVisitorGLTF} from './visitor-gltf.js';
 
-// Visitors share the loaded player's clips, materials and unmerged geometry.
-// Only merged buffers and cloned skeleton resources belong to this system.
+// Visitors share the V2 rig's clips, materials and unmerged geometry.
 export const NPC_ROUTES = Object.freeze({
   classic: Object.freeze([[-11,3],[-8,3],[-2,3],[2,3],[8,3],[11,3],[-11,7],[-11,15],[-3,16],[3,16],[11,15],[11,7]]),
   expanded: Object.freeze([[-12,4],[-8,4],[0,4],[10,4],[20,4],[30,4],[32,12],[32,20],[32,32],[30,39],[20,39],[10,39],[0,39],[-10,39],[-12,32],[-12,20],[-12,12]])
@@ -174,7 +175,23 @@ export function cloneNpcRig(source) {
   return clone;
 }
 
-export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200}) {
+export async function loadNpcSystem(T, options) {
+  const source = await loadVisitorGLTF(new URL('./gjh-mall-visitor-v2.glb', import.meta.url));
+  let customization;
+  const disposeSource = () => {
+    customization?.dispose();
+    disposeVisitorScene(source.scene);
+  };
+  try {
+    customization = createVisitorCustomization(source.scene);
+    return createNpcSystem(T, {...options, source, disposeSource});
+  } catch (error) {
+    disposeSource();
+    throw error;
+  }
+}
+
+export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, lastPlayer=null;
   let admission=nextNpcAdmission();
   // Expanded arcade waypoints are up to twelve metres apart.
@@ -344,6 +361,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       for(const geometry of ownedGeometry) geometry.dispose();
       for(const material of ownedMaterials) material.dispose();
       for(const skeleton of templateSkeletons) skeleton.dispose();
+      disposeSource?.();
       admission=nextNpcAdmission();
     },
     get occupiedSeatIds() { return visitors.filter(n=>n.seat).map(n=>n.seat.id); },

@@ -11,7 +11,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(os.environ.get('GJH_REAL_OUTPUT', str(ROOT / 'docs/evidence/visitor-v2-ux')))
 OUT.mkdir(parents=True, exist_ok=True)
-URL = os.environ.get('GJH_V2_URL', 'http://127.0.0.1:18773/demos/corporate/gjh/v11/')
+URL = os.environ.get('GJH_V2_URL', 'http://127.0.0.1:18773/demos/corporate/gjh/v11/?visitor=v2')
 SUITE = os.environ.get('GJH_REAL_SUITE', 'all')
 results, errors, warnings = [], [], []
 outcome="running"
@@ -338,7 +338,7 @@ with sync_playwright() as p:
         if SUITE=='v1':
             URL=URL.split('?')[0]+'?visitor=v1'
             context,page=start(browser,1280,800)
-            assert 'v2' not in state(page)['character']['model']
+            assert state(page)['character']['model'] == 'gjh-mall-visitor'
             seat=next(s for s in state(page)['seats'] if s['name']=='MILI bench 1')
             seat_journey(page,seat,'legacy')
             cart_journey(page,'legacy')

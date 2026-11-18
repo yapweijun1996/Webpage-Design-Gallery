@@ -1,48 +1,64 @@
-import {GLTFLoader} from '../vendor/GLTFLoader.js';
-/** Geometry-only LOD shares the original skeleton, mixer and appearance state. */
-export function createVisitorLOD(T,avatar) {
-  const parts=[];avatar.traverse(n=>{if(n.isSkinnedMesh)parts.push({mesh:n,high:n.geometry,low:null});});
-  let loading=null,level=0,failed=false,distance=0,attempts=0,retryAt=0;
-  function dispose(scene){scene?.traverse(n=>{n.geometry?.dispose();if(n.material){for(const m of Array.isArray(n.material)?n.material:[n.material])m.dispose();}});}
+import {disposeVisitorScene,loadVisitorGLTF} from './visitor-gltf.js';
+
+/** Both levels share the live skeleton and mixer. V2 keeps its customized material. */
+export function createVisitorLOD(T,avatar,{
+  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false
+}={}) {
+  const parts=[],position=new T.Vector3();
+  avatar.traverse(mesh=>{
+    if(mesh.isSkinnedMesh)parts.push({mesh,high:mesh.geometry,highMaterial:mesh.material,low:null,lowMaterial:null});
+  });
+  let loading=null,level=0,failed=false,distance=0,attempts=0,retryAt=0,available=false,disposed=false;
+  let lowScene=null;
+  const matricesMatch=(a,b)=>a.elements.every((value,i)=>Math.abs(value-b.elements[i])<.0001);
+  function releaseLow(){
+    for(const part of parts){if(!swapMaterial)part.low?.dispose();part.low=null;part.lowMaterial=null;}
+    if(lowScene){disposeVisitorScene(lowScene);lowScene=null;}
+  }
   async function load(){
-    const controller=new AbortController(); let timer, abandoned=false;
     attempts++;
     try{
-      const source=async()=>{
-        const url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url);
-        const response=await fetch(url,{signal:controller.signal});
-        if(!response.ok)throw Error('LOD unavailable');
-        const gltf=await new GLTFLoader().parseAsync(await response.arrayBuffer(),new URL('.',url).href);
-        if(abandoned){dispose(gltf.scene);throw Error('LOD timeout');}
-        return gltf;
-      };
-      const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>{abandoned=true;controller.abort();reject(Error('LOD timeout'));},8000);});
-      const gltf=await Promise.race([source(),timeout]);
+      const gltf=await loadVisitorGLTF(url);
+      if(disposed){disposeVisitorScene(gltf.scene);return;}
       try{
         for(const part of parts){
           const low=gltf.scene.getObjectByName(part.mesh.name);
           if(!low?.isSkinnedMesh)throw Error('LOD component missing');
-          const geometry=low.geometry.clone(),indices=geometry.attributes.skinIndex;
           const map=low.skeleton.bones.map(b=>part.mesh.skeleton.bones.findIndex(h=>h.name===b.name));
-          if(map.some(i=>i<0)){geometry.dispose();throw Error('LOD skeleton mismatch');}
+          if(map.some(i=>i<0))throw Error('LOD skeleton mismatch');
+          if(swapMaterial && (Array.isArray(low.material) || !low.material.map ||
+            map.length!==part.mesh.skeleton.bones.length || !matricesMatch(low.bindMatrix,part.mesh.bindMatrix) ||
+            map.some((joint,i)=>!matricesMatch(low.skeleton.boneInverses[i],part.mesh.skeleton.boneInverses[joint])))){
+            throw Error('LOD material or bind pose mismatch');
+          }
+          const geometry=part.low=swapMaterial?low.geometry:low.geometry.clone(),indices=geometry.attributes.skinIndex;
           for(let i=0;i<indices.count;i++)for(let j=0;j<4;j++)indices.setComponent(i,j,map[indices.getComponent(i,j)]);
-          part.low=geometry;
+          if(swapMaterial)part.lowMaterial=low.material;
         }
-      }finally{dispose(gltf.scene);}
-      failed=false;
-    }catch{failed=true;retryAt=performance.now()+30000;for(const p of parts){p.low?.dispose();p.low=null;}}
-    finally{clearTimeout(timer);}
+        if(swapMaterial)lowScene=gltf.scene;
+      }finally{if(!lowScene)disposeVisitorScene(gltf.scene);}
+      available=true;
+    }catch{if(!disposed){failed=true;retryAt=performance.now()+30000;}releaseLow();}
   }
   function ensure(){
-    if(loading||parts.every(p=>p.low)||attempts>=2||(failed&&performance.now()<retryAt))return;
+    if(disposed||loading||available||!parts.length||attempts>=2||(failed&&performance.now()<retryAt))return;
     failed=false; loading=load().finally(()=>{loading=null;});
   }
-  if ('requestIdleCallback' in window) window.requestIdleCallback(ensure,{timeout:1500});
+  if (globalThis.window?.requestIdleCallback) window.requestIdleCallback(ensure,{timeout:1500});
   else setTimeout(ensure,0);
+  function switchLevel(next){
+    if(next===level)return;
+    for(const part of parts){
+      part.mesh.geometry=next?part.low:part.high;
+      if(swapMaterial)part.mesh.material=next?part.lowMaterial:part.highMaterial;
+    }
+    level=next;
+  }
   return {update(camera){
-    distance=camera.position.distanceTo(avatar.getWorldPosition(new T.Vector3()));
+    if(disposed)return;
+    distance=camera.position.distanceTo(avatar.getWorldPosition(position));
     if(distance>10)ensure();
-    const next=(level===0?distance>11:distance>9)&&parts.every(p=>p.low)?1:0;
-    if(next!==level){for(const p of parts)p.mesh.geometry=next?p.low:p.high;level=next;}
-  },get state(){return {level,distance,available:parts.every(p=>p.low),failed};}};
+    switchLevel(available && (level===0?distance>11:distance>9)?1:0);
+  },dispose(){disposed=true;switchLevel(0);releaseLow();available=false;},
+  get state(){return {level,distance,available,failed};}};
 }

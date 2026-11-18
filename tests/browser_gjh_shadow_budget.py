@@ -21,7 +21,7 @@ def run():
                 context = browser.new_context(viewport={'width':width, 'height':height}, reduced_motion='reduce', service_workers='block')
                 context.add_init_script(f"localStorage.setItem('gjh-v11-graphics-quality-v1','{quality}')")
                 page = context.new_page()
-                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/#experience')
+                page.goto(f'http://127.0.0.1:{server.server_port}/demos/corporate/gjh/v11/?visitor=v2#experience')
                 page.locator('#app-loader').wait_for(state='hidden', timeout=120000)
                 page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=90000)
                 dismiss_tutorial(page)

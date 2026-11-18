@@ -16,14 +16,31 @@ export function createLocomotionContinuity() {
   };
 }
 
-export async function createCharacter(T) {
-  // Use the released v2 adapter by default; visitor=v1 retains the original asset.
-  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
-    const {createCharacterV2} = await import('./character-v2.js');
-    return createCharacterV2(T, createLocomotionContinuity);
+export async function createSelectedVisitor(selection, {tripo, v2, v1}) {
+  if (selection === 'v1') return v1();
+  if (selection === 'v2') return v2();
+  try {
+    return await tripo();
+  } catch {
+    return v2();
   }
-  // These presentation modules belong only to the explicitly selected V1
-  // visitor; the default V2 visitor supplies its own controls and animation.
+}
+
+export function createCharacter(T) {
+  return createSelectedVisitor(new URLSearchParams(location.search).get('visitor'), {
+    async tripo() {
+      const {createCharacterTripo} = await import('./character-tripo.js');
+      return createCharacterTripo(T, createLocomotionContinuity);
+    },
+    async v2() {
+      const {createCharacterV2} = await import('./character-v2.js');
+      return createCharacterV2(T, createLocomotionContinuity);
+    },
+    v1: () => createCharacterV1(T)
+  });
+}
+
+async function createCharacterV1(T) {
   const [{GLTFLoader}, {createPushCart}, {createSeatedPose}, {createCollectionGesture}, {createCarryBag}] = await Promise.all([
     import('../vendor/GLTFLoader.js'), import('./push-cart.js'), import('./seated-pose.js'),
     import('./collection-gesture.js'), import('./carry-bag.js')

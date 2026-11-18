@@ -16,8 +16,8 @@ Status: **historical local startup-budget acceptance passed** in the then-defaul
   their cascade order, into one generated V11 stylesheet. Original source
   styles remain authoritative; the normal gallery `--check` rejects a stale
   bundle, and the SSOT ratchet continues to inspect the source styles.
-- The default V2 visitor no longer requests the three presentation modules used
-  only by the explicitly selected V1 visitor. V1 still loads them on demand.
+- At this stage V2 was the default. The three V1 presentation modules load
+  only when V1 is selected. See the [current visitor options](../demos/corporate/gjh/v11/README.md#default-tripo-visitor).
 
 ## Matched measurements
 

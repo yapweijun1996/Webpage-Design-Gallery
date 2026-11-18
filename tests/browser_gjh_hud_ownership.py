@@ -34,7 +34,8 @@ def run():
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=[
                 '--use-angle=' + os.environ.get('GALLERY_WEBGL_BACKEND', 'swiftshader'), '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-            cases = [(w, h, '', 'reduce') for w, h in SIZES] + [(390, 844, '?interior=pilot', 'reduce'), (390, 844, '?visitor=v1', 'reduce'), (390, 844, '', 'no-preference')]
+            cases = [(w, h, '', 'reduce') for w, h in SIZES] + [(390, 844, '?interior=pilot', 'reduce'),
+                (390, 844, '?visitor=v1', 'reduce'), (390, 844, '?visitor=v2', 'reduce'), (390, 844, '', 'no-preference')]
             for index, (width, height, query, motion) in enumerate(cases):
                 context = browser.new_context(viewport={'width': width, 'height': height}, has_touch=width < 1000, reduced_motion=motion, service_workers='block')
                 context.add_init_script("""window.hudPad=null;Object.defineProperty(navigator,'getGamepads',{value:()=>hudPad?[hudPad]:[]});""")
@@ -67,7 +68,9 @@ def run():
                 help_open()
                 assert page.locator('#keyboard-help>summary').evaluate('e=>e===document.activeElement')
                 assert page.locator('#graphics-quality').count() == 1
-                assert page.locator('.visitor-v2-controls select').count() == (0 if query == '?visitor=v1' else 7)
+                expected = {'?visitor=v1': 'gjh-mall-visitor', '?visitor=v2': 'gjh-mall-visitor-v2'}.get(query, 'gjh-tripo-visitor')
+                assert page.evaluate('__mall.state.character.model') == expected
+                assert page.locator('.visitor-v2-controls select').count() == (7 if query == '?visitor=v2' else 0)
                 assert 'second finger' in page.locator('#controls-copy').inner_text()
                 bounds = []
                 for fraction in [0, .5, 1]:

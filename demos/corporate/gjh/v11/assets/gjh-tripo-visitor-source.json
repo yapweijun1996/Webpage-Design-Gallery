@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "title": "Studio Gerak Chibi Tripo",
+  "ownership": "The owner's own character from the Blender-3D-Gallery project, supplied for reuse in the GJH virtual mall.",
+  "source_url": "https://yapweijun1996.github.io/Blender-3D-Gallery/?page=tripo-motion",
+  "original_filename": "motion-BRgAS3uq.glb",
+  "raw_sha256": "ffccda1ba2a50eb10948853e03d17f0d095cd9b953d644c03c4fb9cb95529410",
+  "tool_chain": ["Tripo", "Mixamo skeleton and motion", "Blender", "Khronos glTF Blender I/O", "glTF 2.0 GLB"],
+  "source_clips": [
+    {"name": "idle", "seconds": 3.67},
+    {"name": "walk", "seconds": 2.38},
+    {"name": "run", "seconds": 1.25},
+    {"name": "wave", "seconds": 2.67},
+    {"name": "nod", "seconds": 2.33},
+    {"name": "jump", "seconds": 2.08},
+    {"name": "dance", "seconds": 2.67}
+  ],
+  "runtime_exports": {
+    "lod0": "gjh-tripo-visitor.glb",
+    "lod1": "gjh-tripo-visitor-lod1.glb"
+  },
+  "release_note": "The 5.4 MB raw GLB is a development stand-in only. Publish the two optimized exports at the runtime paths and rebuild the gallery."
+}

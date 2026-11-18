@@ -105,7 +105,7 @@ For the opt-in V11 expansion, run `node --test tests/gjh_spatial.test.mjs tests/
 
 Run `python tests/browser_gjh_accessibility.py --axe-script /path/to/axe.min.js` for V11's five-viewport DOM accessibility, dialog keyboard, focus, touch-target and contrast checks. It requires the pinned axe-core 4.10.3 checksum recorded in the test. Set `GALLERY_WEBGL_BACKEND=metal` on macOS to use native ANGLE Metal. Browser automation does not certify physical-device or screen-reader behavior.
 
-Run `node --test tests/gjh_modes.test.mjs` and `python tests/browser_gjh_modes.py` for V11's six-mode lifecycle, retained posture, overlay pause, input cleanup and breakpoint focus checks. The browser suite uses the same Chrome/backend settings and includes the default Visitor v2 and a legacy v1 smoke. See [mode ownership and evidence](docs/v11-mode-state-review.md).
+Run `node --test tests/gjh_modes.test.mjs` and `python tests/browser_gjh_modes.py` for V11's six-mode lifecycle, retained posture, overlay pause, input cleanup and breakpoint focus checks. The browser suite uses the same Chrome/backend settings and includes the default visitor and a legacy v1 smoke. See [mode ownership and evidence](docs/v11-mode-state-review.md).
 
 Run `python tests/browser_gjh_mode_review.py` for the additional nested-menu, animation and real context-loss review, including unavailable Cart actions and Bag focus/selection preservation.
 
@@ -156,11 +156,13 @@ The default expanded layout is a walkable 17-store mall. Use the map to reach a 
 
 Original Blender-authored lounge benches and areca-inspired planters are reused from the owner's [Blender-3D-Gallery collection PR](https://github.com/yapweijun1996/Blender-3D-Gallery/pull/4). Editable sources stay upstream; local GLBs are pinned by commit and SHA-256, loaded once and instanced across the mall. Per-asset procedural fallback preserves the scene on load failure. See [furniture source and verification](docs/gjh-furnishings-review.md); `python tests/browser_gjh_furnishings.py` covers responsive loading, instance reuse and independent failure recovery.
 
-### Reference-led visitor (application 1.1.2)
+### Mall visitors
+
+**Studio Gerak Chibi Tripo**, the owner's own character, is the v11 default. If its required assets or clips fail, v11 loads Visitor v2. Open `?visitor=v2` for appearance controls or `?visitor=v1` for the original green-polo visitor. [Visitor controls, asset packaging and provenance](demos/corporate/gjh/v11/README.md#default-tripo-visitor)
 
 Application **1.1.2** replaces the legacy shopper rendering with an original, locally vendored green-polo mascot `gjh-mall-visitor.glb`. Editable geometry and the reproducible authoring script belong to `Blender-3D-Gallery/models/gjh-mall-visitor/`; [character receipts](demos/corporate/gjh/v11/assets/character-sources.json) pin source `1a091b18e29b34ca468baf506968e1e65d815005` and the accepted export SHA-256 (upstream PR #5 merged). The original Kenney model and its license remain preserved as legacy assets, without serving as an automatic fallback.
 
-`assets/character.js` owns the native-scale PBR model and authored `idle`, `walk` and `sprint` clips. `assets/player.js` retains movement, physics and camera behavior. A failed character load uses the existing accessible directory fallback. The GLB remains outside the PWA installation cache. See [character acceptance and verification](docs/gjh-character-review.md) for the current evidence status; revision 3 measures 369,976 bytes and 10,356 triangles, and the full V11 suite passed at all three widths. A bounded presentation interval bridges isolated contact corrections without changing physics; [the canonical review](docs/gjh-character-review.md) records source, browser, release and deployment evidence.
+`assets/character.js` selects the visitor adapter. `assets/player.js` owns movement, physics and camera behavior. The mall uses the accessible directory if its selected visitor and applicable fallback both fail. Visitor GLBs remain outside the PWA installation cache. [Historical v1 character acceptance](docs/gjh-character-review.md)
 
 Application **1.1.3** adds held Q/E left/right turning in V11, including while walking or running. F inspects nearby displays. [Keyboard verification](docs/gjh-keyboard-review.md) records real-key tests, focus guards and browser limitations. On macOS, `GALLERY_WEBGL_BACKEND=metal python tests/browser_gjh_v11.py` runs the same V11 checks through native ANGLE Metal.
 
@@ -168,7 +170,7 @@ PWA demo/shared-theme boundary and same-tab Demo bag update evidence: [V11 PWA b
 
 ## GJH V11 interior pilot
 
-Open [the complete eight-asset pilot](demos/corporate/gjh/v11/index.html?interior=pilot). The released default route retains M056 shelves, Shelf focus, Visitor v2 and graphics recovery; the query selects DSP-001 shelves with their own native bounds, product supports and collision. The other seven pilot assets are shared by both routes.
+The default route uses M056 shelves. The eight-asset interior pilot uses DSP-001 shelves with their own native bounds, product supports and collision. Both routes share Shelf focus, graphics recovery and the other seven pilot assets. [Open the complete eight-asset pilot](demos/corporate/gjh/v11/index.html?interior=pilot)
 
 The [eight-asset pilot](docs/gjh-v11-interior-pilot-review.md) integrates reusable benches, planters, a relocated directory, shelves, sign frames, wall lights, coffee tables and an atrium plinth. Editable Blender sources, reproducible commands and per-asset acceptance records live in [models/gjh-interior-pilot](models/gjh-interior-pilot/README.md); authoring files are excluded from the Pages artifact.
 

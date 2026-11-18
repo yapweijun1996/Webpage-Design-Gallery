@@ -29,6 +29,8 @@ const expanded = new URLSearchParams(location.search).get('layout') !== 'classic
 document.body.classList.toggle('is-expanded', expanded);
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const startupOverlay = document.getElementById('app-loader');
+let greetedOnArrival = false, pageEnded = false;
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let three;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
@@ -192,6 +194,11 @@ const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:wor
   pixelRatio: renderer?.getPixelRatio() || 1, hidden: document.hidden});
 Object.defineProperty(window, '__mall', {value: Object.freeze({
   performanceReport,
+  emote(name) {
+    if (!canPlayEmote()) return false;
+    greetOnArrival();
+    return player.emote(name);
+  },
   get ready() { return ready; }, get state() { return snapshot(); },
   get mode() { return modes.current(); },
   heroVisibility(number) { return heroVisibility(number); },
@@ -227,6 +234,18 @@ function updateHUD() {
   shelfFocus?.setNearby(nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper});
 }
+function canPlayEmote() {
+  return ready && !document.hidden && !windowBlurred && !modes.paused() &&
+    startupOverlay.hidden && document.body.classList.contains('is-3d');
+}
+function greetOnArrival() {
+  if (greetedOnArrival || !canPlayEmote()) return;
+  if (player.state.character.model !== 'gjh-tripo-visitor' || reducedMotion.matches) {
+    greetedOnArrival = true;
+  } else if (!player.state.cameraOccluded) {
+    greetedOnArrival = player.emote('wave', {arrival: true});
+  }
+}
 function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
@@ -242,6 +261,7 @@ function tick(refreshHud = true) {
     }
   }
   elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state); player.updateCamera(STEP); if (refreshHud) updateHUD();
+  greetOnArrival();
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
@@ -416,15 +436,7 @@ function resize() {
   }
   if (resized) {
     renderWidth = width; renderHeight = height;
-    const camera = player.camera;
-    camera.aspect = width / height;
-    camera.fov = width < 600 ? 68 : 58;
-    if (expanded && width < 600 && width < height) {
-      // Keep both the visitor and the adjacent shop window in portrait frame.
-      const portraitFov = 2 * Math.atan(Math.tan(Math.PI / 6) / camera.aspect) * 180 / Math.PI;
-      camera.fov = Math.min(100, Math.max(camera.fov, portraitFov));
-    }
-    camera.updateProjectionMatrix();
+    player.resizeCamera(width, height);
     if (shelfFocus?.open) shelfFocus.resize(); else player.updateCamera(0, true);
   }
   render();
@@ -457,6 +469,22 @@ function validateRestoration() {
   } catch {
     fallback('The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.');
   }
+}
+async function installNpcs(T, R, source) {
+  if (pageEnded || fatal) return;
+  const enabled = new URLSearchParams(location.search).get('npcs') !== 'off';
+  if (!source && !enabled) return;
+  try {
+    const {createNpcSystem, loadNpcSystem} = await import('./assets/npcs.js');
+    const options = {scene:world.scene,seats:world.seats,physics,R,playerCollider:player.capsule,
+      playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled};
+    const system = source ? createNpcSystem(T, {...options, source}) : await loadNpcSystem(T, options);
+    if (pageEnded || fatal) system.dispose();
+    else {
+      npcs = system;
+      npcs.setQuality({mobile:innerWidth<1000,tier:quality.state?.tier||'balanced'});
+    }
+  } catch { /* NPCs are optional. */ }
 }
 async function initialize() {
   // Allow the initial overlay to paint before expensive module and scene work.
@@ -541,10 +569,8 @@ async function initialize() {
   }
   if(mallTheme && !contextLost && !interrupted) await mallTheme.restore();
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded);
-  if(player.npcSource){
-    const {createNpcSystem} = await import('./assets/npcs.js');
-    npcs=createNpcSystem(T,{scene:world.scene,source:player.npcSource,seats:world.seats,physics,R,playerCollider:player.capsule,playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
-  }
+  if (player.npcSource) await installNpcs(T, R, player.npcSource);
+  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R));
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
@@ -556,11 +582,17 @@ async function initialize() {
   ui.setShelfFocus(shelfFocus);
   interactions = createInteractionRegistry(world.interactables, item => ui.describeInteraction(item));
   ui.setInteractionRegistry(interactions);
-  if (elevator) {
-    const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
-    productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions);
-    const {installVisitorV2Controls} = await import('./assets/visitor-v2-controls.js');
-    installVisitorV2Controls(document.querySelector('#controls-copy'), changes => { player.customize(changes); render(); });
+  if (player.state.character.physicalProduct) {
+    try {
+      const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
+      productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions);
+    } catch { /* Physical product handling is optional. */ }
+  }
+  if (player.npcSource) {
+    try {
+      const {installVisitorV2Controls} = await import('./assets/visitor-v2-controls.js');
+      installVisitorV2Controls(document.querySelector('#controls-copy'), changes => { player.customize(changes); render(); });
+    } catch { /* Appearance controls are optional. */ }
   }
   if (elevator) ui.setElevator(() => {
     manual=false; player.setInput(null);
@@ -609,4 +641,6 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   console.error('3D mall initialization failed:', error);
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
-window.addEventListener('pagehide', event=>{if(!event.persisted) { mallTheme?.destroy(); npcs?.dispose(); }});
+window.addEventListener('pagehide', event=>{if(!event.persisted) {
+  pageEnded = true; mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.();
+}});

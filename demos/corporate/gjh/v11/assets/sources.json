@@ -417,6 +417,15 @@
     "eshop": "https://www.gjheshop.com/"
   },
   "copiedFrom": "demos/corporate/gjh/v10/assets/sources.json",
+  "defaultVisitor": {
+    "id": "gjh-tripo-visitor",
+    "name": "Studio Gerak Chibi Tripo",
+    "localPath": "assets/gjh-tripo-visitor.glb",
+    "lod1Path": "assets/gjh-tripo-visitor-lod1.glb",
+    "sourcePage": "https://yapweijun1996.github.io/Blender-3D-Gallery/?page=tripo-motion",
+    "provenance": "assets/gjh-tripo-visitor-source.json",
+    "ownership": "Owner-authored character supplied for this mall."
+  },
   "model": {
     "id": "mall-shopper",
     "name": "Kenney Mini Characters 2.0 — character-male-a",
