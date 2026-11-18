@@ -3753,6 +3753,9 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   get mode() {
     return modes.current();
   },
+  get camera() {
+    return player ? Object.freeze(player.cameraState(shelfFocus?.open)) : null;
+  },
   heroVisibility(number) {
     return heroVisibility(number);
   },
@@ -3845,6 +3848,8 @@ function tick(refreshHud = true) {
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === "shelf")) {
+    if (!shelfFocus?.open)
+      player.refreshCameraMode();
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
     const pose = player.state;
@@ -4395,6 +4400,7 @@ async function initialize() {
     T,
     canvas,
     normalCamera: player.camera,
+    getFramingFov: () => player.chaseFov,
     shelves: world.shelves,
     projection,
     onChange: () => {

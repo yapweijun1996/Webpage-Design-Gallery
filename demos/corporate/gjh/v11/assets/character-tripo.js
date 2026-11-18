@@ -240,6 +240,8 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     return {
       visual, emote, update, updateLOD: lod.update,
       setCameraOccluded(value) { placement.visible = !value; },
+      get seatWeight() { return seatWeight; },
+      get productPhase() { return transfer.phase; },
       setBagCount(value) { count = Math.max(0, Number(value) || 0); cart?.setCount(count); },
       setCart(value) {
         if (value && (!cart?.state.available || seatWeight > 0)) return false;

@@ -203,6 +203,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
   },
   get ready() { return ready; }, get state() { return snapshot(); },
   get mode() { return modes.current(); },
+  get camera() { return player ? Object.freeze(player.cameraState(shelfFocus?.open)) : null; },
   heroVisibility(number) { return heroVisibility(number); },
   teleport(zone) { if (!ready || !player.teleport(zone)) return false; updateHUD(); render(); return true; },
   setInput(input) {
@@ -267,6 +268,7 @@ function tick(refreshHud = true) {
 }
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
+    if (!shelfFocus?.open) player.refreshCameraMode();
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
     const pose = player.state;
@@ -605,7 +607,7 @@ async function initialize() {
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
   guidance = createTargetGuidance({canvas, projection});
   const {createShelfFocus} = await import('./assets/shelf-focus.js');
-  shelfFocus = createShelfFocus({T, canvas, normalCamera: player.camera, shelves: world.shelves, projection,
+  shelfFocus = createShelfFocus({T, canvas, normalCamera: player.camera, getFramingFov: () => player.chaseFov, shelves: world.shelves, projection,
     onChange: () => { syncMode(); render(); }, onDetails: ui.inspect, onAdd: ui.addToBag,
     onRestore: resized => { if (resized) player.updateCamera(0, true); }});
   ui.setShelfFocus(shelfFocus);

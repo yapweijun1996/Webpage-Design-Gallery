@@ -101,6 +101,8 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
     pickProduct:transfer.pick, returnProduct:transfer.putBack, bagProduct:transfer.putInBag, resetProduct:transfer.reset,
     customize: customization.apply,
     get animation() { return animation === 'push' ? 'walk' : animation; },
+    get seatWeight() { return seatWeight; },
+    get productPhase() { return transfer.phase; },
     get state() {
       return {model, asset: `assets/${model}.glb`, nativeHeight, scale: 1, clips, lod:lod.state, cart: {...cart.state,mode:'contact-ik',ik:true,wheelMotion:'distance-driven',wheelPhysics:false},
         seated: seatWeight > 0, seatWeight, carrying: {available: false, visible: false, count},

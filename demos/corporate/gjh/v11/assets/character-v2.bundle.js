@@ -748,6 +748,12 @@ async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
     get animation() {
       return animation === "push" ? "walk" : animation;
     },
+    get seatWeight() {
+      return seatWeight;
+    },
+    get productPhase() {
+      return transfer.phase;
+    },
     get state() {
       return {
         model,

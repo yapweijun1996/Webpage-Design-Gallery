@@ -119,6 +119,7 @@ async function createCharacterV1(T, prepareModel) {
     setSeated(value){collection.cancel();seated.set(value);carryBag.setSeated(value);},
     startCollection: collection.start, cancelCollection: collection.cancel,
     get animation() { return animation; },
+    get seatWeight() { return seated.weight; },
     get state() {
       return Object.freeze({
         model, asset, nativeHeight, scale: 1, clips, cart:cart.state, seated:seated.active,seatWeight:seated.weight, carrying: carryBag.state, collection: collection.state,

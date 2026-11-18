@@ -6,6 +6,14 @@ Map travel and the auxiliary `pickup`, `return` and `bag` actions also dispatch 
 
 Auxiliary actions use `register(entry)` and `get(kind, id)` so a shelf's pickup action can coexist with its proximity-selected inspect entry. Pickup registrations carry the shelf approach anchor, ground floor and reach radius; they do not compete in `nearest`. Map destinations are likewise registered once by store ID. Callers look up the registered action and dispatch it, rather than constructing a new handler on each activation.
 
+## Exploration camera
+
+Open **Tools** for **First person**, **+** and **−**. The buttons have 44 × 44 CSS pixel minimum targets. With the scene focused, **V** toggles the view and **+ / −** zoom. The mouse wheel and trackpad pinch work over the canvas. On a touchscreen, begin a two-finger pinch away from the fixed movement pad. With Full-screen joystick enabled, start both touches before moving and move both fingers along their line of separation. A joystick already in motion keeps its movement role and leaves the second finger available for drag-look. Drag and the gamepad's right stick change the heading in either view.
+
+The third-person spring arm requests 1–11 m and still sweeps against the existing colliders and camera obstacles. It hides the local avatar below 1.15 m of clearance and shows it again at 1.45 m. First person places the camera 1.55 m above the visitor's simulated floor position and zooms the vertical field of view from 40° to 75°. The existing visitor meshes hide while the hand-positioned shelf product remains a scene prop. The two views retain independent zoom settings in the current tab's session storage. Reduced motion applies zoom immediately.
+
+Shelf focus retains its dedicated camera and normal chase framing. Sit/stand, cart, elevator travel, collection and physical pickup/return use their chase presentation, then restore the visitor's selected view. `window.__mall.camera` gives a read-only `{mode, zoom}` snapshot once the player exists. Mode is `first-person` or `third-person`. Zoom is the requested setting from −1 (wide/far) through 0 (default) to +1 (narrow/close). Temporary action framing reports the default setting.
+
 ## Tripo visitor
 
 `assets/character-tripo.js` turns the +Z-facing Mixamo rig to walk along -Z and scales the loaded GLB to 1.7 m. It maps source `idle` and `walk` to the engine's matching states and source `run` to the `sprint` clip used by the engine's `run` state. The adapter fixes horizontal hips translation in place and retains the authored vertical motion. Physics owns travel, so the authored step length can differ from the distance travelled on the floor.
