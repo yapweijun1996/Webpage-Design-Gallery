@@ -241,7 +241,11 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     }
   };
   tree(garden.x-.8,garden.z,5.9);
-  for(const lounge of [-4,24])tree(lounge-2.35,27,4.2);
+  for (const lounge of atriumLayout.lounges) {
+    // Use the inner planter on the west lounge to clear the shop arrival views.
+    const planter = lounge.planters[lounge.id === 'west' ? 1 : 0];
+    tree(planter.x, planter.z, 4.2);
+  }
   // The lift's moving cabin still uses the entire clear shaft. Only the
   // fixed side guards receive the stone door surround; the entrance stays clear.
   for(const z of [8.37,11.63]){

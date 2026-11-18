@@ -44,7 +44,7 @@
     "demos/corporate/gjh/v11/assets/performance-monitor.js": "0eb875b7e4aea7494b096668ca91cec39938a2ca46d05fc8d48065c656feb2cb",
     "demos/corporate/gjh/v11/assets/performance-panel.js": "9b7e56353cc226c97e6ef718b3e0dc43316617cda4db172895ae15cf218b0148",
     "demos/corporate/gjh/v11/assets/player.js": "9a087978961b6e9ac4ac578bed87b8255f9440eae6ead05aef1d27b92a08243e",
-    "demos/corporate/gjh/v11/assets/public-architecture.js": "ac786dfea43e4c31fd9df76c95361cb6689e5d18f12da1e9bbbf1cd018317885",
+    "demos/corporate/gjh/v11/assets/public-architecture.js": "34a300b424fce903da08fef2f70026c87cdf5113e51940e1ad12b30136360472",
     "demos/corporate/gjh/v11/assets/push-cart.js": "b57b31fc55c21808a8b95192ccfdf92cc47307473a562eb76e44189d72fb07fd",
     "demos/corporate/gjh/v11/assets/scene-warmup.js": "8202caf60e0b6efe511bef292a6b5d92af6a5d7b8ff411f032a0231017c66c70",
     "demos/corporate/gjh/v11/assets/seat-placements.js": "c585792472c792b2dd403a81d0369f7529a1e5a22143a5262ed8975a201ccf48",
@@ -81,7 +81,7 @@
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "5f43ef8da439217ec8bcedc7821a07128b11652bd98041f8e6e46578b18a4c65",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "758254ece5a2369ae1fe61ae66ea84fea9fa8e6456011b9bc15bfaa0905a1462",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "1fd28f2b82d13d807f296042dcb362cd7204568a8f612253df208e794fa02995",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "1b72752a0b9773e3996a56897c522808d5c8c20a2bd098848bdf8e7ddc3f2b84",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "9ec7b7860650856f7a6dbbb211ee06786531c821cc4ff7a0f141bc7f3cac9ef7"
   }

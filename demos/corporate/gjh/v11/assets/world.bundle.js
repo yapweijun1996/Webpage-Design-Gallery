@@ -356,8 +356,10 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     }
   };
   tree(garden.x - 0.8, garden.z, 5.9);
-  for (const lounge2 of [-4, 24])
-    tree(lounge2 - 2.35, 27, 4.2);
+  for (const lounge2 of atriumLayout.lounges) {
+    const planter = lounge2.planters[lounge2.id === "west" ? 1 : 0];
+    tree(planter.x, planter.z, 4.2);
+  }
   for (const z of [8.37, 11.63]) {
     box("ivory", -4.99, 1.87, z, 0.31, 3.74, 0.46);
     box("brass", -5.16, 1.74, z, 0.055, 2.2, 0.13);
