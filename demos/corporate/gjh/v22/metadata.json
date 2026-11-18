@@ -1,0 +1,19 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Brand Chapters",
+  "version": "v22",
+  "designStyle": "Full-bleed brand chapters with editorial photography, persistent sales actions and a contextual enquiry sheet.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v22/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v22",
+  "companyId": "gjh",
+  "displayTitle": "Brand Chapters",
+  "summary": "Explore immersive brand chapters and prepare a sales enquiry with product details.",
+  "styles": [
+    "corporate"
+  ],
+  "order": 190
+}

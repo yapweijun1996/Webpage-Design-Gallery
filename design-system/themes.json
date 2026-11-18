@@ -1578,6 +1578,83 @@
         "entry-front": "4"
       },
       "overrides": []
+    },
+    "v22": {
+      "tokens": {
+        "canvas": "#110e0c",
+        "on-dark": "#ffffff",
+        "cream": "#f1ebe5",
+        "ink": "#171514",
+        "muted-ink": "#5b5048",
+        "paper": "#faf7f2",
+        "warm-white": "#f2eee8",
+        "action-red": "#b91e17",
+        "action-hover": "#961912",
+        "charcoal": "#2b241f",
+        "control-border": "#85766c",
+        "divider": "#d5cbc0",
+        "clear": "transparent",
+        "glass": "rgb(17 14 12 / 88%)",
+        "glass-top": "rgb(17 14 12 / 96%)",
+        "scrim": "rgb(17 14 12 / 64%)",
+        "scrim-core": "rgb(17 14 12 / 88%)",
+        "scrim-tail": "rgb(17 14 12 / 8%)",
+        "modal-backdrop": "rgb(0 0 0 / 58%)",
+        "chapter-font": "-apple-system, BlinkMacSystemFont, \"SF Pro Display\", \"Helvetica Neue\", Arial, \"Segoe UI\", Roboto, sans-serif",
+        "hero-type": "clamp(3.5rem, 7.22vw, 6.5rem)",
+        "chapter-type": "clamp(4rem, 8.75vw, 7.875rem)",
+        "borsch-type": "clamp(3.5rem, 7.78vw, 7rem)",
+        "band-type": "clamp(2.625rem, 5.2vw, 4.75rem)",
+        "mall-type": "clamp(2.625rem, 5.8vw, 5.25rem)",
+        "sheet-type": "clamp(2.375rem, 3.47vw, 3.125rem)",
+        "body-type": "clamp(1rem, 1.46vw, 1.3125rem)",
+        "ui-type": "clamp(.875rem, 1.11vw, 1rem)",
+        "sheet-body-type": "clamp(1rem, 1.25vw, 1.125rem)",
+        "product-type": "clamp(.875rem, 1.4vw, 1.25rem)",
+        "eyebrow-type": "clamp(.75rem, .9vw, .8125rem)",
+        "close-type": "1.375rem",
+        "gutter": "clamp(24px, 5.28vw, 76px)",
+        "frame-max": "90rem",
+        "nav-height": "56px",
+        "dock-height": "calc(var(--size-control) + 2 * var(--space-1) + 2px)",
+        "dock-width": "22rem",
+        "focus-ring-dark": "0 0 0 var(--space-1) var(--canvas)",
+        "focus-ring-light": "0 0 0 var(--space-1) var(--paper)",
+        "header-logo": "67px",
+        "brand-mark-width": "67px",
+        "band-padding": "clamp(3rem, 7vw, 7rem)",
+        "panel-padding": "clamp(1rem, 3vw, 2.75rem)",
+        "sheet-padding": "clamp(1.25rem, 2.65vw, 2.375rem)",
+        "sheet-width": "930px",
+        "radius-card": "18px",
+        "radius-sheet": "24px",
+        "radius-small": "10px",
+        "scrim-gutter": "max(var(--gutter), calc((100vw - var(--frame-max)) / 2))",
+        "layer-scene": "-1",
+        "layer-header": "10",
+        "layer-dock": "11",
+        "layer-skip": "12"
+      },
+      "overrides": [
+        {
+          "condition": "@media (max-width: 1280px)",
+          "tokens": {
+            "dock-height": "64px"
+          }
+        },
+        {
+          "condition": "@media (max-width: 700px)",
+          "tokens": {
+            "gutter": "clamp(16px, 5.13vw, 20px)",
+            "nav-height": "54px",
+            "header-logo": "54px",
+            "brand-mark-width": "44px",
+            "hero-type": "clamp(2.375rem, min(14.36vw, 6.7svh), 3.5rem)",
+            "chapter-type": "clamp(3rem, 14vw, 4rem)",
+            "borsch-type": "clamp(2.75rem, 12vw, 3.625rem)"
+          }
+        }
+      ]
     }
   }
 }

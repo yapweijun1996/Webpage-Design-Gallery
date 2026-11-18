@@ -126,6 +126,13 @@
     "detail": "Open New Moon from the brand strip or prepare a sales enquiry for the featured 425g pack.", "items": ["Food & Beverage", "Lifestyle", "Healthcare"]
   },
   {
+    "key": "brand-chapters", "version": "v22", "kind": "primary", "style": "Brand chapters",
+    "headline": "Explore Goh Joo Hin’s Brands", "action": "Explore Our Brands", "image": "demos/corporate/gjh/v22/assets/hero-wide.webp",
+    "composition": "poster", "background": "#110e0c", "ink": "#ffffff", "accent": "#b91e17",
+    "notes": "The approved study gives each brand a full-bleed chapter with a dedicated photo. The revised opening uses a separate editorial table scene and keeps brand shortcuts above the persistent sales actions.",
+    "detail": "Jump directly to New Moon from the first screen, view the 425g product or open its prefilled sales enquiry.", "items": ["New Moon", "MILI", "GOGO", "Borsch Med", "Sony"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

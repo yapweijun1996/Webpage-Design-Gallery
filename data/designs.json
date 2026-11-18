@@ -698,6 +698,44 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v22",
+    "companyId": "gjh",
+    "slug": "v22",
+    "version": "v22",
+    "title": "Brand Chapters",
+    "description": "Explore immersive brand chapters and prepare a sales enquiry with product details.",
+    "styles": [
+      "corporate"
+    ],
+    "status": "concept",
+    "order": 190,
+    "demoPath": "demos/corporate/gjh/v22/index.html",
+    "thumbnail": "demos/corporate/gjh/v22/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v22/screenshots/1440.png",
+        "width": 1440,
+        "height": 7798
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v22/screenshots/768.png",
+        "width": 768,
+        "height": 8116
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v22/screenshots/390.png",
+        "width": 390,
+        "height": 7304
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",
