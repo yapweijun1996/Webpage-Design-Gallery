@@ -289,7 +289,7 @@ def build_pages(catalog, release=None):
     category_names = {c["id"]: c["name"] for c in catalog["categories"]}
     pages = {}
     for path, prefix in (("index.html", ""), ("companies/index.html", "../")):
-        filters = '<div class="filter-bar" id="filters"><label class="search-field">Find a company<input id="company-search" type="search" placeholder="Search companies, industries or locations" autocomplete="off"></label><label>Category<select id="category-filter"><option value="">All categories</option>'
+        filters = '<div class="filter-bar" id="filters"><label class="search-field">Find a company<input id="company-search" type="search" placeholder="Search companies" autocomplete="off"></label><label>Category<select id="category-filter"><option value="">All categories</option>'
         filters += "".join(f'<option value="{escape(c["id"])}">{escape(c["name"])}</option>' for c in catalog["categories"])
         filters += '</select></label><label>Sort by<select id="company-sort"><option value="name">Name A–Z</option><option value="designs">Most designs</option></select></label></div>'
         single_company = len(companies) == 1

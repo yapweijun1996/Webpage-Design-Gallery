@@ -38,7 +38,7 @@ Run `python tests/ui_audit.py <url> <out-dir>`. It covers deterministic candidat
 - [ ] Viewports 320x720, 390x844, 430x932, 768x1024, 1024x768, 1440x900.
 - [ ] No horizontal document overflow; no clipped controls or text; no offscreen fixed overlays.
 - [ ] Every visible control has an accessible name; images have `alt`; no broken images; exactly one H1; no heading jumps; `lang` and viewport meta present.
-- [ ] Touch targets >= 44 px on touch widths; >= 36 px for pointer widths (state which rule applied).
+- [ ] Interactive targets measure at least 36 × 36 CSS px with a fine pointer and at least 44 × 44 CSS px whenever a coarse pointer is available, including on hybrid laptops. Record the measured threshold for each context. Use `(any-pointer: coarse)` and the Gallery `--size-control` token for coarse-pointer sizing.
 - [ ] Keyboard: visible focus ring on every stop, logical order, skip link, no trap. Never remove a valid focus ring for looks.
 - [ ] Contrast >= 4.5:1 (text) measured, including text over imagery (scrim).
 - [ ] States: loading, empty, error, long content, offline, reduced motion, no JS.

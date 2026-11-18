@@ -19,18 +19,21 @@ function selectValue(control, value, fallback) {
   control.value = [...control.options].some((option) => option.value === value) ? value : fallback;
 }
 
+function viewportAtMost(token) {
+  const width = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+  return matchMedia(`(max-width: ${width})`);
+}
+
 function initialPreviewDevice() {
-  const tokens = getComputedStyle(document.documentElement);
-  const matches = (name) => matchMedia(`(max-width: ${tokens.getPropertyValue(name).trim()})`).matches;
-  if (matches('--breakpoint-narrow')) return 'mobile';
-  return matches('--breakpoint-medium') ? 'tablet' : 'desktop';
+  if (viewportAtMost('--breakpoint-narrow').matches) return 'mobile';
+  return viewportAtMost('--breakpoint-medium').matches ? 'tablet' : 'desktop';
 }
 
 function initSettings() {
   const settings = document.querySelector('.gallery-settings');
   if (!settings) return;
   const summary = settings.querySelector('summary');
-  const compact = matchMedia('(max-width: 1000px)');
+  const compact = viewportAtMost('--breakpoint-medium');
   const sync = () => {
     if (compact.matches && settings.contains(document.activeElement)) summary.focus();
     settings.open = !compact.matches;
@@ -73,6 +76,12 @@ function initCompanies() {
   const sort = document.querySelector('#company-sort');
   const grid = document.querySelector('.company-grid');
   const pages = document.querySelector('.pagination');
+  const compactSearch = viewportAtMost('--breakpoint-medium');
+  const syncSearchPlaceholder = () => {
+    search.placeholder = compactSearch.matches ? 'Search companies' : 'Search companies, industries or locations';
+  };
+  syncSearchPlaceholder();
+  compactSearch.addEventListener('change', syncSearchPlaceholder);
   const perPage = 12;
   let currentPage = 1;
   function restore() {

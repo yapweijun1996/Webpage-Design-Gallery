@@ -5,6 +5,10 @@
 .app-release { margin-left: auto; display: flex; align-items: center; gap: var(--space-4); }
 .app-version { font-size: var(--font-size-xs); color: var(--ink); white-space: nowrap; }
 .app-version small { display: block; font: var(--font-release); color: var(--muted); }
+#check-update { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-width: 14ch; white-space: nowrap; }
+#check-update .gallery-icon { color: var(--accent); flex-shrink: 0; }
+#check-update:enabled:hover { background: var(--color-surface-subtle); }
+#check-update:disabled { opacity: 1; cursor: wait; }
 .app-release button, .update-notice button, .app-tools > button, #close-update { border: 1px solid var(--color-border-control); border-radius: var(--radius-sm); min-height: var(--size-control); padding: 10px 15px; font-size: var(--font-size-xs); color: var(--ink); background: var(--surface); }
 .app-release button:hover, .app-tools > button:hover { background: var(--color-surface-subtle); }
 .update-notice { padding: 14px max(24px, env(safe-area-inset-right, 0px)) 14px max(24px, env(safe-area-inset-left, 0px)); display: flex; justify-content: center; align-items: center; gap: var(--space-6); border-bottom: 1px solid var(--color-border-control); background: var(--color-surface-subtle); color: var(--ink); }

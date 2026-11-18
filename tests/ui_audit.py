@@ -16,7 +16,8 @@ JS='''()=>{
  const vis=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'};
  const ctl=[...document.querySelectorAll('a[href],button,input,select,textarea,[role=button],summary')].filter(vis);
  out.controls=ctl.length;
- out.small=ctl.map(e=>{const r=e.getBoundingClientRect();return [e.tagName,(e.getAttribute('aria-label')||e.innerText||e.id||'').trim().slice(0,28),Math.round(r.width),Math.round(r.height)]}).filter(a=>a[3]<44||a[2]<44);
+ out.targetMinimum=matchMedia('(any-pointer: coarse)').matches?44:36;
+ out.small=ctl.map(e=>{const r=e.getBoundingClientRect();return [e.tagName,(e.getAttribute('aria-label')||e.innerText||e.id||'').trim().slice(0,28),r.width,r.height]}).filter(a=>a[3]<out.targetMinimum||a[2]<out.targetMinimum);
  out.unnamed=ctl.filter(e=>!(e.getAttribute('aria-label')||e.innerText||e.getAttribute('title')||e.labels?.length||e.getAttribute('alt'))).map(e=>e.outerHTML.slice(0,120));
  out.imgsNoAlt=[...document.images].filter(i=>!i.hasAttribute('alt')).length;
  out.imgsBroken=[...document.images].filter(i=>i.complete&&i.naturalWidth===0).map(i=>i.src.slice(-50));
@@ -46,6 +47,6 @@ with sync_playwright() as p:
 json.dump(rep,open(S+'/audit.json','w'),indent=1)
 for k,v in rep.items():
     if k=='tabstops': print('TAB',v); continue
-    print(k,'overflow',v['overflow'],'controls',v['controls'],'small<44:',len(v['small']),'unnamed',len(v['unnamed']),'noalt',v['imgsNoAlt'],'broken',v['imgsBroken'],'h1',v['h1'],'jumps',v['headingJumps'],'tiny<12px',v['tinyText'],'pageH',v['pageH'],'err',v['errors'])
+    print(k,'overflow',v['overflow'],'controls',v['controls'],f"small<{v['targetMinimum']}:",len(v['small']),'unnamed',len(v['unnamed']),'noalt',v['imgsNoAlt'],'broken',v['imgsBroken'],'h1',v['h1'],'jumps',v['headingJumps'],'tiny<12px',v['tinyText'],'pageH',v['pageH'],'err',v['errors'])
 print('title/lang',rep['390x844']['title'],rep['390x844']['lang'])
 print('small@390',rep['390x844']['small'][:14])
