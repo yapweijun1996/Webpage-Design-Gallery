@@ -175,18 +175,21 @@ export function cloneNpcRig(source) {
   const clone=source.clone(true), originals=[], copies=[];
   source.traverse(node=>originals.push(node));
   clone.traverse(node=>copies.push(node));
-  const remap=new Map(originals.map((node,i)=>[node,copies[i]]));
+  const remap=new Map(originals.map((node,i)=>[node,copies[i]])), skeletons=new Map();
   for (let i=0;i<originals.length;i++) {
     const original=originals[i], copy=copies[i];
     if(Array.isArray(original.material)) copy.material=original.material.slice();
     if (!original.isSkinnedMesh) continue;
-    copy.skeleton=original.skeleton.clone();
-    copy.skeleton.bones=original.skeleton.bones.map(bone=>{
-      const result=remap.get(bone);
-      if (!result) throw new Error('NPC skeleton bone is outside the visitor model');
-      return result;
-    });
-    copy.bind(copy.skeleton,original.bindMatrix);
+    if (!skeletons.has(original.skeleton)) {
+      const skeleton=original.skeleton.clone();
+      skeleton.bones=original.skeleton.bones.map(bone=>{
+        const result=remap.get(bone);
+        if (!result) throw new Error('NPC skeleton bone is outside the visitor model');
+        return result;
+      });
+      skeletons.set(original.skeleton,skeleton);
+    }
+    copy.bind(skeletons.get(original.skeleton),original.bindMatrix);
   }
   return clone;
 }
@@ -207,12 +210,14 @@ export async function loadNpcSystem(T, options) {
   }
 }
 
-export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel}) {
+export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, hasPlayer=false;
   let admission=nextNpcAdmission();
   const admissionOptions={}, lastPlayer={x:0,z:0}, nextPosition={x:0,z:0};
   const seatPoint={x:0,y:0,z:0};
-  let boy=null, boyNpc=null, boyLoad=null, boyController=null, placeLoadedBoy=false, preparingBoy=null;
+  let boy=null, boyNpc=null, boyLoad=null, boyController=null, boyLoading=false, placeLoadedBoy=false, preparingBoy=null;
+  let modularLoader, modularController, modularLooks, preparingModular;
+  let modularStatus='deferred', appearanceSerial=0;
   // Expanded arcade waypoints are up to twelve metres apart.
   const maxLeg = expanded ? 12.5 : 9;
   const visitors=[], routes=NPC_ROUTES[expanded?'expanded':'classic'].map(([x,z])=>({x,y:0,z}));
@@ -243,16 +248,39 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
   const visitorCalls=template?visibleDrawCalls(template):0;
   let callsPerNpc=visitorCalls;
   const limitForSettings=()=>available && !disposed ? npcLimit(settings) : 0;
+  const allowModular=()=>limitForSettings()>0 && !(settings.mobile && settings.tier==='low');
+  function enableModular(loader=async signal=>(await import('./crowd.js')).loadModularLooks(signal)) {
+    modularLoader=loader;
+  }
+  function reportModularFallback() {
+    if (!disposed) onModularFallback?.();
+  }
+  function requestModular() {
+    if (!modularLoader || modularStatus!=='deferred' || !allowModular()) return;
+    if (!visitors.some(npc=>!npc.seat && npc!==boyNpc)) return;
+    modularStatus='loading';
+    const controller=modularController=new AbortController();
+    Promise.resolve().then(()=>modularLoader(controller.signal)).then(looks=>{
+      if (disposed || controller.signal.aborted) looks.dispose();
+      else { modularLooks=looks; modularStatus='ready'; }
+    }).catch(()=>{
+      if (controller.signal.aborted) return;
+      modularStatus='unavailable';
+      reportModularFallback();
+    });
+  }
   async function loadBoy(loader=loadTripoNpc) {
     if (!limitForSettings() || boyLoad) return boyLoad;
     boyController=new AbortController();
+    boyLoading=true;
     boyLoad=Promise.resolve().then(()=>loader(boyController.signal)).then(asset=>{
       if (!asset) return;
       if (disposed) { asset.dispose(); return; }
       callsPerNpc=Math.max(callsPerNpc,visibleDrawCalls(asset.scene));
       boy=asset;
       placeLoadedBoy=true;
-    }).catch(()=>{ /* The existing visitor rig stays in service if the boy cannot load. */ });
+    }).catch(()=>{ /* The existing visitor rig stays in service if the boy cannot load. */ })
+      .finally(()=>{boyLoading=false;});
     return boyLoad;
   }
   function applyVisibility() {
@@ -303,27 +331,32 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     }
     return true;
   }
-  function disposeRig({avatar,mixer}) {
+  function disposeRig({avatar,mixer,materials}) {
     avatar.removeFromParent();
     mixer.stopAllAction(); mixer.uncacheRoot(avatar);
     const skeletons=new Set();
     avatar.traverse(node=>{if(node.isSkinnedMesh) skeletons.add(node.skeleton);});
     for(const skeleton of skeletons) skeleton.dispose();
+    materials?.forEach(material=>material.dispose());
   }
   function remove(npc) {
     npc.upload?.abort();
     scene.remove(npc.visual); disposeRig(npc);
+    if (npc.fallbackRig) disposeRig(npc.fallbackRig);
     if (npc===boyNpc) boyNpc=null;
     visitors.splice(visitors.indexOf(npc),1);
   }
   function clearVisitors() {
     while (visitors.length) remove(visitors[visitors.length-1]);
   }
-  function makeRig(npc, asset) {
-    const avatar=cloneNpcRig(asset?.scene || template);
-    const animationClips=asset?.clips || clips;
+  function makeRig(npc, asset, look=null) {
+    const avatar=look?.avatar || cloneNpcRig(asset?.scene || template);
+    const animationClips=look?.clips || asset?.clips || clips;
     avatar.visible=true;
-    if (asset) {
+    if (look) {
+      avatar.scale.multiplyScalar(look.scale);
+      avatar.position.y=look.groundOffset;
+    } else if (asset) {
       avatar.scale.multiplyScalar(BOY_SCALE);
       avatar.position.y=npc.seat ? BOY_SEAT_OFFSET : BOY_FLOOR_OFFSET;
     } else avatar.position.y=npc.seat ? -.13 : 0;
@@ -332,15 +365,21 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       if(node.isMesh){node.castShadow=false;node.receiveShadow=true;node.raycast=ignoreRaycast;}
     });
     const mixer=new T.AnimationMixer(avatar), actions={};
-    for(const name of CLIP_NAMES) {
+    for(const name of look ? Object.keys(animationClips) : CLIP_NAMES) {
       actions[name]=mixer.clipAction(animationClips[name]);
-      actions[name].setEffectiveWeight(name===npc.mode?1:0).play();
+      actions[name].setEffectiveWeight(name===npc.mode?1:0);
+      if (name==='wave' || name==='nod') {
+        actions[name].setLoop(T.LoopOnce,1);
+        actions[name].clampWhenFinished=true;
+      } else actions[name].play();
     }
-    actions.sit.paused=true;
-    actions.sit.time=Math.max(0,animationClips.sit.duration-.00001);
+    if (actions.sit) {
+      actions.sit.paused=true;
+      actions.sit.time=Math.max(0,animationClips.sit.duration-.00001);
+    }
     mixer.update(0);
     const mesh=asset ? avatar.getObjectByName(asset.meshName) : null;
-    return {avatar,mixer,actions,mesh,highGeometry:mesh?.geometry};
+    return {avatar,mixer,actions,mesh,highGeometry:mesh?.geometry,look,materials:look?.materials};
   }
   function mountRig(npc, rig) {
     Object.assign(npc,rig);
@@ -355,6 +394,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     visual.rotation.y=seat?.angle||0;
     visual.layers.set(2); facing.layers.set(2); visual.visible=false;
     const npc={visual,facing,seat,admitted:false,gpuReady:!prepareModel,mode:seat?'sit':'idle',target:null,delay:2+(serial++%4),route:serial%routes.length,blockedTime:0};
+    npc.appearanceIndex=appearanceSerial++;
     mountRig(npc,makeRig(npc,null));
     scene.add(visual);
     visitors.push(npc);
@@ -368,15 +408,16 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     }
   }
   function placeBoy(first) {
-    if (!boy || boyNpc || preparingBoy) return;
-    const candidates=visitors.slice(first).filter(npc=>npc.gpuReady);
-    const choice=candidates.find(npc=>!npc.seat) || candidates[0];
+    if (!boy || boyNpc || preparingBoy || preparingModular) return;
+    const candidates=visitors.slice(first).filter(npc=>npc.gpuReady && !npc.look);
+    // Modular walking clips have no approved sit pose. Use the existing boy
+    // seat path when possible so another slot can use the modular wardrobe.
+    const choice=candidates.find(npc=>modularLoader && allowModular() ? npc.seat : !npc.seat) || candidates[0];
     if (!choice) return;
     let rig;
     try { rig=makeRig(choice,boy); }
     catch {
       boy.dispose(); boy=null; placeLoadedBoy=false;
-      callsPerNpc=visitorCalls;
       return;
     }
     const mount=()=>{
@@ -399,6 +440,56 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       if (visitors.includes(choice)) mount();
       else disposeRig(rig);
     },()=>disposeRig(rig)).finally(()=>{preparingBoy=null;});
+  }
+  function placeModular() {
+    if (!modularLooks || !allowModular() || preparingModular || preparingBoy) return;
+    const candidates=visitors.filter(npc=>npc.gpuReady && npc!==boyNpc && !npc.seat && !npc.modularAttempted);
+    // Keep one existing visitor eligible for a boy load still in flight.
+    const remaining=visitors.filter(npc=>npc.gpuReady && !npc.look).length;
+    const choice=candidates[0];
+    if (!choice || (!boyNpc && (boy || boyLoading) && remaining<=1)) return;
+    choice.modularAttempted=true;
+    let rig;
+    try {
+      rig=makeRig(choice,null,modularLooks.createLook(choice.appearanceIndex,cloneNpcRig));
+    } catch {
+      reportModularFallback();
+      return;
+    }
+    const mount=()=>{
+      if (!allowModular() || !visitors.includes(choice)) { disposeRig(rig); return; }
+      const {avatar,mixer,actions,mesh,highGeometry,look,materials}=choice;
+      choice.fallbackRig={avatar,mixer,actions,mesh,highGeometry,look,materials};
+      choice.avatar.removeFromParent();
+      callsPerNpc=Math.max(callsPerNpc,visibleDrawCalls(rig.avatar));
+      mountRig(choice,rig);
+      choice.greeting=null;
+      choice.idleTime=0;
+      choice.greeted=false;
+    };
+    if (!prepareModel) { mount(); return; }
+    const upload=new AbortController();
+    choice.upload=upload;
+    preparingModular=choice;
+    void prepareModel(rig.avatar,{signal:upload.signal}).then(mount,()=>{
+      disposeRig(rig);
+      if (!upload.signal.aborted) reportModularFallback();
+    }).finally(()=>{preparingModular=null;});
+  }
+  function updateGreeting(npc, dt, reducedMotion) {
+    if (reducedMotion || npc.mode!=='idle' || npc.target) {
+      npc.idleTime=0;
+      npc.greeted=false;
+      npc.greeting=null;
+    } else if (!npc.greeted && (npc.idleTime+=dt)>.55 && npc.delay>.5) {
+      const action=npc.actions[npc.look.greeting];
+      npc.greeting=action.reset().setEffectiveWeight(0).play();
+      npc.greeted=true;
+    }
+    if (npc.greeting?.paused) npc.greeting=null;
+    npc.actions.idle.paused=reducedMotion;
+    if (reducedMotion) npc.actions.idle.time=0;
+    return npc.greeting;
   }
   function updateBoy(npc, player, reducedMotion) {
     npc.actions.idle.paused=reducedMotion;
@@ -456,10 +547,12 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
           if(d<=step+.001) { npc.target=null; npc.delay=2+(serial++%4); npc.mode='idle'; }
         }
       }
-      for(const name of CLIP_NAMES) {
+      const greeting=npc.look ? updateGreeting(npc,dt,reducedMotion) : null;
+      for(const name in npc.actions) {
         const action=npc.actions[name];
-        const target=name===npc.mode?1:0;
+        const target=greeting ? Number(action===greeting) : Number(name===npc.mode);
         action.setEffectiveWeight(action.getEffectiveWeight()+(target-action.getEffectiveWeight())*blend);
+        if (npc.look && reducedMotion && (name==='wave' || name==='nod')) action.stop();
       }
       if (npc===boyNpc) updateBoy(npc,player,reducedMotion);
       npc.mixer.update(dt);
@@ -501,20 +594,42 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       placeBoy(first);
       if (boyNpc) updateBoy(boyNpc,player,reducedMotion);
     }
+    requestModular();
+    placeModular();
     measure(admission.nonNpcCalls,false);
   }
   return {
-    update, releaseSeat, clearVisitors, loadBoy,
+    update, releaseSeat, clearVisitors, loadBoy, enableModular,
     admit(nonNpcCalls) { showing=true; return measure(nonNpcCalls,true); },
     setVisible(value) { showing=Boolean(value); applyVisibility(); },
     setDrawCallBudget(value) { settings.drawCallBudget=value; measure(admission.nonNpcCalls,false); },
-    setQuality(next={}) { settings={...settings,...next}; measure(admission.nonNpcCalls,false); },
+    setQuality(next={}) {
+      settings={...settings,...next};
+      if (!allowModular()) {
+        if (modularStatus==='loading') {
+          modularController.abort();
+          modularStatus='deferred';
+        }
+        preparingModular?.upload?.abort();
+        if (preparingModular) preparingModular.modularAttempted=false;
+        for (const npc of visitors) {
+          if (!npc.fallbackRig) continue;
+          disposeRig(npc);
+          mountRig(npc,npc.fallbackRig);
+          npc.fallbackRig=null;
+          npc.modularAttempted=false;
+        }
+      }
+      measure(admission.nonNpcCalls,false);
+    },
     dispose() {
       if(disposed)return;
       disposed=true;
       boyController?.abort();
+      modularController?.abort();
       clearVisitors();
       boy?.dispose(); boy=null;
+      modularLooks?.dispose(); modularLooks=null;
       for(const geometry of ownedGeometry) geometry.dispose();
       for(const material of ownedMaterials) material.dispose();
       for(const skeleton of templateSkeletons) skeleton.dispose();
@@ -526,7 +641,12 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       const visible=visitors.filter(n=>n.visual.visible).length;
       return {tier:settings.tier,enabled:settings.enabled,available,limit:limitForSettings(),active:visitors.length,visible,
         ...admission,drawCallBudget:settings.drawCallBudget,totalCallCap:200,drawCalls:visible*callsPerNpc,callsPerNpc,
-        occupiedSeatIds:visitors.filter(n=>n.seat).map(n=>n.seat.id)};
+        occupiedSeatIds:visitors.filter(n=>n.seat).map(n=>n.seat.id),
+        modular:{status:modularStatus, active:visitors.filter(n=>n.look).map(n=>({
+          slot:n.appearanceIndex, outfit:{...n.look.appearance}, tint:[...n.look.tint], scale:n.look.variation,
+          clip:n.greeting?.getClip().name || n.mode, time:n.mixer.time, visible:n.visual.visible,
+          triangles:n.look.triangles
+        }))}};
     }
   };
 }

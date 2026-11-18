@@ -4,7 +4,8 @@ import {readFile} from 'node:fs/promises';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createLocomotionContinuity} from '../demos/corporate/gjh/v11/assets/character.js';
 import {createCharacterTripo} from '../demos/corporate/gjh/v11/assets/character-tripo.js';
-import {createNpcSystem,loadNpcSystem,npcLimit} from '../demos/corporate/gjh/v11/assets/npcs.js';
+import {cloneNpcRig,createNpcSystem,loadNpcSystem,npcLimit} from '../demos/corporate/gjh/v11/assets/npcs.js';
+import {loadModularLooks,validateManifest} from '../demos/corporate/gjh/v11/assets/crowd.js';
 import {loadTripoNpc,tripoNpcClips} from '../demos/corporate/gjh/v11/assets/npc-tripo.js';
 
 const clipNames = ['idle','walk','run','sit','wave','nod'];
@@ -211,11 +212,12 @@ test('an incompatible LOD leaves the high geometry in service and late models ar
 test('the shipped Tripo visitor and boy coexist with the separately loaded V2 crowd',async t=>{
   const assets = new URL('../demos/corporate/gjh/v11/assets/',import.meta.url);
   const files = ['gjh-tripo-visitor.glb','gjh-tripo-visitor-lod1.glb','gjh-mall-visitor-v2.glb',
-    'gjh-tripo-npc-boy.glb','gjh-tripo-npc-boy-lod1.glb'];
+    'gjh-tripo-npc-boy.glb','gjh-tripo-npc-boy-lod1.glb',
+    ...['manifest.json','base_body.glb','hair-bob.glb','hand_gestures.glb','motion-clips.glb'].map(file=>'chibi-crowd/'+file)];
   const models = new Map(await Promise.all(files.map(async name=>[name,await readFile(new URL(name,assets))])));
   const globals = {
     fetch: async url=>{
-      const data = models.get(new URL(url).pathname.split('/').at(-1));
+      const data = models.get(new URL(url).pathname.split('/assets/').at(-1));
       return data ? new Response(data) : new Response(null,{status:404});
     },
     self: globalThis,
@@ -256,9 +258,76 @@ test('the shipped Tripo visitor and boy coexist with the separately loaded V2 cr
   assert.equal(mesh.geometry.index.count/3,6313);
   system.update(.016,{x:boy.position.x+13,y:0,z:boy.position.z});
   assert.equal(mesh.geometry.index.count/3,2630);
+  system.setQuality({tier:'low',mobile:true});
+  let pending;
+  system.enableModular(signal=>{
+    pending=loadModularLooks(signal);
+    return pending;
+  });
+  system.update(.016,player);
+  assert.equal(system.state.modular.status,'deferred');
+  assert.equal(system.state.active,1);
+  system.setQuality({tier:'detailed',mobile:false});
+  system.update(.016,player);
+  await Promise.resolve();
+  const looks = await pending;
+  await new Promise(resolve=>setImmediate(resolve));
+  const sample = looks.createLook(1,cloneNpcRig), repeated = looks.createLook(1,cloneNpcRig);
+  const other = looks.createLook(2,cloneNpcRig);
+  assert.deepEqual([sample.appearance,sample.tint,sample.variation],[repeated.appearance,repeated.tint,repeated.variation]);
+  assert.notEqual(sample.variation,other.variation);
+  for (const look of [sample,repeated,other]) {
+    assert.deepEqual(look.appearance,{body:'neutral-body',hair:'hair-bob'});
+    assert.ok(look.variation>=.95 && look.variation<=1.05);
+    assert.equal(look.triangles,12506);
+    const body = look.avatar.getObjectByName('Base_Body');
+    const hair = look.avatar.getObjectByName('Hair_Bob');
+    assert.equal(body.skeleton,hair.skeleton);
+    body.skeleton.dispose();
+    look.materials.forEach(material=>material.dispose());
+  }
+  assert.equal(sample.avatar.getObjectByName('Base_Body').geometry,repeated.avatar.getObjectByName('Base_Body').geometry);
+  assert.equal(sample.avatar.getObjectByName('Hair_Bob').geometry,repeated.avatar.getObjectByName('Hair_Bob').geometry);
+  const clips = new Set();
+  const started = performance.now();
+  for (let i=0; i<600; i++) {
+    system.update(1/60,player);
+    system.admit(120);
+    for (const actor of system.state.modular.active) clips.add(actor.clip);
+  }
+  const crowdState = system.state;
+  assert.ok(crowdState.modular.active.length>=2);
+  assert.ok(crowdState.modular.active.every(actor=>actor.time>9));
+  for (const clip of ['walk','idle','wave','nod']) assert.ok(clips.has(clip), [...clips]);
+  t.diagnostic(JSON.stringify({simulationTicks:600, elapsedMs:+(performance.now()-started).toFixed(2),
+    active:crowdState.active,modular:crowdState.modular.active.length,admitted:crowdState.admitted,
+    callsPerModular:2,conservativeCallsPerNpc:crowdState.callsPerNpc}));
+  system.update(.016,player,true);
+  assert.ok(system.state.modular.active.every(actor=>!['wave','nod'].includes(actor.clip)));
+  system.setQuality({tier:'low',mobile:true});
+  system.update(.016,player);
+  assert.equal(system.state.modular.active.length,0);
+  assert.equal(system.state.active,1);
   assert.equal(system.state.totalCallCap,200);
   system.admit(199);
   assert.ok(199+system.state.drawCalls<=200);
   system.dispose();
   assert.deepEqual(scene.children,[visitor.visual]);
+});
+
+test('invalid or unavailable modular assets keep existing visitors in service',async()=>{
+  const scene = new T.Scene();
+  let failures = 0;
+  const system = createNpcSystem(T,{scene,source:model('fallback'),R:{Capsule:class{}},
+    physics:{intersectionWithShape:()=>null},onModularFallback:()=>failures++});
+  assert.throws(()=>validateManifest({version:1,seed:1,modules:[{id:'unreviewed',slot:'body',status:'draft'}]}));
+  system.enableModular(()=>Promise.reject(new Error('Missing manifest')));
+  system.update(1/60,player);
+  await new Promise(resolve=>setImmediate(resolve));
+  system.update(1/60,player);
+  admit(system,120);
+  assert.equal(system.state.modular.status,'unavailable');
+  assert.equal(system.state.visible,4);
+  assert.equal(failures,1);
+  system.dispose();
 });

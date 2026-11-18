@@ -1,4 +1,4 @@
-"""Verify four GJH concepts as standalone pages in the publishable artifact.
+"""Verify four standalone GJH concepts and the V11 crowd in the publishable artifact.
 
 Requires Python Playwright and a local Chrome. Optional --axe-script accepts a
 locally reviewed axe-core browser bundle; this runner never downloads code.
@@ -75,6 +75,49 @@ def check_entry_action(page, version):
         assert page.locator(target).is_visible(), (version, target)
 
 
+def check_v11_crowd(browser, base):
+    context = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True,
+                                  has_touch=True, service_workers="block", reduced_motion="no-preference")
+    context.add_init_script("""localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
+                              localStorage.setItem('gjh-v11-graphics-quality-v1','balanced');""")
+    page = context.new_page()
+    errors, requested = [], set()
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
+    page.on("request", lambda request: requested.add(request.url))
+    page.goto(base + "demos/corporate/gjh/v11/", wait_until="domcontentloaded")
+    assert not any('/chibi-crowd/' in url for url in requested), requested
+    page.locator("#arrival-walk").click()
+    page.wait_for_function("window.__sceneReady || window.__sceneFailed", timeout=90000)
+    assert page.evaluate("window.__sceneReady && __mall.ready"), page.locator("#loader-status").inner_text()
+    page.locator("#app-loader").wait_for(state="hidden", timeout=90000)
+    assert page.evaluate("__mall.teleport('atrium')")
+    page.wait_for_function("window.__mall.state.npcs?.modular.active.some(npc => npc.visible)", timeout=45000)
+    state = page.evaluate("__mall.state")
+    npcs = state["npcs"]
+    assert 1 <= npcs["visible"] <= npcs["active"] <= npcs["limit"] == 2, npcs
+    assert state["renderBudget"]["totalCalls"] <= 200, state["renderBudget"]
+    assert page.evaluate("innerWidth === 390 && document.documentElement.scrollWidth <= innerWidth")
+    actor = next(npc for npc in npcs["modular"]["active"] if npc["visible"])
+    assert actor["outfit"] == {"body": "neutral-body", "hair": "hair-bob"}, actor
+    page.wait_for_function("""first => __mall.state.npcs.modular.active.some(npc =>
+        npc.slot === first.slot && npc.time > first.time + .1)""", arg=actor)
+    page.locator("#mall-tools > summary").click()
+    page.locator("#keyboard-help summary").click()
+    page.wait_for_function("__mall.state.paused")
+    then = page.evaluate("__mall.state.npcs.modular.active")
+    page.wait_for_timeout(250)
+    assert page.evaluate("__mall.state.npcs.modular.active") == then
+    page.locator("#graphics-quality").select_option("low")
+    assert page.evaluate("__mall.state.npcs.modular.active.length === 0 && __mall.state.npcs.limit === 1")
+    assert not errors, errors
+    context.close()
+    print(f"v11 / 390px: crowd, animation, pause, Low fallback and layout PASS; "
+          f"{npcs['visible']} admitted, {state['renderBudget']['totalCalls']} total draws", flush=True)
+    return {"width": 390, "npcCount": npcs["visible"], "drawCalls": state["renderBudget"]["totalCalls"],
+            "animation": "PASS", "pause": "PASS", "layoutOverflow": "PASS", "consoleErrors": errors}
+
+
 def run(axe_script=None):
     evidence = {
         "capturedAt": datetime.now(timezone.utc).isoformat(),
@@ -119,7 +162,9 @@ def run(axe_script=None):
         try:
             with sync_playwright() as playwright:
                 chrome = os.environ.get("GALLERY_CHROME", r"C:\Program Files\Google\Chrome\Application\chrome.exe")
-                browser = playwright.chromium.launch(executable_path=chrome, headless=True)
+                browser = playwright.chromium.launch(executable_path=chrome, headless=True, args=[
+                    "--use-angle=" + os.environ.get("GALLERY_WEBGL_BACKEND", "swiftshader"),
+                    "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
                 evidence["browserVersion"] = browser.version
                 for version in VERSIONS:
                     for width, height in VIEWPORTS:
@@ -217,6 +262,7 @@ def run(axe_script=None):
                     assert page.url.endswith("#business")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
                     context.close()
+                evidence["v11Crowd"] = check_v11_crowd(browser, base)
                 browser.close()
         finally:
             server.shutdown()

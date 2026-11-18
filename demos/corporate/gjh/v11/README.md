@@ -116,7 +116,7 @@ The mall browser check uses SwiftShader by default. Set `GALLERY_WEBGL_BACKEND=m
 
 Essential scene textures retry twice after a failed request, without navigating away. If all attempts fail, initialization reports the asset name in the console and retains the accessible directory. The startup retry browser check covers both temporary and persistent failures.
 
-The ambient crowd can include one Tripo boy within the existing graphics-tier NPC limit. He reuses the mall's routes, bench rules and render admission. The standard crowd remains available if the optional boy asset cannot load. See [NPC behavior, asset provenance and verification](../../../../docs/gjh-v11-npcs.md).
+The ambient crowd includes the V2 chibi fallback, an optional Tripo boy and modular walkway outfits within the existing graphics-tier NPC limits. All visitors share the mall's routes, bench rules and render admission. The modular wardrobe loads after the first frame in eligible tiers. Mobile Low uses the original crowd models. See [NPC behavior, asset provenance and verification](../../../../docs/gjh-v11-npcs.md).
 
 The initial loader prepares current-mall shop models and scene furnishings, with deduplication, bounded waits and per-asset failure reporting. Available procedural stand-ins remain in use when their models fail. Visitors may enter early or use the directory; after the overall wait limit, incomplete assets continue preparing without a false ready claim. The status describes downloaded and parsed models, not GPU upload or shader compilation. Separate product-preview contexts remain on demand. Cached models retain distance-based visibility, and preload can increase startup transfer and memory use.
 
@@ -138,7 +138,7 @@ The three store sections also use nine AI-generated lifestyle scenes, three per 
 
 ## Standalone PWA
 
-V11 has its own scoped manifest and an integrity-checked worker that saves only a reconnect screen and app icons. The directory and 3D mall still require a connection; the demo bag remains session-only. Updates require an explicit action. See [PWA scope, tests and limitations](../../../../docs/gjh-v11-pwa.md).
+V11 has its own scoped manifest and an integrity-checked worker that saves a reconnect screen and its supporting assets. The worker also caches verified wardrobe files on demand. The directory and 3D mall still require a connection; the demo bag remains session-only. Updates require an explicit action. See [PWA scope, tests and limitations](../../../../docs/gjh-v11-pwa.md).
 
 In the expanded layout, the additional storefront destinations use the IDs `planned-space-04` through `planned-space-17`. Run `python tests/browser_gjh_shop_walkthrough.py` to check arrivals, doors, interior routes, fixture collisions and exits for the ground-floor shops.
 

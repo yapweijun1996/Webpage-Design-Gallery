@@ -2,10 +2,21 @@
 const BUILD = __BUILD__;
 const VERSION = __VERSION__;
 const PRECACHE = __PRECACHE__;
+const LAZY_ASSETS = __LAZY_ASSETS__;
 const BASE = new URL('./', self.location.href);
 const ROOT = new URL('../../../../', BASE);
 const PREFIX = 'gjh-v11:' + BASE.pathname + ':offline:';
 const CACHE = PREFIX + BUILD;
+
+async function fetchVerified({path, sha256}) {
+  const url = new URL(path, BASE); url.searchParams.set('v', BUILD);
+  const asset = await fetch(url, {cache:'reload', redirect:'error'});
+  if (!asset.ok || asset.redirected) throw new Error('Offline resource unavailable');
+  const hash = await crypto.subtle.digest('SHA-256', await asset.clone().arrayBuffer());
+  const actual = Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2,'0')).join('');
+  if (actual !== sha256) throw new Error('Offline resource integrity mismatch');
+  return asset;
+}
 
 async function installRelease() {
   try {
@@ -14,15 +25,7 @@ async function installRelease() {
     const identity = await response.json();
     if (identity.build !== BUILD || identity.version !== VERSION) throw new Error('Release identity mismatch');
     const cache = await caches.open(CACHE);
-    for (const {path, sha256} of PRECACHE) {
-      const url = new URL(path, BASE); url.searchParams.set('v', BUILD);
-      const asset = await fetch(url, {cache:'reload'});
-      if (!asset.ok || asset.redirected) throw new Error('Offline resource unavailable');
-      const hash = await crypto.subtle.digest('SHA-256', await asset.clone().arrayBuffer());
-      const actual = Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2,'0')).join('');
-      if (actual !== sha256) throw new Error('Offline resource integrity mismatch');
-      await cache.put(new URL(path, BASE), asset);
-    }
+    for (const entry of PRECACHE) await cache.put(new URL(entry.path, BASE), await fetchVerified(entry));
   } catch (error) { await caches.delete(CACHE); throw error; }
 }
 self.addEventListener('install', event => event.waitUntil(installRelease()));
@@ -51,5 +54,16 @@ self.addEventListener('fetch', event => {
       const cached = await (await caches.open(CACHE)).match(new URL(url.pathname, BASE));
       return cached || new Response('Saved resource unavailable. Reconnect and try again.', {status:503});
     })());
+  } else {
+    const entry = LAZY_ASSETS.find(entry => new URL(entry.path, BASE).pathname === url.pathname);
+    if (!entry) return;
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE), key = new URL(entry.path, BASE);
+      const cached = await cache.match(key);
+      if (cached) return cached;
+      const asset = await fetchVerified(entry);
+      try { await cache.put(key, asset.clone()); } catch { /* Storage is optional. */ }
+      return asset;
+    })().catch(() => new Response('Visitor outfit unavailable.', {status:503})));
   }
 });

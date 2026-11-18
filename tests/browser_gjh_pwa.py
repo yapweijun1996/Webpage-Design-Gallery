@@ -45,6 +45,22 @@ def run():
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert page.locator('#mall-update-notice').is_hidden(), 'Fresh installation must not announce a nonexistent update'
                 assert page.evaluate('window.__sceneReady === true')
+                # Wardrobe files enter the release cache on demand and survive
+                # disconnection. The mall navigation still uses its reconnect page.
+                wardrobe = page.evaluate("""async () => {
+                    const base = 'assets/chibi-crowd/';
+                    const response = await fetch(base + 'manifest.json');
+                    if (!response.ok) throw new Error('Wardrobe manifest unavailable');
+                    const data = await response.json();
+                    const files = ['manifest.json', ...[...data.modules, ...Object.values(data.animation)]
+                        .filter(entry => entry.status === 'verified').map(entry => entry.file)];
+                    for (const file of files) {
+                        const asset = await fetch(base + file);
+                        if (!asset.ok) throw new Error('Wardrobe file unavailable: ' + file);
+                        await asset.arrayBuffer();
+                    }
+                    return files.map(file => base + file);
+                }""")
                 if page.locator('#experience').is_visible(): page.locator('#view-toggle').click()
                 settings = page.locator('.mall-app-settings')
                 settings.locator('summary').click()
@@ -73,7 +89,7 @@ def run():
                 assert page.evaluate("fetch('pwa.js?offline-test=1').then(() => false).catch(() => true)")
                 assert page.locator('#mall-connection-notice').is_visible()
                 assert page.evaluate("fetch('manifest.webmanifest').then(r => r.ok)")
-                for resource in ('style.bundle.css', 'assets/loader.js', 'assets/gjh-loader-mark.svg'):
+                for resource in ('style.bundle.css', 'assets/loader.js', 'assets/gjh-loader-mark.svg', *wardrobe):
                     assert page.evaluate("(name) => fetch(name).then(r => r.ok)", resource), resource
                 page.reload(wait_until='domcontentloaded')
                 assert page.get_by_role('heading', name='Let’s reconnect.').is_visible()

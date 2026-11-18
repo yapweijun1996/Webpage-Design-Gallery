@@ -7,11 +7,14 @@
   // The skinned smile is in front of the head bone in the real visitor GLB.
   // Read the deformed vertices: a scene root's +Z alone cannot establish facing.
   function forward(visual) {
-    const tripo = visual.getObjectByName('tripo_node_1c818c0d');
-    if (tripo) {
+    let mixamo;
+    visual.traverse(node => {
+      if (node.isSkinnedMesh && node.skeleton.getBoneByName('mixamorigHips')) mixamo=node.skeleton;
+    });
+    if (mixamo) {
       // The Mixamo hips define the forward direction of the posed body.
-      const left = tripo.skeleton.getBoneByName('mixamorigLeftUpLeg');
-      const right = tripo.skeleton.getBoneByName('mixamorigRightUpLeg');
+      const left = mixamo.getBoneByName('mixamorigLeftUpLeg');
+      const right = mixamo.getBoneByName('mixamorigRightUpLeg');
       return left.getWorldPosition(new T.Vector3()).sub(right.getWorldPosition(new T.Vector3()))
         .cross(T.Object3D.DEFAULT_UP).normalize();
     }
