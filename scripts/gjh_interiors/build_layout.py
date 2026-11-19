@@ -35,6 +35,9 @@ def project(shop):
     if shop.get('centreFixture') == 'cookbase':
         counter = next(item for item in items if item['socket'] == 'cookbase')
         details['cookbase'] = {key: counter[key] for key in ('xyz', 'standing')}
+    if shop['slot'] == 'S04':
+        cabinet = next(item for item in items if item['socket'] == 'rightwall')
+        details['lingzhiStanding'] = cabinet['standing']
     if 'storyPanels' in shop:
         details['storyPanels'] = shop['storyPanels']
     if 'teaNiches' in shop:

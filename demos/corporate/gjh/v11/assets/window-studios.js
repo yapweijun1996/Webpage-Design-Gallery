@@ -120,7 +120,12 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       // Merchandise is evenly grouped into bays with gaps between collections.
       for(let i=0;i<9;i++) {
         const z=back+.81+i*(span-1.66)/8;
-        if(kind==='tin') can(x-s*.19,y+.05,z,packColour(i+row,base),.10,.21);
+        if(n===4 && s===1 && row===2 && i===3) {
+          for (const offset of [-.084,.084]) {
+            box(x-.19,y+.194,z+offset,.14,.29,.147,pearl);
+            box(x-.264,y+.19,z+offset,.009,.083,.128,base);
+          }
+        } else if(kind==='tin') can(x-s*.19,y+.05,z,packColour(i+row,base),.10,.21);
         else box(x-s*.19,y+.19,z,.14,.28,.20,packColour(i+row,base));
       }
     }

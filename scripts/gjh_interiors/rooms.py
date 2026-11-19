@@ -123,6 +123,14 @@ def borsch(r,_):
         x=-2.25+i*1.95
         r.ring(x,3.97,-1.6,.55,.21,.055,"c5dc77",PRINT,True)
     placard(r,2.7,2.13,-4.97,.94,"765285")
+    # Unprinted carton, pouch and sticker sheet on the original folio ledge.
+    r.box(-.89,1.283,-.23,.20,.26,.075,"dbc9a3")
+    r.box(-.89,1.301,-.187,.17,.053,.009,"7b9457")
+    r.box(-.59,1.202,-.205,.16,.115,.023,"b88e7d")
+    r.box(-.59,1.232,-.191,.16,.013,.007,"eee1bf")
+    r.box(-.36,1.168,-.22,.14,.022,.12,"fff5d4")
+    for x in (-.398,-.36,-.322):
+        r.lathe(x,1.180,-.218,.013,.004,((1,0),(1,1)),["c88b5c"],8)
 
 
 def herbal(r,profiles):

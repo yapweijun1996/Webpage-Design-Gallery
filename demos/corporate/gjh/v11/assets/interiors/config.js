@@ -16,10 +16,14 @@ export function interiorAsset(store, tier) {
   return store.files[tier] ?? (tier === 'detailed' ? store.files.balanced : store.files.low);
 }
 
-export function worldInteriorBox(store, box) {
-  const [x,y,z] = box.center, [ox,oy,oz] = store.frame.world_origin_m;
+export function worldInteriorPoint(store, [x,y,z]) {
+  const [ox,oy,oz] = store.frame.world_origin_m;
   const a = radians(store.frame.yaw_world_deg), c = Math.cos(a), s = Math.sin(a);
-  return {center:[ox+x*c+z*s,oy+y,oz-x*s+z*c],size:box.size,yaw:a+radians(box.yaw)};
+  return [ox+x*c+z*s,oy+y,oz-x*s+z*c];
+}
+
+export function worldInteriorBox(store, box) {
+  return {center:worldInteriorPoint(store,box.center),size:box.size,yaw:radians(store.frame.yaw_world_deg)+radians(box.yaw)};
 }
 
 export function interiorRoutes(store) {

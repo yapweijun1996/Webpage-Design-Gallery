@@ -2,6 +2,16 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ["Borsch Med · The 18-patch pack","Borsch Med · 18 片装","Borsch Med · Pek 18 tampalan"],
+  ["The 18-patch pack","18 片装","Pek 18 tampalan"],
+  ["Borsch Med · Lingzhi twin pack","Borsch Med · 灵芝双包装","Borsch Med · Pek kembar Lingzhi"],
+  ["Lingzhi twin pack","灵芝双包装","Pek kembar Lingzhi"],
+  ["Official Borsch Med brand mark","Borsch Med 官方品牌标志","Logo rasmi Borsch Med"],
+  ["Product library","产品展示","Pameran produk"],
+  ["View the official repellent patch listing","查看官方驱蚊贴商品页面","Lihat penyenaraian rasmi tampalan penghalau nyamuk"],
+  ["View the official Lingzhi pack listing","查看官方灵芝商品页面","Lihat penyenaraian rasmi pek Lingzhi"],
+  ["Goh Joo Hin lists the Borsch Med Mosquito Repellent Patch in an 18-patch pack. The official gallery shows the carton, pouch and sticker sheet. This folio illustrates those three pack forms.","Goh Joo Hin 的目录列有 Borsch Med 18 片装驱蚊贴。官方图集展示外盒、袋装和贴纸。此展台呈现这三种形态。","Goh Joo Hin menyenaraikan Tampalan Penghalau Nyamuk Borsch Med dalam pek 18 tampalan. Galeri rasmi menunjukkan kotak, kantung dan helaian pelekat. Ketiga-tiga bentuk ini dipamerkan di sini."],
+  ["The Borsch Med Lingzhi Cracked Spores Powder Capsule twin pack has its own catalogue entry. The gallery shows its pack front and side views.","Borsch Med 灵芝破壁孢子粉胶囊双包装设有独立商品页面，图集展示包装正面与侧面。","Pek kembar Kapsul Serbuk Spora Lingzhi Borsch Med mempunyai entri katalog tersendiri. Galeri menunjukkan bahagian hadapan dan sisi pek."],
   ["GOGO · Fruit and red bean potong","GOGO · 水果和红豆冰棒","GOGO · Potong buah dan kacang merah"],
   ["Fruit and red bean potong","水果和红豆冰棒","Potong buah dan kacang merah"],
   ["Cart exhibit","冰棒车展示","Pameran troli"],

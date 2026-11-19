@@ -43,4 +43,4 @@ Four generated views describe one proposed room and its visitor circulation. Com
 
 The story is reachable from the entrance side of the cart. It links to the GJH brand page and identifies the 2016 records. The visitor can continue through the centre aisle to the existing rear GOGO artwork.
 
-Desktop and 390 px touch-emulated Chrome verified the existing entrance, the cart story, the official link and the route through the open centre to the rear artwork. The desktop run also checked the story in Simplified Chinese and Malay. Both runs loaded the revised room GLB. [Runtime Chrome captures](cart-runtime.webp)
+On published build `077553e3b1a6c526`, desktop and 390 px touch-emulated Chrome verified the existing entrance, the cart story, the official link and the route through the open centre to the rear artwork. The desktop run also checked the story in Simplified Chinese and Malay. Both runs loaded the revised room GLB. [Runtime Chrome captures](cart-runtime.webp) · [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44549696669)
