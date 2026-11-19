@@ -51,7 +51,7 @@ async function loadVisitorGLTF(url) {
 }
 
 // demos/corporate/gjh/v11/assets/visitor-carry-hand.js
-function createFirstPersonHand(T, visual, dress) {
+function createFirstPersonHand(T, visual, dress, prepareModel) {
   const root = new T.Group, grip = new T.Group, local = new T.Matrix4;
   root.name = "FirstPersonCarryHand";
   root.matrixAutoUpdate = false;
@@ -59,21 +59,31 @@ function createFirstPersonHand(T, visual, dress) {
   root.add(grip);
   visual.add(root);
   let model, loading, disposed = false;
+  const upload = new AbortController;
   function prepare() {
     if (!model && !loading && !disposed) {
-      loading = loadVisitorGLTF(new URL("./visitor-carry-hand.glb", import.meta.url)).then(({ scene }) => {
-        if (disposed) {
-          disposeVisitorScene(scene);
-          return;
+      loading = loadVisitorGLTF(new URL("./visitor-carry-hand.glb", import.meta.url)).then(async ({ scene }) => {
+        try {
+          if (disposed)
+            return;
+          if (prepareModel)
+            await prepareModel(scene, { signal: upload.signal });
+          if (disposed)
+            return;
+          dress?.(scene);
+          grip.add(scene);
+          model = scene;
+        } finally {
+          if (!model)
+            disposeVisitorScene(scene);
         }
-        model = scene;
-        dress?.(model);
-        grip.add(model);
       }).catch(() => {}).finally(() => {
         loading = null;
       });
     }
   }
+  if (prepareModel)
+    prepare();
   function frame(camera) {
     if (!root.visible)
       return;
@@ -103,6 +113,7 @@ function createFirstPersonHand(T, visual, dress) {
     },
     dispose() {
       disposed = true;
+      upload.abort();
       root.removeFromParent();
       if (model)
         disposeVisitorScene(model);
@@ -111,9 +122,17 @@ function createFirstPersonHand(T, visual, dress) {
 }
 
 // demos/corporate/gjh/v11/assets/visitor-v2-lod.js
+function projectedVisitorLevel(heightPx, previous) {
+  if (heightPx >= 160)
+    return 0;
+  if (heightPx <= 64)
+    return 1;
+  return previous;
+}
 function createVisitorLOD(T, avatar, {
   url = new URL("./gjh-mall-visitor-v2-lod1.glb", import.meta.url),
   swapMaterial = false,
+  prepareMaterial,
   prepareModel
 } = {}) {
   const parts = [], position = new T.Vector3;
@@ -157,11 +176,15 @@ function createVisitorLOD(T, avatar, {
             throw Error("LOD material or bind pose mismatch");
           }
           const geometry = part.low = swapMaterial ? low.geometry : low.geometry.clone(), indices = geometry.attributes.skinIndex;
-          for (let i = 0;i < indices.count; i++)
-            for (let j = 0;j < 4; j++)
-              indices.setComponent(i, j, map[indices.getComponent(i, j)]);
-          if (swapMaterial)
+          if (map.some((joint, index) => joint !== index)) {
+            for (let i = 0;i < indices.count; i++)
+              for (let j = 0;j < 4; j++)
+                indices.setComponent(i, j, map[indices.getComponent(i, j)]);
+          }
+          if (swapMaterial) {
+            prepareMaterial?.(low.material);
             part.lowMaterial = low.material;
+          }
         }
         if (swapMaterial)
           lowScene = gltf.scene;
@@ -177,7 +200,8 @@ function createVisitorLOD(T, avatar, {
             proxy.material = lowMaterial;
           return proxy;
         });
-        await prepareModel(meshes, { signal: upload.signal, alternates: parts.map((part, i) => [part.mesh, meshes[i]]) });
+        const bindings = swapMaterial ? [...parts.map((part) => part.mesh), ...meshes] : meshes;
+        await prepareModel(bindings, { signal: upload.signal, alternates: parts.map((part, i) => [part.mesh, meshes[i]]) });
       }
       if (disposed)
         return;
@@ -213,13 +237,22 @@ function createVisitorLOD(T, avatar, {
     level = next;
   }
   return {
-    update(camera) {
+    update(camera, cssHeight) {
       if (disposed)
         return;
       distance = camera.position.distanceTo(avatar.getWorldPosition(position));
-      if (distance > 10)
+      let next = (level === 0 ? distance > 11 : distance > 9) ? 1 : 0;
+      if (swapMaterial && cssHeight > 0 && camera.isPerspectiveCamera) {
+        camera.updateWorldMatrix(true, false);
+        const footY = position.project(camera).y;
+        avatar.getWorldPosition(position).y += 1.7;
+        const heightPx = Math.abs(position.project(camera).y - footY) * cssHeight / 2;
+        if (Number.isFinite(heightPx))
+          next = projectedVisitorLevel(heightPx, level);
+      }
+      if (next)
         ensure();
-      switchLevel(available && (level === 0 ? distance > 11 : distance > 9) ? 1 : 0);
+      switchLevel(available ? next : 0);
     },
     dispose() {
       disposed = true;
@@ -786,7 +819,7 @@ async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
   const eyeHand = createFirstPersonHand(T, visual, (model2) => {
     model2.getObjectByName("ChibiGrip").material.color.copy(skin.material.color);
     model2.getObjectByName("SleeveCuff").material.color.copy((hoodie.visible ? hoodie : polo).material.color);
-  });
+  }, prepareModel);
   const transfer = createProductTransfer(T, avatar, wrist, visual, new T.Vector3(0, -0.03, 0.045), eyeHand);
   const contacts = { hands: [], feet: [] };
   avatar.updateWorldMatrix(true, true);

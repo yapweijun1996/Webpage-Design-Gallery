@@ -1,3 +1,4 @@
+import {prepareCrowdMaterial, prepareTripoMaterial} from './character-tripo-material.js';
 import {DoubleSide,PropertyBinding} from '../vendor/three.module.min.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {loadTripoNpc} from './npc-tripo.js';
@@ -227,7 +228,7 @@ export async function loadNpcSystem(T, options) {
   }
 }
 
-export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback}) {
+export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback,onAvatarEvent}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, hasPlayer=false;
   let admission=nextNpcAdmission();
   const admissionOptions={}, lastPlayer={x:0,z:0}, nextPosition={x:0,z:0};
@@ -293,6 +294,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     boyLoad=Promise.resolve().then(()=>loader(boyController.signal)).then(asset=>{
       if (!asset) return;
       if (disposed) { asset.dispose(); return; }
+      prepareTripoMaterial(asset.scene.getObjectByName(asset.meshName)?.material);
       callsPerNpc=Math.max(callsPerNpc,visibleDrawCalls(asset.scene));
       boy=asset;
       placeLoadedBoy=true;
@@ -318,6 +320,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
         if (add ? d < best : d > best) { best=d; choice=npc; }
       }
       choice.admitted=add;
+      onAvatarEvent?.(add ? 'npc-admit' : 'npc-hide', choice.appearanceIndex);
       count += add ? 1 : -1;
     }
     for (const npc of visitors) npc.visual.visible=showing && npc.admitted;
@@ -383,6 +386,10 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     } else avatar.position.y=npc.seat ? -.13 : 0;
     avatar.traverse(node=>{
       node.layers.set(2);
+      if (!asset && node.isSkinnedMesh) {
+        const materials = Array.isArray(node.material) ? node.material : [node.material];
+        for (const material of materials) prepareCrowdMaterial(material, node.name);
+      }
       if(node.isMesh){node.castShadow=false;node.receiveShadow=true;node.raycast=ignoreRaycast;}
     });
     const mixer=new T.AnimationMixer(avatar), actions={};
@@ -404,6 +411,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       triangleCost:rigTriangles(avatar)};
   }
   function mountRig(npc, rig) {
+    onAvatarEvent?.('npc-mount', {slot:npc.appearanceIndex, rig:rig.mesh ? 'boy' : rig.look ? 'modular' : 'visitor', pose:npc.mode});
     Object.assign(npc,rig);
     npc.facing.add(npc.avatar);
     // Keep the offset outside the animated root. The route wrapper faces -Z;
@@ -519,7 +527,10 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     if (!boy.lowGeometry) return;
     const mesh=npc.mesh, low=mesh.geometry===boy.lowGeometry, d=distance(npc.visual.position,player);
     const useLow=low ? d>BOY_LOD_NEAR : d>BOY_LOD_FAR;
-    if (useLow!==low) mesh.geometry=useLow ? boy.lowGeometry : npc.highGeometry;
+    if (useLow!==low) {
+      mesh.geometry=useLow ? boy.lowGeometry : npc.highGeometry;
+      onAvatarEvent?.('npc-lod', {slot:npc.appearanceIndex, level:useLow ? 1 : 0});
+    }
   }
   function releaseSeat(id) {
     const npc=visitors.find(candidate=>candidate.seat?.id===id);

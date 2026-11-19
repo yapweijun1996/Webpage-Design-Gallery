@@ -7,12 +7,104 @@ import {buildShopInteractionTargets, installShopInteractions} from '../demos/cor
 import {interiorStores} from '../demos/corporate/gjh/v11/assets/interiors/config.js';
 import {gogoStoolSeat} from '../demos/corporate/gjh/v11/assets/interiors/gogo-seats.js';
 import {isInFrontOfSeat} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
+import {addOriginalShopDetails} from '../demos/corporate/gjh/v11/assets/shop-anchor-details-first.js';
 import {installPhysicalProductControl} from '../demos/corporate/gjh/v11/assets/visitor-v2-product-ui.js';
-import {audit, capsule, floorGrid, obstacles, programme, studioBoxes} from '../scripts/gjh_interiors/sweep.mjs';
+import {audit, auditStandingInteractions, capsule, floorGrid, obstacles, programme, studioBoxes} from '../scripts/gjh_interiors/sweep.mjs';
 
 const slots = ['S01','S02','S03'];
 const plan = JSON.parse(readFileSync(programme));
 const builds = await buildShopInteractionTargets();
+
+function seatEntry(seat) {
+  return {id:seat.id, kind:'sit', x:seat.exitX, z:seat.exitZ, floor:seat.floor,
+    radius:seat.clearance.interactionRadius, seat, handler:() => true};
+}
+
+function storyEntry(shop, id, standing, radius) {
+  const [x,,z] = shop.frame.world_origin_m;
+  return {id, kind:'inspect', x:x+standing[0], z:z+standing[1], radius, handler:() => true};
+}
+
+test('MILI, GOGO and New Moon offer their standing actions within two Next presses', async () => {
+  const {S01, S02, S03} = interiorStores;
+  const moonSeats = [];
+  addOriginalShopDetails('newmoon',S01.frame.world_origin_m[0],{
+    box() {}, cylinder() {}, collider:() => ({handle:1}), seats:moonSeats
+  });
+  const entries = [
+    storyEntry(S02,'mili-sauce-story',S02.cookbase.standing,1.12),
+    storyEntry(S03,'gogo-potong-story',S03.anchor.standing,1),
+    ...S01.storyPanels.map(panel => storyEntry(S01,panel.id,panel.interactionXZ,panel.radius)),
+    ...S03.gogoStools.map(stool => seatEntry(gogoStoolSeat(S03.frame,stool,1,true))),
+    ...moonSeats.map(seatEntry),
+    ...builds.filter(target => target.shopAction.productId).map(target =>
+      ({id:target.shopAction.productId,...target.standing,radius:1.9}))
+  ];
+  const registry = createInteractionRegistry(entries);
+  const targets = await installShopInteractions(T,{add() {}},registry);
+
+  const expected = {
+    'S02-plate': [.5,-3.5,'S02-plate'],
+    'S03-drink': [11,-2.5,'S03-drink'],
+    'S03-focal': [7.7,-2.7,'gogo-potong-story'],
+    'S01-kettle': [-8.8,-5.5,'S01-kettle'],
+    'S01-cups1': [-8.8,-2.4,'S01-cups1']
+  };
+  assert(Object.keys(expected).every(id => targets.some(target => target.id === id)));
+  for (const target of targets) {
+    const {id} = target;
+    const position = {...target.standing, y:target.floor};
+    const context = {zone:target.shopAction.zone};
+    let {item} = registry.nearest(position,context);
+    if (expected[id]) {
+      const [x,z,first] = expected[id];
+      assert(Math.hypot(x-position.x,z-position.z) < 1e-8,id);
+      assert.equal(item?.id,first,id);
+    }
+    for (let i = 0; i < 2 && item?.id !== id; i++) {
+      assert(registry.canCycle(),id);
+      assert(registry.cycle(1),id);
+      ({item} = registry.nearest(position,context));
+    }
+    assert.equal(item?.id,id);
+    assert(registry.dispatch(item),id);
+    registry.advanceShopActions(context.zone,1,true);
+    registry.nearest({x:0,z:0},{zone:'atrium'});
+  }
+
+  for (const [entry, zone, alternative] of [
+    [entries.find(e => e.id === 'mili-sauce-story'),'mili','S02-cookbase'],
+    [entries.find(e => e.id === 'S03-stools31'),'gogo','S03-drink'],
+    [seatEntry(moonSeats[1]),'newmoon','S01-cups3']
+  ]) {
+    const context = {zone};
+    const position = {x:entry.x, z:entry.z, y:entry.floor ?? 0};
+    const {item} = registry.nearest(position,context);
+    assert.equal(item.id,entry.id);
+    assert(registry.dispatch(item));
+    const offered = new Set();
+    for (let i = 0; i < 2 && registry.cycle(1); i++) offered.add(registry.nearest(position,context).item.id);
+    assert(offered.has(alternative),entry.id);
+    registry.nearest({x:0,z:0},{zone:'atrium'});
+  }
+});
+
+test('all 17 layouts offer every action from its own standing position', () => {
+  assert.equal(plan.stores.length,17);
+  for (const shop of plan.stores) assert.deepEqual(auditStandingInteractions(shop),[],shop.slot);
+});
+
+test('layout rejects standing positions closer than 0.45 m without shared Next cycling', () => {
+  const shop = structuredClone(plan.stores[1]);
+  const plate = shop.items.find(item => item.id === 'S02-plate');
+  const cookbase = shop.items.find(item => item.id === 'S02-cookbase');
+  plate.standing = [cookbase.standing[0]+.4,cookbase.standing[1]];
+  plate.reachDistance = .3;
+  assert(auditStandingInteractions(shop).some(([id,issue]) =>
+    id === cookbase.id && issue === 'standing position < 0.45 m from S02-plate without shared Next cycling'));
+  plate.standing[0] += .05;
+  assert.deepEqual(auditStandingInteractions(shop),[]);
+});
 
 test('interaction lifecycle covers focus, completion, interruption, retry and sleeping', () => {
   const [action, other] = ['S03-focal','S03-drink'].map(id => builds.find(item => item.id === id));

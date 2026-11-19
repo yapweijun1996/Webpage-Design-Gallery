@@ -8,11 +8,11 @@ The [interior programme](gjh-v11-interior-program.json) defines item IDs, action
 | MILI | Press the island button to serve the tasting plate, or water the herb planter. |
 | New Moon | Pour tea at the island or from either tasting stool. Cycle from the original shelf action to its drawer, open it, then pick up the corresponding can. Use the existing Add to bag or Return to shelf controls. |
 
-Use **F** or the context card to activate the selected action. **[** and **]** cycle nearby actions in either camera view. The card's **Next** button cycles on touch. Use **Escape** or **Cancel** to stop a running action, then **Retry** to restart it. Both tasting stools keep their separate **Stand** button. Remaining pilot props show their exhibit label, and benches retain their original seat actions.
+Use **F** or the context card to activate the selected action. The closest standing position sets the first prompt. Shared positions offer native actions first, and a cabinet drawer follows its shelf. Use **[**, **]** or the card's **Next** button to cycle through nearby shop actions, stories and seats in either camera view. Use **Escape** or **Cancel** to stop a running action, then **Retry** to restart it. Both tasting stools keep their separate **Stand** button. Remaining pilot props show their exhibit label, and benches retain their original seat actions.
 
 One procedural prop renders at a time, with no shadows or auxiliary lights. It shows the current action and its completed result while that target is selected. The ticker sleeps between actions and the state lives outside the graphics tiers. Leaving the room cancels an unfinished action.
 
-Node coverage checks the 17 target sets, pilot standing routes, the animation lifecycle and the original four-product pickup, return and bag controls. Headed Chrome remains unverified. Inspect the 44 px touch controls, both camera views, tier changes during an action, the GOGO stool sit/stand routes and the four New Moon shelves. Compare cold early entry and the [lap and shop video probes](gjh-v11-probes.md) with the prior build.
+The layout sweep checks each action from its standing position across all 17 shops. Standing positions less than 0.45 m apart must offer both actions through the same Next cycle. Node regression tests replay the three pilot rooms and cover the animation lifecycle and the four-product pickup, return and bag controls.
 
 ## Future interactions
 

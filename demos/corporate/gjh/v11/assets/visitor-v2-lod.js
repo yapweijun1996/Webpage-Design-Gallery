@@ -1,8 +1,16 @@
 import {disposeVisitorScene,loadVisitorGLTF} from './visitor-gltf.js';
 
+// The shipped player has two geometries. The interval between thresholds
+// retains the current level so camera bob cannot repeatedly trigger a swap.
+export function projectedVisitorLevel(heightPx, previous) {
+  if (heightPx >= 160) return 0;
+  if (heightPx <= 64) return 1;
+  return previous;
+}
+
 /** Both levels share the live skeleton and mixer. V2 keeps its customized material. */
 export function createVisitorLOD(T,avatar,{
-  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false, prepareModel
+  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false, prepareMaterial, prepareModel
 }={}) {
   const parts=[],position=new T.Vector3();
   avatar.traverse(mesh=>{
@@ -33,8 +41,10 @@ export function createVisitorLOD(T,avatar,{
             throw Error('LOD material or bind pose mismatch');
           }
           const geometry=part.low=swapMaterial?low.geometry:low.geometry.clone(),indices=geometry.attributes.skinIndex;
-          for(let i=0;i<indices.count;i++)for(let j=0;j<4;j++)indices.setComponent(i,j,map[indices.getComponent(i,j)]);
-          if(swapMaterial)part.lowMaterial=low.material;
+          if (map.some((joint, index) => joint !== index)) {
+            for(let i=0;i<indices.count;i++)for(let j=0;j<4;j++)indices.setComponent(i,j,map[indices.getComponent(i,j)]);
+          }
+          if(swapMaterial){prepareMaterial?.(low.material);part.lowMaterial=low.material;}
         }
         if(swapMaterial)lowScene=gltf.scene;
       }finally{if(!lowScene)disposeVisitorScene(gltf.scene);}
@@ -45,7 +55,8 @@ export function createVisitorLOD(T,avatar,{
           if(swapMaterial)proxy.material=lowMaterial;
           return proxy;
         });
-        await prepareModel(meshes,{signal:upload.signal,alternates:parts.map((part,i)=>[part.mesh,meshes[i]])});
+        const bindings = swapMaterial ? [...parts.map(part => part.mesh), ...meshes] : meshes;
+        await prepareModel(bindings,{signal:upload.signal,alternates:parts.map((part,i)=>[part.mesh,meshes[i]])});
       }
       if(disposed)return;
       available=true;
@@ -65,11 +76,21 @@ export function createVisitorLOD(T,avatar,{
     }
     level=next;
   }
-  return {update(camera){
+  return {update(camera, cssHeight){
     if(disposed)return;
     distance=camera.position.distanceTo(avatar.getWorldPosition(position));
-    if(distance>10)ensure();
-    switchLevel(available && (level===0?distance>11:distance>9)?1:0);
+    let next = (level === 0 ? distance > 11 : distance > 9) ? 1 : 0;
+    if (swapMaterial && cssHeight > 0 && camera.isPerspectiveCamera) {
+      // The chase camera faces the player. Measure projected feet and crown
+      // in CSS pixels independently of render scale, zoom and camera pitch.
+      camera.updateWorldMatrix(true, false);
+      const footY = position.project(camera).y;
+      avatar.getWorldPosition(position).y += 1.7;
+      const heightPx = Math.abs(position.project(camera).y - footY) * cssHeight / 2;
+      if (Number.isFinite(heightPx)) next = projectedVisitorLevel(heightPx, level);
+    }
+    if(next)ensure();
+    switchLevel(available ? next : 0);
   },dispose(){disposed=true;upload.abort();switchLevel(0);releaseLow();available=false;},
   get state(){return {level,distance,available,failed};}};
 }

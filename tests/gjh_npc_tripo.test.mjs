@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createLocomotionContinuity} from '../demos/corporate/gjh/v11/assets/character.js';
+import {createModelWarmup} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
 import {createCharacterTripo} from '../demos/corporate/gjh/v11/assets/character-tripo.js';
 import {cloneNpcRig,createNpcSystem,loadNpcSystem,npcLimit} from '../demos/corporate/gjh/v11/assets/npcs.js';
 import {loadModularLooks,validateManifest} from '../demos/corporate/gjh/v11/assets/crowd.js';
@@ -209,10 +210,10 @@ test('an incompatible LOD leaves the high geometry in service and late models ar
   assert.equal(disposed,2);
 });
 
-test('the shipped Tripo visitor and boy coexist with the separately loaded V2 crowd',async t=>{
+async function installVisitorAssets(t) {
   const assets = new URL('../demos/corporate/gjh/v11/assets/',import.meta.url);
   const wardrobe = JSON.parse(await readFile(new URL('chibi-crowd/manifest.json',assets),'utf8'));
-  const files = ['gjh-tripo-visitor.glb','gjh-tripo-visitor-lod1.glb','gjh-mall-visitor-v2.glb',
+  const files = ['visitor-carry-hand.glb','gjh-tripo-visitor.glb','gjh-tripo-visitor-lod1.glb','gjh-mall-visitor-v2.glb',
     'gjh-tripo-npc-boy.glb','gjh-tripo-npc-boy-lod1.glb',
     ...['manifest.json','hand_gestures.glb','motion-clips.glb',...wardrobe.modules.map(module=>module.file)].map(file=>'chibi-crowd/'+file)];
   const models = new Map(await Promise.all(files.map(async name=>[name,await readFile(new URL(name,assets))])));
@@ -228,16 +229,19 @@ test('the shipped Tripo visitor and boy coexist with the separately loaded V2 cr
   };
   const originals = Object.fromEntries(Object.keys(globals).map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
   Object.assign(globalThis,globals);
-  let visitor, system;
   t.after(()=>{
-    system?.dispose();
-    visitor?.dispose();
     for (const [key,descriptor] of Object.entries(originals)) {
       if (descriptor) Object.defineProperty(globalThis,key,descriptor);
       else delete globalThis[key];
     }
   });
 
+}
+
+test('the shipped Tripo visitor and boy coexist with the separately loaded V2 crowd',async t=>{
+  await installVisitorAssets(t);
+  let visitor, system;
+  t.after(()=>{ system?.dispose(); visitor?.dispose(); });
   const scene = new T.Scene();
   visitor = await createCharacterTripo(T,createLocomotionContinuity);
   scene.add(visitor.visual);
@@ -256,6 +260,9 @@ test('the shipped Tripo visitor and boy coexist with the separately loaded V2 cr
   assert.equal(variants.length,1);
   const [boy] = variants;
   const mesh = boy.getObjectByName(meshName);
+  const playerSkin = visitor.visual.getObjectByProperty('isSkinnedMesh', true);
+  assert.equal(mesh.material.customProgramCacheKey(), 'gjh-tripo-portrait-v1');
+  assert.equal(mesh.material.customProgramCacheKey(), playerSkin.material.customProgramCacheKey());
   assert.equal(mesh.geometry.index.count/3,6313);
   system.update(.016,{x:boy.position.x+13,y:0,z:boy.position.z});
   assert.equal(mesh.geometry.index.count/3,2630);
@@ -336,4 +343,95 @@ test('invalid or unavailable modular assets keep existing visitors in service',a
   assert.equal(system.state.visible,4);
   assert.equal(failures,1);
   system.dispose();
+});
+
+test('background warm plan covers every live avatar material key and both shipped LOD bindings', async t => {
+  await installVisitorAssets(t);
+  const scene = new T.Scene(), planned = new Set();
+  function key(mesh, material) {
+    return [mesh.geometry.uuid, material.uuid, material.customProgramCacheKey(), mesh.layers.mask,
+      mesh.isSkinnedMesh, mesh.castShadow, material.map?.uuid].join('/');
+  }
+  const sun = new T.DirectionalLight(), accent = new T.PointLight();
+  const depth = new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking});
+  sun.castShadow = true;
+  scene.add(sun, accent);
+  let target;
+  const uploaded = new Set(), depthBindings = new Set();
+  const renderer = {
+    info:{render:{}}, shadowMap:{}, extensions:{has:()=>false},
+    getContext:() => ({isContextLost:()=>false}), getRenderTarget:() => target,
+    setRenderTarget(value) { target = value; },
+    getActiveCubeFace:()=>0, getActiveMipmapLevel:()=>0,
+    getScissor() {}, setScissor() {}, getScissorTest:()=>false, setScissorTest() {},
+    initTexture(texture) { uploaded.add(texture); },
+    compile(stage) {
+      const mesh = stage.children.at(-1);
+      const pass = [stage.children.includes(accent), Boolean(target), renderer.shadowMap.enabled].join('/');
+      for (const mat of [mesh.material].flat()) {
+        if (mat.isMeshDepthMaterial) depthBindings.add(mesh.geometry);
+        else planned.add(key(mesh, mat) + '/' + pass);
+      }
+      return new Set([mesh.material].flat());
+    },
+    render(stage, camera) {
+      const mesh = stage.children.at(-1);
+      if (renderer.shadowMap.needsUpdate && mesh.castShadow) {
+        renderer.renderBufferDirect(camera, null, mesh.geometry, depth, mesh);
+      }
+    },
+    renderBufferDirect() {}
+  };
+  const warm = createModelWarmup(T, renderer);
+  t.after(() => { warm.dispose(); depth.dispose(); });
+  function prepareModel(roots, options) {
+    const done = warm.prepare(roots, scene, {lighting:()=>[[sun],[sun,accent]], linear:()=>true, ...options});
+    while (warm.report().pendingUploads) warm.runFrame(true);
+    return done;
+  }
+  function covered(root) {
+    root.traverse(mesh => {
+      if (!mesh.isMesh) return;
+      if (mesh.castShadow) assert.ok(depthBindings.has(mesh.geometry), 'depth: ' + mesh.name);
+      for (const mat of [mesh.material].flat()) {
+        if (mat.map) assert.ok(uploaded.has(mat.map), mat.name);
+        for (const accent of [true,false]) for (const [linear, shadows] of [[false,false],[false,true],[true,true]]) {
+          const pass = [accent, linear, shadows].join('/');
+          assert.ok(planned.has(key(mesh, mat) + '/' + pass), [mesh.name, mat.name, pass].join(' / '));
+        }
+      }
+    });
+  }
+  const visitor = await createCharacterTripo(T, createLocomotionContinuity, prepareModel);
+  t.after(() => visitor.dispose());
+  const system = await loadNpcSystem(T, {scene, prepareModel, tier:'detailed',
+    R:{Capsule:class {}}, physics:{intersectionWithShape:()=>null}});
+  t.after(() => system.dispose());
+  await system.loadBoy();
+  await system.enableModular();
+  const camera = new T.PerspectiveCamera();
+  const skin = visitor.visual.getObjectByProperty('isSkinnedMesh', true);
+  async function waitFor(condition) {
+    const deadline = performance.now() + 5000;
+    while (!condition()) {
+      assert.ok(performance.now() < deadline, 'avatar warm plan did not settle');
+      system.update(1/60, player);
+      await new Promise(resolve => setTimeout(resolve, 5));
+    }
+  }
+  await waitFor(() => visitor.state.lod.available && visitor.visual.getObjectByName('ChibiGrip') &&
+    scene.getObjectByName('tripo_node_1c818c0d') && system.state.modular.active.length);
+  covered(visitor.visual.getObjectByName('FirstPersonCarryHand'));
+  for (const [z, level] of [[0,0],[20,1],[0,0]]) {
+    camera.position.z = z;
+    visitor.updateLOD(camera);
+    assert.equal(visitor.state.lod.level, level);
+    covered(skin);
+  }
+  const boy = scene.children.find(root => root.getObjectByName('tripo_node_1c818c0d'));
+  for (const [distance, triangles] of [[13,2630],[8,6313]]) {
+    system.update(.016, {x:boy.position.x+distance,y:0,z:boy.position.z});
+    assert.equal(boy.getObjectByName('tripo_node_1c818c0d').geometry.index.count/3, triangles);
+    covered(scene);
+  }
 });

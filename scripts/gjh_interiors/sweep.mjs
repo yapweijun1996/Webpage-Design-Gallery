@@ -4,6 +4,8 @@ import {pathToFileURL} from 'node:url';
 import * as T from '../../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {expandedLayout} from '../../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {createExpandedInteriors} from '../../demos/corporate/gjh/v11/assets/expanded-interiors.js';
+import {createInteractionRegistry} from '../../demos/corporate/gjh/v11/assets/interaction-registry.js';
+import {createShopInteractionTarget} from '../../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js';
 
 export const programme = new URL('../../docs/gjh-v11-interior-program.json', import.meta.url);
 const grid = .1;
@@ -90,8 +92,44 @@ export function floorGrid(shop, boxes) {
   return {clearance,edge,flood};
 }
 
+export function auditStandingInteractions(shop) {
+  const targets = shop.items.filter(item => item.action.length)
+    .map(item => createShopInteractionTarget(shop.slot,shop,item));
+  const seats = targets.filter(target => target.shopAction.seat)
+    .map(({id,standing,floor,radius}) => ({id,...standing,floor,radius,kind:'sit'}));
+  const actions = targets.filter(target => !target.shopAction.seat);
+  const selectable = new Map();
+  const issues = [];
+  for (const target of targets) {
+    // Layout validation uses authored seat positions and the runtime selection
+    // rules without creating meshes or player controllers.
+    const registry = createInteractionRegistry(seats);
+    registry.installShopActions(actions);
+    const position = {...target.standing,y:target.floor};
+    const context = {zone:target.shopAction.zone};
+    const offered = new Set();
+    for (let i = 0; i < targets.length; i++) {
+      const {item} = registry.nearest(position,context);
+      if (!item || offered.has(item.id)) break;
+      offered.add(item.id);
+      if (!registry.cycle(1)) break;
+    }
+    selectable.set(target.id,offered);
+    if (!offered.has(target.id)) issues.push([target.id,'action unavailable from standing position']);
+  }
+  for (const [index, first] of targets.entries()) {
+    for (const second of targets.slice(index+1)) {
+      const separation = Math.hypot(first.standing.x-second.standing.x,first.standing.z-second.standing.z);
+      if (separation < .45 && (!selectable.get(first.id).has(second.id) || !selectable.get(second.id).has(first.id))) {
+        issues.push([first.id, `standing position < 0.45 m from ${second.id} without shared Next cycling`]);
+      }
+    }
+  }
+  return issues;
+}
+
 export function audit(shop,studio) {
-  const boxes=obstacles(shop,studio), floor=floorGrid(shop,boxes), issues=[];
+  const boxes=obstacles(shop,studio), floor=floorGrid(shop,boxes), issues=auditStandingInteractions(shop);
   // Structural side and back walls are axis-aligned in the local shop frame.
   const walls=boxes.filter(b=>Math.max(b.size[0],b.size[2])>6 && Math.min(b.size[0],b.size[2])<.3);
   const reachable=floor.flood(capsule), wide=floor.flood(.6);

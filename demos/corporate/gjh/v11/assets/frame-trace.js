@@ -65,3 +65,32 @@ export function createFrameTrace(renderer) {
   }
   return {start,end,steps,watchShadowMap,report:() => events.length < capacity ? events.slice() : [...events.slice(next),...events.slice(0,next)]};
 }
+
+// Sample adjacent warm and live submissions separately. Three can evict one
+// program and create another without changing renderer.info.programs.length.
+export function createProgramTrace(renderer) {
+  let previous = new Set(), next = 0, lastPose;
+  const samples = [], events = [];
+  function event(kind, detail) { events.push({kind, detail}); }
+  function player(pose) {
+    const values = [pose.character.lod?.level, pose.seatPhase, pose.character.physicalProduct?.phase, pose.cameraOccluded];
+    const labels = ['player-lod','seat','product','camera-occlusion'];
+    values.forEach((value, i) => {
+      if (lastPose?.[i] !== value) event(labels[i], value);
+    });
+    lastPose = values;
+  }
+  function sample(pass, warm, zone) {
+    const programs = renderer.info.programs;
+    const added = programs.filter(program => !previous.has(program.id));
+    const removed = previous.size + added.length - programs.length;
+    const changes = pass === 'live' ? events.splice(0) : [];
+    if (!added.length && !removed && !changes.length) return;
+    samples[next] = {at:performance.now(), pass, warm, zone, events:changes,
+      delta:programs.length - previous.size, removed,
+      added:added.map(({id,name,cacheKey}) => ({id,name,cacheKey}))};
+    next = (next + 1) % 512;
+    previous = new Set(programs.map(program => program.id));
+  }
+  return {event, player, sample, report:() => samples.length < 512 ? samples.slice() : [...samples.slice(next), ...samples.slice(0,next)]};
+}

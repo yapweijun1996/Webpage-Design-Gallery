@@ -599,6 +599,43 @@ function createFrameTrace(renderer) {
   }
   return { start, end, steps, watchShadowMap, report: () => events.length < capacity ? events.slice() : [...events.slice(next), ...events.slice(0, next)] };
 }
+function createProgramTrace(renderer) {
+  let previous = new Set, next = 0, lastPose;
+  const samples = [], events = [];
+  function event(kind, detail) {
+    events.push({ kind, detail });
+  }
+  function player(pose) {
+    const values = [pose.character.lod?.level, pose.seatPhase, pose.character.physicalProduct?.phase, pose.cameraOccluded];
+    const labels = ["player-lod", "seat", "product", "camera-occlusion"];
+    values.forEach((value, i) => {
+      if (lastPose?.[i] !== value)
+        event(labels[i], value);
+    });
+    lastPose = values;
+  }
+  function sample(pass, warm, zone) {
+    const programs = renderer.info.programs;
+    const added = programs.filter((program) => !previous.has(program.id));
+    const removed = previous.size + added.length - programs.length;
+    const changes = pass === "live" ? events.splice(0) : [];
+    if (!added.length && !removed && !changes.length)
+      return;
+    samples[next] = {
+      at: performance.now(),
+      pass,
+      warm,
+      zone,
+      events: changes,
+      delta: programs.length - previous.size,
+      removed,
+      added: added.map(({ id, name, cacheKey }) => ({ id, name, cacheKey }))
+    };
+    next = (next + 1) % 512;
+    previous = new Set(programs.map((program) => program.id));
+  }
+  return { event, player, sample, report: () => samples.length < 512 ? samples.slice() : [...samples.slice(next), ...samples.slice(0, next)] };
+}
 
 // assets/onboarding/components.js
 function element(tag, className, text) {
@@ -2758,6 +2795,7 @@ function createUI(expanded = false) {
 }
 
 // demos/corporate/gjh/v11/assets/graphics-quality.js
+var AVATAR_ANISOTROPY = Object.freeze({ phone: 2, tablet: 4, desktop: 4 });
 var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
 var RESOLUTION_KEY = "gjh-v11-auto-resolution-v1";
 var MALL_FRAME_BUDGETS = Object.freeze({
@@ -4012,7 +4050,7 @@ function createModelWarmup(T, renderer) {
       depthMaterials?.forEach((material) => material.dispose());
     }
   }
-  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, fence = false, ...options } = {}) {
+  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, shadowVariants = () => true, fence = false, ...options } = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse((mesh) => {
@@ -4043,6 +4081,8 @@ function createModelWarmup(T, renderer) {
         if (variants) {
           for (const lights of variants) {
             yield* prepareMesh(mesh, scene, mask, false, { lights, shadows: false });
+            if (!shadowVariants())
+              continue;
             yield* prepareMesh(mesh, scene, mask, false, {
               lights,
               shadows: true,
@@ -4607,7 +4647,10 @@ function* prepareScene({
       if (prepared.has(node))
         continue;
       prepared.add(node);
-      meshes.push(node);
+      if (node.isSkinnedMesh && node.material?.customProgramCacheKey?.() === "gjh-tripo-portrait-v1")
+        meshes.unshift(node);
+      else
+        meshes.push(node);
       for (const texture of meshTextures(node, shadows))
         textures.add(texture);
     }
@@ -5195,6 +5238,16 @@ function isInFrontOfSeat(seat, { x, z }) {
 }
 
 // demos/corporate/gjh/v11/assets/interaction-registry.js
+function distanceToInteraction(item, position, context) {
+  const floor = typeof item.floor === "number" ? item.floor : item.y;
+  if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
+    return Infinity;
+  if (item.seat && !isInFrontOfSeat(item.seat, position))
+    return Infinity;
+  const point2 = item.standing ?? item.anchor;
+  const distance = item.shopAction?.seated && context.player?.seated ? 0 : Math.hypot(position.x - point2.x, position.z - point2.z);
+  return distance < item.radius ? distance : Infinity;
+}
 function createInteractionState({ announce = () => {}, present = () => {} } = {}) {
   const states = new Map;
   const idle = Object.freeze({ phase: "idle", message: "" });
@@ -5304,27 +5357,21 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     return actions2.get(kind)?.get(id) || null;
   }
   function nearest(position, context = {}) {
-    let best = null, priority = Infinity, distance = Infinity;
+    let best = null, distance = Infinity;
     selectionContext = context;
     const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
     candidates.length = 0;
     function consider(source) {
       const item = normalize(source);
-      const floor = typeof item.floor === "number" ? item.floor : item.y;
-      if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
+      const d = distanceToInteraction(item, position, context);
+      if (d === Infinity)
         return;
-      if (item.seat && !isInFrontOfSeat(item.seat, position))
-        return;
-      const point2 = item.standing ?? item.anchor;
-      const d = item.shopAction?.seated && context.player?.seated ? 0 : Math.hypot(position.x - point2.x, position.z - point2.z);
-      if (d >= item.radius)
-        return;
-      if (shopEntries && (!context.player?.seated || item.shopAction?.seated))
-        candidates.push({ item, distance: d });
-      const rank = item.shopAction?.seated && context.player?.seated ? -1 : !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
-      if (!item.shopAction?.productId && (rank < priority || rank === priority && d < distance)) {
+      if (shopEntries && (!context.player?.seated || item.shopAction?.seated)) {
+        const rank = !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
+        candidates.push({ item, distance: d, rank });
+      }
+      if (d < distance) {
         best = item;
-        priority = rank;
         distance = d;
       }
     }
@@ -5334,6 +5381,14 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     if (shopEntries)
       for (const source of shopEntries)
         consider(source);
+    if (candidates.length) {
+      candidates.sort((a, b) => a.distance - b.distance || a.rank - b.rank);
+      const primary = candidates[0];
+      const shelf = primary.item.shopAction?.productId && candidates.findIndex(({ item }) => item.id === primary.item.shopAction.productId);
+      if (shelf > 0)
+        candidates.unshift(...candidates.splice(shelf, 1));
+      ({ item: best, distance } = candidates[0]);
+    }
     const chosen = cycled && candidates.find((candidate) => candidate.item === cycled);
     if (!chosen)
       cycled = null;
@@ -5350,7 +5405,7 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     return true;
   }
   function canCycle() {
-    return candidates.some(({ item }) => item.shopAction) && (candidates.length > 1 || candidates[0]?.item !== selected);
+    return candidates.length > 1 && candidates.some(({ item }) => item.shopAction);
   }
   function dispatch(item, context = selectionContext) {
     if (!item || item.availability && !item.availability(context, item))
@@ -5769,6 +5824,7 @@ var movementHistory = new Array(300);
 var movementFrame = 0;
 var three;
 var frameTrace;
+var programTrace;
 var modelWarmup;
 var tierQueue;
 var requestedProfile;
@@ -5902,6 +5958,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
+    ...programTrace && { programTrace: programTrace.report() },
     ...frameTrace && { frameTrace: frameTrace.report() },
     uploads: { ...modelWarmup?.report() ?? { lateAdditions: 0, pendingUploads: 0 }, maxFrameUploadMs },
     warm: { ...warmReport, upperLevel: world?.upperWarmStatus ?? null },
@@ -6323,10 +6380,14 @@ function render(force = false) {
         world.interiors?.endFrame();
       }
     };
+    const warmPhase = warmReport.background ?? warmReport.reason;
+    programTrace?.sample("pre-draw", warmPhase, currentZone);
+    programTrace?.player(pose);
     if (shelfFocus?.open)
       player.renderShelf(draw);
     else
       draw();
+    programTrace?.sample("live", warmPhase, currentZone);
     frames++;
     if (window.__sceneReady)
       ui.offerFirstGuide();
@@ -6909,6 +6970,7 @@ async function installNpcs(T, R, prepareModel, source) {
   try {
     const { createNpcSystem, loadNpcSystem } = await import("./assets/npcs.js");
     const options = {
+      onAvatarEvent: programTrace?.event,
       scene: world.scene,
       seats: world.seats,
       physics,
@@ -6956,6 +7018,8 @@ async function initialize() {
   lightWash = expanded && allowMallLightWash(quality.deviceClass, context);
   const diagnostics = new URLSearchParams(location.search);
   renderer.debug.checkShaderErrors = diagnostics.get("debugShaders") === "1";
+  if (diagnostics.get("tracePrograms") === "1" || diagnostics.get("traceWarm") === "1")
+    programTrace = createProgramTrace(renderer);
   if (diagnostics.get("traceWarm") === "1")
     frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace;
@@ -7093,12 +7157,17 @@ async function initialize() {
     world.interactables.push(...elevator.interactables);
     world.cameraObstacles.push(...elevator.cameraObstacles || []);
   }
+  const prepareAvatar = (model, options) => prepareModel(model, {
+    lighting: (lights) => atmosphere.lightVariants(lights),
+    shadowVariants: warmShadows,
+    ...options
+  });
   const { createPlayer } = await import("./assets/player.bundle.js");
-  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareModel);
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar);
   if (player.npcSource)
-    await installNpcs(T, R, prepareModel, player.npcSource);
+    await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")
-    firstFrame.then(() => installNpcs(T, R, prepareModel));
+    firstFrame.then(() => installNpcs(T, R, prepareAvatar));
   const { createDOMProjection } = await import("./assets/dom-projection.js");
   const projection = createDOMProjection(T, canvas);
   const { createTargetGuidance } = await import("./assets/target-guidance.js");

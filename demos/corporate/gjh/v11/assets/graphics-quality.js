@@ -1,3 +1,4 @@
+export const AVATAR_ANISOTROPY = Object.freeze({phone:2, tablet:4, desktop:4});
 export const QUALITY_KEY = 'gjh-v11-graphics-quality-v1';
 export const RESOLUTION_KEY = 'gjh-v11-auto-resolution-v1';
 export const MALL_FRAME_BUDGETS = Object.freeze({
