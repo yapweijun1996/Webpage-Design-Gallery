@@ -85,7 +85,7 @@ export async function installShopInteractions(T, scene, registry, announce, getT
 function createShopActionVisual(T, scene, targets, getTier) {
   const items = new Map(targets.map(({id,shopAction:{item}}) => [id,item]));
   const shapes = new Map();
-  let mesh;
+  let mesh, mounted = false;
   const box = () => new T.BoxGeometry();
   const disc = () => new T.CylinderGeometry(.5,.43,1,10);
   function merge(parts) {
@@ -123,7 +123,10 @@ function createShopActionVisual(T, scene, targets, getTier) {
       mesh = new T.Mesh(geometry,new T.MeshBasicMaterial());
       mesh.name = 'Shop action prop';
     }
-    if (!mesh.parent) scene.add(mesh);
+    if (!mounted) {
+      scene.add(mesh);
+      mounted = true;
+    }
     mesh.geometry = geometry;
     mesh.material.color.setHex(color);
     mesh.position.set(...position);
@@ -135,7 +138,10 @@ function createShopActionVisual(T, scene, targets, getTier) {
   function present(target,t) {
     if (mesh) mesh.visible = false;
     paint(target,t);
-    if (mesh && !mesh.visible && getTier?.() === 'low') mesh.removeFromParent();
+    if (mounted && !mesh.visible && getTier?.() === 'low') {
+      mesh.removeFromParent();
+      mounted = false;
+    }
   }
   function paint(target,t) {
     const action = target?.shopAction;
