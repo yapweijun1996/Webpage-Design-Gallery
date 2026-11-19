@@ -4534,7 +4534,6 @@ var productControl = null;
 var shelfFocus = null;
 var guidance = null;
 var mallTheme = null;
-var brandWallStarted = false;
 var atmosphere = null;
 var npcs = null;
 var spatialHud = null;
@@ -4617,7 +4616,7 @@ function performanceReport() {
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
     uploads: modelWarmup?.report() ?? { lateAdditions: 0, maxFrameUploadMs: 0, pendingUploads: 0 },
-    warm: { ...warmReport },
+    warm: { ...warmReport, upperLevel: world?.upperWarmStatus ?? null },
     viewport: { width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio() },
     graphics: { tier: quality.state?.tier, contextLosses: losses, restorations: validations }
   };
@@ -4859,13 +4858,6 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
-  if (expanded && currentZone === "upper" && !brandWallStarted) {
-    brandWallStarted = true;
-    world.ensureBrandWall().then(({ records }) => {
-      ui.setBrandStories(records);
-      updateHUD();
-    }).catch((error) => console.error("Upper deck brand wall could not load:", error));
-  }
   const selection = interactions.nearest(p, { travelling: Boolean(p.elevatorTravel), player: p });
   selectedInteraction = selection.item;
   interactionDistance = selection.distance;
@@ -5380,6 +5372,7 @@ function validateRestoration() {
     try {
       atmosphere?.restoreEnvironment();
     } catch {}
+    world.prepareUpperLevel();
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))
       throw new Error("Theme restoration failed");
     atmosphere?.applyTheme(mallTheme?.definition());
@@ -5485,7 +5478,9 @@ async function initialize() {
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded, warmModel);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
-  const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
+  if (world.brandStories)
+    ui.setBrandStories(world.brandStories);
+  const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)
     assetRecords.push(world.productAssets.shelf);
   document.getElementById("loader-asset-notice").hidden = !assetRecords.some((record) => record?.status === "fallback");
@@ -5581,6 +5576,7 @@ async function initialize() {
   if (new URLSearchParams(location.search).get("visitor") !== "v1") {
     const { createElevatorV2 } = await import("./assets/elevator-v2.js");
     elevator = createElevatorV2(T, R, physics, world.scene, expanded);
+    world.prepareUpperLevel();
     if (mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {
       mallTheme.destroy();
       mallTheme = null;

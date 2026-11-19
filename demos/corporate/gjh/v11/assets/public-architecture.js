@@ -2,7 +2,7 @@ import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, daylightSkylight=false}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -142,7 +142,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     const a=(i/12-.5)*Math.PI,x=-3+13.15*Math.sin(a),y=13.1+3.9*Math.cos(a);
     box('green',x,y,10.1,.07,.09,26.1);
   }
-  arch(-3,10.1,13.14,13.18,3.91,26.05,.036,'glass');
+  if(!daylightSkylight)arch(-3,10.1,13.14,13.18,3.91,26.05,.036,'glass');
   for(const z of [-2.75,22.85]){
     box('ivory',-3,10.68,z,26.2,.45,.58);
     box('oak',-3,10.38,z,26.2,.15,.63);

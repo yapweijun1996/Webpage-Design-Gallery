@@ -25,7 +25,7 @@ function wrap(context, text, x, y, maxWidth, lineHeight, maxLines) {
   if (lines < maxLines && line) context.fillText(line, x, y + lines * lineHeight, maxWidth);
 }
 
-export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
+export async function addBrandWallAtlas(T, scene, deckY) {
   const kitResponse = await fetch(new URL('./brand-kit/brand-kit.json', import.meta.url));
   if (!kitResponse.ok) throw new Error('Brand-kit metadata unavailable');
   const kit = await kitResponse.json();
@@ -38,8 +38,9 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
     image(new URL(`./brands/${entry.slot}-${LOGO_FILES[index]}.webp`, import.meta.url).href)));
   const cellWidth = 256, cellHeight = 224;
   const canvas = document.createElement('canvas');
-  canvas.width = cellWidth * COLUMNS; canvas.height = cellHeight * Math.ceil(SLOT_COUNT / COLUMNS);
+  canvas.width = canvas.height = 256;
   const context = canvas.getContext('2d');
+  context.scale(canvas.width / (cellWidth * COLUMNS), canvas.height / (cellHeight * Math.ceil(SLOT_COUNT / COLUMNS)));
   entries.forEach((entry, index) => {
     const x = index % COLUMNS * cellWidth, y = Math.floor(index / COLUMNS) * cellHeight;
     context.fillStyle = '#f4efdf'; context.fillRect(x, y, cellWidth, cellHeight);
@@ -62,27 +63,26 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
   const positions = [], uvs = [], indices = [], interactables = [], records = {};
   entries.forEach((entry, index) => {
     const column = index % COLUMNS, row = Math.floor(index / COLUMNS);
-    const x = -6.25 + column * 2.15, y = 10.7 - row * .78, z = 14.38;
-    const width = 2, height = .72;
-    positions.push(x-width/2,y-height/2,z, x+width/2,y-height/2,z,
-      x+width/2,y+height/2,z, x-width/2,y+height/2,z);
+    const x = -6.25 + column * 2.15, y = deckY + 2.16 - row * .455, z = 15.69;
+    const width = 2, height = .40;
+    positions.push(x+width/2,y-height/2,z, x-width/2,y-height/2,z,
+      x-width/2,y+height/2,z, x+width/2,y+height/2,z);
     const left = column / COLUMNS, right = (column + 1) / COLUMNS;
     const top = 1 - row / Math.ceil(SLOT_COUNT / COLUMNS), bottom = 1 - (row + 1) / Math.ceil(SLOT_COUNT / COLUMNS);
     uvs.push(left,bottom,right,bottom,right,top,left,top);
     const vertex = index * 4; indices.push(vertex,vertex+1,vertex+2,vertex,vertex+2,vertex+3);
     const id = `brand-plaque-${entry.slot}`;
-    interactables.push({id,x:x+(row-2)*.13,y:deckY,z:13.45+column*.08,radius:1.35});
+    interactables.push({id,x:x+(row-2)*.13,y:deckY,z:14.50+column*.05,radius:1.35});
     records[id] = {name:entry.brand,brand:entry.brand,tagline:entry.tagline,story:entry.story,
       image:`assets/brands/${entry.slot}-${LOGO_FILES[index]}.webp`, action:'brand-story',
       kind:'Brand plaque · independent virtual mall concept',alt:`${entry.brand} logo`};
   });
   const geometry = new T.BufferGeometry();
   geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
   geometry.setIndex(indices); geometry.computeBoundingSphere();
-  const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({map:texture,side:T.DoubleSide}));
+  const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({map:texture,toneMapped:false}));
   mesh.name = 'Seventeen brand wall plaques'; mesh.userData.deckLod = true;
-  try { await prepareModel?.(mesh); }
-  catch (error) { geometry.dispose(); mesh.material.dispose(); texture.dispose(); throw error; }
   mesh.visible = false;
   scene.add(mesh);
   return {mesh,interactables,records};

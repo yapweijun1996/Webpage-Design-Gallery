@@ -30,10 +30,10 @@ export function createSeatPlacements(expanded) {
     add(store.id, x - 3, -6.8, -1); add(store.id, x + 3, -6.8, -1);
   }
   if (expanded) {
-    add('deck', -6.1, 8.8, 1, 'Upper deck bench 1', liftLayout.upper);
-    add('deck', .1, 8.8, 1, 'Upper deck bench 2', liftLayout.upper);
-    // Face the clear approach between the bench and shaft guard.
-    add('deck', -3, 6, -1, 'Upper deck bench 3', liftLayout.upper);
+    for(const [i,seat] of atriumLayout.upperSeats.entries()){
+      add('deck',seat.x,seat.z,seat.facing,`Upper deck bench ${i+1}`,liftLayout.upper);
+      placements.at(-1).finish=seat.finish;
+    }
   }
   return placements;
 }

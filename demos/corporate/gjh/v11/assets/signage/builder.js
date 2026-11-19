@@ -5,9 +5,9 @@ import {bayWidth,fasciaBand} from './config.js';
 // Shared dimensions for the two atlas decals and their projecting hardware socket.
 export const bladeSocket = Object.freeze({inset:.24, drop:.78, reach:.94, height:.69, thickness:.043});
 
-export function uvRect(r) {
-  return [(r.x+.5)/atlasSize,1-(r.y+r.h-.5)/atlasSize,
-    (r.x+r.w-.5)/atlasSize,1-(r.y+.5)/atlasSize];
+export function uvRect(r,size=atlasSize) {
+  return [(r.x+.5)/size,1-(r.y+r.h-.5)/size,
+    (r.x+r.w-.5)/size,1-(r.y+.5)/size];
 }
 
 // Local +Z faces the aisle. A group carries only the mount and one static face

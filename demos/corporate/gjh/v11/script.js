@@ -41,7 +41,7 @@ let ready = false, player, world, physics, renderer, elevator, manual = false, f
 let three;
 let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmReport = createWarmReport();
-let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
+let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let markFirstFrame;
@@ -86,7 +86,7 @@ function performanceReport() {
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
     layout: expanded ? 'expanded' : 'classic',
     uploads: modelWarmup?.report() ?? {lateAdditions:0, maxFrameUploadMs:0, pendingUploads:0},
-    warm: {...warmReport},
+    warm: {...warmReport, upperLevel:world?.upperWarmStatus ?? null},
     viewport: {width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio()},
     graphics: {tier: quality.state?.tier, contextLosses: losses, restorations: validations}
   };
@@ -244,11 +244,6 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
-  if(expanded&&currentZone==='upper'&&!brandWallStarted){
-    brandWallStarted=true;
-    world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();})
-      .catch(error=>console.error('Upper deck brand wall could not load:',error));
-  }
   const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
@@ -591,6 +586,7 @@ function validateRestoration() {
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
     try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
+    world.prepareUpperLevel();
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
@@ -658,7 +654,8 @@ async function initialize() {
   });
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded, warmModel);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
-  const assetRecords = [world.furnishings, world.shell, world.deckRailings, world.amenities, world.productAssets?.cans]
+  if(world.brandStories)ui.setBrandStories(world.brandStories);
+  const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans]
     .flatMap(group => Object.values(group || {}));
   if (world.productAssets?.shelf) assetRecords.push(world.productAssets.shelf);
   document.getElementById('loader-asset-notice').hidden = !assetRecords.some(record => record?.status === 'fallback');
@@ -722,6 +719,7 @@ async function initialize() {
   if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
     const {createElevatorV2} = await import('./assets/elevator-v2.js');
     elevator = createElevatorV2(T, R, physics, world.scene, expanded);
+    world.prepareUpperLevel();
     if(mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {mallTheme.destroy();mallTheme=null;ui.configureMallTheme(null);}
     world.interactables.push(...elevator.interactables);
     world.cameraObstacles.push(...(elevator.cameraObstacles||[]));
