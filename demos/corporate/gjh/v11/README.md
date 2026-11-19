@@ -26,6 +26,8 @@ New Moon product details automatically open an unofficial interactive 3D preview
 
 With Tripo or Visitor v2, choose **Pick up product** within reach of a New Moon shelf. **Add to bag** follows the held can throughout the mall, including after map travel, and adds one of that product to the demo bag. The visitor lowers the can in a short gesture. Reduced motion clears the hand immediately. The original shelf's facing is restored as a reusable display, consistent with the demo bag's cosmetic stock. **Return to shelf** is available within reach of the original shelf. Either action frees your hands for seats, the cart and the elevator. If your bag has nine of the product, it opens so you can make room.
 
+Approach a lounge bench from its open side and use **Sit**. The visitor faces the aisle and the camera frames the seated visitor from the open side at chase distance. **Stand** checks for a free spot in front of the bench and restores the previous view.
+
 ## Shared current-store spatial data
 
 The existing three storefronts use [assets/spatial.js](assets/spatial.js) for stable IDs, numbers, labels, nominal bounds and arrival anchors. The world, player, map and live directory consume these records; static directory HTML remains available without JavaScript. The records describe the current scene, not the proposed 17-store expansion. See the [stage 2 spatial pilot](../../../../docs/gjh-v11-stage2-spatial-pilot.md) for contracts, fallback behavior, evidence and remaining work.
@@ -93,6 +95,8 @@ The state snapshot exposes immutable `character` metadata and normalized idle/wa
 The polish review captures spawn, walking, every interior and all panels at 1440×900, 768×1024 and 390×844. Desktop help now sits in the lower-left utility area with separate headline/disclaimer spacing; mobile keeps a compact top row. Temporary review images are not published; only three final spawn screenshots and the thumbnail are retained. Front-only can labels remain a packaging limitation. The replacement visitor passed a fresh full V11 run at all three widths, with maximum draw calls of 130, 114 and 101; the canonical character review records focused animation-transition and release checks.
 
 ## Verification
+
+For the 393×700 MILI bench 2 probe, serve this worktree with `python3 -m http.server 8812 --bind 127.0.0.1`. With Playwright available to Node and `GALLERY_CHROME` set, run `node tests/probe_gjh_mili_seat.cjs` to capture the approach, seated pose and standing exit in headed Chrome.
 
 ```sh
 export GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"

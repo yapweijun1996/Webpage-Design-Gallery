@@ -7,6 +7,7 @@ import {createLocomotionContinuity, createSelectedVisitor} from '../demos/corpor
 import {createCharacterTripo, mapTripoClips, normalizeTripoHeight} from '../demos/corporate/gjh/v11/assets/character-tripo.js';
 import {createCharacterV2} from '../demos/corporate/gjh/v11/assets/character-v2.js';
 import {playerCameraFraming} from '../demos/corporate/gjh/v11/assets/player.js';
+import {createSeatAnchor, createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
 
 const names = ['idle', 'walk', 'run', 'wave', 'nod', 'jump', 'dance'];
 const hips = {name: 'mixamorigHips', position: new T.Vector3(.02, .37, .08)};
@@ -157,6 +158,40 @@ test('the authored sit reaches a stable seated pose with both boots on the floor
     character.setSeated(false);
     character.update('idle', 0);
     assert.ok(Math.abs(point(knee).z - upright.z) < .005);
+  });
+});
+
+test('the runtime seat pose fits the actual visitor to ground and upper benches in both directions', async () => {
+  await withVisitorAssets(async character => {
+    const skin = character.visual.getObjectByProperty('isSkinnedMesh', true);
+    const hips = skin.skeleton.bones.find(bone => bone.name.endsWith('Hips'));
+    const foot = skin.skeleton.bones.find(bone => bone.name.endsWith('LeftFoot'));
+    const toe = skin.skeleton.bones.find(bone => bone.name.endsWith('LeftToeBase'));
+    const placements = createSeatPlacements(true);
+    for (const placement of placements) {
+      const footY = placement.floor + (placement.group === 'atrium' ? .016 : placement.floor ? 0 : .0245);
+      const seat = createSeatAnchor(placement, 1, undefined, undefined, footY);
+      character.visual.position.set(seat.x, seat.floor+.015, seat.z);
+      character.visual.rotation.y = seat.angle;
+      character.setSeated(true);
+      character.update('idle', 1/60, 'idle', 1, seat);
+      const pelvis = hips.getWorldPosition(new T.Vector3());
+      assert.ok(Math.abs(pelvis.x - seat.x) < .01, seat.name);
+      assert.ok(pelvis.y > seat.y && pelvis.y < seat.y+.17, seat.name);
+      assert.ok((pelvis.z-seat.z)*seat.facing > -seat.frontEdge, seat.name);
+      const footForward = toe.getWorldPosition(new T.Vector3()).sub(foot.getWorldPosition(new T.Vector3()));
+      assert.ok(footForward.z*seat.facing < -.10, seat.name);
+      const soles = [Infinity, Infinity];
+      meshVertices(character.visual, skin, vertex => {
+        const side = Number(vertex.x >= seat.x);
+        soles[side] = Math.min(soles[side], vertex.y);
+      });
+      assert.ok(soles.every(y => Math.abs(y-footY) < .012), `${seat.name} soles ${soles}`);
+    }
+    character.setSeated(false);
+    character.update('idle', 0);
+    const restored = foot.getWorldPosition(new T.Vector3());
+    assert.ok(Math.abs(restored.y-character.visual.position.y-.122) < .02);
   });
 });
 

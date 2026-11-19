@@ -7,6 +7,126 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/visitor-v2-contact.js
+function createContactSolver(T, root) {
+  const a = new T.Vector3, b = new T.Vector3, c = new T.Vector3, q = new T.Quaternion, parent = new T.Quaternion;
+  function solve(names, target) {
+    const joints = names.map((name) => root.getObjectByName(name));
+    if (joints.some((n) => !n))
+      return Infinity;
+    const tip = joints.at(-1);
+    for (let i = 0;i < 18; i++) {
+      for (let j = joints.length - 2;j >= 0; j--) {
+        const joint = joints[j];
+        root.updateWorldMatrix(true, true);
+        joint.getWorldPosition(a);
+        tip.getWorldPosition(b);
+        b.sub(a).normalize();
+        c.copy(target).sub(a).normalize();
+        q.setFromUnitVectors(b, c);
+        joint.parent.getWorldQuaternion(parent);
+        q.premultiply(parent.clone().invert()).multiply(parent);
+        joint.quaternion.premultiply(q);
+      }
+      root.updateWorldMatrix(true, true);
+      tip.getWorldPosition(b);
+      if (b.distanceTo(target) < 0.002)
+        break;
+    }
+    return b.distanceTo(target);
+  }
+  function solveTwoBone(names, target, pole) {
+    const [upper, lower, tip] = names.map((n) => root.getObjectByName(n));
+    root.updateWorldMatrix(true, true);
+    const origin = upper.getWorldPosition(new T.Vector3), middle = lower.getWorldPosition(new T.Vector3), end = tip.getWorldPosition(new T.Vector3);
+    const l1 = origin.distanceTo(middle), l2 = middle.distanceTo(end), direction = target.clone().sub(origin);
+    const distance = Math.min(l1 + l2 - 0.000001, Math.max(Math.abs(l1 - l2) + 0.000001, direction.length()));
+    direction.normalize();
+    const bend = pole.clone().sub(origin);
+    bend.addScaledVector(direction, -bend.dot(direction)).normalize();
+    const along = (l1 * l1 - l2 * l2 + distance * distance) / (2 * distance);
+    const knee = origin.clone().addScaledVector(direction, along).addScaledVector(bend, Math.sqrt(Math.max(0, l1 * l1 - along * along)));
+    function aim(joint, child, point) {
+      root.updateWorldMatrix(true, true);
+      joint.getWorldPosition(a);
+      child.getWorldPosition(b);
+      b.sub(a).normalize();
+      c.copy(point).sub(a).normalize();
+      q.setFromUnitVectors(b, c);
+      joint.parent.getWorldQuaternion(parent);
+      q.premultiply(parent.clone().invert()).multiply(parent);
+      joint.quaternion.premultiply(q);
+    }
+    aim(upper, lower, knee);
+    aim(lower, tip, target);
+    root.updateWorldMatrix(true, true);
+    return tip.getWorldPosition(b).distanceTo(target);
+  }
+  return { solve, solveTwoBone };
+}
+function isShelfInReach({ x, y, z }, approach) {
+  return Math.abs(y) <= 0.5 && Math.hypot(x - approach.x, z - approach.z) <= approach.radius;
+}
+
+// demos/corporate/gjh/v11/assets/seat-contact.js
+function createSeatContact(T, visual, rig, { prefix = "", tripo = false } = {}) {
+  const pelvis = tripo ? rig.getObjectByName(`${prefix}Hips`) : null;
+  const legNames = tripo ? ["UpLeg", "Leg", "Foot"] : ["Hip", "Knee", "Foot"];
+  const legs = ["Left", "Right"].map((side) => {
+    const names = legNames.map((name) => prefix + side + name);
+    const joints = names.map((name) => rig.getObjectByName(name));
+    const foot = joints[2];
+    const point2 = visual.worldToLocal(foot.getWorldPosition(new T.Vector3));
+    const rotation = visual.getWorldQuaternion(new T.Quaternion).invert().multiply(foot.getWorldQuaternion(new T.Quaternion));
+    return { names, joints, point: point2, rotation, saved: joints.map(() => new T.Quaternion) };
+  });
+  const rest = new T.Vector3, point = new T.Vector3, other = new T.Vector3, target = new T.Vector3;
+  const pole = new T.Vector3, hip = new T.Vector3, knee = new T.Vector3, footRotation = new T.Quaternion;
+  const facing = new T.Quaternion;
+  const solver = createContactSolver(T, rig);
+  let applied = false;
+  function restore() {
+    if (!applied)
+      return;
+    rig.position.copy(rest);
+    for (const { joints, saved } of legs)
+      joints.forEach((joint, i) => joint.quaternion.copy(saved[i]));
+    applied = false;
+  }
+  function apply(seat, weight) {
+    rest.copy(rig.position);
+    for (const { joints, saved } of legs)
+      joints.forEach((joint, i) => saved[i].copy(joint.quaternion));
+    applied = true;
+    if (pelvis)
+      pelvis.getWorldPosition(point);
+    else
+      legs[0].joints[0].getWorldPosition(point).lerp(legs[1].joints[0].getWorldPosition(other), 0.5);
+    visual.worldToLocal(point);
+    const originY = visual.getWorldPosition(other).y;
+    const hipHeight = tripo ? 0.115 : 0.075;
+    const hipInset = tripo ? 0.11 : 0.17;
+    target.set(0, seat.y - originY + hipHeight, hipInset - seat.frontEdge);
+    rig.position.add(target.sub(point).multiplyScalar(weight));
+    visual.getWorldQuaternion(facing);
+    return legs.map(({ names, joints: [upper, lower, foot], point: restFoot, rotation }) => {
+      visual.worldToLocal(upper.getWorldPosition(hip));
+      visual.worldToLocal(lower.getWorldPosition(knee));
+      visual.worldToLocal(foot.getWorldPosition(point));
+      target.set(restFoot.x, seat.footY - originY + restFoot.y + (tripo ? 0.026 : 0), -seat.frontEdge - 0.04);
+      const reach = hip.distanceTo(knee) + knee.distanceTo(point) - 0.003;
+      const maxForward = Math.sqrt(Math.max(0, reach ** 2 - (target.y - hip.y) ** 2 - (target.x - hip.x) ** 2));
+      target.z = Math.max(target.z, hip.z - maxForward);
+      target.lerp(point, 1 - weight);
+      const error = solver.solveTwoBone(names, visual.localToWorld(target), visual.localToWorld(pole.set(hip.x, hip.y, hip.z - 1)));
+      foot.parent.getWorldQuaternion(footRotation).invert().multiply(facing).multiply(rotation);
+      foot.quaternion.slerp(footRotation, weight);
+      return error;
+    });
+  }
+  return { apply, restore };
+}
+
 // demos/corporate/gjh/v11/assets/character.js
 function createLocomotionContinuity() {
   let grace = 0;
@@ -76,6 +196,7 @@ async function createCharacterV1(T, prepareModel) {
   const seated = createSeatedPose(avatar);
   const visual = new T.Group;
   visual.add(avatar);
+  const seatContact = createSeatContact(T, visual, avatar);
   const cart = await createPushCart(T, avatar, visual, { prepareModel });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const clips = Object.freeze({ idle: "idle", walk: "walk", run: "sprint" });
@@ -93,7 +214,7 @@ async function createCharacterV1(T, prepareModel) {
   const resolveLocomotion = createLocomotionContinuity();
   actions.idle.paused = reducedMotion.matches;
   mixer.update(0);
-  function update(actual, dt, requested = actual, sprintRate = 1) {
+  function update(actual, dt, requested = actual, sprintRate = 1, seat) {
     actions.run.setEffectiveTimeScale(sprintRate);
     const state = resolveLocomotion(actual, requested, dt);
     if (state !== animation) {
@@ -111,6 +232,7 @@ async function createCharacterV1(T, prepareModel) {
       action.setEffectiveWeight(Math.abs(weight - nextWeight) < 0.001 ? weight : nextWeight);
     }
     actions.idle.paused = reducedMotion.matches;
+    seatContact.restore();
     carryBag.restore();
     collection.restore();
     seated.restore();
@@ -120,6 +242,8 @@ async function createCharacterV1(T, prepareModel) {
     collection.update(dt);
     seated.apply();
     cart.apply();
+    if (seat && seated.active)
+      seatContact.apply(seat, seated.weight);
   }
   return {
     visual,
@@ -322,11 +446,6 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
 }));
 var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
 
-// demos/corporate/gjh/v11/assets/visitor-v2-contact.js
-function isShelfInReach({ x, y, z }, approach) {
-  return Math.abs(y) <= 0.5 && Math.hypot(x - approach.x, z - approach.z) <= approach.radius;
-}
-
 // demos/corporate/gjh/v11/assets/camera-controller.js
 var MIN_DISTANCE = 1;
 var MAX_DISTANCE = 11;
@@ -390,6 +509,261 @@ function createCameraController(getStorage = () => globalThis.sessionStorage) {
   };
 }
 
+// demos/corporate/gjh/v11/assets/atrium-layout.js
+var point = (x, z) => Object.freeze({ x, z });
+var lounge = (id, x) => Object.freeze({
+  id,
+  x,
+  z: 24,
+  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
+  table: point(x, 24.5),
+  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
+});
+var atriumLayout = Object.freeze({
+  arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
+  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
+  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
+  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
+});
+
+// demos/corporate/gjh/v11/assets/interior-pilot-registry.js
+var INTERIOR_PILOT = Object.freeze({
+  bench: {
+    asset_id: "GJH-PUB-002",
+    kind: "bench",
+    version: "1.0.0",
+    file: "GJH_PUB_002.glb",
+    sha256: "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+    bytes: 233176,
+    dimensions_m: [
+      2.58,
+      1.3175,
+      0.922
+    ],
+    authoring_dimensions_wdh_m: [
+      2.58,
+      0.922,
+      1.3175
+    ],
+    reuse_decision: "reuse",
+    source: "gjh-mall-furniture/sources/gjh-lounge-bench.blend",
+    source_sha256: "925f75d253188eed591a48f20b1daa0329abb492799ab9ba91b61a4c57bf6ee0",
+    capabilities: [
+      "SIT"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_002.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  planter: {
+    asset_id: "GJH-PUB-008",
+    kind: "planter",
+    version: "1.0.0",
+    file: "GJH_PUB_008.glb",
+    sha256: "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+    bytes: 119732,
+    dimensions_m: [
+      1.230091,
+      2.347567,
+      1.191551
+    ],
+    authoring_dimensions_wdh_m: [
+      1.230091,
+      1.191551,
+      2.347567
+    ],
+    reuse_decision: "reuse",
+    source: "gjh-mall-furniture/sources/gjh-areca-planter.blend",
+    source_sha256: "79522ae07850e010abcbda93aff1e0c9d1afe22b4311d982673abb04e4805b2a",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_008.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  kiosk: {
+    asset_id: "GJH-PUB-017",
+    kind: "kiosk",
+    version: "1.0.0",
+    file: "GJH_PUB_017.glb",
+    sha256: "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+    bytes: 181376,
+    dimensions_m: [
+      0.96,
+      2.05,
+      0.68
+    ],
+    authoring_dimensions_wdh_m: [
+      0.96,
+      0.68,
+      2.05
+    ],
+    reuse_decision: "adapt",
+    source: "mall-essentials/sources/mall-directory-kiosk.blend",
+    source_sha256: "b7a0e9ebb766e12b51d3115823f6dbd7b431312b475c35452d3b9338b699df0e",
+    capabilities: [
+      "USE"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_017.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  shelf: {
+    asset_id: "GJH-DSP-001",
+    kind: "shelf",
+    version: "1.0.0",
+    file: "GJH_DSP_001.glb",
+    sha256: "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+    bytes: 228924,
+    dimensions_m: [
+      1.52,
+      1.96,
+      0.58
+    ],
+    authoring_dimensions_wdh_m: [
+      1.52,
+      0.58,
+      1.96
+    ],
+    reuse_decision: "reuse",
+    source: "mall-essentials/sources/mall-display-shelf.blend",
+    source_sha256: "18ae5c2311b81356b529af04724fa627efd6b2eee2597ec10c58f7f828dacbea",
+    capabilities: [
+      "INSPECT"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_DSP_001.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  storeSign: {
+    asset_id: "GJH-STF-008",
+    kind: "storeSign",
+    version: "1.0.0",
+    file: "GJH_STF_008.glb",
+    sha256: "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+    bytes: 21912,
+    dimensions_m: [
+      2.52,
+      1.21,
+      0.213
+    ],
+    authoring_dimensions_wdh_m: [
+      2.52,
+      0.213,
+      1.21
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_STF_008.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  wallLight: {
+    asset_id: "GJH-LGT-009",
+    kind: "wallLight",
+    version: "1.0.0",
+    file: "GJH_LGT_009.glb",
+    sha256: "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+    bytes: 22804,
+    dimensions_m: [
+      0.32,
+      1,
+      0.255
+    ],
+    authoring_dimensions_wdh_m: [
+      0.32,
+      0.255,
+      1
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_LGT_009.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  coffeeTable: {
+    asset_id: "GJH-PUB-005",
+    kind: "coffeeTable",
+    version: "1.0.0",
+    file: "GJH_PUB_005.glb",
+    sha256: "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+    bytes: 160536,
+    dimensions_m: [
+      1.61,
+      0.875,
+      1.61
+    ],
+    authoring_dimensions_wdh_m: [
+      1.61,
+      1.61,
+      0.875
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_005.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  plinth: {
+    asset_id: "GJH-VER-017",
+    kind: "plinth",
+    version: "1.0.0",
+    file: "GJH_VER_017.glb",
+    sha256: "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+    bytes: 129236,
+    dimensions_m: [
+      4.5,
+      0.6525,
+      4.5
+    ],
+    authoring_dimensions_wdh_m: [
+      4.5,
+      4.5,
+      0.6525
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_VER_017.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  }
+});
+
+// demos/corporate/gjh/v11/assets/seat-placements.js
+var loungeBench = {
+  size: INTERIOR_PILOT.bench.dimensions_m,
+  top: 0.635,
+  flatFront: -0.381,
+  front: -0.456,
+  backrestFront: 0.213
+};
+function isInFrontOfSeat(seat, z) {
+  return (z - seat.z) * seat.facing <= -seat.frontEdge;
+}
+
 // demos/corporate/gjh/v11/assets/player.js
 var CAMERA_AXES = ["x", "y", "z"];
 var CAMERA_LIFTS = [1.1, 2.2];
@@ -431,7 +805,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   let vertical = 0, runToggle = true, stickX = 0, stickY = 0, injected = null;
   let seated = false, pushing = false, elevatorTravel = null, cartEyePitch = null;
   const walkingShape = new R.Capsule(0.55, 0.3), cartShape = new R.Cylinder(0.85, 1.4);
-  let seat = null, seatPhase = "idle", seatTime = 0, seatFrom = null, seatStartAngle = 0, seatStartWeight = 0;
+  let seat = null, seatPhase = "idle", seatTime = 0, seatFrom = null, seatExit = null, seatStartAngle = 0, seatStartWeight = 0;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const reduceSeatMotion = () => reducedMotion.matches;
   let yaw = 0, pitch = 0.1, drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
@@ -631,9 +1005,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     dragStick();
     look(drag.x - pair.secondX, drag.y - pair.secondY);
   }
-  function movePinch(point, event) {
-    point.x = event.clientX;
-    point.y = event.clientY;
+  function movePinch(point2, event) {
+    point2.x = event.clientX;
+    point2.y = event.clientY;
     if (pinch.pending) {
       const { first, second, firstX, firstY, secondX, secondY, axisX, axisY } = pinch;
       const firstDx = first.x - firstX, firstDy = first.y - firstY;
@@ -666,9 +1040,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
         return;
       const box = stick?.pad ?? joystick.getBoundingClientRect();
       const onPad = box.width > 0 && event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
-      const point = { id: event.pointerId, x: event.clientX, y: event.clientY, touch: true, pinchEligible: !onPad };
+      const point2 = { id: event.pointerId, x: event.clientX, y: event.clientY, touch: true, pinchEligible: !onPad };
       if (!stick && (onPad || fullScreenControl.checked)) {
-        stick = point;
+        stick = point2;
         stick.pad = box;
         if (fullScreenControl.checked) {
           stickOrigin = { x: event.clientX, y: event.clientY };
@@ -681,11 +1055,11 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
         }
         dragStick();
       } else if (!drag) {
-        drag = point;
+        drag = point2;
         if (stick?.pinchEligible && fullScreenControl.checked && !onPad && !chaseRequired())
           beginPinch(stick, drag, true);
       } else if (!stick && drag.touch && !onPad && !chaseRequired()) {
-        beginPinch(drag, point, false);
+        beginPinch(drag, point2, false);
       } else
         return;
       canvas.focus({ preventScroll: true });
@@ -847,7 +1221,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (seated) {
       updateSeat(dt);
       yaw += ((keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0)) * (110 * Math.PI / 180) * dt;
-      character.update("idle", dt);
+      updateSeatCharacter(dt);
       return;
     }
     if (productApproach) {
@@ -915,8 +1289,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     contact.position.set(p.x, Math.max(0.05, p.y - 0.83), p.z);
     contact.rotation.z = visual.rotation.y;
   }
-  function sweepCamera(origin, point) {
-    direction.copy(point).sub(origin);
+  function sweepCamera(origin, point2) {
+    direction.copy(point2).sub(origin);
     const length = direction.length();
     if (length < 0.000001)
       return 0;
@@ -1004,14 +1378,15 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     projectCamera(false);
     target.copy(visual.position);
     target.y += 1.24 - 0.34 * character.seatWeight;
-    const requestedDistance = actionView ? 3 : chaseDistance(framing.distance, zoom);
+    const seatView = actionView?.kind === "seat";
+    const requestedDistance = actionView && !seatView ? 3 : chaseDistance(framing.distance, zoom);
     const changedMode = renderedMode !== mode;
     cameraDistance = easeCameraValue(cameraDistance ?? requestedDistance, requestedDistance, dt, immediate || changedMode);
     cameraRadius = Math.max(0.22, camera.near * Math.tan(camera.fov * Math.PI / 360) * Math.hypot(1, camera.aspect) + 0.08);
     cameraBall.radius = cameraRadius;
     offset.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(cameraDistance);
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
-    const orbitHeight = actionView ? 0 : framing.height * closeFraming;
+    const orbitHeight = seatView ? Math.max(0.9, framing.height * 0.7) : actionView ? 0 : framing.height * closeFraming;
     let lift = 0, length = cameraCandidate(orbitHeight, desired);
     if (length < Math.min(cameraDistance - 0.05, cameraLift ? 2.4 : 2))
       for (const height of CAMERA_LIFTS) {
@@ -1109,11 +1484,17 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     body.setTranslation(position, true);
     body.setNextKinematicTranslation(position);
   }
+  const seatBodyTarget = (seat2) => ({ x: seat2.x, y: seat2.floor + 0.89, z: seat2.z });
+  function updateSeatCharacter(dt) {
+    sync();
+    character.update("idle", dt, "idle", 1, seat);
+  }
   function finishStand() {
-    moveSeat({ x: seat.exitX, y: seat.floor + 0.91, z: seat.exitZ });
+    moveSeat(seatExit);
     seated = false;
     seatPhase = "idle";
     seat = null;
+    seatExit = null;
     restoreActionView();
     character.setSeated(false);
     capsule.setEnabled(true);
@@ -1126,7 +1507,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       return;
     seatTime += dt;
     const duration = seatPhase === "align" ? 0.35 : 0.85, t = Math.min(1, seatTime / duration), e = t * t * (3 - 2 * t);
-    const end = seatPhase === "sit" ? { x: seat.x, y: seat.y + 0.875, z: seat.z } : { x: seat.exitX, y: seat.floor + 0.91, z: seat.exitZ };
+    const end = seatPhase === "sit" ? seatBodyTarget(seat) : seatExit;
     moveSeat({ x: seatFrom.x + (end.x - seatFrom.x) * e, y: seatFrom.y + (end.y - seatFrom.y) * e, z: seatFrom.z + (end.z - seatFrom.z) * e });
     const delta = Math.atan2(Math.sin(seat.angle - seatStartAngle), Math.cos(seat.angle - seatStartAngle));
     visual.rotation.y = seatStartAngle + delta * e;
@@ -1150,14 +1531,15 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const candidate = seats.find((s) => s.id === id), p = body.translation();
     if (!candidate)
       return false;
-    if (Math.abs(p.y - 0.875 - candidate.floor) > 0.5 || Math.hypot(p.x - candidate.exitX, p.z - candidate.exitZ) > candidate.clearance.interactionRadius || (p.z - candidate.z) * candidate.facing > -0.25)
+    if (Math.abs(p.y - 0.875 - candidate.floor) > 0.5 || Math.hypot(p.x - candidate.exitX, p.z - candidate.exitZ) > candidate.clearance.interactionRadius || !isInFrontOfSeat(candidate, p.z))
       return false;
     seat = candidate;
-    const exit = { x: seat.exitX, y: seat.floor + 0.91, z: seat.exitZ }, target2 = { x: seat.x, y: seat.y + 0.875, z: seat.z };
+    const exit = { x: seat.exitX, y: seat.floor + 0.91, z: seat.exitZ }, target2 = seatBodyTarget(seat);
     if (!clearPath(p, exit) || !clearPath(exit, target2, true)) {
       seat = null;
       return false;
     }
+    seatExit = exit;
     clearInput();
     injected = null;
     cancelCollection();
@@ -1168,7 +1550,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     seatFrom = { ...p };
     seatPhase = "align";
     seatStartWeight = 0;
-    beginActionView("seat", seat.angle + Math.PI + seat.cameraOffset);
+    beginActionView("seat", seat.angle + Math.PI);
     vertical = 0;
     if (reduceSeatMotion()) {
       moveSeat(target2);
@@ -1176,7 +1558,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       seatPhase = "seated";
       character.setSeated(true);
     }
-    character.update("idle", 0);
+    updateSeatCharacter(0);
     physics.step();
     updateCamera(0, reduceSeatMotion());
     return true;
@@ -1186,9 +1568,11 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       return false;
     if (seatPhase === "stand" && !instant)
       return true;
-    const position = { x: seat.exitX, y: seat.floor + 0.91, z: seat.exitZ };
-    if (!clearAt(position) || !clearPath(body.translation(), position, true))
+    const from = body.translation();
+    const position = [0, -0.45, 0.45].map((offset2) => ({ x: seat.exitX + offset2, y: seat.floor + 0.91, z: seat.exitZ })).find((point2) => clearAt(point2) && clearPath(from, point2, true));
+    if (!position)
       return false;
+    seatExit = position;
     clearInput();
     injected = null;
     seatFrom = { ...body.translation() };
@@ -1198,7 +1582,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     seatPhase = "stand";
     if (instant || reduceSeatMotion())
       finishStand();
-    character.update("idle", 0);
+    updateSeatCharacter(0);
     physics.step();
     updateCamera(0, instant || reduceSeatMotion());
     return true;
@@ -1220,6 +1604,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     seated = false;
     seatPhase = "idle";
     seat = null;
+    seatExit = null;
     character.setSeated(false);
     capsule.setEnabled(true);
     const { x, z } = destination;
