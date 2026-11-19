@@ -47,7 +47,7 @@ Codex CLI's built-in image tool generated eight images: six page heroes, an illu
 | Six complete, consistent pages | One header, footer and token set on every page. Full-page captures at 1440 and 390 px were reviewed against the mockups. |
 | Navigation, buttons, forms and filters work | Browser E2E checked:<br>- Brands: category filter (3 health, 9 food, all 17), `?category=` deep link, search, empty state and reset, the brand dialog with Escape and focus return, and `#brand-search` focus.<br>- Contact: `?topic=` preselection, 4 invalid fields with an alert summary, and a success state that does not claim delivery.<br>- Virtual World: the preview dialog opens and closes, and the entry link targets the v11 mall. |
 | Brand data verified | Every brand fact and figure cites the research files above. |
-| No overflow or clipping | `scrollWidth - innerWidth = 0` on all six pages at 1440 and 390 px. The mobile menu and hero were fixed during review. |
+| No overflow or clipping | `scrollWidth - innerWidth = 0` on all six pages at 1440 and 390 px. Because `body` clips horizontal overflow, an element-bounds check also ran at 320, 360, 375, 768, 920 and 1024 px, and no visible element extends past the viewport. The mobile menu and hero were fixed during review. |
 | No critical console errors | None on any page. Before generation, the only error was the missing `sw.js`. |
 | Reduced motion and keyboard | Reduced-motion captures show all content. The first Tab reaches "Skip to content". Dialogs trap focus and restore it. The menu closes on Escape. |
 | 3D does not slow corporate pages | No 3D requests before the user enters. |

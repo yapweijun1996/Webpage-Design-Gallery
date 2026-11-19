@@ -55,7 +55,7 @@
       year: 2010, source: historySource, shop: true
     },
     {
-      id: 'borsch-med', name: 'Borsch Med', category: 'health', relationship: 'House brand',
+      id: 'borsch-med', name: 'Borsch Med', category: 'health', relationship: 'GJH brand (2004)',
       evidence: 'GJH’s company history describes Borsch Med as its fifth brand in 2004.',
       year: 2004, source: historySource, shop: true, image: 'borsch-med-medium.webp', logo: 'borsch-med-logo.webp'
     },
