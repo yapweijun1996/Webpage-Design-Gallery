@@ -13,9 +13,9 @@ The 17 shops here are the V11 game’s authored roster. Some represent house bra
 | S03 | [GOGO](03-gogo/brand-research.md) · [Concept packet](03-gogo/README.md) |
 | S04 | [Borsch Med](04-borsch-med/brand-research.md) · [Concept packet](04-borsch-med/README.md) |
 | S05 | [Pien Tze Huang](05-pien-tze-huang/brand-research.md) · [Concept packet](05-pien-tze-huang/README.md) |
-| S06 | [Flying Wheel](06-flying-wheel/brand-research.md) |
-| S07 | [Gu Long](07-gu-long/brand-research.md) |
-| S08 | [SKIPPY](08-skippy/brand-research.md) |
+| S06 | [Flying Wheel](06-flying-wheel/brand-research.md) · [Concept packet](06-flying-wheel/README.md) |
+| S07 | [Gu Long](07-gu-long/brand-research.md) · [Concept packet](07-gu-long/README.md) |
+| S08 | [SKIPPY](08-skippy/brand-research.md) · [Concept packet](08-skippy/README.md) |
 | S09 | [SPAM](09-spam/brand-research.md) |
 | S10 | [California Mexico](10-california-mexico/brand-research.md) |
 | S11 | [Hormel](11-hormel/brand-research.md) |

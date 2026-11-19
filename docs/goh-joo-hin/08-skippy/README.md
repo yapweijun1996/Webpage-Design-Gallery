@@ -1,0 +1,46 @@
+# S08 · SKIPPY
+
+**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+
+[First-party brand research and product photo sources](brand-research.md)
+
+## Player walkthrough
+
+The blue checker pattern and tall jar display read clearly. The procedural breakfast chair has a collider and no Sit anchor.
+
+[Chrome player baseline](player-baseline.webp)
+
+## Interior design
+
+Make a retro tasting nook with sky blue tile, soft cream and mellow oak. Use a restrained illuminated jar frame as the hero and grouped Creamy and Chunky stock with a clear front approach.
+
+| Element | Placement and interaction |
+| --- | --- |
+| Main display | Jar stand in a striped breakfast booth, local XYZ (-0.58, 0.58, -0.76), yaw 0°. Keep the current jar fixture facing the entrance and preserve the large silhouette. |
+| Visitor route | Threshold local XZ (0, 5). Follow the right aisle to the rear of the breakfast vignette. |
+| Fixtures and use points | Retain a single chair at the breakfast position. It needs an independently tested sit pose and stand point before interaction can be advertised. |
+
+World origin (-20, 0, 20), yaw 90°. Dimensions are authored metres. The [floor plan](floor-plan.webp) shows programme footprints and the [inventory](model-inventory.md) resolves fixture coordinates and upstream assets.
+
+## Display products and model work
+
+| Reference | Proposed placement | Model status |
+| --- | --- | --- |
+| SKIPPY Creamy Peanut Butter 500g | One front shelf facing on the left half of the display | Pending source-matched body, teal cap and label map. GJH lists 73 × 73 × 124 mm. |
+| SKIPPY Chunky Peanut Butter 500g | Separate adjacent facing | Pending right-hand variant. Share geometry only after matching the two views. |
+
+Link to the GJH regional pack instead of substituting a different market edition.
+
+[Top-down floor plan](floor-plan.webp) · [Model inventory](model-inventory.md) · [Product model reference](product-model-reference.webp)
+
+The built-in image generator made the interior proposal and unlabelled product shape study. The proposal contains lighting and material intent. Use the actual browser capture for installed visuals and the source listings for real product forms and label details.
+
+## Interior viewpoints
+
+The four ImageGen studies cover the entrance, the main fixture, the browse aisle and the return toward the concourse. The floor plan records authored placement. The concepts illustrate finishes and sightlines, and the Chrome baseline records the installed room.
+
+[1. Entrance](interior-concept.webp) · [2. Signature display](signature-display.webp) · [3. Furniture and aisle](furniture-angle.webp) · [4. Back toward the entrance](reverse-to-entry.webp)
+
+## Runtime acceptance
+
+Desktop and touch routes passed. SKU viewer and breakfast chair seating are therefore tracked independently from the existing jar fixture.
