@@ -6404,6 +6404,7 @@ async function initialize() {
   });
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
+  ui.setBrandStories(world.newMoonExhibit);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)

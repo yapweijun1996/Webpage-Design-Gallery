@@ -213,54 +213,40 @@
         ],
         "planned_change": "Keep four shelf targets and pickup positions. Lift the focal image above the shelf line; use the right tea island and left reading stand as secondary stops."
       },
-      "style": "Collector’s pantry",
-      "concept": "A walnut collector’s cabinet opens above four working seafood shelves like the leaves of a folding screen.",
+      "style": "New Moon abalone gallery",
+      "concept": "A cream scalloped header and yellow crescent lead to four honey oak display bays, with optional heritage and serving stories beside the aisle.",
       "palette": [
         {
-          "material": "smoked walnut",
-          "hex": "#513527"
+          "material": "honey oak",
+          "hex": "#D6AA73"
         },
         {
           "material": "brushed brass",
           "hex": "#B59A68"
         },
         {
-          "material": "pearl linen",
-          "hex": "#F2EFE8"
+          "material": "warm limestone",
+          "hex": "#F2E9DA"
         },
         {
-          "material": "oxblood lacquer",
-          "hex": "#833E36"
+          "material": "New Moon blue",
+          "hex": "#233D79"
         }
       ],
-      "signature_family": "folding collector-cabinet leaves",
+      "signature_family": "scalloped cabinet crown with crescent",
       "anchor": {
-        "name": "Hinged walnut collector cabinet with brass photo recess",
-        "asset_id": "collector-triptych",
-        "source": "NEW",
+        "asset_id": "crescent-header",
         "position_m": [
           0,
-          2.47,
-          -3.46
+          2.39,
+          -3.08
         ],
         "yaw_deg": 0,
         "envelope_whd_m": [
-          3.95,
-          2.3,
-          0.7
-        ],
-        "count": 1,
-        "triangles_per_instance": {
-          "Low": 860,
-          "Balanced": 2400,
-          "Detailed": 6000
-        },
-        "tier_treatment": {
-          "Low": "author geometry",
-          "Balanced": "author geometry",
-          "Detailed": "author geometry"
-        },
-        "assembly_note": "Fasten the upper triptych to the structural back wall on concealed spacers. The four original M056 centres span x ±3.63 m and reach x ±4.83 m at the outer trim; those existing extremities intersect the wall lining. Preserve the four functional bounds and trim the new visual returns to the wall face."
+          8.95,
+          1.67,
+          0.25
+        ]
       },
       "props": [
         {
@@ -548,7 +534,7 @@
         }
       ],
       "floor": {
-        "treatment": "A navy woven runner widens at the four shelf pickup points; twin brass threads lead back to the door.",
+        "treatment": "Light limestone frames a pale woven field with two narrow brass threads.",
         "position_m": [
           0,
           0.0245,
@@ -752,7 +738,7 @@
           0.55,
           2.55
         ],
-        "expected_signature": "folding collector-cabinet leaves",
+        "expected_signature": "scalloped cabinet crown with crescent",
         "viewport_css_px": [
           393,
           612

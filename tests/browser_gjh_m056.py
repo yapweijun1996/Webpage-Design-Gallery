@@ -9,10 +9,10 @@ try:
  with sync_playwright() as p:
   b=p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle=swiftshader','--enable-unsafe-swiftshader']);rows=[]
   for w,h in ([(390,844)] if args.url else [(390,844),(1440,900)]):
-   page=b.new_page(viewport={'width':w,'height':h},has_touch=w<650);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');a=state(page)['productAssets'];assert a['shelf']['model']=='GJH-M056' and a['shelf']['status']=='loaded' and a['shelf']['primitives']==29 and a['shelf']['instances']==4;assert a['totalInstances']==204
+   page=b.new_page(viewport={'width':w,'height':h},has_touch=w<650);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));ready(page,args.url or f'http://127.0.0.1:{s.server_port}/demos/corporate/gjh/v11/');page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"');a=state(page)['productAssets'];assert a['shelf']['model']=='GJH-M056' and a['shelf']['status']=='loaded' and a['shelf']['primitives']==29 and a['shelf']['instances']==4;assert a['totalInstances']==132
    page.evaluate('__mall.teleport("newmoon");__mall.setInput({forward:1});__mall.step(3200);__mall.setInput({forward:0});__mall.step(20)');page.screenshot(path=str(out/f'after-wide-{w}.png'));draw=state(page)['drawCalls'];assert draw<150
    for sku,record in a['cans'].items():
-    x=record['placements'][record['reserveIndex']]['x'];assert -15<x-1.2 and x+1.2<-5;assert record['actualBoundsScale'][0]<1.001;assert len(record['placements'])==51
+    x=record['placements'][record['reserveIndex']]['x'];assert -15<x-1.2 and x+1.2<-5;assert record['actualBoundsScale'][0]<1.001;assert len(record['placements'])==33
     assert sorted(set(round(v['y'],3) for v in record['placements']))==[.451,.991,1.531]
     # Move parallel in the clear aisle, then approach the matching shelf.
     move(page,x,-7.5);assert state(page)['nearby']==f'new-moon-{sku}-front';page.get_by_role('button',name='Pick up product',exact=True).click();page.evaluate('__mall.setInput({forward:0});__mall.step(1000)');held=state(page)['character']['physicalProduct'];assert held['phase']=='held',held

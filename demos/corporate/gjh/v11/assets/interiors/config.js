@@ -1,9 +1,10 @@
 import {layouts} from './layout.js';
 import {floorFinishOffset, floorInlayOffset} from '../surface-decals.js';
+import {newMoonAnchorBytes} from './detail-files.js';
 
 // Runtime download sizes are verified against the provenance manifest in Node.
 const fixtureBytes = {
-  S01: {low:41552, balanced:97576, detailed:133608},
+  S01: newMoonAnchorBytes,
   S02: {low:38936, balanced:56428},
   S03: {low:57460, balanced:150476},
   S04: {low:26892, balanced:75300, detailed:103268},

@@ -472,6 +472,51 @@ function extrudeArtworkGutter(context, { x, y, w, h }, padding) {
     context.drawImage(sheet, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
+// demos/corporate/gjh/v11/assets/new-moon-exhibit.js
+var newMoonExhibit = {
+  "newmoon-heritage": {
+    brand: "New Moon",
+    tagline: "It began with abalone",
+    kind: "Brand history",
+    image: "assets/new-moon-nz-425g-front.jpg",
+    alt: "New Moon New Zealand Abalone 425g front packshot",
+    story: "Goh Joo Hin introduced New Moon as its first house brand in 1959, starting with abalone. The range later expanded to bird’s nest, chicken essence, rice, sauces and other groceries.",
+    action: "brand-story"
+  },
+  "newmoon-tasting": {
+    brand: "New Moon",
+    tagline: "Three ways to serve abalone",
+    kind: "Serving ideas",
+    image: "assets/new-moon-brand-cover.jpg",
+    alt: "New Moon serving presentation",
+    story: "New Moon shows New Zealand abalone served in steamboat, in soup and as part of a chilled dish.",
+    action: "brand-story"
+  }
+};
+function heritagePanel(photo) {
+  const panel = document.createElement("canvas");
+  panel.width = 512;
+  panel.height = 512;
+  const ink = panel.getContext("2d");
+  ink.scale(2 / 3, 2 / 3);
+  ink.fillStyle = "#fff7e6";
+  ink.fillRect(0, 0, 768, 768);
+  ink.fillStyle = "#233d79";
+  ink.textAlign = "center";
+  ink.font = "600 52px Georgia, serif";
+  ink.fillText("1959", 384, 105);
+  ink.font = "700 63px system-ui, sans-serif";
+  ink.fillText("IT BEGAN WITH", 384, 192);
+  ink.fillText("ABALONE", 384, 260);
+  ink.drawImage(photo, 192, 295, 384, 384);
+  ink.fillStyle = "#233d79";
+  ink.fillRect(0, 688, 768, 80);
+  ink.fillStyle = "#fff7e6";
+  ink.font = "600 28px system-ui, sans-serif";
+  ink.fillText("ABOUT NEW MOON", 384, 738);
+  return panel;
+}
+
 // demos/corporate/gjh/v11/assets/surface-decals.js
 var decalClearance = 0.003;
 var floorFinishOffset = 0.006;
@@ -1088,18 +1133,18 @@ totalEmissiveRadiance *= vColor;`);
 var layouts = {
   S01: {
     brand: "New Moon",
-    style: "Collector’s pantry",
-    concept: "A walnut collector’s cabinet opens above four working seafood shelves like the leaves of a folding screen.",
-    signature_family: "folding collector-cabinet leaves",
+    style: "New Moon abalone gallery",
+    concept: "A cream scalloped header and yellow crescent lead to four honey oak display bays, with optional heritage and serving stories beside the aisle.",
+    signature_family: "scalloped cabinet crown with crescent",
     frame: { world_origin_m: [-10, 0, -6], yaw_world_deg: 0, lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, threshold_local_xz_m: [0, 6], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [] },
-    palette: [{ material: "smoked walnut", hex: "#513527" }, { material: "brushed brass", hex: "#B59A68" }, { material: "pearl linen", hex: "#F2EFE8" }, { material: "oxblood lacquer", hex: "#833E36" }],
+    palette: [{ material: "honey oak", hex: "#D6AA73" }, { material: "brushed brass", hex: "#B59A68" }, { material: "warm limestone", hex: "#F2E9DA" }, { material: "New Moon blue", hex: "#233D79" }],
     accent_kelvin: 2850,
     lighting: [0, 4.75, -2.81],
-    anchor: { asset_id: "collector-triptych", position_m: [0, 2.47, -3.46], yaw_deg: 0, envelope_whd_m: [3.95, 2.3, 0.7] },
-    floor: { treatment: "A navy woven runner widens at the four shelf pickup points; twin brass threads lead back to the door.", position_m: [0, 0.0245, -0.1], yaw_deg: 0, field_width_depth_m: [8.05, 6.35], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "runner", colours: [2, "#354154", 1] },
+    anchor: { asset_id: "crescent-header", position_m: [0, 2.39, -3.08], yaw_deg: 0, envelope_whd_m: [8.95, 1.67, 0.25] },
+    floor: { treatment: "Light limestone frames a pale woven field with two narrow brass threads.", position_m: [0, 0.0245, -0.1], yaw_deg: 0, field_width_depth_m: [8.05, 6.35], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "runner", colours: [2, "#D7C8AC", 1] },
     routes: [[[0, 2.55], [0, -2.635]], [[-3.42, -2.635], [3.84, -2.635]]],
     pickups: [[-3.42, -2.635], [-1, -2.635], [1.42, -2.635], [3.84, -2.635]],
-    capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "folding collector-cabinet leaves", viewport_css_px: [393, 612], planned_evidence_stem: "S01-entrance" },
+    capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "scalloped cabinet crown with crescent", viewport_css_px: [393, 612], planned_evidence_stem: "S01-entrance" },
     props: [
       { name: "Four active collection cabinets", socket: "shelves", position_m: [-3.63, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.4, 2.4, 0.55], count: 4, instance_positions_m: [[-3.63, 0, -3.25], [-1.21, 0, -3.25], [1.21, 0, -3.25], [3.63, 0, -3.25]], kind: "retain" },
       { name: "Tea kettle at stone island", socket: "kettle", position_m: [2.8, 1.185, 1.45], yaw_deg: -26, envelope_whd_m: [0.41, 0.36, 0.28], count: 1, kind: "retain" },
@@ -1513,9 +1558,100 @@ var layouts = {
   }
 };
 
+// demos/corporate/gjh/v11/assets/interiors/detail-files.js
+var roomAtlas = { file: "showroom-atlas.png", bytes: 47721 };
+var roomDetails = {
+  S01: {
+    file: "s01-new-moon-details.glb",
+    bytes: 5376,
+    roomDetail: true
+  },
+  S02: {
+    file: "s02-mili-details.glb",
+    bytes: 43312,
+    roomDetail: true
+  },
+  S03: {
+    file: "s03-gogo-details.glb",
+    bytes: 75264,
+    roomDetail: true
+  },
+  S04: {
+    file: "s04-borsch-details.glb",
+    bytes: 24124,
+    roomDetail: true
+  },
+  S05: {
+    file: "s05-herbal-details.glb",
+    bytes: 67544,
+    roomDetail: true
+  },
+  S06: {
+    file: "s06-wheel-details.glb",
+    bytes: 50900,
+    roomDetail: true
+  },
+  S07: {
+    file: "s07-dragon-details.glb",
+    bytes: 79092,
+    roomDetail: true
+  },
+  S08: {
+    file: "s08-skippy-details.glb",
+    bytes: 46692,
+    roomDetail: true
+  },
+  S09: {
+    file: "s09-spam-details.glb",
+    bytes: 16156,
+    roomDetail: true
+  },
+  S10: {
+    file: "s10-coast-details.glb",
+    bytes: 71920,
+    roomDetail: true
+  },
+  S11: {
+    file: "s11-deli-details.glb",
+    bytes: 75704,
+    roomDetail: true
+  },
+  S12: {
+    file: "s12-herbarium-details.glb",
+    bytes: 33300,
+    roomDetail: true
+  },
+  S13: {
+    file: "s13-listening-details.glb",
+    bytes: 23540,
+    roomDetail: true
+  },
+  S14: {
+    file: "s14-living-details.glb",
+    bytes: 12184,
+    roomDetail: true
+  },
+  S15: {
+    file: "s15-recital-details.glb",
+    bytes: 37608,
+    roomDetail: true
+  },
+  S16: {
+    file: "s16-power-details.glb",
+    bytes: 22604,
+    roomDetail: true
+  },
+  S17: {
+    file: "s17-telephone-details.glb",
+    bytes: 36748,
+    roomDetail: true
+  }
+};
+var newMoonAnchorBytes = { low: 50244, balanced: 72472, detailed: 106456 };
+
 // demos/corporate/gjh/v11/assets/interiors/config.js
 var fixtureBytes = {
-  S01: { low: 41552, balanced: 97576, detailed: 133608 },
+  S01: newMoonAnchorBytes,
   S02: { low: 38936, balanced: 56428 },
   S03: { low: 57460, balanced: 150476 },
   S04: { low: 26892, balanced: 75300, detailed: 103268 },
@@ -7011,96 +7147,6 @@ function* prepareInteriorDecoration(T, store2, materials2, detail = 0) {
   return group;
 }
 
-// demos/corporate/gjh/v11/assets/interiors/detail-files.js
-var roomAtlas = { file: "showroom-atlas.png", bytes: 47721 };
-var roomDetails = {
-  S01: {
-    file: "s01-new-moon-details.glb",
-    bytes: 40440,
-    roomDetail: true
-  },
-  S02: {
-    file: "s02-mili-details.glb",
-    bytes: 43312,
-    roomDetail: true
-  },
-  S03: {
-    file: "s03-gogo-details.glb",
-    bytes: 75264,
-    roomDetail: true
-  },
-  S04: {
-    file: "s04-borsch-details.glb",
-    bytes: 24124,
-    roomDetail: true
-  },
-  S05: {
-    file: "s05-herbal-details.glb",
-    bytes: 67544,
-    roomDetail: true
-  },
-  S06: {
-    file: "s06-wheel-details.glb",
-    bytes: 50900,
-    roomDetail: true
-  },
-  S07: {
-    file: "s07-dragon-details.glb",
-    bytes: 79092,
-    roomDetail: true
-  },
-  S08: {
-    file: "s08-skippy-details.glb",
-    bytes: 46692,
-    roomDetail: true
-  },
-  S09: {
-    file: "s09-spam-details.glb",
-    bytes: 16156,
-    roomDetail: true
-  },
-  S10: {
-    file: "s10-coast-details.glb",
-    bytes: 71920,
-    roomDetail: true
-  },
-  S11: {
-    file: "s11-deli-details.glb",
-    bytes: 75704,
-    roomDetail: true
-  },
-  S12: {
-    file: "s12-herbarium-details.glb",
-    bytes: 33300,
-    roomDetail: true
-  },
-  S13: {
-    file: "s13-listening-details.glb",
-    bytes: 23540,
-    roomDetail: true
-  },
-  S14: {
-    file: "s14-living-details.glb",
-    bytes: 12184,
-    roomDetail: true
-  },
-  S15: {
-    file: "s15-recital-details.glb",
-    bytes: 37608,
-    roomDetail: true
-  },
-  S16: {
-    file: "s16-power-details.glb",
-    bytes: 22604,
-    roomDetail: true
-  },
-  S17: {
-    file: "s17-telephone-details.glb",
-    bytes: 36748,
-    roomDetail: true
-  }
-};
-
 // demos/corporate/gjh/v11/assets/interiors/models.js
 function positionRoomInlays(geometry, store2) {
   const originalY = store2.frame.floor_surface_y_m < 0.05 ? 0.032 : 0.091;
@@ -7405,16 +7451,10 @@ function createInteriorKit(T, scene, {
     if (store2.id !== "S01" || !packshot)
       return base;
     const photo = decalMaterial(new T.MeshBasicMaterial({ map: packshot, toneMapped: false }));
-    const panel = (width, x2, y2, z2, yaw = 0) => new T.PlaneGeometry(width, width).rotateY(yaw).translate(x2 + decalClearance * Math.sin(yaw), y2, z2 + decalClearance * Math.cos(yaw));
-    const [x, y, z] = store2.anchor.position_m;
+    const panel = (width, x, y, z, yaw = 0) => new T.PlaneGeometry(width, width).rotateY(yaw).translate(x + decalClearance * Math.sin(yaw), y, z + decalClearance * Math.cos(yaw));
     const stand = store2.props.find((prop) => prop.kind === "photo");
     const [sx, sy, sz] = stand.position_m, a = radians(stand.yaw_deg);
-    const photos = [
-      panel(1.51, x, y + 1.1, decalHeight(z)),
-      panel(0.69, sx + 0.05 * Math.sin(a), sy + stand.envelope_whd_m[1] - 0.4, sz + 0.05 * Math.cos(a), a)
-    ];
-    base.add(new T.Mesh(mergeStaticGeometries(T, photos), photo));
-    photos.forEach((geometry) => geometry.dispose());
+    base.add(new T.Mesh(panel(0.69, sx + 0.05 * Math.sin(a), sy + stand.envelope_whd_m[1] - 0.4, sz + 0.05 * Math.cos(a), a), photo));
     return base;
   }
   const shops = Object.values(interiorStores).map((store2) => {
@@ -8567,7 +8607,8 @@ metalnessFactor=vSurface.y;`);
     interactables.push({ id: "mall-directory", ...directory2, radius: 2.8 });
     for (const store2 of spatial.stores) {
       const zone = store2.id, x = storeCenterX(store2);
-      const wall = expanded ? zone === "newmoon" ? "wood" : "cream" : zone === "mili" ? "cream" : "green";
+      const lightNewMoon = expanded && zone === "newmoon";
+      const wall = expanded ? lightNewMoon ? "ivory" : "cream" : zone === "mili" ? "cream" : "green";
       if (expanded) {
         const floor = `${zone}Floor`;
         finishForRole.set(floor, "shopFloor");
@@ -8579,9 +8620,9 @@ metalnessFactor=vSurface.y;`);
           box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
       const backdrop = `${zone}Backdrop`;
       let rearWall = wall;
-      if (expanded && zone === "newmoon") {
-        materials2.newmoonLacquer = mat(interiorStores.S01.palette[3].hex);
-        rearWall = "newmoonLacquer";
+      if (lightNewMoon) {
+        materials2.newMoonOak = mat(interiorStores.S01.palette[0].hex);
+        materials2.newMoonBlue = mat(interiorStores.S01.palette[3].hex);
       } else if (expanded) {
         materials2[backdrop] = shopBackdrop(zone);
         rearWall = backdrop;
@@ -8633,7 +8674,7 @@ metalnessFactor=vSurface.y;`);
         for (const side of [-1, 1]) {
           const bx = x + 3.57 * side, bz = -0.66;
           if (zone === "newmoon" || zone === "mili" && side < 0) {
-            const casing = zone === "newmoon" ? "wood" : "oak";
+            const casing = lightNewMoon ? "newMoonOak" : "oak";
             box(casing, bx, 1.98, bz - 0.32, 1.96, 3.45, 0.09);
             for (const edge of [-1, 1])
               box(casing, bx + edge * 0.96, 1.98, bz, 0.075, 3.45, 0.68);
@@ -8676,9 +8717,11 @@ metalnessFactor=vSurface.y;`);
         box("brass", x + side * 4.63, 0.245, -5.25, 0.025, 0.025, 10.15);
         box("oak", x + side * 4.65, 5.37, -5.25, 0.09, 0.16, 10.15);
         box("brass", x + side * 4.59, 5.26, -5.25, 0.025, 0.025, 10.15);
-        box("oak", x + side * 4.64, 1.08, -5.25, 0.075, 0.095, 10.15);
-        box("brass", x + side * 4.59, 1.15, -5.25, 0.025, 0.018, 10.15);
-        if (side > 0 || zone === "mili")
+        if (!lightNewMoon) {
+          box("oak", x + side * 4.64, 1.08, -5.25, 0.075, 0.095, 10.15);
+          box("brass", x + side * 4.59, 1.15, -5.25, 0.025, 0.018, 10.15);
+        }
+        if (!lightNewMoon && (side > 0 || zone === "mili"))
           for (const z of [-2.2, -5.2, -8.2]) {
             for (const edge of [-1, 1]) {
               box("oak", x + side * 4.635, 2.85, z + edge * 1.13, 0.045, 2.55, 0.045);
@@ -8770,9 +8813,21 @@ metalnessFactor=vSurface.y;`);
       box("brass", x, 0.22, -10.32, 9.3, 0.045, 0.04);
       if (zone === "newmoon") {
         lightPool(x, 0.054, -8.6, 7.5, 2.1);
-        const cover = art("new-moon-brand-cover.jpg", x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
-        box("brass", x - 4.665, 2.8, -5.8, 0.035, cover.scale.y + 0.14, 3.74);
-        box("oak", x - 4.67, 2.8, -5.8, 0.04, cover.scale.y + 0.28, 3.88);
+        if (lightNewMoon) {
+          const image2 = textures.get("new-moon-nz-425g-front.jpg").image;
+          textures.set("new-moon-heritage-panel", setupArtworkTexture(T, new T.CanvasTexture(heritagePanel(image2)), artworkTier()));
+          box("newMoonOak", x - 4.67, 2.1, -4.6, 0.11, 3.45, 3.45);
+          art("new-moon-heritage-panel", x - 4.612, 2.1, -4.6, 3.24, Math.PI / 2);
+          box("newMoonBlue", x + 4.65, 2.55, -5.15, 0.11, 4.5, 4.08);
+          art("new-moon-brand-cover.jpg", x + 4.59, 2.48, -5.15, 2.48, -Math.PI / 2);
+          const serving = sign("THREE WAYS TO SERVE ABALONE", x + 4.58, 3.86, -5.15, 2.8, 0.19, true, 54);
+          serving.rotation.y = -Math.PI / 2;
+          interactables.push({ id: "newmoon-heritage", x: x - 3.65, z: -4.6, radius: 1.4 }, { id: "newmoon-tasting", x: x + 2.5, z: -6.14, radius: 1.34 });
+        } else {
+          const cover = art("new-moon-brand-cover.jpg", x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
+          box("brass", x - 4.665, 2.8, -5.8, 0.035, cover.scale.y + 0.14, 3.74);
+          box("oak", x - 4.67, 2.8, -5.8, 0.04, cover.scale.y + 0.28, 3.88);
+        }
         let sampleCan = null;
         if (expanded) {
           for (const [material, y, height, radius2] of [["brass", 0.085, 0.17, 0.76], ["shellFloor", 0.63, 0.96, 0.78], ["ivory", 1.14, 0.09, 0.8]]) {
@@ -9238,7 +9293,7 @@ metalnessFactor=vSurface.y;`);
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let upperWarmStatus = null, landingLights;
     let brandWallPromise = null;
-    return { signage, interiors: interiorKit, getPreloadedModels() {
+    return { signage, interiors: interiorKit, newMoonExhibit: expanded ? newMoonExhibit : {}, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;

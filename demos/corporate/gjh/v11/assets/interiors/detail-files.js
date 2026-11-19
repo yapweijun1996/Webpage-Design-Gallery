@@ -3,7 +3,7 @@ export const roomAtlas = {"file":"showroom-atlas.png","bytes":47721};
 export const roomDetails = {
   "S01": {
     "file": "s01-new-moon-details.glb",
-    "bytes": 40440,
+    "bytes": 5376,
     "roomDetail": true
   },
   "S02": {
@@ -87,3 +87,4 @@ export const roomDetails = {
     "roomDetail": true
   }
 };
+export const newMoonAnchorBytes = {"low":50244,"balanced":72472,"detailed":106456};

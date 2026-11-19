@@ -19,6 +19,12 @@ function emit(name, text) {
 const anchors = path.join(gallery,'exports/gjh-v11-interiors');
 const anchorManifest = fs.readFileSync(path.join(anchors,'manifest.json'),'utf8').trimEnd();
 const manifest = JSON.parse(anchorManifest);
+const planBytes = fs.readFileSync(new URL('../../docs/gjh-v11-interior-program.json', import.meta.url));
+const newMoon = JSON.parse(planBytes).stores.find(store => store.id === 'S01');
+const originalAnchors = manifest.assets;
+const runtimeAnchors = originalAnchors.map(asset => values['models-only'] || asset.store !== 'S01' ? asset : {
+  ...asset, file:`s01-${newMoon.anchor.asset_id}-${asset.tier.toLowerCase()}.glb`, model:newMoon.anchor.asset_id
+});
 const brands = path.resolve(values.brands ?? path.join(output,'../brands'));
 const sources = JSON.parse(fs.readFileSync(path.join(brands,'logo-sources.json')));
 const marks = Object.fromEntries(Object.entries(sources).map(([slot,record])=>[slot,{
@@ -37,7 +43,7 @@ const source = (slug, file) => {
 };
 const lamp = source('chinese-lantern','chinese-lantern.glb');
 const plate = source('mamak-stainless-steel-plate','mamak-stainless-steel-plate.glb');
-for (const file of [...manifest.assets.map(a=>a.file),...names]) {
+for (const file of [...runtimeAnchors.map(a=>a.file),...names]) {
   const bytes = values['models-only'] && !names.includes(file) ? fs.readFileSync(path.join(anchors,file)) : read(file);
   const result = await validator.validateBytes(bytes,{uri:file,maxIssues:0,externalResourceFunction:async uri=>{
     assert.equal(uri,atlas);
@@ -45,11 +51,37 @@ for (const file of [...manifest.assets.map(a=>a.file),...names]) {
   }});
   const {numErrors:errors,numWarnings:warnings,messages} = result.issues;
   assert.equal(errors+warnings,0,file+' '+JSON.stringify(messages));
+  const gltf = JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
   if (!names.includes(file)) {
-    assert.equal(sha(bytes),manifest.assets.find(a=>a.file===file).sha256,file);
+    const asset = runtimeAnchors.find(a=>a.file===file);
+    if (asset.store !== 'S01' || values['models-only']) {
+      assert.equal(sha(bytes),asset.sha256,file);
+    } else {
+      const primitives = gltf.meshes.flatMap(mesh => mesh.primitives);
+      const positions = primitives.map(primitive => gltf.accessors[primitive.attributes.POSITION]);
+      assert(!gltf.images?.length && gltf.nodes.every(node => !node.matrix && !node.translation && !node.rotation && !node.scale));
+      const bounds_m = {
+        min:[0,1,2].map(axis => Math.min(...positions.map(value => value.min[axis]))),
+        max:[0,1,2].map(axis => Math.max(...positions.map(value => value.max[axis])))
+      };
+      const triangles = primitives.reduce((sum,primitive) => sum + gltf.accessors[primitive.indices].count/3,0);
+      const root = 'models/gjh-new-moon-header';
+      Object.assign(asset,{
+        triangles, bytes:bytes.length, vertices:positions.reduce((sum,position) => sum+position.count,0),
+        materials:gltf.materials.map(material=>material.name), primitives:primitives.length,
+        groups:gltf.nodes.map(node=>node.name), bounds_m, textures:[], sha256:sha(bytes),
+        triangle_cap:asset.tier==='Low'?960:asset.triangle_cap,
+        provenance:{kind:'NEW',author:'Yap Wei Jun project / agent-assisted procedural modeling', finish:'solid-pbr',
+          credit:[{credit:'Original scalloped fascia, oak bead, underside light and crescent geometry.'}],
+          generator:`${root}/generate.py`, editable_source:`${root}/s01-crescent-header.blend`,
+          licence_reference:`${root}/README.md`, licence_text:asset.licence},
+        validator:{version:result.validatorVersion,errors,warnings}
+      });
+      assert(triangles<=asset.triangle_cap,file);
+      assert(bounds_m.max.every((max,axis)=>max-bounds_m.min[axis]<=newMoon.anchor.envelope_whd_m[axis]),file);
+    }
     continue;
   }
-  const gltf = JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
   const store = file.slice(0,3).toUpperCase(), slot = Number(store.slice(1));
   assert.equal(slot,details.length+1);
   assert.deepEqual(gltf.images.map(img=>img.uri),[atlas]);
@@ -67,7 +99,7 @@ for (const file of [...manifest.assets.map(a=>a.file),...names]) {
   assert(draws<=4,file);
   details.push({store,file,bytes:bytes.length,sha256:sha(bytes),triangles,draws,instances,
     motion:gltf.materials.map(m=>m.name).filter(name=>['Pulse','Scroll'].includes(name)),
-    sources:slot===2?[plate]:[1,5,7].includes(slot)?[lamp]:[],
+    sources:slot===2?[plate]:[5,7].includes(slot)?[lamp]:[],
     validator:{version:result.validatorVersion,errors,warnings}});
 }
 manifest.round2 = {version:1,coordinates:'Slot-local metres, +Y up, +Z toward entrance. Shared by all tiers.',
@@ -77,13 +109,20 @@ manifest.round2 = {version:1,coordinates:'Slot-local metres, +Y up, +Z toward en
 if (values['models-only']) {
   emit('manifest.json',JSON.stringify(manifest.round2,null,2)+'\n');
 } else {
-  // Carry the original publisher's signed anchor records and numeric formatting.
-  assert(!JSON.parse(anchorManifest).round2,'Expected the phase-one anchor manifest');
-  const extra = JSON.stringify({round2:manifest.round2},null,2).slice(1);
-  emit('manifest.json',anchorManifest.slice(0,-1).trimEnd()+','+extra+'\n');
+  const previousLow = originalAnchors.find(asset=>asset.store==='S01' && asset.tier==='Low');
+  const currentLow = runtimeAnchors.find(asset=>asset.store==='S01' && asset.tier==='Low');
+  manifest.anchor_source_plan_sha256 = manifest.plan_sha256;
+  manifest.plan_sha256 = sha(planBytes);
+  manifest.totals.low_anchor_triangles += currentLow.triangles-previousLow.triangles;
+  manifest.totals.low_anchor_bytes += currentLow.bytes-previousLow.bytes;
+  manifest.totals.projected_full_low_triangles += currentLow.triangles-previousLow.triangles;
+  manifest.assets = runtimeAnchors;
+  emit('manifest.json',JSON.stringify(manifest,null,2)+'\n');
 }
 const atlasRecord = JSON.stringify({file:atlas,bytes:png.length});
 const files=Object.fromEntries(details.map(({store,file,bytes})=>[store,{file,bytes,roomDetail:true}]));
 if (!values['models-only']) emit('detail-files.js','// Generated by scripts/gjh_interiors/package_rooms.mjs.\n'+
-  'export const roomAtlas = '+atlasRecord+';\nexport const roomDetails = '+JSON.stringify(files,null,2)+';\n');
+  'export const roomAtlas = '+atlasRecord+';\nexport const roomDetails = '+JSON.stringify(files,null,2)+';\n'+
+  'export const newMoonAnchorBytes = '+JSON.stringify(Object.fromEntries(runtimeAnchors
+    .filter(asset=>asset.store==='S01').map(asset=>[asset.tier.toLowerCase(),asset.bytes])))+';\n');
 console.log(`Khronos validated ${manifest.assets.length} anchors and ${details.length} room models.`);

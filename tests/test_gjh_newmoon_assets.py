@@ -29,7 +29,8 @@ class NewMoonIntegrationTests(unittest.TestCase):
         source = (ASSETS / "products.js").read_text()
         self.assertIn("const shelfTops = Object.freeze(interiorPilot ? [.6825, 1.1925, 1.7025] : [.451, .991, 1.531])", source)
         self.assertIn("totalInstances: cans.length * shelfTops.length * facingCount", source)
-        self.assertIn("const facingCount = interiorPilot ? 11 : 17", source)
+        self.assertIn("const facingCount = interiorPilot || lightNewMoon ? 11 : 17", source)
+        self.assertIn("const spacing = lightNewMoon ? .16 : .10", source)
         self.assertIn("reserveIndex", source)
         self.assertIn("crypto.subtle.digest('SHA-256'", source)
         for token in ("hash-mismatch", "unsupported-external-resource", "invalid-dimensions", "timeout"):

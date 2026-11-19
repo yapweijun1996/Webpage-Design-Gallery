@@ -83,8 +83,8 @@ def run():
         page.locator('#view-toggle').click();page.locator('.product-card [data-inspect]').first.click();page.locator('#product-add').click();page.keyboard.press('Escape');page.locator('#view-toggle').click();drive(page)
         page.evaluate('()=>__mall.teleport("atrium")');drive(page);page.locator('#bag-open').click();page.locator('#cart-toggle').click();assert state(page)['pushing'];row['cart']=route_through_stores(page)
         page.locator('#bag-open').click();page.locator('#cart-toggle').click();page.locator('#bag-close').click();drive(page)
-        # All native stock and reserve indices remain intact.
-        for item in state(page)['productAssets']['cans'].values():assert item['frontFacings']==(11 if profile=='pilot' else 17) and item['reserveIndex']==(16 if profile=='pilot' else 25)
+        # Both expanded shelf profiles retain the middle can on the middle shelf.
+        for item in state(page)['productAssets']['cans'].values():assert item['frontFacings']==11 and item['reserveIndex']==16
         page.evaluate('()=>__mall.teleport("atrium")');drive(page);before=state(page)['rendererResources']
         for _ in range(4):page.locator('#view-toggle').click();page.locator('#view-toggle').click();drive(page)
         assert state(page)['rendererResources']==before
