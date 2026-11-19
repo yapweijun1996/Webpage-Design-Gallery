@@ -29,8 +29,13 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   const solver = createContactSolver(T, avatar);
   const seatContact = createSeatContact(T, visual, avatar);
   const wrist = avatar.getObjectByName('RightHand'), skin = avatar.getObjectByName('V2_body_Warm_peach_skin');
-  const transfer = createProductTransfer(T, avatar, wrist, visual, new T.Vector3(0, -.03, .045),
-    createFirstPersonHand(T, visual, skin, wrist));
+  const polo = avatar.getObjectByName('V2_outfit_GJH_emerald_polo');
+  const hoodie = avatar.getObjectByName('V2_outfit_alt_Hoodie_slate');
+  const eyeHand = createFirstPersonHand(T, visual, model => {
+    model.getObjectByName('ChibiGrip').material.color.copy(skin.material.color);
+    model.getObjectByName('SleeveCuff').material.color.copy((hoodie.visible ? hoodie : polo).material.color);
+  });
+  const transfer = createProductTransfer(T, avatar, wrist, visual, new T.Vector3(0, -.03, .045), eyeHand);
   const contacts={hands:[],feet:[]};
   avatar.updateWorldMatrix(true,true);
   const footRest=Object.fromEntries(['Left','Right'].map(side=>[side,avatar.getObjectByName(side+'Foot').getWorldQuaternion(new T.Quaternion())]));
@@ -50,8 +55,7 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   const resolveLocomotion = createLocomotionContinuity();
   let animation = 'idle', seatWeight = 0, pushing = false, count = 0;
   function updateProduct(dt) {
-    if (transfer.firstPerson) targetPoint.set(-.10, 1.36, -.45);
-    else targetPoint.set(-.30, 1.08, -.32);
+    targetPoint.set(-.30, 1.08, -.32);
     visual.localToWorld(targetPoint);
     transfer.reachTarget(targetPoint);
     solver.solve(['RightShoulder','RightElbow','RightHand'], targetPoint);
@@ -102,11 +106,10 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   }
   update('idle', 0);
   return {
-    visual, npcSource:gltf, update, updateLOD:camera=>lod.update(camera),
+    visual, npcSource:gltf, update, frameCarry:eyeHand.frame, updateLOD:camera=>lod.update(camera),
     setCameraOccluded(value, firstPerson) {
       avatar.visible = !value;
       transfer.setFirstPerson(firstPerson);
-      if (transfer.phase === 'held') updateProduct(0);
     },
     setBagCount(value) { count = Math.max(0, Number(value) || 0); cart.setCount(count); },
     setCart(value) { pushing = Boolean(value) && cart.set(value); if (!value) cart.set(false); return !value || pushing; },
@@ -114,7 +117,15 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
     setSeated(value) { seatWeight = value ? 1 : 0; },
     startCollection() { return false; }, cancelCollection() {transfer.cancel();},
     pickProduct:transfer.pick, returnProduct:transfer.putBack, bagProduct:transfer.putInBag, resetProduct:transfer.reset,
-    customize: customization.apply,
+    customize(changes) {
+      const style = customization.apply(changes);
+      eyeHand.refreshStyle();
+      return style;
+    },
+    dispose() {
+      transfer.reset();
+      eyeHand.dispose();
+    },
     get animation() { return animation === 'push' ? 'walk' : animation; },
     get seatWeight() { return seatWeight; },
     get productPhase() { return transfer.phase; },

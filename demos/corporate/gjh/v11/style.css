@@ -1035,6 +1035,12 @@ body.is-3d :is(.site-header,.mall-overlay) :is(.hud-control,#camera-tools button
     }
   }
 }
+/* Leave the lower-right grip visible between the held-item action and the touch controls. */
+@media(max-width:650px) and (orientation:portrait){
+  body.is-3d #scene[data-camera-view="first-person"] + .mall-overlay #hud-context-stack:has([data-context="held"]){
+    top:var(--hud-context-top);bottom:auto;flex-direction:column;
+  }
+}
 @media(pointer:coarse),(max-width:650px),(max-height:560px) and (orientation:landscape){
   body.is-3d .mall-overlay #guide-card{
     position:static;width:330px;max-width:calc(100% - var(--space-2));min-height:0;overflow:auto;

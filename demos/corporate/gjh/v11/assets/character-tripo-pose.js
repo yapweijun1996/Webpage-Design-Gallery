@@ -108,13 +108,8 @@ export function createTripoPoses(T, mesh, visual, authoredSeat) {
   return {
     rightHand: hand,
     middleKnuckle: knuckle,
-    gripProduct(target, pole, palm, eyeView, waveWeight) {
+    gripProduct(target, pole, palm, waveWeight) {
       if (waveWeight === 1) return;
-      if (eyeView && carryJoints.includes(clavicle)) {
-        // Lift the shoulder with the arm to keep the grip within elbow reach.
-        aim(clavicle, upper, target);
-        clavicle.quaternion.slerp(carryBase.at(-1), .35);
-      }
       bendLimb(upper, forearm, hand, target, pole);
       // Local +Y runs along the fingers. Roll the palm (-X) upward under the can.
       direction.copy(palm).sub(hand.getWorldPosition(origin)).normalize();

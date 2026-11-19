@@ -41,14 +41,14 @@ export function isShelfInReach({x,y,z}, approach) {
 
 /** One cosmetic shelf facing is reserved during each physical transfer. */
 export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('RightHand'), facing = avatar.parent,
-  grip = new T.Vector3(), showHand = () => {}) {
+  grip = new T.Vector3(), eyeHand) {
   const bagDuration = .45;
   const point = new T.Vector3(), offset = new T.Vector3(), shelfPoint = new T.Vector3();
   const rotation = new T.Quaternion(), shelfRotation = new T.Quaternion(), carryRotation = new T.Quaternion();
   const bagScale = new T.Vector3();
   let item = null, phase = 'empty', elapsed = 0, centerHeight = 0, firstPerson = false;
 
-  function presentHand() { showHand(firstPerson && (phase === 'held' || phase === 'bag')); }
+  function presentHand() { eyeHand?.show(firstPerson && (phase === 'held' || phase === 'bag')); }
   function worldCarry() {
     // grip marks the can centre in bone space. The product GLB pivots at its base.
     hand.localToWorld(point.copy(grip));
@@ -56,6 +56,12 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
     return point;
   }
   function hold() {
+    if (firstPerson && eyeHand) {
+      if (item.prop.parent !== eyeHand.grip) eyeHand.grip.add(item.prop);
+      item.prop.position.set(0, -centerHeight, 0);
+      item.prop.quaternion.identity();
+      return;
+    }
     if (item.prop.parent !== facing) facing.attach(item.prop);
     item.prop.position.copy(facing.worldToLocal(worldCarry()));
     item.prop.quaternion.identity(); // Facing turns only about world Y.
@@ -68,10 +74,14 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
     presentHand();
   }
   return {
-    get firstPerson() { return firstPerson; },
-    setFirstPerson(value) { firstPerson = value; presentHand(); },
+    setFirstPerson(value) {
+      firstPerson = value;
+      presentHand();
+      if (phase === 'held' || phase === 'bag') hold();
+    },
     pick(token) {
       if (item || !token) return false;
+      eyeHand?.prepare();
       item = token;
       item.owner = item.prop.parent;
       shelfRotation.copy(item.prop.quaternion);
@@ -123,6 +133,7 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
       if (phase === 'bag') {
         if (reduced || elapsed >= bagDuration) { reset(); return; }
         hold();
+        if (firstPerson && eyeHand) eyeHand.grip.position.y = -.075 * T.MathUtils.smoothstep(elapsed, 0, bagDuration);
         const drop = T.MathUtils.smoothstep(elapsed, .25, bagDuration);
         item.prop.scale.copy(bagScale).multiplyScalar(1 - drop);
         // Shrink about the grip, settling the last 15 mm into the lowered hand.
