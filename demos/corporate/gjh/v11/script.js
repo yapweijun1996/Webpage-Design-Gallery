@@ -47,6 +47,7 @@ let three, frameTrace;
 let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true, entryPresentation;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
+let themeMidnightTimer;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let markFirstFrame;
@@ -572,10 +573,22 @@ document.addEventListener('keydown', event => {
 window.addEventListener('blur', () => { windowBlurred = true; pausePerformance();hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
 window.addEventListener('focus', () => { windowBlurred = false; if (ready) { updateHUD(); render(); } });
 window.addEventListener('resize', () => { modes.interrupt('viewport resize'); resize(); });
+function scheduleThemeMidnight() {
+  clearTimeout(themeMidnightTimer);
+  if (!ready || !mallTheme || pageEnded) return;
+  const now = new Date();
+  const midnight = new Date(now).setHours(24, 0, 0, 0);
+  themeMidnightTimer = setTimeout(refreshCalendarTheme, midnight - now);
+}
+function refreshCalendarTheme() {
+  scheduleThemeMidnight();
+  if (ready && !pageEnded) void mallTheme?.refresh();
+}
+window.addEventListener('pageshow', refreshCalendarTheme);
 document.addEventListener('visibilitychange', () => {
   warmRunner?.visibility(document.hidden);
-  if (document.hidden) { pausePerformance();mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
-  else { if (ready) { updateHUD(); render(); } else validateRestoration(); resume(); }
+  if (document.hidden) { pausePerformance();if(ready)mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
+  else { if (ready) { refreshCalendarTheme(); updateHUD(); render(); } else validateRestoration(); resume(); }
 });
 canvas.addEventListener('webglcontextlost', event => {
   quality.resetSampling();
@@ -651,6 +664,7 @@ function validateRestoration() {
     quality.recover(); world.signage?.recover(); resize();
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
+    frameTrace?.watchShadowMap();
     try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
     world.prepareUpperLevel();
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
@@ -670,7 +684,7 @@ function validateRestoration() {
     if (window.mallLoader?.ready) scheduleTier();
     markFirstFrame();
     window.__sceneFailed = false; window.__sceneReady = true;
-    mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();
+    mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();scheduleThemeMidnight();
   } catch {
     fallback('The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.');
   }
@@ -706,7 +720,11 @@ async function initialize() {
   three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({canvas, context, antialias: true});
-  if (new URLSearchParams(location.search).get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
+  const diagnostics = new URLSearchParams(location.search);
+  // Three's first draw synchronously reads the link status, program log and
+  // both shader logs in debug mode, even after a parallel link has completed.
+  renderer.debug.checkShaderErrors = diagnostics.get('debugShaders') === '1';
+  if (diagnostics.get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
@@ -754,9 +772,8 @@ async function initialize() {
         ui.updateMallTheme(state);
         if(state.active!==paintedTheme){
           paintedTheme=state.active;
-          // A single frame shows the committed stage behind settings; the
-          // paused scene must not restart its animation loop.
-          if(!state.suspended && document.body.classList.contains('is-3d') && document.querySelector('#mall-theme-dialog').open){
+          // Show the committed stage after the previous decorations are released.
+          if(!state.suspended && document.body.classList.contains('is-3d')){
             try { render(true); } catch(error) { console.error('Theme preview could not render.',error); }
           }
         }
@@ -773,7 +790,7 @@ async function initialize() {
         }
         return stage;
       },commit(next,previous,stage){
-        try { if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');atmosphere.applyTheme(next);stage?.mount?.();render(); }
+        try { if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');atmosphere.applyTheme(next);stage?.mount?.(); }
         catch(error) { world.applyMallTheme(previous);elevator?.applyMallTheme?.(previous);atmosphere.applyTheme(previous);throw error; }
       }});
       if(!world.applyMallTheme(mallTheme.definition())) throw new Error('Invalid initial theme');
@@ -790,7 +807,6 @@ async function initialize() {
     world.interactables.push(...elevator.interactables);
     world.cameraObstacles.push(...(elevator.cameraObstacles||[]));
   }
-  if(mallTheme && !contextLost && !interrupted) await mallTheme.restore();
   const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded,prepareModel);
   if (player.npcSource) await installNpcs(T, R, prepareModel, player.npcSource);
   else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareModel));
@@ -849,10 +865,17 @@ async function initialize() {
   initialized = true;
   new ResizeObserver(resize).observe(canvas);
   // A hidden tab cannot supply a visible first frame. Resume only when visible.
-  while (document.hidden) await new Promise(resolve => {
-    const visible = () => { if (!document.hidden) { document.removeEventListener('visibilitychange', visible); resolve(); } };
-    document.addEventListener('visibilitychange', visible);
-  });
+  for (;;) {
+    while (document.hidden) await new Promise(resolve => {
+      const visible = () => { if (!document.hidden) { document.removeEventListener('visibilitychange', visible); resolve(); } };
+      document.addEventListener('visibilitychange', visible);
+    });
+    if (interrupted) { validateRestoration(); return; }
+    const day = new Date().toDateString();
+    // Wait for the selected pack before exposing the first 3D frame.
+    await mallTheme?.restore();
+    if (!document.hidden && day === new Date().toDateString()) break;
+  }
   if (interrupted) { validateRestoration(); return; }
   resize();
   ready = true; graphicsStatus = 'available';
@@ -867,7 +890,7 @@ async function initialize() {
     initialPreloadStarted=performance.now();
     window.mallLoader?.prepare('Preparing shop models. You can enter now or browse the directory.');
   }
-  window.__sceneReady = true; ui.offerFirstGuide(); resume();
+  window.__sceneReady = true; ui.offerFirstGuide(); resume(); scheduleThemeMidnight();
 }
 // The directory mounts its controls above without downloading physics, models or a WebGL world.
 if (document.body.dataset.entryMode !== 'directory') initialize().catch(error => {
@@ -875,6 +898,7 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
+  clearTimeout(themeMidnightTimer);
   cancelEntryPresentation();
   pageEnded = true; elevator?.kit?.dispose(); arrivalChime.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
 }});

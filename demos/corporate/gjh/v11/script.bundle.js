@@ -517,17 +517,45 @@ function createFrameTrace(renderer) {
     };
     next = (next + 1) % capacity;
   }
-  for (const method of ["compile", "render", "initTexture", "initRenderTarget"]) {
-    const original = renderer[method];
-    renderer[method] = function(...args) {
+  function wrap(owner, method, label, describe) {
+    const original = owner[method];
+    owner[method] = function(...args) {
       const before = start();
       try {
         return original.apply(this, args);
       } finally {
-        const subject = args[0];
-        end(`renderer.${method}`, before, subject?.name || subject?.image?.src || subject?.type);
+        end(label, before, describe?.(args));
       }
     };
+  }
+  let shadowMap;
+  function watchShadowMap() {
+    if (shadowMap === renderer.shadowMap)
+      return;
+    shadowMap = renderer.shadowMap;
+    wrap(shadowMap, "render", "shadowMap.render", ([, scene]) => scene.name || scene.type);
+  }
+  for (const method of ["compile", "render", "initTexture", "initRenderTarget"]) {
+    wrap(renderer, method, `renderer.${method}`, ([subject, camera]) => {
+      const name = subject?.name || subject?.image?.src || subject?.type;
+      if (method !== "render")
+        return name;
+      const target = renderer.getRenderTarget();
+      return `${name} layer=${camera.layers.mask} target=${target ? target.texture.name || "offscreen" : "screen"}`;
+    });
+  }
+  watchShadowMap();
+  const gl = renderer.getContext();
+  for (const method of [
+    "getProgramInfoLog",
+    "getShaderInfoLog",
+    "getProgramParameter",
+    "texStorage2D",
+    "texImage2D",
+    "texSubImage2D",
+    "generateMipmap"
+  ]) {
+    wrap(gl, method, `gl.${method}`, method === "getProgramParameter" ? ([, parameter]) => parameter : undefined);
   }
   function* steps(label, work) {
     try {
@@ -543,7 +571,7 @@ function createFrameTrace(renderer) {
       work.return();
     }
   }
-  return { start, end, steps, report: () => events.length < capacity ? events.slice() : [...events.slice(next), ...events.slice(0, next)] };
+  return { start, end, steps, watchShadowMap, report: () => events.length < capacity ? events.slice() : [...events.slice(next), ...events.slice(0, next)] };
 }
 
 // assets/onboarding/components.js
@@ -987,6 +1015,10 @@ function createContextNavigation({ globalHost, directory, onHome, onShops, recov
   };
 }
 
+// demos/corporate/gjh/v11/assets/ui.js
+import { setupDemoBag } from "./assets/demo-bag.js";
+import { setupNewMoonPreview } from "./assets/newmoon-detail-preview.js";
+
 // demos/corporate/gjh/v11/assets/icons.js
 var registry = Object.freeze({
   "arrow-down": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1172,186 +1204,6 @@ function icon(name, { size = 24, label } = {}) {
   return svg;
 }
 
-// demos/corporate/gjh/v11/assets/demo-bag.js
-function createBagStore(ids, storage = null) {
-  const allowed = new Set(ids), quantities = new Map, listeners = new Set;
-  const key = "gjh-v11-demo-bag-v1";
-  try {
-    const saved = JSON.parse(storage?.getItem(key) || "{}");
-    for (const id of allowed)
-      if (Number.isInteger(saved?.[id]) && saved[id] > 0 && saved[id] <= 9)
-        quantities.set(id, saved[id]);
-  } catch {}
-  const snapshot = () => Object.freeze(Object.fromEntries(quantities));
-  function change(id, amount) {
-    if (!allowed.has(id) || !Number.isInteger(amount))
-      return;
-    const next = Math.max(0, Math.min(9, (quantities.get(id) || 0) + amount));
-    if (next)
-      quantities.set(id, next);
-    else
-      quantities.delete(id);
-    publish();
-  }
-  function add(id, prepare) {
-    if (!allowed.has(id) || quantities.get(id) === 9 || !prepare(id))
-      return false;
-    change(id, 1);
-    return true;
-  }
-  function publish() {
-    const value = snapshot();
-    try {
-      storage?.setItem(key, JSON.stringify(value));
-    } catch {}
-    listeners.forEach((listener) => listener(value));
-  }
-  return { snapshot, change, add, remove(id) {
-    if (allowed.has(id)) {
-      quantities.delete(id);
-      publish();
-    }
-  }, clear() {
-    quantities.clear();
-    publish();
-  }, subscribe(listener) {
-    listeners.add(listener);
-    listener(snapshot());
-    return () => listeners.delete(listener);
-  } };
-}
-function setupDemoBag() {
-  const records = new Map([...document.querySelectorAll("[data-product]")].map((card) => [card.dataset.product, { name: card.dataset.productName, image: card.dataset.productImage }]));
-  let storage = null;
-  try {
-    storage = sessionStorage;
-  } catch {}
-  const store = createBagStore(records.keys(), storage);
-  const dialog = document.querySelector("#bag-dialog"), open = document.querySelector("#bag-open"), close = document.querySelector("#bag-close"), items = document.querySelector("#bag-items"), empty = document.querySelector("#bag-empty"), clear = document.querySelector("#bag-clear"), add = document.querySelector("#product-add"), note = document.querySelector("#product-bag-status"), status = document.querySelector("#bag-status");
-  const bagIcon = icon("shopping-bag", { size: 18 });
-  const collect = document.querySelector("#product-collect");
-  let current = null, collectListener = null, canCollect = () => false;
-  let returnFocus = open;
-  const header = dialog.querySelector(".bag-top");
-  const measureHeader = () => dialog.style.setProperty("--bag-header-height", `${header.getBoundingClientRect().height}px`);
-  new ResizeObserver(measureHeader).observe(header);
-  function button2(text, label, action) {
-    const el = document.createElement("button");
-    el.type = "button";
-    el.textContent = text;
-    el.setAttribute("aria-label", label);
-    el.addEventListener("click", action);
-    return el;
-  }
-  function render(value) {
-    const active = document.activeElement, focusKey = active?.dataset.bagFocus;
-    const total = Object.values(value).reduce((a, b) => a + b, 0);
-    open.textContent = `Bag (${total})`;
-    open.prepend(bagIcon);
-    open.setAttribute("aria-label", `Open inventory bag, ${total} collected items`);
-    open.title = "Inventory Bag — items collected in the mall, not purchases";
-    items.replaceChildren();
-    empty.hidden = total > 0;
-    clear.hidden = total === 0;
-    for (const [id, quantity] of Object.entries(value)) {
-      const record = records.get(id), row = document.createElement("li"), image = document.createElement("img"), name = document.createElement("h3"), controls = document.createElement("div"), count = document.createElement("output");
-      image.src = record.image;
-      image.alt = "";
-      image.width = 64;
-      image.height = 64;
-      name.textContent = record.name;
-      count.textContent = quantity === 9 ? "9 (max)" : `${quantity}`;
-      count.setAttribute("aria-label", `Quantity ${quantity}${quantity === 9 ? ", maximum per item" : ""}`);
-      const minus = button2("", `Decrease ${record.name}`, () => {
-        store.change(id, -1);
-        status.textContent = `${record.name} quantity decreased.`;
-      }), plus = button2("", `Increase ${record.name}`, () => {
-        store.change(id, 1);
-        status.textContent = `${record.name} quantity increased.`;
-      }), remove = button2("Remove", `Remove ${record.name}`, () => {
-        store.remove(id);
-        status.textContent = `${record.name} removed.`;
-      });
-      minus.append(icon("minus", { size: 18 }));
-      plus.append(icon("plus", { size: 18 }));
-      [minus, plus, remove].forEach((el, i) => el.dataset.bagFocus = `${id}-${i}`);
-      plus.disabled = quantity === 9;
-      controls.className = "bag-quantity";
-      controls.append(minus, count, plus, remove);
-      row.append(image, name, controls);
-      items.append(row);
-    }
-    if (current) {
-      const n = value[current] || 0;
-      add.disabled = n === 9;
-      collect.hidden = !canCollect(current);
-      collect.disabled = n === 9;
-      note.textContent = n ? `${n} in your demo bag · maximum 9 per item.` : "Demo only. No payment or order is created.";
-    }
-    if (focusKey && dialog.open) {
-      const replacement = [...items.querySelectorAll("button")].find((el) => el.dataset.bagFocus === focusKey && !el.disabled);
-      (replacement || close).focus({ preventScroll: true });
-    }
-  }
-  store.subscribe(render);
-  open.hidden = false;
-  open.addEventListener("click", () => {
-    dialog.showModal();
-    measureHeader();
-    close.focus({ preventScroll: true });
-  });
-  close.addEventListener("click", () => dialog.close());
-  dialog.addEventListener("close", () => {
-    status.classList.add("sr-only");
-    const target = returnFocus;
-    returnFocus = open;
-    (target instanceof HTMLElement && target.isConnected && !target.closest("[hidden]") ? target : open).focus({ preventScroll: true });
-  });
-  clear.addEventListener("click", () => {
-    store.clear();
-    status.textContent = "Demo bag cleared.";
-    close.focus({ preventScroll: true });
-  });
-  add.addEventListener("click", () => {
-    if (current) {
-      store.change(current, 1);
-      note.textContent = `Added to demo bag. ${store.snapshot()[current]} of this item. No order created.`;
-    }
-  });
-  collect.addEventListener("click", () => {
-    if (current && collectListener && document.querySelector("#product-dialog").open)
-      store.add(current, collectListener);
-  });
-  function addHeldProduct(id, prepare, message) {
-    if (store.add(id, prepare)) {
-      status.textContent = message;
-      return true;
-    }
-    if (store.snapshot()[id] === 9) {
-      status.textContent = "Your bag has 9 of this product. Remove one to make room, then try Add to bag again.";
-      status.classList.remove("sr-only");
-      open.click();
-    }
-    return false;
-  }
-  return { change: store.change, snapshot: store.snapshot, addHeldProduct, closeTo(target) {
-    returnFocus = target;
-    dialog.close();
-  }, configureCollect(test, listener) {
-    canCollect = test;
-    collectListener = listener;
-  }, subscribe: store.subscribe, get open() {
-    return dialog.open;
-  }, select(id) {
-    current = records.has(id) ? id : null;
-    document.querySelector("#product-bag-actions").hidden = !current;
-    render(store.snapshot());
-  } };
-}
-
-// demos/corporate/gjh/v11/assets/ui.js
-import { setupNewMoonPreview } from "./assets/newmoon-detail-preview.js";
-
 // demos/corporate/gjh/v11/assets/feature-kiosk.js
 var FEATURE_KIOSK_ID = "gjh-feature-kiosk";
 var FEATURE_KIOSK_RECORD = Object.freeze({
@@ -1365,8 +1217,64 @@ var FEATURE_KIOSK_RECORD = Object.freeze({
   action: "brand-story"
 });
 
+// demos/corporate/gjh/v11/assets/mall-theme-copy.js
+var MALL_THEME_COPY = {
+  "zh-Hans": {
+    "Automatic (follows the calendar)": "自动（跟随节日日历）",
+    "Follow the festival calendar or choose a theme manually.": "跟随节日日历，或手动选择主题。",
+    Everyday: "日常",
+    "Lunar New Year": "农历新年",
+    Christmas: "圣诞节",
+    Deepavali: "屠妖节",
+    "Automatic: {festival} ({date}, {when})": "自动：{festival}（{date}，{when}）",
+    "Automatic: Everyday (next: {festival} {when})": "自动：日常（下一个节日：{festival}，{when}）",
+    "Automatic: Everyday": "自动：日常",
+    "Theme settings could not be saved.": "无法保存主题设置。"
+  },
+  ms: {
+    "Automatic (follows the calendar)": "Automatik (mengikut kalendar)",
+    "Follow the festival calendar or choose a theme manually.": "Ikut kalendar perayaan atau pilih tema secara manual.",
+    Everyday: "Harian",
+    "Lunar New Year": "Tahun Baharu Cina",
+    Christmas: "Krismas",
+    Deepavali: "Deepavali",
+    "Automatic: {festival} ({date}, {when})": "Automatik: {festival} ({date}, {when})",
+    "Automatic: Everyday (next: {festival} {when})": "Automatik: Harian (seterusnya: {festival} {when})",
+    "Automatic: Everyday": "Automatik: Harian",
+    "Theme settings could not be saved.": "Tetapan tema tidak dapat disimpan."
+  },
+  en: {
+    "Automatic (follows the calendar)": "Automatic (follows the calendar)",
+    "Follow the festival calendar or choose a theme manually.": "Follow the festival calendar or choose a theme manually.",
+    Everyday: "Everyday",
+    "Lunar New Year": "Lunar New Year",
+    Christmas: "Christmas",
+    Deepavali: "Deepavali",
+    "Automatic: {festival} ({date}, {when})": "Automatic: {festival} ({date}, {when})",
+    "Automatic: Everyday (next: {festival} {when})": "Automatic: Everyday (next: {festival} {when})",
+    "Automatic: Everyday": "Automatic: Everyday",
+    "Theme settings could not be saved.": "Theme settings could not be saved."
+  }
+};
+
 // demos/corporate/gjh/v11/assets/ui.js
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function formatAutomaticMallTheme(calendar, saved) {
+  const language = document.documentElement.lang;
+  const copy = MALL_THEME_COPY[language] ?? MALL_THEME_COPY.en;
+  const locale = language === "en" ? "en-SG" : language;
+  let text = copy["Automatic: Everyday"];
+  if (calendar.festival) {
+    const template = calendar.theme === "everyday" ? "Automatic: Everyday (next: {festival} {when})" : "Automatic: {festival} ({date}, {when})";
+    const values = {
+      festival: copy[calendar.festivalLabel],
+      date: new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(calendar.festival.date)),
+      when: new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(calendar.daysToFestival, "day")
+    };
+    text = copy[template].replace(/\{(\w+)\}/g, (_, key) => values[key]);
+  }
+  return saved ? text : `${text} ${copy["Theme settings could not be saved."]}`;
+}
 function createUI(expanded = false) {
   const scene = document.getElementById("scene");
   const experience = document.getElementById("experience");
@@ -1415,7 +1323,8 @@ function createUI(expanded = false) {
   const return3D = document.getElementById("graphics-return");
   const themeDialog = document.getElementById("mall-theme-dialog"), themeSelect = document.getElementById("mall-theme-select"), themeApply = document.getElementById("mall-theme-apply"), themeStatus = document.getElementById("mall-theme-status");
   const themeOpen = document.getElementById("mall-theme-open"), directoryThemeOpen = document.getElementById("directory-theme-open");
-  let mallTheme = null, themeOpener = null;
+  let mallTheme = null, themeOpener = null, themePreference = null;
+  const cancelMallTheme = () => mallTheme?.cancel({ interactiveOnly: true });
   document.getElementById("graphics-reload").addEventListener("click", () => location.reload());
   return3D.addEventListener("click", () => {
     if (available)
@@ -1709,23 +1618,6 @@ function createUI(expanded = false) {
   const dialog = document.getElementById("product-dialog");
   const newMoonPreview = setupNewMoonPreview();
   const bag = setupDemoBag();
-  const bagButton = document.getElementById("bag-open");
-  const bagLabel = document.createElement("span"), bagCount = document.createElement("span");
-  bagLabel.className = "hud-nav-label";
-  bagLabel.textContent = "Bag";
-  bagCount.className = "hud-bag-count";
-  bagCount.setAttribute("aria-hidden", "true");
-  function projectBagCount(items) {
-    const count = Object.values(items).reduce((sum, count2) => sum + count2, 0);
-    setHudText(bagCount, String(count));
-    if (bagCount.parentNode !== bagButton) {
-      for (const node of [...bagButton.childNodes])
-        if (node.nodeType === Node.TEXT_NODE)
-          node.remove();
-      bagButton.append(bagLabel, bagCount);
-    }
-  }
-  bag.subscribe(projectBagCount);
   const bagDialog = document.getElementById("bag-dialog");
   const listTitle = document.getElementById("list-title");
   const contextNavigation = createContextNavigation({
@@ -2030,32 +1922,37 @@ function createUI(expanded = false) {
     if (status.textContent !== message)
       status.textContent = message;
   }
-  function updateMallTheme(state = mallTheme?.state()) {
+  function updateMallTheme(state = mallTheme?.state(), reset = false) {
     if (!expanded)
       return;
-    if (state && [...themeSelect.options].some((option) => option.value === state.active))
-      themeSelect.value = state.active;
+    if (state && (reset || themePreference !== state.preference)) {
+      themePreference = state.preference;
+      themeSelect.value = themePreference;
+    }
     themeApply.disabled = !mallTheme || !available || Boolean(state?.suspended || state?.pending);
     themeSelect.disabled = !mallTheme || !available || Boolean(state?.suspended || state?.pending);
-    themeStatus.textContent = !mallTheme ? "Theme settings are unavailable. The everyday appearance remains." : !available ? "Theme settings are unavailable while 3D is not ready." : state?.message || `${state?.label || "Everyday"} is active.`;
+    const text = !mallTheme ? "Theme settings are unavailable. The everyday appearance remains." : !available ? "Theme settings are unavailable while 3D is not ready." : state.message || (state.auto ? formatAutomaticMallTheme(state.auto, state.saved) : `${state.label} is active.`);
+    if (themeStatus.textContent !== text)
+      themeStatus.textContent = text;
   }
+  window.addEventListener("mall:languagechange", () => updateMallTheme());
   function openMallTheme(event) {
     if (themeDialog.open || document.querySelector("dialog[open]") || showing3D && !canUsePanels())
       return;
     themeOpener = event.currentTarget;
     shelfFocus?.close({ focus: false });
     themeDialog.showModal();
-    updateMallTheme();
+    updateMallTheme(undefined, true);
     notifyMode();
     document.getElementById("mall-theme-title").focus({ preventScroll: true });
   }
   for (const button2 of [themeOpen, directoryThemeOpen])
     button2.addEventListener("click", openMallTheme);
   document.getElementById("mall-theme-close").addEventListener("click", () => {
-    mallTheme?.cancel();
+    cancelMallTheme();
     themeDialog.close();
   });
-  themeDialog.addEventListener("cancel", () => mallTheme?.cancel());
+  themeDialog.addEventListener("cancel", cancelMallTheme);
   themeDialog.addEventListener("keydown", (event) => {
     if (event.key !== "Tab")
       return;
@@ -2072,7 +1969,7 @@ function createUI(expanded = false) {
     }
   });
   themeDialog.addEventListener("close", () => {
-    mallTheme?.cancel();
+    cancelMallTheme();
     notifyMode();
     if (themeOpener?.isConnected && themeOpener.getClientRects().length && (available || themeOpener === directoryThemeOpen))
       themeOpener.focus({ preventScroll: true });
@@ -2090,7 +1987,7 @@ function createUI(expanded = false) {
     if (dialog.open)
       dialog.close();
     if (themeDialog.open) {
-      mallTheme?.cancel();
+      cancelMallTheme();
       themeDialog.close("view-change");
     }
     amenityPanel.close("view-change");
@@ -2444,7 +2341,7 @@ function createUI(expanded = false) {
     productName,
     projectMode(mode) {
       contextNavigation.update({
-        mode,
+        mode: showing3D || bag.open ? mode : null,
         available,
         destination: showing3D ? "home" : "shops",
         host: bag.open ? document.getElementById("context-navigation-bag") : undefined
@@ -2466,7 +2363,7 @@ function createUI(expanded = false) {
       }
       themeOpen.hidden = false;
       directoryThemeOpen.hidden = false;
-      updateMallTheme();
+      updateMallTheme(undefined, true);
     },
     updateMallTheme,
     show3D() {
@@ -2649,7 +2546,7 @@ function createUI(expanded = false) {
       const wasThemeOpen = themeDialog.open;
       const handled = handlePanelGamepad(pad, themeDialog.open ? themeDialog : amenityPanel.dialog.open ? amenityPanel.dialog : dialog.open ? dialog : bag.open ? bagDialog : help.open ? help : mallMap.open ? mallMap : !showing3D ? document.body : null);
       if (wasThemeOpen && !themeDialog.open)
-        mallTheme?.cancel();
+        cancelMallTheme();
       return handled;
     },
     paused() {
@@ -4146,11 +4043,17 @@ function* prepareScene({
       renderer.autoClear = true;
       renderer.sortObjects = false;
       if (compile) {
+        const linked = [];
         for (const material of renderer.compile(staging, probe)) {
-          for (const program of renderer.properties.get(material).programs.values())
-            programs.add(program);
+          for (const program of renderer.properties.get(material).programs.values()) {
+            if (!programs.has(program)) {
+              programs.add(program);
+              linked.push(program);
+            }
+          }
         }
         report.programs = programs.size;
+        return linked;
       } else
         renderer.render(staging, probe);
     } finally {
@@ -4246,7 +4149,13 @@ function* prepareScene({
     report.lightVariants = Math.max(report.lightVariants, variants.size);
     for (const { active, output, candidates, passShadows } of variants.values()) {
       for (let i = 0;i < candidates.length; i += batchSize) {
-        submit(candidates.slice(i, i + batchSize), active, output, true, false, passShadows);
+        const linking = submit(candidates.slice(i, i + batchSize), active, output, true, false, passShadows);
+        if (parallel && linking.length) {
+          yield false;
+          for (const program of linking)
+            while (!program.isReady())
+              yield false;
+        }
         yield;
       }
     }
@@ -4255,10 +4164,6 @@ function* prepareScene({
       report.textures++;
       yield;
     }
-    if (parallel)
-      for (const program of programs)
-        while (!program.isReady())
-          yield false;
     if (shadows) {
       const active = probeLights(poses[0]).filter((light) => light.layers.isEnabled(0));
       const casters = meshes.filter((mesh) => mesh.castShadow);
@@ -5030,6 +4935,7 @@ var brandWallStarted = false;
 var atmosphere = null;
 var npcs = null;
 var spatialHud = null;
+var themeMidnightTimer;
 var initialized = false;
 var fatal = false;
 var contextLost = false;
@@ -5831,11 +5737,26 @@ window.addEventListener("resize", () => {
   modes.interrupt("viewport resize");
   resize();
 });
+function scheduleThemeMidnight() {
+  clearTimeout(themeMidnightTimer);
+  if (!ready || !mallTheme || pageEnded)
+    return;
+  const now = new Date;
+  const midnight = new Date(now).setHours(24, 0, 0, 0);
+  themeMidnightTimer = setTimeout(refreshCalendarTheme, midnight - now);
+}
+function refreshCalendarTheme() {
+  scheduleThemeMidnight();
+  if (ready && !pageEnded)
+    mallTheme?.refresh();
+}
+window.addEventListener("pageshow", refreshCalendarTheme);
 document.addEventListener("visibilitychange", () => {
   warmRunner?.visibility(document.hidden);
   if (document.hidden) {
     pausePerformance();
-    mallTheme?.cancel();
+    if (ready)
+      mallTheme?.cancel();
     hideGuidance();
     shelfFocus?.close();
     modes.interrupt("document hidden");
@@ -5843,6 +5764,7 @@ document.addEventListener("visibilitychange", () => {
     frame = 0;
   } else {
     if (ready) {
+      refreshCalendarTheme();
       updateHUD();
       render();
     } else
@@ -5946,6 +5868,7 @@ function validateRestoration() {
     const gl = renderer.getContext();
     if (gl.isContextLost())
       return;
+    frameTrace?.watchShadowMap();
     try {
       atmosphere?.restoreEnvironment();
     } catch {}
@@ -5977,6 +5900,7 @@ function validateRestoration() {
     ui.restored();
     resume();
     mallTheme?.restore();
+    scheduleThemeMidnight();
   } catch {
     fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.");
   }
@@ -6031,7 +5955,9 @@ async function initialize() {
   three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({ canvas, context, antialias: true });
-  if (new URLSearchParams(location.search).get("traceWarm") === "1")
+  const diagnostics = new URLSearchParams(location.search);
+  renderer.debug.checkShaderErrors = diagnostics.get("debugShaders") === "1";
+  if (diagnostics.get("traceWarm") === "1")
     frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -6098,7 +6024,7 @@ async function initialize() {
         ui.updateMallTheme(state);
         if (state.active !== paintedTheme) {
           paintedTheme = state.active;
-          if (!state.suspended && document.body.classList.contains("is-3d") && document.querySelector("#mall-theme-dialog").open) {
+          if (!state.suspended && document.body.classList.contains("is-3d")) {
             try {
               render(true);
             } catch (error) {
@@ -6131,7 +6057,6 @@ async function initialize() {
             throw new Error("Invalid theme");
           atmosphere.applyTheme(next);
           stage?.mount?.();
-          render();
         } catch (error) {
           world.applyMallTheme(previous);
           elevator?.applyMallTheme?.(previous);
@@ -6162,8 +6087,6 @@ async function initialize() {
     world.interactables.push(...elevator.interactables);
     world.cameraObstacles.push(...elevator.cameraObstacles || []);
   }
-  if (mallTheme && !contextLost && !interrupted)
-    await mallTheme.restore();
   const { createPlayer } = await import("./assets/player.bundle.js");
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareModel);
   if (player.npcSource)
@@ -6257,16 +6180,26 @@ async function initialize() {
   window.mallLoader?.complete("models");
   initialized = true;
   new ResizeObserver(resize).observe(canvas);
-  while (document.hidden)
-    await new Promise((resolve) => {
-      const visible = () => {
-        if (!document.hidden) {
-          document.removeEventListener("visibilitychange", visible);
-          resolve();
-        }
-      };
-      document.addEventListener("visibilitychange", visible);
-    });
+  for (;; ) {
+    while (document.hidden)
+      await new Promise((resolve) => {
+        const visible = () => {
+          if (!document.hidden) {
+            document.removeEventListener("visibilitychange", visible);
+            resolve();
+          }
+        };
+        document.addEventListener("visibilitychange", visible);
+      });
+    if (interrupted) {
+      validateRestoration();
+      return;
+    }
+    const day = new Date().toDateString();
+    await mallTheme?.restore();
+    if (!document.hidden && day === new Date().toDateString())
+      break;
+  }
   if (interrupted) {
     validateRestoration();
     return;
@@ -6293,6 +6226,7 @@ async function initialize() {
   window.__sceneReady = true;
   ui.offerFirstGuide();
   resume();
+  scheduleThemeMidnight();
 }
 if (document.body.dataset.entryMode !== "directory")
   initialize().catch((error) => {
@@ -6301,6 +6235,7 @@ if (document.body.dataset.entryMode !== "directory")
   });
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
+    clearTimeout(themeMidnightTimer);
     cancelEntryPresentation();
     pageEnded = true;
     elevator?.kit?.dispose();

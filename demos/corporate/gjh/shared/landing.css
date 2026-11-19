@@ -91,8 +91,7 @@ html[data-gjh-design="v9"] .street-stage{transform:none;animation:none}.street-e
 .arcade-entry>div>p:not(.entry-kicker){font-size:var(--entry-subtitle);line-height:1.5;margin:1.5rem 0;max-width:26ch}.arcade-entry nav{position:absolute;top:20px;right:4vw;display:flex;gap:5px}.arcade-entry nav a{display:flex;align-items:center;min-height:44px;padding:8px 12px;color:var(--entry-light);background:var(--entry-paper);border-bottom:1px solid var(--entry-accent)}
 
 .arrivals {position:relative;padding:0 4.5vw 36px;min-height:100svh}.arrivals[hidden]{display:none}
-.arrivals header,.arrival-actions,.arrival-board li a {display:flex;align-items:center;justify-content:space-between;gap:12px}
-.arrivals header{height:76px;border-bottom:1px solid var(--entry-rule)}.arrivals header strong{font:var(--entry-large) Georgia,serif;font-weight:700}.arrivals header>span{font-size:var(--entry-caption);text-transform:uppercase;letter-spacing:.12em}
+.arrival-actions,.arrival-board li a {display:flex;align-items:center;justify-content:space-between;gap:12px}
 .arrival-layout{display:grid;grid-template-columns:43% 53%;justify-content:space-between;align-items:center;min-height:calc(100svh - 120px);gap:2%}
 .arrivals .arrival-copy{min-width:0}.arrivals .entry-lead{font-size:var(--entry-subtitle);max-width:31ch}.arrival-actions{justify-content:flex-start;flex-wrap:wrap}
 .arrival-actions #arrival-walk{min-height:44px;padding:8px 12px;background:transparent;color:var(--entry-light);border:1px solid currentColor;cursor:pointer;font-size:var(--entry-body)}
@@ -101,7 +100,6 @@ html[data-gjh-design="v9"] .street-stage{transform:none;animation:none}.street-e
 .arrival-board h2{font:normal var(--entry-shelf) Georgia,serif;margin:0 0 12px}.arrival-board ul{margin:0;padding:0;list-style:none}.arrival-board li a{justify-content:flex-start;text-decoration:none;padding:12px 0;border-top:1px solid var(--entry-rule);color:var(--entry-ink)}
 .arrival-board img{width:clamp(50px,5vw,77px);height:clamp(50px,5vw,77px);object-fit:contain;background:var(--entry-light)}.arrival-board li span{display:grid;gap:3px}
 .arrival-board small{font-size:var(--entry-caption)}.arrival-board strong,.arrival-board b{font-size:var(--entry-label)}.arrival-board b{margin-left:auto}.arrivals .entry-action:hover,.arrivals a:hover strong{text-decoration:underline}
-@media(scripting:enabled){.mall-routing body[data-arrivals] > :not(#mall-arrivals):not(script):not(noscript) {display:none!important}}
 @media(max-width:750px){
   html[data-gjh-design] .entry {padding:25px 20px;gap:22px;grid-template-columns:1fr;min-height:0}
   html[data-gjh-design] .entry h1,.street-entry h1,.arcade-entry h1,.arrivals h1{font-size:var(--entry-shelf);line-height:1.04}
@@ -123,7 +121,7 @@ html[data-gjh-design="v9"] .street-stage{transform:none;animation:none}.street-e
   .street-entry>figure img{object-position:50% 48%}.street-entry figcaption,.arrivals figcaption{font-size:var(--entry-caption);padding:4px 7px}
   .arcade-entry{height:calc(100svh - 68px);min-height:525px;align-items:flex-end;padding:26px 18px 35px}.arcade-entry>div{max-width:100%}.arcade-entry>div>p:not(.entry-kicker){margin:12px 0;font-size:var(--entry-body)}
   .arcade-entry:before{background:linear-gradient(0deg,var(--entry-paper),color-mix(in srgb,var(--entry-paper) 86%,transparent) 37%,transparent 82%)}.arcade-entry nav{top:8px;left:10px;right:auto}.arcade-entry nav a{padding:5px 8px;font-size:var(--entry-caption)}
-  .arrivals {padding:0 17px 20px}.arrivals header{height:56px}.arrivals header strong{font-size:var(--entry-label)}.arrivals header>span{font-size:var(--entry-caption);letter-spacing:0}
+  .arrivals {padding:0 17px 20px}
   .arrival-layout{grid-template-columns:1fr;gap:17px;min-height:0;padding-top:17px}.arrivals h1 br{display:none}.arrivals .entry-lead{max-width:38ch}
   .arrivals figure{height:87px;margin:12px 0 0}.arrival-board{padding:12px 15px}.arrivals .arrival-board .entry-kicker{margin-bottom:3px}.arrival-board h2{font-size:var(--entry-label);margin:0 0 6px}
   .arrival-board li a{padding:5px 0;min-height:48px}.arrival-board img{height:42px;width:42px}.arrival-board strong,.arrival-board b{font-size:var(--entry-body)}

@@ -21,15 +21,41 @@
 <link rel="stylesheet" href="../shared/landing.css">
 </head>
 <body data-arrivals>
+<a class="skip-link skip-arrivals" href="#arrival-board-heading">Skip to featured products</a>
+<a class="skip-link skip-directory" href="#main">Skip to mall and store directory</a>
+<header class="site-header">
+  <a class="wordmark" href="#mall-arrivals" aria-label="GJH Virtual Mall home"><span class="wordmark-initials">GJH<span class="wordmark-period">.</span></span><span class="wordmark-caption">VIRTUAL<br>MALL</span></a>
+  <button id="location-map" class="header-location" type="button" aria-controls="mall-map" aria-expanded="false" title="Open mall map" hidden><span class="location-light" aria-hidden="true"></span><span id="location-name">Courtyard</span><span data-icon="chevron-down" aria-hidden="true"></span></button>
+  <button id="header-map" class="header-map" type="button" aria-label="Open mall map" aria-controls="mall-map" aria-expanded="false" title="Open mall map" hidden><span data-icon="map-pin" aria-hidden="true"></span><span class="hud-nav-label">Map</span></button>
+  <button id="bag-open" class="bag-open" type="button" aria-controls="bag-dialog" hidden>Bag (0)</button>
+  <button id="view-toggle" class="view-toggle" type="button" aria-controls="experience store-list" hidden><span id="view-toggle-icon" aria-hidden="true"></span><span id="view-toggle-label" class="hud-nav-label">Enter 3D Mall</span></button>
+  <a class="site-enter" href="#experience">Enter 3D Mall</a>
+</header>
+<div class="site-secondary">
+  <nav class="site-tabs" aria-label="Mall sections">
+    <a href="#mall-arrivals" aria-current="page">Home</a>
+    <a href="#store-list">Shops</a>
+  </nav>
+  <div class="site-settings" role="group" aria-label="Page settings">
+    <button id="arrival-theme" type="button" aria-labelledby="site-theme-label" aria-describedby="arrival-theme-label" aria-pressed="false">
+      <span class="site-theme-icon" aria-hidden="true"></span>
+      <span id="site-theme-label" class="site-theme-label">Mall theme settings</span>
+      <span id="arrival-theme-label" class="sr-only">Switch to light theme</span>
+    </button>
+    <button id="directory-theme-open" type="button" aria-controls="mall-theme-dialog" aria-labelledby="directory-theme-label" hidden>
+      <span class="site-theme-icon" aria-hidden="true"></span>
+      <span id="directory-theme-label" class="site-theme-label">Mall theme settings</span>
+    </button>
+    <label class="arrival-language">
+      <span id="site-language-code" aria-hidden="true" translate="no">EN</span>
+      <select id="arrival-language" data-mall-language aria-label="Language"><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select>
+    </label>
+  </div>
+</div>
+<p id="loader-asset-notice" class="loader-asset-notice" hidden>Some 3D models were unavailable, so the mall is using stand-ins.</p>
+<div id="mall-connection-notice" class="mall-connection-notice" role="status" aria-live="polite" hidden>Connection unavailable. Reconnect to browse the mall and its products.</div>
+<div id="mall-update-notice" class="mall-update-notice" role="status" aria-live="polite" hidden><span id="mall-update-message">An update is ready.</span><button id="mall-apply-update" type="button">Update</button></div>
 <section id="mall-arrivals" class="arrivals" aria-labelledby="arrivals-heading">
-  <a class="skip-link" href="#arrival-board-heading">Skip to featured products</a><header><strong>Goh Joo Hin</strong><span>Virtual mall / Visitor arrivals</span>
-    <div class="arrival-tools" role="group" aria-label="Page settings">
-      <label class="arrival-language"><span class="sr-only">Language</span><select id="arrival-language" data-mall-language><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select></label>
-      <button id="arrival-theme" class="arrival-theme" type="button" aria-pressed="false"><span id="arrival-theme-label">Switch to light theme</span></button>
-      <button id="arrival-check-update" class="arrival-update" data-mall-check type="button" disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button>
-    </div>
-    <p id="arrival-update-status" class="arrival-update-status" role="status" aria-live="polite"></p>
-  </header>
   <div class="arrival-layout"><div class="arrival-copy"><p class="entry-kicker">Walking guide</p>
   <h1 id="arrivals-heading">Everyday, <br><em>explored.</em></h1>
   <p class="entry-lead">Go straight to four New Moon packs, or explore the mall on foot.</p>
@@ -37,7 +63,11 @@
   <a id="arrival-walk" href="#experience">Enter 3D mall</a></div>
   <figure><img src="assets/concept-wayfinding.webp" alt="Illustrated wayfinding signs in the mall"><figcaption>Store wayfinding · Concept illustration</figcaption></figure></div>
   <div class="arrival-board"><p class="entry-kicker">Featured products</p><h2 id="arrival-board-heading" tabindex="-1">New Moon</h2><ul><li><a href="#arrival-nz" data-arrival-product="nz"><img src="assets/new-moon-nz-425g-front.jpg" alt=""><span><small>New Moon abalone</small><strong>New Zealand</strong></span><b>425 g</b></a></li><li><a href="#arrival-au" data-arrival-product="au"><img src="assets/new-moon-au-425g-front.jpg" alt=""><span><small>New Moon abalone</small><strong>Australia</strong></span><b>425 g</b></a></li><li><a href="#arrival-sa" data-arrival-product="sa"><img src="assets/new-moon-sa-425g-front.jpg" alt=""><span><small>New Moon abalone</small><strong>South Africa</strong></span><b>425 g</b></a></li><li><a href="#arrival-mx" data-arrival-product="mx"><img src="assets/new-moon-mx-454g-front.jpg" alt=""><span><small>New Moon abalone</small><strong>Mexico</strong></span><b>454 g</b></a></li></ul></div></div>
-  </section>
+  <div class="arrival-update-tools">
+    <button id="arrival-check-update" class="arrival-update" data-mall-check type="button" disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button>
+    <p id="arrival-update-status" class="arrival-update-status" role="status" aria-live="polite"></p>
+  </div>
+</section>
   <section id="app-loader" class="app-loader" aria-label="Loading the virtual mall">
     <div class="app-loader-card">
       <img class="app-loader-mark" src="assets/gjh-loader-mark.svg" alt="GJH">
@@ -57,18 +87,7 @@
       <p class="app-loader-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
     </div>
   </section>
-  <noscript><style>#app-loader,#arrival-walk,.directory-launch{display:none!important}</style></noscript>
-  <a class="skip-link" href="#main">Skip to mall and store directory</a>
-  <header class="site-header">
-    <a class="wordmark" href="#mall-arrivals" aria-label="GJH Virtual Mall home"><span class="wordmark-initials">GJH<span class="wordmark-period">.</span></span><span class="wordmark-caption">VIRTUAL<br>MALL</span></a>
-    <button id="location-map" class="header-location" type="button" aria-controls="mall-map" aria-expanded="false" title="Open mall map" hidden><span class="location-light" aria-hidden="true"></span><span id="location-name">Courtyard</span><span data-icon="chevron-down" aria-hidden="true"></span></button>
-    <button id="header-map" class="header-map" type="button" aria-label="Open mall map" aria-controls="mall-map" aria-expanded="false" title="Open mall map" hidden><span data-icon="map-pin" aria-hidden="true"></span><span class="hud-nav-label">Map</span></button>
-    <button id="bag-open" class="bag-open" type="button" aria-controls="bag-dialog" hidden>Bag (0)</button>
-    <button id="view-toggle" class="view-toggle" type="button" aria-controls="experience store-list" hidden><span id="view-toggle-icon" aria-hidden="true"></span><span id="view-toggle-label" class="hud-nav-label">Enter 3D Mall</span></button>
-  </header>
-  <p id="loader-asset-notice" class="loader-asset-notice" hidden>Some 3D models were unavailable, so the mall is using stand-ins.</p>
-  <div id="mall-connection-notice" class="mall-connection-notice" role="status" aria-live="polite" hidden>Connection unavailable. Reconnect to browse the mall and its products.</div>
-  <div id="mall-update-notice" class="mall-update-notice" role="status" aria-live="polite" hidden><span id="mall-update-message">An update is ready.</span><button id="mall-apply-update" type="button">Update</button></div>
+  <noscript><style>#app-loader,#arrival-walk,.site-enter,.site-settings{display:none!important}</style></noscript>
 
   <div id="context-navigation-global" class="context-navigation-global" hidden></div>
 
@@ -188,10 +207,8 @@
     </section>
 
     <section id="store-list" class="store-list" aria-labelledby="list-title" tabindex="-1">
-      <a class="directory-launch" href="#experience">Enter 3D mall</a>
       <div class="list-heading"><div class="hero-copy"><p class="eyebrow">GJH virtual mall</p><h1 id="list-title">Everyday, <em>explored.</em></h1><p class="list-intro">Discover our stores and their collections, or step inside the 3D mall.</p><p class="list-summary"><strong>17 stores</strong><span aria-hidden="true"> · </span><strong>14 concept stores</strong><span aria-hidden="true"> · </span><strong>4 products</strong></p><div class="hero-actions"><button id="directory-enter-3d" type="button" hidden>Enter 3D Mall <span aria-hidden="true"><span data-icon="arrow-right"></span></span></button><a id="hero-shop" href="#featured-products">Shop products <span aria-hidden="true"><span data-icon="arrow-up-right"></span></span></a></div><p id="model-preload-status" role="status" aria-live="polite" hidden></p></div><a class="mall-preview" href="#amenities-title"><img src="assets/concept-wayfinding.webp" alt="" width="1600" height="900"><span class="mall-preview-caption"><span>Store wayfinding</span> · <span>Concept illustration</span></span></a></div>
       <p class="layout-preview"><a id="layout-preview-link" href="?layout=classic">Classic 3-store view</a> <span id="layout-preview-notice" hidden>— Ground-floor preview: 17 stores open to explore.</span></p>
-      <button id="directory-theme-open" class="directory-theme-open" type="button" aria-controls="mall-theme-dialog" hidden>Mall theme settings</button>
       <details id="expanded-facilities-note" class="planned-spaces-directory"><summary>Expanded preview: lift and facilities</summary><p>The lift is in the north-west court of the expanded preview and serves a small upper viewing landing. The directory is west of the entrance, Guest services is east of the entrance, and the featured New Moon collection is beside the west court. The lift is visitor-only. Before riding, stow the cart and add any held product to your bag or return it to its original shelf. Call the lift when needed, then choose Ride after it arrives. The original visitor (v1) stays on the ground floor.</p><p>Guest services is a self-service guide. The facilities reservation is planned and not operating; the north service reserves are closed to visitors. No restroom or staffed service is available in this demo.</p></details>
       <p id="directory-loading" class="product-results" role="status" hidden>Loading the 3D mall. You can browse the directory while it loads.</p><p id="fallback-message" class="fallback-message" role="status" hidden></p>
       <div id="graphics-recovery" class="graphics-recovery" hidden><button id="graphics-return" type="button" hidden>Return to 3D mall</button><button id="graphics-reload" type="button">Reload page to retry 3D</button><p>Reload restarts the demo. Your saved demo bag is kept when browser storage is available.</p></div>
@@ -255,7 +272,7 @@
   <div id="mall-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
   <dialog id="mall-theme-dialog" class="mall-theme-dialog" aria-labelledby="mall-theme-title" aria-describedby="mall-theme-description mall-theme-status">
     <div class="mall-theme-top"><div><p class="eyebrow">Mall appearance</p><h2 id="mall-theme-title" tabindex="-1">Mall theme</h2></div><button id="mall-theme-close" type="button">Close</button></div>
-    <p id="mall-theme-description">Choose Everyday, Lunar New Year, Christmas or Deepavali.</p>
+    <p id="mall-theme-description">Follow the festival calendar or choose a theme manually.</p>
     <label for="mall-theme-select">Choose a theme</label><select id="mall-theme-select"></select>
     <button id="mall-theme-apply" type="button">Apply theme</button>
     <p id="mall-theme-status" role="status" aria-live="polite"></p>

@@ -331,5 +331,17 @@
     "Build {build}": "Build {build}",
     ": {title}": ": {title}",
     "Independent, unofficial concepts. Not affiliated with or endorsed by {name}.": "Independent, unofficial concepts. Not affiliated with or endorsed by {name}."
+  },
+  "mallTheme": {
+    "Automatic (follows the calendar)": "Automatic (follows the calendar)",
+    "Follow the festival calendar or choose a theme manually.": "Follow the festival calendar or choose a theme manually.",
+    "Everyday": "Everyday",
+    "Lunar New Year": "Lunar New Year",
+    "Christmas": "Christmas",
+    "Deepavali": "Deepavali",
+    "Automatic: {festival} ({date}, {when})": "Automatic: {festival} ({date}, {when})",
+    "Automatic: Everyday (next: {festival} {when})": "Automatic: Everyday (next: {festival} {when})",
+    "Automatic: Everyday": "Automatic: Everyday",
+    "Theme settings could not be saved.": "Theme settings could not be saved."
   }
 }

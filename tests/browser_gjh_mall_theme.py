@@ -1,5 +1,5 @@
 """Mall-theme settings, retained visitor state and recovery on real Chrome."""
-from gjh_startup_test_helpers import mall_entry_url
+from gjh_startup_test_helpers import mall_entry_url, set_off_season_date
 import argparse,functools,http.server,os,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -15,7 +15,7 @@ def run():
  def fresh(browser,w=390,h=844,motion='reduce',init=''):
   c=browser.new_context(viewport={'width':w,'height':h},has_touch=w<1000,reduced_motion=motion,service_workers='block')
   c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed');"+init)
-  p=c.new_page();errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
+  p=c.new_page();set_off_season_date(p);errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
  def ready(p):p.goto(mall_entry_url(url));p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
  def open_theme(p,button='#mall-theme-open'):
   p.locator(button).click();d=p.locator('#mall-theme-dialog');assert d.is_visible();assert p.evaluate('document.activeElement.id')=='mall-theme-title';return d
@@ -37,11 +37,12 @@ def run():
     p.locator('#view-toggle').click();p.locator('[data-add]').first.click();p.locator('#view-toggle').click()
     before=p.evaluate('''()=>{let s=__mall.state;return {x:s.x,y:s.y,z:s.z,scene:s.graphics.sceneId,children:s.graphics.sceneChildren,resources:s.rendererResources}}''')
     d=open_theme(p);bounds=d.bounding_box();assert bounds['x']>=0 and bounds['y']>=0 and bounds['x']+bounds['width']<=w+.5 and bounds['y']+bounds['height']<=h+.5,bounds
-    assert p.locator('#mall-theme-select option').count()==4 and p.locator('#mall-theme-select').input_value()=='everyday'
-    assert 'Deepavali' in d.inner_text();assert p.evaluate('__mall.state.paused')
+    assert p.locator('#mall-theme-select option').count()==5 and p.locator('#mall-theme-select').input_value()=='automatic'
+    assert p.locator('#mall-theme-select option[value="deepavali"]').inner_text()=='Deepavali'
+    assert p.evaluate('__mall.state.paused')
     p.locator('#mall-theme-close').focus();p.keyboard.press('Shift+Tab');assert p.evaluate('document.activeElement.id')=='mall-theme-apply'
     p.keyboard.press('Tab');assert p.evaluate('document.activeElement.id')=='mall-theme-close'
-    for i in range(8):apply(p)
+    for i in range(8):apply(p,'everyday')
     assert p.evaluate('(key)=>localStorage.getItem(key)',KEY)=='everyday'
     assert p.locator('#mall-theme-status').inner_text()=='Everyday is already active.'
     after=p.evaluate('''()=>{let s=__mall.state;return {x:s.x,y:s.y,z:s.z,scene:s.graphics.sceneId,children:s.graphics.sceneChildren,resources:s.rendererResources}}''');assert before==after,(before,after)
@@ -54,12 +55,12 @@ def run():
     assert p.locator('[data-store]').count()==3 and p.locator('.product-card').count()==4
     print(f'PASS {w}x{h}: discoverable settings, focus, repeated apply, retained bag and resources',flush=True);c.close()
    # Unknown persisted values are never treated as a supported theme.
-   c,p,errors=fresh(browser,init=f"localStorage.setItem('{KEY}','unknown-theme');");ready(p);open_theme(p)
-   assert p.locator('#mall-theme-select').input_value()=='everyday' and 'unavailable' in p.locator('#mall-theme-status').inner_text()
-   apply(p);assert p.evaluate('(key)=>localStorage.getItem(key)',KEY)=='everyday';close(p,'mall-theme-open')
+   c,p,errors=fresh(browser,init=f"if (!localStorage.getItem('{KEY}')) localStorage.setItem('{KEY}','unknown-theme');");ready(p);open_theme(p)
+   assert p.locator('#mall-theme-select').input_value()=='automatic' and 'Automatic: Everyday' in p.locator('#mall-theme-status').inner_text()
+   apply(p,'everyday');assert p.evaluate('(key)=>localStorage.getItem(key)',KEY)=='everyday';close(p,'mall-theme-open')
    p.reload();p.wait_for_function('window.__sceneReady',timeout=90000);open_theme(p);assert p.locator('#mall-theme-select').input_value()=='everyday'
    print('PASS invalid saved theme falls back, is replaced and survives reload',flush=True);c.close()
-   c,p,errors=fresh(browser,init="Object.defineProperty(window,'localStorage',{configurable:true,get(){throw new DOMException('blocked','SecurityError')}});");ready(p);open_theme(p);apply(p)
+   c,p,errors=fresh(browser,init="Object.defineProperty(window,'localStorage',{configurable:true,get(){throw new DOMException('blocked','SecurityError')}});");ready(p);open_theme(p);apply(p,'everyday')
    assert 'session' in p.locator('#mall-theme-status').inner_text() and p.evaluate('__mall.state.theme.saved===false')
    print('PASS unavailable local storage retains in-memory theme',flush=True);c.close()
    # A missing optional coordinator must not make the mall unavailable.
@@ -98,10 +99,10 @@ def run():
    open_theme(p,'#directory-theme-open');assert p.locator('#mall-theme-apply').is_disabled();close(p,'directory-theme-open')
    p.evaluate('__loss.restoreContext()');p.wait_for_function('__mall.ready && __mall.state.graphics.validations>0',timeout=60000)
    assert p.evaluate('__mall.state.theme.active==="everyday" && !__mall.state.theme.suspended');p.locator('#graphics-return').click()
-   assert '1' in p.locator('#bag-open').inner_text();open_theme(p);apply(p);close(p,'mall-theme-open')
+   assert '1' in p.locator('#bag-open').inner_text();open_theme(p);apply(p,'everyday');close(p,'mall-theme-open')
    print('PASS graphics loss and restoration retain theme and bag',flush=True);c.close()
    c,p,errors=fresh(browser);p.goto(mall_entry_url(url+'&visitor=v1'));p.wait_for_function('window.__sceneReady',timeout=90000)
-   open_theme(p);apply(p);close(p,'mall-theme-open');assert p.evaluate('__mall.state.theme.active==="everyday"') and not errors
+   open_theme(p);apply(p,'everyday');close(p,'mall-theme-open');assert p.evaluate('__mall.state.theme.active==="everyday"') and not errors
    print('PASS Visitor v1 expanded theme settings',flush=True);c.close()
    # The expanded default exposes its theme settings; the static fallback keeps the control hidden.
    c,p,errors=fresh(browser);p.goto(mall_entry_url(url.replace('?layout=expanded','')));p.wait_for_function('window.__sceneReady',timeout=90000)

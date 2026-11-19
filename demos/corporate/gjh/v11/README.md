@@ -156,4 +156,6 @@ Reports include the last five seconds of individual frames, up to two minutes of
 
 ## Visitor arrivals page controls
 
-The arrivals header offers a language picker (English by default, 简体中文, Bahasa Melayu), a dark or light page theme (dark is the default and the choice is saved under `gjh-v11-color-scheme`) and a "Check for updates" button that shows the release version from `version.json` (for example v1.4.0) and reuses the existing update flow. The theme changes the arrivals page chrome only; the 3D mall keeps its own lighting. Tests: `tests/browser_gjh_demos.py` (`check_v11_arrival_tools`).
+Arrivals and the store directory share a sticky header with Home, Shops, page theme, language, Bag and Enter 3D Mall. At 650 CSS pixels and below, the tabs, theme and language controls sit in a row that scrolls with the page. The header height also sets the root anchor offset. The 3D mall uses its own HUD.
+
+The language picker offers English, 简体中文 and Bahasa Melayu. Dark is the default page theme and the selection is saved under `gjh-v11-color-scheme`. The arrivals theme also applies to the directory header. The "Check for updates" control below the arrivals board shows the release version and uses the existing update flow. The arrivals controls are covered by `check_v11_arrival_tools` in `tests/browser_gjh_demos.py`.

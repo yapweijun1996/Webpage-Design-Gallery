@@ -1,3 +1,5 @@
+import {MALL_THEME_COPY} from './mall-theme-copy.js';
+
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
   ['Objectives','目标','Objektif'],
@@ -325,8 +327,7 @@ const messages = new Map([
   ['Some 3D models were unavailable, so the mall is using stand-ins.','部分 3D 模型未能加载，现使用替代模型。','Sesetengah model 3D tidak tersedia. Model gantian sedang digunakan.'],
   ['Mall theme','商场主题','Tema pusat beli-belah'], ['Mall theme settings','商场主题设置','Tetapan tema pusat beli-belah'],
   ['Mall appearance','商场外观','Rupa pusat beli-belah'], ['Choose a theme','选择主题','Pilih tema'],
-  ['Apply theme','应用主题','Gunakan tema'], ['Everyday','日常','Harian'], ['Lunar New Year','农历新年','Tahun Baharu Cina'], ['Christmas','圣诞节','Krismas'], ['Deepavali','屠妖节','Deepavali'],
-  ['Choose Everyday, Lunar New Year, Christmas or Deepavali.','选择日常、农历新年、圣诞节或屠妖节。','Pilih Harian, Tahun Baharu Cina, Krismas atau Deepavali.'],
+  ['Apply theme','应用主题','Gunakan tema'],
   ['Explore our stores','探索商店','Terokai kedai kami'],
   ['Discover our stores and their collections, or step inside the 3D mall.','探索商店和商品，或进入 3D 商场。','Terokai kedai dan koleksi kami atau masuk ke pusat beli-belah 3D.'],
   ['4 products','4 件商品','4 produk'],
@@ -418,6 +419,8 @@ let language = 'en';
 function translate(source) {
   const key = source.trim();
   let output = messages.get(key)?.[language];
+  const themeCopy = MALL_THEME_COPY[language];
+  if (!output && Object.hasOwn(themeCopy,key)) output = themeCopy[key];
   if (!output && language !== 'en') {
     for (const [pattern, chinese, malay] of patterns) {
       if (pattern.test(key)) { output = key.replace(pattern, language === 'ms' ? malay : chinese); break; }
@@ -454,13 +457,16 @@ const observer = new MutationObserver(records => {
   }
 });
 const selectors = document.querySelectorAll('[data-mall-language]');
+const headerCode = document.getElementById('site-language-code');
 function setLanguage(code) {
   observer.disconnect();
   language = ['zh-Hans','ms'].includes(code) ? code : 'en';
   document.documentElement.lang = language;
+  headerCode.textContent = language === 'zh-Hans' ? '中' : language.toUpperCase();
   for (const select of selectors) select.value = language;
   visit(document.documentElement);
   if (language !== 'en') observer.observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:attributes});
+  window.dispatchEvent(new Event('mall:languagechange'));
 }
 let preferred = 'en';
 try { preferred = localStorage.getItem('wdg.language'); } catch { /* Session only. */ }

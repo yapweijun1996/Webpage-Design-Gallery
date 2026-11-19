@@ -247,7 +247,9 @@ for (const detailed of [false, true]) {
     let steps = 0;
     while (f.work.next().value !== false) { f.restored(); assert.ok(++steps < 1000); }
     assert.equal(f.draws.length, 0);
-    assert.ok(f.compiles.length);
+    assert.equal(f.compiles.length, 1);
+    for (let i=0; i<3; i++) assert.equal(f.work.next().value, false);
+    assert.equal(f.compiles.length, 1);
     f.link();
     while (!f.fence) { f.work.next(); f.restored(); assert.ok(++steps < 2000); }
     assert.ok(f.draws.some(draw => draw.objects.includes(f.instances)));

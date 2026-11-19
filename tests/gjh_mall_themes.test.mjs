@@ -8,13 +8,59 @@ import {DEEPAVALI_DECOR_LAYOUT} from '../demos/corporate/gjh/v11/assets/deepaval
 import {atriumLayout} from '../demos/corporate/gjh/v11/assets/atrium-layout.js';
 
 const other=Object.freeze({id:'test-theme',label:'Test theme'});
-const memory=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),map:m};};
+const memory=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)};};
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
-test('only the reviewed themes are available and invalid stored IDs are safe',async()=>{
+test('automatic and only the reviewed themes are available and invalid stored IDs are safe',async()=>{
  const store=memory();store.setItem(THEME_STORAGE_KEY,'unknown');const c=createMallThemeCoordinator({storage:store});
- assert.deepEqual(c.options(),[{id:'everyday',label:'Everyday'},{id:'lunar-new-year',label:'Lunar New Year'},{id:'christmas',label:'Christmas'},{id:'deepavali',label:'Deepavali'}]);assert.equal(c.state().active,'everyday');assert.match(c.state().message,/unavailable/);
+ assert.deepEqual(c.options(),[{id:'automatic',label:'Automatic (follows the calendar)'},{id:'everyday',label:'Everyday'},{id:'lunar-new-year',label:'Lunar New Year'},{id:'christmas',label:'Christmas'},{id:'deepavali',label:'Deepavali'}]);assert.equal(c.state().preference,'automatic');assert.match(c.state().message,/unavailable/);
  assert.equal(await c.select('unknown'),false);assert.equal(c.state().active,'everyday');
  assert.equal(await c.select('everyday'),true);assert.equal(store.getItem(THEME_STORAGE_KEY),'everyday');
+});
+test('automatic is the default, while explicit Everyday survives restore until the override is cleared',async()=>{
+ const store=memory();let date=new Date(2026,10,19);
+ const options={storage:store,now:()=>date};
+ const initial=createMallThemeCoordinator(options);
+ assert.equal(await initial.restore(),true);
+ assert.equal(initial.state().active,'christmas');
+ assert.equal(initial.state().preference,'automatic');
+ assert.equal(store.getItem(THEME_STORAGE_KEY),null);
+ assert.equal(await initial.select('everyday'),true);
+ assert.equal(store.getItem(THEME_STORAGE_KEY),'everyday');
+ const reopened=createMallThemeCoordinator(options);
+ await reopened.restore();
+ assert.equal(await reopened.refresh(),false);
+ assert.equal(reopened.state().active,'everyday');
+ assert.equal(await reopened.select('automatic'),true);
+ assert.equal(store.getItem(THEME_STORAGE_KEY),null);
+ assert.equal(reopened.state().active,'christmas');
+ date=new Date(2026,11,26);
+ assert.equal(await reopened.refresh(),true);
+ assert.equal(reopened.state().active,'lunar-new-year');
+ assert.equal(store.getItem(THEME_STORAGE_KEY),null);
+});
+test('closing settings only cancels interactive preparation',async()=>{
+ const stage=deferred();
+ const c=createMallThemeCoordinator({storage:memory(),now:()=>new Date(2026,10,19),prepare:()=>stage.promise});
+ const refresh=c.refresh();
+ c.cancel({interactiveOnly:true});
+ stage.resolve({value:CHRISTMAS,dispose(){}});
+ assert.equal(await refresh,true);
+ assert.equal(c.state().active,'christmas');
+});
+test('returning to Automatic clears the override even when the current pack fails',async()=>{
+ const store=memory();store.setItem(THEME_STORAGE_KEY,'everyday');
+ let fail=true;
+ const c=createMallThemeCoordinator({storage:store,now:()=>new Date(2026,10,19),prepare:async theme=>{
+  if(fail)throw Error('Pack unavailable');
+  return {value:theme,dispose(){}};
+ }});
+ assert.equal(await c.select('automatic'),false);
+ assert.equal(c.state().active,'everyday');
+ assert.equal(c.state().preference,'automatic');
+ assert.equal(store.getItem(THEME_STORAGE_KEY),null);
+ fail=false;
+ assert.equal(await c.refresh(),true);
+ assert.equal(c.state().active,'christmas');
 });
 test('Deepavali decorations respect planter and event reservations',()=>{
  const {garden,event}=atriumLayout,{lamps,lampRadius,motif,garlands,garlandBottom,banner}=DEEPAVALI_DECOR_LAYOUT;
