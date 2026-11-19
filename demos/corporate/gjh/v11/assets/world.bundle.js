@@ -120,7 +120,7 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, daylightSkylight = false }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -138,7 +138,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   }
   spandrel.closePath();
   geometry.archSpandrel = new T.ExtrudeGeometry(spandrel, { depth: 1, bevelEnabled: false });
-  function arch(center, z, spring, radius, rise, depth, thickness, material) {
+  function arch(center, z, spring, radius, rise, depth, thickness, material, ribClearance = 0) {
     const segments = 24;
     for (let i = 0;i < segments; i++) {
       const point2 = (n) => {
@@ -147,9 +147,11 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       };
       const [x0, y0] = point2(i), [x1, y1] = point2(i + 1);
       solid("box", material, (x0 + x1) / 2, (y0 + y1) / 2, z, Math.hypot(x1 - x0, y1 - y0) + 0.018, thickness, depth, 0, 0, "XYZ", Math.atan2(y1 - y0, x1 - x0));
+      if (ribClearance)
+        ceilingBounds?.((x0 + x1) / 2, (y0 + y1) / 2, z, x1 - x0 + thickness + 0.018, Math.abs(y1 - y0) + thickness + 2 * ribClearance, depth);
     }
   }
-  arch(10, 33.3, 5.16, 8.1, 3.02, 28.9, 0.18, timber);
+  arch(10, 33.3, 5.16, 8.1, 3.02, 28.9, 0.18, timber, 0.12);
   for (const z of [19.05, 24.8, 30.55, 36.3, 42.05, 47.55]) {
     arch(10, z, 5.1, 8.06, 3, 0.36, 0.24, "ivory");
     arch(10, z - 0.23, 5.14, 8.05, 3, 0.075, 0.09, "glow");
@@ -253,7 +255,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("green", x, y, 10.1, 0.07, 0.09, 26.1);
   }
   if (!daylightSkylight)
-    arch(-3, 10.1, 13.14, 13.18, 3.91, 26.05, 0.036, "glass");
+    arch(-3, 10.1, 13.14, 13.18, 3.91, 26.05, 0.036, "glass", 0.14);
   for (const z of [-2.75, 22.85]) {
     box("ivory", -3, 10.68, z, 26.2, 0.45, 0.58);
     box("oak", -3, 10.38, z, 26.2, 0.15, 0.63);
@@ -2346,8 +2348,280 @@ var INTERIOR_PILOT = Object.freeze({
   }
 });
 
+// demos/corporate/gjh/v11/assets/interior-additions-registry.js
+var INTERIOR_ADDITIONS = Object.freeze({
+  ottoman: {
+    asset_id: "GJH-PUB-001",
+    kind: "ottoman",
+    version: "1.0.0",
+    file: "GJH_PUB_001.glb",
+    sha256: "17f6a7b82689d48d2c3a2e159330b50e835893e914ac1ac29cc0768f4b3e0fa6",
+    bytes: 17500,
+    dimensions_m: [
+      0.7,
+      0.45,
+      0.7
+    ],
+    capabilities: [
+      "SIT"
+    ],
+    priority: "P1",
+    placed: false,
+    label: "Round single-seat ottoman",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_ottoman_round.glb",
+    source_sha256: "6fbcb41b0dfed91e36e129e0fdd0c73791b372e82b2374679b5f207f0869cd6c",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  planterSmall: {
+    asset_id: "GJH-PUB-007",
+    kind: "planterSmall",
+    version: "1.0.0",
+    file: "GJH_PUB_007.glb",
+    sha256: "6e156fcac8b68d637fd8dc96bd6bc1c8ffda877760177990ba6fa5c8f5479de7",
+    bytes: 75724,
+    dimensions_m: [
+      0.75,
+      1.4,
+      0.75
+    ],
+    capabilities: [],
+    priority: "P1",
+    placed: false,
+    label: "Small round planter with a leafy plant",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_planter_round.glb",
+    source_sha256: "760f7d0813fba6471d9509922d1a9ae7ba342ba0da7db7d774729bd009f8637f",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  directorySign: {
+    asset_id: "GJH-PUB-016",
+    kind: "directorySign",
+    version: "1.0.0",
+    file: "GJH_PUB_016.glb",
+    sha256: "5058bbb9f5914891f46bf060bd7e49446c107d9c66a325f55047958f70809dba",
+    bytes: 53468,
+    dimensions_m: [
+      0.75,
+      1.95,
+      0.25
+    ],
+    capabilities: [
+      "USE"
+    ],
+    priority: "P1",
+    placed: false,
+    label: "Freestanding directory column",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_sign_directory.glb",
+    source_sha256: "3411cc8230761efc2d662abb18b481cbbed332fc9c3f3248c51cddf731038299",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  floorLamp: {
+    asset_id: "GJH-LGT-017",
+    kind: "floorLamp",
+    version: "1.0.0",
+    file: "GJH_LGT_017.glb",
+    sha256: "fc271840c7ed190118e8027462161a44fdf09d5095b568c6a5ced0ab96e07e68",
+    bytes: 42260,
+    dimensions_m: [
+      0.6,
+      1.7,
+      0.6
+    ],
+    capabilities: [],
+    priority: "P2",
+    placed: false,
+    label: "Arched floor lamp (closest match to the decorative lamp column)",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_lamp_floor.glb",
+    source_sha256: "5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  infoDesk: {
+    asset_id: "GJH-PUB-018",
+    kind: "infoDesk",
+    version: "1.0.0",
+    file: "GJH_PUB_018.glb",
+    sha256: "bca9ae4f273161e3beb30553fbf2ac100dcdebf5d911c30daccdd9d25c05b4f5",
+    bytes: 68492,
+    dimensions_m: [
+      1.6,
+      1.05,
+      0.7
+    ],
+    capabilities: [
+      "USE"
+    ],
+    priority: "P2",
+    placed: false,
+    label: "Curved information desk",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_desk_service.glb",
+    source_sha256: "d27221a7795118769a4344eec8f9ebce216dcfcffa81513358b4bd07066dbc9d",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  garmentRail: {
+    asset_id: "GJH-DSP-009",
+    kind: "garmentRail",
+    version: "1.0.0",
+    file: "GJH_DSP_009.glb",
+    sha256: "d42ab7fff497c04c6639eb55ce921c89fc7bb00fbbe7de9ebe22393fbd28ed84",
+    bytes: 44204,
+    dimensions_m: [
+      1.2,
+      1.6,
+      0.45
+    ],
+    capabilities: [
+      "INSPECT"
+    ],
+    priority: "P1",
+    placed: false,
+    label: "Garment rail with hangers",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_rack_clothes.glb",
+    source_sha256: "7511bf4b5654467c27d51a363c32ece01ad625a6e6f2ca73c12246b27aa41b6b",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  endcapShelf: {
+    asset_id: "GJH-DSP-003",
+    kind: "endcapShelf",
+    version: "1.0.0",
+    file: "GJH_DSP_003.glb",
+    sha256: "217511272e51554cb93c7c3bbc49c1daca3200372a756a0426ec32f28812f70f",
+    bytes: 44616,
+    dimensions_m: [
+      0.9,
+      1.8,
+      0.35
+    ],
+    capabilities: [
+      "INSPECT"
+    ],
+    priority: "P1",
+    placed: false,
+    label: "Open end-cap display shelf",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_shelf_display.glb",
+    source_sha256: "dfb3e6fcfa385786b08298c177e44ce14433826753e757d79eb19c4ad647949f",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  islandTable: {
+    asset_id: "GJH-DSP-007",
+    kind: "islandTable",
+    version: "1.0.0",
+    file: "GJH_DSP_007.glb",
+    sha256: "c85865de8aa34bb41f8993c922be36518e6814f15f29001be25a93035766e453",
+    bytes: 24248,
+    dimensions_m: [
+      1.1,
+      0.85,
+      0.6
+    ],
+    capabilities: [
+      "INSPECT"
+    ],
+    priority: "P1",
+    placed: false,
+    label: "Island display table",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_table_display.glb",
+    source_sha256: "30234aa8ff7d21761920ee1527f374076ded2ae2d296f6499edea2e2759d4ba9",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  cashierCounter: {
+    asset_id: "GJH-STF-016",
+    kind: "cashierCounter",
+    version: "1.0.0",
+    file: "GJH_STF_016.glb",
+    sha256: "a288f0d096269a50a7e163f1449050fb1c015b0a90ff5fce78426f74fb84788c",
+    bytes: 29664,
+    dimensions_m: [
+      1.8,
+      1.05,
+      0.6
+    ],
+    capabilities: [
+      "USE"
+    ],
+    priority: "P1",
+    placed: false,
+    label: "Cashier counter",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_counter_shop.glb",
+    source_sha256: "e07ff75ca20d92d9f7192caf7e50b6c368b8f56755fcc4f7a485025b49d513fa",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  framePanel: {
+    asset_id: "GJH-STF-014",
+    kind: "framePanel",
+    version: "1.0.0",
+    file: "GJH_STF_014.glb",
+    sha256: "afe7520b3d057c0a76457d98c6d41d8e7b66cb9f6779cef294b3772119fc7068",
+    bytes: 14568,
+    dimensions_m: [
+      0.9,
+      0.9,
+      0.05
+    ],
+    capabilities: [],
+    priority: "P1",
+    placed: false,
+    label: "Framed wall art panel (closest match to the interchangeable advertising frame)",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_wall_art.glb",
+    source_sha256: "6ddc4eb7cabee2eb52a1f4a8c1e8ca965a00ca70d696551d9c41ba43273db6bc",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  },
+  globePendant: {
+    asset_id: "GJH-LGT-008",
+    kind: "globePendant",
+    version: "1.0.0",
+    file: "GJH_LGT_008.glb",
+    sha256: "ce31985d396e232af169749fc5c94721ee5171ac1b9b92055481cdb43d107b0c",
+    bytes: 25632,
+    dimensions_m: [
+      0.38,
+      0.85,
+      0.38
+    ],
+    capabilities: [],
+    priority: "P1",
+    placed: false,
+    label: "Globe pendant lamp",
+    source: "models/gjh-interior-additions/sources/GJH_NEW_lamp_pendant.glb",
+    source_sha256: "b0b9fa4dadbd22e05dbbdaf774aecabec0b8a3def580ee7ac4a861496fdb9ccc",
+    lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; flat PBR materials only.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+  }
+});
+
 // demos/corporate/gjh/v11/assets/furnishings.js
-var pilotSources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")));
+var placedAdditions = Object.fromEntries(Object.entries(INTERIOR_ADDITIONS).filter(([, asset]) => asset.placed));
+var pilotSources = Object.freeze({ ...Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")), ...placedAdditions });
 var shopSources = Object.freeze({
   barStool: {
     asset_id: "ASSET_MallBarStool",
@@ -2425,7 +2699,7 @@ async function createFurnishings(T, shadows, expanded = false) {
     record.status = "loading";
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
     record.sourcePrimitiveCount = record.primitives.length;
-    if (record.status === "loaded" && (["bench", "planter", "coffeeTable", "storeSign", "wallLight"].includes(kind) || Object.hasOwn(shopSources, kind))) {
+    if (record.status === "loaded" && (["bench", "planter", "coffeeTable", "storeSign", "wallLight", ...Object.keys(placedAdditions)].includes(kind) || Object.hasOwn(shopSources, kind))) {
       const opaque = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() === 0);
       const emissive = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() !== 0);
       if (opaque.length > 1)
@@ -6735,15 +7009,15 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
 }
 async function createWorld(T, R, physics, expanded = false, warmModel) {
   try {
-    let ceilingBox = function(material, x, y, z, sx, sy, sz, hole = liftLayout.shaft) {
-      if (!expandedLift) {
-        box(material, x, y, z, sx, sy, sz);
-        return [{ minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 }];
-      }
-      const panels = cutRectangle({ minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 }, hole);
+    let ceilingBounds = function(x, y, z, sx, sy, sz) {
+      ceilingObstacles.push({ min: { x: x - sx / 2, y: y - sy / 2, z: z - sz / 2 }, max: { x: x + sx / 2, y: y + sy / 2, z: z + sz / 2 } });
+    }, ceilingBox = function(material, x, y, z, sx, sy, sz, hole = liftLayout.shaft) {
+      const bounds = { minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 };
+      const panels = expandedLift && hole ? cutRectangle(bounds, hole) : [bounds];
       for (const r of panels) {
-        box(material, (r.minX + r.maxX) / 2, y, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, sy, r.maxZ - r.minZ);
-        ceilingObstacles.push({ min: { x: r.minX, y: y - sy / 2, z: r.minZ }, max: { x: r.maxX, y: y + sy / 2, z: r.maxZ } });
+        const panel = [(r.minX + r.maxX) / 2, y, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, sy, r.maxZ - r.minZ];
+        box(material, ...panel);
+        ceilingBounds(...panel);
       }
       return panels;
     }, refreshInstanceColours = function() {
@@ -7199,7 +7473,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, daylightSkylight: expandedLift }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight: expandedLift }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -7239,7 +7513,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     if (!expanded) {
       const roof = new URLSearchParams(location.search).get("visitor") !== "v1" ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
       for (const component of [...SHELL_LAYOUT.caps, ...roof])
-        box(component.material, ...component.position, ...component.size);
+        ceilingBox(component.material, ...component.position, ...component.size);
+      const ceiling = SHELL_LAYOUT.assets.ceiling;
+      const [width, height, depth] = ceiling.bounds_max.map((max, axis) => max - ceiling.bounds_min[axis]);
+      for (const [x, y, z] of ceiling.placements)
+        ceilingBounds(x, y + height / 2, z, width, height, depth);
       shellState = shell.finish(scene, solid);
     }
     if (!expanded) {
@@ -7418,11 +7696,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         box("dark", x, 4.7, 0, 9.7, 1.55, 0.5, true);
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
       }
-      box("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4);
+      ceilingBox("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4, null);
       activeShopSlot = expanded ? Number(store2.number) : null;
       if (expanded && zone === "newmoon") {
         for (const z of [-2.5, -5.4, -8.3]) {
-          box("ivory", x, 5.63, z, 7.9, 0.12, 2.35);
+          ceilingBox("ivory", x, 5.63, z, 7.9, 0.12, 2.35, null);
           for (const side of [-1, 1]) {
             box("brass", x + side * 3.85, 5.55, z, 0.06, 0.06, 2.24);
             box("brass", x, 5.55, z + side * 1.12, 7.75, 0.06, 0.06);

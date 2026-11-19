@@ -2,8 +2,11 @@
 import {loadStaticAsset} from './static-asset.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
+import {INTERIOR_ADDITIONS} from './interior-additions-registry.js';
 
-const pilotSources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf')));
+// Placed additions load with the pilot set; reserved ones stay registered but unmounted.
+const placedAdditions = Object.fromEntries(Object.entries(INTERIOR_ADDITIONS).filter(([, asset]) => asset.placed));
+const pilotSources = Object.freeze({...Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf')), ...placedAdditions});
 
 const shopSources = Object.freeze({
   barStool: {
@@ -68,7 +71,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
     record.status = 'loading';
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
     record.sourcePrimitiveCount=record.primitives.length;
-    if(record.status==='loaded'&&(['bench','planter','coffeeTable','storeSign','wallLight'].includes(kind) || Object.hasOwn(shopSources,kind))){
+    if(record.status==='loaded'&&(['bench','planter','coffeeTable','storeSign','wallLight',...Object.keys(placedAdditions)].includes(kind) || Object.hasOwn(shopSources,kind))){
       const opaque=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()===0);
       const emissive=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()!==0);
       if(opaque.length>1)record.primitives=[...batchFurniture(T,opaque),...emissive];

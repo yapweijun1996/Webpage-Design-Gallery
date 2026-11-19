@@ -2,7 +2,7 @@ import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, daylightSkylight=false}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -24,7 +24,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
 
   // A continuous barrel vault. The same ellipse drives the curved timber
   // lining, pale transverse ribs and fine concealed strips between bays.
-  function arch(center, z, spring, radius, rise, depth, thickness, material) {
+  function arch(center, z, spring, radius, rise, depth, thickness, material, ribClearance = 0) {
     const segments = 24;
     for (let i = 0; i < segments; i++) {
       const point = n => {
@@ -34,9 +34,12 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       const [x0,y0] = point(i), [x1,y1] = point(i + 1);
       solid('box',material,(x0+x1)/2,(y0+y1)/2,z,
         Math.hypot(x1-x0,y1-y0)+.018,thickness,depth,0,0,'XYZ',Math.atan2(y1-y0,x1-x0));
+      // Include the ribs beneath the continuous vault without adding player colliders.
+      if (ribClearance) ceilingBounds?.((x0+x1)/2,(y0+y1)/2,z,
+        x1-x0+thickness+.018,Math.abs(y1-y0)+thickness+2*ribClearance,depth);
     }
   }
-  arch(10,33.3,5.16,8.1,3.02,28.9,.18,timber);
+  arch(10,33.3,5.16,8.1,3.02,28.9,.18,timber,.12);
   for (const z of [19.05,24.8,30.55,36.3,42.05,47.55]) {
     arch(10,z,5.1,8.06,3.0,.36,.24,'ivory');
     arch(10,z-.23,5.14,8.05,3,.075,.09,'glow');
@@ -142,7 +145,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     const a=(i/12-.5)*Math.PI,x=-3+13.15*Math.sin(a),y=13.1+3.9*Math.cos(a);
     box('green',x,y,10.1,.07,.09,26.1);
   }
-  if(!daylightSkylight)arch(-3,10.1,13.14,13.18,3.91,26.05,.036,'glass');
+  if(!daylightSkylight)arch(-3,10.1,13.14,13.18,3.91,26.05,.036,'glass',.14);
   for(const z of [-2.75,22.85]){
     box('ivory',-3,10.68,z,26.2,.45,.58);
     box('oak',-3,10.38,z,26.2,.15,.63);

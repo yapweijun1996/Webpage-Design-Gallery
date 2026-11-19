@@ -812,6 +812,10 @@ async function initialize() {
         updateHUD();
         render();
       });
+      const {pickup} = productControl.actions;
+      const pickupLabel = document.createElement('span');
+      pickupLabel.textContent = pickup.textContent;
+      pickup.replaceChildren(icon('pick-up', {size: 16}), pickupLabel);
       mallHud.connectProductActions(productControl.actions);
     } catch { /* Physical product handling is optional. */ }
   }
