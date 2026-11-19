@@ -2737,11 +2737,11 @@
           "reachDistance": 1.65,
           "bakedPart": {
             "material": "Enamel",
-            "firstVertex": 240,
+            "firstVertex": 1072,
             "vertexCount": 540,
             "sourceOrigin": [
               0.48,
-              1.228,
+              1.22,
               1.39
             ]
           }

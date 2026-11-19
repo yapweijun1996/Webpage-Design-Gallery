@@ -21,7 +21,10 @@ The four listings show a nominal 75 × 75 × 120 mm while the current GLBs are a
 
 - [ ] **Original Oyster Sauce 510 g.** Compare cap and shoulder against its exact [catalogue photographs](https://www.gjheshop.com/product/mili-oyster-sauce-510g/). Retain the 55 × 55 × 245 mm nominal envelope and track print artwork separately.
 - [ ] **Vegetarian Oyster Sauce 510 g.** Check the companion bottle and cap against the [separate source](https://www.gjheshop.com/product/mili-vegetarian-oyster-sauce-510g/). Confirm the current print edition before texture work.
-- [ ] **Vegetarian Mock Duck 280 g.** Model an unprinted short tin to the evidenced profile. Confirm actual can dimensions, end profile and edition against a matching sample or supplier data. [Official product identity](https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/)
+- [x] **Vegetarian Mock Duck 280 g, unprinted form study.** The official photo shows a tall straight-sided can with rolled rims. The 76 × 113 mm display estimate is a [316-triangle editable study](../../models/gjh-mili-mock-duck/README.md) in the room craft batch. [Official product and photo](https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/)
+- [ ] **Vegetarian Mock Duck 280 g, exact retail pack.** Confirm measured can dimensions, detailed ends and current print edition against a matching sample or supplier data.
+
+S02 passed on Pages build `8140834cc8e13632` in desktop and 390 px Chrome touch emulation. Both routes reached the cookline story and returned to the concourse. The deployed detail GLB contains 1,742 triangles in three draws, including the can; the parsed Low shop total is 2,762 triangles. The corrected baked plate range leaves both sauce bottles on their authored positions. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44634045382)
 
 ## S03 GOGO
 
@@ -29,6 +32,8 @@ The four listings show a nominal 75 × 75 × 120 mm while the current GLBs are a
 
 - [ ] **Premium Potong Red Bean, historical 6 × 65 g.** Verify contemporary availability and collect a measured product and individual/outer wrappers if available.
 - [ ] **Premium Potong Assorted Real Fruit, historical 6 × 65 g.** Verify the fruit format and packaging revision independently of Red Bean. The dated HPB listing and unwrapped cart studies are the historical evidence.
+
+The [dated HPB list](https://www.healthhub.sg/sites/assets/Assets/PDFs/HPB/Food/HCS%20products%20list%20for%20website%20updated%20till%2031%20July%2016.pdf#page=51) confirms both historical records. The current brand page lacks identified pack images and item dimensions for these two records. Retain the cart and its two existing unwrapped forms pending stronger evidence.
 
 ## S04 Borsch Med
 

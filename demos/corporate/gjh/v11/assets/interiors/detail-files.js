@@ -8,7 +8,7 @@ export const roomDetails = {
   },
   "S02": {
     "file": "s02-mili-details.glb",
-    "bytes": 75440,
+    "bytes": 84536,
     "roomDetail": true
   },
   "S03": {

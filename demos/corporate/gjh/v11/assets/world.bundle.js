@@ -7561,7 +7561,7 @@ function* prepareInteriorDecoration(T, store2, materials2, detail = 0) {
 }
 
 // demos/corporate/gjh/v11/assets/interiors/baked-layout.js
-var bakedParts = { "s02-mili-details.glb": { material: "Enamel", firstVertex: 240, vertexCount: 540, sourceOrigin: [0.48, 1.228, 1.39], xyz: [0.5, 1.22, 1.4] } };
+var bakedParts = { "s02-mili-details.glb": { material: "Enamel", firstVertex: 1072, vertexCount: 540, sourceOrigin: [0.48, 1.22, 1.39], xyz: [0.5, 1.22, 1.4] } };
 
 // demos/corporate/gjh/v11/assets/interiors/detail-files.js
 var roomAtlas = { file: "showroom-atlas.png", bytes: 47721 };
@@ -7573,7 +7573,7 @@ var roomDetails = {
   },
   S02: {
     file: "s02-mili-details.glb",
-    bytes: 75440,
+    bytes: 84536,
     roomDetail: true
   },
   S03: {

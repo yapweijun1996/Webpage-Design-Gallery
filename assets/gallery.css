@@ -41,14 +41,14 @@ h1, h2, h3, p { margin-top: 0; }
 .nav-link:hover, .nav-link[aria-current] { color: var(--accent); background: var(--color-surface-subtle); }
 .nav-link[aria-current] { font-weight: var(--font-weight-medium); }
 .site-identity:focus-visible, .nav-link:focus-visible { outline-offset: 0; }
-.gallery-settings { grid-area: settings; justify-self: end; }
+.header-actions { grid-area: settings; justify-self: end; display: flex; align-items: center; gap: var(--space-2); }
 .gallery-settings > summary { display: none; }
 .settings-panel, .gallery-preferences { display: flex; align-items: center; gap: var(--space-2); }
 .gallery-settings:not([open]) > .settings-panel { display: none; }
 .preference-control { position: relative; display: block; }
 .preference-control > .gallery-icon { position: absolute; top: 50%; inset-inline-start: var(--space-2); width: var(--icon-sm); height: var(--icon-sm); transform: translateY(-50%); pointer-events: none; color: var(--muted); }
 .preference-control::after { content: ""; position: absolute; top: 50%; inset-inline-end: var(--space-2); width: 6px; height: 6px; border: solid currentColor; border-width: 0 1px 1px 0; transform: translateY(-70%) rotate(45deg); color: var(--muted); pointer-events: none; }
-.gallery-preferences select, .gallery-settings > summary, #check-update {
+.gallery-preferences select, .language-control select, .theme-toggle, .gallery-settings > summary, #check-update {
   min-height: var(--header-control-size);
   padding: 0 var(--space-3);
   border: 1px solid var(--color-border-control);
@@ -58,8 +58,12 @@ h1, h2, h3, p { margin-top: 0; }
   font-size: var(--font-size-sm);
   line-height: var(--line-height-label);
 }
-.gallery-preferences select { appearance: none; padding-inline: calc(var(--space-2) + var(--icon-sm) + var(--space-1)) var(--space-5); }
-.gallery-settings > summary:hover, .gallery-settings[open] > summary { background: var(--color-surface-subtle); }
+.gallery-preferences select, .language-control select { appearance: none; padding-inline: calc(var(--space-2) + var(--icon-sm) + var(--space-1)) var(--space-5); }
+.theme-toggle { display: inline-flex; align-items: center; justify-content: center; width: var(--header-control-size); padding: 0; cursor: pointer; }
+.theme-toggle .gallery-icon { width: var(--icon-sm); height: var(--icon-sm); }
+/* Show the theme the button switches to: a moon in light mode, a sun in dark mode. */
+[data-theme="dark"] .theme-toggle .theme-icon-moon, :root:not([data-theme="dark"]) .theme-toggle .theme-icon-sun { display: none; }
+.theme-toggle:hover, .gallery-settings > summary:hover, .gallery-settings[open] > summary { background: var(--color-surface-subtle); }
 .gallery-settings > summary:focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
 
 @media (max-width: 1000px) {
@@ -84,14 +88,27 @@ h1, h2, h3, p { margin-top: 0; }
   }
   .gallery-preferences { flex-direction: column; align-items: stretch; }
   .gallery-preferences select { width: 100%; }
+  /* Compact header: the language switch becomes a globe button over a native select. */
+  .language-control select { width: var(--header-control-size); padding: 0; color: transparent; cursor: pointer; }
+  .language-control select option { color: var(--ink); }
+  .language-control > .gallery-icon { inset-inline-start: 50%; transform: translate(-50%, -50%); color: var(--ink); }
+  .language-control::after { display: none; }
+  .language-control:hover select { background: var(--color-surface-subtle); }
 }
 @media (max-width: 650px) {
   .header-inner { --header-gutter: var(--layout-mobile-gutter); gap: var(--space-2); }
+  /* Mobile header buttons are icon-only; the Settings label stays available to assistive technology. */
+  .gallery-settings > summary { width: var(--header-control-size); padding: 0; gap: 0; }
+  .gallery-settings > summary .settings-arrow { display: none; }
+  .gallery-settings > summary .settings-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 @media (max-width: 559px) {
   .header-inner { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand settings" "nav nav"; row-gap: 0; padding-block: var(--space-1); }
   .header-inner nav { justify-self: start; }
-  .site-identity { gap: var(--space-2); }
+  .site-identity { gap: var(--space-2); min-width: 0; }
+  /* Keep the brand from colliding with the language, theme and settings buttons. */
+  .header-inner, .header-actions { column-gap: var(--space-1); }
+  .site-identity > span:last-child, .identity-second { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 @media (any-pointer: coarse) {
   .header-inner { --header-control-size: var(--size-control); }
@@ -426,6 +443,21 @@ body.gallery .footer-brand { font-family: var(--font-editorial-heading); font-si
   --color-text-on-action: var(--palette-night-page);
 }
 :root[data-theme="light"] { color-scheme: light; }
+/* Colour palettes swap only the editorial accent and wash; terracotta is the default. */
+:root[data-palette="ocean"] { --palette-editorial-accent: var(--palette-gallery-ocean-accent); --palette-editorial-wash: var(--palette-gallery-ocean-wash); }
+:root[data-palette="forest"] { --palette-editorial-accent: var(--palette-gallery-forest-accent); --palette-editorial-wash: var(--palette-gallery-forest-wash); }
+:root[data-palette="plum"] { --palette-editorial-accent: var(--palette-gallery-plum-accent); --palette-editorial-wash: var(--palette-gallery-plum-wash); }
+:root[data-palette="amber"] { --palette-editorial-accent: var(--palette-gallery-amber-accent); --palette-editorial-wash: var(--palette-gallery-amber-wash); }
+:root[data-palette="rose"] { --palette-editorial-accent: var(--palette-gallery-rose-accent); --palette-editorial-wash: var(--palette-gallery-rose-wash); }
+:root[data-palette="teal"] { --palette-editorial-accent: var(--palette-gallery-teal-accent); --palette-editorial-wash: var(--palette-gallery-teal-wash); }
+:root[data-palette="indigo"] { --palette-editorial-accent: var(--palette-gallery-indigo-accent); --palette-editorial-wash: var(--palette-gallery-indigo-wash); }
+:root[data-theme="dark"][data-palette="ocean"] { --palette-editorial-accent: var(--palette-gallery-ocean-night-accent); --palette-editorial-wash: var(--palette-gallery-ocean-night-wash); }
+:root[data-theme="dark"][data-palette="forest"] { --palette-editorial-accent: var(--palette-gallery-forest-night-accent); --palette-editorial-wash: var(--palette-gallery-forest-night-wash); }
+:root[data-theme="dark"][data-palette="plum"] { --palette-editorial-accent: var(--palette-gallery-plum-night-accent); --palette-editorial-wash: var(--palette-gallery-plum-night-wash); }
+:root[data-theme="dark"][data-palette="amber"] { --palette-editorial-accent: var(--palette-gallery-amber-night-accent); --palette-editorial-wash: var(--palette-gallery-amber-night-wash); }
+:root[data-theme="dark"][data-palette="rose"] { --palette-editorial-accent: var(--palette-gallery-rose-night-accent); --palette-editorial-wash: var(--palette-gallery-rose-night-wash); }
+:root[data-theme="dark"][data-palette="teal"] { --palette-editorial-accent: var(--palette-gallery-teal-night-accent); --palette-editorial-wash: var(--palette-gallery-teal-night-wash); }
+:root[data-theme="dark"][data-palette="indigo"] { --palette-editorial-accent: var(--palette-gallery-indigo-night-accent); --palette-editorial-wash: var(--palette-gallery-indigo-night-wash); }
 html[lang="zh-Hans"] main[data-page="companies"] .home-intro h1 { line-height: 1.25; letter-spacing: -.02em; }
 html[lang="ms"] .card-bottom { flex-wrap: wrap; }
 

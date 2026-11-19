@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Webpage Gallery">
   <meta name="app-version" content="1.4.0">
-  <meta name="app-build" content="a280d1bcf8475e4d">
+  <meta name="app-build" content="701b09e1ffbae006">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>Companies — Webpage Design Gallery</title>
   <link rel="icon" href="assets/icons/gallery.svg" type="image/svg+xml">
@@ -39,37 +39,40 @@
         <a class="nav-link" href="index.html#companies" aria-current="page">Companies</a>
         <a class="nav-link" href="#about-gallery">About the gallery</a>
       </nav>
-      <details class="gallery-settings" open>
-        <summary>Settings <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#arrow-down"></use></svg></summary>
-        <div class="settings-panel">
-          <div class="gallery-preferences" hidden>
-            <label class="preference-control">
-              <span class="visually-hidden">Theme</span>
-              <svg class="gallery-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="12" r="4"></circle>
-                <line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line>
-                <line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line>
-                <line x1="5" y1="5" x2="6.5" y2="6.5"></line><line x1="17.5" y1="17.5" x2="19" y2="19"></line>
-                <line x1="5" y1="19" x2="6.5" y2="17.5"></line><line x1="17.5" y1="6.5" x2="19" y2="5"></line>
-              </svg>
-              <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
-            </label>
-            <label class="preference-control">
-              <span class="visually-hidden">Language</span>
-              <svg class="gallery-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="12" r="9"></circle><ellipse cx="12" cy="12" rx="4" ry="9"></ellipse><line x1="3" y1="12" x2="21" y2="12"></line>
-              </svg>
-              <select id="language-select" translate="no"><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select>
-            </label>
-            <span id="preferences-status" class="visually-hidden" role="status"></span>
+      <div class="header-actions">
+        <label class="preference-control language-control" title="Language" hidden>
+          <span class="visually-hidden">Language</span>
+          <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#globe"></use></svg>
+          <select id="language-select" translate="no"><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select>
+        </label>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark theme" title="Switch to dark theme" hidden>
+          <svg class="gallery-icon theme-icon-moon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#moon"></use></svg>
+          <svg class="gallery-icon theme-icon-sun" aria-hidden="true" focusable="false"><use href="assets/icons.svg#sun"></use></svg>
+        </button>
+        <span id="preferences-status" class="visually-hidden" role="status"></span>
+        <details class="gallery-settings" open>
+          <summary title="Settings"><svg class="gallery-icon settings-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#sliders"></use></svg><span class="settings-label">Settings</span> <svg class="gallery-icon settings-arrow" aria-hidden="true" focusable="false"><use href="assets/icons.svg#arrow-down"></use></svg></summary>
+          <div class="settings-panel">
+            <div class="gallery-preferences" hidden>
+              <label class="preference-control">
+                <span class="visually-hidden">Theme</span>
+                <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#sun"></use></svg>
+                <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+              </label>
+              <label class="preference-control">
+                <span class="visually-hidden">Colour palette</span>
+                <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#palette"></use></svg>
+                <select id="palette-select"><option value="terracotta">Terracotta</option><option value="ocean">Ocean</option><option value="forest">Forest</option><option value="plum">Plum</option><option value="amber">Amber</option><option value="rose">Rose</option><option value="teal">Teal</option><option value="indigo">Indigo</option></select>
+              </label>
+            </div>
+            <button type="button" id="check-update" aria-describedby="check-update-description" hidden>
+              <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#info"></use></svg>
+              <span>Check updates</span>
+            </button>
+            <span id="check-update-description" hidden>Checks for a verified Gallery release.</span>
           </div>
-          <button type="button" id="check-update" aria-describedby="check-update-description" hidden>
-            <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#info"></use></svg>
-            <span>Check updates</span>
-          </button>
-          <span id="check-update-description" hidden>Checks for a verified Gallery release.</span>
-        </div>
-      </details>
+        </details>
+      </div>
     </div>
   </header>
   <aside class="update-notice" id="update-notice" hidden aria-label="Gallery update">
@@ -109,7 +112,7 @@
     <div><span class="footer-brand">Good ideas deserve a place.</span><p>Independent website design concepts, organized by company.<br>Explore the possibilities. Open a demo. Find a direction.</p></div>
     <div class="footer-note"><p>Concepts are unofficial and do not imply company endorsement.</p><a href="index.html">All companies <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#arrow-up-right"></use></svg></a></div>
   </footer>
-  <div class="app-tools"><p id="app-status" role="status" aria-live="polite">Version v1.4.0 · a280d1bcf8475e4d</p><button type="button" id="install-app" hidden>Install gallery</button><details><summary>Install help &amp; offline access</summary><p>Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.</p></details></div>
+  <div class="app-tools"><p id="app-status" role="status" aria-live="polite">Version v1.4.0 · 701b09e1ffbae006</p><button type="button" id="install-app" hidden>Install gallery</button><details><summary>Install help &amp; offline access</summary><p>Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.</p></details></div>
   <button class="scroll-top" type="button" id="scroll-top" aria-label="Back to top" hidden><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#arrow-up"></use></svg></button>
   <dialog id="update-dialog" aria-labelledby="update-title"><div class="update-spinner" aria-hidden="true"></div><h2 id="update-title">Updating Webpage Gallery</h2><p id="update-progress" role="status">Preparing the latest version…</p><button type="button" id="close-update" hidden>Close and try again</button></dialog>
 </body>

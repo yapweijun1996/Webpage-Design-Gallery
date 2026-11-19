@@ -25,3 +25,11 @@ The [installed bar stools](../../../demos/corporate/gjh/v11/assets/gogo-bar-stoo
 | GOGO header panel | XYZ (−2.22, 1.60, 2.64), yaw 12° | [Room-detail geometry](../../../scripts/gjh_interiors/rooms.py) and [existing sourced graphic](../../../demos/corporate/gjh/v11/assets/gogo-logo.jpg) |
 | Red bean and fruit samples | XZ (−2.94, 2.38) and (−2.76, 2.38), above the counter | [Original unwrapped geometry](../../../scripts/gjh_interiors/rooms.py) |
 | Story action | Authored cart standing point XZ (−2.3, 3.3) | [Unified programme](../../gjh-v11-interior-program.json) and [exhibit text](../../../demos/corporate/gjh/v11/assets/gogo-exhibit.js) |
+
+## Production reference recheck, 2026-11-20
+
+Page 51 of the [dated Singapore HPB list](https://www.healthhub.sg/sites/assets/Assets/PDFs/HPB/Food/HCS%20products%20list%20for%20website%20updated%20till%2031%20July%2016.pdf#page=51) establishes two historical 6 × 65 g references, Premium Potong Assorted Real Fruit and Premium Potong Red Bean. The [current GOGO brand page](https://gjh.com.sg/gogo/) does not show usable current packs or measurements for those two exact items. The displayed unwrapped red-bean and fruit-colour pieces remain original studies of the category.
+
+For each exact model, obtain a dated specimen or source that identifies the corresponding bar shape, wrapper and outer carton. The retail print version, current availability, individual geometry and packaging usage scope remain pending. [Production checklist](../production-model-checklist.md#s03-gogo)
+
+On Pages build `8140834cc8e13632`, desktop keyboard and 390 px Chrome touch emulation reached the cart story, crossed the open centre to the rear display and returned to the concourse. Each route loaded the existing detail GLB and preserved the historical date and two product entries.
