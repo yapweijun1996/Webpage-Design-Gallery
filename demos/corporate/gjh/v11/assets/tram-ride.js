@@ -8,8 +8,14 @@ const VISITOR_RADIUS = .35;
 export const TRAM_STATION_ID = 'tram-south-entrance';
 export const TRAM_BOARD_LABEL = 'Ride the tram';
 export const tramLanding = Object.freeze({
-  x: tramStations.entry.x, y: 0, z: tramStations.entry.z + 1.5, radius: 1.4
+  x: tramStations.entry.x, y: 0, z: tramStations.entry.z - 1.5, radius: 1.4
 });
+
+// Keep the waiting visitor outside the swept car envelope.
+export function atTramLanding({x, z}) {
+  return z <= tramStations.entry.z - tramEnvelopes.car.width / 2 - VISITOR_RADIUS &&
+    Math.hypot(x - tramLanding.x, z - tramLanding.z) < tramLanding.radius;
+}
 
 // Distances from the T1 route survey. Copy comes from each store's brand and
 // concept in docs/gjh-v11-interior-program.json, checked by the caption test.
@@ -58,7 +64,7 @@ const idle = Object.freeze({phase:'idle', distance:0, caption:-1, active:false, 
 
 export function createTramRide({blocked, canBoard, canExit, onBoard, onExit}) {
   let phase = 'idle', distance = 0, dwell = 0, obstructed = false;
-  let paused = false, ending = false, skipped = -1;
+  let paused = false, ending = false, skipped = -1, speedMultiplier = 1;
   const seated = () => phase === 'ride' || phase === 'arrival';
   function reset() {
     phase = 'idle';
@@ -100,6 +106,7 @@ export function createTramRide({blocked, canBoard, canExit, onBoard, onExit}) {
       paused = false;
       return true;
     },
+    setSpeedMultiplier(value) { speedMultiplier = value; },
     step(dt) {
       if (phase === 'approach' && move(dt, 0)) {
         phase = 'boarding';
@@ -110,7 +117,7 @@ export function createTramRide({blocked, canBoard, canExit, onBoard, onExit}) {
           onBoard(tramRoute.sample(0));
           phase = 'ride';
         }
-      } else if (phase === 'ride' && !paused && move(dt, tramRoute.length)) {
+      } else if (phase === 'ride' && !paused && move(dt * speedMultiplier, tramRoute.length)) {
         phase = 'arrival';
         dwell = DWELL;
       } else if (phase === 'arrival') {
@@ -161,19 +168,21 @@ export function tramTrackBlocked(scene, visitor, from, to) {
 function landingOccupied(scene) {
   const {x, z} = tramStations.entry;
   return someVisitor(scene, p => Math.abs(p.x - x) < .6 + VISITOR_RADIUS &&
-    p.z >= z - VISITOR_RADIUS && p.z <= tramLanding.z + .6 + VISITOR_RADIUS);
+    p.z >= tramLanding.z - .6 - VISITOR_RADIUS && p.z <= z + VISITOR_RADIUS);
 }
 
-export function createPlayerTram({expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat}) {
+export function createPlayerTram({expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel}) {
   if (!tramEnabled(expanded, search)) return null;
   const exit = {x:tramLanding.x, y:.91, z:tramLanding.z};
   const seat = {x:tramStations.entry.x, y:.52, z:tramStations.entry.z,
     id:TRAM_STATION_ID, name:'Mall tram', floor:.16, footY:.16, frontEdge:.26};
   const seatTarget = {x:seat.x,y:seat.floor + .89,z:seat.z};
-  let car, previousDistance = 0;
+  const car = createTramCar(T, scene);
+  if (prepareModel) void prepareModel(car.mesh, {late:false}).catch(() => {});
+  let previousDistance = 0;
   function nearStation() {
     const p = getPosition();
-    return Math.abs(p.y - .89) <= .5 && Math.hypot(p.x - exit.x, p.z - exit.z) < tramLanding.radius;
+    return Math.abs(p.y - .89) <= .5 && atTramLanding(p);
   }
   const ride = createTramRide({
     blocked: (from, to) => tramTrackBlocked(scene, ride.seated ? null : getPosition(), from, to),
@@ -187,11 +196,11 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
     get reason() { return getBoardReason(); },
     board() {
       if (getBoardReason() || !nearStation() || !ride.board()) return false;
-      car ??= createTramCar(T, scene);
       previousDistance = ride.distance;
       car.place(tramRoute.sample(ride.distance));
       return true;
     },
+    setSpeedMultiplier: ride.setSpeedMultiplier,
     pause: ride.togglePause,
     skip: ride.skipShop,
     end() {
@@ -221,6 +230,6 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
       car.mesh.visible = distance > -APPROACH;
       return distance;
     },
-    dispose() { car?.dispose(); }
+    dispose() { car.dispose(); }
   };
 }

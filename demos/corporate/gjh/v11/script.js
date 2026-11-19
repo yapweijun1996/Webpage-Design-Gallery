@@ -14,13 +14,15 @@ import {createArrivalChime} from './assets/elevator-chime.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
 import {emptyInteriorReport} from './assets/interiors/warmup.js';
-import {createFixedClock, FIXED_STEP as STEP} from './assets/movement.js';
+import {createFixedClock, MOVEMENT, FIXED_STEP as STEP} from './assets/movement.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
 import {createMallHud} from './assets/hud-coordinator.js';
 import {storeDestinations} from './assets/store-destinations.js';
 import {icon} from './assets/icons.js';
+import {tramRoute} from './assets/tram-layout.js';
+import {createTestWalk} from './assets/test-walk.js';
 for (const slot of document.querySelectorAll('[data-icon]')) {
   const svg = icon(slot.dataset.icon, {size: 18});
   if (slot.id) slot.append(svg);
@@ -35,7 +37,9 @@ for (const [selector, name, size] of [
   document.querySelector(selector).prepend(icon(name, {size}));
 }
 document.querySelector('#interaction-point').append(icon('map-pin', {size: 18}));
-const expanded = new URLSearchParams(location.search).get('layout') !== 'classic';
+const startupFlags = new URLSearchParams(location.search);
+const expanded = startupFlags.get('layout') !== 'classic';
+const testEnabled = startupFlags.get('test') === '1' || Boolean(window.__GJH_TEST);
 document.body.classList.toggle('is-expanded', expanded);
 
 const arrivalChime = createArrivalChime();
@@ -71,11 +75,12 @@ let renderRequested = false, forceRender = false, enteredAt = null;
 let simulationMs = 0, simulationSteps = 0;
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
-let shopActionsLoad, shopActionsAttemptZone, shopActionsTime;
+let shopActionsLoad, shopActionsAttemptZone, shopActionsTime, testWalk;
 let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
 let nearby = null, currentZone = 'atrium', wasRiding = false;
 function clearTransientState(event) {
+  testWalk?.cancel('Test movement interrupted by a mode or focus change');
   quality.resetSampling();
   simulationMs = simulationSteps = 0;
   hideGuidance();
@@ -256,7 +261,67 @@ const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:wor
   rendererResources: Object.freeze({geometries: renderer?.info.memory.geometries || 0, textures: renderer?.info.memory.textures || 0}), frames, reducedMotion: reducedMotion.matches,
   roomSigns: Object.freeze((world?.roomSigns || []).map(({zone, mesh, left, right, top, bottom}) => Object.freeze({zone, visible: mesh.visible, left, right, top, bottom}))),
   pixelRatio: renderer?.getPixelRatio() || 1, hidden: document.hidden});
+testWalk = testEnabled ? createTestWalk({
+  position: () => player.body.translation(),
+  setInput: input => player.setInput(input),
+  snapshot
+}) : null;
+function canTest() { return canPlayEmote(); }
+function resumeTestSimulation() {
+  if (!manual) return;
+  manual = false;
+  fixedClock.reset();
+  player.resetInterpolation();
+  player.setInput(null);
+}
+async function startTestWalk(x, z, speed, face = false) {
+  if (!canTest()) throw new Error('Enter and focus the 3D mall before running a test command');
+  const pose = player.state;
+  if (pose.elevatorTravel || pose.seated || pose.tramRide?.active || pose.productApproaching) {
+    throw new Error('The player is busy');
+  }
+  resumeTestSimulation();
+  player.clearInput();
+  const maxSpeed = pose.pushing ? MOVEMENT.cart : MOVEMENT.desktopWalk;
+  return testWalk.start(x, z, speed ?? Math.min(2.5, maxSpeed), maxSpeed, face);
+}
+const testAPI = testEnabled ? {
+  testWalkTo: (x, z, {speed} = {}) => startTestWalk(x, z, speed),
+  testFaceTo: (x, z) => startTestWalk(x, z, undefined, true),
+  testPress(action) {
+    if (!['interact', 'next', 'drop', 'ride'].includes(action)) throw new RangeError('Unknown test action: ' + action);
+    if (!canTest()) return false;
+    resumeTestSimulation();
+    let handled = false;
+    if (action === 'next') handled = interactions.cycle(1);
+    else if (action === 'drop') handled = interactions.dispatch(interactions.get('drop', 'held-product'));
+    else if (action === 'interact' || selectedInteraction?.kind === 'tram') handled = interactNearby();
+    updateHUD(); requestRender();
+    return Boolean(handled);
+  },
+  testShopActions: () => shopActionsLoad ?? null,
+  testShopState: id => interactions?.shopState(id),
+  testProps: () => world?.interactables.physicsProps?.sample(),
+  testTramRouteLength: () => tramRoute.length,
+  testTramState: () => player?.tramState,
+  testTramCarVisible() {
+    const car = world?.scene.getObjectByName('Mall tram');
+    if (!car?.visible) return false;
+    const camera = player.camera;
+    const frustum = new three.Frustum().setFromProjectionMatrix(
+      new three.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    );
+    return frustum.intersectsObject(car);
+  },
+  testSetTramSpeed(multiplier) {
+    if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > 12) throw new RangeError('Expected tram speed multiplier 1–12');
+    if (!player?.state.tram) return false;
+    player.state.tram.setSpeedMultiplier(multiplier);
+    return true;
+  },
+} : {};
 Object.defineProperty(window, '__mall', {value: Object.freeze({
+  ...testAPI,
   performanceReport,
   movementSample: () => player && {...player.sampleMovement(),frames},
   emote(name) {
@@ -270,10 +335,12 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
   heroVisibility(number) { return heroVisibility(number); },
   teleport(zone) {
     if (!ready || !player.teleport(zone)) return false;
+    testWalk?.cancel('Test movement interrupted by teleport');
     quality.resetSampling(); updateHUD(); requestRender(); return true;
   },
   setInput(input) {
     if (!ready || modes.paused()) return;
+    testWalk?.cancel('Test movement interrupted by manual input');
     if (manual && input === null) { fixedClock.reset(); player.resetInterpolation(); }
     manual = input !== null;
     const clean = input === null ? null : {forward: Math.max(-1, Math.min(1, Number(input.forward) || 0)), right: Math.max(-1, Math.min(1, Number(input.right) || 0)), run: Boolean(input.run)};
@@ -283,13 +350,18 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
   },
   step(ms) {
     if (!ready || !Number.isFinite(ms) || document.hidden || modes.paused()) return snapshot();
+    testWalk?.cancel('Test movement interrupted by manual step');
     manual = true;
     quality.resetSampling();
     const count = Math.max(0, Math.min(600, Math.floor(ms / (STEP * 1000))));
     for (let i = 0; i < count; i++) tick();
     // Diagnostics return the draw counts for this exact simulated pose.
     player.updateCamera(count * STEP); greetOnArrival();
-    render(); return snapshot();
+    render();
+    // Also submit the final pose in a presentation callback. Synchronous steps
+    // can be batched inside one task, outside the browser's paint cycle.
+    requestRender();
+    return snapshot();
   }
 }), writable: false});
 function updateHUD() {
@@ -343,10 +415,12 @@ function tick(refreshHud = true) {
     }
   }
   movementTimings.physicsMs += performance.now() - doorsStart;
+  testWalk?.beforeTick();
   elevator?.update?.(STEP,p); player.update(STEP);
   const physicsStart = performance.now();
   physics.step();
   movementTimings.physicsMs += performance.now() - physicsStart;
+  testWalk?.afterTick();
   if (npcs) {
     const start = frameTrace?.start();
     npcs.update(STEP,player.state,reducedMotion.matches);
@@ -374,10 +448,22 @@ function render(force = false) {
       if (!shopActionsLoad && (['newmoon','mili','gogo'].includes(currentZone) || /^planned-space-(0[4-9]|1[0-7])$/.test(currentZone)) && shopActionsAttemptZone !== currentZone) {
         shopActionsAttemptZone = currentZone;
         shopActionsLoad = import('./assets/interiors/shop-interactions.js')
-          .then(({installShopInteractions}) => {
-            if (!pageEnded && !fatal) return installShopInteractions(three, world.scene, interactions, ui.announce);
+          .then(async ({installShopInteractions}) => {
+            if (pageEnded || fatal) return;
+            const targets = await installShopInteractions(three, world.scene, interactions, ui.announce);
+            if (pageEnded || fatal) return;
+            updateHUD(); requestRender();
+            if (!testEnabled) return;
+            const nativeSeats = world.seats.flatMap(seat => {
+              const stool = seat.id.match(/^newmoon-tasting-stool-([12])$/);
+              const item = stool ? 'S01-stools1' + stool[1] : seat.id;
+              if (!/^S0[13]-stools/.test(item)) return [];
+              return [{id:seat.id, item, x:seat.x, z:seat.z, standing:{x:seat.exitX,z:seat.exitZ},
+                zone:stool ? 'newmoon' : 'gogo', slot:item.slice(0,3), label:'Sit', done:'', seat:true}];
+            });
+            return [...targets.map(({id, x, z, standing, shopAction:{zone, slot, label, done, productId}}) =>
+              ({id, item:id, x, z, standing, zone, slot, label, done, productId})), ...nativeSeats];
           })
-          .then(() => { if (!pageEnded && !fatal) { updateHUD(); requestRender(); } })
           .catch(error => { shopActionsLoad = null; console.error('Shop actions unavailable:', error); });
       } else if (!shopActionsLoad && currentZone !== shopActionsAttemptZone) shopActionsAttemptZone = undefined;
       if (interactions.advanceShopActions(currentZone, Math.min(.1, (now-(shopActionsTime ?? now))/1000), reducedMotion.matches)) updateHUD();
@@ -586,7 +672,7 @@ function animate(now) {
   if (!advancing) fixedClock.reset();
   last = now;
   const callbackStart = performance.now();
-  const pad=readStandardGamepad();
+  const pad=testWalk?.active ? null : readStandardGamepad();
   const consumed=ui.handleGamepad(pad);
   const inspectPressed=Boolean(pad?.buttons[0]?.pressed);
   const focused=document.activeElement===canvas||document.activeElement===document.body;
@@ -608,8 +694,10 @@ function animate(now) {
   const slotMs = quality.cadence.take(now);
   if (!slotMs) return;
 
-  const uploadMs = warmModels(player.state);
   const live = advancing && !modes.paused() || modes.current() === 'shelf';
+  // Direct-pass warm-up submits a scissored draw to the default framebuffer.
+  // Its non-preserved back buffer must be covered by a live draw before paint.
+  const uploadMs = live || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
   let pose, callbackMs = 0;
   if (live || renderRequested) {
     // Tier preparation can exercise one real screen pixel. The live scene
@@ -622,6 +710,7 @@ function animate(now) {
       greetOnArrival();
     }
     pose = render(force);
+    if (pose) testWalk?.presented();
     const renderEnd = performance.now();
     callbackMs = renderEnd - callbackStart;
     if (pose && live && !windowBlurred && startupOverlay.hidden) {
@@ -673,6 +762,12 @@ ui.onTeleport(zone => {
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
 ui.onView(visual => { if (visual) { last = performance.now(); requestRender(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
 ui.onShopCycle(() => { if (interactions.cycle(1)) { updateHUD(); requestRender(); } });
+function interactNearby() {
+  if (!nearby) return false;
+  player.clearInput();
+  return player.state.seated && !selectedInteraction?.shopAction?.seated ?
+    player.stand() : ui.inspectNearby(nearby);
+}
 document.addEventListener('keydown', event => {
   if (modes.paused() || event.defaultPrevented) return;
   if (event.code === 'Escape') {
@@ -688,9 +783,7 @@ document.addEventListener('keydown', event => {
     }
   }
   if (event.code === 'KeyF' && nearby) {
-    event.preventDefault(); player.clearInput();
-    if (player.state.seated && !selectedInteraction?.shopAction?.seated) player.stand();
-    else ui.inspectNearby(nearby);
+    event.preventDefault(); interactNearby();
     updateHUD(); requestRender();
   }
 });

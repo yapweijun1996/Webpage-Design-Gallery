@@ -14,7 +14,7 @@ async function setup() {
     const zone = expandedStoreAt(position.x,position.z).id;
     const context = {zone,player:{camera}};
     let {item} = registry.nearest(position,context);
-    for (let i=0; item?.id !== target.id && i<entries.length+targets.length; i++) {
+    for (let i=0; item?.id !== target.id && i<2; i++) {
       assert(registry.cycle(1),target.id);
       item = registry.nearest(position,context).item;
     }

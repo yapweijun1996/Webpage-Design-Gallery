@@ -652,7 +652,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     getPosition: () => body.translation(),
     getBoardReason: () => tramBoardReason({pushing, seated, elevatorTravel, productApproaching:productApproach,
       character:character.state}),
-    clearPath,
+    clearPath, prepareModel,
     enterSeat(rideSeat, pose) {
       clearInput(); injected = null; cancelCollection(); vertical = 0;
       beforeTram = {yaw, facing, cameraDistance, eyeFov, eyeFovInitialized};
@@ -709,6 +709,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     setPaused: fn => { isPaused = fn; },
     setGamepadInput: input => { gamepad = input; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) previousYaw = yaw = input.yaw; if (Number.isFinite(input?.pitch)) setPitch(input.pitch); },
+    get tramState() { return tram?.controls.state; },
     get collisionTicks() { return collisions; },
     sampleMovement() {
       const {x,z} = body.translation();

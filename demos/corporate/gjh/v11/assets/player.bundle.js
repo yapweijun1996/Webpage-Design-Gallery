@@ -536,9 +536,9 @@ function createTramCar(T, scene) {
     [0, 0.11, 0, width, 0.1, length, jade],
     [0, 0.47, 1.44, width, 0.62, 0.12, jade],
     [0, 0.43, -1.44, width, 0.54, 0.12, jade],
-    [0.64, 0.38, 0, 0.12, 0.44, 2.78, jade],
-    [-0.64, 0.38, -0.98, 0.12, 0.44, 0.75, jade],
-    [-0.64, 0.38, 0.98, 0.12, 0.44, 0.75, jade],
+    [-0.64, 0.38, 0, 0.12, 0.44, 2.78, jade],
+    [0.64, 0.38, -0.98, 0.12, 0.44, 0.75, jade],
+    [0.64, 0.38, 0.98, 0.12, 0.44, 0.75, jade],
     [0, 0.4, -0.05, 0.98, 0.16, 0.46, jade],
     [0, 0.49, -0.05, 0.98, 0.06, 0.46, cream],
     [0, 0.78, -0.3, 0.98, 0.42, 0.12, cream],
@@ -760,9 +760,12 @@ var TRAM_STATION_ID = "tram-south-entrance";
 var tramLanding = Object.freeze({
   x: tramStations.entry.x,
   y: 0,
-  z: tramStations.entry.z + 1.5,
+  z: tramStations.entry.z - 1.5,
   radius: 1.4
 });
+function atTramLanding({ x, z }) {
+  return z <= tramStations.entry.z - tramEnvelopes.car.width / 2 - VISITOR_RADIUS && Math.hypot(x - tramLanding.x, z - tramLanding.z) < tramLanding.radius;
+}
 var tramCaptions = Object.freeze([
   ["S11", 22.56, "Hormel", "An open packing bench, kraft rolls and nested slatted crates make this a working stockroom for generic tinned goods."],
   ["S10", 27.14, "California Mexico", "A deep, open scallop shell cradles a generic seafood gift display against pale sand-coloured plaster."],
@@ -807,7 +810,7 @@ function tramBoardReason(player) {
 var idle = Object.freeze({ phase: "idle", distance: 0, caption: -1, active: false, seated: false, blocked: false });
 function createTramRide({ blocked, canBoard, canExit, onBoard, onExit }) {
   let phase = "idle", distance = 0, dwell = 0, obstructed = false;
-  let paused = false, ending = false, skipped = -1;
+  let paused = false, ending = false, skipped = -1, speedMultiplier = 1;
   const seated = () => phase === "ride" || phase === "arrival";
   function reset() {
     phase = "idle";
@@ -854,6 +857,9 @@ function createTramRide({ blocked, canBoard, canExit, onBoard, onExit }) {
       paused = false;
       return true;
     },
+    setSpeedMultiplier(value) {
+      speedMultiplier = value;
+    },
     step(dt) {
       if (phase === "approach" && move(dt, 0)) {
         phase = "boarding";
@@ -864,7 +870,7 @@ function createTramRide({ blocked, canBoard, canExit, onBoard, onExit }) {
           onBoard(tramRoute.sample(0));
           phase = "ride";
         }
-      } else if (phase === "ride" && !paused && move(dt, tramRoute.length)) {
+      } else if (phase === "ride" && !paused && move(dt * speedMultiplier, tramRoute.length)) {
         phase = "arrival";
         dwell = DWELL;
       } else if (phase === "arrival") {
@@ -923,9 +929,9 @@ function tramTrackBlocked(scene, visitor, from, to) {
 }
 function landingOccupied(scene) {
   const { x, z } = tramStations.entry;
-  return someVisitor(scene, (p) => Math.abs(p.x - x) < 0.6 + VISITOR_RADIUS && p.z >= z - VISITOR_RADIUS && p.z <= tramLanding.z + 0.6 + VISITOR_RADIUS);
+  return someVisitor(scene, (p) => Math.abs(p.x - x) < 0.6 + VISITOR_RADIUS && p.z >= tramLanding.z - 0.6 - VISITOR_RADIUS && p.z <= z + VISITOR_RADIUS);
 }
-function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat }) {
+function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel }) {
   if (!tramEnabled(expanded, search))
     return null;
   const exit = { x: tramLanding.x, y: 0.91, z: tramLanding.z };
@@ -940,10 +946,13 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
     frontEdge: 0.26
   };
   const seatTarget = { x: seat.x, y: seat.floor + 0.89, z: seat.z };
-  let car, previousDistance = 0;
+  const car = createTramCar(T, scene);
+  if (prepareModel)
+    prepareModel(car.mesh, { late: false }).catch(() => {});
+  let previousDistance = 0;
   function nearStation() {
     const p = getPosition();
-    return Math.abs(p.y - 0.89) <= 0.5 && Math.hypot(p.x - exit.x, p.z - exit.z) < tramLanding.radius;
+    return Math.abs(p.y - 0.89) <= 0.5 && atTramLanding(p);
   }
   const ride = createTramRide({
     blocked: (from, to) => tramTrackBlocked(scene, ride.seated ? null : getPosition(), from, to),
@@ -962,11 +971,11 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
     board() {
       if (getBoardReason() || !nearStation() || !ride.board())
         return false;
-      car ??= createTramCar(T, scene);
       previousDistance = ride.distance;
       car.place(tramRoute.sample(ride.distance));
       return true;
     },
+    setSpeedMultiplier: ride.setSpeedMultiplier,
     pause: ride.togglePause,
     skip: ride.skipShop,
     end() {
@@ -1005,7 +1014,7 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
       return distance;
     },
     dispose() {
-      car?.dispose();
+      car.dispose();
     }
   };
 }
@@ -2253,6 +2262,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       character: character.state
     }),
     clearPath,
+    prepareModel,
     enterSeat(rideSeat, pose) {
       clearInput();
       injected = null;
@@ -2386,6 +2396,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
         previousYaw = yaw = input.yaw;
       if (Number.isFinite(input?.pitch))
         setPitch(input.pitch);
+    },
+    get tramState() {
+      return tram?.controls.state;
     },
     get collisionTicks() {
       return collisions;

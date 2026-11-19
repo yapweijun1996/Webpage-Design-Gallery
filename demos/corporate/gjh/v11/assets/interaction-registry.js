@@ -1,9 +1,9 @@
-import {TRAM_BOARD_LABEL, TRAM_STATION_ID, tramLanding} from './tram-ride.js';
+import {TRAM_BOARD_LABEL, TRAM_STATION_ID, atTramLanding, tramLanding} from './tram-ride.js';
 import {isInFrontOfSeat} from './seat-placements.js';
 
 const tramStation = {
   ...tramLanding, id:TRAM_STATION_ID, kind:'tram', prompt:TRAM_BOARD_LABEL,
-  availability: ({player}) => Boolean(player?.tram && !player.tram.state.active),
+  availability: ({player}) => Boolean(player?.tram && !player.tram.state.active && atTramLanding(player)),
   handler: (_, {player}) => player.tram.board()
 };
 

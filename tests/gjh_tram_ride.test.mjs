@@ -7,7 +7,7 @@ import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
 import {createInteractionRegistry} from '../demos/corporate/gjh/v11/assets/interaction-registry.js';
 import {chaseDistance, tramRoute, seatEyeHeight} from '../demos/corporate/gjh/v11/assets/tram-layout.js';
 import {
-  createTramRide, tramBoardReason, tramCaptionIndex, tramCaptions, tramEnabled, tramLanding, tramTrackBlocked
+  atTramLanding, createTramRide, tramBoardReason, tramCaptionIndex, tramCaptions, tramEnabled, tramLanding, tramTrackBlocked
 } from '../demos/corporate/gjh/v11/assets/tram-ride.js';
 
 const near = (actual, expected, tolerance = 1e-5) =>
@@ -105,6 +105,9 @@ test('single-station ride boards after docking, pauses, skips a caption and retu
 });
 
 test('feature gating and blocking checks distinguish landing, track, and upper-floor visitors', () => {
+  assert.deepEqual([tramLanding.x, tramLanding.z], [10,39]);
+  assert.equal(atTramLanding({x:10,z:39}), true);
+  assert.equal(atTramLanding({x:10,z:40}), false);
   assert.equal(tramEnabled(true, ''), false);
   assert.equal(tramEnabled(true, '?tram=debug'), false);
   assert.equal(tramEnabled(false, '?tram=1'), false);

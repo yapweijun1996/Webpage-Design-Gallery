@@ -672,6 +672,11 @@ function roundedLoop(west, north, east, south, radius = 2) {
     return pose(segment, d - segment.start);
   } };
 }
+var tramEnvelopes = {
+  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
+  camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
+};
 var tramStations = {
   entry: { x: 10, z: 40.5 },
   east: { x: 33.5, z: 22 },
@@ -680,14 +685,18 @@ var tramStations = {
 var tramRoute = roundedLoop(tramStations.upper.x, 2.25, tramStations.east.x, tramStations.entry.z);
 
 // demos/corporate/gjh/v11/assets/tram-ride.js
+var VISITOR_RADIUS = 0.35;
 var TRAM_STATION_ID = "tram-south-entrance";
 var TRAM_BOARD_LABEL = "Ride the tram";
 var tramLanding = Object.freeze({
   x: tramStations.entry.x,
   y: 0,
-  z: tramStations.entry.z + 1.5,
+  z: tramStations.entry.z - 1.5,
   radius: 1.4
 });
+function atTramLanding({ x, z }) {
+  return z <= tramStations.entry.z - tramEnvelopes.car.width / 2 - VISITOR_RADIUS && Math.hypot(x - tramLanding.x, z - tramLanding.z) < tramLanding.radius;
+}
 var tramCaptions = Object.freeze([
   ["S11", 22.56, "Hormel", "An open packing bench, kraft rolls and nested slatted crates make this a working stockroom for generic tinned goods."],
   ["S10", 27.14, "California Mexico", "A deep, open scallop shell cradles a generic seafood gift display against pale sand-coloured plaster."],
@@ -5457,7 +5466,7 @@ var tramStation = {
   id: TRAM_STATION_ID,
   kind: "tram",
   prompt: TRAM_BOARD_LABEL,
-  availability: ({ player }) => Boolean(player?.tram && !player.tram.state.active),
+  availability: ({ player }) => Boolean(player?.tram && !player.tram.state.active && atTramLanding(player)),
   handler: (_, { player }) => player.tram.board()
 };
 function distanceToInteraction(item, position, context) {
@@ -6059,6 +6068,76 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
   };
 }
 
+// demos/corporate/gjh/v11/assets/test-walk.js
+var TEST_ARRIVAL_RADIUS = 0.08;
+function testWalkInput(position, x, z, speed, maxSpeed = MOVEMENT.desktopWalk) {
+  const dx = x - position.x, dz = z - position.z;
+  const distance = Math.hypot(dx, dz);
+  const yaw = distance < 0.000001 ? position.yaw : Math.atan2(-dx, -dz);
+  const targetSpeed = Math.min(speed, distance * 5);
+  return { yaw, forward: distance <= TEST_ARRIVAL_RADIUS ? 0 : targetSpeed / maxSpeed, right: 0 };
+}
+function createTestWalk({ position, setInput, snapshot }) {
+  let pending;
+  function finish(error) {
+    if (!pending)
+      return;
+    const { resolve, reject } = pending;
+    pending = null;
+    setInput(null);
+    if (error)
+      reject(new Error(error));
+    else
+      resolve(snapshot());
+  }
+  return {
+    get active() {
+      return Boolean(pending);
+    },
+    start(x, z, speed, maxSpeed, face = false) {
+      if (pending)
+        throw new Error("A test movement command is already running");
+      if (![x, z, speed].every(Number.isFinite) || speed <= 0 || speed > maxSpeed) {
+        throw new RangeError(`Expected finite coordinates and speed between 0 and ${maxSpeed} m/s`);
+      }
+      return new Promise((resolve, reject) => {
+        pending = { x, z, speed, maxSpeed, face, resolve, reject, ticks: 0, still: 0 };
+      });
+    },
+    beforeTick() {
+      if (!pending || pending.done)
+        return;
+      const { x, z, speed, maxSpeed, face } = pending;
+      const p = position();
+      const input = testWalkInput(p, x, z, speed, maxSpeed);
+      setInput({ ...input, forward: face ? 0 : input.forward });
+      pending.previous = p;
+    },
+    afterTick() {
+      if (!pending || pending.done)
+        return;
+      const { x, z, face, previous, speed } = pending;
+      const p = position();
+      const moved = Math.hypot(previous.x - p.x, previous.z - p.z);
+      const close = Math.hypot(x - p.x, z - p.z) <= TEST_ARRIVAL_RADIUS;
+      pending.still = moved <= Math.min(0.001, speed / 120) ? pending.still + 1 : 0;
+      pending.ticks++;
+      if ((face || close) && pending.still >= 3)
+        pending.done = true;
+      else if (pending.still >= 120 || pending.ticks >= 3600) {
+        finish(`Could not walk to (${x}, ${z}); stopped at (${p.x.toFixed(3)}, ${p.z.toFixed(3)})`);
+      }
+    },
+    presented() {
+      if (pending?.done)
+        finish();
+    },
+    cancel(reason) {
+      finish(reason);
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/script.js
 for (const slot2 of document.querySelectorAll("[data-icon]")) {
   const svg = icon(slot2.dataset.icon, { size: 18 });
@@ -6076,7 +6155,9 @@ for (const [selector, name, size] of [
   document.querySelector(selector).prepend(icon(name, { size }));
 }
 document.querySelector("#interaction-point").append(icon("map-pin", { size: 18 }));
-var expanded = new URLSearchParams(location.search).get("layout") !== "classic";
+var startupFlags = new URLSearchParams(location.search);
+var expanded = startupFlags.get("layout") !== "classic";
+var testEnabled = startupFlags.get("test") === "1" || Boolean(window.__GJH_TEST);
 document.body.classList.toggle("is-expanded", expanded);
 var arrivalChime = createArrivalChime();
 var skipRide = document.getElementById("skip-lift-ride");
@@ -6160,6 +6241,7 @@ var interactions;
 var shopActionsLoad;
 var shopActionsAttemptZone;
 var shopActionsTime;
+var testWalk;
 var lastPreloadUpdate = -Infinity;
 var initialPreloadStarted = null;
 var preloadSettled = !expanded;
@@ -6173,6 +6255,7 @@ var nearby = null;
 var currentZone = "atrium";
 var wasRiding = false;
 function clearTransientState(event) {
+  testWalk?.cancel("Test movement interrupted by a mode or focus change");
   quality.resetSampling();
   simulationMs = simulationSteps = 0;
   hideGuidance();
@@ -6444,7 +6527,78 @@ var snapshot = () => Object.freeze({
   pixelRatio: renderer?.getPixelRatio() || 1,
   hidden: document.hidden
 });
+testWalk = testEnabled ? createTestWalk({
+  position: () => player.body.translation(),
+  setInput: (input) => player.setInput(input),
+  snapshot
+}) : null;
+function canTest() {
+  return canPlayEmote();
+}
+function resumeTestSimulation() {
+  if (!manual)
+    return;
+  manual = false;
+  fixedClock.reset();
+  player.resetInterpolation();
+  player.setInput(null);
+}
+async function startTestWalk(x, z, speed, face = false) {
+  if (!canTest())
+    throw new Error("Enter and focus the 3D mall before running a test command");
+  const pose = player.state;
+  if (pose.elevatorTravel || pose.seated || pose.tramRide?.active || pose.productApproaching) {
+    throw new Error("The player is busy");
+  }
+  resumeTestSimulation();
+  player.clearInput();
+  const maxSpeed = pose.pushing ? MOVEMENT.cart : MOVEMENT.desktopWalk;
+  return testWalk.start(x, z, speed ?? Math.min(2.5, maxSpeed), maxSpeed, face);
+}
+var testAPI = testEnabled ? {
+  testWalkTo: (x, z, { speed } = {}) => startTestWalk(x, z, speed),
+  testFaceTo: (x, z) => startTestWalk(x, z, undefined, true),
+  testPress(action) {
+    if (!["interact", "next", "drop", "ride"].includes(action))
+      throw new RangeError("Unknown test action: " + action);
+    if (!canTest())
+      return false;
+    resumeTestSimulation();
+    let handled = false;
+    if (action === "next")
+      handled = interactions.cycle(1);
+    else if (action === "drop")
+      handled = interactions.dispatch(interactions.get("drop", "held-product"));
+    else if (action === "interact" || selectedInteraction?.kind === "tram")
+      handled = interactNearby();
+    updateHUD();
+    requestRender();
+    return Boolean(handled);
+  },
+  testShopActions: () => shopActionsLoad ?? null,
+  testShopState: (id) => interactions?.shopState(id),
+  testProps: () => world?.interactables.physicsProps?.sample(),
+  testTramRouteLength: () => tramRoute.length,
+  testTramState: () => player?.tramState,
+  testTramCarVisible() {
+    const car = world?.scene.getObjectByName("Mall tram");
+    if (!car?.visible)
+      return false;
+    const camera = player.camera;
+    const frustum = new three.Frustum().setFromProjectionMatrix(new three.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    return frustum.intersectsObject(car);
+  },
+  testSetTramSpeed(multiplier) {
+    if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > 12)
+      throw new RangeError("Expected tram speed multiplier 1–12");
+    if (!player?.state.tram)
+      return false;
+    player.state.tram.setSpeedMultiplier(multiplier);
+    return true;
+  }
+} : {};
 Object.defineProperty(window, "__mall", { value: Object.freeze({
+  ...testAPI,
   performanceReport,
   movementSample: () => player && { ...player.sampleMovement(), frames },
   emote(name) {
@@ -6471,6 +6625,7 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   teleport(zone) {
     if (!ready || !player.teleport(zone))
       return false;
+    testWalk?.cancel("Test movement interrupted by teleport");
     quality.resetSampling();
     updateHUD();
     requestRender();
@@ -6479,6 +6634,7 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   setInput(input) {
     if (!ready || modes.paused())
       return;
+    testWalk?.cancel("Test movement interrupted by manual input");
     if (manual && input === null) {
       fixedClock.reset();
       player.resetInterpolation();
@@ -6494,6 +6650,7 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   step(ms) {
     if (!ready || !Number.isFinite(ms) || document.hidden || modes.paused())
       return snapshot();
+    testWalk?.cancel("Test movement interrupted by manual step");
     manual = true;
     quality.resetSampling();
     const count = Math.max(0, Math.min(600, Math.floor(ms / (FIXED_STEP * 1000))));
@@ -6502,6 +6659,7 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
     player.updateCamera(count * FIXED_STEP);
     greetOnArrival();
     render();
+    requestRender();
     return snapshot();
   }
 }), writable: false });
@@ -6566,11 +6724,13 @@ function tick(refreshHud = true) {
     }
   }
   movementTimings.physicsMs += performance.now() - doorsStart;
+  testWalk?.beforeTick();
   elevator?.update?.(FIXED_STEP, p);
   player.update(FIXED_STEP);
   const physicsStart = performance.now();
   physics.step();
   movementTimings.physicsMs += performance.now() - physicsStart;
+  testWalk?.afterTick();
   if (npcs) {
     const start = frameTrace?.start();
     npcs.update(FIXED_STEP, player.state, reducedMotion2.matches);
@@ -6601,14 +6761,35 @@ function render(force = false) {
     if (expanded && startupOverlay.hidden) {
       if (!shopActionsLoad && (["newmoon", "mili", "gogo"].includes(currentZone) || /^planned-space-(0[4-9]|1[0-7])$/.test(currentZone)) && shopActionsAttemptZone !== currentZone) {
         shopActionsAttemptZone = currentZone;
-        shopActionsLoad = import("./assets/interiors/shop-interactions.js").then(({ installShopInteractions }) => {
-          if (!pageEnded && !fatal)
-            return installShopInteractions(three, world.scene, interactions, ui.announce);
-        }).then(() => {
-          if (!pageEnded && !fatal) {
-            updateHUD();
-            requestRender();
-          }
+        shopActionsLoad = import("./assets/interiors/shop-interactions.js").then(async ({ installShopInteractions }) => {
+          if (pageEnded || fatal)
+            return;
+          const targets = await installShopInteractions(three, world.scene, interactions, ui.announce);
+          if (pageEnded || fatal)
+            return;
+          updateHUD();
+          requestRender();
+          if (!testEnabled)
+            return;
+          const nativeSeats = world.seats.flatMap((seat) => {
+            const stool = seat.id.match(/^newmoon-tasting-stool-([12])$/);
+            const item = stool ? "S01-stools1" + stool[1] : seat.id;
+            if (!/^S0[13]-stools/.test(item))
+              return [];
+            return [{
+              id: seat.id,
+              item,
+              x: seat.x,
+              z: seat.z,
+              standing: { x: seat.exitX, z: seat.exitZ },
+              zone: stool ? "newmoon" : "gogo",
+              slot: item.slice(0, 3),
+              label: "Sit",
+              done: "",
+              seat: true
+            }];
+          });
+          return [...targets.map(({ id, x, z, standing, shopAction: { zone, slot: slot2, label: label2, done, productId } }) => ({ id, item: id, x, z, standing, zone, slot: slot2, label: label2, done, productId })), ...nativeSeats];
         }).catch((error) => {
           shopActionsLoad = null;
           console.error("Shop actions unavailable:", error);
@@ -6866,7 +7047,7 @@ function animate(now) {
     fixedClock.reset();
   last = now;
   const callbackStart = performance.now();
-  const pad = readStandardGamepad();
+  const pad = testWalk?.active ? null : readStandardGamepad();
   const consumed = ui.handleGamepad(pad);
   const inspectPressed = Boolean(pad?.buttons[0]?.pressed);
   const focused = document.activeElement === canvas || document.activeElement === document.body;
@@ -6893,8 +7074,8 @@ function animate(now) {
   const slotMs = quality.cadence.take(now);
   if (!slotMs)
     return;
-  const uploadMs = warmModels(player.state);
   const live = advancing && !modes.paused() || modes.current() === "shelf";
+  const uploadMs = live || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
   let pose, callbackMs = 0;
   if (live || renderRequested) {
     const renderStart = performance.now();
@@ -6905,6 +7086,8 @@ function animate(now) {
       greetOnArrival();
     }
     pose = render(force);
+    if (pose)
+      testWalk?.presented();
     const renderEnd = performance.now();
     callbackMs = renderEnd - callbackStart;
     if (pose && live && !windowBlurred && startupOverlay.hidden) {
@@ -7014,6 +7197,12 @@ ui.onShopCycle(() => {
     requestRender();
   }
 });
+function interactNearby() {
+  if (!nearby)
+    return false;
+  player.clearInput();
+  return player.state.seated && !selectedInteraction?.shopAction?.seated ? player.stand() : ui.inspectNearby(nearby);
+}
 document.addEventListener("keydown", (event) => {
   if (modes.paused() || event.defaultPrevented)
     return;
@@ -7041,11 +7230,7 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.code === "KeyF" && nearby) {
     event.preventDefault();
-    player.clearInput();
-    if (player.state.seated && !selectedInteraction?.shopAction?.seated)
-      player.stand();
-    else
-      ui.inspectNearby(nearby);
+    interactNearby();
     updateHUD();
     requestRender();
   }

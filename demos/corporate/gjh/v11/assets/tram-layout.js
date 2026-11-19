@@ -76,7 +76,7 @@ export function addTramDebug(T, scene, now = () => performance.now()) {
 }
 
 // One opaque instanced draw with the mall's shared plain-box finish. Keep all pieces
-// inside the surveyed car envelope and leave the south-side boarding opening.
+// inside the surveyed car envelope and leave the landing-side boarding opening.
 export function createTramCar(T, scene) {
   const existingMaterial = scene.getObjectByName('box plain')?.material;
   const material = existingMaterial ?? new T.MeshStandardMaterial({roughness:.72});
@@ -87,9 +87,9 @@ export function createTramCar(T, scene) {
     [0,.11,0,width,.10,length,jade],
     [0,.47,1.44,width,.62,.12,jade],
     [0,.43,-1.44,width,.54,.12,jade],
-    [.64,.38,0,.12,.44,2.78,jade],
-    [-.64,.38,-.98,.12,.44,.75,jade],
-    [-.64,.38,.98,.12,.44,.75,jade],
+    [-.64,.38,0,.12,.44,2.78,jade],
+    [.64,.38,-.98,.12,.44,.75,jade],
+    [.64,.38,.98,.12,.44,.75,jade],
     [0,.40,-.05,.98,.16,.46,jade],
     [0,.49,-.05,.98,.06,.46,cream],
     [0,.78,-.30,.98,.42,.12,cream],

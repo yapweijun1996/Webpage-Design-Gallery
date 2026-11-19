@@ -153,12 +153,20 @@ function createPhysicsPropPool(world, { phone = false } = {}) {
       }
     }
   }
+  function sample(prop) {
+    const slot = slots.find((slot2) => slot2.prop === prop && slot2.body);
+    if (!slot)
+      return null;
+    const { x, y, z } = slot.body.translation();
+    return { x, y, z, sleeping: slot.body.isSleeping() };
+  }
   return {
     setZone,
     spawn,
     despawn,
     push,
     afterStep,
+    sample,
     get zone() {
       return zone;
     },
@@ -262,6 +270,13 @@ function registerPhysicsProps(T, R, world, {
       product?.release();
   };
   interactables.physicsProps = {
+    sample: () => ({
+      can: dropped ? { ...pool.sample(can), id: dropped.id, floor: can.floor, halfHeight: can.halfHeight } : null,
+      ball: pool.sample(ball),
+      basket: pool.sample(basket),
+      activeBodies: pool.activeBodies,
+      bodyStepMs
+    }),
     visit(zone, position) {
       const next = position.elevatorTravel ? null : zone;
       if (next !== pool.zone) {
