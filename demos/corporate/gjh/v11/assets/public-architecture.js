@@ -290,7 +290,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
           .90+(blade%3)*.04,cz+.19*Math.cos(yaw),.50,1,.88,yaw,-.71,'YXZ');
       }
     }
-    tree(x,z,4.55);
+    // Keep the lift landing in view above the low planting collar.
     lightPool(x,.023,z,2.8,2.8);
   }
   // A03's trailing greenery softens the upper clerestory. Planter boxes

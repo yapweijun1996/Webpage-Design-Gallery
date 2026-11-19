@@ -196,14 +196,14 @@ class GalleryTests(unittest.TestCase):
                 self.assertIn(artwork, cached)
                 self.assertTrue((output / artwork).is_file())
             mall = output / "demos/corporate/gjh/v11"
-            for kit in ("signage", "interiors"):
+            for kit in ("signage", "interiors", "tram"):
                 for source in (ROOT / "demos/corporate/gjh/v11/assets" / kit).rglob("*"):
                     if source.is_file():
                         name = source.relative_to(ROOT)
                         self.assertEqual((output / name).read_bytes(), source.read_bytes(), name)
                         self.assertNotIn(name.as_posix(), cached)
             startup_models = json.loads((ROOT / "data/gjh-startup-assets.json").read_text())
-            self.assertFalse(any(name.startswith(("signage/", "interiors/")) for name in startup_models))
+            self.assertFalse(any(name.startswith(("signage/", "interiors/", "tram/")) for name in startup_models))
             mall_worker = (mall / "pwa-sw.js").read_text()
             mall_entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", mall_worker, re.S).group(1))
             self.assertEqual({entry["path"] for entry in mall_entries}, {

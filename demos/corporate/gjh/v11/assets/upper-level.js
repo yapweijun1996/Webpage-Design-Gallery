@@ -17,12 +17,6 @@ export const deckPlanters=[[-6.25,13.8],[.45,13.8],[-7,8],[.45,6.15]];
 const lamp=[-1.38,5.75],table=[-4.79,6.05];
 const directory={x:-2.96,z:13.52,width:2.46,height:2.56};
 
-// The open lightwell starts at the platform's existing east balustrade.
-export const galleryVoid=Object.freeze({
-  minX:lift.slab.maxX,maxX:lift.roofOpening.maxX-1.53,
-  minZ:lift.slab.minZ,maxZ:lift.slab.maxZ,farRise:1.46
-});
-
 // Two short returns protect the sides of the threshold while the cabin is docked.
 // The lift owns all four perimeter walls, fixed shaft walls and moving west gate.
 export function thresholdReturns() {
@@ -165,54 +159,13 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   brass(x,.23,z,1.25,.46,.13);
   collider(x,floor+1.31,z,width+.10,2.62,.17);
 
-  // The east cut face of the roof becomes the apron of one continuous arcade.
-  // The four windows are architectural displays outside the walkable deck.
+  // Frame the architectural shop windows across the lightwell. The former
+  // sloped bridges and balcony apron ended at guards and had no public access.
   const front=lift.roofOpening.maxX, start=lift.roofOpening.minZ, end=lift.roofOpening.maxZ;
   const span=(end-start)/4,mid=(start+end)/2;
   block(0xc0ad8c,front+.12,1.17,mid,.42,.56,end-start+.14);
-  block(0xbcae94,front-.67,1.39,mid,1.78,.15,end-start+.12);
-  const lip=front-1.53;
-  glass.push(plane.clone().applyMatrix4(matrix(lip,1.92,mid,end-start,.96,1,-Math.PI/2)));
-  brass(lip,2.42,mid,.076,.055,end-start);
-  led(lip,1.37,mid,.075,.027,end-start);
-  for(let j=0;j<=12;j++)brass(lip,1.93,start+(end-start)*j/12,.045,.99,.045);
   block(0x28453b,front+.16,2.98,mid,.30,3.3,end-start+.12);
   for(const y of [1.44,4.61])brass(front-.09,y,mid,.20,.085,end-start+.18);
-  // The lightwell overlooks the ground court even when the lift is upstairs.
-  // The same inclined spans drive the fascia, glass, LED and Rapier guards.
-  const {minX,maxX,minZ,maxZ,farRise}=galleryVoid;
-  const run=maxX-minX,riseAngle=Math.atan2(farRise,run);
-  const slope=Math.hypot(run,farRise),cx=(minX+maxX)/2;
-  const rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),riseAngle);
-  function bridgeMatrix(y,z,w,h,d) {
-    return new T.Matrix4().compose(new T.Vector3(cx,floor+farRise/2+y,z),rotation,new T.Vector3(w,h,d));
-  }
-  function bridgeCollider(y,z,w,h,d) {
-    collider(cx,floor+farRise/2+y,z,w,h,d)?.setRotation(rotation);
-  }
-  for(const [z,side] of [[minZ,-1],[maxZ,1]]){
-    const walkway=z+side*.52;
-    tint(unit,bridgeMatrix(-.075,walkway,slope+.10,.15,1.05),0xc3ac88);
-    bridgeCollider(-.075,walkway,slope+.10,.15,1.05);
-    for(const edge of [z,z+side*1.05]){
-      glass.push(plane.clone().applyMatrix4(bridgeMatrix(.55,edge,slope+.08,1.10,1)));
-      bridgeCollider(.55,edge,slope+.10,1.13,.10);
-      gold.push(bridgeMatrix(1.13,edge,slope+.10,.056,.09));
-    }
-    glass.push(plane.clone().applyMatrix4(matrix(minX,.55,walkway,1.06,1.10,1,-Math.PI/2)));
-    brass(minX,1.13,walkway,.09,.056,1.09);
-    collider(minX,floor+.55,walkway,.10,1.13,1.09);
-    emit.push(unit.clone().applyMatrix4(bridgeMatrix(.10,z,slope+.10,.038,.10)));
-    for(const t of [.25,.5,.75])brass(minX+run*t,farRise*t+.55,z,.043,1.10,.043);
-  }
-  collider(front-.67,floor+1.39,mid,1.78,.15,end-start+.12);
-  collider(lip,floor+farRise+.48,mid,.10,1.02,end-start);
-  collider(front+.10,floor+2.98,mid,.19,3.3,end-start);
-  for(const endZ of [start,end]){
-    glass.push(plane.clone().applyMatrix4(matrix(front-.67,1.94,endZ,1.78,1.01,1)));
-    brass(front-.67,2.46,endZ,1.78,.055,.075);
-    collider(front-.67,floor+1.94,endZ,1.78,1.03,.10);
-  }
 
   for(let i=0;i<4;i++){
     const c=start+(i+.5)*span;

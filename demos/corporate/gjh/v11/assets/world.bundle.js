@@ -427,7 +427,7 @@ function roundedLoop(west, north, east, south, radius = 2) {
   } };
 }
 var tramEnvelopes = {
-  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  car: { width: 1.4, length: 3, bottom: 0, top: 2.2 },
   passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
   camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
 };
@@ -1882,7 +1882,6 @@ totalEmissiveRadiance *= vColor;`);
         solid("publicLeaf", leafColors[(clump + blade) % 2], cx + 0.19 * Math.sin(yaw), 0.9 + blade % 3 * 0.04, cz + 0.19 * Math.cos(yaw), 0.5, 1, 0.88, yaw, -0.71, "YXZ");
       }
     }
-    tree(x, z, 4.55);
     lightPool(x, 0.023, z, 2.8, 2.8);
   }
   for (let bay = 0;bay < 5; bay++) {
@@ -3761,13 +3760,6 @@ var deckPlanters = [[-6.25, 13.8], [0.45, 13.8], [-7, 8], [0.45, 6.15]];
 var lamp = [-1.38, 5.75];
 var table = [-4.79, 6.05];
 var directory = { x: -2.96, z: 13.52, width: 2.46, height: 2.56 };
-var galleryVoid = Object.freeze({
-  minX: liftLayout.slab.maxX,
-  maxX: liftLayout.roofOpening.maxX - 1.53,
-  minZ: liftLayout.slab.minZ,
-  maxZ: liftLayout.slab.maxZ,
-  farRise: 1.46
-});
 function thresholdReturns() {
   const { minX, maxX, minZ, maxZ } = liftLayout.threshold;
   return [minZ, maxZ].map((z) => ({ x: (minX + maxX) / 2, z, width: maxX - minX, depth: 0.055 }));
@@ -3833,15 +3825,15 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     lightWash(x2, floor + 0.018, z2, alongX ? w : 0.64, alongX ? 0.64 : d, 0, -Math.PI / 2);
   }
   function frame(rect, door) {
-    const { minX: minX2, maxX: maxX2, minZ: minZ2, maxZ: maxZ2 } = rect, cx2 = (minX2 + maxX2) / 2, cz2 = (minZ2 + maxZ2) / 2;
-    for (const z2 of [minZ2, maxZ2])
-      guard(cx2, z2, maxX2 - minX2, 0.1);
-    guard(maxX2, cz2, 0.1, maxZ2 - minZ2);
+    const { minX, maxX, minZ, maxZ } = rect, cx = (minX + maxX) / 2, cz2 = (minZ + maxZ) / 2;
+    for (const z2 of [minZ, maxZ])
+      guard(cx, z2, maxX - minX, 0.1);
+    guard(maxX, cz2, 0.1, maxZ - minZ);
     if (!door)
-      guard(minX2, cz2, 0.1, maxZ2 - minZ2);
+      guard(minX, cz2, 0.1, maxZ - minZ);
     else
-      for (const [a, b] of [[minZ2, door.minZ], [door.maxZ, maxZ2]])
-        guard(minX2, (a + b) / 2, 0.1, b - a);
+      for (const [a, b] of [[minZ, door.minZ], [door.maxZ, maxZ]])
+        guard(minX, (a + b) / 2, 0.1, b - a);
   }
   frame(liftLayout.slab);
   frame(liftLayout.shaft, liftLayout.threshold);
@@ -3934,50 +3926,9 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   const front = liftLayout.roofOpening.maxX, start = liftLayout.roofOpening.minZ, end = liftLayout.roofOpening.maxZ;
   const span = (end - start) / 4, mid = (start + end) / 2;
   block(12627340, front + 0.12, 1.17, mid, 0.42, 0.56, end - start + 0.14);
-  block(12365460, front - 0.67, 1.39, mid, 1.78, 0.15, end - start + 0.12);
-  const lip = front - 1.53;
-  glass.push(plane.clone().applyMatrix4(matrix(lip, 1.92, mid, end - start, 0.96, 1, -Math.PI / 2)));
-  brass(lip, 2.42, mid, 0.076, 0.055, end - start);
-  led(lip, 1.37, mid, 0.075, 0.027, end - start);
-  for (let j = 0;j <= 12; j++)
-    brass(lip, 1.93, start + (end - start) * j / 12, 0.045, 0.99, 0.045);
   block(2639163, front + 0.16, 2.98, mid, 0.3, 3.3, end - start + 0.12);
   for (const y of [1.44, 4.61])
     brass(front - 0.09, y, mid, 0.2, 0.085, end - start + 0.18);
-  const { minX, maxX, minZ, maxZ, farRise } = galleryVoid;
-  const run = maxX - minX, riseAngle = Math.atan2(farRise, run);
-  const slope = Math.hypot(run, farRise), cx = (minX + maxX) / 2;
-  const rotation = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), riseAngle);
-  function bridgeMatrix(y, z2, w, h, d) {
-    return new T.Matrix4().compose(new T.Vector3(cx, floor + farRise / 2 + y, z2), rotation, new T.Vector3(w, h, d));
-  }
-  function bridgeCollider(y, z2, w, h, d) {
-    collider(cx, floor + farRise / 2 + y, z2, w, h, d)?.setRotation(rotation);
-  }
-  for (const [z2, side] of [[minZ, -1], [maxZ, 1]]) {
-    const walkway = z2 + side * 0.52;
-    tint2(unit, bridgeMatrix(-0.075, walkway, slope + 0.1, 0.15, 1.05), 12823688);
-    bridgeCollider(-0.075, walkway, slope + 0.1, 0.15, 1.05);
-    for (const edge of [z2, z2 + side * 1.05]) {
-      glass.push(plane.clone().applyMatrix4(bridgeMatrix(0.55, edge, slope + 0.08, 1.1, 1)));
-      bridgeCollider(0.55, edge, slope + 0.1, 1.13, 0.1);
-      gold.push(bridgeMatrix(1.13, edge, slope + 0.1, 0.056, 0.09));
-    }
-    glass.push(plane.clone().applyMatrix4(matrix(minX, 0.55, walkway, 1.06, 1.1, 1, -Math.PI / 2)));
-    brass(minX, 1.13, walkway, 0.09, 0.056, 1.09);
-    collider(minX, floor + 0.55, walkway, 0.1, 1.13, 1.09);
-    emit.push(unit.clone().applyMatrix4(bridgeMatrix(0.1, z2, slope + 0.1, 0.038, 0.1)));
-    for (const t of [0.25, 0.5, 0.75])
-      brass(minX + run * t, farRise * t + 0.55, z2, 0.043, 1.1, 0.043);
-  }
-  collider(front - 0.67, floor + 1.39, mid, 1.78, 0.15, end - start + 0.12);
-  collider(lip, floor + farRise + 0.48, mid, 0.1, 1.02, end - start);
-  collider(front + 0.1, floor + 2.98, mid, 0.19, 3.3, end - start);
-  for (const endZ of [start, end]) {
-    glass.push(plane.clone().applyMatrix4(matrix(front - 0.67, 1.94, endZ, 1.78, 1.01, 1)));
-    brass(front - 0.67, 2.46, endZ, 1.78, 0.055, 0.075);
-    collider(front - 0.67, floor + 1.94, endZ, 1.78, 1.03, 0.1);
-  }
   for (let i = 0;i < 4; i++) {
     const c = start + (i + 0.5) * span;
     if (i === 0 || i === 3) {

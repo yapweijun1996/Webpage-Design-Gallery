@@ -4,6 +4,8 @@ Goh Joo Hin Pte Ltd traces its origins to a provision store started by the Goh b
 
 The 17 shops here are the V11 game’s authored roster. Some represent house brands, some represent partner or distributor relationships, and some are category-led concepts. The layout is an independent, unofficial virtual mall. Inclusion does not establish current exclusivity, ownership, a physical tenancy, endorsement, or permission to redistribute product images. [Goh Joo Hin brand overview](https://www.gjhglobal.com/) · [V11 shop programme](../gjh-v11-interior-program.md)
 
+[Production model checklist](production-model-checklist.md) tracks the next numbered modeling passes and their acceptance evidence.
+
 ## Shop research index
 
 | Unit | Shop |

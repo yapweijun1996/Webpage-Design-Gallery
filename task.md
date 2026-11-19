@@ -28,6 +28,10 @@ Shipped on 2026-11-19 (main c06ed9ad): automatic festival theme, single sticky s
 - [x] Verify the S12–S14 exhibits on published build `ba278cec19153b4e`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44554504937)
 - [x] Verify S15–S17 on published build `95e5ba13a1d96807`. Repeat the full New Moon route at 390 px on the same build. [Published showroom verification](docs/goh-joo-hin/README.md#published-showroom-verification)
 
+### V11 numbered production models
+
+- [ ] Work through the [S01–S17 production checklist](docs/goh-joo-hin/production-model-checklist.md) in order. Keep each released asset and each exact-product deferral recorded under its shop.
+
 ### V11 loader motion
 
 [Codex CLI concept storyboard](docs/gjh-v11-references/loader-motion-concept.webp) shows Engine, Models and Retry on a phone viewport. The illustration explores a gold atrium outline, progressive fixture lighting and a quiet failure state. [Chrome startup comparison](docs/gjh-v11-references/loader-motion-runtime.jpg).

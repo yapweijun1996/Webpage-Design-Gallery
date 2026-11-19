@@ -87,7 +87,7 @@ def run():
                 open_map(page)
                 assert page.locator('#mall-map .expanded-map-number').count()==17
                 assert page.locator('[data-space-status="open"]').count()==14
-                assert page.locator('#map-destination option').count()==17
+                assert page.locator('#map-destination option').count()==19
                 assert page.locator('[data-teleport]').count()==3
                 if args.screens and not visitor and width in (390,768,1440):
                     page.screenshot(path=str(args.screens/f'map-{width}.png'))

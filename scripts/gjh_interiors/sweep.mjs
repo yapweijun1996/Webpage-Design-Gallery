@@ -67,22 +67,27 @@ export function floorGrid(shop, boxes) {
     const jamb = Math.hypot(Math.max(0,door-Math.abs(x)),Math.max(0,front-z));
     return Math.min(width/2-Math.abs(x),z-back,jamb,...boxes.map(b=>distance(p,b)));
   }
+  return clearanceGrid(clearance, [0, front], ([,z]) => z <= front);
+}
+
+export function clearanceGrid(clearance, origin, inBounds = () => true) {
+  const key = point => point.map(value => Math.round(value / grid)).join(',');
   // Sample between grid nodes as well as at each standing position.
   function edge(from,to,r) {
     const n = Math.max(1, Math.ceil(Math.hypot(to[0]-from[0],to[1]-from[1])/.05));
     for (let i=0;i<=n;i++) {
       const f=i/n;
-      if (clearance(from.map((v,k)=>v+f*(to[k]-v)))+1e-8 < r) return false;
+      if (!(clearance(from.map((v,k)=>v+f*(to[k]-v)))+1e-8 >= r)) return false;
     }
     return true;
   }
   function flood(radius) {
-    const start = [0,Math.round(front/grid)], queue = [start], visited = new Map();
+    const start = origin.map(value => Math.round(value / grid)), queue = [start], visited = new Map();
     const queued = new Set([start.join(',')]);
     for (let head=0;head<queue.length;head++) {
       const [i,j] = queue[head], key=i+','+j;
       const p=[i*grid,j*grid];
-      if (p[1]>front || clearance(p)<radius-1e-8) continue;
+      if (!inBounds(p) || clearance(p)<radius-1e-8) continue;
       visited.set(key,p);
       for (const [di,dj] of [[0,1],[1,0],[0,-1],[-1,0]]) {
         const ni=i+di,nj=j+dj;
@@ -95,7 +100,7 @@ export function floorGrid(shop, boxes) {
     }
     return visited;
   }
-  return {clearance,edge,flood};
+  return {clearance,edge,flood,key};
 }
 
 export function auditStandingInteractions(shop) {
@@ -139,9 +144,8 @@ export function audit(shop,studio) {
   // Structural side and back walls are axis-aligned in the local shop frame.
   const walls=boxes.filter(b=>Math.max(b.size[0],b.size[2])>6 && Math.min(b.size[0],b.size[2])<.3);
   const reachable=floor.flood(capsule), wide=floor.flood(.6);
-  const pointKey=p=>p.map(v=>Math.round(v/grid)).join(',');
   function connected(p,field,r) {
-    const node=field.get(pointKey(p));
+    const node=field.get(floor.key(p));
     return node && floor.edge(node,p,r);
   }
   for (const item of shop.items) {

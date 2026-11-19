@@ -11,6 +11,7 @@ import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {allowMallLightWash, createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createArrivalChime} from './assets/elevator-chime.js';
+import {liftLayout} from './assets/lift-layout.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
 import {emptyInteriorReport} from './assets/interiors/warmup.js';
@@ -40,6 +41,7 @@ for (const [selector, name, size] of [
 document.querySelector('#interaction-point').append(icon('map-pin', {size: 18}));
 const startupFlags = new URLSearchParams(location.search);
 const expanded = startupFlags.get('layout') !== 'classic';
+const liftEnabled = startupFlags.get('visitor') !== 'v1';
 const testEnabled = startupFlags.get('test') === '1' || Boolean(window.__GJH_TEST);
 document.body.classList.toggle('is-expanded', expanded);
 
@@ -80,9 +82,11 @@ let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = 
 let shopActionsLoad, shopActionsAttemptZone, shopActionsTime, testWalk;
 let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
+let pendingFloorRide;
 let nearby = null, currentZone = 'atrium', wasRiding = false;
 function clearTransientState(event) {
   testWalk?.cancel('Test movement interrupted by a mode or focus change');
+  if (event.kind === 'interrupt') pendingFloorRide = undefined;
   quality.resetSampling();
   simulationMs = simulationSteps = 0;
   hideGuidance();
@@ -101,7 +105,7 @@ const ui = createUI(expanded), canvas = document.querySelector('#scene');
 const destinations = storeDestinations(expanded).map(store => ({
   ...store, arrival: expanded ? expandedStoreArrival(store.id) : store.arrival,
 }));
-const mallHud = createMallHud({destinations, scene: canvas, announce: ui.announce,
+const mallHud = createMallHud({destinations, expanded:expanded && liftEnabled, scene: canvas, announce: ui.announce,
   subscribeBag: ui.onBagChange, subscribeInspect: ui.onProductInspect});
 const performanceMonitor = createPerformanceMonitor();
 performanceMonitor.setEnabled(true);
@@ -301,6 +305,9 @@ const testAPI = testEnabled ? {
     updateHUD(); requestRender();
     return Boolean(handled);
   },
+  testUpperPoints: () => world?.interactables
+    .filter(item => item.y === liftLayout.upper && (item.seat || item.id.startsWith('brand-plaque-')))
+    .map(({id, x, z, seat}) => ({id, x, z, name:seat?.name})) ?? [],
   testShopActions: () => shopActionsLoad ?? null,
   testShopState: id => interactions?.shopState(id),
   testProps: () => world?.interactables.physicsProps?.sample(),
@@ -313,7 +320,8 @@ const testAPI = testEnabled ? {
     const frustum = new three.Frustum().setFromProjectionMatrix(
       new three.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
     );
-    return frustum.intersectsObject(car);
+    // The real carriage is a Group of meshes, so test its world-space box instead of one geometry.
+    return frustum.intersectsBox(new three.Box3().setFromObject(car));
   },
   testSetTramSpeed(multiplier) {
     if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > 12) throw new RangeError('Expected tram speed multiplier 1–12');
@@ -423,6 +431,19 @@ function tick(refreshHud = true) {
   physics.step();
   movementTimings.physicsMs += performance.now() - physicsStart;
   testWalk?.afterTick();
+  if (pendingFloorRide?.phase === 'calling' && !elevator.calling) {
+    const {target, arrival} = pendingFloorRide;
+    const result = rideElevator({target});
+    pendingFloorRide = result.riding && arrival ? {target, arrival, phase:'riding'} : undefined;
+    ui.announce(result.reason || 'Elevator travelling to the other level.');
+  } else if (pendingFloorRide?.phase === 'riding' && !player.state.elevatorTravel) {
+    const {target, arrival} = pendingFloorRide;
+    pendingFloorRide = undefined;
+    if (Math.abs(player.state.y - target) < .35) {
+      updateHUD();
+      arrival();
+    }
+  }
   if (npcs) {
     const start = frameTrace?.start();
     npcs.update(STEP,player.state,reducedMotion.matches);
@@ -472,6 +493,7 @@ function render(force = false) {
       shopActionsTime = now;
     }
     mallHud.update({position: pose, zone: currentZone, travelling: pose.elevatorTravel,
+      liftDocked: expanded && elevator?.height === 0 && !elevator.calling,
       enabled: !windowBlurred && !modes.paused() && document.body.classList.contains('is-3d') && startupOverlay.hidden,
       now, forward: {x: -matrix[8], z: -matrix[10]}});
     const guiding = !windowBlurred && ['explore', 'cart'].includes(modes.current()) && !pose.character.collection.active;
@@ -758,8 +780,30 @@ function fallback(message, terminal = true) {
   shelfFocus?.close();
   cancelAnimationFrame(frame); frame = 0; modes.interrupt('fallback'); ui.fallback(message);
 }
+function rideElevator(options) {
+  if (!ready || !elevator) return {reason:'The elevator is unavailable right now. Please try again.'};
+  manual = false;
+  player.setInput(null);
+  const result = player.useElevator(elevator, arrivalChime.play, options);
+  if (result.riding) arrivalChime.unlock();
+  return result;
+}
+function requestFloorRide(upper, arrival) {
+  const target = upper ? liftLayout.upper : 0;
+  const result = rideElevator({approach:true, target});
+  if (result.calling) {
+    pendingFloorRide = {target, arrival, phase:'calling'};
+    // Unlock during the map tap, before the automatic boarding tick.
+    arrivalChime.unlock();
+  } else if (result.riding && arrival) {
+    pendingFloorRide = {target, arrival, phase:'riding'};
+  }
+  if (ready) { updateHUD(); requestRender(); }
+  return result;
+}
 ui.onTeleport(zone => {
   if (!ready || player.state.elevatorTravel || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone))) return false;
+  pendingFloorRide = undefined;
   manual = false; player.cancelCollection(); player.setInput(null);
   if (!player.teleport(zone)) return false;
   quality.resetSampling(); updateHUD(); requestRender(); canvas.focus({preventScroll: true}); return true;
@@ -871,6 +915,7 @@ function applyProfile(profile) {
   profile = quality.apply(profile);
   themeStage?.setTier?.(profile.tier);
   void elevator?.kit?.select(profile.tier);
+  void player?.setTramTier?.(profile.tier);
   npcs?.setQuality({tier:profile.tier,mobile:renderWidth<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
   if (!contextLost) renderer.shadowMap.enabled = profile.shadows;
 }
@@ -1054,7 +1099,7 @@ async function initialize() {
     } catch { mallTheme?.destroy();mallTheme=null; }
     ui.configureMallTheme(mallTheme);
   }
-  if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
+  if (liftEnabled) {
     const {createElevatorV2} = await import('./assets/elevator-v2.js');
     elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
     world.prepareUpperLevel();
@@ -1090,7 +1135,7 @@ async function initialize() {
   } : null;
   const {createPlayer} = await import('./assets/player.js');
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,
-    world.cameraObstacles, expanded, prepareAvatar, portrait);
+    world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
   if (player.npcSource) await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareAvatar));
   const {createDOMProjection} = await import('./assets/dom-projection.js');
@@ -1126,11 +1171,9 @@ async function initialize() {
     } catch { /* Appearance controls are optional. */ }
   }
   if (elevator) ui.setElevator(() => {
-    manual=false; player.setInput(null);
-    const ok=player.useElevator(elevator,arrivalChime.play);
-    if (ok && player.state.elevatorTravel) arrivalChime.unlock();
-    updateHUD(); requestRender(); return ok;
-  });
+    const result = rideElevator();
+    updateHUD(); requestRender(); return result;
+  }, requestFloorRide);
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
   ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel,capability:player.cartCapability()}),value=>{

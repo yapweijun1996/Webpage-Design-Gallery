@@ -1,3 +1,4 @@
+import {floorDestinations} from './elevator-ride.js';
 import {TRAM_BOARD_LABEL, TRAM_STATION_ID, tramCaptions} from './tram-ride.js';
 import {restroomArrival, restroomRooms} from './restroom-layout.js';
 import {createActionDialog} from '../../../../../assets/onboarding/action-dialog.js';
@@ -459,7 +460,16 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     const destinationSelect = document.getElementById('map-destination');
     for (const store of destinations) destinationSelect.add(new Option(`${store.number} · ${store.label}`, store.id));
     document.getElementById('map-destination-controls').hidden = false;
-    document.getElementById('map-visit').addEventListener('click', () => travelToStore(destinationSelect.value));
+    const visit = document.getElementById('map-visit');
+    destinationSelect.addEventListener('change', () => {
+      setHudText(visit, floorDestinations[destinationSelect.value] ? 'Ride lift' : 'Visit store');
+      document.getElementById('map-travel-status').textContent = '';
+    });
+    visit.addEventListener('click', () => {
+      const floor = floorDestinations[destinationSelect.value];
+      if (floor) travelToFloor(floor.upper);
+      else travelToStore(destinationSelect.value);
+    });
     const ns='http://www.w3.org/2000/svg';
     floorplan.setAttribute('viewBox','0 0 700 600'); floorplan.setAttribute('preserveAspectRatio','xMidYMid meet');
     const background=floorplan.querySelector('.map-courtyard');
@@ -544,7 +554,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     mapButtons[0]?.focus({preventScroll: true});
     mapButtons[0]?.scrollIntoView({block: 'nearest', behavior: 'instant'});
   }
-  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null,previousHeldProduct=null,previousElevatorTravel=false,previousCartReason=null;
+  let seated=false, seatNotice=null, seatListener=null, elevatorListener=null, floorRideListener=null, cartListener=null, cartState=()=>({available:false,active:false}), previousCartMode=null,previousCartSeated=null,previousCartAvailable=null,previousHeldProduct=null,previousElevatorTravel=false,previousCartReason=null;
   let currentElevatorState=null,currentElevatorUpper=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   const sceneCart=document.querySelector('#scene-cart');
@@ -712,7 +722,14 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       return Boolean(message);
     },
     amenity: id => openAmenity(id),
-    elevator: () => {const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator. Return held products to their shelves or add them to your bag, and stow the cart before travelling.');scene.focus({preventScroll:true});return ok;},
+    elevator: () => {
+      const result = elevatorListener?.();
+      if (!result) return false;
+      announce(result.reason || (result.calling ? 'Elevator called. Wait here, then choose Ride when it arrives.' : 'Elevator travelling to the other level.'));
+      if (result.reason) setHudText(nearbyName, result.reason);
+      scene.focus({preventScroll:true});
+      return Boolean(result.calling || result.riding);
+    },
     seat: id => {const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';setHudText(nearbyName, seatNotice);announce(seatNotice);}scene.focus({preventScroll:true});return ok;},
     map: () => {const opened=openMap();if (opened) announce(expanded?'The directory kiosk shows the expanded mall map.':'The kiosk screen is decorative. Use this three-store map to choose an entrance.');return opened;},
   };
@@ -866,29 +883,47 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     button.hidden = false;
     button.addEventListener('click', () => inspect(button.dataset.inspect));
   }
+  function travelToFloor(upper, arrival) {
+    const result = floorRideListener?.(upper, arrival);
+    const reason = result?.reason || '';
+    document.getElementById('map-travel-status').textContent = reason;
+    if (reason) announce(reason);
+    if (!result?.riding && !result?.calling) return;
+    help.open = false;
+    mallMap.open = false;
+    announce(result.calling ? 'Elevator called. Boarding will begin when it arrives.' : 'Elevator travelling to the other level.');
+    scene.focus({preventScroll:true});
+  }
   function travelToStore(zone){
     const store=destinationById.get(zone);
     if(!showing3D||dialog.open||!store?.available)return;
+    if (currentZone === 'upper') { travelToFloor(false, () => travelToStore(zone)); return; }
     if(!interactionRegistry?.dispatch(interactionRegistry.get('travel',zone))){announce('Store travel is unavailable right now. Please try again.');return;}
-    if(expanded)document.getElementById('map-destination').value=zone;
+    if (expanded) {
+      const select = document.getElementById('map-destination');
+      select.value = zone;
+      select.dispatchEvent(new Event('change'));
+    }
     help.open=false;mallMap.open=false;
     announce(`At the ${store.label} storefront.`);scene.focus({preventScroll:true});
   }
   for(const button of mapButtons)button.addEventListener('click',()=>travelToStore(button.dataset.teleport));
-  for(const button of document.querySelectorAll('[data-restroom-visit]')) {
-    button.hidden=!expanded;
-    button.addEventListener('click',()=>{
-      if(!expanded||!available||dialog.open)return;
-      setView(true);
-      if(!interactionRegistry?.dispatch(interactionRegistry.get('travel','restrooms'))) {
-        announce('Restroom directions are unavailable right now.');
-        return;
-      }
-      mallMap.open=false;
-      help.open=false;
-      announce('At the public restroom entrances.');
-      scene.focus({preventScroll:true});
-    });
+  function travelToRestrooms() {
+    if (!expanded || !available || dialog.open) return;
+    setView(true);
+    if (currentZone === 'upper') { travelToFloor(false, travelToRestrooms); return; }
+    if (!interactionRegistry?.dispatch(interactionRegistry.get('travel','restrooms'))) {
+      announce('Restroom directions are unavailable right now.');
+      return;
+    }
+    mallMap.open = false;
+    help.open = false;
+    announce('At the public restroom entrances.');
+    scene.focus({preventScroll:true});
+  }
+  for (const button of document.querySelectorAll('[data-restroom-visit]')) {
+    button.hidden = !expanded;
+    button.addEventListener('click', travelToRestrooms);
   }
 
   function navigateStore(zone){
@@ -1197,7 +1232,16 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       });
     },
     onCart(state,listener){cartState=state;cartListener=listener;},
-    setElevator(listener){addMapService('visitor-lift','L','Visitor lift',liftLayout);records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});elevatorListener=listener;},
+    setElevator(listener, floorListener) {
+      addMapService('visitor-lift','L','Visitor lift',liftLayout);
+      records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});
+      elevatorListener = listener;
+      if (expanded) {
+        floorRideListener = floorListener;
+        const select = document.getElementById('map-destination');
+        for (const [id, {label}] of Object.entries(floorDestinations)) select.add(new Option(label, id));
+      }
+    },
     setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
     setBrandStories(stories){for(const [id,record] of Object.entries(stories))records.set(id,record);},
     onSeat(listener){seatListener=listener;},

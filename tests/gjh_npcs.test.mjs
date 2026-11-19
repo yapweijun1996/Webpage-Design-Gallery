@@ -1,4 +1,6 @@
 import test from 'node:test';
+import {readFile} from 'node:fs/promises';
+import {setTimeout as delay} from 'node:timers/promises';
 import assert from 'node:assert/strict';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {cloneNpcRig,createNpcSystem,npcLimit,nextNpcAdmission} from '../demos/corporate/gjh/v11/assets/npcs.js';
@@ -25,7 +27,19 @@ function fixture(options={}) {
 const player={x:0,y:0,z:10,seatId:null};
 const admitFrames=(system,calls=0,frames=48)=>{for(let i=0;i<frames;i++) system.admit(calls);};
 
-test('entry crowd keeps the tram landing clear through boarding and return', t => {
+test('entry crowd keeps the tram landing clear through boarding and return', async t => {
+  const fetch = globalThis.fetch;
+  t.mock.method(globalThis, 'fetch', async url =>
+    String(url).startsWith('file:') ? new Response(await readFile(url)) : fetch(url));
+  const previousSelf = globalThis.self, previousBitmap = globalThis.createImageBitmap;
+  globalThis.self = globalThis;
+  globalThis.createImageBitmap = async () => ({width:7, height:1});
+  t.after(() => {
+    if (previousSelf === undefined) delete globalThis.self;
+    else globalThis.self = previousSelf;
+    if (previousBitmap === undefined) delete globalThis.createImageBitmap;
+    else globalThis.createImageBitmap = previousBitmap;
+  });
   const {system,scene} = fixture({expanded:true, tram:true, seats:[], tier:'balanced'});
   t.after(() => system.dispose());
   // Spawn the crowd while the player is approaching the station from the entrance.
@@ -41,7 +55,8 @@ test('entry crowd keeps the tram landing clear through boarding and return', t =
     exitSeat:landing => {position = landing;}
   });
   t.after(() => tram.dispose());
-  assert.equal(tram.controls.board(), true);
+  for (let i = 0; i < 150 && tram.controls.reason; i++) await delay(10);
+  assert.equal(tram.controls.board(), true, tram.controls.reason);
   function tick() {
     const pose = tram.update(.1);
     if (pose) position = {x:pose.x, y:1.05, z:pose.z};

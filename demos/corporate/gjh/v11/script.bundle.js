@@ -637,6 +637,13 @@ function createProgramTrace(renderer) {
   return { event, player, sample, report: () => samples.length < 512 ? samples.slice() : [...samples.slice(next), ...samples.slice(0, next)] };
 }
 
+// demos/corporate/gjh/v11/assets/elevator-ride.js
+var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84 });
+var floorDestinations = Object.freeze({
+  "floor-upper": Object.freeze({ label: "Upper level", upper: true }),
+  "floor-ground": Object.freeze({ label: "Ground floor", upper: false })
+});
+
 // demos/corporate/gjh/v11/assets/tram-layout.js
 function roundedLoop(west, north, east, south, radius = 2) {
   let x = 10, z = south, heading = -Math.PI / 2, length = 0;
@@ -673,7 +680,7 @@ function roundedLoop(west, north, east, south, radius = 2) {
   } };
 }
 var tramEnvelopes = {
-  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  car: { width: 1.4, length: 3, bottom: 0, top: 2.2 },
   passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
   camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
 };
@@ -1971,7 +1978,18 @@ function createUI(expanded = false) {
     for (const store of destinations)
       destinationSelect.add(new Option(`${store.number} · ${store.label}`, store.id));
     document.getElementById("map-destination-controls").hidden = false;
-    document.getElementById("map-visit").addEventListener("click", () => travelToStore(destinationSelect.value));
+    const visit = document.getElementById("map-visit");
+    destinationSelect.addEventListener("change", () => {
+      setHudText(visit, floorDestinations[destinationSelect.value] ? "Ride lift" : "Visit store");
+      document.getElementById("map-travel-status").textContent = "";
+    });
+    visit.addEventListener("click", () => {
+      const floor = floorDestinations[destinationSelect.value];
+      if (floor)
+        travelToFloor(floor.upper);
+      else
+        travelToStore(destinationSelect.value);
+    });
     const ns = "http://www.w3.org/2000/svg";
     floorplan.setAttribute("viewBox", "0 0 700 600");
     floorplan.setAttribute("preserveAspectRatio", "xMidYMid meet");
@@ -2084,7 +2102,7 @@ function createUI(expanded = false) {
     mapButtons[0]?.focus({ preventScroll: true });
     mapButtons[0]?.scrollIntoView({ block: "nearest", behavior: "instant" });
   }
-  let seated = false, seatNotice = null, seatListener = null, elevatorListener = null, cartListener = null, cartState = () => ({ available: false, active: false }), previousCartMode = null, previousCartSeated = null, previousCartAvailable = null, previousHeldProduct = null, previousElevatorTravel = false, previousCartReason = null;
+  let seated = false, seatNotice = null, seatListener = null, elevatorListener = null, floorRideListener = null, cartListener = null, cartState = () => ({ available: false, active: false }), previousCartMode = null, previousCartSeated = null, previousCartAvailable = null, previousHeldProduct = null, previousElevatorTravel = false, previousCartReason = null;
   let currentElevatorState = null, currentElevatorUpper = null;
   const cartControls = document.querySelector("#cart-controls"), cartToggle = document.querySelector("#cart-toggle"), cartStatus = document.querySelector("#cart-status");
   const sceneCart = document.querySelector("#scene-cart");
@@ -2328,11 +2346,14 @@ function createUI(expanded = false) {
     },
     amenity: (id) => openAmenity(id),
     elevator: () => {
-      const calling = currentElevatorState && currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0);
-      const ok = elevatorListener?.();
-      announce(ok ? calling ? "Elevator called. Wait here, then choose Ride when it arrives." : "Elevator travelling to the other level." : "Wait for the elevator. Return held products to their shelves or add them to your bag, and stow the cart before travelling.");
+      const result = elevatorListener?.();
+      if (!result)
+        return false;
+      announce(result.reason || (result.calling ? "Elevator called. Wait here, then choose Ride when it arrives." : "Elevator travelling to the other level."));
+      if (result.reason)
+        setHudText(nearbyName, result.reason);
       scene.focus({ preventScroll: true });
-      return ok;
+      return Boolean(result.calling || result.riding);
     },
     seat: (id) => {
       const ok = seatListener?.(true, id);
@@ -2539,16 +2560,36 @@ function createUI(expanded = false) {
     button2.hidden = false;
     button2.addEventListener("click", () => inspect(button2.dataset.inspect));
   }
+  function travelToFloor(upper, arrival) {
+    const result = floorRideListener?.(upper, arrival);
+    const reason = result?.reason || "";
+    document.getElementById("map-travel-status").textContent = reason;
+    if (reason)
+      announce(reason);
+    if (!result?.riding && !result?.calling)
+      return;
+    help.open = false;
+    mallMap.open = false;
+    announce(result.calling ? "Elevator called. Boarding will begin when it arrives." : "Elevator travelling to the other level.");
+    scene.focus({ preventScroll: true });
+  }
   function travelToStore(zone) {
     const store = destinationById.get(zone);
     if (!showing3D || dialog.open || !store?.available)
       return;
+    if (currentZone === "upper") {
+      travelToFloor(false, () => travelToStore(zone));
+      return;
+    }
     if (!interactionRegistry?.dispatch(interactionRegistry.get("travel", zone))) {
       announce("Store travel is unavailable right now. Please try again.");
       return;
     }
-    if (expanded)
-      document.getElementById("map-destination").value = zone;
+    if (expanded) {
+      const select = document.getElementById("map-destination");
+      select.value = zone;
+      select.dispatchEvent(new Event("change"));
+    }
     help.open = false;
     mallMap.open = false;
     announce(`At the ${store.label} storefront.`);
@@ -2556,21 +2597,26 @@ function createUI(expanded = false) {
   }
   for (const button2 of mapButtons)
     button2.addEventListener("click", () => travelToStore(button2.dataset.teleport));
+  function travelToRestrooms() {
+    if (!expanded || !available || dialog.open)
+      return;
+    setView(true);
+    if (currentZone === "upper") {
+      travelToFloor(false, travelToRestrooms);
+      return;
+    }
+    if (!interactionRegistry?.dispatch(interactionRegistry.get("travel", "restrooms"))) {
+      announce("Restroom directions are unavailable right now.");
+      return;
+    }
+    mallMap.open = false;
+    help.open = false;
+    announce("At the public restroom entrances.");
+    scene.focus({ preventScroll: true });
+  }
   for (const button2 of document.querySelectorAll("[data-restroom-visit]")) {
     button2.hidden = !expanded;
-    button2.addEventListener("click", () => {
-      if (!expanded || !available || dialog.open)
-        return;
-      setView(true);
-      if (!interactionRegistry?.dispatch(interactionRegistry.get("travel", "restrooms"))) {
-        announce("Restroom directions are unavailable right now.");
-        return;
-      }
-      mallMap.open = false;
-      help.open = false;
-      announce("At the public restroom entrances.");
-      scene.focus({ preventScroll: true });
-    });
+    button2.addEventListener("click", travelToRestrooms);
   }
   function navigateStore(zone) {
     if (showing3D)
@@ -2981,10 +3027,16 @@ function createUI(expanded = false) {
       cartState = state;
       cartListener = listener;
     },
-    setElevator(listener) {
+    setElevator(listener, floorListener) {
       addMapService("visitor-lift", "L", "Visitor lift", liftLayout);
       records.set("visitor-elevator", { name: "Elevator · Change level", action: "elevator" });
       elevatorListener = listener;
+      if (expanded) {
+        floorRideListener = floorListener;
+        const select = document.getElementById("map-destination");
+        for (const [id, { label }] of Object.entries(floorDestinations))
+          select.add(new Option(label, id));
+      }
     },
     setSeats(seats) {
       for (const seat of seats)
@@ -5907,9 +5959,9 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
 
 // demos/corporate/gjh/v11/assets/hud-coordinator.js
 var priority = ["held", "interaction", "nearby", "quest"];
-var goalKeys = ["visit", "inspect", "bag"];
-var goalTargets = [3, 1, 1];
-var goalHints = ["Walk into three different stores", "Inspect a product at New Moon", "Add a product to the demo bag"];
+var goalKeys = ["visit", "inspect", "bag", "upper"];
+var goalTargets = [3, 1, 1, 1];
+var goalHints = ["Walk into three different stores", "Inspect a product at New Moon", "Add a product to the demo bag", "Visit the upper level"];
 var bearings = ["Ahead", "Ahead right", "Right", "Behind right", "Behind", "Behind left", "Left", "Ahead left"];
 function createContextQueue() {
   const sources = new Map;
@@ -5926,11 +5978,13 @@ function createContextQueue() {
     }
   };
 }
-function createObjectiveTracker(storeIds, initialBag = {}) {
+function createObjectiveTracker(storeIds, initialBag = {}, expanded = false) {
   const stores = new Set(storeIds), visited = new Set;
-  let inspected = false, added = false, bag = initialBag;
+  let inspected = false, added = false, upperVisited = false, bag = initialBag;
   return {
     visit(id) {
+      if (id === "upper")
+        upperVisited = true;
       if (stores.has(id) && visited.size < goalTargets[0])
         visited.add(id);
     },
@@ -5942,9 +5996,18 @@ function createObjectiveTracker(storeIds, initialBag = {}) {
       bag = next;
     },
     progress() {
-      return [visited.size, Number(inspected), Number(added)];
+      const progress = [visited.size, Number(inspected), Number(added)];
+      if (expanded)
+        progress.push(Number(upperVisited));
+      return progress;
     }
   };
+}
+function objectiveHint(progress, zone) {
+  if (zone === "upper")
+    return null;
+  const next = progress.findIndex((value, index) => value < goalTargets[index]);
+  return goalHints[next] ?? null;
 }
 function nearbyStore(position, forward, destinations, currentStore, range = 20) {
   let target = null, distance = range;
@@ -5963,13 +6026,16 @@ function nearbyStore(position, forward, destinations, currentStore, range = 20) 
   }
   return target;
 }
-function createMallHud({ destinations, announce, scene, subscribeBag, subscribeInspect }) {
+function createMallHud({ destinations, expanded, announce, scene, subscribeBag, subscribeInspect }) {
   const byId = (id) => document.getElementById(id);
   const context = byId("hud-context"), held = byId("held-product-status"), hint = byId("hud-context-hint");
   const hintText = byId("hud-context-text"), arrow = byId("hud-nearby-arrow"), direction = byId("hud-nearby-direction");
   const prompt = byId("inspect-prompt"), nearbyName = byId("nearby-name"), inspect = byId("inspect");
   const more = byId("hud-more-actions");
-  const total = byId("hud-objective-total"), toast = byId("hud-objective-toast");
+  const total = byId("hud-objective-total"), toast = byId("hud-objective-toast"), liftHint = byId("hud-lift-hint");
+  if (expanded)
+    for (const node of document.querySelectorAll("[data-hud-upper-objective]"))
+      node.hidden = false;
   const dots = [...document.querySelectorAll(".hud-objective-dots i")];
   const progressLabels = goalKeys.map((key) => document.querySelector(`[data-hud-progress="${key}"]`));
   const queue = createContextQueue();
@@ -6010,7 +6076,7 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
   });
   subscribeBag((items) => {
     if (!tracker)
-      tracker = createObjectiveTracker(stores, items);
+      tracker = createObjectiveTracker(stores, items, expanded);
     else
       tracker.bag(items);
     updateGoals();
@@ -6027,11 +6093,9 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
       dots[index].classList.toggle("is-complete", done);
       text(progressLabels[index], `${value} / ${goalTargets[index]}`);
     });
-    text(total, `${completed} of 3 objectives complete`);
-    const nextGoal = progress.findIndex((value, i) => value < goalTargets[i]);
-    if (nextGoal === -1)
+    text(total, `${completed} of ${progress.length} objectives complete`);
+    if (completed === progress.length)
       completionPending = true;
-    queue.set("quest", goalHints[nextGoal]);
   }
   function render() {
     const selected = queue.current();
@@ -6088,14 +6152,20 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
       notice.classList.add("sr-only");
       pickup.setAttribute("aria-describedby", notice.id);
     },
-    update({ position, zone, enabled, travelling, now, forward }) {
+    update({ position, zone, enabled, travelling, liftDocked, now, forward }) {
       active = enabled;
-      if (active && lastZone !== zone) {
+      if (active && !travelling && lastZone !== zone) {
         lastZone = zone;
         lastSample = -Infinity;
         tracker.visit(zone);
         updateGoals();
       }
+      const progress = tracker.progress();
+      queue.set("quest", travelling ? null : objectiveHint(progress, zone));
+      const showLiftHint = active && expanded && zone === "atrium" && !travelling && !progress[3] && Math.hypot(position.x - liftLayout.exit.x, position.z - liftLayout.exit.z) <= 5;
+      hide(liftHint, !showLiftHint);
+      if (showLiftHint)
+        text(liftHint, liftDocked ? "Upper level: take the lift (Ride)" : "Upper level: call the lift, then Ride");
       const showHeld = !held.hidden;
       const canInteract = !showHeld && !prompt.hidden;
       const usePhysical = Boolean(canInteract && pickupAction && !pickupAction.hidden && !pickupAction.disabled);
@@ -6122,6 +6192,7 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
     suspend() {
       active = false;
       hide(context, true);
+      hide(liftHint, true);
       lastAnnouncement = "";
     }
   };
@@ -6216,6 +6287,7 @@ for (const [selector, name, size] of [
 document.querySelector("#interaction-point").append(icon("map-pin", { size: 18 }));
 var startupFlags = new URLSearchParams(location.search);
 var expanded = startupFlags.get("layout") !== "classic";
+var liftEnabled = startupFlags.get("visitor") !== "v1";
 var testEnabled = startupFlags.get("test") === "1" || Boolean(window.__GJH_TEST);
 document.body.classList.toggle("is-expanded", expanded);
 var arrivalChime = createArrivalChime();
@@ -6311,11 +6383,14 @@ function hideGuidance() {
   ui.clearGuidance();
   spatialHud?.suspend();
 }
+var pendingFloorRide;
 var nearby = null;
 var currentZone = "atrium";
 var wasRiding = false;
 function clearTransientState(event) {
   testWalk?.cancel("Test movement interrupted by a mode or focus change");
+  if (event.kind === "interrupt")
+    pendingFloorRide = undefined;
   quality.resetSampling();
   simulationMs = simulationSteps = 0;
   hideGuidance();
@@ -6344,6 +6419,7 @@ var destinations = storeDestinations(expanded).map((store) => ({
 }));
 var mallHud = createMallHud({
   destinations,
+  expanded: expanded && liftEnabled,
   scene: canvas,
   announce: ui.announce,
   subscribeBag: ui.onBagChange,
@@ -6635,6 +6711,7 @@ var testAPI = testEnabled ? {
     requestRender();
     return Boolean(handled);
   },
+  testUpperPoints: () => world?.interactables.filter((item) => item.y === liftLayout.upper && (item.seat || item.id.startsWith("brand-plaque-"))).map(({ id, x, z, seat }) => ({ id, x, z, name: seat?.name })) ?? [],
   testShopActions: () => shopActionsLoad ?? null,
   testShopState: (id) => interactions?.shopState(id),
   testProps: () => world?.interactables.physicsProps?.sample(),
@@ -6646,7 +6723,7 @@ var testAPI = testEnabled ? {
       return false;
     const camera = player.camera;
     const frustum = new three.Frustum().setFromProjectionMatrix(new three.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-    return frustum.intersectsObject(car);
+    return frustum.intersectsBox(new three.Box3().setFromObject(car));
   },
   testSetTramSpeed(multiplier) {
     if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > 12)
@@ -6791,6 +6868,19 @@ function tick(refreshHud = true) {
   physics.step();
   movementTimings.physicsMs += performance.now() - physicsStart;
   testWalk?.afterTick();
+  if (pendingFloorRide?.phase === "calling" && !elevator.calling) {
+    const { target, arrival } = pendingFloorRide;
+    const result = rideElevator({ target });
+    pendingFloorRide = result.riding && arrival ? { target, arrival, phase: "riding" } : undefined;
+    ui.announce(result.reason || "Elevator travelling to the other level.");
+  } else if (pendingFloorRide?.phase === "riding" && !player.state.elevatorTravel) {
+    const { target, arrival } = pendingFloorRide;
+    pendingFloorRide = undefined;
+    if (Math.abs(player.state.y - target) < 0.35) {
+      updateHUD();
+      arrival();
+    }
+  }
   if (npcs) {
     const start = frameTrace?.start();
     npcs.update(FIXED_STEP, player.state, reducedMotion2.matches);
@@ -6864,6 +6954,7 @@ function render(force = false) {
       position: pose,
       zone: currentZone,
       travelling: pose.elevatorTravel,
+      liftDocked: expanded && elevator?.height === 0 && !elevator.calling,
       enabled: !windowBlurred && !modes.paused() && document.body.classList.contains("is-3d") && startupOverlay.hidden,
       now,
       forward: { x: -matrix[8], z: -matrix[10] }
@@ -7214,9 +7305,35 @@ function fallback(message, terminal = true) {
   modes.interrupt("fallback");
   ui.fallback(message);
 }
+function rideElevator(options) {
+  if (!ready || !elevator)
+    return { reason: "The elevator is unavailable right now. Please try again." };
+  manual = false;
+  player.setInput(null);
+  const result = player.useElevator(elevator, arrivalChime.play, options);
+  if (result.riding)
+    arrivalChime.unlock();
+  return result;
+}
+function requestFloorRide(upper, arrival) {
+  const target = upper ? liftLayout.upper : 0;
+  const result = rideElevator({ approach: true, target });
+  if (result.calling) {
+    pendingFloorRide = { target, arrival, phase: "calling" };
+    arrivalChime.unlock();
+  } else if (result.riding && arrival) {
+    pendingFloorRide = { target, arrival, phase: "riding" };
+  }
+  if (ready) {
+    updateHUD();
+    requestRender();
+  }
+  return result;
+}
 ui.onTeleport((zone) => {
   if (!ready || player.state.elevatorTravel || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone)))
     return false;
+  pendingFloorRide = undefined;
   manual = false;
   player.cancelCollection();
   player.setInput(null);
@@ -7430,6 +7547,7 @@ function applyProfile(profile) {
   profile = quality.apply(profile);
   themeStage?.setTier?.(profile.tier);
   elevator?.kit?.select(profile.tier);
+  player?.setTramTier?.(profile.tier);
   npcs?.setQuality({ tier: profile.tier, mobile: renderWidth < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
   if (!contextLost)
     renderer.shadowMap.enabled = profile.shadows;
@@ -7677,7 +7795,7 @@ async function initialize() {
     }
     ui.configureMallTheme(mallTheme);
   }
-  if (new URLSearchParams(location.search).get("visitor") !== "v1") {
+  if (liftEnabled) {
     const { createElevatorV2 } = await import("./assets/elevator-v2.js");
     elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
     world.prepareUpperLevel();
@@ -7718,7 +7836,7 @@ async function initialize() {
     }
   } : null;
   const { createPlayer } = await import("./assets/player.bundle.js");
-  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait);
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
   if (player.npcSource)
     await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")
@@ -7775,15 +7893,11 @@ async function initialize() {
   }
   if (elevator)
     ui.setElevator(() => {
-      manual = false;
-      player.setInput(null);
-      const ok = player.useElevator(elevator, arrivalChime.play);
-      if (ok && player.state.elevatorTravel)
-        arrivalChime.unlock();
+      const result = rideElevator();
       updateHUD();
       requestRender();
-      return ok;
-    });
+      return result;
+    }, requestFloorRide);
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
   ui.onCart(() => ({ ...player.state.character.cart, available: ready && player.state.character.cart.available, seated: player.state.seated, heldProduct: player.state.character.physicalProduct?.id, elevatorTravel: player.state.elevatorTravel, capability: player.cartCapability() }), (value) => {

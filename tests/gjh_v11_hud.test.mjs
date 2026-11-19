@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createContextQueue, createObjectiveTracker, nearbyStore} from '../demos/corporate/gjh/v11/assets/hud-coordinator.js';
+import {createContextQueue, createObjectiveTracker, nearbyStore, objectiveHint} from '../demos/corporate/gjh/v11/assets/hud-coordinator.js';
 
 test('context sources preempt lower priorities and reveal the newest queued value', () => {
   const queue = createContextQueue();
@@ -64,4 +64,18 @@ test('bearings rotate with the camera and handle a vertical camera or arrival ov
   assert.equal(nearbyStore(position, {x: -1, z: 0}, shops).sector, 4);
   assert.equal(nearbyStore(position, {x: 0, z: 0}, shops).sector, null);
   assert.equal(nearbyStore({x: 12, z: 0}, north, shops).sector, null);
+});
+
+test('upper visit completes once per session and ground objectives stay downstairs', () => {
+  const tracker = createObjectiveTracker(['mili'], {}, true);
+  assert.deepEqual(tracker.progress(), [0, 0, 0, 0]);
+  assert.equal(objectiveHint(tracker.progress(), 'atrium'), 'Walk into three different stores');
+  tracker.visit('upper');
+  tracker.visit('upper');
+  assert.deepEqual(tracker.progress(), [0, 0, 0, 1]);
+  assert.equal(objectiveHint(tracker.progress(), 'upper'), null);
+  assert.equal(objectiveHint(tracker.progress(), 'atrium'), 'Walk into three different stores');
+  assert.equal(objectiveHint([3, 1, 1, 0], 'atrium'), 'Visit the upper level');
+  assert.equal(objectiveHint([3, 1, 1, 1], 'atrium'), null);
+  assert.deepEqual(createObjectiveTracker([], {}, true).progress(), [0, 0, 0, 0]);
 });

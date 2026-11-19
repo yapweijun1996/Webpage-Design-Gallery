@@ -174,9 +174,11 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
       else delete globalThis[key];
     }
   });
+  const tramRequests = [];
   const fetchAsset = globalThis.fetch;
   t.mock.method(globalThis, 'fetch', async input => {
     const url = new URL(input instanceof Request ? input.url : input);
+    if (url.pathname.includes('/assets/tram/')) tramRequests.push(url.pathname);
     if (url.protocol === 'blob:') return fetchAsset(input);
     assert.equal(url.protocol, 'file:');
     return new Response(await readFile(url), {headers:{
@@ -193,12 +195,17 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     const physics = new R.World({x:0, y:-24, z:0});
     physics.createCollider(R.ColliderDesc.cuboid(60,.2,60).setTranslation(0,-.2,0));
     const scene = new T.Scene(), canvas = Object.assign(document.createElement('canvas'), {clientWidth:393,clientHeight:650});
-    const material = new T.MeshStandardMaterial();
-    const sharedBox = new T.InstancedMesh(new T.BoxGeometry(), material, 1);
-    sharedBox.name = 'box plain';
-    scene.add(sharedBox);
+    let releaseWarm, warming = false;
+    const prepare = async (model, options) => {
+      if (model.getObjectByName?.('TramSeatAnchor')) {
+        assert.equal(options.fence, true);
+        assert.equal(options.late, false);
+        warming = true;
+        await new Promise(resolve => { releaseWarm = resolve; });
+      }
+    };
     const player = await createPlayer(T, R, physics, scene, canvas, new T.MeshBasicMaterial(),
-      new T.PlaneGeometry(), [], [], true);
+      new T.PlaneGeometry(), [], [], true, prepare);
     t.after(() => { player.dispose(); physics.free(); });
     player.body.setTranslation({x:tramLanding.x,y:.89,z:tramLanding.z}, true);
     player.body.setNextKinematicTranslation(player.body.translation());
@@ -210,6 +217,7 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     };
     let item = select();
     if (!search) {
+      assert.deepEqual(tramRequests, []);
       assert.equal(item, null);
       assert.equal(registry.tram, undefined);
       assert.equal(scene.getObjectByName('Mall tram'), undefined);
@@ -217,6 +225,14 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     }
 
     assert.equal(item.prompt, 'Ride the tram');
+    for (let i = 0; i < 150 && !warming; i++) await delay(10);
+    assert.equal(warming, true);
+    assert.equal(registry.dispatch(item), false);
+    assert.equal(scene.getObjectByName('TramSeatAnchor'), undefined);
+    releaseWarm();
+    await delay(0);
+    assert.equal(tramRequests.length, 1);
+    assert.ok(tramRequests[0].endsWith('/balanced.glb'));
     for (let i = 0; i < 100 && !player.state.character.cart.available; i++) await delay(10);
     assert.equal(player.setCart(true), true);
     select();
@@ -253,10 +269,8 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     assert.equal(player.teleport('entry'), false);
     assert.equal(player.cameraState().mode, 'third-person');
     const car = scene.getObjectByName('Mall tram');
-    assert.equal(car.isInstancedMesh, true);
-    assert.equal(car.material, material);
-    assert.equal(car.geometry.index.count / 3 * car.count, 168);
-    assert.equal(car.geometry.getAttribute('instanceSurface').count, car.count);
+    const anchor = car.getObjectByName('TramSeatAnchor');
+    assert.ok(anchor && car.getObjectByName('TramLamp'));
     assert.equal(car.castShadow, false);
     assert.equal(car.layers.mask, 1);
 
@@ -281,8 +295,9 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
 
     step(910, .5);
     assert.equal(controls.state.blocked, false);
-    near(player.visual.position.x, car.position.x, .0001);
-    near(player.visual.position.z, car.position.z, .0001);
+    const contact = anchor.getWorldPosition(new T.Vector3());
+    near(player.visual.position.x, contact.x, .0001);
+    near(player.visual.position.z, contact.z, .0001);
     assert.equal(controls.state.caption, 0);
     assert.match(caption.children[0].textContent, /On your left/);
     assert.equal(document.key('KeyN', canvas), true);
@@ -317,5 +332,15 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     near(player.state.z, tramLanding.z);
     assert.equal(card.hidden, true);
     assert.equal(select().prompt, 'Ride the tram');
+    // A live quality change must retain the prepared carriage until the new fence settles.
+    releaseWarm = null;
+    const swap = player.setTramTier('low');
+    for (let i = 0; i < 150 && !releaseWarm; i++) await delay(10);
+    assert.equal(car.getObjectByName('TramSeatAnchor'), anchor);
+    assert.ok(releaseWarm);
+    releaseWarm();
+    await swap;
+    assert.notEqual(car.getObjectByName('TramSeatAnchor'), anchor);
+    assert.ok(tramRequests.at(-1).endsWith('/low.glb'));
   }
 });

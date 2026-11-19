@@ -162,7 +162,7 @@ test('the HUD centers its icons and resting joystick knob independently of badge
   assert.doesNotMatch(read('../demos/corporate/gjh/v11/index.html'), /joystick-label/);
 });
 
-test('the objective summary reserves room for all three progress dots', () => {
+test('the objective summary reserves room for all progress dots', () => {
   assert.ok(rule('.hud-objective-dots').includes('flex:none'));
   assert.ok(rule(cornerChips).includes('white-space:nowrap'));
 });

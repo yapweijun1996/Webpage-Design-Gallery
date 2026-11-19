@@ -1,4 +1,4 @@
-import {rideTime,sampleRide} from './elevator-ride.js';
+import {rideTime,sampleRide,elevatorRideBlockReason} from './elevator-ride.js';
 import {createCharacter} from './character.js';
 import {spatial, courtyardArrival} from './spatial.js';
 import {liftLayout} from './lift-layout.js';
@@ -34,7 +34,7 @@ export function playerCameraFraming(model, expanded, width, height) {
   };
 }
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel, portrait) {
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel, portrait, tramTier = 'balanced') {
   const character = await createCharacter(T, prepareModel, portrait);
   const model = character.state.model;
   const visual = character.visual;
@@ -314,7 +314,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const wasRidingTram = Boolean(beforeTram);
     const tramPose = tram?.update(dt);
     if (tramPose) {
-      const heading = tramPose.heading + Math.PI;
+      const heading = tramPose.heading;
       yaw += interpolateAngle(facing, heading, 1) - facing;
       facing = heading;
       body.setNextKinematicTranslation({x:tramPose.x, y:seat.floor + .89, z:tramPose.z});
@@ -411,6 +411,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const from = previousPosition ?? p;
     const x = interpolate(from.x, p.x, alpha), y = interpolate(from.y, p.y, alpha), z = interpolate(from.z, p.z, alpha);
     visual.position.set(x, y - .875, z);
+    if (tram?.seated) {
+      tram.visualSeat(visual.position);
+      visual.position.y = seat.floor + .015;
+    }
     const angle = alpha === 1 ? facing : interpolateAngle(previousFacing, facing, alpha);
     visual.rotation.y = angle;
     // Clear the visual floor/rug inlays as well as the physical walking slab.
@@ -616,23 +620,45 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(carryingProduct){sync();character.update('idle',0);}
     resetInterpolation(); updateCamera(0, true); return true;
   }
-  function useElevator(elevator,chime) {
-    const p=body.translation();
-    const from=p.y-.875>elevator.upper/2?elevator.upper:0;
-    if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty'||Math.abs(p.y-.875-from)>.35)return false;
-    if(elevator.expanded){
-      if(productApproach||Math.hypot(p.x-elevator.exit.x,p.z-elevator.exit.z)>elevator.radius)return false;
-      if(elevator.state.calling||elevator.state.riding)return false;
-      if(elevator.state.docked!==from)return elevator.call(from);
-      if(!clearPath(p,{x:elevator.x,y:from+.89,z:elevator.z}))return false;
-    } else if(Math.hypot(p.x-elevator.x,p.z-elevator.z)>1.45)return false;
+  function useElevator(elevator, chime, {approach = false, target} = {}) {
+    let p = body.translation();
+    const from = p.y - .875 > elevator.upper / 2 ? elevator.upper : 0;
+    const reason = elevatorRideBlockReason({pushing, seated, elevatorTravel,
+      physicalProduct:character.state.physicalProduct, productApproaching:productApproach});
+    if (reason) return {reason};
+    if (Math.abs(p.y - .875 - from) > .35) return {reason:'Wait until you reach the landing.'};
+    if (target === from) return {reason:from ? 'You are already on the upper level.' : 'You are already on the ground floor.'};
+    if (elevator.expanded) {
+      const state = elevator.state;
+      if (state.calling || state.riding) return {reason:'Wait for the elevator to stop.'};
+      const approachDistance = Math.hypot(p.x - elevator.exit.x, p.z - elevator.exit.z);
+      if (approach && approachDistance > .08) {
+        // Like the store shortcuts, this places the visitor at a known approach
+        // on their current floor. Only the physical ride changes floors.
+        p = {x:elevator.exit.x, y:from + .89, z:elevator.exit.z};
+        if (!clearAt(p)) return {reason:'The elevator entrance is blocked. Please try again.'};
+        moveSeat(p);
+        clearInput();
+        injected = null;
+        yaw = facing = -Math.PI / 2;
+        resetInterpolation();
+      } else if (approachDistance > elevator.radius) {
+        return {reason:'Walk to the visitor lift to ride.'};
+      }
+      if (state.docked !== from && elevator.call(from)) return {calling:true};
+      if (state.docked !== from || !clearPath(p,{x:elevator.x,y:from+.89,z:elevator.z})) {
+        return {reason:'The elevator entrance is blocked. Please try again.'};
+      }
+    } else if (Math.hypot(p.x - elevator.x, p.z - elevator.z) > 1.45) {
+      return {reason:'Walk to the visitor lift to ride.'};
+    }
     clearInput();injected=null;cancelCollection();vertical=0;capsule.setEnabled(false);
     beginActionView('elevator',Math.PI/2);elevator.setRiding?.('boarding');
     elevatorTravel={elevator,x:elevator.x,z:elevator.z,startX:p.x,startZ:p.z,
       exitX:elevator.exit?.x??elevator.x,exitZ:elevator.exit?.z??elevator.z,
       from,to:from?0:elevator.upper,elapsed:0,phase:'board',height:from,position:{x:p.x,y:p.y,z:p.z},
       groundDoor:0,upperDoor:0,skip:false,chimed:false,chime,setHeight:elevator.setHeight};
-    return true;
+    return {riding:true};
   }
   function skipRide(){if(elevatorTravel)elevatorTravel.skip=true;}
   function interruptGraphics() {
@@ -652,7 +678,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     getPosition: () => body.translation(),
     getBoardReason: () => tramBoardReason({pushing, seated, elevatorTravel, productApproaching:productApproach,
       character:character.state}),
-    clearPath, prepareModel,
+    clearPath, prepareModel, tier:tramTier,
     enterSeat(rideSeat, pose) {
       clearInput(); injected = null; cancelCollection(); vertical = 0;
       beforeTram = {yaw, facing, cameraDistance, eyeFov, eyeFovInitialized};
@@ -661,7 +687,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       seat = rideSeat; seated = true; seatPhase = 'seated';
       capsule.setEnabled(false);
       moveSeat(seatBodyTarget(seat));
-      yaw = facing = pose.heading + Math.PI;
+      yaw = facing = pose.heading;
       character.setSeated(true);
       resetInterpolation();
     },
@@ -677,6 +703,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   });
   return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
+    setTramTier: tram?.selectTier,
     dispose() { tram?.dispose(); character.dispose?.(); },
     renderShelf(draw) {
       // The visitor can stand directly in front of the selected shelf. Exclude

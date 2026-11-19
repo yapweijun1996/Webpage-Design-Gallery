@@ -1,9 +1,10 @@
+import {liftLayout} from './lift-layout.js';
 import {icon} from './icons.js';
 
 const priority = ['held', 'interaction', 'nearby', 'quest'];
-const goalKeys = ['visit', 'inspect', 'bag'];
-const goalTargets = [3, 1, 1];
-const goalHints = ['Walk into three different stores', 'Inspect a product at New Moon', 'Add a product to the demo bag'];
+const goalKeys = ['visit', 'inspect', 'bag', 'upper'];
+const goalTargets = [3, 1, 1, 1];
+const goalHints = ['Walk into three different stores', 'Inspect a product at New Moon', 'Add a product to the demo bag', 'Visit the upper level'];
 const bearings = ['Ahead', 'Ahead right', 'Right', 'Behind right', 'Behind', 'Behind left', 'Left', 'Ahead left'];
 
 export function createContextQueue() {
@@ -20,18 +21,31 @@ export function createContextQueue() {
   };
 }
 
-export function createObjectiveTracker(storeIds, initialBag = {}) {
+export function createObjectiveTracker(storeIds, initialBag = {}, expanded = false) {
   const stores = new Set(storeIds), visited = new Set();
-  let inspected = false, added = false, bag = initialBag;
+  let inspected = false, added = false, upperVisited = false, bag = initialBag;
   return {
-    visit(id) { if (stores.has(id) && visited.size < goalTargets[0]) visited.add(id); },
+    visit(id) {
+      if (id === 'upper') upperVisited = true;
+      if (stores.has(id) && visited.size < goalTargets[0]) visited.add(id);
+    },
     inspect() { inspected = true; },
     bag(next) {
       added ||= Object.keys(next).some(id => next[id] > (bag[id] ?? 0));
       bag = next;
     },
-    progress() { return [visited.size, Number(inspected), Number(added)]; },
+    progress() {
+      const progress = [visited.size, Number(inspected), Number(added)];
+      if (expanded) progress.push(Number(upperVisited));
+      return progress;
+    },
   };
+}
+
+export function objectiveHint(progress, zone) {
+  if (zone === 'upper') return null;
+  const next = progress.findIndex((value, index) => value < goalTargets[index]);
+  return goalHints[next] ?? null;
 }
 
 export function nearbyStore(position, forward, destinations, currentStore, range = 20) {
@@ -50,13 +64,14 @@ export function nearbyStore(position, forward, destinations, currentStore, range
   return target;
 }
 
-export function createMallHud({destinations, announce, scene, subscribeBag, subscribeInspect}) {
+export function createMallHud({destinations, expanded, announce, scene, subscribeBag, subscribeInspect}) {
   const byId = id => document.getElementById(id);
   const context = byId('hud-context'), held = byId('held-product-status'), hint = byId('hud-context-hint');
   const hintText = byId('hud-context-text'), arrow = byId('hud-nearby-arrow'), direction = byId('hud-nearby-direction');
   const prompt = byId('inspect-prompt'), nearbyName = byId('nearby-name'), inspect = byId('inspect');
   const more = byId('hud-more-actions');
-  const total = byId('hud-objective-total'), toast = byId('hud-objective-toast');
+  const total = byId('hud-objective-total'), toast = byId('hud-objective-toast'), liftHint = byId('hud-lift-hint');
+  if (expanded) for (const node of document.querySelectorAll('[data-hud-upper-objective]')) node.hidden = false;
   const dots = [...document.querySelectorAll('.hud-objective-dots i')];
   const progressLabels = goalKeys.map(key => document.querySelector(`[data-hud-progress="${key}"]`));
   const queue = createContextQueue();
@@ -95,7 +110,7 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
     updateGoals();
   });
   subscribeBag(items => {
-    if (!tracker) tracker = createObjectiveTracker(stores, items);
+    if (!tracker) tracker = createObjectiveTracker(stores, items, expanded);
     else tracker.bag(items);
     updateGoals();
   });
@@ -111,10 +126,8 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
       dots[index].classList.toggle('is-complete', done);
       text(progressLabels[index], `${value} / ${goalTargets[index]}`);
     });
-    text(total, `${completed} of 3 objectives complete`);
-    const nextGoal = progress.findIndex((value, i) => value < goalTargets[i]);
-    if (nextGoal === -1) completionPending = true;
-    queue.set('quest', goalHints[nextGoal]);
+    text(total, `${completed} of ${progress.length} objectives complete`);
+    if (completed === progress.length) completionPending = true;
   }
 
   function render() {
@@ -165,14 +178,20 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
       notice.classList.add('sr-only');
       pickup.setAttribute('aria-describedby', notice.id);
     },
-    update({position, zone, enabled, travelling, now, forward}) {
+    update({position, zone, enabled, travelling, liftDocked, now, forward}) {
       active = enabled;
-      if (active && lastZone !== zone) {
+      if (active && !travelling && lastZone !== zone) {
         lastZone = zone;
         lastSample = -Infinity;
         tracker.visit(zone);
         updateGoals();
       }
+      const progress = tracker.progress();
+      queue.set('quest', travelling ? null : objectiveHint(progress, zone));
+      const showLiftHint = active && expanded && zone === 'atrium' && !travelling && !progress[3] &&
+        Math.hypot(position.x - liftLayout.exit.x, position.z - liftLayout.exit.z) <= 5;
+      hide(liftHint, !showLiftHint);
+      if (showLiftHint) text(liftHint, liftDocked ? 'Upper level: take the lift (Ride)' : 'Upper level: call the lift, then Ride');
       const showHeld = !held.hidden;
       const canInteract = !showHeld && !prompt.hidden;
       const usePhysical = Boolean(canInteract && pickupAction && !pickupAction.hidden && !pickupAction.disabled);
@@ -199,6 +218,7 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
     suspend() {
       active = false;
       hide(context, true);
+      hide(liftHint, true);
       lastAnnouncement = '';
     },
   };

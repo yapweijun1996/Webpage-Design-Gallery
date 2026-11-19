@@ -164,11 +164,12 @@
         <div class="scene-readouts">
           <p id="floor-indicator" class="sr-only">Floor 01 - Atrium</p>
           <details id="hud-objectives">
-            <summary><span>Objectives</span><span class="hud-objective-dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="hud-objective-total" class="sr-only">0 of 3 objectives complete</span></summary>
+            <summary><span>Objectives</span><span class="hud-objective-dots" aria-hidden="true"><i></i><i></i><i></i><i data-hud-upper-objective hidden></i></span><span id="hud-objective-total" class="sr-only">0 of 3 objectives complete</span></summary>
             <ul>
               <li><span>Visit three stores</span><span data-hud-progress="visit">0 / 3</span></li>
               <li><span>Inspect a product</span><span data-hud-progress="inspect">0 / 1</span></li>
               <li><span>Add to the demo bag</span><span data-hud-progress="bag">0 / 1</span></li>
+              <li data-hud-upper-objective hidden><span>Visit the upper level</span><span data-hud-progress="upper">0 / 1</span></li>
             </ul>
           </details>
           <p id="hud-objective-toast" hidden></p>
@@ -241,6 +242,7 @@
             <p id="hud-context-hint" class="hud-context-chip" hidden><span id="hud-nearby-arrow" data-icon="arrow-up" aria-hidden="true" hidden></span><span id="hud-context-text"></span><span id="hud-nearby-direction" class="sr-only" hidden></span></p>
             <div class="inspect-prompt" id="inspect-prompt" hidden><div class="nearby-card"><img id="nearby-image" alt="" width="26" height="26" hidden><span id="nearby-name"></span><span id="nearby-distance" aria-describedby="interaction-distance-description" hidden></span></div><button id="hud-more-actions" type="button" aria-label="More actions" title="More actions" aria-expanded="false" aria-controls="inspect" hidden><span data-icon="menu" aria-hidden="true"></span></button><button id="inspect" class="hud-control" type="button" aria-describedby="interaction-distance-description"><span id="inspect-verb">Inspect</span></button></div>
           </div>
+          <p id="hud-lift-hint" class="hud-context-chip" hidden>Upper level: take the lift (Ride)</p>
           <button id="skip-lift-ride" class="hud-context-chip" type="button" hidden>Skip ride</button>
         </div>
         <div id="nearby-shelf-outline" class="nearby-shelf-outline" aria-hidden="true" hidden></div>
@@ -264,7 +266,8 @@
             <button class="map-store-button map-mili" type="button" data-teleport="mili" aria-label="Go to the MILI storefront"><span>02</span>MILI</button>
             <button class="map-store-button map-gogo" type="button" data-teleport="gogo" aria-label="Go to the GOGO storefront"><span>03</span>GOGO</button>
           </div>
-          <div id="map-destination-controls" hidden><select id="map-destination" aria-label="Choose a store"></select><button id="map-visit" type="button">Visit store</button><button type="button" data-restroom-visit hidden>Go to restrooms</button></div>
+          <div id="map-destination-controls" hidden><select id="map-destination" aria-label="Choose a destination"></select><button id="map-visit" type="button">Visit store</button><button type="button" data-restroom-visit hidden>Go to restrooms</button></div>
+          <p id="map-travel-status" role="status"></p>
           <p class="map-caption"><span class="map-key" aria-hidden="true"></span>You are here<span class="map-scale">Not to scale</span></p>
           </div>
         </details>

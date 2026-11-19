@@ -32,9 +32,33 @@ The stock loader checks dimensions and hashes. Local Khronos validation returned
 ## Collision and navigation
 
 - The original landing spans X −9…3 and Z 4…16. The visitor capsule has radius 0.30 m, half-height 0.55 m and a 0.20 m autostep. Full-height, continuous cuboids stop the capsule between posts and at corners. Existing sofa and bench colliders remain selectable for sitting.
-- The permanent lightwell spans X 3…8.47 and Z 4…16. Its west boundary is the original east landing rail. The two glazed side galleries rise 1.46 m to meet the opposite storefront balcony. The slope, rail and physical guards use the same transform. There is no walking surface over the opening. The outer bridge edges, end caps and far frontage are also guarded.
+- The permanent lightwell opens beyond the east rail at X 3. The inclined side bridges and opposite balcony apron suggested a route from the landing, but their end rails kept them inaccessible. The current facade retains the illuminated category windows and display shelves across the lightwell. The landing rail follows the edge of the public floor.
 - The lift shaft is a separate opening at X −5…−1 and Z 8…12. The cabin gate owns the only boarding passage, on the west at Z 9…11. Two short side returns protect the 0.40 m threshold. The docked threshold and cabin floor provide continuous support. The gate closes during travel and while the car is away.
 - The floor finish clips to the real slab panels. Rugs, printed faces and LED strips have no walkable collision. The fixed directory, lamp base, side table and screen have small physical proxies. A 1.02 m aisle between the directory and south shaft guard connects both sides of the deck. The seat exits and west lift approach remain clear.
+
+
+## Visitor access and reachability
+
+The map offers **Upper level** and **Ground floor**. **Ride lift** uses the same boarding rules, moving cabin and exit as the landing action. The map shortcut brings a walking visitor to the lift approach on their current floor and calls the cabin if needed. Stow the cart in Bag or return or add the held product before riding. Selecting a ground-floor store or the restrooms from upstairs rides down before applying the ground-floor shortcut. A first-visit hint appears near the ground-floor lift. The upper-level objective completes after exiting the cabin and resets with the page session. Store objective hints appear on the ground floor.
+
+| Source | Surface or point of interest | Access |
+| --- | --- | --- |
+| `lift-layout.js`, `elevator-v2.js` | Four upper slab panels around the shaft, including the west landing, north and south corridors, and east deck | Continuous level route from the lift exit at **(-6.4, 10)**. Glass guards protect the outer edges and shaft. |
+| `lift-layout.js`, `elevator-v2.js` | West boarding threshold and cabin floor | The threshold and gate permit access while the cabin is docked. |
+| `upper-level.js`, `atrium-layout.js` | Three lounge seats, directory, east lightwell viewpoint and south brand-story gallery | All three seat approaches, the directory front, the lightwell rail and all 17 brand plaques have a capsule route. |
+| `upper-level.js` | Former north and south ramps, bridge ends and opposite balcony apron | The false walking surfaces and their guards were removed. The opposite category windows remain part of the facade. |
+| `expanded-layout.js` | All 17 shop lots and their entrances | Ground floor. The upper gallery provides brand stories and views across the lightwell. |
+
+The Node suite shares the shop audit's flood grid with the upper deck. It uses Rapier collider footprints, a .30 m walking capsule and .025 m controller clearance, then follows the continuous route with the Rapier character controller. The headed Chrome probe shares the route and reads the actual seat and plaque positions from the test hook.
+
+```sh
+python -m http.server 8830
+GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" python docs/verify_upper_level.py
+```
+
+The probe uses a 390 × 844 touch viewport with `?test=1`. It taps Ride in the HUD and map, checks floor height and zone, visits the upper points via normal movement, and captures the lift, directory and viewpoint.
+
+Chrome DevTools ran the itinerary at 390 × 844 with touch enabled and Low quality using a local file preview with bundled assets. All 39 walking stops passed, including the three lounge seats, 17 plaques, directory, and viewpoint. The run verified HUD and map round trips, automatic cabin calling, the cart block reason, and a ground-floor store shortcut from upstairs. The ground lift entry and Ride button were visible after trimming the planter. The local shell sandbox blocked HTTP server binding and Playwright's Chrome launch. The iPhone browser remains unverified.
 
 ## Phone budget
 

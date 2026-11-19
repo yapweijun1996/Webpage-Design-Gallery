@@ -21,3 +21,19 @@ export function sampleRide(time,trip) {
   trip.height=y;
   trip.phase=time<board ? 'board' : time<arrive ? 'ride' : 'exit';
 }
+
+
+export const floorDestinations = Object.freeze({
+  'floor-upper': Object.freeze({label:'Upper level', upper:true}),
+  'floor-ground': Object.freeze({label:'Ground floor', upper:false}),
+});
+
+export function elevatorRideBlockReason({pushing, seated, elevatorTravel, physicalProduct, productApproaching}) {
+  if (elevatorTravel) return 'Wait for the elevator to stop.';
+  if (pushing) return 'Stow your cart from Bag before riding the elevator.';
+  if (physicalProduct && physicalProduct.phase !== 'empty' || productApproaching) {
+    return 'Return the held product to its shelf or add it to your bag before riding the elevator.';
+  }
+  if (seated) return 'Stand up before riding the elevator.';
+  return '';
+}

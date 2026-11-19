@@ -3,13 +3,16 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
-import {buildUpperLevel,loadUpperLevel,galleryVoid,deckPlanters} from '../demos/corporate/gjh/v11/assets/upper-level.js';
+import {buildUpperLevel,loadUpperLevel,deckPlanters} from '../demos/corporate/gjh/v11/assets/upper-level.js';
 import {createElevatorV2} from '../demos/corporate/gjh/v11/assets/elevator-v2.js';
 import {liftLayout as L} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
 import {createMallSurfaceAtmosphere} from '../demos/corporate/gjh/v11/assets/mall-atmosphere.js';
 import {cells,categories} from '../demos/corporate/gjh/v11/assets/upper-level-atlas.js';
 import {createSeatAnchor,createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
 import {addBrandWallAtlas} from '../demos/corporate/gjh/v11/assets/brand-wall.js';
+import {clearanceGrid,distance} from '../scripts/gjh_interiors/sweep.mjs';
+
+const route = JSON.parse(await readFile(new URL('../docs/gjh-v11-upper-level-route.json', import.meta.url)));
 
 function localFetch(t) {
   t.mock.method(globalThis,'fetch',async url=>{
@@ -72,13 +75,17 @@ test('actual upper batches, gallery GLBs and tier washes fit the phone budget',a
   for(const rect of [cells.mark,cells.directory,...cells.signs])assert(rect.x+rect.w<=256&&rect.y+rect.h<=256);
 });
 
-test('the brand wall warms before its mesh and story interactions are available',async t=>{
-  localFetch(t);
+function mockBrandCanvas(t) {
   const noop=()=>{};
   const ctx=new Proxy({measureText:value=>({width:value.length*8})},{get:(target,key)=>target[key]??noop});
   globalThis.Image=class {set src(_url){queueMicrotask(()=>this.onerror());}};
   globalThis.document={createElement:()=>({getContext:()=>ctx})};
   t.after(()=>{delete globalThis.Image;delete globalThis.document;});
+}
+
+test('the brand wall warms before its mesh and story interactions are available',async t=>{
+  localFetch(t);
+  mockBrandCanvas(t);
   const scene=new T.Scene();
   let revealMesh,finishUpload;
   const started=new Promise(resolve=>{revealMesh=resolve;});
@@ -155,18 +162,16 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
       assert(Math.hypot(p.x-x,p.z-z)>.24,JSON.stringify({message:'approach should reach the rail',height,i,x,z,p}));
     }
   }
-  const v=galleryVoid,cx=(v.minX+v.maxX)/2,cz=(v.minZ+v.maxZ)/2;
+  const cx=(L.slab.maxX+L.roofOpening.maxX)/2,cz=L.z;
   colliders(cx,-.1,cz,40,.2,40);
   for(const cabinHeight of [0,L.upper]){
     elevator.setHeight(cabinHeight);physics.step();
     const open=physics.castRay(new R.Ray({x:cx,y:L.upper+2,z:cz},{x:0,y:-1,z:0}),16,true);
     assert(Math.abs(open.timeOfImpact-L.upper-2)<.01,'permanent atrium is open to the ground floor at both stops');
-    assert(walk(v.minX-1,cz,1,0).x<v.minX-.29);
-    assert(walk(v.maxX+.75,cz,-1,0,55,L.upper+v.farRise).x>v.maxX+.29);
-    for(const t of [.10,.5,.90]){
-      const x=v.minX+t*(v.maxX-v.minX),y=L.upper+t*v.farRise;
-      assert(walk(x,v.minZ-.57,0,1,45,y).z<v.minZ-.29);
-      assert(walk(x,v.maxZ+.57,0,-1,45,y).z>v.maxZ+.29);
+    assert(walk(L.slab.maxX-1,cz,1,0).x<L.slab.maxX-.29);
+    for (const x of [4, 6, 8]) for (const z of [3.48, 16.52, cz]) {
+      const hit = physics.castRay(new R.Ray({x,y:L.upper+2,z},{x:0,y:-1,z:0}),16,true);
+      assert(Math.abs(hit.timeOfImpact-L.upper-2)<.01, 'former bridge and apron are clear of false floors');
     }
   }
   const aisle=walk(-4.75,12.56,1,0,100);
@@ -213,5 +218,46 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
         c=>c.handle!==seat.collider);
       assert.equal(obstruction,null,`${seat.name}: clear seated pose and stand path`);
     }
+  }
+
+  // Reuse the shop audit grid with the actual Rapier footprints and the
+  // visitor's .30 m radius plus .025 m controller offset.
+  const {minX,maxX,minZ,maxZ} = L.slab;
+  const obstacles = [];
+  physics.forEachCollider(c => {
+    const {x,y,z} = c.translation();
+    if (c.handle === capsule.handle || y <= L.upper || y > L.upper+1.75 || c.shapeType() !== R.ShapeType.Cuboid) return;
+    const e = c.halfExtents();
+    obstacles.push({xyz:[x,y,z],size:[2*e.x,2*e.y,2*e.z]});
+  });
+  const grid = clearanceGrid(([x,z]) => Math.min(x-minX,maxX-x,z-minZ,maxZ-z,
+    ...obstacles.map(box => distance([x,z],box))), [L.exit.x,L.exit.z]);
+  const radius = .325;
+  const reachable = grid.flood(radius);
+  assert(reachable.size > 5000, 'connected upper walkable area');
+  mockBrandCanvas(t);
+  const {interactables:plaques} = await addBrandWallAtlas(T,new T.Scene(),L.upper);
+  assert.equal(plaques.length,17);
+  const stops = route.flatMap(({id, at})=>{
+    if (at) return [[id, at]];
+    if (id === 'brand-wall') return plaques.map(p => [p.id,[p.x,p.z]]);
+    const placement = deckSeats.find(seat => seat.name === id);
+    assert(placement,id);
+    return [[id,[placement.exit.x,placement.exit.z]]];
+  });
+  for (const [id, point] of stops) {
+    const node = reachable.get(grid.key(point));
+    assert(node && grid.edge(node,point,radius), `${id}: no capsule path to ${point}`);
+  }
+
+  // Exercise the continuous browser itinerary with the same Rapier controller.
+  body.setTranslation({x:L.exit.x,y:L.upper+.875,z:L.exit.z},true); physics.step();
+  for (const [id,[x,z]] of stops) {
+    let p = body.translation(), remaining = Math.hypot(x-p.x,z-p.z);
+    for (let i=0; i<450 && remaining>.038; i++) {
+      p = advance((x-p.x)/remaining,(z-p.z)/remaining,1);
+      remaining = Math.hypot(x-p.x,z-p.z);
+    }
+    assert(remaining<=.038,`${id}: blocked near (${p.x}, ${p.z}) en route to (${x}, ${z})`);
   }
 });
