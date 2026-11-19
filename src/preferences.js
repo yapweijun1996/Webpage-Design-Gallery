@@ -90,9 +90,38 @@ function appearance(choice) {
 function applyPalette(choice) {
   if (!palettes.includes(choice)) choice = 'terracotta';
   document.documentElement.dataset.palette = choice;
-  const select = document.querySelector('#palette-select');
-  if (select) select.value = choice;
+  const option = document.querySelector(`.palette-panel input[value="${choice}"]`);
+  if (option) {
+    option.checked = true;
+    document.querySelector('.palette-name').textContent = option.parentElement.lastElementChild.textContent;
+  }
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.querySelector('.site-header')).backgroundColor;
+}
+function initPalettePicker() {
+  const picker = document.querySelector('.palette-picker');
+  const summary = picker.querySelector('summary');
+  const close = (restoreFocus) => {
+    if (!picker.open) return;
+    picker.open = false;
+    if (restoreFocus) summary.focus();
+  };
+  picker.querySelector('.palette-panel').addEventListener('change', (event) => {
+    const saved = storage.set('palette', event.target.value);
+    applyPalette(event.target.value);
+    document.querySelector('#preferences-status').textContent = saved ? 'Preferences saved.' : 'Preferences apply to this tab. Storage is unavailable.';
+  });
+  // Pointer choices close the popover; arrow keys keep it open to browse palettes.
+  picker.querySelector('.palette-panel').addEventListener('click', (event) => {
+    if (event.target.matches('input') && event.detail > 0) close(true);
+  });
+  picker.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') { event.preventDefault(); close(true); }
+    if (event.key === 'Enter' && event.target.matches('input')) { event.preventDefault(); close(true); }
+  });
+  picker.addEventListener('toggle', () => {
+    if (picker.open) picker.querySelector('input:checked')?.focus();
+  });
+  document.addEventListener('click', (event) => { if (!picker.contains(event.target)) close(false); });
 }
 function setLanguage(value) {
   language = supported.includes(value) ? value : 'en';
@@ -110,11 +139,7 @@ async function init() {
     document.querySelector('#preferences-status').textContent = saved ? 'Preferences saved.' : 'Preferences apply to this tab. Storage is unavailable.';
   });
   applyPalette(document.documentElement.dataset.palette);
-  document.querySelector('#palette-select').addEventListener('change', (event) => {
-    const saved = storage.set('palette', event.target.value);
-    applyPalette(event.target.value);
-    document.querySelector('#preferences-status').textContent = saved ? 'Preferences saved.' : 'Preferences apply to this tab. Storage is unavailable.';
-  });
+  initPalettePicker();
   document.querySelector('#theme-toggle').addEventListener('click', () => {
     const choice = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     const saved = storage.set('theme', choice);
@@ -172,7 +197,7 @@ async function init() {
   controls.hidden = false;
   document.querySelector('.language-control').hidden = false;
   document.querySelector('#theme-toggle').hidden = false;
-  document.querySelector('.palette-control').hidden = false;
+  document.querySelector('.palette-picker').hidden = false;
   document.documentElement.dataset.preferencesReady = 'true';
 }
 init();
