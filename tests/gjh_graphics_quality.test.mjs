@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createAdaptiveQuality, createGraphicsQuality, createRenderCadence, detectDeviceClass,
-  isAndroidChrome, QUALITY_KEY, qualityPreference, RESOLUTION_KEY, resolveQuality}
+  estimateRefreshHz, isAndroidChrome, QUALITY_KEY, qualityPreference, RESOLUTION_KEY,
+  resolveQuality, resolveRenderCadence}
   from '../demos/corporate/gjh/v11/assets/graphics-quality.js';
 
 test('device classification combines platform, touch, pointer and viewport hints', () => {
@@ -106,6 +107,15 @@ test('steady 16 ms at 60 FPS, occasional 40 ms spikes and 20 ms at 30 FPS preser
   assert.deepEqual(phone.events, []);
 });
 
+test('adaptive quality uses the effective native cadence to detect missed refreshes', () => {
+  const {targetFps} = resolveRenderCadence('desktop', 75);
+  const desktop = series(targetFps);
+  desktop.feed(1000/75, 12000);
+  assert.deepEqual(desktop.events, []);
+  desktop.feed(i => i % 4 === 0 ? 2000/75 : 1000/75, 12000);
+  assert.ok(desktop.scale < 1);
+});
+
 test('sustained 25 ms at 60 FPS lowers resolution in small steps, then lowers one tier at a time', () => {
   const result = series(60);
   result.feed(25, 60000);
@@ -160,22 +170,50 @@ test('sampling interruptions clear overload timers and exclude settling frames',
   assert.equal(result.scale, .95);
 });
 
-test('render cadence caps 60, 75, 120 and 144 Hz displays without counting normal refresh quantization as misses', () => {
-  for (const refresh of [60,75,120,144]) for (const target of [30,60]) {
-    const cadence = createRenderCadence(target);
+test('refresh estimation uses 120 active rAF intervals and takes their median', () => {
+  const intervals = Array.from({length:120}, (_, i) => i % 5 === 0 ? 100 : (1000 / 75) + (i % 2 ? .04 : -.04));
+  assert.equal(estimateRefreshHz(intervals.slice(1)), null);
+  assert.equal(estimateRefreshHz(intervals), 75);
+
+  const cadence = createRenderCadence('desktop');
+  for (let i = 0; i < 100; i++) cadence.observe(i * 10, false);
+  for (let i = 100; i < 200; i++) cadence.observe(i * 10, true);
+  assert.equal(cadence.refreshHz, null);
+  cadence.observe(2000, false);
+  for (let i = 0; i < 120; i++) cadence.observe(3000 + i * 1000 / 120, true);
+  assert.equal(cadence.refreshHz, null);
+  assert.equal(cadence.capped, false);
+  assert.equal(cadence.observe(4000, true), true);
+  assert.equal(cadence.refreshHz, 120);
+  assert.equal(cadence.capped, true);
+});
+
+test('native tablet and desktop cadence below 100 Hz and integer caps on high-refresh displays and phones', () => {
+  const cases = [
+    ['tablet',60,1,60], ['desktop',75,1,75], ['tablet',90,1,90], ['desktop',99,1,99],
+    ['desktop',100,2,50], ['tablet',120,2,60], ['desktop',144,2,72],
+    ['phone',60,2,30], ['phone',90,3,30], ['phone',120,4,30], ['phone',144,5,28.8]
+  ];
+  for (const [device, refresh, divisor, targetFps] of cases) {
+    assert.deepEqual(resolveRenderCadence(device, refresh), {divisor, targetFps});
+    const cadence = createRenderCadence(device);
+    for (let i = 0; i <= 120; i++) cadence.observe(i * 1000 / refresh, true);
     const timings = Array.from({length:refresh * 20}, (_, i) => cadence.take(i * 1000 / refresh)).filter(Boolean);
-    assert.equal(timings.length, target * 20, `${target} on ${refresh} Hz`);
-    assert.ok(timings.every(ms => ms === 1000 / target));
+    assert.equal(timings.length, targetFps * 20, `${device} on ${refresh} Hz`);
+    assert.ok(timings.every(ms => Math.abs(ms - 1000 / targetFps) < 1e-9));
   }
 });
 
-test('render cadence drops missed slots without rendering twice and resumes from a fresh phase', () => {
-  const cadence = createRenderCadence(60);
+test('missed refreshes never trigger a short catch-up draw and resume keeps the measured rate', () => {
+  const cadence = createRenderCadence('desktop');
+  for (let i = 0; i <= 120; i++) cadence.observe(i * 1000 / 120, true);
   assert.equal(cadence.take(0), 1000/60);
-  assert.equal(cadence.take(6), 0);
-  assert.equal(cadence.take(51), 50);
-  assert.equal(cadence.take(54), 0);
+  assert.equal(cadence.take(1000/120), 0);
+  assert.equal(cadence.take(25), 25);
+  assert.equal(cadence.take(4000/120), 0);
+  assert.equal(cadence.take(5000/120), 1000/60);
   cadence.reset();
+  assert.equal(cadence.refreshHz, 120);
   assert.equal(cadence.take(10001), 1000/60);
 });
 
@@ -198,6 +236,10 @@ test('graphics settings keep manual tier and Auto resolution independent and per
     quality.apply(quality.resolve(1440));
     assert.equal(quality.deviceClass, 'desktop');
     assert.equal(quality.targetFps, 60);
+    assert.equal(quality.refreshHz, null);
+    for (let i = 0; i <= 120; i++) quality.observeRefresh(i * 1000 / 75, true);
+    assert.equal(quality.refreshHz, 75);
+    assert.equal(quality.targetFps, 75);
     assert.equal(resolution.checked, true);
     assert.equal(quality.state.tier, 'detailed');
 
@@ -226,7 +268,7 @@ test('graphics settings keep manual tier and Auto resolution independent and per
     assert.equal(quality.state.tier, 'detailed');
     assert.equal(quality.state.renderScale, .6);
     assert.equal(quality.tierDowngrades, 2);
-    assert.match(status.textContent, /Detailed. 60 FPS cap. 60% resolution/);
+    assert.match(status.textContent, /Detailed. 75 Hz native refresh. 60% resolution/);
     quality.recover();
     quality.apply(quality.resolve(1440));
     assert.equal(quality.state.tier, 'low');

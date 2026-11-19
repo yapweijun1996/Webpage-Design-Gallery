@@ -54,7 +54,8 @@ REPORT = """(start) => {
     .map(frame => frame.frameMs);
   return {drawCalls:peak('drawCalls'), triangles:peak('triangles'), zone:report.zone,
     tier:report.graphics.tier, budgetSamples:frames.length, gaps, renderScale:report.renderScale,
-    targetFps:report.targetFps, deviceClass:report.deviceClass, tierDowngrades:report.tierDowngrades};
+    targetFps:report.targetFps, refreshHz:report.refreshHz, deviceClass:report.deviceClass,
+    tierDowngrades:report.tierDowngrades};
 }"""
 
 
@@ -70,8 +71,8 @@ def stats(gaps):
 
 
 def verdict(row, device):
-    _, _, target, max_p95, min_fps = DEVICES[device]
-    return (row['deviceClass'] == device and row['targetFps'] == target and row['frames'] > 20
+    _, _, _, max_p95, min_fps = DEVICES[device]
+    return (row['deviceClass'] == device and row['targetFps'] >= min_fps and row['frames'] > 20
             and row['p95'] <= max_p95 and row['fps'] >= min_fps)
 
 

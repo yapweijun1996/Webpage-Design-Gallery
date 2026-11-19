@@ -158,7 +158,7 @@ function shelfShadowGeometry(primitives) {
   return merged;
 }
 
-export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null) {
+export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null,shopSlot) {
   const displayLods = [];
   let shadowMesh = null, shadowLod = null;
   const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
@@ -206,8 +206,8 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
         placement.bounds.union(mesh.geometry.boundingBox.clone().applyMatrix4(matrix));
       });
     }
-    displayLods.push(createProductDisplayLod(T, meshes.filter(mesh => mesh !== shadowMesh), placements));
-    shadowLod = createProductDisplayLod(T, [shadowMesh], placements);
+    displayLods.push(createProductDisplayLod(T, meshes.filter(mesh => mesh !== shadowMesh), placements, {shopSlot}));
+    shadowLod = createProductDisplayLod(T, [shadowMesh], placements, {shadow:true,shopSlot});
   }
   const interactables = [], stock = new Map(), loadedCans = [];
   // The same bounds own collision, focus framing and the projected whole-shelf target.
@@ -233,16 +233,16 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
       const meshes = fallbackCan(T, scene, textures, brass, sku, placements);
       slots.forEach(slot => slot.bounds.setFromCenterAndSize(new T.Vector3(slot.x,slot.y + canBounds.y/2,slot.z),
         new T.Vector3(canBounds.x,canBounds.y,canBounds.z)));
-      displayLods.push(createProductDisplayLod(T, meshes, slots));
+      displayLods.push(createProductDisplayLod(T, meshes, slots, {shopSlot}));
     }
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
-  const display = createCanDisplay(T, scene, loadedCans);
+  const display = createCanDisplay(T, scene, loadedCans, shopSlot);
   return {displayedProducts:showcase.length,
     updateShopLods(visitor, view) {
       for (const lod of displayLods) lod.update(visitor, view);
       display.update(visitor, view);
-      if (shadowMesh?.visible) shadowLod.update(visitor);
+      if (shadowMesh?.visible) shadowLod.update(visitor, view);
     },
     setShadows(enabled) { if (shadowMesh) shadowMesh.visible = enabled; }, shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);

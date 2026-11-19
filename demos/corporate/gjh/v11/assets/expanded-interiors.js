@@ -36,7 +36,7 @@ function displayPlacements(number, heroX, heroZ) {
 
 // Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
-export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}) {
+export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.65});
   const woodFinishes = new Set([0xb18356,0x66412f,0x69442c,0x8b5a38,0xb28a5c,0xc59d69,0x8e4d35,0x66482f,0x604534,0x694635,0xaa8464]);
@@ -63,7 +63,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       '#include <emissivemap_fragment>\ntotalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);\n' +
       'if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;');
   };
-  const studioParts = new Map(), studioBatches = [];
+  const studioParts = [];
   const shops = [], collisionBoxes = [];
   const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
   const modelStates = new Map(slots.flatMap(slot => {
@@ -135,6 +135,12 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     }
     const tools = {
       block,
+      opaqueWall(x,y,z,w,h,d,color) {
+        box(x,y,z,w,h,d,color);
+        const a = group.rotation.y, c = Math.cos(a), s = Math.sin(a);
+        shopVisibility?.addWall(number,group.position.x+x*c+z*s,y,group.position.z-x*s+z*c,
+          w*Math.abs(c)+d*Math.abs(s),h,w*Math.abs(s)+d*Math.abs(c));
+      },
       replaceDisplay(build) {
         // Retain the solid envelopes while the room kit owns their surfaces.
         replaced = true;
@@ -173,12 +179,11 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     buildWindowStudio(number, tools, width, depth, interiorFloorColour(interiorStores['S'+slot.number]));
     buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
-    if (!studioParts.has(side)) studioParts.set(side, []);
     function addStudioParts(geometries, visible) {
       for (const geometry of geometries) {
         geometry.applyMatrix4(group.matrix);
         geometry.computeBoundingBox();
-        studioParts.get(side).push({geometries:[geometry], bounds:geometry.boundingBox, visible});
+        studioParts.push({geometries:[geometry], bounds:geometry.boundingBox, visible, number});
       }
     }
     addStudioParts(parts);
@@ -292,6 +297,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     // Secondary furnishings belong to the bay, so they remain visible when a
     // visitor looks across adjoining windows and the nearest hero changes.
     const shopState = {number:String(slot.number), status:'pending', galleryLoaded:0, galleryFailed:0};
+    const gallery = [];
     async function loadShop() {
       await Promise.all([
         loadHero?.(),
@@ -304,7 +310,10 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             model.name = `S${slot.number} gallery: ${file}`;
             mergeOpaqueMeshes(T, model);
             await prepareModel(model);
-            group.add(model); shopState.galleryLoaded++;
+            group.add(model);
+            model.updateWorldMatrix(true,true);
+            gallery.push({model, bounds:new T.Box3().setFromObject(model)});
+            shopState.galleryLoaded++;
           } catch (error) {
             shopState.galleryFailed++;
             console.warn(`Unavailable shop furnishing: ${file}`, error);
@@ -312,15 +321,12 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         })
       ]);
     }
-    shops.push({group, hero, x:group.position.x, z:group.position.z, display, isLoaded:() => loaded,
+    shops.push({group, hero, number, gallery, x:group.position.x, z:group.position.z, display, isLoaded:() => loaded,
       loadDisplay: loadShop, state:shopState});
   });
-  for (const [wing, parts] of studioParts) {
-    const batch = createPackedDraw(T, parts, material);
-    batch.mesh.name = `Concourse window studios: ${wing}`;
-    scene.add(batch.mesh);
-    studioBatches.push(batch);
-  }
+  const studioBatch = createPackedDraw(T, studioParts, material);
+  studioBatch.mesh.name = 'Concourse window studios';
+  scene.add(studioBatch.mesh);
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
     if (loading || scheduled) return;
@@ -357,13 +363,19 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       }
     }
     for (const shop of shops) {
+      for (const {model,bounds} of shop.gallery) {
+        model.visible = !view || bounds.isEmpty() || !shopVisibility?.occluded(shop.number,bounds);
+      }
       if (!shop.display) continue;
       const active = shop === nearest;
       shop.display.visible = active;
       shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
     }
-    for (const batch of studioBatches) batch.update(part =>
-      (!part.visible || part.visible()) && (!view || view.frustum.intersectsBox(part.bounds)) ? 0 : -1);
+    studioBatch.update(part => {
+      if (part.visible && !part.visible()) return -1;
+      if (!view) return 0;
+      return view.frustum.intersectsBox(part.bounds) && !shopVisibility?.occluded(part.number,part.bounds) ? 0 : -1;
+    });
     schedulePrefetch();
   }};
 }

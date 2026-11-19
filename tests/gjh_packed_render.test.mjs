@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {mergeStaticGeometries} from '../demos/corporate/gjh/v11/assets/merge-static-geometries.js';
-import {boxFrontFaces, createPackedDraw, createInstanceVisibility, createProjectedBatch, distantDetail, projectedError} from '../demos/corporate/gjh/v11/assets/packed-draw.js';
+import {boxFrontFaces, createGlassBatch, createPackedDraw, createInstanceVisibility, createProjectedBatch, distantDetail, projectedError} from '../demos/corporate/gjh/v11/assets/packed-draw.js';
+import {createShopVisibility} from '../demos/corporate/gjh/v11/assets/shop-visibility.js';
 import {canDetail, makeCanLods, createCanDisplay} from '../demos/corporate/gjh/v11/assets/product-display-lod.js';
 import {simplifyBench} from '../demos/corporate/gjh/v11/assets/furnishings.js';
 
@@ -203,4 +204,44 @@ test('convex doors select the entry faces independently of which side the camera
   assert.equal(boxFrontFaces(new T.Vector3(6,9,4),centre,size),1|4|32);
   assert.equal(boxFrontFaces(new T.Vector3(1,2,5),centre,size),2);
   assert.equal(boxFrontFaces(centre,centre,size),0);
+});
+
+test('shop occlusion preserves partial views through the storefront and from inside', () => {
+  const rooms = createShopVisibility(T);
+  rooms.addWall(1,0,2,-4,.2,4,8);
+  const stock = new T.Box3(new T.Vector3(-3,.5,-7),new T.Vector3(-1,3,-5));
+  rooms.setEye(new T.Vector3(3,2,-5));
+  assert.equal(rooms.occluded(1,stock),true);
+  assert.equal(rooms.occluded(2,stock),false);
+  rooms.setEye(new T.Vector3(-4,2,-4));
+  assert.equal(rooms.occluded(1,stock),false);
+  rooms.setEye(new T.Vector3(3,2,7));
+  assert.equal(rooms.occluded(1,stock),false);
+  rooms.setEye(new T.Vector3(3,9,-5));
+  assert.equal(rooms.occluded(1,stock),false);
+});
+
+test('packed glass keeps exit and entry faces ordered while leaves move and leave the view', () => {
+  const source = new T.BoxGeometry();
+  const pane = z => ({position:new T.Vector3(0,0,z),scale:new T.Vector3(2,3,.06)});
+  const near = pane(-2), far = pane(-4);
+  const batch = createGlassBatch(T,source,new T.MeshStandardMaterial(),[near,far]);
+  const {geometry} = batch.mesh, view = cameraView();
+  batch.update(view);
+  assert.equal(geometry.drawRange.count,72);
+  // The farther pane goes first, with its positive-Z entry face last.
+  const entry = [...source.index.array.slice(24,30)];
+  assert.deepEqual([...geometry.index.array.slice(30,36)],entry.map(index => index+24));
+  const positionVersion = geometry.attributes.position.version, indexVersion = geometry.index.version;
+  batch.update(view);
+  assert.equal(geometry.attributes.position.version,positionVersion);
+  assert.equal(geometry.index.version,indexVersion);
+  far.position.x = 50;
+  batch.update(view);
+  assert.equal(geometry.drawRange.count,36);
+  assert.deepEqual([...geometry.index.array.slice(30,36)],entry);
+  far.position.set(1,0,-4);
+  batch.update(view);
+  assert.equal(geometry.drawRange.count,72);
+  assert.equal(geometry.boundingBox.max.x,2);
 });

@@ -1,6 +1,12 @@
 export const QUALITY_KEY = 'gjh-v11-graphics-quality-v1';
 export const RESOLUTION_KEY = 'gjh-v11-auto-resolution-v1';
+export const MALL_FRAME_BUDGETS = Object.freeze({
+  low:Object.freeze({triangles:220000, calls:70}),
+  balanced:Object.freeze({triangles:300000, calls:90}),
+  detailed:Object.freeze({triangles:420000, calls:110})
+});
 const TIERS = ['low', 'balanced', 'detailed'];
+const REFRESH_SAMPLE_COUNT = 120;
 const WINDOW_SIZE = 90;
 const MIN_SCALE = 60;
 const SCALE_STEP = 5;
@@ -19,7 +25,23 @@ export function detectDeviceClass({userAgent = '', platform = '', maxTouchPoints
 }
 
 export const isAndroidChrome = userAgent => /Android/i.test(userAgent) && /Chrome\//i.test(userAgent);
-export const targetFpsFor = deviceClass => deviceClass === 'phone' ? 30 : 60;
+
+export function estimateRefreshHz(intervals) {
+  const sorted = intervals.filter(positive).sort((a, b) => a - b);
+  if (sorted.length < REFRESH_SAMPLE_COUNT) return null;
+  const middle = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  return Math.round(1000 / median);
+}
+
+export function resolveRenderCadence(deviceClass, refreshHz) {
+  const phone = deviceClass === 'phone';
+  const hz = positive(refreshHz) ? refreshHz : 60;
+  // Phones stay at or below 30. High-refresh tablets and desktops use the
+  // integer divisor nearest the nominal 60 FPS ratio, with at least two ticks.
+  const divisor = phone ? Math.ceil(hz / 30) : hz >= 100 ? Math.max(2, Math.round(hz / 60)) : 1;
+  return {divisor, targetFps:hz / divisor};
+}
 
 export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memory,
   recovered = false, autoTier = null, deviceClass = 'desktop', androidChrome = false, highPerformanceWebGL2 = false}) {
@@ -38,20 +60,39 @@ export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memo
     shadows:tier === 'detailed' && width >= 1000, recovered});
 }
 
-// A refresh-rate-independent schedule. Keep the phase on fractional refresh
-// ratios (e.g. 60 FPS on 75 Hz), and drop slots instead of drawing to catch up.
-export function createRenderCadence(targetFps) {
-  const interval = 1000 / targetFps;
-  const slack = .8;
-  let next = null;
+export function createRenderCadence(deviceClass) {
+  const intervals = [];
+  let refreshHz = null, lastSample = null, lastDraw = null;
+  let policy = resolveRenderCadence(deviceClass, refreshHz);
   return {
-    reset() { next = null; },
+    get refreshHz() { return refreshHz; },
+    get targetFps() { return policy.targetFps; },
+    get capped() { return policy.divisor > 1; },
+    reset() { lastDraw = lastSample = null; intervals.length = 0; },
+    observe(now, active) {
+      if (refreshHz !== null) return false;
+      if (!active) { lastSample = null; intervals.length = 0; return false; }
+      if (lastSample !== null && now > lastSample) intervals.push(now - lastSample);
+      lastSample = now;
+      if (intervals.length < REFRESH_SAMPLE_COUNT) return false;
+      refreshHz = estimateRefreshHz(intervals);
+      policy = resolveRenderCadence(deviceClass, refreshHz);
+      intervals.length = 0;
+      return true;
+    },
     take(now) {
-      next ??= now;
-      if (now + slack < next) return 0;
-      const slots = 1 + Math.floor((now + slack - next) / interval);
-      next += slots * interval;
-      return slots * interval;
+      const elapsed = lastDraw === null ? 1000 / policy.targetFps : now - lastDraw;
+      if (refreshHz) {
+        // Anchor each draw to a real refresh. After a missed callback, wait
+        // a full divisor again instead of catching up with a short frame.
+        const refreshes = Math.max(1, Math.round(elapsed * refreshHz / 1000));
+        if (refreshes < policy.divisor) return 0;
+        lastDraw = now;
+        return refreshes * 1000 / refreshHz;
+      }
+      if (policy.divisor > 1 && elapsed + .8 < 1000 / policy.targetFps) return 0;
+      lastDraw = now;
+      return elapsed;
     }
   };
 }
@@ -109,14 +150,14 @@ export function createAdaptiveQuality(targetFps) {
       reset(now);
     },
     get renderScale() { return state.scale / 100; },
-    sample(now, frameMs, callbackMs, tier, allowTierDowngrade) {
+    sample(now, frameMs, callbackMs, tier, allowTierDowngrade, currentTargetFps = targetFps) {
       if (now < ignoreUntil || !positive(frameMs)) return null;
       firstSample ??= now;
       samples[cursor] = {frameMs, callbackMs};
       cursor = (cursor + 1) % WINDOW_SIZE;
       if (now < nextCheck || (samples.length < WINDOW_SIZE && (samples.length < 8 || now - firstSample < 3000))) return null;
       nextCheck = now + 250;
-      const {lowerTier, ...next} = decideAdaptiveQuality(state, samples, {now, targetFps, tier, allowTierDowngrade});
+      const {lowerTier, ...next} = decideAdaptiveQuality(state, samples, {now, targetFps:currentTargetFps, tier, allowTierDowngrade});
       const scaleChanged = next.scale !== state.scale;
       state = next;
       if (!scaleChanged && !lowerTier) return null;
@@ -133,9 +174,9 @@ export function createGraphicsQuality(onChange) {
   const deviceClass = detectDeviceClass({userAgent:navigator.userAgent, platform:navigator.platform,
     maxTouchPoints:navigator.maxTouchPoints, coarsePointer:window.matchMedia('(pointer: coarse)').matches,
     width:window.innerWidth, height:window.innerHeight});
-  const targetFps = targetFpsFor(deviceClass);
+  const cadence = createRenderCadence(deviceClass);
   const androidChrome = isAndroidChrome(navigator.userAgent);
-  const adaptive = createAdaptiveQuality(targetFps);
+  const adaptive = createAdaptiveQuality(cadence.targetFps);
   let preference = 'auto', recovered = false, profile, autoTier = null;
   let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
   let autoEnabled = true;
@@ -160,6 +201,13 @@ export function createGraphicsQuality(onChange) {
     onChange('resolution');
   });
 
+  function updateStatus() {
+    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
+    const rate = Number(cadence.targetFps.toFixed(1));
+    const pacing = cadence.capped ? `${rate} FPS cap.` : cadence.refreshHz ? `${cadence.refreshHz} Hz native refresh.` : 'Native refresh.';
+    status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${pacing} ${Math.round(profile.renderScale * 100)}% resolution. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'}`;
+  }
+
   function apply(next) {
     const renderScale = adaptive.renderScale;
     profile = Object.freeze({...next, renderScale, pixelRatio:next.basePixelRatio * renderScale});
@@ -167,13 +215,20 @@ export function createGraphicsQuality(onChange) {
       tierDowngrades++;
       pendingDowngrade = null;
     }
-    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-    status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${targetFps} FPS cap. ${Math.round(renderScale * 100)}% resolution. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'}`;
+    updateStatus();
     return profile;
   }
 
   return {
-    deviceClass, targetFps, androidChrome,
+    deviceClass, androidChrome, cadence,
+    get targetFps() { return cadence.targetFps; },
+    get refreshHz() { return cadence.refreshHz; },
+    observeRefresh(now, active) {
+      if (cadence.observe(now, active)) {
+        adaptive.reset(now);
+        if (profile) updateStatus();
+      }
+    },
     setWebGLHint(value) { highPerformanceWebGL2 = value; },
     recover() {
       recovered = true;
@@ -187,7 +242,7 @@ export function createGraphicsQuality(onChange) {
         adaptive.reset(now);
         return;
       }
-      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === 'auto' && !recovered);
+      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === 'auto' && !recovered, cadence.targetFps);
       if (next?.tier) autoTier = pendingDowngrade = next.tier;
       if (next) onChange(next.tier ? 'tier' : 'resolution');
     },

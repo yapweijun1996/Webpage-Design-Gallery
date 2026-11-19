@@ -3,7 +3,7 @@ import {createPerformanceMonitor} from './assets/performance-monitor.js';
 import {createPerformancePanel} from './assets/performance-panel.js';
 import {createFrameTrace} from './assets/frame-trace.js';
 import {createUI} from './assets/ui.js';
-import {createGraphicsQuality, createRenderCadence} from './assets/graphics-quality.js';
+import {createGraphicsQuality, MALL_FRAME_BUDGETS} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
@@ -59,8 +59,8 @@ const quality = createGraphicsQuality(change => {
     requestRender();
   } else resize();
 });
-const renderCadence = createRenderCadence(quality.targetFps);
 let renderRequested = false, forceRender = false, enteredAt = null;
+let simulationMs = 0, simulationSteps = 0;
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
 let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
@@ -68,6 +68,7 @@ function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGu
 let nearby = null, currentZone = 'atrium', wasRiding = false;
 function clearTransientState(event) {
   quality.resetSampling();
+  simulationMs = simulationSteps = 0;
   hideGuidance();
   mallHud.suspend();
   player?.clearInput();
@@ -94,6 +95,7 @@ function performanceReport() {
     ...performanceMonitor.snapshot(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
+    refreshHz: quality.refreshHz,
     deviceClass: quality.deviceClass,
     tierDowngrades: quality.tierDowngrades,
     signage: world?.signage?.report() ?? {modelsLoaded:0,signs:0,drawCalls:0,triangles:0,textureMB:0,previousTextureMB:0,atlasPx:0,phoneProof:null,tier:quality.state?.tier??'low'},
@@ -370,7 +372,8 @@ function render(force = false) {
     const draw=()=>{
       world.interiors?.beginFrame();
       try {
-        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs);
+        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs,
+          expanded ? MALL_FRAME_BUDGETS[tier] : undefined);
       } finally { world.interiors?.endFrame(); }
     };
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
@@ -519,13 +522,13 @@ function animate(now) {
     quality.resetSampling(now);
     return;
   }
+  const entered = startupOverlay.hidden && document.body.classList.contains('is-3d');
+  if (entered) enteredAt ??= now;
+  quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
   if (advancing) accumulator = Math.min(.1, accumulator + Math.max(0, (now - last) / 1000));
   else accumulator = 0;
   last = now;
-  const slotMs = renderCadence.take(now);
-  if (!slotMs) return;
-
   const callbackStart = performance.now();
   const pad=readStandardGamepad();
   const consumed=ui.handleGamepad(pad);
@@ -547,7 +550,12 @@ function animate(now) {
     }
     if (steps) updateHUD();
   }
-  const simulationEnd = performance.now();
+  simulationSteps += steps;
+  simulationMs += performance.now() - simulationStart;
+  // Drawing can skip refreshes while the simulation still consumes fixed steps.
+  const slotMs = quality.cadence.take(now);
+  if (!slotMs) return;
+
   const uploadMs = warmModels(player.state);
   const live = advancing && !modes.paused() || modes.current() === 'shelf';
   let pose, callbackMs = 0;
@@ -563,8 +571,8 @@ function animate(now) {
     if (pose && live && !windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
-        simulationMs: simulationEnd - simulationStart, renderMs: renderEnd - renderStart, uploadMs,
-        callbackMs, steps, zone: currentZone, x: pose.x, z: pose.z, tier: quality.state?.tier,
+        simulationMs, renderMs: renderEnd - renderStart, uploadMs,
+        callbackMs, steps: simulationSteps, zone: currentZone, x: pose.x, z: pose.z, tier: quality.state?.tier,
         renderScale: quality.state?.renderScale, width: canvas.width, height: canvas.height
       });
       if (now - lastMetricsUpdate >= 1000) {
@@ -573,9 +581,9 @@ function animate(now) {
       }
     } else pausePerformance();
   } else pausePerformance();
-  if (startupOverlay.hidden) enteredAt ??= now;
+  simulationMs = simulationSteps = 0;
   quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel &&
-    !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && startupOverlay.hidden &&
+    !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered &&
     now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost &&
     ['explore','cart'].includes(modes.current())));
 }
@@ -583,7 +591,7 @@ function resume() {
   if (ready && !frame && !document.hidden) {
     last = performance.now();
     accumulator = 0;
-    renderCadence.reset();
+    quality.cadence.reset();
     frame = requestAnimationFrame(animate);
   }
 }

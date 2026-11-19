@@ -20,7 +20,7 @@ const finishes = {
 };
 
 export function buildWindowStudio(n, t, width, depth, floorColour) {
-  const {box, column, disc, bar, arch, ring, ellipse, tapered, block} = t;
+  const {box, column, disc, bar, arch, ring, ellipse, tapered, block, opaqueWall = box} = t;
   const [wall, base, floor] = finishes[n];
   const back=-depth/2+.38, front=depth/2-.18, side=width/2-.23, span=front-back, mid=(front+back)/2;
   const replace = t.replaceDisplay ?? (build => build());
@@ -162,7 +162,7 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
   block(0,.041,mid,side*2,.08,span);
   // Floor slabs sample the arcade's existing mineral tile at shop scale.
   box(0,.041,mid,side*2,.08,span,floorColour ?? floor,-2);
-  box(0,2.12,back,side*2,4.18,.13,wall);
+  opaqueWall(0,2.12,back,side*2,4.18,.13,wall);
   // Bounced cove light keeps the underside of the plaster ceiling legible.
   box(0,4.19,mid,side*2,.18,span,cream,-3);
   // The north jamb is local +X in the west wing and -X in the east wing.
@@ -173,7 +173,7 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
   for(const s of [-1,1]) {
     box(s*(side-.20),4.082,mid,.40,.064,span,pearl,-3);
     const wallEnd = s === pilasterSide ? pilasterBack : front;
-    box(s*side,2.10,(back+wallEnd)/2,.13,4.13,wallEnd-back,wall);
+    opaqueWall(s*side,2.10,(back+wallEnd)/2,.13,4.13,wallEnd-back,wall);
     box(s*(side-.31),4.05,mid,.065,.046,span-.6,shopLamp);
     box(s*(side-.2),.19,mid,.15,.21,span,base);
   }

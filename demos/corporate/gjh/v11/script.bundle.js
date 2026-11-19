@@ -2621,7 +2621,13 @@ function createUI(expanded = false) {
 // demos/corporate/gjh/v11/assets/graphics-quality.js
 var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
 var RESOLUTION_KEY = "gjh-v11-auto-resolution-v1";
+var MALL_FRAME_BUDGETS = Object.freeze({
+  low: Object.freeze({ triangles: 220000, calls: 70 }),
+  balanced: Object.freeze({ triangles: 300000, calls: 90 }),
+  detailed: Object.freeze({ triangles: 420000, calls: 110 })
+});
 var TIERS = ["low", "balanced", "detailed"];
+var REFRESH_SAMPLE_COUNT = 120;
 var WINDOW_SIZE = 90;
 var MIN_SCALE = 60;
 var SCALE_STEP = 5;
@@ -2647,7 +2653,20 @@ function detectDeviceClass({
   return "desktop";
 }
 var isAndroidChrome = (userAgent) => /Android/i.test(userAgent) && /Chrome\//i.test(userAgent);
-var targetFpsFor = (deviceClass) => deviceClass === "phone" ? 30 : 60;
+function estimateRefreshHz(intervals) {
+  const sorted = intervals.filter(positive).sort((a, b) => a - b);
+  if (sorted.length < REFRESH_SAMPLE_COUNT)
+    return null;
+  const middle = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  return Math.round(1000 / median);
+}
+function resolveRenderCadence(deviceClass, refreshHz) {
+  const phone = deviceClass === "phone";
+  const hz = positive(refreshHz) ? refreshHz : 60;
+  const divisor = phone ? Math.ceil(hz / 30) : hz >= 100 ? Math.max(2, Math.round(hz / 60)) : 1;
+  return { divisor, targetFps: hz / divisor };
+}
 function resolveQuality({
   preference = "auto",
   width,
@@ -2681,21 +2700,55 @@ function resolveQuality({
     recovered
   });
 }
-function createRenderCadence(targetFps) {
-  const interval = 1000 / targetFps;
-  const slack = 0.8;
-  let next = null;
+function createRenderCadence(deviceClass) {
+  const intervals = [];
+  let refreshHz = null, lastSample = null, lastDraw = null;
+  let policy = resolveRenderCadence(deviceClass, refreshHz);
   return {
+    get refreshHz() {
+      return refreshHz;
+    },
+    get targetFps() {
+      return policy.targetFps;
+    },
+    get capped() {
+      return policy.divisor > 1;
+    },
     reset() {
-      next = null;
+      lastDraw = lastSample = null;
+      intervals.length = 0;
+    },
+    observe(now, active) {
+      if (refreshHz !== null)
+        return false;
+      if (!active) {
+        lastSample = null;
+        intervals.length = 0;
+        return false;
+      }
+      if (lastSample !== null && now > lastSample)
+        intervals.push(now - lastSample);
+      lastSample = now;
+      if (intervals.length < REFRESH_SAMPLE_COUNT)
+        return false;
+      refreshHz = estimateRefreshHz(intervals);
+      policy = resolveRenderCadence(deviceClass, refreshHz);
+      intervals.length = 0;
+      return true;
     },
     take(now) {
-      next ??= now;
-      if (now + slack < next)
+      const elapsed = lastDraw === null ? 1000 / policy.targetFps : now - lastDraw;
+      if (refreshHz) {
+        const refreshes = Math.max(1, Math.round(elapsed * refreshHz / 1000));
+        if (refreshes < policy.divisor)
+          return 0;
+        lastDraw = now;
+        return refreshes * 1000 / refreshHz;
+      }
+      if (policy.divisor > 1 && elapsed + 0.8 < 1000 / policy.targetFps)
         return 0;
-      const slots = 1 + Math.floor((now + slack - next) / interval);
-      next += slots * interval;
-      return slots * interval;
+      lastDraw = now;
+      return elapsed;
     }
   };
 }
@@ -2750,7 +2803,7 @@ function createAdaptiveQuality(targetFps) {
     get renderScale() {
       return state.scale / 100;
     },
-    sample(now, frameMs, callbackMs, tier, allowTierDowngrade) {
+    sample(now, frameMs, callbackMs, tier, allowTierDowngrade, currentTargetFps = targetFps) {
       if (now < ignoreUntil || !positive(frameMs))
         return null;
       firstSample ??= now;
@@ -2759,7 +2812,7 @@ function createAdaptiveQuality(targetFps) {
       if (now < nextCheck || samples.length < WINDOW_SIZE && (samples.length < 8 || now - firstSample < 3000))
         return null;
       nextCheck = now + 250;
-      const { lowerTier, ...next } = decideAdaptiveQuality(state, samples, { now, targetFps, tier, allowTierDowngrade });
+      const { lowerTier, ...next } = decideAdaptiveQuality(state, samples, { now, targetFps: currentTargetFps, tier, allowTierDowngrade });
       const scaleChanged = next.scale !== state.scale;
       state = next;
       if (!scaleChanged && !lowerTier)
@@ -2781,9 +2834,9 @@ function createGraphicsQuality(onChange) {
     width: window.innerWidth,
     height: window.innerHeight
   });
-  const targetFps = targetFpsFor(deviceClass);
+  const cadence = createRenderCadence(deviceClass);
   const androidChrome = isAndroidChrome(navigator.userAgent);
-  const adaptive = createAdaptiveQuality(targetFps);
+  const adaptive = createAdaptiveQuality(cadence.targetFps);
   let preference = "auto", recovered = false, profile, autoTier = null;
   let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
   let autoEnabled = true;
@@ -2811,6 +2864,12 @@ function createGraphicsQuality(onChange) {
     } catch {}
     onChange("resolution");
   });
+  function updateStatus() {
+    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
+    const rate = Number(cadence.targetFps.toFixed(1));
+    const pacing = cadence.capped ? `${rate} FPS cap.` : cadence.refreshHz ? `${cadence.refreshHz} Hz native refresh.` : "Native refresh.";
+    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${pacing} ${Math.round(profile.renderScale * 100)}% resolution. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."}`;
+  }
   function apply(next) {
     const renderScale = adaptive.renderScale;
     profile = Object.freeze({ ...next, renderScale, pixelRatio: next.basePixelRatio * renderScale });
@@ -2818,14 +2877,26 @@ function createGraphicsQuality(onChange) {
       tierDowngrades++;
       pendingDowngrade = null;
     }
-    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${targetFps} FPS cap. ${Math.round(renderScale * 100)}% resolution. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."}`;
+    updateStatus();
     return profile;
   }
   return {
     deviceClass,
-    targetFps,
     androidChrome,
+    cadence,
+    get targetFps() {
+      return cadence.targetFps;
+    },
+    get refreshHz() {
+      return cadence.refreshHz;
+    },
+    observeRefresh(now, active) {
+      if (cadence.observe(now, active)) {
+        adaptive.reset(now);
+        if (profile)
+          updateStatus();
+      }
+    },
     setWebGLHint(value) {
       highPerformanceWebGL2 = value;
     },
@@ -2843,7 +2914,7 @@ function createGraphicsQuality(onChange) {
         adaptive.reset(now);
         return;
       }
-      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === "auto" && !recovered);
+      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === "auto" && !recovered, cadence.targetFps);
       if (next?.tier)
         autoTier = pendingDowngrade = next.tier;
       if (next)
@@ -3090,35 +3161,53 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       materials.forEach((material) => material.dispose());
     }
   }
-  let base = null, glow = null, composite = null, quad = null, postScene = null, postCamera = null;
+  let base, glow, blurredGlow, blur, composite, blurScene, postScene, postCamera;
   const bufferSize = new T.Vector2, savedClearColor = new T.Color;
   function initPost() {
     if (base)
       return;
     base = new T.WebGLRenderTarget(1, 1);
     glow = new T.WebGLRenderTarget(1, 1);
-    composite = new T.ShaderMaterial({
-      uniforms: { base: { value: base.texture }, glow: { value: glow.texture }, texel: { value: new T.Vector2(1, 1) } },
-      vertexShader: "varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}",
-      fragmentShader: `uniform sampler2D base; uniform sampler2D glow; uniform vec2 texel; varying vec2 vUv;
-        void main(){ vec3 c=texture2D(base,vUv).rgb; vec3 b=vec3(0.0);
+    blurredGlow = new T.WebGLRenderTarget(1, 1, { depthBuffer: false });
+    const vertexShader = "varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}";
+    blur = new T.ShaderMaterial({
+      uniforms: { glow: { value: glow.texture }, texel: { value: new T.Vector2(1, 1) } },
+      vertexShader,
+      fragmentShader: `uniform sampler2D glow; uniform vec2 texel; varying vec2 vUv;
+        void main(){ vec3 b=vec3(0.0);
           for(int x=-2;x<=2;x++) for(int y=-2;y<=2;y++) {
             vec3 s=texture2D(glow,vUv+vec2(float(x),float(y))*texel).rgb;
             b+=max(s-vec3(0.38),vec3(0.0));
           }
-          gl_FragColor=vec4(c+b*(0.16/25.0),1.0);
+          gl_FragColor=vec4(b/25.0,1.0);
+        }`,
+      depthTest: false,
+      depthWrite: false,
+      toneMapped: false
+    });
+    composite = new T.ShaderMaterial({
+      uniforms: { base: { value: base.texture }, glow: { value: blurredGlow.texture } },
+      vertexShader,
+      fragmentShader: `uniform sampler2D base; uniform sampler2D glow; varying vec2 vUv;
+        void main(){ vec3 c=texture2D(base,vUv).rgb;
+          gl_FragColor=vec4(c+texture2D(glow,vUv).rgb*.16,1.0);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`,
       depthTest: false,
       depthWrite: false
     });
+    postCamera = new T.Camera;
+    const plane = new T.PlaneGeometry(2, 2);
+    blurScene = new T.Scene;
+    blurScene.name = "Mall glow filter";
     postScene = new T.Scene;
     postScene.name = "Mall glow composite";
-    postCamera = new T.Camera;
-    quad = new T.Mesh(new T.PlaneGeometry(2, 2), composite);
-    quad.frustumCulled = false;
-    postScene.add(quad);
+    for (const [target, material] of [[blurScene, blur], [postScene, composite]]) {
+      const quad = new T.Mesh(plane, material);
+      quad.frustumCulled = false;
+      target.add(quad);
+    }
   }
   function sizePost(width, height) {
     initPost();
@@ -3126,34 +3215,59 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       return;
     base.setSize(width, height);
     glow.setSize(Math.max(1, Math.floor(width / 4)), Math.max(1, Math.floor(height / 4)));
-    composite.uniforms.texel.value.set(1 / glow.width, 1 / glow.height);
+    blurredGlow.setSize(glow.width, glow.height);
+    blur.uniforms.texel.value.set(1 / glow.width, 1 / glow.height);
   }
   function* preparePost(width, height, screenPixel) {
     sizePost(width, height);
-    for (const target of [base, glow]) {
+    for (const target of [base, glow, blurredGlow]) {
       renderer.initRenderTarget(target);
       yield;
     }
-    renderer.compile(postScene, postCamera);
-    const program = renderer.properties.get(composite).currentProgram;
-    if (renderer.extensions.has("KHR_parallel_shader_compile"))
-      while (!program.isReady())
-        yield false;
+    const previous = renderer.getRenderTarget();
     const box = renderer.getScissor(new T.Vector4), test = renderer.getScissorTest();
-    try {
-      const size = screenPixel();
-      renderer.setScissor(0, 0, size, size);
-      renderer.setScissorTest(true);
-      renderer.render(postScene, postCamera);
-    } finally {
-      renderer.setScissor(box);
-      renderer.setScissorTest(test);
+    for (const [post, material, target] of [[blurScene, blur, blurredGlow], [postScene, composite, previous]]) {
+      renderer.setRenderTarget(target);
+      try {
+        renderer.compile(post, postCamera);
+      } finally {
+        renderer.setRenderTarget(previous);
+      }
+      const program = renderer.properties.get(material).currentProgram;
+      if (renderer.extensions.has("KHR_parallel_shader_compile"))
+        while (!program.isReady())
+          yield false;
+      try {
+        renderer.setRenderTarget(target);
+        const size = screenPixel();
+        if (target) {
+          const scissor = target.scissor.clone(), scissorTest = target.scissorTest;
+          target.scissor.set(0, 0, size, size);
+          target.scissorTest = true;
+          try {
+            renderer.setRenderTarget(target);
+            renderer.render(post, postCamera);
+          } finally {
+            target.scissor.copy(scissor);
+            target.scissorTest = scissorTest;
+          }
+        } else {
+          renderer.setScissor(0, 0, size, size);
+          renderer.setScissorTest(true);
+          renderer.render(post, postCamera);
+        }
+      } finally {
+        renderer.setScissor(box);
+        renderer.setScissorTest(test);
+        renderer.setRenderTarget(previous);
+      }
+      yield;
     }
   }
   const state = { bloom: false, nonNpcCalls: 0, npcCalls: 0, admitted: 0, totalCalls: 0, submissions: 0 };
-  function renderVisitors(camera, npcs, reservedCalls) {
+  function renderVisitors(camera, npcs, reservedCalls, budget) {
     state.nonNpcCalls = renderer.info.render.calls + reservedCalls;
-    state.admitted = npcs?.admit(state.nonNpcCalls) || 0;
+    state.admitted = npcs?.admit(state.nonNpcCalls, renderer.info.render.triangles + 2 * reservedCalls, budget) || 0;
     if (!state.admitted)
       return;
     const mask = camera.layers.mask, background = scene.background;
@@ -3174,7 +3288,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     }
     state.npcCalls = renderer.info.render.calls - before;
   }
-  function render(camera, enabled, npcs) {
+  function render(camera, enabled, npcs, budget) {
     state.bloom = Boolean(enabled);
     state.npcCalls = 0;
     state.submissions = 0;
@@ -3188,7 +3302,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       if (!enabled) {
         renderer.render(scene, camera);
         state.submissions++;
-        renderVisitors(camera, npcs, 0);
+        renderVisitors(camera, npcs, 0, budget);
       } else {
         const size = renderer.getDrawingBufferSize(bufferSize);
         sizePost(size.x, size.y);
@@ -3200,13 +3314,15 @@ function createMallAtmosphere(T, renderer, scene, slots) {
         scene.background = null;
         renderer.setClearColor(0, 0);
         renderer.setRenderTarget(glow);
-        renderer.clear();
         renderer.render(scene, camera);
+        state.submissions++;
+        renderer.setRenderTarget(blurredGlow);
+        renderer.render(blurScene, postCamera);
         state.submissions++;
         renderer.setRenderTarget(base);
         camera.layers.mask = mask;
         scene.background = background;
-        renderVisitors(camera, npcs, 1);
+        renderVisitors(camera, npcs, 1, budget);
         renderer.setRenderTarget(target);
         renderer.render(postScene, postCamera);
         state.submissions++;
@@ -5021,10 +5137,11 @@ var quality = createGraphicsQuality((change) => {
   } else
     resize();
 });
-var renderCadence = createRenderCadence(quality.targetFps);
 var renderRequested = false;
 var forceRender = false;
 var enteredAt = null;
+var simulationMs = 0;
+var simulationSteps = 0;
 var selectedInteraction = null;
 var interactionDistance = Infinity;
 var windowBlurred = false;
@@ -5043,6 +5160,7 @@ var currentZone = "atrium";
 var wasRiding = false;
 function clearTransientState(event) {
   quality.resetSampling();
+  simulationMs = simulationSteps = 0;
   hideGuidance();
   mallHud.suspend();
   player?.clearInput();
@@ -5083,6 +5201,7 @@ function performanceReport() {
     ...performanceMonitor.snapshot(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
+    refreshHz: quality.refreshHz,
     deviceClass: quality.deviceClass,
     tierDowngrades: quality.tierDowngrades,
     signage: world?.signage?.report() ?? { modelsLoaded: 0, signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, previousTextureMB: 0, atlasPx: 0, phoneProof: null, tier: quality.state?.tier ?? "low" },
@@ -5471,7 +5590,7 @@ function render(force = false) {
     const draw = () => {
       world.interiors?.beginFrame();
       try {
-        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs);
+        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs, expanded ? MALL_FRAME_BUDGETS[tier] : undefined);
       } finally {
         world.interiors?.endFrame();
       }
@@ -5659,15 +5778,16 @@ function animate(now) {
     quality.resetSampling(now);
     return;
   }
+  const entered = startupOverlay.hidden && document.body.classList.contains("is-3d");
+  if (entered)
+    enteredAt ??= now;
+  quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
   if (advancing)
     accumulator = Math.min(0.1, accumulator + Math.max(0, (now - last) / 1000));
   else
     accumulator = 0;
   last = now;
-  const slotMs = renderCadence.take(now);
-  if (!slotMs)
-    return;
   const callbackStart = performance.now();
   const pad = readStandardGamepad();
   const consumed = ui.handleGamepad(pad);
@@ -5695,7 +5815,11 @@ function animate(now) {
     if (steps)
       updateHUD();
   }
-  const simulationEnd = performance.now();
+  simulationSteps += steps;
+  simulationMs += performance.now() - simulationStart;
+  const slotMs = quality.cadence.take(now);
+  if (!slotMs)
+    return;
   const uploadMs = warmModels(player.state);
   const live = advancing && !modes.paused() || modes.current() === "shelf";
   let pose, callbackMs = 0;
@@ -5709,11 +5833,11 @@ function animate(now) {
     if (pose && live && !windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
-        simulationMs: simulationEnd - simulationStart,
+        simulationMs,
         renderMs: renderEnd - renderStart,
         uploadMs,
         callbackMs,
-        steps,
+        steps: simulationSteps,
         zone: currentZone,
         x: pose.x,
         z: pose.z,
@@ -5730,15 +5854,14 @@ function animate(now) {
       pausePerformance();
   } else
     pausePerformance();
-  if (startupOverlay.hidden)
-    enteredAt ??= now;
-  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel && !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && startupOverlay.hidden && now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost && ["explore", "cart"].includes(modes.current())));
+  simulationMs = simulationSteps = 0;
+  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel && !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered && now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost && ["explore", "cart"].includes(modes.current())));
 }
 function resume() {
   if (ready && !frame && !document.hidden) {
     last = performance.now();
     accumulator = 0;
-    renderCadence.reset();
+    quality.cadence.reset();
     frame = requestAnimationFrame(animate);
   }
 }
