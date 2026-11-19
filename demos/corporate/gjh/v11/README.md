@@ -151,3 +151,7 @@ In the expanded layout, the additional storefront destinations use the IDs `plan
 Select the FPS counter in the 3D view to inspect frame cadence, simulation time, render submission time, draw calls and triangles. Reproduce a slowdown, open the counter and choose **Download report (JSON)**. Help includes a **Show FPS** setting. The report stays in the browser until downloaded.
 
 Reports include the last five seconds of individual frames, up to two minutes of one-second summaries and the latest twenty slow events within the past minute. World coordinates, zone and quality help locate a problem. Times use milliseconds relative to the report’s `timeOrigin`. Hidden and paused intervals are excluded. A `busy-callback` identifies at least 50 ms of synchronous callback work. A `raf-gap` identifies a long interval with a shorter current callback. The render metric measures CPU submission time; GPU completion can occur later. In DevTools, `window.__mall.performanceReport()` returns the same data.
+
+## Visitor arrivals page controls
+
+The arrivals header offers a language picker (English by default, 简体中文, Bahasa Melayu), a dark or light page theme (dark is the default and the choice is saved under `gjh-v11-color-scheme`) and a "Check for updates" button that shows the release version from `version.json` (for example v1.4.0) and reuses the existing update flow. The theme changes the arrivals page chrome only; the 3D mall keeps its own lighting. Tests: `tests/browser_gjh_demos.py` (`check_v11_arrival_tools`).

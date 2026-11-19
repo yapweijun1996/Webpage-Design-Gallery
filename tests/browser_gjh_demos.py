@@ -75,6 +75,39 @@ def check_entry_action(page, version):
         assert page.locator(target).is_visible(), (version, target)
 
 
+def check_v11_arrival_tools(browser, base):
+    """The visitor arrivals page offers the release version, three languages and a dark or light theme."""
+    results = []
+    for width, height in ((1440, 900), (393, 780)):
+        context = browser.new_context(viewport={"width": width, "height": height}, service_workers="block")
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
+        page.goto(base + "demos/corporate/gjh/v11/", wait_until="domcontentloaded")
+        theme, check = page.locator("#arrival-theme"), page.locator("#arrival-check-update")
+        theme.wait_for()
+        page.wait_for_function("document.querySelector('#arrival-check-update [data-mall-version]').textContent.startsWith('v')")
+        assert page.evaluate("document.documentElement.dataset.colorScheme") == "dark"
+        assert theme.get_attribute("aria-pressed") == "false" and "light" in theme.inner_text()
+        theme.click()
+        assert page.evaluate("document.documentElement.dataset.colorScheme") == "light"
+        assert page.evaluate("localStorage.getItem('gjh-v11-color-scheme')") == "light"
+        assert theme.get_attribute("aria-pressed") == "true" and "dark" in theme.inner_text()
+        assert page.evaluate("getComputedStyle(document.querySelector('.arrivals')).backgroundColor") == "rgb(244, 241, 230)"
+        for code, word in (("zh-Hans", "检查更新"), ("ms", "Semak kemas kini"), ("en", "Check for updates")):
+            page.select_option("#arrival-language", code)
+            assert word in check.inner_text(), (code, check.inner_text())
+        page.reload(wait_until="domcontentloaded")
+        assert page.evaluate("document.documentElement.dataset.colorScheme") == "light"
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+        assert not errors, errors
+        results.append({"width": width, "theme": "dark/light persisted", "languages": "en zh-Hans ms", "overflow": "none"})
+        context.close()
+    print("v11 arrivals: version label, language and theme controls PASS", flush=True)
+    return results
+
+
 def check_v11_crowd(browser, base):
     context = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True,
                                   has_touch=True, service_workers="block", reduced_motion="no-preference")
@@ -254,6 +287,7 @@ def run(axe_script=None):
                     assert page.url.endswith("#business")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
                     context.close()
+                evidence["v11Arrival"] = check_v11_arrival_tools(browser, base)
                 evidence["v11Crowd"] = check_v11_crowd(browser, base)
                 browser.close()
         finally:
