@@ -6,9 +6,11 @@ import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
 import {isShelfInReach} from './visitor-v2-contact.js';
 import {
   chaseDistance, clampCameraPitch, createCameraController, DEFAULT_PITCH, easeCameraValue, firstPersonFov,
-  limitCameraByFloor, neutralFramingWeight, sweepCameraClearance
+  limitCameraByFloor, neutralFramingWeight, positionTramChase, sweepCameraClearance
 } from './camera-controller.js';
 import {advanceVelocity, interpolate, interpolateAngle, MOVEMENT, stickStrength} from './movement.js';
+import {createPlayerTram, tramBoardReason} from './tram-ride.js';
+import {seatEyeHeight} from './tram-layout.js';
 import {isInFrontOfSeat} from './seat-placements.js';
 
 const CAMERA_LIFTS = [1.1, 2.2];
@@ -54,7 +56,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let yaw = 0, facing = 0, previousYaw = 0, previousFacing = 0, previousPosition = null;
   let drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
   let actionView=null,cameraDistance=null,cameraOccluded=false,productApproach=null,productHome=null;
-  const view = createCameraController();
+  const walkingView = createCameraController();
+  let view = walkingView, beforeTram = null, tramCameraDistance = null;
   const camera = new T.PerspectiveCamera(58, 1, CHASE_NEAR, 100);
   let renderedMode = 'third-person', eyeFov = firstPersonFov(0), eyeFovInitialized = false;
   let renderedPitch = DEFAULT_PITCH;
@@ -73,7 +76,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   const zoomIn = document.querySelector('#camera-zoom-in'), zoomOut = document.querySelector('#camera-zoom-out');
   const viewToggle = document.querySelector('#camera-view-toggle');
   let isPaused = () => false;
-  const chaseRequired = () => Boolean(actionView || seated || pushing || elevatorTravel);
+  const chaseRequired = () => Boolean(actionView || (seated && !beforeTram) || pushing || elevatorTravel);
   const cameraMode = () => view.mode(chaseRequired());
   const currentPitch = () => actionView?.pitch ?? view.pitch(chaseRequired());
   function setPitch(value) {
@@ -85,7 +88,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     updateCamera(0);
   }
   function adjustZoom(delta) {
-    if (isPaused() || !view.adjust(delta, chaseRequired())) return;
+    if (isPaused() || (beforeTram && !view.firstPerson) || !view.adjust(delta, chaseRequired())) return;
     if (reducedMotion.matches) updateCamera(0, true);
   }
   zoomIn.addEventListener('click', () => adjustZoom(ZOOM_STEP));
@@ -143,7 +146,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (event.altKey || event.ctrlKey || event.metaKey) { clearInput(); return; }
     if (isPaused() || event.defaultPrevented) return;
     const sceneFocused = event.target === canvas || event.target === document.body;
-    if (sceneFocused || cameraControls.contains(event.target)) {
+    if (sceneFocused || cameraControls.contains(event.target) ||
+        (beforeTram && event.target.closest?.('#tram-ride-hud'))) {
       if (event.code === 'KeyV') {
         event.preventDefault();
         if (!event.repeat) toggleView();
@@ -307,6 +311,17 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     previousFacing = facing; previousYaw = yaw;
     sync();
     if (isPaused()) { clearInput(); return; }
+    const wasRidingTram = Boolean(beforeTram);
+    const tramPose = tram?.update(dt);
+    if (tramPose) {
+      const heading = tramPose.heading + Math.PI;
+      yaw += interpolateAngle(facing, heading, 1) - facing;
+      facing = heading;
+      body.setNextKinematicTranslation({x:tramPose.x, y:seat.floor + .89, z:tramPose.z});
+      character.update('idle', dt, 'idle', 1, seat);
+      return;
+    }
+    if (wasRidingTram) return; // The station exit already placed the body this tick.
     if (elevatorTravel) {
       const trip = elevatorTravel;
       const before=trip.phase;
@@ -391,6 +406,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     return Math.hypot(position.x-previousPosition.x, position.z-previousPosition.z) / dt / MOVEMENT.walkClipSpeed;
   }
   function sync(alpha = 1) {
+    tramCameraDistance = tram?.sync(alpha);
     const p = body.translation();
     const from = previousPosition ?? p;
     const x = interpolate(from.x, p.x, alpha), y = interpolate(from.y, p.y, alpha), z = interpolate(from.z, p.z, alpha);
@@ -449,7 +465,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     contact.visible = !firstPerson;
     const presentation = firstPerson ? mode : occluded ? 'close' : mode;
     if (canvas.dataset.cameraView !== presentation) canvas.dataset.cameraView = presentation;
-    if (viewToggle.disabled !== required) viewToggle.disabled = zoomIn.disabled = zoomOut.disabled = required;
+    if (viewToggle.disabled !== required) viewToggle.disabled = required;
+    const zoomDisabled = required || (Boolean(beforeTram) && !firstPerson);
+    if (zoomIn.disabled !== zoomDisabled) zoomIn.disabled = zoomOut.disabled = zoomDisabled;
     if (renderedMode !== mode) viewToggle.setAttribute('aria-pressed', String(firstPerson));
     renderedMode = mode;
   }
@@ -464,7 +482,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       eyeFov = easeCameraValue(eyeFov, firstPersonFov(zoom), dt, immediate || !eyeFovInitialized);
       eyeFovInitialized = true;
       projectCamera(true);
-      camera.position.copy(visual.position); camera.position.y += EYE_HEIGHT;
+      camera.position.copy(visual.position);
+      camera.position.y = beforeTram ? seatEyeHeight : visual.position.y + EYE_HEIGHT;
       const cosPitch = Math.cos(pitch);
       sightline.set(-Math.sin(viewYaw) * cosPitch, -Math.sin(pitch), -Math.cos(viewYaw) * cosPitch).add(camera.position);
       camera.lookAt(sightline);
@@ -475,6 +494,13 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     projectCamera(false);
     target.copy(visual.position); target.y += 1.24 - .34 * character.seatWeight;
+    if (beforeTram && tramCameraDistance != null) {
+      positionTramChase(camera, tramCameraDistance, target);
+      cameraLift = 0; cameraClearance = camera.position.distanceTo(target);
+      presentView(mode, false, required);
+      character.updateLOD?.(camera, lodViewportHeight);
+      return;
+    }
     const seatView = actionView?.kind === 'seat';
     const requestedDistance = actionView && !seatView ? 3 : chaseDistance(framing.distance, zoom);
     // View-mode changes cut directly to a swept position.
@@ -568,7 +594,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     resetInterpolation();updateSeatCharacter(0);updateCamera(0,reduceSeatMotion());return true;
   }
   function stand(instant=false) {
-    if(!seated)return false;if(seatPhase==='stand'&&!instant)return true;
+    if(!seated||beforeTram)return false;if(seatPhase==='stand'&&!instant)return true;
     const from=body.translation();
     const position=[0, -.45, .45].map(offset=>({x:seat.exitX+offset,y:seat.floor+.91,z:seat.exitZ}))
       .find(point=>clearAt(point)&&clearPath(from,point,true));
@@ -579,7 +605,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     resetInterpolation();updateSeatCharacter(0);updateCamera(0,instant||reduceSeatMotion());return true;
   }
   function teleport(zone) {
-    if (elevatorTravel) return false;
+    if (elevatorTravel || beforeTram) return false;
     const destination = zone === 'atrium' ? (expanded ? expandedLayout.courtyardArrival : courtyardArrival) : expanded && zone === 'entry' ? expandedLayout.entrance : expanded ? expandedStoreArrival(zone) : spatial.arrival(zone);
     if (!destination) return false;
     productApproach=null;
@@ -621,9 +647,37 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     capsule.setEnabled(true); vertical = 0; clearInput(); injected = null;
     restoreActionView(); resetInterpolation(); updateCamera(0, true);
   }
+  const tram = createPlayerTram({
+    expanded, search:globalThis.location?.search, T, scene,
+    getPosition: () => body.translation(),
+    getBoardReason: () => tramBoardReason({pushing, seated, elevatorTravel, productApproaching:productApproach,
+      character:character.state}),
+    clearPath,
+    enterSeat(rideSeat, pose) {
+      clearInput(); injected = null; cancelCollection(); vertical = 0;
+      beforeTram = {yaw, facing, cameraDistance, eyeFov, eyeFovInitialized};
+      view = createCameraController(() => null);
+      if (walkingView.firstPerson) view.toggle();
+      seat = rideSeat; seated = true; seatPhase = 'seated';
+      capsule.setEnabled(false);
+      moveSeat(seatBodyTarget(seat));
+      yaw = facing = pose.heading + Math.PI;
+      character.setSeated(true);
+      resetInterpolation();
+    },
+    exitSeat(position) {
+      seatExit = position;
+      finishStand();
+      ({yaw, facing, cameraDistance, eyeFov, eyeFovInitialized} = beforeTram);
+      beforeTram = null;
+      view = walkingView;
+      resetInterpolation();
+      character.update('idle', 0);
+    }
+  });
   return {body, capsule, camera, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
-    dispose: character.dispose,
+    dispose() { tram?.dispose(); character.dispose?.(); },
     renderShelf(draw) {
       // The visitor can stand directly in front of the selected shelf. Exclude
       // only that presentation during the draw; retain all authored/gameplay state.
@@ -674,6 +728,12 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       const required = Boolean(shelfOpen || chaseRequired());
       return {mode: view.mode(required), zoom: view.zoom(required)};
     },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, capsuleEnabled:capsule.isEnabled(), productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase:elevatorTravel?.phase||null, cartCapability:cartCapability(), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state}; }
+    get state() { const p = body.translation(); const state = {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, capsuleEnabled:capsule.isEnabled(), productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase:elevatorTravel?.phase||null, cartCapability:cartCapability(), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state};
+      if (tram) {
+        Object.defineProperty(state, 'tram', {value:tram.controls});
+        state.tramRide = tram.controls.state;
+      }
+      return state;
+    }
   };
 }

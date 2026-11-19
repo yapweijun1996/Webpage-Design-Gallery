@@ -478,6 +478,108 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
 }));
 var expandedStoreArrival = (id) => id === "restrooms" ? restroomArrival : shopArrivals.get(id) || spatial.arrival(id);
 
+// demos/corporate/gjh/v11/assets/tram-layout.js
+function roundedLoop(west, north, east, south, radius = 2) {
+  let x = 10, z = south, heading = -Math.PI / 2, length = 0;
+  const segments = [];
+  function append(span, curvature = 0) {
+    const segment = { start: length, span, x, z, heading, curvature };
+    segments.push(segment);
+    ({ x, z, heading } = pose(segment, span));
+    length += span;
+  }
+  function pose(segment, d) {
+    const { x: x2, z: z2, heading: heading2, curvature: k } = segment;
+    const angle = heading2 + k * d;
+    return {
+      x: x2 + (k ? (Math.cos(heading2) - Math.cos(angle)) / k : d * Math.sin(angle)),
+      z: z2 + (k ? (Math.sin(angle) - Math.sin(heading2)) / k : d * Math.cos(angle)),
+      heading: angle
+    };
+  }
+  const corner = () => append(Math.PI * radius / 2, -1 / radius);
+  append(10 - west - radius);
+  corner();
+  append(south - north - 2 * radius);
+  corner();
+  append(east - west - 2 * radius);
+  corner();
+  append(south - north - 2 * radius);
+  corner();
+  append(east - radius - 10);
+  return { length, sample(distance) {
+    const d = (distance % length + length) % length;
+    const segment = segments.find((s) => d < s.start + s.span) ?? segments[0];
+    return pose(segment, d - segment.start);
+  } };
+}
+var tramEnvelopes = {
+  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
+  camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
+};
+var seatEyeHeight = 1.48;
+var chaseDistance = 5.2;
+var tramStations = {
+  entry: { x: 10, z: 40.5 },
+  east: { x: 33.5, z: 22 },
+  upper: { x: -13.5, z: 10, y: 7.2 }
+};
+var tramRoute = roundedLoop(tramStations.upper.x, 2.25, tramStations.east.x, tramStations.entry.z);
+function createTramCar(T, scene) {
+  const existingMaterial = scene.getObjectByName("box plain")?.material;
+  const material = existingMaterial ?? new T.MeshStandardMaterial({ roughness: 0.72 });
+  const geometry = new T.BoxGeometry;
+  const { width, length } = tramEnvelopes.car;
+  const jade = 1391664, cream = 14931639, brass = 11901794;
+  const pieces = [
+    [0, 0.11, 0, width, 0.1, length, jade],
+    [0, 0.47, 1.44, width, 0.62, 0.12, jade],
+    [0, 0.43, -1.44, width, 0.54, 0.12, jade],
+    [0.64, 0.38, 0, 0.12, 0.44, 2.78, jade],
+    [-0.64, 0.38, -0.98, 0.12, 0.44, 0.75, jade],
+    [-0.64, 0.38, 0.98, 0.12, 0.44, 0.75, jade],
+    [0, 0.4, -0.05, 0.98, 0.16, 0.46, jade],
+    [0, 0.49, -0.05, 0.98, 0.06, 0.46, cream],
+    [0, 0.78, -0.3, 0.98, 0.42, 0.12, cream],
+    [0, 0.81, 1.44, width, 0.06, 0.12, brass],
+    [0, 0.73, -1.44, width, 0.06, 0.12, brass],
+    [0, 0.4, -0.99, 0.98, 0.16, 0.46, jade],
+    [0, 0.49, -0.99, 0.98, 0.06, 0.46, cream],
+    [0, 0.78, -1.24, 0.98, 0.42, 0.12, cream]
+  ];
+  if (existingMaterial) {
+    const surfaces = new Float32Array(pieces.length * 2);
+    pieces.forEach((_, i) => {
+      surfaces[i * 2] = 0.72;
+    });
+    geometry.setAttribute("instanceSurface", new T.InstancedBufferAttribute(surfaces, 2));
+  }
+  const mesh = new T.InstancedMesh(geometry, material, pieces.length);
+  mesh.name = "Mall tram";
+  mesh.visible = false;
+  const matrix = new T.Matrix4, color = new T.Color;
+  pieces.forEach(([x, y, z, w, h, l, tint], index) => {
+    mesh.setMatrixAt(index, matrix.makeScale(w, h, l).setPosition(x, y, z));
+    mesh.setColorAt(index, color.setHex(tint));
+  });
+  scene.add(mesh);
+  return {
+    mesh,
+    place({ x, z, heading }) {
+      mesh.position.set(x, 0, z);
+      mesh.rotation.y = heading;
+    },
+    dispose() {
+      scene.remove(mesh);
+      mesh.dispose();
+      geometry.dispose();
+      if (!existingMaterial)
+        material.dispose();
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/camera-controller.js
 var MIN_DISTANCE = 1;
 var MAX_DISTANCE = 11;
@@ -532,7 +634,7 @@ function sweepCameraClearance(physics, origin, rotation, direction, ball, length
 function clampZoom(value) {
   return Number.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
 }
-function chaseDistance(neutral, zoom) {
+function chaseDistance2(neutral, zoom) {
   const value = clampZoom(zoom);
   return neutral - value * (value < 0 ? MAX_DISTANCE - neutral : neutral - MIN_DISTANCE);
 }
@@ -598,6 +700,12 @@ function createCameraController(getStorage = () => globalThis.sessionStorage) {
     }
   };
 }
+function positionTramChase(camera, distance, target) {
+  const { x, z } = tramRoute.sample(distance - chaseDistance);
+  const { bottom, top } = tramEnvelopes.camera;
+  camera.position.set(x, (bottom + top) / 2, z);
+  camera.lookAt(target);
+}
 
 // demos/corporate/gjh/v11/assets/movement.js
 var FIXED_STEP = 1 / 60;
@@ -640,6 +748,266 @@ function interpolate(from, to, alpha) {
 function interpolateAngle(from, to, alpha) {
   const difference = to - from;
   return from + Math.atan2(Math.sin(difference), Math.cos(difference)) * alpha;
+}
+
+// demos/corporate/gjh/v11/assets/tram-ride.js
+var SPEED = 1.5;
+var APPROACH = 3;
+var DWELL = 0.8;
+var LOOK_AHEAD = 0.35;
+var VISITOR_RADIUS = 0.35;
+var TRAM_STATION_ID = "tram-south-entrance";
+var tramLanding = Object.freeze({
+  x: tramStations.entry.x,
+  y: 0,
+  z: tramStations.entry.z + 1.5,
+  radius: 1.4
+});
+var tramCaptions = Object.freeze([
+  ["S11", 22.56, "Hormel", "An open packing bench, kraft rolls and nested slatted crates make this a working stockroom for generic tinned goods."],
+  ["S10", 27.14, "California Mexico", "A deep, open scallop shell cradles a generic seafood gift display against pale sand-coloured plaster."],
+  ["S09", 35.14, "SPAM", "A stopped tinning conveyor with a yellow return wheel leads the eye diagonally across a navy machine-room counter."],
+  ["S08", 43.14, "Skippy", "A tall stand of plain peanut-butter jars fronts a striped breakfast booth with toast trays at serving height."],
+  ["S07", 51.14, "Gu Long", "A stepped pyramid of plain tins on a jade serving drum sits beneath one red lantern, like a banquet centrepiece."],
+  ["S06", 59.05, "Flying Wheel", "Golden noodle ribbons hang at different lengths from a freestanding timber loom, against a quiet slate wall."],
+  ["S01", 63.53, "New Moon", "A cream scalloped header and yellow crescent lead to four honey oak display bays, with optional heritage and serving stories beside the aisle."],
+  ["S02", 73.53, "MILI", "A low lacquer pass and a broad copper extraction hood frame the preparation of a bowl, with condiments within reach of the cook."],
+  ["S03", 83.53, "GOGO", "A scalloped parasol and compact ice-cream cart bring a street-side frozen-treat bar indoors."],
+  ["S04", 93.53, "Borsch Med", "A sage sample counter opens into an oversized folding folio whose white leaves hold plain patch cards."],
+  ["S05", 103.53, "Pien Tze Huang", "A bank of stepped dark-wood drawers opens around a single pale porcelain bowl in a quiet apothecary."],
+  ["S12", 108.02, "Zeria", "Offset frosted index fins rise behind a low white supplement display, casting blue-green shadows between the layers."],
+  ["S13", 115.92, "Sony", "Backlit headphone silhouettes turn a charcoal felt listening bar into a dark, close-focus audio showroom."],
+  ["S14", 123.92, "LG", "Two offset picture planes frame an ivory upholstered living room like a bright domestic cinema."],
+  ["S15", 131.92, "Casio", "A raised piano lid cuts a diagonal against walnut concert slats, with a shallow ivory-lit stage under the instrument."],
+  ["S16", 139.92, "GP", "A perforated teal tool board holds a family of oversized empty eyelets above a small tracker demonstration bench."],
+  ["S17", 144.5, "Gigaset", "A gabled felt telephone alcove frames a small real-scale cordless handset at the end of a warm domestic corridor."]
+].map(([id, distance, name, feature]) => Object.freeze({ id, distance, name, feature, direction: "On your left" })));
+function tramCaptionIndex(distance) {
+  if (distance < 0 || distance >= tramRoute.length)
+    return -1;
+  let index = tramCaptions.length - 1;
+  while (index >= 0 && distance < tramCaptions[index].distance)
+    index--;
+  return index;
+}
+function tramEnabled(expanded, search) {
+  return expanded && new URLSearchParams(search).get("tram") === "1";
+}
+function tramBoardReason(player) {
+  if (player.pushing)
+    return "Stow the cart before boarding.";
+  const product = player.character.physicalProduct;
+  if (player.productApproaching || product && product.phase !== "empty") {
+    return "Return the held product or add it to your bag before boarding.";
+  }
+  if (player.seated || player.elevatorTravel)
+    return "Finish your current action before boarding.";
+  return "";
+}
+var idle = Object.freeze({ phase: "idle", distance: 0, caption: -1, active: false, seated: false, blocked: false });
+function createTramRide({ blocked, canBoard, canExit, onBoard, onExit }) {
+  let phase = "idle", distance = 0, dwell = 0, obstructed = false;
+  let paused = false, ending = false, skipped = -1;
+  const seated = () => phase === "ride" || phase === "arrival";
+  function reset() {
+    phase = "idle";
+    distance = dwell = 0;
+    paused = ending = obstructed = false;
+    skipped = -1;
+  }
+  function move(dt, limit) {
+    const next = Math.min(limit, distance + dt * SPEED);
+    obstructed = blocked(distance, Math.min(limit, next + LOOK_AHEAD));
+    if (!obstructed)
+      distance = next;
+    return distance === limit;
+  }
+  return {
+    board() {
+      if (phase !== "idle")
+        return false;
+      phase = "approach";
+      distance = -APPROACH;
+      return true;
+    },
+    togglePause() {
+      if (phase !== "ride" || ending)
+        return false;
+      paused = !paused;
+      return true;
+    },
+    skipShop() {
+      const index = tramCaptionIndex(distance);
+      if (phase !== "ride" || ending || index < 0 || index === skipped)
+        return false;
+      skipped = index;
+      return true;
+    },
+    end() {
+      if (phase === "approach" || phase === "boarding") {
+        reset();
+        return true;
+      }
+      if (phase !== "ride" || ending)
+        return false;
+      ending = true;
+      paused = false;
+      return true;
+    },
+    step(dt) {
+      if (phase === "approach" && move(dt, 0)) {
+        phase = "boarding";
+        dwell = DWELL;
+      } else if (phase === "boarding") {
+        dwell -= dt;
+        if (dwell <= 0 && canBoard()) {
+          onBoard(tramRoute.sample(0));
+          phase = "ride";
+        }
+      } else if (phase === "ride" && !paused && move(dt, tramRoute.length)) {
+        phase = "arrival";
+        dwell = DWELL;
+      } else if (phase === "arrival") {
+        dwell -= dt;
+        if (dwell > 0)
+          return;
+        obstructed = !canExit();
+        if (!obstructed) {
+          onExit();
+          reset();
+        }
+      }
+    },
+    get active() {
+      return phase !== "idle";
+    },
+    get seated() {
+      return seated();
+    },
+    get distance() {
+      return distance;
+    },
+    get state() {
+      if (phase === "idle")
+        return idle;
+      const index = tramCaptionIndex(distance);
+      return {
+        phase,
+        distance,
+        active: true,
+        seated: seated(),
+        paused,
+        ending,
+        blocked: obstructed,
+        index,
+        caption: ending || index === skipped ? -1 : index
+      };
+    }
+  };
+}
+function someVisitor(scene, test) {
+  return scene.children.some((node) => node.isGroup && node.visible && node.layers.mask === 1 << 2 && Math.abs(node.position.y) < 1.1 && test(node.position));
+}
+function tramTrackBlocked(scene, visitor, from, to) {
+  const steps = Math.max(1, Math.ceil((to - from) / 0.12));
+  const poses = Array.from({ length: steps + 1 }, (_, i) => tramRoute.sample(from + (to - from) * i / steps));
+  function overlaps(point) {
+    const { width, length } = tramEnvelopes.car;
+    return poses.some(({ x, z, heading }) => {
+      const dx = point.x - x, dz = point.z - z;
+      const sin = Math.sin(heading), cos = Math.cos(heading);
+      return Math.abs(dx * cos - dz * sin) <= width / 2 + VISITOR_RADIUS && Math.abs(dx * sin + dz * cos) <= length / 2 + VISITOR_RADIUS;
+    });
+  }
+  return visitor && Math.abs(visitor.y - 0.89) < 1.1 && overlaps(visitor) || someVisitor(scene, overlaps);
+}
+function landingOccupied(scene) {
+  const { x, z } = tramStations.entry;
+  return someVisitor(scene, (p) => Math.abs(p.x - x) < 0.6 + VISITOR_RADIUS && p.z >= z - VISITOR_RADIUS && p.z <= tramLanding.z + 0.6 + VISITOR_RADIUS);
+}
+function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat }) {
+  if (!tramEnabled(expanded, search))
+    return null;
+  const exit = { x: tramLanding.x, y: 0.91, z: tramLanding.z };
+  const seat = {
+    x: tramStations.entry.x,
+    y: 0.52,
+    z: tramStations.entry.z,
+    id: TRAM_STATION_ID,
+    name: "Mall tram",
+    floor: 0.16,
+    footY: 0.16,
+    frontEdge: 0.26
+  };
+  const seatTarget = { x: seat.x, y: seat.floor + 0.89, z: seat.z };
+  let car, previousDistance = 0;
+  function nearStation() {
+    const p = getPosition();
+    return Math.abs(p.y - 0.89) <= 0.5 && Math.hypot(p.x - exit.x, p.z - exit.z) < tramLanding.radius;
+  }
+  const ride = createTramRide({
+    blocked: (from, to) => tramTrackBlocked(scene, ride.seated ? null : getPosition(), from, to),
+    canBoard: () => !getBoardReason() && !landingOccupied(scene) && clearPath(getPosition(), seatTarget),
+    canExit: () => !landingOccupied(scene) && clearPath(getPosition(), exit),
+    onBoard: (pose) => enterSeat(seat, pose),
+    onExit: () => exitSeat(exit)
+  });
+  const controls = {
+    get state() {
+      return ride.state;
+    },
+    get reason() {
+      return getBoardReason();
+    },
+    board() {
+      if (getBoardReason() || !nearStation() || !ride.board())
+        return false;
+      car ??= createTramCar(T, scene);
+      previousDistance = ride.distance;
+      car.place(tramRoute.sample(ride.distance));
+      return true;
+    },
+    pause: ride.togglePause,
+    skip: ride.skipShop,
+    end() {
+      if (!ride.end())
+        return false;
+      if (!ride.active)
+        car.mesh.visible = false;
+      return true;
+    }
+  };
+  return {
+    controls,
+    get seated() {
+      return ride.seated;
+    },
+    update(dt) {
+      if (!ride.active)
+        return null;
+      previousDistance = ride.distance;
+      if (!ride.seated && !nearStation())
+        controls.end();
+      else
+        ride.step(dt);
+      if (!ride.active) {
+        car.mesh.visible = false;
+        return null;
+      }
+      return ride.seated ? tramRoute.sample(ride.distance) : null;
+    },
+    sync(alpha) {
+      if (!ride.active)
+        return null;
+      const distance = previousDistance + (ride.distance - previousDistance) * alpha;
+      car.place(tramRoute.sample(distance));
+      car.mesh.visible = distance > -APPROACH;
+      return distance;
+    },
+    dispose() {
+      car?.dispose();
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/assets/atrium-layout.js
@@ -950,7 +1318,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   let yaw = 0, facing = 0, previousYaw = 0, previousFacing = 0, previousPosition = null;
   let drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
   let actionView = null, cameraDistance = null, cameraOccluded = false, productApproach = null, productHome = null;
-  const view = createCameraController();
+  const walkingView = createCameraController();
+  let view = walkingView, beforeTram = null, tramCameraDistance = null;
   const camera = new T.PerspectiveCamera(58, 1, CHASE_NEAR, 100);
   let renderedMode = "third-person", eyeFov = firstPersonFov(0), eyeFovInitialized = false;
   let renderedPitch = DEFAULT_PITCH;
@@ -969,7 +1338,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   const zoomIn = document.querySelector("#camera-zoom-in"), zoomOut = document.querySelector("#camera-zoom-out");
   const viewToggle = document.querySelector("#camera-view-toggle");
   let isPaused = () => false;
-  const chaseRequired = () => Boolean(actionView || seated || pushing || elevatorTravel);
+  const chaseRequired = () => Boolean(actionView || seated && !beforeTram || pushing || elevatorTravel);
   const cameraMode = () => view.mode(chaseRequired());
   const currentPitch = () => actionView?.pitch ?? view.pitch(chaseRequired());
   function setPitch(value) {
@@ -984,7 +1353,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     updateCamera(0);
   }
   function adjustZoom(delta) {
-    if (isPaused() || !view.adjust(delta, chaseRequired()))
+    if (isPaused() || beforeTram && !view.firstPerson || !view.adjust(delta, chaseRequired()))
       return;
     if (reducedMotion.matches)
       updateCamera(0, true);
@@ -1071,7 +1440,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (isPaused() || event.defaultPrevented)
       return;
     const sceneFocused = event.target === canvas || event.target === document.body;
-    if (sceneFocused || cameraControls.contains(event.target)) {
+    if (sceneFocused || cameraControls.contains(event.target) || beforeTram && event.target.closest?.("#tram-ride-hud")) {
       if (event.code === "KeyV") {
         event.preventDefault();
         if (!event.repeat)
@@ -1323,6 +1692,18 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       clearInput();
       return;
     }
+    const wasRidingTram = Boolean(beforeTram);
+    const tramPose = tram?.update(dt);
+    if (tramPose) {
+      const heading = tramPose.heading + Math.PI;
+      yaw += interpolateAngle(facing, heading, 1) - facing;
+      facing = heading;
+      body.setNextKinematicTranslation({ x: tramPose.x, y: seat.floor + 0.89, z: tramPose.z });
+      character.update("idle", dt, "idle", 1, seat);
+      return;
+    }
+    if (wasRidingTram)
+      return;
     if (elevatorTravel) {
       const trip = elevatorTravel;
       const before = trip.phase;
@@ -1439,6 +1820,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     return Math.hypot(position.x - previousPosition.x, position.z - previousPosition.z) / dt / MOVEMENT.walkClipSpeed;
   }
   function sync(alpha = 1) {
+    tramCameraDistance = tram?.sync(alpha);
     const p = body.translation();
     const from = previousPosition ?? p;
     const x = interpolate(from.x, p.x, alpha), y = interpolate(from.y, p.y, alpha), z = interpolate(from.z, p.z, alpha);
@@ -1503,7 +1885,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (canvas.dataset.cameraView !== presentation)
       canvas.dataset.cameraView = presentation;
     if (viewToggle.disabled !== required)
-      viewToggle.disabled = zoomIn.disabled = zoomOut.disabled = required;
+      viewToggle.disabled = required;
+    const zoomDisabled = required || Boolean(beforeTram) && !firstPerson;
+    if (zoomIn.disabled !== zoomDisabled)
+      zoomIn.disabled = zoomOut.disabled = zoomDisabled;
     if (renderedMode !== mode)
       viewToggle.setAttribute("aria-pressed", String(firstPerson));
     renderedMode = mode;
@@ -1521,7 +1906,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       eyeFovInitialized = true;
       projectCamera(true);
       camera.position.copy(visual.position);
-      camera.position.y += EYE_HEIGHT;
+      camera.position.y = beforeTram ? seatEyeHeight : visual.position.y + EYE_HEIGHT;
       const cosPitch2 = Math.cos(pitch);
       sightline.set(-Math.sin(viewYaw) * cosPitch2, -Math.sin(pitch), -Math.cos(viewYaw) * cosPitch2).add(camera.position);
       camera.lookAt(sightline);
@@ -1534,8 +1919,16 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     projectCamera(false);
     target.copy(visual.position);
     target.y += 1.24 - 0.34 * character.seatWeight;
+    if (beforeTram && tramCameraDistance != null) {
+      positionTramChase(camera, tramCameraDistance, target);
+      cameraLift = 0;
+      cameraClearance = camera.position.distanceTo(target);
+      presentView(mode, false, required);
+      character.updateLOD?.(camera, lodViewportHeight);
+      return;
+    }
     const seatView = actionView?.kind === "seat";
-    const requestedDistance = actionView && !seatView ? 3 : chaseDistance(framing.distance, zoom);
+    const requestedDistance = actionView && !seatView ? 3 : chaseDistance2(framing.distance, zoom);
     const changedMode = renderedMode !== mode;
     renderedPitch = easeCameraValue(renderedPitch, pitch, dt, immediate || changedMode);
     cameraDistance = easeCameraValue(cameraDistance ?? requestedDistance, requestedDistance, dt, immediate || changedMode);
@@ -1719,7 +2112,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     return true;
   }
   function stand(instant = false) {
-    if (!seated)
+    if (!seated || beforeTram)
       return false;
     if (seatPhase === "stand" && !instant)
       return true;
@@ -1743,7 +2136,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     return true;
   }
   function teleport(zone) {
-    if (elevatorTravel)
+    if (elevatorTravel || beforeTram)
       return false;
     const destination = zone === "atrium" ? expanded ? expandedLayout.courtyardArrival : courtyardArrival : expanded && zone === "entry" ? expandedLayout.entrance : expanded ? expandedStoreArrival(zone) : spatial.arrival(zone);
     if (!destination)
@@ -1846,6 +2239,48 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     resetInterpolation();
     updateCamera(0, true);
   }
+  const tram = createPlayerTram({
+    expanded,
+    search: globalThis.location?.search,
+    T,
+    scene,
+    getPosition: () => body.translation(),
+    getBoardReason: () => tramBoardReason({
+      pushing,
+      seated,
+      elevatorTravel,
+      productApproaching: productApproach,
+      character: character.state
+    }),
+    clearPath,
+    enterSeat(rideSeat, pose) {
+      clearInput();
+      injected = null;
+      cancelCollection();
+      vertical = 0;
+      beforeTram = { yaw, facing, cameraDistance, eyeFov, eyeFovInitialized };
+      view = createCameraController(() => null);
+      if (walkingView.firstPerson)
+        view.toggle();
+      seat = rideSeat;
+      seated = true;
+      seatPhase = "seated";
+      capsule.setEnabled(false);
+      moveSeat(seatBodyTarget(seat));
+      yaw = facing = pose.heading + Math.PI;
+      character.setSeated(true);
+      resetInterpolation();
+    },
+    exitSeat(position) {
+      seatExit = position;
+      finishStand();
+      ({ yaw, facing, cameraDistance, eyeFov, eyeFovInitialized } = beforeTram);
+      beforeTram = null;
+      view = walkingView;
+      resetInterpolation();
+      character.update("idle", 0);
+    }
+  });
   return {
     body,
     capsule,
@@ -1874,7 +2309,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     startCollection,
     cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
-    dispose: character.dispose,
+    dispose() {
+      tram?.dispose();
+      character.dispose?.();
+    },
     renderShelf(draw) {
       const visible = visual.visible, contactVisible = contact.visible;
       visual.visible = contact.visible = false;
@@ -1982,7 +2420,12 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     },
     get state() {
       const p = body.translation();
-      return { x: p.x, y: p.y - 0.875, z: p.z, cameraOccluded, capsuleEnabled: capsule.isEnabled(), productApproaching: Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase: elevatorTravel?.phase || null, cartCapability: cartCapability(), cameraFocus: actionView?.kind || null, cameraDistance, cameraObstruction: { lift: cameraLift, distance: cameraClearance, radius: cameraRadius, avatarVisible: !cameraOccluded }, seatPhase, seatId: seat?.id || null, seatName: seat?.name || null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state };
+      const state = { x: p.x, y: p.y - 0.875, z: p.z, cameraOccluded, capsuleEnabled: capsule.isEnabled(), productApproaching: Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase: elevatorTravel?.phase || null, cartCapability: cartCapability(), cameraFocus: actionView?.kind || null, cameraDistance, cameraObstruction: { lift: cameraLift, distance: cameraClearance, radius: cameraRadius, avatarVisible: !cameraOccluded }, seatPhase, seatId: seat?.id || null, seatName: seat?.name || null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state };
+      if (tram) {
+        Object.defineProperty(state, "tram", { value: tram.controls });
+        state.tramRide = tram.controls.state;
+      }
+      return state;
     }
   };
 }

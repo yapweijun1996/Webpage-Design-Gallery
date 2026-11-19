@@ -1,3 +1,4 @@
+import {TRAM_BOARD_LABEL, TRAM_STATION_ID, tramCaptions} from './tram-ride.js';
 import {restroomArrival, restroomRooms} from './restroom-layout.js';
 import {createActionDialog} from '../../../../../assets/onboarding/action-dialog.js';
 import {createTutorial} from './ux-tutorial.js';
@@ -29,6 +30,111 @@ function formatAutomaticMallTheme(calendar, saved) {
     text = copy[template].replace(/\{(\w+)\}/g, (_, key) => values[key]);
   }
   return saved ? text : `${text} ${copy['Theme settings could not be saved.']}`;
+}
+
+const hudText = new WeakMap();
+function setHudText(node, value) {
+  if (hudText.get(node) !== value) { hudText.set(node, value); node.textContent = value; }
+}
+
+export function createTramHud(parent, scene, canControl) {
+  const card = document.createElement('section');
+  card.id = 'tram-ride-hud';
+  card.hidden = true;
+  card.setAttribute('aria-label', 'Mall tram tour');
+  Object.assign(card.style, {
+    background:'var(--green)', color:'var(--paper)', border:'1px solid var(--gold)',
+    borderRadius:'var(--radius-md)', padding:'var(--space-2) var(--space-3)',
+    width:'min(100%, 27rem)', boxSizing:'border-box', flex:'none', pointerEvents:'auto'
+  });
+  const caption = document.createElement('div');
+  caption.setAttribute('aria-live', 'polite');
+  caption.setAttribute('aria-atomic', 'true');
+  const title = document.createElement('strong'), feature = document.createElement('p');
+  feature.style.margin = '0';
+  caption.append(title, feature);
+  const progress = document.createElement('div');
+  progress.setAttribute('aria-hidden', 'true');
+  Object.assign(progress.style, {display:'flex', gap:'4px', margin:'8px 0'});
+  const dots = tramCaptions.map(() => {
+    const dot = document.createElement('span');
+    Object.assign(dot.style, {width:'6px', height:'6px', borderRadius:'50%'});
+    progress.append(dot);
+    return dot;
+  });
+  const actions = document.createElement('div');
+  Object.assign(actions.style, {display:'flex', gap:'4px', flexWrap:'wrap'});
+  const buttons = {};
+  let controls = null, previousIndex = -2, wasActive = false;
+  for (const [action,label,key] of [['pause','Pause','Space'], ['skip','Skip shop','N'], ['end','End','Escape']]) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.setAttribute('aria-keyshortcuts', key);
+    Object.assign(button.style, {minWidth:'44px', minHeight:'44px', margin:'0', paddingInline:'8px'});
+    button.addEventListener('click', () => command(action));
+    actions.append(button);
+    buttons[action] = button;
+  }
+  buttons.end.title = 'End the tour at the south entrance station';
+  card.append(caption, progress, actions);
+  parent.append(card);
+  document.addEventListener('keydown', event => {
+    if (event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey ||
+        !controls?.state.active || !canControl()) return;
+    const sceneFocused = event.target === scene || event.target === document.body;
+    if (!sceneFocused && !card.contains(event.target)) return;
+    const action = {Space:'pause', KeyN:'skip', Escape:'end'}[event.code];
+    if (!action || (!sceneFocused && action === 'pause')) return;
+    event.preventDefault();
+    command(action);
+  });
+  function command(action) {
+    if (canControl() && controls?.[action]()) show(controls);
+  }
+  function show(next, boardReason = '') {
+    controls = next;
+    const state = controls?.state;
+    const active = Boolean(state?.active);
+    const restoreFocus = wasActive && !active && card.contains(document.activeElement);
+    wasActive = active;
+    card.hidden = !active && !boardReason;
+    if (card.hidden) {
+      if (restoreFocus && canControl()) scene.focus({preventScroll:true});
+      return;
+    }
+    progress.hidden = actions.hidden = !active;
+    const shop = active ? tramCaptions[state.caption] : null;
+    const heading = shop ? `${shop.name} · ${shop.direction}` : 'South entrance tram';
+    let copy = boardReason;
+    if (active) {
+      if (state.phase === 'arrival') copy = state.blocked ? 'Waiting for a clear exit.' : 'Arriving at the south entrance.';
+      else if (state.blocked) copy = 'Waiting for the track to clear.';
+      else if (state.phase === 'boarding') copy = 'Boarding when the landing is clear.';
+      else if (state.phase === 'approach') copy = 'The tram is approaching.';
+      else if (state.ending) copy = 'Returning to the south entrance.';
+      else if (state.paused) copy = 'Ride paused.';
+      else if (shop) copy = shop.feature;
+      else copy = state.index >= 0 ? 'Next shop ahead.' : 'The brand tour begins along the west wing.';
+    }
+    setHudText(title, heading);
+    setHudText(feature, shop && copy !== shop.feature ? `${shop.feature} ${copy}` : copy);
+    const index = active ? state.index : -1;
+    if (index !== previousIndex) {
+      dots.forEach((dot, i) => {
+        dot.style.background = i <= index ? 'var(--gold)' : 'currentColor';
+        dot.style.opacity = i <= index ? '1' : '.35';
+      });
+      previousIndex = index;
+    }
+    const riding = state?.phase === 'ride' && !state.ending;
+    setHudText(buttons.pause, state?.paused ? 'Resume' : 'Pause');
+    buttons.pause.disabled = !riding;
+    buttons.skip.disabled = !riding || !shop;
+    buttons.end.disabled = !active || state.ending || state.phase === 'arrival';
+    if (restoreFocus && canControl()) scene.focus({preventScroll:true});
+  }
+  return {show};
 }
 
 export function createUI(expanded = false) {
@@ -112,11 +218,7 @@ export function createUI(expanded = false) {
     if (selectedInteraction?.shopAction?.seated) inspectNearby(selectedInteraction.id);
     scene.focus({preventScroll:true});
   });
-  const hudText = new WeakMap();
   const hudLabels = new WeakMap();
-  function setHudText(node, value) {
-    if (hudText.get(node) !== value) { hudText.set(node, value); node.textContent = value; }
-  }
   function setHudAttribute(node, name, value) {
     let attributes = hudLabels.get(node);
     if (!attributes) { attributes = new Map(); hudLabels.set(node, attributes); }
@@ -494,7 +596,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let currentZone = 'atrium';
   let externalPaused = false;
   let nearby = null;
-  let interactionRegistry = null, selectedInteraction = null;
+  let interactionRegistry = null, selectedInteraction = null, tramHud = null;
   let returnFocus = null, productInspectListener = null;
   let teleportListener = null;
   let viewListener = null;
@@ -651,7 +753,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     // viewer is the first surface opened from the user's Inspect action.
     if (selectedInteraction?.id === id && !dialog.open && !bag.open && !amenityPanel.dialog.open) {
       const result = interactionRegistry?.dispatch(selectedInteraction);
-      if (selectedInteraction?.shopAction) scene.focus({preventScroll:true});
+      if (selectedInteraction?.shopAction || selectedInteraction?.kind === 'tram') scene.focus({preventScroll:true});
       return result;
     }
   }
@@ -953,6 +1055,18 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       currentElevatorState=elevatorState;currentElevatorUpper=elevatorUpper;
       selectedInteraction = interaction;
       const shopAction = interaction?.shopAction;
+      const tram = interactionRegistry?.tram;
+      const tramState = tram?.state;
+      const tramSelected = interaction?.kind === 'tram';
+      const tramReason = tramSelected ? tram.reason : '';
+      if (tramSelected && !records.has(TRAM_STATION_ID)) {
+        records.set(TRAM_STATION_ID, {name:'South entrance tram', action:'tram'});
+      }
+      if (tramState?.active || tramReason) {
+        tramHud ??= createTramHud(document.getElementById('hud-context-stack'), scene,
+          () => canUsePanels() && !mallMap.open && !help.open && !shelfFocus?.open);
+      }
+      tramHud?.show(tram, tramReason);
       if (shopAction && !records.has(interaction.id)) records.set(interaction.id,{name:shopAction.name,action:'shop'});
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
@@ -994,7 +1108,11 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       document.body.classList.toggle('is-seated', seated);
       const cart = updateCartControls();
       const cartBlocksSeat = nearby && records.get(nearby).action === 'seat' && cart.active;
-      if (seated) {
+      if (tramSelected) {
+        setHudText(nearbyName, 'South entrance tram');
+        setHudText(inspectVerb, TRAM_BOARD_LABEL);
+        labelInspect(TRAM_BOARD_LABEL);
+      } else if (seated && !tramState?.seated) {
         const pose = seatPhase === 'align' ? 'Aligning' : seatPhase === 'sit' ? 'Sitting down' : seatPhase === 'stand' ? 'Standing up' : 'Seated';
         setHudText(nearbyName, showSeatedAction && shopState.message || `${seatName || 'Bench'} · ${pose}`);
         setHudText(inspectVerb, 'Stand');
@@ -1033,18 +1151,20 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       const actionIcon=interactionIcons.get(iconName);
       if(inspectButton.firstChild!==actionIcon){inspectButton.querySelector('svg')?.remove();inspectButton.prepend(actionIcon);}
       document.body.classList.toggle('is-pushing',Boolean(cart.active));
-      const disabled = Boolean(cartBlocksSeat || seatPhase === 'stand');
+      const disabled = Boolean(cartBlocksSeat || tramReason || seatPhase === 'stand');
       if (inspectButton.disabled !== disabled) inspectButton.disabled = disabled;
       if (holdingProduct && !hasHeldProduct) seatNotice = null;
       if (seatNotice) setHudText(nearbyName, seatNotice);
-      const inspectHidden = !nearby && !seated;
-      if (shopAction && !seated) {
+      const inspectHidden = !nearby && (!seated || tramState?.seated);
+      if ((shopAction && !seated) || tramSelected) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = '44px';
         setHudAttribute(inspectButton,'aria-keyshortcuts','F');
       } else if (inspectButton.style.minWidth) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = '';
         setHudAttribute(inspectButton,'aria-keyshortcuts','');
       }
+      const inspectDisplay = tramSelected ? 'inline-flex' : '';
+      if (inspectButton.style.display !== inspectDisplay) inspectButton.style.display = inspectDisplay;
       if (inspectButton.hidden !== inspectHidden) inspectButton.hidden = inspectHidden;
       if (nearbyCard.hidden !== inspectHidden) nearbyCard.hidden = inspectHidden;
       holdingProduct = hasHeldProduct;

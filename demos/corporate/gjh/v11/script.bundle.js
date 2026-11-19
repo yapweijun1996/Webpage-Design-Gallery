@@ -637,6 +637,78 @@ function createProgramTrace(renderer) {
   return { event, player, sample, report: () => samples.length < 512 ? samples.slice() : [...samples.slice(next), ...samples.slice(0, next)] };
 }
 
+// demos/corporate/gjh/v11/assets/tram-layout.js
+function roundedLoop(west, north, east, south, radius = 2) {
+  let x = 10, z = south, heading = -Math.PI / 2, length = 0;
+  const segments = [];
+  function append(span, curvature = 0) {
+    const segment = { start: length, span, x, z, heading, curvature };
+    segments.push(segment);
+    ({ x, z, heading } = pose(segment, span));
+    length += span;
+  }
+  function pose(segment, d) {
+    const { x: x2, z: z2, heading: heading2, curvature: k } = segment;
+    const angle = heading2 + k * d;
+    return {
+      x: x2 + (k ? (Math.cos(heading2) - Math.cos(angle)) / k : d * Math.sin(angle)),
+      z: z2 + (k ? (Math.sin(angle) - Math.sin(heading2)) / k : d * Math.cos(angle)),
+      heading: angle
+    };
+  }
+  const corner = () => append(Math.PI * radius / 2, -1 / radius);
+  append(10 - west - radius);
+  corner();
+  append(south - north - 2 * radius);
+  corner();
+  append(east - west - 2 * radius);
+  corner();
+  append(south - north - 2 * radius);
+  corner();
+  append(east - radius - 10);
+  return { length, sample(distance) {
+    const d = (distance % length + length) % length;
+    const segment = segments.find((s) => d < s.start + s.span) ?? segments[0];
+    return pose(segment, d - segment.start);
+  } };
+}
+var tramStations = {
+  entry: { x: 10, z: 40.5 },
+  east: { x: 33.5, z: 22 },
+  upper: { x: -13.5, z: 10, y: 7.2 }
+};
+var tramRoute = roundedLoop(tramStations.upper.x, 2.25, tramStations.east.x, tramStations.entry.z);
+
+// demos/corporate/gjh/v11/assets/tram-ride.js
+var TRAM_STATION_ID = "tram-south-entrance";
+var TRAM_BOARD_LABEL = "Ride the tram";
+var tramLanding = Object.freeze({
+  x: tramStations.entry.x,
+  y: 0,
+  z: tramStations.entry.z + 1.5,
+  radius: 1.4
+});
+var tramCaptions = Object.freeze([
+  ["S11", 22.56, "Hormel", "An open packing bench, kraft rolls and nested slatted crates make this a working stockroom for generic tinned goods."],
+  ["S10", 27.14, "California Mexico", "A deep, open scallop shell cradles a generic seafood gift display against pale sand-coloured plaster."],
+  ["S09", 35.14, "SPAM", "A stopped tinning conveyor with a yellow return wheel leads the eye diagonally across a navy machine-room counter."],
+  ["S08", 43.14, "Skippy", "A tall stand of plain peanut-butter jars fronts a striped breakfast booth with toast trays at serving height."],
+  ["S07", 51.14, "Gu Long", "A stepped pyramid of plain tins on a jade serving drum sits beneath one red lantern, like a banquet centrepiece."],
+  ["S06", 59.05, "Flying Wheel", "Golden noodle ribbons hang at different lengths from a freestanding timber loom, against a quiet slate wall."],
+  ["S01", 63.53, "New Moon", "A cream scalloped header and yellow crescent lead to four honey oak display bays, with optional heritage and serving stories beside the aisle."],
+  ["S02", 73.53, "MILI", "A low lacquer pass and a broad copper extraction hood frame the preparation of a bowl, with condiments within reach of the cook."],
+  ["S03", 83.53, "GOGO", "A scalloped parasol and compact ice-cream cart bring a street-side frozen-treat bar indoors."],
+  ["S04", 93.53, "Borsch Med", "A sage sample counter opens into an oversized folding folio whose white leaves hold plain patch cards."],
+  ["S05", 103.53, "Pien Tze Huang", "A bank of stepped dark-wood drawers opens around a single pale porcelain bowl in a quiet apothecary."],
+  ["S12", 108.02, "Zeria", "Offset frosted index fins rise behind a low white supplement display, casting blue-green shadows between the layers."],
+  ["S13", 115.92, "Sony", "Backlit headphone silhouettes turn a charcoal felt listening bar into a dark, close-focus audio showroom."],
+  ["S14", 123.92, "LG", "Two offset picture planes frame an ivory upholstered living room like a bright domestic cinema."],
+  ["S15", 131.92, "Casio", "A raised piano lid cuts a diagonal against walnut concert slats, with a shallow ivory-lit stage under the instrument."],
+  ["S16", 139.92, "GP", "A perforated teal tool board holds a family of oversized empty eyelets above a small tracker demonstration bench."],
+  ["S17", 144.5, "Gigaset", "A gabled felt telephone alcove frames a small real-scale cordless handset at the end of a warm domestic corridor."]
+].map(([id, distance, name, feature]) => Object.freeze({ id, distance, name, feature, direction: "On your left" })));
+var idle = Object.freeze({ phase: "idle", distance: 0, caption: -1, active: false, seated: false, blocked: false });
+
 // assets/onboarding/components.js
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -1338,6 +1410,131 @@ function formatAutomaticMallTheme(calendar, saved) {
   }
   return saved ? text : `${text} ${copy["Theme settings could not be saved."]}`;
 }
+var hudText = new WeakMap;
+function setHudText(node, value) {
+  if (hudText.get(node) !== value) {
+    hudText.set(node, value);
+    node.textContent = value;
+  }
+}
+function createTramHud(parent, scene, canControl) {
+  const card = document.createElement("section");
+  card.id = "tram-ride-hud";
+  card.hidden = true;
+  card.setAttribute("aria-label", "Mall tram tour");
+  Object.assign(card.style, {
+    background: "var(--green)",
+    color: "var(--paper)",
+    border: "1px solid var(--gold)",
+    borderRadius: "var(--radius-md)",
+    padding: "var(--space-2) var(--space-3)",
+    width: "min(100%, 27rem)",
+    boxSizing: "border-box",
+    flex: "none",
+    pointerEvents: "auto"
+  });
+  const caption = document.createElement("div");
+  caption.setAttribute("aria-live", "polite");
+  caption.setAttribute("aria-atomic", "true");
+  const title = document.createElement("strong"), feature = document.createElement("p");
+  feature.style.margin = "0";
+  caption.append(title, feature);
+  const progress = document.createElement("div");
+  progress.setAttribute("aria-hidden", "true");
+  Object.assign(progress.style, { display: "flex", gap: "4px", margin: "8px 0" });
+  const dots = tramCaptions.map(() => {
+    const dot = document.createElement("span");
+    Object.assign(dot.style, { width: "6px", height: "6px", borderRadius: "50%" });
+    progress.append(dot);
+    return dot;
+  });
+  const actions2 = document.createElement("div");
+  Object.assign(actions2.style, { display: "flex", gap: "4px", flexWrap: "wrap" });
+  const buttons = {};
+  let controls = null, previousIndex = -2, wasActive = false;
+  for (const [action, label, key] of [["pause", "Pause", "Space"], ["skip", "Skip shop", "N"], ["end", "End", "Escape"]]) {
+    const button2 = document.createElement("button");
+    button2.type = "button";
+    button2.textContent = label;
+    button2.setAttribute("aria-keyshortcuts", key);
+    Object.assign(button2.style, { minWidth: "44px", minHeight: "44px", margin: "0", paddingInline: "8px" });
+    button2.addEventListener("click", () => command(action));
+    actions2.append(button2);
+    buttons[action] = button2;
+  }
+  buttons.end.title = "End the tour at the south entrance station";
+  card.append(caption, progress, actions2);
+  parent.append(card);
+  document.addEventListener("keydown", (event) => {
+    if (event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey || !controls?.state.active || !canControl())
+      return;
+    const sceneFocused = event.target === scene || event.target === document.body;
+    if (!sceneFocused && !card.contains(event.target))
+      return;
+    const action = { Space: "pause", KeyN: "skip", Escape: "end" }[event.code];
+    if (!action || !sceneFocused && action === "pause")
+      return;
+    event.preventDefault();
+    command(action);
+  });
+  function command(action) {
+    if (canControl() && controls?.[action]())
+      show(controls);
+  }
+  function show(next, boardReason = "") {
+    controls = next;
+    const state = controls?.state;
+    const active = Boolean(state?.active);
+    const restoreFocus = wasActive && !active && card.contains(document.activeElement);
+    wasActive = active;
+    card.hidden = !active && !boardReason;
+    if (card.hidden) {
+      if (restoreFocus && canControl())
+        scene.focus({ preventScroll: true });
+      return;
+    }
+    progress.hidden = actions2.hidden = !active;
+    const shop = active ? tramCaptions[state.caption] : null;
+    const heading = shop ? `${shop.name} · ${shop.direction}` : "South entrance tram";
+    let copy = boardReason;
+    if (active) {
+      if (state.phase === "arrival")
+        copy = state.blocked ? "Waiting for a clear exit." : "Arriving at the south entrance.";
+      else if (state.blocked)
+        copy = "Waiting for the track to clear.";
+      else if (state.phase === "boarding")
+        copy = "Boarding when the landing is clear.";
+      else if (state.phase === "approach")
+        copy = "The tram is approaching.";
+      else if (state.ending)
+        copy = "Returning to the south entrance.";
+      else if (state.paused)
+        copy = "Ride paused.";
+      else if (shop)
+        copy = shop.feature;
+      else
+        copy = state.index >= 0 ? "Next shop ahead." : "The brand tour begins along the west wing.";
+    }
+    setHudText(title, heading);
+    setHudText(feature, shop && copy !== shop.feature ? `${shop.feature} ${copy}` : copy);
+    const index = active ? state.index : -1;
+    if (index !== previousIndex) {
+      dots.forEach((dot, i) => {
+        dot.style.background = i <= index ? "var(--gold)" : "currentColor";
+        dot.style.opacity = i <= index ? "1" : ".35";
+      });
+      previousIndex = index;
+    }
+    const riding = state?.phase === "ride" && !state.ending;
+    setHudText(buttons.pause, state?.paused ? "Resume" : "Pause");
+    buttons.pause.disabled = !riding;
+    buttons.skip.disabled = !riding || !shop;
+    buttons.end.disabled = !active || state.ending || state.phase === "arrival";
+    if (restoreFocus && canControl())
+      scene.focus({ preventScroll: true });
+  }
+  return { show };
+}
 function createUI(expanded = false) {
   const scene = document.getElementById("scene");
   const experience = document.getElementById("experience");
@@ -1436,14 +1633,7 @@ function createUI(expanded = false) {
       inspectNearby(selectedInteraction.id);
     scene.focus({ preventScroll: true });
   });
-  const hudText = new WeakMap;
   const hudLabels = new WeakMap;
-  function setHudText(node, value) {
-    if (hudText.get(node) !== value) {
-      hudText.set(node, value);
-      node.textContent = value;
-    }
-  }
   function setHudAttribute(node, name, value) {
     let attributes = hudLabels.get(node);
     if (!attributes) {
@@ -1978,7 +2168,7 @@ function createUI(expanded = false) {
   let currentZone = "atrium";
   let externalPaused = false;
   let nearby = null;
-  let interactionRegistry = null, selectedInteraction = null;
+  let interactionRegistry = null, selectedInteraction = null, tramHud = null;
   let returnFocus = null, productInspectListener = null;
   let teleportListener = null;
   let viewListener = null;
@@ -2188,7 +2378,7 @@ function createUI(expanded = false) {
   function inspectNearby(id) {
     if (selectedInteraction?.id === id && !dialog.open && !bag.open && !amenityPanel.dialog.open) {
       const result = interactionRegistry?.dispatch(selectedInteraction);
-      if (selectedInteraction?.shopAction)
+      if (selectedInteraction?.shopAction || selectedInteraction?.kind === "tram")
         scene.focus({ preventScroll: true });
       return result;
     }
@@ -2605,6 +2795,17 @@ function createUI(expanded = false) {
       currentElevatorUpper = elevatorUpper;
       selectedInteraction = interaction;
       const shopAction = interaction?.shopAction;
+      const tram = interactionRegistry?.tram;
+      const tramState = tram?.state;
+      const tramSelected = interaction?.kind === "tram";
+      const tramReason = tramSelected ? tram.reason : "";
+      if (tramSelected && !records.has(TRAM_STATION_ID)) {
+        records.set(TRAM_STATION_ID, { name: "South entrance tram", action: "tram" });
+      }
+      if (tramState?.active || tramReason) {
+        tramHud ??= createTramHud(document.getElementById("hud-context-stack"), scene, () => canUsePanels() && !mallMap.open && !help.open && !shelfFocus?.open);
+      }
+      tramHud?.show(tram, tramReason);
       if (shopAction && !records.has(interaction.id))
         records.set(interaction.id, { name: shopAction.name, action: "shop" });
       const next = records.has(nextNearby) ? nextNearby : null;
@@ -2652,7 +2853,11 @@ function createUI(expanded = false) {
       document.body.classList.toggle("is-seated", seated);
       const cart = updateCartControls();
       const cartBlocksSeat = nearby && records.get(nearby).action === "seat" && cart.active;
-      if (seated) {
+      if (tramSelected) {
+        setHudText(nearbyName, "South entrance tram");
+        setHudText(inspectVerb, TRAM_BOARD_LABEL);
+        labelInspect(TRAM_BOARD_LABEL);
+      } else if (seated && !tramState?.seated) {
         const pose = seatPhase === "align" ? "Aligning" : seatPhase === "sit" ? "Sitting down" : seatPhase === "stand" ? "Standing up" : "Seated";
         setHudText(nearbyName, showSeatedAction && shopState.message || `${seatName || "Bench"} · ${pose}`);
         setHudText(inspectVerb, "Stand");
@@ -2695,21 +2900,24 @@ function createUI(expanded = false) {
         inspectButton.prepend(actionIcon);
       }
       document.body.classList.toggle("is-pushing", Boolean(cart.active));
-      const disabled = Boolean(cartBlocksSeat || seatPhase === "stand");
+      const disabled = Boolean(cartBlocksSeat || tramReason || seatPhase === "stand");
       if (inspectButton.disabled !== disabled)
         inspectButton.disabled = disabled;
       if (holdingProduct && !hasHeldProduct)
         seatNotice = null;
       if (seatNotice)
         setHudText(nearbyName, seatNotice);
-      const inspectHidden = !nearby && !seated;
-      if (shopAction && !seated) {
+      const inspectHidden = !nearby && (!seated || tramState?.seated);
+      if (shopAction && !seated || tramSelected) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = "44px";
         setHudAttribute(inspectButton, "aria-keyshortcuts", "F");
       } else if (inspectButton.style.minWidth) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = "";
         setHudAttribute(inspectButton, "aria-keyshortcuts", "");
       }
+      const inspectDisplay = tramSelected ? "inline-flex" : "";
+      if (inspectButton.style.display !== inspectDisplay)
+        inspectButton.style.display = inspectDisplay;
       if (inspectButton.hidden !== inspectHidden)
         inspectButton.hidden = inspectHidden;
       if (nearbyCard.hidden !== inspectHidden)
@@ -5244,6 +5452,14 @@ function isInFrontOfSeat(seat, { x, z }) {
 }
 
 // demos/corporate/gjh/v11/assets/interaction-registry.js
+var tramStation = {
+  ...tramLanding,
+  id: TRAM_STATION_ID,
+  kind: "tram",
+  prompt: TRAM_BOARD_LABEL,
+  availability: ({ player }) => Boolean(player?.tram && !player.tram.state.active),
+  handler: (_, { player }) => player.tram.board()
+};
 function distanceToInteraction(item, position, context) {
   const floor = typeof item.floor === "number" ? item.floor : item.y;
   if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
@@ -5256,9 +5472,9 @@ function distanceToInteraction(item, position, context) {
 }
 function createInteractionState({ announce = () => {}, present = () => {} } = {}) {
   const states = new Map;
-  const idle = Object.freeze({ phase: "idle", message: "" });
+  const idle2 = Object.freeze({ phase: "idle", message: "" });
   let focused = null, active = null, displayed = null, dirty = false;
-  const read = (id) => states.get(id) ?? idle;
+  const read = (id) => states.get(id) ?? idle2;
   function set(item, phase, message = "") {
     states.set(item.id, { phase, message });
     if (message)
@@ -5365,7 +5581,9 @@ function createInteractionRegistry(entries, describe = () => ({})) {
   function nearest(position, context = {}) {
     let best = null, distance = Infinity;
     selectionContext = context;
-    const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
+    const tram = context.player?.tram;
+    const travelling = context.travelling || tram?.state.active;
+    const shopEntries = travelling ? null : shops?.byZone.get(context.zone);
     candidates.length = 0;
     function consider(source) {
       const item = normalize(source);
@@ -5381,9 +5599,12 @@ function createInteractionRegistry(entries, describe = () => ({})) {
         distance = d;
       }
     }
-    if (!context.travelling)
+    if (!travelling) {
+      if (tram)
+        consider(tramStation);
       for (const source of entries)
         consider(source);
+    }
     if (shopEntries)
       for (const source of shopEntries)
         consider(source);
@@ -5445,6 +5666,9 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     subscribe,
     cycle,
     canCycle,
+    get tram() {
+      return selectionContext.player?.tram;
+    },
     installShopActions(targets, presentation) {
       shops = { byZone: new Map, state: createInteractionState(presentation) };
       for (const item of targets) {

@@ -1,4 +1,11 @@
+import {TRAM_BOARD_LABEL, TRAM_STATION_ID, tramLanding} from './tram-ride.js';
 import {isInFrontOfSeat} from './seat-placements.js';
+
+const tramStation = {
+  ...tramLanding, id:TRAM_STATION_ID, kind:'tram', prompt:TRAM_BOARD_LABEL,
+  availability: ({player}) => Boolean(player?.tram && !player.tram.state.active),
+  handler: (_, {player}) => player.tram.board()
+};
 
 function distanceToInteraction(item, position, context) {
   const floor = typeof item.floor === 'number' ? item.floor : item.y;
@@ -102,7 +109,9 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
   function nearest(position, context = {}) {
     let best = null, distance = Infinity;
     selectionContext = context;
-    const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
+    const tram = context.player?.tram;
+    const travelling = context.travelling || tram?.state.active;
+    const shopEntries = travelling ? null : shops?.byZone.get(context.zone);
     candidates.length = 0;
     function consider(source) {
       const item = normalize(source);
@@ -118,7 +127,10 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
         distance = d;
       }
     }
-    if (!context.travelling) for (const source of entries) consider(source);
+    if (!travelling) {
+      if (tram) consider(tramStation);
+      for (const source of entries) consider(source);
+    }
     if (shopEntries) for (const source of shopEntries) consider(source);
     if (candidates.length) {
       candidates.sort((a,b) => a.distance - b.distance || a.rank - b.rank);
@@ -161,6 +173,7 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
   }
   function subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); }
   return {normalize, nearest, dispatch, register, get, subscribe, cycle, canCycle,
+    get tram() { return selectionContext.player?.tram; },
     installShopActions(targets, presentation) {
       shops = {byZone:new Map(), state:createInteractionState(presentation)};
       for (const item of targets) {

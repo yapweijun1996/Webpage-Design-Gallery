@@ -1,3 +1,5 @@
+import {chaseDistance as tramChaseDistance, tramEnvelopes, tramRoute} from './tram-layout.js';
+
 const MIN_DISTANCE = 1;
 const MAX_DISTANCE = 11;
 const NARROW_FOV = 40;
@@ -111,4 +113,12 @@ export function createCameraController(getStorage = () => globalThis.sessionStor
       return true;
     }
   };
+}
+
+// Keep the chase camera in the clearance pocket surveyed by T1, including bends.
+export function positionTramChase(camera, distance, target) {
+  const {x,z} = tramRoute.sample(distance - tramChaseDistance);
+  const {bottom, top} = tramEnvelopes.camera;
+  camera.position.set(x, (bottom + top) / 2, z);
+  camera.lookAt(target);
 }
