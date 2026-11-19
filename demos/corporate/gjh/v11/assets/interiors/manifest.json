@@ -1,5 +1,5 @@
 {
-  "plan_sha256": "37dc85814f6b737bcef4fb730dd8003f5f01b57ed4c352bc6d8372da82706b00",
+  "plan_sha256": "90825424b408a33985be9161cef788aa4d1836f332c2d7ba552b66db575827c5",
   "assets": [
     {
       "file": "s01-crescent-header-low.glb",
@@ -3213,11 +3213,11 @@
       {
         "store": "S09",
         "file": "s09-spam-details.glb",
-        "bytes": 16156,
-        "sha256": "032edacbe6aaad9dbfc943358469d06d969fa25896a1b87b93144572ce838249",
-        "triangles": 1522,
+        "bytes": 40464,
+        "sha256": "8aa9c4158df1d0b62f430da87f030b8dd32e0e1a1b3faa46d3283976e97a98fe",
+        "triangles": 1624,
         "draws": 3,
-        "instances": 19,
+        "instances": 16,
         "motion": [],
         "sources": [],
         "validator": {

@@ -43,7 +43,7 @@ export const roomDetails = {
   },
   "S09": {
     "file": "s09-spam-details.glb",
-    "bytes": 16156,
+    "bytes": 40464,
     "roomDetail": true
   },
   "S10": {

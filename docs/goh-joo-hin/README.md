@@ -16,9 +16,9 @@ The 17 shops here are the V11 game’s authored roster. Some represent house bra
 | S06 | [Flying Wheel](06-flying-wheel/brand-research.md) · [Loom exhibit and concept](06-flying-wheel/README.md) |
 | S07 | [Gu Long](07-gu-long/brand-research.md) · [Tin pyramid exhibit and concept](07-gu-long/README.md) |
 | S08 | [SKIPPY](08-skippy/brand-research.md) · [Jar exhibit and concept](08-skippy/README.md) |
-| S09 | [SPAM](09-spam/brand-research.md) · [Concept packet](09-spam/README.md) |
-| S10 | [California Mexico](10-california-mexico/brand-research.md) · [Concept packet](10-california-mexico/README.md) |
-| S11 | [Hormel](11-hormel/brand-research.md) · [Concept packet](11-hormel/README.md) |
+| S09 | [SPAM](09-spam/brand-research.md) · [Conveyor exhibit and concept](09-spam/README.md) |
+| S10 | [California Mexico](10-california-mexico/brand-research.md) · [Abalone exhibit and concept](10-california-mexico/README.md) |
+| S11 | [Hormel](11-hormel/brand-research.md) · [Packing bench exhibit and concept](11-hormel/README.md) |
 | S12 | [Zeria](12-zeria/brand-research.md) · [Concept packet](12-zeria/README.md) |
 | S13 | [Sony](13-sony/brand-research.md) · [Concept packet](13-sony/README.md) |
 | S14 | [LG](14-lg/brand-research.md) · [Concept packet](14-lg/README.md) |

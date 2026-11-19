@@ -2,6 +2,22 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ["SPAM · Three 340 g tins","SPAM · 三款 340 克罐头","SPAM · Tiga tin 340 g"],
+  ["Three 340 g tins","三款 340 克罐头","Tiga tin 340 g"],
+  ["California Mexico · Red and Black abalone","California Mexico · 红罐与黑罐鲍鱼","California Mexico · Abalon Merah dan Hitam"],
+  ["Red and Black abalone","红罐与黑罐鲍鱼","Abalon Merah dan Hitam"],
+  ["HORMEL · Chili with and without beans","HORMEL · 含豆与无豆辣肉酱","HORMEL · Cili dengan dan tanpa kacang"],
+  ["Chili with and without beans","含豆与无豆辣肉酱","Cili dengan dan tanpa kacang"],
+  ["Abalone exhibit","鲍鱼展示","Pameran abalon"],
+  ["Official SPAM brand mark","SPAM 官方品牌标志","Logo rasmi SPAM"],
+  ["Official California Mexico brand mark","California Mexico 官方品牌标志","Logo rasmi California Mexico"],
+  ["Official HORMEL brand mark","HORMEL 官方品牌标志","Logo rasmi HORMEL"],
+  ["View the official SPAM catalogue","查看 SPAM 官方目录","Lihat katalog rasmi SPAM"],
+  ["View the official abalone catalogue","查看官方鲍鱼目录","Lihat katalog rasmi abalon"],
+  ["View the HORMEL Chili catalogue","查看 HORMEL 辣肉酱目录","Lihat katalog Cili HORMEL"],
+  ["Goh Joo Hin lists SPAM Classic, Lite and Less Sodium in separate 340 g tins. The catalogue photographs show each variant and its packaging.","Goh Joo Hin 目录分别列出 SPAM 原味、Lite 和 Less Sodium 三款 340 克罐头，并展示各自的包装。","Goh Joo Hin menyenaraikan SPAM Classic, Lite dan Less Sodium sebagai tiga tin 340 g yang berasingan. Foto katalog menunjukkan setiap varian dan bungkusannya."],
+  ["The Goh Joo Hin abalone catalogue lists two California Mexico products, Red and Black. Both list 454 g and Mexico as the country of origin.","Goh Joo Hin 鲍鱼目录列有 California Mexico 红罐和黑罐。两款均标示 454 克，原产地为墨西哥。","Katalog abalon Goh Joo Hin menyenaraikan dua produk California Mexico, Merah dan Hitam. Kedua-duanya menyatakan 454 g dan berasal dari Mexico."],
+  ["The HORMEL manufacturer catalogue lists Chili No Beans and Chili with Beans. The manufacturer shows a 15 oz No Beans version in its product photograph.","HORMEL 制造商目录列有无豆和含豆两款辣肉酱。制造商的商品照片展示了 15 盎司无豆版本。","Katalog pengilang HORMEL menyenaraikan Cili Tanpa Kacang dan Cili dengan Kacang. Foto produknya menunjukkan versi 15 oz tanpa kacang."],
   ["Flying Wheel · Air-dried Ban Mee","Flying Wheel · 风干板面","Flying Wheel · Ban Mee kering udara"],
   ["Air-dried Ban Mee","风干板面","Ban Mee kering udara"],
   ["Noodle exhibit","面食展示","Pameran mi"],

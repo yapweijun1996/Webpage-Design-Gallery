@@ -108,7 +108,10 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       box(x,h-.04,decalHeight(z+.48)-.0175,w-.05,.035,.035,shopLamp);
       // The Low room kit supplies linked, category-shaped stock to these bays.
       const featured = n===4 && x===0 || h===2.07 && x<0 && [5,6,7,8,10,11,12,17].includes(n);
-      if (!featured) packageRow(x,h+.05,z+.28,Math.floor(w/.27),.25,kind,c);
+      if (featured && (n===10 || n===11)) {
+        const pair = n===10 ? [0x993630,0x29282a] : [0x9a363a,0xb54b36];
+        for (const [i,colour] of pair.entries()) can(x+(i-.5)*.21,h+.043,z+.29,colour,.064,.106);
+      } else if (!featured) packageRow(x,h+.05,z+.28,Math.floor(w/.27),.25,kind,c);
     }
   }
   function sideShelf(s,c=oak,kind='tin') {
@@ -327,9 +330,10 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
         for(let j=-5;j<=5;j++)box(cx+j*.143,.62,island+.563,.025,.74,.027,0x41546b);
       }, base);
       for(const z of [mid+.35,mid-2.65]){
-        column(2.30,3.54,z,.025,1.04,brass);
-        for(const [y,r] of [[3.16,.52],[3.04,.35],[2.95,.19]]){
-          tapered(2.30,y,z,r*.62,r,.10,brass);column(2.30,y-.054,z,r*.89,.025,shopLamp);
+        const pendantX = 2.92;
+        column(pendantX,3.74,z,.025,.64,brass);
+        for(const [y,r] of [[3.56,.43],[3.44,.31],[3.35,.16]]){
+          tapered(pendantX,y,z,r*.62,r,.10,brass);column(pendantX,y-.054,z,r*.89,.025,shopLamp);
         }
       }
       plant(side-1.15,rear+1.31,1.78);break;
