@@ -5,6 +5,7 @@ import {liftLayout} from './lift-layout.js';
 import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
 import {isShelfInReach} from './visitor-v2-contact.js';
 import {chaseDistance, createCameraController, easeCameraValue, firstPersonFov} from './camera-controller.js';
+import {isInFrontOfSeat} from './seat-placements.js';
 
 const CAMERA_AXES = ['x', 'y', 'z'];
 const CAMERA_LIFTS = [1.1, 2.2];
@@ -44,7 +45,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let seated = false, pushing=false, elevatorTravel=null, cartEyePitch=null;
   // A conservative full-turn footprint encloses avatar and cart. No sweeping corners.
   const walkingShape=new R.Capsule(.55,.3), cartShape=new R.Cylinder(.85,1.4);
-  let seat=null, seatPhase='idle', seatTime=0, seatFrom=null, seatStartAngle=0, seatStartWeight=0;
+  let seat=null, seatPhase='idle', seatTime=0, seatFrom=null, seatExit=null, seatStartAngle=0, seatStartWeight=0;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const reduceSeatMotion=()=>reducedMotion.matches;
   let yaw = 0, pitch = .1, drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
@@ -304,7 +305,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     updateActionView(dt);
     if(gamepad){yaw-=gamepad.lookX*1.9*dt;pitch=clampPitch(pitch+gamepad.lookY*1.4*dt);}
-    if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;character.update('idle',dt);return;}
+    if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;updateSeatCharacter(dt);return;}
     if(productApproach){
       const a=productApproach,t=Math.min(1,(a.elapsed+=dt)/.45),e=t*t*(3-2*t);
       moveSeat({x:a.from.x+(a.to.x-a.from.x)*e,y:.91,z:a.from.z+(a.to.z-a.from.z)*e});
@@ -423,7 +424,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     projectCamera(false);
     target.copy(visual.position); target.y += 1.24 - .34 * character.seatWeight;
-    const requestedDistance = actionView ? 3 : chaseDistance(framing.distance, zoom);
+    const seatView = actionView?.kind === 'seat';
+    const requestedDistance = actionView && !seatView ? 3 : chaseDistance(framing.distance, zoom);
     // View-mode changes cut directly to a swept position.
     const changedMode = renderedMode !== mode;
     cameraDistance = easeCameraValue(cameraDistance ?? requestedDistance, requestedDistance, dt, immediate || changedMode);
@@ -434,7 +436,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     // Lift the orbit pivot so the Tripo visitor leaves the entrance sightline
     // clear even when the glass wall limits the available spring-arm distance.
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
-    const orbitHeight=actionView?0:framing.height * closeFraming;
+    const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView ? 0 : framing.height * closeFraming;
     let lift=0,length=cameraCandidate(orbitHeight,desired);
     // Prefer the requested bearing; lift above furniture rather than entering the visitor.
     if(length<Math.min(cameraDistance - .05, cameraLift?2.4:2))for(const height of CAMERA_LIFTS){
@@ -479,11 +481,16 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function clearAt(position,ignoreBench=false){return !physics.intersectionWithShape(position,rotation,walkingShape,undefined,undefined,capsule,body,ignoreBench?c=>c.handle!==seat.collider:undefined);}
   function clearPath(from,to,ignoreBench=false){const steps=Math.max(1,Math.ceil(Math.hypot(to.x-from.x,to.y-from.y,to.z-from.z)/.08));for(let i=0;i<=steps;i++){const t=i/steps;if(!clearAt({x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t,z:from.z+(to.z-from.z)*t},ignoreBench))return false;}return true;}
   function moveSeat(position){body.setTranslation(position,true);body.setNextKinematicTranslation(position);}
-  function finishStand(){moveSeat({x:seat.exitX,y:seat.floor+.91,z:seat.exitZ});seated=false;seatPhase='idle';seat=null;restoreActionView();character.setSeated(false);capsule.setEnabled(true);clearInput();injected=null;vertical=0;}
+  const seatBodyTarget = seat => ({x:seat.x, y:seat.floor+.89, z:seat.z});
+  function updateSeatCharacter(dt) {
+    sync();
+    character.update('idle', dt, 'idle', 1, seat);
+  }
+  function finishStand(){moveSeat(seatExit);seated=false;seatPhase='idle';seat=null;seatExit=null;restoreActionView();character.setSeated(false);capsule.setEnabled(true);clearInput();injected=null;vertical=0;}
   function updateSeat(dt){
     if(seatPhase==='seated')return;
     seatTime+=dt;const duration=seatPhase==='align'?.35:.85,t=Math.min(1,seatTime/duration),e=t*t*(3-2*t);
-    const end=seatPhase==='sit'?{x:seat.x,y:seat.y+.875,z:seat.z}:{x:seat.exitX,y:seat.floor+.91,z:seat.exitZ};
+    const end=seatPhase==='sit'?seatBodyTarget(seat):seatExit;
     moveSeat({x:seatFrom.x+(end.x-seatFrom.x)*e,y:seatFrom.y+(end.y-seatFrom.y)*e,z:seatFrom.z+(end.z-seatFrom.z)*e});
     const delta=Math.atan2(Math.sin(seat.angle-seatStartAngle),Math.cos(seat.angle-seatStartAngle));visual.rotation.y=seatStartAngle+delta*e;
     character.setSeatProgress(seatPhase==='sit'?e:seatPhase==='stand'?seatStartWeight*(1-e):0);
@@ -491,20 +498,23 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function sit(id) {
     if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
-    if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||(p.z-candidate.z)*candidate.facing>-.25)return false;
-    seat=candidate;const exit={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ},target={x:seat.x,y:seat.y+.875,z:seat.z};
+    if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||!isInFrontOfSeat(candidate,p.z))return false;
+    seat=candidate;const exit={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ},target=seatBodyTarget(seat);
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
-    clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=visual.rotation.y;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI+seat.cameraOffset);vertical=0;
+    seatExit=exit;clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=visual.rotation.y;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI);vertical=0;
     if(reduceSeatMotion()){moveSeat(target);visual.rotation.y=seat.angle;seatPhase='seated';character.setSeated(true);}
-    character.update('idle',0);physics.step();updateCamera(0,reduceSeatMotion());return true;
+    updateSeatCharacter(0);physics.step();updateCamera(0,reduceSeatMotion());return true;
   }
   function stand(instant=false) {
     if(!seated)return false;if(seatPhase==='stand'&&!instant)return true;
-    const position={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ};
-    if(!clearAt(position)||!clearPath(body.translation(),position,true))return false;
+    const from=body.translation();
+    const position=[0, -.45, .45].map(offset=>({x:seat.exitX+offset,y:seat.floor+.91,z:seat.exitZ}))
+      .find(point=>clearAt(point)&&clearPath(from,point,true));
+    if(!position)return false;
+    seatExit=position;
     clearInput();injected=null;seatFrom={...body.translation()};seatStartAngle=visual.rotation.y;seatStartWeight=character.state.seatWeight;seatTime=0;seatPhase='stand';
     if(instant||reduceSeatMotion())finishStand();
-    character.update('idle',0);physics.step();updateCamera(0,instant||reduceSeatMotion());return true;
+    updateSeatCharacter(0);physics.step();updateCamera(0,instant||reduceSeatMotion());return true;
   }
   function teleport(zone) {
     if (elevatorTravel) return false;
@@ -513,7 +523,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     productApproach=null;
     const carryingProduct=character.state.physicalProduct?.held;
     if(!carryingProduct){productHome=null;character.resetProduct?.();}
-    setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;character.setSeated(false);capsule.setEnabled(true);
+    setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;seatExit=null;character.setSeated(false);capsule.setEnabled(true);
     const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = destination.yaw || 0; pitch = .1; visual.rotation.y = yaw; clearInput();
     if(carryingProduct){sync();character.update('idle',0);}
     // Update broad-phase query positions before spring-arm obstruction tests.

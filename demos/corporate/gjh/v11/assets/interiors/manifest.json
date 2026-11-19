@@ -2982,5 +2982,423 @@
     "low_anchor_bytes": 745496,
     "projected_full_low_triangles": 30518,
     "projected_max_per_shop": 2480
+  },
+  "round2": {
+    "version": 1,
+    "coordinates": "Slot-local metres, +Y up, +Z toward entrance. Shared by all tiers.",
+    "limits": {
+      "lowTrianglesPerShop": 2800,
+      "lowTrianglesAllShops": 45000,
+      "extraDrawsPerShop": 4
+    },
+    "atlas": {
+      "file": "showroom-atlas.png",
+      "sha256": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "bytes": 47721,
+      "width": 256,
+      "height": 256,
+      "marks": {
+        "S01": {
+          "file": "S01-new-moon.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+          "sha256": "88de0bf10408644131758f9ae5075b9748389b59586bd1614e2a54229ad5e8cc"
+        },
+        "S02": {
+          "file": "S02-mili.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg",
+          "sha256": "8afaba18923b1ddef65082f5816d9766a88d0044c706387964bfa13794493b0d"
+        },
+        "S03": {
+          "file": "S03-gogo.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg",
+          "sha256": "2594872c68334dbc3b81a3bee62cd8e560cdc199d3d557d1c8d0ac5934de4860"
+        },
+        "S04": {
+          "file": "S04-borsch-med.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/06/bm-brand2.jpg",
+          "sha256": "f2b6ab5f02af744f18231cb7bc96c2d24f76145369345aa609cc27dc4d2b4757"
+        },
+        "S05": {
+          "file": "S05-pien-tze-huang.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/08/LOGO_PTH_4C.png",
+          "sha256": "9b38fb8d56e19ac55239bbff770c7699c9bfc048f1b8eaa1d654bc1efc1517e7"
+        },
+        "S06": {
+          "file": "S06-flying-wheel.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/flyingwheel-brand.jpg",
+          "sha256": "c8a8d8f71a03a57a9f1243077c8067d95a0f059df6235555bdc80066b460b58e"
+        },
+        "S07": {
+          "file": "S07-gu-long.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/08/Gulong.jpg",
+          "sha256": "1c94ea41c43240c807f2dfad14c68bee59914438766333248f90e08015996293"
+        },
+        "S08": {
+          "file": "S08-skippy.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/skippy-brand.jpg",
+          "sha256": "f9bdacbd9d47bc79461af6b062d7a2d65b2f8c63c54ebb8d8ea105321c80645d"
+        },
+        "S09": {
+          "file": "S09-spam.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/spam-brand.jpg",
+          "sha256": "c3ba3b715e12ebca4e44f914e3bcf16f34ad40de8045be92721a963197dc623a"
+        },
+        "S10": {
+          "file": "S10-california-mexico.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/cm-brand.jpg",
+          "sha256": "67dadc913106fa9df21fa3f91386e9675636ee6f51e14b45977a1bf27a5d9078"
+        },
+        "S11": {
+          "file": "S11-hormel.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/hormel-brand.jpg",
+          "sha256": "bbed1e4b6fe1b66591e4cf46735b561dace99dbb7d2ef6e641bf121d45bfd8c2"
+        },
+        "S12": {
+          "file": "S12-zeria.webp",
+          "source": "https://www.zeria.co.jp/english/media/logo.gif",
+          "sha256": "4c3da84bb455a6c2f1e8c77f683b1925c7a2a44040776a86ae5ec7013a2175fc"
+        },
+        "S13": {
+          "file": "S13-sony.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/sony-brand.jpg",
+          "sha256": "83c79531be536419929a11c92d3c12ef8922d2b6a603a2800ed03d287b66b18c"
+        },
+        "S14": {
+          "file": "S14-lg.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/lg-brand.jpg",
+          "sha256": "8ccdabee26e7d6150c2167291ddf9c820f3bec2c8f82ebc251b6bb9f8be2fcdf"
+        },
+        "S15": {
+          "file": "S15-casio.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/casio-brand.jpg",
+          "sha256": "5add50da8be8b34900f8527af68da630333e0478b147d4ff06b6ab492e14aaad"
+        },
+        "S16": {
+          "file": "S16-gp.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/04/GP-brand.jpg",
+          "sha256": "6325105e43278f5bcb867c6994e1dfc080c90f25bec5925139635eecaa184ff5"
+        },
+        "S17": {
+          "file": "S17-gigaset.webp",
+          "source": "https://www.gjhglobal.com/wp-content/uploads/2022/08/gigaset-new-logo.svg",
+          "sha256": "b082e430cc4343b1451d926e43c52b9bb7560b8574e4c7139acdd7d0080c29e5"
+        }
+      }
+    },
+    "generator": "scripts/gjh_interiors/build_rooms.py",
+    "details": [
+      {
+        "store": "S01",
+        "file": "s01-new-moon-details.glb",
+        "bytes": 40440,
+        "sha256": "deb22472395a881a7550550ada2da523d60d7f4681331cb9d891260fe0f8c45a",
+        "triangles": 558,
+        "draws": 2,
+        "instances": 0,
+        "motion": [],
+        "sources": [
+          {
+            "file": "models/chinese-lantern/exports/chinese-lantern.glb",
+            "sha256": "8157a23e63a1d96c3d043f5e54ff52258dd6128e26ca28fe6bb12115b687a8c9",
+            "author": "Blender-3D-Gallery / agent-assisted original source",
+            "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified. National-symbol usage restrictions still apply where relevant."
+          }
+        ],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S02",
+        "file": "s02-mili-details.glb",
+        "bytes": 43312,
+        "sha256": "b12b639865f1bf7657ddda0f6234e781e808bac08b8d5be0728a05954f6a0ae4",
+        "triangles": 1538,
+        "draws": 3,
+        "instances": 16,
+        "motion": [],
+        "sources": [
+          {
+            "file": "models/mamak-stainless-steel-plate/exports/mamak-stainless-steel-plate.glb",
+            "sha256": "b3110c770ccae54c6e382cd92a34e18a09f57149f0e19a7c72a898fe1516bdc1",
+            "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+            "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
+          }
+        ],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S03",
+        "file": "s03-gogo-details.glb",
+        "bytes": 75264,
+        "sha256": "5fb627dcf761e9284d968a89852a0c5e92a1c613b7dea6e65495d4562c746520",
+        "triangles": 1014,
+        "draws": 3,
+        "instances": 0,
+        "motion": [
+          "Pulse"
+        ],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S04",
+        "file": "s04-borsch-details.glb",
+        "bytes": 24124,
+        "sha256": "832dd9f7c7c2699f992b2a2a07c884adae92a5b08f16f914486f104534e1b34f",
+        "triangles": 1566,
+        "draws": 3,
+        "instances": 20,
+        "motion": [],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S05",
+        "file": "s05-herbal-details.glb",
+        "bytes": 67544,
+        "sha256": "cddc309aca0af6e993a5f250909ceccb06a6b614b965562f557f262c49749618",
+        "triangles": 1056,
+        "draws": 3,
+        "instances": 4,
+        "motion": [],
+        "sources": [
+          {
+            "file": "models/chinese-lantern/exports/chinese-lantern.glb",
+            "sha256": "8157a23e63a1d96c3d043f5e54ff52258dd6128e26ca28fe6bb12115b687a8c9",
+            "author": "Blender-3D-Gallery / agent-assisted original source",
+            "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified. National-symbol usage restrictions still apply where relevant."
+          }
+        ],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S06",
+        "file": "s06-wheel-details.glb",
+        "bytes": 50900,
+        "sha256": "00277942dbefc3a0b6b6f8713cee4f0b9b2910c01a918fefeab0327a683f856e",
+        "triangles": 758,
+        "draws": 3,
+        "instances": 4,
+        "motion": [],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S07",
+        "file": "s07-dragon-details.glb",
+        "bytes": 79092,
+        "sha256": "1ae48f02ea806483a1d06df471d2178a8a8875b91318ba8b03beeb44a75da66f",
+        "triangles": 1182,
+        "draws": 3,
+        "instances": 4,
+        "motion": [],
+        "sources": [
+          {
+            "file": "models/chinese-lantern/exports/chinese-lantern.glb",
+            "sha256": "8157a23e63a1d96c3d043f5e54ff52258dd6128e26ca28fe6bb12115b687a8c9",
+            "author": "Blender-3D-Gallery / agent-assisted original source",
+            "rights": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified. National-symbol usage restrictions still apply where relevant."
+          }
+        ],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S08",
+        "file": "s08-skippy-details.glb",
+        "bytes": 46692,
+        "sha256": "210332d16146666f4495c26ec2ef3793d72e3146a32eb40744439f40e175cf4e",
+        "triangles": 760,
+        "draws": 4,
+        "instances": 4,
+        "motion": [
+          "Pulse"
+        ],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S09",
+        "file": "s09-spam-details.glb",
+        "bytes": 16156,
+        "sha256": "032edacbe6aaad9dbfc943358469d06d969fa25896a1b87b93144572ce838249",
+        "triangles": 1522,
+        "draws": 3,
+        "instances": 19,
+        "motion": [],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S10",
+        "file": "s10-coast-details.glb",
+        "bytes": 71920,
+        "sha256": "70cf42760d3393f52c51595f7dbb0056234183e621003ac324251390283e45a7",
+        "triangles": 1096,
+        "draws": 3,
+        "instances": 4,
+        "motion": [],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S11",
+        "file": "s11-deli-details.glb",
+        "bytes": 75704,
+        "sha256": "9649dfdcb6ab6a91d454d923267d07cfa5864d83de749b7f07c04b1941e770d2",
+        "triangles": 1136,
+        "draws": 3,
+        "instances": 4,
+        "motion": [],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S12",
+        "file": "s12-herbarium-details.glb",
+        "bytes": 33300,
+        "sha256": "e8799f9b97863ef9586e61e076476cfa39b5736721478631817cf5922658d874",
+        "triangles": 538,
+        "draws": 3,
+        "instances": 4,
+        "motion": [],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S13",
+        "file": "s13-listening-details.glb",
+        "bytes": 23540,
+        "sha256": "662c8f1f682adc7f8694101aa6744ef503d3a9c962669e3164a1add6f08227ea",
+        "triangles": 262,
+        "draws": 3,
+        "instances": 0,
+        "motion": [
+          "Scroll"
+        ],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S14",
+        "file": "s14-living-details.glb",
+        "bytes": 12184,
+        "sha256": "f7432c18148e289ad3eff00d0de6a389442fdf0eb486645170d209684a2c1e18",
+        "triangles": 122,
+        "draws": 3,
+        "instances": 0,
+        "motion": [
+          "Scroll"
+        ],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S15",
+        "file": "s15-recital-details.glb",
+        "bytes": 37608,
+        "sha256": "57a79f4b9ae519d83be892eaed528e933beea4f1edbe3296379454b1240db9b1",
+        "triangles": 502,
+        "draws": 2,
+        "instances": 0,
+        "motion": [],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S16",
+        "file": "s16-power-details.glb",
+        "bytes": 22604,
+        "sha256": "0f32e9c78c008509137b8f850de327f8c85d2abdf006bb3ec7c266ce18098efa",
+        "triangles": 266,
+        "draws": 3,
+        "instances": 0,
+        "motion": [
+          "Pulse"
+        ],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      {
+        "store": "S17",
+        "file": "s17-telephone-details.glb",
+        "bytes": 36748,
+        "sha256": "0c9c8530ea5aae83e5492155cf1692abdfd69db1a68ecb11e1aed36f87796ccb",
+        "triangles": 512,
+        "draws": 4,
+        "instances": 4,
+        "motion": [
+          "Pulse"
+        ],
+        "sources": [],
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    ]
   }
 }

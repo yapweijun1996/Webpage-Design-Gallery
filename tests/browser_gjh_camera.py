@@ -9,13 +9,13 @@ OUT=ROOT/'docs/screenshots/mall-camera'
 
 def distance(s):
  return math.dist(s['camera']['position'],[s['x'],s['y']+1.24,s['z']])
-def assert_clear(s,variant):
+def assert_clear(s):
  assert s['drawCalls']<=200,s['drawCalls']
  p=s['camera']['position'];r=s['cameraObstruction']['radius']-.025
  boxes=[(-12.5,.94,5.8,2.88,1.88,.961),(-7,.9,2.2,.75,1.8,.532)]
- scale=1 if variant=='v1' else .8
  for seat in s['seats']:
-  boxes.append((seat['x'],1.3175*scale/2,seat['z']+.23*seat['facing'],2.58,1.3175*scale,.922))
+  lo,hi=([seat['bounds'][side][axis] for axis in 'xyz'] for side in ['min','max'])
+  boxes.append(tuple((a+b)/2 for a,b in zip(lo,hi))+tuple(b-a for a,b in zip(lo,hi)))
  for box in boxes:
   separation=math.sqrt(sum(max(abs(p[i]-box[i])-box[i+3]/2,0)**2 for i in range(3)))
   assert separation>=r,(p,box,separation,r)
@@ -42,22 +42,22 @@ def run(baseline=False):
     page.screenshot(path=str(OUT/f'{"before" if baseline else "after"}-desk-rear-{width}-{variant}.png'))
     if baseline:
      assert distance(s)<.9,distance(s);results.append({'baselineDeskHeadClippingReproduced':True,'distance':distance(s)});ctx.close();continue
-    assert_clear(s,variant);assert s['cameraObstruction']['lift']>0
+    assert_clear(s);assert s['cameraObstruction']['lift']>0
     assert s['drawCalls']<=200,s['drawCalls']
     page.evaluate('__mall.teleport("atrium");__mall.setInput({})');drive(page,2200,right=-1)
     for yaw in [0,.6,1.2,math.pi]:
-     s=drive(page,400,yaw=yaw,pitch=-.08);assert_clear(s,variant)
+     s=drive(page,400,yaw=yaw,pitch=-.08);assert_clear(s)
     page.screenshot(path=str(OUT/f'after-benches-{width}-{variant}.png'))
     page.evaluate('__mall.teleport("newmoon");__mall.setInput({})')
     drive(page,1000,forward=-1);drive(page,800,right=1);drive(page,1000,forward=-1)
     for yaw in [0,.4,math.pi]:
-     s=drive(page,500,yaw=yaw,pitch=-.08);assert_clear(s,variant)
+     s=drive(page,500,yaw=yaw,pitch=-.08);assert_clear(s)
     page.screenshot(path=str(OUT/f'after-bench-front-{width}-{variant}.png'))
     approach(page,'desk');close(page);samples=[]
     # One continuous loop: service desk -> showcase -> ceiling sign -> service desk.
     for label,ms,inputs,expected in [('desk-to-showcase-side',1950,{'right':1},None),('showcase',1350,{'forward':1},'featured-showcase'),('clear-showcase',850,{'forward':-1},None),('sign',1100,{'right':1},'wayfinding-west'),('clear-kiosk',1100,{'right':-1},None),('front-aisle',600,{'forward':-1},None),('desk',1950,{'right':-1},'service-desk')]:
      for step in range(math.ceil(ms/50)):
-      s=drive(page,min(50,ms-step*50),**inputs);assert_clear(s,variant);samples.append(distance(s))
+      s=drive(page,min(50,ms-step*50),**inputs);assert_clear(s);samples.append(distance(s))
      if expected:
       assert s['nearby']==expected,(label,s['x'],s['z'],s['nearby'])
       page.locator('#scene').focus();page.keyboard.press('f');page.locator('#amenity-dialog').wait_for(state='visible');close(page)

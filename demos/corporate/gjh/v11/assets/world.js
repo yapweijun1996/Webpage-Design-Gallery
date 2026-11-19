@@ -16,7 +16,7 @@ import {createInteriorKit} from './interiors/runtime.js';
 import {interiorFloorColour,interiorStores} from './interiors/config.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
-import {createSeatPlacements, createSeatAnchor} from './seat-placements.js';
+import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere} from './mall-atmosphere.js';
 
@@ -249,13 +249,15 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
   function bench(placement) {
-    const {x,z,facing}=placement;
-    const seatScale=new URLSearchParams(location.search).get('visitor') !== 'v1' ? .8 : 1;
-    const seatCollider=collider(x, .3*seatScale, z, placement.clearance.colliderWidth, .4*seatScale, placement.clearance.colliderDepth);
-    seats.push(createSeatAnchor(placement,seatCollider.handle));
-    const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*seatScale,bz,sx,sy*seatScale,sz);
-    if (!furnishings.place('bench', x, z, seatScale, facing, 0, null, activeShopSlot)) {
-      benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, .56, z, 2.55, .18, .9);
+    const {x,z,facing,group}=placement;
+    const modelPlaced=furnishings.place('bench', x, z, benchScale, facing, 0, placement.pose.angle, activeShopSlot);
+    const seatCollider=collider(x, .3*benchScale, z, placement.clearance.colliderWidth, .4*benchScale, placement.clearance.colliderDepth);
+    const footY=group==='atrium' ? (expanded ? .016 : 0) : (expanded ? .0245 : .015);
+    seats.push(createSeatAnchor(placement,seatCollider.handle,modelPlaced ? undefined : groundBenchFallback,benchScale,footY));
+    const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*benchScale,bz,sx,sy*benchScale,sz);
+    if (!modelPlaced) {
+      const {top,front}=groundBenchFallback;
+      benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, top-.09, z, 2.55, .18, -2*front);
       benchBox('seat', x, .94, z + facing * .35, 2.55, .7, .18);
       benchBox('brass', x, .47, z - facing * .451, 2.52, .035, .025);
       benchBox('oak', x, 1.285, z + facing * .35, 2.58, .065, .21);
@@ -537,11 +539,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
           box('brass', x + side * 3.85, 5.55, z, .06, .06, 2.24);
           box('brass', x, 5.55, z + side * 1.12, 7.75, .06, .06);
         }
-      }
-    } else if (expanded && zone === 'gogo') {
-      // Narrow angled timber fins make a light pergola over the lounge.
-      for (let z = -1.6; z > -9.3; z -= .95) {
-        box('oak', x - 2.56, 5.5, z, 3.8, .19, .35);
       }
     }
     if (expanded) {
@@ -878,15 +875,18 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     activeDeck=true;
     const deckBench=placement=>{
       const {x,z,facing}=placement;
-      if(!furnishings.place('bench',x,z,.8,facing,liftLayout.upper,null,-1)){
+      const modelPlaced=furnishings.place('bench',x,z,benchScale,facing,liftLayout.upper,placement.pose.angle,-1);
+      if(!modelPlaced){
+        const {top,front}=deckBenchFallback;
         box('wood',x,liftLayout.upper+.24,z,2.3,.32,.72);
-        box('seat',x,liftLayout.upper+.49,z,2.34,.18,.76);
+        box('seat',x,liftLayout.upper+top-.09,z,2.34,.18,-2*front);
         box('seat',x,liftLayout.upper+.82,z+facing*.28,2.34,.54,.16);
         box('brass',x,liftLayout.upper+.44,z-facing*.38,2.32,.025,.025);
       }
       // Leave capsule clearance between each bench and the adjacent planter.
       const seatCollider=collider(x,liftLayout.upper+.26,z,placement.clearance.colliderWidth,.5,placement.clearance.colliderDepth);
-      if(placement.accessible!==false)seats.push(createSeatAnchor(placement,seatCollider.handle));
+      if(placement.accessible!==false)seats.push(createSeatAnchor(placement,seatCollider.handle,
+        modelPlaced ? undefined : deckBenchFallback,modelPlaced ? benchScale : 1));
     };
     for(const placement of seatPlacements.filter(item=>item.group==='deck'))deckBench(placement);
     for(const [x,z] of [[-8.1,12.8],[2.1,12.8],[-8.1,9.2],[2.1,9.2]]){
@@ -1027,10 +1027,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     // LOD controllers can continue updating visibility while the layer gate is closed.
     void prepareModel(meshes, {hide:true, late:false, priority}).catch(() => {});
   }
-  const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
-  const cameraObstacles=ceilingObstacles.concat(shopObstacles,seats.filter(seat=>seat.floor===0).map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
+  const cameraObstacles=ceilingObstacles.concat(shopObstacles,seats.map(seat=>seat.bounds));
   let brandWallPromise=null;
   function ensureBrandWall(){
     if(!expanded)return Promise.reject(new Error('Brand wall is only available in the expanded mall'));

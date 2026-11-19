@@ -3513,14 +3513,28 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       ellipse(x + Math.sin(angle) * radius, y + Math.cos(angle) * radius, z - 0.035 * Math.abs(i), 0.16 * size, height * 0.53, 0.095 * size, i % 2 ? 15457224 : pearl, 0, -angle);
     }
   }
+  const packColours = {
+    4: [7753864, 9021786, 15445064],
+    5: [10893613, 13015899, 7358266],
+    6: [14464359, 9859914, 15257228],
+    7: [11284525, 13606480, 4810836],
+    8: [2646168, 13598801, 4421548],
+    9: [2510729, 14724931, 4681111],
+    10: [5868930, 13547671, 8038302],
+    11: [11354433, 5864021, 14196343],
+    12: [8564121, 9476794, 13074816],
+    16: [11124537, 3571824, 5661285],
+    17: [7238254, 12156505, 5924463]
+  }[n];
+  const packColour = (index, fallback) => packColours?.[index % 3] ?? fallback;
   function packageRow(x, y, z, count, step, kind, c) {
     for (let j = 0;j < count; j++) {
       const px = x + (j - (count - 1) / 2) * step;
       if (kind === "tin")
-        can(px, y, z, j % 3 === 0 ? cream : c);
+        can(px, y, z, packColour(j, c));
       else {
         const h = kind === "pack" ? 0.31 : 0.24;
-        box(px, y + h / 2, z, 0.18, h, 0.13, j % 3 === 0 ? pearl : c);
+        box(px, y + h / 2, z, 0.18, h, 0.13, packColour(j, c));
         box(px, y + h * 0.43, z + 0.071, 0.14, 0.035, 0.018, j % 3 === 0 ? c : cream);
       }
     }
@@ -3536,7 +3550,9 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
     for (const h of [0.61, 1.34, 2.07, 2.8]) {
       box(x, h, z + 0.23, w, 0.085, 0.5, oak);
       box(x, h - 0.04, z + 0.46, w - 0.05, 0.035, 0.035, shopLamp);
-      packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind, c);
+      const featured = n === 4 && x === 0 || h === 2.07 && x < 0 && [5, 6, 7, 8, 10, 11, 12, 17].includes(n);
+      if (!featured)
+        packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind, c);
     }
   }
   function sideShelf(s, c = oak, kind = "tin") {
@@ -3550,9 +3566,9 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       for (let i = 0;i < 9; i++) {
         const z = back + 0.81 + i * (span - 1.66) / 8;
         if (kind === "tin")
-          can(x - s * 0.19, y + 0.05, z, i % 3 ? cream : base, 0.1, 0.21);
+          can(x - s * 0.19, y + 0.05, z, packColour(i + row, base), 0.1, 0.21);
         else
-          box(x - s * 0.19, y + 0.19, z, 0.14, 0.28, 0.2, i % 3 ? white : base);
+          box(x - s * 0.19, y + 0.19, z, 0.14, 0.28, 0.2, packColour(i + row, base));
       }
     }
     for (const z of [back + 0.4, mid, front - 0.41])
@@ -3685,15 +3701,6 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       }
       cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
       blossomVase(-0.43, 1.2475, island, 9873258);
-      for (const z of [mid - 1.6, mid + 0.12, mid + 1.82]) {
-        bar(0.22, 3.62, z, 0.22, 4.1, z, 0.025, brass);
-        box(0.22, 3.34, z, 0.42, 0.51, 0.42, shopLamp);
-        for (const y of [3.07, 3.6])
-          box(0.22, y, z, 0.48, 0.055, 0.48, walnut);
-        for (const dx of [-0.22, 0.22])
-          for (const dz of [-0.22, 0.22])
-            box(0.22 + dx, 3.34, z + dz, 0.027, 0.51, 0.027, walnut);
-      }
       break;
     }
     case 6: {
@@ -3732,10 +3739,10 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       for (let z = back + 0.83;z < front; z += 1.82)
         box(0, 4.01, z, side * 2 - 0.45, 0.14, 0.12, walnut);
       for (const [r, y, count] of [[0.72, 3.43, 20], [0.45, 3.17, 14]]) {
-        ringLight(0, mid - 0.38, r, y);
+        ringLight(-2.07, mid - 0.88, r * 0.78, y);
         for (let j = 0;j < count; j++) {
           const a = j * Math.PI * 2 / count;
-          tapered(r * Math.cos(a), y - 0.111, mid - 0.38 + r * Math.sin(a), 0.05, 0.028, 0.21, j % 3 ? pearl : shopLamp);
+          tapered(-2.07 + r * 0.78 * Math.cos(a), y - 0.111, mid - 0.88 + r * 0.78 * Math.sin(a), 0.05, 0.028, 0.21, j % 3 ? pearl : shopLamp);
         }
       }
       replace(() => {
@@ -3768,7 +3775,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
         for (let i = -2;i <= 2; i++)
           can(i * 0.28, top, island, 13805164, 0.12, 0.33);
       }, base);
-      for (const x of [-1.83, 0, 1.83])
+      for (const x of [-1.83, 1.83])
         pendant(x, mid + 0.2, 3.1, 0.45, cream);
       break;
     }
@@ -3778,7 +3785,6 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       for (let k = 0;k < 3; k++) {
         const w = 2.48 - 0.43 * k;
         box(0, 0.85 + k * 0.52, rear + 0.36, w, 0.08, 0.43, brass);
-        packageRow(0, 0.91 + k * 0.52, rear + 0.36, 7 - 2 * k, 0.28, "pack", cream);
       }
       const cx = -0.48;
       replace(() => {
@@ -3787,10 +3793,10 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
           box(cx + j * 0.143, 0.62, island + 0.563, 0.025, 0.74, 0.027, 4281451);
       }, base);
       for (const z of [mid + 0.35, mid - 2.65]) {
-        column(cx, 3.54, z, 0.025, 1.04, brass);
+        column(2.3, 3.54, z, 0.025, 1.04, brass);
         for (const [y, r] of [[3.16, 0.52], [3.04, 0.35], [2.95, 0.19]]) {
-          tapered(cx, y, z, r * 0.62, r, 0.1, brass);
-          column(cx, y - 0.054, z, r * 0.89, 0.025, shopLamp);
+          tapered(2.3, y, z, r * 0.62, r, 0.1, brass);
+          column(2.3, y - 0.054, z, r * 0.89, 0.025, shopLamp);
         }
       }
       plant(side - 1.15, rear + 1.31, 1.78);
@@ -3805,8 +3811,8 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
         shelf(s * 2.1, rear, 1.58, "tin", sage, true);
       }
       replace(() => circleIsland(0, island, 1.2, 0.79, base), base);
-      for (let i = 0;i < 7; i++)
-        pendant(Math.sin(i * 2.4) * 0.56, mid + Math.cos(i * 2.4) * 0.46, 2.93 + i * 0.09, 0.15, pearl);
+      for (let i = 0;i < 4; i++)
+        pendant(2.15 + 0.29 * Math.sin(i * 2.4), mid - 0.66 + i * 0.38, 3.13 + i * 0.12, 0.13, pearl);
       break;
     case 11:
       for (let i = -1;i <= 1; i++)
@@ -3873,8 +3879,8 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       plant(-side + 0.81, front - 0.85, 1.61);
       break;
     case 15:
-      for (let i = -17;i <= 17; i++)
-        box(i * 0.19, 3.98, mid, 0.078, 0.19, span - 0.28, walnut);
+      for (let i = -5;i <= 5; i++)
+        box(i * 0.58, 4.04, mid, 0.23, 0.065, span - 0.28, 13283214);
       replace(() => cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak), walnut);
       block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
       block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
@@ -4279,7 +4285,7 @@ var layouts = {
     accent_kelvin: 3300,
     lighting: [-0.65, 3.85, -0.18],
     anchor: { asset_id: "noodle-loom", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, envelope_whd_m: [2.45, 2.96, 1.05] },
-    floor: { treatment: "Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, field_width_depth_m: [4.55, 4.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "planks", colours: [2, 0, 3] },
+    floor: { treatment: "Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, field_width_depth_m: [4.55, 4.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "planks", colours: ["#AC845C", 0, 3] },
     routes: [],
     pickups: [],
     capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "ban mee drying combs", viewport_css_px: [393, 612], planned_evidence_stem: "S06-entrance" },
@@ -4641,7 +4647,8 @@ var interiorStores = Object.fromEntries(Object.entries(layouts).map(([id, layout
   return [id, { ...layout, id, files, colliders }];
 }));
 function interiorFloorColour(store2) {
-  return store2.palette[store2.floor.colours[0]].hex;
+  const finish2 = store2.floor.colours[0];
+  return store2.palette[finish2]?.hex ?? finish2;
 }
 function interiorAsset(store2, tier) {
   return store2.files[tier] ?? (tier === "detailed" ? store2.files.balanced : store2.files.low);
@@ -4787,7 +4794,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     group.rotation.y = side === "west" ? Math.PI / 2 : side === "east" ? -Math.PI / 2 : 0;
     const front = depth / 2;
     let parts = [];
-    let heroOffset = 0, replaced = null;
+    let heroOffset = 0, replaced = false;
     function add(geometry, x, y, z, color, finish2 = color === shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
       if (replaced) {
         geometry.dispose();
@@ -4812,7 +4819,6 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       add(new T.CylinderGeometry(r, r, h, 12), x, y, z, color);
     }
     function block(x, y, z, w, h, d) {
-      replaced?.push([x, z, w, d]);
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
       collisionBoxes.push({
         x: group.position.x + x * c + z * sn,
@@ -4825,13 +4831,13 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     const tools = {
       block,
-      replaceDisplay(build, finish2) {
-        replaced = [];
-        build();
-        const footprints = replaced;
-        replaced = null;
-        for (const [x, z, w, d] of footprints)
-          box(x, 0.096, z, w, 0.022, d, finish2);
+      replaceDisplay(build) {
+        replaced = true;
+        try {
+          build();
+        } finally {
+          replaced = false;
+        }
       },
       surface(points, triangles, color) {
         const panel = new T.BufferGeometry;
@@ -5243,7 +5249,7 @@ function buildInteriorDecoration(T, store2, materials2, detail = 0) {
   const cylinder = (x, y, z, r, h, c = edge, round = 8) => piece(new T.CylinderGeometry(r, r, h, round), x, y, z, c, false);
   function fixture2(prop, position) {
     const { kind } = prop;
-    if (kind === "retain")
+    if (kind === "retain" || prop.socket === "ceiling")
       return;
     origin = position;
     yaw = radians(prop.yaw_deg);
@@ -5392,6 +5398,8 @@ function buildInteriorDecoration(T, store2, materials2, detail = 0) {
         box(x + offset, y + 1, back + 0.12 + distance / 2, 0.15, 0.24, distance, body);
     }
     if (store2.id === "S02") {
+      box(0, 4.81, 5.734, 9.65, 1.77, 0.038, pale);
+      box(0, 3.918, 5.98, 9.69, 0.025, 0.54, edge);
       const [x, y, z] = store2.anchor.position_m, top = y + store2.anchor.envelope_whd_m[1];
       for (const offset of [-0.45, 0.45])
         box(x + offset, (ceiling + top) / 2, z, 0.065, ceiling - top, 0.065, accent);
@@ -5436,6 +5444,96 @@ function buildInteriorDecoration(T, store2, materials2, detail = 0) {
   return group;
 }
 
+// demos/corporate/gjh/v11/assets/interiors/detail-files.js
+var roomAtlas = { file: "showroom-atlas.png", bytes: 47721 };
+var roomDetails = {
+  S01: {
+    file: "s01-new-moon-details.glb",
+    bytes: 40440,
+    roomDetail: true
+  },
+  S02: {
+    file: "s02-mili-details.glb",
+    bytes: 43312,
+    roomDetail: true
+  },
+  S03: {
+    file: "s03-gogo-details.glb",
+    bytes: 75264,
+    roomDetail: true
+  },
+  S04: {
+    file: "s04-borsch-details.glb",
+    bytes: 24124,
+    roomDetail: true
+  },
+  S05: {
+    file: "s05-herbal-details.glb",
+    bytes: 67544,
+    roomDetail: true
+  },
+  S06: {
+    file: "s06-wheel-details.glb",
+    bytes: 50900,
+    roomDetail: true
+  },
+  S07: {
+    file: "s07-dragon-details.glb",
+    bytes: 79092,
+    roomDetail: true
+  },
+  S08: {
+    file: "s08-skippy-details.glb",
+    bytes: 46692,
+    roomDetail: true
+  },
+  S09: {
+    file: "s09-spam-details.glb",
+    bytes: 16156,
+    roomDetail: true
+  },
+  S10: {
+    file: "s10-coast-details.glb",
+    bytes: 71920,
+    roomDetail: true
+  },
+  S11: {
+    file: "s11-deli-details.glb",
+    bytes: 75704,
+    roomDetail: true
+  },
+  S12: {
+    file: "s12-herbarium-details.glb",
+    bytes: 33300,
+    roomDetail: true
+  },
+  S13: {
+    file: "s13-listening-details.glb",
+    bytes: 23540,
+    roomDetail: true
+  },
+  S14: {
+    file: "s14-living-details.glb",
+    bytes: 12184,
+    roomDetail: true
+  },
+  S15: {
+    file: "s15-recital-details.glb",
+    bytes: 37608,
+    roomDetail: true
+  },
+  S16: {
+    file: "s16-power-details.glb",
+    bytes: 22604,
+    roomDetail: true
+  },
+  S17: {
+    file: "s17-telephone-details.glb",
+    bytes: 36748,
+    roomDetail: true
+  }
+};
+
 // demos/corporate/gjh/v11/assets/interiors/models.js
 function mergeInteriorAnchor(T, scene) {
   scene.updateMatrixWorld(true);
@@ -5469,31 +5567,107 @@ function mergeInteriorAnchor(T, scene) {
     throw new Error("Empty interior fixture");
   return anchor;
 }
+async function readMember(assetBase2, asset, signal) {
+  const url = new URL("interiors/" + asset.file, assetBase2);
+  const controller = new AbortController;
+  const abort = () => controller.abort();
+  if (signal?.aborted)
+    abort();
+  else
+    signal?.addEventListener("abort", abort, { once: true });
+  const timer = setTimeout(abort, 8000);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok)
+      throw new Error(`Interior asset request failed: ${response.status}`);
+    const buffer = await response.arrayBuffer();
+    if (buffer.byteLength !== asset.bytes)
+      throw new Error("Interior asset size mismatch");
+    return buffer;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", abort);
+  }
+}
 function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
-  return async function load2(asset, signal) {
-    const url = new URL("interiors/" + asset.file, assetBase2);
-    const controller = new AbortController;
-    const abort = () => controller.abort();
-    if (signal.aborted)
-      abort();
-    else
-      signal.addEventListener("abort", abort, { once: true });
-    const timer = setTimeout(abort, 8000);
-    let buffer;
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      if (!response.ok)
-        throw new Error(`Interior fixture request failed: ${response.status}`);
-      buffer = await response.arrayBuffer();
-      if (buffer.byteLength !== asset.bytes)
-        throw new Error("Interior fixture size mismatch");
-    } finally {
-      clearTimeout(timer);
-      signal.removeEventListener("abort", abort);
+  let atlas;
+  const shared = new Map, lifetime = new AbortController;
+  async function loadAtlas() {
+    const bytes = await readMember(assetBase2, roomAtlas, lifetime.signal);
+    const blob = new Blob([bytes], { type: "image/png" });
+    let texture;
+    if (typeof createImageBitmap === "function") {
+      texture = new T.Texture(await createImageBitmap(blob, { colorSpaceConversion: "none", premultiplyAlpha: "none" }));
+    } else {
+      const local = URL.createObjectURL(blob);
+      try {
+        texture = await new T.TextureLoader().loadAsync(local);
+      } finally {
+        URL.revokeObjectURL(local);
+      }
     }
-    const { scene } = await loader.parseAsync(buffer, new URL(".", url).href);
-    return mergeInteriorAnchor(T, scene);
+    texture.flipY = false;
+    texture.wrapS = texture.wrapT = T.RepeatWrapping;
+    texture.colorSpace = T.SRGBColorSpace;
+    texture.userData.roomAtlas = true;
+    texture.needsUpdate = true;
+    return texture;
+  }
+  loader.register((parser) => ({
+    name: "GJH_room_atlas",
+    loadTexture(index) {
+      const def = parser.json.textures[index];
+      if (parser.json.images[def.source]?.uri !== roomAtlas.file)
+        return null;
+      atlas ??= loadAtlas().catch((error) => {
+        atlas = undefined;
+        throw error;
+      });
+      return atlas;
+    }
+  }));
+  async function load2(asset, signal) {
+    const buffer = await readMember(assetBase2, asset, signal);
+    const { scene } = await loader.parseAsync(buffer, new URL("interiors/", assetBase2).href);
+    if (!asset.roomDetail)
+      return mergeInteriorAnchor(T, scene);
+    const motion = { scroll: null, pulse: null };
+    scene.traverse((mesh) => {
+      if (!mesh.isMesh)
+        return;
+      const m = mesh.material;
+      if (!lifetime.signal.aborted && (m.name === "Enamel" || m.name === "Printed opal")) {
+        const reusable = shared.get(m.name);
+        if (!reusable) {
+          m.userData.roomShared = true;
+          shared.set(m.name, m);
+        } else if (reusable !== m) {
+          mesh.material = reusable;
+          m.dispose();
+        }
+      }
+      if (m.name === "Pulse")
+        motion.pulse = m;
+      if (m.name === "Scroll") {
+        motion.scroll = m.map.clone();
+        motion.scroll.userData.roomAtlasView = true;
+        m.map = m.emissiveMap = motion.scroll;
+      }
+    });
+    scene.userData.roomMotion = motion.scroll || motion.pulse ? motion : null;
+    return scene;
+  }
+  load2.dispose = () => {
+    lifetime.abort();
+    for (const material of shared.values())
+      material.dispose();
+    shared.clear();
+    atlas?.then((texture) => {
+      texture.dispose();
+      texture.image?.close?.();
+    }, () => {});
   };
+  return load2;
 }
 function disposeInteriorModel(model) {
   if (!model)
@@ -5503,7 +5677,10 @@ function disposeInteriorModel(model) {
     if (!mesh.isMesh)
       return;
     mesh.geometry.dispose();
-    materials2.add(mesh.material);
+    if (mesh.isInstancedMesh)
+      mesh.dispose();
+    if (!mesh.material.userData.roomShared)
+      materials2.add(mesh.material);
   });
   for (const material of materials2) {
     for (const value of Object.values(material))
@@ -5512,8 +5689,12 @@ function disposeInteriorModel(model) {
     material.dispose();
   }
   for (const map of maps) {
-    map.dispose();
-    map.image?.close?.();
+    if (map.userData.roomAtlasView)
+      map.dispose();
+    else if (!map.userData.roomAtlas) {
+      map.dispose();
+      map.image?.close?.();
+    }
   }
 }
 
@@ -5535,16 +5716,21 @@ function createInteriorKit(T, scene, {
   prepareModel,
   registerCollider,
   loadModel = createInteriorModelLoader(T, assetBase2),
+  reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)"),
   now = () => performance.now()
 }) {
   const materials2 = interiorMaterials(T);
   const report = emptyInteriorReport("low"), renderedShops = new Set;
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
+  let lastUpdate;
   function measure(root, id) {
     root.traverse((mesh) => {
       if (!mesh.isMesh)
         return;
-      mesh.geometry.computeBoundingSphere();
+      if (mesh.isInstancedMesh)
+        mesh.computeBoundingSphere();
+      else
+        mesh.geometry.computeBoundingSphere();
       let calls, triangles;
       mesh.onBeforeRender = (renderer) => {
         if (drawing)
@@ -5586,7 +5772,7 @@ function createInteriorKit(T, scene, {
       registerCollider(worldInteriorBox(store2, box));
     group.visible = false;
     scene.add(group);
-    return { store: store2, group, distance: Infinity, near: false, models: new Map, layers: [], ready: new Map, shown: null };
+    return { store: store2, group, distance: Infinity, near: false, phase: 0, motion: null, models: new Map, layers: [], ready: new Map, shown: null };
   });
   function show(shop, roots) {
     for (const root of shop.shown ?? [])
@@ -5639,31 +5825,35 @@ function createInteriorKit(T, scene, {
     const { tier, controller: { signal } } = job;
     const asset = interiorAsset(shop.store, tier), detail = interiorTiers.indexOf(tier);
     const priority = () => shop.distance - 200;
-    let model = shop.models.get(asset.file), freshModel;
-    const freshLayers = [];
+    const required = [asset, roomDetails[shop.store.id]];
+    const freshModels = new Map, freshLayers = [];
     try {
       try {
-        if (!model)
-          freshModel = model = await loadModel(asset, signal);
-        if (signal.aborted)
-          return;
-        if (freshModel) {
-          model.name = `${shop.store.id} ${shop.store.anchor.asset_id} (${asset.tier})`;
-          model.position.set(...shop.store.anchor.position_m);
-          model.rotation.y = radians(shop.store.anchor.yaw_deg);
+        for (const member of required) {
+          if (shop.models.has(member.file))
+            continue;
+          try {
+            const model = await loadModel(member, signal);
+            freshModels.set(member.file, model);
+            model.name = `${shop.store.id} ${member.file}`;
+            if (!member.roomDetail) {
+              model.position.set(...shop.store.anchor.position_m);
+              model.rotation.y = radians(shop.store.anchor.yaw_deg);
+            }
+          } catch {}
+          if (signal.aborted)
+            return;
         }
-      } catch {
-        if (signal.aborted)
-          return;
       } finally {
         decoding = false;
       }
       for (let i = shop.layers.length;i <= detail; i++)
         freshLayers.push(decoration(shop.store, i));
-      const fresh = [...freshLayers, ...freshModel ? [freshModel] : []];
+      const fresh = [...freshLayers, ...freshModels.values()];
       for (const root of fresh)
         measure(root, shop.store.id);
-      const roots = [...shop.layers.slice(0, detail + 1), ...freshLayers, ...model ? [model] : []];
+      const models = required.map((member) => freshModels.get(member.file) ?? shop.models.get(member.file)).filter(Boolean);
+      const roots = [...shop.layers.slice(0, detail + 1), ...freshLayers, ...models];
       await installer.prepare(roots, { tier, priority, signal, prepareModel });
       if (signal.aborted)
         return;
@@ -5672,14 +5862,19 @@ function createInteriorKit(T, scene, {
         shop.group.add(root);
       }
       shop.layers.push(...freshLayers);
-      if (freshModel) {
-        shop.models.set(asset.file, freshModel);
+      for (const member of required) {
+        const root = freshModels.get(member.file);
+        if (!root)
+          continue;
+        shop.models.set(member.file, root);
+        if (member.roomDetail)
+          shop.motion = root.userData.roomMotion;
         report.modelsLoaded++;
-        report.bytes += asset.bytes;
+        report.bytes += member.bytes;
       }
-      freshModel = undefined;
+      freshModels.clear();
       freshLayers.length = 0;
-      if (model) {
+      if (models.length === required.length) {
         shop.ready.set(tier, roots);
         report.preinstalled.shops++;
       }
@@ -5688,7 +5883,8 @@ function createInteriorKit(T, scene, {
         show(shop, roots);
       }
     } catch {} finally {
-      disposeInteriorModel(freshModel);
+      for (const root of freshModels.values())
+        disposeInteriorModel(root);
       for (const layer of freshLayers)
         layer.traverse((mesh) => {
           mesh.geometry?.dispose();
@@ -5716,10 +5912,20 @@ function createInteriorKit(T, scene, {
         start(target);
     },
     update(position) {
-      for (const shop of shops) {
+      const time = now(), delta = Math.min(0.1, Math.max(0, (time - (lastUpdate ?? time)) * 0.001));
+      lastUpdate = time;
+      for (let i = 0;i < shops.length; i++) {
+        const shop = shops[i], wasNear = shop.near;
         shop.distance = Math.hypot(position.x - shop.group.position.x, position.z - shop.group.position.z);
         shop.near = Math.abs(position.y) < 4 && shop.distance < 12.5;
         shop.group.visible = shop.shown !== null && shop.near;
+        if (!shop.group.visible || !wasNear || !shop.motion || reducedMotion?.matches)
+          continue;
+        shop.phase += delta;
+        if (shop.motion.scroll)
+          shop.motion.scroll.offset.x = shop.phase * 0.065 % 1;
+        if (shop.motion.pulse)
+          shop.motion.pulse.emissiveIntensity = 1 + 0.32 * Math.sin(shop.phase * 2.1);
       }
     },
     runFrame() {
@@ -5773,6 +5979,20 @@ function createInteriorKit(T, scene, {
       request?.controller.abort();
       request?.resolve({ ...report.preinstalled });
       installer?.dispose();
+      for (const shop of shops) {
+        for (const model of shop.models.values())
+          disposeInteriorModel(model);
+        for (const layer of shop.layers)
+          layer.traverse((mesh) => {
+            mesh.geometry?.dispose();
+            if (packshot && mesh.material?.map === packshot)
+              mesh.material.dispose();
+          });
+        shop.group.removeFromParent();
+      }
+      materials2.opaque.dispose();
+      materials2.glow.dispose();
+      loadModel.dispose?.();
     }
   };
 }
@@ -5781,18 +6001,35 @@ function createInteriorKit(T, scene, {
 import { releaseStartupAssetPack } from "./startup-asset-pack.js";
 
 // demos/corporate/gjh/v11/assets/seat-placements.js
+var benchScale = 0.8;
+var loungeBench = {
+  size: INTERIOR_PILOT.bench.dimensions_m,
+  top: 0.635,
+  flatFront: -0.381,
+  front: -0.456,
+  backrestFront: 0.213
+};
+var groundBenchFallback = {
+  size: [2.58, 1.3175, 0.925],
+  top: 0.65,
+  flatFront: -0.45,
+  front: -0.45,
+  backrestFront: 0.26
+};
+var deckBenchFallback = {
+  size: [2.34, 1.09, 0.785],
+  top: 0.508,
+  flatFront: -0.38,
+  front: -0.38,
+  backrestFront: 0.2
+};
 function createSeatPlacements(expanded) {
   const placements = [];
   const add = (group, x, z, facing = 1, name = null, floor = 0, accessible = true) => {
     const index = placements.length;
     const id = index === 0 ? "courtyard-seat" : `bench-seat-${index + 1}`;
-    const anchor = { x, y: floor + 0.015, z: z - 0.23 * facing };
     const exit = { x, y: floor, z: z - 1.2 * facing };
-    const pose = {
-      facing,
-      angle: facing === 1 ? 0 : Math.PI,
-      cameraOffset: z < 0 ? (index % 2 === 0 ? -Math.PI / 2 : Math.PI / 2) * facing : 0.45
-    };
+    const pose = { facing, angle: facing === 1 ? 0 : Math.PI };
     const clearance = {
       interactionRadius: 1.65,
       capsuleRadius: 0.3,
@@ -5807,9 +6044,7 @@ function createSeatPlacements(expanded) {
       z,
       facing,
       floor,
-      cameraOffset: pose.cameraOffset,
       accessible,
-      anchor,
       exit,
       pose,
       clearance
@@ -5837,8 +6072,15 @@ function createSeatPlacements(expanded) {
   }
   return placements;
 }
-function createSeatAnchor(placement, collider) {
-  const { id, name, floor, anchor, exit, pose, clearance, accessible } = placement;
+function createSeatAnchor(placement, collider, profile2 = loungeBench, scale = benchScale, footY = placement.floor) {
+  const { id, name, x, z, floor, exit, pose, clearance, accessible } = placement;
+  const centre = (profile2.flatFront + profile2.backrestFront) / 2;
+  const anchor = { x, y: floor + profile2.top * scale, z: z + centre * pose.facing };
+  const [width, height, depth] = profile2.size;
+  const bounds = {
+    min: { x: x - width / 2, y: floor, z: z - depth / 2 },
+    max: { x: x + width / 2, y: floor + height * scale, z: z + depth / 2 }
+  };
   return {
     id,
     name,
@@ -5850,11 +6092,13 @@ function createSeatAnchor(placement, collider) {
     floor,
     facing: pose.facing,
     angle: pose.angle,
-    cameraOffset: pose.cameraOffset,
     collider,
+    footY,
+    frontEdge: centre - profile2.front,
     anchor,
     exit,
     pose,
+    bounds,
     clearance,
     accessible
   };
@@ -6085,14 +6329,16 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       collider(x, 0.4, z, 0.85, 0.8, 0.85);
       shadow(x, z, 2.1, 2.1);
     }, bench = function(placement) {
-      const { x, z, facing } = placement;
-      const seatScale2 = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
-      const seatCollider = collider(x, 0.3 * seatScale2, z, placement.clearance.colliderWidth, 0.4 * seatScale2, placement.clearance.colliderDepth);
-      seats.push(createSeatAnchor(placement, seatCollider.handle));
-      const benchBox = (m, bx, by, bz, sx, sy, sz) => box(m, bx, by * seatScale2, bz, sx, sy * seatScale2, sz);
-      if (!furnishings.place("bench", x, z, seatScale2, facing, 0, null, activeShopSlot)) {
+      const { x, z, facing, group } = placement;
+      const modelPlaced = furnishings.place("bench", x, z, benchScale, facing, 0, placement.pose.angle, activeShopSlot);
+      const seatCollider = collider(x, 0.3 * benchScale, z, placement.clearance.colliderWidth, 0.4 * benchScale, placement.clearance.colliderDepth);
+      const footY = group === "atrium" ? expanded ? 0.016 : 0 : expanded ? 0.0245 : 0.015;
+      seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : groundBenchFallback, benchScale, footY));
+      const benchBox = (m, bx, by, bz, sx, sy, sz) => box(m, bx, by * benchScale, bz, sx, sy * benchScale, sz);
+      if (!modelPlaced) {
+        const { top, front } = groundBenchFallback;
         benchBox("wood", x, 0.3, z, 2.5, 0.4, 0.85);
-        benchBox("seat", x, 0.56, z, 2.55, 0.18, 0.9);
+        benchBox("seat", x, top - 0.09, z, 2.55, 0.18, -2 * front);
         benchBox("seat", x, 0.94, z + facing * 0.35, 2.55, 0.7, 0.18);
         benchBox("brass", x, 0.47, z - facing * 0.451, 2.52, 0.035, 0.025);
         benchBox("oak", x, 1.285, z + facing * 0.35, 2.58, 0.065, 0.21);
@@ -6639,10 +6885,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
             box("brass", x, 5.55, z + side * 1.12, 7.75, 0.06, 0.06);
           }
         }
-      } else if (expanded && zone === "gogo") {
-        for (let z = -1.6;z > -9.3; z -= 0.95) {
-          box("oak", x - 2.56, 5.5, z, 3.8, 0.19, 0.35);
-        }
       }
       if (expanded) {
         for (const side of [-1, 1]) {
@@ -7013,15 +7255,17 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       activeDeck = true;
       const deckBench = (placement) => {
         const { x, z, facing } = placement;
-        if (!furnishings.place("bench", x, z, 0.8, facing, liftLayout.upper, null, -1)) {
+        const modelPlaced = furnishings.place("bench", x, z, benchScale, facing, liftLayout.upper, placement.pose.angle, -1);
+        if (!modelPlaced) {
+          const { top, front } = deckBenchFallback;
           box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
-          box("seat", x, liftLayout.upper + 0.49, z, 2.34, 0.18, 0.76);
+          box("seat", x, liftLayout.upper + top - 0.09, z, 2.34, 0.18, -2 * front);
           box("seat", x, liftLayout.upper + 0.82, z + facing * 0.28, 2.34, 0.54, 0.16);
           box("brass", x, liftLayout.upper + 0.44, z - facing * 0.38, 2.32, 0.025, 0.025);
         }
         const seatCollider = collider(x, liftLayout.upper + 0.26, z, placement.clearance.colliderWidth, 0.5, placement.clearance.colliderDepth);
         if (placement.accessible !== false)
-          seats.push(createSeatAnchor(placement, seatCollider.handle));
+          seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : deckBenchFallback, modelPlaced ? benchScale : 1));
       };
       for (const placement of seatPlacements.filter((item) => item.group === "deck"))
         deckBench(placement);
@@ -7144,8 +7388,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
       prepareModel(meshes, { hide: true, late: false, priority }).catch(() => {});
     }
-    const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
-    const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
+    const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let brandWallPromise = null;
     return { signage, interiors: interiorKit, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];

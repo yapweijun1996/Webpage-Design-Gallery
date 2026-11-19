@@ -4123,6 +4123,261 @@ function shouldOpenStoreDoor(door, player) {
   return player.y < 2 && Math.hypot(player.x - door.x, player.z) < (door.targetOpen ? 5.2 : 4.8);
 }
 
+// demos/corporate/gjh/v11/assets/atrium-layout.js
+var point = (x, z) => Object.freeze({ x, z });
+var lounge = (id, x) => Object.freeze({
+  id,
+  x,
+  z: 24,
+  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
+  table: point(x, 24.5),
+  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
+});
+var atriumLayout = Object.freeze({
+  arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
+  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
+  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
+  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
+});
+
+// demos/corporate/gjh/v11/assets/interior-pilot-registry.js
+var INTERIOR_PILOT = Object.freeze({
+  bench: {
+    asset_id: "GJH-PUB-002",
+    kind: "bench",
+    version: "1.0.0",
+    file: "GJH_PUB_002.glb",
+    sha256: "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+    bytes: 233176,
+    dimensions_m: [
+      2.58,
+      1.3175,
+      0.922
+    ],
+    authoring_dimensions_wdh_m: [
+      2.58,
+      0.922,
+      1.3175
+    ],
+    reuse_decision: "reuse",
+    source: "gjh-mall-furniture/sources/gjh-lounge-bench.blend",
+    source_sha256: "925f75d253188eed591a48f20b1daa0329abb492799ab9ba91b61a4c57bf6ee0",
+    capabilities: [
+      "SIT"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_002.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  planter: {
+    asset_id: "GJH-PUB-008",
+    kind: "planter",
+    version: "1.0.0",
+    file: "GJH_PUB_008.glb",
+    sha256: "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+    bytes: 119732,
+    dimensions_m: [
+      1.230091,
+      2.347567,
+      1.191551
+    ],
+    authoring_dimensions_wdh_m: [
+      1.230091,
+      1.191551,
+      2.347567
+    ],
+    reuse_decision: "reuse",
+    source: "gjh-mall-furniture/sources/gjh-areca-planter.blend",
+    source_sha256: "79522ae07850e010abcbda93aff1e0c9d1afe22b4311d982673abb04e4805b2a",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_008.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  kiosk: {
+    asset_id: "GJH-PUB-017",
+    kind: "kiosk",
+    version: "1.0.0",
+    file: "GJH_PUB_017.glb",
+    sha256: "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+    bytes: 181376,
+    dimensions_m: [
+      0.96,
+      2.05,
+      0.68
+    ],
+    authoring_dimensions_wdh_m: [
+      0.96,
+      0.68,
+      2.05
+    ],
+    reuse_decision: "adapt",
+    source: "mall-essentials/sources/mall-directory-kiosk.blend",
+    source_sha256: "b7a0e9ebb766e12b51d3115823f6dbd7b431312b475c35452d3b9338b699df0e",
+    capabilities: [
+      "USE"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_017.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  shelf: {
+    asset_id: "GJH-DSP-001",
+    kind: "shelf",
+    version: "1.0.0",
+    file: "GJH_DSP_001.glb",
+    sha256: "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+    bytes: 228924,
+    dimensions_m: [
+      1.52,
+      1.96,
+      0.58
+    ],
+    authoring_dimensions_wdh_m: [
+      1.52,
+      0.58,
+      1.96
+    ],
+    reuse_decision: "reuse",
+    source: "mall-essentials/sources/mall-display-shelf.blend",
+    source_sha256: "18ae5c2311b81356b529af04724fa627efd6b2eee2597ec10c58f7f828dacbea",
+    capabilities: [
+      "INSPECT"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_DSP_001.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  storeSign: {
+    asset_id: "GJH-STF-008",
+    kind: "storeSign",
+    version: "1.0.0",
+    file: "GJH_STF_008.glb",
+    sha256: "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+    bytes: 21912,
+    dimensions_m: [
+      2.52,
+      1.21,
+      0.213
+    ],
+    authoring_dimensions_wdh_m: [
+      2.52,
+      0.213,
+      1.21
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_STF_008.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  wallLight: {
+    asset_id: "GJH-LGT-009",
+    kind: "wallLight",
+    version: "1.0.0",
+    file: "GJH_LGT_009.glb",
+    sha256: "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+    bytes: 22804,
+    dimensions_m: [
+      0.32,
+      1,
+      0.255
+    ],
+    authoring_dimensions_wdh_m: [
+      0.32,
+      0.255,
+      1
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_LGT_009.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  coffeeTable: {
+    asset_id: "GJH-PUB-005",
+    kind: "coffeeTable",
+    version: "1.0.0",
+    file: "GJH_PUB_005.glb",
+    sha256: "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+    bytes: 160536,
+    dimensions_m: [
+      1.61,
+      0.875,
+      1.61
+    ],
+    authoring_dimensions_wdh_m: [
+      1.61,
+      1.61,
+      0.875
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_005.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  plinth: {
+    asset_id: "GJH-VER-017",
+    kind: "plinth",
+    version: "1.0.0",
+    file: "GJH_VER_017.glb",
+    sha256: "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+    bytes: 129236,
+    dimensions_m: [
+      4.5,
+      0.6525,
+      4.5
+    ],
+    authoring_dimensions_wdh_m: [
+      4.5,
+      4.5,
+      0.6525
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_VER_017.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  }
+});
+
+// demos/corporate/gjh/v11/assets/seat-placements.js
+var loungeBench = {
+  size: INTERIOR_PILOT.bench.dimensions_m,
+  top: 0.635,
+  flatFront: -0.381,
+  front: -0.456,
+  backrestFront: 0.213
+};
+function isInFrontOfSeat(seat, z) {
+  return (z - seat.z) * seat.facing <= -seat.frontEdge;
+}
+
 // demos/corporate/gjh/v11/assets/interaction-registry.js
 function createInteractionRegistry(entries, describe = () => ({})) {
   const cache = new WeakMap;
@@ -4171,7 +4426,7 @@ function createInteractionRegistry(entries, describe = () => ({})) {
       const floor = typeof item.floor === "number" ? item.floor : item.y;
       if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
         continue;
-      if (item.seat && (position.z - item.seat.z) * item.seat.facing > -0.25)
+      if (item.seat && !isInFrontOfSeat(item.seat, position.z))
         continue;
       const d = Math.hypot(position.x - item.anchor.x, position.z - item.anchor.z);
       if (d < item.radius && d < distance) {
@@ -4273,11 +4528,11 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
       if (miniMap)
         miniMap.dataset.floor = upper ? "02" : "01";
       if (position && Number.isFinite(position.x) && Number.isFinite(position.z)) {
-        const point = expanded ? expandedMapPoint(position.x, position.z) : mapPoint(position.x, position.z);
-        setAttribute(dot, "cx", point.x);
-        setAttribute(dot, "cy", point.y);
+        const point2 = expanded ? expandedMapPoint(position.x, position.z) : mapPoint(position.x, position.z);
+        setAttribute(dot, "cx", point2.x);
+        setAttribute(dot, "cy", point2.y);
         const angle = -(position.yaw || 0) * 180 / Math.PI;
-        setAttribute(heading, "transform", `translate(${point.x} ${point.y}) rotate(${angle})`);
+        setAttribute(heading, "transform", `translate(${point2.x} ${point2.y}) rotate(${angle})`);
       }
       if (dot)
         dot.style.display = upper || travelling ? "none" : "";
@@ -4743,7 +4998,7 @@ function heroVisibility(number) {
     root.updateWorldMatrix(true, true);
     camera.updateWorldMatrix(true, false);
     const out = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity, inFront: true };
-    const point = new T.Vector3;
+    const point2 = new T.Vector3;
     function visit(object) {
       if (!object.visible)
         return;
@@ -4761,10 +5016,10 @@ function heroVisibility(number) {
           for (const x of [bounds.min.x, bounds.max.x])
             for (const y of [bounds.min.y, bounds.max.y])
               for (const z of [bounds.min.z, bounds.max.z]) {
-                point.set(x, y, z).applyMatrix4(object.matrixWorld).project(camera);
-                if (point.z < -1 || point.z > 1)
+                point2.set(x, y, z).applyMatrix4(object.matrixWorld).project(camera);
+                if (point2.z < -1 || point2.z > 1)
                   out.inFront = false;
-                const px = rect.left + (point.x + 1) * rect.width / 2, py = rect.top + (1 - point.y) * rect.height / 2;
+                const px = rect.left + (point2.x + 1) * rect.width / 2, py = rect.top + (1 - point2.y) * rect.height / 2;
                 out.left = Math.min(out.left, px);
                 out.right = Math.max(out.right, px);
                 out.top = Math.min(out.top, py);
@@ -4837,7 +5092,17 @@ var snapshot = () => Object.freeze({
     buffer: renderer ? [canvas.width, canvas.height] : null
   }),
   gpu: renderer ? { ...renderer.info.memory } : null,
-  seats: world?.seats?.map(({ id, name, x, z, exitX, exitZ, facing }) => ({ id, name, x, z, exitX, exitZ, facing })) || [],
+  seats: world?.seats?.map(({ id, name, x, y, z, exitX, exitZ, facing, bounds }) => ({
+    id,
+    name,
+    x,
+    y,
+    z,
+    exitX,
+    exitZ,
+    facing,
+    bounds: { min: { ...bounds.min }, max: { ...bounds.max } }
+  })) || [],
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map((door) => [door.zone, door.open]))),
   drawCalls: renderer?.info.render.calls || 0,
   renderTriangles: renderer?.info.render.triangles || 0,

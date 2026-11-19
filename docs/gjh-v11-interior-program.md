@@ -4,6 +4,8 @@
 
 The [machine-readable programme](gjh-v11-interior-program.json) contains every placement, repeated transform, model source, licence record, active-scene measurement, clearance result and cost allocation. Room numbers and merchandise evidence follow the [brand kit](../demos/corporate/gjh/v11/assets/brand-kit/brand-kit.json).
 
+**Round two.** The installed Low fit-out uses 34,490 triangles across all 17 shops. Gu Long is the largest at 2,730. The final review includes staging images, updated per-shop measurements and browser verification limits. [Installed fit-out](#installed-fit-out) · [Per-shop detail and evidence](#how-to-verify)
+
 ## Entrance views
 
 | Slot | Store | Room and entrance anchor | Material palette, dominant first | Accent | Exclusive prop family |
@@ -515,56 +517,58 @@ Triangles equal the sum of each placement’s per-instance cap × count plus the
 
 ## Installed fit-out
 
-The expanded mall mounts a local interior kit for all 17 slots. The configuration records the approved palette, floor field, fixtures, Kelvin, plan transforms and clearance routes. Back-wall returns, ceiling rails and low-profile floor patterns are vertex-coloured batches. The glow batch uses the specified colour temperature without adding a real-time light. Eight supporting prop specifications per shop are implemented with retained fixtures or low-poly pieces. The higher tiers layer small shelf displays and light fittings. New solid fixtures register oriented Rapier boxes at scene construction. The permanent studio preserves all 187 original boxes, including the footprints beneath replaced decorative displays.
+Each of the 17 shops uses its original entrance anchor, a set of batched finishes and one Blender-authored room detail GLB. All tiers share the same room detail file. Higher tiers retain their more detailed anchor and trim. The core fit-out preserves the 187 original studio collision boxes, the four New Moon pickup positions, the MILI and GOGO seats and the approved circulation routes. [Runtime configuration](../demos/corporate/gjh/v11/assets/interiors/config.js) · [Build procedure](../scripts/gjh_interiors/README.md) · [Asset manifest](../demos/corporate/gjh/v11/assets/interiors/manifest.json)
 
-New Moon uses the walnut collector triptych and the official NZ 425 g front photograph in its recess. A small reading stand repeats that local image. The M056 cabinets, product facings, tasting island, native-size sample and four pickup positions use their original assets and controllers. MILI retains the serving island and two seats under the new hood. GOGO retains the bar and two seats beside the potong cart. [Runtime configuration](../demos/corporate/gjh/v11/assets/interiors/config.js) · [GLB placement and provenance](../demos/corporate/gjh/v11/assets/interiors/README.md)
+The peach rectangle visible next to several fascia signs came from the front face of the generic ceiling fixture. Its warm output matched the room temperature, including SPAM's 3,450 K salmon rectangle. Each shop now supplies a shaped ceiling treatment. MILI carries its hood trim across the lintel gap and puts the menu on the hood face. GOGO replaces the stepped timber overhead with a popsicle garland. SPAM's conveyor now carries a row of labelled tins.
 
-The fifth loader stage starts one nearest-first installation for all 17 shops at the selected tier. Each room's finishes, props and parsed anchor go through the sliced uploader. The installer compiles the atmosphere's accent-light variants and waits for the room's GPU fence. A normal warm completion requires all rooms and the scene and signage sweep. At the six-second foreground deadline or on early entry, the room queue continues from its current position and reprioritizes as the visitor moves. An unavailable fixture is retried. Distance and frustum culling limit the visible geometry. [Warm-stage coordinator](../demos/corporate/gjh/v11/assets/scene-warmup.js) · [Interior installer](../demos/corporate/gjh/v11/assets/interiors/warmup.js)
+Room details use metallic-roughness materials and a single shared 256 × 256 atlas. It contains the registered brand artwork, shelf tickets, illustrated food and screen content. Eleven shops use GPU-instanced product rows with colour variants. The retained shelves also use brand-specific colours. One shared animation update scrolls the Sony and LG texture views and varies emissive intensity for the pulsing fixtures. Each effect advances only while its shop is near and visible and motion is enabled. The room models add no real-time lights or shadow casters. Interactive concepts are recorded in the [interaction backlog](gjh-v11-interior-interactions-backlog.md).
 
-Low requests the 17 Low anchors and uses the 5.33 MiB signage atlas. Detailed uses the eight delivered Detailed anchors and nine Balanced anchors with Detailed trim. The interior GLBs are served individually outside the packed startup payload and the service-worker precaches. Auto and manual tier changes keep the current kits visible while the next tier uploads. Once the interiors and the staged signage are ready, the same frame switches both and applies the graphics profile. Desktop Detailed can then use its linear and glow passes.
+The fifth loader stage queues all 17 rooms. It decodes the shared image once, then installs the finishes, anchor and room detail together through the sliced uploader, lighting compilation and GPU fence. A normal warm completion requires every room and the scene and signage sweep. On early entry or the existing foreground timeout, the same queue continues nearest-first. Tier changes keep the current sets visible until the requested rooms and signs can switch together. Detailed uses eight Detailed anchors and nine Balanced fallbacks. The full asset catalogue contains 42 anchors, 17 room details and the shared image. [Warm-stage coordinator](../demos/corporate/gjh/v11/assets/scene-warmup.js) · [Interior installer](../demos/corporate/gjh/v11/assets/interiors/warmup.js)
 
 ### As-built budget
 
-Run `node --test tests/gjh_interiors.test.mjs` to repeat the measurement. The test parses all 42 exported files with the vendored GLTFLoader, confirms hashes and bounds, counts submitted meshes after material consolidation and includes all new finish geometry, supporting props and both S01 photo planes. Browser image decode and WebGL timing are outside this probe. Figures assume every room's complete active tier is submitted once in the main pass. Retained shop displays, stock, shell and signage belong to the existing baseline. Removed legacy geometry is excluded from the savings calculation.
+The table uses the same scope as the prior 20,750-triangle Low baseline. It counts each complete installed kit, including repeated instances, actual merged procedural finishes, both New Moon photo planes and the MILI lintel correction. Retained permanent displays, playable stock, building shells and common signage stay in the baseline. Savings from removed scenery are excluded. The draw counts assume all rooms are submitted once in the main pass. [Budget test](../tests/gjh_interiors.test.mjs)
 
-| Tier | Added triangles across 17 shops | Max added triangles in one shop | Draws across all 17 / max per shop | Anchor triangles | Selected GLB bytes |
+| Tier | Kit triangles across 17 shops | Largest shop | Main-pass draws across 17 / max per shop | Anchor triangles | Active-set GLB bytes |
 |---|---:|---:|---:|---:|---:|
-| Low | 20,750 | 2,048 (S15) | 53 / 5 | 8,272 | 745,496 |
-| Balanced | 38,566 | 3,900 (S15) | 70 / 6 | 24,816 | 1,757,252 |
-| Detailed | 47,154 | 6,184 (S10) | 101 / 7 | 32,132 | 2,018,084 |
+| Low | 34,490 | 2,730 (S07) | 104 / 7 | 8,272 | 1,502,628 |
+| Balanced | 52,306 | 4,508 (S07) | 121 / 8 | 24,816 | 2,514,384 |
+| Detailed | 60,894 | 7,232 (S10) | 152 / 10 | 32,132 | 2,775,216 |
 
-The Low addition has 29,250 triangles of mall-wide headroom and 952 triangles of headroom in its largest shop. Each active-tier set carries 5,943,420 nominal texture bytes as RGBA8 with full mip chains. Each 256² colour atlas occupies 349,524 bytes. The exports carry an additional one or two 4×4 finish or emissive maps, adding 84 or 168 bytes above a one-page colour allocation. The two New Moon planes reuse its already resident packshot. No far atlas is required by the installed kit. The original whole-room and one-focus-plus-far targets above describe the proposed replacement of legacy content and need separate renderer evidence.
+Low has 10,510 triangles of headroom against 45,000. Gu Long has 70 against the 2,800 per-shop limit. Every shop adds at most four Low draw calls to its previous count. The shared PNG adds 47,721 download bytes to each set and 349,524 nominal RGBA8 bytes with a full mip chain. Nominal active-set texture bytes total 6,292,944. Actual driver memory depends on the browser.
 
-`window.__mall.performanceReport().interiors` gives the effective `tier`, distinct `shops` submitted during the last visible frame, its `drawCalls` and `triangles`, and the resident parsed `modelsLoaded` and source `bytes`. `preinstalled.shops` counts ready rooms for the requested tier and `preinstalled.ms` records elapsed installation time. The frame counts include visible post-processing submissions. Detached preuploads contribute to `uploads`. Changing tier can retain cached anchors of other tiers, so the resident bytes can exceed the selected-set column. Classic reports zero kit geometry and bytes.
+`window.__mall.performanceReport().interiors` gives the effective tier, shops submitted in the last visible frame, draw calls, triangles, resident parsed models and source bytes. `preinstalled.shops` counts ready rooms and `preinstalled.ms` gives their installation time. Frame reports include visible post-processing submissions. Cached models from other tiers can raise resident bytes above the selected-set column.
 
 ## HOW-TO-VERIFY
 
-Capture every listed entrance at **393 × 612 Low** and **1440 × 900 Detailed**. Repeat with Balanced for a tier comparison. Wait for the applicable anchor to appear. Use the default third-person view and standard HUD with the map closed. Approach from the map arrival and face inward 0.75 m outside the door with both leaves open. Save the stems below with `-phone-low` or `-desktop-detailed` and record the effective tier, CSS viewport, DPR and build ID. The first three also need a closer shot matching the existing baseline composition.
+Capture every listed entrance at **393 × 612 Low** and **1440 × 900 Detailed**. Repeat with Balanced for a tier comparison. Wait for both the anchor and the detail GLB to appear. Use the default third-person view and standard HUD with the map closed. Approach from the map arrival and face inward 0.75 m outside the door with both leaves open. Save the stems below with `-phone-low` or `-desktop-detailed` and record the effective tier, CSS viewport, DPR and build ID. The first three also need a closer shot matching the existing baseline composition.
 
 | Capture stem | Entrance evidence | Low / Balanced / Detailed added triangles |
 |---|---|---:|
-| S01-entrance | Open leaves, official NZ photo above working cabinets, navy runner | 618 / 1,466 / 2,298 |
-| S02-entrance | Metal hood, lacquer pass and moss-edged quarry tile | 996 / 1,244 / 1,268 |
-| S03-entrance | Potong cart to the left, curved terrazzo leading to the lagoon bar | 1,292 / 2,894 / 2,918 |
-| S04-entrance | Fan-fold folio against sage pill-shaped terrazzo | 1,104 / 1,876 / 2,688 |
-| S05-entrance | Stepped drawer bank with bowl niche and parchment reed field | 1,302 / 2,662 / 3,222 |
-| S06-entrance | Slatted drying loom with crosswise beech field | 1,172 / 2,104 / 3,404 |
-| S07-entrance | Stepped tin pyramid on jade drum and octagonal inset | 1,596 / 3,374 / 3,434 |
-| S08-entrance | Jar stand with blue booth and gingham field | 1,524 / 3,204 / 3,264 |
-| S09-entrance | Diagonal tin conveyor and paired steel tracks | 706 / 1,186 / 1,282 |
-| S10-entrance | Standing nacre shell cradle and scalloped teal edging | 1,656 / 3,236 / 6,184 |
-| S11-entrance | High-roll packing rail and end-grain loading field | 1,094 / 1,662 / 1,758 |
-| S12-entrance | Four stepped index fins and indigo resin arcs | 1,296 / 1,984 / 2,496 |
-| S13-entrance | Headphone rack in front of acoustic baffle on felt ellipse | 1,476 / 3,264 / 3,324 |
-| S14-entrance | Staggered screen wall and aubergine wool field | 882 / 1,230 / 1,326 |
-| S15-entrance | Raised baby-grand lid and ivory-outlined walnut oval | 2,048 / 3,900 / 3,960 |
-| S16-entrance | Eyelet rail and teal service lane with lime indexing marks | 1,134 / 1,838 / 2,382 |
-| S17-entrance | Gabled telephone alcove and widened cork runner | 854 / 1,442 / 1,946 |
+| S01-entrance | Moon lanterns around the collector wall, crescent floor inlay | 1,176 / 2,024 / 2,856 |
+| S02-entrance | Menu on the illuminated hood, stacked sauce bottles and tasting plate | 2,558 / 2,806 / 2,830 |
+| S03-entrance | Ice-cream cart, popsicle garland, balloons and coloured floor rings | 2,306 / 3,908 / 3,932 |
+| S04-entrance | Colour-coded apothecary bottles and a botanical floor motif | 2,622 / 3,394 / 4,206 |
+| S05-entrance | Gold wall mark, red lanterns and gold cloud inlays | 2,310 / 3,670 / 4,230 |
+| S06-entrance | Ship wheel, hanging noodle bundles, wheat sacks and warm timber flooring | 1,882 / 2,814 / 4,114 |
+| S07-entrance | Neon dragon, lantern strings and the stepped banquet tin display | 2,730 / 4,508 / 4,568 |
+| S08-entrance | Giant jar photo spot, peanut footsteps and an illustrated toast advertisement | 2,236 / 3,916 / 3,976 |
+| S09-entrance | Large luminous SPAM wordmark, stacked can wall and stocked conveyor | 2,180 / 2,660 / 2,756 |
+| S10-entrance | Clam and glowing pearl, shell wall and pearl pendants | 2,704 / 4,284 / 7,232 |
+| S11-entrance | Deli counter, sliced meats, chequered floor and Hormel mark | 2,182 / 2,750 / 2,846 |
+| S12-entrance | Red dispensary mark, planted herbs and shelf tickets | 1,786 / 2,474 / 2,986 |
+| S13-entrance | Headphone listening wall, scrolling waveform and blue-white floor light strips | 1,690 / 3,478 / 3,538 |
+| S14-entrance | Two emissive gradient screens and a red LG lightbox | 956 / 1,304 / 1,400 |
+| S15-entrance | Luminous piano keys, watch cases and widely spaced overhead slats | 2,502 / 4,354 / 4,414 |
+| S16-entrance | Large battery standee and illuminated lightning bolts | 1,352 / 2,056 / 2,600 |
+| S17-entrance | Large desktop phone, signal arcs and telephone accessories | 1,318 / 1,906 / 2,410 |
 
 1. Review copies with the HUD and names masked. Match each room by its anchor and floor zone. Check the approved 120 CSS px anchor target, the readable official photo in S01 and the unobstructed foreground. Use the baseline PNGs for S01–S03. [Taste checklist](ui-ux/taste-engine-checklist.md)
 2. Run `python3 tests/browser_gjh_shop_walkthrough.py`. Walk the entrances, browse points and return routes. At each of the four New Moon pickup points, pick up a can and return it, then repeat the Add to bag flow with a held can. Check seat exits, the cart and the elevator. Match Low, Balanced and Detailed frames to the CPU budget and inspect the two wing diagonals, upper deck and tier transitions. [Collision probe](../tests/gjh_shop_collisions.mjs)
-3. Serve the rebuilt root with `python3 -m http.server 8811 --bind 127.0.0.1`. With the manager's headed Chrome setup, run `python3 docs/interiors_probe.py` for three cold Low walks through all 17 entrances. Check `interiorsAtLoaderHide.preinstalled.shops` for 17 and the warm reason for `complete`. Run three cold walks per tier with `docs/walk_probe.py` and its `--tier` option. Both probes require zero intervals ≥50 ms and a maximum below 40 ms. [Three-tier cold-run procedure](gjh-v11-late-asset-uploads.md)
+3. Serve the rebuilt root with `python3 -m http.server 8814 --bind 127.0.0.1`. With the manager's headed Chrome setup, set `GALLERY_CHROME` to the Google Chrome executable and run `python3 docs/interiors_probe.py --url http://127.0.0.1:8814/demos/corporate/gjh/v11/` for three cold Low walks through all 17 entrances. Check `interiorsAtLoaderHide.preinstalled.shops` for 17 and the warm reason for `complete`. Run three cold walks per tier with `docs/walk_probe.py` and its `--tier` option. Both probes require zero intervals ≥50 ms and a maximum below 40 ms. [Three-tier cold-run procedure](gjh-v11-late-asset-uploads.md)
 
 ## Evidence limits
 
-**UNVERIFIED.** The new entrance images, blind identification, eye-level sightlines, full browser pickup/seat/cart/lift interactions, draw calls at matched camera poses, texture residency and physical-phone frame pacing need manager acceptance. Node verifies the new clearance envelopes against the approved paths and confirms the original studio boxes. The 4 cm New Moon pickup margin remains the approved static value.
+The Low review used the delivered GLBs and common atlas in Cycles CPU. Reviewers inspected the 17 store interiors, three supplementary entrance/lintel views and eight shelf close-ups. The first three outer shells use measured approximations and fascia text uses stand-ins. The receipts bind the staged images, model files and atlas by hash. [Shops 01–06](evidence/interiors/round2/shops-01-06.jpg) · [Shops 07–12](evidence/interiors/round2/shops-07-12.jpg) · [Shops 13–17](evidence/interiors/round2/shops-13-17.jpg) · [Shelf close-ups](evidence/interiors/round2/shelf-inspection.jpg) · [Review receipts](evidence/interiors/round2/final-receipts.json)
+
+All 59 GLBs passed the Khronos glTF validator. Node checks the loader lifecycle, shared atlas, material and instance counts, clearance envelopes and original collision boxes. Browser walkthroughs and the interior probe were attempted. Sandbox loopback binding and the Chrome launch both failed. **UNVERIFIED** items include in-game lighting and camera framing, blind brand recognition, pickups and seating in the revised scenes, renderer draw counts at matched poses, live screen scrolling, cold-walk hitch timing and physical-phone frame pacing.

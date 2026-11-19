@@ -1,0 +1,479 @@
+{
+  "assets": [
+    {
+      "file": "new-moon-au-425g-front.jpg",
+      "dimensions": [
+        1000,
+        1000
+      ],
+      "bytes": 147632,
+      "sha256": "5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a",
+      "source": "assets/companies/gjh/official/new-moon-au-425g-front.jpg",
+      "sourceSha256": "5aa9106a7e04a5888d1ad653e0faeeefbca74a7ca389121c289cad6d5e45a34a",
+      "kind": "product-front",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Australia-Abalone-425g-Front.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-au-425g-front"
+    },
+    {
+      "file": "new-moon-mx-454g-front.jpg",
+      "dimensions": [
+        1000,
+        1000
+      ],
+      "bytes": 147949,
+      "sha256": "68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979",
+      "source": "assets/companies/gjh/official/new-moon-mx-454g-front.jpg",
+      "sourceSha256": "68e266d70a1fbbc74351d368ae35555f1629454e20a2118be94ec40de910e979",
+      "kind": "product-front",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-Mexico-Abalone-454g-Front.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-mx-454g-front"
+    },
+    {
+      "file": "new-moon-nz-425g-front.jpg",
+      "dimensions": [
+        1000,
+        1000
+      ],
+      "bytes": 143514,
+      "sha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+      "source": "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+      "sourceSha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+      "kind": "product-front",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-nz-425g-front"
+    },
+    {
+      "file": "new-moon-sa-425g-front.jpg",
+      "dimensions": [
+        1000,
+        1000
+      ],
+      "bytes": 140822,
+      "sha256": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
+      "source": "assets/companies/gjh/official/new-moon-sa-425g-front.jpg",
+      "sourceSha256": "c0c77f857f17dfa3ab0dc5b0ab74fd0356448abf0014ac7e40ca4b1a96374b71",
+      "kind": "product-front",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-South-Africa-Abalone-4-â€“-5pcs-425g-Front-1.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-sa-425g-front"
+    },
+    {
+      "file": "new-moon-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 90972,
+      "sha256": "78d7f198634f27caa1467bb89cd717427f23a2bed5fa2fbbc763f5176b158156",
+      "source": "assets/companies/gjh/landing-concepts/images/001.webp",
+      "sourceSha256": "24eff6d8e7e1b1b2b58877a43c2d29c082ceedfa5b87dbd331b2163860b13d23",
+      "kind": "AI-generated concept",
+      "libraryId": "001",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#001"
+    },
+    {
+      "file": "new-moon-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 50596,
+      "sha256": "de097c5b3094974fa27026c9bc55eff2f94bc783d1b0361d159504cd54855086",
+      "source": "assets/companies/gjh/landing-concepts/images/001.webp",
+      "sourceSha256": "24eff6d8e7e1b1b2b58877a43c2d29c082ceedfa5b87dbd331b2163860b13d23",
+      "kind": "AI-generated concept",
+      "libraryId": "001",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#001"
+    },
+    {
+      "file": "new-moon-story.webp",
+      "dimensions": [
+        780,
+        975
+      ],
+      "bytes": 64134,
+      "sha256": "be5dd5b8be96e4927a442cfb17ce1a81b7e4324d7eeef159d099e38d979d4b74",
+      "source": "assets/companies/gjh/landing-concepts/images/002.webp",
+      "sourceSha256": "a91221974a9cce3efee4d9ad23be32a036dd1e891126af14710fe01e31b2132e",
+      "kind": "AI-generated concept",
+      "libraryId": "002",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#002"
+    },
+    {
+      "file": "mili-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 99140,
+      "sha256": "859f7a181e462d1e505b683f4d6a299a5c71513c0677e5cb4af242b6ffefa4b7",
+      "source": "assets/companies/gjh/landing-concepts/images/005.webp",
+      "sourceSha256": "91d9e1c0c4015c34381d947973af59da80c554e61f8d57a60d9c642b83d9e66a",
+      "kind": "AI-generated concept",
+      "libraryId": "005",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#005"
+    },
+    {
+      "file": "mili-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 57258,
+      "sha256": "5fe98fb6b9dfc5f8dcf3cab8b6125cf849004d7e7ba117ffc283f5c1e19244b7",
+      "source": "assets/companies/gjh/landing-concepts/images/005.webp",
+      "sourceSha256": "91d9e1c0c4015c34381d947973af59da80c554e61f8d57a60d9c642b83d9e66a",
+      "kind": "AI-generated concept",
+      "libraryId": "005",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#005"
+    },
+    {
+      "file": "mili-story.webp",
+      "dimensions": [
+        780,
+        975
+      ],
+      "bytes": 125596,
+      "sha256": "25e9b2d0ed4ad0c1695bbcbbe4bbbf0b2aff3d21d99b8ec81cf4357a59e4d29d",
+      "source": "assets/companies/gjh/landing-concepts/images/006.webp",
+      "sourceSha256": "286dc2341f0719270804604e47020dc6b77844fa1804520d6cc0eef4bf78605b",
+      "kind": "AI-generated concept",
+      "libraryId": "006",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#006"
+    },
+    {
+      "file": "gogo-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 82944,
+      "sha256": "70a791f92de02f825e74b8f14222a280bf943ec59a41f579807adb947efa934d",
+      "source": "assets/companies/gjh/landing-concepts/images/009.webp",
+      "sourceSha256": "79a0f622698061e531e7b5cbbf798a7e18de2504409a0353214340e5a70ddaf4",
+      "kind": "AI-generated concept",
+      "libraryId": "009",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#009"
+    },
+    {
+      "file": "gogo-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 50766,
+      "sha256": "05320ed2f1ad70604f98eeb557b3416437f2701cf356710faf33d8959db80607",
+      "source": "assets/companies/gjh/landing-concepts/images/009.webp",
+      "sourceSha256": "79a0f622698061e531e7b5cbbf798a7e18de2504409a0353214340e5a70ddaf4",
+      "kind": "AI-generated concept",
+      "libraryId": "009",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#009"
+    },
+    {
+      "file": "gogo-story.webp",
+      "dimensions": [
+        780,
+        975
+      ],
+      "bytes": 68084,
+      "sha256": "3137e79ce6dc5bcaadfe2a5fae71e972e2d0c109a0113f9bd0bcae95b5feb2b7",
+      "source": "assets/companies/gjh/landing-concepts/images/010.webp",
+      "sourceSha256": "a345389bb316d0e16e12ec21bee95d4b083eca95ef7657f11bcedf735f98a864",
+      "kind": "AI-generated concept",
+      "libraryId": "010",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#010"
+    },
+    {
+      "file": "borsch-med-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 191678,
+      "sha256": "e9d1d4f1a7a92319d12d42ad87c5fc776613d861bbfe0211f2da0df0d93e3876",
+      "source": "assets/companies/gjh/landing-concepts/images/013.webp",
+      "sourceSha256": "5350ceee2173e42a7fa2f7ae670349986896fcf7dc5b4ad72c6fbb908adbd27e",
+      "kind": "AI-generated concept",
+      "libraryId": "013",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#013"
+    },
+    {
+      "file": "borsch-med-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 115436,
+      "sha256": "3a6f62616c73b912b0d34dc64a57ff312d41f7a48fd9d4d8b43a679f7b8c7e33",
+      "source": "assets/companies/gjh/landing-concepts/images/013.webp",
+      "sourceSha256": "5350ceee2173e42a7fa2f7ae670349986896fcf7dc5b4ad72c6fbb908adbd27e",
+      "kind": "AI-generated concept",
+      "libraryId": "013",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#013"
+    },
+    {
+      "file": "borsch-med-story.webp",
+      "dimensions": [
+        780,
+        975
+      ],
+      "bytes": 68786,
+      "sha256": "061863170c7005769ca1406e06516a65a8362f61fc4ffd7d54582446f1d85da5",
+      "source": "assets/companies/gjh/landing-concepts/images/014.webp",
+      "sourceSha256": "534c2dfed3132ead939b8c4aeb1803759c86deca8b59e1b9aafb471c8b73746d",
+      "kind": "AI-generated concept",
+      "libraryId": "014",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#014"
+    },
+    {
+      "file": "sony-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 150826,
+      "sha256": "a29db2ac24aa102c6f0ecb615ea873a6d87e12a8555f145b2e5068293a69aa08",
+      "source": "assets/companies/gjh/landing-concepts/images/049.webp",
+      "sourceSha256": "b9ea12ca2cdc2be4ca50ba221a5c041e17a445e47dc4e27382f04e848530d45f",
+      "kind": "AI-generated concept",
+      "libraryId": "049",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#049"
+    },
+    {
+      "file": "sony-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 52404,
+      "sha256": "f2792ba89480fbacb4062d57e9ea93e626860153850f0f7638e01c16159cc2d9",
+      "source": "assets/companies/gjh/landing-concepts/images/049.webp",
+      "sourceSha256": "b9ea12ca2cdc2be4ca50ba221a5c041e17a445e47dc4e27382f04e848530d45f",
+      "kind": "AI-generated concept",
+      "libraryId": "049",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#049"
+    },
+    {
+      "file": "sony-story.webp",
+      "dimensions": [
+        780,
+        975
+      ],
+      "bytes": 70942,
+      "sha256": "a5a674e67b891e335a754e07411c28b7c0bdf4391cc8d3c58ebd87d0643c0e02",
+      "source": "assets/companies/gjh/landing-concepts/images/050.webp",
+      "sourceSha256": "b622dabffcfa7b7a6ab68323d4159051415d4f8583f5b1848e86d9fb3802019a",
+      "kind": "AI-generated concept",
+      "libraryId": "050",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#050"
+    },
+    {
+      "file": "new-moon-stage.webp",
+      "dimensions": [
+        320,
+        400
+      ],
+      "bytes": 8842,
+      "sha256": "651f1fa95bf646cacd14c44b87102e3c3ff43ca358f07a4d840523df71a59841",
+      "source": "assets/companies/gjh/landing-concepts/images/004.webp",
+      "sourceSha256": "42af2b13c5bc389cee55c8267bb170231d40953136a23dc94694cfc04e787e71",
+      "kind": "AI-generated concept",
+      "libraryId": "004",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#004"
+    },
+    {
+      "file": "lg-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 25104,
+      "sha256": "c527a7d6d45233c12bef7ace71aa4f1ff657f4d9e7f2abe59251be18d3ac98e4",
+      "source": "assets/companies/gjh/landing-concepts/images/053.webp",
+      "sourceSha256": "3c056f9e0bd36d960738fd8e4f6ac66d9fcf22dd2f84374c962d50b5efe12d68",
+      "kind": "AI-generated concept",
+      "libraryId": "053",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#053"
+    },
+    {
+      "file": "casio-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 23306,
+      "sha256": "fa6154af955836d15a22a19ecb8f4c70e681b0a4cb3c803f982fb66bea896a00",
+      "source": "assets/companies/gjh/landing-concepts/images/058.webp",
+      "sourceSha256": "13231859b8dd477a1994aa5c36ae33768aa5cd4db3e4aa5ba58cc94005579f24",
+      "kind": "AI-generated concept",
+      "libraryId": "058",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#058"
+    },
+    {
+      "file": "gp-batteries-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 31030,
+      "sha256": "3913bbaa5dcf282a2156146df6da74e40eae5f23463cacacd14d5b751816341b",
+      "source": "assets/companies/gjh/landing-concepts/images/061.webp",
+      "sourceSha256": "138034d0ef228039826f51dad4137b42a05887d7b0889a6ae407009cd66b2953",
+      "kind": "AI-generated concept",
+      "libraryId": "061",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#061"
+    },
+    {
+      "file": "gigaset-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 30346,
+      "sha256": "2bcaa67e47369f05d0c08851219969d8659cd2bcbac0302022f757ee58c53ab0",
+      "source": "assets/companies/gjh/landing-concepts/images/066.webp",
+      "sourceSha256": "2a3f46f17c8d21e13397f2c3ec47dd266650f98987d462ceabe94a6bf166ef11",
+      "kind": "AI-generated concept",
+      "libraryId": "066",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#066"
+    },
+    {
+      "file": "gjh-logo.webp",
+      "dimensions": [
+        134,
+        59
+      ],
+      "bytes": 5026,
+      "sha256": "2ac164c707dc0f03337b98b0502f757f7e013fa50dbd47a05152a3860abfa877",
+      "source": "demos/corporate/gjh/v21/assets/gjh-logo.webp",
+      "sourceSha256": "277ff28fc547219821ffb89f2222e4d644f94d6cec639a0ae79953ce97bc262d",
+      "kind": "company-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gjh-corporate-logo"
+    },
+    {
+      "file": "new-moon-logo.webp",
+      "dimensions": [
+        156,
+        32
+      ],
+      "bytes": 5504,
+      "sha256": "b26dff9a6a761ce968053646d0c57e6b127c927058bdffd107a59f948468b37e",
+      "source": "demos/corporate/gjh/v21/assets/new-moon-logo.webp",
+      "sourceSha256": "ffc29bae8868c337db5cb61fa1073ae4107da1a7e62dd48ec8b591b19942f1cd",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/brands/logo-sources.json#S01"
+    },
+    {
+      "file": "mili-logo.webp",
+      "dimensions": [
+        88,
+        54
+      ],
+      "bytes": 2242,
+      "sha256": "d7db6871a6ffd08479bcc453869532750a5fca0e2cc762cb92bdef4be459180b",
+      "source": "demos/corporate/gjh/v21/assets/mili-logo.webp",
+      "sourceSha256": "79ae467e1b813d13ac795dc69275a96b687423986b1965fc28b9652b381dcaca",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#mili-logo"
+    },
+    {
+      "file": "gogo-logo.webp",
+      "dimensions": [
+        120,
+        40
+      ],
+      "bytes": 1836,
+      "sha256": "d1a695fe5e6123a6daa1625ca7e4a884b2e54f8f888a3604b48f26b25307646b",
+      "source": "demos/corporate/gjh/v21/assets/gogo-logo.webp",
+      "sourceSha256": "5696dc538967e71b2ca515452beb0216320ce42e0c81aa547af95275a6dc2851",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gogo-logo"
+    },
+    {
+      "file": "borsch-med-logo.webp",
+      "dimensions": [
+        120,
+        45
+      ],
+      "bytes": 2052,
+      "sha256": "f1cc9e8eab957d5b1e373bcda20635673d7c7720c02b8b473791bce41fcaaf3b",
+      "source": "demos/corporate/gjh/v21/assets/borsch-med-logo.webp",
+      "sourceSha256": "2cab195a45e8d980a23f578b5f185f674df6eb10957832c8275741c5c7635cb2",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/06/bm-brand2.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#borsch-med-logo"
+    },
+    {
+      "file": "sony-logo.webp",
+      "dimensions": [
+        160,
+        42
+      ],
+      "bytes": 1710,
+      "sha256": "cb49aeb9acc7573e500373def76f119faeb73d61f780dd3e3aa727f0069642d4",
+      "source": "demos/corporate/gjh/v21/assets/sony-logo.webp",
+      "sourceSha256": "99dcc2565ce3547ebd4b3ae26ef0d4a0ae7a46371b8848a8a2a29125fedae1e3",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/sony-brand.jpg",
+      "sourceReceipt": "demos/corporate/gjh/v8/assets/sources.json#sony-brand-tile"
+    },
+    {
+      "file": "new-moon-nz-425g-front.webp",
+      "dimensions": [
+        190,
+        306
+      ],
+      "bytes": 20008,
+      "sha256": "1a8833b7dd612a9676699a9153f1547e585f5d41a65aef3a3167a39fd01a545c",
+      "source": "assets/companies/gjh/official/new-moon-nz-425g-front.jpg",
+      "sourceSha256": "5735d60c5951e0c9fef5cbd2931b125281b410a4165ab9bd04b5b6af0c96a082",
+      "kind": "product-front",
+      "sourceUrl": "https://www.gjheshop.com/wp-content/uploads/2023/07/New-Moon-Premium-New-Zealand-Abalone-425g-Front.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#new-moon-nz-425g-front",
+      "description": "Cropped to the can. The connected white background is transparent."
+    },
+    {
+      "file": "gjh-history-composite.webp",
+      "dimensions": [
+        550,
+        240
+      ],
+      "bytes": 21454,
+      "sha256": "649b196a59b2df6b011515e73779f9e83a095004faafb9600641bc9e651ea3e3",
+      "source": "demos/corporate/gjh/v21/assets/gjh-history-composite.webp",
+      "sourceSha256": "358260e8c20c38fbc42ff3eebcaaf6dc3867aa3a9670ff6df070bab8ff709fce",
+      "kind": "historical-composite",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/07/history1940-cover-1.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gjh-history-composite"
+    },
+    {
+      "file": "mall-wide.webp",
+      "dimensions": [
+        1200,
+        676
+      ],
+      "bytes": 166092,
+      "sha256": "acba59f1f2dbd493278f6a5e4011ca49c4689ac7da12c451d416eeb5f4f6d255",
+      "source": "demos/corporate/gjh/v11/assets/concept-atrium.webp",
+      "sourceSha256": "932932ae1a0042755749aae77c9991038bfdbc192ccf5c2fb5156fa5eab7e9f0",
+      "kind": "AI-generated concept",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/concept-imagery.json#concept-atrium.webp"
+    },
+    {
+      "file": "mall-story.webp",
+      "dimensions": [
+        640,
+        800
+      ],
+      "bytes": 70312,
+      "sha256": "d9b2485ee0192fc2d8a1b9a6f01f3015cee2607ef50c05c56e87b64b766b4b9b",
+      "source": "demos/corporate/gjh/v11/assets/concept-atrium.webp",
+      "sourceSha256": "932932ae1a0042755749aae77c9991038bfdbc192ccf5c2fb5156fa5eab7e9f0",
+      "kind": "AI-generated concept",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/concept-imagery.json#concept-atrium.webp"
+    }
+  ]
+}
