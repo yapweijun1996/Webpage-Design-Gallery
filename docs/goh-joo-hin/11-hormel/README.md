@@ -1,6 +1,6 @@
 # S11 · Hormel
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -44,3 +44,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 The current packing bench stays. The proposed products do not change the V11 catalogue or buy flow.
+
+## Catalogue exhibit
+
+The packing bench has a manufacturer-catalogue story for Chili No Beans and Chili with Beans. Two neutral tins sit in the left rear bay. The No Beans 15 oz image is a manufacturer reference and the current GJH range remains a separate source question.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)

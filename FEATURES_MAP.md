@@ -9,7 +9,9 @@
 
 ## Repository-wide feature map
 
-Scanned from this checkout on 2026-11-19 (application version `1.4.0`, design-system `1.0.0`). Counts come from `data/designs.json` and the generator; `README.md` still says 46 designs and is stale.
+Scanned from this checkout on 2026-11-19 (application version `1.4.0`, design-system `1.0.0`). Counts come from `data/designs.json` and the generator.
+
+**Detailed module maps** (per-module responsibilities, imports, state, tests, drift): [gallery platform](docs/module-map-gallery-platform.md), [GJH v11 runtime](docs/module-map-gjh-v11-runtime.md), [all other demos](docs/module-map-demos.md). Known drift they report: `ds.md` says application release 1.1.4 (actual 1.4.0); `docs/company-demo-pwas.md` still counts 16 GJH designs; `assets/deck-railings.js` is imported by nothing; `build_gallery.py --output` still writes some generated files into the repo root; no CI workflow runs the Playwright suites.
 
 ### System layers
 
@@ -38,7 +40,7 @@ locales/source/en.json ┘                                             └ style
 | Release identity | `data/app.json` holds the semantic version. The build ID is the first 16 hex characters of a SHA-256 over the catalog, runtime resources, templates and generator scripts, so any shipped-byte change produces a new build. Output is `version.json`. | `release_info`, `runtime_resources` |
 | Design system SSOT | Tokens, icon registry and per-version GJH themes are JSON sources; the builder generates `tokens.css`, `icons.svg`, `gjh-themes.css` and demo `theme.css` (v20–v23). `check_ssot.py` is a ratchet that rejects new hard-coded colours or other debt, keyed by path, property and value, against `legacy-baseline.json`. Contract text is in `ds.md`. | `scripts/build_design_system.py`, `scripts/check_ssot.py`, `design-system/` |
 | Shared 3D onboarding UI | Framework-neutral welcome dialogs, key hints, input-specific controls, tips, Help and progress, with a six-profile preview page and a gamepad adapter. v11 uses it. | `assets/onboarding/`, `design-system/onboarding/`, `docs/3d-onboarding-components.md` |
-| Style atlas | Public index of reference images paired with the demos (`README.md` says 60; 64 WebP files exist under `style-atlas/images/`); built from `docs/landing-atlas/*/directions.json`, with image path validation. A 46-design visual audit exists. | `scripts/build_style_atlas.py`, `style-atlas/`, `scripts/render_anchor_audit.py`, `scripts/render_style_sheets.py` |
+| Style atlas | Public index of reference images paired with the demos (64 WebP files under `style-atlas/images/`); built from `docs/landing-atlas/*/directions.json`, with image path validation. A 46-design visual audit exists. | `scripts/build_style_atlas.py`, `style-atlas/`, `scripts/render_anchor_audit.py`, `scripts/render_style_sheets.py` |
 | Landing review tools | Before/after capture of landings for review. | `scripts/review_landings.py`, `.agents/skills/gallery-landing-review/` |
 | Asset provenance | Verifies the recorded GJH / New Moon source library (page-context receipts, timestamps, hashes). Signage kit and GLB validators. Mall NPC assets are checked against size and SHA-256 receipts at build time. | `scripts/verify_gjh_asset_library.py`, `scripts/build_signage_kit.py`, `scripts/validate_signage_glb.py`, `build_gallery.py` (`pwa_outputs`) |
 | v11 generated runtime | Combined stylesheet, startup JS bundles (hash-checked; rebuild needs Bun 1.3.11), startup asset pack and the Rapier JS/WASM split. All are generated and checked by the main build. | `scripts/build_gjh_css.py`, `build_gjh_startup_js.py`, `build_gjh_startup_pack.py`, `build_rapier.py`, `data/gjh-startup-bundles.json`, `data/gjh-startup-assets.json` |

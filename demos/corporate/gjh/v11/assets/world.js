@@ -1,9 +1,10 @@
+import {addTramDebug} from './tram-layout.js';
 import {buildRestrooms} from './restrooms.js';
 import {miliExhibit} from './mili-exhibit.js';
 import {gogoExhibit} from './gogo-exhibit.js';
 import {borschExhibit} from './borsch-exhibit.js';
 import {pzhExhibit} from './pzh-exhibit.js';
-import {westFoodExhibits, westFoodFocalExhibits} from './west-food-exhibits.js';
+import {shopCatalogueExhibits, shopCatalogueFocals} from './shop-catalogue-exhibits.js';
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
 import {filterWallArtwork, setupArtworkTexture} from './artwork-textures.js';
@@ -352,6 +353,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
+    if (new URLSearchParams(location.search).get('tram') === 'debug') shopLodUpdates.push(addTramDebug(T, scene));
     shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
@@ -1048,8 +1050,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       } else if (id === 'S05') {
         const [x,,z] = worldInteriorPoint(store,[pzhCartonX,0,pzhCartonStandingZ]);
         interactables.push({id:'pzh-carton-story',x,z,radius:1.0});
-      } else if (westFoodFocalExhibits[id]) {
-        const exhibit = westFoodFocalExhibits[id];
+      } else if (shopCatalogueFocals[id]) {
+        const exhibit = shopCatalogueFocals[id];
         const [standingX,standingZ] = store.anchor.standing;
         const [x,,z] = worldInteriorPoint(store,[standingX,0,standingZ]);
         const plaque = sign(exhibit.caption,...worldInteriorPoint(store,exhibit.panel),1.02,.15,true,65);
@@ -1361,7 +1363,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
-  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...westFoodExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};

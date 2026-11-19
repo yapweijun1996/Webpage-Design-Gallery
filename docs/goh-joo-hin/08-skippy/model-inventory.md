@@ -24,4 +24,4 @@ Product-specific models and pending source work are listed in the [shop brief](R
 | SKIPPY Creamy Peanut Butter 500g | One front shelf facing on the left half of the display | Pending source-matched body, teal cap and label map. GJH lists 73 × 73 × 124 mm. |
 | SKIPPY Chunky Peanut Butter 500g | Separate adjacent facing | Pending right-hand variant. Share geometry only after matching the two views. |
 
-Two original unprinted jar forms sit on the third left rear shelf at local XZ (−2.25, −3.98) and (−2.06, −3.98), bottom Y 2.113 m. Each uses the nominal 73 × 73 × 124 mm listing envelope. [Room detail source](../../../scripts/gjh_interiors/rooms.py)
+Two original unprinted jar forms sit on the third left rear shelf at local XZ (−2.55, −3.98) and (−1.37, −3.98), bottom Y 2.113 m. Each uses the nominal 73 × 73 × 124 mm listing envelope. [Room detail source](../../../scripts/gjh_interiors/rooms.py)

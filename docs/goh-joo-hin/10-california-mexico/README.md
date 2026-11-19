@@ -1,6 +1,6 @@
 # S10 · California Mexico
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -44,3 +44,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 Entrance and bypass passed in Chrome. The front-side inspection point is a proposed corrected visual view.
+
+## Catalogue exhibit
+
+The validated left-front approach faces the open shell. The story distinguishes the Red and Black 454 g catalogue entries. Two neutral colour studies sit on the left rear shelf. Exact retail pack geometry and artwork remain pending.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)
