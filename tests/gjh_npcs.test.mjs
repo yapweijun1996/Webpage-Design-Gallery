@@ -5,6 +5,8 @@ import {cloneNpcRig,createNpcSystem,npcLimit,nextNpcAdmission} from '../demos/co
 import {SHELL_LAYOUT} from '../demos/corporate/gjh/v11/assets/interior-shell-registry.js';
 import {atriumLayout} from '../demos/corporate/gjh/v11/assets/atrium-layout.js';
 import {liftLayout} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
+import {createPlayerTram, tramLanding} from '../demos/corporate/gjh/v11/assets/tram-ride.js';
+import {tramRoute} from '../demos/corporate/gjh/v11/assets/tram-layout.js';
 
 function model() {
   const scene=new T.Group(), bone=new T.Bone(); bone.name='root'; scene.add(bone);
@@ -22,6 +24,42 @@ function fixture(options={}) {
 }
 const player={x:0,y:0,z:10,seatId:null};
 const admitFrames=(system,calls=0,frames=48)=>{for(let i=0;i<frames;i++) system.admit(calls);};
+
+test('entry crowd keeps the tram landing clear through boarding and return', t => {
+  const {system,scene} = fixture({expanded:true, tram:true, seats:[], tier:'balanced'});
+  t.after(() => system.dispose());
+  // Spawn the crowd while the player is approaching the station from the entrance.
+  let position = {x:tramLanding.x, y:.89, z:tramLanding.z + 6};
+  const updateCrowd = dt => system.update(dt, {...position, y:position.y - .875});
+  updateCrowd(.016);
+  admitFrames(system);
+  assert.ok(system.state.visible > 0);
+  position = {...position, z:tramLanding.z};
+  const tram = createPlayerTram({expanded:true, search:'?tram=1', T, scene,
+    getPosition:() => position, getBoardReason:() => '', clearPath:() => true,
+    enterSeat:(_, {x,z}) => {position = {x,y:1.05,z};},
+    exitSeat:landing => {position = landing;}
+  });
+  t.after(() => tram.dispose());
+  assert.equal(tram.controls.board(), true);
+  function tick() {
+    const pose = tram.update(.1);
+    if (pose) position = {x:pose.x, y:1.05, z:pose.z};
+    updateCrowd(.1);
+  }
+  for (let i = 0; i < 60; i++) tick();
+  assert.equal(tram.controls.state.phase, 'ride');
+  const lapTicks = Math.ceil(tramRoute.length / .15) + 20;
+  for (let i = 0; i < lapTicks && tram.controls.state.active; i++) {
+    tick();
+    assert.equal(tram.controls.state.blocked, false);
+  }
+  assert.equal(tram.controls.state.phase, 'idle', JSON.stringify({
+    ride:tram.controls.state,
+    crowd:scene.children.filter(node => node.isGroup && node.visible).map(node => node.position)
+  }));
+  assert.equal(position.z, tramLanding.z);
+});
 
 test('ambient admission fits the tighter of the expanded frame budgets', () => {
   const previous = {admitted:4,safeFrames:0};

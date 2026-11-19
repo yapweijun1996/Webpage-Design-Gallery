@@ -22,6 +22,7 @@ import {createMallHud} from './assets/hud-coordinator.js';
 import {storeDestinations} from './assets/store-destinations.js';
 import {icon} from './assets/icons.js';
 import {tramRoute} from './assets/tram-layout.js';
+import {tramEnabled} from './assets/tram-ride.js';
 import {createTestWalk} from './assets/test-walk.js';
 for (const slot of document.querySelectorAll('[data-icon]')) {
   const svg = icon(slot.dataset.icon, {size: 18});
@@ -379,7 +380,7 @@ function updateHUD() {
   const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p, zone});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  productControl?.update(p, interactions.productTarget(selectedInteraction));
+  productControl?.update(p, interactions.productTarget(selectedInteraction), !selectedInteraction?.shopAction?.productId);
   shelfFocus?.setNearby(nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper,hasHeldProduct:Boolean(productControl&&p.character.physicalProduct.held)});
 }
@@ -917,7 +918,8 @@ async function installNpcs(T, R, prepareModel, source) {
   try {
     const {createNpcSystem, loadNpcSystem} = await import('./assets/npcs.js');
     const options = {onAvatarEvent:programTrace?.event,scene:world.scene,seats:world.seats,physics,R,playerCollider:player.capsule,
-      playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled,prepareModel,
+      playerBody:player.body,expanded,tram:tramEnabled(expanded,location.search),
+      mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled,prepareModel,
       onModularFallback() { document.getElementById('npc-appearance-status').hidden=false; }};
     const system = source ? createNpcSystem(T, {...options, source}) : await loadNpcSystem(T, options);
     if (pageEnded || fatal) system.dispose();

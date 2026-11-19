@@ -88,9 +88,9 @@ def exercise_item(page, args, store, item, row):
     face(page, item["x"], item["z"])
     selected = select_action(page, item)
     inspect = page.locator("#inspect")
-    more = page.locator("#hud-more-actions")
-    if selected and not inspect.is_visible() and more.is_visible():
-        more.click()
+    if selected:
+        # Next changes selection before the HUD draws the new primary action.
+        inspect.wait_for(state="visible", timeout=5000)
     before = capture(page, args.out, f'{item["item"]}-before')
     row["screenshot"] = str(before)
     offered = page.locator("#inspect-verb").inner_text()

@@ -263,14 +263,20 @@ test('drawer pickup uses all four native shelf IDs and preserves return and bag 
   for (const [i, drawer] of drawers.entries()) {
     Object.assign(state,drawer.standing);
     const context = {zone:'newmoon',player:state};
-    assert.equal(registry.nearest(state,context).item.id,drawer.shopAction.productId);
+    const shelf = registry.nearest(state,context).item;
+    assert.equal(shelf.id,drawer.shopAction.productId);
+    controls.update(state,registry.productTarget(shelf));
+    assert.equal(controls.actions.pickup.hidden,false);
     assert(registry.cycle(1));
     const {item} = registry.nearest(state,context);
     assert.equal(item.id,drawer.id);
     assert.equal(registry.productTarget(item),drawer.id);
+    controls.update(state,registry.productTarget(item),false);
+    assert.equal(controls.actions.pickup.hidden,true);
     assert(registry.dispatch(item));
     assert(registry.advanceShopActions('newmoon',1,false));
-    controls.update(state,registry.productTarget(item));
+    controls.update(state,registry.productTarget(item),false);
+    assert.equal(controls.actions.pickup.hidden,true);
     assert.equal(controls.actions.pickup.disabled,false);
     assert(registry.dispatch(item));
     assert.equal(physical.id,drawer.shopAction.productId);

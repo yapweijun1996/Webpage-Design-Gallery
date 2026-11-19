@@ -4,6 +4,7 @@ import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {loadTripoNpc} from './npc-tripo.js';
 import {createVisitorCustomization} from './visitor-v2-customization.js';
 import {disposeVisitorScene, loadVisitorGLTF} from './visitor-gltf.js';
+import {tramLanding} from './tram-ride.js';
 
 // Visitors share the V2 rig's clips, materials and unmerged geometry.
 export const NPC_ROUTES = Object.freeze({
@@ -228,7 +229,7 @@ export async function loadNpcSystem(T, options) {
   }
 }
 
-export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback,onAvatarEvent}) {
+export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,tram=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback,onAvatarEvent}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, hasPlayer=false;
   let admission=nextNpcAdmission();
   const admissionOptions={}, lastPlayer={x:0,z:0}, nextPosition={x:0,z:0};
@@ -238,7 +239,11 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
   let modularStatus='deferred', appearanceSerial=0;
   // Expanded arcade waypoints are up to twelve metres apart.
   const maxLeg = expanded ? 12.5 : 9;
-  const visitors=[], routes=NPC_ROUTES[expanded?'expanded':'classic'].map(([x,z])=>({x,y:0,z}));
+  // Keep the south crowd route outside the tram landing and the waiting player's
+  // avoidance radius, including when visitors spawn before the player arrives.
+  const southLimit = expanded && tram ? tramLanding.z - (PLAYER_CLEARANCE + .9) : Infinity;
+  const visitors=[], routes=NPC_ROUTES[expanded?'expanded':'classic']
+    .map(([x,z])=>({x,y:0,z:Math.min(z,southLimit)}));
   const nearby=new Array(routes.length);
   const clips=Object.fromEntries(CLIP_NAMES.map(name=>[name,source?.animations?.find(clip=>clip.name===name)]));
   const available=Boolean(source?.scene && Object.values(clips).every(clip=>clip && clip.duration>0 && clip.tracks.length));

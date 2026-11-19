@@ -716,6 +716,9 @@ var tramCaptions = Object.freeze([
   ["S16", 139.92, "GP", "A perforated teal tool board holds a family of oversized empty eyelets above a small tracker demonstration bench."],
   ["S17", 144.5, "Gigaset", "A gabled felt telephone alcove frames a small real-scale cordless handset at the end of a warm domestic corridor."]
 ].map(([id, distance, name, feature]) => Object.freeze({ id, distance, name, feature, direction: "On your left" })));
+function tramEnabled(expanded, search) {
+  return expanded && new URLSearchParams(search).get("tram") === "1";
+}
 var idle = Object.freeze({ phase: "idle", distance: 0, caption: -1, active: false, seated: false, blocked: false });
 
 // assets/onboarding/components.js
@@ -6683,7 +6686,7 @@ function updateHUD() {
   selectedInteraction = selection.item;
   interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  productControl?.update(p, interactions.productTarget(selectedInteraction));
+  productControl?.update(p, interactions.productTarget(selectedInteraction), !selectedInteraction?.shopAction?.productId);
   shelfFocus?.setNearby(nearby);
   ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper, hasHeldProduct: Boolean(productControl && p.character.physicalProduct.held) });
 }
@@ -7443,6 +7446,7 @@ async function installNpcs(T, R, prepareModel, source) {
       playerCollider: player.capsule,
       playerBody: player.body,
       expanded,
+      tram: tramEnabled(expanded, location.search),
       mobile: innerWidth < 1000,
       tier: quality.state?.tier || "balanced",
       enabled,

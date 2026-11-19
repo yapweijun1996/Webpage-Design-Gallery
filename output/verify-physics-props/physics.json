@@ -1,0 +1,62 @@
+{
+  "initialCan": {
+    "x": -11.605550765991211,
+    "y": 1.04799485206604,
+    "z": -6.905615329742432,
+    "sleeping": false,
+    "id": "new-moon-au-425g-front",
+    "floor": -0.019901156425476074,
+    "halfHeight": 0.062
+  },
+  "settled": {
+    "can": {
+      "x": -11.671516418457031,
+      "y": 0.01849144883453846,
+      "z": -6.8586249351501465,
+      "sleeping": true,
+      "id": "new-moon-au-425g-front",
+      "floor": -0.019901156425476074,
+      "halfHeight": 0.062
+    },
+    "ball": null,
+    "basket": null,
+    "activeBodies": 0,
+    "bodyStepMs": 0.29999998211860657
+  },
+  "ball": {
+    "before": {
+      "x": 11.399999618530273,
+      "y": 0.13983124494552612,
+      "z": 26,
+      "sleeping": true
+    },
+    "after": {
+      "x": 11.405561447143555,
+      "y": 0.1396952122449875,
+      "z": 25.309457778930664,
+      "sleeping": false
+    },
+    "activeBodies": 1,
+    "bodyStepMs": 0.19999998807907104
+  },
+  "basket": {
+    "before": {
+      "x": 13.000045776367188,
+      "y": 0.11990296840667725,
+      "z": 25.999996185302734,
+      "sleeping": true
+    },
+    "after": {
+      "x": 13.051311492919922,
+      "y": 0.11985334008932114,
+      "z": 25.317180633544922,
+      "sleeping": false
+    },
+    "activeBodies": 2,
+    "bodyStepMs": 0.09999999403953552
+  },
+  "interiors": {
+    "activeBodies": 1,
+    "bodyStepMs": 0.19999998807907104
+  }
+}

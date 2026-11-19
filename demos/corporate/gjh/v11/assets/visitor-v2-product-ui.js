@@ -72,11 +72,12 @@ export function installPhysicalProductControl(player, world, paused, interaction
     }
   });
 
-  return {actions:{pickup,add,putBack,notice}, update(s,id) {
+  return {actions:{pickup,add,putBack,notice}, update(s,id,showPickupButton = true) {
     nearby=id;
     const p=s.character.physicalProduct, shelf=shelves.get(id);
     const inReach=Boolean(shelf&&isShelfInReach(s,shelf.pickup));
-    const showPickup=p.phase==='empty'&&Boolean(shelf)&&!s.seated&&!s.pushing&&!s.elevatorTravel;
+    // A selected drawer owns the prompt for opening and then picking up.
+    const showPickup=showPickupButton&&p.phase==='empty'&&Boolean(shelf)&&!s.seated&&!s.pushing&&!s.elevatorTravel;
     const showConfirmation=p.phase==='bag'||(p.phase==='empty'&&performance.now()<confirmationUntil);
     const returnAvailable=canReturn(s), addAvailable=canAdd(s), pickupAvailable=canPickUp(s,inReach);
     const presentation=[p.phase,p.id,Boolean(s.productApproaching),showPickup,
