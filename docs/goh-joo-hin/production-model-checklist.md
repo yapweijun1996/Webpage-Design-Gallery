@@ -39,8 +39,10 @@ The [dated HPB list](https://www.healthhub.sg/sites/assets/Assets/PDFs/HPB/Food/
 
 [Design and runtime](04-borsch-med/README.md) · [Inventory](04-borsch-med/model-inventory.md)
 
-- [ ] **Mosquito Repellent Patch, 18 patches.** Verify the retail carton, sachet and patch shape and approved print surfaces.
-- [ ] **Lingzhi Cracked Spores Powder 200 mg × 60 twin pack.** Measure the individual box and twin pack. Confirm packaging edition and placement on the right shelf.
+- [x] **Mosquito Repellent Patch, 18 patches, unprinted form study.** The official views support a thin carton with a hanger, a sealed pouch and six rounded-square patches arranged in two columns and three rows. [Editable studies and official views](../../models/gjh-borsch-packs/README.md)
+- [ ] **Mosquito Repellent Patch, 18 patches, exact retail pack.** Measure each component, confirm the current print edition and verify the intended artwork use.
+- [x] **Lingzhi Cracked Spores Powder 200 mg × 60 twin pack, unprinted form study.** Two cartons follow the nominal single and twin dimensions and sit on the right library shelf. [Editable studies and official views](../../models/gjh-borsch-packs/README.md)
+- [ ] **Lingzhi Cracked Spores Powder 200 mg × 60 twin pack, exact retail pack.** Verify with physical samples, including any outer wrap, current label and artwork use.
 
 ## S05 Pien Tze Huang
 

@@ -3117,9 +3117,9 @@
       {
         "store": "S04",
         "file": "s04-borsch-details.glb",
-        "bytes": 34500,
-        "sha256": "71d76edaa1474d650580ca987f6744b3bcd5c8172f5abe122a1b2a534e6f3515",
-        "triangles": 1710,
+        "bytes": 36060,
+        "sha256": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2",
+        "triangles": 1742,
         "draws": 3,
         "instances": 20,
         "motion": [],
