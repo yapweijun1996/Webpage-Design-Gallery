@@ -10,7 +10,25 @@ import {storeDestinations} from './store-destinations.js';
 import {liftLayout} from './lift-layout.js';
 import {icon} from './icons.js';
 import {FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD} from './feature-kiosk.js';
+import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
+function formatAutomaticMallTheme(calendar, saved) {
+  const language = document.documentElement.lang;
+  const copy = MALL_THEME_COPY[language] ?? MALL_THEME_COPY.en;
+  const locale = language === 'en' ? 'en-SG' : language;
+  let text = copy['Automatic: Everyday'];
+  if (calendar.festival) {
+    const template = calendar.theme === 'everyday' ? 'Automatic: Everyday (next: {festival} {when})' :
+      'Automatic: {festival} ({date}, {when})';
+    const values = {
+      festival: copy[calendar.festivalLabel],
+      date: new Intl.DateTimeFormat(locale, {day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(calendar.festival.date)),
+      when: new Intl.RelativeTimeFormat(locale, {numeric:'auto'}).format(calendar.daysToFestival,'day'),
+    };
+    text = copy[template].replace(/\{(\w+)\}/g, (_, key) => values[key]);
+  }
+  return saved ? text : `${text} ${copy['Theme settings could not be saved.']}`;
+}
 
 export function createUI(expanded = false) {
   const scene = document.getElementById('scene');
@@ -50,7 +68,8 @@ export function createUI(expanded = false) {
   const return3D = document.getElementById('graphics-return');
   const themeDialog=document.getElementById('mall-theme-dialog'),themeSelect=document.getElementById('mall-theme-select'),themeApply=document.getElementById('mall-theme-apply'),themeStatus=document.getElementById('mall-theme-status');
   const themeOpen=document.getElementById('mall-theme-open'),directoryThemeOpen=document.getElementById('directory-theme-open');
-  let mallTheme=null,themeOpener=null;
+  let mallTheme=null,themeOpener=null,themePreference=null;
+  const cancelMallTheme=()=>mallTheme?.cancel({interactiveOnly:true});
   document.getElementById('graphics-reload').addEventListener('click', () => location.reload());
   return3D.addEventListener('click', () => { if (available) setView(true, true); });
   const playerDot = document.getElementById('player-dot');
@@ -498,21 +517,28 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     if (status.textContent !== message) status.textContent = message;
   }
 
-  function updateMallTheme(state=mallTheme?.state()) {
+  function updateMallTheme(state=mallTheme?.state(), reset=false) {
     if (!expanded) return;
-    if (state && [...themeSelect.options].some(option=>option.value===state.active)) themeSelect.value=state.active;
+    if (state && (reset || themePreference!==state.preference)) {
+      themePreference=state.preference;
+      themeSelect.value=themePreference;
+    }
     themeApply.disabled=!mallTheme || !available || Boolean(state?.suspended || state?.pending);
     themeSelect.disabled=!mallTheme || !available || Boolean(state?.suspended || state?.pending);
-    themeStatus.textContent=!mallTheme?'Theme settings are unavailable. The everyday appearance remains.':!available?'Theme settings are unavailable while 3D is not ready.':state?.message || `${state?.label || 'Everyday'} is active.`;
+    const text=!mallTheme?'Theme settings are unavailable. The everyday appearance remains.':
+      !available?'Theme settings are unavailable while 3D is not ready.':
+      state.message || (state.auto ? formatAutomaticMallTheme(state.auto,state.saved) : `${state.label} is active.`);
+    if (themeStatus.textContent!==text) themeStatus.textContent=text;
   }
+  window.addEventListener('mall:languagechange',()=>updateMallTheme());
   function openMallTheme(event) {
     if (themeDialog.open || document.querySelector('dialog[open]') || (showing3D && !canUsePanels())) return;
     themeOpener=event.currentTarget;shelfFocus?.close({focus:false});
-    themeDialog.showModal();updateMallTheme();notifyMode();document.getElementById('mall-theme-title').focus({preventScroll:true});
+    themeDialog.showModal();updateMallTheme(undefined,true);notifyMode();document.getElementById('mall-theme-title').focus({preventScroll:true});
   }
   for(const button of [themeOpen,directoryThemeOpen]) button.addEventListener('click',openMallTheme);
-  document.getElementById('mall-theme-close').addEventListener('click',()=>{mallTheme?.cancel();themeDialog.close();});
-  themeDialog.addEventListener('cancel',()=>mallTheme?.cancel());
+  document.getElementById('mall-theme-close').addEventListener('click',()=>{cancelMallTheme();themeDialog.close();});
+  themeDialog.addEventListener('cancel',cancelMallTheme);
   themeDialog.addEventListener('keydown',event=>{
     if(event.key!=='Tab')return;
     const controls=[...themeDialog.querySelectorAll('button:not(:disabled),select:not(:disabled)')].filter(node=>node.getClientRects().length);
@@ -522,7 +548,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}
   });
   themeDialog.addEventListener('close',()=>{
-    mallTheme?.cancel();notifyMode();
+    cancelMallTheme();notifyMode();
     if(themeOpener?.isConnected && themeOpener.getClientRects().length && (available || themeOpener===directoryThemeOpen)) themeOpener.focus({preventScroll:true});
     themeOpener=null;
   });
@@ -533,7 +559,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     if (next === showing3D) return;
     shelfFocus?.close({focus: false});
     if (dialog.open) dialog.close();
-    if (themeDialog.open) {mallTheme?.cancel();themeDialog.close('view-change');}
+    if (themeDialog.open) {cancelMallTheme();themeDialog.close('view-change');}
     amenityPanel.close('view-change');
     showing3D = next;
     mallMap.open = false;
@@ -795,7 +821,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       for(const option of coordinator?.options() || [{id:'everyday',label:'Everyday'}]) {
         const node=document.createElement('option');node.value=option.id;node.textContent=option.label;themeSelect.append(node);
       }
-      themeOpen.hidden=false;directoryThemeOpen.hidden=false;updateMallTheme();
+      themeOpen.hidden=false;directoryThemeOpen.hidden=false;updateMallTheme(undefined,true);
     },
     updateMallTheme,
     show3D() {
@@ -946,7 +972,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       const wasThemeOpen=themeDialog.open;
       const handled=handlePanelGamepad(pad,themeDialog.open?themeDialog:amenityPanel.dialog.open?amenityPanel.dialog:dialog.open?dialog:bag.open?bagDialog:help.open?help:mallMap.open?mallMap:!showing3D?document.body:null);
       // Native close queues its event; abort before a pending preparation microtask.
-      if(wasThemeOpen&&!themeDialog.open)mallTheme?.cancel();
+      if(wasThemeOpen&&!themeDialog.open)cancelMallTheme();
       return handled;
     },
     paused() {
