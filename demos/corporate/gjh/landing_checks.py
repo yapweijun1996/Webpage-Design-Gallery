@@ -14,7 +14,7 @@ from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[3]
 DEMOS = Path(__file__).resolve().parent
-VERSIONS = [1, *range(5, 23)]
+VERSIONS = [1, *range(5, 24)]
 VIEWPORTS = {1440: 900, 768: 1024, 390: 844, 320: 740}
 EXTERNAL = {
     5: ('.hero-covers a', 'https://www.gjh.com.sg/newmoon/'),
@@ -30,6 +30,7 @@ INTERNAL = {
     20: ('.shortcut-list a[href="#featured-product"]', '#featured-product'),
     21: ('.shortcut-list a[href="#brand-new-moon"]', '#brand-new-moon'),
     22: ('.shortcut-list a[href="#brand-new-moon"]', '#brand-new-moon'),
+    23: ('.hero .action', '#brand-new-moon'),
 }
 CHAPTER_BRANDS = {'new-moon': 'New Moon', 'mili': 'MILI', 'gogo': 'GOGO',
                   'borsch-med': 'Borsch Med', 'sony': 'Sony'}
@@ -53,7 +54,9 @@ def activate(page, selector):
 
 
 def journey(page, version):
-    if version == 22:
+    if version == 23:
+        product_wall_journey(page)
+    elif version == 22:
         chapters_journey(page)
     elif version in EXTERNAL:
         if version == 16:
@@ -246,6 +249,35 @@ def exhibition_iframe(browser, origin):
         assert draft.evaluate('field => field.selectionStart === 0 && field.selectionEnd === field.value.length')
 
 
+def product_wall_journey(page):
+    hero = page.locator('.hero')
+    expect(hero.get_by_role('link')).to_have_count(1)
+    heading = hero.get_by_role('heading', name='New Moon abalone.')
+    action = hero.get_by_role('link', name='Explore New Moon')
+    expect(heading).to_be_in_viewport(ratio=1)
+    expect(action).to_be_in_viewport(ratio=1)
+    expect(hero.locator('.shelf')).to_have_count(2)
+    if page.viewport_size == {'width': 393, 'height': 852}:
+        assert hero.locator('.wall').bounding_box()['y'] < heading.bounding_box()['y']
+        assert heading.bounding_box()['y'] > page.viewport_size['height'] / 2
+        assert heading.bounding_box()['y'] + heading.bounding_box()['height'] <= action.bounding_box()['y']
+    expect(page.locator('.persistent-actions')).not_to_be_in_viewport()
+    assert abs(hero.bounding_box()['height'] - page.viewport_size['height']) <= 1
+    shortcut, target = INTERNAL[23]
+    activate(page, shortcut)
+    expect(page.locator(target + '-heading')).to_be_focused()
+    expect(page.locator('.persistent-actions')).to_be_in_viewport()
+    trigger = page.get_by_role('link', name='Enquire about New Moon')
+    trigger.click()
+    sheet = page.get_by_role('dialog', name='Sales Enquiry')
+    expect(sheet.get_by_role('radio', name='New Moon', exact=True)).to_be_checked()
+    sheet.get_by_label('Requirements').fill('Delivery date')
+    product = page.locator('#featured-sku').inner_text()
+    expect(sheet.locator('#enquiry-preview')).to_have_text(f'Brand: New Moon\nProduct: {product}\nRequirements: Delivery date')
+    sheet.get_by_role('button', name='Close enquiry sheet').click()
+    expect(trigger).to_be_focused()
+
+
 def chapters_journey(page):
     width, height = page.viewport_size['width'], page.viewport_size['height']
     shortcut, target = INTERNAL[22]
@@ -415,6 +447,8 @@ def run(versions, capture):
             for version in versions:
                 url = f'{origin}/demos/corporate/gjh/v{version}/'
                 widths = dict(VIEWPORTS)
+                if version == 23:
+                    widths[393] = 852
                 if capture and version in (1, 5, 6, 7):
                     widths[375] = 812
                 for width, height in widths.items():
@@ -423,12 +457,12 @@ def run(versions, capture):
                         page = context.new_page()
                         errors = []
                         page.on('pageerror', lambda error: errors.append(str(error)))
-                        if version in (21, 22):
+                        if version in (21, 22, 23):
                             page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
                         page.goto(url, wait_until='domcontentloaded')
                         page.evaluate('document.fonts.ready')
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (version, width)
-                        if capture and width != 320:
+                        if capture and width not in (320, 393):
                             capture_preview(page, version, width)
                         journey(page, version)
                         assert not errors, (version, width, errors)

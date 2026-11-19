@@ -12,6 +12,12 @@ export const atriumLayout = Object.freeze({
   arcadePilaster:Object.freeze({inset:.03,depth:.45}),
   garden:Object.freeze({x:10,z:16,width:8,depth:3,height:.48}),
   lounges:Object.freeze([lounge('west',-4),lounge('east',24)]),
+  facilitiesBlock:Object.freeze({x:25,z:10,width:6,depth:4,height:3}),
+  upperSeats:Object.freeze([
+    Object.freeze({x:-6.1,z:8.8,facing:1,finish:'oak'}),
+    Object.freeze({x:.1,z:8.8,facing:1,finish:'slats'}),
+    Object.freeze({x:-3,z:6,facing:-1,finish:'upholstered'})
+  ]),
   // Reserved for a future removable installation; no stage 4 object occupies it.
   event:Object.freeze({minX:3,maxX:17,minZ:24,maxZ:32})
 });

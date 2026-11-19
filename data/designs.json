@@ -736,6 +736,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v23",
+    "companyId": "gjh",
+    "slug": "v23",
+    "version": "v23",
+    "title": "New Moon Product Wall",
+    "description": "Explore New Moon abalone tins from four origins, then visit the brand chapter or prepare a sales enquiry.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 200,
+    "demoPath": "demos/corporate/gjh/v23/index.html",
+    "thumbnail": "demos/corporate/gjh/v23/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v23/screenshots/1440.png",
+        "width": 1440,
+        "height": 7993
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v23/screenshots/768.png",
+        "width": 768,
+        "height": 8322
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v23/screenshots/390.png",
+        "width": 390,
+        "height": 7508
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

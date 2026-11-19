@@ -2479,6 +2479,7 @@ body.is-3d .mall-overlay #hud-context-stack{
   max-height:calc(100% - var(--hud-context-top) - var(--hud-context-bottom));
   display:flex;flex-direction:column-reverse;align-items:flex-start;gap:var(--space-2);
 }
+#skip-lift-ride{pointer-events:auto;min-height:44px;padding-inline:var(--space-3);cursor:pointer}
 body.is-3d .mall-overlay #hud-context{
   display:flex;flex:none;align-items:center;
   width:max-content;max-width:min(27rem,100%);
@@ -2618,6 +2619,25 @@ body.is-3d :is(.site-header,.mall-overlay) :is(.hud-control,#camera-tools button
     position:static;width:330px;max-width:calc(100% - var(--space-2));min-height:0;overflow:auto;
   }
 }
+
+/* Visitor arrivals page: language, dark or light theme and the update check. Dark is the default look. */
+html[data-gjh-design="v11"] .arrivals header{flex-wrap:wrap;height:auto;min-height:76px;row-gap:8px;padding-block:10px}
+.arrival-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-inline-start:auto}
+.arrival-tools select,.arrival-tools button{min-height:44px;padding:6px 12px;font:600 .82rem Manrope,Arial,sans-serif;color:var(--entry-ink);background:transparent;border:1px solid var(--entry-rule);border-radius:var(--entry-round,1rem);cursor:pointer}
+.arrival-tools select{padding-inline-end:6px}
+.arrival-tools select option{color:#17372e;background:#fffaf1}
+.arrival-tools button:disabled{opacity:.72;cursor:default}
+.arrival-tools button:hover:not(:disabled),.arrival-tools select:hover{border-color:var(--entry-accent)}
+.arrival-tools :focus-visible{outline:3px solid var(--entry-accent);outline-offset:2px}
+.arrival-update bdi{font-variant-numeric:tabular-nums;color:var(--entry-accent)}
+.arrival-update-status{flex-basis:100%;min-height:1.2em;margin:0;font-size:.82rem;color:var(--entry-accent);text-align:end}
+.arrival-update-status:empty{display:none}
+@media(max-width:640px){html[data-gjh-design="v11"] .arrivals header{min-height:56px}.arrival-tools{width:100%;margin-inline-start:0}.arrival-tools>*{flex:1 1 auto}.arrival-update-status{text-align:start}}
+html[data-gjh-design="v11"][data-color-scheme="light"]{color-scheme:light;--entry-paper:#f4f1e6;--entry-ink:#17372e;--entry-accent:#8a6420;--entry-surface:#ebe7d8;--entry-light:#fffaf1;--entry-dark:#fffaf1}
+html[data-gjh-design="v11"][data-color-scheme="light"] .arrival-tools option{color:#17372e;background:#fffaf1}
+html[data-gjh-design="v11"][data-color-scheme="light"] .arrivals .arrival-board img{background:#fff}
+@media(prefers-reduced-motion:reduce){.arrival-tools button,.arrival-tools select{transition:none}}
+html[data-gjh-design="v11"][data-color-scheme="light"] .arrival-actions #arrival-walk{color:var(--entry-ink)}
 
 /* Source: assets/onboarding/onboarding.tokens.css */
 /* Component aliases only. Canonical values live in design-system/tokens.json. */

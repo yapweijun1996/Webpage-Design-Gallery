@@ -82,7 +82,8 @@ def run():
      settled=state(page);assert not settled['elevator']['calling'] and settled['capsuleEnabled'];assert math.hypot(settled['x']-before['x'],settled['z']-before['z'])<.01
      row['contextLosses'].append({'phase':'empty-call','before':calling,'settled':settled})
      page.evaluate('__liftLoss.restoreContext()');page.wait_for_function('__mall.ready',timeout=60000);page.locator('#graphics-return').click();step(page);lobby(page)
-     for elapsed in [150,1100,2400,3100]:
+     # Sample entry, sealed departure, mid-travel and egress on the 1.84 s ride.
+     for elapsed in [150,650,1100,1700]:
       dock(page);action(page);trip=step(page,elapsed);assert trip['elevatorTravel'],trip['elevatorPhase']
       page.evaluate("()=>{window.__liftLoss=document.querySelector('#scene').getContext('webgl2').getExtension('WEBGL_lose_context');__liftLoss.loseContext()}");page.wait_for_function('!__mall.ready')
       s=state(page);assert not s['elevatorTravel'] and s['capsuleEnabled'];assert abs(s['x']+6.4)<.1 and abs(s['z']-10)<.1;assert min(abs(s['y']),abs(s['y']-7.2))<.1

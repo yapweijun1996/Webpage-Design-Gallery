@@ -1,4 +1,5 @@
 import './assets/mall-language.js';
+import './assets/color-scheme.js';
 import {icon} from './assets/icons.js';
 
 /* V11 owns only its scoped offline fallback. Live mall resources stay network-only. */
@@ -9,6 +10,7 @@ import {icon} from './assets/icons.js';
   const checks = [...document.querySelectorAll('[data-mall-check]')];
   const setChecking = disabled => checks.forEach(button => { button.disabled = disabled; });
   const sceneStatus = document.querySelector('[data-mall-check-status]');
+  const arrivalStatus = document.querySelector('#arrival-update-status');
   const status = document.querySelector('#mall-app-status');
   const connection = document.querySelector('#mall-connection-notice');
   const notice = document.querySelector('#mall-update-notice');
@@ -29,6 +31,7 @@ import {icon} from './assets/icons.js';
   function setCheckStatus(text) {
     status.textContent = text;
     sceneStatus.textContent = text;
+    if (arrivalStatus) arrivalStatus.textContent = text;
   }
   function connectionState(connected) {
     connection.hidden = connected;

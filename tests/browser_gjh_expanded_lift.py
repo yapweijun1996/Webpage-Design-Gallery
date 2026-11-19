@@ -88,7 +88,7 @@ def run():
         # Native WebGL loss settles a moving rider at the nearest guarded landing.
         # The physical lift first boards horizontally; these times reach the
         # lower and upper portions of the actual vertical journey.
-        for elapsed in [1100,2400]:
+        for elapsed in [950,1200]:
           c=browser.new_context(viewport={'width':390,'height':844},reduced_motion='no-preference',service_workers='block')
           c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed')");page=c.new_page();page.goto(mall_entry_url(url));page.wait_for_function('window.__sceneReady',timeout=90000)
           page.locator('#view-toggle').click();page.locator('[data-add]').first.click();page.locator('#view-toggle').click()

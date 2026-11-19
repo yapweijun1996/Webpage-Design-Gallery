@@ -13,6 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/mall-icon-192.png">
   <link rel="preload" href="assets/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <script>try{var c=localStorage.getItem("gjh-v11-color-scheme");if(c==="light"||c==="dark")document.documentElement.dataset.colorScheme=c}catch(e){}</script>
   <link rel="stylesheet" href="style.bundle.css">
   <script type="module" src="assets/loader.js"></script>
   <script type="module" src="pwa.js"></script>
@@ -21,7 +22,14 @@
 </head>
 <body data-arrivals>
 <section id="mall-arrivals" class="arrivals" aria-labelledby="arrivals-heading">
-  <a class="skip-link" href="#arrival-board-heading">Skip to featured products</a><header><strong>Goh Joo Hin</strong><span>Virtual mall / Visitor arrivals</span></header>
+  <a class="skip-link" href="#arrival-board-heading">Skip to featured products</a><header><strong>Goh Joo Hin</strong><span>Virtual mall / Visitor arrivals</span>
+    <div class="arrival-tools" role="group" aria-label="Page settings">
+      <label class="arrival-language"><span class="sr-only">Language</span><select id="arrival-language" data-mall-language><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select></label>
+      <button id="arrival-theme" class="arrival-theme" type="button" aria-pressed="false"><span id="arrival-theme-label">Switch to light theme</span></button>
+      <button id="arrival-check-update" class="arrival-update" data-mall-check type="button" disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button>
+    </div>
+    <p id="arrival-update-status" class="arrival-update-status" role="status" aria-live="polite"></p>
+  </header>
   <div class="arrival-layout"><div class="arrival-copy"><p class="entry-kicker">Walking guide</p>
   <h1 id="arrivals-heading">Everyday, <br><em>explored.</em></h1>
   <p class="entry-lead">Go straight to four New Moon packs, or explore the mall on foot.</p>
@@ -148,6 +156,7 @@
             <p id="hud-context-hint" class="hud-context-chip" hidden><span id="hud-nearby-arrow" data-icon="arrow-up" aria-hidden="true" hidden></span><span id="hud-context-text"></span><span id="hud-nearby-direction" class="sr-only" hidden></span></p>
             <div class="inspect-prompt" id="inspect-prompt" hidden><div class="nearby-card"><img id="nearby-image" alt="" width="26" height="26" hidden><span id="nearby-name"></span><span id="nearby-distance" aria-describedby="interaction-distance-description" hidden></span></div><button id="hud-more-actions" type="button" aria-label="More actions" title="More actions" aria-expanded="false" aria-controls="inspect" hidden><span data-icon="menu" aria-hidden="true"></span></button><button id="inspect" class="hud-control" type="button" aria-describedby="interaction-distance-description"><span id="inspect-verb">Inspect</span></button></div>
           </div>
+          <button id="skip-lift-ride" class="hud-context-chip" type="button" hidden>Skip ride</button>
         </div>
         <div id="nearby-shelf-outline" class="nearby-shelf-outline" aria-hidden="true" hidden></div>
         <div id="interaction-point" class="interaction-point" aria-hidden="true" hidden><span></span><small>Press F</small></div>
