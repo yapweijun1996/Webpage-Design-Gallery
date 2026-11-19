@@ -15,6 +15,19 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 - [ ] Running now: New Moon and all-shop flicker fix (photo mip-maps, decal offsets).
 - [ ] Owner real-device checks: iPhone and Android phone (export the performance JSON from the lap page).
 
+### V11 loader motion
+
+[Codex CLI concept storyboard](docs/gjh-v11-references/loader-motion-concept.webp) shows Engine, Models and Retry on a phone viewport. The illustration explores a gold atrium outline, progressive fixture lighting and a quiet failure state. [Chrome startup comparison](docs/gjh-v11-references/loader-motion-runtime.jpg).
+
+- [x] Develop the “Everyday, explored.” loading screen into a teal-and-gold atrium arrival. Each completed milestone can reveal one set of architectural lines and light fixtures. Use a short transition into the live mall once the first scene and required preparation are ready.
+- [x] Confirm the five existing states on desktop and 390 px touch layouts. Engine establishes the outline, Scene reveals the atrium, Models adds fixtures, First view lights the entrance, and Details settles the final state. Progress and assistive announcements follow the existing readiness signals. Keep Enter now where the runtime permits it.
+- [x] Review failure and recovery when a required asset request drops. Freeze motion at the last completed milestone and keep Retry and the store directory available. Honor reduced motion with static milestone states, stop visual work when hidden, and preserve keyboard focus and readable status messages.
+- [x] Build from the authored [loader markup](demos/corporate/gjh/v11/index.html), [loader state](demos/corporate/gjh/v11/assets/loader.js), [startup milestones](demos/corporate/gjh/v11/script.js), and [loader CSS](demos/corporate/gjh/v11/style.css). Use a small inline drawing with transform and opacity transitions. Verify startup and early-entry frame timing without adding runtime downloads, animation timers, or a second WebGL canvas.
+
+### V11 touch Sit button alignment
+
+- [x] Centre the seated-person icon and `Sit` label on the same vertical centreline in the round nearby-action button. Stack them and align the pair optically within the circle. Verify a phone-viewport screenshot against the reported misalignment, retain the touch target size, and tap through Sit and Stand to confirm the interaction. Chrome touch emulation at 390 px measured a 56 × 56 px target and horizontal centre alignment within 0.01 px. [Chrome seat action](docs/gjh-v11-references/sit-button-runtime.jpg).
+
 ## Mobile performance, controls and signage programme (2026-11-18)
 
 Owner device: iPhone, 393 px wide. Owner priorities: no lag on the phone, premium look, shop signage and interiors that read as real brands. Verification rule: judge from real browser screenshots and the walk probe (`docs/walk_probe.py`), not from agent summaries. Checklist: [taste engine checklist](docs/ui-ux/taste-engine-checklist.md).

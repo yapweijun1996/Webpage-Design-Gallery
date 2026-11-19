@@ -70,19 +70,79 @@
 </section>
   <section id="app-loader" class="app-loader" aria-label="Loading the virtual mall">
     <div class="app-loader-card">
-      <img class="app-loader-mark" src="assets/gjh-loader-mark.svg" alt="GJH">
       <p class="app-loader-kicker">GJH Virtual Mall</p>
       <h2>Everyday, <em>explored.</em></h2>
+      <svg class="app-loader-atrium" viewBox="0 0 400 318" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="loader-stone" x2="0%" y2="100%">
+            <stop stop-color="#f5ddb0"/><stop offset="1" stop-color="#877357"/>
+          </linearGradient>
+          <linearGradient id="loader-glass" x2="0%" y2="100%">
+            <stop stop-color="#254d43"/><stop offset="1" stop-color="#0c211d"/>
+          </linearGradient>
+          <radialGradient id="loader-lamp">
+            <stop stop-color="#ffd688" stop-opacity=".85"/><stop offset="1" stop-color="#eeb363" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <path d="M32 247 200 189l168 58-168 63Z" fill="#152e29" stroke="#49635a" stroke-width="1.5"/>
+        <g class="app-loader-reveal app-loader-shell">
+          <path d="M32 247 200 189l168 58v8l-168 63-168-63Z" fill="#6d5f4d"/>
+          <path d="M32 247 200 189l168 58-168 63Z" fill="#bb9f72" stroke="#d7bc8a"/>
+          <path d="m70 261 168-58m-130 72 167-59m-128 73 165-59m17 35-166-62m127 77-164-64m124 78-159-64" fill="none" stroke="#e5c99c" opacity=".55"/>
+          <path d="M41 240V149L200 95l159 54v91L200 184Z" fill="url(#loader-glass)" stroke="#9b8967" stroke-width="2"/>
+          <path d="M41 150V92l159-55 159 55v58L200 95Z" fill="#295047" stroke="#9b8967" stroke-width="2"/>
+          <path d="m38 92 162-56 162 56v9L200 45 38 101Zm0 58 162-56 162 56v14l-162-56-162 56Z" fill="url(#loader-stone)" stroke="#f0d4a5"/>
+          <path d="M49 140v-22l151-53 151 53v22L200 88Z" fill="none" stroke="#d0af74" stroke-width="2"/>
+          <path d="M58 137v-22m21 14v-21m21 14v-22m21 14v-21m21 14v-22m21 14V78m21 14V70m32 0v22m21-14v21m21-14v22m21-14v21m21-14v22m21-14v21m21-14v22" fill="none" stroke="#ab926b"/>
+        </g>
+        <g class="app-loader-reveal app-loader-fixtures" stroke="#a58a62" stroke-width="1.5">
+          <path d="M53 235v-64l58-20v64Zm68-24v-64l64-22v64Zm94-22v-64l64 22v64Zm74 26v-64l58 20v64Z" fill="#5a4f37"/>
+          <path d="M61 231v-54l42-14v54Zm70-24v-54l45-16v54Zm93-16v-54l45 16v54Zm73 26v-54l42 14v54Z" fill="#845f3c"/>
+          <path d="M82 170v54m72-79v54m92-54v54m72-29v54" fill="none" stroke="#d5ae71"/>
+          <path d="m74 208 24-8v9l-24 8Zm63-26 28-10v9l-28 10Zm97-10 29 10v9l-29-10Zm69 29 25 8v9l-25-8Z" fill="#c69b62"/>
+          <path d="m64 250 24-8 32 10-24 8Zm216 2 24-10 32 8-24 9Z" fill="#263d31" stroke="#b49c70"/>
+          <ellipse cx="200" cy="261" rx="26" ry="10" fill="#536347"/>
+          <path d="M175 260v8c0 10 50 10 50 0v-8c-10 9-40 9-50 0Z" fill="url(#loader-stone)"/>
+          <path d="M200 259v-48m0 25-15-12m15 7 14-13" fill="none" stroke="#b88e5e" stroke-width="2.5"/>
+          <path d="M190 218c-14 3-17-13-6-16-1-10 16-15 21-5 10-7 22 6 15 15 3 9-12 16-19 9-4 6-11 4-11-3Z" fill="#496847" stroke="#869671"/>
+        </g>
+        <g class="app-loader-reveal app-loader-entrance" stroke="#ead4a5" stroke-width="1.6" stroke-linejoin="round">
+          <path class="app-loader-portico" d="M78 113C94 62 146 16 200 16s106 46 122 97h-19c-15-44-60-79-103-79s-88 35-103 79ZM80 110h22v124H80Zm218 0h22v124h-22ZM76 113h30v13H76Zm218 0h30v13h-30ZM76 230h30v12H76Zm218 0h30v12h-30ZM190 13h20l-3 26h-14Z"/>
+          <path d="M87 113C103 67 152 25 200 25s97 42 113 88m-222 13v104m218-104v104M80 118h22m200 0h18M80 235h22m200 0h18" fill="none" opacity=".68"/>
+        </g>
+        <g class="app-loader-reveal app-loader-lighting">
+          <path d="M173 36v43m27-39v57m27-61v43" stroke="#d0a571" stroke-width="1.2"/>
+          <g fill="url(#loader-lamp)">
+            <circle cx="173" cy="79" r="17"/><circle cx="200" cy="97" r="23"/><circle cx="227" cy="79" r="17"/>
+            <circle cx="61" cy="196" r="18"/><circle cx="130" cy="172" r="19"/><circle cx="270" cy="172" r="19"/><circle cx="339" cy="196" r="18"/>
+          </g>
+          <path d="M200 267c-42 0-62-6-62-12s20-12 62-12 62 6 62 12-20 12-62 12Z" fill="url(#loader-lamp)" opacity=".4"/>
+          <g fill="#fff0c8">
+            <circle cx="173" cy="79" r="2.5"/><circle cx="200" cy="97" r="3"/><circle cx="227" cy="79" r="2.5"/>
+            <circle cx="61" cy="196" r="2"/><circle cx="130" cy="172" r="2"/><circle cx="270" cy="172" r="2"/><circle cx="339" cy="196" r="2"/>
+          </g>
+        </g>
+        <g class="app-loader-reveal app-loader-finish" fill="none" stroke="#f6da9a" stroke-width="1.8" stroke-linecap="round">
+          <path d="m113 280 87 31 87-31M89 261l-14-5m236 5 14-5"/>
+          <path d="M184 46c-31 5-62 31-76 54m108-54c31 5 62 31 76 54" opacity=".7"/>
+        </g>
+      </svg>
       <div class="app-loader-progress">
-        <div class="app-loader-progress-head"><strong id="loader-status" role="status" aria-live="polite">Preparing the mall…</strong><span id="loader-count" aria-hidden="true">0 / 4</span></div>
+        <div class="app-loader-progress-head"><strong id="loader-status" role="status" aria-live="polite">Preparing the mall…</strong><span id="loader-count" aria-hidden="true">0 / 5</span></div>
         <div class="app-loader-bar" aria-hidden="true"><i id="loader-fill"></i></div>
-        <progress id="loader-progress" aria-label="Mall startup stages completed" value="0" max="4">0 of 4 stages</progress>
-        <ol class="app-loader-steps" aria-hidden="true"><li data-stage="physics">Engine</li><li data-stage="scene">Scene</li><li data-stage="models">Models</li><li data-stage="frame">First view</li></ol>
+        <progress id="loader-progress" aria-label="Mall startup stages completed" value="0" max="5">0 of 5 stages</progress>
+        <ol class="app-loader-steps" aria-hidden="true">
+          <li data-stage="physics">Engine</li>
+          <li data-stage="scene">Scene</li>
+          <li data-stage="models">Models</li>
+          <li data-stage="frame">First view</li>
+          <li data-stage="warm">Details</li>
+        </ol>
       </div>
       <div class="app-loader-actions">
-        <button id="loader-retry" type="button" hidden>Retry 3D mall</button>
         <button id="loader-enter-now" type="button" hidden>Enter 3D mall now</button>
         <a id="loader-directory" href="#store-list">Browse the store directory <span data-icon="arrow-right" aria-hidden="true"></span></a>
+        <button id="loader-retry" type="button" hidden>Retry 3D mall</button>
       </div>
       <p class="app-loader-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
     </div>

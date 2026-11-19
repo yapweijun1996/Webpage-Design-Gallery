@@ -2069,7 +2069,6 @@ function createUI(expanded = false) {
     productKind.textContent = record.kind;
     productDescription.textContent = record.description;
     bag.select(id);
-    projectBagCount(bag.snapshot());
     returnFocus = document.activeElement;
     dialog.showModal();
     newMoonPreview.open(id);
@@ -2518,6 +2517,7 @@ function createUI(expanded = false) {
         labelInspect(`${action} ${records.get(nearby).name}`);
       }
       const iconName = seated || selectedInteraction?.kind === "sit" ? "sit" : selectedInteraction?.kind === "travel" ? "lift" : selectedInteraction?.kind === "open" && selectedInteraction.door ? "door" : selectedInteraction?.kind === "pickup" ? "pick-up" : records.get(nearby)?.action === "map" ? "map-pin" : "quality-inspection";
+      setHudAttribute(inspectButton, "data-action-icon", iconName);
       if (!interactionIcons.has(iconName))
         interactionIcons.set(iconName, icon(iconName, { size: 18 }));
       const actionIcon = interactionIcons.get(iconName);
@@ -4811,8 +4811,9 @@ var loungeBench = {
   front: -0.456,
   backrestFront: 0.213
 };
-function isInFrontOfSeat(seat, z) {
-  return (z - seat.z) * seat.facing <= -seat.frontEdge;
+function isInFrontOfSeat(seat, { x, z }) {
+  const depth = (x - seat.x) * Math.sin(seat.angle) + (z - seat.z) * Math.cos(seat.angle);
+  return depth <= -seat.frontEdge;
 }
 
 // demos/corporate/gjh/v11/assets/interaction-registry.js
@@ -4863,7 +4864,7 @@ function createInteractionRegistry(entries, describe = () => ({})) {
       const floor = typeof item.floor === "number" ? item.floor : item.y;
       if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
         continue;
-      if (item.seat && !isInFrontOfSeat(item.seat, position.z))
+      if (item.seat && !isInFrontOfSeat(item.seat, position))
         continue;
       const d = Math.hypot(position.x - item.anchor.x, position.z - item.anchor.z);
       if (d < item.radius && d < distance) {

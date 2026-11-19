@@ -1,13 +1,28 @@
-export function addOriginalShopDetails(zone, x, {box, cylinder, solid, collider}) {
+import {interiorStores} from './interiors/config.js';
+import {createSeatAnchor} from './seat-placements.js';
+
+export function addOriginalShopDetails(zone, x, {box, cylinder, solid, collider, seats}) {
   if (zone === 'newmoon') {
     // Two low tasting stools sit along the open edge of the stone island.
-    for(const z of [-3.29,-4.58]) {
-      const cx=x+1.49;
+    const {frame,props} = interiorStores.S01;
+    const stools = props.find(({socket}) => socket === 'stools1');
+    const [width,,depth] = stools.envelope_whd_m;
+    const floor = frame.floor_surface_y_m;
+    const profile = {size:[width,.693,depth],top:.693,seatCentre:0,front:-depth/2};
+    for (const [index,[localX,,localZ]] of stools.instance_positions_m.entries()) {
+      const cx = x + localX, z = frame.world_origin_m[2] + localZ;
       cylinder('wood',cx,.59,z,.26,.075);
-      cylinder('ivory',cx,.67,z,.27,.095);
+      cylinder('ivory',cx,floor+profile.top-.095/2,z,.27,.095);
       for(const dx of [-.16,.16])for(const dz of [-.16,.16])box('wood',cx+dx,.30,z+dz,.048,.56,.048);
       for(const dz of [-.16,.16])box('brass',cx,.20,z+dz,.34,.026,.027);
-      collider(cx,.35,z,.54,.70,.54);
+      const seatCollider = collider(cx,.35,z,width,.70,depth);
+      seats.push(createSeatAnchor({
+        id:`newmoon-tasting-stool-${index+1}`, name:`New Moon tasting stool ${index+1}`,
+        x:cx,z,floor,accessible:true,
+        exit:{x:cx-.95,y:floor,z},
+        pose:{facing:0,angle:Math.PI/2},
+        clearance:{interactionRadius:.8,capsuleRadius:.3,colliderWidth:width,colliderDepth:depth}
+      },seatCollider.handle,profile,1));
     }
   } else if (zone === 'mili') {
     // A continuous oak kitchen run grounds the pantry shelves above it.

@@ -85,7 +85,7 @@ test('model preparation remains optional and can finish or be skipped', () => {
 test('the last step follows the selected mall language and preserves interruption status', () => {
   const loader = createLoaderState();
   for (const stage of ['physics','scene','models']) loader.complete(stage);
-  assert.equal(loaderLabels(loader.snapshot(), 'ms').lastStep, null);
+  assert.equal(loaderLabels(loader.snapshot(), 'ms').lastStep, 'Butiran');
   loader.complete('frame');
   const state = loader.snapshot();
   assert.deepEqual(loaderLabels(state, 'en'), {status:'Preparing the mall details…', lastStep:'Details'});

@@ -6,14 +6,16 @@ const demo = new URL('../demos/corporate/gjh/v11/', import.meta.url);
 const css = readFileSync(new URL('style.css', demo), 'utf8');
 const html = readFileSync(new URL('index.html', demo), 'utf8');
 const loader = readFileSync(new URL('assets/loader.js', demo), 'utf8');
+const theme = JSON.parse(readFileSync(new URL('../design-system/themes.json', import.meta.url), 'utf8')).themes.v11.tokens;
 
 test('v11 page navigation has one sticky bar and one responsive tabs landmark', () => {
   const sticky = [...css.matchAll(/([^{}]+)\{[^{}]*position:\s*sticky\b[^{}]*\}/g)]
     .map(match => match[1].trim())
     .filter(selector => /(?:site-header|site-secondary|site-tabs|context-navigation-global)/.test(selector));
   assert.deepEqual(sticky, ['body:not(.is-3d) .site-header']);
-  assert.match(css, /body:not\(\.is-3d\) \.site-header\{\s*position:sticky;top:0;z-index:50/);
-  assert.match(css, /\.site-tabs\{position:relative;z-index:49/);
+  assert.match(css, /body:not\(\.is-3d\) \.site-header\{\s*position:sticky;top:0;z-index:var\(--gjh-layer-site-header-sticky\)/);
+  assert.match(css, /\.site-tabs\{position:relative;z-index:var\(--gjh-layer-site-tabs\)/);
+  assert(Number(theme['gjh-layer-site-header-sticky']) > Number(theme['gjh-layer-site-tabs']));
   assert.match(css, /body:not\(\.is-3d\) \.context-navigation-global\{display:none\}/);
   assert.equal((html.match(/<nav class="site-tabs"/g) ?? []).length, 1);
   assert.match(html, /<a href="#mall-arrivals" aria-current="page">Home<\/a>\s*<a href="#store-list">Shops<\/a>/);
@@ -22,12 +24,14 @@ test('v11 page navigation has one sticky bar and one responsive tabs landmark', 
 });
 
 test('v11 page header, anchors and notices share the responsive height token', () => {
-  assert.match(css, /:root\{[^}]*--header-h:64px/);
-  assert.match(css, /@media\(max-width:650px\)\{:root\{--header-h:56px\}/);
+  assert.match(css, /:root\{[^}]*--header-h:var\(--gjh-size-main-header\)/);
+  assert.match(css, /@media\(max-width:650px\)\{:root\{--header-h:var\(--gjh-size-main-header-compact\)\}/);
+  assert.equal(theme['gjh-size-main-header'], '64px');
+  assert.equal(theme['gjh-size-main-header-compact'], '56px');
   assert.match(loader, /matchMedia\('\(max-width: 650px\)'\)/);
   assert.match(css, /scroll-padding-top:calc\(var\(--header-h\) \+ 16px\)/);
   assert.doesNotMatch(css, /scroll-margin-top:/);
-  assert.match(css, /position:sticky;top:0;z-index:50;\s*height:calc\(var\(--header-h\) \+ var\(--header-safe-top\)\)/);
+  assert.match(css, /position:sticky;top:0;z-index:var\(--gjh-layer-site-header-sticky\);\s*height:calc\(var\(--header-h\) \+ var\(--header-safe-top\)\)/);
   for (const notice of ['.mall-update-notice', '.mall-connection-notice']) {
     const rule = css.split(`\n${notice}{`)[1].split('}')[0];
     assert.match(rule, /top:calc\(var\(--header-h\)/);

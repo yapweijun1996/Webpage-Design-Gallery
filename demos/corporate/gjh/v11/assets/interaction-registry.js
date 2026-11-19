@@ -39,7 +39,7 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
       const item = normalize(source);
       const floor = typeof item.floor === 'number' ? item.floor : item.y;
       if (Math.abs((position.y ?? 0) - floor) > .5 || !item.availability(context, item)) continue;
-      if (item.seat && !isInFrontOfSeat(item.seat, position.z)) continue;
+      if (item.seat && !isInFrontOfSeat(item.seat, position)) continue;
       const d = Math.hypot(position.x - item.anchor.x, position.z - item.anchor.z);
       if (d < item.radius && d < distance) { selected = item; distance = d; }
     }

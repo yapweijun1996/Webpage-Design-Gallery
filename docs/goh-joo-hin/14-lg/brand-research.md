@@ -1,0 +1,6 @@
+# S14 · LG brand research
+
+Evidence checked 2026-11-19. Product imagery is linked to the first-party source where available.
+
+- GJH describes its LG relationship as Home Entertainment. LG Singapore names Goh Joo Hin an authorised retailer/dealer and named it in the 2025 terms that included the OLED55C5. LG Singapore's exact product page identifies OLED55C5PSA, a 55-inch 4K OLED television. Its dimensions without the stand are 1222 × 703 × 45.1 mm. The page has a gallery and the separate support page has setup documentation. [GJH LG](https://www.gjh.com.sg/lg/), [LG authorised dealers](https://www.lg.com/sg/support/lg-authorised-retailers-dealers/), [LG 2025 promotion terms](https://www.lg.com/content/dam/channel/wcms/sg/promotions/2025/07/03-sg60/LG_SG60_Celebrate_with_Smarter_Living_2PP.pdf), [LG OLED55C5PSA gallery and specs](https://www.lg.com/sg/tvs-soundbars/oled-evo/oled55c5psa/), [LG support](https://www.lg.com/sg/support/product-support/cs-OLED55C5PSA.ATC)
+- V11 has `s14-tv-wall-mounted-{low,balanced}.glb`, `tv-demo-table.glb`, `tv-floor-stand.glb`, `gallery-assets/refrigerator.glb`, `s14-living-details.glb` and procedural laundry cabinets. The existing wall screen is a gallery-scale fixture, with low-tier bounds about 3.55 × 2.08 × 0.30 m, several times the actual model width. The appliance scenery has no verified SKU in the current assets.
