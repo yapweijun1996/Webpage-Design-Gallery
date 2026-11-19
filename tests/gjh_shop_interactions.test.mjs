@@ -44,9 +44,9 @@ test('MILI, GOGO and New Moon offer their standing actions within two Next press
   const targets = await installShopInteractions(T,{add() {}},registry);
 
   const expected = {
-    'S02-plate': [.5,-3.5,'S02-plate'],
-    'S03-drink': [11,-2.5,'S03-drink'],
-    'S03-focal': [7.7,-2.7,'gogo-potong-story'],
+    'S02-plate': [.6,-3.4,'S02-plate'],
+    'S03-drink': [10.8,-2.6,'S03-drink'],
+    'S03-focal': [7.7,-2.5,'gogo-potong-story'],
     'S01-kettle': [-8.8,-5.5,'S01-kettle'],
     'S01-cups1': [-8.8,-2.4,'S01-cups1']
   };

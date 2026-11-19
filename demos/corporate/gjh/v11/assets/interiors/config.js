@@ -47,3 +47,11 @@ export async function loadInteriorActions(slot) {
   const {actionsBySlot} = await import('./action-layout.js');
   return actionsBySlot[slot] ?? [];
 }
+
+// The secondary GLBs and their studio colliders share this bay-local transform.
+export function galleryFixture(slot, socket, file, scale = 1, onTop = false) {
+  const prop = interiorStores[slot].props.find(entry => entry.socket === socket);
+  const [x,y,z] = prop.position_m;
+  return {file:'gallery-assets/'+file+'.glb',
+    position:[x,y+(onTop ? prop.envelope_whd_m[1] : 0),z], yaw:radians(prop.yaw_deg), scale};
+}

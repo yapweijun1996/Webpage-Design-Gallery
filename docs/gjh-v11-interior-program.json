@@ -1649,24 +1649,24 @@
         "preserved_seats": [
           {
             "centre_local_m": [
-              -2.55,
+              -2.7,
               -0.8
             ],
             "exit_local_m": [
-              -2.55,
-              0.3999999999999999
+              -1.66077,
+              -0.2
             ],
             "id": "bench-seat-5",
             "radius": 0.3
           },
           {
             "centre_local_m": [
-              3.4,
-              -1.97
+              3.05,
+              -1.85
             ],
             "exit_local_m": [
-              3.4,
-              -0.77
+              2.201472,
+              -1.001472
             ],
             "id": "bench-seat-6",
             "radius": 0.3
@@ -2288,8 +2288,8 @@
             "en": "Hammered-metal hood over the lacquer pass"
           },
           "standing": [
-            0,
-            2.6
+            -0.55,
+            2.65
           ],
           "reachDistance": 1.65
         },
@@ -2329,7 +2329,7 @@
           },
           "standing": [
             0,
-            2.5
+            2.6
           ],
           "reachDistance": 1.65
         },
@@ -2368,7 +2368,7 @@
             "en": "Recessed noodle boiler"
           },
           "standing": [
-            -1.6,
+            -1.7,
             0.9
           ],
           "reachDistance": 1.65
@@ -2408,10 +2408,11 @@
             "en": "Condiments on oak pantry shelf"
           },
           "standing": [
-            -3.2,
+            -3.1,
             3.9
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "placementNote": "Fixed kitchen joinery mounting point."
         },
         {
           "id": "S02-chop",
@@ -2419,9 +2420,9 @@
           "zone": "cookline",
           "anchor": "counter",
           "xyz": [
-            -0.53,
+            -0.55,
             1.22,
-            1.31
+            1.3
           ],
           "yawDeg": 0,
           "scale": [
@@ -2448,8 +2449,8 @@
             "en": "Chopsticks on the opposite pass corner"
           },
           "standing": [
-            -0.5,
-            2.5
+            -0.8,
+            2.6
           ],
           "reachDistance": 1.65
         },
@@ -2459,9 +2460,9 @@
           "zone": "cookline",
           "anchor": "counter",
           "xyz": [
-            0.45,
+            0.5,
             1.22,
-            0.98
+            0.8
           ],
           "yawDeg": 0,
           "scale": [
@@ -2488,8 +2489,8 @@
             "en": "Serving plate on the counter"
           },
           "standing": [
-            0.5,
-            2.5
+            0.6,
+            2.6
           ],
           "reachDistance": 1.65
         },
@@ -2499,11 +2500,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.55,
+            -2.7,
             0,
             -0.8
           ],
-          "yawDeg": 180,
+          "yawDeg": -120,
           "scale": [
             1,
             1,
@@ -2528,8 +2529,8 @@
             "en": "Two existing seat and stand points 1"
           },
           "standing": [
-            -2.5,
-            0.4
+            -1.66077,
+            -0.2
           ],
           "reachDistance": 1.65
         },
@@ -2539,11 +2540,11 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            3.4,
+            3.05,
             0,
-            -1.97
+            -1.85
           ],
-          "yawDeg": 180,
+          "yawDeg": 135,
           "scale": [
             1,
             1,
@@ -2568,8 +2569,8 @@
             "en": "Two existing seat and stand points 2"
           },
           "standing": [
-            3.4,
-            0.1
+            2.201472,
+            -1.001472
           ],
           "reachDistance": 1.65
         },
@@ -2608,10 +2609,11 @@
             "en": "Warm ceramic wall lights 1"
           },
           "standing": [
-            -2.9,
+            -2.7,
             -3.6
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "placementNote": "Fixed kitchen joinery mounting point."
         },
         {
           "id": "S02-rearLights2",
@@ -2648,10 +2650,11 @@
             "en": "Warm ceramic wall lights 2"
           },
           "standing": [
-            2.9,
+            1.9,
             -3.6
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "placementNote": "Fixed kitchen joinery mounting point."
         },
         {
           "id": "S02-plant2",
@@ -2688,8 +2691,8 @@
             "en": "Rear kitchen herb-garden planter"
           },
           "standing": [
-            -3,
-            -1.9
+            -2.6,
+            -2.9
           ],
           "reachDistance": 1.65
         },
@@ -2699,9 +2702,9 @@
           "zone": "cookline",
           "anchor": "counter",
           "xyz": [
-            0.48,
+            0.5,
             1.22,
-            1.39
+            1.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -2729,7 +2732,7 @@
           },
           "standing": [
             0.5,
-            2.5
+            3.3
           ],
           "reachDistance": 1.65,
           "bakedPart": {
@@ -2965,23 +2968,23 @@
           {
             "centre_local_m": [
               -3,
-              -0.7999999999999998
+              -0.8
             ],
             "exit_local_m": [
-              -3,
-              0.40000000000000036
+              -2.689417,
+              0.359111
             ],
             "id": "bench-seat-7",
             "radius": 0.3
           },
           {
             "centre_local_m": [
-              3,
-              -0.7999999999999998
+              3.35,
+              -1.05
             ],
             "exit_local_m": [
-              3,
-              0.40000000000000036
+              2.31077,
+              -0.45
             ],
             "id": "bench-seat-8",
             "radius": 0.3
@@ -3225,7 +3228,7 @@
         "inlay_offset_m": 0.006,
         "treatment": "Broad curved terrazzo bands sweep from the left wheel to the right bar; a coconut-coloured centre stays open.",
         "position_m": [
-          0.18,
+          0,
           0.0245,
           2.28
         ],
@@ -3471,11 +3474,11 @@
         "cold-chest": [
           [
             -3.68,
-            -3.82
+            -4.4
           ],
           [
             -1.9,
-            -3.82
+            -4.4
           ],
           [
             -1.9,
@@ -3585,9 +3588,10 @@
           },
           "standing": [
             -2.3,
-            3.3
+            3.5
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "placementNote": "Registered to the immovable room-detail artwork."
         },
         {
           "id": "S03-drink",
@@ -3595,9 +3599,9 @@
           "zone": "drinks-bar",
           "anchor": "bar",
           "xyz": [
-            2.87,
+            2.6,
             1.26,
-            3.53
+            3.5
           ],
           "yawDeg": -90,
           "scale": [
@@ -3624,8 +3628,8 @@
             "en": "Twin dispenser on the right bar"
           },
           "standing": [
-            1,
-            3.5
+            0.8,
+            3.4
           ],
           "reachDistance": 1.65
         },
@@ -3664,8 +3668,8 @@
             "en": "Lagoon-tiled bar carcass"
           },
           "standing": [
-            1.8,
-            5.5
+            1.6,
+            5.65
           ],
           "reachDistance": 1.65
         },
@@ -3675,7 +3679,7 @@
           "zone": "drinks-bar",
           "anchor": "floor",
           "xyz": [
-            1.93,
+            1.85,
             0.025,
             2.6
           ],
@@ -3704,8 +3708,8 @@
             "en": "Three stools facing the counter 1"
           },
           "standing": [
-            1.1,
-            3.2
+            0.8,
+            2.6
           ],
           "reachDistance": 1.65
         },
@@ -3715,11 +3719,11 @@
           "zone": "drinks-bar",
           "anchor": "floor",
           "xyz": [
-            1.93,
+            1.85,
             0.025,
             3.6
           ],
-          "yawDeg": 90,
+          "yawDeg": 75,
           "scale": [
             1,
             1,
@@ -3744,8 +3748,8 @@
             "en": "Three stools facing the counter 2"
           },
           "standing": [
-            1.1,
-            4.2
+            0.8,
+            4.4
           ],
           "reachDistance": 1.65
         },
@@ -3755,11 +3759,11 @@
           "zone": "drinks-bar",
           "anchor": "floor",
           "xyz": [
-            1.93,
+            1.85,
             0.025,
             4.6
           ],
-          "yawDeg": 90,
+          "yawDeg": 60,
           "scale": [
             1,
             1,
@@ -3784,8 +3788,8 @@
             "en": "Three stools facing the counter 3"
           },
           "standing": [
-            1.8,
-            5.5
+            0.8,
+            5.3
           ],
           "reachDistance": 1.65
         },
@@ -3799,7 +3803,7 @@
             0,
             -0.8
           ],
-          "yawDeg": 180,
+          "yawDeg": -165,
           "scale": [
             1,
             1,
@@ -3824,8 +3828,8 @@
             "en": "Twin lounge benches with existing sit actions 1"
           },
           "standing": [
-            -3,
-            0.4
+            -2.689417,
+            0.359111
           ],
           "reachDistance": 1.65
         },
@@ -3835,11 +3839,11 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            3,
+            3.35,
             0,
-            -0.8
+            -1.05
           ],
-          "yawDeg": 180,
+          "yawDeg": 120,
           "scale": [
             1,
             1,
@@ -3864,8 +3868,8 @@
             "en": "Twin lounge benches with existing sit actions 2"
           },
           "standing": [
-            3,
-            0.4
+            2.31077,
+            -0.45
           ],
           "reachDistance": 1.65
         },
@@ -3904,8 +3908,8 @@
             "en": "Coconut globe above the bar"
           },
           "standing": [
-            1.8,
-            1.7
+            1.7,
+            1.6
           ],
           "reachDistance": 1.65
         },
@@ -3917,7 +3921,7 @@
           "xyz": [
             -2.8,
             0.025,
-            -3.19
+            -3.95
           ],
           "yawDeg": 0,
           "scale": [
@@ -3944,8 +3948,8 @@
             "en": "White cold chest in the rear-left bay"
           },
           "standing": [
-            -2.8,
-            -2.2
+            -2.6,
+            -2.3
           ],
           "reachDistance": 1.65
         },
@@ -3955,9 +3959,9 @@
           "zone": "garden",
           "anchor": "floor",
           "xyz": [
-            3.78,
+            3.8,
             0.025,
-            -3.1
+            -2.8
           ],
           "yawDeg": 0,
           "scale": [
@@ -3984,8 +3988,8 @@
             "en": "Ferns in the rear planter bed"
           },
           "standing": [
-            3,
-            -1.9
+            2.5,
+            -2.9
           ],
           "reachDistance": 1.65
         },
@@ -3995,9 +3999,9 @@
           "zone": "drinks-bar",
           "anchor": "bar",
           "xyz": [
-            3.16,
+            2.5,
             1.26,
-            4.58
+            4.85
           ],
           "yawDeg": -90,
           "scale": [
@@ -4024,8 +4028,8 @@
             "en": "Citrus tray at counter end"
           },
           "standing": [
-            1.6,
-            5.5
+            1.05,
+            5.35
           ],
           "reachDistance": 1.65
         }
@@ -4501,11 +4505,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "A pill-shaped sage terrazzo field surrounds the folio; a plum stitching line turns along its visitor side.",
         "position_m": [
-          -0.48,
+          0,
           0.081,
           -0.63
         ],
-        "yaw_deg": 7,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           4.72,
           3.32
@@ -4709,7 +4713,7 @@
         },
         "rightwall-mount": {
           "xyz": [
-            4.17,
+            3.925,
             1.88,
             -1.1
           ],
@@ -4722,9 +4726,9 @@
         },
         "ceiling-mount": {
           "xyz": [
-            -0.48,
+            -0.5,
             3.3,
-            -0.63
+            -0.65
           ],
           "size": [
             1.18,
@@ -4735,7 +4739,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            4.17,
+            4.15,
             2.74,
             0.3
           ],
@@ -4786,9 +4790,10 @@
           },
           "standing": [
             -0.5,
-            0.7
+            0.8
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "placementNote": "Registered to the immovable room-detail artwork."
         },
         {
           "id": "S04-sample",
@@ -4796,9 +4801,9 @@
           "zone": "left",
           "anchor": "sample-mount",
           "xyz": [
-            -0.48,
+            -0.5,
             1.15,
-            -0.51
+            -0.5
           ],
           "yawDeg": 7,
           "scale": [
@@ -4825,10 +4830,11 @@
             "en": "Unlabelled patch samples on folio shelf"
           },
           "standing": [
-            -0.5,
-            0.7
+            -1.3,
+            0.8
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "placementNote": "Registered to the immovable room-detail artwork."
         },
         {
           "id": "S04-leftrear",
@@ -4836,9 +4842,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.97,
+            -3.65,
             0.081,
-            -1.8
+            -2
           ],
           "yawDeg": 90,
           "scale": [
@@ -4865,8 +4871,8 @@
             "en": "Sage service counter in left rear bay"
           },
           "standing": [
-            -3.2,
-            -0.6
+            -2.8,
+            -0.7
           ],
           "reachDistance": 1.65
         },
@@ -4876,7 +4882,7 @@
           "zone": "right",
           "anchor": "rightwall-mount",
           "xyz": [
-            4.17,
+            3.925,
             1.88,
             -1.1
           ],
@@ -4905,7 +4911,7 @@
             "en": "Shallow ivory wall cabinet"
           },
           "standing": [
-            3.4,
+            3.3,
             -0.5
           ],
           "reachDistance": 1.65
@@ -4916,11 +4922,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -3.49,
+            -3.5,
             0.081,
-            3.22
+            3.25
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -4945,8 +4951,8 @@
             "en": "Matte entrance-side dispenser"
           },
           "standing": [
-            -3.4,
-            4.3
+            -3.3,
+            4.6
           ],
           "reachDistance": 1.65
         },
@@ -4956,9 +4962,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            3.55,
             0.081,
-            -4.58
+            -5.1
           ],
           "yawDeg": 0,
           "scale": [
@@ -4998,9 +5004,9 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -0.48,
+            -0.5,
             3.3,
-            -0.63
+            -0.65
           ],
           "yawDeg": 0,
           "scale": [
@@ -5027,8 +5033,8 @@
             "en": "Diffuse white counter light"
           },
           "standing": [
-            -0.5,
-            0.7
+            0.3,
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -5038,11 +5044,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -4.010000000000001,
+            -3.7,
             0.081,
             0.4
           ],
-          "yawDeg": 80,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -5067,8 +5073,8 @@
             "en": "Blank paper swatch easel"
           },
           "standing": [
-            -3.4,
-            1.4
+            -3.2,
+            1.6
           ],
           "reachDistance": 1.65
         },
@@ -5078,7 +5084,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            4.17,
+            4.15,
             2.74,
             0.3
           ],
@@ -5107,7 +5113,7 @@
             "en": "Wall washer over the samples"
           },
           "standing": [
-            3.4,
+            3.3,
             0.9
           ],
           "reachDistance": 1.65
@@ -5650,7 +5656,7 @@
           "xyz": [
             0,
             1.36,
-            -4.38
+            -4.15
           ],
           "size": [
             4.2,
@@ -5664,7 +5670,7 @@
           "xyz": [
             0,
             3.3,
-            -4.38
+            -4.15
           ],
           "size": [
             1.18,
@@ -5675,7 +5681,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            4.17,
+            4.15,
             2.74,
             0.3
           ],
@@ -5688,7 +5694,7 @@
         },
         "rightwall-mount": {
           "xyz": [
-            4.17,
+            3.925,
             1.88,
             -1.1
           ],
@@ -5709,7 +5715,7 @@
           "xyz": [
             0,
             0.081,
-            -4.38
+            -4.15
           ],
           "yawDeg": 0,
           "scale": [
@@ -5739,7 +5745,7 @@
           },
           "standing": [
             0,
-            -3.2
+            -2.8
           ],
           "reachDistance": 1.65
         },
@@ -5751,7 +5757,7 @@
           "xyz": [
             0,
             1.36,
-            -4.15
+            -3.9
           ],
           "yawDeg": 0,
           "scale": [
@@ -5778,8 +5784,8 @@
             "en": "Single pale bowl and saucer in drawer niche"
           },
           "standing": [
-            0,
-            -3.2
+            0.9,
+            -2.8
           ],
           "reachDistance": 1.65
         },
@@ -5789,11 +5795,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -3.49,
+            -3.5,
             0.081,
-            3.22
+            3.25
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -5818,8 +5824,8 @@
             "en": "Unmarked cartons on a parchment stand"
           },
           "standing": [
-            -2.4,
-            4
+            -2.3,
+            3.8
           ],
           "reachDistance": 1.65
         },
@@ -5829,11 +5835,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -4.010000000000001,
+            -3.775,
             0.081,
             0.4
           ],
-          "yawDeg": 80,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -5860,8 +5866,8 @@
             "result": "The case door swings open."
           },
           "standing": [
-            -3.5,
-            1.5
+            -3.3,
+            1.6
           ],
           "reachDistance": 1.65
         },
@@ -5873,7 +5879,7 @@
           "xyz": [
             0,
             3.3,
-            -4.38
+            -4.15
           ],
           "yawDeg": 0,
           "scale": [
@@ -5900,8 +5906,8 @@
             "en": "Parchment lantern at the consultation end"
           },
           "standing": [
-            0,
-            -3.2
+            -0.9,
+            -2.8
           ],
           "reachDistance": 1.65
         },
@@ -5911,9 +5917,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            3.55,
             0.081,
-            -4.58
+            -4.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -5940,8 +5946,8 @@
             "en": "Cinnabar planter"
           },
           "standing": [
-            2.7,
-            -3.6
+            2.8,
+            -3.3
           ],
           "reachDistance": 1.65
         },
@@ -5951,11 +5957,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.58,
+            -3.45,
             0.081,
-            -4.58
+            -4.4
           ],
-          "yawDeg": 5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -5980,8 +5986,8 @@
             "en": "Wooden receiving chest below side return"
           },
           "standing": [
-            -2.7,
-            -3.6
+            -2.8,
+            -3.3
           ],
           "reachDistance": 1.65
         },
@@ -5991,7 +5997,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            4.17,
+            4.15,
             2.74,
             0.3
           ],
@@ -6020,7 +6026,7 @@
             "en": "Aged brass reading light"
           },
           "standing": [
-            3.4,
+            3.3,
             0.9
           ],
           "reachDistance": 1.65
@@ -6031,7 +6037,7 @@
           "zone": "right",
           "anchor": "rightwall-mount",
           "xyz": [
-            4.17,
+            3.925,
             1.88,
             -1.1
           ],
@@ -6060,7 +6066,7 @@
             "en": "Closed sample cabinet on the right wall"
           },
           "standing": [
-            3.4,
+            3.3,
             -0.5
           ],
           "reachDistance": 1.65
@@ -6403,11 +6409,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.",
         "position_m": [
-          -0.65,
+          0,
           0.081,
           -0.83
         ],
-        "yaw_deg": 3,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           4.55,
           4.15
@@ -6597,9 +6603,9 @@
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -2
           ],
           "size": [
             1.36,
@@ -6611,9 +6617,9 @@
         },
         "onleft2-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -2
           ],
           "size": [
             1.36,
@@ -6627,7 +6633,7 @@
           "xyz": [
             -0.65,
             3.3,
-            -0.83
+            -0.85
           ],
           "size": [
             1.18,
@@ -6638,7 +6644,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -6659,9 +6665,9 @@
           "xyz": [
             -0.65,
             0.081,
-            -0.83
+            -0.85
           ],
-          "yawDeg": 3,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -6689,7 +6695,7 @@
           },
           "standing": [
             -0.7,
-            0.7
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -6699,11 +6705,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.64,
             0.081,
-            3.22
+            2.55
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -6728,7 +6734,7 @@
             "en": "Plain noodle bags on a hook rack"
           },
           "standing": [
-            -1.3,
+            -1.1,
             3.9
           ],
           "reachDistance": 1.65
@@ -6739,9 +6745,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             0.081,
-            -1.8
+            -2
           ],
           "yawDeg": 90,
           "scale": [
@@ -6768,8 +6774,8 @@
             "en": "Brushed preparation sideboard"
           },
           "standing": [
-            -1.9,
-            -1.9
+            -1.5,
+            -2.2
           ],
           "reachDistance": 1.65
         },
@@ -6779,11 +6785,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.52
+            -1.7
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -6811,8 +6817,8 @@
             "result": "A noodle nest is ready on the tray."
           },
           "standing": [
-            -1.9,
-            -1.9
+            -1.6,
+            -3.1
           ],
           "reachDistance": 1.65
         },
@@ -6822,11 +6828,11 @@
           "zone": "left",
           "anchor": "onleft2-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -2.15
+            -2.35
           ],
-          "yawDeg": 88,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -6851,8 +6857,8 @@
             "en": "Utensil holder on sideboard"
           },
           "standing": [
-            -1.9,
-            -1.9
+            -0.9,
+            -2.6
           ],
           "reachDistance": 1.65
         },
@@ -6862,11 +6868,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.03,
+            -2.6,
             0.081,
             0.4
           ],
-          "yawDeg": 80,
+          "yawDeg": 75,
           "scale": [
             1,
             1,
@@ -6891,8 +6897,8 @@
             "en": "Slatted flour crate"
           },
           "standing": [
-            -2.4,
-            1.4
+            -1.7,
+            1.3
           ],
           "reachDistance": 1.65
         },
@@ -6904,7 +6910,7 @@
           "xyz": [
             -0.65,
             3.3,
-            -0.83
+            -0.85
           ],
           "yawDeg": 0,
           "scale": [
@@ -6931,8 +6937,8 @@
             "en": "Cylindrical work lamp"
           },
           "standing": [
-            -0.7,
-            0.7
+            0.1,
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -6942,9 +6948,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            0.95,
             0.081,
-            -3.68
+            -3.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -6971,8 +6977,8 @@
             "en": "Woven-colour basket by the rear wall"
           },
           "standing": [
-            2.4,
-            -2.7
+            2.3,
+            -2.5
           ],
           "reachDistance": 1.65
         },
@@ -6982,7 +6988,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -7011,7 +7017,7 @@
             "en": "Raking lamp above the comb"
           },
           "standing": [
-            2.4,
+            2.3,
             0.9
           ],
           "reachDistance": 1.65
@@ -7354,11 +7360,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "An octagonal jade inset under the drum breaks into a border of brick-red tiles along the walk.",
         "position_m": [
-          -0.55,
+          0,
           0.081,
           -0.85
         ],
-        "yaw_deg": -8,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           3.65,
           3.65
@@ -7557,7 +7563,7 @@
             0,
             1.84
           ],
-          "yawDeg": -8,
+          "yawDeg": -15,
           "owner": "S07-drum"
         },
         "ceiling-mount": {
@@ -7575,9 +7581,9 @@
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -1.95
           ],
           "size": [
             1.36,
@@ -7589,9 +7595,9 @@
         },
         "onleft2-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -1.95
           ],
           "size": [
             1.36,
@@ -7603,7 +7609,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -7626,7 +7632,7 @@
             0.48,
             -0.85
           ],
-          "yawDeg": -8,
+          "yawDeg": -15,
           "scale": [
             1,
             1,
@@ -7668,7 +7674,7 @@
             0.081,
             -0.85
           ],
-          "yawDeg": -8,
+          "yawDeg": -15,
           "scale": [
             1,
             1,
@@ -7693,8 +7699,8 @@
             "en": "Low jade serving drum under tin pyramid"
           },
           "standing": [
-            -0.6,
-            1.2
+            -0.8,
+            1.3
           ],
           "reachDistance": 1.65
         },
@@ -7733,8 +7739,8 @@
             "en": "Silk banquet lantern above the drum"
           },
           "standing": [
-            -1.8,
-            0.5
+            -1.4,
+            -2.7
           ],
           "reachDistance": 1.65
         },
@@ -7744,9 +7750,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             0.081,
-            -1.8
+            -1.95
           ],
           "yawDeg": 90,
           "scale": [
@@ -7773,8 +7779,8 @@
             "en": "Lacquer provision shelf"
           },
           "standing": [
-            -2.4,
-            -0.5
+            -0.7,
+            -2.7
           ],
           "reachDistance": 1.65
         },
@@ -7784,11 +7790,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.52
+            -1.65
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -7816,8 +7822,8 @@
             "result": "The banquet sample is served."
           },
           "standing": [
-            -2.4,
-            -0.5
+            -1.3,
+            -3
           ],
           "reachDistance": 1.65
         },
@@ -7827,11 +7833,11 @@
           "zone": "left",
           "anchor": "onleft2-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -2.15
+            -2.3
           ],
-          "yawDeg": 88,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -7856,8 +7862,8 @@
             "en": "Bronze-coloured condiment tray"
           },
           "standing": [
-            -2.4,
-            -0.5
+            -1,
+            -3.1
           ],
           "reachDistance": 1.65
         },
@@ -7867,11 +7873,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.45,
             0.081,
-            3.22
+            1.35
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -7896,20 +7902,20 @@
             "en": "Hand basket in left window"
           },
           "standing": [
-            -1.3,
-            3.9
+            -0.4,
+            1.6
           ],
           "reachDistance": 1.65
         },
         {
           "id": "S07-backright",
           "socket": "backright",
-          "zone": "right",
+          "zone": "left",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            -2.55,
             0.081,
-            -3.68
+            -3.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -7936,8 +7942,8 @@
             "en": "Red-glazed corner planter"
           },
           "standing": [
-            2.4,
-            -2.7
+            -0.5,
+            -3.1
           ],
           "reachDistance": 1.65
         },
@@ -7947,7 +7953,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -7976,7 +7982,7 @@
             "en": "Jade shelf washer"
           },
           "standing": [
-            2.4,
+            2.3,
             0.9
           ],
           "reachDistance": 1.65
@@ -8320,7 +8326,7 @@
         "inlay_offset_m": 0.006,
         "treatment": "A navy-and-cream gingham field folds around the breakfast counter, with a plain band at the threshold.",
         "position_m": [
-          -0.42,
+          0,
           0.081,
           -0.5
         ],
@@ -8514,9 +8520,9 @@
         },
         "focal-mount": {
           "xyz": [
-            -0.58,
+            -0.6,
             0.58,
-            -0.76
+            -0.75
           ],
           "size": [
             1.76,
@@ -8528,9 +8534,9 @@
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -2
           ],
           "size": [
             1.36,
@@ -8542,9 +8548,9 @@
         },
         "ceiling-mount": {
           "xyz": [
-            -0.58,
+            -0.6,
             3.3,
-            -0.76
+            -0.75
           ],
           "size": [
             1.18,
@@ -8555,9 +8561,9 @@
         },
         "onleft2-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -2
           ],
           "size": [
             1.36,
@@ -8575,9 +8581,9 @@
           "zone": "left",
           "anchor": "focal-mount",
           "xyz": [
-            -0.58,
+            -0.6,
             0.58,
-            -0.76
+            -0.75
           ],
           "yawDeg": 0,
           "scale": [
@@ -8607,7 +8613,7 @@
           },
           "standing": [
             -0.6,
-            1.1
+            1.3
           ],
           "reachDistance": 1.65
         },
@@ -8617,9 +8623,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -0.58,
+            -0.6,
             0.081,
-            -0.76
+            -0.75
           ],
           "yawDeg": 0,
           "scale": [
@@ -8646,8 +8652,8 @@
             "en": "Blue enamel jar-stand base"
           },
           "standing": [
-            -0.6,
-            1.1
+            0.3,
+            1.3
           ],
           "reachDistance": 1.65
         },
@@ -8657,11 +8663,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.52
+            -1.7
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -8688,8 +8694,8 @@
             "result": "The toast has a peanut butter swirl."
           },
           "standing": [
-            -2,
-            0.1
+            -1.5,
+            -2.4
           ],
           "reachDistance": 1.65
         },
@@ -8699,9 +8705,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             0.081,
-            -1.8
+            -2
           ],
           "yawDeg": 90,
           "scale": [
@@ -8728,8 +8734,8 @@
             "en": "Maple breakfast sideboard"
           },
           "standing": [
-            -1.9,
-            -1.8
+            -1.6,
+            -3.1
           ],
           "reachDistance": 1.65
         },
@@ -8739,20 +8745,20 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.5,
             0.081,
-            3.22
+            4.55
           ],
-          "yawDeg": 7,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
             1
           ],
           "size": [
-            1.15,
-            1.48,
-            0.82
+            0.8,
+            1.02,
+            0.5
           ],
           "modelId": "peanut-butter-jar-stand",
           "lod": {
@@ -8768,7 +8774,7 @@
             "en": "Small second display at the window"
           },
           "standing": [
-            -1.3,
+            -1.1,
             3.9
           ],
           "reachDistance": 1.65
@@ -8779,11 +8785,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.03,
+            -2.35,
             0.081,
-            0.4
+            0.5
           ],
-          "yawDeg": 80,
+          "yawDeg": 120,
           "scale": [
             1,
             1,
@@ -8808,8 +8814,8 @@
             "en": "Single sky-blue breakfast chair"
           },
           "standing": [
-            -2.4,
-            1.4
+            -2.2,
+            1.8
           ],
           "reachDistance": 1.65
         },
@@ -8819,9 +8825,9 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -0.58,
+            -0.6,
             3.3,
-            -0.76
+            -0.75
           ],
           "yawDeg": 0,
           "scale": [
@@ -8849,7 +8855,7 @@
           },
           "standing": [
             -0.6,
-            1.1
+            -2.5
           ],
           "reachDistance": 1.65
         },
@@ -8859,9 +8865,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            0.95,
             0.081,
-            -3.68
+            -3.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -8888,7 +8894,7 @@
             "en": "Picnic basket in the rear corner"
           },
           "standing": [
-            2.4,
+            2.3,
             -2.7
           ],
           "reachDistance": 1.65
@@ -8899,11 +8905,11 @@
           "zone": "left",
           "anchor": "onleft2-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -2.15
+            -2.35
           ],
-          "yawDeg": 88,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -8928,8 +8934,8 @@
             "en": "Cream breakfast tray on sideboard"
           },
           "standing": [
-            -1.9,
-            -1.8
+            -1,
+            -3.1
           ],
           "reachDistance": 1.65
         }
@@ -9271,11 +9277,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "Two parallel steel inlays trace the belt ends in a charcoal rubber field; keep the public path plain.",
         "position_m": [
-          -0.72,
+          0,
           0.081,
           -1.1
         ],
-        "yaw_deg": 12,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           4.65,
           3.24
@@ -9465,9 +9471,9 @@
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -2.4
           ],
           "size": [
             1.36,
@@ -9479,9 +9485,9 @@
         },
         "onleft2-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -2.4
           ],
           "size": [
             1.36,
@@ -9493,7 +9499,7 @@
         },
         "ceiling-mount": {
           "xyz": [
-            -0.72,
+            -0.8,
             3.3,
             -1.1
           ],
@@ -9506,7 +9512,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -9525,11 +9531,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -0.72,
+            -0.8,
             0.081,
             -1.1
           ],
-          "yawDeg": 12,
+          "yawDeg": 15,
           "scale": [
             1,
             1,
@@ -9557,7 +9563,7 @@
           },
           "standing": [
             -0.7,
-            0.6
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -9567,11 +9573,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.58,
+            -2.6,
             0.081,
-            -3.68
+            -3.7
           ],
-          "yawDeg": 5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -9596,8 +9602,8 @@
             "en": "Abstract tin stack at the belt intake"
           },
           "standing": [
-            -2,
-            -2.8
+            -1.5,
+            -2.9
           ],
           "reachDistance": 1.65
         },
@@ -9607,9 +9613,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             0.081,
-            -1.8
+            -2.4
           ],
           "yawDeg": 90,
           "scale": [
@@ -9636,8 +9642,8 @@
             "en": "Tool station with folded-metal top"
           },
           "standing": [
-            -1.9,
-            -2
+            -1.5,
+            -2.3
           ],
           "reachDistance": 1.65
         },
@@ -9647,11 +9653,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.52
+            -2.1
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -9678,8 +9684,8 @@
             "result": "The scanner confirms the tin."
           },
           "standing": [
-            -2.4,
-            0.1
+            -0.9,
+            -2.4
           ],
           "reachDistance": 1.65
         },
@@ -9689,11 +9695,11 @@
           "zone": "left",
           "anchor": "onleft2-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -2.15
+            -2.75
           ],
-          "yawDeg": 88,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -9718,8 +9724,8 @@
             "en": "Unmarked mechanical till on the tool station"
           },
           "standing": [
-            -1.9,
-            -2
+            -1,
+            -3.6
           ],
           "reachDistance": 1.65
         },
@@ -9729,11 +9735,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.64,
             0.081,
-            3.22
+            2.55
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -9758,7 +9764,7 @@
             "en": "Navy steel rack at left window"
           },
           "standing": [
-            -1.3,
+            -1.1,
             3.9
           ],
           "reachDistance": 1.65
@@ -9769,7 +9775,7 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -0.72,
+            -0.8,
             3.3,
             -1.1
           ],
@@ -9798,8 +9804,8 @@
             "en": "Deep enamel task lamp"
           },
           "standing": [
-            -0.7,
-            0.6
+            0.1,
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -9809,9 +9815,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            2.55,
             0.081,
-            -3.68
+            -3.95
           ],
           "yawDeg": 0,
           "scale": [
@@ -9838,8 +9844,8 @@
             "en": "Low ochre metal drawer unit"
           },
           "standing": [
-            2.4,
-            -2.2
+            2.3,
+            -2
           ],
           "reachDistance": 1.65
         },
@@ -9849,7 +9855,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -9878,7 +9884,7 @@
             "en": "Light on the return wheel"
           },
           "standing": [
-            2.4,
+            2.3,
             0.9
           ],
           "reachDistance": 1.65
@@ -10223,11 +10229,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "Flow from a chalk-white sand field to a scalloped teal band around the gift display.",
         "position_m": [
-          -0.45,
+          0,
           0.081,
           -1.4
         ],
-        "yaw_deg": -7,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           5.25,
           4.25
@@ -10426,14 +10432,14 @@
             0,
             1.24
           ],
-          "yawDeg": -7,
+          "yawDeg": 0,
           "owner": "S10-focal"
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.8,
             1.081,
-            -1.8
+            -1.55
           ],
           "size": [
             1.36,
@@ -10458,7 +10464,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -10481,7 +10487,7 @@
             0.081,
             -1.4
           ],
-          "yawDeg": -7,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -10508,8 +10514,8 @@
             "result": "The shell reveals a pearl."
           },
           "standing": [
-            -1.9,
-            0.55
+            2,
+            -0.1
           ],
           "reachDistance": 1.65
         },
@@ -10521,9 +10527,9 @@
           "xyz": [
             -0.45,
             1.15,
-            -1.2799999999999998
+            -1.3
           ],
-          "yawDeg": -7,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -10548,8 +10554,8 @@
             "en": "Neutral gift boxes on inner shell ledge"
           },
           "standing": [
-            -1.9,
-            -0.3
+            -1.5,
+            -2.8
           ],
           "reachDistance": 1.65
         },
@@ -10559,9 +10565,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.8,
             0.081,
-            -1.8
+            -1.55
           ],
           "yawDeg": 90,
           "scale": [
@@ -10588,8 +10594,8 @@
             "en": "Sea-glass display cabinet"
           },
           "standing": [
-            -2.1,
-            -0.4
+            -2.4,
+            -3
           ],
           "reachDistance": 1.65
         },
@@ -10599,11 +10605,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.8,
             1.081,
-            -1.52
+            -1.25
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -10628,8 +10634,8 @@
             "en": "Pearl-coloured serving dish inside cabinet"
           },
           "standing": [
-            -2.1,
-            -0.4
+            -2.9,
+            -3
           ],
           "reachDistance": 1.65
         },
@@ -10639,11 +10645,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.65,
             0.081,
-            3.22
+            1.95
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -10668,8 +10674,8 @@
             "en": "Open gift basket in the left window"
           },
           "standing": [
-            -1.5,
-            4.1
+            -1.3,
+            3.8
           ],
           "reachDistance": 1.65
         },
@@ -10679,9 +10685,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            3.25,
             0.081,
-            -3.68
+            -3.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -10710,8 +10716,8 @@
             "result": "Orchid watered."
           },
           "standing": [
-            2.6,
-            -2.7
+            2.3,
+            -2.5
           ],
           "reachDistance": 1.65
         },
@@ -10750,8 +10756,8 @@
             "en": "Pearl pendant over the cradle"
           },
           "standing": [
-            -1.9,
-            -0.3
+            -0.6,
+            -2.8
           ],
           "reachDistance": 1.65
         },
@@ -10761,11 +10767,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.03,
+            -2.75,
             0.081,
             0.4
           ],
-          "yawDeg": 80,
+          "yawDeg": 75,
           "scale": [
             1,
             1,
@@ -10790,8 +10796,8 @@
             "en": "Low teak shipping crate"
           },
           "standing": [
-            -2.6,
-            1.5
+            -1.4,
+            1.4
           ],
           "reachDistance": 1.65
         },
@@ -10801,7 +10807,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -10830,7 +10836,7 @@
             "en": "Teal shell-rib washer"
           },
           "standing": [
-            2.6,
+            2.4,
             0.9
           ],
           "reachDistance": 1.65
@@ -11174,7 +11180,7 @@
         "inlay_offset_m": 0.006,
         "treatment": "Worn end-grain blocks form a rectangular loading mat with a burgundy perimeter and zinc doorway strip.",
         "position_m": [
-          -0.56,
+          0,
           0.081,
           -1.05
         ],
@@ -11368,7 +11374,7 @@
         },
         "sample-mount": {
           "xyz": [
-            -0.56,
+            -0.55,
             1.15,
             -1.05
           ],
@@ -11382,7 +11388,7 @@
         },
         "ceiling-mount": {
           "xyz": [
-            -0.56,
+            -0.55,
             3.3,
             -1.05
           ],
@@ -11395,9 +11401,9 @@
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -1.65
           ],
           "size": [
             1.36,
@@ -11415,7 +11421,7 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -0.56,
+            -0.55,
             0.081,
             -1.05
           ],
@@ -11446,8 +11452,8 @@
             "result": "The parcel opens around a deli sample."
           },
           "standing": [
-            0.25,
-            0.6
+            0.2,
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -11457,11 +11463,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.03,
+            -2.7,
             0.081,
-            0.4
+            0.25
           ],
-          "yawDeg": 80,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -11486,8 +11492,8 @@
             "en": "Slatted receiving crate at working end"
           },
           "standing": [
-            -2.4,
-            1.4
+            -1.1,
+            0.9
           ],
           "reachDistance": 1.65
         },
@@ -11497,11 +11503,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.4,
             0.081,
-            3.22
+            1.55
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -11526,8 +11532,8 @@
             "en": "Low pallet in the left window"
           },
           "standing": [
-            -1.3,
-            3.9
+            -0.4,
+            1.8
           ],
           "reachDistance": 1.65
         },
@@ -11537,9 +11543,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             0.081,
-            -1.8
+            -1.65
           ],
           "yawDeg": 90,
           "scale": [
@@ -11566,8 +11572,8 @@
             "en": "Burgundy dispatch shelving"
           },
           "standing": [
-            -1.9,
-            -2.3
+            -1.5,
+            -2.4
           ],
           "reachDistance": 1.65
         },
@@ -11577,9 +11583,9 @@
           "zone": "left",
           "anchor": "sample-mount",
           "xyz": [
-            -0.56,
+            -0.55,
             1.15,
-            -0.93
+            -0.95
           ],
           "yawDeg": 0,
           "scale": [
@@ -11607,7 +11613,7 @@
           },
           "standing": [
             -0.6,
-            0.6
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -11617,9 +11623,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            0.95,
             0.081,
-            -3.68
+            -3.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -11646,7 +11652,7 @@
             "en": "Wire returns basket"
           },
           "standing": [
-            2.4,
+            2.3,
             -2.7
           ],
           "reachDistance": 1.65
@@ -11657,7 +11663,7 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -0.56,
+            -0.55,
             3.3,
             -1.05
           ],
@@ -11686,8 +11692,8 @@
             "en": "Long zinc task light above packing bench"
           },
           "standing": [
-            -0.6,
-            0.6
+            0.7,
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -11697,11 +11703,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.52
+            -1.35
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -11728,8 +11734,8 @@
             "result": "The scale shows the parcel weight."
           },
           "standing": [
-            -2,
-            0.1
+            -1.1,
+            -2.4
           ],
           "reachDistance": 1.65
         },
@@ -11739,11 +11745,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.58,
+            -2.735,
             0.081,
-            -3.68
+            -3.1
           ],
-          "yawDeg": 5,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -11768,8 +11774,8 @@
             "en": "Short pantry rack on rear return"
           },
           "standing": [
-            -2,
-            -2.8
+            -1.6,
+            -3.1
           ],
           "reachDistance": 1.65
         }
@@ -12113,11 +12119,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "Pale resin flooring carries three quiet indigo arcs around the sample station and a matte seafoam browsing zone.",
         "position_m": [
-          -0.52,
+          0,
           0.081,
           -1.2
         ],
-        "yaw_deg": -5,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           4.93,
           4.48
@@ -12307,7 +12313,7 @@
         },
         "sample-mount": {
           "xyz": [
-            -0.52,
+            -0.5,
             1.15,
             -1.2
           ],
@@ -12316,12 +12322,12 @@
             0,
             1.05
           ],
-          "yawDeg": -5,
+          "yawDeg": 0,
           "owner": "S12-focal"
         },
         "ceiling-mount": {
           "xyz": [
-            -0.52,
+            -0.5,
             3.3,
             -1.2
           ],
@@ -12334,7 +12340,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -12353,11 +12359,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -0.52,
+            -0.5,
             0.081,
             -1.2
           ],
-          "yawDeg": -5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -12385,8 +12391,8 @@
             "result": "The two leaf outlines match."
           },
           "standing": [
-            -1.8,
-            -0.1
+            1.9,
+            -0.4
           ],
           "reachDistance": 1.65
         },
@@ -12396,11 +12402,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.55,
             0.081,
-            3.22
+            1.95
           ],
-          "yawDeg": 7,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -12425,8 +12431,8 @@
             "en": "Plain carton stand beside the glazing"
           },
           "standing": [
-            -2,
-            4.2
+            -1.8,
+            4.1
           ],
           "reachDistance": 1.65
         },
@@ -12436,9 +12442,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             0.081,
-            -1.8
+            -1.85
           ],
           "yawDeg": 90,
           "scale": [
@@ -12465,8 +12471,8 @@
             "en": "White drawer cabinet in the alcove"
           },
           "standing": [
-            -2,
-            -0.2
+            -0.8,
+            -3.3
           ],
           "reachDistance": 1.65
         },
@@ -12476,11 +12482,11 @@
           "zone": "left",
           "anchor": "sample-mount",
           "xyz": [
-            -0.52,
+            -0.45,
             1.15,
-            -1.08
+            -1.1
           ],
-          "yawDeg": -5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -12505,8 +12511,8 @@
             "en": "Opal sample tray on central ledge"
           },
           "standing": [
-            -1.8,
-            -0.1
+            -0.3,
+            -2.6
           ],
           "reachDistance": 1.65
         },
@@ -12516,11 +12522,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.03,
+            -2.6,
             0.081,
             0.4
           ],
-          "yawDeg": 80,
+          "yawDeg": 75,
           "scale": [
             1,
             1,
@@ -12545,20 +12551,20 @@
             "en": "Mint supply trolley parked off aisle"
           },
           "standing": [
-            -2.4,
-            1.4
+            -1.3,
+            1.3
           ],
           "reachDistance": 1.65
         },
         {
           "id": "S12-backright",
           "socket": "backright",
-          "zone": "right",
+          "zone": "left",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            -2.55,
             0.081,
-            -3.68
+            -3.4
           ],
           "yawDeg": 0,
           "scale": [
@@ -12587,8 +12593,8 @@
             "result": "Orchid watered."
           },
           "standing": [
-            2.4,
-            -2.7
+            -0.5,
+            -3.6
           ],
           "reachDistance": 1.65
         },
@@ -12598,7 +12604,7 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -0.52,
+            -0.5,
             3.3,
             -1.2
           ],
@@ -12627,8 +12633,8 @@
             "en": "Cool inspection bar above fins"
           },
           "standing": [
-            -1.8,
-            -0.1
+            0.6,
+            -2.6
           ],
           "reachDistance": 1.65
         },
@@ -12638,7 +12644,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -12667,7 +12673,7 @@
             "en": "Side fin washer"
           },
           "standing": [
-            2.4,
+            2.3,
             0.9
           ],
           "reachDistance": 1.65
@@ -12678,11 +12684,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.58,
+            -1.65,
             0.081,
-            -3.68
+            -2.35
           ],
-          "yawDeg": 5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -12707,8 +12713,8 @@
             "en": "Recessed blank material-sample easel"
           },
           "standing": [
-            -2,
-            -2.8
+            0.2,
+            -3.3
           ],
           "reachDistance": 1.65
         }
@@ -12799,11 +12805,11 @@
             1.5499999999999998
           ],
           [
-            2.1,
+            1.95,
             1.5499999999999998
           ],
           [
-            2.1,
+            1.95,
             -2.4000000000000004
           ]
         ],
@@ -13013,7 +13019,7 @@
           "kind": "spot"
         },
         {
-          "name": "Ribbed felt acoustic baffle",
+          "name": "Acoustic baffle along the listening aisle",
           "asset_id": "office-partition",
           "source": "models/office-partition/exports/optimized.glb",
           "count": 1,
@@ -13056,11 +13062,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "A charcoal felt ellipse interrupts the black rubber floor and points its long axis toward the listening bar.",
         "position_m": [
-          -0.64,
+          0,
           0.081,
           -1.05
         ],
-        "yaw_deg": 8,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           4.08,
           4.38
@@ -13166,7 +13172,7 @@
           5.75
         ],
         "browse_local_xz_m": [
-          2.1,
+          1.95,
           -2.4000000000000004
         ],
         "expected_signature": "suspended headphone hooks",
@@ -13250,7 +13256,7 @@
         },
         "focal-mount": {
           "xyz": [
-            -0.64,
+            -0.65,
             0.43,
             -1.05
           ],
@@ -13259,14 +13265,14 @@
             0,
             1.07
           ],
-          "yawDeg": 8,
+          "yawDeg": 15,
           "owner": "S13-audiofoot"
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -3.3,
             1.081,
-            -1.8
+            -2.65
           ],
           "size": [
             1.36,
@@ -13278,7 +13284,7 @@
         },
         "ceiling-mount": {
           "xyz": [
-            -0.64,
+            -0.65,
             3.48,
             -1.05
           ],
@@ -13291,7 +13297,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -13310,11 +13316,11 @@
           "zone": "left",
           "anchor": "focal-mount",
           "xyz": [
-            -0.64,
+            -0.65,
             0.43,
             -1.05
           ],
-          "yawDeg": 8,
+          "yawDeg": 15,
           "scale": [
             1,
             1,
@@ -13342,7 +13348,7 @@
           },
           "standing": [
             -0.6,
-            0.4
+            0.6
           ],
           "reachDistance": 1.65
         },
@@ -13352,11 +13358,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -0.64,
+            -0.65,
             0.081,
             -1.05
           ],
-          "yawDeg": 8,
+          "yawDeg": 15,
           "scale": [
             1,
             1,
@@ -13381,8 +13387,8 @@
             "en": "Oval dark plinth for headphone rack"
           },
           "standing": [
-            -0.6,
-            0.4
+            -1.4,
+            0.6
           ],
           "reachDistance": 1.65
         },
@@ -13392,11 +13398,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -3.3,
             1.081,
-            -1.52
+            -2.35
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -13423,8 +13429,8 @@
             "result": "The soundbar sample ends."
           },
           "standing": [
-            -2,
-            -2.7
+            -1.7,
+            -3
           ],
           "reachDistance": 1.65
         },
@@ -13434,9 +13440,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -3.3,
             0.081,
-            -1.8
+            -2.65
           ],
           "yawDeg": 90,
           "scale": [
@@ -13463,8 +13469,8 @@
             "en": "Black listening console"
           },
           "standing": [
-            -2.1,
-            0.4
+            -1.3,
+            -2.7
           ],
           "reachDistance": 1.65
         },
@@ -13474,11 +13480,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.58,
+            -2.35,
             0.081,
-            -3.68
+            -1.95
           ],
-          "yawDeg": 5,
+          "yawDeg": 60,
           "scale": [
             1,
             1,
@@ -13503,8 +13509,8 @@
             "en": "Felt listening chair behind the console"
           },
           "standing": [
-            -2,
-            -2.8
+            -0.5,
+            -3
           ],
           "reachDistance": 1.65
         },
@@ -13514,20 +13520,20 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.45,
             0.081,
-            3.22
+            3.05
           ],
-          "yawDeg": 7,
+          "yawDeg": 15,
           "scale": [
-            1,
-            1,
-            1
+            1.2,
+            1.2,
+            1.2
           ],
           "size": [
-            1.15,
-            1.48,
-            0.82
+            0.72,
+            1.68,
+            0.48
           ],
           "modelId": "headphone-display-stand",
           "lod": {
@@ -13545,7 +13551,7 @@
             "result": "Audio setting changed."
           },
           "standing": [
-            -2.2,
+            -1.5,
             4.2
           ],
           "reachDistance": 1.65
@@ -13556,7 +13562,7 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -0.64,
+            -0.65,
             3.48,
             -1.05
           ],
@@ -13585,22 +13591,22 @@
             "en": "Small silver spotlight raking the hooks"
           },
           "standing": [
-            -0.6,
-            0.4
+            -0.1,
+            0.9
           ],
           "reachDistance": 1.65
         },
         {
           "id": "S13-baffle",
           "socket": "baffle",
-          "zone": "left",
+          "zone": "right",
           "anchor": "floor",
           "xyz": [
-            -0.64,
+            3.55,
             0.081,
-            -1.99
+            -3.15
           ],
-          "yawDeg": 0,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -13622,11 +13628,11 @@
             "press"
           ],
           "a11y": {
-            "en": "Ribbed felt acoustic baffle"
+            "en": "Acoustic baffle along the listening aisle"
           },
           "standing": [
-            -0.6,
-            -2.7
+            2.3,
+            -2.1
           ],
           "reachDistance": 1.65
         },
@@ -13636,7 +13642,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -13665,7 +13671,7 @@
             "en": "Silver slit of light along the side wall"
           },
           "standing": [
-            2.1,
+            2,
             0.9
           ],
           "reachDistance": 1.65
@@ -14019,7 +14025,7 @@
         "inlay_offset_m": 0.006,
         "treatment": "Use a large aubergine wool rectangle beneath the sofa and a pale polished perimeter for the gallery walk.",
         "position_m": [
-          -2.02,
+          0,
           0.081,
           0.29
         ],
@@ -14213,9 +14219,9 @@
         },
         "focal-mount": {
           "xyz": [
-            -0.62,
+            -0.6,
             1.03,
-            -3.99
+            -4
           ],
           "size": [
             3.65,
@@ -14226,9 +14232,9 @@
         },
         "ceiling-mount": {
           "xyz": [
-            -0.62,
+            -0.6,
             3.3,
-            -3.99
+            -4
           ],
           "size": [
             1.18,
@@ -14239,7 +14245,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -14258,9 +14264,9 @@
           "zone": "left",
           "anchor": "focal-mount",
           "xyz": [
-            -0.62,
+            -0.6,
             1.03,
-            -3.99
+            -4
           ],
           "yawDeg": 0,
           "scale": [
@@ -14290,7 +14296,7 @@
           },
           "standing": [
             -0.6,
-            -2.9
+            -2.8
           ],
           "reachDistance": 1.65
         },
@@ -14300,9 +14306,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            0.75,
             0.081,
-            -3.68
+            -3.1
           ],
           "yawDeg": 0,
           "scale": [
@@ -14340,11 +14346,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.03,
+            -3.1,
             0.081,
-            0.4
+            -0.55
           ],
-          "yawDeg": 80,
+          "yawDeg": 150,
           "scale": [
             1,
             1,
@@ -14369,8 +14375,8 @@
             "en": "Ivory sofa in left browsing alcove"
           },
           "standing": [
-            -1.5,
-            1.1
+            -1.9,
+            -1.1
           ],
           "reachDistance": 1.65
         },
@@ -14380,9 +14386,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -0.62,
+            -0.6,
             0.081,
-            -3.8600000000000003
+            -3.85
           ],
           "yawDeg": 0,
           "scale": [
@@ -14409,8 +14415,8 @@
             "en": "Low console below the screen"
           },
           "standing": [
-            -0.6,
-            -2.9
+            -1.5,
+            -2.8
           ],
           "reachDistance": 1.65
         },
@@ -14420,11 +14426,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -1.9,
             0.081,
-            3.22
+            3.7
           ],
-          "yawDeg": 7,
+          "yawDeg": 165,
           "scale": [
             1,
             1,
@@ -14449,8 +14455,8 @@
             "en": "Small velvet ottoman in left window"
           },
           "standing": [
-            -2.1,
-            4.2
+            -0.7,
+            4.4
           ],
           "reachDistance": 1.65
         },
@@ -14460,11 +14466,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.96,
+            -3.4,
             0.081,
-            -3.58
+            -4.05
           ],
-          "yawDeg": 0,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -14491,7 +14497,7 @@
             "result": "The refrigerator door swings open."
           },
           "standing": [
-            -2.1,
+            -2.4,
             -2.9
           ],
           "reachDistance": 1.65
@@ -14502,9 +14508,9 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -0.62,
+            -0.6,
             3.3,
-            -3.99
+            -4
           ],
           "yawDeg": 0,
           "scale": [
@@ -14531,22 +14537,22 @@
             "en": "Grazing light across screen reveals"
           },
           "standing": [
-            -0.6,
-            -2.9
+            -0.1,
+            -2.1
           ],
           "reachDistance": 1.65
         },
         {
           "id": "S14-leftrear",
           "socket": "leftrear",
-          "zone": "left",
+          "zone": "right",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            3,
             0.081,
-            -1.8
+            -4
           ],
-          "yawDeg": 90,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -14571,8 +14577,8 @@
             "en": "Small domestic arrangement at sofa end"
           },
           "standing": [
-            -2,
-            -1
+            2.5,
+            -2.5
           ],
           "reachDistance": 1.65
         },
@@ -14582,7 +14588,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -14611,8 +14617,8 @@
             "en": "Soft gallery wall light"
           },
           "standing": [
-            3.1,
-            1.3
+            2.9,
+            1.4
           ],
           "reachDistance": 1.65
         }
@@ -14703,11 +14709,11 @@
             1.5499999999999998
           ],
           [
-            2.8,
+            2.65,
             1.5499999999999998
           ],
           [
-            2.8,
+            2.65,
             -2.4000000000000004
           ]
         ],
@@ -14879,7 +14885,7 @@
           "kind": "lantern"
         },
         {
-          "name": "Empty glass object case with ivory stage samples",
+          "name": "Glass sample case on the left wall",
           "asset_id": "mall-glass-showcase",
           "source": "models/mall-glass-showcase/exports/optimized.glb",
           "count": 1,
@@ -14936,7 +14942,7 @@
           "kind": "plant"
         },
         {
-          "name": "Single audience chair beside the rear wall",
+          "name": "Audience chair facing the piano",
           "asset_id": "meeting-chair",
           "source": "models/meeting-chair/exports/optimized.glb",
           "count": 1,
@@ -14960,11 +14966,11 @@
         "inlay_offset_m": 0.006,
         "treatment": "An oval walnut marquetry field and an ivory stage outline gather the instrument and bench.",
         "position_m": [
-          -1.05,
+          0,
           0.081,
           -1.02
         ],
-        "yaw_deg": -22,
+        "yaw_deg": 0,
         "field_width_depth_m": [
           3.55,
           4.05
@@ -15070,7 +15076,7 @@
           5.75
         ],
         "browse_local_xz_m": [
-          2.8,
+          2.65,
           -2.4000000000000004
         ],
         "expected_signature": "raised baby-grand lids",
@@ -15156,7 +15162,7 @@
           "xyz": [
             -1.05,
             3.3,
-            -1.02
+            -1
           ],
           "size": [
             1.18,
@@ -15167,9 +15173,9 @@
         },
         "frontpend-mount": {
           "xyz": [
-            -2.5,
+            -2.35,
             3.15,
-            2.88
+            4.25
           ],
           "size": [
             0.44,
@@ -15180,7 +15186,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -15201,9 +15207,9 @@
           "xyz": [
             -1.05,
             0.081,
-            -1.02
+            -1
           ],
-          "yawDeg": -22,
+          "yawDeg": -15,
           "scale": [
             1,
             1,
@@ -15230,8 +15236,8 @@
             "result": "The final piano key lights up."
           },
           "standing": [
-            0,
-            0.7
+            0.1,
+            1.1
           ],
           "reachDistance": 1.65
         },
@@ -15241,11 +15247,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.35,
             0.081,
-            3.22
+            4.25
           ],
-          "yawDeg": 7,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -15272,7 +15278,7 @@
             "result": "The final keyboard key lights up."
           },
           "standing": [
-            -0.7,
+            -0.6,
             3.6
           ],
           "reachDistance": 1.65
@@ -15285,7 +15291,7 @@
           "xyz": [
             -1.05,
             3.3,
-            -1.02
+            -1
           ],
           "yawDeg": 0,
           "scale": [
@@ -15312,8 +15318,8 @@
             "en": "Warm stage special above lid"
           },
           "standing": [
-            0,
-            0.7
+            1,
+            -2.1
           ],
           "reachDistance": 1.65
         },
@@ -15323,11 +15329,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -0.64,
+            -0.65,
             0.081,
-            -3.76
+            -4.25
           ],
-          "yawDeg": -2,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -15354,8 +15360,8 @@
             "result": "Audio setting changed."
           },
           "standing": [
-            0.9,
-            -2.3
+            0.7,
+            -2.9
           ],
           "reachDistance": 1.65
         },
@@ -15365,9 +15371,9 @@
           "zone": "front",
           "anchor": "frontpend-mount",
           "xyz": [
-            -2.5,
+            -2.35,
             3.15,
-            2.88
+            4.25
           ],
           "yawDeg": 0,
           "scale": [
@@ -15394,20 +15400,20 @@
             "en": "Small amber lamp over practice area"
           },
           "standing": [
-            -0.7,
-            3.5
+            -0.9,
+            4.3
           ],
           "reachDistance": 1.65
         },
         {
           "id": "S15-leftrear",
           "socket": "leftrear",
-          "zone": "right",
+          "zone": "left",
           "anchor": "floor",
           "xyz": [
-            1.15,
+            -3.3,
             0.081,
-            -3.58
+            -3.75
           ],
           "yawDeg": 90,
           "scale": [
@@ -15431,11 +15437,11 @@
             "open"
           ],
           "a11y": {
-            "en": "Empty glass object case with ivory stage samples"
+            "en": "Glass sample case on the left wall"
           },
           "standing": [
-            1.1,
-            -2.3
+            -1.3,
+            -3.3
           ],
           "reachDistance": 1.65
         },
@@ -15445,7 +15451,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -15474,8 +15480,8 @@
             "en": "Keybed side light"
           },
           "standing": [
-            3.1,
-            0.9
+            2.9,
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -15485,9 +15491,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            3.25,
             0.081,
-            -3.68
+            -4.1
           ],
           "yawDeg": 0,
           "scale": [
@@ -15522,14 +15528,14 @@
         {
           "id": "S15-backleft",
           "socket": "backleft",
-          "zone": "front",
+          "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -1.7,
+            -2.55,
             0.081,
-            4.2
+            0.55
           ],
-          "yawDeg": 5,
+          "yawDeg": 135,
           "scale": [
             1,
             1,
@@ -15551,11 +15557,11 @@
             "sit"
           ],
           "a11y": {
-            "en": "Single audience chair beside the rear wall"
+            "en": "Audience chair facing the piano"
           },
           "standing": [
             -0.6,
-            4.8
+            1.5
           ],
           "reachDistance": 1.65
         }
@@ -15746,7 +15752,7 @@
       },
       "props": [
         {
-          "name": "Cell display in left window",
+          "name": "Battery cell test display in the right window",
           "asset_id": "battery-display-rack",
           "source": "models/battery-display-rack/exports/optimized.glb",
           "count": 1,
@@ -15903,7 +15909,7 @@
         "inlay_offset_m": 0.006,
         "treatment": "White anti-static tile with a teal service lane and three lime indexing marks points to the rail.",
         "position_m": [
-          -0.25,
+          0,
           0.081,
           -0.12
         ],
@@ -16097,9 +16103,9 @@
         },
         "onright-mount": {
           "xyz": [
-            2.63,
+            2.2,
             1.131,
-            -3.68
+            -3.5
           ],
           "size": [
             0.98,
@@ -16111,9 +16117,9 @@
         },
         "ceiling-mount": {
           "xyz": [
-            -1.56,
+            -1.55,
             3.3,
-            -1.28
+            -1.3
           ],
           "size": [
             1.18,
@@ -16124,7 +16130,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -16137,9 +16143,9 @@
         },
         "onleft-mount": {
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.8
+            -2.85
           ],
           "size": [
             1.36,
@@ -16157,11 +16163,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -1.56,
+            -1.55,
             0.081,
-            -1.28
+            -1.3
           ],
-          "yawDeg": 5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -16189,7 +16195,7 @@
           },
           "standing": [
             -1.6,
-            0.6
+            0.7
           ],
           "reachDistance": 1.65
         },
@@ -16199,20 +16205,20 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
-            0.081,
-            3.22
+            2.55,
+            0.07,
+            4
           ],
-          "yawDeg": 7,
+          "yawDeg": 0,
           "scale": [
-            1,
-            1,
-            1
+            1.3,
+            1.3,
+            1.3
           ],
           "size": [
-            1.15,
-            1.48,
-            0.82
+            1.3,
+            2.6,
+            0.65
           ],
           "modelId": "battery-display-rack",
           "lod": {
@@ -16225,13 +16231,13 @@
             "press"
           ],
           "a11y": {
-            "en": "Cell display in left window",
+            "en": "Battery cell test display in the right window",
             "action": "Test the battery cells",
             "result": "The battery meter shows three bars."
           },
           "standing": [
-            -2.4,
-            4.3
+            0.4,
+            4.2
           ],
           "reachDistance": 1.65
         },
@@ -16241,9 +16247,9 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             0.081,
-            -1.8
+            -2.85
           ],
           "yawDeg": 90,
           "scale": [
@@ -16270,8 +16276,8 @@
             "en": "White modular accessories shelving"
           },
           "standing": [
-            -1.9,
-            -2.4
+            -1.5,
+            -2.5
           ],
           "reachDistance": 1.65
         },
@@ -16281,9 +16287,9 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            2.2,
             0.081,
-            -3.68
+            -3.5
           ],
           "yawDeg": 0,
           "scale": [
@@ -16310,8 +16316,8 @@
             "en": "Neutral rear test desk"
           },
           "standing": [
-            2.6,
-            -2.7
+            0.7,
+            -2.9
           ],
           "reachDistance": 1.65
         },
@@ -16321,9 +16327,9 @@
           "zone": "right",
           "anchor": "onright-mount",
           "xyz": [
-            2.63,
+            2.2,
             1.131,
-            -3.68
+            -3.5
           ],
           "yawDeg": 0,
           "scale": [
@@ -16350,8 +16356,8 @@
             "en": "Generic static display on rear desk"
           },
           "standing": [
-            2.6,
-            -2.7
+            0.6,
+            -2.4
           ],
           "reachDistance": 1.65
         },
@@ -16361,11 +16367,11 @@
           "zone": "left",
           "anchor": "floor",
           "xyz": [
-            -3.03,
+            -2.7,
             0.081,
-            0.4
+            0.85
           ],
-          "yawDeg": 80,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -16390,8 +16396,8 @@
             "en": "Lime polymer tool bin"
           },
           "standing": [
-            -2.4,
-            1.4
+            -1.7,
+            1.7
           ],
           "reachDistance": 1.65
         },
@@ -16401,9 +16407,9 @@
           "zone": "left",
           "anchor": "ceiling-mount",
           "xyz": [
-            -1.56,
+            -1.55,
             3.3,
-            -1.28
+            -1.3
           ],
           "yawDeg": 0,
           "scale": [
@@ -16430,7 +16436,7 @@
             "en": "Bench inspection strip"
           },
           "standing": [
-            -1.6,
+            -0.5,
             0.6
           ],
           "reachDistance": 1.65
@@ -16441,7 +16447,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -16470,8 +16476,8 @@
             "en": "Pegboard edge light"
           },
           "standing": [
-            3.1,
-            0.9
+            2.9,
+            0.8
           ],
           "reachDistance": 1.65
         },
@@ -16481,11 +16487,11 @@
           "zone": "left",
           "anchor": "onleft-mount",
           "xyz": [
-            -2.9899999999999998,
+            -2.65,
             1.081,
-            -1.52
+            -2.55
           ],
-          "yawDeg": 83,
+          "yawDeg": 90,
           "scale": [
             1,
             1,
@@ -16510,8 +16516,8 @@
             "en": "Handheld bench scanner on left shelf"
           },
           "standing": [
-            -1.9,
-            -2.4
+            -1.5,
+            -3
           ],
           "reachDistance": 1.65
         }
@@ -16601,11 +16607,11 @@
             1.5499999999999998
           ],
           [
-            2.1,
+            1.8,
             1.5499999999999998
           ],
           [
-            2.1,
+            1.8,
             -2.4000000000000004
           ]
         ],
@@ -16721,7 +16727,7 @@
           "kind": "handset"
         },
         {
-          "name": "Small domestic writing desk",
+          "name": "Writing desk on the right wall",
           "asset_id": "work-desk",
           "source": "models/work-desk/exports/optimized.glb",
           "count": 1,
@@ -16969,7 +16975,7 @@
           5.75
         ],
         "browse_local_xz_m": [
-          2.1,
+          1.8,
           -2.4000000000000004
         ],
         "expected_signature": "gable-roof handset niches",
@@ -17055,35 +17061,35 @@
           "xyz": [
             -0.55,
             1.09,
-            -2.95
+            -2.85
           ],
           "size": [
             2.15,
             0,
             1.25
           ],
-          "yawDeg": -5,
+          "yawDeg": 0,
           "owner": "S17-focal"
         },
         "onleft-mount": {
           "xyz": [
-            1.42,
+            3.3,
             1.081,
-            -3.9
+            0.95
           ],
           "size": [
             1.36,
             0,
             0.8
           ],
-          "yawDeg": 0,
+          "yawDeg": -90,
           "owner": "S17-leftrear"
         },
         "ceiling-mount": {
           "xyz": [
             -0.55,
             3.3,
-            -2.95
+            -2.85
           ],
           "size": [
             1.18,
@@ -17094,7 +17100,7 @@
         },
         "lightwall-mount": {
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -17115,9 +17121,9 @@
           "xyz": [
             -0.55,
             0.081,
-            -2.95
+            -2.85
           ],
-          "yawDeg": -5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -17142,8 +17148,8 @@
             "en": "Gabled private-call alcove with open front"
           },
           "standing": [
-            1.1,
-            -2.4
+            1.3,
+            -2.6
           ],
           "reachDistance": 1.65
         },
@@ -17153,11 +17159,11 @@
           "zone": "right",
           "anchor": "handset-mount",
           "xyz": [
-            0.22,
+            0.4,
             1.09,
-            -2.66
+            -2.4
           ],
-          "yawDeg": -5,
+          "yawDeg": 0,
           "scale": [
             1,
             1,
@@ -17185,8 +17191,8 @@
             "result": "The handset answers the call."
           },
           "standing": [
-            1.1,
-            -2.4
+            1.9,
+            -2
           ],
           "reachDistance": 1.65
         },
@@ -17196,11 +17202,11 @@
           "zone": "right",
           "anchor": "floor",
           "xyz": [
-            1.42,
+            3.3,
             0.081,
-            -3.9
+            0.95
           ],
-          "yawDeg": 0,
+          "yawDeg": -90,
           "scale": [
             1,
             1,
@@ -17222,11 +17228,11 @@
             "press"
           ],
           "a11y": {
-            "en": "Small domestic writing desk"
+            "en": "Writing desk on the right wall"
           },
           "standing": [
-            1.4,
-            -2.9
+            2.5,
+            -1.3
           ],
           "reachDistance": 1.65
         },
@@ -17236,11 +17242,11 @@
           "zone": "right",
           "anchor": "onleft-mount",
           "xyz": [
-            1.42,
+            3.1,
             1.081,
-            -3.69
+            0.95
           ],
-          "yawDeg": 0,
+          "yawDeg": -90,
           "scale": [
             1,
             1,
@@ -17267,8 +17273,8 @@
             "result": "The call indicator lights up."
           },
           "standing": [
-            1.4,
-            -2.9
+            2,
+            -0.6
           ],
           "reachDistance": 1.65
         },
@@ -17278,20 +17284,20 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            -2.51,
+            -2.2,
             0.081,
-            3.22
+            2.45
           ],
-          "yawDeg": 7,
+          "yawDeg": 165,
           "scale": [
-            1,
-            1,
-            1
+            0.86,
+            0.86,
+            0.86
           ],
           "size": [
-            1.15,
-            1.48,
-            0.82
+            2.58,
+            0.688,
+            1.29
           ],
           "modelId": "lounge-sofa-bench",
           "lod": {
@@ -17307,7 +17313,7 @@
             "en": "Cork-coloured waiting seat in left window"
           },
           "standing": [
-            -2.1,
+            -0.8,
             4.2
           ],
           "reachDistance": 1.65
@@ -17320,7 +17326,7 @@
           "xyz": [
             -0.55,
             3.3,
-            -2.95
+            -2.85
           ],
           "yawDeg": 0,
           "scale": [
@@ -17347,8 +17353,8 @@
             "en": "Domestic pendant above desk"
           },
           "standing": [
-            1.1,
-            -2.4
+            1.3,
+            -2.9
           ],
           "reachDistance": 1.65
         },
@@ -17358,11 +17364,11 @@
           "zone": "front",
           "anchor": "floor",
           "xyz": [
-            3.15,
+            3.38,
             0.081,
-            2.7
+            2.35
           ],
-          "yawDeg": 80,
+          "yawDeg": -90,
           "scale": [
             1,
             1,
@@ -17387,8 +17393,8 @@
             "en": "Correspondence drawer cabinet"
           },
           "standing": [
-            2.2,
-            2.7
+            2.1,
+            2.5
           ],
           "reachDistance": 1.65
         },
@@ -17398,7 +17404,7 @@
           "zone": "right",
           "anchor": "lightwall-mount",
           "xyz": [
-            3.19,
+            3.2,
             2.74,
             0.3
           ],
@@ -17427,20 +17433,20 @@
             "en": "Gable reading lamp"
           },
           "standing": [
-            3.1,
-            0.9
+            2.1,
+            0.8
           ],
           "reachDistance": 1.65
         },
         {
           "id": "S17-backright",
           "socket": "backright",
-          "zone": "right",
+          "zone": "front",
           "anchor": "floor",
           "xyz": [
-            2.63,
+            -2.1,
             0.081,
-            -3.68
+            4.45
           ],
           "yawDeg": 0,
           "scale": [
@@ -17467,8 +17473,8 @@
             "en": "Chalk planter at end of runner"
           },
           "standing": [
-            2.6,
-            -2.7
+            -0.8,
+            4.3
           ],
           "reachDistance": 1.65
         }

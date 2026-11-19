@@ -136,7 +136,8 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
       collisionBoxes.push({
         x:group.position.x+x*c+z*sn, y, z:group.position.z-x*sn+z*c,
-        width:w*Math.abs(c)+d*Math.abs(sn), height:h, depth:w*Math.abs(sn)+d*Math.abs(c)
+        width:w*Math.abs(c)+d*Math.abs(sn), height:h, depth:w*Math.abs(sn)+d*Math.abs(c),
+        ...(replaced && {replacedDisplay:true})
       });
     }
     const tools = {

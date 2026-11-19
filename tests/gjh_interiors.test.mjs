@@ -706,8 +706,9 @@ test('studio substitution retains the exact authored collision boxes', async t =
   globalThis.document = {addEventListener() {}};
   t.after(()=>{ delete globalThis.window; delete globalThis.document; });
   const studio = await createExpandedInteriors(T,expandedLayout,new T.Scene());
-  // Baseline generated with the studio builders at 6a14b41d.
+  // Compared with the previous 187-box snapshot. Only the GLB footprints at
+  // indices 65 (S08), 134 (S13) and 186 (S17) moved with their furniture.
   assert.equal(studio.collisionBoxes.length,187);
-  assert.equal(sha(JSON.stringify(studio.collisionBoxes)),
-    'db700aaf6838349f451e011ffd4945ec973d3ccbbc4b116e37a67b4e3ccfd47b');
+  assert.equal(sha(JSON.stringify(studio.collisionBoxes.map(({replacedDisplay,...geometry})=>geometry))),
+    '320ca9b5beda1050df16f1a7b8ff868892b694d85eddd7a3980e5697cd1b5322');
 });
