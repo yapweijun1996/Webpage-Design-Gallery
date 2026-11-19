@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - New Moon Product Wall",
+  "version": "v23",
+  "designStyle": "Two tilted shelves of official abalone tins fill the screen. A dark gradient frames the white headline and red chapter link.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v23/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v23",
+  "companyId": "gjh",
+  "displayTitle": "New Moon Product Wall",
+  "summary": "Explore New Moon abalone tins from four origins, then visit the brand chapter or prepare a sales enquiry.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 200
+}
