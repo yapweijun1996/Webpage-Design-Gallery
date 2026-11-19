@@ -92,16 +92,30 @@ def check_v11_crowd(browser, base):
     assert page.evaluate("window.__sceneReady && __mall.ready"), page.locator("#loader-status").inner_text()
     page.locator("#app-loader").wait_for(state="hidden", timeout=90000)
     assert page.evaluate("__mall.teleport('atrium')")
-    page.wait_for_function("window.__mall.state.npcs?.modular.active.some(npc => npc.visible)", timeout=45000)
-    state = page.evaluate("__mall.state")
+    # Take the snapshot in the same task that observes a visible NPC: the crowd rotates between frames.
+    page.wait_for_function("""() => {
+        const live = window.__mall.state.npcs?.modular.active.some(npc => npc.visible);
+        if (live) window.__crowdSnapshot = structuredClone(window.__mall.state);
+        return live;
+    }""", timeout=45000)
+    state = page.evaluate("window.__crowdSnapshot")
     npcs = state["npcs"]
     assert 1 <= npcs["visible"] <= npcs["active"] <= npcs["limit"] == 2, npcs
     assert state["renderBudget"]["totalCalls"] <= 200, state["renderBudget"]
     assert page.evaluate("innerWidth === 390 && document.documentElement.scrollWidth <= innerWidth")
     actor = next(npc for npc in npcs["modular"]["active"] if npc["visible"])
     assert actor["outfit"] == {"body": "neutral-body", "hair": "hair-bob"}, actor
-    page.wait_for_function("""first => __mall.state.npcs.modular.active.some(npc =>
-        npc.slot === first.slot && npc.time > first.time + .1)""", arg=actor)
+    # NPCs rotate in and out, so watch every active slot and accept any whose animation time advances.
+    page.wait_for_function("""() => {
+        const seen = window.__crowdTimes ||= {};
+        let advanced = false;
+        for (const npc of __mall.state.npcs.modular.active) {
+            const before = seen[npc.slot];
+            if (before !== undefined && npc.time > before + .1) advanced = true;
+            if (before === undefined || npc.time < before) seen[npc.slot] = npc.time;
+        }
+        return advanced;
+    }""", timeout=45000)
     page.locator("#mall-tools > summary").click()
     page.locator("#keyboard-help summary").click()
     page.wait_for_function("__mall.state.paused")
@@ -109,7 +123,7 @@ def check_v11_crowd(browser, base):
     page.wait_for_timeout(250)
     assert page.evaluate("__mall.state.npcs.modular.active") == then
     page.locator("#graphics-quality").select_option("low")
-    assert page.evaluate("__mall.state.npcs.modular.active.length === 0 && __mall.state.npcs.limit === 1")
+    page.wait_for_function("__mall.state.npcs.modular.active.length === 0 && __mall.state.npcs.limit === 1", timeout=10000)
     assert not errors, errors
     context.close()
     print(f"v11 / 390px: crowd, animation, pause, Low fallback and layout PASS; "
