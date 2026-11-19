@@ -41,7 +41,7 @@ def project(shop):
         details['teaNiches'] = shop['teaNiches']
     return dict(**details, **{key:shop[key] for key in ('brand','style','concept','signature_family','frame','palette','floor','capture')},
                 lighting=shop['lighting']['position_m'], accent_kelvin=shop['lighting']['accent_kelvin'],
-                centreFixture=shop.get('centreFixture'), props=props, anchor=dict(asset_id=focal['modelId'], **placement(focal)),
+                centreFixture=shop.get('centreFixture'), props=props, anchor=dict(asset_id=focal['modelId'], **placement(focal), standing=focal['standing']),
                 routes=shop['additional_clearance_segments'], pickups=[item['standing'] for item in items if item['socket']=='shelves'],
                 colliders=colliders, files={tier:dict(file=file, bytes=receipts[file], tier=tier)
                     for tier,file in focal['lod'].items() if file.endswith('-'+tier+'.glb')})

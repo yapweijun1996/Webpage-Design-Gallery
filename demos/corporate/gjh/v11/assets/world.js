@@ -1,5 +1,6 @@
 import {buildRestrooms} from './restrooms.js';
 import {miliExhibit} from './mili-exhibit.js';
+import {gogoExhibit} from './gogo-exhibit.js';
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
 import {filterWallArtwork, setupArtworkTexture} from './artwork-textures.js';
@@ -830,6 +831,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       plant(x - 3.8, -8.8, 1.15); plant(x + 3.8, -8.8, 1.15); plant(x + 3.8, -2.5);
       if (zone === 'gogo') {
         if (expanded) {
+          const {frame, anchor} = interiorStores.S03;
+          const [standingX, standingZ] = anchor.standing;
+          const [originX, originY, originZ] = frame.world_origin_m;
+          art('gogo-logo.jpg',originX-2.213,originY+1.60,originZ+2.669,.49,anchor.yaw_deg*Math.PI/180);
+          interactables.push({id:'gogo-potong-story',x:frame.world_origin_m[0]+standingX,z:frame.world_origin_m[2]+standingZ,radius:1.0});
           const cx = x+3.15, cz = -2.40;
           box('water',cx,.59,cz,1.55,1.16,3.25);
           box('brass',cx,.10,cz,1.57,.16,3.29);
@@ -1301,7 +1307,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
-  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};

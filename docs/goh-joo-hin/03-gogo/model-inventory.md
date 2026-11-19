@@ -16,3 +16,12 @@ Upstream paths were checked against [Blender-3D-Gallery main `0b71ed7e`](https:/
 | Room detail pack | Slot origin | [Installed detail GLB](../../../demos/corporate/gjh/v11/assets/interiors/s03-gogo-details.glb) | Room detail generated using the [web repository source](../../../scripts/gjh_interiors/rooms.py). |
 
 The [installed bar stools](../../../demos/corporate/gjh/v11/assets/gogo-bar-stool.glb) reuse the original Blender Gallery model with the web runtime’s brass and upholstery variant. See the [source and transform record](../../gjh-gogo-bar-stool.md). Historical Red Bean and Assorted Real Fruit Potong have planned left-cart placements. The unwrapped studies in the [shop brief](README.md) have no corresponding verified SKU GLBs. Fixture GLBs and generic shelf stock are exhibit assets.
+
+
+## Installed cart treatment
+
+| Object | Local placement | Runtime source |
+| --- | --- | --- |
+| GOGO header panel | XYZ (−2.22, 1.60, 2.64), yaw 12° | [Room-detail geometry](../../../scripts/gjh_interiors/rooms.py) and [existing sourced graphic](../../../demos/corporate/gjh/v11/assets/gogo-logo.jpg) |
+| Red bean and fruit samples | XZ (−2.94, 2.38) and (−2.76, 2.38), above the counter | [Original unwrapped geometry](../../../scripts/gjh_interiors/rooms.py) |
+| Story action | Authored cart standing point XZ (−2.3, 3.3) | [Unified programme](../../gjh-v11-interior-program.json) and [exhibit text](../../../demos/corporate/gjh/v11/assets/gogo-exhibit.js) |

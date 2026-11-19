@@ -3099,9 +3099,9 @@
       {
         "store": "S03",
         "file": "s03-gogo-details.glb",
-        "bytes": 75264,
-        "sha256": "5fb627dcf761e9284d968a89852a0c5e92a1c613b7dea6e65495d4562c746520",
-        "triangles": 1014,
+        "bytes": 93580,
+        "sha256": "0f574baab3ecc94be6b9a4fed02db53d2d720fb5c9b46b7576911c94c1f72ac7",
+        "triangles": 1256,
         "draws": 3,
         "instances": 0,
         "motion": [

@@ -13,7 +13,7 @@ export const roomDetails = {
   },
   "S03": {
     "file": "s03-gogo-details.glb",
-    "bytes": 75264,
+    "bytes": 93580,
     "roomDetail": true
   },
   "S04": {

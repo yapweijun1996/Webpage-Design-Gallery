@@ -98,7 +98,17 @@ def gogo(r,_):
         y=2.75+i*.23
         r.line((-3.12,1.20,2.10),(x,y,z),.018,BONE)
         r.lathe(x,y,z,.16,.40,GLOBE,[("efade6","70cdb9","feb46c")[i]],8)
-    r.panel(-2.26,.91,2.626,1.0,.40,logo(3),yaw=radians(12))
+    # The logo uses the already-loaded source image in the world builder.
+    yaw=radians(12)
+    r.box(-2.22,1.60,2.64,.62,.31,.055,"e5bd76",yaw=yaw)
+    for x in (-2.47,-2.00):
+        r.box(x,1.465,2.60,.035,.16,.045,"a88853",yaw=yaw)
+
+    # Unwrapped exhibit forms for two historically documented potong flavours.
+    profile=((.66,0),(.91,.10),(1,.24),(1,.79),(.86,.94),(.57,1))
+    for x,color in [(-2.94,"a86e64"),(-2.76,"dfa052")]:
+        r.box(x,1.56,2.38,.018,.072,.015,"d7b283")
+        r.lathe(x,1.59,2.38,.032,.108,profile,[color],8,depth=.72)
     for rad in (1.16,1.44):
         r.ring(.24,r.floor,1.23,rad,rad*.82,.065,MINT,PULSE,True,start=-.14,end=pi*1.3)
 

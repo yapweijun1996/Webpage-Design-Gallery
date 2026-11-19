@@ -2,6 +2,12 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ["GOGO · Fruit and red bean potong","GOGO · 水果和红豆冰棒","GOGO · Potong buah dan kacang merah"],
+  ["Fruit and red bean potong","水果和红豆冰棒","Potong buah dan kacang merah"],
+  ["Cart exhibit","冰棒车展示","Pameran troli"],
+  ["Official GOGO drinks brand cover","GOGO 官方饮料品牌图片","Imej rasmi jenama minuman GOGO"],
+  ["View the official GOGO brand page","查看 GOGO 官方品牌页面","Lihat laman rasmi jenama GOGO"],
+  ["Goh Joo Hin lists drinks and potong ice cream under GOGO. A Singapore Health Promotion Board list from 2016 records two GOGO Premium Potong Ice Cream packs: Assorted Real Fruit and Red Bean, both 6 × 65 g. The two unwrapped samples at the cart represent those historical flavours.","Goh Joo Hin 的 GOGO 系列包括饮料和冰棒。新加坡保健促进局 2016 年的目录记载了两款 GOGO 冰棒，分别是什锦水果和红豆口味，每盒 6 支，每支 65 克。推车上的两款无包装样品展示这些历史口味。","Goh Joo Hin menyenaraikan minuman dan aiskrim potong di bawah jenama GOGO. Senarai Lembaga Penggalakan Kesihatan Singapura pada 2016 merekodkan dua pek Aiskrim Potong Premium GOGO, iaitu Buah Campuran dan Kacang Merah. Setiap pek mengandungi 6 batang seberat 65 g setiap satu. Dua sampel tanpa pembalut di troli mewakili perisa tersebut."],
   ['Pause motion','暂停动画','Jeda animasi'],
   ['Resume motion','继续动画','Sambung animasi'],
   ["MILI · Two sauces at the cookline","MILI · 比较两款调味酱","MILI · Dua sos di ruang memasak"],
