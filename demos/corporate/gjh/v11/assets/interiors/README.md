@@ -27,3 +27,9 @@ Create a slot parent with the world translation and yaw below. Attach the GLB at
 | S17 Gigaset | telephone-alcove | [-0.55, 0.081, -2.95] | -5 | [40.0, 0, 44.0] | -90 | [2.15, 2.86, 1.25] |
 
 Rights and transformations accompany each file in [manifest.json](manifest.json).
+
+Room artwork uses trilinear minification and tier-specific anisotropy through the
+mall's sliced warm-up. Colour maps use sRGB and straight alpha. The storefront
+atlas fills its gutters and uploads its explicit mip chain in 128 KiB slices.
+The floor layout places the finish and baked motif on separate 6 mm layers
+above the slab, preserving render batches and collision.

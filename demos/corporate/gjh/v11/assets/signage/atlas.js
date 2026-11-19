@@ -1,7 +1,8 @@
 import {registry} from '../icons.js';
 import {swatch as s} from './tokens.js';
+import {extrudeArtworkGutter, setupArtworkTexture} from '../artwork-textures.js';
 
-import {atlasSize,lowAtlasSize,atlasCells,plateRect} from './atlas-layout.js';
+import {atlasSize,lowAtlasSize,atlasCells,atlasGutter,plateRect} from './atlas-layout.js';
 function canvas(w,h) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
@@ -258,6 +259,7 @@ export async function bakeAtlas(configs,assetBase) {
       }
     }
     paintPoster(ctx,c,poster,cells.poster);
+    for (const cell of Object.values(cells)) extrudeArtworkGutter(ctx,cell,atlasGutter);
     tiles.set(c.id,{cells,mask:masks});
   }));
   const lowSheet=canvas(lowAtlasSize,lowAtlasSize), low=lowSheet.getContext('2d');
@@ -270,11 +272,7 @@ export async function bakeAtlas(configs,assetBase) {
 // subsequent copy uses at most 128 KiB, with the same UVs as the Low atlas.
 export function createProgressiveAtlas(T, sheet) {
   const size = sheet.width;
-  const texture = new T.DataTexture(null, size, size);
-  texture.colorSpace = T.SRGBColorSpace;
-  texture.minFilter = T.LinearMipmapLinearFilter;
-  texture.magFilter = T.LinearFilter;
-  texture.anisotropy = 2;
+  const texture = setupArtworkTexture(T,new T.DataTexture(null,size,size),'balanced',{mipmaps:'explicit'});
   const levels = texture.mipmaps;
   for (let width=size; width>=1; width/=2) levels.push({width,height:width,data:null});
   texture.source.dataReady = false;

@@ -75,7 +75,7 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
       const directPrepared = new WeakSet(), directPrograms = new Set();
       if (startup && ((expanded && shadows) || (signage && signage.getTier() !== tier))) {
         yield* prepareScene({T, renderer, scene, camera:player.camera, expanded, elevator,
-          shadows:false, detailed:false, screenPixel, extra:modelWarmup.pendingMeshes(),
+          shadows:false, detailed:false, artworkTier:tier, screenPixel, extra:modelWarmup.pendingMeshes(),
           exclude:interiors?.groups, prepared:directPrepared, programs:directPrograms,
           updateLights:atmosphere.update, lightVariants:atmosphere.lightVariants,
           initTexture:modelWarmup.initTexture, alternatesFor:modelWarmup.alternatesFor}, report);
@@ -103,13 +103,18 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
         revision = modelWarmup.arrivalRevision;
         const extra = modelWarmup.pendingMeshes();
         if (replacing) extra.push(...stage.meshes);
-        yield* prepareScene({T, renderer, scene, camera, expanded, elevator, shadows, detailed,
+        yield* prepareScene({T, renderer, scene, camera, expanded, elevator, shadows, detailed, artworkTier:tier,
           screenPixel, extra, exclude, prepared, programs, chase, updateLights:atmosphere.update,
           lightVariants:atmosphere.lightVariants, initTexture:modelWarmup.initTexture,
           alternatesFor:modelWarmup.alternatesFor}, report);
         while (!interiorsReady) {
           if (interiorError) throw interiorError;
           yield false;
+        }
+        // Cached rooms skip the installer. Their shared atlas still has to
+        // follow the incoming tier after a downgrade or a superseded sweep.
+        for (const texture of interiors?.artworkForTier?.(tier) ?? []) {
+          if (modelWarmup.initTexture(texture,tier)) yield false;
         }
         // Other models can arrive while either GPU fence is pending.
       } while (revision !== modelWarmup.arrivalRevision);
@@ -226,7 +231,7 @@ export function mallProbePoses(expanded, elevator, chase) {
 // r170's screen and linear-target programs differ. A nonempty one-pixel
 // viewport on the real canvas exercises its output color space and MSAA under
 // the opaque loader. Detailed ground-floor passes use the linear target too.
-export function* prepareScene({T, renderer, scene, camera, expanded, elevator, detailed,
+export function* prepareScene({T, renderer, scene, camera, expanded, elevator, detailed, artworkTier,
   updateLights, lightVariants, initTexture, alternatesFor, shadows=renderer.shadowMap.enabled, extra=[], exclude=[], screenPixel=()=>1,
   prepared=new WeakSet(), programs=new Set(), chase}, report) {
   const probe = camera.clone(false), staging = new T.Scene(), meshes = [], lights = [];
@@ -436,9 +441,9 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       }
     }
     for (const texture of textures) {
-      initTexture(texture);
+      const uploaded = initTexture(texture,artworkTier);
       report.textures++;
-      yield;
+      yield uploaded && texture.userData?.artworkMipmaps === 'generate' ? false : undefined;
     }
     if(shadows){
       const active=probeLights(poses[0]).filter(light=>light.layers.isEnabled(0));

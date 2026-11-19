@@ -3252,6 +3252,18 @@ function createArrivalChime() {
   };
 }
 
+// demos/corporate/gjh/v11/assets/artwork-textures.js
+var anisotropyFor = (tier) => tier === "low" ? 2 : 4;
+function setArtworkTextureTier(texture, tier) {
+  if (tier === undefined || texture.userData?.artworkMipmaps !== "generate" || texture.userData.artworkFixedTier)
+    return;
+  const anisotropy = anisotropyFor(tier);
+  if (texture.anisotropy === anisotropy)
+    return;
+  texture.anisotropy = anisotropy;
+  texture.needsUpdate = true;
+}
+
 // demos/corporate/gjh/v11/assets/model-warmup.js
 function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, maxSteps = 2 } = {}) {
   const jobs = [];
@@ -3385,11 +3397,13 @@ function createModelWarmup(T, renderer) {
   staging.matrixWorldAutoUpdate = false;
   const target = new T.WebGLRenderTarget(1, 1);
   const scissor = new T.Vector4;
-  function initTexture(texture) {
+  function initTexture(texture, artworkTier) {
+    setArtworkTextureTier(texture, artworkTier);
     if (initialized.get(texture) === texture.version)
-      return;
+      return false;
     renderer.initTexture(texture);
     initialized.set(texture, texture.version);
+    return true;
   }
   function withMesh(mesh, scene, mask, linear, work) {
     const { visible, frustumCulled, children, count } = mesh;
@@ -3466,7 +3480,7 @@ function createModelWarmup(T, renderer) {
       return false;
     };
   }
-  function prepare(root, scene, { hide = false, linear = () => false, alternates = [], includeInSceneSweep = true, ...options } = {}) {
+  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, ...options } = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse((mesh) => {
@@ -3486,9 +3500,12 @@ function createModelWarmup(T, renderer) {
     return scheduler.enqueue(function* () {
       for (const { mesh, mask } of meshes) {
         for (const texture of new Set(meshTextures(mesh))) {
-          if (initialized.get(texture) === texture.version)
+          if (artworkTier === undefined && initialized.get(texture) === texture.version)
             continue;
-          yield () => initTexture(texture);
+          yield () => {
+            if (initTexture(texture, artworkTier) && texture.userData?.artworkMipmaps === "generate")
+              return false;
+          };
         }
         yield* prepareMesh(mesh, scene, mask, false);
         if (linear())
@@ -3619,7 +3636,7 @@ function createInstaller(T, renderer, scene, accents) {
     const linear = () => tier === "detailed";
     const options = { priority, signal, late: false };
     const results = await Promise.allSettled([
-      prepareModel(roots, { ...options, linear, includeInSceneSweep: false }),
+      prepareModel(roots, { ...options, linear, artworkTier: tier, includeInSceneSweep: false }),
       queue.enqueue(function* () {
         const programs = new Set;
         for (const output of linear() ? [false, true] : [false]) {
@@ -3772,6 +3789,7 @@ function prepareTier({
           elevator,
           shadows: false,
           detailed: false,
+          artworkTier: tier,
           screenPixel,
           extra: modelWarmup.pendingMeshes(),
           exclude: interiors?.groups,
@@ -3816,6 +3834,7 @@ function prepareTier({
           elevator,
           shadows,
           detailed,
+          artworkTier: tier,
           screenPixel,
           extra,
           exclude,
@@ -3831,6 +3850,10 @@ function prepareTier({
           if (interiorError)
             throw interiorError;
           yield false;
+        }
+        for (const texture of interiors?.artworkForTier?.(tier) ?? []) {
+          if (modelWarmup.initTexture(texture, tier))
+            yield false;
         }
       } while (revision !== modelWarmup.arrivalRevision);
       if (interiors && !interiors.activateTier(tier))
@@ -3972,6 +3995,7 @@ function* prepareScene({
   expanded,
   elevator,
   detailed,
+  artworkTier,
   updateLights,
   lightVariants,
   initTexture,
@@ -4210,9 +4234,9 @@ function* prepareScene({
       }
     }
     for (const texture of textures) {
-      initTexture(texture);
+      const uploaded = initTexture(texture, artworkTier);
       report.textures++;
-      yield;
+      yield uploaded && texture.userData?.artworkMipmaps === "generate" ? false : undefined;
     }
     if (shadows) {
       const active = probeLights(poses[0]).filter((light) => light.layers.isEnabled(0));
@@ -5507,7 +5531,7 @@ function scheduleTier() {
       return;
     warmRunner.stop("superseded");
   }
-  if (profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier) && (!world.interiors || world.interiors.activeTier === profile.tier)) {
+  if (!tierQueue.pending && profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier) && (!world.interiors || world.interiors.activeTier === profile.tier)) {
     tierQueue.cancel();
     world.interiors?.setTier(profile.tier);
     applyProfile(profile);
@@ -6036,7 +6060,7 @@ async function initialize() {
     ...options
   });
   const { createWorld } = await import("./assets/world.bundle.js");
-  world = await createWorld(T, R, physics, expanded, warmModel);
+  world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)

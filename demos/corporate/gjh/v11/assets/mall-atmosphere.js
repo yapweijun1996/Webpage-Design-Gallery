@@ -1,4 +1,5 @@
 import {createInstanceVisibility} from './packed-draw.js';
+import {placeDecal} from './surface-decals.js';
 
 const SURFACES = {
   low:{roughness:1, emission:1, washOpacity:0},
@@ -10,7 +11,7 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
   // One main-pass batch shares the existing gradient texture. The opaque
   // surfaces keep their original shader programs and use the mall's PMREM.
   const washMaterial = poolMaterial.clone();
-  const washMesh = new T.InstancedMesh(plane, washMaterial, washes.length);
+  const washMesh = placeDecal(new T.InstancedMesh(plane,washMaterial,washes.length),-1);
   const transform = new T.Object3D();
   washes.forEach(([x, y, z, width, depth, yaw, pitch], index) => {
     transform.position.set(x,y,z);
