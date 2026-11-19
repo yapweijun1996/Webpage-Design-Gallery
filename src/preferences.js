@@ -172,6 +172,7 @@ async function init() {
   controls.hidden = false;
   document.querySelector('.language-control').hidden = false;
   document.querySelector('#theme-toggle').hidden = false;
+  document.querySelector('.palette-control').hidden = false;
   document.documentElement.dataset.preferencesReady = 'true';
 }
 init();
