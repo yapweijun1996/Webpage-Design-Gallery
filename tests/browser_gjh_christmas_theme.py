@@ -1,5 +1,5 @@
 """Real Christmas/Everyday/Lunar New Year transitions, clearances and failure recovery."""
-from gjh_startup_test_helpers import mall_entry_url
+from gjh_startup_test_helpers import mall_entry_url, set_off_season_date
 import argparse,functools,http.server,io,json,os,threading
 from pathlib import Path
 from PIL import Image,ImageChops,ImageStat
@@ -15,7 +15,7 @@ def run():
  def fresh(browser,w=390,h=844,init=''):
   c=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=2,has_touch=w<1000,reduced_motion='reduce',service_workers='block')
   c.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1','dismissed');"+init)
-  p=c.new_page();errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
+  p=c.new_page();set_off_season_date(p);errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
  def ready(p,query=''):
   p.goto(mall_entry_url(url+query));p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
  def open_theme(p):

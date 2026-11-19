@@ -331,5 +331,17 @@
     "Build {build}": "Binaan {build}",
     ": {title}": ": {title}",
     "Independent, unofficial concepts. Not affiliated with or endorsed by {name}.": "Konsep bebas dan tidak rasmi. Tidak berkaitan dengan atau disokong oleh {name}."
+  },
+  "mallTheme": {
+    "Automatic (follows the calendar)": "Automatik (mengikut kalendar)",
+    "Follow the festival calendar or choose a theme manually.": "Ikut kalendar perayaan atau pilih tema secara manual.",
+    "Everyday": "Harian",
+    "Lunar New Year": "Tahun Baharu Cina",
+    "Christmas": "Krismas",
+    "Deepavali": "Deepavali",
+    "Automatic: {festival} ({date}, {when})": "Automatik: {festival} ({date}, {when})",
+    "Automatic: Everyday (next: {festival} {when})": "Automatik: Harian (seterusnya: {festival} {when})",
+    "Automatic: Everyday": "Automatik: Harian",
+    "Theme settings could not be saved.": "Tetapan tema tidak dapat disimpan."
   }
 }

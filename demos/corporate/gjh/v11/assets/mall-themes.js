@@ -1,6 +1,9 @@
+import {FESTIVAL_CALENDAR, resolveAutoTheme} from './festival-calendar.js';
+
 // Theme identifiers and visual roles are local trusted data, never URLs or code
 // supplied through storage. Each seasonal pack is registered only after review.
 export const THEME_STORAGE_KEY = 'gjh-v11-mall-theme-v1';
+const AUTOMATIC = {id:'automatic',label:'Automatic (follows the calendar)'};
 export const EVERYDAY = Object.freeze({
   id:'everyday', label:'Everyday',
   materials:Object.freeze({floorTextured:0xe8dbc6,floorFlat:0xdac8ae,ceiling:0xf0e8d9,ceilingGlow:0xb3a286,ceilingGlowIntensity:.55,
@@ -38,54 +41,97 @@ export const MALL_THEMES = Object.freeze([EVERYDAY,LUNAR_NEW_YEAR,CHRISTMAS,DEEP
 
 /** Stage a trusted theme before a synchronous commit. Prepared resources belong
  * to the stage and are disposed on supersession, cancellation or replacement. */
-export function createMallThemeCoordinator({registry=MALL_THEMES, storage, prepare=async theme=>({value:theme,dispose(){}}), commit=()=>{}, notify=()=>{}}={}) {
+export function createMallThemeCoordinator({registry=MALL_THEMES, storage, now=()=>new Date(), prepare=async theme=>({value:theme,dispose(){}}), commit=()=>{}, notify=()=>{}}={}) {
   const records=new Map();
   for(const theme of registry){
     if(!theme || typeof theme.id!=='string' || !theme.id || typeof theme.label!=='string' || !theme.label || records.has(theme.id)) throw new TypeError('Invalid theme registry');
     records.set(theme.id,theme);
   }
   if(!records.has('everyday')) throw new TypeError('Everyday theme is required');
-  let active='everyday', remembered=null, pending=null, message='', saved=true, generation=0, suspended=false, currentStage=null, destroyed=false, controller=null;
+  const calendar = FESTIVAL_CALENDAR.filter(festival=>records.has(festival.theme));
+  let active='everyday', preference=AUTOMATIC.id, auto=null, pending=null, interactive=false, message='', saved=true, generation=0, suspended=false, currentStage=null, destroyed=false, controller=null;
   try {
     if(!storage) throw Error('Storage unavailable');
     const value=storage.getItem(THEME_STORAGE_KEY);
-    if(value && records.has(value)) remembered=value;
-    else if(value) message='Saved theme is unavailable. Everyday is active.';
+    if(records.has(value)) preference=value;
+    else if(value && value!==AUTOMATIC.id) message='Saved theme is unavailable. Everyday is active.';
   } catch { saved=false; message='Everyday is active for this session. Theme settings could not be saved.'; }
-  const state=()=>Object.freeze({active,label:records.get(active).label,pending,message,saved,suspended});
+  const state=()=>Object.freeze({active,label:records.get(active).label,preference,auto,pending,message,saved,suspended});
   const publish=()=>notify(state());
-  const persist=()=>{try{if(!storage)throw Error('Storage unavailable');storage.setItem(THEME_STORAGE_KEY,active);saved=true;return true;}catch{saved=false;return false;}};
+  function persist(){
+    try {
+      if(preference===AUTOMATIC.id) storage.removeItem(THEME_STORAGE_KEY);
+      else storage.setItem(THEME_STORAGE_KEY,preference);
+      saved=true;
+    } catch { saved=false; }
+  }
   const release=stage=>{try{stage?.dispose?.();}catch{/* Cleanup cannot replace the active theme. */}};
-  async function select(id){
+  function cancelPending(){
+    generation++;controller?.abort();controller=null;pending=null;interactive=false;
+  }
+  function complete(choice,calendar,save,alreadyActive=false){
+    preference=choice;auto=calendar;
+    if(save) persist();
+    const label=records.get(active).label;
+    message=auto ? '' : saved ? `${label} is ${alreadyActive?'already ':''}active.` :
+      `${label} is active for this session. Theme settings could not be saved.`;
+    publish();
+    return true;
+  }
+  function calendarChoice(){
+    const result=resolveAutoTheme(now(),calendar);
+    return {...result,festivalLabel:records.get(result.festival?.theme)?.label};
+  }
+  async function select(choice){
     if(destroyed||suspended){message='Theme settings are unavailable while the scene recovers.';publish();return false;}
-    if(!records.has(id)){generation++;controller?.abort();controller=null;pending=null;message='That theme is unavailable. The current theme is unchanged.';publish();return false;}
-    const epoch=++generation;controller?.abort();controller=null;
-    if(id===active && !pending){
-      try { commit(records.get(active),records.get(active),currentStage); }
+    if(choice===AUTOMATIC.id){
+      const calendar=calendarChoice();
+      return apply(calendar.theme,choice,calendar,true);
+    }
+    if(!records.has(choice)){cancelPending();message='That theme is unavailable. The current theme is unchanged.';publish();return false;}
+    return apply(choice,choice,null,true);
+  }
+  async function apply(id,choice,calendar,save=false){
+    const wasPending=Boolean(pending);
+    cancelPending();
+    const epoch=generation;
+    if(id===active && !wasPending){
+      try { if(save && !calendar) commit(records.get(active),records.get(active),currentStage); }
       catch { message='Theme could not be applied. The current theme is unchanged.';publish();return false; }
-      message=persist()?`${records.get(active).label} is already active.`:`${records.get(active).label} is active for this session. Theme settings could not be saved.`;publish();return true;
+      return complete(choice,calendar,save,true);
     }
     controller=new AbortController();const signal=controller.signal;
-    pending=id;message=`Preparing ${records.get(id).label}…`;publish();let stage;
+    pending=id;interactive=save;message=`Preparing ${records.get(id).label}…`;publish();let stage;
     try {
       stage=await prepare(records.get(id),{signal});
       if(!stage || !Object.hasOwn(stage,'value') || typeof stage.dispose!=='function') throw new Error('Invalid theme stage');
       if(epoch!==generation||suspended||destroyed){release(stage);return false;}
       // commit must be synchronous and restore previous scene values if it fails.
       commit(stage.value,records.get(active),stage);
-      const previous=currentStage;currentStage=stage;active=id;pending=null;controller=null;
-      message=persist()?`${records.get(id).label} is active.`:`${records.get(id).label} is active for this session. Theme settings could not be saved.`;
-      release(previous);publish();return true;
+      const previous=currentStage;currentStage=stage;active=id;pending=null;controller=null;interactive=false;
+      release(previous);
+      return complete(choice,calendar,save);
     } catch {
       release(stage);
       if(epoch!==generation||destroyed)return false;
-      pending=null;controller=null;message='Theme could not be applied. The current theme is unchanged.';publish();return false;
+      // Keep following the calendar if its current decoration pack is unavailable.
+      if(save && calendar){preference=choice;auto=null;persist();}
+      pending=null;controller=null;interactive=false;message='Theme could not be applied. The current theme is unchanged.';publish();return false;
     }
   }
-  return Object.freeze({state, options:()=>[...records.values()].map(({id,label})=>({id,label})), definition:()=>records.get(active), select,
-    async restore(){const id=remembered;remembered=null;return !id || id===active ? true : select(id);},
-    cancel(){if(destroyed||!pending)return;generation++;controller?.abort();controller=null;pending=null;message=`${records.get(active).label} remains active.`;publish();},
-    suspend(){if(destroyed)return;generation++;controller?.abort();controller=null;pending=null;suspended=true;message='Theme settings are unavailable while the scene recovers.';publish();},
-    resume(){if(destroyed)return;suspended=false;message=saved?`${records.get(active).label} is active.`:`${records.get(active).label} is active for this session. Theme settings could not be saved.`;publish();},
-    destroy(){if(destroyed)return;destroyed=true;generation++;controller?.abort();controller=null;pending=null;release(currentStage);currentStage=null;}});
+  async function refresh(){
+    if(destroyed || suspended || pending || preference!==AUTOMATIC.id) return false;
+    const calendar=calendarChoice();
+    return apply(calendar.theme,preference,calendar);
+  }
+  return Object.freeze({state, options:()=>[AUTOMATIC,...records.values()].map(({id,label})=>({id,label})), definition:()=>records.get(active), select, refresh,
+    async restore(){
+      if(destroyed || suspended || pending) return false;
+      if(preference===AUTOMATIC.id) return refresh();
+      return preference===active || apply(preference,preference,null);
+    },
+    cancel({interactiveOnly=false}={}){if(destroyed||!pending||(interactiveOnly&&!interactive))return;cancelPending();message=`${records.get(active).label} remains active.`;publish();},
+    suspend(){if(destroyed)return;cancelPending();suspended=true;message='Theme settings are unavailable while the scene recovers.';publish();},
+    resume(){if(destroyed)return;suspended=false;message=auto?'':saved?`${records.get(active).label} is active.`:`${records.get(active).label} is active for this session. Theme settings could not be saved.`;publish();},
+    destroy(){if(destroyed)return;destroyed=true;cancelPending();release(currentStage);currentStage=null;}});
 }
