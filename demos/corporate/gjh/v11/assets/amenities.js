@@ -3,6 +3,8 @@ import {createPackedDraw, shadowReceiverBounds} from './packed-draw.js';
 import {opaqueSurfaceMaterial} from './opaque-batch.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {fetchStartupAsset} from './startup-asset-pack.js';
+import {setupArtworkTexture} from './artwork-textures.js';
+import {decalHeight, decalMaterial} from './surface-decals.js';
 
 export const AMENITIES = Object.freeze({
   desk:{file:'mall-service-desk.glb',sha:'228c94a05e5c92c94662ebba6a02863b397a4f0f10768c8ce488b8c322cabcd0',root:'ASSET_MallServiceDesk',bytes:245748,triangles:8024,size:[2.88,1.87,.961],clips:[],placements:[[-12.5,0,5.8,Math.PI]]},
@@ -69,7 +71,7 @@ async function load(T,kind,definition){
   }catch(error){dispose(root);return {status:'fallback',reason:error.message,primitives:[],size:definition.size};}
   finally{clearTimeout(timer);}
 }
-function signTexture(T,x,rear){
+function signTexture(T,x,rear,tier){
   const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;const context=canvas.getContext('2d');
   context.fillStyle='#102d26';context.fillRect(0,0,1024,256);context.fillStyle='#f5e8cb';context.font='bold 68px Arial';context.textBaseline='middle';
   const destinations=[['NEW MOON',-10],['MILI',0],['GOGO',10]];
@@ -78,9 +80,9 @@ function signTexture(T,x,rear){
   const right=destinations.filter(([,destination])=>(destination<x)===rear).map(([label])=>label);
   context.fillText(`LEFT: ${left.join(' · ')}`,40,65,944);
   context.textAlign='right';context.fillText(`RIGHT: ${right.join(' · ')}`,984,191,944);
-  const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;return texture;
+  return setupArtworkTexture(T,new T.CanvasTexture(canvas),tier);
 }
-export async function addAmenities(T,scene,collider,createCollectProp,shadows,staticProductCount=null,expanded=false){
+export async function addAmenities(T,scene,collider,createCollectProp,shadows,staticProductCount=null,expanded=false,artworkTier=()=> 'low'){
   const entries=await Promise.all(Object.entries(AMENITIES).map(async([kind,definition])=>[kind,await load(T,kind,definition)]));
   const group=new T.Group();group.name='Mall amenities';const state={},opaque=[];
   for(const [kind,record] of entries){
@@ -130,8 +132,9 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
   }
   const directions = [];
   for(const [x,y,z] of AMENITIES.signs.placements)for(const rear of [false,true]){
-    const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),new T.MeshBasicMaterial({map:signTexture(T,x,rear)}));
-    plane.position.set(x,y-.7,z+(rear?-.083:.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
+    const material=decalMaterial(new T.MeshBasicMaterial({map:signTexture(T,x,rear,artworkTier())}),-1);
+    const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),material);
+    plane.position.set(x,y-.7,z+(rear?-1:1)*decalHeight(.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
     directions.push({plane, rear});
   }
   if(expanded){collider(liftLayout.desk.x,.94,liftLayout.desk.z,2.88,1.88,.961);collider(liftLayout.showcase.x,.9,liftLayout.showcase.z,.75,1.8,.532);}

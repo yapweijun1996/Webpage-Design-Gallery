@@ -1,3 +1,6 @@
+import {extrudeArtworkGutter, setupArtworkTexture} from './artwork-textures.js';
+import {decalClearance, decalMaterial} from './surface-decals.js';
+
 const SLOT_COUNT = 17;
 const COLUMNS = 4;
 const LOGO_FILES = Object.freeze(['new-moon','mili','gogo','borsch-med','pien-tze-huang','flying-wheel','gu-long','skippy','spam','california-mexico','hormel','zeria','sony','lg','casio','gp','gigaset']);
@@ -25,7 +28,7 @@ function wrap(context, text, x, y, maxWidth, lineHeight, maxLines) {
   if (lines < maxLines && line) context.fillText(line, x, y + lines * lineHeight, maxWidth);
 }
 
-export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
+export async function addBrandWallAtlas(T, scene, deckY, prepareModel, artworkTier = () => 'low') {
   const kitResponse = await fetch(new URL('./brand-kit/brand-kit.json', import.meta.url));
   if (!kitResponse.ok) throw new Error('Brand-kit metadata unavailable');
   const kit = await kitResponse.json();
@@ -40,9 +43,17 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 256;
   const context = canvas.getContext('2d');
-  context.scale(canvas.width / (cellWidth * COLUMNS), canvas.height / (cellHeight * Math.ceil(SLOT_COUNT / COLUMNS)));
+  const cellPx = Math.floor(canvas.height / Math.ceil(SLOT_COUNT / COLUMNS)), columnPx = canvas.width / COLUMNS;
+  const padding = 4;
+  const cells = entries.map((_,i) => ({
+    x:i%COLUMNS*columnPx+padding, y:Math.floor(i/COLUMNS)*cellPx+padding,
+    w:columnPx-2*padding, h:cellPx-2*padding
+  }));
   entries.forEach((entry, index) => {
-    const x = index % COLUMNS * cellWidth, y = Math.floor(index / COLUMNS) * cellHeight;
+    const cell = cells[index], x = 0, y = 0;
+    context.save();
+    context.translate(cell.x,cell.y);
+    context.scale(cell.w/cellWidth,cell.h/cellHeight);
     context.fillStyle = '#f4efdf'; context.fillRect(x, y, cellWidth, cellHeight);
     context.fillStyle = '#174638'; context.fillRect(x + 7, y + 7, cellWidth - 14, cellHeight - 14);
     context.strokeStyle = '#d0ae65'; context.lineWidth = 3; context.strokeRect(x + 11, y + 11, cellWidth - 22, cellHeight - 22);
@@ -57,18 +68,20 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
     }
     context.fillStyle = '#f4efdf'; context.font = 'bold 17px Arial'; context.textAlign = 'center'; context.textBaseline = 'middle';
     wrap(context, entry.tagline, x + cellWidth / 2, y + 166, 218, 19, 2);
+    context.restore();
+    extrudeArtworkGutter(context,cell,padding);
   });
-  const texture = new T.CanvasTexture(canvas);
-  texture.colorSpace = T.SRGBColorSpace;
+  const texture = setupArtworkTexture(T,new T.CanvasTexture(canvas),artworkTier());
   const positions = [], uvs = [], indices = [], interactables = [], records = {};
   entries.forEach((entry, index) => {
     const column = index % COLUMNS, row = Math.floor(index / COLUMNS);
-    const x = -6.25 + column * 2.15, y = deckY + 2.16 - row * .455, z = 15.69;
+    const x = -6.25 + column * 2.15, y = deckY + 2.16 - row * .455, z = 15.69-decalClearance;
     const width = 2, height = .40;
     positions.push(x+width/2,y-height/2,z, x-width/2,y-height/2,z,
       x-width/2,y+height/2,z, x+width/2,y+height/2,z);
-    const left = column / COLUMNS, right = (column + 1) / COLUMNS;
-    const top = 1 - row / Math.ceil(SLOT_COUNT / COLUMNS), bottom = 1 - (row + 1) / Math.ceil(SLOT_COUNT / COLUMNS);
+    const cell = cells[index];
+    const left = (cell.x+.5)/canvas.width, right = (cell.x+cell.w-.5)/canvas.width;
+    const top = 1-(cell.y+.5)/canvas.height, bottom = 1-(cell.y+cell.h-.5)/canvas.height;
     uvs.push(left,bottom,right,bottom,right,top,left,top);
     const vertex = index * 4; indices.push(vertex,vertex+1,vertex+2,vertex,vertex+2,vertex+3);
     const id = `brand-plaque-${entry.slot}`;
@@ -81,7 +94,7 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
   geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
   geometry.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
   geometry.setIndex(indices); geometry.computeBoundingSphere();
-  const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({map:texture,toneMapped:false}));
+  const mesh = new T.Mesh(geometry,decalMaterial(new T.MeshBasicMaterial({map:texture,toneMapped:false}),-1));
   mesh.name = 'Seventeen brand wall plaques'; mesh.userData.deckLod = true;
   try { await prepareModel?.(mesh); }
   catch (error) { geometry.dispose(); mesh.material.dispose(); texture.dispose(); throw error; }

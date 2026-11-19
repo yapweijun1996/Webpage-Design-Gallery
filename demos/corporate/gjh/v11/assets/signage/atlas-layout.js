@@ -1,6 +1,7 @@
 export const slotCapacity = 24;
 export const atlasSize = 2048;
 export const lowAtlasSize = 1024;
+export const atlasGutter = 8;
 
 // RGBA8, including the complete mip chain down to 1x1.
 export function atlasMiB(size) {
@@ -8,12 +9,14 @@ export function atlasMiB(size) {
 }
 export function atlasCells(index) {
   if (!Number.isInteger(index) || index<0 || index>=slotCapacity) throw RangeError('Sign atlas holds 24 lots');
-  // Three rows of posters below twelve sign rows. Gutters isolate level-zero sampling.
+  // Three rows of posters below twelve sign rows. The baked edge texels fill
+  // the gutters so the first few mip levels never sample an adjacent tile.
   const x = index%2*1024, row = Math.floor(index/2)*112;
+  const inset = (x,y,w,h) => ({x:x+atlasGutter,y:y+atlasGutter,w:w-2*atlasGutter,h:h-2*atlasGutter});
   return {
-    fascia:{x:x+3,y:row+3,w:861,h:106},
-    blade:{x:x+870,y:row+3,w:150,h:106},
-    poster:{x:index%8*256+3,y:1344+Math.floor(index/8)*232+3,w:250,h:226}
+    fascia:inset(x,row,864,112),
+    blade:inset(x+864,row,160,112),
+    poster:inset(index%8*256,1344+Math.floor(index/8)*232,256,232)
   };
 }
 // The plate is also the lower enamel insert on each blade.

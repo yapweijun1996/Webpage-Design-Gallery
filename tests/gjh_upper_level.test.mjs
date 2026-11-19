@@ -32,6 +32,13 @@ test('actual upper batches, gallery GLBs and tier washes fit the phone budget',a
   const scene=new T.Scene(),washes=[];
   const build=buildUpperLevel(T,assets,{collider:noop,lightWash:(...a)=>washes.push(a)});
   scene.add(build.group,build.panes,build.cabinMark);
+  const glass = build.panes.getObjectByName('Daylight glass');
+  assert.equal(glass.material.side,T.FrontSide);
+  const fromBelow = new T.Raycaster(new T.Vector3(-3,13,10),new T.Vector3(0,1,0));
+  const fromAbove = new T.Raycaster(new T.Vector3(-3,20,10),new T.Vector3(0,-1,0),0,6);
+  assert.ok(fromBelow.intersectObject(glass).length,'roof is visible from inside');
+  assert.equal(fromAbove.intersectObject(glass).length,0,'roof has no outer face');
+
   const lounge=build.group.getObjectByName('Lounge, stone paving and shop arcade');
   for(const placement of createSeatPlacements(true).filter(({group})=>group==='deck')){
     const profile=build.seatProfiles.get(placement.finish);

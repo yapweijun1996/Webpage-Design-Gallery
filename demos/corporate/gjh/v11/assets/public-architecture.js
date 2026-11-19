@@ -1,9 +1,12 @@
 import {mergeOpaqueMeshes} from './packed-draw.js';
 import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
+import {setupArtworkTexture} from './artwork-textures.js';
+import {decalMaterial} from './surface-decals.js';
+
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false, setCanopyMaterial}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false, setCanopyMaterial, artworkTier=()=> 'low'}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -348,13 +351,14 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       ink.moveTo(316-dir*6,y);ink.lineTo(tip,y-15);
       ink.lineTo(tip-dir*10,y-15);ink.moveTo(tip,y-15);ink.lineTo(tip,y-5);ink.stroke();
     }
-    const map=new T.CanvasTexture(panel);map.colorSpace=T.SRGBColorSpace;
+    const map=setupArtworkTexture(T,new T.CanvasTexture(panel),artworkTier());
+    const material=decalMaterial(new T.MeshBasicMaterial({map}),-1);
     // Printed insert on the stock blank standee. Both the original moulded
     // jade frame and the double-sided backlit panels stay intact.
-    const print=new T.Mesh(geometry.plane,new T.MeshBasicMaterial({map}));
+    const print=new T.Mesh(geometry.plane,material);
     print.name='Gallery standee printed directions';print.position.set(0,1.065,.093);
     print.scale.set(.69,1.30,1);totem.add(print);
-    const mesh=new T.Mesh(geometry.plane,new T.MeshBasicMaterial({map}));
+    const mesh=new T.Mesh(geometry.plane,material);
     mesh.name='Wayfinding court directory';mesh.position.set(tabletX,1.69,tabletZ+.138);mesh.scale.set(1.01,2.24,1);scene.add(mesh);
   }
   for(const x of [garden.x-2.65,garden.x+1.65]){

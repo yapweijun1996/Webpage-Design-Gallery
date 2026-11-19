@@ -5,6 +5,7 @@ import {atriumLayout} from './atrium-layout.js';
 import {loadStaticAsset} from './static-asset.js';
 import {uvRect} from './signage/builder.js';
 import {atlasPx, cells, paintUpperAtlas} from './upper-level-atlas.js';
+import {decalMaterial} from './surface-decals.js';
 
 const models = {
   bench:{id:'GJH_NEW_bench_oak',dimensions_m:[1.4,.45,.42],sha256:'064fb57f222a95e9327e2fa9ea9e111a2020dbcfc02590c6d6060a54e7570bd9'},
@@ -28,13 +29,13 @@ export function thresholdReturns() {
   return [minZ,maxZ].map(z=>({x:(minX+maxX)/2,z,width:maxX-minX,depth:.055}));
 }
 
-export async function loadUpperLevel(T) {
+export async function loadUpperLevel(T, artworkTier = () => 'low') {
   const mark=new Image();mark.src=new URL('./gjh-loader-mark.svg',import.meta.url).href;
   const [logo,...records]=await Promise.all([mark.decode().then(()=>mark,()=>null),
     ...Object.values(models).map(({id,...receipt})=>loadStaticAsset(T,{
       ...receipt,asset_id:id,file:'gallery-assets/upper-level/'+id+'.glb'
     },import.meta.url))]);
-  return {map:paintUpperAtlas(T,logo),models:Object.fromEntries(Object.keys(models).map((key,i)=>[key,records[i]]))};
+  return {map:paintUpperAtlas(T,logo,artworkTier()),models:Object.fromEntries(Object.keys(models).map((key,i)=>[key,records[i]]))};
 }
 
 export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWash}) {
@@ -277,7 +278,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     return mesh;
   }
   merged('Lounge, stone paving and shop arcade',solids,new T.MeshStandardMaterial({vertexColors:true,roughness:.67}),group);
-  const ink=new T.MeshBasicMaterial({map,toneMapped:false,fog:false});
+  const ink=decalMaterial(new T.MeshBasicMaterial({map,toneMapped:false,fog:false}),-1);
   merged('Directory, mall mark and display graphics',prints,ink,group);
   const rail = new T.InstancedMesh(unit,new T.MeshStandardMaterial({color:0xcdab70,metalness:.52,roughness:.34}),gold.length);
   gold.forEach((matrix,i) => rail.setMatrixAt(i,matrix));
@@ -295,6 +296,18 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
 
   // Single sheets transmit daylight through the existing barrel-vault ribs.
   const panes=new T.Group();panes.name='Atrium skylight and threshold glass';
+  // Keep the railings visible from both sides in the existing glass draw.
+  for (const pane of glass.slice()) {
+    const back = pane.clone();
+    const {index,attributes:{normal}} = back;
+    for (let i=0; i<index.count; i+=3) {
+      const a = index.getX(i);
+      index.setX(i,index.getX(i+1));
+      index.setX(i+1,a);
+    }
+    for (let i=0; i<normal.count; i++) normal.setXYZ(i,-normal.getX(i),-normal.getY(i),-normal.getZ(i));
+    glass.push(back);
+  }
   const positions=[],uvs=[],indices=[];
   for(let i=0;i<=24;i++){
     const a=(i/24-.5)*Math.PI,px=-3+13.18*Math.sin(a),py=13.14+3.91*Math.cos(a);
@@ -304,7 +317,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   const roof=new T.BufferGeometry();roof.setAttribute('position',new T.Float32BufferAttribute(positions,3));
   roof.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));roof.setIndex(indices);roof.computeVertexNormals();glass.push(roof);
   const glazing=new T.MeshStandardMaterial({color:0xdeeff1,emissive:0xb3dbe2,emissiveIntensity:.22,
-    transparent:true,opacity:.14,depthWrite:false,roughness:.22,side:T.DoubleSide,forceSinglePass:true});
+    transparent:true,opacity:.14,depthWrite:false,roughness:.22,side:T.FrontSide});
   merged('Daylight glass',glass,glazing,panes);
   return {group,panes,cabinMark,seatProfiles,updateView(frustum) {
     if (group.visible) for (const update of viewUpdates) update(frustum);

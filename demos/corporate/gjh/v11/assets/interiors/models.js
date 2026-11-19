@@ -1,6 +1,26 @@
 import {bakedParts} from './baked-layout.js';
 import {roomAtlas} from './detail-files.js';
 import {GLTFLoader, mergeGeometries} from '../shop-sign-vendor.js';
+import {setupArtworkTexture, setupMaterialArtwork} from '../artwork-textures.js';
+import {decalHeight} from '../surface-decals.js';
+import {interiorStores} from './config.js';
+
+// Room details were baked against fixed floor planes. Rebase just their
+// horizontal inlays when the layered floor finish sits above that datum.
+export function positionRoomInlays(geometry, store) {
+  const originalY = store.frame.floor_surface_y_m < .05 ? .032 : .091;
+  const {position_m,offset_m,inlay_offset_m} = store.floor;
+  const delta = decalHeight(decalHeight(position_m[1],offset_m),inlay_offset_m) - originalY;
+  const {position,normal} = geometry.attributes;
+  if (!normal || position.count === 0) return;
+  for (let i=0; i<position.count; i++) {
+    const y = position.getY(i);
+    if (Math.abs(normal.getY(i)) > .999 && y >= originalY-.00001 && y <= originalY+.00201) {
+      // The raised vein on a leaf also needs clearance from its printed base.
+      position.setY(i,y+delta+(y>originalY+.001 ? .002 : 0));
+    }
+  }
+}
 
 function* mergeInteriorAnchor(T, scene) {
   scene.updateMatrixWorld(true);
@@ -62,7 +82,7 @@ async function readMember(assetBase, asset, signal) {
   }
 }
 
-export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader()) {
+export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(), artworkTier = () => 'low') {
   let atlas;
   const shared = new Map(), lifetime = new AbortController();
   async function loadAtlas() {
@@ -77,10 +97,8 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
     }
     texture.flipY = false;
     texture.wrapS = texture.wrapT = T.RepeatWrapping;
-    texture.colorSpace = T.SRGBColorSpace;
     texture.userData.roomAtlas = true;
-    texture.needsUpdate = true;
-    return texture;
+    return setupArtworkTexture(T,texture,artworkTier());
   }
   loader.register(parser => ({
     name:'GJH_room_atlas',
@@ -91,13 +109,14 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
       return atlas;
     }
   }));
-  function* prepareDetail(scene, placement) {
+  function* prepareDetail(scene, store, placement) {
     // Blender already batched each finish. Preserve the stock instance matrices.
     const motion = {scroll:null,pulse:null};
     const meshes = [];
     scene.traverse(mesh => { if (mesh.isMesh) meshes.push(mesh); });
     for (const mesh of meshes) {
       const m = mesh.material;
+      if (!mesh.isInstancedMesh && store) positionRoomInlays(mesh.geometry,store);
       // Keep the plate and its samples in their shared draw and preserve the shipped GLB.
       if (placement && m.name === placement.material && !mesh.isInstancedMesh) {
         const positions = mesh.geometry.attributes.position;
@@ -135,7 +154,19 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
     const {scene} = await loader.parseAsync(buffer,new URL('interiors/',assetBase).href);
     try {
       if (signal?.aborted) throw new DOMException('Interior asset cancelled','AbortError');
-      const work = () => asset.roomDetail ? prepareDetail(scene,bakedParts[asset.file]) : mergeInteriorAnchor(T,scene);
+      const store = interiorStores[asset.file.slice(0,3).toUpperCase()];
+      const work = function* () {
+        const materials = new Set();
+        scene.traverse(mesh => {
+          if (mesh.isMesh) for (const material of [].concat(mesh.material)) materials.add(material);
+        });
+        for (const material of materials) {
+          setupMaterialArtwork(T,material,artworkTier());
+          yield;
+        }
+        if (asset.roomDetail) return yield* prepareDetail(scene,store,bakedParts[asset.file]);
+        return yield* mergeInteriorAnchor(T,scene);
+      };
       if (build) return await build(work);
       const iterator = work();
       let step;

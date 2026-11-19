@@ -4,6 +4,8 @@ import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {fetchStartupAsset} from './startup-asset-pack.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 import {createCanDisplay, createProductDisplayLod} from './product-display-lod.js';
+import {setupArtworkTexture, setupMaterialArtwork} from './artwork-textures.js';
+import {decalMaterial} from './surface-decals.js';
 
 // Replaceable candidate configuration; this is not a claim that future generic cans are this SKU set.
 export const NEW_MOON_CANS = Object.freeze([
@@ -68,7 +70,7 @@ function disposeAsset(scene) {
   textures.forEach(value => value.dispose()); materials.forEach(value => value.dispose()); geometries.forEach(value => value.dispose());
 }
 
-async function loadAsset(T, definition, kind) {
+async function loadAsset(T, definition, kind, artworkTier) {
   const controller = new AbortController(); let timer; let expired = false; let parsed = null;
   try {
     const operation = async () => {
@@ -93,6 +95,7 @@ async function loadAsset(T, definition, kind) {
     });
     if (!primitives.length || primitives.length > (kind === 'shelf' ? 32 : 8)) throw Error('invalid-primitives');
     if (kind === 'can' && !primitives.some(item => item.material?.map?.image)) throw Error('invalid-label-texture');
+      for (const material of new Set(primitives.map(({material}) => material))) setupMaterialArtwork(T,material,artworkTier());
     return {status: 'loaded', reason: null, primitives, size: [size.x, size.y, size.z]};
     };
     return await Promise.race([
@@ -103,7 +106,7 @@ async function loadAsset(T, definition, kind) {
   finally { clearTimeout(timer); }
 }
 
-function fallbackCan(T, scene, textures, brass, sku, placements) {
+function fallbackCan(T, scene, textures, brass, sku, placements, artworkTier) {
   const profile = [[0, -.485], [.95, -.485], [.98, -.5], [1, -.49], [1, -.465], [.972, -.445], [.972, .445], [1, .465], [1, .49], [.98, .5], [.95, .5], [.95, .475], [0, .475]].map(([r, y]) => new T.Vector2(r, y));
   const body = new T.InstancedMesh(new T.LatheGeometry(profile, 24), brass, placements.length);
   const source = textures.get(`new-moon-${sku}-front.jpg`), canvas = document.createElement('canvas'); canvas.width = canvas.height = 512;
@@ -113,7 +116,9 @@ function fallbackCan(T, scene, textures, brass, sku, placements) {
     const x1 = 326 + (Math.sin(((column + 1) / 512 - .5) * Math.PI) + 1) * 174;
     context.drawImage(source.image, x0 * source.image.width / 1000, 315 * source.image.height / 1000, (x1 - x0) * source.image.width / 1000, 512 * source.image.height / 1000, column, 0, 1, 512);
   }
-  const label = new T.InstancedMesh(new T.CylinderGeometry(.974, .974, 512 / 594, 24, 1, true, -Math.PI / 2, Math.PI), new T.MeshStandardMaterial({map: new T.CanvasTexture(canvas), roughness: .65}), placements.length);
+  const map = setupArtworkTexture(T,new T.CanvasTexture(canvas),artworkTier());
+  const material = decalMaterial(new T.MeshStandardMaterial({map,roughness:.65}));
+  const label = new T.InstancedMesh(new T.CylinderGeometry(.974, .974, 512 / 594, 24, 1, true, -Math.PI / 2, Math.PI),material,placements.length);
   const matrix = new T.Matrix4(), scale = new T.Vector3(canBounds.x / 2, canBounds.y, canBounds.z / 2);
   placements.forEach((placement, index) => { matrix.compose(placement.clone().add(new T.Vector3(0, canBounds.y / 2, 0)), new T.Quaternion(), scale); body.setMatrixAt(index, matrix); label.setMatrixAt(index, matrix); });
   body.castShadow = label.castShadow = false;
@@ -150,6 +155,9 @@ function batchShelf(T, primitives) {
   }
   const result=[];
   for(const [material,parts] of buckets){
+    // The imported trim and price rails share planes with the crown, posts
+    // and shelf ends. Bias their finish without splitting the material batch.
+    if (material.name === 'Champagne gold') decalMaterial(material,-3);
     const geometry=mergeGeometries(parts);
     parts.forEach(part=>part.dispose());
     geometry.computeBoundingSphere();
@@ -173,10 +181,12 @@ function shelfShadowGeometry(primitives) {
   return merged;
 }
 
-export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null,shopSlot) {
+export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null,shopSlot,artworkTier=()=> 'low') {
   const displayLods = [];
   let shadowMesh = null, shadowLod = null;
-  const [shelfRecord, ...canRecords] = await Promise.all([loadAsset(T, shelf, 'shelf'), ...cans.map(item => loadAsset(T, item, 'can'))]);
+  const [shelfRecord, ...canRecords] = await Promise.all([
+    loadAsset(T,shelf,'shelf',artworkTier), ...cans.map(item => loadAsset(T,item,'can',artworkTier))
+  ]);
   const sourceShelfPrimitives=shelfRecord.primitives.length;
   if(shelfRecord.status==='loaded')shelfRecord.primitives=batchShelf(T,shelfRecord.primitives);
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene, displayShelves);
@@ -245,7 +255,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
       loadedCans.push({primitives:record.primitives, placements:slots});
       stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, slot:slots[reserveIndex]});
     } else {
-      const meshes = fallbackCan(T, scene, textures, brass, sku, placements);
+      const meshes = fallbackCan(T, scene, textures, brass, sku, placements,artworkTier);
       slots.forEach(slot => slot.bounds.setFromCenterAndSize(new T.Vector3(slot.x,slot.y + canBounds.y/2,slot.z),
         new T.Vector3(canBounds.x,canBounds.y,canBounds.z)));
       displayLods.push(createProductDisplayLod(T, meshes, slots, {shopSlot}));

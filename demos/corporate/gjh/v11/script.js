@@ -8,11 +8,12 @@ import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
-import {createMallAtmosphere} from './assets/mall-atmosphere.js';
+import {allowMallLightWash, createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createArrivalChime} from './assets/elevator-chime.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
 import {emptyInteriorReport} from './assets/interiors/warmup.js';
+import {createFixedClock, FIXED_STEP as STEP} from './assets/movement.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
 import {createSpatialHud} from './assets/ux-spatial-hud.js';
@@ -42,10 +43,15 @@ skipRide.addEventListener('click',()=>{player?.skipRide();canvas.focus({preventS
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const startupOverlay = document.getElementById('app-loader');
 let greetedOnArrival = false, pageEnded = false;
-let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
+let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, frames = 0;
+const fixedClock = createFixedClock();
+const movementTimings = {physicsMs:0,cameraMs:0};
+const movementHistory = new Array(300);
+let movementFrame = 0;
 let three, frameTrace;
 let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true, entryPresentation;
+let lightWash=false;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let themeMidnightTimer;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
@@ -77,7 +83,7 @@ function clearTransientState(event) {
   // transient demo gesture; physical shelf products remain owned by the player.
   const interaction=player?.state;
   if (event.kind === 'interrupt' && (!interaction?.character.physicalProduct?.held || interaction.productApproaching)) player?.cancelCollection();
-  manual = false; accumulator = 0; last = performance.now();
+  manual = false; fixedClock.reset(); player?.resetInterpolation(); last = performance.now();
 }
 const modes = createModes({onCleanup: clearTransientState,
   onEnter(mode) { document.body.dataset.mode = mode; }});
@@ -90,9 +96,18 @@ const mallHud = createMallHud({destinations, scene: canvas, announce: ui.announc
 const performanceMonitor = createPerformanceMonitor();
 performanceMonitor.setEnabled(true);
 let measuringFrames = false, lastMetricsUpdate = -Infinity, maxFrameUploadMs = 0;
+function movementReport() {
+  const percentile = index => {
+    const values = movementHistory.map(frame => frame[index]).filter(Number.isFinite).sort((a,b) => a-b);
+    return values[Math.ceil(values.length * .95) - 1] ?? null;
+  };
+  return {frames:Math.min(movementFrame,movementHistory.length), physicsP95Ms:percentile(0),
+    cameraQueryP95Ms:percentile(1), collisionTicks:player?.collisionTicks ?? 0};
+}
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
+    movement: movementReport(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
     refreshHz: quality.refreshHz,
@@ -149,7 +164,6 @@ function syncMode(signals = ui.modeSignals()) {
 ui.onModeState(syncMode);
 setupOriginalTin(ui);
 syncMode();
-const STEP = 1 / 60;
 // Optional appearance imports cannot block required scene initialization.
 async function loadOptionalThemeModule(loader) {
   let timer;
@@ -240,6 +254,7 @@ const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:wor
   pixelRatio: renderer?.getPixelRatio() || 1, hidden: document.hidden});
 Object.defineProperty(window, '__mall', {value: Object.freeze({
   performanceReport,
+  movementSample: () => player && {...player.sampleMovement(),frames},
   emote(name) {
     if (!canPlayEmote()) return false;
     greetOnArrival();
@@ -255,6 +270,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
   },
   setInput(input) {
     if (!ready || modes.paused()) return;
+    if (manual && input === null) { fixedClock.reset(); player.resetInterpolation(); }
     manual = input !== null;
     const clean = input === null ? null : {forward: Math.max(-1, Math.min(1, Number(input.forward) || 0)), right: Math.max(-1, Math.min(1, Number(input.right) || 0)), run: Boolean(input.run)};
     if (clean && Number.isFinite(input.yaw)) clean.yaw = input.yaw;
@@ -268,6 +284,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
     const count = Math.max(0, Math.min(600, Math.floor(ms / (STEP * 1000))));
     for (let i = 0; i < count; i++) tick();
     // Diagnostics return the draw counts for this exact simulated pose.
+    player.updateCamera(count * STEP); greetOnArrival();
     render(); return snapshot();
   }
 }), writable: false});
@@ -302,28 +319,35 @@ function greetOnArrival() {
     greetedOnArrival = player.emote('wave', {arrival: true});
   }
 }
+const fixedTick = () => tick(false);
 function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
+  const doorsStart = performance.now();
   for (const door of world.doors) {
     if (door.advance) { door.advance(p, STEP, reducedMotion.matches); continue; }
-    const open = shouldOpenStoreDoor(door, p);
+    const open = shouldOpenStoreDoor(door, p) || (door.open > 0 && door.occupied());
     door.targetOpen = open;
-    door.open = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
+    const next = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
+    if (next === door.open) continue;
+    door.open = next;
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);
       leaf.group.position.x = x;
       leaf.body.setNextKinematicTranslation({x, y: 1.8, z: .05});
     }
   }
-  elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync();
+  movementTimings.physicsMs += performance.now() - doorsStart;
+  elevator?.update?.(STEP,p); player.update(STEP);
+  const physicsStart = performance.now();
+  physics.step();
+  movementTimings.physicsMs += performance.now() - physicsStart;
   if (npcs) {
     const start = frameTrace?.start();
     npcs.update(STEP,player.state,reducedMotion.matches);
     frameTrace?.end('crowd.update', start);
   }
-  player.updateCamera(STEP); if (refreshHud) updateHUD();
-  greetOnArrival();
+  if (refreshHud) updateHUD();
 }
 let lastGuidanceSample = -Infinity, projectedTarget = null;
 function requestRender(force = false) {
@@ -364,8 +388,8 @@ function render(force = false) {
     const detailedReady = detailed && world.interiors?.activeTier === 'detailed';
     if (expanded) renderer.shadowMap.enabled = detailedReady;
     world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera,
-      canvas.height, Boolean(shelfFocus?.open));
-    atmosphere?.update(pose);
+      canvas.height, Boolean(shelfFocus?.open), lightWash);
+    atmosphere?.update(pose,now);
     const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion);
     frameTrace?.end('signage.update', signStart);
@@ -422,7 +446,7 @@ function scheduleTier() {
     if (warmRunner.blocking || warmKey === key) return;
     warmRunner.stop('superseded');
   }
-  if(profile.tier===active.tier && profile.shadows===active.shadows &&
+  if(!tierQueue.pending && profile.tier===active.tier && profile.shadows===active.shadows &&
      (!world.signage || world.signage.getTier()===profile.tier) &&
      (!world.interiors || world.interiors.activeTier===profile.tier)){
     tierQueue.cancel();
@@ -518,7 +542,7 @@ function animate(now) {
   updateModelPreload(now);
   if (advanceStartupWarm()) {
     last = now;
-    accumulator = 0;
+    fixedClock.reset();
     quality.resetSampling(now);
     return;
   }
@@ -526,8 +550,8 @@ function animate(now) {
   if (entered) enteredAt ??= now;
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
-  if (advancing) accumulator = Math.min(.1, accumulator + Math.max(0, (now - last) / 1000));
-  else accumulator = 0;
+  const elapsed = (now - last) / 1000;
+  if (!advancing) fixedClock.reset();
   last = now;
   const callbackStart = performance.now();
   const pad=readStandardGamepad();
@@ -543,11 +567,7 @@ function animate(now) {
   const simulationStart = performance.now();
   let steps = 0;
   if (advancing && !modes.paused()) {
-    while (accumulator + 1e-9 >= STEP) {
-      tick(false);
-      accumulator = Math.max(0, accumulator - STEP);
-      steps++;
-    }
+    steps = fixedClock.advance(elapsed, fixedTick);
     if (steps) updateHUD();
   }
   simulationSteps += steps;
@@ -565,11 +585,17 @@ function animate(now) {
     const renderStart = performance.now();
     const force = forceRender;
     renderRequested = forceRender = false;
+    if (advancing && !modes.paused() && !shelfFocus?.open) {
+      player.updateCamera(Math.min(.1, slotMs / 1000), false, fixedClock.alpha);
+      greetOnArrival();
+    }
     pose = render(force);
     const renderEnd = performance.now();
     callbackMs = renderEnd - callbackStart;
     if (pose && live && !windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
+      player.takeQueryTimings(movementTimings);
+      movementHistory[movementFrame++ % movementHistory.length] = [movementTimings.physicsMs, movementTimings.cameraMs];
       performanceMonitor.frame(now, renderer.info, {
         simulationMs, renderMs: renderEnd - renderStart, uploadMs,
         callbackMs, steps: simulationSteps, zone: currentZone, x: pose.x, z: pose.z, tier: quality.state?.tier,
@@ -581,6 +607,8 @@ function animate(now) {
       }
     } else pausePerformance();
   } else pausePerformance();
+  player.takeQueryTimings(movementTimings);
+  movementTimings.physicsMs = movementTimings.cameraMs = 0;
   simulationMs = simulationSteps = 0;
   quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel &&
     !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered &&
@@ -590,7 +618,7 @@ function animate(now) {
 function resume() {
   if (ready && !frame && !document.hidden) {
     last = performance.now();
-    accumulator = 0;
+    fixedClock.reset();
     quality.cadence.reset();
     frame = requestAnimationFrame(animate);
   }
@@ -720,7 +748,7 @@ function validateRestoration() {
     atmosphere?.update(player.state);
     player.camera.updateMatrixWorld();
     sizeDrawingBuffer();
-    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height);
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash);
     world.updateSigns(player.camera, canvas, reducedMotion);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
@@ -764,7 +792,7 @@ async function installNpcs(T, R, prepareModel, source) {
 async function initialize() {
   // Allow the initial overlay to paint before expensive module and scene work.
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const attributes = {antialias: true, alpha: false, powerPreference: 'high-performance'};
+  const attributes = {antialias: !expanded, alpha: false, powerPreference: 'high-performance'};
   const preferredContext = quality.androidChrome ?
     canvas.getContext('webgl2', {...attributes, failIfMajorPerformanceCaveat:true}) : null;
   const context = preferredContext || canvas.getContext('webgl2', attributes);
@@ -773,13 +801,14 @@ async function initialize() {
   const T = await import('./vendor/three.module.min.js');
   three = T;
   await waitForContext(context);
-  renderer = new T.WebGLRenderer({canvas, context, antialias: true});
+  renderer = new T.WebGLRenderer({canvas, context, antialias:attributes.antialias});
+  lightWash = expanded && allowMallLightWash(quality.deviceClass,context);
   const diagnostics = new URLSearchParams(location.search);
   // Three's first draw synchronously reads the link status, program log and
   // both shader logs in debug mode, even after a parallel link has completed.
   renderer.debug.checkShaderErrors = diagnostics.get('debugShaders') === '1';
   if (diagnostics.get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
-  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
+  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = expanded ? 1.03 : 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
   try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
@@ -791,14 +820,17 @@ async function initialize() {
   const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
     linear: () => expanded && quality.state?.tier === 'detailed' && renderWidth >= 1000, ...options
   });
-  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded, warmModel);
+  const {createWorld} = await import('./assets/world.js');
+  world = await createWorld(T, R, physics, expanded, warmModel,
+    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans]
     .flatMap(group => Object.values(group || {}));
   if (world.productAssets?.shelf) assetRecords.push(world.productAssets.shelf);
   document.getElementById('loader-asset-notice').hidden = !assetRecords.some(record => record?.status === 'fallback');
   window.mallLoader?.complete('scene');
-  atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds));
+  atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds),
+    expanded ? {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane} : undefined);
   try { if (!contextLost && !context.isContextLost()) atmosphere.restoreEnvironment(); } catch { /* Keep the mall usable without reflections. */ }
   if (expanded) {
     try {
@@ -936,6 +968,7 @@ async function initialize() {
   if (window.mallLoader?.snapshot().dismissed) document.getElementById('store-list').dispatchEvent(new Event('pointerdown'));
   ui.show3D(); resize();
   for (let i = 0; i < 5; i++) tick();
+  player.updateCamera(0, true);
   render(true);
   if (contextLost || context.isContextLost()) return;
   if (!renderer.info.render.calls) throw new Error('First scene frame unavailable');

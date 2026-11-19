@@ -7,6 +7,16 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/doorway-occupancy.js
+function createDoorwayOccupancy(R, physics, center, halfExtents, leaves) {
+  const shape = new R.Cuboid(...halfExtents);
+  const rotation = { x: 0, y: 0, z: 0, w: 1 };
+  const flags = R.QueryFilterFlags.EXCLUDE_FIXED | R.QueryFilterFlags.EXCLUDE_SENSORS;
+  const bodies = new Set(leaves.map((leaf) => leaf.body.handle));
+  const isOccupant = (collider) => !bodies.has(collider.parent()?.handle);
+  return () => Boolean(physics.intersectionWithShape(center, rotation, shape, flags, undefined, undefined, undefined, isOccupant));
+}
+
 // demos/corporate/gjh/v11/assets/merge-static-geometries.js
 function mergeStaticGeometries(T, geometries) {
   const first = geometries[0];
@@ -421,6 +431,65 @@ function createProjectedBatch(T, mesh, distant, error, colours, slots) {
   };
 }
 
+// demos/corporate/gjh/v11/assets/artwork-textures.js
+var anisotropyFor = (tier) => tier === "low" ? 2 : 4;
+function setupArtworkTexture(T, texture, tier = "low", { mipmaps = "generate", fixedTier = false } = {}) {
+  if (!texture || texture.isCompressedTexture || texture.isRenderTargetTexture)
+    return texture;
+  texture.colorSpace = T.SRGBColorSpace;
+  texture.premultiplyAlpha = false;
+  texture.generateMipmaps = mipmaps === "generate";
+  texture.minFilter = T.LinearMipmapLinearFilter;
+  texture.magFilter = T.LinearFilter;
+  texture.anisotropy = anisotropyFor(tier);
+  texture.userData.artworkMipmaps = mipmaps;
+  texture.userData.artworkFixedTier = fixedTier;
+  texture.needsUpdate = true;
+  return texture;
+}
+function setupMaterialArtwork(T, material, tier) {
+  for (const map of new Set([material?.map, material?.emissiveMap])) {
+    if (map?.isTexture && !map.userData.artworkMipmaps)
+      setupArtworkTexture(T, map, tier);
+  }
+}
+function filterWallArtwork(T, material) {
+  material.onBeforeCompile = (shader) => {
+    for (const [chunk, sample] of [["map_fragment", "map, vMapUv"], ["emissivemap_fragment", "emissiveMap, vEmissiveMapUv"]]) {
+      shader.fragmentShader = shader.fragmentShader.replace(`#include <${chunk}>`, T.ShaderChunk[chunk].replace(sample, `${sample}, 0.65`));
+    }
+  };
+  return material;
+}
+function extrudeArtworkGutter(context, { x, y, w, h }, padding) {
+  const sheet = context.canvas;
+  for (const [sx, sy, sw, sh, dx, dy, dw, dh] of [
+    [x, y, 1, h, x - padding, y, padding, h],
+    [x + w - 1, y, 1, h, x + w, y, padding, h],
+    [x - padding, y, w + 2 * padding, 1, x - padding, y - padding, w + 2 * padding, padding],
+    [x - padding, y + h - 1, w + 2 * padding, 1, x - padding, y + h, w + 2 * padding, padding]
+  ])
+    context.drawImage(sheet, sx, sy, sw, sh, dx, dy, dw, dh);
+}
+
+// demos/corporate/gjh/v11/assets/surface-decals.js
+var decalClearance = 0.003;
+function decalHeight(surface, offset = decalClearance) {
+  return surface + offset;
+}
+function decalMaterial(material, units = -2) {
+  material.polygonOffset = true;
+  material.polygonOffsetFactor = -1;
+  material.polygonOffsetUnits = units;
+  if (material.transparent)
+    material.depthWrite = false;
+  return material;
+}
+function placeDecal(mesh, order = -2) {
+  mesh.renderOrder = order;
+  return mesh;
+}
+
 // demos/corporate/gjh/v11/assets/shop-visibility.js
 function createShopVisibility(T) {
   const walls = new Map;
@@ -587,7 +656,7 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false, setCanopyMaterial }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false, setCanopyMaterial, artworkTier = () => "low" }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -960,14 +1029,14 @@ totalEmissiveRadiance *= vColor;`);
       ink.lineTo(tip, y - 5);
       ink.stroke();
     }
-    const map = new T.CanvasTexture(panel);
-    map.colorSpace = T.SRGBColorSpace;
-    const print = new T.Mesh(geometry.plane, new T.MeshBasicMaterial({ map }));
+    const map = setupArtworkTexture(T, new T.CanvasTexture(panel), artworkTier());
+    const material = decalMaterial(new T.MeshBasicMaterial({ map }), -1);
+    const print = new T.Mesh(geometry.plane, material);
     print.name = "Gallery standee printed directions";
     print.position.set(0, 1.065, 0.093);
     print.scale.set(0.69, 1.3, 1);
     totem.add(print);
-    const mesh = new T.Mesh(geometry.plane, new T.MeshBasicMaterial({ map }));
+    const mesh = new T.Mesh(geometry.plane, material);
     mesh.name = "Wayfinding court directory";
     mesh.position.set(tabletX, 1.69, tabletZ + 0.138);
     mesh.scale.set(1.01, 2.24, 1);
@@ -1266,7 +1335,7 @@ async function load(T, kind, definition) {
     clearTimeout(timer);
   }
 }
-function signTexture(T, x, rear) {
+function signTexture(T, x, rear, tier) {
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 256;
@@ -1282,11 +1351,9 @@ function signTexture(T, x, rear) {
   context.fillText(`LEFT: ${left.join(" · ")}`, 40, 65, 944);
   context.textAlign = "right";
   context.fillText(`RIGHT: ${right.join(" · ")}`, 984, 191, 944);
-  const texture = new T.CanvasTexture(canvas);
-  texture.colorSpace = T.SRGBColorSpace;
-  return texture;
+  return setupArtworkTexture(T, new T.CanvasTexture(canvas), tier);
 }
-async function addAmenities(T, scene, collider, createCollectProp, shadows, staticProductCount = null, expanded = false) {
+async function addAmenities(T, scene, collider, createCollectProp, shadows, staticProductCount = null, expanded = false, artworkTier = () => "low") {
   const entries = await Promise.all(Object.entries(AMENITIES).map(async ([kind, definition]) => [kind, await load(T, kind, definition)]));
   const group = new T.Group;
   group.name = "Mall amenities";
@@ -1350,8 +1417,9 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   const directions = [];
   for (const [x, y, z] of AMENITIES.signs.placements)
     for (const rear of [false, true]) {
-      const plane = new T.Mesh(new T.PlaneGeometry(2.04, 0.44), new T.MeshBasicMaterial({ map: signTexture(T, x, rear) }));
-      plane.position.set(x, y - 0.7, z + (rear ? -0.083 : 0.083));
+      const material = decalMaterial(new T.MeshBasicMaterial({ map: signTexture(T, x, rear, artworkTier()) }), -1);
+      const plane = new T.Mesh(new T.PlaneGeometry(2.04, 0.44), material);
+      plane.position.set(x, y - 0.7, z + (rear ? -1 : 1) * decalHeight(0.083));
       plane.rotation.y = rear ? Math.PI : 0;
       plane.name = "Actual store directions";
       group.add(plane);
@@ -1521,6 +1589,7 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
 var slotCapacity = 24;
 var atlasSize = 2048;
 var lowAtlasSize = 1024;
+var atlasGutter = 8;
 function atlasMiB(size) {
   return +((4 * size * size - 1) / 3 * 4 / 1048576).toFixed(2);
 }
@@ -1528,10 +1597,11 @@ function atlasCells(index) {
   if (!Number.isInteger(index) || index < 0 || index >= slotCapacity)
     throw RangeError("Sign atlas holds 24 lots");
   const x = index % 2 * 1024, row = Math.floor(index / 2) * 112;
+  const inset = (x2, y, w, h) => ({ x: x2 + atlasGutter, y: y + atlasGutter, w: w - 2 * atlasGutter, h: h - 2 * atlasGutter });
   return {
-    fascia: { x: x + 3, y: row + 3, w: 861, h: 106 },
-    blade: { x: x + 870, y: row + 3, w: 150, h: 106 },
-    poster: { x: index % 8 * 256 + 3, y: 1344 + Math.floor(index / 8) * 232 + 3, w: 250, h: 226 }
+    fascia: inset(x, row, 864, 112),
+    blade: inset(x + 864, row, 160, 112),
+    poster: inset(index % 8 * 256, 1344 + Math.floor(index / 8) * 232, 256, 232)
   };
 }
 function plateRect(blade) {
@@ -2040,15 +2110,15 @@ function createShopSign(T, config, bay) {
   const z = (anchor ? 0.44 : 0.23) + depth, y = (band.top + band.bottom) / 2;
   const bladeX = -width / 2 + bladeSocket.inset, bladeY = y - bladeSocket.drop, bladeDepth = bladeSocket.reach;
   const positions = [], uvs = [], indices = [];
-  function panel(x, y2, z2, w, h, yaw, cell) {
+  function panel(x, y2, z2, w, h, yaw, cell, offset = decalClearance) {
     const start = positions.length / 3, cs = Math.cos(yaw), sn = Math.sin(yaw);
     for (const [u, v] of [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]])
-      positions.push(x + w * u * cs, y2 + h * v, z2 - w * u * sn);
+      positions.push(x + w * u * cs + offset * sn, y2 + h * v, z2 - w * u * sn + offset * cs);
     const [l, b, r, t] = uvRect(cell);
     uvs.push(l, b, r, b, r, t, l, t);
     indices.push(start, start + 1, start + 2, start, start + 2, start + 3);
   }
-  panel(0, y, z, width, height, 0, cells.fascia);
+  panel(0, y, z, width, height, 0, cells.fascia, 0);
   if (config.blade) {
     for (const side of [-1, 1])
       panel(bladeX + side * (bladeSocket.thickness / 2 + 0.001), bladeY, z + bladeDepth / 2, bladeDepth - 0.05, bladeSocket.height - 0.045, side * Math.PI / 2, cells.blade);
@@ -2138,7 +2208,7 @@ var cells = {
   filament: { x: 88, y: 151, w: 8, h: 6 },
   louvres: { x: 100, y: 151, w: 55, h: 11 }
 };
-function paintUpperAtlas(T, mark) {
+function paintUpperAtlas(T, mark, tier) {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = atlasPx;
   const ctx = canvas.getContext("2d");
@@ -2153,6 +2223,7 @@ function paintUpperAtlas(T, mark) {
     ctx.clip();
     draw(cell.w, cell.h);
     ctx.restore();
+    extrudeArtworkGutter(ctx, cell, 1);
   }
   inCell(cells.directory, (w, h) => {
     ctx.strokeStyle = brass;
@@ -2298,10 +2369,7 @@ function paintUpperAtlas(T, mark) {
     ctx.fillStyle = "#ffedba";
     ctx.fillRect(0, 0, w, h);
   });
-  const map = new T.CanvasTexture(canvas);
-  map.colorSpace = T.SRGBColorSpace;
-  map.anisotropy = 4;
-  return map;
+  return setupArtworkTexture(T, new T.CanvasTexture(canvas), tier);
 }
 
 // demos/corporate/gjh/v11/assets/upper-level.js
@@ -2325,7 +2393,7 @@ function thresholdReturns() {
   const { minX, maxX, minZ, maxZ } = liftLayout.threshold;
   return [minZ, maxZ].map((z) => ({ x: (minX + maxX) / 2, z, width: maxX - minX, depth: 0.055 }));
 }
-async function loadUpperLevel(T) {
+async function loadUpperLevel(T, artworkTier = () => "low") {
   const mark = new Image;
   mark.src = new URL("./gjh-loader-mark.svg", import.meta.url).href;
   const [logo, ...records] = await Promise.all([
@@ -2336,7 +2404,7 @@ async function loadUpperLevel(T) {
       file: "gallery-assets/upper-level/" + id + ".glb"
     }, import.meta.url))
   ]);
-  return { map: paintUpperAtlas(T, logo), models: Object.fromEntries(Object.keys(models).map((key, i) => [key, records[i]])) };
+  return { map: paintUpperAtlas(T, logo, artworkTier()), models: Object.fromEntries(Object.keys(models).map((key, i) => [key, records[i]])) };
 }
 function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash }) {
   const group = new T.Group;
@@ -2581,7 +2649,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     return mesh;
   }
   merged("Lounge, stone paving and shop arcade", solids, new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.67 }), group);
-  const ink = new T.MeshBasicMaterial({ map, toneMapped: false, fog: false });
+  const ink = decalMaterial(new T.MeshBasicMaterial({ map, toneMapped: false, fog: false }), -1);
   merged("Directory, mall mark and display graphics", prints, ink, group);
   const rail = new T.InstancedMesh(unit, new T.MeshStandardMaterial({ color: 13478768, metalness: 0.52, roughness: 0.34 }), gold.length);
   gold.forEach((matrix2, i) => rail.setMatrixAt(i, matrix2));
@@ -2598,6 +2666,18 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   plane.dispose();
   const panes = new T.Group;
   panes.name = "Atrium skylight and threshold glass";
+  for (const pane of glass.slice()) {
+    const back = pane.clone();
+    const { index, attributes: { normal } } = back;
+    for (let i = 0;i < index.count; i += 3) {
+      const a = index.getX(i);
+      index.setX(i, index.getX(i + 1));
+      index.setX(i + 1, a);
+    }
+    for (let i = 0;i < normal.count; i++)
+      normal.setXYZ(i, -normal.getX(i), -normal.getY(i), -normal.getZ(i));
+    glass.push(back);
+  }
   const positions = [], uvs = [], indices = [];
   for (let i = 0;i <= 24; i++) {
     const a = (i / 24 - 0.5) * Math.PI, px = -3 + 13.18 * Math.sin(a), py = 13.14 + 3.91 * Math.cos(a);
@@ -2621,8 +2701,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     opacity: 0.14,
     depthWrite: false,
     roughness: 0.22,
-    side: T.DoubleSide,
-    forceSinglePass: true
+    side: T.FrontSide
   });
   merged("Daylight glass", glass, glazing, panes);
   return { group, panes, cabinMark, seatProfiles, updateView(frustum) {
@@ -4012,6 +4091,8 @@ async function bakeAtlas(configs, assetBase) {
       }
     }
     paintPoster(ctx, c, poster, cells2.poster);
+    for (const cell of Object.values(cells2))
+      extrudeArtworkGutter(ctx, cell, atlasGutter);
     tiles.set(c.id, { cells: cells2, mask: masks });
   }));
   const lowSheet = canvas(lowAtlasSize, lowAtlasSize), low = lowSheet.getContext("2d");
@@ -4021,11 +4102,7 @@ async function bakeAtlas(configs, assetBase) {
 }
 function createProgressiveAtlas(T, sheet) {
   const size = sheet.width;
-  const texture = new T.DataTexture(null, size, size);
-  texture.colorSpace = T.SRGBColorSpace;
-  texture.minFilter = T.LinearMipmapLinearFilter;
-  texture.magFilter = T.LinearFilter;
-  texture.anisotropy = 2;
+  const texture = setupArtworkTexture(T, new T.DataTexture(null, size, size), "balanced", { mipmaps: "explicit" });
   const levels = texture.mipmaps;
   for (let width = size;width >= 1; width /= 2)
     levels.push({ width, height: width, data: null });
@@ -4280,7 +4357,7 @@ function phoneProof(tier) {
 
 // demos/corporate/gjh/v11/assets/signage/runtime.js
 function nearFaceMaterial(T, texture, pulse) {
-  const material = new T.MeshBasicMaterial({ map: texture, toneMapped: false });
+  const material = decalMaterial(new T.MeshBasicMaterial({ map: texture, toneMapped: false }), -1);
   material.onBeforeCompile = (shader) => {
     shader.uniforms.signPulse = pulse;
     shader.vertexShader = `attribute vec4 signRange; attribute float signPulseEnabled; varying vec2 vSignEffect;
@@ -4431,16 +4508,9 @@ function* buildRelief(T, signs, tiles, modules, texture, detailed) {
 }
 function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
   const pulse = { value: 0 };
-  function atlas(canvas2) {
-    const texture = new T.CanvasTexture(canvas2);
-    texture.colorSpace = T.SRGBColorSpace;
-    texture.generateMipmaps = true;
-    texture.minFilter = T.LinearMipmapLinearFilter;
-    texture.anisotropy = 2;
-    return texture;
-  }
-  const lowTexture = atlas(bake.lowSheet), fullAtlas = createProgressiveAtlas(T, bake.sheet);
-  const flat = new T.MeshBasicMaterial({ map: lowTexture, toneMapped: false });
+  const lowTexture = setupArtworkTexture(T, new T.CanvasTexture(bake.lowSheet), "low", { fixedTier: true });
+  const fullAtlas = createProgressiveAtlas(T, bake.sheet);
+  const flat = decalMaterial(new T.MeshBasicMaterial({ map: lowTexture, toneMapped: false }), -1);
   const pieces = [], signs = [];
   configs.forEach((config, index) => {
     const group = createShopSign(T, { ...config, faceMaterial: flat }, bays[index]);
@@ -4663,10 +4733,8 @@ function addExpandedStorefronts(T, layout, scene, signs) {
     frame: { material: new T.MeshStandardMaterial({ color: 1656373, roughness: 0.66 }), matrices: [] },
     brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.65, roughness: 0.38 }), matrices: [] },
     accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
-    glass: { material: new T.MeshStandardMaterial({
+    glass: { material: new T.MeshBasicMaterial({
       color: 12179920,
-      metalness: 0.05,
-      roughness: 0.18,
       transparent: true,
       opacity: 0.065,
       depthWrite: false
@@ -4881,7 +4949,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       arch(x, 1.88, z + 0.17, w * 0.46, 0.66, 0.07, frame);
     for (const h of [0.61, 1.34, 2.07, 2.8]) {
       box(x, h, z + 0.23, w, 0.085, 0.5, oak);
-      box(x, h - 0.04, z + 0.46, w - 0.05, 0.035, 0.035, shopLamp);
+      box(x, h - 0.04, decalHeight(z + 0.48) - 0.0175, w - 0.05, 0.035, 0.035, shopLamp);
       const featured = n === 4 && x === 0 || h === 2.07 && x < 0 && [5, 6, 7, 8, 10, 11, 12, 17].includes(n);
       if (!featured)
         packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind, c);
@@ -5481,7 +5549,7 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
 }
 
 // demos/corporate/gjh/v11/assets/interiors/layout.js
-var layouts = { S01: { brand: "New Moon", style: "Collector’s pantry", concept: "A walnut collector’s cabinet opens above four working seafood shelves like the leaves of a folding screen.", signature_family: "folding collector-cabinet leaves", frame: { wing: "north", world_origin_m: [-10, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [-15, -5, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, door_width_m: 4.7, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [-10, 0], arrival_world_xz_m: [-10, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [], depth_datum: "Original spatial zone from back-wall centre to threshold." }, palette: [{ material: "smoked walnut", hex: "#513527" }, { material: "brushed brass", hex: "#B59A68" }, { material: "pearl linen", hex: "#F2EFE8" }, { material: "oxblood lacquer", hex: "#833E36" }], floor: { treatment: "A navy woven runner widens at the four shelf pickup points; twin brass threads lead back to the door.", position_m: [0, 0.0245, -0.1], yaw_deg: 0, field_width_depth_m: [8.05, 6.35], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "runner", colours: [2, "#354154", 1] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "folding collector-cabinet leaves", viewport_css_px: [393, 612], planned_evidence_stem: "S01-entrance" }, lighting: [0, 4.75, -2.81], accent_kelvin: 2850, centreFixture: "tea-island", props: [{ name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [-3.39, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [-1.13, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [1.13, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [3.39, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Tea kettle at stone island", socket: "kettle", kind: "retain", position_m: [2.8, 1.185, 1.45], yaw_deg: -26, envelope_whd_m: [0.41, 0.36, 0.28] }, { name: "Three tasting cups", socket: "cups", kind: "retain", position_m: [2.3, 1.185, 2.54], yaw_deg: 0, envelope_whd_m: [0.156, 0.088, 0.156] }, { name: "Three tasting cups", socket: "cups", kind: "retain", position_m: [2.8, 1.185, 2.73], yaw_deg: 0, envelope_whd_m: [0.156, 0.088, 0.156] }, { name: "Three tasting cups", socket: "cups", kind: "retain", position_m: [2.36, 1.185, 1.95], yaw_deg: 0, envelope_whd_m: [0.156, 0.088, 0.156] }, { name: "Two walnut tasting stools", socket: "stools1", kind: "retain", position_m: [1.49, 0.025, 2.71], yaw_deg: 0, envelope_whd_m: [0.54, 0.7, 0.54] }, { name: "Two walnut tasting stools", socket: "stools1", kind: "retain", position_m: [1.49, 0.025, 1.42], yaw_deg: 0, envelope_whd_m: [0.54, 0.7, 0.54] }, { name: "Amber globe over tea service", socket: "pend1", kind: "retain", position_m: [2.65, 3.37, 2], yaw_deg: 0, envelope_whd_m: [0.65, 0.7, 0.65] }, { name: "Orchid at the entry-side return", socket: "plant1", kind: "retain", position_m: [-3.6, 0.025, 3.7], yaw_deg: 0, envelope_whd_m: [1, 1.48, 0.96] }, { name: "Brass reading sconce at the rear-left leaf", socket: "rearLights", kind: "retain", position_m: [-3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13] }, { name: "Linen-framed official NZ front photograph", socket: "photo1", kind: "photo", position_m: [-2.64, 0.025, 2.32], yaw_deg: 12, envelope_whd_m: [0.76, 1.54, 0.48] }], anchor: { asset_id: "collector-triptych", position_m: [0, 2.47, -3.46], yaw_deg: 0, envelope_whd_m: [3.95, 2.3, 0.7] }, routes: [[[0, 3], [0, -2.3]], [[-3.4, -2.3], [3.4, -2.3]]], pickups: [[-3.39, -2.3], [-1.13, -2.3], [1.13, -2.3], [3.39, -2.3]], colliders: [{ center: [-2.64, 0.795, 2.32], size: [0.76, 1.54, 0.48], yaw: 12 }], files: { low: { file: "s01-collector-triptych-low.glb", bytes: 41552, tier: "low" }, balanced: { file: "s01-collector-triptych-balanced.glb", bytes: 97576, tier: "balanced" }, detailed: { file: "s01-collector-triptych-detailed.glb", bytes: 133608, tier: "detailed" } } }, S02: { brand: "MILI", style: "Open noodle kitchen", concept: "A low lacquer pass and a broad copper extraction hood frame the preparation of a bowl, with condiments within reach of the cook.", signature_family: "suspended cookline extraction hood", frame: { wing: "north", world_origin_m: [0, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [-5, 5, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, door_width_m: 4.7, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [0, 0], arrival_world_xz_m: [0, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [{ centre_local_m: [-2.55, -0.8], exit_local_m: [-2.55, 0.3999999999999999], id: "bench-seat-5", radius: 0.3 }, { centre_local_m: [3.4, -1.97], exit_local_m: [3.4, -0.77], id: "bench-seat-6", radius: 0.3 }], depth_datum: "Original spatial zone from back-wall centre to threshold." }, palette: [{ material: "red-brown lacquer", hex: "#833D2D" }, { material: "moss tile", hex: "#49634B" }, { material: "bone ceramic", hex: "#F1E9D7" }, { material: "brushed copper", hex: "#AA7151" }], floor: { treatment: "Cream quarry tile through the aisle, with a moss border turning around the island and terminating before both seat exits.", position_m: [0, 0.0245, 0.5], yaw_deg: 0, field_width_depth_m: [5.85, 5.45], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "tile", colours: [2, 2, 1] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "suspended cookline extraction hood", viewport_css_px: [393, 612], planned_evidence_stem: "S02-entrance" }, lighting: [0, 4.75, 1.15], accent_kelvin: 3050, centreFixture: "cookbase", props: [{ name: "Lacquer island base with counter", socket: "cookbase", kind: "retain", position_m: [0, 0.025, 0.5], yaw_deg: 0, envelope_whd_m: [1.82, 1.195, 2.69] }, { name: "Recessed noodle boiler", socket: "boiler", kind: "boiler", position_m: [0, 1.22, 0.3], yaw_deg: 0, envelope_whd_m: [0.85, 0.72, 0.88] }, { name: "Condiments on oak pantry shelf", socket: "miliwall", kind: "retain", position_m: [-4.43, 3.0425, 3.25], yaw_deg: 90, envelope_whd_m: [0.9, 1.1, 0.35] }, { name: "Chopsticks on the opposite pass corner", socket: "chop", kind: "chopsticks", position_m: [-0.53, 1.22, 1.31], yaw_deg: 0, envelope_whd_m: [0.22, 0.3, 0.21] }, { name: "Serving plate on the counter", socket: "plate", kind: "plate", position_m: [0.45, 1.22, 0.98], yaw_deg: 0, envelope_whd_m: [0.32, 0.05, 0.32] }, { name: "Two existing seat and stand points", socket: "seats", kind: "retain", position_m: [-2.55, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Two existing seat and stand points", socket: "seats", kind: "retain", position_m: [3.4, 0, -1.97], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Warm ceramic wall lights", socket: "rearLights", kind: "retain", position_m: [-3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13] }, { name: "Warm ceramic wall lights", socket: "rearLights", kind: "retain", position_m: [3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13] }, { name: "Rear kitchen herb-garden planter", socket: "plant2", kind: "retain", position_m: [-3.8, 0.025, -2.8], yaw_deg: 0, envelope_whd_m: [0.7, 1.3, 0.7] }, { name: "Loaded tasting plate with three samples", socket: "tasting-plate", kind: "retain", position_m: [0.48, 1.22, 1.39], yaw_deg: 0, envelope_whd_m: [0.52, 0.114, 0.52] }], anchor: { asset_id: "hawker-stall-exhaust-hood", position_m: [0, 2.38, 0.5], yaw_deg: 0, envelope_whd_m: [2.65, 1.35, 1.4] }, routes: [[[0, 3], [1.8, 3]], [[1.8, 3], [1.8, 0.5]]], pickups: [], colliders: [], files: { low: { file: "s02-hawker-stall-exhaust-hood-low.glb", bytes: 38936, tier: "low" }, balanced: { file: "s02-hawker-stall-exhaust-hood-balanced.glb", bytes: 56428, tier: "balanced" } } }, S03: { brand: "GOGO", style: "Potong garden bar", concept: "A scalloped parasol and compact ice-cream cart bring a street-side frozen-treat bar indoors.", signature_family: "three-wheel potong parasol carts", frame: { wing: "north", world_origin_m: [10, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [5, 15, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, door_width_m: 4.7, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [10, 0], arrival_world_xz_m: [10, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [{ centre_local_m: [-3, -0.7999999999999998], exit_local_m: [-3, 0.40000000000000036], id: "bench-seat-7", radius: 0.3 }, { centre_local_m: [3, -0.7999999999999998], exit_local_m: [3, 0.40000000000000036], id: "bench-seat-8", radius: 0.3 }], depth_datum: "Original spatial zone from back-wall centre to threshold." }, palette: [{ material: "citrus enamel", hex: "#E7863B" }, { material: "lagoon tile", hex: "#2E7C7A" }, { material: "coconut terrazzo", hex: "#F5F0E5" }, { material: "leaf green", hex: "#4F7047" }], floor: { treatment: "Broad curved terrazzo bands sweep from the left wheel to the right bar; a coconut-coloured centre stays open.", position_m: [0.18, 0.0245, 2.28], yaw_deg: 0, field_width_depth_m: [7.35, 4.2], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "sweep", colours: [2, 2, 1] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "three-wheel potong parasol carts", viewport_css_px: [393, 612], planned_evidence_stem: "S03-entrance" }, lighting: [-2.35, 4.75, 2.7], accent_kelvin: 3900, centreFixture: "open floor", props: [{ name: "Twin dispenser on the right bar", socket: "drink", kind: "dispenser", position_m: [2.87, 1.26, 3.53], yaw_deg: -90, envelope_whd_m: [0.74, 0.76, 0.54] }, { name: "Lagoon-tiled bar carcass", socket: "gbar", kind: "retain", position_m: [3.15, 0.025, 3.6], yaw_deg: -90, envelope_whd_m: [3.25, 1.235, 1.55] }, { name: "Three stools facing the counter", socket: "stools3", kind: "retain", position_m: [1.93, 0.025, 2.6], yaw_deg: 90, envelope_whd_m: [0.48, 1.04, 0.48] }, { name: "Three stools facing the counter", socket: "stools3", kind: "retain", position_m: [1.93, 0.025, 3.6], yaw_deg: 90, envelope_whd_m: [0.48, 1.04, 0.48] }, { name: "Three stools facing the counter", socket: "stools3", kind: "retain", position_m: [1.93, 0.025, 4.6], yaw_deg: 90, envelope_whd_m: [0.48, 1.04, 0.48] }, { name: "Twin lounge benches with existing sit actions", socket: "seats", kind: "retain", position_m: [-3, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Twin lounge benches with existing sit actions", socket: "seats", kind: "retain", position_m: [3, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Coconut globe above the bar", socket: "pend3", kind: "retain", position_m: [2.7, 3.4, 2.3], yaw_deg: 0, envelope_whd_m: [0.6, 0.5, 0.6] }, { name: "White cold chest in the rear-left bay", socket: "cold", kind: "chest", position_m: [-2.8, 0.025, -3.19], yaw_deg: 0, envelope_whd_m: [1.35, 1.1, 0.74] }, { name: "Ferns in the rear planter bed", socket: "fern3", kind: "retain", position_m: [3.78, 0.025, -3.1], yaw_deg: 0, envelope_whd_m: [0.81, 1.07, 0.73] }, { name: "Citrus tray at counter end", socket: "tray3", kind: "tray", position_m: [3.16, 1.26, 4.58], yaw_deg: -90, envelope_whd_m: [0.36, 0.03, 0.27] }], anchor: { asset_id: "ice-cream-cart-potong", position_m: [-2.35, 0.025, 2.05], yaw_deg: 12, envelope_whd_m: [2, 2.6, 1.25] }, routes: [[[0, 2.55], [0, -3]], [[-3, 0.4], [3, 0.4]]], pickups: [], colliders: [{ center: [-2.35, 1.325, 2.05], size: [2, 2.6, 1.25], yaw: 12 }, { center: [-2.8, 0.5750000000000001, -3.19], size: [1.35, 1.1, 0.74], yaw: 0 }], files: { low: { file: "s03-ice-cream-cart-potong-low.glb", bytes: 57460, tier: "low" }, balanced: { file: "s03-ice-cream-cart-potong-balanced.glb", bytes: 150476, tier: "balanced" } } }, S04: { brand: "Borsch Med", style: "Patch library", concept: "A sage sample counter opens into an oversized folding folio whose white leaves hold plain patch cards.", signature_family: "fan-fold patch sample folios", frame: { wing: "north", world_origin_m: [20, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [15, 25, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 11.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [20, 0], arrival_world_xz_m: [20, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55], [2.1, 2.55], [2.1, -1.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "porcelain", hex: "#F8F7F1" }, { material: "powder sage", hex: "#63745D" }, { material: "plum felt", hex: "#6B4A55" }, { material: "pale ash", hex: "#CFBEA7" }], floor: { treatment: "A pill-shaped sage terrazzo field surrounds the folio; a plum stitching line turns along its visitor side.", position_m: [-0.48, 0.081, -0.63], yaw_deg: 7, field_width_depth_m: [4.72, 3.32], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "pill", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [2.1, -1.4000000000000004], expected_signature: "fan-fold patch sample folios", viewport_css_px: [393, 612], planned_evidence_stem: "S04-entrance" }, lighting: [-0.48, 3.85, 0.02], accent_kelvin: 4200, centreFixture: null, props: [{ name: "Unlabelled patch samples on folio shelf", socket: "sample", kind: "samples", position_m: [-0.48, 1.15, -0.51], yaw_deg: 7, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Sage service counter in left rear bay", socket: "leftrear", kind: "counter", position_m: [-3.97, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Shallow ivory wall cabinet", socket: "rightwall", kind: "cabinet", position_m: [4.17, 1.88, -1.1], yaw_deg: -90, envelope_whd_m: [1.48, 0.85, 0.25] }, { name: "Matte entrance-side dispenser", socket: "leftfront", kind: "dispenser", position_m: [-3.49, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Plum ceramic orchid pot", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -4.58], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Diffuse white counter light", socket: "ceiling", kind: "light", position_m: [-0.48, 3.3, -0.63], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Blank paper swatch easel", socket: "leftmid", kind: "easel", position_m: [-4.010000000000001, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Wall washer over the samples", socket: "lightwall", kind: "sconce", position_m: [4.17, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "patch-folio", position_m: [-0.48, 0.081, -0.63], yaw_deg: 7, envelope_whd_m: [2.38, 2.35, 1.12] }, routes: [], pickups: [], colliders: [{ center: [-0.48, 1.256, -0.63], size: [2.38, 2.35, 1.12], yaw: 7 }, { center: [-3.97, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.49, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -4.58], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-4.010000000000001, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }], files: { low: { file: "s04-patch-folio-low.glb", bytes: 26892, tier: "low" }, balanced: { file: "s04-patch-folio-balanced.glb", bytes: 75300, tier: "balanced" }, detailed: { file: "s04-patch-folio-detailed.glb", bytes: 103268, tier: "detailed" } } }, S05: { brand: "Pien Tze Huang", style: "Herbal counting house", concept: "A bank of stepped dark-wood drawers opens around a single pale porcelain bowl in a quiet apothecary.", signature_family: "stepped specimen-drawer banks", frame: { wing: "north", world_origin_m: [30, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [25, 35, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 11.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [30, 0], arrival_world_xz_m: [30, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55], [2.1, 2.55], [2.1, -1.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "ink-stained elm", hex: "#352C28" }, { material: "warm parchment", hex: "#E9DDBF" }, { material: "cinnabar", hex: "#9E3F35" }, { material: "aged copper", hex: "#A87249" }], floor: { treatment: "Inset a parchment-coloured woven reed field in dark boards with a narrow cinnabar seam at the drawer face.", position_m: [0, 0.081, -2.6], yaw_deg: 0, field_width_depth_m: [6.95, 4.55], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "reed", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [2.1, -1.4000000000000004], expected_signature: "stepped specimen-drawer banks", viewport_css_px: [393, 612], planned_evidence_stem: "S05-entrance" }, lighting: [0, 3.85, -3.73], accent_kelvin: 2650, centreFixture: null, props: [{ name: "Single pale bowl and saucer in drawer niche", socket: "bowl", kind: "bowl", position_m: [0, 1.36, -4.15], yaw_deg: 0, envelope_whd_m: [0.32, 0.22, 0.28] }, { name: "Unmarked cartons on a parchment stand", socket: "leftfront", kind: "stand", position_m: [-3.49, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Dark-framed specimen vitrine", socket: "leftmid", kind: "case", position_m: [-4.010000000000001, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Parchment lantern at the consultation end", socket: "ceiling", kind: "lantern", position_m: [0, 3.3, -4.38], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Cinnabar planter", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -4.58], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Wooden receiving chest below side return", socket: "backleft", kind: "chest", position_m: [-2.58, 0.081, -4.58], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }, { name: "Aged brass reading light", socket: "lightwall", kind: "sconce", position_m: [4.17, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Closed sample cabinet on the right wall", socket: "rightwall", kind: "cabinet", position_m: [4.17, 1.88, -1.1], yaw_deg: -90, envelope_whd_m: [1.48, 0.85, 0.25] }], anchor: { asset_id: "specimen-drawers", position_m: [0, 0.081, -4.38], yaw_deg: 0, envelope_whd_m: [4.2, 2.98, 1.05] }, routes: [], pickups: [], colliders: [{ center: [0, 1.571, -4.38], size: [4.2, 2.98, 1.05], yaw: 0 }, { center: [-3.49, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-4.010000000000001, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -4.58], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-2.58, 0.606, -4.58], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s05-specimen-drawers-low.glb", bytes: 45516, tier: "low" }, balanced: { file: "s05-specimen-drawers-balanced.glb", bytes: 133736, tier: "balanced" }, detailed: { file: "s05-specimen-drawers-detailed.glb", bytes: 145484, tier: "detailed" } } }, S06: { brand: "Flying Wheel", style: "Air-drying workshop", concept: "Golden noodle ribbons hang at different lengths from a freestanding timber loom, against a quiet slate wall.", signature_family: "ban mee drying combs", frame: { wing: "west", world_origin_m: [-20, 0, 4], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 0, 8], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 4], arrival_world_xz_m: [-12.6, 4], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "pale beech", hex: "#D7BB87" }, { material: "wheat", hex: "#C6A66C" }, { material: "slate-blue casein", hex: "#536777" }, { material: "rice paper", hex: "#F0E9D9" }], floor: { treatment: "Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, field_width_depth_m: [4.55, 4.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "planks", colours: ["#AC845C", 0, 3] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "ban mee drying combs", viewport_css_px: [393, 612], planned_evidence_stem: "S06-entrance" }, lighting: [-0.65, 3.85, -0.18], accent_kelvin: 3300, centreFixture: null, props: [{ name: "Plain noodle bags on a hook rack", socket: "leftfront", kind: "rack", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Brushed preparation sideboard", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Pale wooden drying tray on sideboard", socket: "onleft", kind: "tray", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Utensil holder on sideboard", socket: "onleft2", kind: "utensils", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }, { name: "Slatted flour crate", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Cylindrical work lamp", socket: "ceiling", kind: "light", position_m: [-0.65, 3.3, -0.83], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Woven-colour basket by the rear wall", socket: "backright", kind: "basket", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Raking lamp above the comb", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "noodle-loom", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, envelope_whd_m: [2.45, 2.96, 1.05] }, routes: [], pickups: [], colliders: [{ center: [-0.65, 1.561, -0.83], size: [2.45, 2.96, 1.05], yaw: 3 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s06-noodle-loom-low.glb", bytes: 52960, tier: "low" }, balanced: { file: "s06-noodle-loom-balanced.glb", bytes: 111984, tier: "balanced" }, detailed: { file: "s06-noodle-loom-detailed.glb", bytes: 182128, tier: "detailed" } } }, S07: { brand: "Gu Long", style: "Banquet provision hall", concept: "A stepped pyramid of plain tins on a jade serving drum sits beneath one red lantern, like a banquet centrepiece.", signature_family: "banquet tin pyramids", frame: { wing: "west", world_origin_m: [-20, 0, 12], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 8, 16], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 12], arrival_world_xz_m: [-12.6, 12], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "oxblood lacquer", hex: "#742E29" }, { material: "jade glaze", hex: "#4F6E5A" }, { material: "rice silk", hex: "#EFE4D0" }, { material: "patinated bronze", hex: "#9A794D" }], floor: { treatment: "An octagonal jade inset under the drum breaks into a border of brick-red tiles along the walk.", position_m: [-0.55, 0.081, -0.85], yaw_deg: -8, field_width_depth_m: [3.65, 3.65], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "octagon", colours: [0, 1, 0] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "banquet tin pyramids", viewport_css_px: [393, 612], planned_evidence_stem: "S07-entrance" }, lighting: [-0.55, 3.85, -0.2], accent_kelvin: 2750, centreFixture: null, props: [{ name: "Low jade serving drum under tin pyramid", socket: "drum", kind: "drum", position_m: [-0.55, 0.081, -0.85], yaw_deg: -8, envelope_whd_m: [1.84, 0.399, 1.84] }, { name: "Silk banquet lantern above the drum", socket: "ceiling", kind: "lantern", position_m: [-0.55, 3.3, -0.85], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Lacquer provision shelf", socket: "leftrear", kind: "rack", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Stack of serving platters on shelf", socket: "onleft", kind: "plates", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Bronze-coloured condiment tray", socket: "onleft2", kind: "tray", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }, { name: "Hand basket in left window", socket: "leftfront", kind: "basket", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Red-glazed corner planter", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Jade shelf washer", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "stacked-can-pyramid", position_m: [-0.55, 0.48, -0.85], yaw_deg: -8, envelope_whd_m: [1.65, 2.45, 1.65] }, routes: [], pickups: [], colliders: [{ center: [-0.55, 1.705, -0.85], size: [1.65, 2.45, 1.65], yaw: -8 }, { center: [-0.55, 0.2805, -0.85], size: [1.84, 0.399, 1.84], yaw: -8 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s07-stacked-can-pyramid-low.glb", bytes: 42456, tier: "low" }, balanced: { file: "s07-stacked-can-pyramid-balanced.glb", bytes: 162152, tier: "balanced" } } }, S08: { brand: "Skippy", style: "Breakfast stand", concept: "A tall stand of plain peanut-butter jars fronts a striped breakfast booth with toast trays at serving height.", signature_family: "peanut-jar breakfast stands", frame: { wing: "west", world_origin_m: [-20, 0, 20], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 16, 24], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 20], arrival_world_xz_m: [-12.6, 20], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "sky-blue enamel", hex: "#70A9D4" }, { material: "navy canvas", hex: "#1D3A64" }, { material: "peanut maple", hex: "#E8D1A3" }, { material: "butter yellow", hex: "#F4CB69" }], floor: { treatment: "A navy-and-cream gingham field folds around the breakfast counter, with a plain band at the threshold.", position_m: [-0.42, 0.081, -0.5], yaw_deg: 0, field_width_depth_m: [4.48, 5.68], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "gingham", colours: [0, 2, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "peanut-jar breakfast stands", viewport_css_px: [393, 612], planned_evidence_stem: "S08-entrance" }, lighting: [-0.58, 3.85, -0.11], accent_kelvin: 3650, centreFixture: null, props: [{ name: "Blue enamel jar-stand base", socket: "jarbase", kind: "plinth", position_m: [-0.58, 0.081, -0.76], yaw_deg: 0, envelope_whd_m: [1.76, 0.499, 1.17] }, { name: "Toast and timber service rack on sideboard", socket: "onleft", kind: "rack-small", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Maple breakfast sideboard", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Small second display at the window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Single sky-blue breakfast chair", socket: "leftmid", kind: "chair", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Butter-yellow breakfast light", socket: "ceiling", kind: "lantern", position_m: [-0.58, 3.3, -0.76], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Picnic basket in the rear corner", socket: "backright", kind: "basket", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Cream breakfast tray on sideboard", socket: "onleft2", kind: "tray", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }], anchor: { asset_id: "peanut-butter-jar-stand", position_m: [-0.58, 0.58, -0.76], yaw_deg: 0, envelope_whd_m: [1.65, 2.15, 1.05] }, routes: [], pickups: [], colliders: [{ center: [-0.58, 1.6549999999999998, -0.76], size: [1.65, 2.15, 1.05], yaw: 0 }, { center: [-0.58, 0.3305, -0.76], size: [1.76, 0.499, 1.17], yaw: 0 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s08-peanut-butter-jar-stand-low.glb", bytes: 60780, tier: "low" }, balanced: { file: "s08-peanut-butter-jar-stand-balanced.glb", bytes: 111012, tier: "balanced" } } }, S09: { brand: "SPAM", style: "Canning-line grocer", concept: "A stopped tinning conveyor with a yellow return wheel leads the eye diagonally across a navy machine-room counter.", signature_family: "tinning-line rollers", frame: { wing: "west", world_origin_m: [-20, 0, 28], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 24, 32], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 28], arrival_world_xz_m: [-12.6, 28], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [1.7, 1.5499999999999998], [1.7, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "blue-black steel", hex: "#173B68" }, { material: "tinplate", hex: "#B5C0C1" }, { material: "ochre enamel", hex: "#E4B63F" }, { material: "rubber", hex: "#303639" }], floor: { treatment: "Two parallel steel inlays trace the belt ends in a charcoal rubber field; keep the public path plain.", position_m: [-0.72, 0.081, -1.1], yaw_deg: 12, field_width_depth_m: [4.65, 3.24], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "tracks", colours: [0, 3, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [1.7, -2.4000000000000004], expected_signature: "tinning-line rollers", viewport_css_px: [393, 612], planned_evidence_stem: "S09-entrance" }, lighting: [-0.72, 3.85, -0.45], accent_kelvin: 3450, centreFixture: null, props: [{ name: "Abstract tin stack at the belt intake", socket: "backleft", kind: "tins", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }, { name: "Tool station with folded-metal top", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Scanner parked on the tool station", socket: "onleft", kind: "scanner", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Unmarked mechanical till on the tool station", socket: "onleft2", kind: "till", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }, { name: "Navy steel rack at left window", socket: "leftfront", kind: "rack", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Deep enamel task lamp", socket: "ceiling", kind: "light", position_m: [-0.72, 3.3, -1.1], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Low ochre metal drawer unit", socket: "backright", kind: "chest", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Light on the return wheel", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "conveyor-belt", position_m: [-0.72, 0.081, -1.1], yaw_deg: 12, envelope_whd_m: [2.65, 1.6, 1.02] }, routes: [], pickups: [], colliders: [{ center: [-0.72, 0.881, -1.1], size: [2.65, 1.6, 1.02], yaw: 12 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s09-conveyor-belt-low.glb", bytes: 22728, tier: "low" }, balanced: { file: "s09-conveyor-belt-balanced.glb", bytes: 50592, tier: "balanced" } } }, S10: { brand: "California Mexico", style: "Coastal gift market", concept: "A deep, open scallop shell cradles a generic seafood gift display against pale sand-coloured plaster.", signature_family: "open nacre shell cradles", frame: { wing: "west", world_origin_m: [-20, 0, 36], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 32, 40], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 36], arrival_world_xz_m: [-12.6, 36], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "shell limestone", hex: "#F0EAE0" }, { material: "sea-glass teal", hex: "#2C7776" }, { material: "coral ceramic", hex: "#C65B46" }, { material: "oiled teak", hex: "#956847" }], floor: { treatment: "Flow from a chalk-white sand field to a scalloped teal band around the gift display.", position_m: [-0.45, 0.081, -1.4], yaw_deg: -7, field_width_depth_m: [5.25, 4.25], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "scallop", colours: [1, 0, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "open nacre shell cradles", viewport_css_px: [393, 612], planned_evidence_stem: "S10-entrance" }, lighting: [-0.45, 3.85, -0.75], accent_kelvin: 3550, centreFixture: null, props: [{ name: "Neutral gift boxes on inner shell ledge", socket: "sample", kind: "samples", position_m: [-0.45, 1.15, -1.2799999999999998], yaw_deg: -7, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Sea-glass display cabinet", socket: "leftrear", kind: "case", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Pearl-coloured serving dish inside cabinet", socket: "onleft", kind: "plate", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Open gift basket in the left window", socket: "leftfront", kind: "basket", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Coral glazed planter in the back corner", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Pearl pendant over the cradle", socket: "ceiling", kind: "lantern", position_m: [-0.45, 3.3, -1.4], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Low teak shipping crate", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Teal shell-rib washer", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "nacre-cradle", position_m: [-0.45, 0.081, -1.4], yaw_deg: -7, envelope_whd_m: [2.6, 2.62, 1.24] }, routes: [], pickups: [], colliders: [{ center: [-0.45, 1.391, -1.4], size: [2.6, 2.62, 1.24], yaw: -7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }], files: { low: { file: "s10-nacre-cradle-low.glb", bytes: 49888, tier: "low" }, balanced: { file: "s10-nacre-cradle-balanced.glb", bytes: 91528, tier: "balanced" }, detailed: { file: "s10-nacre-cradle-detailed.glb", bytes: 160204, tier: "detailed" } } }, S11: { brand: "Hormel", style: "Provision packing room", concept: "An open packing bench, kraft rolls and nested slatted crates make this a working stockroom for generic tinned goods.", signature_family: "parcel-wrapping benches", frame: { wing: "west", world_origin_m: [-20, 0, 44], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 40, 48], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 44], arrival_world_xz_m: [-12.6, 44], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "kraft board", hex: "#BE9062" }, { material: "burgundy steel", hex: "#843E43" }, { material: "zinc", hex: "#767976" }, { material: "cream paper", hex: "#EEE7D9" }], floor: { treatment: "Worn end-grain blocks form a rectangular loading mat with a burgundy perimeter and zinc doorway strip.", position_m: [-0.56, 0.081, -1.05], yaw_deg: 0, field_width_depth_m: [4.8, 3.72], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "blocks", colours: [2, 0, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "parcel-wrapping benches", viewport_css_px: [393, 612], planned_evidence_stem: "S11-entrance" }, lighting: [-0.56, 3.85, -0.4], accent_kelvin: 3150, centreFixture: null, props: [{ name: "Slatted receiving crate at working end", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Low pallet in the left window", socket: "leftfront", kind: "pallet", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Burgundy dispatch shelving", socket: "leftrear", kind: "rack", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Blank packing tray on bench", socket: "sample", kind: "tray", position_m: [-0.56, 1.15, -0.93], yaw_deg: 0, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Wire returns basket", socket: "backright", kind: "basket", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Long zinc task light above packing bench", socket: "ceiling", kind: "light", position_m: [-0.56, 3.3, -1.05], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Countertop packing scale on shelf", socket: "onleft", kind: "scale", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Short pantry rack on rear return", socket: "backleft", kind: "rack", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }], anchor: { asset_id: "packing-station", position_m: [-0.56, 0.081, -1.05], yaw_deg: 0, envelope_whd_m: [2.62, 2.15, 1.12] }, routes: [], pickups: [], colliders: [{ center: [-0.56, 1.156, -1.05], size: [2.62, 2.15, 1.12], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s11-packing-station-low.glb", bytes: 29088, tier: "low" }, balanced: { file: "s11-packing-station-balanced.glb", bytes: 63544, tier: "balanced" } } }, S12: { brand: "Zeria", style: "Quiet dispensary", concept: "Offset frosted index fins rise behind a low white supplement display, casting blue-green shadows between the layers.", signature_family: "frosted dispensary index fins", frame: { wing: "east", world_origin_m: [40, 0, 4], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 0, 8], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 4], arrival_world_xz_m: [32.6, 4], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "opal resin", hex: "#F1F3F1" }, { material: "seafoam", hex: "#B6D2C8" }, { material: "indigo slate", hex: "#3C4A66" }, { material: "anodised teal", hex: "#6F9690" }], floor: { treatment: "Pale resin flooring carries three quiet indigo arcs around the sample station and a matte seafoam browsing zone.", position_m: [-0.52, 0.081, -1.2], yaw_deg: -5, field_width_depth_m: [4.93, 4.48], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "arcs", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "frosted dispensary index fins", viewport_css_px: [393, 612], planned_evidence_stem: "S12-entrance" }, lighting: [-0.52, 3.85, -0.55], accent_kelvin: 4650, centreFixture: null, props: [{ name: "Plain carton stand beside the glazing", socket: "leftfront", kind: "stand", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "White drawer cabinet in the alcove", socket: "leftrear", kind: "cabinet", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Opal sample tray on central ledge", socket: "sample", kind: "tray", position_m: [-0.52, 1.15, -1.08], yaw_deg: -5, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Mint supply trolley parked off aisle", socket: "leftmid", kind: "trolley", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "White stone orchid pot", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Cool inspection bar above fins", socket: "ceiling", kind: "light", position_m: [-0.52, 3.3, -1.2], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Side fin washer", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Recessed blank material-sample easel", socket: "backleft", kind: "easel", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }], anchor: { asset_id: "opal-index", position_m: [-0.52, 0.081, -1.2], yaw_deg: -5, envelope_whd_m: [2.55, 2.46, 1.05] }, routes: [], pickups: [], colliders: [{ center: [-0.52, 1.311, -1.2], size: [2.55, 2.46, 1.05], yaw: -5 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s12-opal-index-low.glb", bytes: 30636, tier: "low" }, balanced: { file: "s12-opal-index-balanced.glb", bytes: 75168, tier: "balanced" }, detailed: { file: "s12-opal-index-detailed.glb", bytes: 91240, tier: "detailed" } } }, S13: { brand: "Sony", style: "Listening studio", concept: "Backlit headphone silhouettes turn a charcoal felt listening bar into a dark, close-focus audio showroom.", signature_family: "suspended headphone hooks", frame: { wing: "east", world_origin_m: [40, 0, 12], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 8, 16], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 12], arrival_world_xz_m: [32.6, 12], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "charcoal felt", hex: "#292B2D" }, { material: "black glass", hex: "#14171C" }, { material: "bead-blasted silver", hex: "#BFC3C5" }, { material: "ice blue", hex: "#A6D7EB" }], floor: { treatment: "A charcoal felt ellipse interrupts the black rubber floor and points its long axis toward the listening bar.", position_m: [-0.64, 0.081, -1.05], yaw_deg: 8, field_width_depth_m: [4.08, 4.38], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "felt", colours: [1, 0, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "suspended headphone hooks", viewport_css_px: [393, 612], planned_evidence_stem: "S13-entrance" }, lighting: [-0.64, 3.85, -0.4], accent_kelvin: 4100, centreFixture: null, props: [{ name: "Oval dark plinth for headphone rack", socket: "audiofoot", kind: "plinth", position_m: [-0.64, 0.081, -1.05], yaw_deg: 8, envelope_whd_m: [1.38, 0.349, 1.07] }, { name: "Slim soundbar on the left console", socket: "onleft", kind: "soundbar", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Black listening console", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Felt listening chair behind the console", socket: "backleft", kind: "chair", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }, { name: "Second short headphone stand at window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Small silver spotlight raking the hooks", socket: "ceiling", kind: "spot", position_m: [-0.64, 3.48, -1.05], yaw_deg: 0, envelope_whd_m: [1.18, 0.42, 0.68] }, { name: "Ribbed felt acoustic baffle", socket: "baffle", kind: "baffle", position_m: [-0.64, 0.081, -1.99], yaw_deg: 0, envelope_whd_m: [2.55, 2.96, 0.2] }, { name: "Silver slit of light along the side wall", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "headphone-display-stand", position_m: [-0.64, 0.43, -1.05], yaw_deg: 8, envelope_whd_m: [1.12, 2.6, 0.75] }, routes: [], pickups: [], colliders: [{ center: [-0.64, 1.73, -1.05], size: [1.12, 2.6, 0.75], yaw: 8 }, { center: [-0.64, 0.2555, -1.05], size: [1.38, 0.349, 1.07], yaw: 8 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }, { center: [-0.64, 1.561, -1.99], size: [2.55, 2.96, 0.2], yaw: 0 }], files: { low: { file: "s13-headphone-display-stand-low.glb", bytes: 55696, tier: "low" }, balanced: { file: "s13-headphone-display-stand-balanced.glb", bytes: 163820, tier: "balanced" } } }, S14: { brand: "LG", style: "Living picture gallery", concept: "Two offset picture planes frame an ivory upholstered living room like a bright domestic cinema.", signature_family: "staggered picture-window screens", frame: { wing: "east", world_origin_m: [40, 0, 20], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 16, 24], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 20], arrival_world_xz_m: [32.6, 20], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "gallery white", hex: "#F5F3EF" }, { material: "satin aluminium", hex: "#BEC1C2" }, { material: "aubergine velvet", hex: "#5B3F7A" }, { material: "blush limestone", hex: "#DBBEB1" }], floor: { treatment: "Use a large aubergine wool rectangle beneath the sofa and a pale polished perimeter for the gallery walk.", position_m: [-2.02, 0.081, 0.29], yaw_deg: 0, field_width_depth_m: [3.05, 3.95], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "wool", colours: [0, 2, 3] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "staggered picture-window screens", viewport_css_px: [393, 612], planned_evidence_stem: "S14-entrance" }, lighting: [-0.62, 3.85, -3.34], accent_kelvin: 4000, centreFixture: null, props: [{ name: "Second smaller floor screen angled toward main screen", socket: "backright", kind: "screen", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Ivory sofa in left browsing alcove", socket: "leftmid", kind: "sofa", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Low console below the screen", socket: "underTV", kind: "console", position_m: [-0.62, 0.081, -3.8600000000000003], yaw_deg: 0, envelope_whd_m: [2.8, 0.72, 0.55] }, { name: "Small velvet ottoman in left window", socket: "leftfront", kind: "ottoman", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Satin domestic appliance at back left", socket: "backleft", kind: "cabinet", position_m: [-2.96, 0.081, -3.58], yaw_deg: 0, envelope_whd_m: [0.7, 1.72, 0.58] }, { name: "Grazing light across screen reveals", socket: "ceiling", kind: "light", position_m: [-0.62, 3.3, -3.99], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Small domestic arrangement at sofa end", socket: "leftrear", kind: "plant", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Soft gallery wall light", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "tv-wall-mounted", position_m: [-0.62, 1.03, -3.99], yaw_deg: 0, envelope_whd_m: [3.65, 2.08, 0.3] }, routes: [], pickups: [], colliders: [{ center: [-0.62, 2.0700000000000003, -3.99], size: [3.65, 2.08, 0.3], yaw: 0 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [-0.62, 0.441, -3.8600000000000003], size: [2.8, 0.72, 0.55], yaw: 0 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.96, 0.941, -3.58], size: [0.7, 1.72, 0.58], yaw: 0 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }], files: { low: { file: "s14-tv-wall-mounted-low.glb", bytes: 34300, tier: "low" }, balanced: { file: "s14-tv-wall-mounted-balanced.glb", bytes: 53492, tier: "balanced" } } }, S15: { brand: "Casio", style: "Chamber recital room", concept: "A raised piano lid cuts a diagonal against walnut concert slats, with a shallow ivory-lit stage under the instrument.", signature_family: "raised baby-grand lids", frame: { wing: "east", world_origin_m: [40, 0, 28], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 24, 32], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 28], arrival_world_xz_m: [32.6, 28], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.8, 1.5499999999999998], [2.8, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "piano lacquer", hex: "#202123" }, { material: "oiled walnut", hex: "#76543D" }, { material: "key ivory", hex: "#F1EDE2" }, { material: "oxblood wool", hex: "#723F46" }], floor: { treatment: "An oval walnut marquetry field and an ivory stage outline gather the instrument and bench.", position_m: [-1.05, 0.081, -1.02], yaw_deg: -22, field_width_depth_m: [3.55, 4.05], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "stage", colours: [3, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.8, -2.4000000000000004], expected_signature: "raised baby-grand lids", viewport_css_px: [393, 612], planned_evidence_stem: "S15-entrance" }, lighting: [-1.05, 3.85, -0.37], accent_kelvin: 2900, centreFixture: null, props: [{ name: "Practice keyboard at left window", socket: "leftfront", kind: "keyboard", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Warm stage special above lid", socket: "ceiling", kind: "spot", position_m: [-1.05, 3.3, -1.02], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Walnut acoustic screen behind instrument", socket: "pianoback", kind: "baffle", position_m: [-0.64, 0.081, -3.76], yaw_deg: -2, envelope_whd_m: [2.52, 2.72, 0.28] }, { name: "Small amber lamp over practice area", socket: "frontpend", kind: "lantern", position_m: [-2.5, 3.15, 2.88], yaw_deg: 0, envelope_whd_m: [0.44, 0.66, 0.44] }, { name: "Empty glass object case with ivory stage samples", socket: "leftrear", kind: "case", position_m: [1.15, 0.081, -3.58], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Keybed side light", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Small recital flower arrangement", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Single audience chair beside the rear wall", socket: "backleft", kind: "chair", position_m: [-1.7, 0.081, 4.2], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }], anchor: { asset_id: "grand-piano", position_m: [-1.05, 0.081, -1.02], yaw_deg: -22, envelope_whd_m: [1.95, 2.38, 2.75] }, routes: [], pickups: [], colliders: [{ center: [-1.05, 1.271, -1.02], size: [1.95, 2.38, 2.75], yaw: -22 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-0.64, 1.441, -3.76], size: [2.52, 2.72, 0.28], yaw: -2 }, { center: [1.15, 0.581, -3.58], size: [1.36, 1, 0.8], yaw: 90 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-1.7, 0.606, 4.2], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s15-grand-piano-low.glb", bytes: 68504, tier: "low" }, balanced: { file: "s15-grand-piano-balanced.glb", bytes: 186224, tier: "balanced" } } }, S16: { brand: "GP", style: "Locator workshop", concept: "A perforated teal tool board holds a family of oversized empty eyelets above a small tracker demonstration bench.", signature_family: "overscale locator eyelet rails", frame: { wing: "east", world_origin_m: [40, 0, 36], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 32, 40], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 36], arrival_world_xz_m: [32.6, 36], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [0, 1.5499999999999998], [0, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "powder white", hex: "#F4F5F2" }, { material: "anodised teal", hex: "#3D8C8A" }, { material: "lime polymer", hex: "#B7C94A" }, { material: "graphite rubber", hex: "#363C3D" }], floor: { treatment: "White anti-static tile with a teal service lane and three lime indexing marks points to the rail.", position_m: [-0.25, 0.081, -0.12], yaw_deg: 0, field_width_depth_m: [5.25, 6.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "lane", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [0, -2.4000000000000004], expected_signature: "overscale locator eyelet rails", viewport_css_px: [393, 612], planned_evidence_stem: "S16-entrance" }, lighting: [-1.56, 3.85, -0.63], accent_kelvin: 4900, centreFixture: null, props: [{ name: "Cell display in left window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "White modular accessories shelving", socket: "leftrear", kind: "rack", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Neutral rear test desk", socket: "backright", kind: "counter", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.98, 1.05, 0.64] }, { name: "Generic static display on rear desk", socket: "onright", kind: "screen", position_m: [2.63, 1.131, -3.68], yaw_deg: 0, envelope_whd_m: [0.59, 0.48, 0.3] }, { name: "Lime polymer tool bin", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Bench inspection strip", socket: "ceiling", kind: "light", position_m: [-1.56, 3.3, -1.28], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Pegboard edge light", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Handheld bench scanner on left shelf", socket: "onleft", kind: "scanner", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }], anchor: { asset_id: "eyelet-rail", position_m: [-1.56, 0.081, -1.28], yaw_deg: 5, envelope_whd_m: [1.65, 2.55, 0.9] }, routes: [], pickups: [], colliders: [{ center: [-1.56, 1.3559999999999999, -1.28], size: [1.65, 2.55, 0.9], yaw: 5 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [2.63, 0.606, -3.68], size: [0.98, 1.05, 0.64], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }], files: { low: { file: "s16-eyelet-rail-low.glb", bytes: 59820, tier: "low" }, balanced: { file: "s16-eyelet-rail-balanced.glb", bytes: 107836, tier: "balanced" }, detailed: { file: "s16-eyelet-rail-detailed.glb", bytes: 123736, tier: "detailed" } } }, S17: { brand: "Gigaset", style: "Domestic telephone bureau", concept: "A gabled felt telephone alcove frames a small real-scale cordless handset at the end of a warm domestic corridor.", signature_family: "gable-roof handset niches", frame: { wing: "east", world_origin_m: [40, 0, 44], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 40, 48], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 44], arrival_world_xz_m: [32.6, 44], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "graphite felt", hex: "#4A4D50" }, { material: "satin nickel", hex: "#B8BBBD" }, { material: "chalk", hex: "#F5F4EF" }, { material: "apricot cork", hex: "#D99E74" }], floor: { treatment: "A cork runner widens into a threshold-shaped wool inset beneath the phone alcove.", position_m: [0, 0.081, -0.2], yaw_deg: 0, field_width_depth_m: [4.68, 6.72], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "cork", colours: [2, 3, 0] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "gable-roof handset niches", viewport_css_px: [393, 612], planned_evidence_stem: "S17-entrance" }, lighting: [-0.55, 3.85, -2.3], accent_kelvin: 3200, centreFixture: null, props: [{ name: "Real-scale generic handset in the alcove", socket: "handset", kind: "handset", position_m: [0.22, 1.09, -2.66], yaw_deg: -5, envelope_whd_m: [0.34, 0.42, 0.32] }, { name: "Small domestic writing desk", socket: "leftrear", kind: "counter", position_m: [1.42, 0.081, -3.9], yaw_deg: 0, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Second unbranded dock on writing desk", socket: "onleft", kind: "handset", position_m: [1.42, 1.081, -3.69], yaw_deg: 0, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Cork-coloured waiting seat in left window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Domestic pendant above desk", socket: "ceiling", kind: "lantern", position_m: [-0.55, 3.3, -2.95], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Correspondence drawer cabinet", socket: "leftmid", kind: "cabinet", position_m: [3.15, 0.081, 2.7], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Gable reading lamp", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Chalk planter at end of runner", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }], anchor: { asset_id: "telephone-alcove", position_m: [-0.55, 0.081, -2.95], yaw_deg: -5, envelope_whd_m: [2.15, 2.86, 1.25] }, routes: [], pickups: [], colliders: [{ center: [-0.55, 1.511, -2.95], size: [2.15, 2.86, 1.25], yaw: -5 }, { center: [1.42, 0.581, -3.9], size: [1.36, 1, 0.8], yaw: 0 }, { center: [3.15, 0.5509999999999999, 2.7], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s17-telephone-alcove-low.glb", bytes: 28284, tier: "low" }, balanced: { file: "s17-telephone-alcove-balanced.glb", bytes: 66384, tier: "balanced" }, detailed: { file: "s17-telephone-alcove-detailed.glb", bytes: 80676, tier: "detailed" } } } };
+var layouts = { S01: { brand: "New Moon", style: "Collector’s pantry", concept: "A walnut collector’s cabinet opens above four working seafood shelves like the leaves of a folding screen.", signature_family: "folding collector-cabinet leaves", frame: { wing: "north", world_origin_m: [-10, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [-15, -5, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, door_width_m: 4.7, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [-10, 0], arrival_world_xz_m: [-10, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [], depth_datum: "Original spatial zone from back-wall centre to threshold." }, palette: [{ material: "smoked walnut", hex: "#513527" }, { material: "brushed brass", hex: "#B59A68" }, { material: "pearl linen", hex: "#F2EFE8" }, { material: "oxblood lacquer", hex: "#833E36" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "A navy woven runner widens at the four shelf pickup points; twin brass threads lead back to the door.", position_m: [0, 0.0245, -0.1], yaw_deg: 0, field_width_depth_m: [8.05, 6.35], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "runner", colours: [2, "#354154", 1] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "folding collector-cabinet leaves", viewport_css_px: [393, 612], planned_evidence_stem: "S01-entrance" }, lighting: [0, 4.75, -2.81], accent_kelvin: 2850, centreFixture: "tea-island", props: [{ name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [-3.39, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [-1.13, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [1.13, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Four active collection cabinets", socket: "shelves", kind: "retain", position_m: [3.39, 0, -3.25], yaw_deg: 0, envelope_whd_m: [2.232, 2.4, 0.55] }, { name: "Tea kettle at stone island", socket: "kettle", kind: "retain", position_m: [2.8, 1.185, 1.45], yaw_deg: -26, envelope_whd_m: [0.41, 0.36, 0.28] }, { name: "Three tasting cups", socket: "cups", kind: "retain", position_m: [2.3, 1.185, 2.54], yaw_deg: 0, envelope_whd_m: [0.156, 0.088, 0.156] }, { name: "Three tasting cups", socket: "cups", kind: "retain", position_m: [2.8, 1.185, 2.73], yaw_deg: 0, envelope_whd_m: [0.156, 0.088, 0.156] }, { name: "Three tasting cups", socket: "cups", kind: "retain", position_m: [2.36, 1.185, 1.95], yaw_deg: 0, envelope_whd_m: [0.156, 0.088, 0.156] }, { name: "Two walnut tasting stools", socket: "stools1", kind: "retain", position_m: [1.49, 0.025, 2.71], yaw_deg: 0, envelope_whd_m: [0.54, 0.7, 0.54] }, { name: "Two walnut tasting stools", socket: "stools1", kind: "retain", position_m: [1.49, 0.025, 1.42], yaw_deg: 0, envelope_whd_m: [0.54, 0.7, 0.54] }, { name: "Amber globe over tea service", socket: "pend1", kind: "retain", position_m: [2.65, 3.37, 2], yaw_deg: 0, envelope_whd_m: [0.65, 0.7, 0.65] }, { name: "Orchid at the entry-side return", socket: "plant1", kind: "retain", position_m: [-3.6, 0.025, 3.7], yaw_deg: 0, envelope_whd_m: [1, 1.48, 0.96] }, { name: "Brass reading sconce at the rear-left leaf", socket: "rearLights", kind: "retain", position_m: [-3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13] }, { name: "Linen-framed official NZ front photograph", socket: "photo1", kind: "photo", position_m: [-2.64, 0.025, 2.32], yaw_deg: 12, envelope_whd_m: [0.76, 1.54, 0.48] }], anchor: { asset_id: "collector-triptych", position_m: [0, 2.47, -3.46], yaw_deg: 0, envelope_whd_m: [3.95, 2.3, 0.7] }, routes: [[[0, 3], [0, -2.3]], [[-3.4, -2.3], [3.4, -2.3]]], pickups: [[-3.39, -2.3], [-1.13, -2.3], [1.13, -2.3], [3.39, -2.3]], colliders: [{ center: [-2.64, 0.795, 2.32], size: [0.76, 1.54, 0.48], yaw: 12 }], files: { low: { file: "s01-collector-triptych-low.glb", bytes: 41552, tier: "low" }, balanced: { file: "s01-collector-triptych-balanced.glb", bytes: 97576, tier: "balanced" }, detailed: { file: "s01-collector-triptych-detailed.glb", bytes: 133608, tier: "detailed" } } }, S02: { brand: "MILI", style: "Open noodle kitchen", concept: "A low lacquer pass and a broad copper extraction hood frame the preparation of a bowl, with condiments within reach of the cook.", signature_family: "suspended cookline extraction hood", frame: { wing: "north", world_origin_m: [0, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [-5, 5, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, door_width_m: 4.7, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [0, 0], arrival_world_xz_m: [0, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [{ centre_local_m: [-2.55, -0.8], exit_local_m: [-2.55, 0.3999999999999999], id: "bench-seat-5", radius: 0.3 }, { centre_local_m: [3.4, -1.97], exit_local_m: [3.4, -0.77], id: "bench-seat-6", radius: 0.3 }], depth_datum: "Original spatial zone from back-wall centre to threshold." }, palette: [{ material: "red-brown lacquer", hex: "#833D2D" }, { material: "moss tile", hex: "#49634B" }, { material: "bone ceramic", hex: "#F1E9D7" }, { material: "brushed copper", hex: "#AA7151" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Cream quarry tile through the aisle, with a moss border turning around the island and terminating before both seat exits.", position_m: [0, 0.0245, 0.5], yaw_deg: 0, field_width_depth_m: [5.85, 5.45], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "tile", colours: [2, 2, 1] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "suspended cookline extraction hood", viewport_css_px: [393, 612], planned_evidence_stem: "S02-entrance" }, lighting: [0, 4.75, 1.15], accent_kelvin: 3050, centreFixture: "cookbase", props: [{ name: "Lacquer island base with counter", socket: "cookbase", kind: "retain", position_m: [0, 0.025, 0.5], yaw_deg: 0, envelope_whd_m: [1.82, 1.195, 2.69] }, { name: "Recessed noodle boiler", socket: "boiler", kind: "boiler", position_m: [0, 1.22, 0.3], yaw_deg: 0, envelope_whd_m: [0.85, 0.72, 0.88] }, { name: "Condiments on oak pantry shelf", socket: "miliwall", kind: "retain", position_m: [-4.43, 3.0425, 3.25], yaw_deg: 90, envelope_whd_m: [0.9, 1.1, 0.35] }, { name: "Chopsticks on the opposite pass corner", socket: "chop", kind: "chopsticks", position_m: [-0.53, 1.22, 1.31], yaw_deg: 0, envelope_whd_m: [0.22, 0.3, 0.21] }, { name: "Serving plate on the counter", socket: "plate", kind: "plate", position_m: [0.45, 1.22, 0.98], yaw_deg: 0, envelope_whd_m: [0.32, 0.05, 0.32] }, { name: "Two existing seat and stand points", socket: "seats", kind: "retain", position_m: [-2.55, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Two existing seat and stand points", socket: "seats", kind: "retain", position_m: [3.4, 0, -1.97], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Warm ceramic wall lights", socket: "rearLights", kind: "retain", position_m: [-3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13] }, { name: "Warm ceramic wall lights", socket: "rearLights", kind: "retain", position_m: [3.08, 3.32, -4.04], yaw_deg: 0, envelope_whd_m: [0.3, 0.9, 0.13] }, { name: "Rear kitchen herb-garden planter", socket: "plant2", kind: "retain", position_m: [-3.8, 0.025, -2.8], yaw_deg: 0, envelope_whd_m: [0.7, 1.3, 0.7] }, { name: "Loaded tasting plate with three samples", socket: "tasting-plate", kind: "retain", position_m: [0.48, 1.22, 1.39], yaw_deg: 0, envelope_whd_m: [0.52, 0.114, 0.52] }], anchor: { asset_id: "hawker-stall-exhaust-hood", position_m: [0, 2.38, 0.5], yaw_deg: 0, envelope_whd_m: [2.65, 1.35, 1.4] }, routes: [[[0, 3], [1.8, 3]], [[1.8, 3], [1.8, 0.5]]], pickups: [], colliders: [], files: { low: { file: "s02-hawker-stall-exhaust-hood-low.glb", bytes: 38936, tier: "low" }, balanced: { file: "s02-hawker-stall-exhaust-hood-balanced.glb", bytes: 56428, tier: "balanced" } } }, S03: { brand: "GOGO", style: "Potong garden bar", concept: "A scalloped parasol and compact ice-cream cart bring a street-side frozen-treat bar indoors.", signature_family: "three-wheel potong parasol carts", frame: { wing: "north", world_origin_m: [10, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [5, 15, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 10.5, floor_surface_y_m: 0.0245, door_width_m: 4.7, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [10, 0], arrival_world_xz_m: [10, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55]], preserved_seats: [{ centre_local_m: [-3, -0.7999999999999998], exit_local_m: [-3, 0.40000000000000036], id: "bench-seat-7", radius: 0.3 }, { centre_local_m: [3, -0.7999999999999998], exit_local_m: [3, 0.40000000000000036], id: "bench-seat-8", radius: 0.3 }], depth_datum: "Original spatial zone from back-wall centre to threshold." }, palette: [{ material: "citrus enamel", hex: "#E7863B" }, { material: "lagoon tile", hex: "#2E7C7A" }, { material: "coconut terrazzo", hex: "#F5F0E5" }, { material: "leaf green", hex: "#4F7047" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Broad curved terrazzo bands sweep from the left wheel to the right bar; a coconut-coloured centre stays open.", position_m: [0.18, 0.0245, 2.28], yaw_deg: 0, field_width_depth_m: [7.35, 4.2], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "sweep", colours: [2, 2, 1] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [0.55, 2.55], expected_signature: "three-wheel potong parasol carts", viewport_css_px: [393, 612], planned_evidence_stem: "S03-entrance" }, lighting: [-2.35, 4.75, 2.7], accent_kelvin: 3900, centreFixture: "open floor", props: [{ name: "Twin dispenser on the right bar", socket: "drink", kind: "dispenser", position_m: [2.87, 1.26, 3.53], yaw_deg: -90, envelope_whd_m: [0.74, 0.76, 0.54] }, { name: "Lagoon-tiled bar carcass", socket: "gbar", kind: "retain", position_m: [3.15, 0.025, 3.6], yaw_deg: -90, envelope_whd_m: [3.25, 1.235, 1.55] }, { name: "Three stools facing the counter", socket: "stools3", kind: "retain", position_m: [1.93, 0.025, 2.6], yaw_deg: 90, envelope_whd_m: [0.48, 1.04, 0.48] }, { name: "Three stools facing the counter", socket: "stools3", kind: "retain", position_m: [1.93, 0.025, 3.6], yaw_deg: 90, envelope_whd_m: [0.48, 1.04, 0.48] }, { name: "Three stools facing the counter", socket: "stools3", kind: "retain", position_m: [1.93, 0.025, 4.6], yaw_deg: 90, envelope_whd_m: [0.48, 1.04, 0.48] }, { name: "Twin lounge benches with existing sit actions", socket: "seats", kind: "retain", position_m: [-3, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Twin lounge benches with existing sit actions", socket: "seats", kind: "retain", position_m: [3, 0, -0.8], yaw_deg: 180, envelope_whd_m: [2.5, 1.32, 0.85] }, { name: "Coconut globe above the bar", socket: "pend3", kind: "retain", position_m: [2.7, 3.4, 2.3], yaw_deg: 0, envelope_whd_m: [0.6, 0.5, 0.6] }, { name: "White cold chest in the rear-left bay", socket: "cold", kind: "chest", position_m: [-2.8, 0.025, -3.19], yaw_deg: 0, envelope_whd_m: [1.35, 1.1, 0.74] }, { name: "Ferns in the rear planter bed", socket: "fern3", kind: "retain", position_m: [3.78, 0.025, -3.1], yaw_deg: 0, envelope_whd_m: [0.81, 1.07, 0.73] }, { name: "Citrus tray at counter end", socket: "tray3", kind: "tray", position_m: [3.16, 1.26, 4.58], yaw_deg: -90, envelope_whd_m: [0.36, 0.03, 0.27] }], anchor: { asset_id: "ice-cream-cart-potong", position_m: [-2.35, 0.025, 2.05], yaw_deg: 12, envelope_whd_m: [2, 2.6, 1.25] }, routes: [[[0, 2.55], [0, -3]], [[-3, 0.4], [3, 0.4]]], pickups: [], colliders: [{ center: [-2.35, 1.325, 2.05], size: [2, 2.6, 1.25], yaw: 12 }, { center: [-2.8, 0.5750000000000001, -3.19], size: [1.35, 1.1, 0.74], yaw: 0 }], files: { low: { file: "s03-ice-cream-cart-potong-low.glb", bytes: 57460, tier: "low" }, balanced: { file: "s03-ice-cream-cart-potong-balanced.glb", bytes: 150476, tier: "balanced" } } }, S04: { brand: "Borsch Med", style: "Patch library", concept: "A sage sample counter opens into an oversized folding folio whose white leaves hold plain patch cards.", signature_family: "fan-fold patch sample folios", frame: { wing: "north", world_origin_m: [20, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [15, 25, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 11.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [20, 0], arrival_world_xz_m: [20, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55], [2.1, 2.55], [2.1, -1.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "porcelain", hex: "#F8F7F1" }, { material: "powder sage", hex: "#63745D" }, { material: "plum felt", hex: "#6B4A55" }, { material: "pale ash", hex: "#CFBEA7" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "A pill-shaped sage terrazzo field surrounds the folio; a plum stitching line turns along its visitor side.", position_m: [-0.48, 0.081, -0.63], yaw_deg: 7, field_width_depth_m: [4.72, 3.32], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "pill", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [2.1, -1.4000000000000004], expected_signature: "fan-fold patch sample folios", viewport_css_px: [393, 612], planned_evidence_stem: "S04-entrance" }, lighting: [-0.48, 3.85, 0.02], accent_kelvin: 4200, centreFixture: null, props: [{ name: "Unlabelled patch samples on folio shelf", socket: "sample", kind: "samples", position_m: [-0.48, 1.15, -0.51], yaw_deg: 7, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Sage service counter in left rear bay", socket: "leftrear", kind: "counter", position_m: [-3.97, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Shallow ivory wall cabinet", socket: "rightwall", kind: "cabinet", position_m: [4.17, 1.88, -1.1], yaw_deg: -90, envelope_whd_m: [1.48, 0.85, 0.25] }, { name: "Matte entrance-side dispenser", socket: "leftfront", kind: "dispenser", position_m: [-3.49, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Plum ceramic orchid pot", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -4.58], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Diffuse white counter light", socket: "ceiling", kind: "light", position_m: [-0.48, 3.3, -0.63], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Blank paper swatch easel", socket: "leftmid", kind: "easel", position_m: [-4.010000000000001, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Wall washer over the samples", socket: "lightwall", kind: "sconce", position_m: [4.17, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "patch-folio", position_m: [-0.48, 0.081, -0.63], yaw_deg: 7, envelope_whd_m: [2.38, 2.35, 1.12] }, routes: [], pickups: [], colliders: [{ center: [-0.48, 1.256, -0.63], size: [2.38, 2.35, 1.12], yaw: 7 }, { center: [-3.97, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.49, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -4.58], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-4.010000000000001, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }], files: { low: { file: "s04-patch-folio-low.glb", bytes: 26892, tier: "low" }, balanced: { file: "s04-patch-folio-balanced.glb", bytes: 75300, tier: "balanced" }, detailed: { file: "s04-patch-folio-detailed.glb", bytes: 103268, tier: "detailed" } } }, S05: { brand: "Pien Tze Huang", style: "Herbal counting house", concept: "A bank of stepped dark-wood drawers opens around a single pale porcelain bowl in a quiet apothecary.", signature_family: "stepped specimen-drawer banks", frame: { wing: "north", world_origin_m: [30, 0, -6], yaw_world_deg: 0, world_bounds_xz_m: [25, 35, -12, 0], lot_width_depth_m: [10, 12], actual_room_depth_m: 11.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 6], threshold_world_xz_m: [30, 0], arrival_world_xz_m: [30, 2.4], walk_path_local_xz_m: [[0, 8.4], [0, 6], [0, 2.55], [0.55, 2.55], [2.1, 2.55], [2.1, -1.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "ink-stained elm", hex: "#352C28" }, { material: "warm parchment", hex: "#E9DDBF" }, { material: "cinnabar", hex: "#9E3F35" }, { material: "aged copper", hex: "#A87249" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Inset a parchment-coloured woven reed field in dark boards with a narrow cinnabar seam at the drawer face.", position_m: [0, 0.081, -2.6], yaw_deg: 0, field_width_depth_m: [6.95, 4.55], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "reed", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 6.75], browse_local_xz_m: [2.1, -1.4000000000000004], expected_signature: "stepped specimen-drawer banks", viewport_css_px: [393, 612], planned_evidence_stem: "S05-entrance" }, lighting: [0, 3.85, -3.73], accent_kelvin: 2650, centreFixture: null, props: [{ name: "Single pale bowl and saucer in drawer niche", socket: "bowl", kind: "bowl", position_m: [0, 1.36, -4.15], yaw_deg: 0, envelope_whd_m: [0.32, 0.22, 0.28] }, { name: "Unmarked cartons on a parchment stand", socket: "leftfront", kind: "stand", position_m: [-3.49, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Dark-framed specimen vitrine", socket: "leftmid", kind: "case", position_m: [-4.010000000000001, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Parchment lantern at the consultation end", socket: "ceiling", kind: "lantern", position_m: [0, 3.3, -4.38], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Cinnabar planter", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -4.58], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Wooden receiving chest below side return", socket: "backleft", kind: "chest", position_m: [-2.58, 0.081, -4.58], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }, { name: "Aged brass reading light", socket: "lightwall", kind: "sconce", position_m: [4.17, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Closed sample cabinet on the right wall", socket: "rightwall", kind: "cabinet", position_m: [4.17, 1.88, -1.1], yaw_deg: -90, envelope_whd_m: [1.48, 0.85, 0.25] }], anchor: { asset_id: "specimen-drawers", position_m: [0, 0.081, -4.38], yaw_deg: 0, envelope_whd_m: [4.2, 2.98, 1.05] }, routes: [], pickups: [], colliders: [{ center: [0, 1.571, -4.38], size: [4.2, 2.98, 1.05], yaw: 0 }, { center: [-3.49, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-4.010000000000001, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -4.58], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-2.58, 0.606, -4.58], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s05-specimen-drawers-low.glb", bytes: 45516, tier: "low" }, balanced: { file: "s05-specimen-drawers-balanced.glb", bytes: 133736, tier: "balanced" }, detailed: { file: "s05-specimen-drawers-detailed.glb", bytes: 145484, tier: "detailed" } } }, S06: { brand: "Flying Wheel", style: "Air-drying workshop", concept: "Golden noodle ribbons hang at different lengths from a freestanding timber loom, against a quiet slate wall.", signature_family: "ban mee drying combs", frame: { wing: "west", world_origin_m: [-20, 0, 4], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 0, 8], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 4], arrival_world_xz_m: [-12.6, 4], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "pale beech", hex: "#D7BB87" }, { material: "wheat", hex: "#C6A66C" }, { material: "slate-blue casein", hex: "#536777" }, { material: "rice paper", hex: "#F0E9D9" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, field_width_depth_m: [4.55, 4.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "planks", colours: ["#AC845C", 0, 3] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "ban mee drying combs", viewport_css_px: [393, 612], planned_evidence_stem: "S06-entrance" }, lighting: [-0.65, 3.85, -0.18], accent_kelvin: 3300, centreFixture: null, props: [{ name: "Plain noodle bags on a hook rack", socket: "leftfront", kind: "rack", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Brushed preparation sideboard", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Pale wooden drying tray on sideboard", socket: "onleft", kind: "tray", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Utensil holder on sideboard", socket: "onleft2", kind: "utensils", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }, { name: "Slatted flour crate", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Cylindrical work lamp", socket: "ceiling", kind: "light", position_m: [-0.65, 3.3, -0.83], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Woven-colour basket by the rear wall", socket: "backright", kind: "basket", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Raking lamp above the comb", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "noodle-loom", position_m: [-0.65, 0.081, -0.83], yaw_deg: 3, envelope_whd_m: [2.45, 2.96, 1.05] }, routes: [], pickups: [], colliders: [{ center: [-0.65, 1.561, -0.83], size: [2.45, 2.96, 1.05], yaw: 3 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s06-noodle-loom-low.glb", bytes: 52960, tier: "low" }, balanced: { file: "s06-noodle-loom-balanced.glb", bytes: 111984, tier: "balanced" }, detailed: { file: "s06-noodle-loom-detailed.glb", bytes: 182128, tier: "detailed" } } }, S07: { brand: "Gu Long", style: "Banquet provision hall", concept: "A stepped pyramid of plain tins on a jade serving drum sits beneath one red lantern, like a banquet centrepiece.", signature_family: "banquet tin pyramids", frame: { wing: "west", world_origin_m: [-20, 0, 12], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 8, 16], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 12], arrival_world_xz_m: [-12.6, 12], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "oxblood lacquer", hex: "#742E29" }, { material: "jade glaze", hex: "#4F6E5A" }, { material: "rice silk", hex: "#EFE4D0" }, { material: "patinated bronze", hex: "#9A794D" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "An octagonal jade inset under the drum breaks into a border of brick-red tiles along the walk.", position_m: [-0.55, 0.081, -0.85], yaw_deg: -8, field_width_depth_m: [3.65, 3.65], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "octagon", colours: [0, 1, 0] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "banquet tin pyramids", viewport_css_px: [393, 612], planned_evidence_stem: "S07-entrance" }, lighting: [-0.55, 3.85, -0.2], accent_kelvin: 2750, centreFixture: null, props: [{ name: "Low jade serving drum under tin pyramid", socket: "drum", kind: "drum", position_m: [-0.55, 0.081, -0.85], yaw_deg: -8, envelope_whd_m: [1.84, 0.399, 1.84] }, { name: "Silk banquet lantern above the drum", socket: "ceiling", kind: "lantern", position_m: [-0.55, 3.3, -0.85], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Lacquer provision shelf", socket: "leftrear", kind: "rack", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Stack of serving platters on shelf", socket: "onleft", kind: "plates", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Bronze-coloured condiment tray", socket: "onleft2", kind: "tray", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }, { name: "Hand basket in left window", socket: "leftfront", kind: "basket", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Red-glazed corner planter", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Jade shelf washer", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "stacked-can-pyramid", position_m: [-0.55, 0.48, -0.85], yaw_deg: -8, envelope_whd_m: [1.65, 2.45, 1.65] }, routes: [], pickups: [], colliders: [{ center: [-0.55, 1.705, -0.85], size: [1.65, 2.45, 1.65], yaw: -8 }, { center: [-0.55, 0.2805, -0.85], size: [1.84, 0.399, 1.84], yaw: -8 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s07-stacked-can-pyramid-low.glb", bytes: 42456, tier: "low" }, balanced: { file: "s07-stacked-can-pyramid-balanced.glb", bytes: 162152, tier: "balanced" } } }, S08: { brand: "Skippy", style: "Breakfast stand", concept: "A tall stand of plain peanut-butter jars fronts a striped breakfast booth with toast trays at serving height.", signature_family: "peanut-jar breakfast stands", frame: { wing: "west", world_origin_m: [-20, 0, 20], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 16, 24], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 20], arrival_world_xz_m: [-12.6, 20], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "sky-blue enamel", hex: "#70A9D4" }, { material: "navy canvas", hex: "#1D3A64" }, { material: "peanut maple", hex: "#E8D1A3" }, { material: "butter yellow", hex: "#F4CB69" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "A navy-and-cream gingham field folds around the breakfast counter, with a plain band at the threshold.", position_m: [-0.42, 0.081, -0.5], yaw_deg: 0, field_width_depth_m: [4.48, 5.68], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "gingham", colours: [0, 2, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "peanut-jar breakfast stands", viewport_css_px: [393, 612], planned_evidence_stem: "S08-entrance" }, lighting: [-0.58, 3.85, -0.11], accent_kelvin: 3650, centreFixture: null, props: [{ name: "Blue enamel jar-stand base", socket: "jarbase", kind: "plinth", position_m: [-0.58, 0.081, -0.76], yaw_deg: 0, envelope_whd_m: [1.76, 0.499, 1.17] }, { name: "Toast and timber service rack on sideboard", socket: "onleft", kind: "rack-small", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Maple breakfast sideboard", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Small second display at the window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Single sky-blue breakfast chair", socket: "leftmid", kind: "chair", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Butter-yellow breakfast light", socket: "ceiling", kind: "lantern", position_m: [-0.58, 3.3, -0.76], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Picnic basket in the rear corner", socket: "backright", kind: "basket", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Cream breakfast tray on sideboard", socket: "onleft2", kind: "tray", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }], anchor: { asset_id: "peanut-butter-jar-stand", position_m: [-0.58, 0.58, -0.76], yaw_deg: 0, envelope_whd_m: [1.65, 2.15, 1.05] }, routes: [], pickups: [], colliders: [{ center: [-0.58, 1.6549999999999998, -0.76], size: [1.65, 2.15, 1.05], yaw: 0 }, { center: [-0.58, 0.3305, -0.76], size: [1.76, 0.499, 1.17], yaw: 0 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s08-peanut-butter-jar-stand-low.glb", bytes: 60780, tier: "low" }, balanced: { file: "s08-peanut-butter-jar-stand-balanced.glb", bytes: 111012, tier: "balanced" } } }, S09: { brand: "SPAM", style: "Canning-line grocer", concept: "A stopped tinning conveyor with a yellow return wheel leads the eye diagonally across a navy machine-room counter.", signature_family: "tinning-line rollers", frame: { wing: "west", world_origin_m: [-20, 0, 28], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 24, 32], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 28], arrival_world_xz_m: [-12.6, 28], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [1.7, 1.5499999999999998], [1.7, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "blue-black steel", hex: "#173B68" }, { material: "tinplate", hex: "#B5C0C1" }, { material: "ochre enamel", hex: "#E4B63F" }, { material: "rubber", hex: "#303639" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Two parallel steel inlays trace the belt ends in a charcoal rubber field; keep the public path plain.", position_m: [-0.72, 0.081, -1.1], yaw_deg: 12, field_width_depth_m: [4.65, 3.24], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "tracks", colours: [0, 3, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [1.7, -2.4000000000000004], expected_signature: "tinning-line rollers", viewport_css_px: [393, 612], planned_evidence_stem: "S09-entrance" }, lighting: [-0.72, 3.85, -0.45], accent_kelvin: 3450, centreFixture: null, props: [{ name: "Abstract tin stack at the belt intake", socket: "backleft", kind: "tins", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }, { name: "Tool station with folded-metal top", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Scanner parked on the tool station", socket: "onleft", kind: "scanner", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Unmarked mechanical till on the tool station", socket: "onleft2", kind: "till", position_m: [-2.9899999999999998, 1.081, -2.15], yaw_deg: 88, envelope_whd_m: [0.43, 0.34, 0.34] }, { name: "Navy steel rack at left window", socket: "leftfront", kind: "rack", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Deep enamel task lamp", socket: "ceiling", kind: "light", position_m: [-0.72, 3.3, -1.1], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Low ochre metal drawer unit", socket: "backright", kind: "chest", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Light on the return wheel", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "conveyor-belt", position_m: [-0.72, 0.081, -1.1], yaw_deg: 12, envelope_whd_m: [2.65, 1.6, 1.02] }, routes: [], pickups: [], colliders: [{ center: [-0.72, 0.881, -1.1], size: [2.65, 1.6, 1.02], yaw: 12 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s09-conveyor-belt-low.glb", bytes: 22728, tier: "low" }, balanced: { file: "s09-conveyor-belt-balanced.glb", bytes: 50592, tier: "balanced" } } }, S10: { brand: "California Mexico", style: "Coastal gift market", concept: "A deep, open scallop shell cradles a generic seafood gift display against pale sand-coloured plaster.", signature_family: "open nacre shell cradles", frame: { wing: "west", world_origin_m: [-20, 0, 36], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 32, 40], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 36], arrival_world_xz_m: [-12.6, 36], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "shell limestone", hex: "#F0EAE0" }, { material: "sea-glass teal", hex: "#2C7776" }, { material: "coral ceramic", hex: "#C65B46" }, { material: "oiled teak", hex: "#956847" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Flow from a chalk-white sand field to a scalloped teal band around the gift display.", position_m: [-0.45, 0.081, -1.4], yaw_deg: -7, field_width_depth_m: [5.25, 4.25], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "scallop", colours: [1, 0, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "open nacre shell cradles", viewport_css_px: [393, 612], planned_evidence_stem: "S10-entrance" }, lighting: [-0.45, 3.85, -0.75], accent_kelvin: 3550, centreFixture: null, props: [{ name: "Neutral gift boxes on inner shell ledge", socket: "sample", kind: "samples", position_m: [-0.45, 1.15, -1.2799999999999998], yaw_deg: -7, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Sea-glass display cabinet", socket: "leftrear", kind: "case", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Pearl-coloured serving dish inside cabinet", socket: "onleft", kind: "plate", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Open gift basket in the left window", socket: "leftfront", kind: "basket", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Coral glazed planter in the back corner", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Pearl pendant over the cradle", socket: "ceiling", kind: "lantern", position_m: [-0.45, 3.3, -1.4], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Low teak shipping crate", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Teal shell-rib washer", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "nacre-cradle", position_m: [-0.45, 0.081, -1.4], yaw_deg: -7, envelope_whd_m: [2.6, 2.62, 1.24] }, routes: [], pickups: [], colliders: [{ center: [-0.45, 1.391, -1.4], size: [2.6, 2.62, 1.24], yaw: -7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }], files: { low: { file: "s10-nacre-cradle-low.glb", bytes: 49888, tier: "low" }, balanced: { file: "s10-nacre-cradle-balanced.glb", bytes: 91528, tier: "balanced" }, detailed: { file: "s10-nacre-cradle-detailed.glb", bytes: 160204, tier: "detailed" } } }, S11: { brand: "Hormel", style: "Provision packing room", concept: "An open packing bench, kraft rolls and nested slatted crates make this a working stockroom for generic tinned goods.", signature_family: "parcel-wrapping benches", frame: { wing: "west", world_origin_m: [-20, 0, 44], yaw_world_deg: 90, world_bounds_xz_m: [-25, -15, 40, 48], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [-15, 44], arrival_world_xz_m: [-12.6, 44], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "kraft board", hex: "#BE9062" }, { material: "burgundy steel", hex: "#843E43" }, { material: "zinc", hex: "#767976" }, { material: "cream paper", hex: "#EEE7D9" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Worn end-grain blocks form a rectangular loading mat with a burgundy perimeter and zinc doorway strip.", position_m: [-0.56, 0.081, -1.05], yaw_deg: 0, field_width_depth_m: [4.8, 3.72], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "blocks", colours: [2, 0, 1] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "parcel-wrapping benches", viewport_css_px: [393, 612], planned_evidence_stem: "S11-entrance" }, lighting: [-0.56, 3.85, -0.4], accent_kelvin: 3150, centreFixture: null, props: [{ name: "Slatted receiving crate at working end", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Low pallet in the left window", socket: "leftfront", kind: "pallet", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Burgundy dispatch shelving", socket: "leftrear", kind: "rack", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Blank packing tray on bench", socket: "sample", kind: "tray", position_m: [-0.56, 1.15, -0.93], yaw_deg: 0, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Wire returns basket", socket: "backright", kind: "basket", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Long zinc task light above packing bench", socket: "ceiling", kind: "light", position_m: [-0.56, 3.3, -1.05], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Countertop packing scale on shelf", socket: "onleft", kind: "scale", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Short pantry rack on rear return", socket: "backleft", kind: "rack", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }], anchor: { asset_id: "packing-station", position_m: [-0.56, 0.081, -1.05], yaw_deg: 0, envelope_whd_m: [2.62, 2.15, 1.12] }, routes: [], pickups: [], colliders: [{ center: [-0.56, 1.156, -1.05], size: [2.62, 2.15, 1.12], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s11-packing-station-low.glb", bytes: 29088, tier: "low" }, balanced: { file: "s11-packing-station-balanced.glb", bytes: 63544, tier: "balanced" } } }, S12: { brand: "Zeria", style: "Quiet dispensary", concept: "Offset frosted index fins rise behind a low white supplement display, casting blue-green shadows between the layers.", signature_family: "frosted dispensary index fins", frame: { wing: "east", world_origin_m: [40, 0, 4], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 0, 8], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 4], arrival_world_xz_m: [32.6, 4], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "opal resin", hex: "#F1F3F1" }, { material: "seafoam", hex: "#B6D2C8" }, { material: "indigo slate", hex: "#3C4A66" }, { material: "anodised teal", hex: "#6F9690" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Pale resin flooring carries three quiet indigo arcs around the sample station and a matte seafoam browsing zone.", position_m: [-0.52, 0.081, -1.2], yaw_deg: -5, field_width_depth_m: [4.93, 4.48], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "arcs", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "frosted dispensary index fins", viewport_css_px: [393, 612], planned_evidence_stem: "S12-entrance" }, lighting: [-0.52, 3.85, -0.55], accent_kelvin: 4650, centreFixture: null, props: [{ name: "Plain carton stand beside the glazing", socket: "leftfront", kind: "stand", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "White drawer cabinet in the alcove", socket: "leftrear", kind: "cabinet", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Opal sample tray on central ledge", socket: "sample", kind: "tray", position_m: [-0.52, 1.15, -1.08], yaw_deg: -5, envelope_whd_m: [0.66, 0.43, 0.41] }, { name: "Mint supply trolley parked off aisle", socket: "leftmid", kind: "trolley", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "White stone orchid pot", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Cool inspection bar above fins", socket: "ceiling", kind: "light", position_m: [-0.52, 3.3, -1.2], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Side fin washer", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Recessed blank material-sample easel", socket: "backleft", kind: "easel", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }], anchor: { asset_id: "opal-index", position_m: [-0.52, 0.081, -1.2], yaw_deg: -5, envelope_whd_m: [2.55, 2.46, 1.05] }, routes: [], pickups: [], colliders: [{ center: [-0.52, 1.311, -1.2], size: [2.55, 2.46, 1.05], yaw: -5 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s12-opal-index-low.glb", bytes: 30636, tier: "low" }, balanced: { file: "s12-opal-index-balanced.glb", bytes: 75168, tier: "balanced" }, detailed: { file: "s12-opal-index-detailed.glb", bytes: 91240, tier: "detailed" } } }, S13: { brand: "Sony", style: "Listening studio", concept: "Backlit headphone silhouettes turn a charcoal felt listening bar into a dark, close-focus audio showroom.", signature_family: "suspended headphone hooks", frame: { wing: "east", world_origin_m: [40, 0, 12], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 8, 16], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 12], arrival_world_xz_m: [32.6, 12], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "charcoal felt", hex: "#292B2D" }, { material: "black glass", hex: "#14171C" }, { material: "bead-blasted silver", hex: "#BFC3C5" }, { material: "ice blue", hex: "#A6D7EB" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "A charcoal felt ellipse interrupts the black rubber floor and points its long axis toward the listening bar.", position_m: [-0.64, 0.081, -1.05], yaw_deg: 8, field_width_depth_m: [4.08, 4.38], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "felt", colours: [1, 0, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "suspended headphone hooks", viewport_css_px: [393, 612], planned_evidence_stem: "S13-entrance" }, lighting: [-0.64, 3.85, -0.4], accent_kelvin: 4100, centreFixture: null, props: [{ name: "Oval dark plinth for headphone rack", socket: "audiofoot", kind: "plinth", position_m: [-0.64, 0.081, -1.05], yaw_deg: 8, envelope_whd_m: [1.38, 0.349, 1.07] }, { name: "Slim soundbar on the left console", socket: "onleft", kind: "soundbar", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Black listening console", socket: "leftrear", kind: "counter", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Felt listening chair behind the console", socket: "backleft", kind: "chair", position_m: [-2.58, 0.081, -3.68], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }, { name: "Second short headphone stand at window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Small silver spotlight raking the hooks", socket: "ceiling", kind: "spot", position_m: [-0.64, 3.48, -1.05], yaw_deg: 0, envelope_whd_m: [1.18, 0.42, 0.68] }, { name: "Ribbed felt acoustic baffle", socket: "baffle", kind: "baffle", position_m: [-0.64, 0.081, -1.99], yaw_deg: 0, envelope_whd_m: [2.55, 2.96, 0.2] }, { name: "Silver slit of light along the side wall", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "headphone-display-stand", position_m: [-0.64, 0.43, -1.05], yaw_deg: 8, envelope_whd_m: [1.12, 2.6, 0.75] }, routes: [], pickups: [], colliders: [{ center: [-0.64, 1.73, -1.05], size: [1.12, 2.6, 0.75], yaw: 8 }, { center: [-0.64, 0.2555, -1.05], size: [1.38, 0.349, 1.07], yaw: 8 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [-2.58, 0.606, -3.68], size: [0.9, 1.05, 0.63], yaw: 5 }, { center: [-0.64, 1.561, -1.99], size: [2.55, 2.96, 0.2], yaw: 0 }], files: { low: { file: "s13-headphone-display-stand-low.glb", bytes: 55696, tier: "low" }, balanced: { file: "s13-headphone-display-stand-balanced.glb", bytes: 163820, tier: "balanced" } } }, S14: { brand: "LG", style: "Living picture gallery", concept: "Two offset picture planes frame an ivory upholstered living room like a bright domestic cinema.", signature_family: "staggered picture-window screens", frame: { wing: "east", world_origin_m: [40, 0, 20], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 16, 24], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 20], arrival_world_xz_m: [32.6, 20], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "gallery white", hex: "#F5F3EF" }, { material: "satin aluminium", hex: "#BEC1C2" }, { material: "aubergine velvet", hex: "#5B3F7A" }, { material: "blush limestone", hex: "#DBBEB1" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "Use a large aubergine wool rectangle beneath the sofa and a pale polished perimeter for the gallery walk.", position_m: [-2.02, 0.081, 0.29], yaw_deg: 0, field_width_depth_m: [3.05, 3.95], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "wool", colours: [0, 2, 3] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "staggered picture-window screens", viewport_css_px: [393, 612], planned_evidence_stem: "S14-entrance" }, lighting: [-0.62, 3.85, -3.34], accent_kelvin: 4000, centreFixture: null, props: [{ name: "Second smaller floor screen angled toward main screen", socket: "backright", kind: "screen", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Ivory sofa in left browsing alcove", socket: "leftmid", kind: "sofa", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Low console below the screen", socket: "underTV", kind: "console", position_m: [-0.62, 0.081, -3.8600000000000003], yaw_deg: 0, envelope_whd_m: [2.8, 0.72, 0.55] }, { name: "Small velvet ottoman in left window", socket: "leftfront", kind: "ottoman", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Satin domestic appliance at back left", socket: "backleft", kind: "cabinet", position_m: [-2.96, 0.081, -3.58], yaw_deg: 0, envelope_whd_m: [0.7, 1.72, 0.58] }, { name: "Grazing light across screen reveals", socket: "ceiling", kind: "light", position_m: [-0.62, 3.3, -3.99], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Small domestic arrangement at sofa end", socket: "leftrear", kind: "plant", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Soft gallery wall light", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }], anchor: { asset_id: "tv-wall-mounted", position_m: [-0.62, 1.03, -3.99], yaw_deg: 0, envelope_whd_m: [3.65, 2.08, 0.3] }, routes: [], pickups: [], colliders: [{ center: [-0.62, 2.0700000000000003, -3.99], size: [3.65, 2.08, 0.3], yaw: 0 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [-0.62, 0.441, -3.8600000000000003], size: [2.8, 0.72, 0.55], yaw: 0 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-2.96, 0.941, -3.58], size: [0.7, 1.72, 0.58], yaw: 0 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }], files: { low: { file: "s14-tv-wall-mounted-low.glb", bytes: 34300, tier: "low" }, balanced: { file: "s14-tv-wall-mounted-balanced.glb", bytes: 53492, tier: "balanced" } } }, S15: { brand: "Casio", style: "Chamber recital room", concept: "A raised piano lid cuts a diagonal against walnut concert slats, with a shallow ivory-lit stage under the instrument.", signature_family: "raised baby-grand lids", frame: { wing: "east", world_origin_m: [40, 0, 28], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 24, 32], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 28], arrival_world_xz_m: [32.6, 28], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.8, 1.5499999999999998], [2.8, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "piano lacquer", hex: "#202123" }, { material: "oiled walnut", hex: "#76543D" }, { material: "key ivory", hex: "#F1EDE2" }, { material: "oxblood wool", hex: "#723F46" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "An oval walnut marquetry field and an ivory stage outline gather the instrument and bench.", position_m: [-1.05, 0.081, -1.02], yaw_deg: -22, field_width_depth_m: [3.55, 4.05], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "stage", colours: [3, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.8, -2.4000000000000004], expected_signature: "raised baby-grand lids", viewport_css_px: [393, 612], planned_evidence_stem: "S15-entrance" }, lighting: [-1.05, 3.85, -0.37], accent_kelvin: 2900, centreFixture: null, props: [{ name: "Practice keyboard at left window", socket: "leftfront", kind: "keyboard", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Warm stage special above lid", socket: "ceiling", kind: "spot", position_m: [-1.05, 3.3, -1.02], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Walnut acoustic screen behind instrument", socket: "pianoback", kind: "baffle", position_m: [-0.64, 0.081, -3.76], yaw_deg: -2, envelope_whd_m: [2.52, 2.72, 0.28] }, { name: "Small amber lamp over practice area", socket: "frontpend", kind: "lantern", position_m: [-2.5, 3.15, 2.88], yaw_deg: 0, envelope_whd_m: [0.44, 0.66, 0.44] }, { name: "Empty glass object case with ivory stage samples", socket: "leftrear", kind: "case", position_m: [1.15, 0.081, -3.58], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Keybed side light", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Small recital flower arrangement", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }, { name: "Single audience chair beside the rear wall", socket: "backleft", kind: "chair", position_m: [-1.7, 0.081, 4.2], yaw_deg: 5, envelope_whd_m: [0.9, 1.05, 0.63] }], anchor: { asset_id: "grand-piano", position_m: [-1.05, 0.081, -1.02], yaw_deg: -22, envelope_whd_m: [1.95, 2.38, 2.75] }, routes: [], pickups: [], colliders: [{ center: [-1.05, 1.271, -1.02], size: [1.95, 2.38, 2.75], yaw: -22 }, { center: [-2.51, 0.821, 3.22], size: [1.15, 1.48, 0.82], yaw: 7 }, { center: [-0.64, 1.441, -3.76], size: [2.52, 2.72, 0.28], yaw: -2 }, { center: [1.15, 0.581, -3.58], size: [1.36, 1, 0.8], yaw: 90 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }, { center: [-1.7, 0.606, 4.2], size: [0.9, 1.05, 0.63], yaw: 5 }], files: { low: { file: "s15-grand-piano-low.glb", bytes: 68504, tier: "low" }, balanced: { file: "s15-grand-piano-balanced.glb", bytes: 186224, tier: "balanced" } } }, S16: { brand: "GP", style: "Locator workshop", concept: "A perforated teal tool board holds a family of oversized empty eyelets above a small tracker demonstration bench.", signature_family: "overscale locator eyelet rails", frame: { wing: "east", world_origin_m: [40, 0, 36], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 32, 40], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 36], arrival_world_xz_m: [32.6, 36], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [0, 1.5499999999999998], [0, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "powder white", hex: "#F4F5F2" }, { material: "anodised teal", hex: "#3D8C8A" }, { material: "lime polymer", hex: "#B7C94A" }, { material: "graphite rubber", hex: "#363C3D" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "White anti-static tile with a teal service lane and three lime indexing marks points to the rail.", position_m: [-0.25, 0.081, -0.12], yaw_deg: 0, field_width_depth_m: [5.25, 6.15], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "lane", colours: [0, 1, 2] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [0, -2.4000000000000004], expected_signature: "overscale locator eyelet rails", viewport_css_px: [393, 612], planned_evidence_stem: "S16-entrance" }, lighting: [-1.56, 3.85, -0.63], accent_kelvin: 4900, centreFixture: null, props: [{ name: "Cell display in left window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "White modular accessories shelving", socket: "leftrear", kind: "rack", position_m: [-2.9899999999999998, 0.081, -1.8], yaw_deg: 90, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Neutral rear test desk", socket: "backright", kind: "counter", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.98, 1.05, 0.64] }, { name: "Generic static display on rear desk", socket: "onright", kind: "screen", position_m: [2.63, 1.131, -3.68], yaw_deg: 0, envelope_whd_m: [0.59, 0.48, 0.3] }, { name: "Lime polymer tool bin", socket: "leftmid", kind: "crate", position_m: [-3.03, 0.081, 0.4], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Bench inspection strip", socket: "ceiling", kind: "light", position_m: [-1.56, 3.3, -1.28], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Pegboard edge light", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Handheld bench scanner on left shelf", socket: "onleft", kind: "scanner", position_m: [-2.9899999999999998, 1.081, -1.52], yaw_deg: 83, envelope_whd_m: [0.48, 0.4, 0.38] }], anchor: { asset_id: "eyelet-rail", position_m: [-1.56, 0.081, -1.28], yaw_deg: 5, envelope_whd_m: [1.65, 2.55, 0.9] }, routes: [], pickups: [], colliders: [{ center: [-1.56, 1.3559999999999999, -1.28], size: [1.65, 2.55, 0.9], yaw: 5 }, { center: [-2.9899999999999998, 0.581, -1.8], size: [1.36, 1, 0.8], yaw: 90 }, { center: [2.63, 0.606, -3.68], size: [0.98, 1.05, 0.64], yaw: 0 }, { center: [-3.03, 0.5509999999999999, 0.4], size: [0.93, 0.94, 0.65], yaw: 80 }], files: { low: { file: "s16-eyelet-rail-low.glb", bytes: 59820, tier: "low" }, balanced: { file: "s16-eyelet-rail-balanced.glb", bytes: 107836, tier: "balanced" }, detailed: { file: "s16-eyelet-rail-detailed.glb", bytes: 123736, tier: "detailed" } } }, S17: { brand: "Gigaset", style: "Domestic telephone bureau", concept: "A gabled felt telephone alcove frames a small real-scale cordless handset at the end of a warm domestic corridor.", signature_family: "gable-roof handset niches", frame: { wing: "east", world_origin_m: [40, 0, 44], yaw_world_deg: -90, world_bounds_xz_m: [35, 45, 40, 48], lot_width_depth_m: [8, 10], actual_room_depth_m: 9.44, floor_surface_y_m: 0.081, door_width_m: 2.48, threshold_local_xz_m: [0, 5], threshold_world_xz_m: [35, 44], arrival_world_xz_m: [32.6, 44], walk_path_local_xz_m: [[0, 7.4], [0, 5], [0, 1.5499999999999998], [0.55, 1.5499999999999998], [2.1, 1.5499999999999998], [2.1, -2.4000000000000004]], preserved_seats: [], depth_datum: "Studio span in window-studios.js, from back wall centre to facade-side front datum; finish and collider faces reduce free width/depth." }, palette: [{ material: "graphite felt", hex: "#4A4D50" }, { material: "satin nickel", hex: "#B8BBBD" }, { material: "chalk", hex: "#F5F4EF" }, { material: "apricot cork", hex: "#D99E74" }], floor: { offset_m: 0.006, inlay_offset_m: 0.006, treatment: "A cork runner widens into a threshold-shaped wool inset beneath the phone alcove.", position_m: [0, 0.081, -0.2], yaw_deg: 0, field_width_depth_m: [4.68, 6.72], construction: "Replace colour/roughness within the existing floor mesh; zero-height material boundary.", pattern: "cork", colours: [2, 3, 0] }, capture: { threshold_approach_local_xz_m: [0, 5.75], browse_local_xz_m: [2.1, -2.4000000000000004], expected_signature: "gable-roof handset niches", viewport_css_px: [393, 612], planned_evidence_stem: "S17-entrance" }, lighting: [-0.55, 3.85, -2.3], accent_kelvin: 3200, centreFixture: null, props: [{ name: "Real-scale generic handset in the alcove", socket: "handset", kind: "handset", position_m: [0.22, 1.09, -2.66], yaw_deg: -5, envelope_whd_m: [0.34, 0.42, 0.32] }, { name: "Small domestic writing desk", socket: "leftrear", kind: "counter", position_m: [1.42, 0.081, -3.9], yaw_deg: 0, envelope_whd_m: [1.36, 1, 0.8] }, { name: "Second unbranded dock on writing desk", socket: "onleft", kind: "handset", position_m: [1.42, 1.081, -3.69], yaw_deg: 0, envelope_whd_m: [0.48, 0.4, 0.38] }, { name: "Cork-coloured waiting seat in left window", socket: "leftfront", kind: "retain", position_m: [-2.51, 0.081, 3.22], yaw_deg: 7, envelope_whd_m: [1.15, 1.48, 0.82] }, { name: "Domestic pendant above desk", socket: "ceiling", kind: "lantern", position_m: [-0.55, 3.3, -2.95], yaw_deg: 0, envelope_whd_m: [1.18, 0.49, 0.68] }, { name: "Correspondence drawer cabinet", socket: "leftmid", kind: "cabinet", position_m: [3.15, 0.081, 2.7], yaw_deg: 80, envelope_whd_m: [0.93, 0.94, 0.65] }, { name: "Gable reading lamp", socket: "lightwall", kind: "sconce", position_m: [3.19, 2.74, 0.3], yaw_deg: -90, envelope_whd_m: [0.42, 0.64, 0.2] }, { name: "Chalk planter at end of runner", socket: "backright", kind: "plant", position_m: [2.63, 0.081, -3.68], yaw_deg: 0, envelope_whd_m: [0.91, 1.42, 0.64] }], anchor: { asset_id: "telephone-alcove", position_m: [-0.55, 0.081, -2.95], yaw_deg: -5, envelope_whd_m: [2.15, 2.86, 1.25] }, routes: [], pickups: [], colliders: [{ center: [-0.55, 1.511, -2.95], size: [2.15, 2.86, 1.25], yaw: -5 }, { center: [1.42, 0.581, -3.9], size: [1.36, 1, 0.8], yaw: 0 }, { center: [3.15, 0.5509999999999999, 2.7], size: [0.93, 0.94, 0.65], yaw: 80 }, { center: [2.63, 0.7909999999999999, -3.68], size: [0.91, 1.42, 0.64], yaw: 0 }], files: { low: { file: "s17-telephone-alcove-low.glb", bytes: 28284, tier: "low" }, balanced: { file: "s17-telephone-alcove-balanced.glb", bytes: 66384, tier: "balanced" }, detailed: { file: "s17-telephone-alcove-detailed.glb", bytes: 80676, tier: "detailed" } } } };
 
 // demos/corporate/gjh/v11/assets/interiors/config.js
 var interiorTiers = ["low", "balanced", "detailed"];
@@ -5532,7 +5600,7 @@ function displayPlacements(number, heroX, heroZ) {
   const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 0.7;
   return [[heroX, height, heroZ, scale]];
 }
-async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}, shopVisibility) {
+async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => "low") {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.65 });
   const woodFinishes = new Set([11633494, 6701359, 6898732, 9132600, 11700828, 12950889, 9325877, 6703151, 6309172, 6899253, 11175012]);
@@ -5587,6 +5655,14 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
           });
           throw new Error("Model load timed out");
         }
+        const materials2 = new Set;
+        gltf.scene.traverse((mesh) => {
+          if (mesh.isMesh)
+            for (const material2 of [].concat(mesh.material))
+              materials2.add(material2);
+        });
+        for (const material2 of materials2)
+          setupMaterialArtwork(T, material2, artworkTier());
         return gltf.scene;
       };
       const deadline2 = new Promise((_, reject) => {
@@ -5978,6 +6054,7 @@ function radialFloor(steps, radiusAt, rings, put) {
 function floorFinish(T, store2) {
   const floor = store2.floor, [width, depth] = floor.field_width_depth_m;
   const [x, y, z] = floor.position_m, a = radians(floor.yaw_deg), c = Math.cos(a), s = Math.sin(a);
+  const finishY = decalHeight(y, floor.offset_m);
   const palette = store2.palette.map((entry) => entry.hex);
   const [, field, edge] = floor.colours.map((value) => palette[value] ?? value);
   const color = new T.Color(field), trim = new T.Color(edge);
@@ -5987,7 +6064,7 @@ function floorFinish(T, store2) {
   function put(points, finish2) {
     for (let i = 1;i < points.length - 1; i++)
       for (const [u, v] of [points[0], points[i], points[i + 1]]) {
-        positions.push(x + c * u * width + s * v * depth, y + 0.004, z - s * u * width + c * v * depth);
+        positions.push(x + c * u * width + s * v * depth, finishY, z - s * u * width + c * v * depth);
         colours.push(finish2.r, finish2.g, finish2.b);
       }
   }
@@ -6409,6 +6486,20 @@ var roomDetails = {
 };
 
 // demos/corporate/gjh/v11/assets/interiors/models.js
+function positionRoomInlays(geometry, store2) {
+  const originalY = store2.frame.floor_surface_y_m < 0.05 ? 0.032 : 0.091;
+  const { position_m, offset_m, inlay_offset_m } = store2.floor;
+  const delta = decalHeight(decalHeight(position_m[1], offset_m), inlay_offset_m) - originalY;
+  const { position, normal } = geometry.attributes;
+  if (!normal || position.count === 0)
+    return;
+  for (let i = 0;i < position.count; i++) {
+    const y = position.getY(i);
+    if (Math.abs(normal.getY(i)) > 0.999 && y >= originalY - 0.00001 && y <= originalY + 0.00201) {
+      position.setY(i, y + delta + (y > originalY + 0.001 ? 0.002 : 0));
+    }
+  }
+}
 function* mergeInteriorAnchor(T, scene) {
   scene.updateMatrixWorld(true);
   const batches = new Map, anchor = new T.Group;
@@ -6478,7 +6569,7 @@ async function readMember(assetBase2, asset, signal) {
     signal?.removeEventListener("abort", abort);
   }
 }
-function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
+function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3, artworkTier = () => "low") {
   let atlas;
   const shared = new Map, lifetime = new AbortController;
   async function loadAtlas() {
@@ -6497,10 +6588,8 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
     }
     texture.flipY = false;
     texture.wrapS = texture.wrapT = T.RepeatWrapping;
-    texture.colorSpace = T.SRGBColorSpace;
     texture.userData.roomAtlas = true;
-    texture.needsUpdate = true;
-    return texture;
+    return setupArtworkTexture(T, texture, artworkTier());
   }
   loader.register((parser) => ({
     name: "GJH_room_atlas",
@@ -6515,7 +6604,7 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
       return atlas;
     }
   }));
-  function* prepareDetail(scene, placement) {
+  function* prepareDetail(scene, store2, placement) {
     const motion = { scroll: null, pulse: null };
     const meshes = [];
     scene.traverse((mesh) => {
@@ -6524,6 +6613,8 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
     });
     for (const mesh of meshes) {
       const m = mesh.material;
+      if (!mesh.isInstancedMesh && store2)
+        positionRoomInlays(mesh.geometry, store2);
       if (placement && m.name === placement.material && !mesh.isInstancedMesh) {
         const positions = mesh.geometry.attributes.position;
         const offset = placement.xyz.map((v, k) => v - placement.sourceOrigin[k]);
@@ -6561,7 +6652,22 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
     try {
       if (signal?.aborted)
         throw new DOMException("Interior asset cancelled", "AbortError");
-      const work = () => asset.roomDetail ? prepareDetail(scene, bakedParts[asset.file]) : mergeInteriorAnchor(T, scene);
+      const store2 = interiorStores[asset.file.slice(0, 3).toUpperCase()];
+      const work = function* () {
+        const materials2 = new Set;
+        scene.traverse((mesh) => {
+          if (mesh.isMesh)
+            for (const material of [].concat(mesh.material))
+              materials2.add(material);
+        });
+        for (const material of materials2) {
+          setupMaterialArtwork(T, material, artworkTier());
+          yield;
+        }
+        if (asset.roomDetail)
+          return yield* prepareDetail(scene, store2, bakedParts[asset.file]);
+        return yield* mergeInteriorAnchor(T, scene);
+      };
       if (build)
         return await build(work);
       const iterator = work();
@@ -6633,7 +6739,8 @@ function createInteriorKit(T, scene, {
   packshot,
   prepareModel,
   registerCollider,
-  loadModel = createInteriorModelLoader(T, assetBase2),
+  artworkTier = () => "low",
+  loadModel = createInteriorModelLoader(T, assetBase2, undefined, artworkTier),
   reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)"),
   now = () => performance.now()
 }) {
@@ -6641,6 +6748,8 @@ function createInteriorKit(T, scene, {
   const report = emptyInteriorReport("low"), renderedShops = new Set;
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
   let lastUpdate;
+  if (packshot && !packshot.userData.artworkMipmaps)
+    setupArtworkTexture(T, packshot, artworkTier());
   function* measure(root, id) {
     const meshes = [];
     root.traverse((mesh) => {
@@ -6688,14 +6797,14 @@ function createInteriorKit(T, scene, {
     }
     if (store2.id !== "S01" || !packshot)
       return base;
-    const photo = new T.MeshBasicMaterial({ map: packshot, toneMapped: false });
-    const panel = (width, x2, y2, z2, yaw = 0) => new T.PlaneGeometry(width, width).rotateY(yaw).translate(x2, y2, z2);
+    const photo = decalMaterial(new T.MeshBasicMaterial({ map: packshot, toneMapped: false }));
+    const panel = (width, x2, y2, z2, yaw = 0) => new T.PlaneGeometry(width, width).rotateY(yaw).translate(x2 + decalClearance * Math.sin(yaw), y2, z2 + decalClearance * Math.cos(yaw));
     const [x, y, z] = store2.anchor.position_m;
     const stand = store2.props.find((prop) => prop.kind === "photo");
     const [sx, sy, sz] = stand.position_m, a = radians(stand.yaw_deg);
     const photos = [
-      panel(1.51, x, y + 1.1, z + 0.006),
-      panel(0.69, sx + 0.053 * Math.sin(a), sy + stand.envelope_whd_m[1] - 0.4, sz + 0.053 * Math.cos(a), a)
+      panel(1.51, x, y + 1.1, decalHeight(z)),
+      panel(0.69, sx + 0.05 * Math.sin(a), sy + stand.envelope_whd_m[1] - 0.4, sz + 0.05 * Math.cos(a), a)
     ];
     base.add(new T.Mesh(mergeStaticGeometries(T, photos), photo));
     photos.forEach((geometry) => geometry.dispose());
@@ -6706,13 +6815,34 @@ function createInteriorKit(T, scene, {
     group.name = `${store2.id} ${store2.style}`;
     group.position.set(...store2.frame.world_origin_m);
     group.rotation.y = radians(store2.frame.yaw_world_deg);
-    for (const box of store2.colliders)
-      registerCollider(worldInteriorBox(store2, box));
     group.visible = false;
     scene.add(group);
-    return { store: store2, group, distance: Infinity, near: false, phase: 0, motion: null, models: new Map, layers: [], ready: new Map, shown: null };
+    return { store: store2, group, distance: Infinity, near: false, phase: 0, motion: null, models: new Map, layers: [], ready: new Map, shown: null, removeColliders: null };
   });
+  function installColliders(shop) {
+    if (shop.removeColliders)
+      return;
+    const removals = [];
+    try {
+      for (const box of shop.store.colliders) {
+        const remove = registerCollider(worldInteriorBox(shop.store, box));
+        if (typeof remove === "function")
+          removals.push(remove);
+      }
+      shop.removeColliders = removals;
+    } catch (error) {
+      for (const remove of removals)
+        remove();
+      throw error;
+    }
+  }
+  function removeColliders(shop) {
+    for (const remove of shop.removeColliders ?? [])
+      remove();
+    shop.removeColliders = null;
+  }
   function show(shop, roots) {
+    installColliders(shop);
     for (const root of shop.shown ?? [])
       root.visible = false;
     for (const root of roots)
@@ -6825,12 +6955,12 @@ function createInteriorKit(T, scene, {
       freshModels.clear();
       freshDecoration = undefined;
       if (models2.length === required.length) {
+        if (!activeTier && tier === initialTier) {
+          show(shop, roots);
+          report.tier = tier;
+        }
         shop.ready.set(tier, roots);
         report.preinstalled.shops++;
-      }
-      if (!activeTier && tier === initialTier) {
-        report.tier = tier;
-        show(shop, roots);
       }
     } catch {} finally {
       for (const root of freshModels.values())
@@ -6855,6 +6985,23 @@ function createInteriorKit(T, scene, {
       return deferActivation ? job.done : awaitLatest(job);
     },
     activateTier,
+    artworkForTier(tier) {
+      const textures = new Set;
+      for (const shop of shops)
+        for (const root of shop.ready.get(tier) ?? []) {
+          root.traverse((mesh) => {
+            if (!mesh.isMesh)
+              return;
+            for (const material of [].concat(mesh.material)) {
+              for (const map of [material.map, material.emissiveMap]) {
+                if (map?.userData.artworkMipmaps === "generate")
+                  textures.add(map);
+              }
+            }
+          });
+        }
+      return textures;
+    },
     groups: shops.map((shop) => shop.group),
     setTier(tier) {
       const target = interiorTiers.includes(tier) ? tier : "low";
@@ -6923,6 +7070,7 @@ function createInteriorKit(T, scene, {
       request = initialTier = activeTier = undefined;
       report.preinstalled = { shops: 0, ms: 0 };
       for (const shop of shops) {
+        removeColliders(shop);
         shop.ready.clear();
         for (const root of shop.shown ?? [])
           root.visible = false;
@@ -6936,6 +7084,7 @@ function createInteriorKit(T, scene, {
       request?.resolve({ ...report.preinstalled });
       installer?.dispose();
       for (const shop of shops) {
+        removeColliders(shop);
         for (const model of shop.models.values())
           disposeInteriorModel(model);
         shop.layers.forEach((layer) => layer.traverse((mesh) => {
@@ -7100,15 +7249,17 @@ function addFeatureKiosk({ x, z, box, cylinder, sign }) {
 
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
 var SURFACES = {
-  low: { roughness: 1, emission: 1, washOpacity: 0 },
+  low: { roughness: 1, emission: 1.12, washOpacity: 0.22 },
   balanced: { roughness: 0.82, emission: 1.2, washOpacity: 0.32 },
   detailed: { roughness: 0.68, emission: 1.38, washOpacity: 0.48 }
 };
 function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, floors, fixtures, vault }) {
   const washMaterial = poolMaterial.clone();
-  const washMesh = new T.InstancedMesh(plane, washMaterial, washes.length);
+  const washMesh = placeDecal(new T.InstancedMesh(plane, washMaterial, washes.length), -1);
   const transform = new T.Object3D;
-  washes.forEach(([x, y, z, width, depth, yaw, pitch], index) => {
+  const stripSlots = [];
+  washes.forEach(([x, y, z, width, depth, yaw, pitch, coveStrip = false], index) => {
+    stripSlots.push(coveStrip);
     transform.position.set(x, y, z);
     transform.rotation.set(pitch, yaw, 0, "YXZ");
     transform.scale.set(width, depth, 1);
@@ -7118,45 +7269,52 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
   washMesh.name = "Mall cove and storefront light wash";
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
-  const washVisibility = createInstanceVisibility(T, washMesh);
+  const washVisibility = createInstanceVisibility(T, washMesh, { slots: stripSlots });
   const floorRoughness = floors.map((floor) => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
   let fixtureEmission = fixtures.emissiveIntensity;
-  let preset2;
-  function setTier(tier) {
+  let preset2, opacity;
+  function setTier(tier, lightWash = true) {
     const next = Object.hasOwn(SURFACES, tier) ? SURFACES[tier] : SURFACES.low;
-    if (next === preset2)
+    const nextOpacity = next === SURFACES.low || lightWash ? next.washOpacity : 0;
+    if (next === preset2 && nextOpacity === opacity)
       return false;
     preset2 = next;
+    opacity = nextOpacity;
     floors.forEach((floor, index) => {
       floor.roughness = floorRoughness[index] * preset2.roughness;
     });
     vault.emissiveIntensity = vaultEmission * preset2.emission;
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
-    washMaterial.opacity = preset2.washOpacity;
-    washMesh.visible = preset2.washOpacity > 0;
+    washMaterial.opacity = opacity;
+    updateWash();
     return true;
   }
   function setFixtureEmission(intensity) {
     fixtureEmission = intensity;
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
   }
+  const allowWash = (strip) => strip === (preset2 === SURFACES.low);
+  function updateWash(frustum) {
+    if (opacity > 0)
+      washVisibility.update(frustum, allowWash);
+    washMesh.visible = opacity > 0 && washMesh.count > 0;
+  }
   setTier("low");
   return { setTier, setFixtureEmission, updateView(view) {
-    if (washMesh.visible)
-      washVisibility.update(view.frustum);
+    updateWash(view.frustum);
   } };
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill }) {
+function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
     return false;
   const { materials: m, lighting: l } = theme;
   const colors = ["floorTextured", "floorFlat", "ceiling", "ceilingGlow", "wall", "green", "ivory", "brass", "wood", "oak", "timber", "timberAlt", "glass", "glow", "glowEmission"];
-  const lightColors = ["sky", "ground", "key", "fill"];
+  const lightColors = ["sky", "ground", "key", "fog"];
   const scalars = ["ceilingGlowIntensity", "glassOpacity", "glassRoughness", "glassMetalness", "glowIntensity"];
-  if (colors.some((k) => !Number.isInteger(m[k]) || m[k] < 0 || m[k] > 16777215) || lightColors.some((k) => !Number.isInteger(l[k]) || l[k] < 0 || l[k] > 16777215) || scalars.some((k) => !Number.isFinite(m[k]) || m[k] < 0 || m[k] > 3) || ["ambient", "keyIntensity", "fillIntensity"].some((k) => !Number.isFinite(l[k]) || l[k] < 0 || l[k] > 5) || ["glassOpacity", "glassRoughness", "glassMetalness"].some((k) => m[k] > 1))
+  if (colors.some((k) => !Number.isInteger(m[k]) || m[k] < 0 || m[k] > 16777215) || lightColors.some((k) => !Number.isInteger(l[k]) || l[k] < 0 || l[k] > 16777215) || scalars.some((k) => !Number.isFinite(m[k]) || m[k] < 0 || m[k] > 3) || ["ambient", "keyIntensity"].some((k) => !Number.isFinite(l[k]) || l[k] < 0 || l[k] > 5) || !Number.isFinite(l.exposure) || l.exposure < 0.5 || l.exposure > 2 || ["glassOpacity", "glassRoughness", "glassMetalness"].some((k) => m[k] > 1))
     return false;
   materials2.shellFloor.color.set(materials2.shellFloor.map ? m.floorTextured : m.floorFlat);
   materials2.shellCeiling.color.set(m.ceiling);
@@ -7177,11 +7335,10 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
   ambient.intensity = l.ambient;
   key.color.set(l.key);
   key.intensity = l.keyIntensity;
-  fill.color.set(l.fill);
-  fill.intensity = l.fillIntensity;
+  fog?.color.set(l.fog);
   return true;
 }
-async function createWorld(T, R, physics, expanded = false, warmModel) {
+async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => "low") {
   try {
     let ceilingBounds = function(x, y, z, sx, sy, sz) {
       ceilingObstacles.push({ min: { x: x - sx / 2, y: y - sy / 2, z: z - sz / 2 }, max: { x: x + sx / 2, y: y + sy / 2, z: z + sz / 2 } });
@@ -7243,8 +7400,14 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         collider(x, y, z, sx, sy, sz);
     }, art = function(name, x, y, z, width, ry = 0) {
       const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
-      const mesh = new T.Mesh(plane, mat(16777215, { map: texture, emissiveMap: texture, emissive: 16777215, emissiveIntensity: 0.2 }));
-      mesh.position.set(x, y, z);
+      const material = decalMaterial(filterWallArtwork(T, mat(16777215, {
+        map: texture,
+        emissiveMap: texture,
+        emissive: 16777215,
+        emissiveIntensity: 0.2
+      })), -1);
+      const mesh = new T.Mesh(plane, material);
+      mesh.position.set(x + decalClearance * Math.sin(ry), y, z + decalClearance * Math.cos(ry));
       mesh.rotation.y = ry;
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
@@ -7268,10 +7431,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.fillText(text, 512, 64);
-      const texture = new T.CanvasTexture(canvas2);
-      texture.colorSpace = T.SRGBColorSpace;
-      const mesh = new T.Mesh(plane, new T.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false }));
-      mesh.position.set(x, y, z);
+      const texture = setupArtworkTexture(T, new T.CanvasTexture(canvas2), artworkTier());
+      const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({ map: texture, transparent: true }))));
+      mesh.position.set(x, y, decalHeight(z));
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
       if (activeShopSlot !== null)
@@ -7369,8 +7531,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           rectangle("#cfac77", x + 9, y + 98, 200, 5);
         }
       }
-      const map = new T.CanvasTexture(panel);
-      map.colorSpace = T.SRGBColorSpace;
+      const map = setupArtworkTexture(T, new T.CanvasTexture(panel), artworkTier());
       return mat(16777215, { map, roughness: 0.88 });
     }, updateFrames = function({ frustum }) {
       let count = 0, changed = false;
@@ -7414,7 +7575,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           }
         mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
-    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus) {
+    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus, lightWash2) {
       productDisplay?.setShadows(shadows);
       if (!expanded) {
         if (camera) {
@@ -7423,7 +7584,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         }
         return;
       }
-      if (surfaceAtmosphere.setTier(tier) && mappedPaving)
+      if (surfaceAtmosphere.setTier(tier, lightWash2) && mappedPaving)
         mappedPaving.roughness = materials2.paving.roughness;
       uploadVisitor = visitor;
       if (camera) {
@@ -7481,7 +7642,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (!warmModel)
         return;
       landingLights ??= new T.Scene;
-      landingLights.children = [ambient, key, fill];
+      landingLights.children = [ambient, key];
       landingLights.fog = scene.fog;
       landingLights.environment = scene.environment;
       landingLights.environmentIntensity = scene.environmentIntensity;
@@ -7502,7 +7663,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (!expanded)
         return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
       if (!brandWallPromise)
-        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper, prepareModel)).then((result) => {
+        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper, prepareModel, artworkTier)).then((result) => {
           interactables.push(...result.interactables);
           deckLodMeshes?.push(result.mesh);
           return result;
@@ -7511,13 +7672,13 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     };
     let shellState = null;
     const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
-    const [furnishings, shell, upperAssets] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expandedLift ? loadUpperLevel(T) : null]);
+    const [furnishings, shell, upperAssets] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expandedLift ? loadUpperLevel(T, artworkTier) : null]);
     const ceilingObstacles = [], shopObstacles = [];
     const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
     const prepareModel = warmModel && ((model, options2) => warmModel(model, scene, options2));
     scene.background = new T.Color(expanded ? 12244444 : 1650226);
-    scene.fog = new T.Fog(12037532, expanded ? 75 : 40, expanded ? 155 : 100);
+    scene.fog = new T.Fog(expanded ? 14268822 : 12037532, expanded ? 75 : 40, expanded ? 155 : 100);
     const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
     const materials2 = {
       jade: mat(2181182, { roughness: 0.24, metalness: 0.22 }),
@@ -7588,6 +7749,14 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const storefrontGlassMaterial = expanded ? materials2.glass.clone() : materials2.glass;
     if (expanded)
       storefrontGlassMaterial.forceSinglePass = true;
+    const doorGlassMaterial = expanded ? new T.MeshBasicMaterial({
+      color: materials2.glass.color,
+      opacity: materials2.glass.opacity * 0.76,
+      transparent: true,
+      depthWrite: false
+    }) : materials2.glass;
+    materials2.skylightGlass = materials2.glass.clone();
+    materials2.skylightGlass.side = T.FrontSide;
     const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
     doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
     const doorFrameGeometry = mergeGeometries5(doorFrameParts);
@@ -7672,9 +7841,7 @@ metalnessFactor=vSurface.y;`);
           await new Promise((resolve) => setTimeout(resolve, attempt ? 800 : 200));
         }
       }
-      texture.colorSpace = T.SRGBColorSpace;
-      texture.anisotropy = 4;
-      textures.set(name, texture);
+      textures.set(name, setupArtworkTexture(T, texture, artworkTier()));
     }));
     const plane = geometry.plane;
     const roomSigns = [];
@@ -7687,7 +7854,7 @@ metalnessFactor=vSurface.y;`);
     gradient.addColorStop(1, "rgba(4,18,12,0)");
     shadowContext.fillStyle = gradient;
     shadowContext.fillRect(0, 0, 64, 64);
-    const contact = new T.MeshBasicMaterial({ map: new T.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false });
+    const contact = decalMaterial(new T.MeshBasicMaterial({ map: new T.CanvasTexture(shadowCanvas), transparent: true }), -1);
     materials2.contact = contact;
     const poolCanvas = document.createElement("canvas");
     poolCanvas.width = poolCanvas.height = 64;
@@ -7699,7 +7866,12 @@ metalnessFactor=vSurface.y;`);
     poolContext.fillRect(0, 0, 64, 64);
     const poolTexture = new T.CanvasTexture(poolCanvas);
     poolTexture.colorSpace = T.SRGBColorSpace;
-    materials2.lightPool = new T.MeshBasicMaterial({ map: poolTexture, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
+    materials2.lightPool = decalMaterial(new T.MeshBasicMaterial({
+      map: poolTexture,
+      transparent: true,
+      blending: T.AdditiveBlending,
+      toneMapped: false
+    }), -1);
     if (expanded) {
       box("dark", 10, -0.22, 18, 70, 0.4, 60, true);
       box("shellFloor", 10, -0.035, 18, 70, 0.04, 60);
@@ -7713,7 +7885,7 @@ metalnessFactor=vSurface.y;`);
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
         finishMaterials.canopy = material;
       } }));
     } else {
@@ -7764,7 +7936,7 @@ metalnessFactor=vSurface.y;`);
     }
     if (!expanded) {
       ceilingBox("dark", 0, 6.29, 8.3, 14.6, 0.06, 13);
-      ceilingBox("glass", 0, 6.25, 8.3, 14.1, 0.025, 12.6);
+      ceilingBox("skylightGlass", 0, 6.25, 8.3, 14.1, 0.025, 12.6);
       for (let x = -7;x <= 7; x += 2)
         ceilingBox("brass", x, 6.18, 8.3, 0.045, 0.08, 12.7);
       for (const z of [2, 5.1, 8.3, 11.5, 14.6])
@@ -8033,8 +8205,9 @@ metalnessFactor=vSurface.y;`);
         box("oak", rugX, 0.025, rugZ, rugWidth, 0.012, rugDepth);
         box(zone === "gogo" ? "rugSage" : "rugSand", rugX, 0.034, rugZ, rugWidth - 0.14, 0.006, rugDepth - 0.14);
         for (const side of [-1, 1]) {
-          box("timber", rugX + side * (rugWidth / 2 - 0.19), 0.04, rugZ, 0.025, 0.004, rugDepth - 0.35);
-          box("timber", rugX, 0.04, rugZ + side * (rugDepth / 2 - 0.19), rugWidth - 0.35, 0.004, 0.025);
+          const trimY = decalHeight(0.037) + 0.002;
+          box("timber", rugX + side * (rugWidth / 2 - 0.19), trimY, rugZ, 0.025, 0.004, rugDepth - 0.355);
+          box("timber", rugX, trimY, rugZ + side * (rugDepth / 2 - 0.19), rugWidth - 0.405, 0.004, 0.025);
           for (const end of [-1, 1]) {
             const cornerX = rugX + side * (rugWidth / 2 - 0.43), cornerZ = rugZ + end * (rugDepth / 2 - 0.43);
             solid("box", "oak", cornerX, 0.041, cornerZ, 0.16, 0.004, 0.16, Math.PI / 4);
@@ -8076,7 +8249,8 @@ metalnessFactor=vSurface.y;`);
         physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
         leaves.push({ group, body, side });
       }
-      const door = { zone, x, open: 0, targetOpen: false, leaves };
+      const occupied = createDoorwayOccupancy(R, physics, { x, y: 1.8, z: 0.05 }, [2.29, 1.75, 0.08], leaves);
+      const door = { zone, x, open: 0, targetOpen: false, leaves, occupied };
       doors.push(door);
       if (expanded && zone === "newmoon") {
         cylinder("brass", x + 1.8, 4.46, -4, 0.028, 2.35);
@@ -8089,9 +8263,6 @@ metalnessFactor=vSurface.y;`);
         pendant(x, -4, 4.2);
         pendant(x, -8, 4.2);
       }
-      const light = new T.PointLight(zone === "gogo" ? 13429186 : 16768937, 45, 15, 2);
-      light.position.set(x, 4.5, -6);
-      scene.add(light);
       box("brass", x, 0.22, -10.32, 9.3, 0.045, 0.04);
       if (zone === "newmoon") {
         lightPool(x, 0.054, -8.6, 7.5, 2.1);
@@ -8126,7 +8297,7 @@ metalnessFactor=vSurface.y;`);
         const { addProducts } = await import("./products.js");
         const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
         const firstProduct = scene.children.length;
-        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], sampleCan, activeShopSlot);
+        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], sampleCan, activeShopSlot, artworkTier);
         queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter((mesh) => mesh.isMesh));
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
@@ -8150,23 +8321,25 @@ metalnessFactor=vSurface.y;`);
         interactables.push({ id: zone, x, z: -9, radius: 2.5 });
         for (const placement of seatPlacements.filter((item) => item.group === zone))
           bench(placement);
-        if (expanded && zone === "mili") {
-          box("jadeAlt", x, 0.57, -5.5, 1.7, 1.12, 2.55);
-          box("brass", x, 0.095, -5.5, 1.72, 0.15, 2.57);
-          for (let dx = -0.8;dx <= 0.85; dx += 0.2)
-            box("courtStone", x + dx, 0.6, -4.218, 0.012, 0.96, 0.015);
-          for (let y = 0.22;y < 1.13; y += 0.2)
-            box("courtStone", x, y, -4.218, 1.68, 0.014, 0.015);
-          box("shellFloor", x, 1.16, -5.5, 1.82, 0.12, 2.69);
-          collider(x, 0.57, -5.5, 1.72, 1.14, 2.55);
-        } else if (!furnishings.place("coffeeTable", x, -5.5, 1, 1, 0, null, activeShopSlot)) {
-          cylinder("brass", x, 0.4, -5.5, 0.08, 0.75);
-          cylinder("oak", x, 0.8, -5.5, 0.8, 0.1);
-          cylinder("brass", x, 0.853, -5.5, 0.805, 0.025);
+        if (!expanded || interiorStores["S" + store2.number].centreFixture !== "open floor") {
+          if (expanded && zone === "mili") {
+            box("jadeAlt", x, 0.57, -5.5, 1.7, 1.12, 2.55);
+            box("brass", x, 0.095, -5.5, 1.72, 0.15, 2.57);
+            for (let dx = -0.8;dx <= 0.85; dx += 0.2)
+              box("courtStone", x + dx, 0.6, -4.218, 0.012, 0.96, 0.015);
+            for (let y = 0.22;y < 1.13; y += 0.2)
+              box("courtStone", x, y, -4.218, 1.68, 0.014, 0.015);
+            box("shellFloor", x, 1.16, -5.5, 1.82, 0.12, 2.69);
+            collider(x, 0.57, -5.5, 1.72, 1.14, 2.55);
+          } else if (!furnishings.place("coffeeTable", x, -5.5, 1, 1, 0, null, activeShopSlot)) {
+            cylinder("brass", x, 0.4, -5.5, 0.08, 0.75);
+            cylinder("oak", x, 0.8, -5.5, 0.8, 0.1);
+            cylinder("brass", x, 0.853, -5.5, 0.805, 0.025);
+          }
+          collider(x, 0.4375, -5.5, 1.61, 0.875, 1.61);
+          cylinder("pot", x, expanded && zone === "mili" ? 1.34 : 0.99, -5.5, 0.115, 0.24);
+          sphere("foliage", x, expanded && zone === "mili" ? 1.55 : 1.2, -5.5, 0.2, 0.23, 0.18);
         }
-        collider(x, 0.4375, -5.5, 1.61, 0.875, 1.61);
-        cylinder("pot", x, expanded && zone === "mili" ? 1.34 : 0.99, -5.5, 0.115, 0.24);
-        sphere("foliage", x, expanded && zone === "mili" ? 1.55 : 1.2, -5.5, 0.2, 0.23, 0.18);
         plant(x - 3.8, -8.8, 1.15);
         plant(x + 3.8, -8.8, 1.15);
         plant(x + 3.8, -2.5);
@@ -8236,6 +8409,8 @@ metalnessFactor=vSurface.y;`);
       let warmStrip = function(x, z, width, depth) {
         const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
         for (const r of panels)
+          lightWash((r.minX + r.maxX) / 2, 8.32, (r.minZ + r.maxZ) / 2, Math.max(0.42, r.maxX - r.minX), Math.max(0.42, r.maxZ - r.minZ), 0, Math.PI / 2, true);
+        for (const r of panels)
           lightPool((r.minX + r.maxX) / 2, 0.052, (r.minZ + r.maxZ) / 2, width > depth ? r.maxX - r.minX : 4.5, width > depth ? 4.5 : r.maxZ - r.minZ);
         const washWidth = width > depth ? width : 2.4, washDepth = width > depth ? 2.4 : depth;
         const bounds = { minX: x - washWidth / 2, maxX: x + washWidth / 2, minZ: z - washDepth / 2, maxZ: z + washDepth / 2 };
@@ -8263,6 +8438,7 @@ metalnessFactor=vSurface.y;`);
           physics.createCollider(R.ColliderDesc.cuboid(normalZ ? 0.62 : 0.035, 1.93, normalZ ? 0.035 : 0.62), body);
           leaves.push({ side, body });
         }
+        const occupied = createDoorwayOccupancy(R, physics, { x: x + normalX * 0.025, y: 1.97, z: z + normalZ * 0.025 }, normalZ ? [halfOpening, 1.93, 0.08] : [0.08, 1.93, halfOpening], leaves);
         const door = {
           zone: `planned-space-${bay.number}`,
           x,
@@ -8270,7 +8446,7 @@ metalnessFactor=vSurface.y;`);
           open: 0,
           advance(visitor, dt, reducedMotion) {
             const dx = visitor.x - x, dz = visitor.z - z;
-            const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25;
+            const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25 || this.open > 0 && occupied();
             const next = reducedMotion ? Number(nearby) : Math.max(0, Math.min(1, this.open + (nearby ? 1 : -1) * dt * 3));
             if (next === this.open)
               return;
@@ -8349,7 +8525,7 @@ metalnessFactor=vSurface.y;`);
         collider(x, liftLayout.upper + 0.25, z, 0.68, 0.5, 0.68);
       }
       activeDeck = false;
-      const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel, shopVisibility);
+      const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel, shopVisibility, artworkTier);
       interiorModels = interiors;
       for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
         collider(x, y, z, width, height, depth);
@@ -8362,16 +8538,24 @@ metalnessFactor=vSurface.y;`);
       interiorKit = createInteriorKit(T, scene, {
         assetBase: new URL(".", import.meta.url),
         packshot: textures.get("new-moon-nz-425g-front.jpg"),
+        artworkTier,
         prepareModel,
         registerCollider({ center: [x, y, z], size: [w, h, d], yaw }) {
-          physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
-          const c = Math.abs(Math.cos(yaw)), s = Math.abs(Math.sin(yaw));
-          const dx = (w * c + d * s) / 2, dz = (w * s + d * c) / 2;
-          shopObstacles.push({ min: { x: x - dx, y: y - h / 2, z: z - dz }, max: { x: x + dx, y: y + h / 2, z: z + dz } });
+          const box2 = physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
+          return () => physics.removeCollider(box2, false);
         }
       });
+      for (const [id, store2] of Object.entries(interiorStores)) {
+        activeShopSlot = Number(id.slice(1));
+        for (const footprint of store2.colliders) {
+          const { center: [x, , z], size: [w, , d], yaw } = worldInteriorBox(store2, footprint);
+          const y = store2.frame.world_origin_m[1] + store2.floor.position_m[1] + 0.024;
+          solid("plane", "contact", x, y, z, w * 1.22, d * 1.22, 1, yaw, -Math.PI / 2, "YXZ");
+        }
+      }
+      activeShopSlot = null;
     }
-    const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
+    const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded, artworkTier);
     interactables.push(...amenities.interactables);
     const frames = new T.InstancedMesh(doorFrameGeometry, materials2.brass, doorFrames.length);
     frames.name = "Sliding shop door frames";
@@ -8388,11 +8572,11 @@ metalnessFactor=vSurface.y;`);
     const frameBox = new T.Box3;
     viewUpdates.push(updateFrames);
     if (expanded)
-      for (const [name, panes, receiveShadow] of [
-        ["Sliding shop door glass", doorGlass, false],
-        ["Original shop window glass", windowGlass, true]
+      for (const [name, panes, material, receiveShadow] of [
+        ["Sliding shop door glass", doorGlass, doorGlassMaterial, false],
+        ["Original shop window glass", windowGlass, storefrontGlassMaterial, true]
       ]) {
-        const batch = createGlassBatch(T, geometry.box, storefrontGlassMaterial, panes);
+        const batch = createGlassBatch(T, geometry.box, material, panes);
         batch.mesh.name = name;
         batch.mesh.receiveShadow = receiveShadow;
         scene.add(batch.mesh);
@@ -8415,6 +8599,10 @@ metalnessFactor=vSurface.y;`);
       const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
       const source = surfaces ? batch.geometry.clone().setAttribute("instanceSurface", surfaces) : batch.geometry;
       const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length);
+      if (batch.material === contact)
+        placeDecal(mesh);
+      if (batch.material === materials2.lightPool)
+        placeDecal(mesh, -1);
       mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
       if (batch.material === materials2.paving) {
         pavingMesh = mesh;
@@ -8448,7 +8636,7 @@ metalnessFactor=vSurface.y;`);
         slots: batch.slots,
         attributes: surfaces ? [surfaces] : []
       }) : null;
-      const allow = (slot2) => slot2 === null || shopNear.get(slot2);
+      const allow = batch.material === contact ? (slot2) => slot2 === null || interiorKit.groups[slot2 - 1]?.visible : (slot2) => slot2 === null || shopNear.get(slot2);
       viewUpdates.push((view2) => {
         if (lod?.mesh.parent)
           lod.update(view2, batch.slots ? allow : undefined);
@@ -8472,9 +8660,9 @@ metalnessFactor=vSurface.y;`);
     }
     lowCylinder.dispose();
     lowSphere.dispose();
-    const ambient = new T.HemisphereLight(expanded ? 15068912 : 16772832, expanded ? 6708816 : 7166779, expanded ? 0.72 : 1.05);
+    const ambient = new T.HemisphereLight(expanded ? 16772570 : 16772832, expanded ? 9203797 : 7166779, 1.05);
     scene.add(ambient);
-    const key = new T.DirectionalLight(expanded ? 16769212 : 16766368, expanded ? 2.6 : 2.1);
+    const key = new T.DirectionalLight(expanded ? 16766114 : 16766368, expanded ? 2.25 : 2.1);
     key.position.set(...expanded ? [-12, 16, 6] : [-8, 15, 9]);
     key.castShadow = true;
     const shadowSize = expanded ? 768 : 1024;
@@ -8483,9 +8671,11 @@ metalnessFactor=vSurface.y;`);
     key.shadow.normalBias = 0.05;
     key.shadow.bias = -0.0004;
     scene.add(key);
-    const fill = new T.DirectionalLight(expanded ? 13360613 : 15325378, expanded ? 0.4 : 0.45);
-    fill.position.set(4, 8, -5);
-    scene.add(fill);
+    const fill = expanded ? null : new T.DirectionalLight(15325378, 0.45);
+    if (fill) {
+      fill.position.set(4, 8, -5);
+      scene.add(fill);
+    }
     const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T, scene, {
       plane: geometry.plane,
       poolMaterial: materials2.lightPool,
@@ -8507,13 +8697,19 @@ metalnessFactor=vSurface.y;`);
         attach();
     }
     const applyMallTheme = (theme) => {
-      const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill });
+      const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog: scene.fog });
       if (applied) {
         surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
         storefrontGlassMaterial.color.copy(materials2.glass.color);
         storefrontGlassMaterial.opacity = materials2.glass.opacity;
         storefrontGlassMaterial.roughness = materials2.glass.roughness;
         storefrontGlassMaterial.metalness = materials2.glass.metalness;
+        doorGlassMaterial.color.copy(materials2.glass.color);
+        doorGlassMaterial.opacity = materials2.glass.opacity * 0.76;
+        materials2.skylightGlass.color.copy(materials2.glass.color);
+        materials2.skylightGlass.opacity = materials2.glass.opacity;
+        materials2.skylightGlass.roughness = materials2.glass.roughness;
+        materials2.skylightGlass.metalness = materials2.glass.metalness;
         refreshInstanceColours();
       }
       return applied;

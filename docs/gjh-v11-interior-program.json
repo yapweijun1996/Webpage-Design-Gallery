@@ -407,6 +407,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "A navy woven runner widens at the four shelf pickup points; twin brass threads lead back to the door.",
         "position_m": [
           0,
@@ -1830,6 +1832,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Cream quarry tile through the aisle, with a moss border turning around the island and terminating before both seat exits.",
         "position_m": [
           0,
@@ -3143,6 +3147,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Broad curved terrazzo bands sweep from the left wheel to the right bar; a coconut-coloured centre stays open.",
         "position_m": [
           0.18,
@@ -4407,6 +4413,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "A pill-shaped sage terrazzo field surrounds the folio; a plum stitching line turns along its visitor side.",
         "position_m": [
           -0.48,
@@ -5354,6 +5362,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Inset a parchment-coloured woven reed field in dark boards with a narrow cinnabar seam at the drawer face.",
         "position_m": [
           0,
@@ -6297,6 +6307,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.",
         "position_m": [
           -0.65,
@@ -7241,6 +7253,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "An octagonal jade inset under the drum breaks into a border of brick-red tiles along the walk.",
         "position_m": [
           -0.55,
@@ -8200,6 +8214,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "A navy-and-cream gingham field folds around the breakfast counter, with a plain band at the threshold.",
         "position_m": [
           -0.42,
@@ -9145,6 +9161,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Two parallel steel inlays trace the belt ends in a charcoal rubber field; keep the public path plain.",
         "position_m": [
           -0.72,
@@ -10091,6 +10109,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Flow from a chalk-white sand field to a scalloped teal band around the gift display.",
         "position_m": [
           -0.45,
@@ -11036,6 +11056,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Worn end-grain blocks form a rectangular loading mat with a burgundy perimeter and zinc doorway strip.",
         "position_m": [
           -0.56,
@@ -11969,6 +11991,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Pale resin flooring carries three quiet indigo arcs around the sample station and a matte seafoam browsing zone.",
         "position_m": [
           -0.52,
@@ -12905,6 +12929,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "A charcoal felt ellipse interrupts the black rubber floor and points its long axis toward the listening bar.",
         "position_m": [
           -0.64,
@@ -13860,6 +13886,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "Use a large aubergine wool rectangle beneath the sofa and a pale polished perimeter for the gallery walk.",
         "position_m": [
           -2.02,
@@ -14795,6 +14823,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "An oval walnut marquetry field and an ivory stage outline gather the instrument and bench.",
         "position_m": [
           -1.05,
@@ -15730,6 +15760,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "White anti-static tile with a teal service lane and three lime indexing marks points to the rail.",
         "position_m": [
           -0.25,
@@ -16680,6 +16712,8 @@
         }
       ],
       "floor": {
+        "offset_m": 0.006,
+        "inlay_offset_m": 0.006,
         "treatment": "A cork runner widens into a threshold-shaped wool inset beneath the phone alcove.",
         "position_m": [
           0,

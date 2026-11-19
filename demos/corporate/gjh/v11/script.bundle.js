@@ -2688,10 +2688,10 @@ function resolveQuality({
   let cap = 2;
   if (tier === "low")
     cap = 1;
+  else if (tier === "balanced")
+    cap = 1.25;
   else if (phone)
     cap = lowEnd ? 1.25 : 1.5;
-  else if (tier === "balanced")
-    cap = width < 600 ? 1.25 : choice === "auto" && width >= 1000 ? 1.5 : 2;
   return Object.freeze({
     preference: choice,
     tier,
@@ -3054,21 +3054,43 @@ function createModes({
 import { setupOriginalTin } from "./assets/original-tin.js";
 
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
-function createMallAtmosphere(T, renderer, scene, slots) {
+function allowMallLightWash(deviceClass, context) {
+  if (deviceClass === "phone")
+    return false;
+  const debug = context.getExtension("WEBGL_debug_renderer_info");
+  const adapter = debug && context.getParameter(debug.UNMASKED_RENDERER_WEBGL);
+  return /GeForce|Quadro|NVIDIA RTX|Radeon RX (?!Vega |[0-9]+M Graphics)/i.test(adapter ?? "");
+}
+var STUDIO_LIGHTING = {
+  atrium: { walls: 11969420, panels: 16772825, ceiling: 16774631, width: 8, intensity: 1 },
+  corridor: { walls: 11115138, panels: 16769468, ceiling: 16772050, width: 5, intensity: 0.9 },
+  shop: { walls: 10389357, panels: 16766632, ceiling: 16770760, width: 3, intensity: 0.8 }
+};
+function mallEnvironmentZone(position, bays, atrium) {
+  const { x, y, z } = position;
+  if (Math.abs(y) < 4 && bays.some(({ minX, maxX, minZ, maxZ }) => x > minX && x < maxX && z > minZ && z < maxZ))
+    return "shop";
+  if (y >= 6 || Math.abs(x - atrium.x) < 13 && Math.abs(z - atrium.z) < 14)
+    return "atrium";
+  return "corridor";
+}
+function createMallAtmosphere(T, renderer, scene, slots, {
+  atrium = { x: 0, z: 8 },
+  contact,
+  plane
+} = {}) {
   const accents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324, 4689030, 8666691, 7313040, 7831429, 6705273, 8549738, 4954515, 6449514];
-  const warm = new T.Color(16770497), interiorWarm = new T.Color(16766368);
+  const interiorWarm = new T.Color(16766368);
   const bays = slots.map((slot2, index) => ({
     x: (slot2.minX + slot2.maxX) / 2,
     z: (slot2.minZ + slot2.maxZ) / 2,
+    side: slot2.side,
     accent: new T.Color(accents[index]),
-    color: new T.Color,
-    distance: 0
+    color: new T.Color
   }));
-  const nearest = [];
-  const lights = Array.from({ length: Math.min(6, bays.length) }, (_, index) => {
+  const lights = Array.from({ length: 2 }, (_, index) => {
     const light = new T.PointLight(16770497, 0, 11, 2);
-    light.name = `Shop ${String(index + 1).padStart(2, "0")} accent light`;
-    light.position.y = 4.2;
+    light.name = `Shop focus accent ${index + 1}`;
     scene.add(light);
     return light;
   });
@@ -3076,34 +3098,58 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     if (node.isLight)
       node.layers.enable(2);
   });
+  const visitorShadows = contact && plane ? createVisitorShadows(T, scene, plane, contact) : null;
+  let focus = null, strength = 0, previousTime;
   function applyTheme(theme) {
-    warm.set(theme?.lighting?.key ?? 16770497).lerp(interiorWarm, 0.25);
+    const warm = new T.Color(theme?.lighting?.key ?? 16770497).lerp(interiorWarm, 0.25);
     for (const bay of bays)
       bay.color.copy(warm).lerp(bay.accent, 0.08);
-    for (let i = 0;i < Math.min(lights.length, nearest.length); i++)
-      lights[i].color.copy(nearest[i].color);
+    if (focus)
+      lights.forEach((light) => light.color.copy(focus.color));
+    if (renderer && Number.isFinite(theme?.lighting?.exposure))
+      renderer.toneMappingExposure = theme.lighting.exposure;
   }
   applyTheme(null);
-  function update(position) {
+  function setLightFloor(position) {
     const ground = Math.abs(position.y) < 6;
-    nearest.length = 0;
+    for (const light of lights)
+      light.visible = ground;
+    return ground;
+  }
+  function update(position, now = performance.now()) {
+    selectEnvironment(mallEnvironmentZone(position, slots, atrium));
+    const ground = setLightFloor(position);
+    let nearest = null, best = 24 ** 2;
     if (ground)
       for (const bay of bays) {
-        const dx = bay.x - position.x, dz = bay.z - position.z;
-        bay.distance = dx * dx + dz * dz;
-        if (bay.distance < 24 * 24)
-          nearest.push(bay);
+        const distance = (bay.x - position.x) ** 2 + (bay.z - position.z) ** 2;
+        const score = distance - (bay === focus ? 4 : 0);
+        if (distance < 24 ** 2 && score < best) {
+          nearest = bay;
+          best = score;
+        }
       }
-    nearest.sort((a, b) => a.distance - b.distance);
-    for (let i = 0;i < lights.length; i++) {
-      const light = lights[i], bay = nearest[i];
-      light.visible = ground;
-      light.intensity = bay ? 28 : 0;
-      if (bay) {
-        light.position.set(bay.x, 4.2, bay.z);
-        light.color.copy(bay.color);
+    const step = previousTime === undefined ? 1 : Math.min(1, Math.max(0, now - previousTime) / 120);
+    previousTime = now;
+    let fadeIn = step;
+    if (nearest !== focus) {
+      const fadeOut = ground ? Math.min(strength, step) : strength;
+      strength -= fadeOut;
+      fadeIn -= fadeOut;
+      if (!strength) {
+        focus = nearest;
+        if (focus) {
+          const [dx, dz] = focus.side === "west" ? [-1, 0] : focus.side === "east" ? [1, 0] : [0, -1];
+          lights[0].position.set(focus.x - dx * 2.1, 3.9, focus.z - dz * 2.1);
+          lights[1].position.set(focus.x + dx * 1.8, 4.3, focus.z + dz * 1.8);
+          lights.forEach((light) => light.color.copy(focus.color));
+        }
       }
     }
+    if (focus && nearest === focus)
+      strength = Math.min(1, strength + fadeIn);
+    lights[0].intensity = 26 * strength;
+    lights[1].intensity = 18 * strength;
   }
   const accentSet = new Set(lights);
   function lightVariants(sceneLights) {
@@ -3117,20 +3163,24 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     });
     return [fixed, [...fixed, ...lights]];
   }
-  let environment = null;
+  let environments = {}, currentZone = "atrium";
+  function selectEnvironment(zone) {
+    currentZone = zone;
+    const environment = environments[zone];
+    if (environment && scene.environment !== environment.texture) {
+      scene.environment = environment.texture;
+      scene.environmentIntensity = STUDIO_LIGHTING[zone].intensity;
+    }
+  }
   function releaseEnvironment() {
     scene.environment = null;
-    environment?.dispose();
-    environment = null;
+    Object.values(environments).forEach((target) => target.dispose());
+    environments = {};
   }
   function restoreEnvironment() {
     const generator = new T.PMREMGenerator(renderer), studio = new T.Scene;
     const geometry = new T.BoxGeometry(1, 1, 1);
-    const materials = [
-      new T.MeshBasicMaterial({ color: 7299152, side: T.BackSide }),
-      new T.MeshBasicMaterial({ color: 16771013 }),
-      new T.MeshBasicMaterial({ color: 16774364 })
-    ];
+    const materials = [new T.MeshBasicMaterial({ side: T.BackSide }), new T.MeshBasicMaterial, new T.MeshBasicMaterial];
     const room = new T.Mesh(geometry, materials[0]);
     room.scale.set(10, 6, 10);
     studio.add(room);
@@ -3142,18 +3192,21 @@ function createMallAtmosphere(T, renderer, scene, slots) {
     }
     const ceiling = new T.Mesh(geometry, materials[2]);
     ceiling.position.y = 2.9;
-    ceiling.scale.set(7, 0.1, 7);
     studio.add(ceiling);
+    const next = {};
     try {
-      const next = generator.fromScene(studio, 0.04);
-      const previous = environment;
-      environment = next;
-      scene.environment = next.texture;
-      if ("environmentIntensity" in scene)
-        scene.environmentIntensity = 0.4;
-      previous?.dispose();
-    } catch (error) {
+      for (const [zone, { walls, panels, ceiling: colour, width }] of Object.entries(STUDIO_LIGHTING)) {
+        materials[0].color.set(walls);
+        materials[1].color.set(panels).multiplyScalar(1.3);
+        materials[2].color.set(colour).multiplyScalar(1.5);
+        ceiling.scale.set(width, 0.1, width);
+        next[zone] = generator.fromScene(studio, 0.04);
+      }
       releaseEnvironment();
+      environments = next;
+      selectEnvironment(currentZone);
+    } catch (error) {
+      Object.values(next).forEach((target) => target.dispose());
       throw error;
     } finally {
       generator.dispose();
@@ -3166,7 +3219,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   function initPost() {
     if (base)
       return;
-    base = new T.WebGLRenderTarget(1, 1);
+    base = new T.WebGLRenderTarget(1, 1, { samples: Math.min(2, renderer.capabilities?.maxSamples ?? 0) });
     glow = new T.WebGLRenderTarget(1, 1);
     blurredGlow = new T.WebGLRenderTarget(1, 1, { depthBuffer: false });
     const vertexShader = "varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}";
@@ -3198,13 +3251,13 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       depthWrite: false
     });
     postCamera = new T.Camera;
-    const plane = new T.PlaneGeometry(2, 2);
+    const plane2 = new T.PlaneGeometry(2, 2);
     blurScene = new T.Scene;
     blurScene.name = "Mall glow filter";
     postScene = new T.Scene;
     postScene.name = "Mall glow composite";
     for (const [target, material] of [[blurScene, blur], [postScene, composite]]) {
-      const quad = new T.Mesh(plane, material);
+      const quad = new T.Mesh(plane2, material);
       quad.frustumCulled = false;
       target.add(quad);
     }
@@ -3267,7 +3320,8 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   const state = { bloom: false, nonNpcCalls: 0, npcCalls: 0, admitted: 0, totalCalls: 0, submissions: 0 };
   function renderVisitors(camera, npcs, reservedCalls, budget) {
     state.nonNpcCalls = renderer.info.render.calls + reservedCalls;
-    state.admitted = npcs?.admit(state.nonNpcCalls, renderer.info.render.triangles + 2 * reservedCalls, budget) || 0;
+    const shadowCall = visitorShadows && npcs?.forEachVisible ? 1 : 0;
+    state.admitted = npcs?.admit(state.nonNpcCalls + shadowCall, renderer.info.render.triangles + 2 * (reservedCalls + (shadowCall ? visitorShadows.capacity : 0)), budget) || 0;
     if (!state.admitted)
       return;
     const mask = camera.layers.mask, background = scene.background;
@@ -3278,9 +3332,12 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       scene.background = null;
       renderer.autoClear = false;
       renderer.shadowMap.autoUpdate = false;
+      if (shadowCall)
+        visitorShadows.update(npcs.forEachVisible);
       renderer.render(scene, camera);
       state.submissions++;
     } finally {
+      visitorShadows?.hide();
       camera.layers.mask = mask;
       scene.background = background;
       renderer.autoClear = autoClear;
@@ -3306,9 +3363,6 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       } else {
         const size = renderer.getDrawingBufferSize(bufferSize);
         sizePost(size.x, size.y);
-        renderer.setRenderTarget(base);
-        renderer.render(scene, camera);
-        state.submissions++;
         renderer.shadowMap.autoUpdate = false;
         camera.layers.set(1);
         scene.background = null;
@@ -3319,10 +3373,15 @@ function createMallAtmosphere(T, renderer, scene, slots) {
         renderer.setRenderTarget(blurredGlow);
         renderer.render(blurScene, postCamera);
         state.submissions++;
-        renderer.setRenderTarget(base);
         camera.layers.mask = mask;
         scene.background = background;
+        renderer.setClearColor(clearColor, clearAlpha);
+        renderer.shadowMap.autoUpdate = shadowAutoUpdate;
+        renderer.setRenderTarget(base);
+        renderer.render(scene, camera);
+        state.submissions++;
         renderVisitors(camera, npcs, 1, budget);
+        renderer.shadowMap.autoUpdate = false;
         renderer.setRenderTarget(target);
         renderer.render(postScene, postCamera);
         state.submissions++;
@@ -3337,9 +3396,42 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.shadowMap.autoUpdate = shadowAutoUpdate;
     }
   }
-  return { update, lightVariants, interiorWarmLights: lights, preparePost, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
+  return { update, setLightFloor, lightVariants, interiorWarmLights: lights, preparePost, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
     return state;
   } };
+}
+function createVisitorShadows(T, scene, plane, contact) {
+  const capacity = 6;
+  const mesh = new T.InstancedMesh(plane, contact, capacity);
+  mesh.name = "Visitor contact shadows";
+  mesh.layers.set(2);
+  mesh.frustumCulled = false;
+  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  mesh.visible = false;
+  scene.add(mesh);
+  const transform = new T.Object3D;
+  return {
+    capacity,
+    hide() {
+      mesh.visible = false;
+    },
+    update(forEachVisible) {
+      let count = 0;
+      forEachVisible((position, yaw, floor) => {
+        if (count >= capacity)
+          return;
+        transform.position.set(position.x, floor + 0.026, position.z);
+        transform.rotation.set(-Math.PI / 2, yaw, 0, "YXZ");
+        transform.scale.set(1.2, 0.88, 1);
+        transform.updateMatrix();
+        mesh.setMatrixAt(count++, transform.matrix);
+      });
+      mesh.count = count;
+      mesh.visible = count > 0;
+      if (count)
+        mesh.instanceMatrix.needsUpdate = true;
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/assets/elevator-chime.js
@@ -3377,6 +3469,18 @@ function createArrivalChime() {
         context.close().catch(() => {});
     }
   };
+}
+
+// demos/corporate/gjh/v11/assets/artwork-textures.js
+var anisotropyFor = (tier) => tier === "low" ? 2 : 4;
+function setArtworkTextureTier(texture, tier) {
+  if (tier === undefined || texture.userData?.artworkMipmaps !== "generate" || texture.userData.artworkFixedTier)
+    return;
+  const anisotropy = anisotropyFor(tier);
+  if (texture.anisotropy === anisotropy)
+    return;
+  texture.anisotropy = anisotropy;
+  texture.needsUpdate = true;
 }
 
 // demos/corporate/gjh/v11/assets/model-warmup.js
@@ -3512,11 +3616,13 @@ function createModelWarmup(T, renderer) {
   staging.matrixWorldAutoUpdate = false;
   const target = new T.WebGLRenderTarget(1, 1);
   const scissor = new T.Vector4;
-  function initTexture(texture) {
+  function initTexture(texture, artworkTier) {
+    setArtworkTextureTier(texture, artworkTier);
     if (initialized.get(texture) === texture.version)
-      return;
+      return false;
     renderer.initTexture(texture);
     initialized.set(texture, texture.version);
+    return true;
   }
   function withMesh(mesh, scene, mask, linear, work) {
     const { visible, frustumCulled, children, count } = mesh;
@@ -3593,7 +3699,7 @@ function createModelWarmup(T, renderer) {
       return false;
     };
   }
-  function prepare(root, scene, { hide = false, linear = () => false, alternates = [], includeInSceneSweep = true, ...options } = {}) {
+  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, ...options } = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse((mesh) => {
@@ -3613,9 +3719,12 @@ function createModelWarmup(T, renderer) {
     return scheduler.enqueue(function* () {
       for (const { mesh, mask } of meshes) {
         for (const texture of new Set(meshTextures(mesh))) {
-          if (initialized.get(texture) === texture.version)
+          if (artworkTier === undefined && initialized.get(texture) === texture.version)
             continue;
-          yield () => initTexture(texture);
+          yield () => {
+            if (initTexture(texture, artworkTier) && texture.userData?.artworkMipmaps === "generate")
+              return false;
+          };
         }
         yield* prepareMesh(mesh, scene, mask, false);
         if (linear())
@@ -3746,7 +3855,7 @@ function createInstaller(T, renderer, scene, accents) {
     const linear = () => tier === "detailed";
     const options = { priority, signal, late: false };
     const results = await Promise.allSettled([
-      prepareModel(roots, { ...options, linear, includeInSceneSweep: false }),
+      prepareModel(roots, { ...options, linear, artworkTier: tier, includeInSceneSweep: false }),
       queue.enqueue(function* () {
         const programs = new Set;
         for (const output of linear() ? [false, true] : [false]) {
@@ -3899,12 +4008,13 @@ function prepareTier({
           elevator,
           shadows: false,
           detailed: false,
+          artworkTier: tier,
           screenPixel,
           extra: modelWarmup.pendingMeshes(),
           exclude: interiors?.groups,
           prepared: directPrepared,
           programs: directPrograms,
-          updateLights: atmosphere.update,
+          updateLights: atmosphere.setLightFloor ?? atmosphere.update,
           lightVariants: atmosphere.lightVariants,
           initTexture: modelWarmup.initTexture,
           alternatesFor: modelWarmup.alternatesFor
@@ -3943,13 +4053,14 @@ function prepareTier({
           elevator,
           shadows,
           detailed,
+          artworkTier: tier,
           screenPixel,
           extra,
           exclude,
           prepared,
           programs,
           chase,
-          updateLights: atmosphere.update,
+          updateLights: atmosphere.setLightFloor ?? atmosphere.update,
           lightVariants: atmosphere.lightVariants,
           initTexture: modelWarmup.initTexture,
           alternatesFor: modelWarmup.alternatesFor
@@ -3958,6 +4069,10 @@ function prepareTier({
           if (interiorError)
             throw interiorError;
           yield false;
+        }
+        for (const texture of interiors?.artworkForTier?.(tier) ?? []) {
+          if (modelWarmup.initTexture(texture, tier))
+            yield false;
         }
       } while (revision !== modelWarmup.arrivalRevision);
       if (interiors && !interiors.activateTier(tier))
@@ -4099,6 +4214,7 @@ function* prepareScene({
   expanded,
   elevator,
   detailed,
+  artworkTier,
   updateLights,
   lightVariants,
   initTexture,
@@ -4337,9 +4453,9 @@ function* prepareScene({
       }
     }
     for (const texture of textures) {
-      initTexture(texture);
+      const uploaded = initTexture(texture, artworkTier);
       report.textures++;
-      yield;
+      yield uploaded && texture.userData?.artworkMipmaps === "generate" ? false : undefined;
     }
     if (shadows) {
       const active = probeLights(poses[0]).filter((light) => light.layers.isEnabled(0));
@@ -4392,6 +4508,45 @@ function* prepareScene({
       gl.deleteSync(fence);
     target?.dispose();
   }
+}
+
+// demos/corporate/gjh/v11/assets/movement.js
+var FIXED_STEP = 1 / 60;
+var MOVEMENT = Object.freeze({
+  desktopWalk: 3.4,
+  desktopRun: 5.2,
+  touchWalk: 3.1,
+  touchRun: 4.5,
+  cart: 1.8,
+  acceleration: 10,
+  deceleration: 18,
+  turnRate: 140 * Math.PI / 180,
+  stickDeadZone: 0.12,
+  stepHeight: 0.18,
+  cartRadius: 0.95,
+  walkClipSpeed: 2.65,
+  runClipSpeed: 5
+});
+function createFixedClock() {
+  let remaining = 0;
+  return {
+    reset() {
+      remaining = 0;
+    },
+    advance(seconds, tick) {
+      remaining = Math.min(0.1, remaining + Math.max(0, seconds));
+      let steps = 0;
+      while (remaining + 0.000000001 >= FIXED_STEP) {
+        tick();
+        remaining = Math.max(0, remaining - FIXED_STEP);
+        steps++;
+      }
+      return steps;
+    },
+    get alpha() {
+      return remaining / FIXED_STEP;
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/assets/auto-door.js
@@ -5092,8 +5247,11 @@ var elevator;
 var manual = false;
 var frame = 0;
 var last = 0;
-var accumulator = 0;
 var frames = 0;
+var fixedClock = createFixedClock();
+var movementTimings = { physicsMs: 0, cameraMs: 0 };
+var movementHistory = new Array(300);
+var movementFrame = 0;
 var three;
 var frameTrace;
 var modelWarmup;
@@ -5104,6 +5262,7 @@ var warmKey;
 var warmReport = createWarmReport();
 var sceneWarmFirst = true;
 var entryPresentation;
+var lightWash = false;
 var productControl = null;
 var shelfFocus = null;
 var guidance = null;
@@ -5169,7 +5328,8 @@ function clearTransientState(event) {
   if (event.kind === "interrupt" && (!interaction?.character.physicalProduct?.held || interaction.productApproaching))
     player?.cancelCollection();
   manual = false;
-  accumulator = 0;
+  fixedClock.reset();
+  player?.resetInterpolation();
   last = performance.now();
 }
 var modes = createModes({
@@ -5196,9 +5356,22 @@ performanceMonitor.setEnabled(true);
 var measuringFrames = false;
 var lastMetricsUpdate = -Infinity;
 var maxFrameUploadMs = 0;
+function movementReport() {
+  const percentile = (index) => {
+    const values = movementHistory.map((frame2) => frame2[index]).filter(Number.isFinite).sort((a, b) => a - b);
+    return values[Math.ceil(values.length * 0.95) - 1] ?? null;
+  };
+  return {
+    frames: Math.min(movementFrame, movementHistory.length),
+    physicsP95Ms: percentile(0),
+    cameraQueryP95Ms: percentile(1),
+    collisionTicks: player?.collisionTicks ?? 0
+  };
+}
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
+    movement: movementReport(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
     refreshHz: quality.refreshHz,
@@ -5267,7 +5440,6 @@ function syncMode(signals = ui.modeSignals()) {
 ui.onModeState(syncMode);
 setupOriginalTin(ui);
 syncMode();
-var STEP = 1 / 60;
 async function loadOptionalThemeModule(loader) {
   let timer;
   try {
@@ -5417,6 +5589,7 @@ var snapshot = () => Object.freeze({
 });
 Object.defineProperty(window, "__mall", { value: Object.freeze({
   performanceReport,
+  movementSample: () => player && { ...player.sampleMovement(), frames },
   emote(name) {
     if (!canPlayEmote())
       return false;
@@ -5449,6 +5622,10 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   setInput(input) {
     if (!ready || modes.paused())
       return;
+    if (manual && input === null) {
+      fixedClock.reset();
+      player.resetInterpolation();
+    }
     manual = input !== null;
     const clean = input === null ? null : { forward: Math.max(-1, Math.min(1, Number(input.forward) || 0)), right: Math.max(-1, Math.min(1, Number(input.right) || 0)), run: Boolean(input.run) };
     if (clean && Number.isFinite(input.yaw))
@@ -5462,9 +5639,11 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
       return snapshot();
     manual = true;
     quality.resetSampling();
-    const count = Math.max(0, Math.min(600, Math.floor(ms / (STEP * 1000))));
+    const count = Math.max(0, Math.min(600, Math.floor(ms / (FIXED_STEP * 1000))));
     for (let i = 0;i < count; i++)
       tick();
+    player.updateCamera(count * FIXED_STEP);
+    greetOnArrival();
     render();
     return snapshot();
   }
@@ -5505,37 +5684,42 @@ function greetOnArrival() {
     greetedOnArrival = player.emote("wave", { arrival: true });
   }
 }
+var fixedTick = () => tick(false);
 function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred)
     return;
   const p = player.state;
+  const doorsStart = performance.now();
   for (const door of world.doors) {
     if (door.advance) {
-      door.advance(p, STEP, reducedMotion2.matches);
+      door.advance(p, FIXED_STEP, reducedMotion2.matches);
       continue;
     }
-    const open = shouldOpenStoreDoor(door, p);
+    const open = shouldOpenStoreDoor(door, p) || door.open > 0 && door.occupied();
     door.targetOpen = open;
-    door.open = reducedMotion2.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
+    const next = reducedMotion2.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * FIXED_STEP * 3));
+    if (next === door.open)
+      continue;
+    door.open = next;
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);
       leaf.group.position.x = x;
       leaf.body.setNextKinematicTranslation({ x, y: 1.8, z: 0.05 });
     }
   }
-  elevator?.update?.(STEP, p);
-  player.update(STEP);
+  movementTimings.physicsMs += performance.now() - doorsStart;
+  elevator?.update?.(FIXED_STEP, p);
+  player.update(FIXED_STEP);
+  const physicsStart = performance.now();
   physics.step();
-  player.sync();
+  movementTimings.physicsMs += performance.now() - physicsStart;
   if (npcs) {
     const start = frameTrace?.start();
-    npcs.update(STEP, player.state, reducedMotion2.matches);
+    npcs.update(FIXED_STEP, player.state, reducedMotion2.matches);
     frameTrace?.end("crowd.update", start);
   }
-  player.updateCamera(STEP);
   if (refreshHud)
     updateHUD();
-  greetOnArrival();
 }
 var lastGuidanceSample = -Infinity;
 var projectedTarget = null;
@@ -5582,8 +5766,8 @@ function render(force = false) {
     const detailedReady = detailed && world.interiors?.activeTier === "detailed";
     if (expanded)
       renderer.shadowMap.enabled = detailedReady;
-    world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera, canvas.height, Boolean(shelfFocus?.open));
-    atmosphere?.update(pose);
+    world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera, canvas.height, Boolean(shelfFocus?.open), lightWash);
+    atmosphere?.update(pose, now);
     const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion2);
     frameTrace?.end("signage.update", signStart);
@@ -5664,7 +5848,7 @@ function scheduleTier() {
       return;
     warmRunner.stop("superseded");
   }
-  if (profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier) && (!world.interiors || world.interiors.activeTier === profile.tier)) {
+  if (!tierQueue.pending && profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier) && (!world.interiors || world.interiors.activeTier === profile.tier)) {
     tierQueue.cancel();
     world.interiors?.setTier(profile.tier);
     applyProfile(profile);
@@ -5774,7 +5958,7 @@ function animate(now) {
   updateModelPreload(now);
   if (advanceStartupWarm()) {
     last = now;
-    accumulator = 0;
+    fixedClock.reset();
     quality.resetSampling(now);
     return;
   }
@@ -5783,10 +5967,9 @@ function animate(now) {
     enteredAt ??= now;
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
-  if (advancing)
-    accumulator = Math.min(0.1, accumulator + Math.max(0, (now - last) / 1000));
-  else
-    accumulator = 0;
+  const elapsed = (now - last) / 1000;
+  if (!advancing)
+    fixedClock.reset();
   last = now;
   const callbackStart = performance.now();
   const pad = readStandardGamepad();
@@ -5807,11 +5990,7 @@ function animate(now) {
   const simulationStart = performance.now();
   let steps = 0;
   if (advancing && !modes.paused()) {
-    while (accumulator + 0.000000001 >= STEP) {
-      tick(false);
-      accumulator = Math.max(0, accumulator - STEP);
-      steps++;
-    }
+    steps = fixedClock.advance(elapsed, fixedTick);
     if (steps)
       updateHUD();
   }
@@ -5827,11 +6006,17 @@ function animate(now) {
     const renderStart = performance.now();
     const force = forceRender;
     renderRequested = forceRender = false;
+    if (advancing && !modes.paused() && !shelfFocus?.open) {
+      player.updateCamera(Math.min(0.1, slotMs / 1000), false, fixedClock.alpha);
+      greetOnArrival();
+    }
     pose = render(force);
     const renderEnd = performance.now();
     callbackMs = renderEnd - callbackStart;
     if (pose && live && !windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
+      player.takeQueryTimings(movementTimings);
+      movementHistory[movementFrame++ % movementHistory.length] = [movementTimings.physicsMs, movementTimings.cameraMs];
       performanceMonitor.frame(now, renderer.info, {
         simulationMs,
         renderMs: renderEnd - renderStart,
@@ -5854,13 +6039,15 @@ function animate(now) {
       pausePerformance();
   } else
     pausePerformance();
+  player.takeQueryTimings(movementTimings);
+  movementTimings.physicsMs = movementTimings.cameraMs = 0;
   simulationMs = simulationSteps = 0;
   quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel && !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered && now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost && ["explore", "cart"].includes(modes.current())));
 }
 function resume() {
   if (ready && !frame && !document.hidden) {
     last = performance.now();
-    accumulator = 0;
+    fixedClock.reset();
     quality.cadence.reset();
     frame = requestAnimationFrame(animate);
   }
@@ -6107,7 +6294,7 @@ function validateRestoration() {
     atmosphere?.update(player.state);
     player.camera.updateMatrixWorld();
     sizeDrawingBuffer();
-    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height);
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash);
     world.updateSigns(player.camera, canvas, reducedMotion2);
     renderer.render(world.scene, player.camera);
     const pixel = new Uint8Array(4);
@@ -6175,7 +6362,7 @@ async function installNpcs(T, R, prepareModel, source) {
 }
 async function initialize() {
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const attributes = { antialias: true, alpha: false, powerPreference: "high-performance" };
+  const attributes = { antialias: !expanded, alpha: false, powerPreference: "high-performance" };
   const preferredContext = quality.androidChrome ? canvas.getContext("webgl2", { ...attributes, failIfMajorPerformanceCaveat: true }) : null;
   const context = preferredContext || canvas.getContext("webgl2", attributes);
   quality.setWebGLHint(preferredContext?.getContextAttributes()?.powerPreference === "high-performance");
@@ -6186,14 +6373,15 @@ async function initialize() {
   const T = await import("./vendor/three.module.min.js");
   three = T;
   await waitForContext(context);
-  renderer = new T.WebGLRenderer({ canvas, context, antialias: true });
+  renderer = new T.WebGLRenderer({ canvas, context, antialias: attributes.antialias });
+  lightWash = expanded && allowMallLightWash(quality.deviceClass, context);
   const diagnostics = new URLSearchParams(location.search);
   renderer.debug.checkShaderErrors = diagnostics.get("debugShaders") === "1";
   if (diagnostics.get("traceWarm") === "1")
     frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
+  renderer.toneMappingExposure = expanded ? 1.03 : 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
   try {
@@ -6204,7 +6392,7 @@ async function initialize() {
     return;
   }
   physics = new R.World({ x: 0, y: -24, z: 0 });
-  physics.timestep = STEP;
+  physics.timestep = FIXED_STEP;
   window.mallLoader?.complete("physics");
   modelWarmup = createModelWarmup(T, renderer);
   tierQueue = createTierQueue(modelWarmup.enqueueSweep);
@@ -6213,14 +6401,14 @@ async function initialize() {
     ...options
   });
   const { createWorld } = await import("./assets/world.bundle.js");
-  world = await createWorld(T, R, physics, expanded, warmModel);
+  world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)
     assetRecords.push(world.productAssets.shelf);
   document.getElementById("loader-asset-notice").hidden = !assetRecords.some((record) => record?.status === "fallback");
   window.mallLoader?.complete("scene");
-  atmosphere = createMallAtmosphere(T, renderer, world.scene, expanded ? expandedLayout.slots : spatial.stores.map((store) => store.bounds));
+  atmosphere = createMallAtmosphere(T, renderer, world.scene, expanded ? expandedLayout.slots : spatial.stores.map((store) => store.bounds), expanded ? { atrium: expandedLayout.atrium, contact: world.contact, plane: world.plane } : undefined);
   try {
     if (!contextLost && !context.isContextLost())
       atmosphere.restoreEnvironment();
@@ -6441,6 +6629,7 @@ async function initialize() {
   resize();
   for (let i = 0;i < 5; i++)
     tick();
+  player.updateCamera(0, true);
   render(true);
   if (contextLost || context.isContextLost())
     return;

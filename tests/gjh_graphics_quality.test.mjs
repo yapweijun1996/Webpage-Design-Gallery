@@ -31,20 +31,21 @@ test('Auto chooses a starting tier and an existing Auto tier survives a resize',
   assert.equal(resolveQuality({width:1440, cores:8, memory:8}).tier, 'detailed');
   assert.equal(resolveQuality({width:820, deviceClass:'tablet'}).tier, 'balanced');
   assert.equal(resolveQuality({width:1024, deviceClass:'phone'}).tier, 'low');
-  assert.equal(resolveQuality({width:1440, autoTier:'balanced'}).tier, 'balanced');
+  assert.equal(resolveQuality({width:1440, autoTier:'balanced', dpr:2}).pixelRatio, 1.25);
   assert.equal(resolveQuality({width:1440, autoTier:'low'}).tier, 'low');
 });
 
-test('phone DPR caps respect both hardware and WebGL hints', () => {
+test('phone DPR caps keep Balanced at 1.25 and apply hardware hints to Detailed', () => {
   for (const preference of ['balanced','detailed']) {
     const phone = {preference, width:393, dpr:3, deviceClass:'phone'};
-    assert.equal(resolveQuality(phone).pixelRatio, 1.5);
+    const fastCap = preference === 'balanced' ? 1.25 : 1.5;
+    assert.equal(resolveQuality(phone).pixelRatio, fastCap);
     for (const hints of [{cores:4}, {memory:4}, {androidChrome:true}]) {
       assert.equal(resolveQuality({...phone, ...hints}).pixelRatio, 1.25);
     }
-    assert.equal(resolveQuality({...phone, androidChrome:true, highPerformanceWebGL2:true}).pixelRatio, 1.5);
+    assert.equal(resolveQuality({...phone, androidChrome:true, highPerformanceWebGL2:true}).pixelRatio, fastCap);
     assert.equal(resolveQuality({...phone, androidChrome:true, highPerformanceWebGL2:true, cores:4}).pixelRatio, 1.25);
-    assert.equal(resolveQuality({...phone, cores:0, memory:NaN}).pixelRatio, 1.5);
+    assert.equal(resolveQuality({...phone, cores:0, memory:NaN}).pixelRatio, fastCap);
     assert.equal(resolveQuality({...phone, dpr:1}).pixelRatio, 1);
     assert.equal(resolveQuality({...phone, recovered:true}).pixelRatio, 1);
   }
@@ -54,7 +55,7 @@ test('explicit profiles retain tier, DPR and shadow eligibility', () => {
   for (const preference of ['low','balanced','detailed']) for (const width of [390,1440]) {
     for (const dpr of [1,1.5,2,3,0,NaN]) {
       const profile = resolveQuality({preference,width,dpr,cores:1,memory:1,autoTier:'low'});
-      const cap = preference === 'low' ? 1 : preference === 'balanced' && width < 600 ? 1.25 : 2;
+      const cap = preference === 'low' ? 1 : preference === 'balanced' ? 1.25 : 2;
       assert.equal(profile.tier, preference);
       assert.equal(profile.pixelRatio, Math.min(Number.isFinite(dpr) && dpr > 0 ? dpr : 1, cap));
       assert.equal(profile.shadows, preference === 'detailed' && width >= 1000);

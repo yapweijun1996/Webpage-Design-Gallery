@@ -1,3 +1,5 @@
+import {setArtworkTextureTier} from './artwork-textures.js';
+
 // Run from the mall's frame loop so every producer shares one upload budget.
 export function createUploadScheduler({now = () => performance.now(), budgetMs = 4, maxSteps = 2} = {}) {
   const jobs = [];
@@ -109,10 +111,12 @@ export function createModelWarmup(T, renderer) {
   const target = new T.WebGLRenderTarget(1, 1);
   const scissor = new T.Vector4();
 
-  function initTexture(texture) {
-    if (initialized.get(texture) === texture.version) return;
+  function initTexture(texture, artworkTier) {
+    setArtworkTextureTier(texture, artworkTier);
+    if (initialized.get(texture) === texture.version) return false;
     renderer.initTexture(texture);
     initialized.set(texture, texture.version);
+    return true;
   }
 
   function withMesh(mesh, scene, mask, linear, work) {
@@ -193,7 +197,7 @@ export function createModelWarmup(T, renderer) {
     };
   }
 
-  function prepare(root, scene, {hide = false, linear = () => false, alternates = [], includeInSceneSweep = true, ...options} = {}) {
+  function prepare(root, scene, {hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, ...options} = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse(mesh => {
@@ -209,8 +213,10 @@ export function createModelWarmup(T, renderer) {
     return scheduler.enqueue(function* () {
       for (const {mesh, mask} of meshes) {
         for (const texture of new Set(meshTextures(mesh))) {
-          if (initialized.get(texture) === texture.version) continue;
-          yield () => initTexture(texture);
+          if (artworkTier === undefined && initialized.get(texture) === texture.version) continue;
+          yield () => {
+            if (initTexture(texture,artworkTier) && texture.userData?.artworkMipmaps === 'generate') return false;
+          };
         }
         yield* prepareMesh(mesh, scene, mask, false);
         if (linear()) yield* prepareMesh(mesh, scene, mask, true);
