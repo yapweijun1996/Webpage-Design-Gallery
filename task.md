@@ -45,7 +45,7 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 - [x] Replace the planned eastern ground-floor facilities block with three enterable rooms for Men, Women and an all-user Accessible restroom. Keep the northern service reserves closed. Design for a step-free public approach, clear entrances and privacy screens, using the BCA public-place guidance as a virtual design reference.
 - [x] Add readable wayfinding and map/directory directions in the supported languages. Use lightweight fixture geometry, mirrors above the basins, an explicit tap on/off action and a short cosmetic flush response.
 - [x] Verify all three entries and exits, tap and flush actions, keyboard and touch controls, and translated destinations in local Chrome. [Room plan, asset inventory and browser views](docs/gjh-v11-public-facilities.md#ground-floor-restroom-cluster).
-- [ ] Verify the published restroom build and capture frame timing separately.
+- [x] Verify all three rooms on published build `167f5d38d8727909` at 1440 and 390 px. Sample frame timing with capture disabled.
 
 ### V11 ambient motion during model preparation
 
