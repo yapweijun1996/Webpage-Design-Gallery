@@ -2,7 +2,7 @@ import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, daylightSkylight=false}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -142,7 +142,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     const a=(i/12-.5)*Math.PI,x=-3+13.15*Math.sin(a),y=13.1+3.9*Math.cos(a);
     box('green',x,y,10.1,.07,.09,26.1);
   }
-  arch(-3,10.1,13.14,13.18,3.91,26.05,.036,'glass');
+  if(!daylightSkylight)arch(-3,10.1,13.14,13.18,3.91,26.05,.036,'glass');
   for(const z of [-2.75,22.85]){
     box('ivory',-3,10.68,z,26.2,.45,.58);
     box('oak',-3,10.38,z,26.2,.15,.63);
@@ -249,19 +249,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     const planter = lounge.planters[lounge.id === 'west' ? 1 : 0];
     tree(planter.x, planter.z, 4.2);
   }
-  // The lift's moving cabin still uses the entire clear shaft. Only the
-  // fixed side guards receive the stone door surround; the entrance stays clear.
-  for(const z of [8.37,11.63]){
-    box('ivory',-4.99,1.87,z,.31,3.74,.46);
-    box('brass',-5.16,1.74,z,.055,2.2,.13);
-    box('glow',-5.194,1.78,z,.035,.76,.06);
-    box('oak',-4.99,5.27,z,.30,3.14,.37);
-  }
-  solid('archSpandrel','ivory',-5.14,2.87,10,1.93,.90,.18,-Math.PI/2);
-  solid('archSpandrel','green',-5.31,2.89,10,1.78,.78,.08,-Math.PI/2);
-  box('green',-5.01,3.78,10,.33,.36,3.82);
-  box('brass',-5.20,3.62,10,.03,.05,3.52);
-  box('ivory',-5.02,4.02,10,.36,.19,3.94);
+  // The elevator kit owns both landing portals. These columns support the gallery above it.
+  for(const z of [8.37,11.63]) box('oak',-4.99,5.27,z,.30,3.14,.37);
   // Planting sits south of the shaft and clear of the west boarding route.
   cylinderPlanter(-4.25,14.1);
   function cylinderPlanter(x,z){

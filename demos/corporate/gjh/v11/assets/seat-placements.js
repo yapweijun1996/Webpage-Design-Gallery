@@ -45,17 +45,17 @@ export function createSeatPlacements(expanded) {
     add(store.id, x - 3, -6.8, -1); add(store.id, x + 3, -6.8, -1);
   }
   if (expanded) {
-    add('deck', -6.1, 8.8, 1, 'Upper deck bench 1', liftLayout.upper);
-    add('deck', .1, 8.8, 1, 'Upper deck bench 2', liftLayout.upper);
-    // Face the clear approach between the bench and shaft guard.
-    add('deck', -3, 6, -1, 'Upper deck bench 3', liftLayout.upper);
+    for(const [i,seat] of atriumLayout.upperSeats.entries()){
+      add('deck',seat.x,seat.z,seat.facing,`Upper deck bench ${i+1}`,liftLayout.upper);
+      placements.at(-1).finish=seat.finish;
+    }
   }
   return placements;
 }
 
 export function createSeatAnchor(placement, collider, profile = loungeBench, scale = benchScale, footY = placement.floor) {
   const {id, name, x, z, floor, exit, pose, clearance, accessible} = placement;
-  const centre = (profile.flatFront + profile.backrestFront) / 2;
+  const centre = profile.seatCentre ?? (profile.flatFront + profile.backrestFront) / 2;
   const anchor = {x, y:floor + profile.top * scale, z:z + centre * pose.facing};
   const [width, height, depth] = profile.size;
   const bounds = {

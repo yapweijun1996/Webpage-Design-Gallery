@@ -136,7 +136,7 @@ export const layouts = {
     accent_kelvin: 3300,
     lighting: [-0.65,3.85,-0.18],
     anchor: {"asset_id":"noodle-loom","position_m":[-0.65,0.081,-0.83],"yaw_deg":3,"envelope_whd_m":[2.45,2.96,1.05]},
-    floor: {"treatment":"Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.","position_m":[-0.65,0.081,-0.83],"yaw_deg":3,"field_width_depth_m":[4.55,4.15],"construction":"Replace colour/roughness within the existing floor mesh; zero-height material boundary.","pattern":"planks","colours":[2,0,3]},
+    floor: {"treatment":"Narrow beech strips run crosswise beneath the loom and turn into wide slate-grey aisle planks.","position_m":[-0.65,0.081,-0.83],"yaw_deg":3,"field_width_depth_m":[4.55,4.15],"construction":"Replace colour/roughness within the existing floor mesh; zero-height material boundary.","pattern":"planks","colours":["#AC845C",0,3]},
     routes: [],
     pickups: [],
     capture: {"threshold_approach_local_xz_m":[0,5.75],"browse_local_xz_m":[2.1,-2.4000000000000004],"expected_signature":"ban mee drying combs","viewport_css_px":[393,612],"planned_evidence_stem":"S06-entrance"},

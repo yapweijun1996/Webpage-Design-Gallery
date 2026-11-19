@@ -44,7 +44,9 @@ export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
   const cylinder = (x,y,z,r,h,c=edge,round=8) => piece(new T.CylinderGeometry(r,r,h,round),x,y,z,c,false);
   function fixture(prop, position) {
     const {kind} = prop;
-    if (kind === 'retain') return;
+    // The room GLB owns the suspended luminaire. Its old forward-facing
+    // rectangular diffuser projected across the rear brand sign from the door.
+    if (kind === 'retain' || prop.socket === 'ceiling') return;
     origin = position;
     yaw = radians(prop.yaw_deg);
     const [w,h,d] = prop.envelope_whd_m;
@@ -182,6 +184,10 @@ export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
         box(x+offset,y+1,back+.12+distance/2,.15,.24,distance,body);
     }
     if (store.id === 'S02') {
+      // The original entrance fascia stops short of the ceiling. Return the
+      // kitchen plaster across its inner face, keeping the full door clearance.
+      box(0,4.81,5.734,9.65,1.77,.038,pale);
+      box(0,3.918,5.98,9.69,.025,.54,edge);
       const [x,y,z] = store.anchor.position_m, top = y+store.anchor.envelope_whd_m[1];
       for (const offset of [-.45,.45])
         box(x+offset,(ceiling+top)/2,z,.065,ceiling-top,.065,accent);

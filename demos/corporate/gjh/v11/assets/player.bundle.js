@@ -7,6 +7,28 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/elevator-ride.js
+var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84 });
+function easedInterval(time, start, end) {
+  const t = Math.max(0, Math.min(1, (time - start) / (end - start)));
+  return t * t * (3 - 2 * t);
+}
+function sampleRide(time, trip) {
+  const { open, board, close, arrive, reopen, exit } = rideTime;
+  const entering = easedInterval(time, open, board), leaving = easedInterval(time, reopen, exit);
+  const y = trip.from + (trip.to - trip.from) * easedInterval(time, close, arrive);
+  const position = trip.position;
+  position.x = trip.startX + (trip.x - trip.startX) * entering + (trip.exitX - trip.x) * leaving;
+  position.z = trip.startZ + (trip.z - trip.startZ) * entering + (trip.exitZ - trip.z) * leaving;
+  position.y = y + 0.89;
+  const source = easedInterval(time, 0, open) * (1 - easedInterval(time, board, close));
+  const destination = easedInterval(time, arrive, reopen);
+  trip.groundDoor = trip.from === 0 ? source : destination;
+  trip.upperDoor = trip.from === 0 ? destination : source;
+  trip.height = y;
+  trip.phase = time < board ? "board" : time < arrive ? "ride" : "exit";
+}
+
 // demos/corporate/gjh/v11/assets/visitor-v2-contact.js
 function createContactSolver(T, root) {
   const a = new T.Vector3, b = new T.Vector3, c = new T.Vector3, q = new T.Quaternion, parent = new T.Quaternion;
@@ -523,6 +545,12 @@ var atriumLayout = Object.freeze({
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
+  facilitiesBlock: Object.freeze({ x: 25, z: 10, width: 6, depth: 4, height: 3 }),
+  upperSeats: Object.freeze([
+    Object.freeze({ x: -6.1, z: 8.8, facing: 1, finish: "oak" }),
+    Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
+    Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
+  ]),
   event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
 });
 
@@ -1164,52 +1192,27 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     }
     if (elevatorTravel) {
       const trip = elevatorTravel;
-      if (trip.elevator?.expanded) {
-        trip.elapsed += dt;
-        const duration = trip.phase === "ride" ? 2.5 : 0.45;
-        const t = reduceSeatMotion() ? 1 : Math.min(1, trip.elapsed / duration), e = t * t * (3 - 2 * t);
-        if (trip.phase === "board")
-          moveSeat({ x: trip.startX + (trip.x - trip.startX) * e, y: trip.from + 0.89, z: trip.startZ + (trip.z - trip.startZ) * e });
-        else if (trip.phase === "ride") {
-          const height = trip.from + (trip.to - trip.from) * e;
-          trip.setHeight(height);
-          moveSeat({ x: trip.x, y: height + 0.89, z: trip.z });
-        } else
-          moveSeat({ x: trip.x + (trip.elevator.exit.x - trip.x) * e, y: trip.to + 0.89, z: trip.z + (trip.elevator.exit.z - trip.z) * e });
-        character.update("idle", dt);
-        if (t === 1) {
-          if (trip.phase === "board") {
-            trip.phase = "ride";
-            trip.elapsed = 0;
-            trip.elevator.setRiding(true);
-          } else if (trip.phase === "ride") {
-            trip.phase = "exit";
-            trip.elapsed = 0;
-            trip.elevator.setRiding(false);
-          } else {
-            elevatorTravel = null;
-            capsule.setEnabled(true);
-            vertical = 0;
-            restoreActionView();
-            clearInput();
-            injected = null;
-          }
-        }
-      } else {
-        trip.elapsed += dt;
-        const t = reduceSeatMotion() ? 1 : Math.min(1, trip.elapsed / 2.5);
-        const eased = t * t * (3 - 2 * t);
-        const height = trip.from + (trip.to - trip.from) * eased;
-        moveSeat({ x: trip.x, y: height + 0.89, z: trip.z });
-        trip.setHeight(height);
-        character.update("idle", dt);
-        if (t === 1) {
-          elevatorTravel = null;
-          capsule.setEnabled(true);
-          vertical = 0;
-          if (view.firstPerson)
-            restoreActionView();
-        }
+      const before = trip.phase;
+      trip.elapsed = reduceSeatMotion() || trip.skip ? rideTime.exit : Math.min(rideTime.exit, trip.elapsed + dt);
+      sampleRide(trip.elapsed, trip);
+      if (before !== trip.phase)
+        trip.elevator.setRiding?.(trip.phase === "ride");
+      trip.elevator.pose(trip);
+      moveSeat(trip.position);
+      const stepping = trip.elapsed > rideTime.open && trip.elapsed < rideTime.board || trip.elapsed > rideTime.reopen;
+      character.update(stepping ? "walk" : "idle", dt);
+      if (!trip.chimed && trip.elapsed >= rideTime.arrive) {
+        trip.chimed = true;
+        trip.chime?.();
+      }
+      if (trip.elapsed >= rideTime.exit) {
+        trip.elevator.finishRide();
+        elevatorTravel = null;
+        capsule.setEnabled(true);
+        vertical = 0;
+        restoreActionView();
+        clearInput();
+        injected = null;
       }
       return;
     }
@@ -1623,43 +1626,55 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     updateCamera(0, true);
     return true;
   }
-  function useElevator(elevator) {
+  function useElevator(elevator, chime) {
     const p = body.translation();
+    const from = p.y - 0.875 > elevator.upper / 2 ? elevator.upper : 0;
+    if (seated || pushing || elevatorTravel || character.state.physicalProduct && character.state.physicalProduct.phase !== "empty" || Math.abs(p.y - 0.875 - from) > 0.35)
+      return false;
     if (elevator.expanded) {
-      const floor = p.y - 0.875 > elevator.upper / 2 ? elevator.upper : 0;
-      if (seated || pushing || elevatorTravel || productApproach || character.state.physicalProduct && character.state.physicalProduct.phase !== "empty" || Math.abs(p.y - 0.875 - floor) > 0.35 || Math.hypot(p.x - elevator.exit.x, p.z - elevator.exit.z) > elevator.radius)
+      if (productApproach || Math.hypot(p.x - elevator.exit.x, p.z - elevator.exit.z) > elevator.radius)
         return false;
       if (elevator.state.calling || elevator.state.riding)
         return false;
-      if (elevator.state.docked !== floor)
-        return elevator.call(floor);
-      if (!clearPath(p, { x: elevator.x, y: floor + 0.89, z: elevator.z }))
+      if (elevator.state.docked !== from)
+        return elevator.call(from);
+      if (!clearPath(p, { x: elevator.x, y: from + 0.89, z: elevator.z }))
         return false;
-      clearInput();
-      injected = null;
-      cancelCollection();
-      vertical = 0;
-      capsule.setEnabled(false);
-      beginActionView("elevator", Math.PI / 2);
-      elevator.setRiding("boarding");
-      elevatorTravel = { elevator, x: elevator.x, z: elevator.z, startX: p.x, startZ: p.z, from: floor, to: floor ? 0 : elevator.upper, elapsed: 0, phase: "board", setHeight: elevator.setHeight };
-      return true;
-    }
-    if (seated || pushing || elevatorTravel || character.state.physicalProduct && character.state.physicalProduct.phase !== "empty" || Math.hypot(p.x - elevator.x, p.z - elevator.z) > 1.45)
+    } else if (Math.hypot(p.x - elevator.x, p.z - elevator.z) > 1.45)
       return false;
-    const from = p.y - 0.875 > elevator.upper / 2 ? elevator.upper : 0;
-    if (Math.abs(p.y - 0.875 - from) > 0.35)
-      return false;
-    elevator.prepare?.(from);
     clearInput();
     injected = null;
     cancelCollection();
     vertical = 0;
     capsule.setEnabled(false);
     beginActionView("elevator", Math.PI / 2);
-    elevatorTravel = { x: elevator.x, z: elevator.z, from, to: from ? 0 : elevator.upper, elapsed: 0, setHeight: elevator.setHeight };
-    moveSeat({ x: elevator.x, y: from + 0.89, z: elevator.z });
+    elevator.setRiding?.("boarding");
+    elevatorTravel = {
+      elevator,
+      x: elevator.x,
+      z: elevator.z,
+      startX: p.x,
+      startZ: p.z,
+      exitX: elevator.exit?.x ?? elevator.x,
+      exitZ: elevator.exit?.z ?? elevator.z,
+      from,
+      to: from ? 0 : elevator.upper,
+      elapsed: 0,
+      phase: "board",
+      height: from,
+      position: { x: p.x, y: p.y, z: p.z },
+      groundDoor: 0,
+      upperDoor: 0,
+      skip: false,
+      chimed: false,
+      chime,
+      setHeight: elevator.setHeight
+    };
     return true;
+  }
+  function skipRide() {
+    if (elevatorTravel)
+      elevatorTravel.skip = true;
   }
   function interruptGraphics() {
     if (!elevatorTravel)
@@ -1701,6 +1716,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     resizeCamera,
     teleport,
     useElevator,
+    skipRide,
     clearInput,
     setBagCount: character.setBagCount,
     startCollection,

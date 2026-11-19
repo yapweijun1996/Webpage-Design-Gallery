@@ -51,7 +51,8 @@ export const interiorStores = Object.fromEntries(Object.entries(layouts).map(([i
 }));
 
 export function interiorFloorColour(store) {
-  return store.palette[store.floor.colours[0]].hex;
+  const finish = store.floor.colours[0];
+  return store.palette[finish]?.hex ?? finish;
 }
 
 export function interiorAsset(store, tier) {

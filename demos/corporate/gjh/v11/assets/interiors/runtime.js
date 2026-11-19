@@ -2,21 +2,27 @@ import {interiorAsset,interiorStores,interiorTiers,radians,worldInteriorBox} fro
 import {prepareInteriorDecoration,interiorMaterials} from './decoration.js';
 import {createInteriorModelLoader,disposeInteriorModel} from './models.js';
 
+import {roomDetails} from './detail-files.js';
 import {emptyInteriorReport} from './warmup.js';
 
 export function createInteriorKit(T, scene, {
   assetBase, packshot, prepareModel, registerCollider,
   loadModel = createInteriorModelLoader(T,assetBase),
+  reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),
   now = () => performance.now()
 }) {
   const materials = interiorMaterials(T);
   const report = emptyInteriorReport('low'), renderedShops = new Set();
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
 
-  function measure(root, id) {
-    root.traverse(mesh => {
-      if (!mesh.isMesh) return;
-      mesh.geometry.computeBoundingSphere();
+  let lastUpdate;
+
+  function* measure(root, id) {
+    const meshes = [];
+    root.traverse(mesh => { if (mesh.isMesh) meshes.push(mesh); });
+    for (const mesh of meshes) {
+      if (mesh.isInstancedMesh) mesh.computeBoundingSphere();
+      else mesh.geometry.computeBoundingSphere();
       let calls, triangles;
       mesh.onBeforeRender = renderer => {
         if (drawing) ({calls,triangles} = renderer.info.render);
@@ -27,7 +33,8 @@ export function createInteriorKit(T, scene, {
         report.triangles += renderer.info.render.triangles-triangles;
         renderedShops.add(id);
       };
-    });
+      yield;
+    }
   }
 
   function* decoration(store, detail) {
@@ -57,7 +64,7 @@ export function createInteriorKit(T, scene, {
     for (const box of store.colliders) registerCollider(worldInteriorBox(store,box));
     group.visible = false;
     scene.add(group);
-    return {store,group,distance:Infinity,near:false,models:new Map(),layers:[],ready:new Map(),shown:null};
+    return {store,group,distance:Infinity,near:false,phase:0,motion:null,models:new Map(),layers:[],ready:new Map(),shown:null};
   });
 
   function show(shop, roots) {
@@ -109,20 +116,25 @@ export function createInteriorKit(T, scene, {
     const asset = interiorAsset(shop.store,tier), detail = interiorTiers.indexOf(tier);
     const priority = () => shop.distance-200;
     const build = work => installer.build(work, {priority,signal});
-    let model = shop.models.get(asset.file), freshModel;
-    const freshLayers = [];
+    const required = [asset,roomDetails[shop.store.id]];
+    const freshModels = new Map(), freshLayers = [];
     try {
       try {
-        if (!model) freshModel = model = await loadModel(asset,signal,build);
-        if (signal.aborted) return;
-        if (freshModel) {
-          model.name = `${shop.store.id} ${shop.store.anchor.asset_id} (${asset.tier})`;
-          model.position.set(...shop.store.anchor.position_m);
-          model.rotation.y = radians(shop.store.anchor.yaw_deg);
+        for (const member of required) {
+          if (shop.models.has(member.file)) continue;
+          try {
+            const model = await loadModel(member,signal,build);
+            freshModels.set(member.file,model);
+            model.name = `${shop.store.id} ${member.file}`;
+            if (!member.roomDetail) {
+              model.position.set(...shop.store.anchor.position_m);
+              model.rotation.y = radians(shop.store.anchor.yaw_deg);
+            }
+          } catch {
+            // Keep successful members and retry only the missing asset.
+          }
+          if (signal.aborted) return;
         }
-      } catch {
-        // A failed fixture request still leaves the procedural room usable.
-        if (signal.aborted) return;
       } finally {
         decoding = false;
       }
@@ -130,26 +142,29 @@ export function createInteriorKit(T, scene, {
         for (let i=shop.layers.length; i<=detail; i++) {
           const layer = yield* decoration(shop.store,i);
           freshLayers.push(layer);
-          measure(layer,shop.store.id);
-          yield;
+          yield* measure(layer,shop.store.id);
         }
-        if (freshModel) measure(freshModel,shop.store.id);
+        for (const model of freshModels.values()) yield* measure(model,shop.store.id);
       });
       if (signal.aborted) return;
-      const fresh = [...freshLayers, ...(freshModel ? [freshModel] : [])];
-      const roots = [...shop.layers.slice(0,detail+1),...freshLayers,...(model ? [model] : [])];
+      const fresh = [...freshLayers,...freshModels.values()];
+      const models = required.map(member => freshModels.get(member.file) ?? shop.models.get(member.file)).filter(Boolean);
+      const roots = [...shop.layers.slice(0,detail+1),...freshLayers,...models];
       await installer.prepare(roots, {tier,priority,signal,prepareModel});
       if (signal.aborted) return;
       for (const root of fresh) { root.visible = false; shop.group.add(root); }
       shop.layers.push(...freshLayers);
-      if (freshModel) {
-        shop.models.set(asset.file,freshModel);
+      for (const member of required) {
+        const root = freshModels.get(member.file);
+        if (!root) continue;
+        shop.models.set(member.file,root);
+        if (member.roomDetail) shop.motion = root.userData.roomMotion;
         report.modelsLoaded++;
-        report.bytes += asset.bytes;
+        report.bytes += member.bytes;
       }
-      freshModel = undefined;
+      freshModels.clear();
       freshLayers.length = 0;
-      if (model) {
+      if (models.length === required.length) {
         shop.ready.set(tier,roots);
         report.preinstalled.shops++;
       }
@@ -162,7 +177,7 @@ export function createInteriorKit(T, scene, {
     } catch {
       // Keep the last usable kit and retry failed rooms on the same schedule.
     } finally {
-      disposeInteriorModel(freshModel);
+      for (const root of freshModels.values()) disposeInteriorModel(root);
       for (const layer of freshLayers) layer.traverse(mesh => {
         mesh.geometry?.dispose();
         if (mesh.material?.map === packshot && packshot) mesh.material.dispose();
@@ -189,10 +204,17 @@ export function createInteriorKit(T, scene, {
       if (installer && !disposed && request?.tier !== target) start(target);
     },
     update(position) {
-      for (const shop of shops) {
+      const time = now(), delta = Math.min(.1,Math.max(0,(time-(lastUpdate ?? time))*.001));
+      lastUpdate = time;
+      for (let i=0; i<shops.length; i++) {
+        const shop = shops[i], wasNear = shop.near;
         shop.distance = Math.hypot(position.x-shop.group.position.x,position.z-shop.group.position.z);
         shop.near = Math.abs(position.y) < 4 && shop.distance < 12.5;
         shop.group.visible = shop.shown !== null && shop.near;
+        if (!shop.group.visible || !wasNear || !shop.motion || reducedMotion?.matches) continue;
+        shop.phase += delta;
+        if (shop.motion.scroll) shop.motion.scroll.offset.x = (shop.phase*.065)%1;
+        if (shop.motion.pulse) shop.motion.pulse.emissiveIntensity = 1+.32*Math.sin(shop.phase*2.1);
       }
     },
     runFrame(remaining = 2) {
@@ -241,6 +263,17 @@ export function createInteriorKit(T, scene, {
       request?.controller.abort();
       request?.resolve({...report.preinstalled});
       installer?.dispose();
+      for (const shop of shops) {
+        for (const model of shop.models.values()) disposeInteriorModel(model);
+        for (const layer of shop.layers) layer.traverse(mesh => {
+          mesh.geometry?.dispose();
+          if (packshot && mesh.material?.map === packshot) mesh.material.dispose();
+        });
+        shop.group.removeFromParent();
+      }
+      materials.opaque.dispose();
+      materials.glow.dispose();
+      loadModel.dispose?.();
     }
   };
 }
