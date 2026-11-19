@@ -7,6 +7,20 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/restroom-layout.js
+var restroomParcel = Object.freeze({ minX: 21, maxX: 29, minZ: 6, maxZ: 14 });
+var restroomArrival = Object.freeze({ x: 31.4, z: 10, yaw: Math.PI / 2 });
+var restroomRooms = Object.freeze([
+  Object.freeze({ id: "restroom-men", label: "Men", sign: "MEN  ·  男厕  ·  LELAKI", minZ: 6, maxZ: 8.5, doorWidth: 1.27 }),
+  Object.freeze({ id: "restroom-women", label: "Women", sign: "WOMEN  ·  女厕  ·  WANITA", minZ: 8.5, maxZ: 11, doorWidth: 1.27 }),
+  Object.freeze({ id: "restroom-accessible", label: "Accessible restroom", sign: "ACCESSIBLE RESTROOM", minZ: 11, maxZ: 14, doorWidth: 1.55 })
+]);
+function restroomAt(x, z) {
+  if (x <= restroomParcel.minX || x >= restroomParcel.maxX)
+    return null;
+  return restroomRooms.find((room) => z > room.minZ && z < room.maxZ) ?? null;
+}
+
 // assets/onboarding/gamepad.js
 function readStandardGamepad() {
   const pads = navigator.getGamepads?.() || [];
@@ -280,7 +294,7 @@ var liftLayout = freeze({
   directory: { x: -5, z: 45 },
   desk: { x: 25, z: 45 },
   showcase: { x: -7, z: 18 },
-  facilities: { minX: 21, maxX: 29, minZ: 6, maxZ: 14, status: "planned" }
+  facilities: { ...restroomParcel, status: "open" }
 });
 
 // demos/corporate/gjh/v11/assets/expanded-layout.js
@@ -338,7 +352,7 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
   const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
   return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
 }));
-var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
+var expandedStoreArrival = (id) => id === "restrooms" ? restroomArrival : shopArrivals.get(id) || spatial.arrival(id);
 function expandedStoreAt(x, z) {
   const original = storeAt(x, z, true);
   if (original)
@@ -1762,6 +1776,7 @@ function createUI(expanded = false) {
     addMapService("directory", "D", "Directory", liftLayout.directory);
     addMapService("guest-guide", "G", "Guest guide", liftLayout.desk);
     addMapService("featured-collection", "F", "Featured collection", liftLayout.showcase);
+    addMapService("restrooms", "W", "Public restrooms", restroomArrival);
   }
   const mapButtons = [...document.querySelectorAll("[data-teleport]")];
   for (const store of spatial.stores) {
@@ -1880,7 +1895,12 @@ function createUI(expanded = false) {
   records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for (const [id, name] of [["service-desk", "Guest services"], ["wayfinding-west", "Store directions"], ["wayfinding-east", "Store directions"], ["featured-showcase", "New Moon featured collection"]])
     records.set(id, { name, action: "amenity" });
-  const zones = { atrium: "Courtyard", ...Object.fromEntries(destinations.map((store) => [store.id, store.label])), upper: "Upper level" };
+  const zones = {
+    atrium: "Courtyard",
+    ...Object.fromEntries(restroomRooms.map(({ id, label }) => [id, label])),
+    ...Object.fromEntries(destinations.map((store) => [store.id, store.label])),
+    upper: "Upper level"
+  };
   let available = false;
   let showing3D = false;
   let currentZone = "atrium";
@@ -2019,7 +2039,19 @@ function createUI(expanded = false) {
     viewListener?.(next);
     notifyMode();
   }
+  let restroomActions = null;
   const interactionHandlers = {
+    restroom: (id) => {
+      const message = restroomActions?.operate(id);
+      if (message) {
+        const action = restroomActions.prompt(id);
+        setHudText(inspectVerb, action);
+        labelInspect(action);
+        announce(message);
+      }
+      scene.focus({ preventScroll: true });
+      return Boolean(message);
+    },
     amenity: (id) => openAmenity(id),
     elevator: () => {
       const calling = currentElevatorState && currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0);
@@ -2243,6 +2275,22 @@ function createUI(expanded = false) {
   }
   for (const button2 of mapButtons)
     button2.addEventListener("click", () => travelToStore(button2.dataset.teleport));
+  for (const button2 of document.querySelectorAll("[data-restroom-visit]")) {
+    button2.hidden = !expanded;
+    button2.addEventListener("click", () => {
+      if (!expanded || !available || dialog.open)
+        return;
+      setView(true);
+      if (!interactionRegistry?.dispatch(interactionRegistry.get("travel", "restrooms"))) {
+        announce("Restroom directions are unavailable right now.");
+        return;
+      }
+      mallMap.open = false;
+      help.open = false;
+      announce("At the public restroom entrances.");
+      scene.focus({ preventScroll: true });
+    });
+  }
   function navigateStore(zone) {
     if (showing3D)
       travelToStore(zone);
@@ -2294,11 +2342,24 @@ function createUI(expanded = false) {
           availability: () => showing3D && !dialog.open && store.available,
           handler: () => teleportListener?.(store.id)
         });
+      if (expanded)
+        registry2.register({
+          id: "restrooms",
+          kind: "travel",
+          prompt: "Go to restrooms",
+          availability: () => showing3D && !dialog.open,
+          handler: () => teleportListener?.("restrooms")
+        });
+    },
+    setRestrooms(restrooms) {
+      restroomActions = restrooms;
+      for (const { id, name } of restrooms?.fixtures ?? [])
+        records.set(id, { name, action: "restroom" });
     },
     describeInteraction(item) {
       const record = records.get(item.id);
       const kind = item.kind || (record?.action === "seat" ? "sit" : record?.action === "elevator" ? "travel" : record?.action === "map" ? "open" : "inspect");
-      const prompt = record?.action === "elevator" ? () => currentElevatorState ? currentElevatorState.calling ? "Calling elevator" : currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0) ? "Call elevator" : `Ride to ${currentZone === "upper" ? "ground floor" : "upper landing"}` : "Change level" : record?.action === "map" ? "Map" : kind === "sit" ? "Sit" : kind === "open" ? "Open" : kind === "travel" ? "Travel" : kind === "pickup" ? "Pick up" : "Inspect";
+      const prompt = record?.action === "restroom" ? () => restroomActions.prompt(item.id) : record?.action === "elevator" ? () => currentElevatorState ? currentElevatorState.calling ? "Calling elevator" : currentElevatorState.docked !== (currentZone === "upper" ? currentElevatorUpper : 0) ? "Call elevator" : `Ride to ${currentZone === "upper" ? "ground floor" : "upper landing"}` : "Change level" : record?.action === "map" ? "Map" : kind === "sit" ? "Sit" : kind === "open" ? "Open" : kind === "travel" ? "Travel" : kind === "pickup" ? "Pick up" : "Inspect";
       return {
         kind,
         prompt,
@@ -2510,6 +2571,10 @@ function createUI(expanded = false) {
         const action = typeof prompt === "function" ? prompt() : prompt;
         setHudText(nearbyName, zone === "upper" ? "Elevator · Upper level" : "Elevator · Ground floor");
         setHudText(inspectVerb, action.startsWith("Ride") ? "Ride" : action.startsWith("Call elevator") ? "Call" : "Travel");
+        labelInspect(action);
+      } else if (nearby && records.get(nearby)?.action === "restroom") {
+        const action = selectedInteraction?.prompt?.() || restroomActions.prompt(nearby);
+        setHudText(inspectVerb, action);
         labelInspect(action);
       } else if (nearby && selectedInteraction?.door) {
         const action = typeof selectedInteraction.prompt === "function" ? selectedInteraction.prompt() : selectedInteraction.prompt;
@@ -4568,7 +4633,6 @@ var atriumLayout = Object.freeze({
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  facilitiesBlock: Object.freeze({ x: 25, z: 10, width: 6, depth: 4, height: 3 }),
   upperSeats: Object.freeze([
     Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
     Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
@@ -5541,6 +5605,7 @@ var snapshot = () => Object.freeze({
   paused: modes.paused(),
   elevator: elevator?.state || null,
   elevatorModel: elevator?.kit ? { tier: elevator.kit.tier, status: elevator.kit.status } : null,
+  restrooms: world?.restrooms?.state ?? null,
   amenities: world?.amenities || null,
   npcs: npcs?.state || null,
   renderBudget: atmosphere ? { ...atmosphere.state } : null,
@@ -5654,7 +5719,7 @@ function updateHUD() {
   const p = player.state;
   if (skipRide.hidden === p.elevatorTravel)
     skipRide.hidden = !p.elevatorTravel;
-  const zone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
+  const zone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
   if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding)
     quality.resetSampling();
   currentZone = zone;
@@ -5692,6 +5757,7 @@ function tick(refreshHud = true) {
     return;
   const p = player.state;
   const doorsStart = performance.now();
+  world.restrooms?.update(FIXED_STEP, p);
   for (const door of world.doors) {
     if (door.advance) {
       door.advance(p, FIXED_STEP, reducedMotion2.matches);
@@ -6536,6 +6602,7 @@ async function initialize() {
     }
   });
   ui.setShelfFocus(shelfFocus);
+  ui.setRestrooms(world.restrooms);
   interactions = createInteractionRegistry(world.interactables, (item) => ui.describeInteraction(item));
   ui.setInteractionRegistry(interactions);
   if (player.state.character.physicalProduct) {

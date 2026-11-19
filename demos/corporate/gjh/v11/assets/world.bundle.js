@@ -17,6 +17,169 @@ function createDoorwayOccupancy(R, physics, center, halfExtents, leaves) {
   return () => Boolean(physics.intersectionWithShape(center, rotation, shape, flags, undefined, undefined, undefined, isOccupant));
 }
 
+// demos/corporate/gjh/v11/assets/restroom-layout.js
+var restroomParcel = Object.freeze({ minX: 21, maxX: 29, minZ: 6, maxZ: 14 });
+var restroomArrival = Object.freeze({ x: 31.4, z: 10, yaw: Math.PI / 2 });
+var restroomRooms = Object.freeze([
+  Object.freeze({ id: "restroom-men", label: "Men", sign: "MEN  ·  男厕  ·  LELAKI", minZ: 6, maxZ: 8.5, doorWidth: 1.27 }),
+  Object.freeze({ id: "restroom-women", label: "Women", sign: "WOMEN  ·  女厕  ·  WANITA", minZ: 8.5, maxZ: 11, doorWidth: 1.27 }),
+  Object.freeze({ id: "restroom-accessible", label: "Accessible restroom", sign: "ACCESSIBLE RESTROOM", minZ: 11, maxZ: 14, doorWidth: 1.55 })
+]);
+function restroomAt(x, z) {
+  if (x <= restroomParcel.minX || x >= restroomParcel.maxX)
+    return null;
+  return restroomRooms.find((room) => z > room.minZ && z < room.maxZ) ?? null;
+}
+
+// demos/corporate/gjh/v11/assets/restrooms.js
+function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, materials, doors, interactables }) {
+  const { minX, maxX, minZ, maxZ } = restroomParcel;
+  const roomWidth = maxX - minX;
+  const centreX = (minX + maxX) / 2;
+  const roomHeight = 2.85;
+  const centreZ = (minZ + maxZ) / 2;
+  const wall = (x, z, w, d) => box("ivory", x, roomHeight / 2, z, w, roomHeight, d, true);
+  const mirror = "restroomMirror";
+  materials[mirror] = new T.MeshStandardMaterial({ color: 11455444, roughness: 0.28, metalness: 0.27 });
+  wall(minX, centreZ, 0.17, maxZ - minZ);
+  for (const z of [minZ, ...restroomRooms.map((room) => room.maxZ)])
+    wall(centreX, z, roomWidth, 0.16);
+  box("cream", centreX, roomHeight + 0.05, centreZ, roomWidth, 0.1, maxZ - minZ, true);
+  const actions = new Map;
+  const effectMaterial = new T.MeshBasicMaterial({ color: 11593969 });
+  const leafMaterial = new T.MeshStandardMaterial({ color: 4615012, roughness: 0.67 });
+  const leafShape = new T.BoxGeometry(1, 1, 1);
+  const streamShape = new T.CylinderGeometry(0.02, 0.014, 0.31, 8);
+  const rippleShape = new T.TorusGeometry(0.14, 0.013, 5, 16);
+  for (const room of restroomRooms) {
+    const z = (room.minZ + room.maxZ) / 2, width = room.maxZ - room.minZ;
+    const half = room.doorWidth / 2;
+    const flank = (width - room.doorWidth) / 2;
+    for (const side of [-1, 1])
+      wall(maxX, z + side * (half + flank / 2), 0.18, flank);
+    box("green", maxX, 2.53, z, 0.19, 0.64, room.doorWidth, true);
+    const plaque = sign(room.sign, maxX + 0.107, 2.51, z, room.doorWidth + 0.48, 0.25, true, 58);
+    plaque.rotation.y = Math.PI / 2;
+    if (room.id === "restroom-accessible") {
+      const letters = sign("无障碍洗手间 · TANDAS MESRA OKU", maxX + 0.109, 2.29, z, 2.26, 0.17, true, 54);
+      letters.rotation.y = Math.PI / 2;
+    }
+    box("shellFloor", centreX, 0.016, z, roomWidth - 0.16, 0.02, width - 0.15);
+    box("green", 27.08, 1.03, room.minZ + 0.65, 0.12, 2.06, 1.26, true);
+    const panelWidth = half - 0.02;
+    const leaves = [-1, 1].map((side) => {
+      const panel = new T.Mesh(leafShape, leafMaterial);
+      panel.name = room.id + " sliding door";
+      panel.scale.set(0.055, 2.2, panelWidth);
+      panel.position.set(maxX, 1.1, z + side * panelWidth / 2);
+      scene.add(panel);
+      const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(maxX, 1.1, panel.position.z));
+      physics.createCollider(R.ColliderDesc.cuboid(0.028, 1.1, panelWidth / 2), body);
+      return { side, body, panel };
+    });
+    const occupied = createDoorwayOccupancy(R, physics, { x: maxX, y: 1.1, z }, [0.09, 1.1, half], leaves);
+    doors.push({ zone: room.id, x: maxX, z, open: 0, advance(visitor, dt, reduced) {
+      const near = visitor.y < 2 && Math.abs(visitor.x - maxX) < 1.95 && Math.abs(visitor.z - z) < half + 0.35 || this.open > 0 && occupied();
+      const progress = reduced ? Number(near) : Math.max(0, Math.min(1, this.open + (near ? 1 : -1) * dt * 4.2));
+      if (this.open === progress)
+        return;
+      this.open = progress;
+      for (const { side, body, panel } of leaves) {
+        panel.position.z = z + side * (panelWidth / 2 + progress * (half + 0.025));
+        body.setNextKinematicTranslation({ x: maxX, y: 1.1, z: panel.position.z });
+      }
+    } });
+    const basinX = 25.07, basinZ = room.minZ + 0.37;
+    if (room.id === "restroom-accessible") {
+      for (const dx of [-0.36, 0.36])
+        box("oak", basinX + dx, 0.77, basinZ - 0.22, 0.07, 0.24, 0.18);
+    } else {
+      box("oak", basinX, 0.66, basinZ, 0.94, 0.23, 0.62);
+    }
+    for (const dz of [-0.27, 0.27])
+      box("cream", basinX, 0.89, basinZ + dz, 0.98, 0.1, 0.11);
+    for (const dx of [-0.398, 0.398])
+      box("cream", basinX + dx, 0.89, basinZ, 0.184, 0.1, 0.432);
+    box("ivory", basinX, 0.797, basinZ, 0.613, 0.057, 0.426);
+    cylinder("brass", basinX, 0.828, basinZ, 0.036, 0.014);
+    cylinder("green", basinX + 0.36, 1.024, basinZ - 0.19, 0.044, 0.14);
+    box("brass", basinX + 0.36, 1.103, basinZ - 0.174, 0.044, 0.024, 0.073);
+    collider(basinX, 0.8, basinZ, 0.98, 0.29, 0.65);
+    box("brass", basinX, 1, basinZ - 0.22, 0.05, 0.22, 0.06);
+    box("brass", basinX, 1.11, basinZ - 0.155, 0.05, 0.042, 0.19);
+    box("oak", basinX, 1.47, room.minZ + 0.1, 0.91, 0.77, 0.035);
+    box(mirror, basinX, 1.47, room.minZ + 0.123, 0.84, 0.7, 0.019);
+    box("ivory", basinX, 1.73, room.minZ + 0.139, 0.76, 0.019, 0.009);
+    const water = new T.Mesh(streamShape, effectMaterial);
+    water.name = room.id + " running tap";
+    water.position.set(basinX, 0.955, basinZ - 0.075);
+    water.visible = false;
+    scene.add(water);
+    const toiletX = 22.18, toiletZ = room.minZ + 0.66;
+    box("cream", toiletX - 0.42, 0.53, toiletZ, 0.24, 0.76, 0.53);
+    cylinder("cream", toiletX, 0.25, toiletZ, 0.235, 0.45);
+    cylinder("ivory", toiletX + 0.16, 0.49, toiletZ, 0.305, 0.105);
+    cylinder(mirror, toiletX + 0.16, 0.549, toiletZ, 0.218, 0.014);
+    box("brass", toiletX - 0.42, 0.94, toiletZ, 0.1, 0.02, 0.07);
+    collider(toiletX - 0.025, 0.36, toiletZ, 1, 0.72, 0.69);
+    if (room.id === "restroom-accessible") {
+      box("brass", toiletX, 0.78, toiletZ - 0.47, 1.02, 0.055, 0.055);
+      for (const x of [toiletX - 0.47, toiletX + 0.47])
+        box("brass", x, 0.52, toiletZ - 0.47, 0.05, 0.55, 0.05);
+    }
+    const ripple = new T.Mesh(rippleShape, effectMaterial);
+    ripple.name = room.id + " flush";
+    ripple.position.set(toiletX + 0.16, 0.56, toiletZ);
+    ripple.rotation.x = -Math.PI / 2;
+    ripple.visible = false;
+    scene.add(ripple);
+    for (const [kind, x, anchorZ, mesh] of [
+      ["tap", basinX, basinZ + 0.78, water],
+      ["flush", toiletX + 0.94, toiletZ, ripple]
+    ]) {
+      const id = room.id + "-" + kind;
+      actions.set(id, { room: room.id, kind, mesh, remaining: 0 });
+      interactables.push({ id, x, z: anchorZ, radius: 0.89, availability: ({ player }) => Boolean(player && restroomAt(player.x, player.z)?.id === room.id) });
+    }
+  }
+  return {
+    fixtures: [...actions].map(([id, { kind }]) => ({ id, name: kind === "tap" ? "Handwashing basin" : "Toilet" })),
+    prompt(id) {
+      const action = actions.get(id);
+      return action.kind === "flush" ? "Flush" : action.mesh.visible ? "Turn tap off" : "Turn tap on";
+    },
+    operate(id) {
+      const action = actions.get(id);
+      if (!action)
+        return null;
+      if (action.kind === "flush") {
+        action.remaining = 0.68;
+        action.mesh.visible = true;
+        return "Toilet flushed.";
+      }
+      action.mesh.visible = !action.mesh.visible;
+      return action.mesh.visible ? "Tap running. Wash your hands." : "Tap off.";
+    },
+    update(dt, visitor) {
+      const room = restroomAt(visitor.x, visitor.z)?.id;
+      for (const action of actions.values()) {
+        if (!action.mesh.visible)
+          continue;
+        if (room !== action.room)
+          action.mesh.visible = false;
+        else if (action.kind === "flush") {
+          action.remaining = Math.max(0, action.remaining - dt);
+          action.mesh.scale.setScalar(1 - action.remaining * 0.64);
+          action.mesh.visible = action.remaining > 0;
+        }
+      }
+    },
+    get state() {
+      return Object.fromEntries([...actions].map(([id, { mesh }]) => [id, mesh.visible]));
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/merge-static-geometries.js
 function mergeStaticGeometries(T, geometries) {
   const first = geometries[0];
@@ -691,7 +854,6 @@ var atriumLayout = Object.freeze({
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  facilitiesBlock: Object.freeze({ x: 25, z: 10, width: 6, depth: 4, height: 3 }),
   upperSeats: Object.freeze([
     Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
     Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
@@ -1172,7 +1334,7 @@ var liftLayout = freeze({
   directory: { x: -5, z: 45 },
   desk: { x: 25, z: 45 },
   showcase: { x: -7, z: 18 },
-  facilities: { minX: 21, maxX: 29, minZ: 6, maxZ: 14, status: "planned" }
+  facilities: { ...restroomParcel, status: "open" }
 });
 function cutRectangle(rect, hole) {
   const x0 = Math.max(rect.minX, hole.minX), x1 = Math.min(rect.maxX, hole.maxX);
@@ -3040,12 +3202,6 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
       const p = c + side * 1.38;
       block(12029281, front - 0.18, 2.18, p, 0.32, 0.095, 1.72);
     }
-  }
-  const service = atriumLayout.facilitiesBlock, cap = service.height - floor + 0.014;
-  print(cells.louvres, service.x, cap, service.z, service.width + 0.02, service.depth + 0.02, 1, 0, -Math.PI / 2);
-  for (const side of [-1, 1]) {
-    print(cells.louvres, service.x + side * (service.width / 2 + 0.012), cap - service.height / 2, service.z, service.depth, service.height, 1, side * Math.PI / 2);
-    print(cells.louvres, service.x, cap - service.height / 2, service.z + side * (service.depth / 2 + 0.012), service.width, service.height, 1, side > 0 ? 0 : Math.PI);
   }
   const radius = 66, segments = 12;
   for (let i = 0;i < segments; i++) {
@@ -7906,6 +8062,7 @@ metalnessFactor=vSurface.y;`);
     }));
     const plane = geometry.plane;
     const roomSigns = [];
+    let restrooms = null;
     let signage, interiorKit;
     const shadowCanvas = document.createElement("canvas");
     shadowCanvas.width = shadowCanvas.height = 64;
@@ -8571,10 +8728,7 @@ metalnessFactor=vSurface.y;`);
       for (const radius2 of [2.2, 3.2])
         solid("torus", "glow", 10, 8.05, 20, radius2, radius2, 0.8, 0, -Math.PI / 2);
       lightPool(10, 0.053, 20, 8, 8);
-      const reserved = atriumLayout.facilitiesBlock;
-      box("ivory", reserved.x, reserved.height / 2, reserved.z, reserved.width, reserved.height, reserved.depth, true);
-      const facility = sign("FUTURE FACILITIES", 28.07, 2, 10, 2.5, 0.35, true, 60);
-      facility.rotation.y = Math.PI / 2;
+      restrooms = buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, materials: materials2, doors, interactables });
       for (const x of [-12, 32])
         box("brass", x, 0.024, 21, 0.035, 0.008, 36);
       for (const z of [3, 39])
@@ -8823,7 +8977,7 @@ metalnessFactor=vSurface.y;`);
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let upperWarmStatus = null, landingLights;
     let brandWallPromise = null;
-    return { signage, interiors: interiorKit, newMoonExhibit: expanded ? newMoonExhibit : {}, getPreloadedModels() {
+    return { signage, interiors: interiorKit, restrooms, newMoonExhibit: expanded ? newMoonExhibit : {}, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;

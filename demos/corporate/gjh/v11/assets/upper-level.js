@@ -238,17 +238,6 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   }
 
 
-  // From the upper rail the previously unexposed service roof and its back
-  // face are in direct view. A louvred screen follows the reserved footprint.
-  const service=atriumLayout.facilitiesBlock,cap=service.height-floor+.014;
-  print(cells.louvres,service.x,cap,service.z,service.width+.02,service.depth+.02,1,0,-Math.PI/2);
-  for(const side of [-1,1]){
-    print(cells.louvres,service.x+side*(service.width/2+.012),cap-service.height/2,service.z,
-      service.depth,service.height,1,side*Math.PI/2);
-    print(cells.louvres,service.x,cap-service.height/2,service.z+side*(service.depth/2+.012),
-      service.width,service.height,1,side>0?0:Math.PI);
-  }
-
   // World-space sky continues from warm horizon to blue zenith as the camera turns.
   const radius=66,segments=12;
   for(let i=0;i<segments;i++){

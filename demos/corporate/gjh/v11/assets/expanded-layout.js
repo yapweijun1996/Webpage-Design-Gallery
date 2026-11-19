@@ -1,5 +1,6 @@
 import {spatial, storeAt} from './spatial.js';
 import {liftLayout} from './lift-layout.js';
+import {restroomArrival} from './restroom-layout.js';
 // Stage 1 coordinates translated to preserve the three existing shop interiors.
 // Plan origin is south-west; world X = plan X - 25, world Z = 48 - plan Y.
 const slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
@@ -45,7 +46,7 @@ const shopArrivals = new Map(plannedSpaces.map(store => {
   const entrance = shopEntrance(expandedLayout.slots[Number(store.number)-1]);
   return [store.id,Object.freeze({x:entrance.x+2.4*entrance.normalX,z:entrance.z+2.4*entrance.normalZ,yaw:entrance.yaw})];
 }));
-export const expandedStoreArrival = id => shopArrivals.get(id) || spatial.arrival(id);
+export const expandedStoreArrival = id => id === 'restrooms' ? restroomArrival : shopArrivals.get(id) || spatial.arrival(id);
 export function expandedStoreAt(x,z) {
   const original=storeAt(x,z,true);
   if(original)return original;

@@ -1,3 +1,4 @@
+import {restroomArrival, restroomRooms} from './restroom-layout.js';
 import {createActionDialog} from '../../../../../assets/onboarding/action-dialog.js';
 import {createTutorial} from './ux-tutorial.js';
 export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -384,6 +385,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     addMapService('directory','D','Directory',liftLayout.directory);
     addMapService('guest-guide','G','Guest guide',liftLayout.desk);
     addMapService('featured-collection','F','Featured collection',liftLayout.showcase);
+    addMapService('restrooms','W','Public restrooms',restroomArrival);
   }
   const mapButtons = [...document.querySelectorAll('[data-teleport]')];
   // Preserve readable static HTML without JS; synchronize the live map and
@@ -461,7 +463,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
   records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
-  const zones = { atrium: 'Courtyard', ...Object.fromEntries(destinations.map(store=>[store.id,store.label])), upper: 'Upper level' };
+  const zones = { atrium: 'Courtyard',
+    ...Object.fromEntries(restroomRooms.map(({id,label})=>[id,label])), ...Object.fromEntries(destinations.map(store=>[store.id,store.label])), upper: 'Upper level' };
   let available = false;
   let showing3D = false;
   let currentZone = 'atrium';
@@ -569,7 +572,19 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     viewListener?.(next);
     notifyMode();
   }
+  let restroomActions = null;
   const interactionHandlers = {
+    restroom: id => {
+      const message=restroomActions?.operate(id);
+      if (message) {
+        const action = restroomActions.prompt(id);
+        setHudText(inspectVerb,action);
+        labelInspect(action);
+        announce(message);
+      }
+      scene.focus({preventScroll:true});
+      return Boolean(message);
+    },
     amenity: id => openAmenity(id),
     elevator: () => {const calling=currentElevatorState&&currentElevatorState.docked!==(currentZone==='upper'?currentElevatorUpper:0);const ok=elevatorListener?.();announce(ok?(calling?'Elevator called. Wait here, then choose Ride when it arrives.':'Elevator travelling to the other level.'):'Wait for the elevator. Return held products to their shelves or add them to your bag, and stow the cart before travelling.');scene.focus({preventScroll:true});return ok;},
     seat: id => {const ok=seatListener?.(true,id);seatNotice=null;if(!ok){seatNotice=cartState().heldProduct?heldInstruction(cartState()):'Seat path blocked. Approach the clear front of the bench.';setHudText(nearbyName, seatNotice);announce(seatNotice);}scene.focus({preventScroll:true});return ok;},
@@ -728,6 +743,22 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     announce(`At the ${store.label} storefront.`);scene.focus({preventScroll:true});
   }
   for(const button of mapButtons)button.addEventListener('click',()=>travelToStore(button.dataset.teleport));
+  for(const button of document.querySelectorAll('[data-restroom-visit]')) {
+    button.hidden=!expanded;
+    button.addEventListener('click',()=>{
+      if(!expanded||!available||dialog.open)return;
+      setView(true);
+      if(!interactionRegistry?.dispatch(interactionRegistry.get('travel','restrooms'))) {
+        announce('Restroom directions are unavailable right now.');
+        return;
+      }
+      mallMap.open=false;
+      help.open=false;
+      announce('At the public restroom entrances.');
+      scene.focus({preventScroll:true});
+    });
+  }
+
   function navigateStore(zone){
     if(showing3D)travelToStore(zone);
     else {storeFilter='all';updateCatalog();const title=document.getElementById(`${zone}-title`) || document.getElementById(zone)?.querySelector('h3');if(!title)return;if(conceptDirectory.contains(title))conceptDirectory.open=true;title.tabIndex=-1;title.scrollIntoView({block:'start'});title.focus({preventScroll:true});}
@@ -759,11 +790,17 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       for (const store of destinations) registry.register({id:store.id,kind:'travel',prompt:`Visit ${store.label}`,
         availability:()=>showing3D&&!dialog.open&&store.available,
         handler:()=>teleportListener?.(store.id)});
+      if(expanded)registry.register({id:'restrooms',kind:'travel',prompt:'Go to restrooms',
+        availability:()=>showing3D&&!dialog.open,handler:()=>teleportListener?.('restrooms')});
+    },
+    setRestrooms(restrooms) {
+      restroomActions=restrooms;
+      for(const {id,name} of restrooms?.fixtures??[])records.set(id,{name,action:'restroom'});
     },
     describeInteraction(item) {
       const record = records.get(item.id);
       const kind = item.kind || (record?.action === 'seat' ? 'sit' : record?.action === 'elevator' ? 'travel' : record?.action === 'map' ? 'open' : 'inspect');
-      const prompt = record?.action === 'elevator' ? () => currentElevatorState ? (currentElevatorState.calling ? 'Calling elevator' : currentElevatorState.docked !== (currentZone === 'upper' ? currentElevatorUpper : 0) ? 'Call elevator' : `Ride to ${currentZone === 'upper' ? 'ground floor' : 'upper landing'}`) : 'Change level' : record?.action === 'map' ? 'Map' : kind === 'sit' ? 'Sit' : kind === 'open' ? 'Open' : kind === 'travel' ? 'Travel' : kind === 'pickup' ? 'Pick up' : 'Inspect';
+      const prompt = record?.action === 'restroom' ? () => restroomActions.prompt(item.id) : record?.action === 'elevator' ? () => currentElevatorState ? (currentElevatorState.calling ? 'Calling elevator' : currentElevatorState.docked !== (currentZone === 'upper' ? currentElevatorUpper : 0) ? 'Call elevator' : `Ride to ${currentZone === 'upper' ? 'ground floor' : 'upper landing'}`) : 'Change level' : record?.action === 'map' ? 'Map' : kind === 'sit' ? 'Sit' : kind === 'open' ? 'Open' : kind === 'travel' ? 'Travel' : kind === 'pickup' ? 'Pick up' : 'Inspect';
       return {kind, prompt,
         availability: () => records.has(item.id), handler: () => {
           if (dialog.open || bag.open || amenityPanel.dialog.open) return false;
@@ -928,6 +965,10 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         const action = typeof prompt === 'function' ? prompt() : prompt;
         setHudText(nearbyName, zone === 'upper' ? 'Elevator · Upper level' : 'Elevator · Ground floor');
         setHudText(inspectVerb, action.startsWith('Ride') ? 'Ride' : action.startsWith('Call elevator') ? 'Call' : 'Travel');
+        labelInspect(action);
+      } else if (nearby && records.get(nearby)?.action==='restroom') {
+        const action=selectedInteraction?.prompt?.() || restroomActions.prompt(nearby);
+        setHudText(inspectVerb,action);
         labelInspect(action);
       } else if (nearby && selectedInteraction?.door) {
         const action = typeof selectedInteraction.prompt === 'function' ? selectedInteraction.prompt() : selectedInteraction.prompt;

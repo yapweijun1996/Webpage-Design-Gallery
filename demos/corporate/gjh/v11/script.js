@@ -1,3 +1,4 @@
+import {restroomAt} from './assets/restroom-layout.js';
 import {readStandardGamepad,gamepadMotion} from '../../../../assets/onboarding/gamepad.js';
 import {createPerformanceMonitor} from './assets/performance-monitor.js';
 import {createPerformancePanel} from './assets/performance-panel.js';
@@ -231,7 +232,7 @@ function heroVisibility(number) {
 }
 const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:world?.modelPreload || null, mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
-  elevator:elevator?.state||null, elevatorModel:elevator?.kit?{tier:elevator.kit.tier,status:elevator.kit.status}:null, amenities: world?.amenities || null,
+  elevator:elevator?.state||null, elevatorModel:elevator?.kit?{tier:elevator.kit.tier,status:elevator.kit.status}:null, restrooms:world?.restrooms?.state??null, amenities: world?.amenities || null,
   npcs: npcs?.state || null,
   renderBudget: atmosphere ? {...atmosphere.state} : null,
   theme: mallTheme?.state() || null,
@@ -291,7 +292,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 function updateHUD() {
   const p = player.state;
   if (skipRide.hidden===p.elevatorTravel) skipRide.hidden=!p.elevatorTravel;
-  const zone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
+  const zone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding) quality.resetSampling();
   currentZone = zone;
   wasRiding = Boolean(p.elevatorTravel);
@@ -324,6 +325,7 @@ function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   const doorsStart = performance.now();
+  world.restrooms?.update(STEP,p);
   for (const door of world.doors) {
     if (door.advance) { door.advance(p, STEP, reducedMotion.matches); continue; }
     const open = shouldOpenStoreDoor(door, p) || (door.open > 0 && door.occupied());
@@ -906,6 +908,7 @@ async function initialize() {
     onChange: () => { syncMode(); requestRender(); }, onDetails: ui.inspect, onAdd: ui.addToBag,
     onRestore: resized => { if (resized) player.updateCamera(0, true); }});
   ui.setShelfFocus(shelfFocus);
+  ui.setRestrooms(world.restrooms);
   interactions = createInteractionRegistry(world.interactables, item => ui.describeInteraction(item));
   ui.setInteractionRegistry(interactions);
   if (player.state.character.physicalProduct) {

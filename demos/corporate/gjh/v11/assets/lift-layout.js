@@ -1,3 +1,5 @@
+import {restroomParcel} from './restroom-layout.js';
+
 // Expanded coordinates use worldX = planX - 25, worldZ = 48 - planY.
 const freeze = value => {
   if (value && typeof value === 'object') { Object.values(value).forEach(freeze); Object.freeze(value); }
@@ -12,7 +14,7 @@ export const liftLayout = freeze({
   threshold:{minX:-5,maxX:-4.6,minZ:9,maxZ:11},
   exit:{x:-6.4,z:10}, radius:1.15,
   directory:{x:-5,z:45}, desk:{x:25,z:45}, showcase:{x:-7,z:18},
-  facilities:{minX:21,maxX:29,minZ:6,maxZ:14,status:'planned'},
+  facilities:{...restroomParcel,status:'open'},
 });
 // Four disjoint panels cover the source rectangle except its intersection with a cutout.
 export function cutRectangle(rect, hole) {

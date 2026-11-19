@@ -387,6 +387,15 @@ function createSpatialRegistry(source, floor = FLOOR) {
 var spatial = createSpatialRegistry(SOURCE);
 var courtyardArrival = Object.freeze({ x: -2, z: 12 });
 
+// demos/corporate/gjh/v11/assets/restroom-layout.js
+var restroomParcel = Object.freeze({ minX: 21, maxX: 29, minZ: 6, maxZ: 14 });
+var restroomArrival = Object.freeze({ x: 31.4, z: 10, yaw: Math.PI / 2 });
+var restroomRooms = Object.freeze([
+  Object.freeze({ id: "restroom-men", label: "Men", sign: "MEN  ·  男厕  ·  LELAKI", minZ: 6, maxZ: 8.5, doorWidth: 1.27 }),
+  Object.freeze({ id: "restroom-women", label: "Women", sign: "WOMEN  ·  女厕  ·  WANITA", minZ: 8.5, maxZ: 11, doorWidth: 1.27 }),
+  Object.freeze({ id: "restroom-accessible", label: "Accessible restroom", sign: "ACCESSIBLE RESTROOM", minZ: 11, maxZ: 14, doorWidth: 1.55 })
+]);
+
 // demos/corporate/gjh/v11/assets/lift-layout.js
 var freeze = (value) => {
   if (value && typeof value === "object") {
@@ -409,7 +418,7 @@ var liftLayout = freeze({
   directory: { x: -5, z: 45 },
   desk: { x: 25, z: 45 },
   showcase: { x: -7, z: 18 },
-  facilities: { minX: 21, maxX: 29, minZ: 6, maxZ: 14, status: "planned" }
+  facilities: { ...restroomParcel, status: "open" }
 });
 
 // demos/corporate/gjh/v11/assets/expanded-layout.js
@@ -467,7 +476,7 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
   const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
   return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
 }));
-var expandedStoreArrival = (id) => shopArrivals.get(id) || spatial.arrival(id);
+var expandedStoreArrival = (id) => id === "restrooms" ? restroomArrival : shopArrivals.get(id) || spatial.arrival(id);
 
 // demos/corporate/gjh/v11/assets/camera-controller.js
 var MIN_DISTANCE = 1;
@@ -647,7 +656,6 @@ var atriumLayout = Object.freeze({
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  facilitiesBlock: Object.freeze({ x: 25, z: 10, width: 6, depth: 4, height: 3 }),
   upperSeats: Object.freeze([
     Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
     Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),

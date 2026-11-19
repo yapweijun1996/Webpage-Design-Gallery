@@ -1,5 +1,7 @@
 # V11 stage 7 — expanded lift and facilities
 
+This page records the Stage 7 baseline. The current public layout is documented in [Expanded V11 public facilities](gjh-v11-public-facilities.md).
+
 Status: local expanded-layout implementation and verification. The default scene and its existing experimental lift remain unchanged. The expanded preview uses a separate visitor-only lift and a small upper viewing area, not a second complete retail floor.
 
 ## Spatial changes

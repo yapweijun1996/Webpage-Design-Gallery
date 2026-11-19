@@ -1,3 +1,4 @@
+import {buildRestrooms} from './restrooms.js';
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
 import {filterWallArtwork, setupArtworkTexture} from './artwork-textures.js';
@@ -242,6 +243,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     return tagShopLod(mesh);
   }
   const roomSigns = [];
+  let restrooms = null;
   let signage, interiorKit;
   function sign(text, x, y, z, width, height = .4, framed = false, fontSize = 42) {
     const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 128;
@@ -946,10 +948,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     for(const radius of [2.2,3.2]) solid('torus','glow',10,8.05,20,radius,radius,.8,0,-Math.PI/2);
     lightPool(10,.053,20,8,8);
 
-    // This is a closed reservation, not an operating facility.
-    const reserved=atriumLayout.facilitiesBlock;
-    box('ivory',reserved.x,reserved.height/2,reserved.z,reserved.width,reserved.height,reserved.depth,true);
-    const facility=sign('FUTURE FACILITIES',28.07,2,10,2.5,.35,true,60);facility.rotation.y=Math.PI/2;
+    restrooms=buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,materials,doors,interactables});
     for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
     for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
     // The story gallery lines the south perimeter, behind the directory.
@@ -1294,7 +1293,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
-  return {signage, interiors:interiorKit, newMoonExhibit:expanded ? newMoonExhibit : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, interiors:interiorKit, restrooms, newMoonExhibit:expanded ? newMoonExhibit : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
