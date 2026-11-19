@@ -724,7 +724,8 @@ var tramCaptions = Object.freeze([
   ["S17", 144.5, "Gigaset", "A gabled felt telephone alcove frames a small real-scale cordless handset at the end of a warm domestic corridor."]
 ].map(([id, distance, name, feature]) => Object.freeze({ id, distance, name, feature, direction: "On your left" })));
 function tramEnabled(expanded, search) {
-  return expanded && new URLSearchParams(search).get("tram") === "1";
+  const flag = new URLSearchParams(search).get("tram");
+  return expanded && flag !== "0" && flag !== "off";
 }
 var idle = Object.freeze({ phase: "idle", distance: 0, caption: -1, active: false, seated: false, blocked: false });
 

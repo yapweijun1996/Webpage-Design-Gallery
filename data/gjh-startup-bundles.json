@@ -98,7 +98,7 @@
     "demos/corporate/gjh/v11/assets/test-walk.js": "61a5cb3589348c5dc02be0b75986710d996f4eb5beefe83cc87aaf13fb638680",
     "demos/corporate/gjh/v11/assets/tram-car.js": "0bb6340a4310c5b6dca5382ba940f39da3f1020c50aee83da8ccdf314a70f308",
     "demos/corporate/gjh/v11/assets/tram-layout.js": "c0731472686ff79be4e310ebd8116b5bdd714fa790823c12529aae1c5e7cde37",
-    "demos/corporate/gjh/v11/assets/tram-ride.js": "e9e5c3d0f9870f7230d6c3fbb36b60ff6528dd14661f87db0146f9a08a7eea76",
+    "demos/corporate/gjh/v11/assets/tram-ride.js": "d58e6d76d569d0f0edf0f87f4f6ee520c298bde1216769835b1c8ec18dc2e4b9",
     "demos/corporate/gjh/v11/assets/ui.js": "c63b5ed1e5200dfbdeacea4c8d69d9c5c2eed59f07c89f1f1ebd8ddf0c573bf2",
     "demos/corporate/gjh/v11/assets/upper-level-atlas.js": "a6d8ee80872f7b7e9d6a3f8813d4b54a67b8e8daa2b06e117e6351096ebcbb8f",
     "demos/corporate/gjh/v11/assets/upper-level.js": "6cb225eab3dbcbd5c5797a8e1821cacf28b336f666e3c61e9572fa1a522b9603",
@@ -114,9 +114,9 @@
     "demos/corporate/gjh/v11/script.js": "40f7bf6b3d44f4c1cdd05c2e5365e1e48fdbc1a6f7c8020abc061cda906a95df"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "6a61e1fc661439d14493bf91208bdf5af5e623b9fd507139c8b9a07f543c03f2",
+    "demos/corporate/gjh/v11/script.bundle.js": "97808e9d4a521fb7e2e7624a5e39b19cdd8b99aa091b98fa45fdd04e4b13351c",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "5f52f0c25854b8724511419cd5394d42e371c54189d6f888d77fda070a7e8c75",
-    "demos/corporate/gjh/v11/assets/player.bundle.js": "bc7fa0c22c0588be2ba0e5502f0c8f66a3d52fd7c6435a272fd9b546511c2f42",
+    "demos/corporate/gjh/v11/assets/player.bundle.js": "1c0f154cbc307870f3d321bd8ca8b2fdb840064356453f23688f91869dada0e7",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "47baec7837deb630e46cb0bc58041d6d98e5e9cb7d841c3c7126eb3d81d5ec87"
   }
 }

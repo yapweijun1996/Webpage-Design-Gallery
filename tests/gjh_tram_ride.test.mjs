@@ -108,10 +108,13 @@ test('feature gating and blocking checks distinguish landing, track, and upper-f
   assert.deepEqual([tramLanding.x, tramLanding.z], [10,39]);
   assert.equal(atTramLanding({x:10,z:39}), true);
   assert.equal(atTramLanding({x:10,z:40}), false);
-  assert.equal(tramEnabled(true, ''), false);
-  assert.equal(tramEnabled(true, '?tram=debug'), false);
+  // Default on in the expanded mall (owner decision 2026-11-20); ?tram=0 or ?tram=off disables it.
+  assert.equal(tramEnabled(true, ''), true);
+  assert.equal(tramEnabled(true, '?tram=debug'), true);
   assert.equal(tramEnabled(false, '?tram=1'), false);
   assert.equal(tramEnabled(true, '?tram=1'), true);
+  assert.equal(tramEnabled(true, '?tram=0'), false);
+  assert.equal(tramEnabled(true, '?tram=off'), false);
   assert.match(tramBoardReason({pushing:true}), /cart/);
   assert.match(tramBoardReason({character:{physicalProduct:{phase:'held'}}}), /held product/);
   assert.equal(tramBoardReason({character:{physicalProduct:{phase:'empty'}}}), '');
@@ -189,7 +192,7 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
   const {createPlayer} = await import('../demos/corporate/gjh/v11/assets/player.bundle.js');
   const {createTramHud} = await import('../demos/corporate/gjh/v11/assets/ui.js');
 
-  for (const search of ['', '?tram=1']) {
+  for (const search of ['?tram=0', '']) {
     globalThis.document = stubDocument();
     globalThis.location.search = search;
     const physics = new R.World({x:0, y:-24, z:0});
@@ -216,7 +219,7 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
       return registry.nearest(position, {player:position, zone:'atrium'}).item;
     };
     let item = select();
-    if (!search) {
+    if (search === '?tram=0') {
       assert.deepEqual(tramRequests, []);
       assert.equal(item, null);
       assert.equal(registry.tram, undefined);
