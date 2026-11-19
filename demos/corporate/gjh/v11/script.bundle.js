@@ -673,7 +673,7 @@ function roundedLoop(west, north, east, south, radius = 2) {
   } };
 }
 var tramEnvelopes = {
-  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  car: { width: 1.4, length: 3, bottom: 0, top: 2.2 },
   passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
   camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
 };
@@ -7430,6 +7430,7 @@ function applyProfile(profile) {
   profile = quality.apply(profile);
   themeStage?.setTier?.(profile.tier);
   elevator?.kit?.select(profile.tier);
+  player?.setTramTier?.(profile.tier);
   npcs?.setQuality({ tier: profile.tier, mobile: renderWidth < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
   if (!contextLost)
     renderer.shadowMap.enabled = profile.shadows;
@@ -7718,7 +7719,7 @@ async function initialize() {
     }
   } : null;
   const { createPlayer } = await import("./assets/player.bundle.js");
-  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait);
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
   if (player.npcSource)
     await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")

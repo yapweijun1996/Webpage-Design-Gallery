@@ -514,11 +514,11 @@ function roundedLoop(west, north, east, south, radius = 2) {
   } };
 }
 var tramEnvelopes = {
-  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  car: { width: 1.4, length: 3, bottom: 0, top: 2.2 },
   passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
   camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
 };
-var seatEyeHeight = 1.48;
+var seatEyeHeight = 1.665;
 var chaseDistance = 5.2;
 var tramStations = {
   entry: { x: 10, z: 40.5 },
@@ -526,59 +526,6 @@ var tramStations = {
   upper: { x: -13.5, z: 10, y: 7.2 }
 };
 var tramRoute = roundedLoop(tramStations.upper.x, 2.25, tramStations.east.x, tramStations.entry.z);
-function createTramCar(T, scene) {
-  const existingMaterial = scene.getObjectByName("box plain")?.material;
-  const material = existingMaterial ?? new T.MeshStandardMaterial({ roughness: 0.72 });
-  const geometry = new T.BoxGeometry;
-  const { width, length } = tramEnvelopes.car;
-  const jade = 1391664, cream = 14931639, brass = 11901794;
-  const pieces = [
-    [0, 0.11, 0, width, 0.1, length, jade],
-    [0, 0.47, 1.44, width, 0.62, 0.12, jade],
-    [0, 0.43, -1.44, width, 0.54, 0.12, jade],
-    [-0.64, 0.38, 0, 0.12, 0.44, 2.78, jade],
-    [0.64, 0.38, -0.98, 0.12, 0.44, 0.75, jade],
-    [0.64, 0.38, 0.98, 0.12, 0.44, 0.75, jade],
-    [0, 0.4, -0.05, 0.98, 0.16, 0.46, jade],
-    [0, 0.49, -0.05, 0.98, 0.06, 0.46, cream],
-    [0, 0.78, -0.3, 0.98, 0.42, 0.12, cream],
-    [0, 0.81, 1.44, width, 0.06, 0.12, brass],
-    [0, 0.73, -1.44, width, 0.06, 0.12, brass],
-    [0, 0.4, -0.99, 0.98, 0.16, 0.46, jade],
-    [0, 0.49, -0.99, 0.98, 0.06, 0.46, cream],
-    [0, 0.78, -1.24, 0.98, 0.42, 0.12, cream]
-  ];
-  if (existingMaterial) {
-    const surfaces = new Float32Array(pieces.length * 2);
-    pieces.forEach((_, i) => {
-      surfaces[i * 2] = 0.72;
-    });
-    geometry.setAttribute("instanceSurface", new T.InstancedBufferAttribute(surfaces, 2));
-  }
-  const mesh = new T.InstancedMesh(geometry, material, pieces.length);
-  mesh.name = "Mall tram";
-  mesh.visible = false;
-  const matrix = new T.Matrix4, color = new T.Color;
-  pieces.forEach(([x, y, z, w, h, l, tint], index) => {
-    mesh.setMatrixAt(index, matrix.makeScale(w, h, l).setPosition(x, y, z));
-    mesh.setColorAt(index, color.setHex(tint));
-  });
-  scene.add(mesh);
-  return {
-    mesh,
-    place({ x, z, heading }) {
-      mesh.position.set(x, 0, z);
-      mesh.rotation.y = heading;
-    },
-    dispose() {
-      scene.remove(mesh);
-      mesh.dispose();
-      geometry.dispose();
-      if (!existingMaterial)
-        material.dispose();
-    }
-  };
-}
 
 // demos/corporate/gjh/v11/assets/camera-controller.js
 var MIN_DISTANCE = 1;
@@ -748,6 +695,83 @@ function interpolate(from, to, alpha) {
 function interpolateAngle(from, to, alpha) {
   const difference = to - from;
   return from + Math.atan2(Math.sin(difference), Math.cos(difference)) * alpha;
+}
+
+// demos/corporate/gjh/v11/assets/tram-car.js
+function createTramCar(T, scene, prepareModel) {
+  const mesh = new T.Group;
+  mesh.name = "Mall tram";
+  mesh.visible = false;
+  scene.add(mesh);
+  let current, anchor, request, tier, failed = false;
+  async function select(next = "balanced") {
+    if (tier === next)
+      return;
+    tier = next;
+    request?.abort();
+    const controller = new AbortController;
+    request = controller;
+    failed = false;
+    let release;
+    try {
+      const { loadVisitorGLTF, disposeVisitorScene } = await import("./visitor-gltf.js");
+      controller.signal.throwIfAborted();
+      const url = new URL("./tram/" + next + ".glb", import.meta.url);
+      const { scene: model } = await loadVisitorGLTF(url);
+      release = () => {
+        model.removeFromParent();
+        disposeVisitorScene(model);
+      };
+      controller.signal.throwIfAborted();
+      const seat = model.getObjectByName("TramSeatAnchor");
+      if (!seat)
+        throw Error("Missing tram seat");
+      await prepareModel?.(model, { late: false, fence: true, signal: controller.signal });
+      controller.signal.throwIfAborted();
+      current?.();
+      mesh.add(model);
+      anchor = seat;
+      current = release;
+      release = null;
+    } catch {
+      if (!controller.signal.aborted) {
+        tier = null;
+        failed = true;
+      }
+    } finally {
+      release?.();
+    }
+  }
+  return {
+    mesh,
+    select,
+    get anchor() {
+      return anchor;
+    },
+    get reason() {
+      if (anchor)
+        return "";
+      return failed ? "Tram unavailable." : "Preparing the tram.";
+    },
+    place({ x, z, heading }) {
+      mesh.position.set(x, 0, z);
+      mesh.rotation.y = heading;
+    },
+    seatPose({ x, z, heading }) {
+      const offset = anchor.position, sin = Math.sin(heading), cos = Math.cos(heading);
+      return {
+        x: x + offset.x * cos + offset.z * sin,
+        y: offset.y,
+        z: z - offset.x * sin + offset.z * cos,
+        heading: heading + anchor.rotation.y
+      };
+    },
+    dispose() {
+      request?.abort();
+      current?.();
+      mesh.removeFromParent();
+    }
+  };
 }
 
 // demos/corporate/gjh/v11/assets/tram-ride.js
@@ -931,24 +955,15 @@ function landingOccupied(scene) {
   const { x, z } = tramStations.entry;
   return someVisitor(scene, (p) => Math.abs(p.x - x) < 0.6 + VISITOR_RADIUS && p.z >= tramLanding.z - 0.6 - VISITOR_RADIUS && p.z <= z + VISITOR_RADIUS);
 }
-function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel }) {
+function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel, tier }) {
   if (!tramEnabled(expanded, search))
     return null;
   const exit = { x: tramLanding.x, y: 0.91, z: tramLanding.z };
-  const seat = {
-    x: tramStations.entry.x,
-    y: 0.52,
-    z: tramStations.entry.z,
-    id: TRAM_STATION_ID,
-    name: "Mall tram",
-    floor: 0.16,
-    footY: 0.16,
-    frontEdge: 0.26
-  };
-  const seatTarget = { x: seat.x, y: seat.floor + 0.89, z: seat.z };
-  const car = createTramCar(T, scene);
-  if (prepareModel)
-    prepareModel(car.mesh, { late: false }).catch(() => {});
+  const car = createTramCar(T, scene, prepareModel);
+  car.select(tier);
+  const floor = 0.4025;
+  const seat = { id: TRAM_STATION_ID, name: "Mall tram", floor, footY: floor, frontEdge: 0.2 };
+  const seatAt = (distance) => car.seatPose(tramRoute.sample(distance));
   let previousDistance = 0;
   function nearStation() {
     const p = getPosition();
@@ -956,9 +971,12 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
   }
   const ride = createTramRide({
     blocked: (from, to) => tramTrackBlocked(scene, ride.seated ? null : getPosition(), from, to),
-    canBoard: () => !getBoardReason() && !landingOccupied(scene) && clearPath(getPosition(), seatTarget),
+    canBoard: () => !getBoardReason() && !landingOccupied(scene) && clearPath(getPosition(), { ...seatAt(0), y: floor + 0.89 }),
     canExit: () => !landingOccupied(scene) && clearPath(getPosition(), exit),
-    onBoard: (pose) => enterSeat(seat, pose),
+    onBoard: () => {
+      const pose = seatAt(0);
+      enterSeat(Object.assign(seat, pose), pose);
+    },
     onExit: () => exitSeat(exit)
   });
   const controls = {
@@ -966,10 +984,10 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
       return ride.state;
     },
     get reason() {
-      return getBoardReason();
+      return getBoardReason() || car.reason;
     },
     board() {
-      if (getBoardReason() || !nearStation() || !ride.board())
+      if (controls.reason || !nearStation() || !ride.board())
         return false;
       previousDistance = ride.distance;
       car.place(tramRoute.sample(ride.distance));
@@ -988,6 +1006,7 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
   };
   return {
     controls,
+    selectTier: car.select,
     get seated() {
       return ride.seated;
     },
@@ -1003,7 +1022,7 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
         car.mesh.visible = false;
         return null;
       }
-      return ride.seated ? tramRoute.sample(ride.distance) : null;
+      return ride.seated ? seatAt(ride.distance) : null;
     },
     sync(alpha) {
       if (!ride.active)
@@ -1012,6 +1031,9 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
       car.place(tramRoute.sample(distance));
       car.mesh.visible = distance > -APPROACH;
       return distance;
+    },
+    visualSeat(target) {
+      car.anchor.getWorldPosition(target);
     },
     dispose() {
       car.dispose();
@@ -1301,7 +1323,7 @@ function playerCameraFraming(model, expanded, width, height) {
     lookAhead: tripo ? 1.7 : 0
   };
 }
-async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel, portrait) {
+async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel, portrait, tramTier = "balanced") {
   const character = await createCharacter(T, prepareModel, portrait);
   const model = character.state.model;
   const visual = character.visual;
@@ -1704,7 +1726,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const wasRidingTram = Boolean(beforeTram);
     const tramPose = tram?.update(dt);
     if (tramPose) {
-      const heading = tramPose.heading + Math.PI;
+      const heading = tramPose.heading;
       yaw += interpolateAngle(facing, heading, 1) - facing;
       facing = heading;
       body.setNextKinematicTranslation({ x: tramPose.x, y: seat.floor + 0.89, z: tramPose.z });
@@ -1834,6 +1856,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const from = previousPosition ?? p;
     const x = interpolate(from.x, p.x, alpha), y = interpolate(from.y, p.y, alpha), z = interpolate(from.z, p.z, alpha);
     visual.position.set(x, y - 0.875, z);
+    if (tram?.seated) {
+      tram.visualSeat(visual.position);
+      visual.position.y = seat.floor + 0.015;
+    }
     const angle = alpha === 1 ? facing : interpolateAngle(previousFacing, facing, alpha);
     visual.rotation.y = angle;
     contact.position.set(x, Math.max(0.05, y - 0.83), z);
@@ -2263,6 +2289,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     }),
     clearPath,
     prepareModel,
+    tier: tramTier,
     enterSeat(rideSeat, pose) {
       clearInput();
       injected = null;
@@ -2277,7 +2304,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       seatPhase = "seated";
       capsule.setEnabled(false);
       moveSeat(seatBodyTarget(seat));
-      yaw = facing = pose.heading + Math.PI;
+      yaw = facing = pose.heading;
       character.setSeated(true);
       resetInterpolation();
     },
@@ -2320,6 +2347,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     startCollection,
     cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
+    setTramTier: tram?.selectTier,
     dispose() {
       tram?.dispose();
       character.dispose?.();

@@ -36,7 +36,7 @@ JOBS = (
     },
     {
         'entry': BASE / 'assets/player.js', 'output': BASE / 'assets/player.bundle.js',
-        'external': ('*character-v2.js', '*character-tripo.js', '*GLTFLoader.js', '*push-cart.js', '*seated-pose.js',
+        'external': ('*visitor-gltf.js', '*character-v2.js', '*character-tripo.js', '*GLTFLoader.js', '*push-cart.js', '*seated-pose.js',
                      '*collection-gesture.js', '*carry-bag.js'),
         'rewrite': (('"./character-v2.js"', '"./character-v2.bundle.js"'),),
     },

@@ -427,7 +427,7 @@ function roundedLoop(west, north, east, south, radius = 2) {
   } };
 }
 var tramEnvelopes = {
-  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  car: { width: 1.4, length: 3, bottom: 0, top: 2.2 },
   passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
   camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
 };

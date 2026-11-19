@@ -2,7 +2,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const validator = require('gltf-validator');
-const root = path.resolve(__dirname,'../demos/corporate/gjh/v11/assets/elevator');
+// Optional directory for another kit with the same three quality tiers.
+const root = process.argv[2] ?? path.resolve(__dirname,'../demos/corporate/gjh/v11/assets/elevator');
 
 async function validate() {
   for (const tier of ['low','balanced','detailed']) {

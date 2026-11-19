@@ -871,6 +871,7 @@ function applyProfile(profile) {
   profile = quality.apply(profile);
   themeStage?.setTier?.(profile.tier);
   void elevator?.kit?.select(profile.tier);
+  void player?.setTramTier?.(profile.tier);
   npcs?.setQuality({tier:profile.tier,mobile:renderWidth<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
   if (!contextLost) renderer.shadowMap.enabled = profile.shadows;
 }
@@ -1090,7 +1091,7 @@ async function initialize() {
   } : null;
   const {createPlayer} = await import('./assets/player.js');
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,
-    world.cameraObstacles, expanded, prepareAvatar, portrait);
+    world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
   if (player.npcSource) await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareAvatar));
   const {createDOMProjection} = await import('./assets/dom-projection.js');

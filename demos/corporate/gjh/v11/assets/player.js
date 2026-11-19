@@ -34,7 +34,7 @@ export function playerCameraFraming(model, expanded, width, height) {
   };
 }
 
-export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel, portrait) {
+export async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel, portrait, tramTier = 'balanced') {
   const character = await createCharacter(T, prepareModel, portrait);
   const model = character.state.model;
   const visual = character.visual;
@@ -314,7 +314,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const wasRidingTram = Boolean(beforeTram);
     const tramPose = tram?.update(dt);
     if (tramPose) {
-      const heading = tramPose.heading + Math.PI;
+      const heading = tramPose.heading;
       yaw += interpolateAngle(facing, heading, 1) - facing;
       facing = heading;
       body.setNextKinematicTranslation({x:tramPose.x, y:seat.floor + .89, z:tramPose.z});
@@ -411,6 +411,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const from = previousPosition ?? p;
     const x = interpolate(from.x, p.x, alpha), y = interpolate(from.y, p.y, alpha), z = interpolate(from.z, p.z, alpha);
     visual.position.set(x, y - .875, z);
+    if (tram?.seated) {
+      tram.visualSeat(visual.position);
+      visual.position.y = seat.floor + .015;
+    }
     const angle = alpha === 1 ? facing : interpolateAngle(previousFacing, facing, alpha);
     visual.rotation.y = angle;
     // Clear the visual floor/rug inlays as well as the physical walking slab.
@@ -652,7 +656,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     getPosition: () => body.translation(),
     getBoardReason: () => tramBoardReason({pushing, seated, elevatorTravel, productApproaching:productApproach,
       character:character.state}),
-    clearPath, prepareModel,
+    clearPath, prepareModel, tier:tramTier,
     enterSeat(rideSeat, pose) {
       clearInput(); injected = null; cancelCollection(); vertical = 0;
       beforeTram = {yaw, facing, cameraDistance, eyeFov, eyeFovInitialized};
@@ -661,7 +665,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       seat = rideSeat; seated = true; seatPhase = 'seated';
       capsule.setEnabled(false);
       moveSeat(seatBodyTarget(seat));
-      yaw = facing = pose.heading + Math.PI;
+      yaw = facing = pose.heading;
       character.setSeated(true);
       resetInterpolation();
     },
@@ -677,6 +681,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   });
   return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
+    setTramTier: tram?.selectTier,
     dispose() { tram?.dispose(); character.dispose?.(); },
     renderShelf(draw) {
       // The visitor can stand directly in front of the selected shelf. Exclude
