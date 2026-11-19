@@ -16,7 +16,7 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "SIT"
     ],
     "priority": "P1",
-    "placed": true,
+    "placed": false,
     "label": "Round single-seat ottoman",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_ottoman_round.glb",
     "source_sha256": "6fbcb41b0dfed91e36e129e0fdd0c73791b372e82b2374679b5f207f0869cd6c",
@@ -87,7 +87,7 @@ export const INTERIOR_ADDITIONS = Object.freeze({
     ],
     "capabilities": [],
     "priority": "P2",
-    "placed": true,
+    "placed": false,
     "label": "Arched floor lamp (closest match to the decorative lamp column)",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_lamp_floor.glb",
     "source_sha256": "5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2",
