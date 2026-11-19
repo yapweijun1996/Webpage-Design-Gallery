@@ -58,7 +58,11 @@ export function createSeatPlacements(expanded) {
 export function createSeatAnchor(placement, collider, profile = loungeBench, scale = benchScale, footY = placement.floor) {
   const {id, name, x, z, floor, exit, pose, clearance, accessible} = placement;
   const centre = profile.seatCentre ?? (profile.flatFront + profile.backrestFront) / 2;
-  const anchor = {x, y:floor + profile.top * scale, z:z + centre * pose.facing};
+  const anchor = {
+    x:x + centre * Math.sin(pose.angle),
+    y:floor + profile.top * scale,
+    z:z + centre * Math.cos(pose.angle)
+  };
   const [width, height, depth] = profile.size;
   const bounds = {
     min:{x:x-width/2, y:floor, z:z-depth/2},
@@ -70,6 +74,7 @@ export function createSeatAnchor(placement, collider, profile = loungeBench, sca
     anchor, exit, pose, bounds, clearance, accessible};
 }
 
-export function isInFrontOfSeat(seat, z) {
-  return (z - seat.z) * seat.facing <= -seat.frontEdge;
+export function isInFrontOfSeat(seat, {x,z}) {
+  const depth = (x-seat.x)*Math.sin(seat.angle) + (z-seat.z)*Math.cos(seat.angle);
+  return depth <= -seat.frontEdge;
 }

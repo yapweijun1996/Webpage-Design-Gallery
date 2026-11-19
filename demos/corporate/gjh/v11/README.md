@@ -4,6 +4,8 @@ Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin 
 
 ## Open and explore
 
+Design reviews, new models, loader screenshots and acceptance use the default expanded 17-shop mall. The Classic 3-store route remains available as a legacy experience. See the [current company and shop design index](../../../../docs/goh-joo-hin/).
+
 Open **Tools** for Guide, Help, Shopping Cart and Theme. Help includes the language picker and versioned update control. These preferences are also accessible from the directory’s **App & offline help**.
 
 The accessible directory contains a separate **Original demo tin — not New Moon packaging** viewer. It lazy-loads the byte-pinned original generic tin, preserves native metre scale, and supports drag/keyboard orbit, zoom, reset and mutually exclusive illustrative OpenClose/Exploded clips. The native dialog is keyboard-contained, restores focus, pauses the mall, and releases resources on close. Missing or invalid assets show a readable fallback; no branded product image, text, eShop link or world geometry is replaced.

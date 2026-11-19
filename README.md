@@ -214,3 +214,7 @@ Expanded stage7 provides a visitor-only ground/upper lift and entrance service w
 Expanded stage8 adds optional shared procedural stone/wood finishes and warmer existing lights, retaining the stage7 roof/camera opening and all-cart200-call gate. See [material verification](docs/gjh-v11-stage8-materials-lighting.md). Run `python tests/browser_gjh_materials.py --evidence /private/tmp/gjh-material-qa --group all` for current viewport/quality, allocation/import failure, late completion and native texture-recovery checks.
 
 The merged theme acceptance follow-up adds bounded optional imports and synchronous gamepad-close cancellation. Run `python tests/browser_gjh_theme_acceptance.py --evidence /private/tmp/gjh-theme-acceptance`; its default mode verifies corrected behavior, late-result cleanup and same-page retry. [Evidence and scope](docs/gjh-v11-stage9-theme-infrastructure.md#merged-release-acceptance-follow-up) distinguish native UI, synthetic deferred stages, collider stubs and physical-device limits.
+
+## Pages deployment
+
+Main-branch pushes run the design-system and generated-file checks, build the static Pages artifact, upload it, and deploy it. The full Python and mall Node contract suites run on pull requests or when **Validate gallery and mall** is dispatched. Direct, focused releases run the checks for the affected area locally before pushing. Confirm the Actions deployment and the public build identifier in version.json afterward.

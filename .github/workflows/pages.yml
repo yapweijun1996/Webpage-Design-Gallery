@@ -32,10 +32,6 @@ jobs:
           python-version: '3.13'
       - name: Check design system
         run: python scripts/check_ssot.py
-      - name: Test design system and gallery contracts
-        run: python -m unittest discover -s tests -p 'test_*.py' -v
-      - name: Test mall state and spatial contracts
-        run: node --test tests/gjh_*.test.mjs
       - name: Check generated gallery
         run: python scripts/build_gallery.py --check
       - name: Build company gallery

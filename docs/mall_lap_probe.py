@@ -15,8 +15,7 @@ the phone preset for Low and the desktop preset for Balanced and Detailed.
 import argparse
 import json
 import math
-import os
-import platform
+from mall_browser_probe import enter, launch, assert_teleport
 import sys
 
 TIERS = {
@@ -32,11 +31,6 @@ DEVICES = {
 
 ZONES = ['entry', 'atrium', 'newmoon', 'mili', 'gogo',
          *(f'planned-space-{i:02d}' for i in range(4, 18))]
-
-INIT = """
-localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
-localStorage.setItem('gjh-v11-graphics-quality-v1','%s');
-"""
 
 WALK = """([tx,tz]) => { const m=window.__mall; for(let i=0;i<500;i++){const p=m.state;
   const dx=tx-p.x,dz=tz-p.z,d=Math.hypot(dx,dz); if(d<.12)break;
@@ -55,7 +49,7 @@ REPORT = """(start) => {
   return {drawCalls:peak('drawCalls'), triangles:peak('triangles'), zone:report.zone,
     tier:report.graphics.tier, budgetSamples:frames.length, gaps, renderScale:report.renderScale,
     targetFps:report.targetFps, refreshHz:report.refreshHz, deviceClass:report.deviceClass,
-    tierDowngrades:report.tierDowngrades};
+    ...mallProbe.read(start, __mall.state.graphics.sceneId), tierDowngrades:report.tierDowngrades};
 }"""
 
 
@@ -65,15 +59,24 @@ def stats(gaps):
         return {'frames': 0}
     pick = lambda q: values[math.ceil(len(values) * q) - 1]
     mean = sum(values) / len(values)
-    return {'frames': len(values), 'fps': 1000 / mean, 'p95': pick(.95),
+    return {'frames': len(values), 'meanMs': mean, 'fps': 1000 / mean, 'p95': pick(.95),
             'p99': pick(.99), 'max': values[-1],
             'slow50': sum(1 for v in values if v >= 50)}
 
 
+def cadence(device, refresh):
+    _, _, target, max_p95, min_fps = DEVICES[device]
+    if device != 'phone' and refresh and refresh < target:
+        return refresh, 1000 / refresh * 1.2, refresh * .95
+    return target, max_p95, min_fps
+
+
 def verdict(row, device):
-    _, _, _, max_p95, min_fps = DEVICES[device]
-    return (row['deviceClass'] == device and row['targetFps'] >= min_fps and row['frames'] > 20
-            and row['p95'] <= max_p95 and row['fps'] >= min_fps)
+    target, max_p95, min_fps = cadence(device, row['referenceHz'])
+    row.update(requiredFps=min_fps, maxP95Ms=max_p95)
+    correct_cap = device != 'phone' or row['targetFps'] <= target + .1
+    return (correct_cap and row['deviceClass'] == device and row['targetFps'] >= min_fps
+            and row['frames'] > 20 and row['p95'] <= max_p95 and row['fps'] >= min_fps)
 
 
 def apply_budget(row, device, tier, max_tris, max_draws):
@@ -85,7 +88,7 @@ def apply_budget(row, device, tier, max_tris, max_draws):
 
 
 def capture(page, label, dwell_ms, walk_key=None, walk_ms=0):
-    start = page.evaluate('performance.now()')
+    start = page.evaluate('() => { mallProbe.timing = true; return performance.now(); }')
     page.wait_for_timeout(dwell_ms)
     if walk_key:
         page.keyboard.down(walk_key)
@@ -93,31 +96,57 @@ def capture(page, label, dwell_ms, walk_key=None, walk_ms=0):
         page.keyboard.up(walk_key)
         page.wait_for_timeout(400)
     report = page.evaluate(REPORT, start)
+    page.evaluate('mallProbe.timing = false')
     return {'stop': label, **stats(report.pop('gaps')), **report}
 
 
 def run_lap(page, lap):
     rows = []
     for zone in ZONES:
-        assert page.evaluate('z=>__mall.teleport(z)', zone), zone
+        assert_teleport(page, zone)
         page.wait_for_timeout(300)
         row = capture(page, f'L{lap} {zone}', 1500, 'w', 1500)
         rows.append(row)
-    # Upper level through the lift: walk around the shaft, ride, dwell, ride back.
-    page.evaluate('z=>__mall.teleport(z)', 'atrium')
-    for waypoint in ([2, 18], [-8, 18], [-8, 10], [-6.4, 10]):
-        page.evaluate(WALK, waypoint)
-    page.locator('#inspect').click()
-    page.wait_for_timeout(5000)
+    # Walk around the shaft and verify the arrival before sampling.
+    reach_upper(page)
     rows.append(capture(page, f'L{lap} upper-level', 2500, 'w', 1200))
-    page.locator('#inspect').click()
-    page.wait_for_timeout(5000)
     return rows
 
 
-def run_tier(browser, args, tier):
+def reach_upper(page):
+    assert_teleport(page, 'atrium')
+    for waypoint in ([2, 18], [-8, 18], [-8, 10], [-6.4, 10]):
+        page.evaluate(WALK, waypoint)
+    if page.evaluate('__mall.state.elevator.docked !== 0'):
+        page.locator('#inspect').click()
+        page.wait_for_function('__mall.state.elevator.docked === 0', timeout=20000)
+    page.locator('#inspect').click()
+    page.wait_for_function("__mall.state.zone === 'upper' && !__mall.state.elevatorTravel", timeout=20000)
+    page.locator('#scene').focus()
+
+
+def native_refresh(context):
+    # Calibrate before loading the mall so scene load cannot lower its own gate.
+    blank = context.new_page()
+    try:
+        blank.bring_to_front()
+        return blank.evaluate("""() => new Promise(resolve => {
+          const times = [];
+          function sample(at) {
+            times.push(at);
+            if (times.length < 62) return requestAnimationFrame(sample);
+            const gaps = times.slice(2).map((v,i) => v-times[i+1]).sort((a,b) => a-b);
+            resolve(Math.round(1000 / ((gaps[29]+gaps[30])/2)));
+          }
+          requestAnimationFrame(sample);
+        })""")
+    finally:
+        blank.close()
+
+
+def run_tier(browser, args, tier, dsf=None):
     device = args.device or ('phone' if (args.width or (393 if tier == 'low' else 1920)) < 500 else 'desktop')
-    default_width, default_height, target, max_p95, min_fps = DEVICES[device]
+    default_width, default_height = DEVICES[device][:2]
     default_tris, default_draws = TIERS[tier]
     width = args.width or default_width
     height = args.height or default_height
@@ -125,28 +154,18 @@ def run_tier(browser, args, tier):
     max_draws = args.max_draws or default_draws
     touch = device != 'desktop'
     context = browser.new_context(viewport={'width': width, 'height': height},
-                                  device_scale_factor=2 if touch else 1,
+                                  device_scale_factor=dsf or (2 if touch else 1),
                                   has_touch=touch, is_mobile=touch, service_workers='block')
     try:
-        context.add_init_script(INIT % tier)
-        page = context.new_page()
-        page.goto(args.url, wait_until='domcontentloaded')
-        page.locator('#arrival-walk').click()
-        page.wait_for_function("""tier => window.__mall?.ready && window.__sceneReady &&
-                               document.querySelector('#app-loader').hidden &&
-                               window.__mall.state.graphics.quality?.tier === tier""",
-                               arg=tier, timeout=180000)
-        page.wait_for_function("""tier => {
-          const {interiors, signage} = window.__mall.performanceReport();
-          const preload = window.__mall.state.modelPreload;
-          return interiors.tier === tier && interiors.preinstalled.shops === 17 &&
-            signage.tier === tier && preload && preload.settled === preload.total;
-        }""", arg=tier, polling=500, timeout=180000)
-        page.locator('#scene').focus()
+        reference_hz = args.refresh_hz or native_refresh(context)
+        page = enter(context, args.url, tier, observe=True, throttle=args.cpu_throttle)
         page.wait_for_timeout(3000)
         rows = []
         for lap in range(1, args.laps + 1):
-            rows.extend(apply_budget(row, device, tier, max_tris, max_draws) for row in run_lap(page, lap))
+            for row in run_lap(page, lap):
+                row.update(referenceHz=reference_hz, dsf=dsf or (2 if touch else 1),
+                           cpuThrottle=args.cpu_throttle)
+                rows.append(apply_budget(row, device, tier, max_tris, max_draws))
     finally:
         context.close()
     print(f"{'stop':26} fps   p95   p99   max  slow draw    tris scale  budget  result")
@@ -156,6 +175,7 @@ def run_tier(browser, args, tier):
               f"{row.get('max', 0):6.1f} {row.get('slow50', 0):3} {row['drawCalls'] or 0:4} "
               f"{row['triangles'] or 0:7}  {row['renderScale']:4.0%}  {'ok' if row['budgetPass'] else 'FAIL':6}  "
               f"{'ok' if row['pass'] else 'FAIL'}")
+    target, max_p95, min_fps = cadence(device, rows[-1]['referenceHz'])
     budget_passes = sum(row['budgetPass'] for row in rows)
     passes = sum(row['pass'] for row in rows)
     print(f"{device} {tier} {width}x{height} (target {target} FPS, p95 <= {max_p95} ms, mean >= {min_fps} FPS): "
@@ -174,7 +194,7 @@ def positive_int(value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://localhost:8830/demos/corporate/gjh/v11/')
-    parser.add_argument('--tier', default='balanced', choices=[*TIERS, 'all'])
+    parser.add_argument('--tier', default=None, choices=[*TIERS, 'all'])
     parser.add_argument('--device', choices=DEVICES, help='Set the viewport, render target and cadence thresholds')
     parser.add_argument('--width', type=positive_int, help='Override the viewport width for a single tier')
     parser.add_argument('--height', type=positive_int, help='Override the viewport height for a single tier')
@@ -182,19 +202,33 @@ def main():
     parser.add_argument('--max-draws', type=positive_int, help='Override the draw-call budget for the selected tiers')
     parser.add_argument('--laps', type=positive_int, default=2)
     parser.add_argument('--json', default='')
+    parser.add_argument('--refresh-hz', type=float, help='Known native refresh; overrides the detected reference')
+    parser.add_argument('--cpu-throttle', type=positive_int, default=1)
+    parser.add_argument('--dsf', type=int, choices=(2, 3), help='Compare a DSF 1 run with this DSF')
     args = parser.parse_args()
+    args.tier = args.tier or ('low' if args.device == 'phone' else 'balanced')
+    if args.refresh_hz is not None and (not math.isfinite(args.refresh_hz) or args.refresh_hz <= 0):
+        parser.error('--refresh-hz must be finite and positive')
     if args.tier == 'all' and (args.width or args.height):
         parser.error('--tier all uses the preset viewport for each tier')
     tiers = TIERS if args.tier == 'all' else [args.tier]
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as playwright:
-        # Use the native Windows ANGLE backend on the owner's laptop.
-        launch_args = ['--use-angle=metal'] if platform.system() == 'Darwin' else []
-        browser = playwright.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME'),
-                                             headless=False, args=launch_args)
+        browser = launch(playwright)
         try:
-            rows = [row for tier in tiers for row in run_tier(browser, args, tier)]
+            rows = []
+            for tier in tiers:
+                first = run_tier(browser, args, tier, 1 if args.dsf else None)
+                rows.extend(first)
+                if args.dsf:
+                    second = run_tier(browser, args, tier, args.dsf)
+                    rows.extend(second)
+                    for low, high in zip(first, second, strict=True):
+                        if low.get('frames') and high.get('frames'):
+                            slope = (high['meanMs'] - low['meanMs']) / (args.dsf - 1)
+                            high['msPerDsf'] = slope
+                            print(f"{tier} {high['stop']}: {slope:+.3f} ms/frame per DSF")
         finally:
             browser.close()
     if args.json:

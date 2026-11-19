@@ -558,7 +558,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function sit(id) {
     if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
-    if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||!isInFrontOfSeat(candidate,p.z))return false;
+    if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||!isInFrontOfSeat(candidate,p))return false;
     seat=candidate;const exit={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ},target=seatBodyTarget(seat);
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
     seatExit=exit;clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=facing;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI);vertical=0;

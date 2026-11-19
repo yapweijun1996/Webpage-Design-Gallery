@@ -1,0 +1,7 @@
+# S05 · Pien Tze Huang brand research
+
+Evidence checked 2026-11-19. Product imagery is linked to the first-party source where available.
+
+- Manufacturer Zhangzhou Pien Tze Huang Pharmaceutical Co., Ltd. documents the PIEN TZE HUANG product as a 3 g troche, one unit per carton, with product photo. GJH’s corporate menu includes the brand, and Borsch Med’s history reports becoming its official distributor in 2004. [Manufacturer product and pack format](https://www.pzhchina.com/gscp/info_169.aspx?itemid=18482&lcid=15) · [GJH brand menu](https://www.gjh.com.sg/explore-our-brand/) · [Borsch Med history](https://www.gjh.com.sg/borsch-med-history/)
+- The official GJH eShop page for Zhang Zhou Pien Tze Huang (10 pcs) opens and is out of stock in the retrieved page. This confirms a listed item. It does not establish its current availability, dimensions or that the 10-piece format is equivalent to the manufacturer's one-carton photo. The existing brand-kit retains an unverified flag and generic illustration. [GJH eShop listing](https://www.gjheshop.com/product/zhang-zhou-pien-tze-huang-10-pcs/)
+- Existing assets. Official mark `brands/S05-pien-tze-huang.webp`; generic category art `brand-kit/S05-hero.webp`; `interiors/s05-specimen-drawers-{low,balanced,detailed}.glb` and `interiors/s05-herbal-details.glb` contain the apothecary casework, stand and bowl. No source-matched pack model documented.

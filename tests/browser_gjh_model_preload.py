@@ -165,10 +165,11 @@ def run_exit(browser, base, mode):
         if mode == 'early':
             page.evaluate("document.querySelector('#loader-enter-now').addEventListener('click', () => { window.__preloadAtClick = Object.entries(__mall.state.modelPreload.models).filter(([,status]) => status === 'loading').map(([name]) => name); }, {capture:true, once:true})")
             click_start = time.monotonic()
-            page.locator('#loader-enter-now').click(force=True)
+            page.locator('#loader-enter-now').press('Enter')
             click_ms = round((time.monotonic()-click_start)*1000)
             page.wait_for_function("window.mallLoader.snapshot().ready && document.querySelector('#app-loader').hidden")
             assert page.locator('#experience').is_visible()
+            assert page.evaluate("document.activeElement.id === 'scene'"), 'Early entry lost keyboard focus'
             assert page.evaluate("__mall.teleport('planned-space-04')")
             state = page.evaluate('window.__preloadAtClick')
             assert state, (state, click_ms)

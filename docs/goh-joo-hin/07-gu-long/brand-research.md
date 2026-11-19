@@ -1,0 +1,7 @@
+# S07 · Gu Long brand research
+
+Evidence checked 2026-11-19. Product imagery is linked to the first-party source where available.
+
+- GJH traces the company to Xiamen Cannery in 1954 and dates the Gu Long canned-food brand to 1994. The product families include stewed pork, luncheon meat, aquatic products, fruits and vegetables. The official eShop GuLong catalog lists eight items and says its selected products are sold in carton quantities. A generic abalone paragraph appears on the corporate brand page and elsewhere on the site, so product conclusions here rely on the store catalog. [GJH Gu Long profile](https://gjhglobal.com/gu-long/) · [GuLong catalog](https://www.gjheshop.com/brand/gulong/)
+- Verified GJH reference: GuLong Stewed Pork Chops 256 g, carton of 48. The gallery contains views numbered 01–03, with the image below explicitly labeled 01. The catalog also lists GuLong Stewed Pork 256 g and Peanut Soup 312 g. [Stewed Pork Chops listing and image gallery](https://www.gjheshop.com/product/gulong-stewed-pork-chops-256g/) · [Listing-linked image 01](https://www.gjheshop.com/wp-content/uploads/2024/04/02-Carton-Deal-Gulong-Stewed-Pork-Chop-48-x-256g_01.jpg)
+- Existing 3D inventory: `s07-stacked-can-pyramid-{low,balanced}.glb` and `s07-dragon-details.glb`. Jade serving drum, dragon wall relief, lanterns and generic tins. Open player route. A second tin pyramid is visible in the window. Low-tier browse view groups the tower into slabs with less obvious individual cans.
