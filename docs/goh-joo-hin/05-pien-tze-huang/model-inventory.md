@@ -1,0 +1,25 @@
+# S05 Pien Tze Huang model inventory
+
+Upstream paths were checked against [Blender-3D-Gallery main `0b71ed7e`](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3). Coordinates are local XYZ metres. A catalogue candidate requires a fit and rights check before replacing a shipped asset. [Shop brief](README.md) · [Floor plan](floor-plan.webp)
+
+| Fixture | Placement | Web runtime | Blender Gallery |
+| --- | --- | --- | --- |
+| Stepped drawer bank with open porcelain niche | 0, 0.081, -4.38 | [Low GLB](../../../demos/corporate/gjh/v11/assets/interiors/s05-specimen-drawers-low.glb) · [Balanced GLB](../../../demos/corporate/gjh/v11/assets/interiors/s05-specimen-drawers-balanced.glb) · [Detailed GLB](../../../demos/corporate/gjh/v11/assets/interiors/s05-specimen-drawers-detailed.glb) | [Low](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s05-specimen-drawers-low.glb) · [Balanced](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s05-specimen-drawers-balanced.glb) · [Detailed](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s05-specimen-drawers-detailed.glb) |
+| Single pale bowl and saucer in drawer niche | 0, 1.36, -4.15 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/kopitiam-saucer-and-cup.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/kopitiam-saucer-and-cup/exports/optimized.glb). Reuse candidate. |
+| Unmarked cartons on a parchment stand | -3.49, 0.081, 3.22 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/gallery-assets/medicine-health-box-set.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/medicine-health-box-set/exports/optimized.glb). Reuse candidate. |
+| Dark-framed specimen vitrine | -4.010000000000001, 0.081, 0.4 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/mall-glass-showcase.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-glass-showcase/exports/optimized.glb). Reuse candidate. |
+| Parchment lantern at the consultation end | 0, 3.3, -4.38 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/chinese-lantern/exports/chinese-lantern.glb). Reuse candidate. |
+| Cinnabar planter | 2.63, 0.081, -4.58 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/orchid-planter/exports/optimized.glb). Reuse candidate. |
+| Wooden receiving chest below side return | -2.58, 0.081, -4.58 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/storage-crate/exports/optimized.glb). Reuse candidate. |
+| Aged brass reading light | 4.17, 2.74, 0.3 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-wall-sconce/exports/optimized.glb). Reuse candidate. |
+| Closed sample cabinet on the right wall | 4.17, 1.88, -1.1 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/medicine-cabinet/exports/optimized.glb). Reuse candidate. |
+| Room detail pack | Slot origin | [Installed detail GLB](../../../demos/corporate/gjh/v11/assets/interiors/s05-herbal-details.glb) | Room detail generated using the [web repository source](../../../scripts/gjh_interiors/rooms.py). |
+
+Product-specific models and pending source work are listed in the [shop brief](README.md). Fixture GLBs and generic shelf stock are exhibit assets.
+
+## Product-specific inventory
+
+| Product | Placement | Runtime and proposed model |
+| --- | --- | --- |
+| Manufacturer single 3 g unit carton | One sample on the shelf set into the drawer wall | Manufacturer-form single-carton concept. New verified carton GLB pending. |
+| GJH 10-piece listing | Research reference only | Hold the group model until its package can be distinguished from the manufacturer’s one-unit carton. |

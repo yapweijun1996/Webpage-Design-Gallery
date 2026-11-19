@@ -37,8 +37,8 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 [Facilities plan and acceptance](docs/gjh-v11-public-facilities.md).
 
 - [x] Verify the public baseline lift round trip. Chrome loaded the redesigned Detailed cabin and reached 7.2 m. Both gates and thresholds behaved as expected while travelling and docked. The tested route left the cabin, walked a short distance across the upper landing and returned.
-- [ ] Identify the seat or nearby furniture conflict at the upper doorway and align the rendered model, collision envelope, sitting pose and stand exit.
-- [ ] Keep a continuous perimeter running route on the upper level, with safe lift approaches, rail guards and reachable seating. Verify a complete keyboard loop with checkpoints on all sides, safe re-entry and descent. Check a representative route in touch emulation and capture before/after evidence and frame timing.
+- [x] Identify the seat or nearby furniture conflict at the upper doorway and align the rendered model, collision envelope, sitting pose and stand exit.
+- [x] Keep a continuous perimeter running route on the upper level, with safe lift approaches, rail guards and reachable seating. Verify a complete keyboard loop with checkpoints on all sides, safe re-entry and descent. Check a representative route in touch emulation and capture before/after evidence and frame timing.
 
 ### Expanded V11 public restrooms
 

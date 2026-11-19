@@ -1,0 +1,25 @@
+# S04 Borsch Med model inventory
+
+Upstream paths were checked against [Blender-3D-Gallery main `0b71ed7e`](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3). Coordinates are local XYZ metres. A catalogue candidate requires a fit and rights check before replacing a shipped asset. [Shop brief](README.md) · [Floor plan](floor-plan.webp)
+
+| Fixture | Placement | Web runtime | Blender Gallery |
+| --- | --- | --- | --- |
+| Fan-fold patch folio counter | -0.48, 0.081, -0.63 | [Low GLB](../../../demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-low.glb) · [Balanced GLB](../../../demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-balanced.glb) · [Detailed GLB](../../../demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-detailed.glb) | [Low](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s04-patch-folio-low.glb) · [Balanced](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s04-patch-folio-balanced.glb) · [Detailed](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s04-patch-folio-detailed.glb) |
+| Unlabelled patch samples on folio shelf | -0.48, 1.15, -0.51 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/gallery-assets/mosquito-patch-pack.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mosquito-patch-pack/exports/optimized.glb). Reuse candidate. |
+| Sage service counter in left rear bay | -3.97, 0.081, -1.8 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/pharmacy-counter.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/pharmacy-counter/exports/optimized.glb). Reuse candidate. |
+| Shallow ivory wall cabinet | 4.17, 1.88, -1.1 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/medicine-cabinet/exports/optimized.glb). Reuse candidate. |
+| Matte entrance-side dispenser | -3.49, 0.081, 3.22 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/hand-sanitizer-stand/exports/hand-sanitizer-stand.glb). Reuse candidate. |
+| Plum ceramic orchid pot | 2.63, 0.081, -4.58 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/orchid-planter/exports/optimized.glb). Reuse candidate. |
+| Diffuse white counter light | -0.48, 3.3, -0.63 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-linear-ceiling-light/exports/optimized.glb). Reuse candidate. |
+| Blank paper swatch easel | -4.010000000000001, 0.081, 0.4 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/mall-directory-standee.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-directory-standee/exports/optimized.glb). Reuse candidate. |
+| Wall washer over the samples | 4.17, 2.74, 0.3 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-wall-sconce/exports/optimized.glb). Reuse candidate. |
+| Room detail pack | Slot origin | [Installed detail GLB](../../../demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb) | Room detail generated using the [web repository source](../../../scripts/gjh_interiors/rooms.py). |
+
+Product-specific models and pending source work are listed in the [shop brief](README.md). Fixture GLBs and generic shelf stock are exhibit assets.
+
+## Product-specific inventory
+
+| Product | Placement | Runtime and proposed model |
+| --- | --- | --- |
+| Borsch Med Mosquito Repellent Patch, 18 patches | Open folio and an adjacent flush shelf socket | Unlabelled carton, sachet and sticker study. Existing folio and generic patch cards can be reused. Exact retail surfaces remain pending. |
+| Lingzhi Cracked Spores Powder Capsule 200 mg × 60 twin pack | Rear product library shelf | A separate branded carton or twin-pack model is pending measured source views. Keep the two categories visually distinct. |

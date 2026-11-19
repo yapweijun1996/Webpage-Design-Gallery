@@ -4570,7 +4570,7 @@ var atriumLayout = Object.freeze({
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
   facilitiesBlock: Object.freeze({ x: 25, z: 10, width: 6, depth: 4, height: 3 }),
   upperSeats: Object.freeze([
-    Object.freeze({ x: -6.1, z: 8.8, facing: 1, finish: "oak" }),
+    Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
     Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
     Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
   ]),

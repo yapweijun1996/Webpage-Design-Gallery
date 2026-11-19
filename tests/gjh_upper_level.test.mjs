@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
-import {buildUpperLevel,loadUpperLevel,galleryVoid} from '../demos/corporate/gjh/v11/assets/upper-level.js';
+import {buildUpperLevel,loadUpperLevel,galleryVoid,deckPlanters} from '../demos/corporate/gjh/v11/assets/upper-level.js';
 import {createElevatorV2} from '../demos/corporate/gjh/v11/assets/elevator-v2.js';
 import {liftLayout as L} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
 import {createMallSurfaceAtmosphere} from '../demos/corporate/gjh/v11/assets/mall-atmosphere.js';
@@ -124,8 +124,7 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
   const body=physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased());
   const capsule=physics.createCollider(R.ColliderDesc.capsule(.55,.3),body);
   const ctrl=physics.createCharacterController(.025);ctrl.enableAutostep(.2,.28,true);ctrl.enableSnapToGround(.25);
-  function walk(x,z,dx,dz,steps=65,floor=L.upper){
-    body.setTranslation({x,y:floor+.875,z},true);physics.step();
+  function advance(dx,dz,steps){
     for(let i=0;i<steps;i++){
       ctrl.computeColliderMovement(capsule,{x:dx*.055,y:-.018,z:dz*.055});
       const at=body.translation(),m=ctrl.computedMovement();
@@ -134,12 +133,16 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
     }
     return body.translation();
   }
+  function walk(x,z,dx,dz,steps=65,floor=L.upper){
+    body.setTranslation({x,y:floor+.875,z},true);physics.step();
+    return advance(dx,dz,steps);
+  }
   for(const [x,z,dx,dz] of [[-7,6,-1,0],[1,10,1,0],[-4,6,0,-1],[0,14.2,0,1],
     [-7.6,5.4,-1,-1],[1.5,5.5,1,-1],[1.6,14.6,1,1],[-7.6,14.6,-1,1]]){
     const p=walk(x,z,dx,dz);
     assert(p.x>=L.slab.minX+.29&&p.x<=L.slab.maxX-.29&&p.z>=L.slab.minZ+.29&&p.z<=L.slab.maxZ-.29);
   }
-  const approaches=[[-6.4,10,1,0],[-6.4,8.55,1,0],[-6.4,11.45,1,0],[.5,10,-1,0],[-3,6.45,0,1],[-3.8,13.6,0,-1],
+  const approaches=[[-6.4,10,1,0],[-6.4,8.55,1,0],[-6.4,11.45,1,0],[.5,10,-1,0],[-3,6.45,0,1],[-3.8,13.05,0,-1],
     [-6.3,6.7,1,1],[.3,6.7,-1,1],[.3,13.3,-1,-1],[-6.3,13.3,1,-1]];
   for(const height of [0,L.upper/2,L.upper]){
     elevator.setHeight(height);
@@ -149,7 +152,7 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
       const gapX=Math.max(L.shaft.minX-p.x,0,p.x-L.shaft.maxX);
       const gapZ=Math.max(L.shaft.minZ-p.z,0,p.z-L.shaft.maxZ);
       assert(Math.hypot(gapX,gapZ)>=.30,JSON.stringify({height,i,x,z,p}));
-      assert(Math.hypot(p.x-x,p.z-z)>.24,'approach should reach the rail');
+      assert(Math.hypot(p.x-x,p.z-z)>.24,JSON.stringify({message:'approach should reach the rail',height,i,x,z,p}));
     }
   }
   const v=galleryVoid,cx=(v.minX+v.maxX)/2,cz=(v.minZ+v.maxZ)/2;
@@ -171,5 +174,44 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
   for(const dz of [-1,1]){
     const p=walk(-4.78,10,0,dz);
     assert(Math.abs(p.z-10)<.72,'docked threshold side returns prevent a lateral fall');
+  }
+
+  // Include the furnishing colliders owned by world.js in the real lift and
+  // upper-level scene. Walk from the landing continuously through each side.
+  colliders(-3,L.upper+1.23,15.78,9.4,2.46,.16);
+  for(const [x,z] of deckPlanters)colliders(x,L.upper+.25,z,.68,.5,.68);
+  const deckSeats=createSeatPlacements(true).filter(({group})=>group==='deck');
+  const seatColliders=deckSeats.map(({x,z,clearance})=>
+    colliders(x,L.upper+.26,z,clearance.colliderWidth,.5,clearance.colliderDepth));
+  const aim=(axis,target,label)=>{
+    const other=axis==='x'?'z':'x', cross=body.translation()[other];
+    let p=body.translation();
+    const direction=Math.sign(target-p[axis]);
+    for(let i=0;i<250 && (target-p[axis])*direction>.06;i++){
+      p=advance(axis==='x'?direction:0,axis==='z'?direction:0,1);
+      assert(Math.abs(p[other]-cross)<.15,`${label}: left the perimeter lane`);
+    }
+    assert(Math.abs(p[axis]-target)<.10,`${label}: ${JSON.stringify(p)}`);
+  };
+  body.setTranslation({x:L.exit.x,y:L.upper+.875,z:L.exit.z},true);physics.step();
+  for(const [axis,target,label] of [
+    ['x',-8.18,'west exit'],['z',4.92,'west to north'],['x',2.12,'north to east'],
+    ['z',14.67,'east to south'],['x',-8.18,'south to west'],['z',L.exit.z,'west return'],
+    ['x',L.exit.x,'lift approach'],['x',L.x,'docked cabin']
+  ])aim(axis,target,label);
+
+  const walkingShape=new R.Capsule(.55,.3), rotation={x:0,y:0,z:0,w:1};
+  for(const [i,placement] of deckSeats.entries()){
+    const seat=createSeatAnchor(placement,seatColliders[i].handle,upper.seatProfiles.get(placement.finish),1);
+    // Follow the open side from the perimeter to the exact interaction point.
+    const laneX=placement.finish==='slats'?2.12:-8.18;
+    body.setTranslation({x:laneX,y:L.upper+.875,z:seat.exitZ},true);physics.step();
+    aim('x',seat.exitX,seat.name+' approach');
+    for(let j=0;j<=16;j++){
+      const at={x:seat.exitX+(seat.x-seat.exitX)*j/16,y:L.upper+.9,z:seat.exitZ+(seat.z-seat.exitZ)*j/16};
+      const obstruction=physics.intersectionWithShape(at,rotation,walkingShape,undefined,undefined,capsule,body,
+        c=>c.handle!==seat.collider);
+      assert.equal(obstruction,null,`${seat.name}: clear seated pose and stand path`);
+    }
   }
 });

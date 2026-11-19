@@ -540,7 +540,8 @@ def upper_deck_gallery(page):
     upper = state(page)
     assert upper['brandPlaqueCount'] == 17, upper
     assert upper['drawCalls'] <= 190, upper['drawCalls']
-    walk_to(page, -6.51, 13.45)
+    for x, z in ((-8.18, 10), (-8.18, 14.67), (-6.51, 14.67)):
+        walk_to(page, x, z, precise=True)
     assert state(page)['nearby'] == 'brand-plaque-S01', state(page)
     story = page.locator('.brand-story-nearby')
     assert story.is_visible() and 'New Zealand' in story.inner_text(), story.inner_text()
@@ -555,11 +556,9 @@ def upper_deck_gallery(page):
                   if seat['id'] == 'bench-seat-9']
     assert len(deck_seats) == 1, deck_seats
     seat = deck_seats[0]
-    # The route passes between the west planter and bench, outside the lift
-    # shaft; the usable gap is only slightly wider than the walking capsule.
-    walk_to(page, -6.51, 13.6)
-    walk_to(page, -7.43, 13.6, precise=True)
-    walk_to(page, -7.43, seat['exitZ'], precise=True)
+    # Return by the west perimeter and turn into the bench's open side.
+    walk_to(page, -8.18, 14.67, precise=True)
+    walk_to(page, -8.18, seat['exitZ'], precise=True)
     walk_to(page, seat['exitX'], seat['exitZ'])
     assert state(page)['nearby'] == seat['id'], state(page)
     page.locator('#inspect').click()
@@ -578,8 +577,8 @@ def upper_deck_gallery(page):
                   if item['id'] == 'bench-seat-11']
     assert len(deck_seats) == 1, deck_seats
     seat = deck_seats[0]
-    walk_to(page, -7.43, stood['z'], precise=True)
-    walk_to(page, -7.43, seat['exitZ'], precise=True)
+    walk_to(page, -8.18, stood['z'], precise=True)
+    walk_to(page, -8.18, seat['exitZ'], precise=True)
     walk_to(page, seat['exitX'], seat['exitZ'], precise=True)
     assert state(page)['nearby'] == seat['id'], state(page)
     page.locator('#inspect').click()
