@@ -5,6 +5,7 @@ import {atriumLayout} from './atrium-layout.js';
 import {loadStaticAsset} from './static-asset.js';
 import {uvRect} from './signage/builder.js';
 import {atlasPx, cells, paintUpperAtlas} from './upper-level-atlas.js';
+import {decalMaterial} from './surface-decals.js';
 
 const models = {
   bench:{id:'GJH_NEW_bench_oak',dimensions_m:[1.4,.45,.42],sha256:'064fb57f222a95e9327e2fa9ea9e111a2020dbcfc02590c6d6060a54e7570bd9'},
@@ -28,13 +29,13 @@ export function thresholdReturns() {
   return [minZ,maxZ].map(z=>({x:(minX+maxX)/2,z,width:maxX-minX,depth:.055}));
 }
 
-export async function loadUpperLevel(T) {
+export async function loadUpperLevel(T, artworkTier = () => 'low') {
   const mark=new Image();mark.src=new URL('./gjh-loader-mark.svg',import.meta.url).href;
   const [logo,...records]=await Promise.all([mark.decode().then(()=>mark,()=>null),
     ...Object.values(models).map(({id,...receipt})=>loadStaticAsset(T,{
       ...receipt,asset_id:id,file:'gallery-assets/upper-level/'+id+'.glb'
     },import.meta.url))]);
-  return {map:paintUpperAtlas(T,logo),models:Object.fromEntries(Object.keys(models).map((key,i)=>[key,records[i]]))};
+  return {map:paintUpperAtlas(T,logo,artworkTier()),models:Object.fromEntries(Object.keys(models).map((key,i)=>[key,records[i]]))};
 }
 
 export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWash}) {
@@ -277,7 +278,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     return mesh;
   }
   merged('Lounge, stone paving and shop arcade',solids,new T.MeshStandardMaterial({vertexColors:true,roughness:.67}),group);
-  const ink=new T.MeshBasicMaterial({map,toneMapped:false,fog:false});
+  const ink=decalMaterial(new T.MeshBasicMaterial({map,toneMapped:false,fog:false}),-1);
   merged('Directory, mall mark and display graphics',prints,ink,group);
   const rail = new T.InstancedMesh(unit,new T.MeshStandardMaterial({color:0xcdab70,metalness:.52,roughness:.34}),gold.length);
   gold.forEach((matrix,i) => rail.setMatrixAt(i,matrix));

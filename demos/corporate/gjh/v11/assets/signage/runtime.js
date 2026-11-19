@@ -6,11 +6,13 @@ import {buildHardware,buildEndTrim} from './hardware.js';
 import {loadModules} from './models.js';
 import {phoneProof} from './phone-proof.js';
 import {atlasSize,atlasMiB} from './atlas-layout.js';
+import {setupArtworkTexture} from '../artwork-textures.js';
+import {decalMaterial} from '../surface-decals.js';
 
 function nearFaceMaterial(T,texture,pulse) {
   // The same atlas alpha channel supplies a height/emission mask. The flat
   // colour is always present, including outside the per-store detail radius.
-  const material=new T.MeshBasicMaterial({map:texture,toneMapped:false});
+  const material=decalMaterial(new T.MeshBasicMaterial({map:texture,toneMapped:false}),-1);
   material.onBeforeCompile=shader=>{
     shader.uniforms.signPulse=pulse;
     shader.vertexShader='attribute vec4 signRange; attribute float signPulseEnabled; varying vec2 vSignEffect;\n'+shader.vertexShader;
@@ -132,16 +134,9 @@ function* buildRelief(T,signs,tiles,modules,texture,detailed){
 
 export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
   const pulse={value:0};
-  function atlas(canvas) {
-    const texture=new T.CanvasTexture(canvas);
-    texture.colorSpace=T.SRGBColorSpace;
-    texture.generateMipmaps=true;
-    texture.minFilter=T.LinearMipmapLinearFilter;
-    texture.anisotropy=2;
-    return texture;
-  }
-  const lowTexture=atlas(bake.lowSheet), fullAtlas=createProgressiveAtlas(T,bake.sheet);
-  const flat=new T.MeshBasicMaterial({map:lowTexture,toneMapped:false});
+  const lowTexture=setupArtworkTexture(T,new T.CanvasTexture(bake.lowSheet),'low',{fixedTier:true});
+  const fullAtlas=createProgressiveAtlas(T,bake.sheet);
+  const flat=decalMaterial(new T.MeshBasicMaterial({map:lowTexture,toneMapped:false}),-1);
   const pieces=[],signs=[];
   configs.forEach((config,index)=>{
     const group=createShopSign(T,{...config,faceMaterial:flat},bays[index]);

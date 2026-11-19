@@ -1,4 +1,5 @@
 import {layouts} from './layout.js';
+import {floorFinishOffset, floorInlayOffset} from '../surface-decals.js';
 
 // Runtime download sizes are verified against the provenance manifest in Node.
 const fixtureBytes = {
@@ -47,7 +48,8 @@ export const interiorStores = Object.fromEntries(Object.entries(layouts).map(([i
       colliders.push(collisionFor({...prop, position_m}));
     }
   }
-  return [id, {...layout,id,files,colliders}];
+  const floor = {...layout.floor, offset_m:floorFinishOffset, inlay_offset_m:floorInlayOffset};
+  return [id, {...layout,id,floor,files,colliders}];
 }));
 
 export function interiorFloorColour(store) {

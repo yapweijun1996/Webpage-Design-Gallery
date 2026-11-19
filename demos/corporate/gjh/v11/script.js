@@ -423,7 +423,7 @@ function scheduleTier() {
     if (warmRunner.blocking || warmKey === key) return;
     warmRunner.stop('superseded');
   }
-  if(profile.tier===active.tier && profile.shadows===active.shadows &&
+  if(!tierQueue.pending && profile.tier===active.tier && profile.shadows===active.shadows &&
      (!world.signage || world.signage.getTier()===profile.tier) &&
      (!world.interiors || world.interiors.activeTier===profile.tier)){
     tierQueue.cancel();
@@ -793,7 +793,9 @@ async function initialize() {
   const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
     linear: () => expanded && quality.state?.tier === 'detailed' && renderWidth >= 1000, ...options
   });
-  const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded, warmModel);
+  const {createWorld} = await import('./assets/world.js');
+  world = await createWorld(T, R, physics, expanded, warmModel,
+    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans]
     .flatMap(group => Object.values(group || {}));
