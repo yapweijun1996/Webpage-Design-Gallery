@@ -8,7 +8,7 @@ import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
-import {createMallAtmosphere} from './assets/mall-atmosphere.js';
+import {allowMallLightWash, createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createArrivalChime} from './assets/elevator-chime.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
@@ -46,6 +46,7 @@ let ready = false, player, world, physics, renderer, elevator, manual = false, f
 let three, frameTrace;
 let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true, entryPresentation;
+let lightWash=false;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let themeMidnightTimer;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
@@ -364,8 +365,8 @@ function render(force = false) {
     const detailedReady = detailed && world.interiors?.activeTier === 'detailed';
     if (expanded) renderer.shadowMap.enabled = detailedReady;
     world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera,
-      canvas.height, Boolean(shelfFocus?.open));
-    atmosphere?.update(pose);
+      canvas.height, Boolean(shelfFocus?.open), lightWash);
+    atmosphere?.update(pose,now);
     const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion);
     frameTrace?.end('signage.update', signStart);
@@ -720,7 +721,7 @@ function validateRestoration() {
     atmosphere?.update(player.state);
     player.camera.updateMatrixWorld();
     sizeDrawingBuffer();
-    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height);
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash);
     world.updateSigns(player.camera, canvas, reducedMotion);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
@@ -764,7 +765,7 @@ async function installNpcs(T, R, prepareModel, source) {
 async function initialize() {
   // Allow the initial overlay to paint before expensive module and scene work.
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const attributes = {antialias: true, alpha: false, powerPreference: 'high-performance'};
+  const attributes = {antialias: !expanded, alpha: false, powerPreference: 'high-performance'};
   const preferredContext = quality.androidChrome ?
     canvas.getContext('webgl2', {...attributes, failIfMajorPerformanceCaveat:true}) : null;
   const context = preferredContext || canvas.getContext('webgl2', attributes);
@@ -773,13 +774,14 @@ async function initialize() {
   const T = await import('./vendor/three.module.min.js');
   three = T;
   await waitForContext(context);
-  renderer = new T.WebGLRenderer({canvas, context, antialias: true});
+  renderer = new T.WebGLRenderer({canvas, context, antialias:attributes.antialias});
+  lightWash = expanded && allowMallLightWash(quality.deviceClass,context);
   const diagnostics = new URLSearchParams(location.search);
   // Three's first draw synchronously reads the link status, program log and
   // both shader logs in debug mode, even after a parallel link has completed.
   renderer.debug.checkShaderErrors = diagnostics.get('debugShaders') === '1';
   if (diagnostics.get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
-  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
+  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = expanded ? 1.03 : 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
   try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
@@ -798,7 +800,8 @@ async function initialize() {
   if (world.productAssets?.shelf) assetRecords.push(world.productAssets.shelf);
   document.getElementById('loader-asset-notice').hidden = !assetRecords.some(record => record?.status === 'fallback');
   window.mallLoader?.complete('scene');
-  atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds));
+  atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds),
+    expanded ? {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane} : undefined);
   try { if (!contextLost && !context.isContextLost()) atmosphere.restoreEnvironment(); } catch { /* Keep the mall usable without reflections. */ }
   if (expanded) {
     try {

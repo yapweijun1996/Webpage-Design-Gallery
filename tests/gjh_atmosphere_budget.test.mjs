@@ -24,7 +24,7 @@ function sceneBudget(scene, {shadows}) {
   return budget;
 }
 
-test('surface atmosphere adds at most one desktop draw and no Low draws, lights, casters, or textures', () => {
+test('surface atmosphere batches Low coves and desktop washes separately and disables broad wash on integrated GPUs', () => {
   const scene = new T.Scene();
   const plane = new T.PlaneGeometry();
   const poolMaterial = new T.MeshBasicMaterial({
@@ -50,18 +50,18 @@ test('surface atmosphere adds at most one desktop draw and no Low draws, lights,
   const vault = new T.MeshStandardMaterial({emissiveIntensity:.32});
   const surfaces = createMallSurfaceAtmosphere(T,scene,{
     plane,poolMaterial,floors:[floor],fixtures:fixture.material,vault,
-    washes:[[0,8,0,6,2,0,Math.PI/2],[0,.03,2,4,2,0,-Math.PI/2]]
+    washes:[[0,8,0,6,.42,0,Math.PI/2,true],[0,.03,2,4,2,0,-Math.PI/2]]
   });
   const wash = scene.getObjectByName('Mall cove and storefront light wash');
   assert.ok(wash.isInstancedMesh);
-  assert.equal(wash.count,2);
+  assert.equal(wash.count,1);
   assert.equal(wash.geometry,plane);
   assert.equal(wash.material.map,poolMaterial.map);
   assert.equal(wash.material.side,T.FrontSide);
   assert.equal(wash.material.depthWrite,false);
   assert.equal(wash.layers.mask,1);
 
-  const expectedDraws = [0,1,1,0];
+  const expectedDraws = [1,1,1,1];
   const observed = profiles.map((profile,index) => {
     surfaces.setTier(profile.tier);
     const budget = sceneBudget(scene,profile);
@@ -72,16 +72,23 @@ test('surface atmosphere adds at most one desktop draw and no Low draws, lights,
     return {roughness:floor.roughness, emission:fixture.material.emissiveIntensity, opacity:wash.material.opacity};
   });
   const [low, balanced, detailed, recovered] = observed;
-  assert.deepEqual(low,{roughness:.39,emission:1.2,opacity:0});
+  assert.deepEqual(low,{roughness:.39,emission:1.2*1.12,opacity:.22});
   assert.deepEqual(recovered,low);
   assert.ok(detailed.roughness < balanced.roughness && balanced.roughness < low.roughness);
   assert.ok(detailed.emission > balanced.emission && balanced.emission > low.emission);
   assert.ok(detailed.opacity > balanced.opacity && balanced.opacity > low.opacity);
 
+  surfaces.setTier('detailed',false);
+  assert.equal(wash.visible,false);
+  surfaces.setTier('balanced',false);
+  assert.equal(wash.visible,false);
   surfaces.setTier('detailed');
+  assert.equal(wash.visible,true);
   surfaces.setFixtureEmission(.8);
   assert.ok(fixture.material.emissiveIntensity > .8);
-  surfaces.setTier('low');
-  assert.equal(fixture.material.emissiveIntensity,.8);
-  assert.equal(vault.emissiveIntensity,.32);
+  surfaces.setTier('low',false);
+  assert.equal(wash.visible,true);
+  assert.equal(wash.count,1);
+  assert.equal(fixture.material.emissiveIntensity,.8*1.12);
+  assert.equal(vault.emissiveIntensity,.32*1.12);
 });

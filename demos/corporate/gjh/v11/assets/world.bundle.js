@@ -2598,6 +2598,18 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   plane.dispose();
   const panes = new T.Group;
   panes.name = "Atrium skylight and threshold glass";
+  for (const pane of glass.slice()) {
+    const back = pane.clone();
+    const { index, attributes: { normal } } = back;
+    for (let i = 0;i < index.count; i += 3) {
+      const a = index.getX(i);
+      index.setX(i, index.getX(i + 1));
+      index.setX(i + 1, a);
+    }
+    for (let i = 0;i < normal.count; i++)
+      normal.setXYZ(i, -normal.getX(i), -normal.getY(i), -normal.getZ(i));
+    glass.push(back);
+  }
   const positions = [], uvs = [], indices = [];
   for (let i = 0;i <= 24; i++) {
     const a = (i / 24 - 0.5) * Math.PI, px = -3 + 13.18 * Math.sin(a), py = 13.14 + 3.91 * Math.cos(a);
@@ -2621,8 +2633,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     opacity: 0.14,
     depthWrite: false,
     roughness: 0.22,
-    side: T.DoubleSide,
-    forceSinglePass: true
+    side: T.FrontSide
   });
   merged("Daylight glass", glass, glazing, panes);
   return { group, panes, cabinMark, seatProfiles, updateView(frustum) {
@@ -4663,10 +4674,8 @@ function addExpandedStorefronts(T, layout, scene, signs) {
     frame: { material: new T.MeshStandardMaterial({ color: 1656373, roughness: 0.66 }), matrices: [] },
     brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.65, roughness: 0.38 }), matrices: [] },
     accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
-    glass: { material: new T.MeshStandardMaterial({
+    glass: { material: new T.MeshBasicMaterial({
       color: 12179920,
-      metalness: 0.05,
-      roughness: 0.18,
       transparent: true,
       opacity: 0.065,
       depthWrite: false
@@ -7575,7 +7584,7 @@ function addFeatureKiosk({ x, z, box, cylinder, sign }) {
 
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
 var SURFACES = {
-  low: { roughness: 1, emission: 1, washOpacity: 0 },
+  low: { roughness: 1, emission: 1.12, washOpacity: 0.22 },
   balanced: { roughness: 0.82, emission: 1.2, washOpacity: 0.32 },
   detailed: { roughness: 0.68, emission: 1.38, washOpacity: 0.48 }
 };
@@ -7583,7 +7592,9 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
   const washMaterial = poolMaterial.clone();
   const washMesh = new T.InstancedMesh(plane, washMaterial, washes.length);
   const transform = new T.Object3D;
-  washes.forEach(([x, y, z, width, depth, yaw, pitch], index) => {
+  const stripSlots = [];
+  washes.forEach(([x, y, z, width, depth, yaw, pitch, coveStrip = false], index) => {
+    stripSlots.push(coveStrip);
     transform.position.set(x, y, z);
     transform.rotation.set(pitch, yaw, 0, "YXZ");
     transform.scale.set(width, depth, 1);
@@ -7593,45 +7604,52 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
   washMesh.name = "Mall cove and storefront light wash";
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
-  const washVisibility = createInstanceVisibility(T, washMesh);
+  const washVisibility = createInstanceVisibility(T, washMesh, { slots: stripSlots });
   const floorRoughness = floors.map((floor) => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
   let fixtureEmission = fixtures.emissiveIntensity;
-  let preset2;
-  function setTier(tier) {
+  let preset2, opacity;
+  function setTier(tier, lightWash = true) {
     const next = Object.hasOwn(SURFACES, tier) ? SURFACES[tier] : SURFACES.low;
-    if (next === preset2)
+    const nextOpacity = next === SURFACES.low || lightWash ? next.washOpacity : 0;
+    if (next === preset2 && nextOpacity === opacity)
       return false;
     preset2 = next;
+    opacity = nextOpacity;
     floors.forEach((floor, index) => {
       floor.roughness = floorRoughness[index] * preset2.roughness;
     });
     vault.emissiveIntensity = vaultEmission * preset2.emission;
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
-    washMaterial.opacity = preset2.washOpacity;
-    washMesh.visible = preset2.washOpacity > 0;
+    washMaterial.opacity = opacity;
+    updateWash();
     return true;
   }
   function setFixtureEmission(intensity) {
     fixtureEmission = intensity;
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
   }
+  const allowWash = (strip) => strip === (preset2 === SURFACES.low);
+  function updateWash(frustum) {
+    if (opacity > 0)
+      washVisibility.update(frustum, allowWash);
+    washMesh.visible = opacity > 0 && washMesh.count > 0;
+  }
   setTier("low");
   return { setTier, setFixtureEmission, updateView(view) {
-    if (washMesh.visible)
-      washVisibility.update(view.frustum);
+    updateWash(view.frustum);
   } };
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill }) {
+function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
     return false;
   const { materials: m, lighting: l } = theme;
   const colors = ["floorTextured", "floorFlat", "ceiling", "ceilingGlow", "wall", "green", "ivory", "brass", "wood", "oak", "timber", "timberAlt", "glass", "glow", "glowEmission"];
-  const lightColors = ["sky", "ground", "key", "fill"];
+  const lightColors = ["sky", "ground", "key", "fog"];
   const scalars = ["ceilingGlowIntensity", "glassOpacity", "glassRoughness", "glassMetalness", "glowIntensity"];
-  if (colors.some((k) => !Number.isInteger(m[k]) || m[k] < 0 || m[k] > 16777215) || lightColors.some((k) => !Number.isInteger(l[k]) || l[k] < 0 || l[k] > 16777215) || scalars.some((k) => !Number.isFinite(m[k]) || m[k] < 0 || m[k] > 3) || ["ambient", "keyIntensity", "fillIntensity"].some((k) => !Number.isFinite(l[k]) || l[k] < 0 || l[k] > 5) || ["glassOpacity", "glassRoughness", "glassMetalness"].some((k) => m[k] > 1))
+  if (colors.some((k) => !Number.isInteger(m[k]) || m[k] < 0 || m[k] > 16777215) || lightColors.some((k) => !Number.isInteger(l[k]) || l[k] < 0 || l[k] > 16777215) || scalars.some((k) => !Number.isFinite(m[k]) || m[k] < 0 || m[k] > 3) || ["ambient", "keyIntensity"].some((k) => !Number.isFinite(l[k]) || l[k] < 0 || l[k] > 5) || !Number.isFinite(l.exposure) || l.exposure < 0.5 || l.exposure > 2 || ["glassOpacity", "glassRoughness", "glassMetalness"].some((k) => m[k] > 1))
     return false;
   materials2.shellFloor.color.set(materials2.shellFloor.map ? m.floorTextured : m.floorFlat);
   materials2.shellCeiling.color.set(m.ceiling);
@@ -7652,8 +7670,7 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
   ambient.intensity = l.ambient;
   key.color.set(l.key);
   key.intensity = l.keyIntensity;
-  fill.color.set(l.fill);
-  fill.intensity = l.fillIntensity;
+  fog?.color.set(l.fog);
   return true;
 }
 async function createWorld(T, R, physics, expanded = false, warmModel) {
@@ -7889,7 +7906,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           }
         mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
-    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus) {
+    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus, lightWash2) {
       productDisplay?.setShadows(shadows);
       if (!expanded) {
         if (camera) {
@@ -7898,7 +7915,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         }
         return;
       }
-      if (surfaceAtmosphere.setTier(tier) && mappedPaving)
+      if (surfaceAtmosphere.setTier(tier, lightWash2) && mappedPaving)
         mappedPaving.roughness = materials2.paving.roughness;
       uploadVisitor = visitor;
       if (camera) {
@@ -7956,7 +7973,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (!warmModel)
         return;
       landingLights ??= new T.Scene;
-      landingLights.children = [ambient, key, fill];
+      landingLights.children = [ambient, key];
       landingLights.fog = scene.fog;
       landingLights.environment = scene.environment;
       landingLights.environmentIntensity = scene.environmentIntensity;
@@ -7992,7 +8009,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const scene = new T.Scene;
     const prepareModel = warmModel && ((model, options2) => warmModel(model, scene, options2));
     scene.background = new T.Color(expanded ? 12244444 : 1650226);
-    scene.fog = new T.Fog(12037532, expanded ? 75 : 40, expanded ? 155 : 100);
+    scene.fog = new T.Fog(expanded ? 14268822 : 12037532, expanded ? 75 : 40, expanded ? 155 : 100);
     const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
     const materials2 = {
       jade: mat(2181182, { roughness: 0.24, metalness: 0.22 }),
@@ -8063,6 +8080,14 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const storefrontGlassMaterial = expanded ? materials2.glass.clone() : materials2.glass;
     if (expanded)
       storefrontGlassMaterial.forceSinglePass = true;
+    const doorGlassMaterial = expanded ? new T.MeshBasicMaterial({
+      color: materials2.glass.color,
+      opacity: materials2.glass.opacity * 0.76,
+      transparent: true,
+      depthWrite: false
+    }) : materials2.glass;
+    materials2.skylightGlass = materials2.glass.clone();
+    materials2.skylightGlass.side = T.FrontSide;
     const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
     doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
     const doorFrameGeometry = mergeGeometries5(doorFrameParts);
@@ -8239,7 +8264,7 @@ metalnessFactor=vSurface.y;`);
     }
     if (!expanded) {
       ceilingBox("dark", 0, 6.29, 8.3, 14.6, 0.06, 13);
-      ceilingBox("glass", 0, 6.25, 8.3, 14.1, 0.025, 12.6);
+      ceilingBox("skylightGlass", 0, 6.25, 8.3, 14.1, 0.025, 12.6);
       for (let x = -7;x <= 7; x += 2)
         ceilingBox("brass", x, 6.18, 8.3, 0.045, 0.08, 12.7);
       for (const z of [2, 5.1, 8.3, 11.5, 14.6])
@@ -8564,9 +8589,6 @@ metalnessFactor=vSurface.y;`);
         pendant(x, -4, 4.2);
         pendant(x, -8, 4.2);
       }
-      const light = new T.PointLight(zone === "gogo" ? 13429186 : 16768937, 45, 15, 2);
-      light.position.set(x, 4.5, -6);
-      scene.add(light);
       box("brass", x, 0.22, -10.32, 9.3, 0.045, 0.04);
       if (zone === "newmoon") {
         lightPool(x, 0.054, -8.6, 7.5, 2.1);
@@ -8711,6 +8733,8 @@ metalnessFactor=vSurface.y;`);
       let warmStrip = function(x, z, width, depth) {
         const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
         for (const r of panels)
+          lightWash((r.minX + r.maxX) / 2, 8.32, (r.minZ + r.maxZ) / 2, Math.max(0.42, r.maxX - r.minX), Math.max(0.42, r.maxZ - r.minZ), 0, Math.PI / 2, true);
+        for (const r of panels)
           lightPool((r.minX + r.maxX) / 2, 0.052, (r.minZ + r.maxZ) / 2, width > depth ? r.maxX - r.minX : 4.5, width > depth ? 4.5 : r.maxZ - r.minZ);
         const washWidth = width > depth ? width : 2.4, washDepth = width > depth ? 2.4 : depth;
         const bounds = { minX: x - washWidth / 2, maxX: x + washWidth / 2, minZ: z - washDepth / 2, maxZ: z + washDepth / 2 };
@@ -8845,6 +8869,15 @@ metalnessFactor=vSurface.y;`);
           shopObstacles.push({ min: { x: x - dx, y: y - h / 2, z: z - dz }, max: { x: x + dx, y: y + h / 2, z: z + dz } });
         }
       });
+      for (const [id, store2] of Object.entries(interiorStores)) {
+        activeShopSlot = Number(id.slice(1));
+        for (const footprint of store2.colliders) {
+          const { center: [x, , z], size: [w, , d], yaw } = worldInteriorBox(store2, footprint);
+          const y = store2.frame.world_origin_m[1] + store2.floor.position_m[1] + 0.024;
+          solid("plane", "contact", x, y, z, w * 1.22, d * 1.22, 1, yaw, -Math.PI / 2, "YXZ");
+        }
+      }
+      activeShopSlot = null;
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
     interactables.push(...amenities.interactables);
@@ -8863,11 +8896,11 @@ metalnessFactor=vSurface.y;`);
     const frameBox = new T.Box3;
     viewUpdates.push(updateFrames);
     if (expanded)
-      for (const [name, panes, receiveShadow] of [
-        ["Sliding shop door glass", doorGlass, false],
-        ["Original shop window glass", windowGlass, true]
+      for (const [name, panes, material, receiveShadow] of [
+        ["Sliding shop door glass", doorGlass, doorGlassMaterial, false],
+        ["Original shop window glass", windowGlass, storefrontGlassMaterial, true]
       ]) {
-        const batch = createGlassBatch(T, geometry.box, storefrontGlassMaterial, panes);
+        const batch = createGlassBatch(T, geometry.box, material, panes);
         batch.mesh.name = name;
         batch.mesh.receiveShadow = receiveShadow;
         scene.add(batch.mesh);
@@ -8923,7 +8956,7 @@ metalnessFactor=vSurface.y;`);
         slots: batch.slots,
         attributes: surfaces ? [surfaces] : []
       }) : null;
-      const allow = (slot2) => slot2 === null || shopNear.get(slot2);
+      const allow = batch.material === contact ? (slot2) => slot2 === null || interiorKit.groups[slot2 - 1]?.visible : (slot2) => slot2 === null || shopNear.get(slot2);
       viewUpdates.push((view2) => {
         if (lod?.mesh.parent)
           lod.update(view2, batch.slots ? allow : undefined);
@@ -8947,9 +8980,9 @@ metalnessFactor=vSurface.y;`);
     }
     lowCylinder.dispose();
     lowSphere.dispose();
-    const ambient = new T.HemisphereLight(expanded ? 15068912 : 16772832, expanded ? 6708816 : 7166779, expanded ? 0.72 : 1.05);
+    const ambient = new T.HemisphereLight(expanded ? 16772570 : 16772832, expanded ? 9203797 : 7166779, 1.05);
     scene.add(ambient);
-    const key = new T.DirectionalLight(expanded ? 16769212 : 16766368, expanded ? 2.6 : 2.1);
+    const key = new T.DirectionalLight(expanded ? 16766114 : 16766368, expanded ? 2.25 : 2.1);
     key.position.set(...expanded ? [-12, 16, 6] : [-8, 15, 9]);
     key.castShadow = true;
     const shadowSize = expanded ? 768 : 1024;
@@ -8958,9 +8991,11 @@ metalnessFactor=vSurface.y;`);
     key.shadow.normalBias = 0.05;
     key.shadow.bias = -0.0004;
     scene.add(key);
-    const fill = new T.DirectionalLight(expanded ? 13360613 : 15325378, expanded ? 0.4 : 0.45);
-    fill.position.set(4, 8, -5);
-    scene.add(fill);
+    const fill = expanded ? null : new T.DirectionalLight(15325378, 0.45);
+    if (fill) {
+      fill.position.set(4, 8, -5);
+      scene.add(fill);
+    }
     const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T, scene, {
       plane: geometry.plane,
       poolMaterial: materials2.lightPool,
@@ -8982,13 +9017,19 @@ metalnessFactor=vSurface.y;`);
         attach();
     }
     const applyMallTheme = (theme) => {
-      const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill });
+      const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog: scene.fog });
       if (applied) {
         surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
         storefrontGlassMaterial.color.copy(materials2.glass.color);
         storefrontGlassMaterial.opacity = materials2.glass.opacity;
         storefrontGlassMaterial.roughness = materials2.glass.roughness;
         storefrontGlassMaterial.metalness = materials2.glass.metalness;
+        doorGlassMaterial.color.copy(materials2.glass.color);
+        doorGlassMaterial.opacity = materials2.glass.opacity * 0.76;
+        materials2.skylightGlass.color.copy(materials2.glass.color);
+        materials2.skylightGlass.opacity = materials2.glass.opacity;
+        materials2.skylightGlass.roughness = materials2.glass.roughness;
+        materials2.skylightGlass.metalness = materials2.glass.metalness;
         refreshInstanceColours();
       }
       return applied;

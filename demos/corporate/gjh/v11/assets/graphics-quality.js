@@ -55,8 +55,8 @@ export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memo
   const tier = recovered ? 'low' : choice !== 'auto' ? choice : TIERS.includes(autoTier) ? autoTier : initialTier;
   let cap = 2;
   if (tier === 'low') cap = 1;
+  else if (tier === 'balanced') cap = 1.25;
   else if (phone) cap = lowEnd ? 1.25 : 1.5;
-  else if (tier === 'balanced') cap = width < 600 ? 1.25 : choice === 'auto' && width >= 1000 ? 1.5 : 2;
   return Object.freeze({preference:choice, tier, pixelRatio:Math.min(positive(dpr) ? dpr : 1, cap),
     shadows:tier === 'detailed' && width >= 1000, recovered});
 }

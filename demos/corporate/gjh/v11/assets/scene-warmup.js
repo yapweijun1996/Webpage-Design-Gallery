@@ -77,7 +77,7 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
         yield* prepareScene({T, renderer, scene, camera:player.camera, expanded, elevator,
           shadows:false, detailed:false, screenPixel, extra:modelWarmup.pendingMeshes(),
           exclude:interiors?.groups, prepared:directPrepared, programs:directPrograms,
-          updateLights:atmosphere.update, lightVariants:atmosphere.lightVariants,
+          updateLights:atmosphere.setLightFloor ?? atmosphere.update, lightVariants:atmosphere.lightVariants,
           initTexture:modelWarmup.initTexture, alternatesFor:modelWarmup.alternatesFor}, report);
       }
       if (signage) {
@@ -104,7 +104,7 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
         const extra = modelWarmup.pendingMeshes();
         if (replacing) extra.push(...stage.meshes);
         yield* prepareScene({T, renderer, scene, camera, expanded, elevator, shadows, detailed,
-          screenPixel, extra, exclude, prepared, programs, chase, updateLights:atmosphere.update,
+          screenPixel, extra, exclude, prepared, programs, chase, updateLights:atmosphere.setLightFloor ?? atmosphere.update,
           lightVariants:atmosphere.lightVariants, initTexture:modelWarmup.initTexture,
           alternatesFor:modelWarmup.alternatesFor}, report);
         while (!interiorsReady) {
@@ -224,7 +224,7 @@ export function mallProbePoses(expanded, elevator, chase) {
 }
 
 // r170's screen and linear-target programs differ. A nonempty one-pixel
-// viewport on the real canvas exercises its output color space and MSAA under
+// viewport on the real canvas exercises its output color space under
 // the opaque loader. Detailed ground-floor passes use the linear target too.
 export function* prepareScene({T, renderer, scene, camera, expanded, elevator, detailed,
   updateLights, lightVariants, initTexture, alternatesFor, shadows=renderer.shadowMap.enabled, extra=[], exclude=[], screenPixel=()=>1,

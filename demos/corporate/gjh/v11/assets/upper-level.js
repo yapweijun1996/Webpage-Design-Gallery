@@ -295,6 +295,18 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
 
   // Single sheets transmit daylight through the existing barrel-vault ribs.
   const panes=new T.Group();panes.name='Atrium skylight and threshold glass';
+  // Keep the railings visible from both sides in the existing glass draw.
+  for (const pane of glass.slice()) {
+    const back = pane.clone();
+    const {index,attributes:{normal}} = back;
+    for (let i=0; i<index.count; i+=3) {
+      const a = index.getX(i);
+      index.setX(i,index.getX(i+1));
+      index.setX(i+1,a);
+    }
+    for (let i=0; i<normal.count; i++) normal.setXYZ(i,-normal.getX(i),-normal.getY(i),-normal.getZ(i));
+    glass.push(back);
+  }
   const positions=[],uvs=[],indices=[];
   for(let i=0;i<=24;i++){
     const a=(i/24-.5)*Math.PI,px=-3+13.18*Math.sin(a),py=13.14+3.91*Math.cos(a);
@@ -304,7 +316,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   const roof=new T.BufferGeometry();roof.setAttribute('position',new T.Float32BufferAttribute(positions,3));
   roof.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));roof.setIndex(indices);roof.computeVertexNormals();glass.push(roof);
   const glazing=new T.MeshStandardMaterial({color:0xdeeff1,emissive:0xb3dbe2,emissiveIntensity:.22,
-    transparent:true,opacity:.14,depthWrite:false,roughness:.22,side:T.DoubleSide,forceSinglePass:true});
+    transparent:true,opacity:.14,depthWrite:false,roughness:.22,side:T.FrontSide});
   merged('Daylight glass',glass,glazing,panes);
   return {group,panes,cabinMark,seatProfiles,updateView(frustum) {
     if (group.visible) for (const update of viewUpdates) update(frustum);
