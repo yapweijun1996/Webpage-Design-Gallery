@@ -1,4 +1,5 @@
 import {buildRestrooms} from './restrooms.js';
+import {miliExhibit} from './mili-exhibit.js';
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
 import {filterWallArtwork, setupArtworkTexture} from './artwork-textures.js';
@@ -804,6 +805,13 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       // Store seating faces the natural route from the entrance, not the rear wall.
       for (const placement of seatPlacements.filter(item=>item.group===zone)) bench(placement);
       if (expanded && zone === 'mili') {
+        const {frame, cookbase} = interiorStores.S02;
+        const [originX, , originZ] = frame.world_origin_m;
+        const [fixtureX, , fixtureZ] = cookbase.xyz;
+        const [standingX, standingZ] = cookbase.standing;
+        const counterX = originX + fixtureX, counterZ = originZ + fixtureZ;
+        sign('COMPARE THE TWO MILI SAUCES', counterX, .91, counterZ+1.307, 1.50, .14, true, 60);
+        interactables.push({id:'mili-sauce-story',x:originX+standingX,z:originZ+standingZ,radius:1.12});
         box('jadeAlt',x,.57,-5.5,1.7,1.12,2.55);
         box('brass',x,.095,-5.5,1.72,.15,2.57);
         for(let dx=-.8;dx<=.85;dx+=.2) box('courtStone',x+dx,.6,-4.218,.012,.96,.015);
@@ -1293,7 +1301,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
-  return {signage, interiors:interiorKit, restrooms, newMoonExhibit:expanded ? newMoonExhibit : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};

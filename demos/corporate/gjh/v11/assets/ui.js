@@ -321,6 +321,8 @@ export function createUI(expanded = false) {
   const productTitle = document.getElementById('product-title');
   const productImage = document.getElementById('product-image');
   const productDescription = document.getElementById('product-description');
+  const productShop = document.getElementById('product-shop');
+  const defaultShop = {href:productShop.href,label:productShop.textContent};
   const productKind = document.getElementById('product-kind');
   const layoutLink=document.getElementById('layout-preview-link');
   const layoutURL=new URL(location.href);
@@ -595,12 +597,14 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     const record = records.get(id);
     if (!record || dialog.open || bag.open || amenityPanel.dialog.open) return false;
     shelfFocus?.close();
+    productShop.href = record.source || defaultShop.href;
+    productShop.textContent = record.sourceLabel || defaultShop.label;
     if(record.action==='brand-story'){
       returnFocus=document.activeElement;
       productTitle.textContent=`${record.brand} · ${record.tagline}`;
       productImage.src=record.image;productImage.alt=record.alt;
       productKind.textContent=record.kind;productDescription.textContent=record.story;
-      dialog.showModal();closeButton.focus({preventScroll:true});notifyMode();
+      dialog.showModal();newMoonPreview.open(id);closeButton.focus({preventScroll:true});notifyMode();
       return true;
     }
     productTitle.textContent = record.name;

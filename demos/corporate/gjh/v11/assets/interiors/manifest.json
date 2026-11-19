@@ -3076,11 +3076,11 @@
       {
         "store": "S02",
         "file": "s02-mili-details.glb",
-        "bytes": 43312,
-        "sha256": "b12b639865f1bf7657ddda0f6234e781e808bac08b8d5be0728a05954f6a0ae4",
-        "triangles": 1538,
+        "bytes": 75440,
+        "sha256": "e33e7a00f17f2d0099a5c9719843638ad2a8ac6b7f7daf6a8fa045df5577e825",
+        "triangles": 1426,
         "draws": 3,
-        "instances": 16,
+        "instances": 8,
         "motion": [],
         "sources": [
           {

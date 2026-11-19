@@ -206,7 +206,8 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
       }
     });
     assert.equal(instances,receipt.instances);
-    if (['S02','S04','S09'].includes(receipt.store)) assert(instances>=12);
+    if (receipt.store==='S02') assert.equal(instances,8);
+    if (['S04','S09'].includes(receipt.store)) assert(instances>=12);
     if (['S05','S06','S07','S08','S10','S11','S12','S17'].includes(receipt.store)) assert(instances>=4);
     const modes = model.userData.roomMotion;
     if (['S13','S14'].includes(receipt.store)) assert(modes.scroll);

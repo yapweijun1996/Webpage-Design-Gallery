@@ -67,12 +67,21 @@ def mili(r,profiles):
         for h in (1.79,2.38):
             r.box(x,h,-4.02,1.47,.07,.40,"895c43")
             r.tag(x+.4,h,-3.811,.28)
-    loc=[(x+(k-1.5)*.29,y,-4.02,1+.08*(k%2)) for x in (-2.95,2.95)
-         for y in (1.826,2.416) for k in range(4)]
+    loc=[(x+(k-.5)*.33,y,-4.02,1+.08*k) for x in (-2.95,2.95)
+         for y in (1.826,2.416) for k in range(2)]
     stock(r,BOTTLE,["973d28",BONE,"ab4b30","853f2e",GOLD],loc,.085,.34,sides=6)
-    r.lathe(.48,1.228,1.39,.26,.044,profiles["plate"],["dfd6b3"],12)
+    # Both GJH 510 g listings give a 55 × 55 × 245 mm envelope.
+    # The shoulder profile follows the two official frontal photographs.
+    counter_top=1.22
+    glass=((.83,0),(.97,.047),(1,.23),(1,.48),(.962,.56),(.856,.66),
+           (.735,.75),(.628,.83),(.535,.905),(.536,.944))
+    closure=((.555,.913),(.605,.936),(.604,.989),(.57,1))
+    for x in (-.39,-.16):
+        r.lathe(x,counter_top,.89,.0275,.245,glass,["513013"],8)
+        r.lathe(x,counter_top,.89,.0275,.245,closure,["d74a23"],8)
+    r.lathe(.48,counter_top,1.39,.26,.044,profiles["plate"],["dfd6b3"],12)
     for i in range(3):
-        r.lathe(.36+i*.11,1.269,1.40,.063,.073,GLOBE,["dc9552"],6)
+        r.lathe(.36+i*.11,counter_top+.041,1.40,.063,.073,GLOBE,["dc9552"],6)
     for k in range(3): leaf(r,-1.51+.16*k,2.04+k*.37,.47,.65,MINT)
 
 

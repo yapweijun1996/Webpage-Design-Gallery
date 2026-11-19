@@ -17,7 +17,7 @@ Run `python3 scripts/gjh_interiors/build_layout.py` before the four gallery gene
 | Sample | Entrance focus | Side operation and return |
 | --- | --- | --- |
 | New Moon | Collector triptych above four cabinets | Read the orchid-side photo, pour at the tea island and follow the open centre to the four pickup positions. Each leaves 0.395 m beyond the capsule at the shelf face. |
-| MILI | Copper hood over the sampling island | Both the procedural serving plate and the tasting plate in the unchanged detail GLB meet the 1.22 m counter. Use the front plate or side boiler. The revised bench positions keep a wide passage to the herbs at the rear. |
+| MILI | Copper hood over the sampling island | Both the procedural serving plate and the tasting plate in the room-detail GLB meet the 1.22 m counter. Use the front plate or side boiler. The revised bench positions keep a wide passage to the herbs at the rear. |
 | GOGO | Potong cart on the left | Ring the bell, pick up a treat, pour at the right bar and return between the two seat exits. The S1 plan calls for open floor at the centre. |
 
 **Integration pending.** The render lane's `world.js` still creates GOGO's coffee table, fallback geometry, pot and solid. The [render-lane patch](../scripts/gjh_interiors/gogo-world.patch) applies the programme's centre-fixture selection to the legacy builder. Until it lands, run the sweep with `--legacy-table` to include the installed obstruction. The historical Rapier replay in `tests/gjh_interiors_layout.test.mjs` stops at z = 1.63 m with the table. Individual action wiring follows in S2.

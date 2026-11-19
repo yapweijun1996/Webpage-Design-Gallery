@@ -1681,6 +1681,8 @@ function createUI(expanded = false) {
   const productTitle = document.getElementById("product-title");
   const productImage = document.getElementById("product-image");
   const productDescription = document.getElementById("product-description");
+  const productShop = document.getElementById("product-shop");
+  const defaultShop = { href: productShop.href, label: productShop.textContent };
   const productKind = document.getElementById("product-kind");
   const layoutLink = document.getElementById("layout-preview-link");
   const layoutURL = new URL(location.href);
@@ -2083,6 +2085,8 @@ function createUI(expanded = false) {
     if (!record || dialog.open || bag.open || amenityPanel.dialog.open)
       return false;
     shelfFocus?.close();
+    productShop.href = record.source || defaultShop.href;
+    productShop.textContent = record.sourceLabel || defaultShop.label;
     if (record.action === "brand-story") {
       returnFocus = document.activeElement;
       productTitle.textContent = `${record.brand} · ${record.tagline}`;
@@ -2091,6 +2095,7 @@ function createUI(expanded = false) {
       productKind.textContent = record.kind;
       productDescription.textContent = record.story;
       dialog.showModal();
+      newMoonPreview.open(id);
       closeButton.focus({ preventScroll: true });
       notifyMode();
       return true;
@@ -6470,7 +6475,7 @@ async function initialize() {
   });
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
-  ui.setBrandStories(world.newMoonExhibit);
+  ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)

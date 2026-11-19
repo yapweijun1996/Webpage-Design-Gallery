@@ -4,6 +4,12 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 const messages = new Map([
   ['Pause motion','暂停动画','Jeda animasi'],
   ['Resume motion','继续动画','Sambung animasi'],
+  ["MILI · Two sauces at the cookline","MILI · 比较两款调味酱","MILI · Dua sos di ruang memasak"],
+  ["Two sauces at the cookline","比较两款调味酱","Dua sos di ruang memasak"],
+  ["Pantry exhibit","食品展示","Pameran makanan pantri"],
+  ["Official MILI brand cover showing a prepared meal","MILI 官方品牌图片，展示一道菜肴","Imej rasmi jenama MILI yang menunjukkan hidangan siap"],
+  ["View the official sauce catalogue","查看官方酱料目录","Lihat katalog sos rasmi"],
+  ["Goh Joo Hin introduced its MILI house brand in 1981. At the cookline, compare two 510 g sauces: MILI Oyster Sauce lists oyster extract, while Vegetarian Oyster Sauce lists mushroom extract. MILI also lists a 280 g Vegetarian Mock Duck tin in its pantry range.","Goh Joo Hin 于 1981 年推出自有品牌 MILI。这里展示两款 510 克的酱料：MILI 蚝油的配料包括牡蛎提取物，素蚝油则采用蘑菇提取物。MILI 也销售 280 克的素鸭罐头。","Goh Joo Hin memperkenalkan jenama MILI pada tahun 1981. Bandingkan dua sos 510 g di ruang memasak ini. Sos tiram MILI menyenaraikan ekstrak tiram, manakala sos tiram vegetarian menyenaraikan ekstrak cendawan. MILI turut menyenaraikan makanan dalam tin Vegetarian Mock Duck 280 g."],
   ['Objectives','目标','Objektif'],
   ['Visit three stores','参观三家商店','Lawati tiga kedai'],
   ['Inspect a product','查看一件商品','Periksa satu produk'],

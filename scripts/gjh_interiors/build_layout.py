@@ -32,6 +32,9 @@ def project(shop):
     for obstacle in shop.get('retainedObstacles', []):
         if obstacle.get('socket') == 'kitchen-run':
             details['kitchenRun'] = obstacle
+    if shop.get('centreFixture') == 'cookbase':
+        counter = next(item for item in items if item['socket'] == 'cookbase')
+        details['cookbase'] = {key: counter[key] for key in ('xyz', 'standing')}
     if 'storyPanels' in shop:
         details['storyPanels'] = shop['storyPanels']
     if 'teaNiches' in shop:
