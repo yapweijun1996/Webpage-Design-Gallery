@@ -6646,7 +6646,7 @@ var testAPI = testEnabled ? {
       return false;
     const camera = player.camera;
     const frustum = new three.Frustum().setFromProjectionMatrix(new three.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-    return frustum.intersectsObject(car);
+    return frustum.intersectsBox(new three.Box3().setFromObject(car));
   },
   testSetTramSpeed(multiplier) {
     if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > 12)

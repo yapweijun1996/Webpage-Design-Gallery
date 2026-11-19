@@ -313,7 +313,8 @@ const testAPI = testEnabled ? {
     const frustum = new three.Frustum().setFromProjectionMatrix(
       new three.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
     );
-    return frustum.intersectsObject(car);
+    // The real carriage is a Group of meshes, so test its world-space box instead of one geometry.
+    return frustum.intersectsBox(new three.Box3().setFromObject(car));
   },
   testSetTramSpeed(multiplier) {
     if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > 12) throw new RangeError('Expected tram speed multiplier 1–12');
