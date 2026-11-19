@@ -8190,7 +8190,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const bay = shopBays.get(slot2);
       const x = (bay.minX + bay.maxX) / 2;
       const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
-      prepareModel(meshes, { hide: true, late: false, priority }).catch(() => {});
+      prepareModel(meshes, { late: false, priority }).catch(() => {});
     }
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let upperWarmStatus = null, landingLights;

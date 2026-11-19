@@ -59,3 +59,25 @@ test('a reserved product stays absent across distance changes and returns to its
   lod.update(near);
   assert.deepEqual(positions()[0], [[0,0,0], [6,0,0], [40,0,0]]);
 });
+
+test('compacted New Moon stock bounds contain every active instance', () => {
+  const {lod, meshes} = display([
+    {x:-13.63,z:-9.25}, {x:-11.21,z:-9.25}, {x:-8.79,z:-9.25}, {x:-6.37,z:-9.25}
+  ]);
+  const matrix = new T.Matrix4(), instance = new T.Sphere();
+  for (const visitor of [{x:10,z:12}, {x:7,z:-9}, {x:-10,z:-8.55}, {x:10,z:12}]) {
+    lod.update(visitor);
+    for (const mesh of meshes) {
+      if (!mesh.count) {
+        assert(mesh.boundingSphere.isEmpty());
+        continue;
+      }
+      for (let i=0; i<mesh.count; i++) {
+        mesh.getMatrixAt(i,matrix);
+        instance.copy(mesh.geometry.boundingSphere).applyMatrix4(matrix);
+        const {center,radius} = mesh.boundingSphere;
+        assert(center.distanceTo(instance.center)+instance.radius <= radius+1e-6);
+      }
+    }
+  }
+});
