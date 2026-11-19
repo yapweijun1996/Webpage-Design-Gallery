@@ -23,7 +23,7 @@ export function interiorMaterials(T) {
   };
 }
 
-export function buildInteriorDecoration(T, store, materials, detail = 0) {
+export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
   const [dominant,secondary,pale,accent] = store.palette.map(({hex}) => new T.Color(hex));
   const warm = kelvinColour(T,store.accent_kelvin);
   const opaque = [], glow = [];
@@ -207,7 +207,10 @@ export function buildInteriorDecoration(T, store, materials, detail = 0) {
     }
   }
   for (const prop of store.props) {
-    for (const position of prop.instance_positions_m ?? [prop.position_m]) fixture(prop,position);
+    for (const position of prop.instance_positions_m ?? [prop.position_m]) {
+      fixture(prop,position);
+      yield;
+    }
   }
   if (detail) {
     origin = [0,0,0]; yaw = 0;
@@ -225,4 +228,11 @@ export function buildInteriorDecoration(T, store, materials, detail = 0) {
     if (geometry) group.add(new T.Mesh(geometry,material));
   }
   return group;
+}
+
+export function buildInteriorDecoration(...args) {
+  const work = prepareInteriorDecoration(...args);
+  let step;
+  do { step = work.next(); } while (!step.done);
+  return step.value;
 }

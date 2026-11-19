@@ -240,6 +240,13 @@ test('the rotated collider matches the Rapier cuboid', async t => {
   physics.free();
 });
 
+function runBuild(work) {
+  const iterator = work();
+  let step;
+  do { step = iterator.next(); } while (!step.done);
+  return step.value;
+}
+
 test('warm registration installs all rooms, reprioritizes remaining work and commits tier changes together', async () => {
   const scene = new T.Scene(), requests = [], pending = [], colliders = [];
   const modelsByFile = new Map();
@@ -256,6 +263,7 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
     }
   });
   const createInstaller = () => ({
+    build:runBuild,
     prepare: (roots,options) => new Promise(resolve => pending.push({roots,options,resolve})),
     runFrame: () => 0,
     dispose() {}
@@ -268,7 +276,7 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   const frame = async () => {
     clock += 16;
     runtime.runFrame();
-    await Promise.resolve();
+    await new Promise(resolve=>setImmediate(resolve));
     return pending.shift();
   };
   const complete = async upload => {
@@ -430,7 +438,7 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   });
   t.after(()=>interiors.dispose());
   // Control the upload completion independently of the scene and sign sweep.
-  interiors.prepare('low',()=>({prepare:async()=>{}, runFrame:()=>0, dispose(){}}),{deferActivation:true});
+  interiors.prepare('low',()=>({build:runBuild, prepare:async()=>{}, runFrame:()=>0, dispose(){}}),{deferActivation:true});
   const signage = {
     *prepareTier(tier) {
       while (blockedSigns === tier) yield false;
@@ -464,17 +472,18 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   low.runFrame();
   assert.equal(report.reason,'timeout');
   move(interiorStores.S17);
-  const resumed = work('low');
+  assert.equal(report.background,'running');
   for (let i=0; i<16; i++) await frame();
   assert.equal(files[1],interiorStores.S17.files.low.file);
   assert.equal(interiors.report().preinstalled.shops,16);
-  for (let i=0; i<30; i++) assert.equal(resumed.next().done,false);
+  low.runFrame();
   assert.deepEqual(visits,[]);
   failFile = null;
   now += 15000;
   await frame();
   assert.equal(interiors.report().preinstalled.shops,17);
-  assert.equal(resumed.next().done,true);
+  low.runFrame();
+  assert.equal(report.background,'complete');
   assert.deepEqual(visits,[['low','low','low']]);
 
   blockedSigns = 'balanced';

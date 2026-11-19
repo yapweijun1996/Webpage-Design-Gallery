@@ -24,9 +24,9 @@ export function loaderLabels(state, language) {
 }
 
 export function createLoaderState(onChange = () => {}) {
-  let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false, preparation = null;
+  let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false, immediate = false, preparation = null;
   const skip = new AbortController();
-  const snapshot = () => ({completed, total: stages.length, hidden, contextLost, failed, dismissed,
+  const snapshot = () => ({completed, total: stages.length, hidden, contextLost, failed, dismissed, immediate,
     stage: stages[completed], ready: completed === stages.length,
     preparing: (Boolean(preparation) || stages[completed] === 'warm') && completed < stages.length,
     message: failed || (completed === stages.length ? messages.at(-1) :
@@ -36,9 +36,10 @@ export function createLoaderState(onChange = () => {}) {
   return {
     snapshot, skipSignal:skip.signal,
     get ready() { return completed === stages.length; },
-    complete(stage) {
+    complete(stage, skipFade = false) {
       if (!failed && stage === stages[completed] && (!['frame','warm'].includes(stage) || (!hidden && !contextLost))) {
         completed++;
+        if (stage === 'warm') immediate = skipFade;
         preparation = null;
       }
       return notify();
@@ -107,7 +108,7 @@ if (typeof document !== 'undefined') {
         if (overlay.contains(document.activeElement))
           (document.querySelector('#experience:not([hidden]) #scene') || document.getElementById('store-list')).focus({preventScroll: true});
         overlay.hidden = true;
-      }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250);
+      }, value.immediate || reduced.matches ? 0 : 250);
     } else if (!overlay.hidden) {
       clearTimeout(fadeTimer);
       overlay.classList.remove('is-fading');

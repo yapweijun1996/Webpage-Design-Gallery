@@ -40,7 +40,7 @@ let greetedOnArrival = false, pageEnded = false;
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
 let three;
 let modelWarmup, tierQueue, requestedProfile;
-let warmRunner = null, warmReport = createWarmReport();
+let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
@@ -75,7 +75,7 @@ const mallHud = createMallHud({destinations, scene: canvas, announce: ui.announc
   subscribeBag: ui.onBagChange, subscribeInspect: ui.onProductInspect});
 const performanceMonitor = createPerformanceMonitor();
 performanceMonitor.setEnabled(true);
-let measuringFrames = false, lastMetricsUpdate = -Infinity;
+let measuringFrames = false, lastMetricsUpdate = -Infinity, maxFrameUploadMs = 0;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
@@ -85,7 +85,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
     layout: expanded ? 'expanded' : 'classic',
-    uploads: modelWarmup?.report() ?? {lateAdditions:0, maxFrameUploadMs:0, pendingUploads:0},
+    uploads: {...(modelWarmup?.report() ?? {lateAdditions:0,pendingUploads:0}), maxFrameUploadMs},
     warm: {...warmReport},
     viewport: {width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio()},
     graphics: {tier: quality.state?.tier, contextLosses: losses, restorations: validations}
@@ -356,14 +356,22 @@ function updateModelPreload(now) {
     } else window.mallLoader?.prepare(node.textContent);
   }
 }
-function tierWork(profile, report) {
+function tierWork(profile, report, startup = false) {
   const screenPixel = () => !startupOverlay.hidden || (!manual && !modes.paused()) ? 1 : 0;
   return prepareTier({T:three, renderer, world, player, expanded, elevator, atmosphere, modelWarmup,
-    width:renderWidth, height:renderHeight, screenPixel, applyProfile}, profile, report);
+    width:renderWidth, height:renderHeight, screenPixel, applyProfile, startup}, profile, report);
+}
+function tierKey(profile) {
+  return [profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
 }
 function scheduleTier() {
   const profile=requestedProfile, active=quality.state;
   if(!profile || !ready || contextLost || pageEnded)return;
+  const key=tierKey(profile);
+  if (warmRunner) {
+    if (warmRunner.blocking || warmKey === key) return;
+    warmRunner.stop('superseded');
+  }
   if(profile.tier===active.tier && profile.shadows===active.shadows &&
      (!world.signage || world.signage.getTier()===profile.tier) &&
      (!world.interiors || world.interiors.activeTier===profile.tier)){
@@ -372,7 +380,6 @@ function scheduleTier() {
     applyProfile(profile);
     return;
   }
-  const key=[profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
   void tierQueue.request(key,()=>tierWork(profile,createWarmReport())).catch(error=>{
     console.warn('Mall graphics tier preparation interrupted',error);
   });
@@ -388,36 +395,45 @@ function advanceStartupWarm() {
     const {tier} = requestedProfile;
     warmReport = createWarmReport();
     warmReport.reason = 'running';
-    const runner = createWarmRunner(tierWork(requestedProfile,warmReport), warmReport, {
+    warmKey = tierKey(requestedProfile);
+    warmRunner = createWarmRunner(tierWork(requestedProfile,warmReport,true), warmReport, {
       budgetMs:tier === 'low' ? 8 : tier === 'balanced' ? 10 : 12,
       signal:loader.skipSignal,
       lost:() => renderer.getContext().isContextLost(),
+      onRelease(result) {
+        if (result.reason !== 'context-loss' && !pageEnded && !fatal) {
+          loader.complete('warm', result.skipped || result.ms >= 5750);
+        }
+      },
       onFinish(result) {
         warmRunner = null;
-        if (result.reason !== 'context-loss' && !pageEnded && !fatal) {
-          loader.complete('warm');
-          if (loader.ready) scheduleTier();
-        }
+        if ((result.reason === 'complete' || result.background === 'complete') && loader.ready) scheduleTier();
       }
     });
-    // An earlier Enter now or directory action closes the runner synchronously.
-    if (loader.skipSignal.aborted) return false;
-    warmRunner = runner;
   }
+  if (!warmRunner.blocking) return false;
   warmRunner.runFrame();
-  if (warmRunner) warmModels(player.state);
+  if (warmRunner?.blocking) warmModels(player.state, false);
   return true;
 }
-function warmModels(pose) {
+function warmModels(pose, background = true) {
   if (!pose || document.hidden || contextLost || restorePending || pageEnded) return 0;
   const {physicalProduct, collection} = pose.character;
   const stableSeat = pose.seatPhase === 'idle' || pose.seatPhase === 'seated';
   const stableProduct = !physicalProduct || ['empty','held'].includes(physicalProduct.phase);
   if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active) return 0;
   const started = performance.now();
-  world.interiors?.runFrame();
-  modelWarmup.runFrame(true);
-  return performance.now() - started;
+  const remaining = () => Math.max(0, 4 - (performance.now() - started));
+  const runner = background && warmRunner;
+  const sceneFirst = runner && sceneWarmFirst;
+  if (runner) sceneWarmFirst = !sceneWarmFirst;
+  if (sceneFirst) runner.runFrame(Math.min(2, remaining()));
+  world.interiors?.runFrame(remaining());
+  modelWarmup.runFrame(true, remaining());
+  if (runner && !sceneFirst) runner.runFrame(remaining());
+  const elapsed = performance.now() - started;
+  maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
+  return elapsed;
 }
 function animate(now) {
   frame = 0;
@@ -482,7 +498,7 @@ function animate(now) {
   }
   // Record monitor telemetry before a quality change can resize and render.
   const movement = player.state.animation;
-  quality.sample(now, advancing && !tierQueue?.pending && preloadSettled && document.getElementById('app-loader').hidden &&
+  quality.sample(now, advancing && !warmRunner && !tierQueue?.pending && preloadSettled && document.getElementById('app-loader').hidden &&
     !windowBlurred && document.hasFocus() && !contextLost && !interrupted &&
     ['explore','cart'].includes(modes.current()), ['walk','run'].includes(movement));
   frame = requestAnimationFrame(animate);

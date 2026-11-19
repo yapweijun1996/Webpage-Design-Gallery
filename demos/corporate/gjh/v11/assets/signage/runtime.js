@@ -1,3 +1,4 @@
+import {createProgressiveAtlas} from './atlas.js';
 import {mergeGeometries} from '../shop-sign-vendor.js';
 import {createShopSign,letterGeometry} from './builder.js';
 import {selectSignLod} from './config.js';
@@ -139,7 +140,7 @@ export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
     texture.anisotropy=2;
     return texture;
   }
-  const lowTexture=atlas(bake.lowSheet), fullTexture=atlas(bake.sheet);
+  const lowTexture=atlas(bake.lowSheet), fullAtlas=createProgressiveAtlas(T,bake.sheet);
   const flat=new T.MeshBasicMaterial({map:lowTexture,toneMapped:false});
   const pieces=[],signs=[];
   configs.forEach((config,index)=>{
@@ -198,17 +199,18 @@ export function createSignageSystem(T,scene,configs,bays,bake,assetBase){
   }
   // Build the exact drawable pools off-scene. The owner commits only after
   // their buffers, programs and textures pass the same fence as the mall.
-  function* prepareTier(tier) {
+  function* prepareTier(tier, renderer) {
     if(tier!=='balanced' && tier!=='detailed')tier='low';
     if(tier===active.tier)return active;
     if(tier==='low')return low;
     moduleTask??=loadModules(assetBase).then(loaded=>{modules=loaded;},()=>{modules=new Map();});
     while(!modules)yield false;
-    const texture=fullTexture, face=new T.Mesh(faces.geometry,nearFaceMaterial(T,texture,pulse));
+    const texture=fullAtlas.texture, face=new T.Mesh(faces.geometry,nearFaceMaterial(T,texture,pulse));
     face.name=faces.name;face.layers.mask=faces.layers.mask;measure(face);
     const stage={tier,faces:face,meshes:[face]};
     let complete=false;
     try {
+      if (renderer) yield* fullAtlas.upload(renderer);
       const detailed=tier==='detailed';
       stage.hardware=buildHardware(T,modules,detailed,signs.length);
       signs.forEach((sign,i)=>stage.hardware.set(i,sign));

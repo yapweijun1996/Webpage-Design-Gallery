@@ -2643,6 +2643,56 @@ async function bakeAtlas(configs, assetBase) {
   low.drawImage(sheet, 0, 0, lowAtlasSize, lowAtlasSize);
   return { sheet, lowSheet, tiles };
 }
+function createProgressiveAtlas(T, sheet) {
+  const size = sheet.width;
+  const texture = new T.DataTexture(null, size, size);
+  texture.colorSpace = T.SRGBColorSpace;
+  texture.minFilter = T.LinearMipmapLinearFilter;
+  texture.magFilter = T.LinearFilter;
+  texture.anisotropy = 2;
+  const levels = texture.mipmaps;
+  for (let width = size;width >= 1; width /= 2)
+    levels.push({ width, height: width, data: null });
+  texture.source.dataReady = false;
+  texture.needsUpdate = true;
+  let ready = false;
+  texture.addEventListener("dispose", () => {
+    ready = false;
+  });
+  function* upload(renderer) {
+    if (ready)
+      return;
+    const strip = canvas(1, 1);
+    const reader = strip.getContext("2d", { willReadFrequently: true });
+    const source = new T.DataTexture;
+    const offset = new T.Vector2;
+    renderer.initTexture(texture);
+    yield;
+    for (let level = levels.length - 1;level >= 0; level--) {
+      const { width } = levels[level], scale = size / width;
+      const rowBytes = width * 4, rows = Math.min(width, Math.floor(131072 / rowBytes));
+      strip.width = width;
+      strip.height = rows;
+      reader.imageSmoothingQuality = "high";
+      const flipped = new Uint8Array(rowBytes * rows);
+      for (let y = 0;y < width; y += rows) {
+        const top = size - (y + rows) * scale;
+        reader.clearRect(0, 0, width, rows);
+        reader.drawImage(sheet, 0, top, size, rows * scale, 0, 0, width, rows);
+        const pixels = reader.getImageData(0, 0, width, rows).data;
+        for (let row = 0;row < rows; row++) {
+          const first = row * rowBytes;
+          flipped.set(pixels.subarray(first, first + rowBytes), (rows - row - 1) * rowBytes);
+        }
+        source.image = { data: flipped, width, height: rows };
+        renderer.copyTextureToTexture(source, texture, null, offset.set(0, y), level);
+        yield;
+      }
+    }
+    ready = true;
+  }
+  return { texture, upload };
+}
 
 // demos/corporate/gjh/v11/assets/shop-sign-vendor.js
 import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
@@ -3118,7 +3168,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     texture.anisotropy = 2;
     return texture;
   }
-  const lowTexture = atlas(bake.lowSheet), fullTexture = atlas(bake.sheet);
+  const lowTexture = atlas(bake.lowSheet), fullAtlas = createProgressiveAtlas(T, bake.sheet);
   const flat = new T.MeshBasicMaterial({ map: lowTexture, toneMapped: false });
   const pieces = [], signs = [];
   configs.forEach((config, index) => {
@@ -3186,7 +3236,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     signature = -1;
     scene.add(...stage.meshes);
   }
-  function* prepareTier(tier) {
+  function* prepareTier(tier, renderer) {
     if (tier !== "balanced" && tier !== "detailed")
       tier = "low";
     if (tier === active.tier)
@@ -3200,13 +3250,15 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     });
     while (!modules)
       yield false;
-    const texture = fullTexture, face = new T.Mesh(faces.geometry, nearFaceMaterial(T, texture, pulse));
+    const texture = fullAtlas.texture, face = new T.Mesh(faces.geometry, nearFaceMaterial(T, texture, pulse));
     face.name = faces.name;
     face.layers.mask = faces.layers.mask;
     measure(face);
     const stage = { tier, faces: face, meshes: [face] };
     let complete = false;
     try {
+      if (renderer)
+        yield* fullAtlas.upload(renderer);
       const detailed = tier === "detailed";
       stage.hardware = buildHardware(T, modules, detailed, signs.length);
       signs.forEach((sign, i) => stage.hardware.set(i, sign));
@@ -5230,7 +5282,7 @@ function interiorMaterials(T) {
     glow: new T.MeshBasicMaterial({ vertexColors: true, toneMapped: false })
   };
 }
-function buildInteriorDecoration(T, store2, materials2, detail = 0) {
+function* prepareInteriorDecoration(T, store2, materials2, detail = 0) {
   const [dominant, secondary, pale, accent] = store2.palette.map(({ hex }) => new T.Color(hex));
   const warm = kelvinColour(T, store2.accent_kelvin);
   const opaque = [], glow = [];
@@ -5421,8 +5473,10 @@ function buildInteriorDecoration(T, store2, materials2, detail = 0) {
     }
   }
   for (const prop of store2.props) {
-    for (const position of prop.instance_positions_m ?? [prop.position_m])
+    for (const position of prop.instance_positions_m ?? [prop.position_m]) {
       fixture2(prop, position);
+      yield;
+    }
   }
   if (detail) {
     origin = [0, 0, 0];
@@ -5446,9 +5500,9 @@ function buildInteriorDecoration(T, store2, materials2, detail = 0) {
 }
 
 // demos/corporate/gjh/v11/assets/interiors/models.js
-function mergeInteriorAnchor(T, scene) {
+function* mergeInteriorAnchor(T, scene) {
   scene.updateMatrixWorld(true);
-  const batches = new Map;
+  const batches = new Map, anchor = new T.Group;
   scene.traverse((mesh) => {
     if (!mesh.isMesh)
       return;
@@ -5456,30 +5510,45 @@ function mergeInteriorAnchor(T, scene) {
       batches.set(mesh.material, []);
     batches.get(mesh.material).push(mesh);
   });
-  const anchor = new T.Group;
-  for (const [material, meshes] of batches) {
-    const parts = meshes.map((mesh) => mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
-    const geometry = mergeGeometries3(parts);
-    for (const part of parts)
-      part.dispose();
-    if (!geometry) {
-      for (const mesh of meshes) {
-        const copy = new T.Mesh(mesh.geometry, material);
-        mesh.matrixWorld.decompose(copy.position, copy.quaternion, copy.scale);
-        anchor.add(copy);
+  let complete = false;
+  try {
+    for (const [material, meshes] of batches) {
+      const parts = [];
+      try {
+        for (const mesh of meshes) {
+          parts.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
+          yield;
+        }
+        const geometry = mergeGeometries3(parts);
+        if (geometry) {
+          anchor.add(new T.Mesh(geometry, material));
+          for (const mesh of meshes)
+            mesh.geometry.dispose();
+        } else {
+          for (const mesh of meshes) {
+            const copy = new T.Mesh(mesh.geometry, material);
+            mesh.matrixWorld.decompose(copy.position, copy.quaternion, copy.scale);
+            anchor.add(copy);
+          }
+        }
+      } finally {
+        for (const part of parts)
+          part.dispose();
       }
-    } else {
-      anchor.add(new T.Mesh(geometry, material));
-      for (const mesh of meshes)
-        mesh.geometry.dispose();
+      yield;
     }
+    if (!anchor.children.length)
+      throw new Error("Empty interior fixture");
+    complete = true;
+    return anchor;
+  } finally {
+    if (!complete)
+      for (const mesh of anchor.children)
+        mesh.geometry.dispose();
   }
-  if (!anchor.children.length)
-    throw new Error("Empty interior fixture");
-  return anchor;
 }
 function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
-  return async function load2(asset, signal) {
+  return async function load2(asset, signal, build) {
     const url = new URL("interiors/" + asset.file, assetBase2);
     const controller = new AbortController;
     const abort = () => controller.abort();
@@ -5501,7 +5570,22 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
       signal.removeEventListener("abort", abort);
     }
     const { scene } = await loader.parseAsync(buffer, new URL(".", url).href);
-    return mergeInteriorAnchor(T, scene);
+    try {
+      if (signal.aborted)
+        throw new DOMException("Interior fixture cancelled", "AbortError");
+      const work = () => mergeInteriorAnchor(T, scene);
+      if (build)
+        return await build(work);
+      const iterator = work();
+      let step;
+      do {
+        step = iterator.next();
+      } while (!step.done);
+      return step.value;
+    } catch (error) {
+      disposeInteriorModel(scene);
+      throw error;
+    }
   };
 }
 function disposeInteriorModel(model) {
@@ -5568,8 +5652,8 @@ function createInteriorKit(T, scene, {
       };
     });
   }
-  function decoration(store2, detail) {
-    const base = buildInteriorDecoration(T, store2, materials2, detail);
+  function* decoration(store2, detail) {
+    const base = yield* prepareInteriorDecoration(T, store2, materials2, detail);
     if (detail || store2.id !== "S01" || !packshot)
       return base;
     const photo = new T.MeshBasicMaterial({ map: packshot, toneMapped: false });
@@ -5633,7 +5717,7 @@ function createInteriorKit(T, scene, {
     const controller = new AbortController, started = now();
     const waiting = shops.filter((shop) => !shop.ready.has(tier));
     report.preinstalled = { shops: shops.length - waiting.length, ms: 0 };
-    const job = { tier, controller, started, waiting, remaining: waiting.length, retryAt: Infinity, deferActivation };
+    const job = { tier, controller, started, waiting, remaining: waiting.length, inflight: 0, retryAt: Infinity, deferActivation };
     job.done = new Promise((resolve) => {
       job.resolve = resolve;
     });
@@ -5648,12 +5732,13 @@ function createInteriorKit(T, scene, {
     const { tier, controller: { signal } } = job;
     const asset = interiorAsset(shop.store, tier), detail = interiorTiers.indexOf(tier);
     const priority = () => shop.distance - 200;
+    const build = (work) => installer.build(work, { priority, signal });
     let model = shop.models.get(asset.file), freshModel;
     const freshLayers = [];
     try {
       try {
         if (!model)
-          freshModel = model = await loadModel(asset, signal);
+          freshModel = model = await loadModel(asset, signal, build);
         if (signal.aborted)
           return;
         if (freshModel) {
@@ -5667,11 +5752,19 @@ function createInteriorKit(T, scene, {
       } finally {
         decoding = false;
       }
-      for (let i = shop.layers.length;i <= detail; i++)
-        freshLayers.push(decoration(shop.store, i));
+      await build(function* () {
+        for (let i = shop.layers.length;i <= detail; i++) {
+          const layer = yield* decoration(shop.store, i);
+          freshLayers.push(layer);
+          measure(layer, shop.store.id);
+          yield;
+        }
+        if (freshModel)
+          measure(freshModel, shop.store.id);
+      });
+      if (signal.aborted)
+        return;
       const fresh = [...freshLayers, ...freshModel ? [freshModel] : []];
-      for (const root of fresh)
-        measure(root, shop.store.id);
       const roots = [...shop.layers.slice(0, detail + 1), ...freshLayers, ...model ? [model] : []];
       await installer.prepare(roots, { tier, priority, signal, prepareModel });
       if (signal.aborted)
@@ -5704,6 +5797,7 @@ function createInteriorKit(T, scene, {
           if (mesh.material?.map === packshot && packshot)
             mesh.material.dispose();
         });
+      job.inflight--;
       if (!signal.aborted) {
         job.remaining--;
         report.preinstalled.ms = Math.round(now() - job.started);
@@ -5731,8 +5825,8 @@ function createInteriorKit(T, scene, {
         shop.group.visible = shop.shown !== null && shop.near;
       }
     },
-    runFrame() {
-      if (!request || disposed)
+    runFrame(remaining = 2) {
+      if (!request || disposed || remaining <= 0)
         return 0;
       if (now() >= request.retryAt) {
         request.waiting = shops.filter((shop) => !shop.ready.has(request.tier));
@@ -5740,16 +5834,17 @@ function createInteriorKit(T, scene, {
         request.retryAt = Infinity;
       }
       const { waiting } = request;
-      if (!decoding && waiting.length) {
+      if (!decoding && waiting.length && request.inflight < 2) {
         let nearest = 0;
         for (let i = 1;i < waiting.length; i++)
           if (waiting[i].distance < waiting[nearest].distance)
             nearest = i;
         const [shop] = waiting.splice(nearest, 1);
         decoding = true;
+        request.inflight++;
         stage(shop, request);
       }
-      return installer.runFrame();
+      return installer.runFrame(remaining);
     },
     get activeTier() {
       return activeTier;
@@ -6223,7 +6318,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (surfaceAtmosphere.setTier(tier) && mappedPaving)
         mappedPaving.roughness = materials2.paving.roughness;
       uploadVisitor = visitor;
-      productDisplay?.updateShopLods(visitor, tier);
+      productDisplay?.updateShopLods(visitor);
       interiorKit.update(visitor);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
