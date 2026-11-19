@@ -108,7 +108,7 @@ function describeBody(parts, motion, gestures) {
 
 // This library owns immutable source buffers. Only skeletons and tinted materials
 // are per visitor. It has no scene, simulation, visibility or admission of its own.
-export async function loadModularLooks(signal) {
+export async function loadModularLooks(signal, {requireClothing = true} = {}) {
   const controller = new AbortController(), abort = () => controller.abort();
   const timer = setTimeout(abort, 8000);
   signal.addEventListener('abort', abort, {once:true});
@@ -122,6 +122,8 @@ export async function loadModularLooks(signal) {
     const response = await fetch(MANIFEST, {signal:controller.signal, redirect:'error'});
     if (!response.ok) throw new Error('Modular NPC manifest unavailable');
     const {seed, entries, motion, gestures} = validateManifest(await response.json());
+    // The bare body wears only shorts. Without a verified top the crowd must keep the clothed legacy visitors.
+    if (requireClothing && !entries.some(entry => entry.slot === 'top')) throw new Error('Modular NPC wardrobe has no clothing');
     const loader = new GLTFLoader();
     async function read(entry) {
       const model = await loadAsset(loader, entry, controller.signal);

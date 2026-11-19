@@ -261,7 +261,7 @@ test('the shipped Tripo visitor and boy coexist with the separately loaded V2 cr
   system.setQuality({tier:'low',mobile:true});
   let pending;
   system.enableModular(signal=>{
-    pending=loadModularLooks(signal);
+    pending=loadModularLooks(signal,{requireClothing:false});
     return pending;
   });
   system.update(.016,player);
