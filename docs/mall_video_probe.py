@@ -11,7 +11,7 @@ timestamp) are saved per segment. The analysis reports, per segment:
     frames (A, B, A). Real motion rarely does that, a flickering model or a
     z-fighting surface does. The share of pixels that blink repeatedly (hotShare, pass
     criterion; blinkShare counts any single blink and is mostly JPEG noise) and their bounding
-    boxes are reported and a red heat-map plus a contact sheet are written so a
+    boxes are reported and a labelled heat-map plus a contact sheet are written so a
     person (or the manager agent) can look at the footage.
 Needs Pillow and numpy. Exit code 1 when a segment exceeds the thresholds.
 """
@@ -24,13 +24,9 @@ import sys
 import time
 
 import numpy as np
-from PIL import Image
-from playwright.sync_api import sync_playwright
-
-INIT = """
-localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
-localStorage.setItem('gjh-v11-graphics-quality-v1','%s');
-"""
+from PIL import Image, ImageDraw
+from mall_browser_probe import enter, launch, assert_teleport
+from mall_lap_probe import ZONES, reach_upper, positive_int
 
 # One scripted path per segment: (zone, [(key, ms) ...], mouse-drag dx per step)
 ROUTES = [
@@ -42,33 +38,60 @@ ROUTES = [
 ]
 
 
+def regions(hot):
+    """8-connected components. Boxes use half-open analysis-pixel coordinates."""
+    remaining = {(int(x), int(y)) for y, x in zip(*np.nonzero(hot))}
+    result = []
+    while remaining:
+        seed = remaining.pop()
+        stack = [seed]
+        left, top = right, bottom = seed
+        area = 0
+        while stack:
+            x, y = stack.pop()
+            area += 1
+            left, top, right, bottom = min(left, x), min(top, y), max(right, x), max(bottom, y)
+            for nx in range(x-1, x+2):
+                for ny in range(y-1, y+2):
+                    if (nx, ny) in remaining:
+                        remaining.remove((nx, ny))
+                        stack.append((nx, ny))
+        result.append({'box': [left, top, right+1, bottom+1], 'area': area})
+    result.sort(key=lambda r: (-r['area'], r['box']))
+    for i, region in enumerate(result, 1):
+        region['label'] = f'R{i:03}'
+    return result
+
+
 def analyse(frames, width=320):
-    """frames: list of (timestamp_s, jpeg_bytes). Returns metrics and arrays."""
+    if len(frames) < 3:
+        raise ValueError('Fewer than three screencast frames; cannot measure flicker')
     stamps = np.array([t for t, _ in frames])
-    gray = []
+    a = b = blink = None
     for _, blob in frames:
         image = Image.open(io.BytesIO(blob)).convert('L')
         height = max(1, round(image.height * width / image.width))
-        gray.append(np.asarray(image.resize((width, height)), dtype=np.int16))
-    stack = np.stack(gray)
+        c = np.asarray(image.resize((width, height)), dtype=np.int16)
+        if blink is None:
+            blink = np.zeros(c.shape, dtype=np.int32)
+        if a is not None:
+            blink += (np.abs(b-a) > 24) & (np.abs(b-c) > 24) & (np.abs(a-c) < 12)
+        a, b = b, c
     gaps = np.diff(stamps) * 1000
     metrics = {'frames': len(frames), 'seconds': round(float(stamps[-1] - stamps[0]), 2),
-               'fps': round(len(frames) / max(stamps[-1] - stamps[0], 1e-6), 1),
+               'fps': round((len(frames) - 1) / max(stamps[-1] - stamps[0], 1e-6), 1),
                'gaps50': int((gaps >= 50).sum()), 'maxGapMs': round(float(gaps.max()), 1) if len(gaps) else 0}
-    blink = np.zeros(stack.shape[1:], dtype=np.int32)
-    if len(stack) >= 3:
-        a, b, c = stack[:-2], stack[1:-1], stack[2:]
-        step = 24
-        blink = ((np.abs(b - a) > step) & (np.abs(b - c) > step) & (np.abs(a - c) < step // 2)).sum(axis=0)
     metrics['blinkShare'] = round(float((blink > 0).mean()), 5)
-    hot = blink >= max(2, len(stack) // 40)
+    hot = blink >= max(2, len(frames) // 40)
     metrics['hotShare'] = round(float(hot.mean()), 5)
     ys, xs = np.where(hot)
     metrics['hotBox'] = [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())] if len(xs) else None
-    return metrics, stack, blink, hot
+    metrics['regions'] = regions(hot)
+    metrics['analysisSize'] = [width, height]
+    return metrics, hot
 
 
-def write_artifacts(folder, frames, stack, blink, hot):
+def write_artifacts(folder, frames, hot, region_list):
     os.makedirs(folder, exist_ok=True)
     picks = np.linspace(0, len(frames) - 1, 12).astype(int)
     tiles = [Image.open(io.BytesIO(frames[i][1])).convert('RGB').resize((320, 180)) for i in picks]
@@ -76,19 +99,37 @@ def write_artifacts(folder, frames, stack, blink, hot):
     for index, tile in enumerate(tiles):
         sheet.paste(tile, ((index % 4) * 320, (index // 4) * 180))
     sheet.save(os.path.join(folder, 'contact-sheet.jpg'), quality=85)
-    base = Image.open(io.BytesIO(frames[len(frames) // 2][1])).convert('RGB').resize((stack.shape[2], stack.shape[1]))
-    overlay = np.asarray(base).copy()
+    source = Image.open(io.BytesIO(frames[len(frames) // 2][1])).convert('RGB')
+    height, width = hot.shape
+    overlay = np.asarray(source.resize((width, height))).copy()
     overlay[hot] = (255, 0, 0)
-    Image.fromarray(overlay).resize((960, round(960 * stack.shape[1] / stack.shape[2]))).save(
-        os.path.join(folder, 'blink-heatmap.png'))
-    for i in picks:
-        with open(os.path.join(folder, f'frame-{i:04d}.jpg'), 'wb') as handle:
-            handle.write(frames[i][1])
+    marked = Image.fromarray(overlay).resize(source.size)
+    draw = ImageDraw.Draw(marked)
+    for region in region_list:
+        x, y, right, bottom = region['box']
+        box = (x*source.width//width, y*source.height//height,
+               int(np.ceil(right*source.width/width)), int(np.ceil(bottom*source.height/height)))
+        name = region['label']
+        source.crop(box).save(os.path.join(folder, name + '.png'))
+        draw.rectangle((box[0], box[1], box[2]-1, box[3]-1), outline='red')
+        draw.text(box[:2], name, fill='yellow')
+    marked.save(os.path.join(folder, 'blink-heatmap.png'))
+    timeline = []
+    for i, (stamp, data) in enumerate(frames):
+        filename = f'frame-{i:04d}.jpg'
+        with open(os.path.join(folder, filename), 'wb') as handle:
+            handle.write(data)
+        timeline.append({'file': filename, 'seconds': stamp-frames[0][0]})
+    with open(os.path.join(folder, 'timeline.json'), 'w') as handle:
+        json.dump(timeline, handle)
 
 
 def record_segment(page, cdp, route, seconds):
     zone, moves, drag = route
-    assert page.evaluate('z=>__mall.teleport(z)', zone), zone
+    if zone == 'upper':
+        reach_upper(page)
+    else:
+        assert_teleport(page, zone)
     page.wait_for_timeout(1200)
     frames = []
 
@@ -98,18 +139,21 @@ def record_segment(page, cdp, route, seconds):
 
     cdp.on('Page.screencastFrame', on_frame)
     cdp.send('Page.startScreencast', {'format': 'jpeg', 'quality': 70, 'maxWidth': 960, 'everyNthFrame': 1})
-    started = time.time()
+    visited = set()
+    started = time.monotonic()
+    page.wait_for_timeout(350)  # Record the entrance before walking.
     box = page.viewport_size
     cx, cy = box['width'] // 2, box['height'] // 2
     index = 0
-    while time.time() - started < seconds:
+    while time.monotonic() - started < seconds:
         key, ms = moves[index % len(moves)]
         index += 1
         page.keyboard.down(key)
-        end = time.time() + ms / 1000
-        while time.time() < end and time.time() - started < seconds:
+        end = time.monotonic() + ms / 1000
+        while time.monotonic() < end and time.monotonic() - started < seconds:
             page.wait_for_timeout(250)
         page.keyboard.up(key)
+        visited.add(page.evaluate('__mall.state.zone'))
         # camera orbit: drag left/right and a little up/down while standing, then a still moment
         page.mouse.move(cx, cy)
         page.mouse.down()
@@ -121,47 +165,61 @@ def record_segment(page, cdp, route, seconds):
     cdp.send('Page.stopScreencast')
     page.wait_for_timeout(300)
     cdp.remove_listener('Page.screencastFrame', on_frame)
-    return frames
+    return frames, visited
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://localhost:8830/demos/corporate/gjh/v11/')
-    parser.add_argument('--tier', default='balanced', choices=['low', 'balanced', 'detailed'])
-    parser.add_argument('--width', type=int, default=1280)
-    parser.add_argument('--height', type=int, default=800)
-    parser.add_argument('--segments', type=int, default=3)
+    parser.add_argument('--tier', choices=['low', 'balanced', 'detailed'])
+    parser.add_argument('--width', type=positive_int)
+    parser.add_argument('--height', type=positive_int)
+    parser.add_argument('--segments', type=positive_int)
     parser.add_argument('--seconds', type=float, default=12)
     parser.add_argument('--gap', type=float, default=10)
     parser.add_argument('--out', default='output/video-probe')
     parser.add_argument('--max-hot-share', type=float, default=0.001, help='share of pixels that blink repeatedly')
     parser.add_argument('--max-gaps', type=int, default=0)
+    parser.add_argument('--device', choices=('phone', 'desktop'))
+    parser.add_argument('--route', choices=('default', 'shops', 'upper', 'character'), default='default')
     args = parser.parse_args()
-    phone = args.width < 500
+    if args.seconds <= 0 or args.gap < 0:
+        parser.error('seconds must be positive and gap non-negative')
+    if args.route == 'character':
+        from mall_character_probe import capture_baseline
+        return capture_baseline(args.url, args.device, args.out if args.out != 'output/video-probe' else 'output/character-baseline')
+    from playwright.sync_api import sync_playwright
+    phone = args.device == 'phone' if args.device else (args.width or 1280) < 500
+    args.tier = args.tier or ('low' if phone else 'balanced')
+    args.width = args.width or (393 if phone else 1280)
+    args.height = args.height or (700 if phone else 800)
+    routes = ROUTES
+    if args.route == 'shops':
+        routes = [(zone, [('w', 2400), ('d', 750), ('a', 750)], 100) for zone in ZONES[2:]]
+        if args.segments and args.segments < len(routes):
+            parser.error('--route shops requires at least 17 segments')
+    elif args.route == 'upper':
+        routes = [('upper', [('w', 1200), ('a', 800), ('s', 1200)], 120)]
+    count = args.segments or (3 if args.route == 'default' else len(routes))
     results = []
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],
-                                             headless=False, args=['--use-angle=metal'])
+        browser = launch(playwright)
         context = browser.new_context(viewport={'width': args.width, 'height': args.height},
                                       device_scale_factor=2 if phone else 1, has_touch=phone,
-                                      service_workers='block')
-        context.add_init_script(INIT % args.tier)
-        page = context.new_page()
-        page.goto(args.url, wait_until='domcontentloaded')
-        page.locator('#arrival-walk').click()
-        page.wait_for_function("window.__mall?.ready && window.__sceneReady && "
-                               "document.querySelector('#app-loader').hidden", timeout=180000)
-        page.locator('#scene').focus()
+                                      is_mobile=phone, service_workers='block')
+        page = enter(context, args.url, args.tier)
         page.wait_for_timeout(1500)
         cdp = context.new_cdp_session(page)
-        for index in range(args.segments):
-            route = ROUTES[index % len(ROUTES)]
-            frames = record_segment(page, cdp, route, args.seconds)
-            metrics, stack, blink, hot = analyse(frames)
+        for index in range(count):
+            route = routes[index % len(routes)]
+            frames, visited = record_segment(page, cdp, route, args.seconds)
+            metrics, hot = analyse(frames)
             folder = os.path.join(args.out, f'segment-{index + 1}-{route[0]}')
-            write_artifacts(folder, frames, stack, blink, hot)
+            write_artifacts(folder, frames, hot, metrics['regions'])
+            metrics['visitedZones'] = sorted(visited)
+            metrics['routePass'] = args.route not in ('upper', 'shops') or route[0] in visited
             metrics.update({'segment': index + 1, 'zone': route[0], 'folder': folder})
-            metrics['pass'] = metrics['hotShare'] <= args.max_hot_share and metrics['gaps50'] <= args.max_gaps
+            metrics['pass'] = metrics['routePass'] and metrics['hotShare'] <= args.max_hot_share and metrics['gaps50'] <= args.max_gaps
             results.append(metrics)
             print(json.dumps(metrics), flush=True)
             page.wait_for_timeout(int(args.gap * 1000))
