@@ -1,3 +1,4 @@
+import {boxFrontFaces, createInstanceVisibility, createProjectedBatch} from './packed-draw.js';
 import {buildPublicArchitecture} from './public-architecture.js';
 import {addOriginalShopDetails} from './shop-anchor-details-first.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
@@ -104,6 +105,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   };
   // Each moving leaf has three fixed brass pieces; bake their local transforms
   // into one shared geometry while the parent and physics body remain movable.
+  const doorGlassMaterial = expanded ? materials.glass.clone() : materials.glass;
+  if (expanded) doorGlassMaterial.forceSinglePass = true;
   const doorFrameParts = [-1.12,1.12].map(x => geometry.box.clone().scale(.035,3.5,.065).translate(x,0,0));
   doorFrameParts.push(geometry.box.clone().scale(2.25,.035,.065).translate(0,-1.73,0));
   const doorFrameGeometry = mergeGeometries(doorFrameParts);
@@ -112,7 +115,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   // These matte and wood finishes differ only in tint within each group.
   // Keep separate batches for each shop, the deck and public architecture.
   const finishForRole = new Map();
-  const finishMaterials = {}, colourBatches = [];
+  const finishMaterials = {}, colourBatches = [], viewUpdates = [];
   if (expanded) {
     for (const [finish, roles] of Object.entries({
       matte: ['green','dark','ivory','cream','foliage','leaf','pot','seat'],
@@ -124,11 +127,18 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       for (const role of roles) finishForRole.set(role, finish);
     }
   }
+  const plainFinish = mat(0xffffff);
+  plainFinish.onBeforeCompile = shader => {
+    shader.vertexShader = 'attribute vec2 instanceSurface; varying vec2 vSurface;\n' + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
+      '#include <begin_vertex>\nvSurface=instanceSurface;');
+    shader.fragmentShader = 'varying vec2 vSurface;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor=vSurface.x;')
+      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor=vSurface.y;');
+  };
   function refreshInstanceColours() {
-    for (const {mesh, colours} of colourBatches) {
-      colours.forEach((colour, index) => mesh.setColorAt(index, colour));
-      mesh.instanceColor.needsUpdate = true;
-    }
+    for (const refresh of colourBatches) refresh();
   }
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
   const shopUploads = new Map();
@@ -159,11 +169,21 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   let activeShopSlot=null,activeDeck=false,upperLevel=null,interiorModels=null,productDisplay=null;
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ', rz = 0) {
-    const finish = finishForRole.get(material);
-    const key = `${type}:${finish || material}${activeShopSlot===null?'':`:shop-${activeShopSlot}`}${activeDeck?':deck':''}`;
-    if (!batches.has(key)) batches.set(key, {geometry: geometry[type], material: finish ? finishMaterials[finish] : materials[material], transforms: [],shopSlot:activeShopSlot,deckLod:activeDeck, colours: finish ? [] : null});
+    const source = materials[material];
+    const plain = expanded && type === 'box' && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() &&
+      !['paving','shellFloor','courtStone'].includes(material);
+    const finish = plain ? 'plain' : type === 'publicLeaf' ? 'canopy' : finishForRole.get(material);
+    const shared = expanded && ((!source.transparent && !material.endsWith('Backdrop')) ||
+      material === 'contact' || material === 'lightPool');
+    const shopSlot = shared ? null : activeShopSlot;
+    const key = `${type}:${finish || material}${shopSlot===null?'':`:shop-${shopSlot}`}${activeDeck?':deck':''}`;
+    if (!batches.has(key)) batches.set(key, {type, finish, geometry: geometry[type],
+      material: plain ? plainFinish : finish ? finishMaterials[finish] : source, transforms: [],
+      shopSlot, deckLod:activeDeck, colours: finish ? [] : null, surfaces:plain ? [] : null, slots:shared ? [] : null});
     const batch = batches.get(key);
-    if (finish) batch.colours.push(materials[material].color);
+    batch.slots?.push(activeShopSlot);
+    if (finish) batch.colours.push(source.color);
+    if (plain) batch.surfaces.push(source.roughness, source.metalness);
     position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, rz, order); quaternion.setFromEuler(euler);
     matrix.compose(position, quaternion, scale); batch.transforms.push(matrix.clone());
   }
@@ -224,10 +244,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   const contact = new T.MeshBasicMaterial({map: new T.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false});
   materials.contact=contact;
   function shadow(x, z, w, d) {
-    // Legacy quads share texture, color and floor plane; one batch preserves
-    // their blending while leaving room for the previously uncounted shadows.
-    if (!expanded) { solid('plane','contact',x,.018,z,w,d,1,0,-Math.PI/2); return; }
-    const mesh = new T.Mesh(plane, contact); mesh.rotation.x = -Math.PI / 2; mesh.position.set(x, .018, z); mesh.scale.set(w, d, 1); scene.add(mesh); tagShopLod(mesh);
+    // Every ground decal uses the same flat color and alpha blend.
+    solid('plane','contact',x,.018,z,w,d,1,0,-Math.PI/2);
   }
   // One soft light texture and one instance batch serve every floor and wall wash.
   const poolCanvas = document.createElement('canvas'); poolCanvas.width = poolCanvas.height = 64;
@@ -299,7 +317,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
-    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight:expandedLift}));
+    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
@@ -436,7 +454,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     for (let i = 0; i < 3; i++) box('ivory', -11, .06 * (i + 1), 11.8 + i * .4, 3.1, .12 * (i + 1), .42, true);
     box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   }
-  const doors = [], interactables = [];
+  const doors = [], interactables = [], doorFrames = [], doorGlass = [];
   if (expanded) {
     interactables.push(addFeatureKiosk({x:10,z:20,box,cylinder,sign}));
     collider(10,.5,20,1.8,1,1.4);
@@ -656,8 +674,14 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     const leaves = [];
     for (const side of [-1, 1]) {
       const group = new T.Group(); group.position.set(x + side * 1.16, 1.8, .05); scene.add(group);
-      const glass = new T.Mesh(geometry.box, materials.glass); glass.scale.set(2.25, 3.5, .06); group.add(glass);
-      group.add(new T.Mesh(doorFrameGeometry, materials.brass));
+      const glass = new T.Mesh(expanded ? geometry.box.clone() : geometry.box, doorGlassMaterial);
+      glass.scale.set(2.25, 3.5, .06);
+      group.add(glass);
+      doorFrames.push(group);
+      if (expanded) {
+        glass.geometry.index.setUsage(T.DynamicDrawUsage);
+        doorGlass.push({glass, front:-1});
+      }
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, .05));
       physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, .03), body); leaves.push({group, body, side});
     }
@@ -920,8 +944,63 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   }
   const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
   interactables.push(...amenities.interactables);
+  // Moving leaves share a brass draw. Their glass remains independently sorted.
+  const frames = new T.InstancedMesh(doorFrameGeometry, materials.brass, doorFrames.length);
+  frames.name = 'Sliding shop door frames';
+  frames.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  let frameCount = -1;
+  const previousDoorX = [];
+  doorFrames.forEach((group, index) => {
+    group.updateMatrix();
+    frames.setMatrixAt(index, group.matrix);
+  });
+  frames.computeBoundingSphere();
+  scene.add(frames);
+  doorFrameGeometry.computeBoundingBox();
+  const frameBox = new T.Box3();
+  function updateFrames({frustum}) {
+    let count = 0, changed = false;
+    for (const group of doorFrames) {
+      matrix.makeTranslation(group.position.x, group.position.y, group.position.z);
+      if (!frustum.intersectsBox(frameBox.copy(doorFrameGeometry.boundingBox).applyMatrix4(matrix))) continue;
+      if (previousDoorX[count] !== group.position.x) changed = true;
+      previousDoorX[count] = group.position.x;
+      frames.setMatrixAt(count++, matrix);
+    }
+    if (!changed && count === frameCount) return;
+    frameCount = frames.count = count;
+    frames.instanceMatrix.needsUpdate = true;
+    frames.computeBoundingSphere();
+  }
+  viewUpdates.push(view => {
+    updateFrames(view);
+    for (const leaf of doorGlass) {
+      const {glass} = leaf, centre = glass.parent.position;
+      // The original double-sided render submits every exit face first.
+      // A convex box has one exit and one entry per ray. Reorder its six
+      // faces on the same mesh to preserve that blend in one submission.
+      const front = boxFrontFaces(view.eye, centre, glass.scale);
+      if (front === leaf.front) continue;
+      leaf.front = front;
+      let offset = 0;
+      for (const side of [false, true]) for (let face = 0; face < 6; face++) {
+        if (Boolean(front & (1 << face)) !== side) continue;
+        glass.geometry.index.array.set(geometry.box.index.array.subarray(face * 6, face * 6 + 6), offset);
+        offset += 6;
+      }
+      glass.geometry.index.needsUpdate = true;
+    }
+  });
+
+  const stagingLods = [];
+  const lowCylinder = new T.CylinderGeometry(1, 1, 1, 12);
+  const lowSphere = new T.SphereGeometry(1, 8, 5);
+  const radius = (m, axis) => Math.hypot(...m.elements.slice(axis * 4, axis * 4 + 3));
   for (const batch of batches.values()) {
-    const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
+    const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
+    const source = surfaces ? batch.geometry.clone().setAttribute('instanceSurface', surfaces) : batch.geometry;
+    const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length);
+    mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
     if (batch.material === materials.paving) {
       pavingMesh = mesh;
       if (mappedPaving) mesh.material = mappedPaving;
@@ -929,13 +1008,41 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     for (const store of spatial.stores) {
       if (batch.material === materials[`${store.id}Backdrop`]) queueShopUpload(Number(store.number), mesh);
     }
-    if (batch.colours) colourBatches.push({mesh, colours: batch.colours});
     batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
-    mesh.castShadow = false; mesh.receiveShadow = batch.material !== materials.lightPool; mesh.computeBoundingSphere(); mesh.userData.shopSlot=batch.shopSlot;mesh.userData.deckLod=batch.deckLod;
-    if(batch.material===materials.glow)mesh.layers.enable(1);
+    batch.colours?.forEach((colour, i) => mesh.setColorAt(i, colour));
+    mesh.receiveShadow = batch.material !== materials.lightPool;
+    mesh.userData.shopSlot = batch.shopSlot;
+    mesh.userData.deckLod = batch.deckLod;
+    if (batch.material === materials.glow) mesh.layers.enable(1);
     scene.add(mesh);
-    if(batch.shopSlot!==null)shopLodMeshes.push(mesh);
+    if (batch.shopSlot !== null) shopLodMeshes.push(mesh);
+
+    const isTimber = batch.type === 'cylinder' && batch.finish === 'woodGrain';
+    const isMatteSphere = batch.type === 'sphere' && batch.finish === 'matte';
+    let lod;
+    if ((isTimber || isMatteSphere) && batch.shopSlot === null && !batch.deckLod) {
+      lod = createProjectedBatch(T, mesh, isTimber ? lowCylinder : lowSphere,
+        isTimber ? m => Math.max(radius(m, 0), radius(m, 2)) * (1 - Math.cos(Math.PI/12))
+          : m => Math.max(radius(m, 0), radius(m, 1), radius(m, 2)) * (1 - Math.cos(Math.PI/8) * Math.cos(Math.PI/10)),
+        batch.colours, batch.slots);
+      stagingLods.push({original:mesh, lod});
+    }
+    const compact = !mesh.material.transparent || [materials.contact, materials.lightPool].includes(batch.material);
+    const controller = expanded && compact ? createInstanceVisibility(T, mesh, {
+      colours:batch.colours, slots:batch.slots, attributes:surfaces ? [surfaces] : []
+    }) : null;
+    const allow = slot => slot === null || shopNear.get(slot);
+    viewUpdates.push(view => {
+      if (lod?.mesh.parent) lod.update(view, batch.slots ? allow : undefined);
+      else if (mesh.visible && controller) controller.update(view.frustum, batch.slots ? allow : undefined);
+    });
+    if (batch.colours) colourBatches.push(() => {
+      lod?.refreshColours();
+      if (controller) controller.refreshColours();
+    });
   }
+  lowCylinder.dispose();
+  lowSphere.dispose();
   const ambient = new T.HemisphereLight(expanded ? 0xe5eef0 : 0xffeee0, expanded ? 0x665e50 : 0x6d5b3b, expanded ? .72 : 1.05);scene.add(ambient);
   const key = new T.DirectionalLight(expanded ? 0xffe0bc : 0xffd5a0, expanded ? 2.6 : 2.1); key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9])); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
@@ -946,10 +1053,23 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     fixtures:materials.glow, vault:materials.vaultOak
   }) : null;
   refreshInstanceColours();
+  for (const {original, lod} of stagingLods) {
+    const attach = () => {
+      original.removeFromParent();
+      original.dispose();
+      scene.add(lod.mesh);
+    };
+    if (prepareModel) void prepareModel(lod.mesh, {late:false}).then(attach, () => lod.mesh.geometry.dispose());
+    else attach();
+  }
   const applyMallTheme = theme => {
     const applied = applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
     if (applied) {
       surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
+      doorGlassMaterial.color.copy(materials.glass.color);
+      doorGlassMaterial.opacity = materials.glass.opacity;
+      doorGlassMaterial.roughness = materials.glass.roughness;
+      doorGlassMaterial.metalness = materials.glass.metalness;
       refreshInstanceColours();
     }
     return applied;
@@ -979,31 +1099,55 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       mesh.visible = !overlaps && (mesh.userData.shopSlot===undefined || mesh.userData.shopLodNear);
     }
   }
+  const shopNear = new Map(), eye = new T.Vector3(), projection = new T.Matrix4();
+  const view = {frustum:new T.Frustum(), eye};
   let deckLodMeshes=null;
-  function updateShopLods(visitor, shadows = true, tier) {
+  function updateShopLods(visitor, shadows = true, tier, camera, height, focus) {
     productDisplay?.setShadows(shadows);
-    if(!expanded)return;
+    if (!expanded) {
+      if (camera) {
+        view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+        updateFrames(view);
+      }
+      return;
+    }
     // The render loop and context recovery both supply the resolved tier here.
     if (surfaceAtmosphere.setTier(tier) && mappedPaving) mappedPaving.roughness = materials.paving.roughness;
     uploadVisitor = visitor;
-    productDisplay?.updateShopLods(visitor);
+    if (camera) {
+      view.camera = camera;
+      view.pixelScale = camera.projectionMatrix.elements[5] * height / 2;
+      view.shadows = shadows;
+      view.focus = focus;
+      eye.setFromMatrixPosition(camera.matrixWorld);
+      view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    }
+    productDisplay?.updateShopLods(visitor, camera && view);
     interiorKit.update(visitor);
     const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
-    for(const mesh of shopLodMeshes){
-      const bay=shopBays.get(mesh.userData.shopSlot);
-      if(!bay)continue;
-      const x=(bay.minX+bay.maxX)/2;
+    view.deckVisible = deckVisible;
+    for (const [slot,bay] of shopBays) {
+      const x = (bay.minX + bay.maxX) / 2;
       // The three occupied stores are visible through their north arcade doors.
-      const z=Number(bay.number)<=3 ? Math.min(bay.maxZ,Math.max(bay.minZ,visitor.z)) : (bay.minZ+bay.maxZ)/2;
-      // The viewing deck overlooks the shop roofs. Include the visitor's
-      // elevation when choosing which ground-floor interiors to draw.
-      mesh.userData.shopLodNear=Math.hypot(visitor.x-x,visitor.y,visitor.z-z)<shopDistance;
-      mesh.visible=mesh.userData.shopLodNear;
-      if (mesh.visible && !deckVisible) furnishings.loadShopDetails(mesh.userData.shopSlot);
+      const z = slot <= 3 ? Math.min(bay.maxZ,Math.max(bay.minZ,visitor.z)) : (bay.minZ+bay.maxZ)/2;
+      shopNear.set(slot, Math.hypot(visitor.x-x,visitor.y,visitor.z-z)<shopDistance);
+    }
+    for (const mesh of shopLodMeshes) {
+      const slot = mesh.userData.shopSlot;
+      if (!shopNear.has(slot)) continue;
+      mesh.visible = mesh.userData.shopLodNear = shopNear.get(slot);
+      if (mesh.visible && !deckVisible) furnishings.loadShopDetails(slot);
     }
     if(!deckLodMeshes){deckLodMeshes=[];scene.traverse(mesh=>{if(mesh.userData.deckLod)deckLodMeshes.push(mesh);});}
     for(const mesh of deckLodMeshes)mesh.visible=deckVisible;
-    for(const update of shopLodUpdates)update(visitor);
+    for (const update of shopLodUpdates) update(visitor, camera && view);
+    if (camera) {
+      for (const update of viewUpdates) update(view);
+      surfaceAtmosphere.updateView(view);
+      furnishings.updateView(view, shopNear);
+      amenities.updateView(view);
+      upperLevel?.updateView(view.frustum);
+    }
   }
   interactables.push(...seats.map(seat=>({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,floor:seat.floor,radius:seat.clearance.interactionRadius,seat})));
   const firstFurnishing = shopLodMeshes.length;

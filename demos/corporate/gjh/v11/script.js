@@ -160,28 +160,32 @@ function heroVisibility(number) {
     root.updateWorldMatrix(true, true); camera.updateWorldMatrix(true, false);
     const out={left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity,inFront:true};
     const point=new T.Vector3();
+    function projectBounds(bounds, matrix) {
+      if (!bounds || bounds.isEmpty()) return;
+      for (const x of [bounds.min.x,bounds.max.x])
+        for (const y of [bounds.min.y,bounds.max.y]) for (const z of [bounds.min.z,bounds.max.z]) {
+          point.set(x,y,z).applyMatrix4(matrix).project(camera);
+          if (point.z < -1 || point.z > 1) out.inFront=false;
+          const px=rect.left+(point.x+1)*rect.width/2, py=rect.top+(1-point.y)*rect.height/2;
+          out.left=Math.min(out.left,px); out.right=Math.max(out.right,px);
+          out.top=Math.min(out.top,py); out.bottom=Math.max(out.bottom,py);
+        }
+    }
     function visit(object) {
       if (!object.visible) return;
       if (object.isMesh && object.geometry) {
-        let bounds;
         if (object.isSkinnedMesh) {
           object.computeBoundingBox();
-          bounds=object.boundingBox;
+          projectBounds(object.boundingBox, object.matrixWorld);
         } else {
           if (!object.geometry.boundingBox) object.geometry.computeBoundingBox();
-          bounds=object.geometry.boundingBox;
+          projectBounds(object.geometry.boundingBox, object.matrixWorld);
         }
-        if (bounds && !bounds.isEmpty()) for (const x of [bounds.min.x,bounds.max.x])
-          for (const y of [bounds.min.y,bounds.max.y]) for (const z of [bounds.min.z,bounds.max.z]) {
-            point.set(x,y,z).applyMatrix4(object.matrixWorld).project(camera);
-            if (point.z < -1 || point.z > 1) out.inFront=false;
-            const px=rect.left+(point.x+1)*rect.width/2, py=rect.top+(1-point.y)*rect.height/2;
-            out.left=Math.min(out.left,px); out.right=Math.max(out.right,px);
-            out.top=Math.min(out.top,py); out.bottom=Math.max(out.bottom,py);
-          }
       }
       for (const child of object.children) visit(child);
     }
+    projectBounds(root.userData.fixtureBounds, root.matrixWorld);
+    if (root.userData.fallbackVisible) projectBounds(root.userData.fallbackBounds, root.matrixWorld);
     visit(root);
     return Number.isFinite(out.left) ? out : null;
   };
@@ -332,7 +336,8 @@ function render(force = false) {
     // programs. A downgrade can use the already warmed direct pass immediately.
     const detailedReady = detailed && world.interiors?.activeTier === 'detailed';
     if (expanded) renderer.shadowMap.enabled = detailedReady;
-    world.updateShopLods(pose, renderer.shadowMap.enabled, tier);
+    world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera,
+      canvas.height, Boolean(shelfFocus?.open));
     atmosphere?.update(pose);
     const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion);
@@ -670,8 +675,9 @@ function validateRestoration() {
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
-    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier);
-    player.camera.updateMatrixWorld(); world.updateSigns(player.camera, canvas, reducedMotion);
+    player.camera.updateMatrixWorld();
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height);
+    world.updateSigns(player.camera, canvas, reducedMotion);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
     // No physics tick or UI transition is needed for this offscreen validation.

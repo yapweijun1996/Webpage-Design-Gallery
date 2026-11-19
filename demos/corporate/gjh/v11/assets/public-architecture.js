@@ -1,8 +1,9 @@
+import {mergeOpaqueMeshes} from './packed-draw.js';
 import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false, setCanopyMaterial}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -220,6 +221,13 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     materials[name]=new T.MeshStandardMaterial({color:tone,roughness:.84,side:T.DoubleSide,
       emissive:tone,emissiveIntensity:.16});
   }
+  const canopy = new T.MeshStandardMaterial({color:0xffffff,roughness:.84,side:T.DoubleSide,
+    emissive:0xffffff,emissiveIntensity:.16});
+  canopy.onBeforeCompile = shader => {
+    shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\ntotalEmissiveRadiance *= vColor;');
+  };
+  setCanopyMaterial?.(canopy);
   const branch=(from,to,girth)=>{
     const dx=to[0]-from[0],dy=to[1]-from[1],dz=to[2]-from[2],length=Math.hypot(dx,dy,dz);
     solid('cylinder','wood',(from[0]+to[0])/2,(from[1]+to[1])/2,(from[2]+to[2])/2,
@@ -302,6 +310,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
         mesh.applyMatrix4(primitive.matrix);
         model.add(mesh);
       }
+      mergeOpaqueMeshes(T, model);
       try { await prepareModel?.(model); }
       catch {
         for (const {geometry, material} of record.primitives) { geometry.dispose(); material.dispose(); }
