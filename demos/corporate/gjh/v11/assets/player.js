@@ -433,6 +433,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       camera.lookAt(sightline);
       cameraLift = cameraClearance = 0; cameraRadius = EYE_CLEARANCE;
       presentView(mode, true, required);
+      character.frameCarry?.(camera);
       return;
     }
     projectCamera(false);

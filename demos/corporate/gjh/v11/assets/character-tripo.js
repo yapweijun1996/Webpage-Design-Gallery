@@ -118,7 +118,8 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     // Tripo's knuckles lie along local +Y and the inside of the palm faces -X.
     const grip = poses.middleKnuckle.position.clone().multiplyScalar(.65);
     grip.x -= .060 / scale;
-    const transfer = createProductTransfer(T, avatar, wrist, visual, grip, createFirstPersonHand(T, visual, mesh, wrist));
+    const eyeHand = createFirstPersonHand(T, visual);
+    const transfer = createProductTransfer(T, avatar, wrist, visual, grip, eyeHand);
     lod = createVisitorLOD(T, placement, {
       url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareModel
     });
@@ -166,19 +167,13 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       return true;
     }
     function updateProduct(dt, waveWeight = 0) {
-      const eye = transfer.firstPerson;
-      if (eye) {
-        target.set(.065, 1.285, -.39);
-        palm.set(.065, 1.415, -.55);
-      } else {
-        target.set(.40, 1.01, -.18);
-        palm.set(.52, 1.01, -.25);
-      }
+      target.set(.40, 1.01, -.18);
+      palm.set(.52, 1.01, -.25);
       visual.localToWorld(target);
       transfer.reachTarget(target);
       visual.localToWorld(pole.set(.40, .70, -.20));
       visual.localToWorld(palm);
-      poses.gripProduct(target, pole, palm.lerp(target, .3), eye, waveWeight);
+      poses.gripProduct(target, pole, palm.lerp(target, .3), waveWeight);
       transfer.update(dt, reducedMotion.matches);
     }
     function update(actual, dt, requested = actual, sprintRate = 1, seat) {
@@ -256,16 +251,10 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     }
 
     return {
-      visual, emote, update, updateLOD: lod.update,
+      visual, emote, update, updateLOD: lod.update, frameCarry: eyeHand.frame,
       setCameraOccluded(value, firstPerson) {
         placement.visible = !value;
         transfer.setFirstPerson(firstPerson);
-        // A view toggle can render immediately, without another simulation tick.
-        if (transfer.phase === 'held' && !emoteAction) {
-          poses.restore();
-          poses.save();
-          updateProduct(0);
-        }
       },
       get seatWeight() { return seatWeight; },
       get productPhase() { return transfer.phase; },
@@ -287,6 +276,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
         if (disposed) return;
         disposed = true;
         transfer.reset();
+        eyeHand.dispose();
         mixer.stopAllAction();
         mixer.uncacheRoot(avatar);
         lod.dispose();

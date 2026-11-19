@@ -1,3 +1,6 @@
+import {setupDemoBag} from './demo-bag.js';
+import {icon} from './icons.js';
+
 // Each unit is a completed startup milestone, not an estimate of bytes or time.
 const stages = ['physics', 'scene', 'models', 'frame', 'warm'];
 // mall-language.js owns the selected language and publishes it on <html>.
@@ -130,6 +133,36 @@ if (typeof document !== 'undefined') {
   experienceRoot?.addEventListener('selectstart', event => { if (!isField(event)) event.preventDefault(); });
   experienceRoot?.addEventListener('contextmenu', event => { if (matchMedia('(pointer: coarse)').matches && !isField(event)) event.preventDefault(); });
   const entrance = document.getElementById('mall-arrivals');
+  const header = document.querySelector('.site-header');
+  const secondary = document.querySelector('.site-secondary');
+  const tabs = secondary.querySelector('.site-tabs');
+  const homeTab = tabs.querySelector('[href="#mall-arrivals"]');
+  const shopsTab = tabs.querySelector('[href="#store-list"]');
+  const wordmark = header.querySelector('.wordmark');
+  const settings = secondary.querySelector('.site-settings');
+  const compactHeader = matchMedia('(max-width: 650px)');
+  function placeHeaderControls() {
+    const active = document.activeElement;
+    const restoreFocus = tabs.contains(active) || settings.contains(active);
+    if (compactHeader.matches) secondary.append(tabs, settings);
+    else {
+      wordmark.after(tabs);
+      header.querySelector('#bag-open').before(settings);
+    }
+    secondary.hidden = !compactHeader.matches;
+    if (restoreFocus) active.focus({preventScroll: true});
+  }
+  for (const target of settings.querySelectorAll('.site-theme-icon')) target.append(icon('theme', {size:18}));
+  setupDemoBag();
+  placeHeaderControls();
+  compactHeader.addEventListener('change', placeHeaderControls);
+  for (const link of [wordmark, homeTab]) link.addEventListener('click', event => {
+    if (location.hash === link.hash && document.body.hasAttribute('data-arrivals') &&
+        !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault();
+      window.scrollTo({top: 0, behavior: 'instant'});
+    }
+  });
   document.documentElement.classList.add('mall-routing');
   let entryMode = 'arrivals';
   let directoryWithinWalk = false;
@@ -158,7 +191,14 @@ if (typeof document !== 'undefined') {
       returnToWalk();
       return;
     }
-    if (!mode || mode === entryMode) return;
+    if (!mode) return;
+    const arrivals = mode === 'arrivals';
+    (arrivals ? shopsTab : homeTab).removeAttribute('aria-current');
+    (arrivals ? homeTab : shopsTab).setAttribute('aria-current', 'page');
+    if (mode === entryMode) {
+      if (arrivals && hash) window.scrollTo({top: 0, behavior: 'instant'});
+      return;
+    }
     if (mode === 'arrivals' && entryMode === 'directory') {
       // The directory has no active renderer. Its return need not reload the document.
       entryMode = 'arrivals';

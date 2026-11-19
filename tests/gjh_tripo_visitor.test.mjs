@@ -22,6 +22,7 @@ const tripoAssets = new URL('../demos/corporate/gjh/v11/assets/', import.meta.ur
 
 async function withVisitorAssets(run, factory = createCharacterTripo) {
   const files = factory === createCharacterV2 ? ['gjh-mall-visitor-v2.glb', 'gjh-mall-visitor-v2-lod1.glb'] : ['gjh-tripo-visitor.glb', 'gjh-tripo-visitor-lod1.glb'];
+  files.push('visitor-carry-hand.glb');
   const data = new Map(await Promise.all(files.map(async file => [file, await readFile(new URL(file, tripoAssets))])));
   const globals = {
     location: {search: ''},
@@ -265,71 +266,126 @@ test('the carried can follows the rendered palm through locomotion, LOD switches
   });
 });
 
-test('the first-person palm and can share the lower part of the portrait view', async () => {
-  await withVisitorAssets(async character => {
-    const {canCenter, checkGrip, id, skin} = await shelfCan(character);
-    character.setCameraOccluded(true, true);
-    const camera = new T.PerspectiveCamera(57.5, 393 / 611, .08, 100);
-    camera.position.y = 1.55;
-    camera.rotation.x = -.1;
-    camera.updateMatrixWorld();
-    function checkFraming() {
-      const ndc = canCenter().project(camera);
-      assert.ok(Math.abs(ndc.x) < .96 && ndc.y > -1 && ndc.y < -.35 && Math.abs(ndc.z) < 1,
-        `can centre NDC ${ndc.toArray().map(n => n.toFixed(3))}`);
+test('the shipped modular grip and cuff are static closed surfaces within 600 triangles', async () => {
+  const {scene, animations} = await parseGLB(await readFile(new URL('visitor-carry-hand.glb', tripoAssets)));
+  const meshes = [];
+  scene.traverse(node => { if (node.isMesh) meshes.push(node); });
+  assert.deepEqual(meshes.map(node => node.name).sort(), ['ChibiGrip', 'SleeveCuff']);
+  assert.equal(animations.length, 0);
+  let triangles = 0;
+  for (const mesh of meshes) {
+    assert.ok(!mesh.isSkinnedMesh && !Array.isArray(mesh.material));
+    const {geometry} = mesh, {position, normal} = geometry.attributes;
+    assert.equal(normal.count, position.count);
+    for (let i = 0; i < normal.count; i++) {
+      assert.ok(Math.abs(new T.Vector3().fromBufferAttribute(normal, i).length() - 1) < .0001);
     }
-    checkFraming(); // A manual view toggle renders before the next physics tick.
-    for (const motion of ['walk', 'run']) {
-      for (let i = 0; i < 60; i++) {
-        character.update(motion, 1 / 60);
-        checkFraming();
+    const edges = new Map();
+    function vertex(index) {
+      return new T.Vector3().fromBufferAttribute(position, geometry.index.getX(index));
+    }
+    for (let i = 0; i < geometry.index.count; i += 3) {
+      const a = vertex(i), b = vertex(i+1), c = vertex(i+2);
+      assert.ok(new T.Triangle(a, b, c).getArea() > 1e-12, 'nondegenerate face');
+      for (const [v, w] of [[a,b], [b,c], [c,a]]) {
+        const key = [v.toArray().join(','), w.toArray().join(',')].sort().join('/');
+        edges.set(key, (edges.get(key) || 0) + 1);
       }
+      triangles++;
     }
-    const visibleSkins = () => {
-      const skins = [];
-      character.visual.traverseVisible(node => { if (node.isSkinnedMesh) skins.push(node); });
-      return skins;
-    };
-    const [arm] = visibleSkins();
-    assert.ok(arm && arm.skeleton === skin.skeleton && arm.geometry.index.count > 0 &&
-      arm.geometry.index.count < skin.geometry.index.count);
-    character.visual.updateMatrixWorld(true);
-    const vertex = arm.geometry.index.getX(0);
-    const skinnedVertex = mesh => mesh.getVertexPosition(vertex, new T.Vector3()).applyMatrix4(mesh.matrixWorld);
-    assert.ok(skinnedVertex(arm).distanceTo(skinnedVertex(skin)) < 1e-5);
-    checkGrip();
-    assert.equal(character.bagProduct(id, false), true);
-    for (let i = 0; i < 22; i++) {
-      character.update('idle', 1 / 60);
-      checkGrip();
-    }
-    character.update('idle', .2);
-    assert.equal(character.productPhase, 'empty');
-    assert.equal(visibleSkins().length, 0);
-  });
+    assert.ok([...edges.values()].every(count => count === 2), mesh.name + ' contains an open or nonmanifold edge');
+  }
+  assert.ok(triangles > 0 && triangles <= 600, triangles + ' triangles');
 });
 
-test('Visitor v2 carries with its own hand rig in both views', async () => {
-  await withVisitorAssets(async character => {
-    const {checkGrip, canCenter} = await shelfCan(character, 'RightFinger1');
-    character.setCameraOccluded(true, true);
-    const camera = new T.PerspectiveCamera(57.5, 393 / 611, .08, 100);
-    camera.position.y = 1.55;
-    camera.rotation.x = -.1;
-    camera.updateMatrixWorld();
-    for (const motion of ['idle', 'walk', 'run']) {
-      character.update(motion, 1 / 60);
+for (const [model, factory, knuckle] of [
+  ['Tripo', createCharacterTripo, 'RightHandMiddle1'], ['v2', createCharacterV2, 'RightFinger1']
+]) {
+  test(model + ' carries a steady camera-space grip, then restores the physical shelf prop', async () => {
+    await withVisitorAssets(async character => {
+      const {canCenter, checkGrip, id, prop} = await shelfCan(character, knuckle);
+      const root = character.visual.getObjectByName('FirstPersonCarryHand');
+      assert.equal(root.visible, false);
+      character.setCameraOccluded(true, true);
+      for (let i = 0; i < 100 && !root.getObjectByName('ChibiGrip'); i++) {
+        await new Promise(resolve => setTimeout(resolve, 5));
+      }
+      const skin = root.getObjectByName('ChibiGrip');
+      assert.ok(skin && root.visible && root.getObjectById(prop.id) === prop);
+      // Compare pads to the actual reserved cylinder in the grip's initial frame.
+      const bounds = new T.Box3().setFromObject(prop);
+      const centre = bounds.getCenter(new T.Vector3()), radius = bounds.getSize(new T.Vector3()).x / 2;
+      const contacts = [];
+      meshVertices(character.visual, skin, point => {
+        const p = point.clone().sub(centre);
+        if (Math.abs(Math.hypot(p.x, p.z) - radius) < .004) contacts.push(p);
+      });
+      assert.ok(contacts.some(p => p.x > 0 && p.z > radius / 2), 'thumb touches the front');
+      const halfHeight = (bounds.max.y - bounds.min.y) / 2;
+      const sideRows = contacts.filter(p => p.x < 0 && Math.abs(p.y) < halfHeight)
+        .map(p => p.y).sort((a, b) => a - b);
+      const separated = [];
+      for (const y of sideRows) {
+        if (!separated.length || y - separated.at(-1) >= .012) separated.push(y);
+      }
+      assert.ok(separated.length >= 4, 'four separated finger pads contact the barrel');
+      const visible = [];
+      character.visual.traverseVisible(n => { if (n.isSkinnedMesh) visible.push(n); });
+      assert.equal(visible.length, 0);
+      if (model === 'v2') {
+        character.customize({skin:'dark', outfit:'hoodie'});
+        assert.equal(skin.material.color.getHex(), 0x75472f);
+        const hoodie = character.visual.getObjectByName('V2_outfit_alt_Hoodie_slate');
+        assert.ok(root.getObjectByName('SleeveCuff').material.color.equals(hoodie.material.color));
+      }
+      const camera = new T.PerspectiveCamera(57.5, 1, .08, 100);
+      for (const [width, height] of [[393,700], [1440,900]]) {
+        camera.aspect = width / height;
+        for (const fov of [40, 57.5, 75]) {
+          camera.fov = fov;
+          camera.updateProjectionMatrix();
+          let previous;
+          for (const [motion, pitch] of [['idle', .1], ['walk', -.9], ['run', 1.35]]) {
+            character.update(motion, 1 / 60);
+            character.visual.translateZ(-.12);
+            character.visual.rotation.y += .38;
+            camera.position.copy(character.visual.position);
+            camera.position.y += 1.55;
+            camera.rotation.set(pitch, .7 + pitch, 0, 'YXZ');
+            character.frameCarry(camera);
+            character.visual.updateMatrixWorld(true);
+            const projected = canCenter().project(camera);
+            assert.ok(projected.x > 1/3 && projected.x < .9 && projected.y < -1/3 && projected.y > -.85);
+            if (previous) assert.ok(projected.distanceTo(previous) < 1e-8, 'walking or looking moved the grip');
+            previous = projected;
+            const orientation = prop.getWorldQuaternion(new T.Quaternion()).premultiply(camera.quaternion.clone().invert());
+            assert.ok(new T.Vector3(0,1,0).applyQuaternion(orientation).y > .99999);
+            root.traverse(n => {
+              if (!n.isMesh) return;
+              const point = new T.Vector3();
+              for (let i = 0; i < n.geometry.attributes.position.count; i++) {
+                n.localToWorld(n.getVertexPosition(i, point));
+                assert.ok(camera.worldToLocal(point).z < -camera.near, n.name + ' crossed the near plane');
+              }
+            });
+          }
+        }
+      }
+      character.setCameraOccluded(false, false);
+      assert.equal(root.visible, false);
       checkGrip();
-      const {x, y, z} = canCenter().project(camera);
-      assert.ok(Math.abs(x) < 1 && y > -1 && y < -.35 && Math.abs(z) < 1);
-    }
-    character.setCameraOccluded(false, false);
-    character.update('walk', 1 / 60);
-    character.visual.translateZ(-.12);
-    checkGrip();
-    character.resetProduct();
-  }, createCharacterV2);
-});
+      character.setCameraOccluded(true, true);
+      character.frameCarry(camera);
+      assert.equal(character.bagProduct(id, false), true);
+      character.update('idle', .28);
+      assert.ok(root.visible && prop.scale.x < 1);
+      character.update('idle', .2);
+      assert.equal(character.productPhase, 'empty');
+      assert.equal(prop.parent, null);
+      assert.equal(root.visible, false);
+    }, factory);
+  });
+}
 
 test('return reaches with the can and releases at the original shelf position', async () => {
   await withVisitorAssets(async character => {
