@@ -324,8 +324,8 @@ var pzhExhibit = {
   }
 };
 
-// demos/corporate/gjh/v11/assets/west-food-exhibits.js
-var westFoodExhibits = {
+// demos/corporate/gjh/v11/assets/shop-catalogue-exhibits.js
+var shopCatalogueExhibits = {
   "wheel-noodle-story": {
     brand: "Flying Wheel",
     tagline: "Air-dried Ban Mee",
@@ -391,15 +391,51 @@ var westFoodExhibits = {
     source: "https://www.hormel.com/brands/hormel-chili/products/",
     sourceLabel: "View the HORMEL Chili catalogue",
     action: "brand-story"
+  },
+  "zeria-pack-story": {
+    brand: "Zeria",
+    tagline: "Bottle and carton",
+    kind: "Product library",
+    image: "assets/brands/S12-zeria.webp",
+    alt: "Official Zeria brand mark",
+    story: "The Goh Joo Hin catalogue lists Zeria Chondro Max 300 Tablets and Lively & Healthy 180 Tablets separately. The Chondro Max product gallery identifies the outer box and bottle.",
+    source: "https://www.gjheshop.com/product/zeria-chondro-max-300-tablets/",
+    sourceLabel: "View the official Chondro Max gallery",
+    action: "brand-story"
+  },
+  "sony-audio-story": {
+    brand: "Sony",
+    tagline: "Headphones and portable audio",
+    kind: "Audio exhibit",
+    image: "assets/brands/S13-sony.webp",
+    alt: "Official Sony brand mark",
+    story: "Sony Singapore documents the WH-1000XM6 wireless headphones and the NW-A306 Walkman. The Walkman measures approximately 56.5 × 98.4 × 11.8 mm. The listening stand illustrates the audio category.",
+    source: "https://www.sony.com.sg/electronics/support/wireless-headphones-bluetooth-headphones/wh-1000xm6",
+    sourceLabel: "View Sony’s WH-1000XM6 reference",
+    action: "brand-story"
+  },
+  "lg-oled-story": {
+    brand: "LG",
+    tagline: "A 55-inch OLED reference",
+    kind: "Screen exhibit",
+    image: "assets/brands/S14-lg.webp",
+    alt: "Official LG brand mark",
+    story: "LG Singapore specifies the OLED55C5PSA as a 55-inch 4K OLED television. Without its stand, the published cabinet measures 1,222 × 703 × 45.1 mm. The room uses an enlarged gallery screen.",
+    source: "https://www.lg.com/sg/tvs-soundbars/oled-evo/oled55c5psa/",
+    sourceLabel: "View LG’s OLED55C5PSA reference",
+    action: "brand-story"
   }
 };
-var westFoodFocalExhibits = {
+var shopCatalogueFocals = {
   S06: { id: "wheel-noodle-story", caption: "AIR-DRIED NOODLES", panel: [-0.1, 2.9, -0.33] },
   S07: { id: "gulong-tin-story", caption: "STEWED PORK TINS", panel: [-0.55, 0.56, 0.04] },
   S08: { id: "skippy-jar-story", caption: "CREAMY + CHUNKY", panel: [-0.58, 0.82, -0.194] },
   S09: { id: "spam-tin-story", caption: "CLASSIC · LITE · LESS SODIUM", panel: [-0.62, 1.31, -0.554] },
   S10: { id: "california-mexico-story", caption: "RED AND BLACK ABALONE", panel: [-0.45, 0.75, -0.745] },
-  S11: { id: "hormel-chili-story", caption: "CHILI TIN EXHIBIT", panel: [-0.56, 0.8, -0.472] }
+  S11: { id: "hormel-chili-story", caption: "CHILI TIN EXHIBIT", panel: [-0.56, 0.8, -0.472] },
+  S12: { id: "zeria-pack-story", caption: "BOTTLE AND CARTON", panel: [-0.52, 1.08, -0.639] },
+  S13: { id: "sony-audio-story", caption: "PERSONAL AUDIO", panel: [-0.64, 1.32, -0.59] },
+  S14: { id: "lg-oled-story", caption: "55-INCH OLED REFERENCE", panel: [2.34, 2.19, -3.865] }
 };
 
 // demos/corporate/gjh/v11/assets/merge-static-geometries.js
@@ -5535,7 +5571,10 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       if (featured && (n === 10 || n === 11)) {
         const pair = n === 10 ? [10040880, 2697258] : [10106426, 11881270];
         for (const [i, colour] of pair.entries())
-          can(x + (i - 0.5) * 0.21, h + 0.043, z + 0.29, colour, 0.064, 0.106);
+          can(x + (i === 0 ? -0.59 : 0.59), h + 0.043, z + 0.29, colour, 0.064, 0.106);
+      } else if (featured && n === 12) {
+        box(x - 0.55, h + 0.167, z + 0.32, 0.113, 0.248, 0.088, white);
+        can(x + 0.55, h + 0.043, z + 0.32, cream, 0.046, 0.155);
       } else if (!featured)
         packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind2, c);
     }
@@ -5855,8 +5894,15 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       plant(-side + 0.7, front - 0.85, 1.53);
       for (const s of [-1, 1]) {
         cabinet(s * (side - 0.65), mid, 0.65, 0.72, 2.8, walnut, base);
-        for (let i = 0;i < 3; i++)
-          box(s * (side - 0.72), 1.19, mid + (i - 1) * 0.92, 0.28, 0.48, 0.3, charcoal);
+        for (const dz of [-0.92, 0.92])
+          box(s * (side - 0.72), 1.19, mid + dz, 0.28, 0.48, 0.3, charcoal);
+        if (s < 0) {
+          const sampleX = -(side - 0.72);
+          box(sampleX, 0.991, mid, 0.2, 0.026, 0.22, walnut);
+          box(sampleX, 1.0532, mid, 0.0118, 0.0984, 0.0565, charcoal);
+          box(sampleX + 0.0062, 1.066, mid, 0.001, 0.055, 0.045, 2240310);
+        } else
+          box(s * (side - 0.72), 1.19, mid, 0.28, 0.48, 0.3, charcoal);
       }
       break;
     case 14:
@@ -7037,7 +7083,7 @@ var roomDetails = {
   },
   S14: {
     file: "s14-living-details.glb",
-    bytes: 12184,
+    bytes: 14064,
     roomDetail: true
   },
   S15: {
@@ -9055,8 +9101,8 @@ metalnessFactor=vSurface.y;`);
         } else if (id === "S05") {
           const [x, , z] = worldInteriorPoint(store2, [pzhCartonX, 0, pzhCartonStandingZ]);
           interactables.push({ id: "pzh-carton-story", x, z, radius: 1 });
-        } else if (westFoodFocalExhibits[id]) {
-          const exhibit = westFoodFocalExhibits[id];
+        } else if (shopCatalogueFocals[id]) {
+          const exhibit = shopCatalogueFocals[id];
           const [standingX, standingZ] = store2.anchor.standing;
           const [x, , z] = worldInteriorPoint(store2, [standingX, 0, standingZ]);
           const plaque = sign(exhibit.caption, ...worldInteriorPoint(store2, exhibit.panel), 1.02, 0.15, true, 65);
@@ -9250,7 +9296,7 @@ metalnessFactor=vSurface.y;`);
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let upperWarmStatus = null, landingLights;
     let brandWallPromise = null;
-    return { signage, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...westFoodExhibits } : {}, getPreloadedModels() {
+    return { signage, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {}, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;

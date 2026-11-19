@@ -3196,7 +3196,7 @@
         "store": "S08",
         "file": "s08-skippy-details.glb",
         "bytes": 71800,
-        "sha256": "0413f92d049919f63e6319ad05421d64c271f8ea4f3c43813cabfc8ce79d559a",
+        "sha256": "c890629d2540607c3fa5fccbea2ca75bd49137ba205645cdc22b16b08c324418",
         "triangles": 1104,
         "draws": 4,
         "instances": 4,
@@ -3295,9 +3295,9 @@
       {
         "store": "S14",
         "file": "s14-living-details.glb",
-        "bytes": 12184,
-        "sha256": "f7432c18148e289ad3eff00d0de6a389442fdf0eb486645170d209684a2c1e18",
-        "triangles": 122,
+        "bytes": 14064,
+        "sha256": "8c204068d5ad30712a2e9c3db736ba6cfb4a2415cae958f8e8b8d61c1252f416",
+        "triangles": 146,
         "draws": 3,
         "instances": 0,
         "motion": [

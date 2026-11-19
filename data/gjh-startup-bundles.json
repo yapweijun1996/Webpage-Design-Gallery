@@ -38,7 +38,7 @@
     "demos/corporate/gjh/v11/assets/interiors/baked-layout.js": "9e5d8198dc2e11ff1499df8aaf613c450ca3c37356c09cfd0b72533c893bc2fb",
     "demos/corporate/gjh/v11/assets/interiors/config.js": "ae83db579ee90f3e996038c524bff9b457f381ccd628a6a13a28ab3488afc75a",
     "demos/corporate/gjh/v11/assets/interiors/decoration.js": "7ff4b5ca9736af48725b68adbd73828936cf4919c76861934a033d57dc2b7837",
-    "demos/corporate/gjh/v11/assets/interiors/detail-files.js": "85d39daa77c64348dcd85bab3ed9d1ae43ab31a42a2b6a1a0d426f5b9440d5aa",
+    "demos/corporate/gjh/v11/assets/interiors/detail-files.js": "7c702b430ece43c1a2459a52c4dccaa2fda07ed70072171ab32cbc85c55467aa",
     "demos/corporate/gjh/v11/assets/interiors/layout.js": "45bd515b43f2f56c1a056dd485b82b3f4c69c767a53720d378a80cde9bf703a5",
     "demos/corporate/gjh/v11/assets/interiors/mili-seats.js": "3f4669987acae20b8ad4c5ef1da73f9614e41d9e1aad340984e63062e9680726",
     "demos/corporate/gjh/v11/assets/interiors/models.js": "0a27dbbd010ce43cbdb3c69b3185cdb36d53e3ed6fbaeabe88cb0bcb51363167",
@@ -70,6 +70,7 @@
     "demos/corporate/gjh/v11/assets/shell.js": "467388367cdfd44333eeebc14080b7c97e5c449df3a15a0c6e40d46aa7e509a6",
     "demos/corporate/gjh/v11/assets/shop-anchor-details-first.js": "9cd5709307dd53889dd987c84400613cddf75a5e46fe6550e9e2f71548b399e0",
     "demos/corporate/gjh/v11/assets/shop-anchor-details-last.js": "06ab8aed8af6f76441d9360a32b04da86ff14be074ac65eb1dc833fa8fdba6a6",
+    "demos/corporate/gjh/v11/assets/shop-catalogue-exhibits.js": "0cd80b43c5945479062d4d458ba356cc683a54d44f24cd6e6489f605d4c89001",
     "demos/corporate/gjh/v11/assets/shop-sign-vendor.js": "68369fb8ccbdd0d0c7a8a6bd68e9055a57c3012b3459c146fca0a23bce752aea",
     "demos/corporate/gjh/v11/assets/shop-signs.js": "654b17499094c6cea9f84b173a7eeef98aca9947771b229db8c5e36073b71f70",
     "demos/corporate/gjh/v11/assets/shop-visibility.js": "8b909a471bf1bc2e20b72bfb7aeb1664a785c60891483e3a7f71c111a8ceb876",
@@ -99,14 +100,13 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "93a63517fa6e067bd29dae5d33e852a14569f44426d3dca8a0c4d88926ccca4b",
     "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "06f77543852578d8d3e11de82e8d0e6b9e063b32ac37e5655d986d3229da165d",
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "4e8a3bd91ab8d507f8fed9e6b0ed8b8d0e2686ac9130a5f757a231c6bacdff2d",
-    "demos/corporate/gjh/v11/assets/west-food-exhibits.js": "f9311fe4b7242a616b07fd3b5327483fd937bd099489513b8bb4572d2a06f89a",
-    "demos/corporate/gjh/v11/assets/window-studios.js": "72593ba70ccbaedb59a5654e99b7462585786d508291f0293bcc30b1d3d841eb",
-    "demos/corporate/gjh/v11/assets/world.js": "37bc9a79de463a7b600490664707bec5194c268cb2551ed4278090278826b290",
+    "demos/corporate/gjh/v11/assets/window-studios.js": "4506671df267801bc130a568191f378bccd84b90f75592ece58259db0cb36cb8",
+    "demos/corporate/gjh/v11/assets/world.js": "964edd9554d4f6aa07e342771b81f0db851a41b0fa5c2cf04c6d4dbaad927ba6",
     "demos/corporate/gjh/v11/script.js": "1f20f0970a970ced5b96373ae88b2efe2f05eb1d33ad13c75d8a9606e339f821"
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "f4ef599f6a780971c75acd431cab4a455a4751f579540964d7d662fd07b30382",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "8d3bdc59e52e3851281cdc51a9a411e16e4375db7cadb0e1ec74c796c15211d3",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "7ef2e21b45fde31c40e60122aa76cbe2045ee7c7f150db9c17f0c294f16691f1",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "690235d9d813785d9b63c86fe872c8fdd79dbc4e4e99e7794a0c3755603a5fa1",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "3e0c6cfaf1bbd5eb78e5361af0e4204ed158af51701f6763669ee2db3754784f"
   }

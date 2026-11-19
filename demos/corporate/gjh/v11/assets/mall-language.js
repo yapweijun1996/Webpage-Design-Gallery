@@ -2,6 +2,23 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ["Zeria · Bottle and carton","Zeria · 瓶装与外盒","Zeria · Botol dan kotak"],
+  ["Bottle and carton","瓶装与外盒","Botol dan kotak"],
+  ["The Goh Joo Hin catalogue lists Zeria Chondro Max 300 Tablets and Lively & Healthy 180 Tablets separately. The Chondro Max product gallery identifies the outer box and bottle.","Goh Joo Hin 目录分别列有 Zeria Chondro Max 300 片装和 Lively & Healthy 180 片装。Chondro Max 官方图集展示外盒和瓶身。","Katalog Goh Joo Hin menyenaraikan Zeria Chondro Max 300 tablet dan Lively & Healthy 180 tablet secara berasingan. Galeri Chondro Max menunjukkan kotak luar dan botol."],
+  ["View the official Chondro Max gallery","查看官方 Chondro Max 图集","Lihat galeri rasmi Chondro Max"],
+  ["Official Zeria brand mark","Zeria 官方品牌标志","Logo rasmi Zeria"],
+  ["Sony · Headphones and portable audio","Sony · 耳机与便携音频","Sony · Fon kepala dan audio mudah alih"],
+  ["Headphones and portable audio","耳机与便携音频","Fon kepala dan audio mudah alih"],
+  ["Sony Singapore documents the WH-1000XM6 wireless headphones and the NW-A306 Walkman. The Walkman measures approximately 56.5 × 98.4 × 11.8 mm. The listening stand illustrates the audio category.","索尼新加坡公布了 WH-1000XM6 无线耳机和 NW-A306 Walkman 的产品资料。后者约为 56.5 × 98.4 × 11.8 毫米。试听台展示个人音频主题。","Sony Singapura mendokumenkan fon kepala tanpa wayar WH-1000XM6 dan Walkman NW-A306. Walkman berukuran kira-kira 56.5 × 98.4 × 11.8 mm. Ruang dengar ini menggambarkan kategori audio."],
+  ["View Sony’s WH-1000XM6 reference","查看索尼 WH-1000XM6 资料","Lihat rujukan Sony WH-1000XM6"],
+  ["Official Sony brand mark","Sony 官方品牌标志","Logo rasmi Sony"],
+  ["LG · A 55-inch OLED reference","LG · 55 英寸 OLED 电视资料","LG · Rujukan OLED 55 inci"],
+  ["A 55-inch OLED reference","55 英寸 OLED 电视资料","Rujukan OLED 55 inci"],
+  ["LG Singapore specifies the OLED55C5PSA as a 55-inch 4K OLED television. Without its stand, the published cabinet measures 1,222 × 703 × 45.1 mm. The room uses an enlarged gallery screen.","LG 新加坡将 OLED55C5PSA 列为 55 英寸 4K OLED 电视。不含底座的机身尺寸为 1,222 × 703 × 45.1 毫米。房间采用放大的展示屏。","LG Singapura menyenaraikan OLED55C5PSA sebagai TV OLED 4K 55 inci. Ukuran kabinet tanpa penyangga ialah 1,222 × 703 × 45.1 mm. Bilik ini menggunakan skrin galeri berskala besar."],
+  ["View LG’s OLED55C5PSA reference","查看 LG OLED55C5PSA 资料","Lihat rujukan LG OLED55C5PSA"],
+  ["Official LG brand mark","LG 官方品牌标志","Logo rasmi LG"],
+  ["Audio exhibit","音频展示","Pameran audio"],
+  ["Screen exhibit","显示屏展示","Pameran skrin"],
   ["SPAM · Three 340 g tins","SPAM · 三款 340 克罐头","SPAM · Tiga tin 340 g"],
   ["Three 340 g tins","三款 340 克罐头","Tiga tin 340 g"],
   ["California Mexico · Red and Black abalone","California Mexico · 红罐与黑罐鲍鱼","California Mexico · Abalon Merah dan Hitam"],
