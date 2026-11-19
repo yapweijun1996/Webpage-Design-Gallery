@@ -114,7 +114,7 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -132,7 +132,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   }
   spandrel.closePath();
   geometry.archSpandrel = new T.ExtrudeGeometry(spandrel, { depth: 1, bevelEnabled: false });
-  function arch(center, z, spring, radius, rise, depth, thickness, material) {
+  function arch(center, z, spring, radius, rise, depth, thickness, material, ribClearance = 0) {
     const segments = 24;
     for (let i = 0;i < segments; i++) {
       const point2 = (n) => {
@@ -141,9 +141,11 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       };
       const [x0, y0] = point2(i), [x1, y1] = point2(i + 1);
       solid("box", material, (x0 + x1) / 2, (y0 + y1) / 2, z, Math.hypot(x1 - x0, y1 - y0) + 0.018, thickness, depth, 0, 0, "XYZ", Math.atan2(y1 - y0, x1 - x0));
+      if (ribClearance)
+        ceilingBounds?.((x0 + x1) / 2, (y0 + y1) / 2, z, x1 - x0 + thickness + 0.018, Math.abs(y1 - y0) + thickness + 2 * ribClearance, depth);
     }
   }
-  arch(10, 33.3, 5.16, 8.1, 3.02, 28.9, 0.18, timber);
+  arch(10, 33.3, 5.16, 8.1, 3.02, 28.9, 0.18, timber, 0.12);
   for (const z of [19.05, 24.8, 30.55, 36.3, 42.05, 47.55]) {
     arch(10, z, 5.1, 8.06, 3, 0.36, 0.24, "ivory");
     arch(10, z - 0.23, 5.14, 8.05, 3, 0.075, 0.09, "glow");
@@ -246,7 +248,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     const a = (i / 12 - 0.5) * Math.PI, x = -3 + 13.15 * Math.sin(a), y = 13.1 + 3.9 * Math.cos(a);
     box("green", x, y, 10.1, 0.07, 0.09, 26.1);
   }
-  arch(-3, 10.1, 13.14, 13.18, 3.91, 26.05, 0.036, "glass");
+  arch(-3, 10.1, 13.14, 13.18, 3.91, 26.05, 0.036, "glass", 0.14);
   for (const z of [-2.75, 22.85]) {
     box("ivory", -3, 10.68, z, 26.2, 0.45, 0.58);
     box("oak", -3, 10.38, z, 26.2, 0.15, 0.63);
@@ -6219,15 +6221,15 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
 }
 async function createWorld(T, R, physics, expanded = false, warmModel) {
   try {
-    let ceilingBox = function(material, x, y, z, sx, sy, sz, hole = liftLayout.shaft) {
-      if (!expandedLift) {
-        box(material, x, y, z, sx, sy, sz);
-        return [{ minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 }];
-      }
-      const panels = cutRectangle({ minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 }, hole);
+    let ceilingBounds = function(x, y, z, sx, sy, sz) {
+      ceilingObstacles.push({ min: { x: x - sx / 2, y: y - sy / 2, z: z - sz / 2 }, max: { x: x + sx / 2, y: y + sy / 2, z: z + sz / 2 } });
+    }, ceilingBox = function(material, x, y, z, sx, sy, sz, hole = liftLayout.shaft) {
+      const bounds = { minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 };
+      const panels = expandedLift && hole ? cutRectangle(bounds, hole) : [bounds];
       for (const r of panels) {
-        box(material, (r.minX + r.maxX) / 2, y, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, sy, r.maxZ - r.minZ);
-        ceilingObstacles.push({ min: { x: r.minX, y: y - sy / 2, z: r.minZ }, max: { x: r.maxX, y: y + sy / 2, z: r.maxZ } });
+        const panel = [(r.minX + r.maxX) / 2, y, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, sy, r.maxZ - r.minZ];
+        box(material, ...panel);
+        ceilingBounds(...panel);
       }
       return panels;
     }, refreshInstanceColours = function() {
@@ -6656,7 +6658,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -6696,7 +6698,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     if (!expanded) {
       const roof = new URLSearchParams(location.search).get("visitor") !== "v1" ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
       for (const component of [...SHELL_LAYOUT.caps, ...roof])
-        box(component.material, ...component.position, ...component.size);
+        ceilingBox(component.material, ...component.position, ...component.size);
+      const ceiling = SHELL_LAYOUT.assets.ceiling;
+      const [width, height, depth] = ceiling.bounds_max.map((max, axis) => max - ceiling.bounds_min[axis]);
+      for (const [x, y, z] of ceiling.placements)
+        ceilingBounds(x, y + height / 2, z, width, height, depth);
       shellState = shell.finish(scene, solid);
     }
     if (!expanded) {
@@ -6875,11 +6881,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         box("dark", x, 4.7, 0, 9.7, 1.55, 0.5, true);
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
       }
-      box("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4);
+      ceilingBox("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4, null);
       activeShopSlot = expanded ? Number(store2.number) : null;
       if (expanded && zone === "newmoon") {
         for (const z of [-2.5, -5.4, -8.3]) {
-          box("ivory", x, 5.63, z, 7.9, 0.12, 2.35);
+          ceilingBox("ivory", x, 5.63, z, 7.9, 0.12, 2.35, null);
           for (const side of [-1, 1]) {
             box("brass", x + side * 3.85, 5.55, z, 0.06, 0.06, 2.24);
             box("brass", x, 5.55, z + side * 1.12, 7.75, 0.06, 0.06);

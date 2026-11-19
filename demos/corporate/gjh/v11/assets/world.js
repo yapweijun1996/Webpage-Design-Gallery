@@ -46,12 +46,16 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   const ceilingObstacles=[], shopObstacles=[];
+  function ceilingBounds(x,y,z,sx,sy,sz){
+    ceilingObstacles.push({min:{x:x-sx/2,y:y-sy/2,z:z-sz/2},max:{x:x+sx/2,y:y+sy/2,z:z+sz/2}});
+  }
   function ceilingBox(material,x,y,z,sx,sy,sz,hole=liftLayout.shaft){
-    if(!expandedLift){box(material,x,y,z,sx,sy,sz);return [{minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2}];}
-    const panels=cutRectangle({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2},hole);
+    const bounds={minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2};
+    const panels=expandedLift && hole ? cutRectangle(bounds,hole) : [bounds];
     for(const r of panels){
-      box(material,(r.minX+r.maxX)/2,y,(r.minZ+r.maxZ)/2,r.maxX-r.minX,sy,r.maxZ-r.minZ);
-      ceilingObstacles.push({min:{x:r.minX,y:y-sy/2,z:r.minZ},max:{x:r.maxX,y:y+sy/2,z:r.maxZ}});
+      const panel=[(r.minX+r.maxX)/2,y,(r.minZ+r.maxZ)/2,r.maxX-r.minX,sy,r.maxZ-r.minZ];
+      box(material,...panel);
+      ceilingBounds(...panel);
     }
     return panels;
   }
@@ -295,7 +299,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
-    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap}));
+    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
@@ -328,7 +332,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   }
   if (!expanded) {
     const roof = new URLSearchParams(location.search).get('visitor') !== 'v1' ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
-    for (const component of [...SHELL_LAYOUT.caps, ...roof]) box(component.material, ...component.position, ...component.size);
+    for (const component of [...SHELL_LAYOUT.caps, ...roof]) ceilingBox(component.material, ...component.position, ...component.size);
+    const ceiling = SHELL_LAYOUT.assets.ceiling;
+    const [width, height, depth] = ceiling.bounds_max.map((max, axis) => max - ceiling.bounds_min[axis]);
+    for (const [x, y, z] of ceiling.placements) ceilingBounds(x, y + height / 2, z, width, height, depth);
     shellState = shell.finish(scene, solid);
   }
   if (!expanded) {
@@ -529,12 +536,12 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     if (expanded) {
       box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
     }
-    box('cream', x, 5.8, -5.2, 9.7, .22, 10.4);
+    ceilingBox('cream', x, 5.8, -5.2, 9.7, .22, 10.4, null);
     activeShopSlot=expanded?Number(store.number):null;
     if (expanded && zone === 'newmoon') {
       // Recessed bronze-edged coffers draw the eye along the product aisle.
       for (const z of [-2.5, -5.4, -8.3]) {
-        box('ivory', x, 5.63, z, 7.9, .12, 2.35);
+        ceilingBox('ivory', x, 5.63, z, 7.9, .12, 2.35, null);
         for (const side of [-1, 1]) {
           box('brass', x + side * 3.85, 5.55, z, .06, .06, 2.24);
           box('brass', x, 5.55, z + side * 1.12, 7.75, .06, .06);

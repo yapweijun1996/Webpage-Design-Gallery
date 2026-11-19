@@ -1,8 +1,167 @@
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import test from 'node:test';
+import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
+import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
+import {createPlayer} from '../demos/corporate/gjh/v11/assets/player.js';
 import {
-  chaseDistance, clampZoom, createCameraController, easeCameraValue, firstPersonFov
+  chaseDistance, clampCameraPitch, clampZoom, createCameraController, easeCameraValue, firstPersonFov,
+  limitCameraByFloor, limitCameraByObstacles, neutralFramingWeight
 } from '../demos/corporate/gjh/v11/assets/camera-controller.js';
+
+const radians = degrees => degrees * Math.PI / 180;
+
+test('chase reaches an upward −30° and downward 75° with neutral framing only between the extremes', () => {
+  const low = clampCameraPitch(-Math.PI, 'third-person');
+  const high = clampCameraPitch(Math.PI, 'third-person');
+  assert.equal(low, radians(-30));
+  assert.equal(high, radians(75));
+  assert.equal(clampCameraPitch(.1, 'third-person'), .1);
+  assert.equal(neutralFramingWeight(.1), 1);
+  assert.equal(neutralFramingWeight(low), 0);
+  assert.equal(neutralFramingWeight(high), 0);
+  assert.ok(neutralFramingWeight(-.1) < 1 && neutralFramingWeight(-.1) > 0);
+  assert.equal(clampCameraPitch(-Math.PI, 'first-person'), radians(-85));
+  assert.equal(clampCameraPitch(Math.PI, 'first-person'), radians(85));
+});
+
+test('pitch survives view changes and forced chase without overwriting either requested angle', () => {
+  const camera = createCameraController(() => null);
+  camera.setPitch(-Math.PI);
+  camera.toggle();
+  camera.setPitch(Math.PI);
+  assert.equal(camera.pitch(), radians(85));
+  assert.equal(camera.pitch(true), radians(-30));
+  camera.setPitch(Math.PI, true);
+  assert.equal(camera.pitch(), radians(85));
+  camera.toggle();
+  assert.equal(camera.pitch(), radians(75));
+});
+
+test('a low arm retracts to keep the camera sphere above the floor or upper-level void', () => {
+  const directionY = Math.sin(radians(-30)), radius = .22, gap = .04;
+  for (const floor of [0, 7.2]) {
+    const originY = floor + 1.24, minimumY = floor + radius + gap;
+    const distance = limitCameraByFloor(originY, directionY, 11, minimumY);
+    assert.ok(distance > 1.9 && distance < 2);
+    assert.ok(Math.abs(originY + distance * directionY - minimumY) < 1e-12);
+    assert.equal(limitCameraByFloor(originY, directionY, 1, minimumY), 1);
+    assert.equal(limitCameraByFloor(originY, Math.sin(radians(75)), 11, minimumY), 11);
+  }
+});
+
+test('sweeps stop the sphere short of a ceiling, shop wall, bench and glass railing', () => {
+  const box = (x, y, z, w, h, d) => ({
+    min: {x, y, z}, max: {x: x + w, y: y + h, z: z + d}
+  });
+  const ceiling = box(-5, 3.8, -5, 10, .2, 10);
+  const shopWall = box(-2, 0, 2.25, 4, 4, .1);
+  const bench = box(-1, 0, 1, 2, .9, .5);
+  const railing = box(-2, 7.2, 1.5, 4, 1.1, .1);
+  const radius = .22;
+  for (const [obstacle, origin, direction, distance] of [
+    [ceiling, {x:0, y:1.24, z:0}, {x:0, y:1, z:0}, 2.32],
+    [shopWall, {x:0, y:1.24, z:0}, {x:0, y:0, z:1}, 2.01],
+    [bench, {x:0, y:1.24, z:0}, {x:0, y:-.5, z:Math.sqrt(.75)}, .78 / Math.sqrt(.75) - .02],
+    [railing, {x:0, y:7.8, z:0}, {x:0, y:0, z:1}, 1.26]
+  ]) {
+    assert.ok(Math.abs(limitCameraByObstacles(origin, direction, 5, radius, [obstacle]) - distance) < 1e-12);
+    assert.equal(limitCameraByObstacles({...origin, x: 10}, direction, 5, radius, [obstacle]), 5);
+  }
+});
+
+test('Tripo chase damps toward both pitches, clears the floor and roof, and retains pitch while walking', async t => {
+  const noop = () => {};
+  const joystick = {width: 75, height: 75, left: 305, right: 380, top: 540, bottom: 615};
+  const control = {addEventListener: noop, setAttribute: noop, querySelector: () => control,
+    getBoundingClientRect: () => joystick, classList: {remove: noop}, style: {}};
+  const keyboard = new Map();
+  const browserGlobals = {
+    document: {addEventListener: (type, handler) => keyboard.set(type, handler), querySelector: () => control},
+    window: {addEventListener: noop},
+    location: {search: ''},
+    matchMedia: () => ({matches: false}),
+    self: globalThis,
+    createImageBitmap: async () => ({width: 1, height: 1})
+  };
+  const previous = Object.getOwnPropertyDescriptors(globalThis);
+  Object.assign(globalThis, browserGlobals);
+  t.after(() => {
+    for (const key of Object.keys(browserGlobals)) {
+      if (previous[key]) Object.defineProperty(globalThis, key, previous[key]);
+      else delete globalThis[key];
+    }
+  });
+  const fetchAsset = globalThis.fetch;
+  t.mock.method(globalThis, 'fetch', async input => {
+    const path = new URL(input instanceof Request ? input.url : input);
+    if (path.protocol !== 'file:') return fetchAsset(input);
+    const contentType = path.pathname.endsWith('.wasm') ? 'application/wasm' : 'application/octet-stream';
+    return new Response(await readFile(path), {headers: {'Content-Type': contentType}});
+  });
+  await R.init();
+  const physics = new R.World({x: 0, y: -9.81, z: 0});
+  physics.createCollider(R.ColliderDesc.cuboid(20, .2, 20).setTranslation(0, -.22, 0));
+  const pointer = new Map();
+  const canvas = {clientWidth: 393, clientHeight: 648, addEventListener: (type, handler) => pointer.set(type, handler),
+    setPointerCapture: noop, focus: noop, dataset: {}};
+  const obstacles = [];
+  const player = await createPlayer(T, R, physics, new T.Scene(), canvas, new T.MeshBasicMaterial(),
+    new T.PlaneGeometry(), [], obstacles, true);
+  t.after(() => { player.dispose(); physics.free(); });
+  assert.equal(player.state.character.model, 'gjh-tripo-visitor');
+  const lookPitch = () => -Math.asin(player.camera.getWorldDirection(new T.Vector3()).y);
+  const settle = () => { for (let i = 0; i < 90; i++) player.updateCamera(1 / 60); };
+  const drag = (pointerType, clientX, fromY, toY) => {
+    const start = {pointerType, clientX, pointerId: 1, button: 0, clientY: fromY};
+    pointer.get('pointerdown')(start);
+    pointer.get('pointermove')({...start, clientY: toY});
+    pointer.get('pointerup')({...start, type: 'pointerup', clientY: toY});
+  };
+
+  player.resizeCamera(393, 648);
+  player.teleport('atrium');
+  const neutral = lookPitch();
+  drag('touch', 342, 580, 550);
+  assert.equal(player.state.pitch, .1);
+  drag('touch', 150, 500, 150);
+  assert.equal(player.state.pitch, radians(-30));
+  player.updateCamera(1 / 60);
+  assert.ok(lookPitch() < neutral && lookPitch() > radians(-20));
+  settle();
+  assert.ok(Math.abs(lookPitch() - radians(-30)) < .005);
+  assert.ok(player.camera.position.y >= player.state.cameraObstruction.radius + .039);
+  assert.ok(player.state.cameraObstruction.avatarVisible);
+  const lowPitch = player.state.pitch;
+  player.setInput({forward: 1});
+  for (let i = 0; i < 12; i++) {
+    player.update(1 / 60);
+    physics.step();
+    player.updateCamera(1 / 60);
+  }
+  assert.ok(player.state.z < 11.9);
+  assert.equal(player.state.pitch, lowPitch);
+  player.teleport('mili');
+  assert.equal(player.state.pitch, lowPitch);
+
+  drag('mouse', 150, 150, 500);
+  settle();
+  assert.ok(Math.abs(lookPitch() - radians(75)) < .005);
+  assert.equal(player.state.cameraDistance, 5);
+  keyboard.get('keydown')({code: 'PageUp', target: canvas, preventDefault: noop});
+  assert.ok(player.state.pitch < radians(75));
+  keyboard.get('keydown')({code: 'PageDown', target: canvas, preventDefault: noop});
+  obstacles.push({min:{x:-3, y:3.8, z:0}, max:{x:3, y:4, z:5}});
+  settle();
+  assert.ok(player.camera.position.y <= 3.8 - player.state.cameraObstruction.radius);
+  assert.equal(player.state.pitch, radians(75));
+
+  player.body.setTranslation({x:0, y:8.09, z:0}, true);
+  player.setInput({pitch: -Math.PI});
+  settle();
+  assert.ok(player.camera.position.y >= 7.2 + player.state.cameraObstruction.radius + .039);
+  assert.ok(Math.abs(lookPitch() - radians(-30)) < .005);
+});
 
 test('zoom clamps numeric inputs and rejects invalid storage values', () => {
   assert.equal(clampZoom(2), 1);

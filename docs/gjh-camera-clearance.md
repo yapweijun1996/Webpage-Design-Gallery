@@ -6,6 +6,8 @@ The previous spring arm tested a centre ray and clamped its boom to 0.18 m after
 
 The player now casts a sphere large enough to enclose its near-plane corners, excluding the visitor's own rigid body/capsule. It first preserves the requested bearing. If the boom has less than 2 m of clearance, it tries bounded 1.1/2.2 m lifts over furniture. A second cast constrains the interpolated position, so an obstruction cannot be crossed during smoothing. Inward recovery is immediate; open-space motion retains smoothing. Reduced Motion and teleport use an immediate safe solution. In a truly enclosed corner where no third-person view fits, only the local visitor presentation is hidden with hysteresis; physical collision and ownership remain unchanged. Open clearance restores the avatar. Authoritative bench dimensions also provide camera-only bounds for the visible back and arms; they do not enlarge the seat-pan physics collider or alter seating paths. Shelf focus retains its separate camera and graphics interruption lifecycle.
 
+The exploration pitch previously ranged from −0.08 to 0.9 radians (−4.6° to 51.6°). The Tripo camera's raised pivot and forward aim left the lower limit looking down in open space. The wider −30° to 75° orbit fades those framing offsets away from the default pitch. The camera sweeps the vertical pivot adjustment and the smoothed boom position. A floor-plane limit shortens the boom while preserving the low bearing, including above the void beside the upper deck. Ceiling, wall and furniture clearance still come from the sphere sweep and camera-only bounds.
+
 The shared onboarding and facility dialogs participate in the released mode state machine through native dialog state. Their assets are copied into generated publication output while remaining outside gallery-shell precaching. The existing contextual navigation footer is retained in the shared welcome surface.
 
 ## Render budget
@@ -13,6 +15,8 @@ The shared onboarding and facility dialogs participate in the released mode stat
 The combined upstream interior pilot and facilities initially produced 220 calls in the released visitor view, exceeding the existing 200-call gate. The gate was retained. Static opaque facilities now share one batch with original linear colour, roughness and metalness carried as vertex attributes; glass remains separate. The four showcase products extend the existing product instance batches, sharing geometry/textures and avoiding duplicate draws. Shelf stock/reservation indices retain their original nine shelf placements. Original GLB bytes and material parameters are preserved. No new render loop or dependency is added.
 
 ## Checks
+
+Run `python tests/browser_gjh_camera_pitch.py` with `GALLERY_CHROME` set to a local Chrome executable. The probe serves this worktree on port 8819 and captures the two pitch limits in the atrium, inside MILI on LG, and by the upper landing at 393×700 and 1440×900. Images are written to `output/playwright/gjh-camera-pitch/`.
 
 `tests/browser_gjh_camera.py` checks the original and released visitor on desktop plus released visitor on mobile with Reduced Motion. It measures camera distance independently, checks sphere separation from authored desk/showcase/bench bounds, orbits by benches, and walks one continuous loop from service desk to showcase to ceiling sign and back. All three facilities open and close along this loop. Each case samples 178 positions. Screenshots and numeric results are in `docs/screenshots/mall-camera` and `docs/evidence/mall-camera.json`.
 
