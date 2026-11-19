@@ -371,7 +371,7 @@ function render(force = false) {
     const now = performance.now();
     if (expanded && !startupOverlay.hidden) shopActionsTime = undefined;
     if (expanded && startupOverlay.hidden) {
-      if (!shopActionsLoad && ['newmoon','mili','gogo'].includes(currentZone) && shopActionsAttemptZone !== currentZone) {
+      if (!shopActionsLoad && (['newmoon','mili','gogo'].includes(currentZone) || /^planned-space-(0[4-9]|1[0-7])$/.test(currentZone)) && shopActionsAttemptZone !== currentZone) {
         shopActionsAttemptZone = currentZone;
         shopActionsLoad = import('./assets/interiors/shop-interactions.js')
           .then(({installShopInteractions}) => {

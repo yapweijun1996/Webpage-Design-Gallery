@@ -10,7 +10,7 @@ function distanceToInteraction(item, position, context) {
   return distance < item.radius ? distance : Infinity;
 }
 
-export function createInteractionState({announce = () => {}, present = () => {}} = {}) {
+export function createInteractionState({announce = () => {}, begin = () => {}, present = () => {}} = {}) {
   const states = new Map();
   const idle = Object.freeze({phase: 'idle', message: ''});
   let focused = null, active = null, displayed = null, dirty = false;
@@ -28,12 +28,13 @@ export function createInteractionState({announce = () => {}, present = () => {}}
   }
   function start(item) {
     if (active) return active.item === item && cancel();
-    active = {item, elapsed: 0};
+    active = {item, elapsed: 0, stop:begin(item)};
     set(item, 'executing', item.shopAction.progress);
     return true;
   }
   function cancel() {
     if (!active) return false;
+    active.stop?.();
     set(active.item, 'cancelled', 'Cancelled. Try again.');
     active = null;
     dirty = true;
