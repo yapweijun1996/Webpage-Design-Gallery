@@ -1,11 +1,69 @@
 import {isInFrontOfSeat} from './seat-placements.js';
 
+export function createInteractionState({announce = () => {}, present = () => {}} = {}) {
+  const states = new Map();
+  const idle = Object.freeze({phase: 'idle', message: ''});
+  let focused = null, active = null, displayed = null, dirty = false;
+  const read = id => states.get(id) ?? idle;
+  function set(item, phase, message = '') {
+    states.set(item.id, {phase, message});
+    if (message) announce(message);
+  }
+  function focus(item) {
+    if (focused === item) return;
+    if (focused && read(focused.id).phase === 'focused') states.delete(focused.id);
+    focused = item;
+    dirty = true;
+    if (item && read(item.id).phase === 'idle') set(item, 'focused');
+  }
+  function start(item) {
+    if (active) return active.item === item && cancel();
+    active = {item, elapsed: 0};
+    set(item, 'executing', item.shopAction.progress);
+    return true;
+  }
+  function cancel() {
+    if (!active) return false;
+    set(active.item, 'cancelled', 'Cancelled. Try again.');
+    active = null;
+    dirty = true;
+    return true;
+  }
+  function advance(zone, delta, reducedMotion = false) {
+    let changed = false;
+    if (active && active.item.shopAction.zone !== zone) changed = cancel();
+    if (active) {
+      const {item} = active;
+      active.elapsed += delta;
+      const progress = reducedMotion || !item.shopAction.duration ? 1 :
+        Math.min(1, active.elapsed / item.shopAction.duration);
+      present(item, progress);
+      displayed = item;
+      if (progress < 1) return changed;
+      set(item, 'done', item.shopAction.done);
+      active = null;
+      changed = true;
+    }
+    const resting = focused && focused.shopAction.zone === zone &&
+      read(focused.id).phase === 'done' ? focused : null;
+    if (resting !== displayed) {
+      present(resting, 1);
+      displayed = resting;
+    }
+    dirty = false;
+    return changed;
+  }
+  return {read, focus, start, cancel, advance,
+    get needsFrame() { return Boolean(active || dirty); }};
+}
+
 // Entries stay owned by the world; this adapter also sees entries added after startup.
 export function createInteractionRegistry(entries, describe = () => ({})) {
   const cache = new WeakMap();
   const actions = new Map();
   const listeners = new Set();
-  let selectionContext = {};
+  const candidates = [];
+  let selectionContext = {}, selected = null, cycled = null, shops = null;
   function normalize(source) {
     let item = cache.get(source);
     if (!item) {
@@ -32,25 +90,77 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
     return actions.get(kind)?.get(id) || null;
   }
   function nearest(position, context = {}) {
-    let selected = null, distance = Infinity;
+    let best = null, priority = Infinity, distance = Infinity;
     selectionContext = context;
-    if (context.travelling) return {item: null, distance};
-    for (const source of entries) {
+    const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
+    candidates.length = 0;
+    function consider(source) {
       const item = normalize(source);
       const floor = typeof item.floor === 'number' ? item.floor : item.y;
-      if (Math.abs((position.y ?? 0) - floor) > .5 || !item.availability(context, item)) continue;
-      if (item.seat && !isInFrontOfSeat(item.seat, position)) continue;
-      const d = Math.hypot(position.x - item.anchor.x, position.z - item.anchor.z);
-      if (d < item.radius && d < distance) { selected = item; distance = d; }
+      if (Math.abs((position.y ?? 0) - floor) > .5 || !item.availability(context, item)) return;
+      if (item.seat && !isInFrontOfSeat(item.seat, position)) return;
+      const point = item.standing ?? item.anchor;
+      const d = item.shopAction?.seated && context.player?.seated ? 0 :
+        Math.hypot(position.x - point.x, position.z - point.z);
+      if (d >= item.radius) return;
+      if (shopEntries && (!context.player?.seated || item.shopAction?.seated)) candidates.push({item, distance:d});
+      // Native displays and seats stay the primary choice when in range.
+      // Drawers augment their own shelf through the same nearby-action cycle.
+      const rank = item.shopAction?.seated && context.player?.seated ? -1 :
+        !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
+      if (!item.shopAction?.productId && (rank < priority || (rank === priority && d < distance))) {
+        best = item; priority = rank; distance = d;
+      }
     }
-    return {item: selected, distance};
+    if (!context.travelling) for (const source of entries) consider(source);
+    if (shopEntries) for (const source of shopEntries) consider(source);
+    const chosen = cycled && candidates.find(candidate => candidate.item === cycled);
+    if (!chosen) cycled = null;
+    selected = chosen?.item ?? best;
+    shops?.state.focus(selected?.shopAction ? selected : null);
+    return {item: selected, distance: chosen?.distance ?? distance};
+  }
+  function cycle(direction) {
+    if (!canCycle()) return false;
+    const index = candidates.findIndex(candidate => candidate.item === selected);
+    const next = index < 0 ? (direction < 0 ? candidates.length - 1 : 0) :
+      (index + direction + candidates.length) % candidates.length;
+    cycled = candidates[next].item;
+    return true;
+  }
+  function canCycle() {
+    return candidates.some(({item}) => item.shopAction) &&
+      (candidates.length > 1 || candidates[0]?.item !== selected);
   }
   function dispatch(item, context = selectionContext) {
     if (!item || (item.availability && !item.availability(context, item))) return false;
-    const result = item.handler?.(item, context) ?? false;
+    let result;
+    if (item.shopAction) {
+      if (item !== selected) return false;
+      const {productId} = item.shopAction;
+      const pickup = productId && get('pickup', productId);
+      if (pickup && shops.state.read(item.id).phase === 'done') return dispatch(pickup, context);
+      result = shops.state.start(item);
+    } else result = item.handler?.(item, context) ?? false;
     if (result) for (const listener of listeners) listener(item, context);
     return result;
   }
   function subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); }
-  return {normalize, nearest, dispatch, register, get, subscribe};
+  return {normalize, nearest, dispatch, register, get, subscribe, cycle, canCycle,
+    installShopActions(targets, presentation) {
+      shops = {byZone:new Map(), state:createInteractionState(presentation)};
+      for (const item of targets) {
+        const zone = item.shopAction.zone;
+        if (!shops.byZone.has(zone)) shops.byZone.set(zone, []);
+        shops.byZone.get(zone).push(item);
+      }
+    },
+    shopState: id => shops?.state.read(id),
+    productTarget(item) {
+      const id = item?.shopAction?.productId;
+      return id && shops?.state.read(item.id).phase === 'done' ? id : item?.id ?? null;
+    },
+    advanceShopActions: (zone, delta, reducedMotion) =>
+      shops?.state.needsFrame && shops.state.advance(zone, delta, reducedMotion),
+    cancelShopAction: () => shops?.state.cancel()};
 }

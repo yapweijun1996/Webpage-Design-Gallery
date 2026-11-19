@@ -71,6 +71,7 @@ let renderRequested = false, forceRender = false, enteredAt = null;
 let simulationMs = 0, simulationSteps = 0;
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
+let shopActionsLoad, shopActionsAttemptZone, shopActionsTime;
 let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
 let nearby = null, currentZone = 'atrium', wasRiding = false;
@@ -302,10 +303,10 @@ function updateHUD() {
     world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();})
       .catch(error=>console.error('Upper deck brand wall could not load:',error));
   }
-  const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p});
+  const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p, zone});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  productControl?.update(p, nearby);
+  productControl?.update(p, interactions.productTarget(selectedInteraction));
   shelfFocus?.setNearby(nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper,hasHeldProduct:Boolean(productControl&&p.character.physicalProduct.held)});
 }
@@ -367,6 +368,20 @@ function render(force = false) {
     const pose = player.state;
     const matrix = camera.matrixWorld.elements;
     const now = performance.now();
+    if (expanded && !startupOverlay.hidden) shopActionsTime = undefined;
+    if (expanded && startupOverlay.hidden) {
+      if (!shopActionsLoad && ['newmoon','mili','gogo'].includes(currentZone) && shopActionsAttemptZone !== currentZone) {
+        shopActionsAttemptZone = currentZone;
+        shopActionsLoad = import('./assets/interiors/shop-interactions.js')
+          .then(({installShopInteractions}) => {
+            if (!pageEnded && !fatal) return installShopInteractions(three, world.scene, interactions, ui.announce);
+          })
+          .then(() => { if (!pageEnded && !fatal) { updateHUD(); requestRender(); } })
+          .catch(error => { shopActionsLoad = null; console.error('Shop actions unavailable:', error); });
+      } else if (!shopActionsLoad && currentZone !== shopActionsAttemptZone) shopActionsAttemptZone = undefined;
+      if (interactions.advanceShopActions(currentZone, Math.min(.1, (now-(shopActionsTime ?? now))/1000), reducedMotion.matches)) updateHUD();
+      shopActionsTime = now;
+    }
     mallHud.update({position: pose, zone: currentZone, travelling: pose.elevatorTravel,
       enabled: !windowBlurred && !modes.paused() && document.body.classList.contains('is-3d') && startupOverlay.hidden,
       now, forward: {x: -matrix[8], z: -matrix[10]}});
@@ -652,11 +667,27 @@ ui.onTeleport(zone => {
 });
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
 ui.onView(visual => { if (visual) { last = performance.now(); requestRender(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
+ui.onShopCycle(() => { if (interactions.cycle(1)) { updateHUD(); requestRender(); } });
 document.addEventListener('keydown', event => {
-  if(event.code==='Escape'&&!modes.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
-  if (event.code === 'KeyF' && nearby && !modes.paused() && !event.repeat &&
-      !event.altKey && !event.ctrlKey && !event.metaKey &&
-      (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); if(player.state.seated){player.stand();updateHUD();}else ui.inspectNearby(nearby); }
+  if (modes.paused() || event.defaultPrevented) return;
+  if (event.code === 'Escape') {
+    if (interactions?.cancelShopAction()) { event.preventDefault(); updateHUD(); requestRender(); return; }
+    if (player?.state.seated) { player.stand(); updateHUD(); }
+    player?.cancelCollection();
+  }
+  if (event.repeat || event.altKey || event.ctrlKey || event.metaKey ||
+      (event.target !== canvas && event.target !== document.body)) return;
+  if (event.code === 'BracketRight' || event.code === 'BracketLeft') {
+    if (interactions?.cycle(event.code === 'BracketRight' ? 1 : -1)) {
+      event.preventDefault(); updateHUD(); requestRender();
+    }
+  }
+  if (event.code === 'KeyF' && nearby) {
+    event.preventDefault(); player.clearInput();
+    if (player.state.seated && !selectedInteraction?.shopAction?.seated) player.stand();
+    else ui.inspectNearby(nearby);
+    updateHUD(); requestRender();
+  }
 });
 window.addEventListener('blur', () => { windowBlurred = true; pausePerformance();hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
 window.addEventListener('focus', () => { windowBlurred = false; quality.resetSampling(); if (ready) { updateHUD(); requestRender(); } });

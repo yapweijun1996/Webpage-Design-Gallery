@@ -29,6 +29,9 @@ def project(shop):
             x, y, z = item['xyz']
             colliders.append(dict(center=[x, y+item['size'][1]/2, z], size=item['size'], yaw=item['yawDeg']))
     details = {}
+    if shop['slot'] == 'S03':
+        details['gogoStools'] = [dict(id=item['id'], standing=item['standing'], **placement(item))
+                                for item in items if item['socket'] == 'stools3']
     for obstacle in shop.get('retainedObstacles', []):
         if obstacle.get('socket') == 'kitchen-run':
             details['kitchenRun'] = obstacle
