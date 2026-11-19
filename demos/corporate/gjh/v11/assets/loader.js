@@ -22,7 +22,7 @@ export function loaderLabels(state, language) {
   const [status, step] = details[language] ?? details.en;
   return {
     status:state.message === details.en[0] ? status : state.message,
-    lastStep:state.stage === 'warm' || state.ready ? step : null
+    lastStep:step
   };
 }
 
@@ -66,39 +66,32 @@ if (typeof document !== 'undefined') {
   const steps = [...document.querySelectorAll('.app-loader-steps li')];
   const retry = document.getElementById('loader-retry');
   const enterNow = document.getElementById('loader-enter-now');
-  const fill = document.getElementById('loader-fill');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  let fadeTimer, shown = 0, goal = 0, stageStart = performance.now(), raf = 0, last = {completed: 0, total: stages.length};
-  // Milestones are real, so the fill eases toward the next one and creeps up to 90% of the gap while it works.
-  // It never claims a stage before the stage completes.
-  function frame(now) {
-    raf = 0;
-    const {completed, total, failed, hidden: paused} = last;
-    const ready = completed === total;
-    const creep = ready || failed || reduced.matches ? 0 : 0.9 * (1 - Math.exp(-(now - stageStart) / 5000));
-    goal = Math.min(100, (completed + creep) / total * 100);
-    shown = reduced.matches ? goal : shown + (goal - shown) * 0.12;
-    if (Math.abs(goal - shown) < 0.05) shown = goal;
-    fill.style.width = `${shown.toFixed(2)}%`;
-    if (!overlay.hidden && !paused && !failed && (shown !== goal || !ready)) raf = requestAnimationFrame(frame);
-  }
-  const drive = value => { if (value.completed !== last.completed) stageStart = performance.now(); last = value; if (!raf) raf = requestAnimationFrame(frame); };
-  const firstView = steps.at(-1);
+  const detailsStep = steps.find(step => step.dataset.stage === 'warm');
+  let fadeTimer, restoreFocus = false;
   function renderText(value) {
     const labels = loaderLabels(value, document.documentElement.lang);
-    status.textContent = labels.status;
-    if (labels.lastStep) firstView.textContent = labels.lastStep;
+    if (status.textContent !== labels.status) status.textContent = labels.status;
+    if (detailsStep.textContent !== labels.lastStep) detailsStep.textContent = labels.lastStep;
   }
   const state = createLoaderState(value => {
     renderText(value);
-    progress.max = value.total;
-    progress.value = value.completed;
-    progress.textContent = `${value.completed} of ${value.total} stages`;
-    count.textContent = `${value.completed} / ${value.total}`;
-    drive(value);
-    // First view and Details share the last column on narrow screens.
-    const segment = value.ready ? steps.length : Math.min(value.completed, steps.length - 1);
-    steps.forEach((step, index) => { step.dataset.state = index < segment ? 'done' : index === segment && !value.failed ? 'current' : 'todo'; });
+    overlay.toggleAttribute('data-motion-paused', Boolean(value.hidden || value.contextLost || value.failed));
+    overlay.toggleAttribute('data-failed', Boolean(value.failed));
+    if (overlay.dataset.completed !== String(value.completed)) {
+      progress.max = value.total;
+      progress.value = value.completed;
+      progress.textContent = `${value.completed} of ${value.total} stages`;
+      count.textContent = `${value.completed} / ${value.total}`;
+      overlay.dataset.completed = value.completed;
+      overlay.style.setProperty('--loader-completed', value.completed);
+      overlay.style.setProperty('--loader-progress', value.completed / value.total);
+      steps.forEach((step, index) => {
+        step.dataset.state = index < value.completed ? 'done' : index === value.completed ? 'current' : 'todo';
+      });
+    }
+    // Hiding Enter now can move focus to the body before the fade completes.
+    if (value.ready && overlay.contains(document.activeElement)) restoreFocus = true;
     retry.hidden = !value.failed;
     enterNow.hidden = !value.preparing || Boolean(value.failed);
     if (value.dismissed) {
@@ -108,7 +101,8 @@ if (typeof document !== 'undefined') {
       overlay.classList.add('is-fading');
       clearTimeout(fadeTimer);
       fadeTimer = setTimeout(() => {
-        if (overlay.contains(document.activeElement))
+        const active = document.activeElement;
+        if (overlay.contains(active) || (restoreFocus && active === document.body))
           (document.querySelector('#experience:not([hidden]) #scene') || document.getElementById('store-list')).focus({preventScroll: true});
         overlay.hidden = true;
       }, value.immediate || reduced.matches ? 0 : 250);

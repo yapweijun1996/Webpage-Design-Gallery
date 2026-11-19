@@ -34,7 +34,7 @@ test('availability and seat approach determine selection and dispatch', () => {
   let available = false, calls = 0;
   const registry = createInteractionRegistry([
     {id:'restricted',x:.1,z:0,radius:1,availability:()=>available,handler:()=>++calls},
-    {id:'seat',x:.2,z:0,radius:1,seat:{z:1,facing:1,frontEdge:.37}},
+    {id:'seat',x:.2,z:0,radius:1,seat:{x:.2,z:1,angle:0,frontEdge:.37}},
   ]);
   assert.equal(registry.nearest(position).item.id, 'seat');
   assert.equal(registry.nearest({x:0,y:0,z:.7}).item, null);
@@ -44,6 +44,14 @@ test('availability and seat approach determine selection and dispatch', () => {
   assert.equal(registry.nearest(position).item.id, 'restricted');
   assert.equal(registry.dispatch(restricted), 1);
   assert.equal(registry.nearest({x:0,y:0,z:1}).item, null);
+});
+
+test('a stool facing the aisle only offers Sit from the aisle side', () => {
+  const registry = createInteractionRegistry([
+    {id:'stool',x:-.95,z:0,radius:1.6,seat:{x:0,z:0,angle:Math.PI / 2,frontEdge:.27}},
+  ]);
+  assert.equal(registry.nearest({x:-.6,y:0,z:0}).item.id, 'stool');
+  assert.equal(registry.nearest({x:.3,y:0,z:0}).item, null);
 });
 
 test('all interaction kinds carry prompts and dispatch through the registry', () => {

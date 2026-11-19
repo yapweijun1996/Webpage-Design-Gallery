@@ -594,7 +594,6 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     productKind.textContent = record.kind;
     productDescription.textContent = record.description;
     bag.select(id);
-    projectBagCount(bag.snapshot());
     returnFocus = document.activeElement;
     dialog.showModal();
     newMoonPreview.open(id);

@@ -542,8 +542,15 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       box(floor, x, .012, -5.1, 9.55, .025, 10.25);
     } else for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     const backdrop = `${zone}Backdrop`;
-    if (expanded && zone !== 'newmoon') materials[backdrop] = shopBackdrop(zone);
-    box(materials[backdrop] ? backdrop : wall, x, 2.85, -10.5, 10, 5.7, .25, true);
+    let rearWall = wall;
+    if (expanded && zone === 'newmoon') {
+      materials.newmoonLacquer = mat(interiorStores.S01.palette[3].hex);
+      rearWall = 'newmoonLacquer';
+    } else if (expanded) {
+      materials[backdrop] = shopBackdrop(zone);
+      rearWall = backdrop;
+    }
+    box(rearWall, x, 2.85, -10.5, 10, 5.7, .25, true);
     for (const side of [-1, 1]) {
       box(wall, x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5, true);
       if (expanded) {
@@ -758,7 +765,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
-        sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true);
+        sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true, expanded ? 78 : undefined);
       }
       staticProductCount=productDisplay.displayedProducts;worldProductAssets = productDisplay.assets; shelves = productDisplay.shelves; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
       plant(x - 3.6, -2.3);
@@ -778,13 +785,15 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         for(let y=.22;y<1.13;y+=.2) box('courtStone',x,y,-4.218,1.68,.014,.015);
         box('shellFloor',x,1.16,-5.5,1.82,.12,2.69);
         collider(x,.57,-5.5,1.72,1.14,2.55);
-      } else if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
-        cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
-        cylinder('brass', x, .853, -5.5, .805, .025);
+      } else if (!expanded) {
+        if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
+          cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
+          cylinder('brass', x, .853, -5.5, .805, .025);
+        }
+        collider(x, .4375, -5.5, 1.61, .875, 1.61);
+        cylinder('pot', x, .99, -5.5, .115, .24);
+        sphere('foliage', x, 1.2, -5.5, .2, .23, .18);
       }
-      collider(x, .4375, -5.5, 1.61, .875, 1.61);
-      cylinder('pot', x, expanded && zone==='mili' ? 1.34 : .99, -5.5, .115, .24);
-      sphere('foliage', x, expanded && zone==='mili' ? 1.55 : 1.2, -5.5, .2, .23, .18);
       plant(x - 3.8, -8.8, 1.15); plant(x + 3.8, -8.8, 1.15); plant(x + 3.8, -2.5);
       if (zone === 'gogo') {
         if (expanded) {
@@ -834,7 +843,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         box('ivory',x+.12,.08,-1.35,.055,.16,.045);box('oak',x+.12,.08,-1.325,.035,.11,.006);
       }
     }
-    if (expanded) addOriginalShopDetails(zone, x, {box, cylinder, solid, collider});
+    if (expanded) addOriginalShopDetails(zone, x, {box, cylinder, solid, collider, seats});
     activeShopSlot=null;
     }
   if (expanded) {
