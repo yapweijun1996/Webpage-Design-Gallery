@@ -33,7 +33,7 @@ test('compact header and corner chips paint at 36px inside 44px or larger touch 
   assert.match(rule(headerControls), /min-height:var\(--size-control\);min-width:var\(--size-control\)/);
   assert.match(rule(cornerControls), /min-height:var\(--size-control\)/);
   assert.match(rule(cornerChips), /width:max-content/);
-  assert.match(rule(chrome), /border:0;border-radius:0;background:transparent/);
+  assert.match(rule(chrome), /border:0;border-radius:(?:0|var\(--entry-flat\));background:transparent/);
   const face = rule(`${chrome}::before`);
   assert.match(face, /inset:var\(--hud-chrome-inset\)/);
   assert.match(face, /pointer-events:none/);
@@ -57,7 +57,7 @@ test('compact HUD stacks Run above the raised joystick and reserves space for ca
   assert.ok(rule('body.is-3d .mall-overlay #hud-context').includes('max-width:min(27rem,100%)'));
   const compact = '@media(pointer:coarse),(max-width:650px)';
   const compactRules = css.split(`${compact}{`)[1];
-  assert.ok(compactRules.includes('--hud-stick-bottom:calc(var(--hud-gutter-bottom) + 20px)'));
+  assert.ok(compactRules.includes('--hud-stick-bottom:calc(var(--hud-gutter-bottom) + var(--gjh-space-joystick-clearance))'));
   assert.ok(compactRules.includes('--hud-run-bottom:calc(var(--hud-stick-bottom) + var(--hud-stick-size) + var(--space-2))'));
   assert.ok(compactRules.includes('--hud-context-bottom:calc(var(--hud-run-bottom) + var(--hud-control-size) + var(--space-2))'));
   const landscape = compactRules.split('@media(max-height:560px) and (orientation:landscape){')[1];
