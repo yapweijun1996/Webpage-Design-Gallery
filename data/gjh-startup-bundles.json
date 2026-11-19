@@ -33,7 +33,7 @@
     "demos/corporate/gjh/v11/assets/hud-coordinator.js": "fd507d6893122dc4b9247678db57fadd016e32d60de12e682de1c97fb19b2132",
     "demos/corporate/gjh/v11/assets/icons.js": "be9bbf0e92cd420c9d27cc5848210a19a7930cc52ffb9bff709161a0eceea19b",
     "demos/corporate/gjh/v11/assets/interaction-registry.js": "1191bc2269c61dbd5b6eb8e9c1daffcde25f087264d8b074f2abc2883ca9efe9",
-    "demos/corporate/gjh/v11/assets/interior-additions-registry.js": "86c57e5c57254cfb0f3d902d0cf7112d1325c0af57e53ca67d505153ea50dc0e",
+    "demos/corporate/gjh/v11/assets/interior-additions-registry.js": "58f1965bd34e1a3006f8b11437f4c69e52a004488a405528ee496a945223efe3",
     "demos/corporate/gjh/v11/assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
     "demos/corporate/gjh/v11/assets/interior-shell-registry.js": "f73ae9237c5ebc37256fcadcebf057b61d45df0e4e6b38f95102a8562ce47b4c",
     "demos/corporate/gjh/v11/assets/interiors/baked-layout.js": "32bc0313d700b096674c0ded58b8a003dfb479d6886bb99bb5a9598b7ce117bd",
@@ -114,7 +114,7 @@
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "fddb9404aeba0c9bd275a03f8cbcb2c5655662f3fe83262b99eca4c6cf3545e4",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "79a35b7054d211937f8cb7ae64fa8245d4bbca9caefaf38f6508f2a3e672fe44",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "63a334135d50ad1c7cf77639c225e4a05f5e3ec2dc869360874f97f15755627c",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "6ee9d43dabe113789a08e7a6aa7165b6381b5b6585daae985ec31d6be5d68dfb",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "47baec7837deb630e46cb0bc58041d6d98e5e9cb7d841c3c7126eb3d81d5ec87"
   }
