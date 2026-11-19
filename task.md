@@ -15,6 +15,13 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 - [ ] Running now: New Moon and all-shop flicker fix (photo mip-maps, decal offsets).
 - [ ] Owner real-device checks: iPhone and Android phone (export the performance JSON from the lap page).
 
+### V11 numbered showroom reviews
+
+- [x] Publish the 17 shop concept packets in numerical batches. Each includes four distinct views, an annotated floor plan, a product-form study and a model inventory. [Shop review index](docs/goh-joo-hin/README.md)
+- [x] Verify the New Moon runtime exhibit and all four can interactions. [S01](docs/goh-joo-hin/01-new-moon/README.md)
+- [x] Verify the MILI cookline comparison on published build `f161060cbd89bbc0` with desktop and touch-emulated routes. [S02](docs/goh-joo-hin/02-mili/README.md)
+- [ ] Verify the GOGO cart exhibit and subsequent shop changes in runtime order.
+
 ### V11 loader motion
 
 [Codex CLI concept storyboard](docs/gjh-v11-references/loader-motion-concept.webp) shows Engine, Models and Retry on a phone viewport. The illustration explores a gold atrium outline, progressive fixture lighting and a quiet failure state. [Chrome startup comparison](docs/gjh-v11-references/loader-motion-runtime.jpg).
