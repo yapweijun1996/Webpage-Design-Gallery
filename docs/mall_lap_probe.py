@@ -2,25 +2,32 @@
 
 Usage (serve the repo root first, e.g. python3 -m http.server 8830):
   GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-  python docs/mall_lap_probe.py --tier balanced --width 1920 --height 893 --laps 2
+  python docs/mall_lap_probe.py --device phone --tier balanced --laps 2
 
 Each lap visits the courtyard, every shop (entrance + a short walk inside),
-the lift and the upper level. Frame gaps come from requestAnimationFrame, peak draw
-calls and triangles from __mall.performanceReport(). A stop passes when
-p95 <= 20 ms, p99 <= 25 ms, no frame >= 50 ms and mean FPS >= 57 (60 Hz
-display) and its peak submission fits the tier budget. Exit code 1 when any
-stop fails. Use --tier all for Low at 393x700 and Balanced/Detailed at 1920x893.
+the lift and the upper level. Rendered frame gaps, render scale and peak
+draw calls and triangles come from __mall.performanceReport(). Phones target
+30 FPS (p95 <= 36 ms, mean >= 29 FPS); tablets and desktops target 60 FPS
+(p95 <= 20 ms, mean >= 57 FPS). Each stop must also fit its tier budget.
+Exit code 1 when any stop fails. With no device specified, --tier all uses
+the phone preset for Low and the desktop preset for Balanced and Detailed.
 """
 import argparse
 import json
+import math
 import os
 import platform
 import sys
 
 TIERS = {
-    "low": (393, 700, 220_000, 70),
-    "balanced": (1920, 893, 300_000, 90),
-    "detailed": (1920, 893, 420_000, 110),
+    "low": (220_000, 70),
+    "balanced": (300_000, 90),
+    "detailed": (420_000, 110),
+}
+DEVICES = {
+    "phone": (393, 700, 30, 36, 29),
+    "tablet": (820, 1180, 60, 20, 57),
+    "desktop": (1920, 893, 60, 20, 57),
 }
 
 ZONES = ['entry', 'atrium', 'newmoon', 'mili', 'gogo',
@@ -29,14 +36,12 @@ ZONES = ['entry', 'atrium', 'newmoon', 'mili', 'gogo',
 INIT = """
 localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
 localStorage.setItem('gjh-v11-graphics-quality-v1','%s');
-window.__gaps=[];let last=performance.now();
-(function t(){const n=performance.now();window.__gaps.push([n,n-last]);last=n;requestAnimationFrame(t)})();
 """
 
 WALK = """([tx,tz]) => { const m=window.__mall; for(let i=0;i<500;i++){const p=m.state;
   const dx=tx-p.x,dz=tz-p.z,d=Math.hypot(dx,dz); if(d<.12)break;
   m.setInput({right:dx/d,forward:-dz/d,yaw:0}); m.step(Math.max(17,Math.min(100,d/2.65*1000)));}
-  m.setInput({}); return m.step(20).nearby; }"""
+  m.setInput({}); const nearby = m.step(20).nearby; m.setInput(null); return nearby; }"""
 
 REPORT = """(start) => {
   const report = window.__mall.performanceReport();
@@ -45,45 +50,50 @@ REPORT = """(start) => {
     const values = frames.map(frame => frame[key]).filter(Number.isFinite);
     return values.length ? Math.max(...values) : null;
   };
+  const gaps = frames.filter((frame, index) => index > 0 && Number.isFinite(frame.frameMs))
+    .map(frame => frame.frameMs);
   return {drawCalls:peak('drawCalls'), triangles:peak('triangles'), zone:report.zone,
-    tier:report.tier, budgetSamples:frames.length};
+    tier:report.graphics.tier, budgetSamples:frames.length, gaps, renderScale:report.renderScale,
+    targetFps:report.targetFps, refreshHz:report.refreshHz, deviceClass:report.deviceClass,
+    tierDowngrades:report.tierDowngrades};
 }"""
 
 
 def stats(gaps):
-    values = sorted(g for _, g in gaps)
+    values = sorted(gaps)
     if not values:
         return {'frames': 0}
-    pick = lambda q: values[min(len(values) - 1, int(len(values) * q))]
+    pick = lambda q: values[math.ceil(len(values) * q) - 1]
     mean = sum(values) / len(values)
-    return {'frames': len(values), 'fps': round(1000 / mean, 1), 'p95': round(pick(.95), 1),
-            'p99': round(pick(.99), 1), 'max': round(values[-1], 1),
+    return {'frames': len(values), 'fps': 1000 / mean, 'p95': pick(.95),
+            'p99': pick(.99), 'max': values[-1],
             'slow50': sum(1 for v in values if v >= 50)}
 
 
-def verdict(row):
-    return (row.get('frames', 0) > 20 and row['p95'] <= 20 and row['p99'] <= 25
-            and row['slow50'] == 0 and row['fps'] >= 57)
+def verdict(row, device):
+    _, _, _, max_p95, min_fps = DEVICES[device]
+    return (row['deviceClass'] == device and row['targetFps'] >= min_fps and row['frames'] > 20
+            and row['p95'] <= max_p95 and row['fps'] >= min_fps)
 
 
-def apply_budget(row, tier, max_tris, max_draws):
+def apply_budget(row, device, tier, max_tris, max_draws):
     row['budgetPass'] = (row['tier'] == tier and row['budgetSamples'] > 0
                          and row['triangles'] is not None and row['triangles'] <= max_tris
                          and row['drawCalls'] is not None and row['drawCalls'] <= max_draws)
-    row['pass'] = verdict(row) and row['budgetPass']
+    row['pass'] = verdict(row, device) and row['budgetPass']
     return row
 
 
 def capture(page, label, dwell_ms, walk_key=None, walk_ms=0):
-    start = page.evaluate('() => { window.__gaps = []; return performance.now(); }')
+    start = page.evaluate('performance.now()')
     page.wait_for_timeout(dwell_ms)
     if walk_key:
         page.keyboard.down(walk_key)
         page.wait_for_timeout(walk_ms)
         page.keyboard.up(walk_key)
         page.wait_for_timeout(400)
-    gaps = [g for g in page.evaluate('window.__gaps') if g[0] > start]
-    return {'stop': label, **stats(gaps), **page.evaluate(REPORT, start)}
+    report = page.evaluate(REPORT, start)
+    return {'stop': label, **stats(report.pop('gaps')), **report}
 
 
 def run_lap(page, lap):
@@ -106,15 +116,17 @@ def run_lap(page, lap):
 
 
 def run_tier(browser, args, tier):
-    default_width, default_height, default_tris, default_draws = TIERS[tier]
+    device = args.device or ('phone' if (args.width or (393 if tier == 'low' else 1920)) < 500 else 'desktop')
+    default_width, default_height, target, max_p95, min_fps = DEVICES[device]
+    default_tris, default_draws = TIERS[tier]
     width = args.width or default_width
     height = args.height or default_height
     max_tris = args.max_tris or default_tris
     max_draws = args.max_draws or default_draws
-    phone = width < 500
+    touch = device != 'desktop'
     context = browser.new_context(viewport={'width': width, 'height': height},
-                                  device_scale_factor=2 if phone else 1,
-                                  has_touch=phone, service_workers='block')
+                                  device_scale_factor=2 if touch else 1,
+                                  has_touch=touch, is_mobile=touch, service_workers='block')
     try:
         context.add_init_script(INIT % tier)
         page = context.new_page()
@@ -131,22 +143,23 @@ def run_tier(browser, args, tier):
             signage.tier === tier && preload && preload.settled === preload.total;
         }""", arg=tier, polling=500, timeout=180000)
         page.locator('#scene').focus()
-        page.wait_for_timeout(1500)
+        page.wait_for_timeout(3000)
         rows = []
         for lap in range(1, args.laps + 1):
-            rows.extend(apply_budget(row, tier, max_tris, max_draws) for row in run_lap(page, lap))
+            rows.extend(apply_budget(row, device, tier, max_tris, max_draws) for row in run_lap(page, lap))
     finally:
         context.close()
-    print(f"{'stop':26} fps   p95   p99   max  slow draw    tris  budget  result")
+    print(f"{'stop':26} fps   p95   p99   max  slow draw    tris scale  budget  result")
     for row in rows:
-        row.update(requestedTier=tier, maxTriangles=max_tris, maxDrawCalls=max_draws)
-        print(f"{row['stop']:26} {row.get('fps', 0):5} {row.get('p95', 0):5} {row.get('p99', 0):5} "
-              f"{row.get('max', 0):6} {row.get('slow50', 0):3} {row['drawCalls'] or 0:4} "
-              f"{row['triangles'] or 0:7}  {'ok' if row['budgetPass'] else 'FAIL':6}  "
+        row.update(requestedTier=tier, requestedDevice=device, maxTriangles=max_tris, maxDrawCalls=max_draws)
+        print(f"{row['stop']:26} {row.get('fps', 0):5.1f} {row.get('p95', 0):5.1f} {row.get('p99', 0):5.1f} "
+              f"{row.get('max', 0):6.1f} {row.get('slow50', 0):3} {row['drawCalls'] or 0:4} "
+              f"{row['triangles'] or 0:7}  {row['renderScale']:4.0%}  {'ok' if row['budgetPass'] else 'FAIL':6}  "
               f"{'ok' if row['pass'] else 'FAIL'}")
     budget_passes = sum(row['budgetPass'] for row in rows)
     passes = sum(row['pass'] for row in rows)
-    print(f"{tier} {width}x{height}: {passes}/{len(rows)} stops pass, "
+    print(f"{device} {tier} {width}x{height} (target {target} FPS, p95 <= {max_p95} ms, mean >= {min_fps} FPS): "
+          f"{passes}/{len(rows)} stops pass, "
           f"{budget_passes}/{len(rows)} within {max_tris:,} tris / {max_draws} draws", flush=True)
     return rows
 
@@ -162,6 +175,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://localhost:8830/demos/corporate/gjh/v11/')
     parser.add_argument('--tier', default='balanced', choices=[*TIERS, 'all'])
+    parser.add_argument('--device', choices=DEVICES, help='Set the viewport, render target and cadence thresholds')
     parser.add_argument('--width', type=positive_int, help='Override the viewport width for a single tier')
     parser.add_argument('--height', type=positive_int, help='Override the viewport height for a single tier')
     parser.add_argument('--max-tris', type=positive_int, help='Override the triangle budget for the selected tiers')

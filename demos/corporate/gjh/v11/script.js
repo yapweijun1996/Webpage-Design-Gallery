@@ -3,7 +3,7 @@ import {createPerformanceMonitor} from './assets/performance-monitor.js';
 import {createPerformancePanel} from './assets/performance-panel.js';
 import {createFrameTrace} from './assets/frame-trace.js';
 import {createUI} from './assets/ui.js';
-import {createGraphicsQuality,MALL_FRAME_BUDGETS} from './assets/graphics-quality.js';
+import {createGraphicsQuality, MALL_FRAME_BUDGETS} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
@@ -53,14 +53,22 @@ let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let markFirstFrame;
 const firstFrame = new Promise(resolve => { markFirstFrame = resolve; });
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
-const quality = createGraphicsQuality(() => resize());
+const quality = createGraphicsQuality(change => {
+  if (change === 'resolution' && quality.state) {
+    quality.apply(quality.state);
+    requestRender();
+  } else resize();
+});
+let renderRequested = false, forceRender = false, enteredAt = null;
+let simulationMs = 0, simulationSteps = 0;
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
 let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
-let nearby = null, currentZone = 'atrium';
+let nearby = null, currentZone = 'atrium', wasRiding = false;
 function clearTransientState(event) {
   quality.resetSampling();
+  simulationMs = simulationSteps = 0;
   hideGuidance();
   mallHud.suspend();
   player?.clearInput();
@@ -85,6 +93,11 @@ let measuringFrames = false, lastMetricsUpdate = -Infinity, maxFrameUploadMs = 0
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
+    renderScale: quality.state?.renderScale ?? 1,
+    targetFps: quality.targetFps,
+    refreshHz: quality.refreshHz,
+    deviceClass: quality.deviceClass,
+    tierDowngrades: quality.tierDowngrades,
     signage: world?.signage?.report() ?? {modelsLoaded:0,signs:0,drawCalls:0,triangles:0,textureMB:0,previousTextureMB:0,atlasPx:0,phoneProof:null,tier:quality.state?.tier??'low'},
     interiors: world?.interiors?.report() ?? emptyInteriorReport(quality.state?.tier ?? 'low'),
     capturedAt: new Date().toISOString(),
@@ -236,7 +249,10 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
   get mode() { return modes.current(); },
   get camera() { return player ? Object.freeze(player.cameraState(shelfFocus?.open)) : null; },
   heroVisibility(number) { return heroVisibility(number); },
-  teleport(zone) { if (!ready || !player.teleport(zone)) return false; updateHUD(); render(); return true; },
+  teleport(zone) {
+    if (!ready || !player.teleport(zone)) return false;
+    quality.resetSampling(); updateHUD(); requestRender(); return true;
+  },
   setInput(input) {
     if (!ready || modes.paused()) return;
     manual = input !== null;
@@ -248,15 +264,20 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
   step(ms) {
     if (!ready || !Number.isFinite(ms) || document.hidden || modes.paused()) return snapshot();
     manual = true;
+    quality.resetSampling();
     const count = Math.max(0, Math.min(600, Math.floor(ms / (STEP * 1000))));
     for (let i = 0; i < count; i++) tick();
+    // Diagnostics return the draw counts for this exact simulated pose.
     render(); return snapshot();
   }
 }), writable: false});
 function updateHUD() {
   const p = player.state;
   if (skipRide.hidden===p.elevatorTravel) skipRide.hidden=!p.elevatorTravel;
-  currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
+  const zone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
+  if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding) quality.resetSampling();
+  currentZone = zone;
+  wasRiding = Boolean(p.elevatorTravel);
   if(expanded&&currentZone==='upper'&&!brandWallStarted){
     brandWallStarted=true;
     world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();})
@@ -305,8 +326,14 @@ function tick(refreshHud = true) {
   greetOnArrival();
 }
 let lastGuidanceSample = -Infinity, projectedTarget = null;
+function requestRender(force = false) {
+  renderRequested = true;
+  forceRender ||= force;
+  resume();
+}
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === 'shelf')) {
+    sizeDrawingBuffer();
     if (!shelfFocus?.open) player.refreshCameraMode();
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
     camera.updateMatrixWorld();
@@ -385,7 +412,7 @@ function tierWork(profile, report, startup = false) {
     width:renderWidth, height:renderHeight, screenPixel, applyProfile, frameTrace, startup}, profile, report);
 }
 function tierKey(profile) {
-  return [profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
+  return [profile.tier,profile.shadows,profile.basePixelRatio,profile.preference,renderWidth,renderHeight].join('/');
 }
 function scheduleTier() {
   const profile=requestedProfile, active=quality.state;
@@ -473,27 +500,35 @@ function warmModels(pose, background = true) {
   if (runner) sceneWarmFirst = !sceneWarmFirst;
   if (sceneFirst) runner.runFrame(Math.min(2, remaining()));
   const roomsStart = frameTrace?.start();
-  world.interiors?.runFrame(remaining());
+  const roomMs = world.interiors?.runFrame(remaining()) ?? 0;
   frameTrace?.end('interiors.install', roomsStart);
   const modelsStart = frameTrace?.start();
-  modelWarmup.runFrame(true, remaining());
+  const modelMs = modelWarmup.runFrame(true, remaining());
   frameTrace?.end('models.upload', modelsStart);
   if (runner && !sceneFirst) runner.runFrame(remaining());
   frameTrace?.end('warm.slice', traceStart);
-  const elapsed = performance.now() - started;
+  const elapsed = runner || roomMs > 0 || modelMs > 0 ? performance.now() - started : 0;
   maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
   return elapsed;
 }
 function animate(now) {
   frame = 0;
   if (!ready || document.hidden) return;
+  frame = requestAnimationFrame(animate);
   updateModelPreload(now);
   if (advanceStartupWarm()) {
     last = now;
     accumulator = 0;
-    frame = requestAnimationFrame(animate);
+    quality.resetSampling(now);
     return;
   }
+  const entered = startupOverlay.hidden && document.body.classList.contains('is-3d');
+  if (entered) enteredAt ??= now;
+  quality.observeRefresh(now, entered && !windowBlurred);
+  const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
+  if (advancing) accumulator = Math.min(.1, accumulator + Math.max(0, (now - last) / 1000));
+  else accumulator = 0;
+  last = now;
   const callbackStart = performance.now();
   const pad=readStandardGamepad();
   const consumed=ui.handleGamepad(pad);
@@ -505,54 +540,61 @@ function animate(now) {
     if(player.state.seated){player.stand();updateHUD();}else ui.inspectNearby(nearby);
   }
   previousGamepadInspect=inspectPressed;
-  const elapsed = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now;
-  const advancing = !manual && !modes.paused();
-  if (advancing || modes.current() === 'shelf') {
-    const simulationStart = performance.now();
-    let steps = 0;
-    if (advancing) {
-      accumulator += elapsed;
-      while (accumulator >= STEP) {
-        tick(false);
-        accumulator -= STEP;
-        steps++;
-      }
-      // During catch-up the physics still steps at its fixed rate, but only
-      // the final HUD state can be presented on this browser frame.
-      if (steps) updateHUD();
+  const simulationStart = performance.now();
+  let steps = 0;
+  if (advancing && !modes.paused()) {
+    while (accumulator + 1e-9 >= STEP) {
+      tick(false);
+      accumulator = Math.max(0, accumulator - STEP);
+      steps++;
     }
+    if (steps) updateHUD();
+  }
+  simulationSteps += steps;
+  simulationMs += performance.now() - simulationStart;
+  // Drawing can skip refreshes while the simulation still consumes fixed steps.
+  const slotMs = quality.cadence.take(now);
+  if (!slotMs) return;
+
+  const uploadMs = warmModels(player.state);
+  const live = advancing && !modes.paused() || modes.current() === 'shelf';
+  let pose, callbackMs = 0;
+  if (live || renderRequested) {
     // Tier preparation can exercise one real screen pixel. The live scene
     // covers it in this same animation callback, before presentation.
-    const simulationEnd = performance.now();
-    const uploadMs = warmModels(player.state);
     const renderStart = performance.now();
-    const pose = render();
+    const force = forceRender;
+    renderRequested = forceRender = false;
+    pose = render(force);
     const renderEnd = performance.now();
-    const end = performance.now();
-    if (!windowBlurred && startupOverlay.hidden) {
+    callbackMs = renderEnd - callbackStart;
+    if (pose && live && !windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
-        simulationMs: simulationEnd - simulationStart, renderMs: renderEnd - renderStart, uploadMs,
-        callbackMs: end - callbackStart, steps, zone: currentZone, x: pose?.x, z: pose?.z, tier: quality.state?.tier,
-        width: canvas.width, height: canvas.height
+        simulationMs, renderMs: renderEnd - renderStart, uploadMs,
+        callbackMs, steps: simulationSteps, zone: currentZone, x: pose.x, z: pose.z, tier: quality.state?.tier,
+        renderScale: quality.state?.renderScale, width: canvas.width, height: canvas.height
       });
       if (now - lastMetricsUpdate >= 1000) {
         performancePanel.update(performanceMonitor.snapshot({includeHistory:false}));
         lastMetricsUpdate = now;
       }
     } else pausePerformance();
-  } else {
-    pausePerformance();
-    warmModels(player.state);
-  }
-  // Record monitor telemetry before a quality change can resize and render.
-  const movement = player.state.animation;
-  quality.sample(now, advancing && !warmRunner && !tierQueue?.pending && preloadSettled && document.getElementById('app-loader').hidden &&
-    !windowBlurred && document.hasFocus() && !contextLost && !interrupted &&
-    ['explore','cart'].includes(modes.current()), ['walk','run'].includes(movement));
-  frame = requestAnimationFrame(animate);
+  } else pausePerformance();
+  simulationMs = simulationSteps = 0;
+  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel &&
+    !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered &&
+    now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost &&
+    ['explore','cart'].includes(modes.current())));
 }
-function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
+function resume() {
+  if (ready && !frame && !document.hidden) {
+    last = performance.now();
+    accumulator = 0;
+    quality.cadence.reset();
+    frame = requestAnimationFrame(animate);
+  }
+}
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
   if (terminal) { fatal = true; graphicsStatus = 'failed'; cancelEntryPresentation(); world?.interiors?.dispose(); modelWarmup?.dispose(); markFirstFrame(); }
@@ -566,10 +608,10 @@ ui.onTeleport(zone => {
   if (!ready || player.state.elevatorTravel || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone))) return false;
   manual = false; player.cancelCollection(); player.setInput(null);
   if (!player.teleport(zone)) return false;
-  updateHUD(); render(); canvas.focus({preventScroll: true}); return true;
+  quality.resetSampling(); updateHUD(); requestRender(); canvas.focus({preventScroll: true}); return true;
 });
-ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();render();return ok;});
-ui.onView(visual => { if (visual) { last = performance.now(); resume(); render(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
+ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
+ui.onView(visual => { if (visual) { last = performance.now(); requestRender(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
 document.addEventListener('keydown', event => {
   if(event.code==='Escape'&&!modes.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
   if (event.code === 'KeyF' && nearby && !modes.paused() && !event.repeat &&
@@ -577,7 +619,7 @@ document.addEventListener('keydown', event => {
       (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); if(player.state.seated){player.stand();updateHUD();}else ui.inspectNearby(nearby); }
 });
 window.addEventListener('blur', () => { windowBlurred = true; pausePerformance();hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
-window.addEventListener('focus', () => { windowBlurred = false; if (ready) { updateHUD(); render(); } });
+window.addEventListener('focus', () => { windowBlurred = false; quality.resetSampling(); if (ready) { updateHUD(); requestRender(); } });
 window.addEventListener('resize', () => { modes.interrupt('viewport resize'); resize(); });
 function scheduleThemeMidnight() {
   clearTimeout(themeMidnightTimer);
@@ -594,7 +636,7 @@ window.addEventListener('pageshow', refreshCalendarTheme);
 document.addEventListener('visibilitychange', () => {
   warmRunner?.visibility(document.hidden);
   if (document.hidden) { pausePerformance();if(ready)mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
-  else { if (ready) { refreshCalendarTheme(); updateHUD(); render(); } else validateRestoration(); resume(); }
+  else { if (ready) { quality.resetSampling(); refreshCalendarTheme(); updateHUD(); requestRender(); } else validateRestoration(); resume(); }
 });
 canvas.addEventListener('webglcontextlost', event => {
   quality.resetSampling();
@@ -642,25 +684,25 @@ function resize() {
     player.resizeCamera(width, height);
     if (shelfFocus?.open) shelfFocus.resize(); else player.updateCamera(0, true);
   }
-  requestedProfile=quality.resolve(width,true);
+  requestedProfile=quality.resolve(width);
   if(!ready || !quality.state || !window.mallLoader?.ready) {
     if(!warmRunner)applyProfile(requestedProfile);
   } else {
-    applyProfile(quality.state);
     scheduleTier();
   }
-  render();
+  requestRender();
 }
 function applyProfile(profile) {
-  const width=renderWidth, height=renderHeight;
-  quality.apply(profile);
+  profile = quality.apply(profile);
   void elevator?.kit?.select(profile.tier);
-  npcs?.setQuality({tier:profile.tier,mobile:width<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
-  if (!contextLost) {
-    if (renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
-      renderer.setDrawingBufferSize(width,height,profile.pixelRatio);
-    }
-    renderer.shadowMap.enabled = profile.shadows;
+  npcs?.setQuality({tier:profile.tier,mobile:renderWidth<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
+  if (!contextLost) renderer.shadowMap.enabled = profile.shadows;
+}
+function sizeDrawingBuffer() {
+  const {pixelRatio} = quality.state;
+  if (renderer.getPixelRatio() !== pixelRatio || canvas.width !== Math.floor(renderWidth * pixelRatio) ||
+      canvas.height !== Math.floor(renderHeight * pixelRatio)) {
+    renderer.setDrawingBufferSize(renderWidth, renderHeight, pixelRatio);
   }
 }
 function validateRestoration() {
@@ -677,6 +719,7 @@ function validateRestoration() {
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
     player.camera.updateMatrixWorld();
+    sizeDrawingBuffer();
     world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height);
     world.updateSigns(player.camera, canvas, reducedMotion);
     renderer.render(world.scene, player.camera);
@@ -721,7 +764,11 @@ async function installNpcs(T, R, prepareModel, source) {
 async function initialize() {
   // Allow the initial overlay to paint before expensive module and scene work.
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const context = canvas.getContext('webgl2', {antialias: true, alpha: false, powerPreference: 'high-performance'});
+  const attributes = {antialias: true, alpha: false, powerPreference: 'high-performance'};
+  const preferredContext = quality.androidChrome ?
+    canvas.getContext('webgl2', {...attributes, failIfMajorPerformanceCaveat:true}) : null;
+  const context = preferredContext || canvas.getContext('webgl2', attributes);
+  quality.setWebGLHint(preferredContext?.getContextAttributes()?.powerPreference === 'high-performance');
   if (!context) { fallback(expanded?'WebGL is unavailable. The 17-store mall plan and verified products remain in the accessible directory below.':'WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.'); return; }
   const T = await import('./vendor/three.module.min.js');
   three = T;
@@ -783,7 +830,7 @@ async function initialize() {
           paintedTheme=state.active;
           // Show the committed stage after the previous decorations are released.
           if(!state.suspended && document.body.classList.contains('is-3d')){
-            try { render(true); } catch(error) { console.error('Theme preview could not render.',error); }
+            requestRender(true);
           }
         }
       },async prepare(theme,{signal}){
@@ -825,7 +872,7 @@ async function initialize() {
   guidance = createTargetGuidance({canvas, projection});
   const {createShelfFocus} = await import('./assets/shelf-focus.js');
   shelfFocus = createShelfFocus({T, canvas, normalCamera: player.camera, getFramingFov: () => player.chaseFov, shelves: world.shelves, projection,
-    onChange: () => { syncMode(); render(); }, onDetails: ui.inspect, onAdd: ui.addToBag,
+    onChange: () => { syncMode(); requestRender(); }, onDetails: ui.inspect, onAdd: ui.addToBag,
     onRestore: resized => { if (resized) player.updateCamera(0, true); }});
   ui.setShelfFocus(shelfFocus);
   interactions = createInteractionRegistry(world.interactables, item => ui.describeInteraction(item));
@@ -835,7 +882,7 @@ async function initialize() {
       const {installPhysicalProductControl} = await import('./assets/visitor-v2-product-ui.js');
       productControl=installPhysicalProductControl(player,world,()=>modes.paused(),interactions,ui,()=>{
         updateHUD();
-        render();
+        requestRender();
       });
       const {pickup} = productControl.actions;
       const pickupLabel = document.createElement('span');
@@ -847,20 +894,20 @@ async function initialize() {
   if (player.npcSource) {
     try {
       const {installVisitorV2Controls} = await import('./assets/visitor-v2-controls.js');
-      installVisitorV2Controls(document.querySelector('#controls-copy'), changes => { player.customize(changes); render(); });
+      installVisitorV2Controls(document.querySelector('#controls-copy'), changes => { player.customize(changes); requestRender(); });
     } catch { /* Appearance controls are optional. */ }
   }
   if (elevator) ui.setElevator(() => {
     manual=false; player.setInput(null);
     const ok=player.useElevator(elevator,arrivalChime.play);
     if (ok && player.state.elevatorTravel) arrivalChime.unlock();
-    updateHUD(); render(); return ok;
+    updateHUD(); requestRender(); return ok;
   });
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
   ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel,capability:player.cartCapability()}),value=>{
     if(!ready)return false;
-    const ok=player.setCart(value);updateHUD();render();return ok;
+    const ok=player.setCart(value);updateHUD();requestRender();return ok;
   });
   ui.onCollect(id=>Boolean(!player.state.seated&&player.state.character.collection.available!==false&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;

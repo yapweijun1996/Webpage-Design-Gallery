@@ -1,5 +1,20 @@
 # GJH V11 Virtual Mall Improvement Plan
 
+## Roadmap from the owner feedback of 2026-11-19 (research-backed)
+
+Full detail: [docs/gjh-v11-improvement-roadmap-2026-11-19.md](docs/gjh-v11-improvement-roadmap-2026-11-19.md) and [docs/gjh-v11-performance-research-2026-11-19.md](docs/gjh-v11-performance-research-2026-11-19.md). Owner targets: phone 30 FPS (Low by default), tablet and PC 60 FPS, dynamic resolution first. Execute lane by lane; verify each step in headed Chrome with `docs/mall_lap_probe.py` and `docs/mall_video_probe.py` before pushing.
+
+Shipped on 2026-11-19: automatic festival theme, single sticky site header, first-person chibi hand, sit fix, elevator and upper level V2, interiors round 2, drawer visibility fix, early-enter warm-up on all tiers, performance budgets rounds 1-2, dynamic resolution and device-class frame targets, lap probe and video probe.
+
+- [ ] R-lane (render and lighting): R1 fill-rate round; L1 warm theme values; L2 three-zone IBL; L3 door lights removed and accents cut to two; L4 light strips on Low; L5 blob contact shadows; L7 avatar rim light; L6 baked floor and ceiling planes; L9 compact Detailed shadows; `tests/browser_lighting.py`.
+- [ ] M-lane (movement and physics): M1 baseline probe; M2 speeds (desktop 3.4/5.2 m/s, phone 3.1/4.5 m/s, dead zone 12%) and one physics step per tick; M3 passage fixes (cart contour, door occupancy, GOGO table, camera boxes); M4 first dynamic props (can, basket, ball); M5 acceptance on 17 shops.
+- [ ] S-lane (shop layouts and interactions): S0 collision sweep; S1 unified layout JSON; S2 GOGO, MILI, New Moon; S3 other 14 shops; S4 animated parts (drawers, bell, piano keys, cup level).
+- [ ] C-lane (character): C1 close-up baseline; C2 avatar lighting; C3 sampling and AA; C4 re-bake and LOD ladder; C5 modular chibi trial.
+- [ ] T-lane (mall train, brand tour): research pending, steps will be added here.
+- [ ] P-lane (probes): real device targets, GPU timer, refresh rate, `--route shops` flicker route.
+- [ ] Running now: New Moon and all-shop flicker fix (photo mip-maps, decal offsets).
+- [ ] Owner real-device checks: iPhone and Android phone (export the performance JSON from the lap page).
+
 ## Mobile performance, controls and signage programme (2026-11-18)
 
 Owner device: iPhone, 393 px wide. Owner priorities: no lag on the phone, premium look, shop signage and interiors that read as real brands. Verification rule: judge from real browser screenshots and the walk probe (`docs/walk_probe.py`), not from agent summaries. Checklist: [taste engine checklist](docs/ui-ux/taste-engine-checklist.md).

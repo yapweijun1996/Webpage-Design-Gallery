@@ -449,6 +449,7 @@ button>svg:first-child:not(:last-child),summary>svg:first-child:not(:last-child)
 /* Graphics settings share the existing Help scroll owner. */
 .graphics-settings{display:grid;gap:var(--space-2);min-width:0;margin-bottom:var(--space-4)}
 .graphics-settings select{width:100%;min-width:44px;min-height:44px;font:inherit;color:var(--green);background:var(--paper)}
+.graphics-resolution-setting{display:flex;align-items:center;gap:var(--space-2);min-height:44px}
 .graphics-recovery{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-bottom:var(--space-6)}
 .graphics-recovery button{min-width:44px;padding:var(--space-2) var(--space-3)}
 .graphics-recovery p{flex-basis:100%;font-size:var(--font-size-sm)}

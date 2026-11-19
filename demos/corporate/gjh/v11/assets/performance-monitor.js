@@ -1,4 +1,4 @@
-// RAF intervals approximate presentation cadence. CPU durations measure the
+// Rendered RAF intervals approximate presentation cadence. CPU durations measure the
 // synchronous handler and render submission; WebGL can finish on the GPU later.
 const FRAME_WINDOW_MS = 5000;
 const SLOW_THRESHOLD_MS = 50;
@@ -49,6 +49,7 @@ function copyFields(record, frameMs, info, detail) {
   record.x = Number.isFinite(detail?.x) ? detail.x : null;
   record.z = Number.isFinite(detail?.z) ? detail.z : null;
   record.tier = detail?.tier ?? null;
+  record.renderScale = metric(detail?.renderScale);
   record.width = metric(detail?.width);
   record.height = metric(detail?.height);
 }
@@ -86,6 +87,7 @@ export function createPerformanceMonitor() {
     }
     bucket.zone = latest.zone;
     bucket.tier = latest.tier;
+    bucket.renderScale = latest.renderScale;
     bucket.x = latest.x;
     bucket.z = latest.z;
     if (interval !== null) {

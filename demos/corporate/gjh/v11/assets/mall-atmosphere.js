@@ -137,7 +137,7 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
   }
 
   // A quarter-resolution, selective glow pass: only explicitly tagged light
-  // strips and signs are rendered. Mobile and Low quality use the direct path.
+  // strips and signs are rendered. The composite fills the drawing buffer.
   let base, glow, blurredGlow, blur, composite, blurScene, postScene, postCamera;
   const bufferSize=new T.Vector2(), savedClearColor=new T.Color();
   function initPost() {
@@ -175,6 +175,8 @@ export function createMallAtmosphere(T, renderer, scene, slots) {
   }
   function sizePost(width,height) {
     initPost();
+    // Match the current scaled drawing buffer, including after a live resize.
+    if (base.width === width && base.height === height) return;
     base.setSize(width,height);
     glow.setSize(Math.max(1,Math.floor(width/4)),Math.max(1,Math.floor(height/4)));
     blurredGlow.setSize(glow.width,glow.height);

@@ -40,7 +40,7 @@ test('surface atmosphere adds at most one desktop draw and no Low draws, lights,
   createMallAtmosphere(T,null,scene,[{minX:0,maxX:2,minZ:0,maxZ:2}]);
 
   const profiles = [
-    resolveQuality({width:390,mobile:true}),
+    resolveQuality({width:390,deviceClass:'phone',preference:'low'}),
     resolveQuality({width:1440,preference:'balanced'}),
     resolveQuality({width:1440,preference:'detailed'}),
     resolveQuality({width:1440,preference:'detailed',recovered:true})
