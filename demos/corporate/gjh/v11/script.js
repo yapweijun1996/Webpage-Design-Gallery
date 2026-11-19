@@ -651,6 +651,7 @@ function validateRestoration() {
     quality.recover(); world.signage?.recover(); resize();
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
+    frameTrace?.watchShadowMap();
     try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
     world.prepareUpperLevel();
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
@@ -706,7 +707,11 @@ async function initialize() {
   three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({canvas, context, antialias: true});
-  if (new URLSearchParams(location.search).get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
+  const diagnostics = new URLSearchParams(location.search);
+  // Three's first draw synchronously reads the link status, program log and
+  // both shader logs in debug mode, even after a parallel link has completed.
+  renderer.debug.checkShaderErrors = diagnostics.get('debugShaders') === '1';
+  if (diagnostics.get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;

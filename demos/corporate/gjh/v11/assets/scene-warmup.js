@@ -326,11 +326,18 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       renderer.autoClear = true;
       renderer.sortObjects = false; // Never cache bounds at the temporary instance count.
       if (compile) {
+        const linked = [];
         for (const material of renderer.compile(staging, probe)) {
           // A shared material can have instanced, skinned and two-sided variants.
-          for (const program of renderer.properties.get(material).programs.values()) programs.add(program);
+          for (const program of renderer.properties.get(material).programs.values()) {
+            if (!programs.has(program)) {
+              programs.add(program);
+              linked.push(program);
+            }
+          }
         }
         report.programs = programs.size;
+        return linked;
       } else renderer.render(staging, probe);
     } finally {
       staging.children = [];
@@ -416,10 +423,15 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       }
     }
     report.lightVariants=Math.max(report.lightVariants,variants.size);
-    // Submit all independent links before waiting on the driver once.
+    // A live draw shares ANGLE's command stream with the staging renderer.
+    // Drain each link batch before adding more work to that stream.
     for(const {active,output,candidates,passShadows} of variants.values()){
       for(let i=0;i<candidates.length;i+=batchSize){
-        submit(candidates.slice(i,i+batchSize),active,output,true,false,passShadows);
+        const linking = submit(candidates.slice(i,i+batchSize),active,output,true,false,passShadows);
+        if (parallel && linking.length) {
+          yield false;
+          for (const program of linking) while (!program.isReady()) yield false;
+        }
         yield;
       }
     }
@@ -428,7 +440,6 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       report.textures++;
       yield;
     }
-    if(parallel)for(const program of programs)while(!program.isReady())yield false;
     if(shadows){
       const active=probeLights(poses[0]).filter(light=>light.layers.isEnabled(0));
       const casters=meshes.filter(mesh=>mesh.castShadow);

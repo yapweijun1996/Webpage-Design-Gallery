@@ -17,16 +17,33 @@ export function createFrameTrace(renderer) {
       geometries:geometries-before.geometries, textures:textures-before.textures};
     next = (next + 1) % capacity;
   }
-  for (const method of ['compile', 'render', 'initTexture', 'initRenderTarget']) {
-    const original = renderer[method];
-    renderer[method] = function (...args) {
+  function wrap(owner, method, label, describe) {
+    const original = owner[method];
+    owner[method] = function (...args) {
       const before = start();
       try { return original.apply(this, args); }
-      finally {
-        const subject = args[0];
-        end(`renderer.${method}`, before, subject?.name || subject?.image?.src || subject?.type);
-      }
+      finally { end(label, before, describe?.(args)); }
     };
+  }
+  let shadowMap;
+  function watchShadowMap() {
+    if (shadowMap === renderer.shadowMap) return;
+    shadowMap = renderer.shadowMap;
+    wrap(shadowMap, 'render', 'shadowMap.render', ([, scene]) => scene.name || scene.type);
+  }
+  for (const method of ['compile', 'render', 'initTexture', 'initRenderTarget']) {
+    wrap(renderer, method, `renderer.${method}`, ([subject, camera]) => {
+      const name = subject?.name || subject?.image?.src || subject?.type;
+      if (method !== 'render') return name;
+      const target = renderer.getRenderTarget();
+      return `${name} layer=${camera.layers.mask} target=${target ? target.texture.name || 'offscreen' : 'screen'}`;
+    });
+  }
+  watchShadowMap();
+  const gl = renderer.getContext();
+  for (const method of ['getProgramInfoLog', 'getShaderInfoLog', 'getProgramParameter',
+    'texStorage2D', 'texImage2D', 'texSubImage2D', 'generateMipmap']) {
+    wrap(gl, method, `gl.${method}`, method === 'getProgramParameter' ? ([, parameter]) => parameter : undefined);
   }
   function* steps(label, work) {
     try {
@@ -39,5 +56,5 @@ export function createFrameTrace(renderer) {
       }
     } finally { work.return(); }
   }
-  return {start,end,steps,report:() => events.length < capacity ? events.slice() : [...events.slice(next),...events.slice(0,next)]};
+  return {start,end,steps,watchShadowMap,report:() => events.length < capacity ? events.slice() : [...events.slice(next),...events.slice(0,next)]};
 }
