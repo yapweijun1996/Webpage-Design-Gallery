@@ -1,6 +1,6 @@
 # S16 · GP Batteries
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -45,3 +45,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 Route was verified at two screen sizes. Exact package and tracker forms remain proposed.
+
+## Catalogue exhibit
+
+The eyelet room includes separate unprinted AA and eTag specimens at their published sizes. The catalogue story distinguishes the AA battery from the eTag's replaceable CR2032 and links to the GP Ultra+ AA specification.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)

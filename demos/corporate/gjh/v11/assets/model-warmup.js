@@ -98,6 +98,44 @@ export function limitWarmGeometry(geometry, grouped) {
   };
 }
 
+// r170 chooses depth/distance materials inside the shadow pass. Record
+// those exact bindings without drawing, then link them before the first draw.
+export function captureShadowMaterials(renderer, draw) {
+  const render = renderer.renderBufferDirect;
+  if (!render) return [];
+  const materials = [];
+  renderer.renderBufferDirect = function (camera, scene, geometry, material) {
+    if (scene === null) {
+      const copy = material.clone();
+      copy.onBeforeCompile = material.onBeforeCompile;
+      copy.customProgramCacheKey = material.customProgramCacheKey;
+      materials.push(copy);
+    }
+  };
+  try {
+    draw();
+    return materials;
+  } catch (error) {
+    materials.forEach(material => material.dispose());
+    throw error;
+  } finally {
+    renderer.renderBufferDirect = render;
+  }
+}
+
+export function withShadowMaterials(mesh, materials, staging, work) {
+  const {material} = mesh, {fog,environment} = staging;
+  try {
+    mesh.material = materials;
+    staging.fog = staging.environment = null;
+    return work();
+  } finally {
+    mesh.material = material;
+    staging.fog = fog;
+    staging.environment = environment;
+  }
+}
+
 export function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap();
@@ -119,15 +157,16 @@ export function createModelWarmup(T, renderer) {
     return true;
   }
 
-  function withMesh(mesh, scene, mask, linear, work) {
+  function withMesh(mesh, scene, mask, linear, work, pass) {
     const {visible, frustumCulled, children, count} = mesh;
     const layers = mesh.layers.mask;
     const previousTarget = renderer.getRenderTarget();
     const activeFace = renderer.getActiveCubeFace(), activeMip = renderer.getActiveMipmapLevel();
     const scissorTest = renderer.getScissorTest();
     const {autoClear, toneMapping, sortObjects} = renderer, autoReset = renderer.info.autoReset;
-    const shadows = renderer.shadowMap, {autoUpdate, needsUpdate} = shadows;
+    const shadows = renderer.shadowMap, {enabled, autoUpdate, needsUpdate} = shadows;
     const {calls, triangles, points, lines} = renderer.info.render;
+    const lightVisibility = pass?.lights?.map(light => light.visible);
     renderer.getScissor(scissor);
     try {
       staging.fog = scene.fog;
@@ -135,8 +174,9 @@ export function createModelWarmup(T, renderer) {
       staging.environmentIntensity = scene.environmentIntensity;
       // Keep the exact mesh and its bindings. In particular, r170 uploads
       // instance attributes per object; a cloned mesh would upload its own.
-      staging.children = scene.children.filter(node => node.isLight && node.visible);
+      staging.children = pass?.lights?.slice() ?? scene.children.filter(node => node.isLight && node.visible);
       staging.children.push(mesh);
+      for (const light of pass?.lights ?? []) light.visible = true;
       mesh.children = [];
       mesh.layers.mask = mask;
       mesh.visible = true;
@@ -147,7 +187,8 @@ export function createModelWarmup(T, renderer) {
       renderer.autoClear = false;
       renderer.sortObjects = false;
       renderer.info.autoReset = false;
-      shadows.autoUpdate = shadows.needsUpdate = false;
+      if (pass) shadows.enabled = pass.shadows;
+      shadows.autoUpdate = shadows.needsUpdate = Boolean(pass?.depth);
       renderer.setRenderTarget(linear ? target : null);
       if (!linear) {
         // An empty scissor keeps the canvas intact and uses the real screen
@@ -169,6 +210,8 @@ export function createModelWarmup(T, renderer) {
       renderer.info.autoReset = autoReset;
       // Keep Three's frame counter monotonic for its internal upload caches.
       Object.assign(renderer.info.render, {calls, triangles, points, lines});
+      if (pass) shadows.enabled = enabled;
+      pass?.lights?.forEach((light,index) => { light.visible = lightVisibility[index]; });
       shadows.autoUpdate = autoUpdate;
       shadows.needsUpdate = needsUpdate;
       renderer.setScissor(scissor);
@@ -177,27 +220,48 @@ export function createModelWarmup(T, renderer) {
     }
   }
 
-  function* prepareMesh(mesh, scene, mask, linear) {
-    let programs;
-    yield () => {
-      const materials = withMesh(mesh, scene, mask, linear, () => renderer.compile(staging, camera));
-      // r170 compileAsync polls these programs on a timer. Hold the references
-      // in this job so polling pauses with it and restarts on context loss.
+  function* prepareMesh(mesh, scene, mask, linear, pass) {
+    let programs, depthMaterials;
+    function compile() {
+      const materials = renderer.compile(staging, camera);
       if (renderer.extensions?.has('KHR_parallel_shader_compile')) {
-        programs = [...materials].map(material => renderer.properties.get(material).currentProgram);
+        programs = [...materials].flatMap(material => {
+          const state = renderer.properties.get(material);
+          return state.programs ? [...state.programs.values()] : [state.currentProgram];
+        });
       }
-      return false;
-    };
-    while (programs?.some(program => !program.isReady())) yield () => false;
-    yield () => {
+    }
+    function draw() {
       const restore = limitWarmGeometry(mesh.geometry, Array.isArray(mesh.material));
-      try { withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera)); }
+      try { withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera), pass); }
       finally { restore(); }
-      return false;
-    };
+    }
+    try {
+      if (pass?.depth) {
+        yield () => {
+          depthMaterials = captureShadowMaterials(renderer, draw);
+          return false;
+        };
+        if (depthMaterials.length) {
+          yield () => {
+            withMesh(mesh,scene,mask,true,() => withShadowMaterials(mesh,depthMaterials,staging,compile),pass);
+            return false;
+          };
+          while (programs?.some(program => !program.isReady())) yield () => false;
+        }
+      }
+      yield () => {
+        withMesh(mesh, scene, mask, linear, compile, pass);
+        return false;
+      };
+      while (programs?.some(program => !program.isReady())) yield () => false;
+      yield () => { draw(); return false; };
+    } finally {
+      depthMaterials?.forEach(material => material.dispose());
+    }
   }
 
-  function prepare(root, scene, {hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, ...options} = {}) {
+  function prepare(root, scene, {hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, fence = false, ...options} = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse(mesh => {
@@ -212,14 +276,39 @@ export function createModelWarmup(T, renderer) {
     if (hide) for (const {mesh} of meshes) mesh.layers.mask = 0;
     return scheduler.enqueue(function* () {
       for (const {mesh, mask} of meshes) {
-        for (const texture of new Set(meshTextures(mesh))) {
+        const variants = lighting?.(scene.children.filter(node => node.isLight));
+        for (const texture of new Set(meshTextures(mesh, Boolean(variants)))) {
           if (artworkTier === undefined && initialized.get(texture) === texture.version) continue;
           yield () => {
-            if (initTexture(texture,artworkTier) && texture.userData?.artworkMipmaps === 'generate') return false;
+            if (initTexture(texture,artworkTier) && (fence || texture.userData?.artworkMipmaps === 'generate')) return false;
           };
         }
-        yield* prepareMesh(mesh, scene, mask, false);
-        if (linear()) yield* prepareMesh(mesh, scene, mask, true);
+        if (variants) {
+          for (const lights of variants) {
+            yield* prepareMesh(mesh, scene, mask, false, {lights,shadows:false});
+            yield* prepareMesh(mesh, scene, mask, false, {lights,shadows:true,
+              depth:mesh.castShadow && (mask & 1) !== 0});
+            if (linear()) yield* prepareMesh(mesh, scene, mask, true, {lights,shadows:true});
+          }
+        } else {
+          yield* prepareMesh(mesh, scene, mask, false);
+          if (linear()) yield* prepareMesh(mesh, scene, mask, true);
+        }
+      }
+      if (fence) {
+        const gl = renderer.getContext();
+        const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (!sync) throw new Error('Unable to fence model uploads');
+        try {
+          gl.flush();
+          let status;
+          do {
+            yield () => { status = gl.clientWaitSync(sync,0,0); return false; };
+          } while (status === gl.TIMEOUT_EXPIRED);
+          if (status === gl.WAIT_FAILED) throw new Error('Model upload fence failed');
+        } finally {
+          if (!gl.isContextLost()) gl.deleteSync(sync);
+        }
       }
     }, options).then(() => {
       // LOD swaps replace geometry/material on the same live mesh; traversal

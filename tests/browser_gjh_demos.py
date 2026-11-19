@@ -155,7 +155,14 @@ def check_v11_crowd(browser, base):
     page.locator("#keyboard-help summary").click()
     page.wait_for_function("__mall.state.paused")
     page.locator("#graphics-quality").select_option("low")
-    page.wait_for_function("__mall.state.npcs.modular.active.length === 0 && __mall.state.npcs.limit === 1", timeout=10000)
+    # The Low tier takes effect after the room and signage GPU work finishes.
+    # This is a behavior check. Mobile cadence spreads preparation over many frames.
+    page.wait_for_function(
+        """() => {
+            const {graphics, npcs, paused} = __mall.state;
+            return paused && graphics.quality.tier === 'low'
+                && npcs.modular.active.length === 0 && npcs.limit === 1;
+        }""", timeout=45000)
     assert not errors, errors
     context.close()
     print(f"v11 / 390px: dressed modular crowd, animation, pause, Low fallback and layout PASS; "

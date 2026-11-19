@@ -32,3 +32,14 @@ The Expanded scene uses the eastern facilities parcel for three independently en
 The map and directory send visitors to the common arcade at X 31.4, Z 10. Each room has its own entrance and a live location label. Wayfinding and the interaction prompts are available in English, Simplified Chinese and Malay. The two northern service reserves stay closed.
 
 Chrome verification followed all three entrances from the arcade, around the privacy screens and back out, with real keyboard input at 1440 × 900 and touch joystick input at 390 × 844 in emulation. Both runs operated all six fixture actions. The desktop run also checked the map, directory and translated destinations. The same routes passed on published build `167f5d38d8727909`. With all capture disabled, the late-route samples measured 16.7 ms p95 across 301 Detailed desktop intervals and 33.4 ms p95 across 151 Low touch-emulated intervals. Neither sample contained an interval of 50 ms or more. A physical phone and assistive technologies were outside these checks. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44547654104)
+
+## Continuous ground-floor loop
+
+Headed Chrome completed all four sides of the public concourse and returned to the New Moon approach on build `95e5ba13a1d96807`. The desktop run used continuous Shift and direction key changes in a local copy of the published build. The 390 × 844 run used one continuously held joystick gesture on the published site, with touch emulation and device scale factor 1. Both routes stayed on the ground floor and reported no page errors.
+
+| Run | Duration | Scene frame intervals | p95 | Longest | At least 50 ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1440 × 900, Detailed, keyboard | 34.2 s | 2,041 | 17.6 ms | 18.8 ms | 0 |
+| 390 × 844, Low, joystick emulation | 62.4 s | 1,869 | 34.2 ms | 34.4 ms | 0 |
+
+The runtime frame history supplied the measurements with screenshots and video disabled. This covers a full concourse circuit at each tested graphics tier. [Recorded route geometry](gjh-v11-references/ground-perimeter.webp) · [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44555819324)
