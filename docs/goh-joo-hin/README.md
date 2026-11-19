@@ -19,9 +19,9 @@ The 17 shops here are the V11 game’s authored roster. Some represent house bra
 | S09 | [SPAM](09-spam/brand-research.md) · [Conveyor exhibit and concept](09-spam/README.md) |
 | S10 | [California Mexico](10-california-mexico/brand-research.md) · [Abalone exhibit and concept](10-california-mexico/README.md) |
 | S11 | [Hormel](11-hormel/brand-research.md) · [Packing bench exhibit and concept](11-hormel/README.md) |
-| S12 | [Zeria](12-zeria/brand-research.md) · [Concept packet](12-zeria/README.md) |
-| S13 | [Sony](13-sony/brand-research.md) · [Concept packet](13-sony/README.md) |
-| S14 | [LG](14-lg/brand-research.md) · [Concept packet](14-lg/README.md) |
+| S12 | [Zeria](12-zeria/brand-research.md) · [Product library and concept](12-zeria/README.md) |
+| S13 | [Sony](13-sony/brand-research.md) · [Personal audio exhibit and concept](13-sony/README.md) |
+| S14 | [LG](14-lg/brand-research.md) · [OLED exhibit and concept](14-lg/README.md) |
 | S15 | [Casio](15-casio/brand-research.md) · [Concept packet](15-casio/README.md) |
 | S16 | [GP Batteries](16-gp-batteries/brand-research.md) · [Concept packet](16-gp-batteries/README.md) |
 | S17 | [Gigaset](17-gigaset/brand-research.md) · [Concept packet](17-gigaset/README.md) |

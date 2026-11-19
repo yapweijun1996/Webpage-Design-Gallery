@@ -110,7 +110,10 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       const featured = n===4 && x===0 || h===2.07 && x<0 && [5,6,7,8,10,11,12,17].includes(n);
       if (featured && (n===10 || n===11)) {
         const pair = n===10 ? [0x993630,0x29282a] : [0x9a363a,0xb54b36];
-        for (const [i,colour] of pair.entries()) can(x+(i-.5)*.21,h+.043,z+.29,colour,.064,.106);
+        for (const [i,colour] of pair.entries()) can(x+(i===0?-.59:.59),h+.043,z+.29,colour,.064,.106);
+      } else if (featured && n===12) {
+        box(x-.55,h+.167,z+.32,.113,.248,.088,white);
+        can(x+.55,h+.043,z+.32,cream,.046,.155);
       } else if (!featured) packageRow(x,h+.05,z+.28,Math.floor(w/.27),.25,kind,c);
     }
   }
@@ -376,7 +379,14 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       ringLight(0,mid+.06,1.12,3.69);plant(-side+.7,front-.85,1.53);
       for(const s of [-1,1]) {
         cabinet(s*(side-.65),mid,.65,.72,2.8,walnut,base);
-        for(let i=0;i<3;i++) box(s*(side-.72),1.19,mid+(i-1)*.92,.28,.48,.30,charcoal);
+        for(const dz of [-.92,.92]) box(s*(side-.72),1.19,mid+dz,.28,.48,.30,charcoal);
+        if (s<0) {
+          const sampleX = -(side-.72);
+          box(sampleX,.991,mid,.20,.026,.22,walnut);
+          // The reference Walkman is 56.5 × 98.4 × 11.8 mm.
+          box(sampleX,1.0532,mid,.0118,.0984,.0565,charcoal);
+          box(sampleX+.0062,1.066,mid,.001,.055,.045,0x222f36);
+        } else box(s*(side-.72),1.19,mid,.28,.48,.30,charcoal);
       }
       break;
     case 14: // LG: side-by-side picture walls, ivory sofa, satin appliances and a halo light.
