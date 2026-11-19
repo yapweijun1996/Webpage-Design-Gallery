@@ -6,9 +6,9 @@ import {presets} from './presets.js';
 const store = (preset, options = {}) => ({preset, ...options});
 export const stores = Object.freeze({
   // The yellow crescent occupies (6,5)–(102,134) in the trimmed 675 × 139 SVG.
-  S01:store('t1-classic',{relief:true,logoModule:'sign_logo3d_new_moon',logoRegion:[6/675,5/139,96/675,129/139]}),
+  S01:store('t1-classic',{relief:true,palette:{fascia:'#3d483f'},faceGlaze:{colour:'#7d786d',opacity:.14},logoModule:'sign_logo3d_new_moon',logoRegion:[6/675,5/139,96/675,129/139]}),
   S02:store('t3-cafe',{relief:true,fasciaInkHeight:.88}),
-  S03:store('t8-kids',{letterInk:'dark'}),
+  S03:store('t8-kids',{letterInk:'dark',faceGlaze:{colour:'#000000',opacity:.15},palette:{fascia:'#ccbaa5'}}),
   S04:store('t6-beauty',{carrier:true,caption:true,letterInk:'pale',inkRegion:[0,0,1,.64]}),
   S05:store('heritage-red',{caption:true,captionLogoWidth:.14}),
   S06:store('t5-book',{carrier:true,letterInk:'all',inkRegion:[.45,0,.55,1]}),
@@ -73,6 +73,10 @@ export function resolveConfig(id, settings, bay, kit, receipts) {
   const config = {preset:'t1-classic', lockup:'logo-left', brand:kit[id].brand, logo:id, poster:id,
     fasciaInkHeight:.80, captionLogoWidth:.28, blade:true, pulse:true, relief:false, carrier:false, caption:false, lodDistance:16, ...preset, ...settings, id, size,
     palette:{...preset.palette, fascia,accent, ...settings.palette}};
+  const glaze = config.faceGlaze;
+  if (glaze && (!/^#[0-9a-f]{6}$/i.test(glaze.colour) ||
+      !Number.isFinite(glaze.opacity) || glaze.opacity < 0 || glaze.opacity > .25))
+    throw Error(id+' invalid face glaze');
   if (!(config.captionLogoWidth>=.12 && config.captionLogoWidth<=.30)) throw Error(id+' invalid caption logo width');
   if (!(config.fasciaInkHeight>=.5 && config.fasciaInkHeight<=.92)) throw Error(id+' invalid ink height');
   if (config.captionText!==undefined && (typeof config.captionText!=='string' || !config.captionText.trim())) throw Error(id+' invalid caption');

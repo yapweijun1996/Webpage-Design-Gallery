@@ -12,9 +12,9 @@ export function allowMallLightWash(deviceClass, context) {
 }
 
 const SURFACES = {
-  low:{roughness:1, emission:1, washOpacity:.58},
-  balanced:{roughness:.91, emission:1.04, washOpacity:.61},
-  detailed:{roughness:.82, emission:1.10, washOpacity:.65}
+  low:{roughness:1, emission:1, washOpacity:.86},
+  balanced:{roughness:.91, emission:1.04, washOpacity:.90},
+  detailed:{roughness:.85, emission:1.10, washOpacity:.94}
 };
 
 export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, washes, floors, fixtures, vault}) {
@@ -68,7 +68,7 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
 }
 
 const STUDIO_LIGHTING = {
-  atrium: {walls:0x726861, panels:0xf7e0c5, ceiling:0xd1c8b9, width:7, intensity:.52},
+  atrium: {walls:0x726861, panels:0xffead4, ceiling:0xece0d0, width:7, intensity:.52, ceilingGain:2.15},
   corridor: {walls:0x66615b, panels:0xf5e6d4, ceiling:0xd7cbbb, width:5, intensity:.58},
   shop: {walls:0x9e9184, panels:0xffefe0, ceiling:0xffefe1, width:3, intensity:.94}
 };
@@ -116,6 +116,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       ? (expanded ? .91 : .74) + .20*(mood.kelvin-2700)/1300 + .10*accentLuminance
       : studioLighting.shop.intensity;
     return {slot,x,z,mood,keyPosition,accentPosition,accent,environmentIntensity,
+      colourSoftening:expanded && store?.id === 'S01' ? .46 : 0,
+      doorFill:expanded && store?.id === 'S14' ? 1.38 : 1,
       temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
   });
   const lights = Array.from({length:2}, (_, index) => {
@@ -127,6 +129,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
   scene.traverse(node => { if (node.isLight) node.layers.enable(2); });
   const visitorShadows = contact && plane ? createVisitorShadows(T, scene, plane, contact) : null;
   let focus = null, strength = 0, previousTime;
+  const neutralFill = new T.Color(0xfff7eb);
   const applyFocusColors = () => lights.forEach((light,index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
     const key = new T.Color(theme?.lighting?.key ?? 0xffe5c1);
@@ -134,6 +137,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       const [main,accent] = bay.colors;
       main.copy(key).lerp(bay.temperature,bay.mood ? .68 : .25).lerp(bay.accent,.08);
       accent.copy(main).lerp(bay.accent,bay.mood ? .30 : 0);
+      main.lerp(neutralFill,bay.colourSoftening);
+      accent.lerp(neutralFill,bay.colourSoftening);
     }
     if (focus) applyFocusColors();
     if (renderer && Number.isFinite(theme?.lighting?.exposure)) renderer.toneMappingExposure = theme.lighting.exposure;
@@ -183,7 +188,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     }
     if (focus && nearest === focus) strength = Math.min(1,strength+fadeIn);
     lights[0].intensity = (focus?.mood && expanded ? 32 : 26) * strength;
-    lights[1].intensity = (focus?.mood && expanded ? 20 : 18) * strength;
+    lights[1].intensity = (focus?.mood && expanded ? 20 : 18) * strength * (focus?.doorFill ?? 1);
   }
 
   const accentSet = new Set(lights);
@@ -225,10 +230,10 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const ceiling = new T.Mesh(geometry,materials[2]); ceiling.position.y=2.9; studio.add(ceiling);
     const next = {};
     try {
-      for (const [zone, {walls,panels,ceiling:colour,width}] of Object.entries(studioLighting)) {
+      for (const [zone, {walls,panels,ceiling:colour,width,ceilingGain = 1.5}] of Object.entries(studioLighting)) {
         materials[0].color.set(walls);
         materials[1].color.set(panels).multiplyScalar(1.3);
-        materials[2].color.set(colour).multiplyScalar(1.5);
+        materials[2].color.set(colour).multiplyScalar(ceilingGain);
         ceiling.scale.set(width,.1,width);
         const before = frameTrace?.start();
         next[zone] = generator.fromScene(studio,.04);

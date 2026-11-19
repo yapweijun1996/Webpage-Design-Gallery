@@ -7,7 +7,7 @@ export function addExpandedStorefronts(T, layout, scene, signs) {
   const batches = {
     frame: {material: new T.MeshStandardMaterial({color: 0x102a22, roughness: .29, metalness: .16}), matrices: []},
     brass: {material: new T.MeshStandardMaterial({color: 0xc9a55e, metalness: .78, roughness: .28}), matrices: []},
-    accent: {material: new T.MeshStandardMaterial({color: 0xffffff, roughness: .58}), matrices: [], slots: []},
+    accent: {material: new T.MeshStandardMaterial({color: 0xffffff, roughness: .58}), matrices: [], colours: []},
     glass: {material: new T.MeshBasicMaterial({color: 0xb9d9d0,
       transparent: true, opacity: .065, depthWrite: false}), matrices: []}
   };
@@ -18,7 +18,7 @@ export function addExpandedStorefronts(T, layout, scene, signs) {
     const {x,z,alongX:cos,normalX:sin,yaw:angle} = shopEntrance(bay);
     const width = (bay.side === 'north' ? bay.maxX - bay.minX : bay.maxZ - bay.minZ) - .6;
     // Local positive Z always faces the concourse.
-    const box = (kind, along, y, depth, w, h, d, leaf = 0) => {
+    const box = (kind, along, y, depth, w, h, d, leaf = 0, colour) => {
       transform.position.set(x + along * cos + depth * sin, y, z - along * sin + depth * cos);
       transform.rotation.set(0, angle, 0);
       transform.scale.set(w, h, d);
@@ -28,7 +28,7 @@ export function addExpandedStorefronts(T, layout, scene, signs) {
         if (!slidingParts.has(bay.number)) slidingParts.set(bay.number, []);
         slidingParts.get(bay.number).push({kind,index:batches[kind].matrices.length-1,dx:leaf*cos,dz:-leaf*sin});
       }
-      if (kind === 'accent') batches.accent.slots.push(bay.number);
+      if (kind === 'accent') batches.accent.colours.push(colour ?? signs.get('S'+bay.number).palette.accent);
     };
     if (number <= 3) {
       // Leave the existing 4.7 m entrance and its moving leaves unobstructed.
@@ -50,7 +50,8 @@ export function addExpandedStorefronts(T, layout, scene, signs) {
     box('brass', 0, 3.94, .22, 2.65, .055, .08);
     for (const side of [-1, 1]) {
       box('glass', side * windowCenter, 2.17, 0, windowWidth, 3.35, .06);
-      box('frame', side * windowCenter, .25, .07, windowWidth, .5, .22);
+      // LG's display plinth uses the existing coloured trim batch.
+      box(number===14 ? 'accent' : 'frame', side * windowCenter, .25, .07, windowWidth, .5, .22, 0, 0x92806a);
       box('brass', side * windowCenter, .51, .2, windowWidth, .045, .05);
       box('frame', side * (width / 2 - .07), 2.02, .08, .14, 4.04, .24);
       box('frame', side * 1.3, 2.02, .08, .12, 4.04, .24);
@@ -71,11 +72,9 @@ export function addExpandedStorefronts(T, layout, scene, signs) {
     if (!batch.matrices.length) continue;
     const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
     batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
-    if (batch.slots) {
+    if (batch.colours) {
       const color=new T.Color();
-      batch.slots.forEach((slot,index)=>{
-        mesh.setColorAt(index,color.set(signs.get('S'+slot).palette.accent));
-      });
+      batch.colours.forEach((tint,index) => mesh.setColorAt(index,color.set(tint)));
       mesh.instanceColor.needsUpdate=true;
     }
     mesh.name = `Expanded storefront ${kind}`;

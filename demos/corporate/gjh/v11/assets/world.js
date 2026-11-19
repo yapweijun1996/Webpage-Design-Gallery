@@ -120,7 +120,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }catch{/* Retain usable solid finishes on module/canvas failure. */}
     finally{clearTimeout(timer);}
     applyMallThemeToWorld(EVERYDAY, {expanded, materials, ambient, key, fog:scene.fog});
-    materials.shellFloor.roughness = .37;
+    materials.shellFloor.roughness = .34;
     materials.brass.roughness = .28;
     materials.brass.metalness = .78;
     materials.green.roughness = .29;
@@ -346,7 +346,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     cylinder('brass', x, (6 + y) / 2, z, .022, 6 - y);
     cylinder('brass', x, y, z, .62, .12); cylinder('glow', x, y - .08, z, .54, .035);
     cylinder('dark', x, y + .08, z, .42, .065);
-    lightPool(x, .052, z, 4.6, 4.6);
+    if (expanded && activeShopSlot === null) lightWash(x,.054,z,3.1,3.1,0,-Math.PI/2,true);
+    else lightPool(x, .052, z, 4.6, 4.6);
   }
   // Continuous slab; shop thresholds remain level and physically unobstructed.
   if (expanded) {
@@ -462,13 +463,13 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       for (const planter of lounge.planters) {
         box('green',planter.x,.3,planter.z,.7,.6,.7,true);
         const aisle = Math.sign(atriumLayout.garden.x-planter.x);
-        lightWash(planter.x+aisle*.354,.23,planter.z,.58,.45,aisle*Math.PI/2,0,true);
+        lightWash(planter.x+aisle*.354,.21,planter.z,.72,.52,aisle*Math.PI/2,0,true);
         box('wood',planter.x,.61,planter.z,.6,.025,.6);
         for (let i=0;i<9;i++) {
           const a=i*Math.PI*2/9;
           solid('sphere',i%2?'leaf':'foliage',planter.x+Math.sin(a)*.12,.8,planter.z+Math.cos(a)*.12,.08,.27,.05,a,.72,'YXZ');
         }
-        lightPool(planter.x,.024,planter.z,2.2,2.2);
+        lightWash(planter.x,.025,planter.z,1.55,1.55,0,-Math.PI/2,true);
       }
       // Shared, non-colliding ceiling lighting keeps each lounge legible at a distance.
       for (const z of [22,26]) {
@@ -565,7 +566,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const zone = store.id, x = storeCenterX(store);
     const lightNewMoon = expanded && zone === 'newmoon';
     const wall = expanded ? (lightNewMoon ? 'newMoonWall' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
-    if (lightNewMoon) materials.newMoonWall = mat(0xe1dcd0);
+    if (lightNewMoon) materials.newMoonWall = mat(0xe6e4df);
     if (expanded) {
       const floor = `${zone}Floor`;
       finishForRole.set(floor,'shopFloor');
@@ -929,12 +930,30 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   if (expanded) {
     signage=await addShopSignAtlas(T,expandedLayout,scene);
     const slide = addExpandedStorefronts(T,expandedLayout,scene,signage.configs);
+    for (const x of atriumLayout.anchorPierXs) {
+      box('green',x,2.83,.27,.29,5.66,.24);
+      box('brass',x,.15,.31,.35,.24,.27);
+      box('brass',x,5.63,.29,.36,.065,.27);
+      lightWash(x,.22,.449,.66,.58,0,0,true);
+    }
+    for (const store of spatial.stores) {
+      const x = storeCenterX(store);
+      box('glow',x,5.595,.416,9.67,.035,.06);
+      for (const dx of [-3.2,0,3.2]) {
+        lightWash(x+dx,5.41,.30,3.85,.74,0,0,true);
+      }
+    }
     for (const bay of expandedLayout.slots) {
       const {x,z,normalX,normalZ,yaw} = shopEntrance(bay);
       const frontage = normalZ ? bay.maxX-bay.minX : bay.maxZ-bay.minZ;
       const offset = 2.15;
       lightWash(x+normalX*offset,.029,z+normalZ*offset,frontage*.78,4.2,yaw,-Math.PI/2);
       lightWash(x-normalX*.28,3.88,z-normalZ*.28,frontage*.72,.55,yaw,Math.PI/2,true);
+      if (bay.number === '14') {
+        lightWash(x+normalX*.23,2.21,z,frontage*.95,3.6,yaw,0,true);
+        // Keep the dark television display readable through the side glass.
+        lightWash(x+normalX*.24,1.55,z+2.35,2.65,2.4,yaw,0,true);
+      }
     }
     for (const bay of expandedLayout.slots.slice(3)) {
       const {x,z,alongX,alongZ,normalX,normalZ}=shopEntrance(bay);
@@ -1008,8 +1027,14 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     lightPool(10,.053,20,8,8);
 
     restrooms=buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,materials,doors,interactables});
-    for (const x of [-12,32]) box('brass',x,.024,21,.035,.008,36);
-    for (const z of [3,39]) box('brass',10,.024,z,44,.008,.035);
+    for (const x of [-12,32]) {
+      box('brass',x,.024,21,.035,.008,36);
+      lightWash(x,.029,21,.028,36,0,-Math.PI/2,true);
+    }
+    for (const z of [3,39]) {
+      box('brass',10,.024,z,44,.008,.035);
+      lightWash(10,.029,z,44,.028,0,-Math.PI/2,true);
+    }
     // The story gallery lines the south perimeter, behind the directory.
     activeDeck=true;
     box('green',-3,liftLayout.upper+1.23,15.78,9.4,2.46,.16,true);

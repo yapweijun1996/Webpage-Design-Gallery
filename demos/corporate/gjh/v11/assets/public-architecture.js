@@ -51,6 +51,10 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   for (const x of [1.87,18.13]) {
     box('ivory',x,5.08,33.3,.46,.45,29);
     box('brass',x,4.86,33.3,.47,.075,29);
+    box('glow',x,4.815,33.3,.055,.036,28.8);
+    for (const z of [21.7,27.5,33.3,39.1,44.9]) {
+      lightWash?.(x,4.79,z,1.1,6.3,0,Math.PI/2,true);
+    }
     const inward=x<10 ? 1 : -1;
     const turn=inward*Math.PI/2;
     // The portal line sits outside the event reservation, on the axis of
@@ -73,7 +77,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   }
 
   // The court uses a softly veined ivory stone tile with staggered joints.
-  materials.paving=new T.MeshStandardMaterial({color:0xb9ad9f,roughness:.37,metalness:.03});
+  materials.paving=new T.MeshStandardMaterial({color:0xcdbfae,roughness:.34,metalness:.09});
   const pavingURL=new URL('concourse-limestone.webp',import.meta.url);
   new T.TextureLoader().load(pavingURL.href,map=>{
     map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;
@@ -100,8 +104,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     map.wrapS=map.wrapT=T.RepeatWrapping;map.repeat.set(4,15);map.anisotropy=4;
     materials.courtStone.map=map;
   }
-  materials.courtStone.color.set(0xc2c1b6);
-  materials.courtStone.metalness = .03;
+  materials.courtStone.color.set(0xc9cbc0);
+  materials.courtStone.metalness = .07;
   materials.courtStone.roughness = .33;
   box('courtStone',10,-.006,33,6.05,.009,29.6);
   for(const x of [6.95,13.05]){
@@ -121,7 +125,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       box(timber,front+inside*.7,soffitY,z,1.55,soffitHeight,7.96);
       box('ivory',front+inside*1.47,6.02,z,.16,.52,8);
       box('glow',front+inside*1.38,5.77,z,.06,.035,7.75);
-      lightWash?.(front+inside*1.30,5.791,z,.75,7.8,0,Math.PI/2,true);
+      lightWash?.(front+inside*1.30,5.791,z,.92,7.8,0,Math.PI/2,true);
+      lightWash?.(front+inside*1.555,5.92,z,7.8,.77,inside*Math.PI/2,0,true);
       for(const dz of [-2.45,2.45]){
         box('brass',front+inside*.77,5.78,z+dz,.31,.06,.31);
         box('glow',front+inside*.77,5.737,z+dz,.21,.04,.21);
@@ -264,7 +269,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     // Use the inner planter on the west lounge to clear the shop arrival views.
     const planter = lounge.planters[lounge.id === 'west' ? 1 : 0];
     tree(planter.x, planter.z, 4.2);
-    lightPool(planter.x,.091,planter.z,2.2,2.2);
+    lightPool(planter.x,.023,planter.z,2.2,2.2);
   }
   // The elevator kit owns both landing portals. These columns support the gallery above it.
   for(const z of [8.37,11.63]) box('oak',-4.99,5.27,z,.30,3.14,.37);
@@ -286,6 +291,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       }
     }
     tree(x,z,4.55);
+    lightPool(x,.023,z,2.8,2.8);
   }
   // A03's trailing greenery softens the upper clerestory. Planter boxes
   // and folded blades use the existing timber and canopy instance batches.

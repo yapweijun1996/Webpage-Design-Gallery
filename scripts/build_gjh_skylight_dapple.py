@@ -10,9 +10,9 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 SIZE = 512
 TILES = 4
-SUN = (255, 242, 219)
-PENUMBRA = (75, 85, 98)
-MAX_ALPHA = 61
+PANES_X, PANES_Z = 10, 5
+SUN = (255, 244, 220)
+MAX_ALPHA = 42
 OUTPUT = (Path(__file__).resolve().parents[1]
           / 'demos/corporate/gjh/v11/assets/mall-skylight-dapple-512.png')
 
@@ -53,15 +53,24 @@ def build():
 
     fade = [edge_fade(pixel) for pixel in range(SIZE)]
     envelope = Image.frombytes('L', (SIZE, SIZE), bytes(round(255*x*y) for y in fade for x in fade))
-    # Keep the floor unchanged at the midpoint and bound the source-over alpha
-    # at both ends. Feather the alpha only so the fade keeps the patch colour.
+    # Model the glazed bays in plan. The lateral shear follows the oblique
+    # projection across the curved roof; dark mullions stay between the panes.
+    panes = Image.new('L', (SIZE, SIZE))
+    draw = ImageDraw.Draw(panes)
+    for row in range(PANES_Z):
+        for column in range(PANES_X):
+            left = column * SIZE / PANES_X
+            right = (column + 1) * SIZE / PANES_X
+            top = row * SIZE / PANES_Z
+            bottom = (row + 1) * SIZE / PANES_Z
+            draw.polygon([(x + .20 * (y - SIZE/2), y) for x, y in
+                          [(left+5, top+6), (right-5, top+6),
+                           (right-5, bottom-6), (left+5, bottom-6)]], fill=255)
+    panes = panes.filter(ImageFilter.GaussianBlur(3.0))
+    dapple = tiled.point(lambda value: round(MAX_ALPHA * (1 - .78 * value / 255)))
     sunlight = Image.new('RGBA', (SIZE, SIZE), SUN)
-    sunlight.putalpha(ImageChops.multiply(
-        tiled.point(lambda value: round(MAX_ALPHA * max(0, 1 - value / 95))), envelope))
-    shade = Image.new('RGBA', (SIZE, SIZE), PENUMBRA)
-    shade.putalpha(ImageChops.multiply(
-        tiled.point(lambda value: round(MAX_ALPHA * max(0, (value - 95) / 160))), envelope))
-    return Image.alpha_composite(sunlight, shade)
+    sunlight.putalpha(ImageChops.multiply(ImageChops.multiply(panes, dapple), envelope))
+    return sunlight
 
 
 if __name__ == '__main__':

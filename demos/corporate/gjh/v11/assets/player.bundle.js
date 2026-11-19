@@ -653,6 +653,7 @@ var lounge = (id, x) => Object.freeze({
   planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
 });
 var atriumLayout = Object.freeze({
+  anchorPierXs: Object.freeze([-14.9, -5, 5, 14.9]),
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),

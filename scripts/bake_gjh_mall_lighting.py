@@ -16,11 +16,12 @@ SIZES = (1024, 2048)
 def source_geometry():
     # Use the live room frames, door openings and authored fixture envelopes.
     script = """
+      import {atriumLayout} from './atrium-layout.js';
       import {expandedLayout} from './expanded-layout.js';
       import {interiorStores} from './interiors/config.js';
       import {bakeAtlasSplit, bakeAtlasGutter} from './mall-baked-lighting.js';
       console.log(JSON.stringify({bounds:expandedLayout.bounds, stores:Object.values(interiorStores),
-        split:bakeAtlasSplit, gutter:bakeAtlasGutter}));
+        pierXs:atriumLayout.anchorPierXs, split:bakeAtlasSplit, gutter:bakeAtlasGutter}));
     """
     return json.loads(subprocess.check_output(
         ['node', '--input-type=module', '-e', script], cwd=ASSETS, text=True
@@ -108,6 +109,11 @@ def bake(size, source):
             raster.stamp(cx, z, width, .22, 0, 1.2, opacity)
     for store in source['stores']:
         shade_store(floor, ceiling, store)
+    # A short soft echo of each lacquer pier base gives the polished floor
+    # local detail while the zone PMREM supplies the view-dependent skylight.
+    for x in source['pierXs']:
+        for z, width, opacity in ((.69, .31, .19), (1.08, .24, .105), (1.48, .16, .055)):
+            floor.stamp(x, z, width, .45, 0, .24, opacity)
     # Recessed public roof areas darken between the cove runs. Perimeter and
     # shop profiles stay distinct from the transparent skylight geometry.
     ambient = Image.new('L', ceiling.alpha.size, 21)

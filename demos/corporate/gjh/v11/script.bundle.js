@@ -3284,7 +3284,7 @@ function allowMallLightWash(deviceClass, context) {
   return /GeForce|Quadro|NVIDIA RTX|Radeon RX (?!Vega |[0-9]+M Graphics)/i.test(adapter ?? "");
 }
 var STUDIO_LIGHTING = {
-  atrium: { walls: 7497825, panels: 16244933, ceiling: 13748409, width: 7, intensity: 0.52 },
+  atrium: { walls: 7497825, panels: 16771796, ceiling: 15524048, width: 7, intensity: 0.52, ceilingGain: 2.15 },
   corridor: { walls: 6709595, panels: 16115412, ceiling: 14142395, width: 5, intensity: 0.58 },
   shop: { walls: 10391940, panels: 16773088, ceiling: 16773089, width: 3, intensity: 0.94 }
 };
@@ -3330,6 +3330,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       accentPosition,
       accent,
       environmentIntensity,
+      colourSoftening: expanded && store?.id === "S01" ? 0.46 : 0,
+      doorFill: expanded && store?.id === "S14" ? 1.38 : 1,
       temperature: mood ? kelvinColour(T, mood.kelvin) : interiorWarm,
       colors: [new T.Color, new T.Color]
     };
@@ -3346,6 +3348,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
   });
   const visitorShadows = contact && plane ? createVisitorShadows(T, scene, plane, contact) : null;
   let focus = null, strength = 0, previousTime;
+  const neutralFill = new T.Color(16775147);
   const applyFocusColors = () => lights.forEach((light, index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
     const key = new T.Color(theme?.lighting?.key ?? 16770497);
@@ -3353,6 +3356,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       const [main, accent] = bay.colors;
       main.copy(key).lerp(bay.temperature, bay.mood ? 0.68 : 0.25).lerp(bay.accent, 0.08);
       accent.copy(main).lerp(bay.accent, bay.mood ? 0.3 : 0);
+      main.lerp(neutralFill, bay.colourSoftening);
+      accent.lerp(neutralFill, bay.colourSoftening);
     }
     if (focus)
       applyFocusColors();
@@ -3408,7 +3413,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     if (focus && nearest === focus)
       strength = Math.min(1, strength + fadeIn);
     lights[0].intensity = (focus?.mood && expanded ? 32 : 26) * strength;
-    lights[1].intensity = (focus?.mood && expanded ? 20 : 18) * strength;
+    lights[1].intensity = (focus?.mood && expanded ? 20 : 18) * strength * (focus?.doorFill ?? 1);
   }
   const accentSet = new Set(lights);
   function lightVariants(sceneLights) {
@@ -3459,10 +3464,10 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     studio.add(ceiling);
     const next = {};
     try {
-      for (const [zone, { walls, panels, ceiling: colour, width }] of Object.entries(studioLighting)) {
+      for (const [zone, { walls, panels, ceiling: colour, width, ceilingGain = 1.5 }] of Object.entries(studioLighting)) {
         materials[0].color.set(walls);
         materials[1].color.set(panels).multiplyScalar(1.3);
-        materials[2].color.set(colour).multiplyScalar(1.5);
+        materials[2].color.set(colour).multiplyScalar(ceilingGain);
         ceiling.scale.set(width, 0.1, width);
         const before = frameTrace?.start();
         next[zone] = generator.fromScene(studio, 0.04);
@@ -4987,6 +4992,7 @@ var lounge = (id, x) => Object.freeze({
   planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
 });
 var atriumLayout = Object.freeze({
+  anchorPierXs: Object.freeze([-14.9, -5, 5, 14.9]),
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),

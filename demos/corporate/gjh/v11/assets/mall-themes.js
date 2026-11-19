@@ -6,7 +6,7 @@ export const THEME_STORAGE_KEY = 'gjh-v11-mall-theme-v1';
 const AUTOMATIC = {id:'automatic',label:'Automatic (follows the calendar)'};
 export const EVERYDAY = Object.freeze({
   id:'everyday', label:'Everyday',
-  materials:Object.freeze({floorTextured:0xc7b9aa,floorFlat:0xb6a99a,ceiling:0x786e64,ceilingGlow:0x988674,ceilingGlowIntensity:.12,
+  materials:Object.freeze({floorTextured:0xd0c1b1,floorFlat:0xc8bbaa,ceiling:0x786e64,ceilingGlow:0x988674,ceilingGlowIntensity:.12,
     wall:0x83796d,green:0x102922,ivory:0xb3a48e,brass:0xb59b62,wood:0x6b513d,oak:0xa08766,timber:0xa48b67,timberAlt:0xa08763,
     glass:0xd7e9df,glassOpacity:.19,glassRoughness:.08,glassMetalness:.08,glow:0xffe7b4,glowEmission:0xffd08a,glowIntensity:1.65,
     liftStone:0xdfd5c4,liftGreen:0x183a30,liftGate:0xb59b62,liftGlassOpacity:.24}),
