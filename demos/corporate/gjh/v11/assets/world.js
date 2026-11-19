@@ -17,6 +17,7 @@ import {addOriginalShopDetails} from './shop-anchor-details-first.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {buildUpperLevel, loadUpperLevel, deckPlanters} from './upper-level.js';
+import {createInteriorAdditions} from './interior-additions.js';
 import {createFurnishings} from './furnishings.js';
 import {createShell} from './shell.js';
 import {SHELL_LAYOUT} from './interior-shell-registry.js';
@@ -1516,6 +1517,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     for(const mesh of deckLodMeshes)mesh.visible=deckVisible;
     for (const mesh of standalonePools) mesh.visible = tier !== 'low' && (!mesh.userData.deckLod || deckVisible);
     for (const update of shopLodUpdates) update(visitor, camera && view);
+    additions?.update(tier,camera ? view : {deckVisible},shopNear);
     furnishings.updateView(camera ? view : {deckVisible},shopNear);
     if (camera) {
       for (const update of viewUpdates) update(view);
@@ -1524,6 +1526,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       upperLevel?.updateView(view.frustum);
     }
   }
+  const additions = expanded ? createInteriorAdditions(T,{scene,collider,seats,prepareModel,tier:artworkTier}) : null;
   interactables.push(...seats.map(seat=>({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,floor:seat.floor,radius:seat.clearance.interactionRadius,seat})));
   const firstFurnishing = shopLodMeshes.length;
   const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh),prepareModel);
@@ -1577,7 +1580,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   return {signage, defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
-  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: Object.freeze({...furnishingState,...additions?.state}), productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

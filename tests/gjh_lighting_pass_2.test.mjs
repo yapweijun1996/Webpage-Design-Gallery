@@ -201,7 +201,7 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
   const R={ColliderDesc:{cuboid:descriptor,cylinder:descriptor},RigidBodyDesc:{kinematicPositionBased:descriptor},
     Cuboid:class {},QueryFilterFlags:{EXCLUDE_FIXED:1,EXCLUDE_SENSORS:2}};
   let handle=0;
-  const physics={createCollider:()=>({setRotation:noop}),createRigidBody:()=>({handle:handle++}),removeCollider:noop};
+  const physics={createCollider:()=>({setRotation:noop,setEnabled(value){this.enabled=value;}}),createRigidBody:()=>({handle:handle++}),removeCollider:noop};
   const textureRequests=[];
   class TextureLoader {
     setCrossOrigin() {return this;}

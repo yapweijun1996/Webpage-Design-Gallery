@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "note": "Interior additions generated with Tripo Studio from owner-supplied reference images and converted to texture-free flat-colour static GLBs (Blender). Owner confirmed on 2026-11-20 that Tripo output may be redistributed publicly in v11 and the gallery. The two-seat bench (GJH-PUB-002) already exists in the pilot and is not replaced. Placed means mounted in the scene today; reserved assets are registered but not mounted.",
+  "note": "Interior additions generated with Tripo Studio from owner-supplied reference images and converted to texture-free flat-colour static GLBs (Blender). Owner confirmed on 2026-11-20 that Tripo output may be redistributed publicly in v11 and the gallery. The two-seat bench (GJH-PUB-002) already exists in the pilot and is not replaced. Placement xyz is the authored GLB origin in expanded world metres. Yaw is in degrees about +Y. Each collider encloses the transformed mesh bounds.",
   "assets": [
     {
       "asset_id": "GJH-PUB-001",
@@ -17,13 +17,24 @@
       "capabilities": [
         "SIT"
       ],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Brushed brass",
         "Warm cream"
       ],
       "triangles": 798,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          -4,
+          0.016,
+          26.8
+        ],
+        "yaw_deg": 0,
+        "support": "west-lounge-rug",
+        "note": "West atrium lounge, facing the coffee table."
+      },
+      "minimum_tier": "low"
     },
     {
       "asset_id": "GJH-PUB-007",
@@ -38,7 +49,7 @@
         0.75
       ],
       "capabilities": [],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Matte dark green",
         "Brushed brass",
@@ -47,7 +58,18 @@
         "Deep plant green"
       ],
       "triangles": 1795,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          22,
+          0.016,
+          21.4
+        ],
+        "yaw_deg": 0,
+        "support": "east-lounge-rug",
+        "note": "East atrium lounge, inside the rug border."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-PUB-016",
@@ -64,14 +86,25 @@
       "capabilities": [
         "USE"
       ],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Matte dark green",
         "Brushed brass",
         "Warm cream"
       ],
       "triangles": 1397,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          4.65,
+          -0.012,
+          44.45
+        ],
+        "yaw_deg": 90,
+        "support": "concourse",
+        "note": "West side of the main entrance, clear of the arrival lane."
+      },
+      "minimum_tier": "low"
     },
     {
       "asset_id": "GJH-LGT-017",
@@ -86,14 +119,25 @@
         0.6
       ],
       "capabilities": [],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Honey oak",
         "Brushed brass",
         "Warm cream"
       ],
       "triangles": 1498,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          26,
+          0.016,
+          21.6
+        ],
+        "yaw_deg": 180,
+        "support": "east-lounge-rug",
+        "note": "East atrium reading lounge, opposite the planter."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-PUB-018",
@@ -110,7 +154,7 @@
       "capabilities": [
         "USE"
       ],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Honey oak",
         "Matte dark green",
@@ -118,7 +162,18 @@
         "Warm cream"
       ],
       "triangles": 1798,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          21.25,
+          -0.012,
+          44.6
+        ],
+        "yaw_deg": 180,
+        "support": "concourse",
+        "note": "Entrance coat-check desk, west of the existing service desk."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-DSP-009",
@@ -135,13 +190,24 @@
       "capabilities": [
         "INSPECT"
       ],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Honey oak",
         "Brushed brass"
       ],
       "triangles": 1198,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          21.25,
+          -0.012,
+          47.1
+        ],
+        "yaw_deg": 180,
+        "support": "concourse",
+        "note": "Coat rail behind the entrance coat-check desk."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-DSP-003",
@@ -158,14 +224,25 @@
       "capabilities": [
         "INSPECT"
       ],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Honey oak",
         "Matte dark green",
         "Brushed brass"
       ],
       "triangles": 1497,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          -17.25,
+          0.081,
+          18
+        ],
+        "yaw_deg": 180,
+        "support": "S08",
+        "note": "Skippy front display bay for pantry merchandise."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-DSP-007",
@@ -182,13 +259,24 @@
       "capabilities": [
         "INSPECT"
       ],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Honey oak",
         "Brushed brass"
       ],
       "triangles": 997,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          37.5,
+          0.081,
+          14.5
+        ],
+        "yaw_deg": -90,
+        "support": "S13",
+        "note": "Sony listening showroom, front accessory display."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-STF-016",
@@ -205,14 +293,25 @@
       "capabilities": [
         "USE"
       ],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Honey oak",
         "Matte dark green",
         "Brushed brass"
       ],
       "triangles": 1375,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          40.5,
+          0.081,
+          41.75
+        ],
+        "yaw_deg": 0,
+        "support": "S17",
+        "note": "Gigaset side counter beside the handset showroom."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-STF-014",
@@ -227,7 +326,7 @@
         0.05
       ],
       "capabilities": [],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Honey oak",
         "Matte dark green",
@@ -235,7 +334,18 @@
         "Warm cream"
       ],
       "triangles": 398,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          21.25,
+          2.4,
+          47.85
+        ],
+        "yaw_deg": 180,
+        "support": "entrance-wall",
+        "note": "Framed print on the inside entrance wall above the coat rail."
+      },
+      "minimum_tier": "balanced"
     },
     {
       "asset_id": "GJH-LGT-008",
@@ -250,14 +360,25 @@
         0.38
       ],
       "capabilities": [],
-      "placed": false,
+      "placed": true,
       "materials": [
         "Matte dark green",
         "Brushed brass",
         "Warm cream"
       ],
       "triangles": 1198,
-      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery.",
+      "placement": {
+        "xyz": [
+          18.13,
+          4.797,
+          44.75
+        ],
+        "yaw_deg": 0,
+        "support": "arcade-beam",
+        "note": "Globe suspended from the east entrance arcade soffit."
+      },
+      "minimum_tier": "balanced"
     }
   ]
 }
