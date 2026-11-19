@@ -64,6 +64,7 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
   modelWarmup, width, height, screenPixel, applyProfile, frameTrace, startup=false}, profile, report) {
   const {scene, signage, interiors} = world;
   const {tier, shadows} = profile;
+  void world.bakedLighting?.prepare(tier);
   let interiorsReady = false, interiorError;
   void registerInteriorWarmup(interiors, {T, renderer, scene, lights:atmosphere.interiorWarmLights, tier},
     {deferActivation:true}).then(() => { interiorsReady = true; }, error => { interiorError = error; });

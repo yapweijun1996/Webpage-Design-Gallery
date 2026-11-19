@@ -28,6 +28,8 @@ import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere} from './mall-atmosphere.js';
+import {createMallBakedLighting} from './mall-baked-lighting.js';
+import {createPlayerShadow} from './mall-player-shadow.js';
 
 export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fog}) {
   if (!expanded || !theme?.materials || !theme?.lighting) return false;
@@ -51,12 +53,13 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 }
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low') {
+export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false) {
   try {
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   const [furnishings,shell,upperAssets]=await Promise.all([createFurnishings(T,true,expanded),expanded ? null : createShell(T),expandedLift ? loadUpperLevel(T,artworkTier) : null]);
   const ceilingObstacles=[], shopObstacles=[];
+  const bakedFloors=[], bakedCeilings=[];
   function ceilingBounds(x,y,z,sx,sy,sz){
     ceilingObstacles.push({min:{x:x-sx/2,y:y-sy/2,z:z-sz/2},max:{x:x+sx/2,y:y+sy/2,z:z+sz/2}});
   }
@@ -67,6 +70,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       const panel=[(r.minX+r.maxX)/2,y,(r.minZ+r.maxZ)/2,r.maxX-r.minX,sy,r.maxZ-r.minZ];
       box(material,...panel);
       ceilingBounds(...panel);
+    }
+    if (expanded && (material === 'shellCeiling' || material === 'cream')) {
+      for (const rect of panels) bakedCeilings.push({...rect, y:y-sy/2-.003});
     }
     return panels;
   }
@@ -545,7 +551,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       finishForRole.set(floor,'shopFloor');
       materials[floor] = materials.shellFloor.clone();
       materials[floor].color.set(interiorFloorColour(interiorStores['S'+store.number]));
-      box(floor, x, .012, -5.1, 9.55, .025, 10.25);
+      const y=.012, z=-5.1, width=9.55, height=.025, depth=10.25;
+      box(floor, x, y, z, width, height, depth);
+      bakedFloors.push({minX:x-width/2,maxX:x+width/2,minZ:z-depth/2,maxZ:z+depth/2,y:y+height/2+.009});
     } else for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     const backdrop = `${zone}Backdrop`;
     let rearWall = wall;
@@ -1005,6 +1013,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       collider(x,y,z,width,height,depth);
       shopObstacles.push({min:{x:x-width/2,y:y-height/2,z:z-depth/2},
         max:{x:x+width/2,y:y+height/2,z:z+depth/2}});
+      const rect = {minX:x-width/2,maxX:x+width/2,minZ:z-depth/2,maxZ:z+depth/2};
+      // The studio generator emits the floor and ceiling collision envelopes
+      // directly from the same dimensions as their visible finishes.
+      if (y === .041 && height === .08) bakedFloors.push({...rect,y:y+height/2+.009});
+      if (y === 4.19 && height === .18) bakedCeilings.push({...rect,y:y-height/2-.003});
     }
     shopLodUpdates.push(interiors.update);
     interiorKit = createInteriorKit(T, scene, {
@@ -1147,9 +1160,25 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   lowCylinder.dispose();
   lowSphere.dispose();
   const ambient = new T.HemisphereLight(expanded ? 0xffedda : 0xffeee0, expanded ? 0x8c7055 : 0x6d5b3b, 1.05);scene.add(ambient);
-  const key = new T.DirectionalLight(expanded ? 0xffd4a2 : 0xffd5a0, expanded ? 2.25 : 2.1); key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9])); key.castShadow = true;
-  const shadowSize = expanded ? 768 : 1024;
-  key.shadow.mapSize.set(shadowSize,shadowSize); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
+  const key = new T.DirectionalLight(expanded ? 0xffd4a2 : 0xffd5a0, expanded ? 2.25 : 2.1);
+  key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9]));
+  key.castShadow = true;
+  scene.add(key);
+  const playerShadow = expanded ? createPlayerShadow(T,scene,key) : null;
+  if (!expanded) {
+    key.shadow.mapSize.set(1024,1024);
+    Object.assign(key.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:.5,far:50});
+    key.shadow.normalBias = .05;
+    key.shadow.bias = -.0004;
+  }
+  let bakedLighting;
+  if (expanded) {
+    const holes = expandedLift ? [...bakedFloors,liftLayout.shaft] : bakedFloors;
+    const publicFloor = holes.reduce((panels,hole) => panels.flatMap(panel => cutRectangle(panel,hole)),
+      [expandedLayout.bounds]);
+    bakedLighting = createMallBakedLighting(T,scene,{contact,phone,prepareModel,
+      floors:[...publicFloor.map(rect => ({...rect,y:.014})),...bakedFloors],ceilings:bakedCeilings});
+  }
   const fill = expanded ? null : new T.DirectionalLight(0xe9d8c2,.45);
   if (fill) { fill.position.set(4,8,-5); scene.add(fill); }
   const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T,scene,{
@@ -1223,6 +1252,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       return;
     }
     // The render loop and context recovery both supply the resolved tier here.
+    bakedLighting.setTier(tier);
+    if (shadows && tier === 'detailed') playerShadow.update(visitor);
     if (surfaceAtmosphere.setTier(tier, lightWash) && mappedPaving) mappedPaving.roughness = materials.paving.roughness;
     uploadVisitor = visitor;
     if (camera) {
@@ -1310,7 +1341,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
-  }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

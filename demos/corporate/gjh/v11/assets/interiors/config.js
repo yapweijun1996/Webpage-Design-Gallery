@@ -3,8 +3,19 @@ import {layouts} from './layout.js';
 export const interiorTiers = ['low', 'balanced', 'detailed'];
 export const radians = degrees => degrees * Math.PI / 180;
 
+const shopAccent = {
+  S01:0xb84739, S02:0xd4a159, S03:0x79a992, S04:0x785a68, S05:0x913f35,
+  S06:0x667887, S07:0x9c4937, S08:0x477aac, S09:0x294f7c, S10:0x478c86,
+  S11:0x843e43, S12:0x6f9690, S13:0xa6d7eb, S14:0x665079, S15:0x723f46,
+  S16:0x4b9993, S17:0xd99e74
+};
+
 export const interiorStores = Object.fromEntries(Object.entries(layouts).map(
-  ([id, layout]) => [id, {...layout, id}]
+  ([id, layout]) => [id, {...layout, id, ambient:{
+    kelvin:Math.max(2700,Math.min(4000,layout.accent_kelvin)),
+    accent:shopAccent[id],
+    focus:layout.lighting // Shop-local metres, including fixture height.
+  }}]
 ));
 
 export function interiorFloorColour(store) {

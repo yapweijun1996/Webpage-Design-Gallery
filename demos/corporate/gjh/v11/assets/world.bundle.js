@@ -1325,7 +1325,30 @@ var layouts = { S01: { storyPanels: [{ id: "newmoon-heritage", frame: [-4.67, 2.
 // demos/corporate/gjh/v11/assets/interiors/config.js
 var interiorTiers = ["low", "balanced", "detailed"];
 var radians = (degrees) => degrees * Math.PI / 180;
-var interiorStores = Object.fromEntries(Object.entries(layouts).map(([id, layout]) => [id, { ...layout, id }]));
+var shopAccent = {
+  S01: 12076857,
+  S02: 13934937,
+  S03: 7973266,
+  S04: 7887464,
+  S05: 9518901,
+  S06: 6715527,
+  S07: 10242359,
+  S08: 4684460,
+  S09: 2707324,
+  S10: 4689030,
+  S11: 8666691,
+  S12: 7313040,
+  S13: 10934251,
+  S14: 6705273,
+  S15: 7487302,
+  S16: 4954515,
+  S17: 14261876
+};
+var interiorStores = Object.fromEntries(Object.entries(layouts).map(([id, layout]) => [id, { ...layout, id, ambient: {
+  kelvin: Math.max(2700, Math.min(4000, layout.accent_kelvin)),
+  accent: shopAccent[id],
+  focus: layout.lighting
+} }]));
 function interiorFloorColour(store) {
   const finish = store.floor.colours[0];
   return store.palette[finish]?.hex ?? finish;
@@ -7553,6 +7576,119 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
   } };
 }
 
+// demos/corporate/gjh/v11/assets/mall-baked-lighting.js
+var { minX, maxX, minZ, maxZ } = expandedLayout.bounds;
+var bakeAtlasSplit = 0.5;
+var bakeAtlasGutter = 0.015625;
+function createLayer(T, panels, material, ceiling) {
+  const positions = [], uv = [], indices = [], normals = [];
+  const span = bakeAtlasSplit - 2 * bakeAtlasGutter;
+  const start = (ceiling ? bakeAtlasSplit : 0) + bakeAtlasGutter;
+  for (const { minX: x0, maxX: x1, minZ: z0, maxZ: z1, y } of panels) {
+    const first = positions.length / 3;
+    for (const [x, z] of [[x0, z0], [x0, z1], [x1, z1], [x1, z0]]) {
+      positions.push(x, y, z);
+      normals.push(0, ceiling ? -1 : 1, 0);
+      const row = start + (z - minZ) / (maxZ - minZ) * span;
+      uv.push((x - minX) / (maxX - minX), 1 - row);
+    }
+    for (const index of ceiling ? [0, 2, 1, 0, 3, 2] : [0, 1, 2, 0, 2, 3])
+      indices.push(first + index);
+  }
+  const geometry = new T.BufferGeometry;
+  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("normal", new T.Float32BufferAttribute(normals, 3));
+  geometry.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
+  geometry.setIndex(indices);
+  const mesh = placeDecal(new T.InstancedMesh(geometry, material, 1), -3);
+  mesh.setMatrixAt(0, new T.Matrix4);
+  mesh.name = ceiling ? "Mall baked ceiling lighting" : "Mall baked floor lighting";
+  mesh.visible = false;
+  return mesh;
+}
+function createMallBakedLighting(T, scene, {
+  floors,
+  ceilings,
+  contact,
+  phone,
+  prepareModel,
+  load: load2 = (url) => new T.TextureLoader().loadAsync(url)
+}) {
+  const material = contact.clone();
+  const floor = createLayer(T, floors, material, false), ceiling = createLayer(T, ceilings, material, true);
+  scene.add(floor, ceiling);
+  const atlasSize2 = (tier) => phone || tier === "low" ? 1024 : 2048;
+  const atlases = new Map, requests = new Map;
+  let currentTier = "low";
+  function apply() {
+    const atlas = atlases.get(atlasSize2(currentTier)) ?? atlases.get(1024);
+    if (atlas)
+      material.map = atlas;
+    floor.visible = Boolean(atlas);
+    ceiling.visible = Boolean(atlas) && currentTier !== "low";
+  }
+  function prepare(tier) {
+    const size = atlasSize2(tier);
+    if (!requests.has(size)) {
+      const url = new URL(`mall-light-ao-${size}.webp`, import.meta.url).href;
+      const request = Promise.resolve().then(() => load2(url)).then(async (atlas) => {
+        atlas.generateMipmaps = false;
+        atlas.minFilter = T.LinearFilter;
+        const stagingMaterial = contact.clone();
+        stagingMaterial.map = atlas;
+        const sample = floor.clone();
+        sample.material = stagingMaterial;
+        try {
+          await prepareModel?.(sample, { late: false, includeInSceneSweep: false, priority: () => 100 });
+          atlases.set(size, atlas);
+          apply();
+        } catch {
+          atlas.dispose();
+        } finally {
+          sample.dispose();
+          stagingMaterial.dispose();
+        }
+      }).catch(() => {});
+      requests.set(size, request);
+    }
+    return requests.get(size);
+  }
+  function setTier(tier) {
+    const next = tier ?? "low";
+    if (next === currentTier && requests.has(atlasSize2(next)))
+      return;
+    currentTier = next;
+    prepare(currentTier);
+    apply();
+  }
+  return { prepare, setTier };
+}
+
+// demos/corporate/gjh/v11/assets/mall-player-shadow.js
+function createPlayerShadow(T, scene, key) {
+  const span = 16, size = 1024, texel = span / size;
+  const { shadow, target } = key;
+  const offset = key.position.clone().sub(target.position);
+  const back = offset.clone().normalize();
+  const right = new T.Vector3().crossVectors(shadow.camera.up, back).normalize();
+  const up = new T.Vector3().crossVectors(back, right);
+  const centre = new T.Vector3;
+  shadow.mapSize.set(size, size);
+  Object.assign(shadow.camera, { left: -span / 2, right: span / 2, top: span / 2, bottom: -span / 2, near: 0.5, far: 50 });
+  shadow.camera.updateProjectionMatrix();
+  shadow.normalBias = 0.025;
+  shadow.bias = -0.00025;
+  scene.add(target);
+  const snap = (value) => Math.round(value / texel) * texel;
+  return {
+    update({ x, y, z }) {
+      centre.set(x, y, z);
+      target.position.copy(right).multiplyScalar(snap(centre.dot(right))).addScaledVector(up, snap(centre.dot(up))).addScaledVector(back, centre.dot(back));
+      key.position.copy(target.position).add(offset);
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/world.js
 function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
@@ -7585,7 +7721,7 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
   fog?.color.set(l.fog);
   return true;
 }
-async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => "low") {
+async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => "low", phone = false) {
   try {
     let ceilingBounds = function(x, y, z, sx, sy, sz) {
       ceilingObstacles.push({ min: { x: x - sx / 2, y: y - sy / 2, z: z - sz / 2 }, max: { x: x + sx / 2, y: y + sy / 2, z: z + sz / 2 } });
@@ -7596,6 +7732,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         const panel = [(r.minX + r.maxX) / 2, y, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, sy, r.maxZ - r.minZ];
         box(material, ...panel);
         ceilingBounds(...panel);
+      }
+      if (expanded && (material === "shellCeiling" || material === "cream")) {
+        for (const rect of panels)
+          bakedCeilings.push({ ...rect, y: y - sy / 2 - 0.003 });
       }
       return panels;
     }, refreshInstanceColours = function() {
@@ -7831,6 +7971,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         }
         return;
       }
+      bakedLighting.setTier(tier);
+      if (shadows && tier === "detailed")
+        playerShadow.update(visitor);
       if (surfaceAtmosphere.setTier(tier, lightWash2) && mappedPaving)
         mappedPaving.roughness = materials2.paving.roughness;
       uploadVisitor = visitor;
@@ -7921,6 +8064,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
     const [furnishings, shell, upperAssets] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expandedLift ? loadUpperLevel(T, artworkTier) : null]);
     const ceilingObstacles = [], shopObstacles = [];
+    const bakedFloors = [], bakedCeilings = [];
     const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
     const prepareModel = warmModel && ((model, options2) => warmModel(model, scene, options2));
@@ -8324,7 +8468,9 @@ metalnessFactor=vSurface.y;`);
         finishForRole.set(floor, "shopFloor");
         materials2[floor] = materials2.shellFloor.clone();
         materials2[floor].color.set(interiorFloorColour(interiorStores["S" + store2.number]));
-        box(floor, x, 0.012, -5.1, 9.55, 0.025, 10.25);
+        const y = 0.012, z = -5.1, width = 9.55, height = 0.025, depth = 10.25;
+        box(floor, x, y, z, width, height, depth);
+        bakedFloors.push({ minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2, y: y + height / 2 + 0.009 });
       } else
         for (let i = 0;i < 18; i++)
           box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
@@ -8818,6 +8964,11 @@ metalnessFactor=vSurface.y;`);
           min: { x: x - width / 2, y: y - height / 2, z: z - depth / 2 },
           max: { x: x + width / 2, y: y + height / 2, z: z + depth / 2 }
         });
+        const rect = { minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2 };
+        if (y === 0.041 && height === 0.08)
+          bakedFloors.push({ ...rect, y: y + height / 2 + 0.009 });
+        if (y === 4.19 && height === 0.18)
+          bakedCeilings.push({ ...rect, y: y - height / 2 - 0.003 });
       }
       shopLodUpdates.push(interiors.update);
       interiorKit = createInteriorKit(T, scene, {
@@ -8950,12 +9101,26 @@ metalnessFactor=vSurface.y;`);
     const key = new T.DirectionalLight(expanded ? 16766114 : 16766368, expanded ? 2.25 : 2.1);
     key.position.set(...expanded ? [-12, 16, 6] : [-8, 15, 9]);
     key.castShadow = true;
-    const shadowSize = expanded ? 768 : 1024;
-    key.shadow.mapSize.set(shadowSize, shadowSize);
-    Object.assign(key.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 0.5, far: 50 });
-    key.shadow.normalBias = 0.05;
-    key.shadow.bias = -0.0004;
     scene.add(key);
+    const playerShadow = expanded ? createPlayerShadow(T, scene, key) : null;
+    if (!expanded) {
+      key.shadow.mapSize.set(1024, 1024);
+      Object.assign(key.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 0.5, far: 50 });
+      key.shadow.normalBias = 0.05;
+      key.shadow.bias = -0.0004;
+    }
+    let bakedLighting;
+    if (expanded) {
+      const holes = expandedLift ? [...bakedFloors, liftLayout.shaft] : bakedFloors;
+      const publicFloor = holes.reduce((panels, hole) => panels.flatMap((panel) => cutRectangle(panel, hole)), [expandedLayout.bounds]);
+      bakedLighting = createMallBakedLighting(T, scene, {
+        contact,
+        phone,
+        prepareModel,
+        floors: [...publicFloor.map((rect) => ({ ...rect, y: 0.014 })), ...bakedFloors],
+        ceilings: bakedCeilings
+      });
+    }
     const fill = expanded ? null : new T.DirectionalLight(15325378, 0.45);
     if (fill) {
       fill.position.set(4, 8, -5);
@@ -9024,7 +9189,7 @@ metalnessFactor=vSurface.y;`);
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;
       return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
-    }, scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus() {
+    }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus() {
       return upperWarmStatus;
     }, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {

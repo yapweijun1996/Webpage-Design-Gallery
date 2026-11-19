@@ -1,5 +1,7 @@
 import {createInstanceVisibility} from './packed-draw.js';
 import {placeDecal} from './surface-decals.js';
+import {interiorStores, worldInteriorBox} from './interiors/config.js';
+import {kelvinColour} from './interiors/surfaces.js';
 
 // Unknown adapters use the same conservative policy as integrated GPUs.
 export function allowMallLightWash(deviceClass, context) {
@@ -73,7 +75,15 @@ const STUDIO_LIGHTING = {
 
 export function mallEnvironmentZone(position, bays, atrium) {
   const {x,y,z} = position;
-  if (Math.abs(y) < 4 && bays.some(({minX,maxX,minZ,maxZ}) => x > minX && x < maxX && z > minZ && z < maxZ)) return 'shop';
+  if (Math.abs(y) < 4 && bays.some(bay => insideBay(x,z,bay))) return 'shop';
+  return publicEnvironmentZone(position,atrium);
+}
+
+function insideBay(x,z,{minX,maxX,minZ,maxZ}) {
+  return x > minX && x < maxX && z > minZ && z < maxZ;
+}
+
+function publicEnvironmentZone({x,y,z},atrium) {
   if (y >= 6 || (Math.abs(x-atrium.x) < 13 && Math.abs(z-atrium.z) < 14)) return 'atrium';
   return 'corridor';
 }
@@ -82,12 +92,25 @@ export function mallEnvironmentZone(position, bays, atrium) {
 export function createMallAtmosphere(T, renderer, scene, slots, {
   atrium = {x:0,z:8}, contact, plane
 } = {}) {
-  const accents = [0xb84739,0xd4a159,0x79a992,0x785a68,0x913f35,0x667887,0x9c4937,0x477aac,0x294f7c,0x478c86,0x843e43,0x6f9690,0x777f85,0x665079,0x82756a,0x4b9993,0x62696a];
+  const classicAccents = [0xb84739,0xd4a159,0x79a992,0x785a68,0x913f35,0x667887,0x9c4937,0x477aac,0x294f7c];
   const interiorWarm = new T.Color(0xffd5a0);
-  const bays = slots.map((slot, index) => ({
-    x:(slot.minX + slot.maxX) / 2, z:(slot.minZ + slot.maxZ) / 2, side:slot.side,
-    accent:new T.Color(accents[index]), color:new T.Color()
-  }));
+  const bays = slots.map((slot, index) => {
+    const store = interiorStores['S'+slot.number], mood = store?.ambient;
+    const x = (slot.minX + slot.maxX) / 2, z = (slot.minZ + slot.maxZ) / 2;
+    const [dx,dz] = slot.side === 'west' ? [-1,0] : slot.side === 'east' ? [1,0] : [0,-1];
+    const anchor = mood ? worldInteriorBox(store,{center:mood.focus,yaw:0}).center : null;
+    const keyPosition = anchor ?? [x-dx*2.1,3.9,z-dz*2.1];
+    const accentPosition = anchor
+      ? [anchor[0]-dx*2,anchor[1]+.35,anchor[2]-dz*2]
+      : [x+dx*1.8,4.3,z+dz*1.8];
+    const accent = new T.Color(mood?.accent ?? classicAccents[index]);
+    const accentLuminance = .2126*accent.r + .7152*accent.g + .0722*accent.b;
+    const environmentIntensity = mood
+      ? .74 + .20*(mood.kelvin-2700)/1300 + .10*accentLuminance
+      : STUDIO_LIGHTING.shop.intensity;
+    return {slot,x,z,mood,keyPosition,accentPosition,accent,environmentIntensity,
+      temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
+  });
   const lights = Array.from({length:2}, (_, index) => {
     const light = new T.PointLight(0xffe5c1, 0, 11, 2);
     light.name = `Shop focus accent ${index + 1}`;
@@ -97,10 +120,15 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
   scene.traverse(node => { if (node.isLight) node.layers.enable(2); });
   const visitorShadows = contact && plane ? createVisitorShadows(T, scene, plane, contact) : null;
   let focus = null, strength = 0, previousTime;
+  const applyFocusColors = () => lights.forEach((light,index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
-    const warm = new T.Color(theme?.lighting?.key ?? 0xffe5c1).lerp(interiorWarm, .25);
-    for (const bay of bays) bay.color.copy(warm).lerp(bay.accent, .08);
-    if (focus) lights.forEach(light => light.color.copy(focus.color));
+    const key = new T.Color(theme?.lighting?.key ?? 0xffe5c1);
+    for (const bay of bays) {
+      const [main,accent] = bay.colors;
+      main.copy(key).lerp(bay.temperature,bay.mood ? .68 : .25).lerp(bay.accent,.08);
+      accent.copy(main).lerp(bay.accent,bay.mood ? .30 : 0);
+    }
+    if (focus) applyFocusColors();
     if (renderer && Number.isFinite(theme?.lighting?.exposure)) renderer.toneMappingExposure = theme.lighting.exposure;
   }
   applyTheme(null);
@@ -112,10 +140,19 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     return ground;
   }
   function update(position, now = performance.now()) {
-    selectEnvironment(mallEnvironmentZone(position,slots,atrium));
+    const {x,y,z} = position;
+    const inside = Math.abs(y) < 4 ? bays.find(bay => insideBay(x,z,bay.slot)) : null;
+    const publicZone = publicEnvironmentZone(position,atrium);
+    if (inside?.mood) {
+      const {minX,maxX,minZ,maxZ} = inside.slot;
+      const edge = Math.min(x-minX,maxX-x,z-minZ,maxZ-z);
+      const weight = Math.min(1,edge/1.6);
+      const outside = STUDIO_LIGHTING[publicZone].intensity;
+      selectEnvironment('shop',outside + weight*(inside.environmentIntensity-outside));
+    } else selectEnvironment(inside ? 'shop' : publicZone);
     const ground = setLightFloor(position);
-    let nearest = null, best = 24 ** 2;
-    if (ground) for (const bay of bays) {
+    let nearest = inside?.mood ? inside : null, best = 24 ** 2;
+    if (ground && !nearest) for (const bay of bays) {
       const distance = (bay.x-position.x)**2 + (bay.z-position.z)**2;
       // Keep the current focus across small movements at a bay boundary.
       const score = distance - (bay === focus ? 4 : 0);
@@ -131,10 +168,9 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       if (!strength) {
         focus = nearest;
         if (focus) {
-          const [dx,dz] = focus.side === 'west' ? [-1,0] : focus.side === 'east' ? [1,0] : [0,-1];
-          lights[0].position.set(focus.x-dx*2.1,3.9,focus.z-dz*2.1);
-          lights[1].position.set(focus.x+dx*1.8,4.3,focus.z+dz*1.8);
-          lights.forEach(light => light.color.copy(focus.color));
+          lights[0].position.set(...focus.keyPosition);
+          lights[1].position.set(...focus.accentPosition);
+          applyFocusColors();
         }
       }
     }
@@ -153,14 +189,14 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     return [fixed,[...fixed,...lights]];
   }
 
-  let environments = {}, currentZone = 'atrium';
-  function selectEnvironment(zone) {
+  let environments = {}, currentZone = 'atrium', currentIntensity = STUDIO_LIGHTING.atrium.intensity;
+  function selectEnvironment(zone, intensity = STUDIO_LIGHTING[zone].intensity) {
     currentZone = zone;
+    currentIntensity = intensity;
     const environment = environments[zone];
-    if (environment && scene.environment !== environment.texture) {
-      scene.environment = environment.texture;
-      scene.environmentIntensity = STUDIO_LIGHTING[zone].intensity;
-    }
+    if (!environment) return;
+    if (scene.environment !== environment.texture) scene.environment = environment.texture;
+    scene.environmentIntensity = intensity;
   }
   function releaseEnvironment() {
     scene.environment = null;
@@ -187,7 +223,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       }
       releaseEnvironment();
       environments = next;
-      selectEnvironment(currentZone);
+      selectEnvironment(currentZone,currentIntensity);
     } catch (error) {
       Object.values(next).forEach(target => target.dispose());
       throw error;

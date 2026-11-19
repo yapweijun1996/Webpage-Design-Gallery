@@ -824,7 +824,7 @@ async function initialize() {
   });
   const {createWorld} = await import('./assets/world.js');
   world = await createWorld(T, R, physics, expanded, warmModel,
-    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
+    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone');
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans]
