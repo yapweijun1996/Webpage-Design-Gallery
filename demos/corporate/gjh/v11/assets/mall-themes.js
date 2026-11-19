@@ -10,7 +10,7 @@ export const EVERYDAY = Object.freeze({
     wall:0xc9c4b6,green:0x153c30,ivory:0xe3d6b7,brass:0xb59b62,wood:0x6b4931,oak:0xa28055,timber:0xa48b67,timberAlt:0xa08763,
     glass:0xd7e9df,glassOpacity:.19,glassRoughness:.08,glassMetalness:.08,glow:0xffe7b4,glowEmission:0xffd08a,glowIntensity:1.2,
     liftStone:0xdfd5c4,liftGreen:0x183a30,liftGate:0xb59b62,liftGlassOpacity:.24}),
-  lighting:Object.freeze({sky:0xe5eef0,ground:0x665e50,ambient:.72,key:0xffe0bc,keyIntensity:2.6,fill:0xcbdde5,fillIntensity:.4}),
+  lighting:Object.freeze({sky:0xffedda,ground:0x8c7055,ambient:1.05,key:0xffd4a2,keyIntensity:2.25,fog:0xd9b996,exposure:1.03}),
   decorationRefs:Object.freeze([])
 });
 export const LUNAR_NEW_YEAR = Object.freeze({
@@ -18,7 +18,7 @@ export const LUNAR_NEW_YEAR = Object.freeze({
   materials:Object.freeze({...EVERYDAY.materials,ceiling:0xf3dfc1,ceilingGlow:0xc3946b,wall:0xe0c8aa,
     green:0x7c1d22,ivory:0xf4dfbb,brass:0xd4aa53,wood:0x67402a,oak:0xa16f43,
     glass:0xe9e3d4,glow:0xffe4ae,glowEmission:0xffbf76,liftGreen:0x792027,liftGate:0x6a2022}),
-  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xffead7,ground:0x876142,key:0xffd09a,fill:0xffe0be}),
+  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xffead7,ground:0x90694e,key:0xffd09a,keyIntensity:2.2,fog:0xe1b58f,exposure:1.01}),
   decorationRefs:Object.freeze(['lunar-new-year'])
 });
 export const CHRISTMAS = Object.freeze({
@@ -26,7 +26,7 @@ export const CHRISTMAS = Object.freeze({
   materials:Object.freeze({...EVERYDAY.materials,ceiling:0xeee5d7,ceilingGlow:0xc7a77a,wall:0xe0d8c6,
     green:0x174638,ivory:0xeee6d0,brass:0xd0ae65,wood:0x644733,oak:0xa17d51,
     glass:0xe0eee7,glow:0xffe9bc,glowEmission:0xffc97c,liftGreen:0x21483b,liftGate:0x34584a}),
-  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xfff0d9,ground:0x796445,key:0xffd39a,fill:0xffe7ca}),
+  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xfff0d9,ground:0x857057,key:0xffd9ac,keyIntensity:2.2,fog:0xd7bc9f,exposure:1.03}),
   decorationRefs:Object.freeze(['christmas'])
 });
 export const DEEPAVALI = Object.freeze({
@@ -34,7 +34,7 @@ export const DEEPAVALI = Object.freeze({
   materials:Object.freeze({...EVERYDAY.materials,ceiling:0xf1e0d5,ceilingGlow:0xc99b82,wall:0xe5d5c4,
     green:0x5e285c,ivory:0xf5e6c8,brass:0xd9ad59,wood:0x704c38,oak:0xa67d52,
     glass:0xece3e2,glow:0xffe4a8,glowEmission:0xffbd70,liftGreen:0x5e2c60,liftGate:0x513254}),
-  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xffeadc,ground:0x80604d,key:0xffce95,fill:0xffe1c5}),
+  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xffeadc,ground:0x8e6b54,key:0xffce95,keyIntensity:2.15,fog:0xdcb492,exposure:1.04}),
   decorationRefs:Object.freeze(['deepavali'])
 });
 export const MALL_THEMES = Object.freeze([EVERYDAY,LUNAR_NEW_YEAR,CHRISTMAS,DEEPAVALI]);

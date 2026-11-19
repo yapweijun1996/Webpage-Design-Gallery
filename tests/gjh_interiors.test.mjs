@@ -56,8 +56,9 @@ test('interior programme pins 17 world frames, anchors, floor fields, palettes, 
       .center.map(round),[door.x,0,door.z]);
     assertFields(store.frame,approved.frame);
     assertFields(store.anchor,approved.anchor);
-    const {pattern,colours,...floor} = store.floor;
+    const {pattern,colours,offset_m,inlay_offset_m,...floor} = store.floor;
     assert.deepEqual(floor,approved.floor);
+    assert(offset_m >= .003 && inlay_offset_m >= .003, store.id+' floor layers');
     assert(colours.every(value => store.palette[value] || /^#[0-9A-F]{6}$/.test(value)));
     for (const field of ['brand','style','concept','signature_family','palette','capture']) assert.deepEqual(store[field],approved[field]);
     assert.equal(store.accent_kelvin,approved.lighting.accent_kelvin);
@@ -112,9 +113,18 @@ function mockInteriorDownloads(t) {
   t.after(()=>{ delete globalThis.self; delete globalThis.createImageBitmap; });
 }
 
+function assertArtworkTexture(map,tier) {
+  assert.equal(map.generateMipmaps,true);
+  assert.equal(map.minFilter,T.LinearMipmapLinearFilter);
+  assert.equal(map.anisotropy,tier==='low' ? 2 : 4);
+  assert.equal(map.colorSpace,T.SRGBColorSpace);
+  assert.equal(map.premultiplyAlpha,false);
+}
+
 test('every tier fits its programme budget using parsed GLBs and the actual merged room meshes', async t => {
   mockInteriorDownloads(t);
-  const load = createInteriorModelLoader(T,assets,new GLTFLoader());
+  let graphicsTier = 'low';
+  const load = createInteriorModelLoader(T,assets,new GLTFLoader(),()=>graphicsTier);
   const models = new Map(), signal = new AbortController().signal;
   for (const receipt of manifest.assets) {
     const file = readFileSync(new URL(receipt.file,folder));
@@ -132,9 +142,13 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     const envelope = plans.get(receipt.store).anchor.envelope_whd_m;
     assert(bounds.getSize(new T.Vector3()).toArray().every((extent,i)=>extent <= envelope[i]+1e-5));
     assert(model.children.every(mesh=>!mesh.material.transparent),'Opaque floor kit');
+    const maps = model.children.flatMap(({material})=>[material.map,material.emissiveMap].filter(Boolean));
+    assert(maps.length > 0,receipt.file);
+    maps.forEach(map=>assertArtworkTexture(map,'low'));
     models.set(receipt.file,measured);
     disposeInteriorModel(model);
   }
+  graphicsTier = 'balanced';
   const modules = new Map(), atlasSources = new Set(), craftMaterials = new Set();
   for (const receipt of manifest.round2.details) {
     const asset = roomDetails[receipt.store], bytes = readFileSync(new URL(asset.file,folder));
@@ -155,8 +169,23 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
         assert.equal(mesh.instanceColor.count,mesh.count);
         instances += mesh.count;
       }
-      if (mesh.material.map) atlasSources.add(mesh.material.map.source);
+      if (mesh.material.map) {
+        atlasSources.add(mesh.material.map.source);
+        assertArtworkTexture(mesh.material.map,'balanced');
+      }
+      if (mesh.material.emissiveMap) assertArtworkTexture(mesh.material.emissiveMap,'balanced');
       if (mesh.material.name === 'Enamel') craftMaterials.add(mesh.material);
+    });
+    const floor = interiorStores[receipt.store].floor;
+    const rug = floor.position_m[1]+floor.offset_m;
+    model.traverse(mesh => {
+      if (!mesh.isMesh || mesh.isInstancedMesh) return;
+      const {position,normal} = mesh.geometry.attributes;
+      for (let i=0; i<position.count; i++) {
+        const y = position.getY(i);
+        if (Math.abs(normal.getY(i))>.999 && y > rug && y < rug+.012)
+          assert(y-rug>=.003,receipt.store+' inlay above the rug');
+      }
     });
     assert.equal(instances,receipt.instances);
     if (['S02','S04','S09'].includes(receipt.store)) assert(instances>=12);
@@ -275,7 +304,7 @@ test('new solid envelopes clear approved routes, seat exits, S01 pickups, and do
     const finish = floorFinish(T,store), normals = finish.attributes.normal, points = finish.attributes.position;
     for (let i=0;i<normals.count;i++) {
       assert(normals.getY(i)>.99,store.id+' floor winding');
-      assert.equal(round(points.getY(i)),round(floor_surface_y_m+.004));
+      assert.equal(round(points.getY(i)),round(floor_surface_y_m+store.floor.offset_m));
       assert(Math.abs(points.getX(i)) < w/2 && points.getZ(i) < d/2-.18 && points.getZ(i) > d/2-depth);
     }
     finish.dispose();

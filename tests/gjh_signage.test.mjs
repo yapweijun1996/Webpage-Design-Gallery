@@ -5,7 +5,7 @@ import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {expandedLayout,shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {stores,resolveConfig,contrast,selectSignLod} from '../demos/corporate/gjh/v11/assets/signage/config.js';
 import {presets} from '../demos/corporate/gjh/v11/assets/signage/presets.js';
-import {atlasSize,atlasCells} from '../demos/corporate/gjh/v11/assets/signage/atlas-layout.js';
+import {atlasSize,atlasCells,atlasGutter} from '../demos/corporate/gjh/v11/assets/signage/atlas-layout.js';
 import {createShopSign,letterGeometry} from '../demos/corporate/gjh/v11/assets/signage/builder.js';
 import {createProgressiveAtlas} from '../demos/corporate/gjh/v11/assets/signage/atlas.js';
 import {createSignageSystem} from '../demos/corporate/gjh/v11/assets/signage/runtime.js';
@@ -62,8 +62,9 @@ test('power-of-two atlas charts and bilinear gutters are disjoint even at capaci
   assert.equal(atlasSize & (atlasSize-1),0);
   const packed=Array.from({length:24},(_,i)=>Object.values(atlasCells(i))).flat();
   for(const [i,a] of packed.entries()){
-    assert.ok(a.x>=2 && a.y>=2 && a.x+a.w<=atlasSize-2 && a.y+a.h<=atlasSize-2);
-    for(const b of packed.slice(i+1))assert.ok(a.x+a.w+2<=b.x||b.x+b.w+2<=a.x||a.y+a.h+2<=b.y||b.y+b.h+2<=a.y);
+    assert.ok(a.x>=atlasGutter && a.y>=atlasGutter && a.x+a.w<=atlasSize-atlasGutter && a.y+a.h<=atlasSize-atlasGutter);
+    const gap = 2*atlasGutter;
+    for(const b of packed.slice(i+1))assert.ok(a.x+a.w+gap<=b.x||b.x+b.w+gap<=a.x||a.y+a.h+gap<=b.y||b.y+b.h+gap<=a.y);
   }
   for(const i of [-1,24,.5])assert.throws(()=>atlasCells(i));
 });
@@ -112,6 +113,9 @@ test('real Three batches compact visible detail, drop far relief and account for
   system.update(camera,reduced,1000);
   assert.equal(scene.children.length,1);assert.equal(system.report().textureMB,5.33);
   const [faces]=scene.children;
+  assert.equal(faces.material.map.anisotropy,2);
+  assert.equal(faces.material.map.generateMipmaps,true);
+  assert.equal(faces.material.map.minFilter,T.LinearMipmapLinearFilter);
   const renderer={info:{render:{calls:17,triangles:200}}};
   faces.onBeforeRender(renderer);renderer.info.render.calls++;renderer.info.render.triangles+=226;faces.onAfterRender(renderer);
   const {phoneProof,...costs}=system.report();
@@ -243,6 +247,10 @@ test('the full atlas uses bounded mip-first copies and restores CanvasTexture ro
   })};
   t.after(()=>{delete globalThis.document;});
   const {texture,upload} = createProgressiveAtlas(T,sheet);
+  assert.equal(texture.anisotropy,4);
+  assert.equal(texture.minFilter,T.LinearMipmapLinearFilter);
+  assert.equal(texture.premultiplyAlpha,false);
+  assert.equal(texture.generateMipmaps,false); // Every level is supplied by upload.
   const copies = [];
   let allocations = 0;
   const renderer = {

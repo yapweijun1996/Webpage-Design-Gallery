@@ -2,13 +2,15 @@ import {interiorAsset,interiorStores,interiorTiers,radians,worldInteriorBox} fro
 import {prepareInteriorDecoration,interiorMaterials} from './decoration.js';
 import {createInteriorModelLoader,disposeInteriorModel} from './models.js';
 import {mergeStaticGeometries} from '../merge-static-geometries.js';
+import {decalClearance, decalHeight, decalMaterial} from '../surface-decals.js';
+import {setupArtworkTexture} from '../artwork-textures.js';
 
 import {roomDetails} from './detail-files.js';
 import {emptyInteriorReport} from './warmup.js';
 
 export function createInteriorKit(T, scene, {
-  assetBase, packshot, prepareModel, registerCollider,
-  loadModel = createInteriorModelLoader(T,assetBase),
+  assetBase, packshot, prepareModel, registerCollider, artworkTier = () => 'low',
+  loadModel = createInteriorModelLoader(T,assetBase,undefined,artworkTier),
   reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),
   now = () => performance.now()
 }) {
@@ -17,6 +19,7 @@ export function createInteriorKit(T, scene, {
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
 
   let lastUpdate;
+  if (packshot && !packshot.userData.artworkMipmaps) setupArtworkTexture(T,packshot,artworkTier());
 
   function* measure(root, id) {
     const meshes = [];
@@ -56,15 +59,16 @@ export function createInteriorKit(T, scene, {
       yield;
     }
     if (store.id !== 'S01' || !packshot) return base;
-    const photo = new T.MeshBasicMaterial({map:packshot,toneMapped:false});
+    const photo = decalMaterial(new T.MeshBasicMaterial({map:packshot,toneMapped:false}));
     const panel = (width,x,y,z,yaw = 0) =>
-      new T.PlaneGeometry(width,width).rotateY(yaw).translate(x,y,z);
+      new T.PlaneGeometry(width,width).rotateY(yaw)
+        .translate(x+decalClearance*Math.sin(yaw),y,z+decalClearance*Math.cos(yaw));
     // The original photograph shares the product and reading-stand texture.
     const [x,y,z] = store.anchor.position_m;
     const stand = store.props.find(prop => prop.kind === 'photo');
     const [sx,sy,sz] = stand.position_m, a = radians(stand.yaw_deg);
-    const photos = [panel(1.51,x,y+1.10,z+.006),
-      panel(.69,sx+.053*Math.sin(a),sy+stand.envelope_whd_m[1]-.4,sz+.053*Math.cos(a),a)];
+    const photos = [panel(1.51,x,y+1.10,decalHeight(z)),
+      panel(.69,sx+.05*Math.sin(a),sy+stand.envelope_whd_m[1]-.4,sz+.05*Math.cos(a),a)];
     base.add(new T.Mesh(mergeStaticGeometries(T,photos),photo));
     photos.forEach(geometry => geometry.dispose());
     return base;
@@ -233,6 +237,20 @@ export function createInteriorKit(T, scene, {
       return deferActivation ? job.done : awaitLatest(job);
     },
     activateTier,
+    artworkForTier(tier) {
+      const textures = new Set();
+      for (const shop of shops) for (const root of shop.ready.get(tier) ?? []) {
+        root.traverse(mesh => {
+          if (!mesh.isMesh) return;
+          for (const material of [].concat(mesh.material)) {
+            for (const map of [material.map,material.emissiveMap]) {
+              if (map?.userData.artworkMipmaps === 'generate') textures.add(map);
+            }
+          }
+        });
+      }
+      return textures;
+    },
     groups: shops.map(shop => shop.group),
     setTier(tier) {
       const target = interiorTiers.includes(tier) ? tier : 'low';

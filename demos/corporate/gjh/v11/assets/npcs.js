@@ -630,6 +630,11 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       return measure(nonNpcCalls,true);
     },
     setVisible(value) { showing=Boolean(value); applyVisibility(); },
+    forEachVisible(visit) {
+      for (const {visual,seat} of visitors) {
+        if (visual.visible) visit(visual.position,visual.rotation.y,seat?.floor ?? visual.position.y);
+      }
+    },
     setDrawCallBudget(value) { settings.drawCallBudget=value; measure(admission.nonNpcCalls,false); },
     setQuality(next={}) {
       settings={...settings,...next};

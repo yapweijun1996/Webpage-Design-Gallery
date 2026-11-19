@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createMallThemeCoordinator, EVERYDAY, LUNAR_NEW_YEAR, CHRISTMAS, DEEPAVALI, THEME_STORAGE_KEY} from '../demos/corporate/gjh/v11/assets/mall-themes.js';
+import {createMallThemeCoordinator, EVERYDAY, LUNAR_NEW_YEAR, CHRISTMAS, DEEPAVALI, MALL_THEMES, THEME_STORAGE_KEY} from '../demos/corporate/gjh/v11/assets/mall-themes.js';
 import {applyMallThemeToWorld} from '../demos/corporate/gjh/v11/assets/world.js';
 import {LUNAR_DECOR_LAYOUT} from '../demos/corporate/gjh/v11/assets/lunar-new-year.js';
 import {CHRISTMAS_DECOR_LAYOUT} from '../demos/corporate/gjh/v11/assets/christmas.js';
@@ -135,12 +135,29 @@ test('validated visual roles update real scene targets atomically before a futur
  const color=()=>({value:null,set(value){this.value=value;}});
  const material=()=>({color:color(),emissive:color(),map:null});
  const materials=Object.fromEntries(['shellFloor','shellCeiling','shellWall','green','ivory','brass','wood','oak','timber','timberAlt','glass','glow'].map(name=>[name,material()]));
- const ambient={color:color(),groundColor:color()},key={color:color()},fill={color:color()};
- const target={expanded:true,materials,ambient,key,fill};
+ const ambient={color:color(),groundColor:color()},key={color:color()},fog={color:color()};
+ const target={expanded:true,materials,ambient,key,fog};
+ for (const theme of MALL_THEMES) {
+   assert.equal(applyMallThemeToWorld(theme,target),true);
+   assert.equal(fog.color.value,theme.lighting.fog);
+   assert.equal(ambient.color.value,theme.lighting.sky);
+   assert.equal(key.intensity,theme.lighting.keyIntensity);
+ }
  assert.equal(applyMallThemeToWorld(EVERYDAY,target),true);
  assert.equal(materials.shellFloor.color.value,EVERYDAY.materials.floorFlat);
- const next={...EVERYDAY,materials:{...EVERYDAY.materials,wall:0x112233,green:0x445566,glassOpacity:.4},lighting:{...EVERYDAY.lighting,fill:0x778899,fillIntensity:.7}};
- assert.equal(applyMallThemeToWorld(next,target),true);assert.equal(materials.shellWall.color.value,0x112233);assert.equal(materials.green.color.value,0x445566);assert.equal(materials.glass.opacity,.4);assert.equal(fill.color.value,0x778899);assert.equal(fill.intensity,.7);
- assert.equal(applyMallThemeToWorld({...next,materials:{...next.materials,wall:-1}},target),false);assert.equal(materials.shellWall.color.value,0x112233);
+ const next={...EVERYDAY,materials:{...EVERYDAY.materials,wall:0x112233,green:0x445566,glassOpacity:.4},
+   lighting:{...EVERYDAY.lighting,fog:0xddbf9f,ambient:1.15}};
+ assert.equal(applyMallThemeToWorld(next,target),true);
+ assert.equal(materials.shellWall.color.value,0x112233);
+ assert.equal(materials.green.color.value,0x445566);
+ assert.equal(materials.glass.opacity,.4);
+ assert.equal(fog.color.value,0xddbf9f);
+ assert.equal(ambient.intensity,1.15);
+ for (const lighting of [{fog:-1},{keyIntensity:5.1},{exposure:Infinity}]) {
+   assert.equal(applyMallThemeToWorld({...EVERYDAY,lighting:{...EVERYDAY.lighting,...lighting}},target),false);
+   assert.equal(materials.shellWall.color.value,0x112233);
+   assert.equal(fog.color.value,0xddbf9f);
+ }
+ assert.equal(applyMallThemeToWorld({...next,materials:{...next.materials,wall:-1}},target),false);
  assert.equal(applyMallThemeToWorld(next,{...target,expanded:false}),false);
 });

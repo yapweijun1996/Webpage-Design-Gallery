@@ -1,5 +1,6 @@
 import {atriumLayout} from './atrium-layout.js';
 import {expandedLayout, shopEntrance} from './expanded-layout.js';
+import {decalHeight} from './surface-decals.js';
 
 // Walkable rooms based on the fourteen shopfront references.
 // Positive Z faces the arcade. Every bay keeps a clear sightline to its rear wall.
@@ -102,7 +103,7 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
     if(arched) arch(x,1.88,z+.17,w*.46,.66,.07,frame);
     for(const h of [.61,1.34,2.07,2.8]) {
       box(x,h,z+.23,w,.085,.50,oak);
-      box(x,h-.04,z+.46,w-.05,.035,.035,shopLamp);
+      box(x,h-.04,decalHeight(z+.48)-.0175,w-.05,.035,.035,shopLamp);
       // The Low room kit supplies linked, category-shaped stock to these bays.
       const featured = n===4 && x===0 || h===2.07 && x<0 && [5,6,7,8,10,11,12,17].includes(n);
       if (!featured) packageRow(x,h+.05,z+.28,Math.floor(w/.27),.25,kind,c);

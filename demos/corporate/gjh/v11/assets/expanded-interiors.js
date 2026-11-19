@@ -3,6 +3,7 @@ import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {buildWindowStudio, shopLamp} from './window-studios.js';
 import {buildLateShopAnchorDetails} from './shop-anchor-details-last.js';
 import {interiorFloorColour,interiorStores} from './interiors/config.js';
+import {setupMaterialArtwork} from './artwork-textures.js';
 import {westShopPlacements} from './gallery-west-shops.js';
 import {eastShopPlacements} from './gallery-east-shops.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
@@ -36,7 +37,7 @@ function displayPlacements(number, heroX, heroZ) {
 
 // Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
-export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility) {
+export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low') {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.65});
   const woodFinishes = new Set([0xb18356,0x66412f,0x69442c,0x8b5a38,0xb28a5c,0xc59d69,0x8e4d35,0x66482f,0x604534,0x694635,0xaa8464]);
@@ -87,6 +88,11 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
           });
           throw new Error('Model load timed out');
         }
+        const materials = new Set();
+        gltf.scene.traverse(mesh => {
+          if (mesh.isMesh) for (const material of [].concat(mesh.material)) materials.add(material);
+        });
+        for (const material of materials) setupMaterialArtwork(T,material,artworkTier());
         return gltf.scene;
       };
       const deadline = new Promise((_,reject) => {

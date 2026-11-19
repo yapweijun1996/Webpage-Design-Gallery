@@ -1,5 +1,7 @@
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
+import {filterWallArtwork, setupArtworkTexture} from './artwork-textures.js';
+import {decalClearance, decalHeight, decalMaterial, placeDecal} from './surface-decals.js';
 import {createShopVisibility} from './shop-visibility.js';
 import {buildPublicArchitecture} from './public-architecture.js';
 import {addOriginalShopDetails} from './shop-anchor-details-first.js';
@@ -16,21 +18,22 @@ import {addShopSignAtlas} from './shop-signs.js';
 import {addExpandedStorefronts} from './expanded-storefronts.js';
 import {createExpandedInteriors} from './expanded-interiors.js';
 import {createInteriorKit} from './interiors/runtime.js';
-import {interiorFloorColour,interiorStores} from './interiors/config.js';
+import {interiorFloorColour,interiorStores,worldInteriorBox} from './interiors/config.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere} from './mall-atmosphere.js';
 
-export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill}) {
+export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fog}) {
   if (!expanded || !theme?.materials || !theme?.lighting) return false;
   const m=theme.materials,l=theme.lighting;
   const colors=['floorTextured','floorFlat','ceiling','ceilingGlow','wall','green','ivory','brass','wood','oak','timber','timberAlt','glass','glow','glowEmission'];
-  const lightColors=['sky','ground','key','fill'];
+  const lightColors=['sky','ground','key','fog'];
   const scalars=['ceilingGlowIntensity','glassOpacity','glassRoughness','glassMetalness','glowIntensity'];
   if(colors.some(k=>!Number.isInteger(m[k])||m[k]<0||m[k]>0xffffff)||lightColors.some(k=>!Number.isInteger(l[k])||l[k]<0||l[k]>0xffffff)||
-     scalars.some(k=>!Number.isFinite(m[k])||m[k]<0||m[k]>3)||['ambient','keyIntensity','fillIntensity'].some(k=>!Number.isFinite(l[k])||l[k]<0||l[k]>5)||
+     scalars.some(k=>!Number.isFinite(m[k])||m[k]<0||m[k]>3)||['ambient','keyIntensity'].some(k=>!Number.isFinite(l[k])||l[k]<0||l[k]>5)||
+     !Number.isFinite(l.exposure)||l.exposure<.5||l.exposure>2||
      ['glassOpacity','glassRoughness','glassMetalness'].some(k=>m[k]>1)) return false;
   materials.shellFloor.color.set(materials.shellFloor.map?m.floorTextured:m.floorFlat);
   materials.shellCeiling.color.set(m.ceiling);materials.shellCeiling.emissive.set(m.ceilingGlow);materials.shellCeiling.emissiveIntensity=m.ceilingGlowIntensity;
@@ -38,16 +41,17 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
   for(const role of ['green','ivory','brass','wood','oak','timber','timberAlt']) materials[role].color.set(m[role]);
   materials.glass.color.set(m.glass);materials.glass.opacity=m.glassOpacity;materials.glass.roughness=m.glassRoughness;materials.glass.metalness=m.glassMetalness;
   materials.glow.color.set(m.glow);materials.glow.emissive.set(m.glowEmission);materials.glow.emissiveIntensity=m.glowIntensity;
-  ambient.color.set(l.sky);ambient.groundColor.set(l.ground);ambient.intensity=l.ambient;key.color.set(l.key);key.intensity=l.keyIntensity;fill.color.set(l.fill);fill.intensity=l.fillIntensity;
+  ambient.color.set(l.sky);ambient.groundColor.set(l.ground);ambient.intensity=l.ambient;key.color.set(l.key);key.intensity=l.keyIntensity;
+  fog?.color.set(l.fog);
   return true;
 }
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, expanded = false, warmModel) {
+export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low') {
   try {
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
-  const [furnishings,shell,upperAssets]=await Promise.all([createFurnishings(T,true,expanded),expanded ? null : createShell(T),expandedLift ? loadUpperLevel(T) : null]);
+  const [furnishings,shell,upperAssets]=await Promise.all([createFurnishings(T,true,expanded),expanded ? null : createShell(T),expandedLift ? loadUpperLevel(T,artworkTier) : null]);
   const ceilingObstacles=[], shopObstacles=[];
   function ceilingBounds(x,y,z,sx,sy,sz){
     ceilingObstacles.push({min:{x:x-sx/2,y:y-sy/2,z:z-sz/2},max:{x:x+sx/2,y:y+sy/2,z:z+sz/2}});
@@ -66,7 +70,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   const scene = new T.Scene();
   const prepareModel = warmModel && ((model, options) => warmModel(model, scene, options));
   scene.background = new T.Color(expanded ? 0xbad5dc : 0x192e32);
-  scene.fog = new T.Fog(0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
+  scene.fog = new T.Fog(expanded ? 0xd9b996 : 0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
   const mat = (color, extra = {}) => new T.MeshStandardMaterial({color, roughness: .72, ...extra});
   const materials = {
     jade: mat(0x21483e, {roughness: .24, metalness: .22}), jadeAlt: mat(0x244c42, {roughness: .28, metalness: .18}),
@@ -109,6 +113,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   // into one shared geometry while the parent and physics body remain movable.
   const storefrontGlassMaterial = expanded ? materials.glass.clone() : materials.glass;
   if (expanded) storefrontGlassMaterial.forceSinglePass = true;
+  const doorGlassMaterial = expanded ? new T.MeshBasicMaterial({
+    color:materials.glass.color, opacity:materials.glass.opacity*.76, transparent:true, depthWrite:false
+  }) : materials.glass;
+  materials.skylightGlass = materials.glass.clone();
+  materials.skylightGlass.side = T.FrontSide;
   const doorFrameParts = [-1.12,1.12].map(x => geometry.box.clone().scale(.035,3.5,.065).translate(x,0,0));
   doorFrameParts.push(geometry.box.clone().scale(2.25,.035,.065).translate(0,-1.73,0));
   const doorFrameGeometry = mergeGeometries(doorFrameParts);
@@ -217,13 +226,17 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         await new Promise(resolve => setTimeout(resolve, attempt ? 800 : 200));
       }
     }
-    texture.colorSpace = T.SRGBColorSpace; texture.anisotropy = 4; textures.set(name, texture);
+    textures.set(name, setupArtworkTexture(T,texture,artworkTier()));
   }));
   const plane = geometry.plane;
   function art(name, x, y, z, width, ry = 0) {
     const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
-    const mesh = new T.Mesh(plane, mat(0xffffff, {map: texture, emissiveMap: texture, emissive: 0xffffff, emissiveIntensity: .2}));
-    mesh.position.set(x, y, z); mesh.rotation.y = ry; mesh.scale.set(width, height, 1); scene.add(mesh);
+    const material = decalMaterial(filterWallArtwork(T,mat(0xffffff, {
+      map:texture, emissiveMap:texture, emissive:0xffffff, emissiveIntensity:.2
+    })), -1);
+    const mesh = new T.Mesh(plane, material);
+    mesh.position.set(x + decalClearance * Math.sin(ry), y, z + decalClearance * Math.cos(ry));
+    mesh.rotation.y = ry; mesh.scale.set(width, height, 1); scene.add(mesh);
     if (activeShopSlot !== null) queueShopUpload(activeShopSlot, mesh);
     return tagShopLod(mesh);
   }
@@ -237,16 +250,16 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       context.strokeStyle = '#b59b62'; context.lineWidth = 3; context.strokeRect(8, 8, 1008, 112);
     }
     context.fillStyle = '#e9d6a9'; context.font = `500 ${fontSize}px Georgia`; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 512, 64);
-    const texture = new T.CanvasTexture(canvas); texture.colorSpace = T.SRGBColorSpace;
-    const mesh = new T.Mesh(plane, new T.MeshBasicMaterial({map: texture, transparent: true, depthWrite: false}));
-    mesh.position.set(x, y, z); mesh.scale.set(width, height, 1); scene.add(mesh);
+    const texture = setupArtworkTexture(T,new T.CanvasTexture(canvas),artworkTier());
+    const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({map:texture,transparent:true}))));
+    mesh.position.set(x, y, decalHeight(z)); mesh.scale.set(width, height, 1); scene.add(mesh);
     if (activeShopSlot !== null) queueShopUpload(activeShopSlot, mesh);
     return tagShopLod(mesh);
   }
   const shadowCanvas = document.createElement('canvas'); shadowCanvas.width = shadowCanvas.height = 64;
   const shadowContext = shadowCanvas.getContext('2d'), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
   gradient.addColorStop(0, 'rgba(4,18,12,.58)'); gradient.addColorStop(.35, 'rgba(4,18,12,.34)'); gradient.addColorStop(1, 'rgba(4,18,12,0)'); shadowContext.fillStyle = gradient; shadowContext.fillRect(0, 0, 64, 64);
-  const contact = new T.MeshBasicMaterial({map: new T.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false});
+  const contact = decalMaterial(new T.MeshBasicMaterial({map:new T.CanvasTexture(shadowCanvas),transparent:true}),-1);
   materials.contact=contact;
   function shadow(x, z, w, d) {
     // Every ground decal uses the same flat color and alpha blend.
@@ -258,7 +271,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   poolGradient.addColorStop(0, 'rgba(255,226,171,.3)'); poolGradient.addColorStop(.35, 'rgba(255,226,171,.15)'); poolGradient.addColorStop(1, 'rgba(255,226,171,0)');
   poolContext.fillStyle = poolGradient; poolContext.fillRect(0, 0, 64, 64);
   const poolTexture = new T.CanvasTexture(poolCanvas); poolTexture.colorSpace = T.SRGBColorSpace;
-  materials.lightPool = new T.MeshBasicMaterial({map: poolTexture, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false});
+  materials.lightPool = decalMaterial(new T.MeshBasicMaterial({
+    map:poolTexture, transparent:true, blending:T.AdditiveBlending, toneMapped:false
+  }),-1);
   function lightPool(x, y, z, width, height, ry = 0, rx = -Math.PI / 2) {
     solid('plane', 'lightPool', x, y, z, width, height, 1, ry, rx);
   }
@@ -322,7 +337,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
-    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
+    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
@@ -364,7 +379,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   if (!expanded) {
   // Skylight replaces the central roof panel visually, with dusk glass and brass ribs.
   ceilingBox('dark', 0, 6.29, 8.3, 14.6, .06, 13);
-  ceilingBox('glass', 0, 6.25, 8.3, 14.1, .025, 12.6);
+  ceilingBox('skylightGlass', 0, 6.25, 8.3, 14.1, .025, 12.6);
   for (let x = -7; x <= 7; x += 2) ceilingBox('brass', x, 6.18, 8.3, .045, .08, 12.7);
   for (const z of [2, 5.1, 8.3, 11.5, 14.6]) ceilingBox('brass', 0, 6.15, z, 14.1, .08, .045);
   // Dusk-lit ceiling inset: no texture or runtime environment download.
@@ -513,8 +528,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         rectangle('#cfac77', x + 9, y + 98, 200, 5);
       }
     }
-    const map = new T.CanvasTexture(panel);
-    map.colorSpace = T.SRGBColorSpace;
+    const map = setupArtworkTexture(T,new T.CanvasTexture(panel),artworkTier());
     return mat(0xffffff, {map, roughness:.88});
   }
   for (const store of spatial.stores) {
@@ -658,8 +672,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       box('oak', rugX, .025, rugZ, rugWidth, .012, rugDepth);
       box(zone === 'gogo' ? 'rugSage' : 'rugSand', rugX, .034, rugZ, rugWidth - .14, .006, rugDepth - .14);
       for (const side of [-1, 1]) {
-        box('timber', rugX + side * (rugWidth / 2 - .19), .04, rugZ, .025, .004, rugDepth - .35);
-        box('timber', rugX, .04, rugZ + side * (rugDepth / 2 - .19), rugWidth - .35, .004, .025);
+        const trimY = decalHeight(.037) + .002;
+        box('timber', rugX + side * (rugWidth / 2 - .19), trimY, rugZ, .025, .004, rugDepth - .355);
+        box('timber', rugX, trimY, rugZ + side * (rugDepth / 2 - .19), rugWidth - .405, .004, .025);
         for (const end of [-1, 1]) {
           const cornerX = rugX + side * (rugWidth / 2 - .43), cornerZ = rugZ + end * (rugDepth / 2 - .43);
           solid('box', 'oak', cornerX, .041, cornerZ, .16, .004, .16, Math.PI / 4);
@@ -705,7 +720,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     } else if (expanded && zone === 'gogo') {
       for (const z of [-2.1,-3.7,-5.3]) pendant(x+2.7, z, 3.35);
     } else if (!expanded) { pendant(x, -4, 4.2); pendant(x, -8, 4.2); }
-    const light = new T.PointLight(zone === 'gogo' ? 0xcce9c2 : 0xffdfa9, 45, 15, 2); light.position.set(x, 4.5, -6); scene.add(light);
     box('brass', x, .22, -10.32, 9.3, .045, .04);
     if (zone === 'newmoon') {
       // The asset display owns its geometry and collision bounds; no legacy rack remains.
@@ -738,7 +752,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       const {addProducts} = await import('./products.js');
       const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
       const firstProduct = scene.children.length;
-      productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],sampleCan,activeShopSlot);
+      productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],sampleCan,activeShopSlot,artworkTier);
       // These GLBs were awaited during startup, but the shelf is out of the entry view.
       queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter(mesh => mesh.isMesh));
       interactables.push(...productDisplay.interactables);
@@ -879,6 +893,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     // The broad wash follows the same roof opening as the fixture.
     function warmStrip(x,z,width,depth){
       const panels=ceilingBox('glow',x,8.34,z,width,.035,depth,liftLayout.roofOpening);
+      for (const r of panels) lightWash(
+        (r.minX+r.maxX)/2,8.32,(r.minZ+r.maxZ)/2,
+        Math.max(.42,r.maxX-r.minX),Math.max(.42,r.maxZ-r.minZ),0,Math.PI/2,true
+      );
       for(const r of panels)lightPool((r.minX+r.maxX)/2,.052,(r.minZ+r.maxZ)/2,
         width>depth?r.maxX-r.minX:4.5,width>depth?4.5:r.maxZ-r.minZ);
       const washWidth=width>depth ? width : 2.4, washDepth=width>depth ? 2.4 : depth;
@@ -936,7 +954,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       collider(x,liftLayout.upper+.25,z,.68,.5,.68);
     }
     activeDeck=false;
-    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility);
+    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier);
     interiorModels=interiors;
     for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
       collider(x,y,z,width,height,depth);
@@ -945,7 +963,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     }
     shopLodUpdates.push(interiors.update);
     interiorKit = createInteriorKit(T, scene, {
-      assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'),
+      assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'), artworkTier,
       prepareModel, registerCollider({center:[x,y,z],size:[w,h,d],yaw}) {
         // The camera sweep already uses these oriented Rapier boxes.
         const box = physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
@@ -953,8 +971,19 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         return () => physics.removeCollider(box,false);
       }
     });
+    // Contact decals follow the authored furniture footprints and share the
+    // public contact batch. Keep them hidden until their room is installed.
+    for (const [id,store] of Object.entries(interiorStores)) {
+      activeShopSlot = Number(id.slice(1));
+      for (const footprint of store.colliders) {
+        const {center:[x,,z],size:[w,,d],yaw} = worldInteriorBox(store,footprint);
+        const y = store.frame.world_origin_m[1] + store.floor.position_m[1] + .024;
+        solid('plane','contact',x,y,z,w*1.22,d*1.22,1,yaw,-Math.PI/2,'YXZ');
+      }
+    }
+    activeShopSlot = null;
   }
-  const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded);
+  const amenities=await addAmenities(T,scene,collider,createCollectProp,true,staticProductCount,expanded,artworkTier);
   interactables.push(...amenities.interactables);
   // The physics still owns each moving leaf. Frame and glass buffers read the
   // same transforms before drawing.
@@ -986,10 +1015,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     frames.computeBoundingSphere();
   }
   viewUpdates.push(updateFrames);
-  if (expanded) for (const [name,panes,receiveShadow] of [
-    ['Sliding shop door glass',doorGlass,false], ['Original shop window glass',windowGlass,true]
+  if (expanded) for (const [name,panes,material,receiveShadow] of [
+    ['Sliding shop door glass',doorGlass,doorGlassMaterial,false],
+    ['Original shop window glass',windowGlass,storefrontGlassMaterial,true]
   ]) {
-    const batch = createGlassBatch(T,geometry.box,storefrontGlassMaterial,panes);
+    const batch = createGlassBatch(T,geometry.box,material,panes);
     batch.mesh.name = name;
     batch.mesh.receiveShadow = receiveShadow;
     scene.add(batch.mesh);
@@ -1013,6 +1043,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
     const source = surfaces ? batch.geometry.clone().setAttribute('instanceSurface', surfaces) : batch.geometry;
     const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length);
+    if (batch.material === contact) placeDecal(mesh);
+    if (batch.material === materials.lightPool) placeDecal(mesh,-1);
     mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
     if (batch.material === materials.paving) {
       pavingMesh = mesh;
@@ -1044,7 +1076,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     const controller = expanded && compact ? createInstanceVisibility(T, mesh, {
       colours:batch.colours, slots:batch.slots, attributes:surfaces ? [surfaces] : []
     }) : null;
-    const allow = slot => slot === null || shopNear.get(slot);
+    const allow = batch.material === contact
+      ? slot => slot === null || interiorKit.groups[slot-1]?.visible
+      : slot => slot === null || shopNear.get(slot);
     viewUpdates.push(view => {
       if (lod?.mesh.parent) lod.update(view, batch.slots ? allow : undefined);
       else if (mesh.visible && controller) controller.update(view.frustum,batch.slots ? allow : undefined,
@@ -1067,11 +1101,12 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   }
   lowCylinder.dispose();
   lowSphere.dispose();
-  const ambient = new T.HemisphereLight(expanded ? 0xe5eef0 : 0xffeee0, expanded ? 0x665e50 : 0x6d5b3b, expanded ? .72 : 1.05);scene.add(ambient);
-  const key = new T.DirectionalLight(expanded ? 0xffe0bc : 0xffd5a0, expanded ? 2.6 : 2.1); key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9])); key.castShadow = true;
+  const ambient = new T.HemisphereLight(expanded ? 0xffedda : 0xffeee0, expanded ? 0x8c7055 : 0x6d5b3b, 1.05);scene.add(ambient);
+  const key = new T.DirectionalLight(expanded ? 0xffd4a2 : 0xffd5a0, expanded ? 2.25 : 2.1); key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9])); key.castShadow = true;
   const shadowSize = expanded ? 768 : 1024;
   key.shadow.mapSize.set(shadowSize,shadowSize); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
-  const fill = new T.DirectionalLight(expanded ? 0xcbdde5 : 0xe9d8c2, expanded ? .4 : .45); fill.position.set(4, 8, -5); scene.add(fill);
+  const fill = expanded ? null : new T.DirectionalLight(0xe9d8c2,.45);
+  if (fill) { fill.position.set(4,8,-5); scene.add(fill); }
   const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T,scene,{
     plane:geometry.plane, poolMaterial:materials.lightPool, washes:atmosphereWashes,
     floors:[materials.shellFloor,materials.paving,materials.courtStone],
@@ -1088,13 +1123,19 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     else attach();
   }
   const applyMallTheme = theme => {
-    const applied = applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
+    const applied = applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fog:scene.fog});
     if (applied) {
       surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
       storefrontGlassMaterial.color.copy(materials.glass.color);
       storefrontGlassMaterial.opacity = materials.glass.opacity;
       storefrontGlassMaterial.roughness = materials.glass.roughness;
       storefrontGlassMaterial.metalness = materials.glass.metalness;
+      doorGlassMaterial.color.copy(materials.glass.color);
+      doorGlassMaterial.opacity = materials.glass.opacity*.76;
+      materials.skylightGlass.color.copy(materials.glass.color);
+      materials.skylightGlass.opacity = materials.glass.opacity;
+      materials.skylightGlass.roughness = materials.glass.roughness;
+      materials.skylightGlass.metalness = materials.glass.metalness;
       refreshInstanceColours();
     }
     return applied;
@@ -1127,7 +1168,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   const shopNear = new Map(), eye = new T.Vector3(), projection = new T.Matrix4();
   const view = {frustum:new T.Frustum(), eye, shopVisibility};
   let deckLodMeshes=null;
-  function updateShopLods(visitor, shadows = true, tier, camera, height, focus) {
+  function updateShopLods(visitor, shadows = true, tier, camera, height, focus, lightWash) {
     productDisplay?.setShadows(shadows);
     if (!expanded) {
       if (camera) {
@@ -1137,7 +1178,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       return;
     }
     // The render loop and context recovery both supply the resolved tier here.
-    if (surfaceAtmosphere.setTier(tier) && mappedPaving) mappedPaving.roughness = materials.paving.roughness;
+    if (surfaceAtmosphere.setTier(tier, lightWash) && mappedPaving) mappedPaving.roughness = materials.paving.roughness;
     uploadVisitor = visitor;
     if (camera) {
       view.camera = camera;
@@ -1199,7 +1240,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     if(!warmModel)return;
     // Match the landing's zero shop accents even while the player is downstairs.
     landingLights??=new T.Scene();
-    landingLights.children=[ambient,key,fill];
+    landingLights.children=[ambient,key];
     landingLights.fog=scene.fog;landingLights.environment=scene.environment;
     landingLights.environmentIntensity=scene.environmentIntensity;
     if(upperWarmStatus==='pending')return;
@@ -1213,7 +1254,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   let brandWallPromise=null;
   function ensureBrandWall(){
     if(!expanded)return Promise.reject(new Error('Brand wall is only available in the expanded mall'));
-    if(!brandWallPromise)brandWallPromise=import('./brand-wall.js').then(({addBrandWallAtlas})=>addBrandWallAtlas(T,scene,liftLayout.upper,prepareModel)).then(result=>{
+    if(!brandWallPromise)brandWallPromise=import('./brand-wall.js').then(({addBrandWallAtlas})=>addBrandWallAtlas(
+      T,scene,liftLayout.upper,prepareModel,artworkTier)).then(result=>{
       interactables.push(...result.interactables);
       deckLodMeshes?.push(result.mesh);
       return result;
