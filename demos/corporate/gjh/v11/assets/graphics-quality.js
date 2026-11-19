@@ -1,5 +1,10 @@
 /** Rendering policy only: downloads, scene content and simulation are unchanged. */
 export const QUALITY_KEY = 'gjh-v11-graphics-quality-v1';
+export const MALL_FRAME_BUDGETS = Object.freeze({
+  low:Object.freeze({triangles:220000, calls:70}),
+  balanced:Object.freeze({triangles:300000, calls:90}),
+  detailed:Object.freeze({triangles:420000, calls:110})
+});
 const CHOICES = new Set(['auto', 'low', 'balanced', 'detailed']);
 const MOBILE_FPS_FLOOR = 24;
 // One 60 Hz refresh plus 1ms covers phase and timer rounding per window.

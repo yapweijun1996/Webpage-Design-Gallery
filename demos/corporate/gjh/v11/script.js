@@ -3,7 +3,7 @@ import {createPerformanceMonitor} from './assets/performance-monitor.js';
 import {createPerformancePanel} from './assets/performance-panel.js';
 import {createFrameTrace} from './assets/frame-trace.js';
 import {createUI} from './assets/ui.js';
-import {createGraphicsQuality} from './assets/graphics-quality.js';
+import {createGraphicsQuality,MALL_FRAME_BUDGETS} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
@@ -345,7 +345,8 @@ function render(force = false) {
     const draw=()=>{
       world.interiors?.beginFrame();
       try {
-        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs);
+        atmosphere.render(camera, detailedReady && Math.abs(pose.y) < 5, npcs,
+          expanded ? MALL_FRAME_BUDGETS[tier] : undefined);
       } finally { world.interiors?.endFrame(); }
     };
     if (shelfFocus?.open) player.renderShelf(draw); else draw();

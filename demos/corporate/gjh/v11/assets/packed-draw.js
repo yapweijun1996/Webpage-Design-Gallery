@@ -132,12 +132,13 @@ export function createInstanceVisibility(T, mesh, {colours, slots, attributes = 
     uploadPrefix(mesh.instanceColor, previousCount * 3);
   }
   return {
-    update(frustum, allow = () => true, shadows = false) {
+    update(frustum, allow = () => true, shadows = false, occluded) {
       let count = 0, changed = false;
       for (const cell of cells.values()) {
         if (!allow(cell.slot)) continue;
-        const visibility = frustum ? boxVisibility(frustum, shadows ? cell.casterBounds : cell.bounds) : 1;
-        if (visibility < 0) continue;
+        const bounds = shadows ? cell.casterBounds : cell.bounds;
+        const visibility = frustum ? boxVisibility(frustum,bounds) : 1;
+        if (visibility < 0 || occluded?.(cell.slot,bounds)) continue;
         for (const {box, casterBounds, index} of cell.parts) {
           if (visibility === 0 && !frustum.intersectsBox(shadows ? casterBounds : box)) continue;
           selected[count] = index;
@@ -191,6 +192,77 @@ export function boxFrontFaces(eye, centre, size) {
     | (z > size.z/2 ? 16 : z < -size.z/2 ? 32 : 0);
 }
 
+// Transparent boxes keep their original exit-then-entry blending. Sort panes
+// back to front before ordering the six faces of each convex box.
+export function createGlassBatch(T, source, material, panes) {
+  const geometry = mergeStaticGeometries(T, panes.map(() => source));
+  const position = geometry.attributes.position.setUsage(T.DynamicDrawUsage);
+  const index = geometry.index.setUsage(T.DynamicDrawUsage);
+  const mesh = new T.Mesh(geometry, material);
+  const bounds = new T.Box3(), centre = new T.Vector3(), half = new T.Vector3();
+  const original = source.index.array, vertices = source.attributes.position;
+  const visible = [], previous = [];
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+  function update(view) {
+    visible.length = 0;
+    let moved = false;
+    for (const [i, pane] of panes.entries()) {
+      const {position:at, scale} = pane;
+      half.copy(scale).multiplyScalar(.5);
+      pane.bounds ??= new T.Box3();
+      pane.bounds.min.copy(at).sub(half);
+      pane.bounds.max.copy(at).add(half);
+      if (view && !view.frustum.intersectsBox(pane.bounds)) continue;
+      if (!pane.lastPosition?.equals(at)) {
+        pane.lastPosition ??= new T.Vector3();
+        pane.lastPosition.copy(at);
+        for (let vertex = 0; vertex < vertices.count; vertex++) {
+          position.setXYZ(i * vertices.count + vertex, at.x + vertices.getX(vertex)*scale.x,
+            at.y + vertices.getY(vertex)*scale.y, at.z + vertices.getZ(vertex)*scale.z);
+        }
+        position.addUpdateRange(i * vertices.count * 3, vertices.count * 3);
+        moved = true;
+      }
+      pane.index = i;
+      pane.front = view ? boxFrontFaces(view.eye,at,scale) : 0;
+      pane.depth = view ? centre.copy(at).applyMatrix4(view.camera.matrixWorldInverse).z : 0;
+      visible.push(pane);
+    }
+    visible.sort((a,b) => a.depth-b.depth);
+    const changed = visible.length*2 !== previous.length ||
+      visible.some(({index,front},i) => index !== previous[i*2] || front !== previous[i*2+1]);
+    if (changed) {
+      let offset = 0;
+      previous.length = 0;
+      for (const pane of visible) {
+        previous.push(pane.index,pane.front);
+        const start = pane.index*vertices.count;
+        for (const front of [false,true]) for (let face = 0; face < 6; face++) {
+          if (Boolean(pane.front & (1 << face)) !== front) continue;
+          for (let corner = 0; corner < 6; corner++) index.array[offset++] = start+original[face*6+corner];
+        }
+      }
+      geometry.setDrawRange(0,offset);
+      if (offset) {
+        index.clearUpdateRanges();
+        index.addUpdateRange(0,offset);
+        index.needsUpdate = true;
+      }
+    }
+    if (moved) position.needsUpdate = true;
+    if (changed || moved) {
+      mesh.visible = visible.length > 0;
+      bounds.makeEmpty();
+      for (const pane of visible) bounds.union(pane.bounds);
+      geometry.boundingBox.copy(bounds);
+      bounds.getBoundingSphere(geometry.boundingSphere);
+    }
+  }
+  update();
+  return {mesh, update};
+}
+
 export function shadowReceiverBounds(box) {
   const reach = box.clone(), height = Math.max(0, box.max.y);
   // Project along the fixed key at (-12,16,6) with a margin for PCF.
@@ -229,6 +301,7 @@ export function createProjectedBatch(T, mesh, distant, error, colours, slots) {
     const bounds = mesh.geometry.boundingBox.clone().applyMatrix4(matrix);
     const casterBounds = mesh.castShadow ? shadowReceiverBounds(bounds) : bounds;
     parts.push({geometries, bounds, casterBounds, slot:slots?.[i],
+      casterSphere:mesh.castShadow ? casterBounds.getBoundingSphere(new T.Sphere()) : null,
       sphere:bounds.getBoundingSphere(new T.Sphere()), error:error(matrix), distant:false});
   }
   const material = colours ? mesh.material.clone() : mesh.material;
@@ -255,12 +328,15 @@ export function createProjectedBatch(T, mesh, distant, error, colours, slots) {
     update(view, allow) {
       batch.update(part => {
         if (allow && !allow(part.slot)) return -1;
+        if (!view?.camera) return 0;
         const visible = view.frustum.intersectsBox(part.bounds);
-        // Preserve every possible Detailed shadow caster, including benches
-        // outside the main camera. Their shadows use the authored silhouette.
-        if (view.shadows && mesh.castShadow && view.frustum.intersectsBox(part.casterBounds)) return 0;
-        if (!visible) return -1;
-        part.distant = !view.focus && distantDetail(part.distant, projectedError(view, part.sphere, part.error));
+        const shadowVisible = view.shadows && mesh.castShadow && view.frustum.intersectsBox(part.casterBounds);
+        if (!visible && !shadowVisible) return -1;
+        if (view.shopVisibility?.occluded(part.slot,shadowVisible ? part.casterBounds : part.bounds)) return -1;
+        const pixels = shadowVisible
+          ? projectedError(view,part.casterSphere,part.error*1.4)
+          : projectedError(view,part.sphere,part.error);
+        part.distant = !view.focus && distantDetail(part.distant,pixels,.55);
         return Number(part.distant);
       });
     }

@@ -94,7 +94,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
   let detailLoading = false, detailScheduled = false;
   const group = new T.Group();
   group.name = 'Blender furnishings';
-  const benchLods = [], staticBatches = [];
+  const projectedBatches = [], staticBatches = [];
   let registerMesh, prepareModel;
   async function load(kind) {
     const definition = sources[kind], record = records[kind];
@@ -114,10 +114,12 @@ export async function createFurnishings(T, shadows, expanded = false) {
 
   function mount(kind, prewarm) {
     const record = records[kind];
+    const projected = expanded && kind === 'bench';
     const sharedLights = expanded && kind === 'wallLight';
+    const shareGround = expanded && ['bench','barStool','planter','wallLight'].includes(kind);
     const placementsBySlot = new Map(), meshes = [];
     for (const placement of record.placements) {
-      const slot = sharedLights ? null : placement.shopSlot;
+      const slot = shareGround && placement.shopSlot !== -1 ? null : placement.shopSlot;
       if (!placementsBySlot.has(slot)) placementsBySlot.set(slot, []);
       placementsBySlot.get(slot).push(placement);
     }
@@ -131,7 +133,9 @@ export async function createFurnishings(T, shadows, expanded = false) {
         mesh.computeBoundingSphere();
         if(shopSlot===-1)mesh.userData.deckLod=true;
         else if(shopSlot!==null)mesh.userData.shopSlot=shopSlot;
-        if (sharedLights) mesh.userData.lightSlots = placements.map(placement => placement.shopSlot);
+        if (expanded && shopSlot !== -1 && (shareGround || shopSlot !== null)) {
+          mesh.userData.slots = placements.map(placement => placement.shopSlot);
+        }
         meshes.push(mesh);
       }
     }
@@ -139,12 +143,14 @@ export async function createFurnishings(T, shadows, expanded = false) {
       for (const mesh of meshes) {
         if (mesh.userData.shopSlot !== undefined) registerMesh(mesh);
         group.add(mesh);
-        if (expanded && kind === 'bench') {
+        const slots = mesh.userData.slots;
+        if (projected) {
           const distant = simplifyBench(T, mesh.geometry);
-          const lod = createProjectedBatch(T, mesh, distant.geometry, matrix => distant.error * matrix.getMaxScaleOnAxis());
+          const lod = createProjectedBatch(T, mesh, distant.geometry, matrix => distant.error * matrix.getMaxScaleOnAxis(),
+            undefined,slots);
           distant.geometry.dispose();
-          const compact = createInstanceVisibility(T, mesh);
-          benchLods.push({mesh, compact, lod});
+          const compact = createInstanceVisibility(T, mesh, {slots,castShadow:mesh.castShadow});
+          projectedBatches.push({mesh,slots,compact,lod});
           const mountLod = () => {
             mesh.removeFromParent();
             lod.mesh.visible = false;
@@ -153,7 +159,6 @@ export async function createFurnishings(T, shadows, expanded = false) {
           if (prepareModel) void prepareModel(lod.mesh, {late:false}).then(mountLod, () => lod.mesh.geometry.dispose());
           else mountLod();
         } else if (expanded && !mesh.material.transparent) {
-          const slots = mesh.userData.lightSlots;
           const compact = createInstanceVisibility(T, mesh, {slots,castShadow:mesh.castShadow});
           staticBatches.push({mesh, slots, compact});
         }
@@ -197,18 +202,18 @@ export async function createFurnishings(T, shadows, expanded = false) {
 
   return {
     updateView(view, shopNear) {
-      const lightNear = slot => slot === null || shopNear.get(slot);
+      const near = slot => slot === null || shopNear.get(slot);
       for (const {mesh, slots, compact} of staticBatches) {
-        if (mesh.visible) compact.update(view.frustum, slots ? lightNear : undefined, view.shadows);
+        if (mesh.visible) compact.update(view.frustum,slots ? near : undefined,view.shadows,view.shopVisibility?.occluded);
       }
-      for (const {mesh, compact, lod} of benchLods) {
+      for (const {mesh,slots,compact,lod} of projectedBatches) {
         const visible = mesh.userData.deckLod ? view.deckVisible : mesh.visible;
         if (!lod.mesh.parent) {
           mesh.visible = visible;
-          if (visible) compact.update(view.shadows ? null : view.frustum);
+          if (visible) compact.update(view.frustum,slots ? near : undefined,view.shadows,view.shopVisibility?.occluded);
           continue;
         }
-        if (visible) lod.update(view);
+        if (visible) lod.update(view,slots ? near : undefined);
         lod.mesh.visible = visible && lod.mesh.geometry.drawRange.count > 0;
       }
     },

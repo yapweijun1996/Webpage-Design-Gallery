@@ -22,6 +22,15 @@ function fixture(options={}) {
 }
 const player={x:0,y:0,z:10,seatId:null};
 const admitFrames=(system,calls=0,frames=48)=>{for(let i=0;i<frames;i++) system.admit(calls);};
+
+test('ambient admission fits the tighter of the expanded frame budgets', () => {
+  const previous = {admitted:4,safeFrames:0};
+  const budget = {limit:4,totalCallCap:90,triangleCap:300000,callsPerNpc:3,trianglesPerNpc:12000};
+  assert.equal(nextNpcAdmission(previous,{...budget,nonNpcCalls:77,nonNpcTriangles:278000}).admitted,1);
+  assert.equal(nextNpcAdmission(previous,{...budget,nonNpcCalls:89,nonNpcTriangles:160000}).admitted,0);
+  assert.equal(nextNpcAdmission(previous,{...budget,nonNpcCalls:70,nonNpcTriangles:252000}).admitted,4);
+  assert.equal(nextNpcAdmission(previous,{...budget,nonNpcCalls:70,nonNpcTriangles:NaN}).admitted,0);
+});
 const meshes=root=>{const result=[];root.traverse(node=>{if(node.isMesh) result.push(node);});return result;};
 
 test('unknown headroom hides immediately and cannot retain a safe-frame streak',()=>{

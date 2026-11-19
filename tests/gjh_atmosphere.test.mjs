@@ -25,3 +25,44 @@ test('shop lighting tracks the nearest bays and theme with stable ground-floor s
   atmosphere.update({x:20,y:7,z:0});
   assert.ok(lights.every(light => !light.visible));
 });
+
+test('Detailed filters glow at quarter resolution and reserves the final draw for budget admission', () => {
+  const scene = new T.Scene(), camera = new T.PerspectiveCamera(), passes = [];
+  let target = null, colour = new T.Color(), alpha = 1;
+  const info = {autoReset:true,render:{calls:0,triangles:0},reset() {
+    this.render.calls = this.render.triangles = 0;
+  }};
+  const renderer = {
+    info, autoClear:true, shadowMap:{autoUpdate:true},
+    getRenderTarget:() => target,
+    setRenderTarget(next) { target = next; },
+    getDrawingBufferSize:size => size.set(1920,892),
+    getClearColor:saved => saved.copy(colour),
+    getClearAlpha:() => alpha,
+    setClearColor(next,opacity) { colour.set(next); alpha = opacity; },
+    clear() {},
+    render(rendered, activeCamera) {
+      passes.push([rendered.name,activeCamera.layers.mask,target?.width,target?.height,this.shadowMap.autoUpdate]);
+      info.render.calls++;
+      info.render.triangles += 2;
+    }
+  };
+  const atmosphere = createMallAtmosphere(T,renderer,scene,[]);
+  const budget = {calls:110,triangles:420000};
+  const npcs = {setVisible() {}, admit(calls,triangles,limits) {
+    assert.equal(limits,budget);
+    assert.equal(calls,4);
+    assert.equal(triangles,8);
+    return 0;
+  }};
+  atmosphere.render(camera,true,npcs,budget);
+  assert.deepEqual(passes,[
+    ['',1,1920,892,true], ['',2,480,223,false],
+    ['Mall glow filter',1,480,223,false], ['Mall glow composite',1,undefined,undefined,false]
+  ]);
+  assert.equal(atmosphere.state.totalCalls,4);
+  assert.equal(atmosphere.state.submissions,4);
+  assert.equal(target,null);
+  assert.equal(camera.layers.mask,1);
+  assert.equal(renderer.shadowMap.autoUpdate,true);
+});

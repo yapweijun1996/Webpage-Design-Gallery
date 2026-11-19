@@ -297,10 +297,11 @@ def install_npc_budget_probe(page, cap):
         const expected=[1,...(b.bloom?[2]:[]),...(n.admitted>0?[4]:[])];
         check(JSON.stringify(world.map(p=>p.mask))===JSON.stringify(expected),
           'Repeated full-world submission or incorrect layer masks', frame);
-        const composite=submissions.filter(p=>p.scene!==s.graphics.sceneId);
-        check(composite.length===(b.bloom?1:0) &&
-          (!b.bloom || submissions.at(-1)===composite[0]),
-          'Bloom composite must be one separate final scene', frame);
+        const post=submissions.filter(p=>p.scene!==s.graphics.sceneId);
+        check(post.length===(b.bloom?2:0) && (!b.bloom ||
+          (post[0].name==='Mall glow filter' && post[1].name==='Mall glow composite' &&
+            submissions.at(-1)===post[1])),
+          'Bloom requires one filter and one final composite', frame);
         check(npc.every(p=>!p.autoClear && !p.shadowAutoUpdate && !p.background),
           'NPC overlay clears the base/depth or updates shadows', frame);
         check(npcCalls<=n.admitted*n.callsPerNpc,
@@ -313,7 +314,7 @@ def install_npc_budget_probe(page, cap):
           const originalRender=renderer.render;
           renderer.render=function(scene,camera) {
             const before=this.info.render.calls, autoReset=this.info.autoReset;
-            const submission={scene:scene.uuid,mask:camera.layers.mask,
+            const submission={scene:scene.uuid,name:scene.name,mask:camera.layers.mask,
               autoClear:this.autoClear,shadowAutoUpdate:this.shadowMap.autoUpdate,
               background:scene.background!==null,visitors:[]};
             probe.current=submission;

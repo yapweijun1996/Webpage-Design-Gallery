@@ -2,7 +2,11 @@
 
 Low caps device pixel ratio at 1, disables real-time shadows, and admits up to two ambient visitors on desktop and one on mobile.
 
-In the expanded mall, all tiers pack New Moon's visible shelves and cans into a dense instance prefix and recompute its frustum bounds. The 18 m horizontal range applies to the loaded shelf fixtures, shelf stock and hero can. Showcase cans remain eligible at all distances. Authored slot indices still own pickup and reservation.
+In the expanded mall, loaded shelves and stock use compacted submissions with current bounds. The 18 m range applies to the loaded shelf fixtures, shelf stock and hero can. Showcase cans remain eligible whenever their bounds intersect the view. Authored slot indices own pickup and reservation.
+
+The expanded mall uses frame budgets of 220,000 triangles and 70 draws on Low, 300,000 and 90 on Balanced, and 420,000 and 110 on Detailed. Ambient visitor admission uses the remaining budget after the world and post-processing passes. An opaque shop wall can reject a render bound only when it covers every sightline to that bound. Partial views through the glazing remain eligible. Physics uses the authored room and door geometry.
+
+Detailed uses the same selective glow radius with a quarter-resolution filter and a full-resolution composite. The expanded mall uses a 768 × 768 shadow map. Product shadow casters are selected using bounds that include their projected reach. Distant furnishings use reduced geometry when the estimated displacement, including the projected shadow, is subpixel.
 
 ## Historical triangle breakdown
 

@@ -1,14 +1,15 @@
 import {mergeStaticGeometries} from './merge-static-geometries.js';
-import {createPackedDraw} from './packed-draw.js';
+import {createPackedDraw, shadowReceiverBounds} from './packed-draw.js';
 
 const DISPLAY_DISTANCE = 18;
 
 // The authored slot is the inventory identity. The GPU only needs a dense
 // prefix of visible placements, even when the current tier is above Low.
-export function createProductDisplayLod(T, meshes, placements) {
+export function createProductDisplayLod(T, meshes, placements, {shadow = false, shopSlot} = {}) {
   const matrix = new T.Matrix4();
   const batches = meshes.map(mesh => ({mesh, original: mesh.instanceMatrix.array.slice()}));
   const inRange = placements.map(() => true);
+  const bounds = placements.map(placement => shadow ? shadowReceiverBounds(placement.bounds) : placement.bounds);
   let reserved = -1;
 
   function sync() {
@@ -33,9 +34,9 @@ export function createProductDisplayLod(T, meshes, placements) {
     update(visitor, view) {
       let changed = false;
       placements.forEach(({x, z, alwaysVisible}, index) => {
-        const visible = Boolean(alwaysVisible) ||
-          (Math.hypot(visitor.x - x, visitor.y ?? 0, visitor.z - z) < DISPLAY_DISTANCE &&
-            (!view || view.frustum.intersectsBox(placements[index].bounds)));
+        const visible = (alwaysVisible || Math.hypot(visitor.x - x, visitor.y ?? 0, visitor.z - z) < DISPLAY_DISTANCE) &&
+          (!view || (view.frustum.intersectsBox(bounds[index]) &&
+            (alwaysVisible || !view.shopVisibility?.occluded(shopSlot, bounds[index]))));
         if (visible !== inRange[index]) changed = true;
         inRange[index] = visible;
       });
@@ -92,7 +93,7 @@ export function canDetail(previous, distance, focus = false) {
   return 2;
 }
 
-export function createCanDisplay(T, scene, records) {
+export function createCanDisplay(T, scene, records, shopSlot) {
   const slots = [];
   const buckets = new Map();
   const point = new T.Vector3();
@@ -132,7 +133,8 @@ export function createCanDisplay(T, scene, records) {
       for (const slot of slots) {
         const {x, y, z, alwaysVisible, bounds} = slot;
         slot.visible = (alwaysVisible || Math.hypot(visitor.x-x, (visitor.y ?? y)-y, visitor.z-z) < DISPLAY_DISTANCE)
-          && (!view || view.frustum.intersectsBox(bounds));
+          && (!view || (view.frustum.intersectsBox(bounds) &&
+            (alwaysVisible || !view.shopVisibility?.occluded(shopSlot,bounds))));
         if (slot.visible) {
           const distance = view ? view.eye.distanceTo(point.set(x,y,z)) : Math.hypot(visitor.x-x,visitor.z-z);
           slot.detail = canDetail(slot.detail, distance, view?.focus);

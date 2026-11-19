@@ -34,6 +34,20 @@ function visibleDrawCalls(root) {
   return Math.max(1,count);
 }
 
+function rigTriangles(root) {
+  let count = 0;
+  root.traverse(node => {
+    if (!node.isMesh) return;
+    const geometry = node.geometry, material = node.material;
+    const triangles = (n, mat) => Math.ceil(n/3) *
+      (mat?.transparent && mat.side === DoubleSide && !mat.forceSinglePass ? 2 : 1);
+    if (Array.isArray(material)) {
+      for (const {count:n,materialIndex} of geometry.groups) count += triangles(n,material[materialIndex]);
+    } else count += triangles(geometry.index?.count ?? geometry.attributes.position.count,material);
+  });
+  return count;
+}
+
 // The two batching passes share the same strict geometry, binding and object contract.
 function compatibleNpcGeometry(other,node) {
   const a=other.geometry,geometry=node.geometry,attrs=Object.keys(geometry.attributes).sort();
@@ -149,13 +163,16 @@ export function nextNpcAdmission(previous={}, options={}) {
   return updateAdmission(previous, options, {});
 }
 
-function updateAdmission(previous, {nonNpcCalls,callsPerNpc,limit=0,active=limit,drawCallBudget=200,advance=true}, output) {
+function updateAdmission(previous, {nonNpcCalls,callsPerNpc,limit=0,active=limit,drawCallBudget=200,
+  totalCallCap=200, nonNpcTriangles=0, trianglesPerNpc=0, triangleCap=Infinity, advance=true}, output) {
   const known=Number.isFinite(nonNpcCalls) && nonNpcCalls>=0;
   const allowance=Number.isFinite(drawCallBudget)?Math.max(0,drawCallBudget):0;
-  const headroom=known?Math.max(0,Math.min(200-Math.ceil(nonNpcCalls),allowance)):0;
+  const headroom=known?Math.max(0,Math.min(totalCallCap-Math.ceil(nonNpcCalls),allowance)):0;
   const cost=Number.isFinite(callsPerNpc) && callsPerNpc>0?Math.ceil(callsPerNpc):0;
   const cap=Number.isFinite(limit) && Number.isFinite(active)?Math.max(0,Math.floor(Math.min(limit,active))):0;
-  const capacity=cost?Math.min(cap,Math.floor(headroom/cost)):0;
+  const triangleCapacity = !Number.isFinite(triangleCap) || !trianglesPerNpc ? cap :
+    Number.isFinite(nonNpcTriangles) ? Math.floor(Math.max(0,triangleCap-nonNpcTriangles)/trianglesPerNpc) : 0;
+  const capacity=cost?Math.min(cap,Math.floor(headroom/cost),triangleCapacity):0;
   const before=Math.max(0,Math.floor(previous.admitted||0));
   let admitted=Math.min(before,capacity),safeFrames=previous.safeFrames||0;
   if(!known || admitted<before || admitted>=capacity || headroom<(admitted+1)*cost+4) safeFrames=0;
@@ -311,7 +328,11 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     admissionOptions.callsPerNpc=callsPerNpc;
     admissionOptions.limit=limitForSettings();
     admissionOptions.active=0;
-    for (const npc of visitors) if (npc.gpuReady) admissionOptions.active++;
+    admissionOptions.trianglesPerNpc=0;
+    for (const npc of visitors) if (npc.gpuReady) {
+      admissionOptions.active++;
+      admissionOptions.trianglesPerNpc=Math.max(admissionOptions.trianglesPerNpc,npc.triangleCost);
+    }
     admissionOptions.drawCallBudget=settings.drawCallBudget;
     admissionOptions.advance=advance;
     updateAdmission(admission,admissionOptions,admission);
@@ -379,7 +400,8 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     }
     mixer.update(0);
     const mesh=asset ? avatar.getObjectByName(asset.meshName) : null;
-    return {avatar,mixer,actions,mesh,highGeometry:mesh?.geometry,look,materials:look?.materials};
+    return {avatar,mixer,actions,mesh,highGeometry:mesh?.geometry,look,materials:look?.materials,
+      triangleCost:rigTriangles(avatar)};
   }
   function mountRig(npc, rig) {
     Object.assign(npc,rig);
@@ -600,7 +622,13 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
   }
   return {
     update, releaseSeat, clearVisitors, loadBoy, enableModular,
-    admit(nonNpcCalls) { showing=true; return measure(nonNpcCalls,true); },
+    admit(nonNpcCalls, nonNpcTriangles = 0, budget) {
+      admissionOptions.totalCallCap=budget?.calls;
+      admissionOptions.triangleCap=budget?.triangles;
+      admissionOptions.nonNpcTriangles=nonNpcTriangles;
+      showing=true;
+      return measure(nonNpcCalls,true);
+    },
     setVisible(value) { showing=Boolean(value); applyVisibility(); },
     setDrawCallBudget(value) { settings.drawCallBudget=value; measure(admission.nonNpcCalls,false); },
     setQuality(next={}) {
@@ -640,7 +668,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     get state() {
       const visible=visitors.filter(n=>n.visual.visible).length;
       return {tier:settings.tier,enabled:settings.enabled,available,limit:limitForSettings(),active:visitors.length,visible,
-        ...admission,drawCallBudget:settings.drawCallBudget,totalCallCap:200,drawCalls:visible*callsPerNpc,callsPerNpc,
+        ...admission,drawCallBudget:settings.drawCallBudget,totalCallCap:admissionOptions.totalCallCap??200,drawCalls:visible*callsPerNpc,callsPerNpc,
         occupiedSeatIds:visitors.filter(n=>n.seat).map(n=>n.seat.id),
         modular:{status:modularStatus, active:visitors.filter(n=>n.look).map(n=>({
           slot:n.appearanceIndex, outfit:{...n.look.appearance}, tint:[...n.look.tint], scale:n.look.variation,
