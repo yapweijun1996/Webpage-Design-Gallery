@@ -1,6 +1,14 @@
 # GJH v11 graphics quality
 
-Low caps device pixel ratio at 1, disables real-time shadows, and admits up to two ambient visitors on desktop and one on mobile.
+## Render cadence and resolution
+
+Phones render at up to 30 FPS (33.3 ms per frame). Tablets and desktops render at up to 60 FPS (16.7 ms). Rendering uses the display's animation callbacks and skips excess refreshes. On refresh rates such as 75 Hz, adjacent frames can span a different number of refreshes. Physics uses 60 Hz fixed steps and catches up before each draw. Device classification combines mobile browser identifiers, iPadOS touch and platform hints, and coarse touch input with the shorter viewport dimension.
+
+Auto starts at Balanced on phones and on viewports narrower than 1000 CSS pixels, and at Detailed on wider tablets and desktops. A reported CPU or memory hint of 2 or less starts Auto at Low. Phone DPR caps are 1.5, or 1.25 when the browser reports at most 4 GB of RAM, at most four logical cores, or Android Chrome lacks a WebGL2 context that accepts the high-performance preference without a major performance caveat. Low caps DPR at 1, disables real-time shadows and glow, and admits up to two ambient visitors on desktop and one on mobile.
+
+**Auto resolution** is enabled by default in Tools. It lowers the drawing-buffer scale in 5-percentage-point steps from 100% to 60%. The rolling window uses the 80th percentile and the rate of missed render slots. A scale increase requires 10 seconds of headroom at the target cadence with spare CPU submission time. A failed increase lengthens the next recovery wait. Once at 60%, five seconds of sustained overload can lower an Auto tier by one step. Auto tiers can only move downward within a page session. A manual tier selection locks that tier and keeps Auto resolution available. Turning Auto resolution off restores 100% scale and suspends automatic tier changes. Both explicit settings are saved locally.
+
+The controller skips entry's first three seconds, asset warm-up, hidden or unfocused time, and lift rides. It clears its sample window and settles after view or zone transitions, teleports, and resizes. Scale applies to the drawing buffer, including the Detailed composite targets. The camera, HUD and pointer coordinates use the canvas's CSS size. The performance report and JSON export include `renderScale`, `targetFps`, `deviceClass` and the number of completed automatic `tierDowngrades`. The history also records the scale used for each frame.
 
 In the expanded mall, all tiers pack New Moon's visible shelves and cans into a dense instance prefix and recompute its frustum bounds. The 18 m horizontal range applies to the loaded shelf fixtures, shelf stock and hero can. Showcase cans remain eligible at all distances. Authored slot indices still own pickup and reservation.
 
@@ -27,4 +35,6 @@ The historical modeled reductions from Balanced to Low were **62.44% at entry** 
 
 ## Browser verification
 
-The current all-tier result is unverified in headed Chrome. The 60-second early-entry probe records peak live triangles for each tier, alongside the visitor route, shader and upload events. See [GJH v11 late asset uploads](gjh-v11-late-asset-uploads.md).
+Run `python docs/mall_lap_probe.py --device phone --tier balanced` against a locally served checkout in headed Chrome. The phone preset uses 393 × 700 and requires p95 ≤ 36 ms and mean ≥ 29 FPS. The tablet preset uses 820 × 1180. The desktop preset uses 1920 × 893. Both 60 FPS presets require p95 ≤ 20 ms and mean ≥ 57 FPS. The probe uses rendered frame intervals and reports the active scale and submission budget at each stop. Keyboard walking and lift travel use the browser's normal timing. Device presets emulate viewport and input on the host. Use a display whose refresh cadence can present the target evenly when evaluating p95.
+
+The 60-second early-entry probe records peak live triangles for each tier, alongside the visitor route, shader and upload events. [GJH v11 late asset uploads](gjh-v11-late-asset-uploads.md)

@@ -1,324 +1,241 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveQuality, qualityPreference, createAdaptiveQuality, createGraphicsQuality} from '../demos/corporate/gjh/v11/assets/graphics-quality.js';
+import {createAdaptiveQuality, createGraphicsQuality, createRenderCadence, detectDeviceClass,
+  isAndroidChrome, QUALITY_KEY, qualityPreference, RESOLUTION_KEY, resolveQuality}
+  from '../demos/corporate/gjh/v11/assets/graphics-quality.js';
 
-test('Auto uses conservative desktop graphics without assuming GPU capacity', () => {
+test('device classification combines platform, touch, pointer and viewport hints', () => {
   const fixtures = [
-    [{cores:2,memory:8}, 'low'], [{cores:8,memory:2}, 'low'],
-    [{cores:4,memory:4}, 'balanced'], [{cores:8}, 'balanced'],
-    [{memory:8}, 'balanced'], [{}, 'balanced'],
-    [{cores:0,memory:NaN}, 'balanced'], [{cores:Infinity,memory:8}, 'balanced'],
+    ['iPhone portrait', {userAgent:'Mozilla (iPhone)', width:393, height:852}, 'phone'],
+    ['iPhone landscape', {userAgent:'Mozilla (iPhone)', width:852, height:393}, 'phone'],
+    ['Android phone', {userAgent:'Mozilla (Android 15) Chrome/131.0 Mobile', width:915, height:412}, 'phone'],
+    ['Android tablet', {userAgent:'Mozilla (Android 15) Chrome/131.0', width:1230, height:800}, 'tablet'],
+    ['iPad', {userAgent:'Mozilla (iPad)', width:768, height:1024}, 'tablet'],
+    ['iPadOS desktop UA', {userAgent:'Mozilla (Macintosh)', platform:'MacIntel', maxTouchPoints:5,
+      width:440, height:1024}, 'tablet'],
+    ['Mac', {userAgent:'Mozilla (Macintosh)', platform:'MacIntel', maxTouchPoints:0, width:430}, 'desktop'],
+    ['touch laptop', {platform:'Win32', maxTouchPoints:10, coarsePointer:false, width:430}, 'desktop'],
+    ['coarse pointer alone', {coarsePointer:true, width:430}, 'desktop'],
+    ['generic landscape phone', {maxTouchPoints:5, coarsePointer:true, width:850, height:390}, 'phone'],
+    ['generic tablet', {maxTouchPoints:5, coarsePointer:true, width:800, height:1100}, 'tablet'],
   ];
-  for (const [hardware, wide] of fixtures) for (const width of [320,390,599,600,650,651,667,768,844,999,1000,1001,1440]) {
-    const p = resolveQuality({width,dpr:3,...hardware});
-    const tier = wide;
-    assert.equal(p.tier, tier, JSON.stringify({hardware,width}));
-    assert.equal(p.pixelRatio, tier === 'low' ? 1 : width < 600 ? 1.25 : width >= 1000 ? 1.5 : 2);
-    assert.equal(p.shadows, tier === 'detailed' && width >= 1000);
-    assert.ok(Object.isFrozen(p));
+  for (const [label, hints, expected] of fixtures) assert.equal(detectDeviceClass(hints), expected, label);
+  assert.equal(isAndroidChrome('Mozilla (Android 15) Chrome/131.0 Mobile'), true);
+  assert.equal(isAndroidChrome('Mozilla (iPhone) CriOS/131.0 Mobile'), false);
+});
+
+test('Auto chooses a starting tier and an existing Auto tier survives a resize', () => {
+  assert.equal(resolveQuality({width:1440, cores:2}).tier, 'low');
+  assert.equal(resolveQuality({width:1440, memory:2}).tier, 'low');
+  assert.equal(resolveQuality({width:1440, cores:8, memory:8}).tier, 'detailed');
+  assert.equal(resolveQuality({width:820, deviceClass:'tablet'}).tier, 'balanced');
+  assert.equal(resolveQuality({width:1024, deviceClass:'phone'}).tier, 'balanced');
+  assert.equal(resolveQuality({width:1440, autoTier:'balanced'}).tier, 'balanced');
+  assert.equal(resolveQuality({width:1440, autoTier:'low'}).tier, 'low');
+});
+
+test('phone DPR caps respect both hardware and WebGL hints', () => {
+  for (const preference of ['balanced','detailed']) {
+    const phone = {preference, width:393, dpr:3, deviceClass:'phone'};
+    assert.equal(resolveQuality(phone).pixelRatio, 1.5);
+    for (const hints of [{cores:4}, {memory:4}, {androidChrome:true}]) {
+      assert.equal(resolveQuality({...phone, ...hints}).pixelRatio, 1.25);
+    }
+    assert.equal(resolveQuality({...phone, androidChrome:true, highPerformanceWebGL2:true}).pixelRatio, 1.5);
+    assert.equal(resolveQuality({...phone, androidChrome:true, highPerformanceWebGL2:true, cores:4}).pixelRatio, 1.25);
+    assert.equal(resolveQuality({...phone, cores:0, memory:NaN}).pixelRatio, 1.5);
+    assert.equal(resolveQuality({...phone, dpr:1}).pixelRatio, 1);
+    assert.equal(resolveQuality({...phone, recovered:true}).pixelRatio, 1);
   }
 });
 
-test('explicit profiles and recovery use bounded DPR with truthful shadow eligibility', () => {
-  for (const preference of ['low','balanced','detailed']) for (const width of [390,1440]) for (const dpr of [1,1.5,2,3,0,NaN]) {
-    const p = resolveQuality({preference,width,dpr,cores:1,memory:1});
-    const cap = preference === 'low' ? 1 : preference === 'balanced' && width < 600 ? 1.25 : 2;
-    assert.equal(p.tier,preference);
-    assert.equal(p.pixelRatio,Math.min(Number.isFinite(dpr)&&dpr>0 ? dpr : 1,cap));
-    assert.equal(p.shadows,preference==='detailed' && width>=1000);
-    const recovered=resolveQuality({preference,width,dpr,recovered:true});
-    assert.equal(recovered.tier,'low'); assert.equal(recovered.shadows,false); assert.ok(recovered.pixelRatio<=1);
+test('explicit profiles retain tier, DPR and shadow eligibility', () => {
+  for (const preference of ['low','balanced','detailed']) for (const width of [390,1440]) {
+    for (const dpr of [1,1.5,2,3,0,NaN]) {
+      const profile = resolveQuality({preference,width,dpr,cores:1,memory:1,autoTier:'low'});
+      const cap = preference === 'low' ? 1 : preference === 'balanced' && width < 600 ? 1.25 : 2;
+      assert.equal(profile.tier, preference);
+      assert.equal(profile.pixelRatio, Math.min(Number.isFinite(dpr) && dpr > 0 ? dpr : 1, cap));
+      assert.equal(profile.shadows, preference === 'detailed' && width >= 1000);
+      assert.ok(Object.isFrozen(profile));
+      const recovered = resolveQuality({preference,width,dpr,recovered:true});
+      assert.equal(recovered.tier, 'low');
+      assert.equal(recovered.shadows, false);
+      assert.ok(recovered.pixelRatio <= 1);
+    }
   }
 });
 
-test('storage values are allowlisted', () => {
+test('stored tier values are allowlisted', () => {
   for (const value of [null,undefined,'','ultra','Low','{"tier":"low"}',{},1]) assert.equal(qualityPreference(value),'auto');
   for (const value of ['auto','low','balanced','detailed']) assert.equal(qualityPreference(value),value);
 });
 
-function sampleFor(controller, initial, interval, duration, start=0, active=true) {
-  let tier=initial, now=start; const changes=[];
-  while (now<start+duration) {
-    now+=interval;
-    const next=controller.sample(now,active,tier);
-    if (next) { changes.push({at:now,tier:next}); tier=next; }
-  }
-  return {tier,now,changes};
+function series(targetFps, allowTierDowngrade = true) {
+  const controller = createAdaptiveQuality(targetFps);
+  let now = 0, tier = 'detailed';
+  const events = [];
+  return {
+    feed(frameTime, duration, callbackMs = 8) {
+      const end = now + duration;
+      for (let i = 0; now < end; i++) {
+        const frameMs = typeof frameTime === 'function' ? frameTime(i) : frameTime;
+        now += frameMs;
+        const change = controller.sample(now, frameMs, callbackMs, tier, allowTierDowngrade);
+        if (change) {
+          tier = change.tier ?? tier;
+          events.push({at:now, ...change});
+        }
+      }
+    },
+    pause(ms) { now += ms; controller.reset(now); },
+    events,
+    get now() { return now; },
+    get scale() { return controller.renderScale; },
+    get tier() { return tier; },
+  };
 }
 
-test('Auto trials Detailed only after sustained 60/120 Hz and rolls back sustained slow frames', () => {
-  for (const interval of [1000/60,1000/120]) {
-    const controller=createAdaptiveQuality({allowDetailed:true});
-    const short=sampleFor(controller,'balanced',interval,14000);
-    assert.equal(short.tier,'balanced');
-    const fast=sampleFor(controller,short.tier,interval,3000,short.now);
-    assert.equal(fast.tier,'detailed'); assert.equal(fast.changes.length,1);
-    const slow=sampleFor(controller,fast.tier,1000/30,2000,fast.now);
-    assert.equal(slow.tier,'balanced'); assert.equal(slow.changes.length,1);
-    const sustained=sampleFor(controller,slow.tier,1000/30,8000,slow.now);
-    assert.equal(sustained.tier,'low');
+test('steady 16 ms at 60 FPS, occasional 40 ms spikes and 20 ms at 30 FPS preserve full resolution', () => {
+  const desktop = series(60);
+  desktop.feed(16, 12000);
+  desktop.feed(i => i % 45 === 0 ? 40 : 16, 12000);
+  assert.deepEqual(desktop.events, []);
+  const phone = series(30);
+  phone.feed(20, 18000);
+  assert.deepEqual(phone.events, []);
+});
+
+test('sustained 25 ms at 60 FPS lowers resolution in small steps, then lowers one tier at a time', () => {
+  const result = series(60);
+  result.feed(25, 60000);
+  const floorIndex = result.events.findIndex(event => event.renderScale === .6);
+  assert.ok(floorIndex >= 0);
+  assert.deepEqual(result.events.slice(0, floorIndex + 1).map(event => event.renderScale),
+    [.95,.9,.85,.8,.75,.7,.65,.6]);
+  const tierEvents = result.events.slice(floorIndex + 1);
+  assert.deepEqual(tierEvents.map(event => event.tier), ['balanced','low']);
+  assert.ok(tierEvents[0].at - result.events[floorIndex].at >= 5000);
+  assert.ok(tierEvents[1].at - tierEvents[0].at >= 5000);
+  result.feed(16, 45000);
+  assert.equal(result.tier, 'low');
+  assert.ok(result.scale > .6);
+});
+
+test('a manual tier keeps scaling and never automatically downgrades', () => {
+  const result = series(60, false);
+  result.feed(25, 60000);
+  assert.equal(result.scale, .6);
+  assert.equal(result.tier, 'detailed');
+  assert.ok(result.events.every(event => !event.tier));
+});
+
+test('recovery requires 10 seconds of headroom and backs off after a failed increase', () => {
+  const result = series(60);
+  result.feed(25, 3000);
+  assert.equal(result.scale, .95);
+  result.feed(1000/60, 15000, 15); // Reaches the cap with little CPU headroom.
+  assert.equal(result.scale, .95);
+  result.feed(1000/60, 10000);
+  assert.equal(result.scale, .95);
+  result.feed(1000/60, 2500);
+  assert.equal(result.scale, 1);
+  result.feed(25, 4000);
+  assert.equal(result.scale, .95);
+  result.pause(500);
+  result.feed(1000/60, 20000);
+  assert.equal(result.scale, .95);
+  result.feed(1000/60, 15000);
+  assert.equal(result.scale, 1);
+});
+
+test('sampling interruptions clear overload timers and exclude settling frames', () => {
+  const result = series(60);
+  result.feed(25, 2500);
+  assert.equal(result.scale, 1);
+  result.pause(5000);
+  result.feed(25, 2500);
+  assert.equal(result.scale, 1);
+  result.feed(25, 1800);
+  assert.equal(result.scale, .95);
+});
+
+test('render cadence caps 60, 75, 120 and 144 Hz displays without counting normal refresh quantization as misses', () => {
+  for (const refresh of [60,75,120,144]) for (const target of [30,60]) {
+    const cadence = createRenderCadence(target);
+    const timings = Array.from({length:refresh * 20}, (_, i) => cadence.take(i * 1000 / refresh)).filter(Boolean);
+    assert.equal(timings.length, target * 20, `${target} on ${refresh} Hz`);
+    assert.ok(timings.every(ms => ms === 1000 / target));
   }
 });
 
-test('slow, isolated spikes and paused intervals do not masquerade as sustained headroom', () => {
-  const controller=createAdaptiveQuality();
-  const slow=sampleFor(controller,'balanced',1000/30,8000);
-  assert.equal(slow.tier,'low');
-  const reset=controller.sample(slow.now+20,false,slow.tier); assert.equal(reset,null);
-  const good=sampleFor(controller,slow.tier,1000/60,8000,slow.now+20);
-  assert.equal(good.tier,'low');
-  controller.sample(good.now+100,false,good.tier);
-  const restarted=sampleFor(controller,good.tier,1000/60,8000,good.now+100);
-  assert.equal(restarted.tier,'low');
-  const isolated=createAdaptiveQuality();
-  let now=0,tier='balanced';
-  for(let i=0;i<400;i++) { now+=i===240?300:1000/60; tier=isolated.sample(now,true,tier)||tier; }
-  assert.equal(tier,'balanced');
+test('render cadence drops missed slots without rendering twice and resumes from a fresh phase', () => {
+  const cadence = createRenderCadence(60);
+  assert.equal(cadence.take(0), 1000/60);
+  assert.equal(cadence.take(6), 0);
+  assert.equal(cadence.take(51), 50);
+  assert.equal(cadence.take(54), 0);
+  cadence.reset();
+  assert.equal(cadence.take(10001), 1000/60);
 });
 
-test('dynamic tier never overrides explicit preferences or recovery', () => {
-  for (const preference of ['low','balanced','detailed']) {
-    assert.equal(resolveQuality({preference,width:1440,dpr:2,autoTier:'low'}).tier,preference);
-    assert.equal(resolveQuality({preference,width:1440,dpr:2,autoTier:'detailed'}).tier,preference);
-    assert.equal(resolveQuality({preference,width:1440,dpr:2,recovered:true,autoTier:'detailed'}).tier,'low');
-  }
-  assert.equal(resolveQuality({preference:'auto',width:1440,dpr:3,autoTier:'detailed'}).pixelRatio,2);
-  assert.equal(resolveQuality({preference:'auto',width:1440,dpr:2,autoTier:'bad'}).tier,'balanced');
-});
-
-test('Auto does not trial Detailed until explicitly gated on', () => {
-  const result=sampleFor(createAdaptiveQuality(),'balanced',1000/60,60000);
-  assert.equal(result.tier,'balanced'); assert.deepEqual(result.changes,[]);
-});
-
-test('stationary load may downgrade but cannot alone establish upgrade headroom', () => {
-  const stationary=createAdaptiveQuality({allowDetailed:true}); let tier='balanced',now=0;
-  for(let i=0;i<1800;i++) { now+=1000/60; tier=stationary.sample(now,true,tier,false)||tier; }
-  assert.equal(tier,'balanced');
-  const slow=createAdaptiveQuality(); tier='balanced'; now=0;
-  for(let i=0;i<250;i++) { now+=1000/30; tier=slow.sample(now,true,tier,false)||tier; }
-  assert.equal(tier,'low');
-});
-
-test('isolated first-view stalls and their catch-up frames do not downgrade Auto', () => {
-  const frame = 1000/75;
-  const intervals = [...Array(300).fill(frame), 240, ...Array(23).fill(frame), 2427, 53, ...Array(400).fill(frame)];
-  for (const initial of ['balanced', 'detailed']) {
-    const controller = createAdaptiveQuality({allowDetailed:true});
-    let now = 0;
-    for (const interval of intervals) {
-      now += interval;
-      assert.equal(controller.sample(now, true, initial, false), null, `${initial} at ${now}ms`);
-    }
-  }
-});
-
-test('sustained 34ms frames still downgrade balanced Auto after a stall', () => {
-  const controller = createAdaptiveQuality({allowDetailed:true});
-  const normal = sampleFor(controller, 'balanced', 1000/75, 4000);
-  assert.equal(controller.sample(normal.now + 2427, true, 'balanced'), null);
-  const slow = sampleFor(controller, 'balanced', 34, 6000, normal.now + 2427);
-  assert.equal(slow.tier, 'low');
-  assert.equal(slow.changes.length, 1);
-});
-
-test('a sustained run of foreground stalls downgrades but one isolated stall does not', () => {
-  let now=0,tier='balanced'; const repeated=createAdaptiveQuality();
-  for(let i=0;i<60;i++) { now+=(i%3===2?1200:1000/60); tier=repeated.sample(now,true,tier,true)||tier; }
-  assert.equal(tier,'low');
-  now=0; tier='balanced'; const once=createAdaptiveQuality();
-  for(let i=0;i<500;i++) { now+=i===240?2500:1000/60; tier=once.sample(now,true,tier,true)||tier; }
-  assert.equal(tier,'balanced');
-});
-
-test('repeated missed refresh intervals cause a downgrade', () => {
-  const controller=createAdaptiveQuality(); let now=0,tier='balanced';
-  for(let i=0;i<600;i++) { now+=i%3===2?33.4:16.7; tier=controller.sample(now,true,tier,true)||tier; }
-  assert.equal(tier,'low');
-});
-
-test('sustained threshold is asymmetric and a slow transition does not flap on isolated spikes', () => {
-  assert.equal(sampleFor(createAdaptiveQuality(),'balanced',20,8000).tier,'balanced');
-  assert.equal(sampleFor(createAdaptiveQuality(),'balanced',20.1,8000).tier,'low');
-  const controller=createAdaptiveQuality();
-  const slow=sampleFor(controller,'balanced',1000/30,8000);
-  assert.equal(slow.tier,'low');
-  const fast=sampleFor(controller,slow.tier,1000/60,17000,slow.now);
-  assert.equal(fast.tier,'balanced'); assert.equal(fast.changes.length,1);
-  const held=sampleFor(controller,fast.tier,1000/60,6000,fast.now);
-  assert.equal(held.tier,'balanced'); assert.equal(held.changes.length,0);
-});
-
-test('manual preferences and recovered mode never adapt or rewrite storage', () => {
-  const keys=['document','window','navigator','localStorage'];
-  const originals=Object.fromEntries(keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
-  let listener, saved='auto', writes=0, callbacks=0, quality;
-  const select={value:'',addEventListener(type,callback){if(type==='change') listener=callback;}};
-  const status={textContent:''};
+test('graphics settings keep manual tier and Auto resolution independent and persist explicit choices', () => {
+  const keys = ['document','window','navigator','localStorage'];
+  const originals = Object.fromEntries(keys.map(key => [key, Object.getOwnPropertyDescriptor(globalThis,key)]));
+  const control = () => ({addEventListener(_, callback) { this.change = callback; }});
+  const select = control(), resolution = control(), status = {};
+  const elements = {'graphics-quality':select, 'auto-resolution':resolution, 'graphics-quality-status':status};
+  const stored = new Map();
+  const globals = {
+    document:{getElementById:id => elements[id]},
+    window:{innerWidth:1440, innerHeight:900, devicePixelRatio:2, matchMedia:() => ({matches:false})},
+    navigator:{hardwareConcurrency:8, deviceMemory:8},
+    localStorage:{getItem:key => stored.get(key), setItem:(key,value) => stored.set(key,value)},
+  };
   try {
-    Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>id==='graphics-quality'?select:status}});
-    Object.defineProperty(globalThis,'window',{configurable:true,value:{devicePixelRatio:2}});
-    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
-    Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>saved,setItem:(key,value)=>{saved=value;writes++;}}});
-    quality=createGraphicsQuality(()=>{callbacks++;quality.resolve(1440);}); quality.resolve(1440);
-    assert.match(status.textContent,/Auto: Balanced/);
-    // Ineligible frames model hidden, blurred, modal and interrupted states.
-    for(let now=0;now<20000;now+=1000/30) quality.sample(now,false,true);
-    assert.equal(quality.state.tier,'balanced'); assert.equal(callbacks,0); assert.equal(writes,0);
-    for(let now=20000;now<28000;now+=1000/30) quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'low'); assert.equal(saved,'auto'); assert.equal(writes,0); assert.equal(callbacks,1);
-    assert.match(status.textContent,/Auto: Low.*shows fewer ambient visitors/);
-    select.value='detailed'; listener(); assert.equal(saved,'detailed'); assert.equal(writes,1);
-    assert.match(status.textContent,/Detailed/);
-    for(let now=28000;now<68000;now+=1000/30) quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'detailed'); assert.equal(callbacks,2); assert.equal(writes,1);
-    quality.recover();quality.resolve(1440);
-    for(let now=68000;now<108000;now+=1000/60) quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'low'); assert.equal(writes,1);
+    for (const key of keys) Object.defineProperty(globalThis,key,{configurable:true,value:globals[key]});
+    const quality = createGraphicsQuality(() => quality.apply(quality.resolve(1440)));
+    quality.apply(quality.resolve(1440));
+    assert.equal(quality.deviceClass, 'desktop');
+    assert.equal(quality.targetFps, 60);
+    assert.equal(resolution.checked, true);
+    assert.equal(quality.state.tier, 'detailed');
+
+    for (let now = 1000; now < 65000; now += 25) quality.sample(now, 25, 8, true);
+    assert.equal(quality.state.tier, 'low');
+    assert.equal(quality.state.renderScale, .6);
+    assert.equal(quality.state.pixelRatio, .6);
+    assert.equal(quality.tierDowngrades, 2);
+    assert.equal(stored.size, 0);
+
+    select.value = 'detailed';
+    select.change();
+    assert.equal(stored.get(QUALITY_KEY), 'detailed');
+    assert.equal(quality.state.tier, 'detailed');
+    assert.equal(quality.state.pixelRatio, 1.2);
+    resolution.checked = false;
+    resolution.change();
+    assert.equal(stored.get(RESOLUTION_KEY), 'off');
+    for (let now = 65000; now < 95000; now += 25) quality.sample(now, 25, 8, true);
+    assert.equal(quality.state.tier, 'detailed');
+    assert.equal(quality.state.renderScale, 1);
+
+    resolution.checked = true;
+    resolution.change();
+    for (let now = 95000; now < 150000; now += 25) quality.sample(now, 25, 8, true);
+    assert.equal(quality.state.tier, 'detailed');
+    assert.equal(quality.state.renderScale, .6);
+    assert.equal(quality.tierDowngrades, 2);
+    assert.match(status.textContent, /Detailed. 60 FPS cap. 60% resolution/);
+    quality.recover();
+    quality.apply(quality.resolve(1440));
+    assert.equal(quality.state.tier, 'low');
+    assert.equal(quality.state.shadows, false);
+    assert.equal(stored.get(QUALITY_KEY), 'detailed');
   } finally {
-    for(const key of keys) if(originals[key]) Object.defineProperty(globalThis,key,originals[key]); else delete globalThis[key];
-  }
-});
-
-test('failed Detailed trials roll back promptly and back off repeated retries', () => {
-  const controller=createAdaptiveQuality({allowDetailed:true});
-  let result=sampleFor(controller,'balanced',1000/60,16000);
-  assert.equal(result.tier,'detailed');
-  let start=result.now;
-  result=sampleFor(controller,result.tier,40,2200,result.now);
-  assert.equal(result.tier,'balanced');assert.ok(result.changes[0].at-start<2000);
-  controller.reset(); // Interruptions clear samples, but retain the retry cooldown.
-  result=sampleFor(controller,result.tier,1000/60,28000,result.now);assert.equal(result.tier,'balanced');
-  result=sampleFor(controller,result.tier,1000/60,6000,result.now);assert.equal(result.tier,'detailed');
-  start=result.now;result=sampleFor(controller,result.tier,40,2200,result.now);
-  assert.equal(result.tier,'balanced');assert.ok(result.changes[0].at-start<2000);
-  result=sampleFor(controller,result.tier,1000/60,57000,result.now);assert.equal(result.tier,'balanced');
-  result=sampleFor(controller,result.tier,1000/60,7000,result.now);assert.equal(result.tier,'detailed');
-});
-
-test('one long Detailed frame does not trigger an emergency rollback', () => {
-  const controller=createAdaptiveQuality({allowDetailed:true});
-  let result=sampleFor(controller,'balanced',1000/60,16000);
-  assert.equal(result.tier,'detailed');
-  assert.equal(controller.sample(result.now+1300,true,result.tier,true),null);
-  assert.equal(controller.sample(result.now+1316.7,true,result.tier,true),null);
-  result=sampleFor(controller,result.tier,1000/60,4000,result.now+1316.7);
-  assert.equal(result.tier,'detailed');
-});
-
-test('production Auto trials Detailed after sustained moving frames and leaves preferences alone', () => {
-  const keys=['document','window','navigator','localStorage'];
-  const originals=Object.fromEntries(keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
-  let saved='auto',writes=0,quality;
-  const select={value:'',addEventListener(){}};const status={textContent:''};
-  try {
-    Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>id==='graphics-quality'?select:status}});
-    Object.defineProperty(globalThis,'window',{configurable:true,value:{devicePixelRatio:2}});
-    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
-    Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>saved,setItem:()=>{writes++;}}});
-    quality=createGraphicsQuality(()=>quality.resolve(1440));quality.resolve(1440);
-    for(let now=0;now<25000;now+=1000/60)quality.sample(now,true,false);
-    assert.equal(quality.state.tier,'balanced');
-    for(let now=25000;now<43000;now+=1000/60)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'detailed');assert.equal(quality.state.shadows,true);assert.match(status.textContent,/Auto: Detailed/);
-    assert.equal(saved,'auto');assert.equal(writes,0);
-    for(let now=43000;now<45500;now+=40)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'balanced');assert.equal(saved,'auto');assert.equal(writes,0);
-  } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
-});
-
-test('mobile holds quality at 24 FPS and above but downgrades sustained 23 FPS', () => {
-  for (const initial of ['balanced','detailed']) for (const fps of [24,25,30]) {
-    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial, now=0;
-    for(let i=0;i<480;i++) { now+=1000/fps; tier=controller.sample(now,true,tier,true,true)||tier; }
-    assert.equal(tier,initial,`${initial} at ${fps} FPS`);
-  }
-  for (const initial of ['balanced','detailed']) {
-    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial, now=0;
-    for(let i=0;i<300;i++) { now+=1000/23; tier=controller.sample(now,true,tier,true,true)||tier; }
-    assert.notEqual(tier,initial,`${initial} at 23 FPS`);
-  }
-});
-
-test('mobile Detailed tolerates both phases of uneven 24 FPS and an isolated stall', () => {
-  for (const initial of ['balanced','detailed']) for (const phase of [0,1]) for (let spike=1;spike<250;spike++) {
-    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial, now=0;
-    for(let i=0;i<320;i++) {
-      now += i===spike ? 1000 : ((i+phase)%2===0 ? 1000/30 : 50);
-      tier=controller.sample(now,true,tier,true,true)||tier;
+    for (const key of keys) {
+      if (originals[key]) Object.defineProperty(globalThis,key,originals[key]);
+      else delete globalThis[key];
     }
-    assert.equal(tier,initial,`${initial} alternating phase ${phase}, spike ${spike}`);
   }
-});
-
-test('mobile promotion still needs sustained near-60 FPS movement and respects retry backoff', () => {
-  const controller=createAdaptiveQuality({allowDetailed:true}); let tier='balanced',now=0;
-  for(let i=0;i<600;i++){ now+=1000/30;tier=controller.sample(now,true,tier,true,true)||tier; }
-  assert.equal(tier,'balanced');
-  for(let i=0;i<1100;i++){ now+=1000/60;tier=controller.sample(now,true,tier,false,true)||tier; }
-  assert.equal(tier,'balanced');
-  for(let i=0;i<1100;i++){ now+=1000/60;tier=controller.sample(now,true,tier,true,true)||tier; }
-  assert.equal(tier,'detailed');
-  for(let i=0;i<60;i++){now+=1000/23;tier=controller.sample(now,true,tier,true,true)||tier;}
-  assert.equal(tier,'balanced');
-  for(let i=0;i<1000;i++){now+=1000/60;tier=controller.sample(now,true,tier,true,true)||tier;}
-  assert.equal(tier,'balanced');
-});
-
-test('production detects width and coarse-pointer mobile mode only when resolving', () => {
-  const keys=['document','window','navigator','localStorage'];
-  const originals=Object.fromEntries(keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
-  let quality, queryCount=0, width=900; const coarse={matches:true};
-  const select={value:'',addEventListener(){}}; const status={textContent:''};
-  try {
-    Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>id==='graphics-quality'?select:status}});
-    Object.defineProperty(globalThis,'window',{configurable:true,value:{devicePixelRatio:2,matchMedia:()=>{queryCount++;return coarse;}}});
-    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
-    Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null,setItem(){}}});
-    quality=createGraphicsQuality(()=>quality.resolve(width));quality.resolve(width);
-    for(let now=0;now<10000;now+=40)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'low', 'phones stay on Low in Auto');
-    assert.equal(queryCount,1);
-    coarse.matches=false; width=1440; quality.resolve(width);
-    for(let now=10000;now<18000;now+=40)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'low');
-    assert.equal(queryCount,1);
-  } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
-});
-
-test('mobile rejects sustained uneven 23 FPS for either refresh phase', () => {
-  for (const initial of ['balanced','detailed']) for (const phase of [0,1]) {
-    const controller=createAdaptiveQuality({allowDetailed:true}); let tier=initial,now=0;
-    for(let i=0;i<360;i++) {
-      now+=(i+phase)%2===0 ? 1000/30 : 2*1000/23-1000/30;
-      tier=controller.sample(now,true,tier,true,true)||tier;
-    }
-    assert.notEqual(tier,initial,`${initial} uneven 23 FPS, phase ${phase}`);
-  }
-});
-
-test('650px width uses mobile policy without a coarse pointer', () => {
-  const keys=['document','window','navigator','localStorage'];
-  const originals=Object.fromEntries(keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
-  let quality,width=650; const select={value:'',addEventListener(){}}; const status={textContent:''};
-  try {
-    Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>id==='graphics-quality'?select:status}});
-    Object.defineProperty(globalThis,'window',{configurable:true,value:{devicePixelRatio:2,matchMedia:()=>({matches:false})}});
-    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{hardwareConcurrency:8,deviceMemory:8}});
-    Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null,setItem(){}}});
-    quality=createGraphicsQuality(()=>quality.resolve(width));quality.resolve(width);
-    for(let now=0;now<10000;now+=40)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'low', 'phones stay on Low in Auto');
-    width=651;quality.resolve(width);
-    for(let now=10000;now<18000;now+=40)quality.sample(now,true,true);
-    assert.equal(quality.state.tier,'low');
-  } finally {for(const key of keys)if(originals[key])Object.defineProperty(globalThis,key,originals[key]);else delete globalThis[key];}
-});
-
-test('Auto on a phone stays on Low, while an explicit choice still applies', () => {
-  assert.equal(resolveQuality({preference:'auto',width:393,dpr:3,mobile:true}).tier,'low');
-  assert.equal(resolveQuality({preference:'auto',width:393,dpr:3,mobile:true,autoTier:'balanced'}).tier,'low');
-  assert.equal(resolveQuality({preference:'auto',width:393,dpr:3,mobile:true}).pixelRatio,1);
-  assert.equal(resolveQuality({preference:'balanced',width:393,dpr:3,mobile:true}).tier,'balanced');
-  assert.equal(resolveQuality({preference:'auto',width:1440,dpr:2}).tier,'balanced');
 });

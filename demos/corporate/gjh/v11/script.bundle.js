@@ -68,6 +68,7 @@ function copyFields(record, frameMs, info, detail) {
   record.x = Number.isFinite(detail?.x) ? detail.x : null;
   record.z = Number.isFinite(detail?.z) ? detail.z : null;
   record.tier = detail?.tier ?? null;
+  record.renderScale = metric(detail?.renderScale);
   record.width = metric(detail?.width);
   record.height = metric(detail?.height);
 }
@@ -106,6 +107,7 @@ function createPerformanceMonitor() {
     }
     bucket.zone = latest.zone;
     bucket.tier = latest.tier;
+    bucket.renderScale = latest.renderScale;
     bucket.x = latest.x;
     bucket.z = latest.z;
     if (interval !== null) {
@@ -2618,186 +2620,236 @@ function createUI(expanded = false) {
 
 // demos/corporate/gjh/v11/assets/graphics-quality.js
 var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
-var CHOICES = new Set(["auto", "low", "balanced", "detailed"]);
-var MOBILE_FPS_FLOOR = 24;
-var MOBILE_CADENCE_SLACK_MS = 1000 / 60 + 1;
-var STALL_MS = 200;
-var STALL_RECOVERY_FRAMES = 2;
-var qualityPreference = (value) => CHOICES.has(value) ? value : "auto";
-function resolveQuality({ preference = "auto", width, dpr = 1, cores, memory, recovered = false, autoTier = null, mobile = false }) {
-  const hint = (value) => Number.isFinite(value) && value > 0;
-  const constrained = hint(cores) && cores <= 2 || hint(memory) && memory <= 2;
+var RESOLUTION_KEY = "gjh-v11-auto-resolution-v1";
+var TIERS = ["low", "balanced", "detailed"];
+var WINDOW_SIZE = 90;
+var MIN_SCALE = 60;
+var SCALE_STEP = 5;
+var RECOVERY_MS = 1e4;
+var qualityPreference = (value) => TIERS.includes(value) ? value : "auto";
+var positive = (value) => Number.isFinite(value) && value > 0;
+function detectDeviceClass({
+  userAgent = "",
+  platform = "",
+  maxTouchPoints = 0,
+  coarsePointer = false,
+  width = Infinity,
+  height = Infinity
+} = {}) {
+  if (/iPad|Tablet|PlayBook|Silk/i.test(userAgent) || /^Mac/i.test(platform) && maxTouchPoints > 1)
+    return "tablet";
+  if (/iPhone|iPod|Windows Phone/i.test(userAgent))
+    return "phone";
+  if (/Android/i.test(userAgent))
+    return /Mobile/i.test(userAgent) ? "phone" : "tablet";
+  if (coarsePointer && maxTouchPoints > 0)
+    return Math.min(width, height) < 600 ? "phone" : "tablet";
+  return "desktop";
+}
+var isAndroidChrome = (userAgent) => /Android/i.test(userAgent) && /Chrome\//i.test(userAgent);
+var targetFpsFor = (deviceClass) => deviceClass === "phone" ? 30 : 60;
+function resolveQuality({
+  preference = "auto",
+  width,
+  dpr = 1,
+  cores,
+  memory,
+  recovered = false,
+  autoTier = null,
+  deviceClass = "desktop",
+  androidChrome = false,
+  highPerformanceWebGL2 = false
+}) {
+  const constrained = positive(cores) && cores <= 2 || positive(memory) && memory <= 2;
+  const lowEnd = positive(cores) && cores <= 4 || positive(memory) && memory <= 4 || androidChrome && !highPerformanceWebGL2;
   const choice = qualityPreference(preference);
-  const tier = recovered ? "low" : choice !== "auto" ? choice : mobile ? "low" : ["low", "balanced", "detailed"].includes(autoTier) ? autoTier : constrained ? "low" : "balanced";
-  const cap = tier === "low" ? 1 : tier === "balanced" && width < 600 ? 1.25 : tier === "balanced" && choice === "auto" && width >= 1000 ? 1.5 : 2;
+  const phone = deviceClass === "phone";
+  const initialTier = constrained ? "low" : phone || width < 1000 ? "balanced" : "detailed";
+  const tier = recovered ? "low" : choice !== "auto" ? choice : TIERS.includes(autoTier) ? autoTier : initialTier;
+  let cap = 2;
+  if (tier === "low")
+    cap = 1;
+  else if (phone)
+    cap = lowEnd ? 1.25 : 1.5;
+  else if (tier === "balanced")
+    cap = width < 600 ? 1.25 : choice === "auto" && width >= 1000 ? 1.5 : 2;
   return Object.freeze({
     preference: choice,
     tier,
-    pixelRatio: Math.min(hint(dpr) ? dpr : 1, cap),
+    pixelRatio: Math.min(positive(dpr) ? dpr : 1, cap),
     shadows: tier === "detailed" && width >= 1000,
     recovered
   });
 }
-function createAdaptiveQuality({ allowDetailed = false } = {}) {
-  const tiers = ["low", "balanced", "detailed"];
-  let last = null, warmUntil = 0, duration = 0, count = 0, slow = 0, slowTime = 0, longest = 0, fast = 0, busy = 0, goodWindows = 0;
-  let changedAt = -Infinity, detailedFailures = 0, detailedRetryAt = -Infinity;
-  let trialDuration = 0, trialCount = 0, trialSlow = 0, trialSlowTime = 0, trialLongest = 0;
-  let recoveryFrames = 0, clusteredStalls = 0, stallStart = 0;
-  function reset() {
-    last = null;
-    duration = count = slow = slowTime = longest = fast = busy = goodWindows = 0;
-    trialDuration = trialCount = trialSlow = trialSlowTime = trialLongest = 0;
-    recoveryFrames = clusteredStalls = stallStart = 0;
+function createRenderCadence(targetFps) {
+  const interval = 1000 / targetFps;
+  const slack = 0.8;
+  let next = null;
+  return {
+    reset() {
+      next = null;
+    },
+    take(now) {
+      next ??= now;
+      if (now + slack < next)
+        return 0;
+      const slots = 1 + Math.floor((now + slack - next) / interval);
+      next += slots * interval;
+      return slots * interval;
+    }
+  };
+}
+function decideAdaptiveQuality(state, samples, { now, targetFps, tier, allowTierDowngrade }) {
+  const budget = 1000 / targetFps;
+  const percentile80 = (key) => samples.map((sample) => sample[key]).sort((a, b) => a - b)[Math.ceil(samples.length * 0.8) - 1];
+  const cadence = percentile80("frameMs");
+  const mean = samples.reduce((total, { frameMs }) => total + Math.min(frameMs, budget * 2), 0) / samples.length;
+  const overloaded = cadence > budget * 1.06 || mean > budget * 1.04;
+  const headroom = mean <= budget * 1.01 && cadence <= budget * 1.01 && percentile80("callbackMs") <= budget * 0.8;
+  const slowSince = overloaded ? state.slowSince ?? now : null;
+  const fastSince = headroom ? state.fastSince ?? now : null;
+  const next = { ...state, slowSince, fastSince };
+  const { scale, raisedAt, recoveryDelay } = state;
+  if (slowSince !== null) {
+    const slowMs = now - slowSince;
+    if (scale > MIN_SCALE && slowMs >= 750) {
+      return {
+        ...next,
+        scale: scale - SCALE_STEP,
+        recoveryDelay: now - raisedAt < 15000 ? Math.min(60000, recoveryDelay * 3) : recoveryDelay
+      };
+    }
+    if (scale === MIN_SCALE && allowTierDowngrade && slowMs >= 5000 && TIERS.indexOf(tier) > 0) {
+      return { ...next, lowerTier: TIERS[TIERS.indexOf(tier) - 1] };
+    }
   }
-  function backoffDetailed(now) {
-    detailedFailures++;
-    detailedRetryAt = now + 30000 * 2 ** Math.min(detailedFailures - 1, 2);
+  if (scale < 100 && fastSince !== null && now - fastSince >= recoveryDelay) {
+    return { ...next, scale: scale + SCALE_STEP, raisedAt: now };
+  }
+  return next;
+}
+function createAdaptiveQuality(targetFps) {
+  const samples = [];
+  let cursor = 0, firstSample, nextCheck, ignoreUntil = 0;
+  let state = { scale: 100, raisedAt: -Infinity, recoveryDelay: RECOVERY_MS, slowSince: null, fastSince: null };
+  function reset(now, settleMs = 500) {
+    samples.length = 0;
+    cursor = 0;
+    firstSample = nextCheck = null;
+    ignoreUntil = now + settleMs;
+    state.slowSince = state.fastSince = null;
   }
   return {
     reset,
-    sample(now, active, tier, moving = true, mobile = false) {
-      if (!active || !Number.isFinite(now) || !tiers.includes(tier)) {
-        reset();
+    restoreScale(now) {
+      state.scale = 100;
+      state.raisedAt = -Infinity;
+      state.recoveryDelay = RECOVERY_MS;
+      reset(now);
+    },
+    get renderScale() {
+      return state.scale / 100;
+    },
+    sample(now, frameMs, callbackMs, tier, allowTierDowngrade) {
+      if (now < ignoreUntil || !positive(frameMs))
         return null;
-      }
-      if (last === null) {
-        last = now;
-        warmUntil = now + 3000;
+      firstSample ??= now;
+      samples[cursor] = { frameMs, callbackMs };
+      cursor = (cursor + 1) % WINDOW_SIZE;
+      if (now < nextCheck || samples.length < WINDOW_SIZE && (samples.length < 8 || now - firstSample < 3000))
         return null;
-      }
-      const elapsed = now - last;
-      last = now;
-      if (elapsed <= 0) {
-        reset();
+      nextCheck = now + 250;
+      const { lowerTier, ...next } = decideAdaptiveQuality(state, samples, { now, targetFps, tier, allowTierDowngrade });
+      const scaleChanged = next.scale !== state.scale;
+      state = next;
+      if (!scaleChanged && !lowerTier)
         return null;
-      }
-      if (elapsed >= STALL_MS) {
-        if (!clusteredStalls)
-          stallStart = now - elapsed;
-        clusteredStalls++;
-        recoveryFrames = STALL_RECOVERY_FRAMES;
-        if (clusteredStalls >= 4 && now - stallStart >= 4000 && now >= warmUntil && tier !== "low") {
-          if (tier === "detailed")
-            backoffDetailed(now);
-          changedAt = now;
-          reset();
-          return tiers[tiers.indexOf(tier) - 1];
-        }
-        return null;
-      }
-      if (recoveryFrames > 0) {
-        recoveryFrames--;
-        return null;
-      }
-      clusteredStalls = 0;
-      if (allowDetailed && tier === "detailed") {
-        trialDuration += elapsed;
-        trialCount++;
-        trialLongest = Math.max(trialLongest, elapsed);
-        if (elapsed > (mobile ? 1000 / MOBILE_FPS_FLOOR : 30)) {
-          trialSlow++;
-          trialSlowTime += elapsed;
-        }
-        if (mobile ? trialDuration >= 1000 && (trialCount >= 24 || trialDuration >= 3000) : trialDuration >= 750) {
-          const trialBad = mobile ? (trialCount - 1) * 1000 / (trialDuration - trialLongest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : trialSlow / trialCount >= 0.2 || trialSlowTime / trialDuration >= 0.5;
-          if (trialSlow >= 3 && trialBad) {
-            backoffDetailed(now);
-            changedAt = now;
-            reset();
-            return "balanced";
-          }
-          trialDuration = trialCount = trialSlow = trialSlowTime = trialLongest = 0;
-        }
-      }
-      if (now < warmUntil)
-        return null;
-      duration += elapsed;
-      count++;
-      longest = Math.max(longest, elapsed);
-      if (elapsed > (mobile ? 1000 / MOBILE_FPS_FLOOR : 20)) {
-        slow++;
-        slowTime += elapsed;
-      }
-      if (elapsed <= 18.5)
-        fast++;
-      if (moving)
-        busy++;
-      if (duration < 4000 || count < 8)
-        return null;
-      const bad = slow >= 3 && (mobile ? (count - 1) * 1000 / (duration - longest - MOBILE_CADENCE_SLACK_MS) < MOBILE_FPS_FLOOR : slow / count >= 0.25 || slowTime / duration >= 0.5);
-      const good = fast / count >= 0.9 && busy / count >= 0.5;
-      goodWindows = good ? goodWindows + 1 : 0;
-      duration = count = slow = slowTime = longest = fast = busy = 0;
-      const index = tiers.indexOf(tier);
-      const ceiling = allowDetailed ? 2 : 1;
-      const next = bad && index > 0 ? tiers[index - 1] : goodWindows >= 3 && now - changedAt >= 1e4 && index < ceiling && (tier !== "balanced" || now >= detailedRetryAt) ? tiers[index + 1] : null;
-      if (next) {
-        if (tier === "detailed" && next === "balanced") {
-          backoffDetailed(now);
-        }
-        changedAt = now;
-        reset();
-        return next;
-      }
-      return null;
+      reset(now);
+      return lowerTier ? { tier: lowerTier } : { renderScale: state.scale / 100 };
     }
   };
 }
 function createGraphicsQuality(onChange) {
   const select = document.getElementById("graphics-quality");
+  const autoResolution = document.getElementById("auto-resolution");
   const status = document.getElementById("graphics-quality-status");
+  const deviceClass = detectDeviceClass({
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    maxTouchPoints: navigator.maxTouchPoints,
+    coarsePointer: window.matchMedia("(pointer: coarse)").matches,
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+  const targetFps = targetFpsFor(deviceClass);
+  const androidChrome = isAndroidChrome(navigator.userAgent);
+  const adaptive = createAdaptiveQuality(targetFps);
   let preference = "auto", recovered = false, profile, autoTier = null;
-  let mobile = null;
-  const coarsePointer = typeof window.matchMedia === "function" ? window.matchMedia("(pointer: coarse)") : null;
-  const adaptive = createAdaptiveQuality({ allowDetailed: true });
+  let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
+  let autoEnabled = true;
   try {
     preference = qualityPreference(localStorage.getItem(QUALITY_KEY));
+    autoEnabled = localStorage.getItem(RESOLUTION_KEY) !== "off";
   } catch {}
   select.value = preference;
+  autoResolution.checked = autoEnabled;
   select.addEventListener("change", () => {
     preference = qualityPreference(select.value);
     recovered = false;
-    autoTier = null;
-    adaptive.reset();
+    pendingDowngrade = null;
+    adaptive.reset(performance.now());
     try {
       localStorage.setItem(QUALITY_KEY, preference);
     } catch {}
     onChange();
   });
+  autoResolution.addEventListener("change", () => {
+    autoEnabled = autoResolution.checked;
+    adaptive.restoreScale(performance.now());
+    try {
+      localStorage.setItem(RESOLUTION_KEY, autoEnabled ? "on" : "off");
+    } catch {}
+    onChange("resolution");
+  });
   function apply(next) {
-    profile = next;
+    const renderScale = adaptive.renderScale;
+    profile = Object.freeze({ ...next, renderScale, pixelRatio: next.basePixelRatio * renderScale });
+    if (preference === "auto" && pendingDowngrade === profile.tier) {
+      tierDowngrades++;
+      pendingDowngrade = null;
+    }
     const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Uses lower resolution and shows fewer ambient visitors." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
+    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${targetFps} FPS cap. ${Math.round(renderScale * 100)}% resolution. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."}`;
     return profile;
   }
   return {
+    deviceClass,
+    targetFps,
+    androidChrome,
+    setWebGLHint(value) {
+      highPerformanceWebGL2 = value;
+    },
     recover() {
       recovered = true;
-      preference = "low";
-      autoTier = null;
-      adaptive.reset();
-      select.value = "low";
+      preference = select.value = "low";
+      pendingDowngrade = null;
+      adaptive.reset(performance.now());
     },
-    resetSampling() {
-      adaptive.reset();
+    resetSampling(now = performance.now()) {
+      adaptive.reset(now);
     },
-    sample(now, active, moving) {
-      if (preference !== "auto" || recovered || mobile || !profile) {
-        adaptive.reset();
+    sample(now, frameMs, callbackMs, active) {
+      if (!active || !autoEnabled || !profile) {
+        adaptive.reset(now);
         return;
       }
-      const next = adaptive.sample(now, active, profile.tier, moving, mobile);
-      if (next) {
-        autoTier = next;
-        onChange();
-      }
+      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === "auto" && !recovered);
+      if (next?.tier)
+        autoTier = pendingDowngrade = next.tier;
+      if (next)
+        onChange(next.tier ? "tier" : "resolution");
     },
-    resolve(width, defer = false) {
-      const nextMobile = width <= 650 || Boolean(coarsePointer?.matches);
-      if (mobile !== null && mobile !== nextMobile)
-        adaptive.reset();
-      mobile = nextMobile;
+    resolve(width) {
       const next = resolveQuality({
         preference,
         width,
@@ -2806,11 +2858,18 @@ function createGraphicsQuality(onChange) {
         memory: navigator.deviceMemory,
         recovered,
         autoTier,
-        mobile
+        deviceClass,
+        androidChrome,
+        highPerformanceWebGL2
       });
-      return defer ? next : apply(next);
+      if (preference === "auto")
+        autoTier ??= next.tier;
+      return Object.freeze({ ...next, basePixelRatio: next.pixelRatio, pixelRatio: next.pixelRatio * adaptive.renderScale });
     },
     apply,
+    get tierDowngrades() {
+      return tierDowngrades;
+    },
     get state() {
       return profile;
     }
@@ -3063,6 +3122,8 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   }
   function sizePost(width, height) {
     initPost();
+    if (base.width === width && base.height === height)
+      return;
     base.setSize(width, height);
     glow.setSize(Math.max(1, Math.floor(width / 4)), Math.max(1, Math.floor(height / 4)));
     composite.uniforms.texel.value.set(1 / glow.width, 1 / glow.height);
@@ -4953,7 +5014,17 @@ var renderWidth = 0;
 var renderHeight = 0;
 var viewportWidth = innerWidth;
 var viewportHeight = innerHeight;
-var quality = createGraphicsQuality(() => resize());
+var quality = createGraphicsQuality((change) => {
+  if (change === "resolution" && quality.state) {
+    quality.apply(quality.state);
+    requestRender();
+  } else
+    resize();
+});
+var renderCadence = createRenderCadence(quality.targetFps);
+var renderRequested = false;
+var forceRender = false;
+var enteredAt = null;
 var selectedInteraction = null;
 var interactionDistance = Infinity;
 var windowBlurred = false;
@@ -4969,6 +5040,7 @@ function hideGuidance() {
 }
 var nearby = null;
 var currentZone = "atrium";
+var wasRiding = false;
 function clearTransientState(event) {
   quality.resetSampling();
   hideGuidance();
@@ -5009,6 +5081,10 @@ var maxFrameUploadMs = 0;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
+    renderScale: quality.state?.renderScale ?? 1,
+    targetFps: quality.targetFps,
+    deviceClass: quality.deviceClass,
+    tierDowngrades: quality.tierDowngrades,
     signage: world?.signage?.report() ?? { modelsLoaded: 0, signs: 0, drawCalls: 0, triangles: 0, textureMB: 0, previousTextureMB: 0, atlasPx: 0, phoneProof: null, tier: quality.state?.tier ?? "low" },
     interiors: world?.interiors?.report() ?? emptyInteriorReport(quality.state?.tier ?? "low"),
     capturedAt: new Date().toISOString(),
@@ -5246,8 +5322,9 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   teleport(zone) {
     if (!ready || !player.teleport(zone))
       return false;
+    quality.resetSampling();
     updateHUD();
-    render();
+    requestRender();
     return true;
   },
   setInput(input) {
@@ -5265,6 +5342,7 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
     if (!ready || !Number.isFinite(ms) || document.hidden || modes.paused())
       return snapshot();
     manual = true;
+    quality.resetSampling();
     const count = Math.max(0, Math.min(600, Math.floor(ms / (STEP * 1000))));
     for (let i = 0;i < count; i++)
       tick();
@@ -5276,7 +5354,11 @@ function updateHUD() {
   const p = player.state;
   if (skipRide.hidden === p.elevatorTravel)
     skipRide.hidden = !p.elevatorTravel;
-  currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
+  const zone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
+  if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding)
+    quality.resetSampling();
+  currentZone = zone;
+  wasRiding = Boolean(p.elevatorTravel);
   if (expanded && currentZone === "upper" && !brandWallStarted) {
     brandWallStarted = true;
     world.ensureBrandWall().then(({ records }) => {
@@ -5338,8 +5420,14 @@ function tick(refreshHud = true) {
 }
 var lastGuidanceSample = -Infinity;
 var projectedTarget = null;
+function requestRender(force = false) {
+  renderRequested = true;
+  forceRender ||= force;
+  resume();
+}
 function render(force = false) {
   if (ready && !document.hidden && (force || !modes.paused() || modes.current() === "shelf")) {
+    sizeDrawingBuffer();
     if (!shelfFocus?.open)
       player.refreshCameraMode();
     const camera = shelfFocus?.open ? shelfFocus.camera : player.camera;
@@ -5445,7 +5533,7 @@ function tierWork(profile, report, startup = false) {
   }, profile, report);
 }
 function tierKey(profile) {
-  return [profile.tier, profile.shadows, profile.pixelRatio, profile.preference, renderWidth, renderHeight].join("/");
+  return [profile.tier, profile.shadows, profile.basePixelRatio, profile.preference, renderWidth, renderHeight].join("/");
 }
 function scheduleTier() {
   const profile = requestedProfile, active = quality.state;
@@ -5547,15 +5635,15 @@ function warmModels(pose, background = true) {
   if (sceneFirst)
     runner.runFrame(Math.min(2, remaining()));
   const roomsStart = frameTrace?.start();
-  world.interiors?.runFrame(remaining());
+  const roomMs = world.interiors?.runFrame(remaining()) ?? 0;
   frameTrace?.end("interiors.install", roomsStart);
   const modelsStart = frameTrace?.start();
-  modelWarmup.runFrame(true, remaining());
+  const modelMs = modelWarmup.runFrame(true, remaining());
   frameTrace?.end("models.upload", modelsStart);
   if (runner && !sceneFirst)
     runner.runFrame(remaining());
   frameTrace?.end("warm.slice", traceStart);
-  const elapsed = performance.now() - started;
+  const elapsed = runner || roomMs > 0 || modelMs > 0 ? performance.now() - started : 0;
   maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
   return elapsed;
 }
@@ -5563,13 +5651,23 @@ function animate(now) {
   frame = 0;
   if (!ready || document.hidden)
     return;
+  frame = requestAnimationFrame(animate);
   updateModelPreload(now);
   if (advanceStartupWarm()) {
     last = now;
     accumulator = 0;
-    frame = requestAnimationFrame(animate);
+    quality.resetSampling(now);
     return;
   }
+  const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
+  if (advancing)
+    accumulator = Math.min(0.1, accumulator + Math.max(0, (now - last) / 1000));
+  else
+    accumulator = 0;
+  last = now;
+  const slotMs = renderCadence.take(now);
+  if (!slotMs)
+    return;
   const callbackStart = performance.now();
   const pad = readStandardGamepad();
   const consumed = ui.handleGamepad(pad);
@@ -5586,40 +5684,41 @@ function animate(now) {
       ui.inspectNearby(nearby);
   }
   previousGamepadInspect = inspectPressed;
-  const elapsed = Math.min(0.1, Math.max(0, (now - last) / 1000));
-  last = now;
-  const advancing = !manual && !modes.paused();
-  if (advancing || modes.current() === "shelf") {
-    const simulationStart = performance.now();
-    let steps = 0;
-    if (advancing) {
-      accumulator += elapsed;
-      while (accumulator >= STEP) {
-        tick(false);
-        accumulator -= STEP;
-        steps++;
-      }
-      if (steps)
-        updateHUD();
+  const simulationStart = performance.now();
+  let steps = 0;
+  if (advancing && !modes.paused()) {
+    while (accumulator + 0.000000001 >= STEP) {
+      tick(false);
+      accumulator = Math.max(0, accumulator - STEP);
+      steps++;
     }
-    const simulationEnd = performance.now();
-    const uploadMs = warmModels(player.state);
+    if (steps)
+      updateHUD();
+  }
+  const simulationEnd = performance.now();
+  const uploadMs = warmModels(player.state);
+  const live = advancing && !modes.paused() || modes.current() === "shelf";
+  let pose, callbackMs = 0;
+  if (live || renderRequested) {
     const renderStart = performance.now();
-    const pose = render();
+    const force = forceRender;
+    renderRequested = forceRender = false;
+    pose = render(force);
     const renderEnd = performance.now();
-    const end = performance.now();
-    if (!windowBlurred && startupOverlay.hidden) {
+    callbackMs = renderEnd - callbackStart;
+    if (pose && live && !windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
       performanceMonitor.frame(now, renderer.info, {
         simulationMs: simulationEnd - simulationStart,
         renderMs: renderEnd - renderStart,
         uploadMs,
-        callbackMs: end - callbackStart,
+        callbackMs,
         steps,
         zone: currentZone,
-        x: pose?.x,
-        z: pose?.z,
+        x: pose.x,
+        z: pose.z,
         tier: quality.state?.tier,
+        renderScale: quality.state?.renderScale,
         width: canvas.width,
         height: canvas.height
       });
@@ -5629,18 +5728,17 @@ function animate(now) {
       }
     } else
       pausePerformance();
-  } else {
+  } else
     pausePerformance();
-    warmModels(player.state);
-  }
-  const movement = player.state.animation;
-  quality.sample(now, advancing && !warmRunner && !tierQueue?.pending && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
-  frame = requestAnimationFrame(animate);
+  if (startupOverlay.hidden)
+    enteredAt ??= now;
+  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel && !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && startupOverlay.hidden && now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost && ["explore", "cart"].includes(modes.current())));
 }
 function resume() {
   if (ready && !frame && !document.hidden) {
     last = performance.now();
     accumulator = 0;
+    renderCadence.reset();
     frame = requestAnimationFrame(animate);
   }
 }
@@ -5674,8 +5772,9 @@ ui.onTeleport((zone) => {
   player.setInput(null);
   if (!player.teleport(zone))
     return false;
+  quality.resetSampling();
   updateHUD();
-  render();
+  requestRender();
   canvas.focus({ preventScroll: true });
   return true;
 });
@@ -5688,14 +5787,13 @@ ui.onSeat((sit, id) => {
     npcs?.releaseSeat(id);
   const ok = sit ? player.sit(id) : player.stand();
   updateHUD();
-  render();
+  requestRender();
   return ok;
 });
 ui.onView((visual) => {
   if (visual) {
     last = performance.now();
-    resume();
-    render();
+    requestRender();
   } else {
     player?.setCart(false);
     if (player?.state.seated)
@@ -5733,9 +5831,10 @@ window.addEventListener("blur", () => {
 });
 window.addEventListener("focus", () => {
   windowBlurred = false;
+  quality.resetSampling();
   if (ready) {
     updateHUD();
-    render();
+    requestRender();
   }
 });
 window.addEventListener("resize", () => {
@@ -5769,9 +5868,10 @@ document.addEventListener("visibilitychange", () => {
     frame = 0;
   } else {
     if (ready) {
+      quality.resetSampling();
       refreshCalendarTheme();
       updateHUD();
-      render();
+      requestRender();
     } else
       validateRestoration();
     resume();
@@ -5840,26 +5940,26 @@ function resize() {
     else
       player.updateCamera(0, true);
   }
-  requestedProfile = quality.resolve(width, true);
+  requestedProfile = quality.resolve(width);
   if (!ready || !quality.state || !window.mallLoader?.ready) {
     if (!warmRunner)
       applyProfile(requestedProfile);
   } else {
-    applyProfile(quality.state);
     scheduleTier();
   }
-  render();
+  requestRender();
 }
 function applyProfile(profile) {
-  const width = renderWidth, height = renderHeight;
-  quality.apply(profile);
+  profile = quality.apply(profile);
   elevator?.kit?.select(profile.tier);
-  npcs?.setQuality({ tier: profile.tier, mobile: width < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
-  if (!contextLost) {
-    if (renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
-      renderer.setDrawingBufferSize(width, height, profile.pixelRatio);
-    }
+  npcs?.setQuality({ tier: profile.tier, mobile: renderWidth < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
+  if (!contextLost)
     renderer.shadowMap.enabled = profile.shadows;
+}
+function sizeDrawingBuffer() {
+  const { pixelRatio } = quality.state;
+  if (renderer.getPixelRatio() !== pixelRatio || canvas.width !== Math.floor(renderWidth * pixelRatio) || canvas.height !== Math.floor(renderHeight * pixelRatio)) {
+    renderer.setDrawingBufferSize(renderWidth, renderHeight, pixelRatio);
   }
 }
 function validateRestoration() {
@@ -5883,6 +5983,7 @@ function validateRestoration() {
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state);
     player.camera.updateMatrixWorld();
+    sizeDrawingBuffer();
     world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height);
     world.updateSigns(player.camera, canvas, reducedMotion2);
     renderer.render(world.scene, player.camera);
@@ -5951,7 +6052,10 @@ async function installNpcs(T, R, prepareModel, source) {
 }
 async function initialize() {
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const context = canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "high-performance" });
+  const attributes = { antialias: true, alpha: false, powerPreference: "high-performance" };
+  const preferredContext = quality.androidChrome ? canvas.getContext("webgl2", { ...attributes, failIfMajorPerformanceCaveat: true }) : null;
+  const context = preferredContext || canvas.getContext("webgl2", attributes);
+  quality.setWebGLHint(preferredContext?.getContextAttributes()?.powerPreference === "high-performance");
   if (!context) {
     fallback(expanded ? "WebGL is unavailable. The 17-store mall plan and verified products remain in the accessible directory below." : "WebGL is unavailable. Explore all three stores and the verified products in the accessible list below.");
     return;
@@ -6030,11 +6134,7 @@ async function initialize() {
         if (state.active !== paintedTheme) {
           paintedTheme = state.active;
           if (!state.suspended && document.body.classList.contains("is-3d")) {
-            try {
-              render(true);
-            } catch (error) {
-              console.error("Theme preview could not render.", error);
-            }
+            requestRender(true);
           }
         }
       }, async prepare(theme, { signal }) {
@@ -6112,7 +6212,7 @@ async function initialize() {
     projection,
     onChange: () => {
       syncMode();
-      render();
+      requestRender();
     },
     onDetails: ui.inspect,
     onAdd: ui.addToBag,
@@ -6129,7 +6229,7 @@ async function initialize() {
       const { installPhysicalProductControl } = await import("./assets/visitor-v2-product-ui.js");
       productControl = installPhysicalProductControl(player, world, () => modes.paused(), interactions, ui, () => {
         updateHUD();
-        render();
+        requestRender();
       });
       const { pickup } = productControl.actions;
       const pickupLabel = document.createElement("span");
@@ -6143,7 +6243,7 @@ async function initialize() {
       const { installVisitorV2Controls } = await import("./assets/visitor-v2-controls.js");
       installVisitorV2Controls(document.querySelector("#controls-copy"), (changes) => {
         player.customize(changes);
-        render();
+        requestRender();
       });
     } catch {}
   }
@@ -6155,7 +6255,7 @@ async function initialize() {
       if (ok && player.state.elevatorTravel)
         arrivalChime.unlock();
       updateHUD();
-      render();
+      requestRender();
       return ok;
     });
   ui.setSeats(world.seats);
@@ -6165,7 +6265,7 @@ async function initialize() {
       return false;
     const ok = player.setCart(value);
     updateHUD();
-    render();
+    requestRender();
     return ok;
   });
   ui.onCollect((id) => Boolean(!player.state.seated && player.state.character.collection.available !== false && world.productAssets?.cans?.[id.replace("new-moon-", "").replace("-front", "")]?.status === "loaded"), (id) => {

@@ -1,146 +1,204 @@
-/** Rendering policy only: downloads, scene content and simulation are unchanged. */
 export const QUALITY_KEY = 'gjh-v11-graphics-quality-v1';
-const CHOICES = new Set(['auto', 'low', 'balanced', 'detailed']);
-const MOBILE_FPS_FLOOR = 24;
-// One 60 Hz refresh plus 1ms covers phase and timer rounding per window.
-const MOBILE_CADENCE_SLACK_MS = 1000/60 + 1;
-const STALL_MS = 200;
-const STALL_RECOVERY_FRAMES = 2;
-export const qualityPreference = value => CHOICES.has(value) ? value : 'auto';
+export const RESOLUTION_KEY = 'gjh-v11-auto-resolution-v1';
+const TIERS = ['low', 'balanced', 'detailed'];
+const WINDOW_SIZE = 90;
+const MIN_SCALE = 60;
+const SCALE_STEP = 5;
+const RECOVERY_MS = 10000;
 
-export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memory, recovered = false, autoTier = null, mobile = false}) {
-  const hint = value => Number.isFinite(value) && value > 0;
-  const constrained = (hint(cores) && cores <= 2) || (hint(memory) && memory <= 2);
-  const choice = qualityPreference(preference);
-  // CPU/RAM hints do not establish GPU capacity; Auto starts conservatively.
-  // Phones stay on Low in Auto: a 30 FPS lock was measured on Balanced. Choosing Balanced or Detailed still works.
-  const tier = recovered ? 'low' : choice !== 'auto' ? choice : mobile ? 'low' : ['low','balanced','detailed'].includes(autoTier) ? autoTier : constrained ? 'low' : 'balanced';
-  const cap = tier === 'low' ? 1 : tier === 'balanced' && width < 600 ? 1.25 : tier === 'balanced' && choice === 'auto' && width >= 1000 ? 1.5 : 2;
-  return Object.freeze({preference: choice, tier, pixelRatio: Math.min(hint(dpr) ? dpr : 1, cap),
-    shadows: tier === 'detailed' && width >= 1000, recovered});
+export const qualityPreference = value => TIERS.includes(value) ? value : 'auto';
+const positive = value => Number.isFinite(value) && value > 0;
+
+export function detectDeviceClass({userAgent = '', platform = '', maxTouchPoints = 0,
+  coarsePointer = false, width = Infinity, height = Infinity} = {}) {
+  if (/iPad|Tablet|PlayBook|Silk/i.test(userAgent) || (/^Mac/i.test(platform) && maxTouchPoints > 1)) return 'tablet';
+  if (/iPhone|iPod|Windows Phone/i.test(userAgent)) return 'phone';
+  if (/Android/i.test(userAgent)) return /Mobile/i.test(userAgent) ? 'phone' : 'tablet';
+  if (coarsePointer && maxTouchPoints > 0) return Math.min(width, height) < 600 ? 'phone' : 'tablet';
+  return 'desktop';
 }
 
-// Sample continuous foreground rendering. Upgrades require representative
-// movement; four-second windows and a cooldown prevent transient flapping.
-export function createAdaptiveQuality({allowDetailed=false}={}) {
-  const tiers=['low','balanced','detailed'];
-  let last=null, warmUntil=0, duration=0, count=0, slow=0, slowTime=0, longest=0, fast=0, busy=0, goodWindows=0;
-  let changedAt=-Infinity, detailedFailures=0, detailedRetryAt=-Infinity;
-  let trialDuration=0, trialCount=0, trialSlow=0, trialSlowTime=0, trialLongest=0;
-  let recoveryFrames=0, clusteredStalls=0, stallStart=0;
-  function reset() {
-    last=null;
-    duration=count=slow=slowTime=longest=fast=busy=goodWindows=0;
-    trialDuration=trialCount=trialSlow=trialSlowTime=trialLongest=0;
-    recoveryFrames=clusteredStalls=stallStart=0;
+export const isAndroidChrome = userAgent => /Android/i.test(userAgent) && /Chrome\//i.test(userAgent);
+export const targetFpsFor = deviceClass => deviceClass === 'phone' ? 30 : 60;
+
+export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memory,
+  recovered = false, autoTier = null, deviceClass = 'desktop', androidChrome = false, highPerformanceWebGL2 = false}) {
+  const constrained = (positive(cores) && cores <= 2) || (positive(memory) && memory <= 2);
+  const lowEnd = (positive(cores) && cores <= 4) || (positive(memory) && memory <= 4) ||
+    (androidChrome && !highPerformanceWebGL2);
+  const choice = qualityPreference(preference);
+  const phone = deviceClass === 'phone';
+  const initialTier = constrained ? 'low' : phone || width < 1000 ? 'balanced' : 'detailed';
+  const tier = recovered ? 'low' : choice !== 'auto' ? choice : TIERS.includes(autoTier) ? autoTier : initialTier;
+  let cap = 2;
+  if (tier === 'low') cap = 1;
+  else if (phone) cap = lowEnd ? 1.25 : 1.5;
+  else if (tier === 'balanced') cap = width < 600 ? 1.25 : choice === 'auto' && width >= 1000 ? 1.5 : 2;
+  return Object.freeze({preference:choice, tier, pixelRatio:Math.min(positive(dpr) ? dpr : 1, cap),
+    shadows:tier === 'detailed' && width >= 1000, recovered});
+}
+
+// A refresh-rate-independent schedule. Keep the phase on fractional refresh
+// ratios (e.g. 60 FPS on 75 Hz), and drop slots instead of drawing to catch up.
+export function createRenderCadence(targetFps) {
+  const interval = 1000 / targetFps;
+  const slack = .8;
+  let next = null;
+  return {
+    reset() { next = null; },
+    take(now) {
+      next ??= now;
+      if (now + slack < next) return 0;
+      const slots = 1 + Math.floor((now + slack - next) / interval);
+      next += slots * interval;
+      return slots * interval;
+    }
+  };
+}
+
+// Pure decision over a rolling window. Quantized slot timings measure cadence
+// independently of display refresh jitter. Submission time supplies a second
+// headroom signal when the cap hides faster frames.
+export function decideAdaptiveQuality(state, samples, {now, targetFps, tier, allowTierDowngrade}) {
+  const budget = 1000 / targetFps;
+  const percentile80 = key => samples.map(sample => sample[key]).sort((a, b) => a - b)[Math.ceil(samples.length * .8) - 1];
+  const cadence = percentile80('frameMs');
+  // Limit the influence of a single long frame on the miss rate.
+  const mean = samples.reduce((total, {frameMs}) => total + Math.min(frameMs, budget * 2), 0) / samples.length;
+  const overloaded = cadence > budget * 1.06 || mean > budget * 1.04;
+  const headroom = mean <= budget * 1.01 && cadence <= budget * 1.01 && percentile80('callbackMs') <= budget * .8;
+  const slowSince = overloaded ? state.slowSince ?? now : null;
+  const fastSince = headroom ? state.fastSince ?? now : null;
+  const next = {...state, slowSince, fastSince};
+  const {scale, raisedAt, recoveryDelay} = state;
+  if (slowSince !== null) {
+    const slowMs = now - slowSince;
+    if (scale > MIN_SCALE && slowMs >= 750) {
+      return {...next, scale:scale - SCALE_STEP,
+        recoveryDelay:now - raisedAt < 15000 ? Math.min(60000, recoveryDelay * 3) : recoveryDelay};
+    }
+    if (scale === MIN_SCALE && allowTierDowngrade && slowMs >= 5000 && TIERS.indexOf(tier) > 0) {
+      return {...next, lowerTier:TIERS[TIERS.indexOf(tier) - 1]};
+    }
   }
-  function backoffDetailed(now) {
-    detailedFailures++;
-    detailedRetryAt=now+30000*2**Math.min(detailedFailures-1,2);
+  if (scale < 100 && fastSince !== null && now - fastSince >= recoveryDelay) {
+    return {...next, scale:scale + SCALE_STEP, raisedAt:now};
   }
+  return next;
+}
+
+export function createAdaptiveQuality(targetFps) {
+  const samples = [];
+  let cursor = 0, firstSample, nextCheck, ignoreUntil = 0;
+  let state = {scale:100, raisedAt:-Infinity, recoveryDelay:RECOVERY_MS, slowSince:null, fastSince:null};
+
+  function reset(now, settleMs = 500) {
+    samples.length = 0;
+    cursor = 0;
+    firstSample = nextCheck = null;
+    ignoreUntil = now + settleMs;
+    state.slowSince = state.fastSince = null;
+  }
+
   return {
     reset,
-    sample(now, active, tier, moving=true, mobile=false) {
-      if (!active || !Number.isFinite(now) || !tiers.includes(tier)) { reset(); return null; }
-      if (last===null) { last=now; warmUntil=now+3000; return null; }
-      const elapsed=now-last; last=now;
-      if (elapsed<=0) { reset(); return null; }
-      if (elapsed>=STALL_MS) {
-        if (!clusteredStalls) stallStart=now-elapsed;
-        clusteredStalls++;
-        recoveryFrames=STALL_RECOVERY_FRAMES;
-        // A run of stalls without recovery is itself a sustained failure.
-        // Individual stalls and catch-up frames stay out of both cadence windows.
-        if (clusteredStalls>=4 && now-stallStart>=4000 && now>=warmUntil && tier!=='low') {
-          if (tier==='detailed') backoffDetailed(now);
-          changedAt=now; reset(); return tiers[tiers.indexOf(tier)-1];
-        }
-        return null;
-      }
-      if (recoveryFrames>0) { recoveryFrames--; return null; }
-      clusteredStalls=0;
-      // A mobile trial tolerates 24 FPS. Average cadence handles the jitter
-      // around 41.67ms.
-      if (allowDetailed && tier==='detailed') {
-        trialDuration+=elapsed;
-        trialCount++;
-        trialLongest=Math.max(trialLongest,elapsed);
-        if (elapsed>(mobile ? 1000/MOBILE_FPS_FLOOR : 30)) { trialSlow++; trialSlowTime+=elapsed; }
-        // A full second of samples avoids mistaking an uneven 24 FPS phase
-        // for a sustained deficit. Very slow trials still terminate in 3s.
-        if (mobile ? trialDuration>=1000 && (trialCount>=24 || trialDuration>=3000) : trialDuration>=750) {
-          const trialBad=mobile ? (trialCount-1)*1000/(trialDuration-trialLongest-MOBILE_CADENCE_SLACK_MS)<MOBILE_FPS_FLOOR :
-            trialSlow/trialCount>=.2 || trialSlowTime/trialDuration>=.5;
-          if (trialSlow>=3 && trialBad) {
-            backoffDetailed(now);
-            changedAt=now; reset(); return 'balanced';
-          }
-          trialDuration=trialCount=trialSlow=trialSlowTime=trialLongest=0;
-        }
-      }
-      if (now<warmUntil) return null;
-      duration+=elapsed;
-      count++; longest=Math.max(longest,elapsed);
-      if (elapsed>(mobile ? 1000/MOBILE_FPS_FLOOR : 20)) { slow++; slowTime+=elapsed; }
-      if (elapsed<=18.5) fast++;
-      if (moving) busy++;
-      if (duration<4000 || count<8) return null;
-      // Mobile cadence also tolerates a single missed refresh near 24 FPS.
-      const bad=slow>=3 && (mobile ? (count-1)*1000/(duration-longest-MOBILE_CADENCE_SLACK_MS)<MOBILE_FPS_FLOOR : slow/count>=.25 || slowTime/duration>=.5);
-      const good=fast/count>=.9 && busy/count>=.5;
-      goodWindows=good?goodWindows+1:0;
-      duration=count=slow=slowTime=longest=fast=busy=0;
-      const index=tiers.indexOf(tier);
-      const ceiling=allowDetailed?2:1;
-      const next=bad&&index>0?tiers[index-1]:goodWindows>=3&&now-changedAt>=10000&&index<ceiling&&(tier!=='balanced'||now>=detailedRetryAt)?tiers[index+1]:null;
-      if (next) {
-        if (tier==='detailed' && next==='balanced') {
-          backoffDetailed(now);
-        }
-        changedAt=now; reset(); return next;
-      }
-      return null;
+    restoreScale(now) {
+      state.scale = 100;
+      state.raisedAt = -Infinity;
+      state.recoveryDelay = RECOVERY_MS;
+      reset(now);
+    },
+    get renderScale() { return state.scale / 100; },
+    sample(now, frameMs, callbackMs, tier, allowTierDowngrade) {
+      if (now < ignoreUntil || !positive(frameMs)) return null;
+      firstSample ??= now;
+      samples[cursor] = {frameMs, callbackMs};
+      cursor = (cursor + 1) % WINDOW_SIZE;
+      if (now < nextCheck || (samples.length < WINDOW_SIZE && (samples.length < 8 || now - firstSample < 3000))) return null;
+      nextCheck = now + 250;
+      const {lowerTier, ...next} = decideAdaptiveQuality(state, samples, {now, targetFps, tier, allowTierDowngrade});
+      const scaleChanged = next.scale !== state.scale;
+      state = next;
+      if (!scaleChanged && !lowerTier) return null;
+      reset(now);
+      return lowerTier ? {tier:lowerTier} : {renderScale:state.scale / 100};
     }
   };
 }
 
 export function createGraphicsQuality(onChange) {
   const select = document.getElementById('graphics-quality');
+  const autoResolution = document.getElementById('auto-resolution');
   const status = document.getElementById('graphics-quality-status');
+  const deviceClass = detectDeviceClass({userAgent:navigator.userAgent, platform:navigator.platform,
+    maxTouchPoints:navigator.maxTouchPoints, coarsePointer:window.matchMedia('(pointer: coarse)').matches,
+    width:window.innerWidth, height:window.innerHeight});
+  const targetFps = targetFpsFor(deviceClass);
+  const androidChrome = isAndroidChrome(navigator.userAgent);
+  const adaptive = createAdaptiveQuality(targetFps);
   let preference = 'auto', recovered = false, profile, autoTier = null;
-  let mobile = null;
-  const coarsePointer = typeof window.matchMedia === 'function' ? window.matchMedia('(pointer: coarse)') : null;
-  const adaptive=createAdaptiveQuality({allowDetailed:true});
-  try { preference = qualityPreference(localStorage.getItem(QUALITY_KEY)); } catch { /* Optional preference storage. */ }
+  let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
+  let autoEnabled = true;
+  try {
+    preference = qualityPreference(localStorage.getItem(QUALITY_KEY));
+    autoEnabled = localStorage.getItem(RESOLUTION_KEY) !== 'off';
+  } catch { /* Optional preference storage. */ }
   select.value = preference;
+  autoResolution.checked = autoEnabled;
   select.addEventListener('change', () => {
-    preference = qualityPreference(select.value); recovered = false; autoTier=null; adaptive.reset();
-    try { localStorage.setItem(QUALITY_KEY, preference); } catch { /* The selection still applies to this page. */ }
+    preference = qualityPreference(select.value);
+    recovered = false;
+    pendingDowngrade = null;
+    adaptive.reset(performance.now());
+    try { localStorage.setItem(QUALITY_KEY, preference); } catch { /* Applies for this session. */ }
     onChange();
   });
+  autoResolution.addEventListener('change', () => {
+    autoEnabled = autoResolution.checked;
+    adaptive.restoreScale(performance.now());
+    try { localStorage.setItem(RESOLUTION_KEY, autoEnabled ? 'on' : 'off'); } catch { /* Applies for this session. */ }
+    onChange('resolution');
+  });
+
   function apply(next) {
-    profile=next;
+    const renderScale = adaptive.renderScale;
+    profile = Object.freeze({...next, renderScale, pixelRatio:next.basePixelRatio * renderScale});
+    if (preference === 'auto' && pendingDowngrade === profile.tier) {
+      tierDowngrades++;
+      pendingDowngrade = null;
+    }
     const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-    status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Uses lower resolution and shows fewer ambient visitors.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
+    status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${targetFps} FPS cap. ${Math.round(renderScale * 100)}% resolution. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'}`;
     return profile;
   }
+
   return {
-    recover() { recovered = true; preference = 'low'; autoTier=null; adaptive.reset(); select.value = 'low'; },
-    resetSampling() { adaptive.reset(); },
-    sample(now, active, moving) {
-      if (preference!=='auto' || recovered || mobile || !profile) { adaptive.reset(); return; }
-      const next=adaptive.sample(now,active,profile.tier,moving,mobile);
-      if (next) { autoTier=next; onChange(); }
+    deviceClass, targetFps, androidChrome,
+    setWebGLHint(value) { highPerformanceWebGL2 = value; },
+    recover() {
+      recovered = true;
+      preference = select.value = 'low';
+      pendingDowngrade = null;
+      adaptive.reset(performance.now());
     },
-    resolve(width, defer=false) {
-      const nextMobile = width <= 650 || Boolean(coarsePointer?.matches);
-      if (mobile !== null && mobile !== nextMobile) adaptive.reset();
-      mobile = nextMobile;
-      const next = resolveQuality({preference, width, dpr: window.devicePixelRatio,
-        cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory, recovered, autoTier, mobile});
-      return defer ? next : apply(next);
+    resetSampling(now = performance.now()) { adaptive.reset(now); },
+    sample(now, frameMs, callbackMs, active) {
+      if (!active || !autoEnabled || !profile) {
+        adaptive.reset(now);
+        return;
+      }
+      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === 'auto' && !recovered);
+      if (next?.tier) autoTier = pendingDowngrade = next.tier;
+      if (next) onChange(next.tier ? 'tier' : 'resolution');
+    },
+    resolve(width) {
+      const next = resolveQuality({preference, width, dpr:window.devicePixelRatio, cores:navigator.hardwareConcurrency,
+        memory:navigator.deviceMemory, recovered, autoTier, deviceClass, androidChrome, highPerformanceWebGL2});
+      if (preference === 'auto') autoTier ??= next.tier;
+      return Object.freeze({...next, basePixelRatio:next.pixelRatio, pixelRatio:next.pixelRatio * adaptive.renderScale});
     },
     apply,
+    get tierDowngrades() { return tierDowngrades; },
     get state() { return profile; },
   };
 }
