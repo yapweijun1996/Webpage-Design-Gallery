@@ -21,6 +21,7 @@ const messages = new Map([
   ['Story','故事','Kisah'],
   ['Stand','起身','Berdiri'],
   ['Ride','乘坐','Naik'],
+  ['Skip ride','跳过乘梯动画','Langkau perjalanan'],
   ['Call','呼叫','Panggil'],
   ['Call elevator','呼叫电梯','Panggil lif'],
   ['Calling elevator','正在呼叫电梯','Memanggil lif'],

@@ -362,17 +362,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     const planter = lounge2.planters[lounge2.id === "west" ? 1 : 0];
     tree(planter.x, planter.z, 4.2);
   }
-  for (const z of [8.37, 11.63]) {
-    box("ivory", -4.99, 1.87, z, 0.31, 3.74, 0.46);
-    box("brass", -5.16, 1.74, z, 0.055, 2.2, 0.13);
-    box("glow", -5.194, 1.78, z, 0.035, 0.76, 0.06);
+  for (const z of [8.37, 11.63])
     box("oak", -4.99, 5.27, z, 0.3, 3.14, 0.37);
-  }
-  solid("archSpandrel", "ivory", -5.14, 2.87, 10, 1.93, 0.9, 0.18, -Math.PI / 2);
-  solid("archSpandrel", "green", -5.31, 2.89, 10, 1.78, 0.78, 0.08, -Math.PI / 2);
-  box("green", -5.01, 3.78, 10, 0.33, 0.36, 3.82);
-  box("brass", -5.2, 3.62, 10, 0.03, 0.05, 3.52);
-  box("ivory", -5.02, 4.02, 10, 0.36, 0.19, 3.94);
   cylinderPlanter(-4.25, 14.1);
   function cylinderPlanter(x, z) {
     solid("cylinder", "ivory", x, 0.29, z, 0.96, 0.58, 0.96);

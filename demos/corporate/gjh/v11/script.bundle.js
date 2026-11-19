@@ -3198,6 +3198,43 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   } };
 }
 
+// demos/corporate/gjh/v11/assets/elevator-chime.js
+function createArrivalChime() {
+  let context, bell;
+  return {
+    unlock() {
+      if (!globalThis.AudioContext)
+        return;
+      try {
+        context ??= new AudioContext;
+        if (!bell) {
+          bell = context.createBuffer(1, Math.ceil(context.sampleRate * 0.52), context.sampleRate);
+          const samples = bell.getChannelData(0);
+          const note = (hz, age) => age < 0 ? 0 : Math.min(1, age / 0.008) * Math.exp(-age * 10) * Math.sin(2 * Math.PI * hz * age);
+          for (let i = 0;i < samples.length; i++) {
+            const t = i / context.sampleRate, tail = Math.min(1, (samples.length - i) / (context.sampleRate * 0.04));
+            samples[i] = 0.095 * tail * (note(784, t) + note(1046.5, t - 0.115));
+          }
+        }
+        if (context.state === "suspended")
+          context.resume().catch(() => {});
+      } catch {}
+    },
+    play() {
+      if (context?.state !== "running" || !bell)
+        return;
+      const source = context.createBufferSource();
+      source.buffer = bell;
+      source.connect(context.destination);
+      source.start();
+    },
+    dispose() {
+      if (context)
+        context.close().catch(() => {});
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/model-warmup.js
 function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, maxSteps = 2 } = {}) {
   const jobs = [];
@@ -4509,6 +4546,12 @@ for (const [selector, name, size] of [
 document.querySelector("#interaction-point").append(icon("map-pin", { size: 18 }));
 var expanded = new URLSearchParams(location.search).get("layout") !== "classic";
 document.body.classList.toggle("is-expanded", expanded);
+var arrivalChime = createArrivalChime();
+var skipRide = document.getElementById("skip-lift-ride");
+skipRide.addEventListener("click", () => {
+  player?.skipRide();
+  canvas.focus({ preventScroll: true });
+});
 var reducedMotion2 = matchMedia("(prefers-reduced-motion: reduce)");
 var startupOverlay = document.getElementById("app-loader");
 var greetedOnArrival = false;
@@ -4766,6 +4809,7 @@ var snapshot = () => Object.freeze({
   modeLayers: modes.layers(),
   paused: modes.paused(),
   elevator: elevator?.state || null,
+  elevatorModel: elevator?.kit ? { tier: elevator.kit.tier, status: elevator.kit.status } : null,
   amenities: world?.amenities || null,
   npcs: npcs?.state || null,
   renderBudget: atmosphere ? { ...atmosphere.state } : null,
@@ -4858,6 +4902,8 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
 }), writable: false });
 function updateHUD() {
   const p = player.state;
+  if (skipRide.hidden === p.elevatorTravel)
+    skipRide.hidden = !p.elevatorTravel;
   currentZone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
   if (expanded && currentZone === "upper" && !brandWallStarted) {
     brandWallStarted = true;
@@ -4985,6 +5031,8 @@ function updateModelPreload(now) {
   const visitorLod = player.state.character.lod;
   const lodStatus = visitorLod ? visitorLod.available ? "loaded" : visitorLod.failed ? "fallback" : "pending" : "loaded";
   const assets = models.concat(Object.values(state.sceneModels), furnishings.map((item) => item.status), lodStatus);
+  if (elevator?.kit)
+    assets.push(elevator.kit.status);
   const done = assets.filter((status) => status === "loaded" || status === "fallback").length;
   const failed = assets.filter((status) => status === "fallback").length;
   const ready2 = done === assets.length && state.settled === state.total;
@@ -5358,6 +5406,7 @@ function resize() {
 function applyProfile(profile) {
   const width = renderWidth, height = renderHeight;
   quality.apply(profile);
+  elevator?.kit?.select(profile.tier);
   npcs?.setQuality({ tier: profile.tier, mobile: width < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
   if (!contextLost) {
     if (renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
@@ -5580,7 +5629,7 @@ async function initialize() {
   }
   if (new URLSearchParams(location.search).get("visitor") !== "v1") {
     const { createElevatorV2 } = await import("./assets/elevator-v2.js");
-    elevator = createElevatorV2(T, R, physics, world.scene, expanded);
+    elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
     if (mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {
       mallTheme.destroy();
       mallTheme = null;
@@ -5646,7 +5695,9 @@ async function initialize() {
     ui.setElevator(() => {
       manual = false;
       player.setInput(null);
-      const ok = player.useElevator(elevator);
+      const ok = player.useElevator(elevator, arrivalChime.play);
+      if (ok && player.state.elevatorTravel)
+        arrivalChime.unlock();
       updateHUD();
       render();
       return ok;
@@ -5723,6 +5774,8 @@ if (document.body.dataset.entryMode !== "directory")
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
     pageEnded = true;
+    elevator?.kit?.dispose();
+    arrivalChime.dispose();
     tierQueue?.cancel();
     warmRunner?.stop("pagehide");
     mallTheme?.destroy();
