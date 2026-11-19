@@ -1,3 +1,4 @@
+import {createKitLoader} from './elevator-kit.js';
 import {liftLayout,cutRectangle} from './lift-layout.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
@@ -40,12 +41,12 @@ function createLegacyElevator(T, R, physics, scene) {
   return {
     x, z, upper,
     setHeight(y) { cabin.position.y = y; },
+    replaceCabin(){cabin.visible=false;},
     interactables: [0, upper].map(y => ({id:'visitor-elevator', x, z, y, radius:1.45})),
   };
 }
 
-export function createElevatorV2(T,R,physics,scene,expanded=false) {
-  if(!expanded)return createLegacyElevator(T,R,physics,scene);
+function createExpandedElevator(T,R,physics,scene,motion) {
   const L=liftLayout, floors=[0,L.upper], staticParts=[], cabinParts=[],deckGlassParts=[];
   const palette={stone:new T.Color(0xdfd5c4),rail:new T.Color(0xb59b62),panel:new T.Color(0x183a30)};
   const obstacles=[], gates=[], thresholds=[];let height=0,call=null,generation=0,riding=false;
@@ -141,16 +142,20 @@ export function createElevatorV2(T,R,physics,scene,expanded=false) {
     });
     return true;
   }
-  const cabinColliders=cabinBoxes.map(w=>({...w,collider:collider(L.x+w.x,w.y,L.z+w.z,...w.size)}));
+  let fitted=false;
+  const cabinColliders=cabinBoxes.map(w=>({...w,position:{x:L.x+w.x,y:w.y,z:L.z+w.z},collider:collider(L.x+w.x,w.y,L.z+w.z,...w.size)}));
   function sync(){
     cabin.position.y=height;
-    for(const w of cabinColliders)w.collider.setTranslation({x:L.x+w.x,y:height+w.y,z:L.z+w.z});
-    for(const gate of gates){const open=!call&&(!riding||riding==='boarding')&&Math.abs(height-gate.floor)<.001;gate.mesh.visible=!open;gate.collider.setEnabled(!open);}
+    for(const w of cabinColliders){w.position.y=height+w.y;w.collider.setTranslation(w.position);}
+    for(const gate of gates){const open=!call&&(!riding||riding==='boarding')&&Math.abs(height-gate.floor)<.001;gate.closed=!open;gate.mesh.visible=!fitted&&!open;gate.collider.setEnabled(!open);}
     for(const threshold of thresholds){const docked=!call&&(!riding||riding==='boarding')&&Math.abs(height-threshold.floor)<.001;threshold.mesh.visible=docked;threshold.collider.setEnabled(docked);}
   }
   function settle(){generation++;call=null;riding=false;height=height<L.upper/2?0:L.upper;sync();}
   sync();
   return {
+    replaceCabin(){fitted=true;cabin.visible=false;sync();},
+    get height(){return height;},
+    get calling(){return Boolean(call);},
     ...L, expanded:true,cameraObstacles:obstacles,applyMallTheme,
     interactables:floors.map(y=>({id:'visitor-elevator',x:L.exit.x,z:L.exit.z,y,radius:L.radius})),
     setHeight(y){height=y;sync();},
@@ -159,10 +164,54 @@ export function createElevatorV2(T,R,physics,scene,expanded=false) {
     update(dt,player){
       if(!call)return;
       if(Math.hypot(player.x-L.exit.x,player.z-L.exit.z)>L.radius+.4||Math.abs(player.y-call.to)>.4){settle();return;}
-      call.elapsed+=dt;const t=matchMedia('(prefers-reduced-motion: reduce)').matches?1:Math.min(1,call.elapsed/2.5);
+      call.elapsed+=dt;const t=motion?.matches?1:Math.min(1,call.elapsed/2.5);
       height=call.from+(call.to-call.from)*t*t*(3-2*t);if(t===1)call=null;sync();
     },
     interrupt:settle,
-    get state(){return {height,calling:Boolean(call),riding,generation,docked:!call&&!riding?(Math.abs(height)<.001?0:Math.abs(height-L.upper)<.001?L.upper:null):null,gates:gates.map(g=>({floor:g.floor,closed:g.mesh.visible})),thresholds:thresholds.map(t=>({floor:t.floor,enabled:t.mesh.visible}))};},
+    get state(){return {height,calling:Boolean(call),riding,generation,docked:!call&&!riding?(Math.abs(height)<.001?0:Math.abs(height-L.upper)<.001?L.upper:null):null,gates:gates.map(g=>({floor:g.floor,closed:g.closed})),thresholds:thresholds.map(t=>({floor:t.floor,enabled:t.mesh.visible}))};},
   };
+}
+
+// The fixed gates and threshold colliders remain authoritative in both the
+// model and fallback paths. Door leaves are a visual follower of the ride.
+export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) {
+  const motion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const lift=expanded ? createExpandedElevator(T,R,physics,scene,motion) : createLegacyElevator(T,R,physics,scene);
+  const kit=prepareModel ? createKitLoader(T,scene,lift,prepareModel,lift.replaceCabin) : null;
+  const physicalUpdate=lift.update, setHeight=lift.setHeight, interrupt=lift.interrupt;
+  let y=0, ground=0, upper=0, dwell=0, down=false;
+  function paint(){
+    kit?.update(y,ground,upper,(y>=lift.upper/2?2:0)+(down?1:0));
+  }
+  lift.kit=kit;
+  lift.setHeight=height=>{setHeight(height);y=height;};
+  lift.pose=(trip)=>{
+    lift.setHeight(trip.height);
+    ground=trip.groundDoor;upper=trip.upperDoor;down=trip.phase==='exit' ? trip.to!==0 : trip.to===0;
+    paint();
+  };
+  lift.finishRide=()=>{dwell=1.1;};
+  lift.update=(dt,p)=>{
+    if (p.elevatorTravel) return;
+    const wasCalling=lift.calling, oldY=y;
+    physicalUpdate?.(dt,p);
+    if (expanded) y=lift.height;
+    if (wasCalling && !lift.calling) dwell=1.1;
+    if (oldY!==y) down=y<oldY;
+    else if (!dwell) down=y===lift.upper;
+    dwell=Math.max(0,dwell-dt);
+    // Also open for visitors who walk through the doorway without taking a ride.
+    const atDoor=expanded ? Math.abs(p.z-lift.z)<1.03 && p.x>lift.shaft.minX-.65 && p.x<lift.x+.15 :
+      Math.abs(p.x-lift.x)<.77 && Math.abs(p.z-(lift.z-1.36))<.65;
+    const open=!lift.calling && (dwell>0 || atDoor && Math.abs(p.y-y)<.45);
+    const step=motion?.matches?1:dt/.22;
+    ground=Math.max(0,Math.min(1,ground+(open&&y===0?step:-step)));
+    upper=Math.max(0,Math.min(1,upper+(open&&y===lift.upper?step:-step)));
+    paint();
+  };
+  lift.interrupt=()=>{
+    interrupt?.(); if(expanded)y=lift.height;
+    dwell=ground=upper=0;down=y===lift.upper;paint();
+  };
+  return lift;
 }

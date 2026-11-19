@@ -1,0 +1,111 @@
+{
+  "reviewer": "visual_review",
+  "reference": {
+    "file": "elevator_ref.png",
+    "sha256": "454764986855f6c512f933294166158e70e3213a3426254bfaddd4c399896520"
+  },
+  "ownerBaseline": {
+    "file": "elevator_now.png",
+    "sha256": "92b900993269254ec4cdf61aa34facefd6122274bd9544e35eecd634bb030f60"
+  },
+  "renderer": "Blender 5.1.2 / Cycles CPU, 10 samples, 700×700, AgX Medium High Contrast; same camera and lights across tiers; left/right door translations ±1.04 m at open endpoint",
+  "cameraScriptSha256": "bd33bf7f082d7bc36d92c629f27b7c3f03995e078e34da14583cb151d3c945e0",
+  "visualCriteria": {
+    "portal": "PASS, shell reads dark green and has a light band over the lintel and gold inner reveals",
+    "sign": "PASS, centered white-gold Elevator lettering and lift glyph physically attached above the doorway",
+    "doorGlazing": "PASS, two steel-framed panes form a narrow center seam and show the rear handrail and vertical cabin divisions through closed glass",
+    "indicator": "PASS, separate right black display reads G and up arrow, with a lower pair of call buttons",
+    "pilastersAndSconces": "PASS, symmetrically paired dimensional warm vertical slats and pale projecting brass-framed sconce lenses",
+    "plants": "PASS, two light stone pots on gold bases with projecting folded leaves; denser foliage at higher tiers",
+    "marbleAndInlay": "PASS, visible marble veins with a dark edge and continuous narrow gold perimeter",
+    "openInterior": "PASS, leaves clear the opening, wood wainscot, metal panel seams, gold handrail and ceiling inserts show cabin depth"
+  },
+  "sources": {
+    "script.bundle.js": "245010707bb284905933be16ebf642005e37794b60e06177d798235057c6ef67",
+    "assets/elevator-v2.js": "0acee3c7b5da54263183b73950a44fde6308ed0dc3948fcab717ebf1d8e230e6",
+    "assets/elevator-kit.js": "8a4e961ae2ee3be832c04aef089ff1a526b1da329510320cb4a599204d32acaa",
+    "assets/player.bundle.js": "9b3440a80a37262a6a0867ae795fbec4cfb5d91d85fc051d8600fc615b9daca1",
+    "assets/world.bundle.js": "9e105e903b19117db851c520c8b418f3279c434a0923b3e39349649ea7fe13b6",
+    "index.html": "b6b861122a1ab6d875acddba829cee3cb38065415326b57ed334d18e2c323588"
+  },
+  "glbs": {
+    "low": "504de8d0919a4dc30365fdbfe35f73434e9a6654bd1ec8503f4d4ae34a2f05a2",
+    "balanced": "1692d2e8fdb598f62d40cad12c32e71a6848c8807ebfc3cf79115acc0af3a454",
+    "detailed": "0d4c3ad5338f248e900807da71abbe169e7794eb92696b316cec882e125a4d21"
+  },
+  "captures": {
+    "balanced-closed.png": "1d34fa3826715cff8260d4d7bb04ead58037ec739754310876d0a9dc4b0013fb",
+    "balanced-open.png": "78448a0bd5a7cd73e30ce2d35cbf8afcf61b2e7c3556f9e0015c519a0f101c26",
+    "browser-balanced-ground-closed.png": "d83baceee5e0df60e62f7758df54eb54b1cd5e76bed610639e067b4727096c86",
+    "browser-classic-ground.png": "4668a4d564265e7cc0c592ec2ec2249ff78473ed065ee4f3998052417e1d5121",
+    "browser-classic-upper.png": "a032a75503e2d6abe7798e2701c0118069d53e7223c80ab587be290a2bfef9ab",
+    "browser-detailed-ground-closed.png": "03199efc716704be53be2080a8d71c924b2e5b88abf2fdd42537ebf95c3800c9",
+    "browser-low-ground-closed.png": "0518b52a46c591075a68fb94453cfefc68e5d632cf3e6f2d75f7f4ddb5857d52",
+    "browser-low-upper-open.png": "aaaaf8e802611a04a0d09f15e5767b84b0f0fd7a76f86f497c92a9fe5c7469b1",
+    "comparison.png": "d029ce76b437a39ff50e5c97acea2a6319282217926b01a6d366be8769efff16",
+    "detailed-closed.png": "9bf22444ae52cfcb4f959e310e5d9dcfabffb0c472b69b9b3372ca7ed0c76fdd",
+    "detailed-open.png": "ad63082a22a77de422a605fe83ab791b96beee49bc55696a9c91622b57a421be",
+    "low-closed.png": "9720ae7799d040159c7e0f39e265af11afd5b98846a65ded6bdbf4551745481c",
+    "low-open.png": "268e5314ffbf3a51d5e7437077d5d6ebba780bdc407a93bd37f3d2781a7a2686"
+  },
+  "browser": {
+    "configuration": "Chrome/ANGLE Apple M4 Metal; 390x844 CSS px mobile/touch at DPR2; in-game render targets 390x792 / 487x990 / 780x1584 Low/Balanced/Detailed; bundled code runs in an offline local fixture which remaps ESM imports and serves exact assets from memory. PWA disabled and webfont untested. Screens capture the real WebGL canvas buffer at a fixed manual simulation instant behind the actual HUD. Network startup times and native phone hardware were outside this check.",
+    "groundCamera": "Original expanded scene; teleport courtyard then walk 10,5.5 -> -6.4,5.5 -> -6.4,10; yaw -pi/2 pitch 0; capture endpoint x=-6.399723,z=9.915881",
+    "approach": "All final quality models reported loaded. The Low completed warm-up reported 20 probes, 210 programs, and no pending uploads. Scene-wide GL instrumentation on first route created two programs and one texture, zero buffers. No further program/buffer/texture creation in the first uphill ride through upper arrival. No claim about attribution of scene-wide events or cold CDN/network frame time.",
+    "draws": {
+      "low": [
+        2220,
+        290,
+        256
+      ],
+      "balanced": [
+        2988,
+        326,
+        352
+      ],
+      "detailed": [
+        4028,
+        362,
+        448
+      ]
+    },
+    "drawsOrder": [
+      "single combined fixed landing batch, both stops",
+      "single movable cabin",
+      "single batch of four instanced leaves"
+    ],
+    "normalRoundtrip": "Up/down each exactly 111 × 1/60 s physics ticks, 1.85 s. Ground/upper 0 / 7.2 m. Ride/proximity and collider restored.",
+    "skip": "Clicking Skip while boarding advances to requested stop and restores capsule and interaction.",
+    "reduced": "One tick on both layouts; empty car recall on expanded also one tick, stationary X/Z.",
+    "map": "Actual expanded map selects New Moon, ground position (-10,2.4), car stays docked above, closed ground gate. Empty call does not carry visitor.",
+    "audio": "Trusted Detailed click emitted one Web Audio buffer, running context, 0.52 s, RMS 0.02794 (previous assembly; chime unchanged). Physical sound not monitored."
+  },
+  "documentImages": {
+    "ground.webp": {
+      "sha256": "284be8f7b2c6682cbaf8d8b1781c999f203aa2e4b26420320a7ceddc053015c4",
+      "capture": "browser-low-ground-closed.png"
+    },
+    "upper.webp": {
+      "sha256": "a6d8cbc7c16b340af1255eb2ee28b12222a6e7e71079a5ebce0feb42a47b5371",
+      "capture": "browser-low-upper-open.png"
+    },
+    "tiers.webp": {
+      "sha256": "9ebea169dbad3d5dc590d379634c6b8d59e356987113bfda2a2405ee07c48b72",
+      "capture": "comparison.png"
+    },
+    "classic-ground.webp": {
+      "sha256": "b571282710288b2db23e92a7ad9f85e12daaabeffbf8d072340bff9d12d4e186",
+      "capture": "browser-classic-ground.png"
+    }
+  },
+  "builders": {
+    "build_elevator_atlas.py": "159e091caeac84c4b974c0cf0f99c3785d99f86c05780258ccaed8292de363c7",
+    "build_elevator_kit.py": "b67bbf1c3c4156dae0579a707a1a147b19f476cfea6f8f607aab264710830c96"
+  },
+  "blendSource": {
+    "file": "models/gjh-courtyard-elevator/sources/elevator.blend",
+    "sha256": "1b559564742dd6c21e48e044a6a503cc9cf642c64a33de54db955fe40e0d5f63",
+    "packedTextures": 3,
+    "nodes": 11
+  }
+}

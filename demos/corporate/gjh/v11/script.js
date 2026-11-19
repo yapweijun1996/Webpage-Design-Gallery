@@ -8,6 +8,7 @@ import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
+import {createArrivalChime} from './assets/elevator-chime.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareTier} from './assets/scene-warmup.js';
 import {emptyInteriorReport} from './assets/interiors/warmup.js';
@@ -34,6 +35,9 @@ document.querySelector('#interaction-point').append(icon('map-pin', {size: 18}))
 const expanded = new URLSearchParams(location.search).get('layout') !== 'classic';
 document.body.classList.toggle('is-expanded', expanded);
 
+const arrivalChime = createArrivalChime();
+const skipRide = document.getElementById('skip-lift-ride');
+skipRide.addEventListener('click',()=>{player?.skipRide();canvas.focus({preventScroll:true});});
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const startupOverlay = document.getElementById('app-loader');
 let greetedOnArrival = false, pageEnded = false;
@@ -193,7 +197,7 @@ function heroVisibility(number) {
 }
 const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:world?.modelPreload || null, mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
-  elevator:elevator?.state||null, amenities: world?.amenities || null,
+  elevator:elevator?.state||null, elevatorModel:elevator?.kit?{tier:elevator.kit.tier,status:elevator.kit.status}:null, amenities: world?.amenities || null,
   npcs: npcs?.state || null,
   renderBudget: atmosphere ? {...atmosphere.state} : null,
   theme: mallTheme?.state() || null,
@@ -244,6 +248,7 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
+  if (skipRide.hidden===p.elevatorTravel) skipRide.hidden=!p.elevatorTravel;
   currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if(expanded&&currentZone==='upper'&&!brandWallStarted){
     brandWallStarted=true;
@@ -342,6 +347,7 @@ function updateModelPreload(now) {
   const visitorLod=player.state.character.lod;
   const lodStatus=visitorLod ? (visitorLod.available?'loaded':visitorLod.failed?'fallback':'pending') : 'loaded';
   const assets=models.concat(Object.values(state.sceneModels),furnishings.map(item => item.status),lodStatus);
+  if(elevator?.kit)assets.push(elevator.kit.status);
   const done=assets.filter(status => status==='loaded'||status==='fallback').length;
   const failed=assets.filter(status => status==='fallback').length;
   const ready=done===assets.length && state.settled===state.total;
@@ -576,6 +582,7 @@ function resize() {
 function applyProfile(profile) {
   const width=renderWidth, height=renderHeight;
   quality.apply(profile);
+  void elevator?.kit?.select(profile.tier);
   npcs?.setQuality({tier:profile.tier,mobile:width<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
   if (!contextLost) {
     if (renderer.getPixelRatio() !== profile.pixelRatio || canvas.width !== Math.floor(width * profile.pixelRatio) || canvas.height !== Math.floor(height * profile.pixelRatio)) {
@@ -723,7 +730,7 @@ async function initialize() {
   }
   if (new URLSearchParams(location.search).get('visitor') !== 'v1') {
     const {createElevatorV2} = await import('./assets/elevator-v2.js');
-    elevator = createElevatorV2(T, R, physics, world.scene, expanded);
+    elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
     world.prepareUpperLevel();
     if(mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {mallTheme.destroy();mallTheme=null;ui.configureMallTheme(null);}
     world.interactables.push(...elevator.interactables);
@@ -762,7 +769,9 @@ async function initialize() {
   }
   if (elevator) ui.setElevator(() => {
     manual=false; player.setInput(null);
-    const ok=player.useElevator(elevator); updateHUD(); render(); return ok;
+    const ok=player.useElevator(elevator,arrivalChime.play);
+    if (ok && player.state.elevatorTravel) arrivalChime.unlock();
+    updateHUD(); render(); return ok;
   });
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
@@ -808,5 +817,5 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
-  pageEnded = true; tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
+  pageEnded = true; elevator?.kit?.dispose(); arrivalChime.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
 }});

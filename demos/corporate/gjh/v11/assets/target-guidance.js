@@ -10,7 +10,7 @@ export function createTargetGuidance({canvas, projection}) {
     hide,
     update(item, label, camera, active) {
       // Products already have their owner-provided whole-shelf outline.
-      if (!active || !item || item.id.startsWith('new-moon-')) { hide(); return; }
+      if (!active || !item || item.id === 'visitor-elevator' || item.id.startsWith('new-moon-')) { hide(); return; }
       const point = projection.point({x: item.x, y: item.y ?? 0, z: item.z}, camera);
       if (!point) { hide(); return; }
       const actionLabel = touchOnly.matches ? 'Tap' : 'Press F';
