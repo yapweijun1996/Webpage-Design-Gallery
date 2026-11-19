@@ -49,3 +49,23 @@ test('crowd shaders preserve merged clothing and share the portrait fill across 
     assert.equal(material.customProgramCacheKey(), 'gjh-crowd-portrait-v1');
   }
 });
+
+test('program trace distinguishes warm links from live replacements at an unchanged count', async () => {
+  const {createProgramTrace} = await import('../demos/corporate/gjh/v11/assets/frame-trace.js');
+  const programs = [{id:1, name:'avatar', cacheKey:'standard,skinned'}];
+  const trace = createProgramTrace({info:{programs}});
+  trace.sample('pre-draw','running','atrium');
+  trace.event('npc-admit', 2);
+  programs[0] = {id:2, name:'depth', cacheKey:'depth,skinned'};
+  trace.sample('live','complete','atrium');
+  trace.event('npc-lod', 1);
+  trace.sample('live','complete','atrium');
+  const [warm, replacement, swap] = trace.report();
+  assert.equal(warm.delta, 1);
+  assert.equal(replacement.delta, 0);
+  assert.equal(replacement.removed, 1);
+  assert.equal(replacement.added[0].cacheKey, 'depth,skinned');
+  assert.deepEqual(replacement.events, [{kind:'npc-admit',detail:2}]);
+  assert.deepEqual(swap.added, []);
+  assert.deepEqual(swap.events, [{kind:'npc-lod',detail:1}]);
+});

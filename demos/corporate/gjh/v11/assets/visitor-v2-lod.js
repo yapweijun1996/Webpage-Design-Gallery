@@ -41,7 +41,9 @@ export function createVisitorLOD(T,avatar,{
             throw Error('LOD material or bind pose mismatch');
           }
           const geometry=part.low=swapMaterial?low.geometry:low.geometry.clone(),indices=geometry.attributes.skinIndex;
-          for(let i=0;i<indices.count;i++)for(let j=0;j<4;j++)indices.setComponent(i,j,map[indices.getComponent(i,j)]);
+          if (map.some((joint, index) => joint !== index)) {
+            for(let i=0;i<indices.count;i++)for(let j=0;j<4;j++)indices.setComponent(i,j,map[indices.getComponent(i,j)]);
+          }
           if(swapMaterial){prepareMaterial?.(low.material);part.lowMaterial=low.material;}
         }
         if(swapMaterial)lowScene=gltf.scene;
@@ -53,7 +55,8 @@ export function createVisitorLOD(T,avatar,{
           if(swapMaterial)proxy.material=lowMaterial;
           return proxy;
         });
-        await prepareModel(meshes,{signal:upload.signal,alternates:parts.map((part,i)=>[part.mesh,meshes[i]])});
+        const bindings = swapMaterial ? [...parts.map(part => part.mesh), ...meshes] : meshes;
+        await prepareModel(bindings,{signal:upload.signal,alternates:parts.map((part,i)=>[part.mesh,meshes[i]])});
       }
       if(disposed)return;
       available=true;

@@ -2,7 +2,7 @@ import {disposeVisitorScene, loadVisitorGLTF} from './visitor-gltf.js';
 
 // The model origin is the centre of the modular hand's cylindrical grip.
 // Keep the reserved shelf prop and the baked fingers in this same frame.
-export function createFirstPersonHand(T, visual, dress) {
+export function createFirstPersonHand(T, visual, dress, prepareModel) {
   const root = new T.Group(), grip = new T.Group(), local = new T.Matrix4();
   root.name = 'FirstPersonCarryHand';
   root.matrixAutoUpdate = false;
@@ -11,16 +11,25 @@ export function createFirstPersonHand(T, visual, dress) {
   visual.add(root);
   let model, loading, disposed = false;
 
+  const upload = new AbortController();
   function prepare() {
     if (!model && !loading && !disposed) {
-      loading = loadVisitorGLTF(new URL('./visitor-carry-hand.glb', import.meta.url)).then(({scene}) => {
-        if (disposed) { disposeVisitorScene(scene); return; }
-        model = scene;
-        dress?.(model);
-        grip.add(model);
+      loading = loadVisitorGLTF(new URL('./visitor-carry-hand.glb', import.meta.url)).then(async ({scene}) => {
+        try {
+          if (disposed) return;
+          if (prepareModel) await prepareModel(scene, {signal:upload.signal});
+          if (disposed) return;
+          dress?.(scene);
+          grip.add(scene);
+          model = scene;
+        } finally {
+          if (!model) disposeVisitorScene(scene);
+        }
       }).catch(() => {}).finally(() => { loading = null; });
     }
   }
+
+  if (prepareModel) prepare();
 
   function frame(camera) {
     if (!root.visible) return;
@@ -47,6 +56,7 @@ export function createFirstPersonHand(T, visual, dress) {
     refreshStyle() { if (model) dress?.(model); },
     dispose() {
       disposed = true;
+      upload.abort();
       root.removeFromParent();
       if (model) disposeVisitorScene(model);
     }

@@ -202,7 +202,13 @@ async function shelfCan(character, knuckle = 'RightHandMiddle1') {
   const scene = new T.Scene(), shelf = new T.Group();
   scene.add(character.visual, shelf);
   const display = await addProducts(T, shelf, new Map(), new T.MeshStandardMaterial());
+  const carryBindings = [];
+  shelf.traverse(mesh => { if (mesh.isMesh && !mesh.isInstancedMesh) carryBindings.push(mesh); });
   const id = 'new-moon-nz-425g-front', token = display.reserveProduct(id);
+  for (const mesh of token.prop.children) {
+    assert.ok(carryBindings.some(binding => binding.geometry === mesh.geometry && binding.material === mesh.material),
+      'non-instanced pickup binding is present before reservation');
+  }
   const {prop, origin} = token;
   // Rotate the owner about the facing's home position to exercise world/local conversion.
   shelf.rotation.y = .6;

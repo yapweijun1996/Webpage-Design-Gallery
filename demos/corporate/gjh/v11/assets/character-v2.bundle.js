@@ -51,7 +51,7 @@ async function loadVisitorGLTF(url) {
 }
 
 // demos/corporate/gjh/v11/assets/visitor-carry-hand.js
-function createFirstPersonHand(T, visual, dress) {
+function createFirstPersonHand(T, visual, dress, prepareModel) {
   const root = new T.Group, grip = new T.Group, local = new T.Matrix4;
   root.name = "FirstPersonCarryHand";
   root.matrixAutoUpdate = false;
@@ -59,21 +59,31 @@ function createFirstPersonHand(T, visual, dress) {
   root.add(grip);
   visual.add(root);
   let model, loading, disposed = false;
+  const upload = new AbortController;
   function prepare() {
     if (!model && !loading && !disposed) {
-      loading = loadVisitorGLTF(new URL("./visitor-carry-hand.glb", import.meta.url)).then(({ scene }) => {
-        if (disposed) {
-          disposeVisitorScene(scene);
-          return;
+      loading = loadVisitorGLTF(new URL("./visitor-carry-hand.glb", import.meta.url)).then(async ({ scene }) => {
+        try {
+          if (disposed)
+            return;
+          if (prepareModel)
+            await prepareModel(scene, { signal: upload.signal });
+          if (disposed)
+            return;
+          dress?.(scene);
+          grip.add(scene);
+          model = scene;
+        } finally {
+          if (!model)
+            disposeVisitorScene(scene);
         }
-        model = scene;
-        dress?.(model);
-        grip.add(model);
       }).catch(() => {}).finally(() => {
         loading = null;
       });
     }
   }
+  if (prepareModel)
+    prepare();
   function frame(camera) {
     if (!root.visible)
       return;
@@ -103,6 +113,7 @@ function createFirstPersonHand(T, visual, dress) {
     },
     dispose() {
       disposed = true;
+      upload.abort();
       root.removeFromParent();
       if (model)
         disposeVisitorScene(model);
@@ -165,9 +176,11 @@ function createVisitorLOD(T, avatar, {
             throw Error("LOD material or bind pose mismatch");
           }
           const geometry = part.low = swapMaterial ? low.geometry : low.geometry.clone(), indices = geometry.attributes.skinIndex;
-          for (let i = 0;i < indices.count; i++)
-            for (let j = 0;j < 4; j++)
-              indices.setComponent(i, j, map[indices.getComponent(i, j)]);
+          if (map.some((joint, index) => joint !== index)) {
+            for (let i = 0;i < indices.count; i++)
+              for (let j = 0;j < 4; j++)
+                indices.setComponent(i, j, map[indices.getComponent(i, j)]);
+          }
           if (swapMaterial) {
             prepareMaterial?.(low.material);
             part.lowMaterial = low.material;
@@ -187,7 +200,8 @@ function createVisitorLOD(T, avatar, {
             proxy.material = lowMaterial;
           return proxy;
         });
-        await prepareModel(meshes, { signal: upload.signal, alternates: parts.map((part, i) => [part.mesh, meshes[i]]) });
+        const bindings = swapMaterial ? [...parts.map((part) => part.mesh), ...meshes] : meshes;
+        await prepareModel(bindings, { signal: upload.signal, alternates: parts.map((part, i) => [part.mesh, meshes[i]]) });
       }
       if (disposed)
         return;
@@ -805,7 +819,7 @@ async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
   const eyeHand = createFirstPersonHand(T, visual, (model2) => {
     model2.getObjectByName("ChibiGrip").material.color.copy(skin.material.color);
     model2.getObjectByName("SleeveCuff").material.color.copy((hoodie.visible ? hoodie : polo).material.color);
-  });
+  }, prepareModel);
   const transfer = createProductTransfer(T, avatar, wrist, visual, new T.Vector3(0, -0.03, 0.045), eyeHand);
   const contacts = { hands: [], feet: [] };
   avatar.updateWorldMatrix(true, true);

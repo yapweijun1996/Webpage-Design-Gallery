@@ -263,7 +263,17 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
         material.emissiveIntensity = .12;
       }
       loadedCans.push({primitives:record.primitives, placements:slots});
-      stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, slot:slots[reserveIndex]});
+      // The hand uses ordinary meshes while shelf stock is instanced. Keep its
+      // bindings in the hidden scene inventory for every tier and context sweep.
+      const carry = new T.Group();
+      carry.visible = false;
+      for (const {geometry, material, matrix} of record.primitives) {
+        const mesh = new T.Mesh(geometry, material);
+        mesh.applyMatrix4(matrix);
+        carry.add(mesh);
+      }
+      scene.add(carry);
+      stock.set(`new-moon-${sku}-front`, {carry, placements:shelfPlacements, slot:slots[reserveIndex]});
     } else {
       const meshes = fallbackCan(T, scene, textures, brass, sku, placements,artworkTier);
       slots.forEach(slot => slot.bounds.setFromCenterAndSize(new T.Vector3(slot.x,slot.y + canBounds.y/2,slot.z),
@@ -284,18 +294,18 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     if (!entry || entry.slot.reserved) return null;
     const index = reserveIndex;
     display.reserve(entry.slot, true);
-    const prop = new T.Group(); prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
-    for (const primitive of entry.record.primitives) {const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);prop.add(mesh);}
+    const prop = entry.carry.clone(); prop.visible=true; prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
     scene.add(prop); let released=false;
     return {id, prop, centerY:canBounds.y/2, approach:shelves.find(s=>s.id===id).pickup, origin:entry.placements[index].clone(), release() {
       if(released)return; released=true; prop.removeFromParent();
       display.reserve(entry.slot, false);
     }};
   }, createCollectProp(id) {
-    const index=cans.findIndex(item => `new-moon-${item.sku}-front`===id), record=canRecords[index];
-    if(!record || record.status!=='loaded') return null;
-    const group=new T.Group();group.name='SelectedDemoCan';
-    for(const primitive of record.primitives){const mesh=new T.Mesh(primitive.geometry,primitive.material);mesh.applyMatrix4(primitive.matrix);group.add(mesh);}
+    const entry = stock.get(id);
+    if (!entry) return null;
+    const group = entry.carry.clone();
+    group.visible = true;
+    group.name = 'SelectedDemoCan';
     // Geometry/materials are shared with the shelf: never dispose on gesture completion.
     return group;
   }, interactables, colliders: shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})), assets: Object.freeze({

@@ -34,7 +34,7 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   const eyeHand = createFirstPersonHand(T, visual, model => {
     model.getObjectByName('ChibiGrip').material.color.copy(skin.material.color);
     model.getObjectByName('SleeveCuff').material.color.copy((hoodie.visible ? hoodie : polo).material.color);
-  });
+  }, prepareModel);
   const transfer = createProductTransfer(T, avatar, wrist, visual, new T.Vector3(0, -.03, .045), eyeHand);
   const contacts={hands:[],feet:[]};
   avatar.updateWorldMatrix(true,true);

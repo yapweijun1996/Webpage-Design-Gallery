@@ -261,7 +261,7 @@ export function createModelWarmup(T, renderer) {
     }
   }
 
-  function prepare(root, scene, {hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, fence = false, ...options} = {}) {
+  function prepare(root, scene, {hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, shadowVariants = () => true, fence = false, ...options} = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse(mesh => {
@@ -286,6 +286,7 @@ export function createModelWarmup(T, renderer) {
         if (variants) {
           for (const lights of variants) {
             yield* prepareMesh(mesh, scene, mask, false, {lights,shadows:false});
+            if (!shadowVariants()) continue;
             yield* prepareMesh(mesh, scene, mask, false, {lights,shadows:true,
               depth:mesh.castShadow && (mask & 1) !== 0});
             if (linear()) yield* prepareMesh(mesh, scene, mask, true, {lights,shadows:true});

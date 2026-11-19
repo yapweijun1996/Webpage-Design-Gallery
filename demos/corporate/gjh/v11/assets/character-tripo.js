@@ -120,7 +120,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     // Tripo's knuckles lie along local +Y and the inside of the palm faces -X.
     const grip = poses.middleKnuckle.position.clone().multiplyScalar(.65);
     grip.x -= .060 / scale;
-    const eyeHand = createFirstPersonHand(T, visual);
+    const eyeHand = createFirstPersonHand(T, visual, undefined, prepareModel);
     const transfer = createProductTransfer(T, avatar, wrist, visual, grip, eyeHand);
     lod = createVisitorLOD(T, placement, {
       url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial: prepareTripoMaterial, prepareModel

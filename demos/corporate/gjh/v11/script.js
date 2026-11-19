@@ -2,7 +2,7 @@ import {restroomAt} from './assets/restroom-layout.js';
 import {readStandardGamepad,gamepadMotion} from '../../../../assets/onboarding/gamepad.js';
 import {createPerformanceMonitor} from './assets/performance-monitor.js';
 import {createPerformancePanel} from './assets/performance-panel.js';
-import {createFrameTrace} from './assets/frame-trace.js';
+import {createFrameTrace, createProgramTrace} from './assets/frame-trace.js';
 import {createUI} from './assets/ui.js';
 import {createGraphicsQuality, MALL_FRAME_BUDGETS} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
@@ -49,7 +49,7 @@ const fixedClock = createFixedClock();
 const movementTimings = {physicsMs:0,cameraMs:0};
 const movementHistory = new Array(300);
 let movementFrame = 0;
-let three, frameTrace;
+let three, frameTrace, programTrace;
 let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true, entryPresentation;
 let lightWash=false;
@@ -122,6 +122,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
     layout: expanded ? 'expanded' : 'classic',
+    ...(programTrace && {programTrace:programTrace.report()}),
     ...(frameTrace && {frameTrace:frameTrace.report()}),
     uploads: {...(modelWarmup?.report() ?? {lateAdditions:0,pendingUploads:0}), maxFrameUploadMs},
     warm: {...warmReport, upperLevel:world?.upperWarmStatus ?? null},
@@ -418,7 +419,11 @@ function render(force = false) {
           expanded ? MALL_FRAME_BUDGETS[tier] : undefined);
       } finally { world.interiors?.endFrame(); }
     };
+    const warmPhase = warmReport.background ?? warmReport.reason;
+    programTrace?.sample('pre-draw', warmPhase, currentZone);
+    programTrace?.player(pose);
     if (shelfFocus?.open) player.renderShelf(draw); else draw();
+    programTrace?.sample('live', warmPhase, currentZone);
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
     return pose;
@@ -818,7 +823,7 @@ async function installNpcs(T, R, prepareModel, source) {
   if (!source && !enabled) return;
   try {
     const {createNpcSystem, loadNpcSystem} = await import('./assets/npcs.js');
-    const options = {scene:world.scene,seats:world.seats,physics,R,playerCollider:player.capsule,
+    const options = {onAvatarEvent:programTrace?.event,scene:world.scene,seats:world.seats,physics,R,playerCollider:player.capsule,
       playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled,prepareModel,
       onModularFallback() { document.getElementById('npc-appearance-status').hidden=false; }};
     const system = source ? createNpcSystem(T, {...options, source}) : await loadNpcSystem(T, options);
@@ -852,6 +857,7 @@ async function initialize() {
   // Three's first draw synchronously reads the link status, program log and
   // both shader logs in debug mode, even after a parallel link has completed.
   renderer.debug.checkShaderErrors = diagnostics.get('debugShaders') === '1';
+  if (diagnostics.get('tracePrograms') === '1' || diagnostics.get('traceWarm') === '1') programTrace = createProgramTrace(renderer);
   if (diagnostics.get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = expanded ? 1.03 : 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
@@ -949,9 +955,14 @@ async function initialize() {
     world.interactables.push(...elevator.interactables);
     world.cameraObstacles.push(...(elevator.cameraObstacles||[]));
   }
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded,prepareModel);
-  if (player.npcSource) await installNpcs(T, R, prepareModel, player.npcSource);
-  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareModel));
+  const prepareAvatar = (model, options) => prepareModel(model, {
+    lighting: lights => atmosphere.lightVariants(lights),
+    shadowVariants: warmShadows,
+    ...options
+  });
+  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded,prepareAvatar);
+  if (player.npcSource) await installNpcs(T, R, prepareAvatar, player.npcSource);
+  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareAvatar));
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');

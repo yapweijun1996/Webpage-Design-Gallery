@@ -599,6 +599,43 @@ function createFrameTrace(renderer) {
   }
   return { start, end, steps, watchShadowMap, report: () => events.length < capacity ? events.slice() : [...events.slice(next), ...events.slice(0, next)] };
 }
+function createProgramTrace(renderer) {
+  let previous = new Set, next = 0, lastPose;
+  const samples = [], events = [];
+  function event(kind, detail) {
+    events.push({ kind, detail });
+  }
+  function player(pose) {
+    const values = [pose.character.lod?.level, pose.seatPhase, pose.character.physicalProduct?.phase, pose.cameraOccluded];
+    const labels = ["player-lod", "seat", "product", "camera-occlusion"];
+    values.forEach((value, i) => {
+      if (lastPose?.[i] !== value)
+        event(labels[i], value);
+    });
+    lastPose = values;
+  }
+  function sample(pass, warm, zone) {
+    const programs = renderer.info.programs;
+    const added = programs.filter((program) => !previous.has(program.id));
+    const removed = previous.size + added.length - programs.length;
+    const changes = pass === "live" ? events.splice(0) : [];
+    if (!added.length && !removed && !changes.length)
+      return;
+    samples[next] = {
+      at: performance.now(),
+      pass,
+      warm,
+      zone,
+      events: changes,
+      delta: programs.length - previous.size,
+      removed,
+      added: added.map(({ id, name, cacheKey }) => ({ id, name, cacheKey }))
+    };
+    next = (next + 1) % 512;
+    previous = new Set(programs.map((program) => program.id));
+  }
+  return { event, player, sample, report: () => samples.length < 512 ? samples.slice() : [...samples.slice(next), ...samples.slice(0, next)] };
+}
 
 // assets/onboarding/components.js
 function element(tag, className, text) {
@@ -4006,7 +4043,7 @@ function createModelWarmup(T, renderer) {
       depthMaterials?.forEach((material) => material.dispose());
     }
   }
-  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, fence = false, ...options } = {}) {
+  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, shadowVariants = () => true, fence = false, ...options } = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse((mesh) => {
@@ -4037,6 +4074,8 @@ function createModelWarmup(T, renderer) {
         if (variants) {
           for (const lights of variants) {
             yield* prepareMesh(mesh, scene, mask, false, { lights, shadows: false });
+            if (!shadowVariants())
+              continue;
             yield* prepareMesh(mesh, scene, mask, false, {
               lights,
               shadows: true,
@@ -5766,6 +5805,7 @@ var movementHistory = new Array(300);
 var movementFrame = 0;
 var three;
 var frameTrace;
+var programTrace;
 var modelWarmup;
 var tierQueue;
 var requestedProfile;
@@ -5899,6 +5939,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
+    ...programTrace && { programTrace: programTrace.report() },
     ...frameTrace && { frameTrace: frameTrace.report() },
     uploads: { ...modelWarmup?.report() ?? { lateAdditions: 0, pendingUploads: 0 }, maxFrameUploadMs },
     warm: { ...warmReport, upperLevel: world?.upperWarmStatus ?? null },
@@ -6320,10 +6361,14 @@ function render(force = false) {
         world.interiors?.endFrame();
       }
     };
+    const warmPhase = warmReport.background ?? warmReport.reason;
+    programTrace?.sample("pre-draw", warmPhase, currentZone);
+    programTrace?.player(pose);
     if (shelfFocus?.open)
       player.renderShelf(draw);
     else
       draw();
+    programTrace?.sample("live", warmPhase, currentZone);
     frames++;
     if (window.__sceneReady)
       ui.offerFirstGuide();
@@ -6906,6 +6951,7 @@ async function installNpcs(T, R, prepareModel, source) {
   try {
     const { createNpcSystem, loadNpcSystem } = await import("./assets/npcs.js");
     const options = {
+      onAvatarEvent: programTrace?.event,
       scene: world.scene,
       seats: world.seats,
       physics,
@@ -6953,6 +6999,8 @@ async function initialize() {
   lightWash = expanded && allowMallLightWash(quality.deviceClass, context);
   const diagnostics = new URLSearchParams(location.search);
   renderer.debug.checkShaderErrors = diagnostics.get("debugShaders") === "1";
+  if (diagnostics.get("tracePrograms") === "1" || diagnostics.get("traceWarm") === "1")
+    programTrace = createProgramTrace(renderer);
   if (diagnostics.get("traceWarm") === "1")
     frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace;
@@ -7088,12 +7136,17 @@ async function initialize() {
     world.interactables.push(...elevator.interactables);
     world.cameraObstacles.push(...elevator.cameraObstacles || []);
   }
+  const prepareAvatar = (model, options) => prepareModel(model, {
+    lighting: (lights) => atmosphere.lightVariants(lights),
+    shadowVariants: warmShadows,
+    ...options
+  });
   const { createPlayer } = await import("./assets/player.bundle.js");
-  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareModel);
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar);
   if (player.npcSource)
-    await installNpcs(T, R, prepareModel, player.npcSource);
+    await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")
-    firstFrame.then(() => installNpcs(T, R, prepareModel));
+    firstFrame.then(() => installNpcs(T, R, prepareAvatar));
   const { createDOMProjection } = await import("./assets/dom-projection.js");
   const projection = createDOMProjection(T, canvas);
   const { createTargetGuidance } = await import("./assets/target-guidance.js");
