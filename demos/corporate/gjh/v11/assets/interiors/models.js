@@ -1,3 +1,4 @@
+import {bakedParts} from './baked-layout.js';
 import {roomAtlas} from './detail-files.js';
 import {GLTFLoader, mergeGeometries} from '../shop-sign-vendor.js';
 
@@ -90,13 +91,23 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
       return atlas;
     }
   }));
-  function* prepareDetail(scene) {
+  function* prepareDetail(scene, placement) {
     // Blender already batched each finish. Preserve the stock instance matrices.
     const motion = {scroll:null,pulse:null};
     const meshes = [];
     scene.traverse(mesh => { if (mesh.isMesh) meshes.push(mesh); });
     for (const mesh of meshes) {
       const m = mesh.material;
+      // Keep the plate and its samples in their shared draw and preserve the shipped GLB.
+      if (placement && m.name === placement.material && !mesh.isInstancedMesh) {
+        const positions = mesh.geometry.attributes.position;
+        const offset = placement.xyz.map((v,k) => v-placement.sourceOrigin[k]);
+        for (let i=placement.firstVertex; i<placement.firstVertex+placement.vertexCount; i++) {
+          positions.setXYZ(i,positions.getX(i)+offset[0],positions.getY(i)+offset[1],positions.getZ(i)+offset[2]);
+        }
+        mesh.geometry.computeBoundingBox();
+        mesh.geometry.computeBoundingSphere();
+      }
       if (!lifetime.signal.aborted && (m.name === 'Enamel' || m.name === 'Printed opal')) {
         const reusable = shared.get(m.name);
         if (!reusable) {
@@ -124,7 +135,7 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
     const {scene} = await loader.parseAsync(buffer,new URL('interiors/',assetBase).href);
     try {
       if (signal?.aborted) throw new DOMException('Interior asset cancelled','AbortError');
-      const work = () => asset.roomDetail ? prepareDetail(scene) : mergeInteriorAnchor(T,scene);
+      const work = () => asset.roomDetail ? prepareDetail(scene,bakedParts[asset.file]) : mergeInteriorAnchor(T,scene);
       if (build) return await build(work);
       const iterator = work();
       let step;

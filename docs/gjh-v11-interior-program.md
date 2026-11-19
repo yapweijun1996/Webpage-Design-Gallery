@@ -6,6 +6,20 @@ The [machine-readable programme](gjh-v11-interior-program.json) contains every p
 
 **Round two.** The installed Low fit-out uses 34,490 triangles across all 17 shops. Gu Long is the largest at 2,730. The final review includes staging images, updated per-shop measurements and browser verification limits. [Installed fit-out](#installed-fit-out) · [Per-shop detail and evidence](#how-to-verify)
 
+## S0 and S1 layout contract
+
+Edit the shop's `items` in the [programme](gjh-v11-interior-program.json). Each row is one placed instance. Its ID, support, local transform, outer dimensions, collision owner, tier representation, action list, accessible name, standing point and horizontal reach travel together. The GLB provenance manifest retains the hash of the original design used to author those assets. The projections used by the kit, four New Moon cabinets and MILI benches come from the current programme.
+
+Run `python3 scripts/gjh_interiors/build_layout.py` before the four gallery generators. Node checks the [schema](gjh-v11-interior-program.schema.json), generated projections and measured kit budgets. Run `node scripts/gjh_interiors/sweep.mjs` for the slot-by-slot floor report. The offline grid tests a 0.28 m capsule and a 0.60 m aisle radius from the open doorway, checks a 0.75 m turning radius, and includes the 14 wing studios' original collision boxes. Horizontal reach is measured to the item envelope. Wall and suspended items use authored mounting surfaces. The three sample rooms also have an entrance sightline test. Final camera visibility, mesh contacts and input delivery require a browser walkthrough.
+
+| Sample | Entrance focus | Side operation and return |
+| --- | --- | --- |
+| New Moon | Collector triptych above four cabinets | Read the orchid-side photo, pour at the tea island and follow the open centre to the four pickup positions. Each leaves 0.395 m beyond the capsule at the shelf face. |
+| MILI | Copper hood over the sampling island | Both the procedural serving plate and the tasting plate in the unchanged detail GLB meet the 1.22 m counter. Use the front plate or side boiler. The revised bench positions keep a wide passage to the herbs at the rear. |
+| GOGO | Potong cart on the left | Ring the bell, pick up a treat, pour at the right bar and return between the two seat exits. The S1 plan calls for open floor at the centre. |
+
+**Integration pending.** The render lane's `world.js` still creates GOGO's coffee table, fallback geometry, pot and solid. The [render-lane patch](../scripts/gjh_interiors/gogo-world.patch) applies the programme's centre-fixture selection to the legacy builder. Until it lands, run the sweep with `--legacy-table` to include the installed obstruction. The historical Rapier replay in `tests/gjh_interiors_layout.test.mjs` stops at z = 1.63 m with the table. Individual action wiring follows in S2.
+
 ## Entrance views
 
 | Slot | Store | Room and entrance anchor | Material palette, dominant first | Accent | Exclusive prop family |
@@ -46,7 +60,7 @@ S03 supports drinks and frozen treats at category level. S05 and S11 have no ver
 
 All positions below use **slot-local metres**. Origin is the nominal expanded lot’s centre at world floor Y=0. +Y points up, +Z points through the door to the arcade, +X points to a visitor’s right when looking in. With yaw θ, world X = centreX + x cosθ + z sinθ and world Z = centreZ − x sinθ + z cosθ. The north, west and east yaws are 0°, +90° and −90°. North lots measure 10 × 12 m. S01–S03 occupy only 10 × 10.5 m of their lots. The actual rear wall is at local z=−4.5. Wing lots measure 8 × 10 m. For S04–S17 the studio back-wall centre is −depth/2 + 0.38, side-wall centres are ±(width/2 − 0.23) and the floor top is 0.081 m. [Slot frame](../demos/corporate/gjh/v11/assets/expanded-layout.js) · [Original zones](../demos/corporate/gjh/v11/assets/spatial.js) · [Studio](../demos/corporate/gjh/v11/assets/window-studios.js)
 
-The arrival is 2.4 m outside each threshold. The original opening spans 4.7 m. The other 14 have a 2.48 m physical opening. Keep glazing, jambs, moving leaves and their travel free. Preserve the positive-X contact podium at x=3.0 m in S04/S05 or 2.55 m in the wings, z=front−1, with its 2.18 × 1.16 m footprint. Walk 3.45 m in, move laterally at that depth, then browse to 7.4 m in the late shops. Use x=+2.1 except S09 +1.7, S15 +2.8 and S16 0. Retrace to exit. In the originals preserve the rear pick/story approaches. MILI and GOGO both keep benches at local (±3,−0.8) and exits (±3,+0.4). Keep the lift at world (−3,10), public deck and all seat logic intact. [Physical doors](../demos/corporate/gjh/v11/assets/world.js) · [Contact assertions](../tests/gjh_shop_collisions.mjs) · [Seats](../demos/corporate/gjh/v11/assets/seat-placements.js) · [Lift](../demos/corporate/gjh/v11/assets/lift-layout.js)
+The arrival is 2.4 m outside each threshold. The original opening spans 4.7 m. The other 14 have a 2.48 m physical opening. Keep glazing, jambs, moving leaves and their travel free. Preserve the positive-X contact podium at x=3.0 m in S04/S05 or 2.55 m in the wings, z=front−1, with its 2.18 × 1.16 m footprint. Walk 3.45 m in, move laterally at that depth, then browse to 7.4 m in the late shops. Use x=+2.1 except S09 +1.7, S15 +2.8 and S16 0. Retrace to exit. In the originals preserve the rear pick/story approaches. GOGO keeps its original benches. MILI uses the S1 bench positions in the table below. Keep the lift at world (−3,10), public deck and all seat logic intact. [Physical doors](../demos/corporate/gjh/v11/assets/world.js) · [Contact assertions](../tests/gjh_shop_collisions.mjs) · [Seats](../demos/corporate/gjh/v11/assets/seat-placements.js) · [Lift](../demos/corporate/gjh/v11/assets/lift-layout.js)
 
 The following static distances are from the planned route centreline to the nearest rotated furniture envelope below 2.10 m, including seat exit points, the retained contact podium and relevant retained islands. Subtract the 0.30 m walking capsule radius for the available margin. At S01 the limiting point is the existing pickup by the cabinet, leaving 0.04 m. Within the original M056 row keep native mesh and interaction bounds aligned. At S02 retain the two paths past the lacquer island. Static checks cover proposed solids on these routes. Dynamic camera, leaf, NPC, bench and cart interactions remain **UNVERIFIED**. Replace retired scenery and its decorative collider as a pair. Register the final proxy envelope before late GLBs can appear. [Player capsule](../demos/corporate/gjh/v11/assets/player.js) · [Shelf bounds](../demos/corporate/gjh/v11/assets/products.js)
 
@@ -60,7 +74,7 @@ A walnut collector’s cabinet opens above four working seafood shelves like the
 
 **Today.** Painted plum roundel with side niches. Gold-edged coffers and disc pendant. Four M056 cabinets with 204 native-size tins. Stone tea island, kettle, three cups, two stools, window shelving and a plant. Official New Moon cover on left wall. The back-wall vessels and blossom are painted architecture. Current GLB assignments in triangles per instance — gjh-m056-shelf-lod1 3,132, new-moon-can-nz-425g-lod1 3,044, new-moon-can-au-425g-lod1 3,044, new-moon-can-sa-425g-lod1 3,044, new-moon-can-mx-454g-lod1 3,044, kopitiam-kettle 2,888, kopitiam-saucer-and-cup 2,708, GJH_PUB_008 5,160, GJH_LGT_009 540. [world.js](../demos/corporate/gjh/v11/assets/world.js) · [shop-anchor-details-first.js](../demos/corporate/gjh/v11/assets/shop-anchor-details-first.js) · [products.js](../demos/corporate/gjh/v11/assets/products.js) · [furnishings.js](../demos/corporate/gjh/v11/assets/furnishings.js)
 
-**Placement.** North (10, 12) m lot, world centre (-10, 0, -6), door world (x,z) (-10, 0). Static minimum route clearance 0.340 m to the fixture. Keep four shelf targets and pickup positions. Lift the focal image above the shelf line. Use the right tea island and left reading stand as secondary stops.
+**Placement.** North (10, 12) m lot, world centre (-10, 0, -6), door world (x,z) (-10, 0). Minimum cabinet-face clearance at the pickup positions is 0.675 m. Keep four shelf targets. Lift the focal image above the shelf line. Use the right tea island and left reading stand as secondary stops.
 
 Fasten the upper triptych to the structural back wall on concealed spacers. The four original M056 centres span x ±3.63 m and reach x ±4.83 m at the outer trim. Those existing extremities intersect the wall lining. Preserve the four functional bounds and trim the new visual returns to the wall face.
 
@@ -69,7 +83,7 @@ Fasten the upper triptych to the structural back wall on concealed spacers. The 
 | Element | Source or new geometry | Local (x, y, z) m | Yaw |
 |---|---|---|---:|
 | **Hinged walnut collector cabinet with brass photo recess** | NEW · `collector-triptych` | (0, 2.47, -3.46) | 0° |
-| Four active collection cabinets | `gjh-m056-premium-wall-shelf-straight` | (-3.63, 0, -3.25) / (-1.21, 0, -3.25) / (1.21, 0, -3.25) / (3.63, 0, -3.25) | 0° |
+| Four active collection cabinets | `gjh-m056-premium-wall-shelf-straight` | (-3.39, 0, -3.25) / (-1.13, 0, -3.25) / (1.13, 0, -3.25) / (3.39, 0, -3.25) | 0° |
 | Tea kettle at stone island | `kopitiam-kettle` | (2.8, 1.185, 1.45) | -26° |
 | Three tasting cups | `kopitiam-saucer-and-cup` | (2.3, 1.185, 2.54) / (2.8, 1.185, 2.73) / (2.36, 1.185, 1.95) | 0° |
 | Two walnut tasting stools | `mall-bar-stool` | (1.49, 0.025, 2.71) / (1.49, 0.025, 1.42) | 0° |
@@ -94,11 +108,11 @@ Carry the hood to the retained ceiling on a narrow copper duct at local (0,4.65,
 |---|---|---|---:|
 | **Hammered-metal hood over the lacquer pass** | `hawker-stall-exhaust-hood` | (0, 2.38, 0.5) | 0° |
 | Lacquer island base with counter | `kitchen-cabinet` | (0, 0.025, 0.5) | 0° |
-| Recessed noodle boiler | `noodle-boiler` | (0, 1.165, 0.3) | 0° |
+| Recessed noodle boiler | `noodle-boiler` | (0, 1.22, 0.3) | 0° |
 | Condiments on oak pantry shelf | `condiment-bottle-jar-set` | (-4.43, 3.0425, 3.25) | 90° |
-| Chopsticks on the opposite pass corner | `chopstick-holder` | (-0.53, 1.165, 1.31) | 0° |
-| Serving plate on the counter | `mamak-stainless-steel-plate` | (0.45, 1.165, 0.98) | 0° |
-| Two existing seat and stand points | `gjh-lounge-bench` | (-3, 0, -0.8) / (3, 0, -0.8) | 180° |
+| Chopsticks on the opposite pass corner | `chopstick-holder` | (-0.53, 1.22, 1.31) | 0° |
+| Serving plate on the counter | `mamak-stainless-steel-plate` | (0.45, 1.22, 0.98) | 0° |
+| Two existing seat and stand points | `gjh-lounge-bench` | (-2.55, 0, -0.8) / (3.4, 0, -1.97) | 180° |
 | Warm ceramic wall lights | `mall-wall-sconce` | (-3.08, 3.32, -4.04) / (3.08, 3.32, -4.04) | 0° |
 | Rear kitchen herb-garden planter | `orchid-planter` | (-3.8, 0.025, -2.8) | 0° |
 
@@ -115,7 +129,7 @@ A scalloped parasol and compact ice-cream cart bring a street-side frozen-treat 
 | Element | Source or new geometry | Local (x, y, z) m | Yaw |
 |---|---|---|---:|
 | **Potong parasol cart on a citrus sunburst** | `ice-cream-cart-potong` | (-2.35, 0.025, 2.05) | 12° |
-| Twin dispenser on the right bar | `drink-dispenser` | (3.15, 1.26, 3.53) | -90° |
+| Twin dispenser on the right bar | `drink-dispenser` | (2.87, 1.26, 3.53) | -90° |
 | Lagoon-tiled bar carcass | `mall-coffee-counter` | (3.15, 0.025, 3.6) | -90° |
 | Three stools facing the counter | `mall-bar-stool` | (1.93, 0.025, 2.6) / (1.93, 0.025, 3.6) / (1.93, 0.025, 4.6) | 90° |
 | Twin lounge benches with existing sit actions | `gjh-lounge-bench` | (-3, 0, -0.8) / (3, 0, -0.8) | 180° |
@@ -393,10 +407,10 @@ A raised piano lid cuts a diagonal against walnut concert slats, with a shallow 
 | Warm stage special above lid | `mall-track-spotlight` | (-1.05, 3.3, -1.02) | 0° |
 | Walnut acoustic screen behind instrument | `office-partition` | (-0.64, 0.081, -3.76) | -2° |
 | Small amber lamp over practice area | `mall-cylinder-pendant` | (-2.5, 3.15, 2.88) | 0° |
-| Empty glass object case with ivory stage samples | `mall-glass-showcase` | (-2.99, 0.081, -1.8) | 90° |
+| Empty glass object case with ivory stage samples | `mall-glass-showcase` | (1.15, 0.081, -3.58) | 90° |
 | Keybed side light | `mall-wall-sconce` | (3.19, 2.74, 0.3) | -90° |
 | Small recital flower arrangement | `orchid-planter` | (2.63, 0.081, -3.68) | 0° |
-| Single audience chair beside the rear wall | `meeting-chair` | (-2.58, 0.081, -3.68) | 5° |
+| Single audience chair beside the rear wall | `meeting-chair` | (-1.7, 0.081, 4.2) | 5° |
 
 ### S16 · GP — Locator workshop
 
@@ -437,12 +451,12 @@ Set the open handset shelf at 1.09 m. Keep its front edge and the face of the ge
 | Element | Source or new geometry | Local (x, y, z) m | Yaw |
 |---|---|---|---:|
 | **Gabled private-call alcove with open front** | NEW · `telephone-alcove` | (-0.55, 0.081, -2.95) | -5° |
-| Real-scale generic handset in the alcove | `cordless-phone-display` | (-0.55, 1.09, -2.77) | -5° |
-| Small domestic writing desk | `work-desk` | (-2.99, 0.081, -1.8) | 90° |
-| Second unbranded dock on writing desk | `cordless-phone-display` | (-2.99, 1.081, -1.52) | 83° |
+| Real-scale generic handset in the alcove | `cordless-phone-display` | (0.22, 1.09, -2.66) | -5° |
+| Small domestic writing desk | `work-desk` | (1.42, 0.081, -3.9) | 0° |
+| Second unbranded dock on writing desk | `cordless-phone-display` | (1.42, 1.081, -3.69) | 0° |
 | Cork-coloured waiting seat in left window | `lounge-sofa-bench` | (-2.51, 0.081, 3.22) | 7° |
 | Domestic pendant above desk | `mall-cylinder-pendant` | (-0.55, 3.3, -2.95) | 0° |
-| Correspondence drawer cabinet | `filing-cabinet` | (-3.03, 0.081, 0.4) | 80° |
+| Correspondence drawer cabinet | `filing-cabinet` | (3.15, 0.081, 2.7) | 80° |
 | Gable reading lamp | `mall-wall-sconce` | (3.19, 2.74, 0.3) | -90° |
 | Chalk planter at end of runner | `orchid-planter` | (2.63, 0.081, -3.68) | 0° |
 

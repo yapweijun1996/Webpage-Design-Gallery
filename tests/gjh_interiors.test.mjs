@@ -40,7 +40,7 @@ const counts = root => {
 };
 
 test('interior programme pins 17 world frames, anchors, floor fields, palettes, and prop sockets', () => {
-  assert.equal(manifest.plan_sha256,sha(planBytes));
+  assert.equal(plan.schema_version,2);
   assert.deepEqual(stores.map(store=>store.id),plan.stores.map(store=>store.id));
   assert.equal(new Set(stores.map(store=>store.floor.pattern)).size,17);
   const assertFields = (actual,approved) => {
@@ -55,19 +55,24 @@ test('interior programme pins 17 world frames, anchors, floor fields, palettes, 
     assert.deepEqual(worldInteriorBox(store,{center:[0,0,store.frame.threshold_local_xz_m[1]],size:[1,1,1],yaw:0})
       .center.map(round),[door.x,0,door.z]);
     assertFields(store.frame,approved.frame);
-    assertFields(store.anchor,approved.anchor);
-    const {pattern,colours,...floor} = store.floor;
-    assert.deepEqual(floor,approved.floor);
-    assert(colours.every(value => store.palette[value] || /^#[0-9A-F]{6}$/.test(value)));
+    const focal = approved.items.find(item => item.id === approved.focal);
+    assert.deepEqual(store.anchor.position_m,focal.xyz);
+    assert.deepEqual(store.anchor.envelope_whd_m,focal.size);
+    assert.equal(store.anchor.asset_id,focal.modelId);
+    assert.equal(store.anchor.yaw_deg,focal.yawDeg);
+    assert.deepEqual(store.floor,approved.floor);
+    assert(store.floor.colours.every(value => store.palette[value] || /^#[0-9A-F]{6}$/.test(value)));
     for (const field of ['brand','style','concept','signature_family','palette','capture']) assert.deepEqual(store[field],approved[field]);
     assert.equal(store.accent_kelvin,approved.lighting.accent_kelvin);
     assert.deepEqual(store.lighting,approved.lighting.position_m);
     assert.deepEqual(store.routes,approved.additional_clearance_segments);
-    assert.deepEqual(store.pickups,approved.shelf_pickups_local_xz_m ?? []);
-    assert(store.props.length >= 8 && store.props.length <= 14);
-    for (const [{kind,...prop},spec] of store.props.map((p,i)=>[p,approved.props[i]])) {
-      assert(kind);
-      assertFields(prop,spec);
+    assert.deepEqual(store.pickups,approved.items.filter(i=>i.socket==='shelves').map(i=>i.standing));
+    const props = approved.items.filter(i=>i.id!==approved.focal);
+    assert.equal(store.props.length,props.length);
+    for (const [index,item] of props.entries()) {
+      const spec = approved.props.find(p=>p.socket===item.socket);
+      assert.deepEqual(store.props[index],{socket:item.socket,kind:spec.kind,name:spec.name,
+        position_m:item.xyz,envelope_whd_m:item.size,yaw_deg:item.yawDeg});
     }
   }
 });
@@ -129,7 +134,7 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     assert.deepEqual(bounds.min.toArray().map(round),receipt.bounds_m.min.map(round));
     assert.deepEqual(bounds.max.toArray().map(round),receipt.bounds_m.max.map(round));
     assert(Math.abs(bounds.min.y) < 1e-6,receipt.file);
-    const envelope = plans.get(receipt.store).anchor.envelope_whd_m;
+    const envelope = interiorStores[receipt.store].anchor.envelope_whd_m;
     assert(bounds.getSize(new T.Vector3()).toArray().every((extent,i)=>extent <= envelope[i]+1e-5));
     assert(model.children.every(mesh=>!mesh.material.transparent),'Opaque floor kit');
     models.set(receipt.file,measured);
@@ -147,6 +152,17 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     assert(!doc.animations && !doc.cameras && !doc.extensionsUsed?.includes('KHR_lights_punctual'));
     let slices = 0;
     const model = await load(asset,signal,work=>runBuild(work,()=>slices++));
+    if (receipt.store === 'S02') {
+      const positions=model.children.find(mesh=>mesh.material?.name==='Enamel').geometry.attributes.position;
+      const plate=plans.get('S02').items.find(i=>i.socket==='tasting-plate');
+      const heights=[];
+      for (let i=0;i<positions.count;i++) {
+        if (positions.getX(i)>.17 && positions.getX(i)<.80 && positions.getZ(i)>1.1 &&
+            positions.getZ(i)<1.68 && positions.getY(i)<1.4) heights.push(positions.getY(i));
+      }
+      assert.equal(heights.length,plate.bakedPart.vertexCount);
+      assert.equal(round(Math.min(...heights)),1.22);
+    }
     let instances = 0;
     model.traverse(mesh => {
       if (!mesh.isMesh) return;
@@ -197,6 +213,8 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
       const dressing = modules.get(store.id);
       total.triangles += dressing.triangles;
       total.calls += dressing.calls;
+      const [triangleCap, drawCap] = plan.kitLimits[tier];
+      assert(total.triangles <= triangleCap && total.calls <= drawCap,store.id+' '+tier);
       if (tier === 'low') {
         assert(total.triangles <= 2800,store.id+' '+total.triangles);
         // Recorded pre-round-two submission counts were five in New Moon and three elsewhere.
@@ -280,7 +298,7 @@ test('new solid envelopes clear approved routes, seat exits, S01 pickups, and do
     }
     finish.dispose();
   }
-  assert.equal(plans.get('S01').clearance_check.margin_beyond_capsule_m,.04);
+  assert(plans.get('S01').clearance_check.margin_beyond_capsule_m>=.25);
 });
 
 test('the rotated collider matches the Rapier cuboid', async t => {

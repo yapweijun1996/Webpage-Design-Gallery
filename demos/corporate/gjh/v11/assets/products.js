@@ -1,3 +1,4 @@
+import {cabinetLayout} from './interiors/cabinet-layout.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {fetchStartupAsset} from './startup-asset-pack.js';
@@ -16,14 +17,25 @@ const cans = NEW_MOON_CANS;
 const interiorPilot = new URLSearchParams(location.search).get('interior') === 'pilot';
 const shelf = interiorPilot ? INTERIOR_PILOT.shelf : Object.freeze({file: 'gjh-m056-shelf-lod1.glb', sha256: '949e8278034779c129e3494e614a002d5542108b74e081296acffd8e9d7c6037'});
 const canBounds = Object.freeze({x: .0775, y: .12399169057607651, z: .0775});
-const shelfBounds = Object.freeze(interiorPilot ? {x: 1.52, y: 1.96, z: .58} : {x: 2.4, y: 2.4, z: .55});
-const shelfXs = Object.freeze(interiorPilot ? [-12.85, -10.95, -9.05, -7.15] : [-13.63, -11.21, -8.79, -6.37]);
+// Container validation uses native GLB dimensions, before the layout's instance scale.
+const shelfBounds = interiorPilot ? {x:1.52,y:1.96,z:.58} : {x:2.4,y:2.4,z:.55};
+const legacyCabinets = interiorPilot || new URLSearchParams(location.search).get('layout')==='classic';
+const [ox,,oz] = cabinetLayout.origin;
+const cabinets = legacyCabinets
+  ? (interiorPilot ? [-12.85,-10.95,-9.05,-7.15] : [-13.63,-11.21,-8.79,-6.37]).map(x=>({
+      x,z:-9.25,scale:[1,1,1],size:[shelfBounds.x,shelfBounds.y,shelfBounds.z],
+      pickup:{x:x+.21,z:-9.25+shelfBounds.z/2+.34,radius:1.65}
+    }))
+  : cabinetLayout.cabinets.map(({xyz,scale,size,standing})=>({
+      x:ox+xyz[0],z:oz+xyz[2],scale,size,pickup:{x:ox+standing[0],z:oz+standing[1],radius:1.65}
+    }));
+const shelfXs = Object.freeze(cabinets.map(c=>c.x));
 const shelfTops = Object.freeze(interiorPilot ? [.6825, 1.1925, 1.7025] : [.451, .991, 1.531]);
 const facingCount = interiorPilot ? 11 : 17;
 const productOffsets = Object.freeze(Array.from({length: facingCount}, (_, i) => (i - (facingCount - 1) / 2) * .10));
 const reserveIndex = facingCount + Math.floor(facingCount / 2);
 // V2 stock sits at the front of the shelf so the short humanoid arm can reach it.
-const productZ = new URLSearchParams(location.search).get('visitor')==='v1' ? (interiorPilot ? -9.25 : -9.23) : -9.03;
+const productOffsetZ = new URLSearchParams(location.search).get('visitor')==='v1' ? (interiorPilot ? 0 : .02) : .22;
 const shelfRotation = interiorPilot ? Math.PI : 0;
 const deadline = 8000;
 
@@ -113,7 +125,10 @@ function fallbackShelf(T, scene, displayShelves = []) {
   const instances=12+displayShelves.length*12;
   const mesh = new T.InstancedMesh(new T.BoxGeometry(shelfBounds.x - .08, .04, shelfBounds.z - .05), new T.MeshStandardMaterial({color: 0x6b4931}), instances);
   const matrix = new T.Matrix4(); let index = 0;
-  for (const x of shelfXs) for (const y of shelfTops.map(top => top - .02)) { matrix.compose(new T.Vector3(x, y, productZ), new T.Quaternion(), new T.Vector3(1, 1, 1)); mesh.setMatrixAt(index++, matrix); }
+  for (const {x,z,scale} of cabinets) for (const top of shelfTops) {
+    matrix.compose(new T.Vector3(x,top-.02,z),new T.Quaternion(),new T.Vector3(...scale));
+    mesh.setMatrixAt(index++,matrix);
+  }
   for(const shelf of displayShelves)for(const y of shelfTops.map(top=>top-.02))for(let part=0;part<4;part++){
     const localX=(part-1.5)*(shelfBounds.x-.08)/4, c=Math.cos(shelf.rotation),s=Math.sin(shelf.rotation);
     matrix.compose(new T.Vector3(shelf.x+localX*c,y,shelf.z-localX*s),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),shelf.rotation),new T.Vector3(1,1,1));mesh.setMatrixAt(index++,matrix);
@@ -170,7 +185,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
       material:new T.MeshBasicMaterial({colorWrite:false,depthWrite:false,side:T.DoubleSide}),
       matrix:new T.Matrix4(), shadowOnly:true};
     const placements = [
-      ...shelfXs.map(x => ({x, z: -9.25, rotation: shelfRotation})),
+      ...cabinets.map(({x,z,scale}) => ({x,z,scale,rotation:shelfRotation})),
       ...displayShelves,
     ];
     const meshes = [...shelfRecord.primitives, shadow].map(primitive => {
@@ -184,11 +199,11 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
         mesh.onBeforeRender = () => { count = mesh.count; mesh.count = 0; };
         mesh.onAfterRender = () => { mesh.count = count; };
       }
-      placements.forEach(({x, z, rotation}, index) => {
+      placements.forEach(({x, z, rotation, scale}, index) => {
         const matrix = new T.Matrix4().compose(
           new T.Vector3(x, 0, z),
           new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), rotation),
-          new T.Vector3(1, 1, 1)
+          new T.Vector3(...(scale ?? [1,1,1]))
         ).multiply(primitive.matrix);
         mesh.setMatrixAt(index, matrix);
       });
@@ -211,13 +226,13 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
   }
   const interactables = [], stock = new Map(), loadedCans = [];
   // The same bounds own collision, focus framing and the projected whole-shelf target.
-  const shelves = shelfXs.map((x, index) => Object.freeze({id: `new-moon-${cans[index].sku}-front`,
-    pickup: Object.freeze({x:x+.21,z:-9.25+shelfBounds.z/2+.34,radius:1.65}),
-    min: Object.freeze({x: x - shelfBounds.x / 2, y: 0, z: -9.25 - shelfBounds.z / 2}),
-    max: Object.freeze({x: x + shelfBounds.x / 2, y: shelfBounds.y, z: -9.25 + shelfBounds.z / 2})}));
+  const shelves = cabinets.map(({x,z,size:[w,h,d],pickup},index) => Object.freeze({
+    id:`new-moon-${cans[index].sku}-front`,pickup:Object.freeze(pickup),
+    min:Object.freeze({x:x-w/2,y:0,z:z-d/2}),max:Object.freeze({x:x+w/2,y:h,z:z+d/2})
+  }));
   canRecords.forEach((record, productIndex) => {
-    const sku = cans[productIndex].sku, x = shelfXs[productIndex], placements = [];
-    for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, productZ));
+    const sku = cans[productIndex].sku, {x,z} = cabinets[productIndex], placements = [];
+    for (const y of shelfTops) for (const dx of productOffsets) placements.push(new T.Vector3(x + dx, y, z+productOffsetZ));
     const shelfPlacements=placements.slice();
     for(const item of showcase.filter(item=>item.id===`new-moon-${sku}-front`))placements.push(new T.Vector3(...item.position));
     const showcaseEnd = placements.length;
@@ -266,8 +281,8 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
   }, interactables, colliders: shelves.map(({min, max}) => ({x: (min.x + max.x) / 2, y: (min.y + max.y) / 2, z: (min.z + max.z) / 2, sx: max.x - min.x, sy: max.y - min.y, sz: max.z - min.z})), assets: Object.freeze({
     shelf: Object.freeze({model:interiorPilot ? shelf.asset_id : 'GJH-M056', assetId:interiorPilot ? shelf.asset_id : null, lod:1, identity:shelf.sha256, frontAxis:'+Z', status: shelfRecord.status, reason: shelfRecord.reason, instances: 4+displayShelves.length, primitives: sourceShelfPrimitives, dimensions: shelfRecord.size}),
     cans: Object.freeze(Object.fromEntries(canRecords.map((record, index) => {
-      const x = shelfXs[index];
-      const placements = Object.freeze(shelfTops.flatMap(y => productOffsets.map(dx => Object.freeze({x: x + dx, y, z: productZ}))));
+      const {x,z} = cabinets[index];
+      const placements = Object.freeze(shelfTops.flatMap(y => productOffsets.map(dx => Object.freeze({x: x + dx, y, z:z+productOffsetZ}))));
       const dimensions = Object.freeze((record.size || [canBounds.x, canBounds.y, canBounds.z]).slice());
       return [cans[index].sku, Object.freeze({status: record.status, reason: record.reason, identity: cans[index].sha256, instances: shelfTops.length * facingCount, frontFacings: facingCount, reserveIndex, primitives: record.primitives.length, dimensions, actualBounds: dimensions, actualBoundsScale: Object.freeze([dimensions[0] / canBounds.x, dimensions[1] / canBounds.y, dimensions[2] / canBounds.z]), placements, floorY: 0, supportTopY: shelfTops[0], frontAxis: '+Z'})];
     }))),

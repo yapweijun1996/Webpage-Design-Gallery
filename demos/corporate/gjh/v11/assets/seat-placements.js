@@ -1,3 +1,4 @@
+import {miliSeats} from './interiors/mili-seats.js';
 import {atriumLayout} from './atrium-layout.js';
 import {liftLayout} from './lift-layout.js';
 import {spatial, storeCenterX} from './spatial.js';
@@ -42,7 +43,8 @@ export function createSeatPlacements(expanded) {
   }
   for (const store of spatial.stores.filter(store => store.id !== 'newmoon')) {
     const x = storeCenterX(store);
-    add(store.id, x - 3, -6.8, -1); add(store.id, x + 3, -6.8, -1);
+    const seats = expanded && store.id === 'mili' ? miliSeats : [[-3,0,-.8],[3,0,-.8]];
+    for (const [dx,,dz] of seats) add(store.id, x + dx, -6 + dz, -1);
   }
   if (expanded) {
     for(const [i,seat] of atriumLayout.upperSeats.entries()){

@@ -140,7 +140,7 @@ export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
       case 'plate':
       case 'plates':
       case 'bowl':
-        cylinder(0,h*.16,0,Math.min(w,d)*.47,h*.24,pale);
+        cylinder(0,h*.12,0,Math.min(w,d)*.47,h*.24,pale);
         cylinder(0,h*.46,0,Math.min(w,d)*.37,h*.4,edge);
         if (kind === 'plates') cylinder(0,h*.81,0,Math.min(w,d)*.45,h*.23,pale);
         break;

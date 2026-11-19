@@ -1,0 +1,39 @@
+--- a/demos/corporate/gjh/v11/assets/world.js
++++ b/demos/corporate/gjh/v11/assets/world.js
+@@ -755,20 +755,22 @@
+       interactables.push({id: zone, x, z: -9, radius: 2.5});
+       // Store seating faces the natural route from the entrance, not the rear wall.
+       for (const placement of seatPlacements.filter(item=>item.group===zone)) bench(placement);
+-      if (expanded && zone === 'mili') {
+-        box('jadeAlt',x,.57,-5.5,1.7,1.12,2.55);
+-        box('brass',x,.095,-5.5,1.72,.15,2.57);
+-        for(let dx=-.8;dx<=.85;dx+=.2) box('courtStone',x+dx,.6,-4.218,.012,.96,.015);
+-        for(let y=.22;y<1.13;y+=.2) box('courtStone',x,y,-4.218,1.68,.014,.015);
+-        box('shellFloor',x,1.16,-5.5,1.82,.12,2.69);
+-        collider(x,.57,-5.5,1.72,1.14,2.55);
+-      } else if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
+-        cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
+-        cylinder('brass', x, .853, -5.5, .805, .025);
+-      }
+-      collider(x, .4375, -5.5, 1.61, .875, 1.61);
+-      cylinder('pot', x, expanded && zone==='mili' ? 1.34 : .99, -5.5, .115, .24);
+-      sphere('foliage', x, expanded && zone==='mili' ? 1.55 : 1.2, -5.5, .2, .23, .18);
++      if (!expanded || interiorStores['S'+store.number].centreFixture !== 'open floor') {
++        if (expanded && zone === 'mili') {
++          box('jadeAlt',x,.57,-5.5,1.7,1.12,2.55);
++          box('brass',x,.095,-5.5,1.72,.15,2.57);
++          for(let dx=-.8;dx<=.85;dx+=.2) box('courtStone',x+dx,.6,-4.218,.012,.96,.015);
++          for(let y=.22;y<1.13;y+=.2) box('courtStone',x,y,-4.218,1.68,.014,.015);
++          box('shellFloor',x,1.16,-5.5,1.82,.12,2.69);
++          collider(x,.57,-5.5,1.72,1.14,2.55);
++        } else if (!furnishings.place('coffeeTable', x, -5.5, 1, 1, 0, null, activeShopSlot)) {
++          cylinder('brass', x, .4, -5.5, .08, .75); cylinder('oak', x, .8, -5.5, .8, .1);
++          cylinder('brass', x, .853, -5.5, .805, .025);
++        }
++        collider(x, .4375, -5.5, 1.61, .875, 1.61);
++        cylinder('pot', x, expanded && zone==='mili' ? 1.34 : .99, -5.5, .115, .24);
++        sphere('foliage', x, expanded && zone==='mili' ? 1.55 : 1.2, -5.5, .2, .23, .18);
++      }
+       plant(x - 3.8, -8.8, 1.15); plant(x + 3.8, -8.8, 1.15); plant(x + 3.8, -2.5);
+       if (zone === 'gogo') {
+         if (expanded) {

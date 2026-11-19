@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GJH interior programme",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "stores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slot": {
+            "type": "string",
+            "pattern": "^S(0[1-9]|1[0-7])$"
+          },
+          "zones": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "anchors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "xyz": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "size": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "yawDeg": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "xyz",
+                "size",
+                "yawDeg"
+              ]
+            }
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "socket": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "zone": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "anchor": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "xyz": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "yawDeg": {
+                  "type": "number"
+                },
+                "scale": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "size": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "modelId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "lod": {
+                  "type": "object",
+                  "properties": {
+                    "low": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "balanced": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "detailed": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "low",
+                    "balanced",
+                    "detailed"
+                  ]
+                },
+                "collision": {
+                  "enum": [
+                    "kit",
+                    "none",
+                    "retained"
+                  ]
+                },
+                "action": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "sit",
+                      "open",
+                      "pick up",
+                      "press",
+                      "pour",
+                      "ring",
+                      "play"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "a11y": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "en"
+                  ]
+                },
+                "standing": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "reachDistance": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "id",
+                "socket",
+                "zone",
+                "anchor",
+                "xyz",
+                "yawDeg",
+                "scale",
+                "size",
+                "modelId",
+                "lod",
+                "collision",
+                "action",
+                "a11y",
+                "standing",
+                "reachDistance"
+              ]
+            }
+          },
+          "turning": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "aisles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "focal": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "slot",
+          "zones",
+          "anchors",
+          "items",
+          "turning",
+          "aisles",
+          "focal"
+        ]
+      },
+      "minItems": 17,
+      "maxItems": 17
+    }
+  },
+  "required": [
+    "schema_version",
+    "stores"
+  ]
+}

@@ -13,7 +13,7 @@ const near = (a,b) => assert.ok(Math.abs(a-b)<1e-9, `${a} != ${b}`);
 test('all classic and expanded bench placements have authored seat data and stable identities', () => {
   const classic=createSeatPlacements(false), expanded=createSeatPlacements(true);
   assert.deepEqual(coordinates(classic), [[-7.8,9.5],[7.8,9.5],[-7.8,13],[7.8,13],[-3,-6.8],[3,-6.8],[7,-6.8],[13,-6.8]]);
-  assert.deepEqual(coordinates(expanded), [[-5.7,24.5],[-2.3,24.5],[22.3,24.5],[25.7,24.5],[-3,-6.8],[3,-6.8],[7,-6.8],[13,-6.8],[-6.1,8.8],[.1,8.8],[-3,6]]);
+  assert.deepEqual(coordinates(expanded), [[-5.7,24.5],[-2.3,24.5],[22.3,24.5],[25.7,24.5],[-2.55,-6.8],[3.4,-7.97],[7,-6.8],[13,-6.8],[-6.1,8.8],[.1,8.8],[-3,6]]);
   for(const placements of [classic,expanded]) {
     for(const [index,p] of placements.entries()) {
       assert.equal(p.id,index ? `bench-seat-${index+1}` : 'courtyard-seat');
