@@ -1,0 +1,130 @@
+# V11 numbered production model checklist
+
+The production sequence is S01 to S17 in the default expanded mall. The [shop index](README.md) links the published room concepts, inventories and browser verification. This checklist tracks product-model gaps separately from the already installed room anchors and detail GLBs. The initial reconciliation uses the [17-shop report source snapshot](https://github.com/yapweijun1996/Webpage-Design-Gallery/tree/612f0395f70e95627d4090b82ba47c28f0645bb9/docs/goh-joo-hin) and newer source evidence where noted.
+
+A checked item requires evidence for the stated scope, editable source if changed, and acceptance of the exact runtime artifact. Catalogue dimensions are nominal unless a measured sample or engineering drawing supports them. A neutral model based on a product photograph can close an explicitly scoped form study while the measured geometry, current retail label or licensed texture remains open. Keep unverified retail photos as references in their source context.
+
+## S01 New Moon
+
+[Shop design and runtime](01-new-moon/README.md) · [Model inventory](01-new-moon/model-inventory.md) · [Four source sets and deployed GLB hashes](../evidence/v11-product-source-consistency.json) · [Pinned editable upstream demo sources](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/1abda0ff96a4b787877a32ff8915555873a0b686/models/gjh-abalone-cans)
+
+- [ ] **NZ Wild Caught 425 g.** Measure diameter, can height and closures. Match a current batch to the [official front, back and nutrition views](https://www.gjheshop.com/product/new-moon-premium-wild-caught-new-zealand-abalone-425g/), then verify artwork positioning and usage scope.
+- [ ] **AU Wild Caught 425 g.** Measure the exact Wild Caught tin and match the red and white edition to the [three official views](https://www.gjheshop.com/product/new-moon-premium-wild-caught-australia-abalone-425g/), then verify usage scope.
+- [ ] **SA Premium 4–5 pcs 425 g.** Obtain the exact 4–5 pcs sample and measure it. The [official front, back and nutrition views](https://www.gjheshop.com/product/new-moon-premium-south-africa-abalone-4-5pcs-425g/) remain source references. Verify current edition and usage scope.
+- [ ] **MX Premium 454 g.** Measure the exact New Moon tin and obtain a flat label or overlapping photos of the whole circumference, including the 121° sector absent from the [official front and information photos](https://www.gjheshop.com/product/new-moon-premium-mexico-abalone-454g/). Verify edition and usage scope.
+
+The four listings show a nominal 75 × 75 × 120 mm while the current GLBs are about 77.5 mm across and 123.99 mm high. All 11 official photos and the four published GLBs matched the existing SHA-256 receipts when checked on 2026-11-20 SGT. Those checks identify the artwork sources and deployed geometry. Physical dimensions, current print revision, and rights for new retail textures remain open. [Existing demo approval](../v11-newmoon-demo-review.md)
+
+## S02 MILI
+
+[Design and runtime](02-mili/README.md) · [Inventory](02-mili/model-inventory.md) · [Editable sauce study](../../models/gjh-mili-sauce-bottles/README.md)
+
+- [ ] **Original Oyster Sauce 510 g.** Compare cap and shoulder against its exact [catalogue photographs](https://www.gjheshop.com/product/mili-oyster-sauce-510g/). Retain the 55 × 55 × 245 mm nominal envelope and track print artwork separately.
+- [ ] **Vegetarian Oyster Sauce 510 g.** Check the companion bottle and cap against the [separate source](https://www.gjheshop.com/product/mili-vegetarian-oyster-sauce-510g/). Confirm the current print edition before texture work.
+- [ ] **Vegetarian Mock Duck 280 g.** Model an unprinted short tin to the evidenced profile. Confirm actual can dimensions, end profile and edition against a matching sample or supplier data. [Official product identity](https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/)
+
+## S03 GOGO
+
+[Design and runtime](03-gogo/README.md) · [Inventory](03-gogo/model-inventory.md)
+
+- [ ] **Premium Potong Red Bean, historical 6 × 65 g.** Verify contemporary availability and collect a measured product and individual/outer wrappers if available.
+- [ ] **Premium Potong Assorted Real Fruit, historical 6 × 65 g.** Verify the fruit format and packaging revision independently of Red Bean. The dated HPB listing and unwrapped cart studies are the historical evidence.
+
+## S04 Borsch Med
+
+[Design and runtime](04-borsch-med/README.md) · [Inventory](04-borsch-med/model-inventory.md)
+
+- [ ] **Mosquito Repellent Patch, 18 patches.** Verify the retail carton, sachet and patch shape and approved print surfaces.
+- [ ] **Lingzhi Cracked Spores Powder 200 mg × 60 twin pack.** Measure the individual box and twin pack. Confirm packaging edition and placement on the right shelf.
+
+## S05 Pien Tze Huang
+
+[Design and runtime](05-pien-tze-huang/README.md) · [Inventory](05-pien-tze-huang/model-inventory.md)
+
+- [ ] **Single 3 g unit.** Confirm carton dimensions and latest manufacturer print art independently of the enlarged display study.
+- [ ] **GJH 10-piece format.** Verify the outer pack shape, size and relationship to the 3 g carton before modeling.
+
+## S06 Flying Wheel
+
+[Design and runtime](06-flying-wheel/README.md) · [Inventory](06-flying-wheel/model-inventory.md)
+
+- [ ] **Air-Dried Singapore Ban Mee 70 g.** Verify packet silhouette, seals and current retailer artwork.
+- [ ] **Shanghai LaMian.** Verify regional SKU, packet geometry and print edition separately from Ban Mee.
+
+## S07 Gu Long
+
+[Design and runtime](07-gu-long/README.md) · [Inventory](07-gu-long/model-inventory.md)
+
+- [ ] **Stewed Pork Chops 256 g.** Measure can and roll seam, then verify label position on a single specimen.
+- [ ] **Stewed Pork 256 g.** Verify same-edition references and own can profile and artwork. Keep the stepped pyramid distinct.
+
+## S08 SKIPPY
+
+[Design and runtime](08-skippy/README.md) · [Inventory](08-skippy/model-inventory.md)
+
+- [ ] **Creamy Peanut Butter 500 g.** Verify lid and source-backed print details for the nominal 73 × 73 × 124 mm study.
+- [ ] **Chunky Peanut Butter 500 g.** Verify its own cap, texture and authorized front and back references. Product viewer and breakfast-chair Sit are separate interaction work.
+
+## S09 SPAM
+
+[Design and runtime](09-spam/README.md) · [Inventory](09-spam/model-inventory.md)
+
+- [ ] **Classic Luncheon Meat 340 g.** Verify the rounded corners and seams against a measured sample. The 100 × 56 × 83 mm study uses a listing proxy.
+- [ ] **Lite Luncheon Meat 340 g.** Match measured packaging and current Lite artwork.
+- [ ] **Less Sodium Luncheon Meat 340 g.** Match measured packaging and current Less Sodium artwork separately.
+
+## S10 California Mexico
+
+[Design and runtime](10-california-mexico/README.md) · [Inventory](10-california-mexico/model-inventory.md)
+
+- [ ] **Red California Mexico Abalone 454 g.** Verify measured can, lid and current authorized Red artwork.
+- [ ] **Black California Mexico Abalone 454 g.** Verify the corresponding separate Black pack. The New Moon Mexico tin has a different product identity.
+
+## S11 Hormel
+
+[Design and runtime](11-hormel/README.md) · [Inventory](11-hormel/model-inventory.md)
+
+- [ ] **Chili No Beans 15 oz.** Confirm actual tin dimensions and current packaging.
+- [ ] **Chili With Beans.** Lock pack size and edition before building its separate specimen. Manufacturer resources identify references while current GJH range remains open.
+
+## S12 Zeria
+
+[Design and runtime](12-zeria/README.md) · [Inventory](12-zeria/model-inventory.md)
+
+- [ ] **Lively & Healthy 180 Tablets.** Verify bottle profile, closure and exact retail packaging.
+- [ ] **Chondro Max 300 Tablets.** Verify the bottle and outer carton as two pieces, using the current GJH product gallery as a reference.
+
+## S13 Sony
+
+[Design and runtime](13-sony/README.md) · [Inventory](13-sony/model-inventory.md)
+
+- [ ] **WH-1000XM6.** Match earcup, hinge and band shapes to the Sony Singapore model, preserving the separate architectural stand.
+- [ ] **NW-A306 Walkman.** Refine the 56.5 × 98.4 × 11.8 mm outer-body study with correct ports, buttons and surfaces.
+
+## S14 LG
+
+[Design and runtime](14-lg/README.md) · [Inventory](14-lg/model-inventory.md)
+
+- [ ] **OLED55C5PSA.** Match cabinet, rear housing, ports and materials within the specified 1,222 × 703 × 45.1 mm body envelope without stand. Keep the separate enlarged architectural screen and verify any new display content in the runtime.
+
+## S15 Casio
+
+[Design and runtime](15-casio/README.md) · [Inventory](15-casio/model-inventory.md)
+
+- [ ] **Casiotone CT-S1BK.** Refine the nominal 930 × 258 × 83 mm, 61-key study with source-backed control and speaker details.
+- [ ] **CELVIANO Grand Hybrid GP-510BP.** Build the straight cabinet and three pedals rather than adapting the curved stage grand. Audio and Sit are separate interaction work.
+
+## S16 GP Batteries
+
+[Design and runtime](16-gp-batteries/README.md) · [Inventory](16-gp-batteries/model-inventory.md)
+
+- [ ] **GP Ultra+ AA.** Verify the 14.5 × 50.5 mm cell, terminal shoulders and packaging revision.
+- [ ] **GP eTag.** Match the exact case and seam to the manufacturer example. Singapore market availability remains separate.
+- [ ] **GP CR2032.** Build a distinct coin-cell specimen and verify package identity before applying markings.
+
+## S17 Gigaset
+
+[Design and runtime](17-gigaset/README.md) · [Inventory](17-gigaset/model-inventory.md)
+
+- [ ] **A170.** Verify the 159 × 48 × 30 mm handset, amber display and cradle geometry from the manufacturer.
+- [ ] **COMFORT 550A.** Verify the exact 161 × 52 × 26 mm handset, keypad and 43 × 123 × 99 mm answering base for the black variant. Sofa Sit is separate interaction work.
