@@ -114,7 +114,7 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, garden, prepareModel, setPavingMap }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -215,17 +215,19 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     box("brass", x, 0.013, 33, 0.025, 0.008, 29.6);
   }
   const { arcadePilaster } = atriumLayout;
+  const soffitY = 5.94, soffitHeight = 0.27;
   for (const side of [-1, 1]) {
     const front = side < 0 ? -15 : 35;
     const inside = -side;
     for (let i = 0;i < 6; i++) {
       const z = i * 8 + 4;
-      box("oak", front + inside * 0.7, 5.94, z, 1.55, 0.27, 7.96);
+      box("oak", front + inside * 0.7, soffitY, z, 1.55, soffitHeight, 7.96);
       box("ivory", front + inside * 1.47, 6.02, z, 0.16, 0.52, 8);
       box("glow", front + inside * 1.38, 5.77, z, 0.06, 0.035, 7.75);
       for (const dz of [-2.45, 2.45]) {
         box("brass", front + inside * 0.77, 5.78, z + dz, 0.31, 0.06, 0.31);
         box("glow", front + inside * 0.77, 5.737, z + dz, 0.21, 0.04, 0.21);
+        lightWash?.(front + inside * 0.77, soffitY - soffitHeight / 2 - 0.008, z + dz, 1.25, 2.5, 0, Math.PI / 2);
       }
       box("ivory", front + side * arcadePilaster.inset, 2.88, z - 3.88, arcadePilaster.depth, 5.76, 0.35);
       for (const offset of [-2.48, 2.48]) {
@@ -5901,6 +5903,52 @@ function addFeatureKiosk({ x, z, box, cylinder, sign }) {
   return { id: FEATURE_KIOSK_ID, x, z, floor: 0, radius: 1.8 };
 }
 
+// demos/corporate/gjh/v11/assets/mall-atmosphere.js
+var SURFACES = {
+  low: { roughness: 1, emission: 1, washOpacity: 0 },
+  balanced: { roughness: 0.82, emission: 1.2, washOpacity: 0.32 },
+  detailed: { roughness: 0.68, emission: 1.38, washOpacity: 0.48 }
+};
+function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, floors, fixtures, vault }) {
+  const washMaterial = poolMaterial.clone();
+  const washMesh = new T.InstancedMesh(plane, washMaterial, washes.length);
+  const transform = new T.Object3D;
+  washes.forEach(([x, y, z, width, depth, yaw, pitch], index) => {
+    transform.position.set(x, y, z);
+    transform.rotation.set(pitch, yaw, 0, "YXZ");
+    transform.scale.set(width, depth, 1);
+    transform.updateMatrix();
+    washMesh.setMatrixAt(index, transform.matrix);
+  });
+  washMesh.name = "Mall cove and storefront light wash";
+  washMesh.computeBoundingSphere();
+  scene.add(washMesh);
+  const floorRoughness = floors.map((floor) => floor.roughness);
+  const vaultEmission = vault.emissiveIntensity;
+  let fixtureEmission = fixtures.emissiveIntensity;
+  let preset2;
+  function setTier(tier) {
+    const next = Object.hasOwn(SURFACES, tier) ? SURFACES[tier] : SURFACES.low;
+    if (next === preset2)
+      return false;
+    preset2 = next;
+    floors.forEach((floor, index) => {
+      floor.roughness = floorRoughness[index] * preset2.roughness;
+    });
+    vault.emissiveIntensity = vaultEmission * preset2.emission;
+    fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
+    washMaterial.opacity = preset2.washOpacity;
+    washMesh.visible = preset2.washOpacity > 0;
+    return true;
+  }
+  function setFixtureEmission(intensity) {
+    fixtureEmission = intensity;
+    fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
+  }
+  setTier("low");
+  return { setTier, setFixtureEmission };
+}
+
 // demos/corporate/gjh/v11/assets/world.js
 function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
@@ -6146,6 +6194,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       productDisplay?.setShadows(shadows);
       if (!expanded)
         return;
+      if (surfaceAtmosphere.setTier(tier) && mappedPaving)
+        mappedPaving.roughness = materials2.paving.roughness;
       uploadVisitor = visitor;
       productDisplay?.updateShopLods(visitor, tier);
       interiorKit.update(visitor);
@@ -6280,6 +6330,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     }
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
     const shopUploads = new Map;
+    const atmosphereWashes = [];
+    const lightWash = (...placement) => atmosphereWashes.push(placement);
     let uploadVisitor, pavingMesh, mappedPaving;
     async function setPavingMap(map) {
       const material = materials2.paving.clone();
@@ -6287,6 +6339,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const sample = new T.InstancedMesh(geometry.box, material, 1);
       try {
         await prepareModel?.(sample);
+        material.roughness = materials2.paving.roughness;
         mappedPaving = material;
         if (pavingMesh)
           pavingMesh.material = material;
@@ -6366,7 +6419,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, garden: atriumLayout.garden, prepareModel, setPavingMap }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -6879,9 +6932,20 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
         for (const r of panels)
           lightPool((r.minX + r.maxX) / 2, 0.052, (r.minZ + r.maxZ) / 2, width > depth ? r.maxX - r.minX : 4.5, width > depth ? 4.5 : r.maxZ - r.minZ);
+        const washWidth = width > depth ? width : 2.4, washDepth = width > depth ? 2.4 : depth;
+        const bounds = { minX: x - washWidth / 2, maxX: x + washWidth / 2, minZ: z - washDepth / 2, maxZ: z + washDepth / 2 };
+        const washes = expandedLift ? cutRectangle(bounds, liftLayout.roofOpening) : [bounds];
+        for (const r of washes)
+          lightWash((r.minX + r.maxX) / 2, 8.367, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, r.maxZ - r.minZ, 0, Math.PI / 2);
       };
       signage = await addShopSignAtlas(T, expandedLayout, scene);
       const slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs);
+      for (const bay of expandedLayout.slots) {
+        const { x, z, normalX, normalZ, yaw } = shopEntrance(bay);
+        const frontage = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
+        const offset = 2.15;
+        lightWash(x + normalX * offset, 0.029, z + normalZ * offset, frontage * 0.78, 4.2, yaw, -Math.PI / 2);
+      }
       for (const bay of expandedLayout.slots.slice(3)) {
         const { x, z, alongX, alongZ, normalX, normalZ } = shopEntrance(bay);
         const width = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
@@ -7057,11 +7121,21 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     const fill = new T.DirectionalLight(expanded ? 13360613 : 15325378, expanded ? 0.4 : 0.45);
     fill.position.set(4, 8, -5);
     scene.add(fill);
+    const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T, scene, {
+      plane: geometry.plane,
+      poolMaterial: materials2.lightPool,
+      washes: atmosphereWashes,
+      floors: [materials2.shellFloor, materials2.paving, materials2.courtStone],
+      fixtures: materials2.glow,
+      vault: materials2.vaultOak
+    }) : null;
     refreshInstanceColours();
     const applyMallTheme = (theme) => {
       const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill });
-      if (applied)
+      if (applied) {
+        surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
         refreshInstanceColours();
+      }
       return applied;
     };
     sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);

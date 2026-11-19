@@ -1,3 +1,49 @@
+const SURFACES = {
+  low:{roughness:1, emission:1, washOpacity:0},
+  balanced:{roughness:.82, emission:1.2, washOpacity:.32},
+  detailed:{roughness:.68, emission:1.38, washOpacity:.48}
+};
+
+export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, washes, floors, fixtures, vault}) {
+  // One main-pass batch shares the existing gradient texture. The opaque
+  // surfaces keep their original shader programs and use the mall's PMREM.
+  const washMaterial = poolMaterial.clone();
+  const washMesh = new T.InstancedMesh(plane, washMaterial, washes.length);
+  const transform = new T.Object3D();
+  washes.forEach(([x, y, z, width, depth, yaw, pitch], index) => {
+    transform.position.set(x,y,z);
+    transform.rotation.set(pitch,yaw,0,'YXZ');
+    transform.scale.set(width,depth,1);
+    transform.updateMatrix();
+    washMesh.setMatrixAt(index,transform.matrix);
+  });
+  washMesh.name = 'Mall cove and storefront light wash';
+  washMesh.computeBoundingSphere();
+  scene.add(washMesh);
+
+  const floorRoughness = floors.map(floor => floor.roughness);
+  const vaultEmission = vault.emissiveIntensity;
+  let fixtureEmission = fixtures.emissiveIntensity;
+  let preset;
+  function setTier(tier) {
+    const next = Object.hasOwn(SURFACES,tier) ? SURFACES[tier] : SURFACES.low;
+    if (next === preset) return false;
+    preset = next;
+    floors.forEach((floor,index) => { floor.roughness = floorRoughness[index] * preset.roughness; });
+    vault.emissiveIntensity = vaultEmission * preset.emission;
+    fixtures.emissiveIntensity = fixtureEmission * preset.emission;
+    washMaterial.opacity = preset.washOpacity;
+    washMesh.visible = preset.washOpacity > 0;
+    return true;
+  }
+  function setFixtureEmission(intensity) {
+    fixtureEmission = intensity;
+    fixtures.emissiveIntensity = fixtureEmission * preset.emission;
+  }
+  setTier('low');
+  return {setTier,setFixtureEmission};
+}
+
 // Local, static lighting resources. No environment image or postprocessing asset is fetched.
 export function createMallAtmosphere(T, renderer, scene, slots) {
   const accents = [0xb84739,0xd4a159,0x79a992,0x785a68,0x913f35,0x667887,0x9c4937,0x477aac,0x294f7c,0x478c86,0x843e43,0x6f9690,0x777f85,0x665079,0x82756a,0x4b9993,0x62696a];

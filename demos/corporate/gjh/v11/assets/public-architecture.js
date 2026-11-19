@@ -2,7 +2,7 @@ import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden, prepareModel, setPavingMap}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0xc4a27c);
@@ -104,17 +104,19 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   // Recessed arcade lights and stone pilasters sit against the closed shop
   // fronts. Keep the walkable aisle, threshold openings and signage clear.
   const {arcadePilaster} = atriumLayout;
+  const soffitY = 5.94, soffitHeight = .27;
   for(const side of [-1,1]){
     const front=side<0?-15:35;
     const inside=-side;
     for(let i=0;i<6;i++){
       const z=i*8+4;
-      box('oak',front+inside*.7,5.94,z,1.55,.27,7.96);
+      box('oak',front+inside*.7,soffitY,z,1.55,soffitHeight,7.96);
       box('ivory',front+inside*1.47,6.02,z,.16,.52,8);
       box('glow',front+inside*1.38,5.77,z,.06,.035,7.75);
       for(const dz of [-2.45,2.45]){
         box('brass',front+inside*.77,5.78,z+dz,.31,.06,.31);
         box('glow',front+inside*.77,5.737,z+dz,.21,.04,.21);
+        lightWash?.(front+inside*.77,soffitY-soffitHeight/2-.008,z+dz,1.25,2.5,0,Math.PI/2);
       }
       box('ivory',front+side*arcadePilaster.inset,2.88,z-3.88,arcadePilaster.depth,5.76,.35);
       // Shallow arched window heads sit below the fascia and to either

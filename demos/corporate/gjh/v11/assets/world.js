@@ -18,6 +18,7 @@ import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {createSeatPlacements, createSeatAnchor} from './seat-placements.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
+import {createMallSurfaceAtmosphere} from './mall-atmosphere.js';
 
 export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill}) {
   if (!expanded || !theme?.materials || !theme?.lighting) return false;
@@ -127,6 +128,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   }
   const position = new T.Vector3(), scale = new T.Vector3(), shopLodMeshes=[],shopLodUpdates=[],shopBays=new Map(expandedLayout.slots.map(bay=>[Number(bay.number),bay]));
   const shopUploads = new Map();
+  const atmosphereWashes = [];
+  const lightWash = (...placement) => atmosphereWashes.push(placement);
   let uploadVisitor, pavingMesh, mappedPaving;
   function queueShopUpload(slot, ...meshes) {
     if (!expanded || !prepareModel) return;
@@ -139,6 +142,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     const sample = new T.InstancedMesh(geometry.box, material, 1);
     try {
       await prepareModel?.(sample);
+      // A graphics tier can change while the mapped material is warming.
+      material.roughness = materials.paving.roughness;
       mappedPaving = material;
       if (pavingMesh) pavingMesh.material = material;
       materials.paving.dispose();
@@ -288,7 +293,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
-    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, garden:atriumLayout.garden, prepareModel, setPavingMap}));
+    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
     for (const proxy of SHELL_LAYOUT.aggregate_colliders) collider(...proxy.position, ...proxy.size);
@@ -782,6 +787,12 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   if (expanded) {
     signage=await addShopSignAtlas(T,expandedLayout,scene);
     const slide = addExpandedStorefronts(T,expandedLayout,scene,signage.configs);
+    for (const bay of expandedLayout.slots) {
+      const {x,z,normalX,normalZ,yaw} = shopEntrance(bay);
+      const frontage = normalZ ? bay.maxX-bay.minX : bay.maxZ-bay.minZ;
+      const offset = 2.15;
+      lightWash(x+normalX*offset,.029,z+normalZ*offset,frontage*.78,4.2,yaw,-Math.PI/2);
+    }
     for (const bay of expandedLayout.slots.slice(3)) {
       const {x,z,alongX,alongZ,normalX,normalZ}=shopEntrance(bay);
       const width = normalZ ? bay.maxX-bay.minX : bay.maxZ-bay.minZ;
@@ -824,11 +835,17 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     // Four roof panels leave the 12 x 12 m upper landing open to the sky.
     ceilingBox('shellCeiling',10,8.5,18,70,.25,60,liftLayout.roofOpening);
     // Recessed strips share the retained roof footprint, including its camera opening.
-    // Reuse existing emissive/pool batches; no new lights or visitor colliders.
+    // The broad wash follows the same roof opening as the fixture.
     function warmStrip(x,z,width,depth){
       const panels=ceilingBox('glow',x,8.34,z,width,.035,depth,liftLayout.roofOpening);
       for(const r of panels)lightPool((r.minX+r.maxX)/2,.052,(r.minZ+r.maxZ)/2,
         width>depth?r.maxX-r.minX:4.5,width>depth?4.5:r.maxZ-r.minZ);
+      const washWidth=width>depth ? width : 2.4, washDepth=width>depth ? 2.4 : depth;
+      const bounds={minX:x-washWidth/2,maxX:x+washWidth/2,minZ:z-washDepth/2,maxZ:z+washDepth/2};
+      const washes=expandedLift ? cutRectangle(bounds,liftLayout.roofOpening) : [bounds];
+      for (const r of washes) lightWash(
+        (r.minX+r.maxX)/2,8.367,(r.minZ+r.maxZ)/2,r.maxX-r.minX,r.maxZ-r.minZ,0,Math.PI/2
+      );
     }
     for(const x of [-12,32])for(const z of [10,22,34])warmStrip(x,z,.07,6);
     for(const x of [-5,10,25])warmStrip(x,3,6,.07);
@@ -934,10 +951,18 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   const key = new T.DirectionalLight(expanded ? 0xffe0bc : 0xffd5a0, expanded ? 2.6 : 2.1); key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9])); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, {left: -20, right: 20, top: 20, bottom: -20, near: .5, far: 50}); key.shadow.normalBias = .05; key.shadow.bias = -.0004; scene.add(key);
   const fill = new T.DirectionalLight(expanded ? 0xcbdde5 : 0xe9d8c2, expanded ? .4 : .45); fill.position.set(4, 8, -5); scene.add(fill);
+  const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T,scene,{
+    plane:geometry.plane, poolMaterial:materials.lightPool, washes:atmosphereWashes,
+    floors:[materials.shellFloor,materials.paving,materials.courtStone],
+    fixtures:materials.glow, vault:materials.vaultOak
+  }) : null;
   refreshInstanceColours();
   const applyMallTheme = theme => {
     const applied = applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fill});
-    if (applied) refreshInstanceColours();
+    if (applied) {
+      surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
+      refreshInstanceColours();
+    }
     return applied;
   };
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
@@ -969,6 +994,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
   function updateShopLods(visitor, shadows = true, tier) {
     productDisplay?.setShadows(shadows);
     if(!expanded)return;
+    // The render loop and context recovery both supply the resolved tier here.
+    if (surfaceAtmosphere.setTier(tier) && mappedPaving) mappedPaving.roughness = materials.paving.roughness;
     uploadVisitor = visitor;
     productDisplay?.updateShopLods(visitor, tier);
     interiorKit.update(visitor);
