@@ -5329,7 +5329,9 @@ function createInteractionRegistry(entries, describe = () => ({})) {
   const actions2 = new Map;
   const listeners = new Set;
   const candidates = [];
+  const props = entries.physicsProps;
   let selectionContext = {}, selected = null, cycled = null, shops = null;
+  let dropButton;
   function normalize(source) {
     let item = cache.get(source);
     if (!item) {
@@ -5357,7 +5359,42 @@ function createInteractionRegistry(entries, describe = () => ({})) {
       actions2.set(source.kind, byId = new Map);
     const item = normalize(source);
     byId.set(item.id, item);
+    if (props && source.kind === "bag" && source.id === "held-product")
+      installDrop(item);
     return item;
+  }
+  function installDrop(bagAction) {
+    const scene = document.getElementById("scene");
+    const prompt = document.getElementById("inspect-prompt");
+    const drop = register({
+      id: "held-product",
+      kind: "drop",
+      prompt: "Drop",
+      availability: (context) => Boolean(context.player?.character?.physicalProduct?.held && bagAction.availability(context)),
+      handler: (_, { player }) => props.drop(player)
+    });
+    dropButton = document.createElement("button");
+    dropButton.type = "button";
+    dropButton.id = "held-product-drop";
+    dropButton.className = "hud-control hud-held-action";
+    dropButton.textContent = drop.prompt;
+    dropButton.hidden = true;
+    dropButton.setAttribute("aria-keyshortcuts", "G");
+    prompt.prepend(dropButton);
+    const activate = () => {
+      if (!dispatch(drop))
+        return false;
+      dropButton.hidden = true;
+      scene.focus({ preventScroll: true });
+      return true;
+    };
+    dropButton.addEventListener("click", activate);
+    document.addEventListener("keydown", (event) => {
+      if (event.code !== "KeyG" || event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.target !== scene && event.target !== document.body)
+        return;
+      if (activate())
+        event.preventDefault();
+    });
   }
   function get(kind, id) {
     return actions2.get(kind)?.get(id) || null;
@@ -5365,6 +5402,12 @@ function createInteractionRegistry(entries, describe = () => ({})) {
   function nearest(position, context = {}) {
     let best = null, distance = Infinity;
     selectionContext = context;
+    props?.visit(context.zone, position);
+    if (dropButton) {
+      const hidden = !position.character?.physicalProduct?.held;
+      if (dropButton.hidden !== hidden)
+        dropButton.hidden = hidden;
+    }
     const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
     candidates.length = 0;
     function consider(source) {
@@ -5398,8 +5441,12 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     const chosen = cycled && candidates.find((candidate) => candidate.item === cycled);
     if (!chosen)
       cycled = null;
+    if (!chosen && !context.travelling && props?.floorAction.availability(context)) {
+      best = normalize(props.floorAction);
+      distance = Math.hypot(position.x - best.anchor.x, position.z - best.anchor.z);
+    }
     selected = chosen?.item ?? best;
-    shops?.state.focus(selected?.shopAction ? selected : null);
+    shops?.state.focus(selected?.shopAction && selected.id !== props?.floorAction.id ? selected : null);
     return { item: selected, distance: chosen?.distance ?? distance };
   }
   function cycle(direction) {
@@ -5417,7 +5464,9 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     if (!item || item.availability && !item.availability(context, item))
       return false;
     let result;
-    if (item.shopAction) {
+    if (item.id === props?.floorAction.id) {
+      result = item === selected && item.handler(item, context);
+    } else if (item.shopAction) {
       if (item !== selected)
         return false;
       const { productId } = item.shopAction;

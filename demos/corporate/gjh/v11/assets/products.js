@@ -296,10 +296,12 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     display.reserve(entry.slot, true);
     const prop = entry.carry.clone(); prop.visible=true; prop.name='HeldShelfProduct'; prop.position.copy(entry.placements[index]);
     scene.add(prop); let released=false;
-    return {id, prop, centerY:canBounds.y/2, approach:shelves.find(s=>s.id===id).pickup, origin:entry.placements[index].clone(), release() {
+    const token = {id, prop, centerY:canBounds.y/2, approach:shelves.find(s=>s.id===id).pickup, origin:entry.placements[index].clone(), release() {
       if(released)return; released=true; prop.removeFromParent();
       display.reserve(entry.slot, false);
+      token.onReleased?.();
     }};
+    return token;
   }, createCollectProp(id) {
     const entry = stock.get(id);
     if (!entry) return null;
