@@ -16,9 +16,9 @@ The 17 shops here are the V11 game’s authored roster. Some represent house bra
 | S06 | [Flying Wheel](06-flying-wheel/brand-research.md) · [Concept packet](06-flying-wheel/README.md) |
 | S07 | [Gu Long](07-gu-long/brand-research.md) · [Concept packet](07-gu-long/README.md) |
 | S08 | [SKIPPY](08-skippy/brand-research.md) · [Concept packet](08-skippy/README.md) |
-| S09 | [SPAM](09-spam/brand-research.md) |
-| S10 | [California Mexico](10-california-mexico/brand-research.md) |
-| S11 | [Hormel](11-hormel/brand-research.md) |
+| S09 | [SPAM](09-spam/brand-research.md) · [Concept packet](09-spam/README.md) |
+| S10 | [California Mexico](10-california-mexico/brand-research.md) · [Concept packet](10-california-mexico/README.md) |
+| S11 | [Hormel](11-hormel/brand-research.md) · [Concept packet](11-hormel/README.md) |
 | S12 | [Zeria](12-zeria/brand-research.md) |
 | S13 | [Sony](13-sony/brand-research.md) |
 | S14 | [LG](14-lg/brand-research.md) |
