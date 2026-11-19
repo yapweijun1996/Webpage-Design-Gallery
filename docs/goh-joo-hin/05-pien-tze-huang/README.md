@@ -26,7 +26,7 @@ World origin (30, 0, -6), yaw 0°. Dimensions are authored metres. The [floor pl
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Manufacturer single 3 g unit carton | One enlarged study on the existing centre counter | Installed unprinted procedural carton. Exact package measurements and artwork remain pending. |
+| Manufacturer single 3 g unit carton | One enlarged study on the existing centre counter | An unprinted carton with a nearly square front and a folded top replaces the previous rectangular block. Physical measurements, closure and artwork remain pending. [Editable study](../../../models/gjh-pzh-single-carton/README.md) |
 | GJH 10-piece listing | Research reference only | Hold the group model until its package can be distinguished from the manufacturer’s one-unit carton. |
 
 Maintain a source-backed distinction between the two package formats.
@@ -41,7 +41,7 @@ The existing corridor and cabinet remain in place. On published build `c59b32c3e
 
 ## Manufacturer image and carton formats
 
-The [manufacturer’s product image and specification](https://www.pzhchina.com/gscp/info_169.aspx?itemid=18482&lcid=15) shows the 3 g, one-unit carton used as the reference for the main labeled position. The [Singapore eShop listing](https://www.gjheshop.com/product/zhang-zhou-pien-tze-huang-10-pcs/) names a separate 10-piece format. Use the [existing sourced mark](../../../demos/corporate/gjh/v11/assets/brands/S05-pien-tze-huang.webp) for the shop identity. Keep the drawers as a spatial display and describe the published carton format without making treatment claims.
+The [manufacturer’s product image and specification](https://www.pzhchina.com/gscp/info_169.aspx?itemid=18482&lcid=15) show the small 3 g one-unit carton beside a larger two-unit carton. The smaller carton is the reference for this exhibit. The [Singapore eShop listing](https://www.gjheshop.com/product/zhang-zhou-pien-tze-huang-10-pcs/) names a separate 10-piece format. Use the [existing sourced mark](../../../demos/corporate/gjh/v11/assets/brands/S05-pien-tze-huang.webp) for the shop identity. Keep the drawers as a spatial display and describe the published carton format without making treatment claims.
 
 ## Interior viewpoints
 

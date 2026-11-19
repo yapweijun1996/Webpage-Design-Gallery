@@ -44,11 +44,14 @@ The [dated HPB list](https://www.healthhub.sg/sites/assets/Assets/PDFs/HPB/Food/
 - [x] **Lingzhi Cracked Spores Powder 200 mg × 60 twin pack, unprinted form study.** Two cartons follow the nominal single and twin dimensions and sit on the right library shelf. [Editable studies and official views](../../models/gjh-borsch-packs/README.md)
 - [ ] **Lingzhi Cracked Spores Powder 200 mg × 60 twin pack, exact retail pack.** Verify with physical samples, including any outer wrap, current label and artwork use.
 
+S04 passed on Pages build `deaf0fd98cc414b0`. Desktop and 390 px touch-emulated Chrome entered the shop, opened both product stories and returned to the atrium. The published room GLB matched the staged Blender export and Low totals 2,798 triangles against the 2,800 per-shop cap. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44637538307)
+
 ## S05 Pien Tze Huang
 
 [Design and runtime](05-pien-tze-huang/README.md) · [Inventory](05-pien-tze-huang/model-inventory.md)
 
-- [ ] **Single 3 g unit.** Confirm carton dimensions and latest manufacturer print art independently of the enlarged display study.
+- [x] **Single 3 g unit, unprinted form study.** The smaller carton in the manufacturer photo supports a nearly square front and narrower side. The [editable 220 × 216 × 100 mm study](../../models/gjh-pzh-single-carton/README.md) preserves the exhibit position and uses photo-estimated proportions.
+- [ ] **Single 3 g unit, exact retail carton.** Confirm physical dimensions, closure and current packaging art independently of the enlarged display study.
 - [ ] **GJH 10-piece format.** Verify the outer pack shape, size and relationship to the 3 g carton before modeling.
 
 ## S06 Flying Wheel

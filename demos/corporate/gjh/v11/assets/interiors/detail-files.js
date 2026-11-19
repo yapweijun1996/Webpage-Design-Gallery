@@ -23,7 +23,7 @@ export const roomDetails = {
   },
   "S05": {
     "file": "s05-herbal-details.glb",
-    "bytes": 67544,
+    "bytes": 70160,
     "roomDetail": true
   },
   "S06": {

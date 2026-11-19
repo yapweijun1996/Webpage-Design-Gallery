@@ -4,6 +4,7 @@ from math import cos, pi, radians, sin, tau
 from mesh import CRAFT, PRINT, PULSE, SCROLL, Room, library_profile, logo
 from borsch_packs import add_borsch_lingzhi_pair, add_borsch_patch_pack
 from mili_mock_duck import add_mili_mock_duck
+from pzh_carton import add_pzh_carton
 
 GOLD, BONE, INK = "d7a95b", "f6ecd2", "203545"
 MINT, RED, SEA = "70cdb9", "c34339", "357675"
@@ -143,6 +144,7 @@ def herbal(r,profiles):
             r.ring(x+dx,r.floor,z+dz,rx,rz,.044,GOLD,PRINT,True,pi,2*pi,10)
         r.ribbon([(x-.44,r.floor,z),(x-.23,r.floor,z+.12),(x+.30,r.floor,z+.12)],
                  .041,GOLD,PRINT,True)
+    add_pzh_carton(r.batches[CRAFT], x=.54, y=1.2475, z=-.36)
 
 
 def wheel(r,_):
