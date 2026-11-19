@@ -5430,7 +5430,10 @@ async function installNpcs(T, R, prepareModel, source) {
       mobile: innerWidth < 1000,
       tier: quality.state?.tier || "balanced",
       enabled,
-      prepareModel
+      prepareModel,
+      onModularFallback() {
+        document.getElementById("npc-appearance-status").hidden = false;
+      }
     };
     const system = source ? createNpcSystem(T, { ...options, source }) : await loadNpcSystem(T, options);
     if (pageEnded || fatal)
@@ -5439,8 +5442,10 @@ async function installNpcs(T, R, prepareModel, source) {
       npcs = system;
       npcs.setQuality({ mobile: innerWidth < 1000, tier: quality.state?.tier || "balanced" });
       firstFrame.then(() => {
-        if (!pageEnded && !fatal)
-          return system.loadBoy();
+        if (pageEnded || fatal)
+          return;
+        system.enableModular();
+        return system.loadBoy();
       });
     }
   } catch {}

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "seed": 20261119,
+  "provenance": {
+    "repository": "Blender-3D-Gallery",
+    "checkoutHead": "12cd121f65ffa0cf9661cc211196f46e45033ee6",
+    "snapshot": "Copied from the local Blender 3D Gallery working tree on 2026-11-19. The HEAD alone may not identify these revisions. SHA-256 pins the exact bytes.",
+    "license": "Tripo output licence for redistribution is unspecified. The owner requested local integration into the GJH v11 demo. No redistribution rights are inferred.",
+    "review": "docs/chibi-dressup-progress.md"
+  },
+  "modules": [
+    {
+      "id": "neutral-body",
+      "file": "base_body.glb",
+      "status": "verified",
+      "bytes": 489252,
+      "sha256": "9ada782f1919f7f6a63d570ded64af45c6802c53b4aa2029276715a9a4a46fa7",
+      "source": "models/chibi-dressup/base_body.glb",
+      "slot": "body",
+      "authoringSource": "output/modular-chibi-parts/hand-gestures-astra/base_body.glb",
+      "upstreamSha256": "f6a979565d81171a1606a37776e755192744ec1415a8b65e6e68ee537824453f",
+      "upstreamBytes": 829248,
+      "optimization": "Embedded colour texture reduced from 2048\u00d72048 to 1024 px maximum using Lanczos resampling. Geometry, rig and material definitions are unchanged."
+    },
+    {
+      "id": "hair-bob",
+      "file": "hair-bob.glb",
+      "status": "verified",
+      "bytes": 227404,
+      "sha256": "32cadfa94be111706295032933e823529364047484f2cd78b71c7919abfd811d",
+      "source": "models/chibi-dressup/modules/hair-bob.glb",
+      "slot": "hair",
+      "authoringSource": "output/modular-chibi-parts/hair-fit-astra/round2/hair_bob_v2.glb",
+      "bodyIds": [
+        "neutral-body"
+      ]
+    }
+  ],
+  "animation": {
+    "motion": {
+      "id": "motion-clips",
+      "file": "motion-clips.glb",
+      "status": "verified",
+      "bytes": 333260,
+      "sha256": "33522ae4856a46b8a43e394a3debec0dfdbff9106a82e06af8471c891de0e320",
+      "source": "models/chibi-dressup/motion-clips.glb",
+      "authoringSource": "models/tripo-chibi-motion/motion.glb via models/chibi-dressup/extract-motion.mjs"
+    },
+    "gestures": {
+      "id": "hand-gestures",
+      "file": "hand_gestures.glb",
+      "status": "verified",
+      "bytes": 96568,
+      "sha256": "022ac7544e0e22f8082caa3a86407c3e2de2052db34d614c87cfede6ddf012ae",
+      "source": "models/chibi-dressup/hand_gestures.glb",
+      "authoringSource": "output/modular-chibi-parts/hand-gestures-astra/hand_gestures.glb"
+    }
+  }
+}

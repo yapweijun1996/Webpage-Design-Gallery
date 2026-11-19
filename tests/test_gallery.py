@@ -94,6 +94,27 @@ class GalleryTests(unittest.TestCase):
         catalog = gallery.load_catalog()
         self.assertEqual(gallery.build_pages(catalog), gallery.build_pages(copy.deepcopy(catalog)))
 
+    def test_v11_verified_wardrobe_is_published_and_cached_on_demand(self):
+        catalog = gallery.load_catalog()
+        scope = Path("demos/corporate/gjh/v11")
+        folder = Path("assets/chibi-crowd")
+        manifest = gallery.read_json(ROOT / scope / folder / "manifest.json")
+        entries = (*manifest["modules"], *manifest["animation"].values())
+        published = set(gallery.runtime_resources(catalog))
+        workers = gallery.pwa_outputs({}, catalog, {"build": "test", "version": "1.0.0"})
+        worker = workers[(scope / "pwa-sw.js").as_posix()]
+        cache = json.loads(re.search(r"const LAZY_ASSETS = (\[.*?\]);", worker, re.S)[1])
+        precache = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", worker, re.S)[1])
+        expected = {folder / "manifest.json", *(folder / entry["file"] for entry in entries
+                                                if entry["status"] == "verified")}
+        self.assertEqual({Path(entry["path"]) for entry in cache}, expected)
+        self.assertTrue({scope / path for path in expected} <= published)
+        self.assertTrue(expected.isdisjoint(Path(entry["path"]) for entry in precache))
+        self.assertNotIn("assets/chibi-crowd/", workers["sw.js"])
+        for entry in cache:
+            asset = ROOT / scope / entry["path"]
+            self.assertEqual(entry["sha256"], hashlib.sha256(gallery.source_bytes(asset)).hexdigest())
+
     def test_paths_cannot_escape_repository(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

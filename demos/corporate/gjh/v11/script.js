@@ -620,14 +620,17 @@ async function installNpcs(T, R, prepareModel, source) {
   try {
     const {createNpcSystem, loadNpcSystem} = await import('./assets/npcs.js');
     const options = {scene:world.scene,seats:world.seats,physics,R,playerCollider:player.capsule,
-      playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled,prepareModel};
+      playerBody:player.body,expanded,mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled,prepareModel,
+      onModularFallback() { document.getElementById('npc-appearance-status').hidden=false; }};
     const system = source ? createNpcSystem(T, {...options, source}) : await loadNpcSystem(T, options);
     if (pageEnded || fatal) system.dispose();
     else {
       npcs = system;
       npcs.setQuality({mobile:innerWidth<1000,tier:quality.state?.tier||'balanced'});
       void firstFrame.then(() => {
-        if (!pageEnded && !fatal) return system.loadBoy();
+        if (pageEnded || fatal) return;
+        system.enableModular();
+        return system.loadBoy();
       });
     }
   } catch { /* NPCs are optional. */ }
