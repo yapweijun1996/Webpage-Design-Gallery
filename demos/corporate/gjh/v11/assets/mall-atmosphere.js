@@ -1,3 +1,5 @@
+import {createInstanceVisibility} from './packed-draw.js';
+
 const SURFACES = {
   low:{roughness:1, emission:1, washOpacity:0},
   balanced:{roughness:.82, emission:1.2, washOpacity:.32},
@@ -20,6 +22,7 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
   washMesh.name = 'Mall cove and storefront light wash';
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
+  const washVisibility = createInstanceVisibility(T, washMesh);
 
   const floorRoughness = floors.map(floor => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
@@ -41,7 +44,9 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
     fixtures.emissiveIntensity = fixtureEmission * preset.emission;
   }
   setTier('low');
-  return {setTier,setFixtureEmission};
+  return {setTier, setFixtureEmission, updateView(view) {
+    if (washMesh.visible) washVisibility.update(view.frustum);
+  }};
 }
 
 // Local, static lighting resources. No environment image or postprocessing asset is fetched.

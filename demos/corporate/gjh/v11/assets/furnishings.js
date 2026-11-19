@@ -1,5 +1,6 @@
 // Optional furniture; opaque surfaces are merged before instancing across placements.
 import {loadStaticAsset} from './static-asset.js';
+import {createInstanceVisibility, createProjectedBatch} from './packed-draw.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
 import {INTERIOR_ADDITIONS} from './interior-additions-registry.js';
@@ -58,6 +59,34 @@ function batchFurniture(T, primitives) {
   return [{geometry:mesh.geometry,material:mesh.material,matrix:new T.Matrix4()}];
 }
 
+// Collapse subpixel bevel steps within each finish, preserving the authored
+// normals on surviving faces. Bound the change by the measured displacement.
+export function simplifyBench(T, geometry) {
+  const size = .012, {position, color, obSurface} = geometry.attributes;
+  const keys = new Map(), remap = new Uint32Array(position.count);
+  const index = [], result = geometry.clone();
+  let error = 0;
+  for (let i = 0; i < position.count; i++) {
+    const x = position.getX(i), y = position.getY(i), z = position.getZ(i);
+    const key = [Math.round(x/size),Math.round(y/size),Math.round(z/size),
+      color?.getX(i),color?.getY(i),color?.getZ(i),obSurface?.getX(i),obSurface?.getY(i)].join(',');
+    if (!keys.has(key)) keys.set(key, i);
+    const first = remap[i] = keys.get(key);
+    const rx = position.getX(first), ry = position.getY(first), rz = position.getZ(first);
+    error = Math.max(error, Math.hypot(x-rx, y-ry, z-rz));
+    result.attributes.position.setXYZ(i,rx,ry,rz);
+  }
+  const source = geometry.index;
+  for (let i = 0; i < (source?.count ?? position.count); i += 3) {
+    const a = source ? source.getX(i) : i;
+    const b = source ? source.getX(i + 1) : i + 1;
+    const c = source ? source.getX(i + 2) : i + 2;
+    if (remap[a] !== remap[b] && remap[b] !== remap[c] && remap[a] !== remap[c]) index.push(a,b,c);
+  }
+  result.setIndex(index);
+  return {geometry:result, error};
+}
+
 export async function createFurnishings(T, shadows, expanded = false) {
   const sources = expanded ? {...pilotSources, ...shopSources} : pilotSources;
   const records = {};
@@ -65,6 +94,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
   let detailLoading = false, detailScheduled = false;
   const group = new T.Group();
   group.name = 'Blender furnishings';
+  const benchLods = [], staticBatches = [];
   let registerMesh, prepareModel;
   async function load(kind) {
     const definition = sources[kind], record = records[kind];
@@ -84,10 +114,12 @@ export async function createFurnishings(T, shadows, expanded = false) {
 
   function mount(kind, prewarm) {
     const record = records[kind];
-    const placementsBySlot=new Map(), meshes=[];
-    for(const placement of record.placements){
-      if(!placementsBySlot.has(placement.shopSlot))placementsBySlot.set(placement.shopSlot,[]);
-      placementsBySlot.get(placement.shopSlot).push(placement);
+    const sharedLights = expanded && kind === 'wallLight';
+    const placementsBySlot = new Map(), meshes = [];
+    for (const placement of record.placements) {
+      const slot = sharedLights ? null : placement.shopSlot;
+      if (!placementsBySlot.has(slot)) placementsBySlot.set(slot, []);
+      placementsBySlot.get(slot).push(placement);
     }
     for (const primitive of record.primitives) {
       for(const [shopSlot,placements] of placementsBySlot){
@@ -99,6 +131,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
         mesh.computeBoundingSphere();
         if(shopSlot===-1)mesh.userData.deckLod=true;
         else if(shopSlot!==null)mesh.userData.shopSlot=shopSlot;
+        if (sharedLights) mesh.userData.lightSlots = placements.map(placement => placement.shopSlot);
         meshes.push(mesh);
       }
     }
@@ -106,8 +139,27 @@ export async function createFurnishings(T, shadows, expanded = false) {
       for (const mesh of meshes) {
         if (mesh.userData.shopSlot !== undefined) registerMesh(mesh);
         group.add(mesh);
+        if (expanded && kind === 'bench') {
+          const distant = simplifyBench(T, mesh.geometry);
+          const lod = createProjectedBatch(T, mesh, distant.geometry, matrix => distant.error * matrix.getMaxScaleOnAxis());
+          distant.geometry.dispose();
+          const compact = createInstanceVisibility(T, mesh);
+          benchLods.push({mesh, compact, lod});
+          const mountLod = () => {
+            mesh.removeFromParent();
+            lod.mesh.visible = false;
+            group.add(lod.mesh);
+          };
+          if (prepareModel) void prepareModel(lod.mesh, {late:false}).then(mountLod, () => lod.mesh.geometry.dispose());
+          else mountLod();
+        } else if (expanded && !mesh.material.transparent) {
+          const slots = mesh.userData.lightSlots;
+          const compact = createInstanceVisibility(T, mesh, {slots,castShadow:mesh.castShadow});
+          staticBatches.push({mesh, slots, compact});
+        }
       }
     };
+    if (sharedLights && prepareModel) prewarm = prepareModel;
     if (prewarm && meshes.length) {
       const staging = new T.Group().add(...meshes);
       return prewarm(staging).then(attach);
@@ -144,6 +196,22 @@ export async function createFurnishings(T, shadows, expanded = false) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleDetails(); });
 
   return {
+    updateView(view, shopNear) {
+      const lightNear = slot => slot === null || shopNear.get(slot);
+      for (const {mesh, slots, compact} of staticBatches) {
+        if (mesh.visible) compact.update(view.frustum, slots ? lightNear : undefined, view.shadows);
+      }
+      for (const {mesh, compact, lod} of benchLods) {
+        const visible = mesh.userData.deckLod ? view.deckVisible : mesh.visible;
+        if (!lod.mesh.parent) {
+          mesh.visible = visible;
+          if (visible) compact.update(view.shadows ? null : view.frustum);
+          continue;
+        }
+        if (visible) lod.update(view);
+        lod.mesh.visible = visible && lod.mesh.geometry.drawRange.count > 0;
+      }
+    },
     place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
       const record = records[kind];
       const transform = new T.Matrix4().compose(new T.Vector3(x, baseY, z),
@@ -170,7 +238,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
             if (!pendingByShop.has(slot)) pendingByShop.set(slot, []);
             pendingByShop.get(slot).push(kind);
           }
-        } else mount(kind);
+        } else void Promise.resolve(mount(kind)).catch(error => console.warn('Furniture preload failed',error));
         state[kind] = Object.freeze({
           assetId:sources[kind].asset_id, identity:sources[kind].sha256, dimensions:sources[kind].dimensions_m,
           instances:record.placements.length, get status(){return record.status;},

@@ -7,6 +7,289 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/packed-draw.js
+import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
+function mergeOpaqueMeshes(T, root) {
+  root.updateMatrixWorld(true);
+  const inverse = root.matrixWorld.clone().invert(), batches = new Map;
+  root.traverse((mesh) => {
+    const m = mesh.material;
+    if (!mesh.isMesh || mesh.isSkinnedMesh || mesh.isInstancedMesh || mesh.morphTargetInfluences || !mesh.visible || mesh.geometry.drawRange.start !== 0 || mesh.geometry.drawRange.count !== Infinity || mesh.children.length || !m || Array.isArray(m) || m.transparent || m.transmission || mesh.renderOrder || mesh.layers.mask !== 1 || mesh.castShadow || mesh.receiveShadow || mesh.matrixWorld.determinant() < 0)
+      return;
+    if (!batches.has(m))
+      batches.set(m, []);
+    batches.get(m).push(mesh);
+  });
+  for (const [material, meshes] of batches) {
+    if (meshes.length < 2)
+      continue;
+    const parts = meshes.map((mesh) => mesh.geometry.clone().applyMatrix4(inverse.clone().multiply(mesh.matrixWorld)));
+    const geometry = mergeGeometries(parts);
+    parts.forEach((part) => part.dispose());
+    if (!geometry)
+      continue;
+    const merged = new T.Mesh(geometry, material);
+    merged.name = meshes[0].name;
+    meshes.forEach((mesh) => mesh.removeFromParent());
+    root.add(merged);
+  }
+}
+function createPackedDraw(T, parts, material) {
+  const sources = parts.flatMap((part) => part.geometries);
+  for (const geometry2 of sources) {
+    if (!geometry2.index)
+      geometry2.setIndex(Array.from({ length: geometry2.attributes.position.count }, (_, i) => i));
+  }
+  const geometry = mergeGeometries(sources);
+  const original = geometry.index.array;
+  let offset = 0, capacity = 0;
+  const ranges = parts.map((part) => {
+    const variants = part.geometries.map((source) => {
+      const range = original.subarray(offset, offset + source.index.count);
+      offset += range.length;
+      return range;
+    });
+    capacity += Math.max(...variants.map((range) => range.length));
+    return variants;
+  });
+  const index = new T.BufferAttribute(new original.constructor(capacity), 1).setUsage(T.DynamicDrawUsage);
+  geometry.setIndex(index);
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+  const mesh = new T.Mesh(geometry, material);
+  const items = parts.map(({ geometries, ...part }) => part);
+  const active = new Int8Array(items.length).fill(-2);
+  const bounds = new T.Box3;
+  let count = 0;
+  function update(select) {
+    let changed = false;
+    for (let i = 0;i < items.length; i++) {
+      const variant = select(items[i], i);
+      if (variant !== active[i]) {
+        active[i] = variant;
+        changed = true;
+      }
+    }
+    if (!changed)
+      return;
+    count = 0;
+    bounds.makeEmpty();
+    for (let i = 0;i < active.length; i++) {
+      if (active[i] < 0)
+        continue;
+      const range = ranges[i][active[i]];
+      index.array.set(range, count);
+      count += range.length;
+      bounds.union(items[i].bounds);
+    }
+    mesh.visible = count > 0;
+    geometry.setDrawRange(0, count);
+    geometry.boundingBox.copy(bounds);
+    bounds.getBoundingSphere(geometry.boundingSphere);
+    if (count) {
+      index.clearUpdateRanges();
+      index.addUpdateRange(0, count);
+      index.needsUpdate = true;
+    }
+  }
+  update(() => 0);
+  for (const source of sources)
+    source.dispose();
+  return { mesh, update };
+}
+function boxVisibility(frustum, box) {
+  let inside = true;
+  for (const { normal, constant } of frustum.planes) {
+    const { x, y, z } = normal;
+    const loX = x < 0 ? box.max.x : box.min.x, hiX = x < 0 ? box.min.x : box.max.x;
+    const loY = y < 0 ? box.max.y : box.min.y, hiY = y < 0 ? box.min.y : box.max.y;
+    const loZ = z < 0 ? box.max.z : box.min.z, hiZ = z < 0 ? box.min.z : box.max.z;
+    if (x * hiX + y * hiY + z * hiZ + constant < 0)
+      return -1;
+    if (x * loX + y * loY + z * loZ + constant < 0)
+      inside = false;
+  }
+  return inside ? 1 : 0;
+}
+function createInstanceVisibility(T, mesh, { colours, slots, attributes = [], cellSize = 3, castShadow = false } = {}) {
+  const matrices = mesh.instanceMatrix.array.slice();
+  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  if (colours)
+    mesh.instanceColor.setUsage(T.DynamicDrawUsage);
+  const extras = attributes.map((attribute) => ({ attribute: attribute.setUsage(T.DynamicDrawUsage), source: attribute.array.slice() }));
+  const matrix = new T.Matrix4, cells = new Map, boxes = [];
+  mesh.geometry.computeBoundingBox();
+  for (let i = 0;i < mesh.count; i++) {
+    matrix.fromArray(matrices, i * 16);
+    const box = mesh.geometry.boundingBox.clone().applyMatrix4(matrix);
+    boxes.push(box);
+    const x = Math.floor(matrix.elements[12] / cellSize), y = Math.floor(matrix.elements[13] / cellSize);
+    const z = Math.floor(matrix.elements[14] / cellSize), key = x + "," + y + "," + z + "," + slots?.[i];
+    if (!cells.has(key))
+      cells.set(key, { bounds: new T.Box3, casterBounds: new T.Box3, parts: [], slot: slots?.[i] });
+    const cell = cells.get(key);
+    const casterBounds = castShadow ? shadowReceiverBounds(box) : box;
+    cell.bounds.union(box);
+    cell.casterBounds.union(casterBounds);
+    cell.parts.push({ box, casterBounds, index: i });
+  }
+  const bounds = new T.Box3, selected = new Uint32Array(mesh.count), previous = selected.slice();
+  let previousCount = -1;
+  mesh.boundingBox ??= new T.Box3;
+  mesh.boundingSphere ??= new T.Sphere;
+  function syncColours() {
+    if (!colours || previousCount <= 0)
+      return;
+    for (let i = 0;i < previousCount; i++)
+      mesh.setColorAt(i, colours[previous[i]]);
+    uploadPrefix(mesh.instanceColor, previousCount * 3);
+  }
+  return {
+    update(frustum, allow = () => true, shadows = false) {
+      let count = 0, changed = false;
+      for (const cell of cells.values()) {
+        if (!allow(cell.slot))
+          continue;
+        const visibility = frustum ? boxVisibility(frustum, shadows ? cell.casterBounds : cell.bounds) : 1;
+        if (visibility < 0)
+          continue;
+        for (const { box, casterBounds, index } of cell.parts) {
+          if (visibility === 0 && !frustum.intersectsBox(shadows ? casterBounds : box))
+            continue;
+          selected[count] = index;
+          if (index !== previous[count])
+            changed = true;
+          count++;
+        }
+      }
+      if (!changed && count === previousCount)
+        return;
+      previousCount = count;
+      previous.set(selected.subarray(0, count));
+      mesh.count = count;
+      bounds.makeEmpty();
+      for (let i = 0;i < count; i++) {
+        matrix.fromArray(matrices, selected[i] * 16);
+        mesh.setMatrixAt(i, matrix);
+        bounds.union(boxes[selected[i]]);
+      }
+      mesh.boundingBox.copy(bounds);
+      bounds.getBoundingSphere(mesh.boundingSphere);
+      if (!count)
+        return;
+      uploadPrefix(mesh.instanceMatrix, count * 16);
+      for (const { attribute, source } of extras) {
+        const { array, itemSize } = attribute;
+        for (let i = 0;i < count; i++) {
+          const offset = selected[i] * itemSize;
+          array.set(source.subarray(offset, offset + itemSize), i * itemSize);
+        }
+        uploadPrefix(attribute, count * itemSize);
+      }
+      syncColours();
+    },
+    refreshColours() {
+      if (previousCount < 0) {
+        for (let i = 0;i < colours.length; i++)
+          mesh.setColorAt(i, colours[i]);
+        mesh.instanceColor.needsUpdate = true;
+      } else
+        syncColours();
+    }
+  };
+}
+function uploadPrefix(attribute, length) {
+  attribute.clearUpdateRanges();
+  attribute.addUpdateRange(0, length);
+  attribute.needsUpdate = true;
+}
+function boxFrontFaces(eye, centre, size) {
+  const x = eye.x - centre.x, y = eye.y - centre.y, z = eye.z - centre.z;
+  return (x > size.x / 2 ? 1 : x < -size.x / 2 ? 2 : 0) | (y > size.y / 2 ? 4 : y < -size.y / 2 ? 8 : 0) | (z > size.z / 2 ? 16 : z < -size.z / 2 ? 32 : 0);
+}
+function shadowReceiverBounds(box) {
+  const reach = box.clone(), height = Math.max(0, box.max.y);
+  reach.min.y = Math.min(-0.05, box.min.y);
+  reach.max.x += 0.75 * height;
+  reach.min.z -= 0.375 * height;
+  return reach.expandByScalar(0.12);
+}
+function projectedError(view, sphere, error) {
+  const { x, y, z } = sphere.center, matrix = view.camera.matrixWorldInverse.elements;
+  const depth = -(matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) - sphere.radius;
+  if (depth <= view.camera.near)
+    return Infinity;
+  return error * view.pixelScale / depth;
+}
+function distantDetail(wasDistant, pixels, threshold = 0.25) {
+  return pixels <= threshold * (wasDistant ? 1.25 : 1);
+}
+function createProjectedBatch(T, mesh, distant, error, colours, slots) {
+  const matrix = new T.Matrix4, parts = [];
+  mesh.geometry.computeBoundingBox();
+  for (let i = 0;i < mesh.count; i++) {
+    mesh.getMatrixAt(i, matrix);
+    const geometries = [mesh.geometry, distant].map((source) => {
+      const geometry = source.clone().applyMatrix4(matrix);
+      if (colours) {
+        const color = new Float32Array(geometry.attributes.position.count * 3);
+        geometry.setAttribute("color", new T.BufferAttribute(color, 3));
+      }
+      return geometry;
+    });
+    const bounds = mesh.geometry.boundingBox.clone().applyMatrix4(matrix);
+    const casterBounds = mesh.castShadow ? shadowReceiverBounds(bounds) : bounds;
+    parts.push({
+      geometries,
+      bounds,
+      casterBounds,
+      slot: slots?.[i],
+      sphere: bounds.getBoundingSphere(new T.Sphere),
+      error: error(matrix),
+      distant: false
+    });
+  }
+  const material = colours ? mesh.material.clone() : mesh.material;
+  if (colours)
+    material.vertexColors = true;
+  const vertexCounts = parts.map(({ geometries }) => geometries.reduce((sum, g) => sum + g.attributes.position.count, 0));
+  const batch = createPackedDraw(T, parts, material);
+  batch.mesh.name = mesh.name;
+  batch.mesh.castShadow = mesh.castShadow;
+  batch.mesh.receiveShadow = mesh.receiveShadow;
+  batch.mesh.layers.mask = mesh.layers.mask;
+  function refreshColours() {
+    if (!colours)
+      return;
+    const attribute = batch.mesh.geometry.attributes.color;
+    let offset = 0;
+    vertexCounts.forEach((count, i) => {
+      const { r, g, b } = colours[i];
+      for (let j = 0;j < count; j++)
+        attribute.setXYZ(offset++, r, g, b);
+    });
+    attribute.needsUpdate = true;
+  }
+  refreshColours();
+  return {
+    mesh: batch.mesh,
+    refreshColours,
+    update(view, allow) {
+      batch.update((part) => {
+        if (allow && !allow(part.slot))
+          return -1;
+        const visible = view.frustum.intersectsBox(part.bounds);
+        if (view.shadows && mesh.castShadow && view.frustum.intersectsBox(part.casterBounds))
+          return 0;
+        if (!visible)
+          return -1;
+        part.distant = !view.focus && distantDetail(part.distant, projectedError(view, part.sphere, part.error));
+        return Number(part.distant);
+      });
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/static-asset.js
 import { GLTFLoader } from "../vendor/GLTFLoader.js";
 import { fetchStartupAsset } from "./startup-asset-pack.js";
@@ -120,7 +403,7 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false, setCanopyMaterial }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -343,6 +626,18 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       emissiveIntensity: 0.16
     });
   }
+  const canopy = new T.MeshStandardMaterial({
+    color: 16777215,
+    roughness: 0.84,
+    side: T.DoubleSide,
+    emissive: 16777215,
+    emissiveIntensity: 0.16
+  });
+  canopy.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+totalEmissiveRadiance *= vColor;`);
+  };
+  setCanopyMaterial?.(canopy);
   const branch = (from, to, girth) => {
     const dx = to[0] - from[0], dy = to[1] - from[1], dz = to[2] - from[2], length = Math.hypot(dx, dy, dz);
     solid("cylinder", "wood", (from[0] + to[0]) / 2, (from[1] + to[1]) / 2, (from[2] + to[2]) / 2, girth, length, girth, Math.atan2(dx, dz), Math.acos(dy / length), "YXZ");
@@ -413,6 +708,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
         mesh.applyMatrix4(primitive.matrix);
         model.add(mesh);
       }
+      mergeOpaqueMeshes(T, model);
       try {
         await prepareModel?.(model);
       } catch {
@@ -584,7 +880,7 @@ function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider }) {
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries6 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/lift-layout.js
 var freeze = (value) => {
@@ -633,13 +929,8 @@ function showcaseProducts(items, expanded) {
 }
 
 // demos/corporate/gjh/v11/assets/opaque-batch.js
-import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
-function opaqueBatch(T, parts, shadows) {
-  if (!parts.length)
-    return null;
-  const geometry = mergeGeometries(parts);
-  parts.forEach((part) => part.dispose());
-  geometry.computeBoundingSphere();
+import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+function opaqueSurfaceMaterial(T) {
   const material = new T.MeshStandardMaterial({ vertexColors: true, side: T.DoubleSide });
   material.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader.replace("#include <common>", `#include <common>
@@ -651,6 +942,15 @@ roughnessFactor=vObSurface.x;`).replace("#include <metalnessmap_fragment>", `#in
 metalnessFactor=vObSurface.y;`);
   };
   material.customProgramCacheKey = () => "mall-opaque-pbr-v1";
+  return material;
+}
+function opaqueBatch(T, parts, shadows) {
+  if (!parts.length)
+    return null;
+  const geometry = mergeGeometries2(parts);
+  parts.forEach((part) => part.dispose());
+  geometry.computeBoundingSphere();
+  const material = opaqueSurfaceMaterial(T);
   const mesh = new T.Mesh(geometry, material);
   mesh.name = "Opaque mall amenities";
   mesh.castShadow = shadows;
@@ -853,9 +1153,17 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
     }
     state[kind] = Object.freeze({ status: record.status, reason: record.reason, identity: definition.sha, instances: definition.placements.length, primitives: record.primitives.length, dimensions: Object.freeze(record.size), placements: definition.placements, doorPose: kind === "showcase" ? "closed" : null });
   }
-  const opaqueMesh = opaqueBatch(T, opaque, shadows);
-  if (opaqueMesh)
-    group.add(opaqueMesh);
+  const batch = opaque.length ? createPackedDraw(T, opaque.map((geometry) => {
+    geometry.computeBoundingBox();
+    return { geometries: [geometry], bounds: geometry.boundingBox, casterBounds: shadowReceiverBounds(geometry.boundingBox) };
+  }), opaqueSurfaceMaterial(T)) : null;
+  if (batch) {
+    batch.mesh.name = "Opaque mall amenities";
+    batch.mesh.castShadow = shadows;
+    batch.mesh.receiveShadow = true;
+    group.add(batch.mesh);
+  }
+  const directions = [];
   for (const [x, y, z] of AMENITIES.signs.placements)
     for (const rear of [false, true]) {
       const plane = new T.Mesh(new T.PlaneGeometry(2.04, 0.44), new T.MeshBasicMaterial({ map: signTexture(T, x, rear) }));
@@ -863,6 +1171,7 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
       plane.rotation.y = rear ? Math.PI : 0;
       plane.name = "Actual store directions";
       group.add(plane);
+      directions.push({ plane, rear });
     }
   if (expanded) {
     collider(liftLayout.desk.x, 0.94, liftLayout.desk.z, 2.88, 1.88, 0.961);
@@ -882,7 +1191,11 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
       products++;
     }
   scene.add(group);
-  return { state: Object.freeze({ ...state, displayedProducts: products }), interactables: [
+  return { updateView(view) {
+    batch?.update(({ bounds, casterBounds }) => view.frustum.intersectsBox(view.shadows && shadows ? casterBounds : bounds) ? 0 : -1);
+    for (const { plane, rear } of directions)
+      plane.visible = view.eye.z > plane.position.z !== rear;
+  }, state: Object.freeze({ ...state, displayedProducts: products }), interactables: [
     { id: "service-desk", x: expanded ? liftLayout.desk.x : -12.5, z: expanded ? liftLayout.desk.z + 1.1 : 6.9, radius: 2 },
     { id: "wayfinding-west", x: -4.2, z: 6, radius: 1.7 },
     { id: "wayfinding-east", x: 6, z: 6, radius: 1.7 },
@@ -891,7 +1204,7 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
 }
 
 // demos/corporate/gjh/v11/assets/upper-level.js
-import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/spatial.js
 var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
@@ -2064,11 +2377,21 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     print(cells.sky, liftLayout.x + radius * Math.sin(a), 23, liftLayout.z + radius * Math.cos(a), 2 * radius * Math.tan(Math.PI / segments) + 0.04, 60, 1, a + Math.PI);
   }
   print(cells.sky, liftLayout.x, 52.95, liftLayout.z, 2.05 * radius, 2.05 * radius, 1, 0, Math.PI / 2);
+  const viewUpdates = [];
   function merged(name, parts, material, parent) {
-    const g = mergeGeometries2(parts);
-    parts.forEach((part) => part.dispose());
+    let mesh;
+    if (material.transparent) {
+      mesh = new T.Mesh(mergeGeometries3(parts), material);
+      parts.forEach((part) => part.dispose());
+    } else {
+      const batch = createPackedDraw(T, parts.map((geometry) => {
+        geometry.computeBoundingBox();
+        return { geometries: [geometry], bounds: geometry.boundingBox };
+      }), material);
+      mesh = batch.mesh;
+      viewUpdates.push((frustum) => batch.update(({ bounds }) => frustum.intersectsBox(bounds) ? 0 : -1));
+    }
     parts.length = 0;
-    const mesh = new T.Mesh(g, material);
     mesh.name = name;
     parent.add(mesh);
     return mesh;
@@ -2076,14 +2399,13 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   merged("Lounge, stone paving and shop arcade", solids, new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.67 }), group);
   const ink = new T.MeshBasicMaterial({ map, toneMapped: false, fog: false });
   merged("Directory, mall mark and display graphics", prints, ink, group);
-  function boxes(name, poses, mat) {
-    const mesh = new T.InstancedMesh(unit, mat, poses.length);
-    poses.forEach((m, i) => mesh.setMatrixAt(i, m));
-    mesh.name = name;
-    mesh.computeBoundingSphere();
-    group.add(mesh);
-  }
-  boxes("Champagne handrails and posts", gold, new T.MeshStandardMaterial({ color: 13478768, metalness: 0.52, roughness: 0.34 }));
+  const rail = new T.InstancedMesh(unit, new T.MeshStandardMaterial({ color: 13478768, metalness: 0.52, roughness: 0.34 }), gold.length);
+  gold.forEach((matrix2, i) => rail.setMatrixAt(i, matrix2));
+  rail.name = "Champagne handrails and posts";
+  rail.computeBoundingSphere();
+  group.add(rail);
+  const railVisibility = createInstanceVisibility(T, rail);
+  viewUpdates.push((frustum) => railVisibility.update(frustum));
   merged("Amber LED channels", emit, new T.MeshStandardMaterial({ color: 4269832, emissive: 16757582, emissiveIntensity: 1.14, toneMapped: false }), group);
   print(cells.mark, liftLayout.cabin.width / 2 - 0.107, 1.26 - floor, 0, 2.12, 1.52, 1, -Math.PI / 2);
   const cabinMark = new T.Mesh(prints.pop(), ink);
@@ -2119,7 +2441,11 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     forceSinglePass: true
   });
   merged("Daylight glass", glass, glazing, panes);
-  return { group, panes, cabinMark, seatProfiles };
+  return { group, panes, cabinMark, seatProfiles, updateView(frustum) {
+    if (group.visible)
+      for (const update of viewUpdates)
+        update(frustum);
+  } };
 }
 
 // demos/corporate/gjh/v11/assets/interior-pilot-registry.js
@@ -2686,6 +3012,41 @@ function batchFurniture(T, primitives) {
     material.dispose();
   return [{ geometry: mesh.geometry, material: mesh.material, matrix: new T.Matrix4 }];
 }
+function simplifyBench(T, geometry) {
+  const size = 0.012, { position, color, obSurface } = geometry.attributes;
+  const keys = new Map, remap = new Uint32Array(position.count);
+  const index = [], result = geometry.clone();
+  let error = 0;
+  for (let i = 0;i < position.count; i++) {
+    const x = position.getX(i), y = position.getY(i), z = position.getZ(i);
+    const key = [
+      Math.round(x / size),
+      Math.round(y / size),
+      Math.round(z / size),
+      color?.getX(i),
+      color?.getY(i),
+      color?.getZ(i),
+      obSurface?.getX(i),
+      obSurface?.getY(i)
+    ].join(",");
+    if (!keys.has(key))
+      keys.set(key, i);
+    const first = remap[i] = keys.get(key);
+    const rx = position.getX(first), ry = position.getY(first), rz = position.getZ(first);
+    error = Math.max(error, Math.hypot(x - rx, y - ry, z - rz));
+    result.attributes.position.setXYZ(i, rx, ry, rz);
+  }
+  const source = geometry.index;
+  for (let i = 0;i < (source?.count ?? position.count); i += 3) {
+    const a = source ? source.getX(i) : i;
+    const b = source ? source.getX(i + 1) : i + 1;
+    const c = source ? source.getX(i + 2) : i + 2;
+    if (remap[a] !== remap[b] && remap[b] !== remap[c] && remap[a] !== remap[c])
+      index.push(a, b, c);
+  }
+  result.setIndex(index);
+  return { geometry: result, error };
+}
 async function createFurnishings(T, shadows, expanded = false) {
   const sources = expanded ? { ...pilotSources, ...shopSources } : pilotSources;
   const records = {};
@@ -2693,6 +3054,7 @@ async function createFurnishings(T, shadows, expanded = false) {
   let detailLoading = false, detailScheduled = false;
   const group = new T.Group;
   group.name = "Blender furnishings";
+  const benchLods = [], staticBatches = [];
   let registerMesh, prepareModel;
   async function load2(kind) {
     const definition = sources[kind], record = records[kind];
@@ -2713,11 +3075,13 @@ async function createFurnishings(T, shadows, expanded = false) {
   }));
   function mount(kind, prewarm) {
     const record = records[kind];
+    const sharedLights = expanded && kind === "wallLight";
     const placementsBySlot = new Map, meshes = [];
     for (const placement of record.placements) {
-      if (!placementsBySlot.has(placement.shopSlot))
-        placementsBySlot.set(placement.shopSlot, []);
-      placementsBySlot.get(placement.shopSlot).push(placement);
+      const slot2 = sharedLights ? null : placement.shopSlot;
+      if (!placementsBySlot.has(slot2))
+        placementsBySlot.set(slot2, []);
+      placementsBySlot.get(slot2).push(placement);
     }
     for (const primitive of record.primitives) {
       for (const [shopSlot, placements] of placementsBySlot) {
@@ -2731,6 +3095,8 @@ async function createFurnishings(T, shadows, expanded = false) {
           mesh.userData.deckLod = true;
         else if (shopSlot !== null)
           mesh.userData.shopSlot = shopSlot;
+        if (sharedLights)
+          mesh.userData.lightSlots = placements.map((placement) => placement.shopSlot);
         meshes.push(mesh);
       }
     }
@@ -2739,8 +3105,30 @@ async function createFurnishings(T, shadows, expanded = false) {
         if (mesh.userData.shopSlot !== undefined)
           registerMesh(mesh);
         group.add(mesh);
+        if (expanded && kind === "bench") {
+          const distant = simplifyBench(T, mesh.geometry);
+          const lod = createProjectedBatch(T, mesh, distant.geometry, (matrix) => distant.error * matrix.getMaxScaleOnAxis());
+          distant.geometry.dispose();
+          const compact = createInstanceVisibility(T, mesh);
+          benchLods.push({ mesh, compact, lod });
+          const mountLod = () => {
+            mesh.removeFromParent();
+            lod.mesh.visible = false;
+            group.add(lod.mesh);
+          };
+          if (prepareModel)
+            prepareModel(lod.mesh, { late: false }).then(mountLod, () => lod.mesh.geometry.dispose());
+          else
+            mountLod();
+        } else if (expanded && !mesh.material.transparent) {
+          const slots = mesh.userData.lightSlots;
+          const compact = createInstanceVisibility(T, mesh, { slots, castShadow: mesh.castShadow });
+          staticBatches.push({ mesh, slots, compact });
+        }
       }
     };
+    if (sharedLights && prepareModel)
+      prewarm = prepareModel;
     if (prewarm && meshes.length) {
       const staging = new T.Group().add(...meshes);
       return prewarm(staging).then(attach);
@@ -2791,6 +3179,25 @@ async function createFurnishings(T, shadows, expanded = false) {
       scheduleDetails();
   });
   return {
+    updateView(view, shopNear) {
+      const lightNear = (slot2) => slot2 === null || shopNear.get(slot2);
+      for (const { mesh, slots, compact } of staticBatches) {
+        if (mesh.visible)
+          compact.update(view.frustum, slots ? lightNear : undefined, view.shadows);
+      }
+      for (const { mesh, compact, lod } of benchLods) {
+        const visible = mesh.userData.deckLod ? view.deckVisible : mesh.visible;
+        if (!lod.mesh.parent) {
+          mesh.visible = visible;
+          if (visible)
+            compact.update(view.shadows ? null : view.frustum);
+          continue;
+        }
+        if (visible)
+          lod.update(view);
+        lod.mesh.visible = visible && lod.mesh.geometry.drawRange.count > 0;
+      }
+    },
     place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
       const record = records[kind];
       const transform = new T.Matrix4().compose(new T.Vector3(x, baseY, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), yaw ?? (facing < 0 ? Math.PI : 0)), new T.Vector3(1, height, 1));
@@ -2818,7 +3225,7 @@ async function createFurnishings(T, shadows, expanded = false) {
             pendingByShop.get(slot2).push(kind);
           }
         } else
-          mount(kind);
+          Promise.resolve(mount(kind)).catch((error) => console.warn("Furniture preload failed", error));
         state[kind] = Object.freeze({
           assetId: sources[kind].asset_id,
           identity: sources[kind].sha256,
@@ -3477,7 +3884,7 @@ function createProgressiveAtlas(T, sheet) {
 }
 
 // demos/corporate/gjh/v11/assets/shop-sign-vendor.js
-import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
 import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
 
 // demos/corporate/gjh/v11/assets/signage/hardware.js
@@ -3740,7 +4147,7 @@ function modelRelief(T, sign, module, mask, finishes) {
       g.dispose();
     return geometry;
   });
-  const merged = mergeGeometries3(pieces);
+  const merged = mergeGeometries4(pieces);
   pieces.forEach((g) => g.dispose());
   const remaining = mask.ink.slice();
   for (let j = Math.floor(y0 + (y1 - y0) * v);j < y0 + (y1 - y0) * (v + h); j++)
@@ -3808,7 +4215,7 @@ function* buildRelief(T, signs, tiles, modules, texture, detailed) {
   }
   if (!pieces.length)
     return null;
-  const geo = mergeGeometries3(pieces);
+  const geo = mergeGeometries4(pieces);
   pieces.forEach((g) => g.dispose());
   const Index = offset > 65535 ? Uint32Array : Uint16Array;
   const original = new Index(source), index = new T.BufferAttribute(new Index(source.length), 1);
@@ -3865,7 +4272,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     const hasEndTrim = config.finish === "timber-slat" || config.preset === "t3-cafe";
     signs.push({ config, matrix, mount, hardwareMatrix, centre, hasEndTrim, sphere: new T.Sphere(centre, config.size.width / 2 + 0.6) });
   });
-  const faces = new T.Mesh(mergeGeometries3(pieces), flat);
+  const faces = new T.Mesh(mergeGeometries4(pieces), flat);
   pieces.forEach((g) => g.dispose());
   faces.name = "Expanded branded shop signs";
   faces.layers.enable(1);
@@ -4160,7 +4567,7 @@ function addExpandedStorefronts(T, layout, scene, signs) {
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
-import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/window-studios.js
 var cream = 15984077;
@@ -5457,7 +5864,7 @@ vShopGlow=shopGlow;vFinishPosition=finishPosition;`);
 totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
 ` + "if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;");
   };
-  const studioParts = new Map;
+  const studioParts = new Map, studioBatches = [];
   const shops = [], collisionBoxes = [];
   const models2 = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader4;
   const modelStates = new Map(slots.flatMap((slot2) => {
@@ -5617,8 +6024,14 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     group.updateMatrix();
     if (!studioParts.has(side))
       studioParts.set(side, []);
-    for (const part of parts)
-      studioParts.get(side).push(part.applyMatrix4(group.matrix));
+    function addStudioParts(geometries, visible) {
+      for (const geometry of geometries) {
+        geometry.applyMatrix4(group.matrix);
+        geometry.computeBoundingBox();
+        studioParts.get(side).push({ geometries: [geometry], bounds: geometry.boundingBox, visible });
+      }
+    }
+    addStudioParts(parts);
     parts = [];
     heroOffset = side === "north" ? 3 : 2.55;
     const heroZ = front - 1;
@@ -5675,15 +6088,21 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     const hero = new T.Group;
     hero.name = `S${slot2.number} hero display`;
     hero.userData.modelReady = !files;
-    const fixture2 = new T.Mesh(mergeGeometries4(fixtureParts), material);
-    fixtureParts.forEach((part) => part.dispose());
-    hero.add(fixture2);
+    function localBounds(geometries) {
+      const bounds = new T.Box3;
+      for (const geometry of geometries) {
+        geometry.computeBoundingBox();
+        bounds.union(geometry.boundingBox);
+      }
+      return bounds;
+    }
+    hero.userData.fixtureBounds = localBounds(fixtureParts);
+    hero.userData.fallbackBounds = localBounds(parts);
+    hero.userData.fallbackVisible = true;
     group.add(hero);
     let loadDisplay, display, loaded = false;
-    const fallback = new T.Mesh(mergeGeometries4(parts), material);
-    parts.forEach((part) => part.dispose());
-    fallback.name = `S${slot2.number} display fallback`;
-    hero.add(fallback);
+    addStudioParts(fixtureParts, () => group.visible);
+    addStudioParts(parts, () => group.visible && (!loaded || !display?.visible));
     if (files) {
       display = new T.Group;
       display.visible = false;
@@ -5696,13 +6115,14 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             instance.position.set(x, y, z);
             instance.scale.setScalar(scale);
             instance.name = `S${slot2.number} ${files[i]}`;
+            mergeOpaqueMeshes(T, instance);
             display.add(instance);
           });
           await prepareModel(display);
           hero.add(display);
           loaded = true;
           hero.userData.modelReady = true;
-          fallback.visible = !display.visible;
+          hero.userData.fallbackVisible = !display.visible;
         }).catch(() => {});
       };
     }
@@ -5729,6 +6149,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
             model.name = `S${slot2.number} gallery: ${file}`;
+            mergeOpaqueMeshes(T, model);
             await prepareModel(model);
             group.add(model);
             shopState.galleryLoaded++;
@@ -5741,21 +6162,20 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     shops.push({
       group,
+      hero,
       x: group.position.x,
       z: group.position.z,
       display,
-      fallback,
       isLoaded: () => loaded,
       loadDisplay: loadShop,
       state: shopState
     });
   });
   for (const [wing, parts] of studioParts) {
-    const scenery = new T.Mesh(mergeGeometries4(parts), material);
-    scenery.name = `Concourse window studios: ${wing}`;
-    scene.add(scenery);
-    for (const part of parts)
-      part.dispose();
+    const batch = createPackedDraw(T, parts, material);
+    batch.mesh.name = `Concourse window studios: ${wing}`;
+    scene.add(batch.mesh);
+    studioBatches.push(batch);
   }
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
@@ -5801,7 +6221,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       settled: shops.filter((shop) => shop.state.status === "settled").length,
       total: shops.length
     };
-  }, update(visitor) {
+  }, update(visitor, view) {
     lastVisitor = { x: visitor.x, z: visitor.z };
     let nearest = null, nearestDistance = 11 * 11;
     for (const shop of shops) {
@@ -5817,8 +6237,10 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         continue;
       const active = shop === nearest;
       shop.display.visible = active;
-      shop.fallback.visible = !active || !shop.isLoaded();
+      shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
     }
+    for (const batch of studioBatches)
+      batch.update((part) => (!part.visible || part.visible()) && (!view || view.frustum.intersectsBox(part.bounds)) ? 0 : -1);
     schedulePrefetch();
   } };
 }
@@ -5947,7 +6369,7 @@ function kelvinColour(T, kelvin) {
 function merged(parts) {
   if (!parts.length)
     return null;
-  const result = mergeGeometries3(parts);
+  const result = mergeGeometries4(parts);
   for (const geometry of parts)
     geometry.dispose();
   return result;
@@ -6294,7 +6716,7 @@ function* mergeInteriorAnchor(T, scene) {
           parts.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
           yield;
         }
-        const geometry = mergeGeometries3(parts);
+        const geometry = mergeGeometries4(parts);
         if (geometry) {
           anchor.add(new T.Mesh(geometry, material));
           for (const mesh of meshes)
@@ -6948,6 +7370,7 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
   washMesh.name = "Mall cove and storefront light wash";
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
+  const washVisibility = createInstanceVisibility(T, washMesh);
   const floorRoughness = floors.map((floor) => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
   let fixtureEmission = fixtures.emissiveIntensity;
@@ -6971,7 +7394,10 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
   }
   setTier("low");
-  return { setTier, setFixtureEmission };
+  return { setTier, setFixtureEmission, updateView(view) {
+    if (washMesh.visible)
+      washVisibility.update(view.frustum);
+  } };
 }
 
 // demos/corporate/gjh/v11/assets/world.js
@@ -7021,10 +7447,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       }
       return panels;
     }, refreshInstanceColours = function() {
-      for (const { mesh, colours } of colourBatches) {
-        colours.forEach((colour, index) => mesh.setColorAt(index, colour));
-        mesh.instanceColor.needsUpdate = true;
-      }
+      for (const refresh of colourBatches)
+        refresh();
     }, queueShopUpload = function(slot2, ...meshes) {
       if (!expanded || !prepareModel)
         return;
@@ -7032,13 +7456,31 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         shopUploads.set(slot2, []);
       shopUploads.get(slot2).push(...meshes);
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
-      const finish2 = finishForRole.get(material);
-      const key2 = `${type}:${finish2 || material}${activeShopSlot === null ? "" : `:shop-${activeShopSlot}`}${activeDeck ? ":deck" : ""}`;
+      const source = materials2[material];
+      const plain = expanded && type === "box" && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() && !["paving", "shellFloor", "courtStone"].includes(material);
+      const finish2 = plain ? "plain" : type === "publicLeaf" ? "canopy" : finishForRole.get(material);
+      const shared = expanded && (!source.transparent && !material.endsWith("Backdrop") || material === "contact" || material === "lightPool");
+      const shopSlot = shared ? null : activeShopSlot;
+      const key2 = `${type}:${finish2 || material}${shopSlot === null ? "" : `:shop-${shopSlot}`}${activeDeck ? ":deck" : ""}`;
       if (!batches.has(key2))
-        batches.set(key2, { geometry: geometry[type], material: finish2 ? finishMaterials[finish2] : materials2[material], transforms: [], shopSlot: activeShopSlot, deckLod: activeDeck, colours: finish2 ? [] : null });
+        batches.set(key2, {
+          type,
+          finish: finish2,
+          geometry: geometry[type],
+          material: plain ? plainFinish : finish2 ? finishMaterials[finish2] : source,
+          transforms: [],
+          shopSlot,
+          deckLod: activeDeck,
+          colours: finish2 ? [] : null,
+          surfaces: plain ? [] : null,
+          slots: shared ? [] : null
+        });
       const batch = batches.get(key2);
+      batch.slots?.push(activeShopSlot);
       if (finish2)
-        batch.colours.push(materials2[material].color);
+        batch.colours.push(source.color);
+      if (plain)
+        batch.surfaces.push(source.roughness, source.metalness);
       position.set(x, y, z);
       scale.set(sx, sy, sz);
       euler.set(rx, ry, rz, order);
@@ -7088,16 +7530,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         queueShopUpload(activeShopSlot, mesh);
       return tagShopLod(mesh);
     }, shadow = function(x, z, w, d) {
-      if (!expanded) {
-        solid("plane", "contact", x, 0.018, z, w, d, 1, 0, -Math.PI / 2);
-        return;
-      }
-      const mesh = new T.Mesh(plane, contact);
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.position.set(x, 0.018, z);
-      mesh.scale.set(w, d, 1);
-      scene.add(mesh);
-      tagShopLod(mesh);
+      solid("plane", "contact", x, 0.018, z, w, d, 1, 0, -Math.PI / 2);
     }, lightPool = function(x, y, z, width, height, ry = 0, rx = -Math.PI / 2) {
       solid("plane", "lightPool", x, y, z, width, height, 1, ry, rx);
     }, plant = function(x, z, tall = 1) {
@@ -7191,6 +7624,22 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const map = new T.CanvasTexture(panel);
       map.colorSpace = T.SRGBColorSpace;
       return mat(16777215, { map, roughness: 0.88 });
+    }, updateFrames = function({ frustum }) {
+      let count = 0, changed = false;
+      for (const group of doorFrames) {
+        matrix.makeTranslation(group.position.x, group.position.y, group.position.z);
+        if (!frustum.intersectsBox(frameBox.copy(doorFrameGeometry.boundingBox).applyMatrix4(matrix)))
+          continue;
+        if (previousDoorX[count] !== group.position.x)
+          changed = true;
+        previousDoorX[count] = group.position.x;
+        frames.setMatrixAt(count++, matrix);
+      }
+      if (!changed && count === frameCount)
+        return;
+      frameCount = frames.count = count;
+      frames.instanceMatrix.needsUpdate = true;
+      frames.computeBoundingSphere();
     }, updateSigns = function(camera, canvas2, reducedMotion) {
       signage?.update(camera, reducedMotion, performance.now());
       const frame = canvas2.getBoundingClientRect();
@@ -7217,26 +7666,42 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           }
         mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
-    }, updateShopLods = function(visitor, shadows = true, tier) {
+    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus) {
       productDisplay?.setShadows(shadows);
-      if (!expanded)
+      if (!expanded) {
+        if (camera) {
+          view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+          updateFrames(view);
+        }
         return;
+      }
       if (surfaceAtmosphere.setTier(tier) && mappedPaving)
         mappedPaving.roughness = materials2.paving.roughness;
       uploadVisitor = visitor;
-      productDisplay?.updateShopLods(visitor);
+      if (camera) {
+        view.camera = camera;
+        view.pixelScale = camera.projectionMatrix.elements[5] * height / 2;
+        view.shadows = shadows;
+        view.focus = focus;
+        eye.setFromMatrixPosition(camera.matrixWorld);
+        view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+      }
+      productDisplay?.updateShopLods(visitor, camera && view);
       interiorKit.update(visitor);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
-      for (const mesh of shopLodMeshes) {
-        const bay = shopBays.get(mesh.userData.shopSlot);
-        if (!bay)
-          continue;
+      view.deckVisible = deckVisible;
+      for (const [slot2, bay] of shopBays) {
         const x = (bay.minX + bay.maxX) / 2;
-        const z = Number(bay.number) <= 3 ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
-        mesh.userData.shopLodNear = Math.hypot(visitor.x - x, visitor.y, visitor.z - z) < shopDistance;
-        mesh.visible = mesh.userData.shopLodNear;
+        const z = slot2 <= 3 ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
+        shopNear.set(slot2, Math.hypot(visitor.x - x, visitor.y, visitor.z - z) < shopDistance);
+      }
+      for (const mesh of shopLodMeshes) {
+        const slot2 = mesh.userData.shopSlot;
+        if (!shopNear.has(slot2))
+          continue;
+        mesh.visible = mesh.userData.shopLodNear = shopNear.get(slot2);
         if (mesh.visible && !deckVisible)
-          furnishings.loadShopDetails(mesh.userData.shopSlot);
+          furnishings.loadShopDetails(slot2);
       }
       if (!deckLodMeshes) {
         deckLodMeshes = [];
@@ -7248,7 +7713,15 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       for (const mesh of deckLodMeshes)
         mesh.visible = deckVisible;
       for (const update of shopLodUpdates)
-        update(visitor);
+        update(visitor, camera && view);
+      if (camera) {
+        for (const update of viewUpdates)
+          update(view);
+        surfaceAtmosphere.updateView(view);
+        furnishings.updateView(view, shopNear);
+        amenities.updateView(view);
+        upperLevel?.updateView(view.frustum);
+      }
     }, prepareUpperLevel = function() {
       if (!upperLevel)
         return;
@@ -7363,13 +7836,16 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       torus: new T.TorusGeometry(1, 0.045, 8, 64),
       ring: new T.RingGeometry(0.985, 1, 64)
     };
+    const doorGlassMaterial = expanded ? materials2.glass.clone() : materials2.glass;
+    if (expanded)
+      doorGlassMaterial.forceSinglePass = true;
     const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
     doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
-    const doorFrameGeometry = mergeGeometries5(doorFrameParts);
+    const doorFrameGeometry = mergeGeometries6(doorFrameParts);
     doorFrameParts.forEach((part) => part.dispose());
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const finishForRole = new Map;
-    const finishMaterials = {}, colourBatches = [];
+    const finishMaterials = {}, colourBatches = [], viewUpdates = [];
     if (expanded) {
       for (const [finish2, roles] of Object.entries({
         matte: ["green", "dark", "ivory", "cream", "foliage", "leaf", "pot", "seat"],
@@ -7382,6 +7858,18 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           finishForRole.set(role, finish2);
       }
     }
+    const plainFinish = mat(16777215);
+    plainFinish.onBeforeCompile = (shader) => {
+      shader.vertexShader = `attribute vec2 instanceSurface; varying vec2 vSurface;
+` + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+vSurface=instanceSurface;`);
+      shader.fragmentShader = `varying vec2 vSurface;
+` + shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
+roughnessFactor=vSurface.x;`).replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
+metalnessFactor=vSurface.y;`);
+    };
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
     const shopUploads = new Map;
     const atmosphereWashes = [];
@@ -7473,7 +7961,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight: expandedLift }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
+        finishMaterials.canopy = material;
+      } }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -7496,10 +7986,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         box("dark", x, 0.037, 13.8, 0.025, 0.008, 5.36);
       for (const z of [11.13, 16.47])
         box("dark", 0, 0.037, z, 7.98, 0.008, 0.025);
-      for (const radius of [1.15, 1.55]) {
+      for (const radius2 of [1.15, 1.55]) {
         for (const side of [-1, 1])
           for (const end of [-1, 1]) {
-            solid("box", "brass", side * radius / 2, 0.039, 13.6 + end * radius / 2, radius * Math.SQRT2, 0.008, 0.035, side * end * Math.PI / 4);
+            solid("box", "brass", side * radius2 / 2, 0.039, 13.6 + end * radius2 / 2, radius2 * Math.SQRT2, 0.008, 0.035, side * end * Math.PI / 4);
           }
       }
       for (const side of [-1, 1]) {
@@ -7616,13 +8106,13 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       cylinder("brass", 0, 1.01, 7.5, 0.065, 0.26);
       solid("torus", "brass", 0, 1.84, 7.5, 0.78, 0.9, 1);
       solid("torus", "brass", 0, 0.65, 7.5, 1.965, 1.965, 0.6, 0, -Math.PI / 2);
-      for (const radius of [0.9, 1.48])
-        solid("ring", "brass", 0, 0.657, 7.5, radius, radius, 1, 0, -Math.PI / 2);
+      for (const radius2 of [0.9, 1.48])
+        solid("ring", "brass", 0, 0.657, 7.5, radius2, radius2, 1, 0, -Math.PI / 2);
       lightPool(0, 0.662, 7.5, 3.8, 3.8);
       physics.createCollider(R.ColliderDesc.cylinder(0.6, 2.25).setTranslation(0, 0.5, 7.5));
       shadow(0, 7.5, 5.4, 5.4);
-      for (const radius of [2.58, 2.74])
-        solid("ring", "brass", 0, 0.032, 7.5, radius, radius, 1, 0, -Math.PI / 2);
+      for (const radius2 of [2.58, 2.74])
+        solid("ring", "brass", 0, 0.032, 7.5, radius2, radius2, 1, 0, -Math.PI / 2);
       for (let i = 0;i < 12; i++) {
         const a = i * Math.PI / 6;
         solid("box", "brass", Math.sin(a) * 2.66, 0.034, 7.5 + Math.cos(a) * 2.66, 0.035, 0.008, 0.1, a);
@@ -7634,7 +8124,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         box("ivory", -11, 0.06 * (i + 1), 11.8 + i * 0.4, 3.1, 0.12 * (i + 1), 0.42, true);
       box("ivory", -11, 0.18, 14, 3.1, 0.36, 2.8, true);
     }
-    const doors = [], interactables = [];
+    const doors = [], interactables = [], doorFrames = [], doorGlass = [];
     if (expanded) {
       interactables.push(addFeatureKiosk({ x: 10, z: 20, box, cylinder, sign }));
       collider(10, 0.5, 20, 1.8, 1, 1.4);
@@ -7817,10 +8307,14 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         const group = new T.Group;
         group.position.set(x + side * 1.16, 1.8, 0.05);
         scene.add(group);
-        const glass = new T.Mesh(geometry.box, materials2.glass);
+        const glass = new T.Mesh(expanded ? geometry.box.clone() : geometry.box, doorGlassMaterial);
         glass.scale.set(2.25, 3.5, 0.06);
         group.add(glass);
-        group.add(new T.Mesh(doorFrameGeometry, materials2.brass));
+        doorFrames.push(group);
+        if (expanded) {
+          glass.geometry.index.setUsage(T.DynamicDrawUsage);
+          doorGlass.push({ glass, front: -1 });
+        }
         const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, 0.05));
         physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
         leaves.push({ group, body, side });
@@ -7849,10 +8343,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         box("oak", x - 4.67, 2.8, -5.8, 0.04, cover.scale.y + 0.28, 3.88);
         let sampleCan = null;
         if (expanded) {
-          for (const [material, y, height, radius] of [["brass", 0.085, 0.17, 0.76], ["shellFloor", 0.63, 0.96, 0.78], ["ivory", 1.14, 0.09, 0.8]]) {
-            box(material, x + 2.65, y, -4, radius * 2, height, 2);
+          for (const [material, y, height, radius2] of [["brass", 0.085, 0.17, 0.76], ["shellFloor", 0.63, 0.96, 0.78], ["ivory", 1.14, 0.09, 0.8]]) {
+            box(material, x + 2.65, y, -4, radius2 * 2, height, 2);
             for (const end of [-1, 1])
-              cylinder(material, x + 2.65, y, -4 + end, radius, height);
+              cylinder(material, x + 2.65, y, -4 + end, radius2, height);
           }
           collider(x + 2.65, 0.57, -4, 1.56, 1.14, 3.3);
           const top = 1.185;
@@ -8052,8 +8546,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         warmStrip(x, 20, 0.09, 27);
       for (const z of [6.5, 33.5])
         warmStrip(10, z, 38, 0.09);
-      for (const radius of [2.2, 3.2])
-        solid("torus", "glow", 10, 8.05, 20, radius, radius, 0.8, 0, -Math.PI / 2);
+      for (const radius2 of [2.2, 3.2])
+        solid("torus", "glow", 10, 8.05, 20, radius2, radius2, 0.8, 0, -Math.PI / 2);
       lightPool(10, 0.053, 20, 8, 8);
       const reserved = atriumLayout.facilitiesBlock;
       box("ivory", reserved.x, reserved.height / 2, reserved.z, reserved.width, reserved.height, reserved.depth, true);
@@ -8122,8 +8616,47 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     }
     const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded);
     interactables.push(...amenities.interactables);
+    const frames = new T.InstancedMesh(doorFrameGeometry, materials2.brass, doorFrames.length);
+    frames.name = "Sliding shop door frames";
+    frames.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    let frameCount = -1;
+    const previousDoorX = [];
+    doorFrames.forEach((group, index) => {
+      group.updateMatrix();
+      frames.setMatrixAt(index, group.matrix);
+    });
+    frames.computeBoundingSphere();
+    scene.add(frames);
+    doorFrameGeometry.computeBoundingBox();
+    const frameBox = new T.Box3;
+    viewUpdates.push((view2) => {
+      updateFrames(view2);
+      for (const leaf of doorGlass) {
+        const { glass } = leaf, centre = glass.parent.position;
+        const front = boxFrontFaces(view2.eye, centre, glass.scale);
+        if (front === leaf.front)
+          continue;
+        leaf.front = front;
+        let offset = 0;
+        for (const side of [false, true])
+          for (let face = 0;face < 6; face++) {
+            if (Boolean(front & 1 << face) !== side)
+              continue;
+            glass.geometry.index.array.set(geometry.box.index.array.subarray(face * 6, face * 6 + 6), offset);
+            offset += 6;
+          }
+        glass.geometry.index.needsUpdate = true;
+      }
+    });
+    const stagingLods = [];
+    const lowCylinder = new T.CylinderGeometry(1, 1, 1, 12);
+    const lowSphere = new T.SphereGeometry(1, 8, 5);
+    const radius = (m, axis) => Math.hypot(...m.elements.slice(axis * 4, axis * 4 + 3));
     for (const batch of batches.values()) {
-      const mesh = new T.InstancedMesh(batch.geometry, batch.material, batch.transforms.length);
+      const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
+      const source = surfaces ? batch.geometry.clone().setAttribute("instanceSurface", surfaces) : batch.geometry;
+      const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length);
+      mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
       if (batch.material === materials2.paving) {
         pavingMesh = mesh;
         if (mappedPaving)
@@ -8133,12 +8666,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         if (batch.material === materials2[`${store2.id}Backdrop`])
           queueShopUpload(Number(store2.number), mesh);
       }
-      if (batch.colours)
-        colourBatches.push({ mesh, colours: batch.colours });
       batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
-      mesh.castShadow = false;
+      batch.colours?.forEach((colour, i) => mesh.setColorAt(i, colour));
       mesh.receiveShadow = batch.material !== materials2.lightPool;
-      mesh.computeBoundingSphere();
       mesh.userData.shopSlot = batch.shopSlot;
       mesh.userData.deckLod = batch.deckLod;
       if (batch.material === materials2.glow)
@@ -8146,7 +8676,35 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       scene.add(mesh);
       if (batch.shopSlot !== null)
         shopLodMeshes.push(mesh);
+      const isTimber = batch.type === "cylinder" && batch.finish === "woodGrain";
+      const isMatteSphere = batch.type === "sphere" && batch.finish === "matte";
+      let lod;
+      if ((isTimber || isMatteSphere) && batch.shopSlot === null && !batch.deckLod) {
+        lod = createProjectedBatch(T, mesh, isTimber ? lowCylinder : lowSphere, isTimber ? (m) => Math.max(radius(m, 0), radius(m, 2)) * (1 - Math.cos(Math.PI / 12)) : (m) => Math.max(radius(m, 0), radius(m, 1), radius(m, 2)) * (1 - Math.cos(Math.PI / 8) * Math.cos(Math.PI / 10)), batch.colours, batch.slots);
+        stagingLods.push({ original: mesh, lod });
+      }
+      const compact = !mesh.material.transparent || [materials2.contact, materials2.lightPool].includes(batch.material);
+      const controller = expanded && compact ? createInstanceVisibility(T, mesh, {
+        colours: batch.colours,
+        slots: batch.slots,
+        attributes: surfaces ? [surfaces] : []
+      }) : null;
+      const allow = (slot2) => slot2 === null || shopNear.get(slot2);
+      viewUpdates.push((view2) => {
+        if (lod?.mesh.parent)
+          lod.update(view2, batch.slots ? allow : undefined);
+        else if (mesh.visible && controller)
+          controller.update(view2.frustum, batch.slots ? allow : undefined);
+      });
+      if (batch.colours)
+        colourBatches.push(() => {
+          lod?.refreshColours();
+          if (controller)
+            controller.refreshColours();
+        });
     }
+    lowCylinder.dispose();
+    lowSphere.dispose();
     const ambient = new T.HemisphereLight(expanded ? 15068912 : 16772832, expanded ? 6708816 : 7166779, expanded ? 0.72 : 1.05);
     scene.add(ambient);
     const key = new T.DirectionalLight(expanded ? 16769212 : 16766368, expanded ? 2.6 : 2.1);
@@ -8169,10 +8727,25 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       vault: materials2.vaultOak
     }) : null;
     refreshInstanceColours();
+    for (const { original, lod } of stagingLods) {
+      const attach = () => {
+        original.removeFromParent();
+        original.dispose();
+        scene.add(lod.mesh);
+      };
+      if (prepareModel)
+        prepareModel(lod.mesh, { late: false }).then(attach, () => lod.mesh.geometry.dispose());
+      else
+        attach();
+    }
     const applyMallTheme = (theme) => {
       const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fill });
       if (applied) {
         surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
+        doorGlassMaterial.color.copy(materials2.glass.color);
+        doorGlassMaterial.opacity = materials2.glass.opacity;
+        doorGlassMaterial.roughness = materials2.glass.roughness;
+        doorGlassMaterial.metalness = materials2.glass.metalness;
         refreshInstanceColours();
       }
       return applied;
@@ -8180,6 +8753,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);
     const signPoint = new T.Vector3;
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
+    const shopNear = new Map, eye = new T.Vector3, projection = new T.Matrix4;
+    const view = { frustum: new T.Frustum, eye };
     let deckLodMeshes = null;
     interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
     const firstFurnishing = shopLodMeshes.length;

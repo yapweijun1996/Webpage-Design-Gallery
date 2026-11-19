@@ -491,12 +491,7 @@ import { GLTFLoader as GLTFLoader2 } from "../vendor/GLTFLoader.js";
 
 // demos/corporate/gjh/v11/assets/opaque-batch.js
 import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
-function opaqueBatch(T, parts, shadows) {
-  if (!parts.length)
-    return null;
-  const geometry = mergeGeometries(parts);
-  parts.forEach((part) => part.dispose());
-  geometry.computeBoundingSphere();
+function opaqueSurfaceMaterial(T) {
   const material = new T.MeshStandardMaterial({ vertexColors: true, side: T.DoubleSide });
   material.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader.replace("#include <common>", `#include <common>
@@ -508,6 +503,15 @@ roughnessFactor=vObSurface.x;`).replace("#include <metalnessmap_fragment>", `#in
 metalnessFactor=vObSurface.y;`);
   };
   material.customProgramCacheKey = () => "mall-opaque-pbr-v1";
+  return material;
+}
+function opaqueBatch(T, parts, shadows) {
+  if (!parts.length)
+    return null;
+  const geometry = mergeGeometries(parts);
+  parts.forEach((part) => part.dispose());
+  geometry.computeBoundingSphere();
+  const material = opaqueSurfaceMaterial(T);
   const mesh = new T.Mesh(geometry, material);
   mesh.name = "Opaque mall amenities";
   mesh.castShadow = shadows;

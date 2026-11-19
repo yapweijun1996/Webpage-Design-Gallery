@@ -1,3 +1,4 @@
+import {createInstanceVisibility, createPackedDraw} from './packed-draw.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {liftLayout as lift, cutRectangle} from './lift-layout.js';
 import {atriumLayout} from './atrium-layout.js';
@@ -255,18 +256,36 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   }
   print(cells.sky,lift.x,52.95,lift.z,2.05*radius,2.05*radius,1,0,Math.PI/2);
 
-  function merged(name,parts,material,parent) {
-    const g=mergeGeometries(parts);parts.forEach(part=>part.dispose());parts.length=0;
-    const mesh=new T.Mesh(g,material);mesh.name=name;parent.add(mesh);return mesh;
+  const viewUpdates = [];
+  function merged(name, parts, material, parent) {
+    let mesh;
+    if (material.transparent) {
+      // Keep the skylight and glass draw order intact.
+      mesh = new T.Mesh(mergeGeometries(parts), material);
+      parts.forEach(part => part.dispose());
+    } else {
+      const batch = createPackedDraw(T, parts.map(geometry => {
+        geometry.computeBoundingBox();
+        return {geometries:[geometry], bounds:geometry.boundingBox};
+      }), material);
+      mesh = batch.mesh;
+      viewUpdates.push(frustum => batch.update(({bounds}) => frustum.intersectsBox(bounds) ? 0 : -1));
+    }
+    parts.length = 0;
+    mesh.name = name;
+    parent.add(mesh);
+    return mesh;
   }
   merged('Lounge, stone paving and shop arcade',solids,new T.MeshStandardMaterial({vertexColors:true,roughness:.67}),group);
   const ink=new T.MeshBasicMaterial({map,toneMapped:false,fog:false});
   merged('Directory, mall mark and display graphics',prints,ink,group);
-  function boxes(name,poses,mat){
-    const mesh=new T.InstancedMesh(unit,mat,poses.length);poses.forEach((m,i)=>mesh.setMatrixAt(i,m));
-    mesh.name=name;mesh.computeBoundingSphere();group.add(mesh);
-  }
-  boxes('Champagne handrails and posts',gold,new T.MeshStandardMaterial({color:0xcdab70,metalness:.52,roughness:.34}));
+  const rail = new T.InstancedMesh(unit,new T.MeshStandardMaterial({color:0xcdab70,metalness:.52,roughness:.34}),gold.length);
+  gold.forEach((matrix,i) => rail.setMatrixAt(i,matrix));
+  rail.name = 'Champagne handrails and posts';
+  rail.computeBoundingSphere();
+  group.add(rail);
+  const railVisibility = createInstanceVisibility(T, rail);
+  viewUpdates.push(frustum => railVisibility.update(frustum));
   merged('Amber LED channels',emit,new T.MeshStandardMaterial({color:0x412708,emissive:0xffb34e,emissiveIntensity:1.14,toneMapped:false}),group);
   // The rear face is local to the moving cabin. A small stand-off clears its trim.
   print(cells.mark,lift.cabin.width/2-.107,1.26-floor,0,2.12,1.52,1,-Math.PI/2);
@@ -287,5 +306,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   const glazing=new T.MeshStandardMaterial({color:0xdeeff1,emissive:0xb3dbe2,emissiveIntensity:.22,
     transparent:true,opacity:.14,depthWrite:false,roughness:.22,side:T.DoubleSide,forceSinglePass:true});
   merged('Daylight glass',glass,glazing,panes);
-  return {group,panes,cabinMark,seatProfiles};
+  return {group,panes,cabinMark,seatProfiles,updateView(frustum) {
+    if (group.visible) for (const update of viewUpdates) update(frustum);
+  }};
 }

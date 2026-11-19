@@ -1,3 +1,4 @@
+import {createPackedDraw, mergeOpaqueMeshes} from './packed-draw.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {buildWindowStudio, shopLamp} from './window-studios.js';
 import {buildLateShopAnchorDetails} from './shop-anchor-details-last.js';
@@ -62,7 +63,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       '#include <emissivemap_fragment>\ntotalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);\n' +
       'if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;');
   };
-  const studioParts = new Map();
+  const studioParts = new Map(), studioBatches = [];
   const shops = [], collisionBoxes = [];
   const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
   const modelStates = new Map(slots.flatMap(slot => {
@@ -172,10 +173,15 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     buildWindowStudio(number, tools, width, depth, interiorFloorColour(interiorStores['S'+slot.number]));
     buildLateShopAnchorDetails(number, tools, width, depth);
     group.updateMatrix();
-    // Cull each wing independently; a view directly into one shop does not
-    // submit all its neighbours' shelves behind the camera.
     if (!studioParts.has(side)) studioParts.set(side, []);
-    for (const part of parts) studioParts.get(side).push(part.applyMatrix4(group.matrix));
+    function addStudioParts(geometries, visible) {
+      for (const geometry of geometries) {
+        geometry.applyMatrix4(group.matrix);
+        geometry.computeBoundingBox();
+        studioParts.get(side).push({geometries:[geometry], bounds:geometry.boundingBox, visible});
+      }
+    }
+    addStudioParts(parts);
     parts = [];
     heroOffset = side === 'north' ? 3 : 2.55;
     // The merchandise fixture sits inside a window, clear of the doorway.
@@ -231,15 +237,21 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     const hero = new T.Group();
     hero.name = `S${slot.number} hero display`;
     hero.userData.modelReady = !files;
-    const fixture = new T.Mesh(mergeGeometries(fixtureParts), material);
-    fixtureParts.forEach(part => part.dispose());
-    hero.add(fixture);
+    function localBounds(geometries) {
+      const bounds = new T.Box3();
+      for (const geometry of geometries) {
+        geometry.computeBoundingBox();
+        bounds.union(geometry.boundingBox);
+      }
+      return bounds;
+    }
+    hero.userData.fixtureBounds = localBounds(fixtureParts);
+    hero.userData.fallbackBounds = localBounds(parts);
+    hero.userData.fallbackVisible = true;
     group.add(hero);
     let loadDisplay, display, loaded = false;
-    const fallback = new T.Mesh(mergeGeometries(parts), material);
-    parts.forEach(part => part.dispose());
-    fallback.name = `S${slot.number} display fallback`;
-    hero.add(fallback);
+    addStudioParts(fixtureParts, () => group.visible);
+    addStudioParts(parts, () => group.visible && (!loaded || !display?.visible));
     if (files) {
       display = new T.Group();
       display.visible = false;
@@ -252,6 +264,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             instance.position.set(x, y, z);
             instance.scale.setScalar(scale);
             instance.name = `S${slot.number} ${files[i]}`;
+            mergeOpaqueMeshes(T, instance);
             display.add(instance);
           });
           // The LOD controller can select this display before it finishes loading.
@@ -259,7 +272,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
           hero.add(display);
           loaded = true;
           hero.userData.modelReady = true;
-          fallback.visible = !display.visible;
+          hero.userData.fallbackVisible = !display.visible;
         }).catch(() => {
           // Keep the procedural display if a model is unavailable.
         });
@@ -289,6 +302,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
             model.name = `S${slot.number} gallery: ${file}`;
+            mergeOpaqueMeshes(T, model);
             await prepareModel(model);
             group.add(model); shopState.galleryLoaded++;
           } catch (error) {
@@ -298,14 +312,14 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         })
       ]);
     }
-    shops.push({group, x:group.position.x, z:group.position.z, display, fallback,
-      isLoaded: () => loaded, loadDisplay: loadShop, state:shopState});
+    shops.push({group, hero, x:group.position.x, z:group.position.z, display, isLoaded:() => loaded,
+      loadDisplay: loadShop, state:shopState});
   });
   for (const [wing, parts] of studioParts) {
-    const scenery = new T.Mesh(mergeGeometries(parts), material);
-    scenery.name = `Concourse window studios: ${wing}`;
-    scene.add(scenery);
-    for (const part of parts) part.dispose();
+    const batch = createPackedDraw(T, parts, material);
+    batch.mesh.name = `Concourse window studios: ${wing}`;
+    scene.add(batch.mesh);
+    studioBatches.push(batch);
   }
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
@@ -331,7 +345,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   return {collisionBoxes, getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
     return {models:Object.fromEntries(modelStates), shops:shops.map(shop => ({...shop.state})),
       settled:shops.filter(shop => shop.state.status==='settled').length, total:shops.length};
-  }, update(visitor) {
+  }, update(visitor, view) {
     lastVisitor = {x:visitor.x, z:visitor.z};
     let nearest = null, nearestDistance = 11*11;
     for (const shop of shops) {
@@ -346,8 +360,10 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       if (!shop.display) continue;
       const active = shop === nearest;
       shop.display.visible = active;
-      shop.fallback.visible = !active || !shop.isLoaded();
+      shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
     }
+    for (const batch of studioBatches) batch.update(part =>
+      (!part.visible || part.visible()) && (!view || view.frustum.intersectsBox(part.bounds)) ? 0 : -1);
     schedulePrefetch();
   }};
 }

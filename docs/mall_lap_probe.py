@@ -5,17 +5,23 @@ Usage (serve the repo root first, e.g. python3 -m http.server 8830):
   python docs/mall_lap_probe.py --tier balanced --width 1920 --height 893 --laps 2
 
 Each lap visits the courtyard, every shop (entrance + a short walk inside),
-the lift and the upper level. Frame gaps come from requestAnimationFrame, draw
+the lift and the upper level. Frame gaps come from requestAnimationFrame, peak draw
 calls and triangles from __mall.performanceReport(). A stop passes when
 p95 <= 20 ms, p99 <= 25 ms, no frame >= 50 ms and mean FPS >= 57 (60 Hz
-display). Exit code 1 when any stop fails.
+display) and its peak submission fits the tier budget. Exit code 1 when any
+stop fails. Use --tier all for Low at 393x700 and Balanced/Detailed at 1920x893.
 """
 import argparse
 import json
 import os
+import platform
 import sys
 
-from playwright.sync_api import sync_playwright
+TIERS = {
+    "low": (393, 700, 220_000, 70),
+    "balanced": (1920, 893, 300_000, 90),
+    "detailed": (1920, 893, 420_000, 110),
+}
 
 ZONES = ['entry', 'atrium', 'newmoon', 'mili', 'gogo',
          *(f'planned-space-{i:02d}' for i in range(4, 18))]
@@ -32,8 +38,16 @@ WALK = """([tx,tz]) => { const m=window.__mall; for(let i=0;i<500;i++){const p=m
   m.setInput({right:dx/d,forward:-dz/d,yaw:0}); m.step(Math.max(17,Math.min(100,d/2.65*1000)));}
   m.setInput({}); return m.step(20).nearby; }"""
 
-REPORT = """() => { const r=window.__mall.performanceReport();
-  return {drawCalls:r.drawCalls,triangles:r.triangles,zone:r.zone,tier:r.tier}; }"""
+REPORT = """(start) => {
+  const report = window.__mall.performanceReport();
+  const frames = report.history.filter(frame => frame.at >= start);
+  const peak = key => {
+    const values = frames.map(frame => frame[key]).filter(Number.isFinite);
+    return values.length ? Math.max(...values) : null;
+  };
+  return {drawCalls:peak('drawCalls'), triangles:peak('triangles'), zone:report.zone,
+    tier:report.tier, budgetSamples:frames.length};
+}"""
 
 
 def stats(gaps):
@@ -52,8 +66,16 @@ def verdict(row):
             and row['slow50'] == 0 and row['fps'] >= 57)
 
 
+def apply_budget(row, tier, max_tris, max_draws):
+    row['budgetPass'] = (row['tier'] == tier and row['budgetSamples'] > 0
+                         and row['triangles'] is not None and row['triangles'] <= max_tris
+                         and row['drawCalls'] is not None and row['drawCalls'] <= max_draws)
+    row['pass'] = verdict(row) and row['budgetPass']
+    return row
+
+
 def capture(page, label, dwell_ms, walk_key=None, walk_ms=0):
-    start = page.evaluate('performance.now()')
+    start = page.evaluate('() => { window.__gaps = []; return performance.now(); }')
     page.wait_for_timeout(dwell_ms)
     if walk_key:
         page.keyboard.down(walk_key)
@@ -61,9 +83,7 @@ def capture(page, label, dwell_ms, walk_key=None, walk_ms=0):
         page.keyboard.up(walk_key)
         page.wait_for_timeout(400)
     gaps = [g for g in page.evaluate('window.__gaps') if g[0] > start]
-    row = {'stop': label, **stats(gaps), **page.evaluate(REPORT)}
-    row['pass'] = verdict(row)
-    return row
+    return {'stop': label, **stats(gaps), **page.evaluate(REPORT, start)}
 
 
 def run_lap(page, lap):
@@ -85,45 +105,88 @@ def run_lap(page, lap):
     return rows
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--url', default='http://localhost:8830/demos/corporate/gjh/v11/')
-    parser.add_argument('--tier', default='balanced', choices=['low', 'balanced', 'detailed'])
-    parser.add_argument('--width', type=int, default=1920)
-    parser.add_argument('--height', type=int, default=893)
-    parser.add_argument('--laps', type=int, default=2)
-    parser.add_argument('--json', default='')
-    args = parser.parse_args()
-    phone = args.width < 500
-    with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],
-                                             headless=False, args=['--use-angle=metal'])
-        context = browser.new_context(viewport={'width': args.width, 'height': args.height},
-                                      device_scale_factor=2 if phone else 1,
-                                      has_touch=phone, service_workers='block')
-        context.add_init_script(INIT % args.tier)
+def run_tier(browser, args, tier):
+    default_width, default_height, default_tris, default_draws = TIERS[tier]
+    width = args.width or default_width
+    height = args.height or default_height
+    max_tris = args.max_tris or default_tris
+    max_draws = args.max_draws or default_draws
+    phone = width < 500
+    context = browser.new_context(viewport={'width': width, 'height': height},
+                                  device_scale_factor=2 if phone else 1,
+                                  has_touch=phone, service_workers='block')
+    try:
+        context.add_init_script(INIT % tier)
         page = context.new_page()
         page.goto(args.url, wait_until='domcontentloaded')
         page.locator('#arrival-walk').click()
-        page.wait_for_function("window.__mall?.ready && window.__sceneReady && "
-                               "document.querySelector('#app-loader').hidden", timeout=180000)
+        page.wait_for_function("""tier => window.__mall?.ready && window.__sceneReady &&
+                               document.querySelector('#app-loader').hidden &&
+                               window.__mall.state.graphics.quality?.tier === tier""",
+                               arg=tier, timeout=180000)
+        page.wait_for_function("""tier => {
+          const {interiors, signage} = window.__mall.performanceReport();
+          const preload = window.__mall.state.modelPreload;
+          return interiors.tier === tier && interiors.preinstalled.shops === 17 &&
+            signage.tier === tier && preload && preload.settled === preload.total;
+        }""", arg=tier, polling=500, timeout=180000)
         page.locator('#scene').focus()
         page.wait_for_timeout(1500)
         rows = []
         for lap in range(1, args.laps + 1):
-            rows += run_lap(page, lap)
-        browser.close()
-    print(f"{'stop':26} fps   p95   p99   max  slow draw    tris  result")
-    for r in rows:
-        print(f"{r['stop']:26} {r.get('fps', 0):5} {r.get('p95', 0):5} {r.get('p99', 0):5} "
-              f"{r.get('max', 0):6} {r.get('slow50', 0):3} {r.get('drawCalls', 0):4} "
-              f"{r.get('triangles', 0):7}  {'ok' if r['pass'] else 'FAIL'}")
-    failed = [r['stop'] for r in rows if not r['pass']]
-    print(f"{args.tier} {args.width}x{args.height}: {len(rows) - len(failed)}/{len(rows)} stops pass")
+            rows.extend(apply_budget(row, tier, max_tris, max_draws) for row in run_lap(page, lap))
+    finally:
+        context.close()
+    print(f"{'stop':26} fps   p95   p99   max  slow draw    tris  budget  result")
+    for row in rows:
+        row.update(requestedTier=tier, maxTriangles=max_tris, maxDrawCalls=max_draws)
+        print(f"{row['stop']:26} {row.get('fps', 0):5} {row.get('p95', 0):5} {row.get('p99', 0):5} "
+              f"{row.get('max', 0):6} {row.get('slow50', 0):3} {row['drawCalls'] or 0:4} "
+              f"{row['triangles'] or 0:7}  {'ok' if row['budgetPass'] else 'FAIL':6}  "
+              f"{'ok' if row['pass'] else 'FAIL'}")
+    budget_passes = sum(row['budgetPass'] for row in rows)
+    passes = sum(row['pass'] for row in rows)
+    print(f"{tier} {width}x{height}: {passes}/{len(rows)} stops pass, "
+          f"{budget_passes}/{len(rows)} within {max_tris:,} tris / {max_draws} draws", flush=True)
+    return rows
+
+
+def positive_int(value):
+    result = int(value)
+    if result < 1:
+        raise argparse.ArgumentTypeError('must be positive')
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--url', default='http://localhost:8830/demos/corporate/gjh/v11/')
+    parser.add_argument('--tier', default='balanced', choices=[*TIERS, 'all'])
+    parser.add_argument('--width', type=positive_int, help='Override the viewport width for a single tier')
+    parser.add_argument('--height', type=positive_int, help='Override the viewport height for a single tier')
+    parser.add_argument('--max-tris', type=positive_int, help='Override the triangle budget for the selected tiers')
+    parser.add_argument('--max-draws', type=positive_int, help='Override the draw-call budget for the selected tiers')
+    parser.add_argument('--laps', type=positive_int, default=2)
+    parser.add_argument('--json', default='')
+    args = parser.parse_args()
+    if args.tier == 'all' and (args.width or args.height):
+        parser.error('--tier all uses the preset viewport for each tier')
+    tiers = TIERS if args.tier == 'all' else [args.tier]
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as playwright:
+        # Use the native Windows ANGLE backend on the owner's laptop.
+        launch_args = ['--use-angle=metal'] if platform.system() == 'Darwin' else []
+        browser = playwright.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME'),
+                                             headless=False, args=launch_args)
+        try:
+            rows = [row for tier in tiers for row in run_tier(browser, args, tier)]
+        finally:
+            browser.close()
     if args.json:
-        with open(args.json, 'w') as handle:
+        with open(args.json, 'w', encoding='utf-8') as handle:
             json.dump(rows, handle, indent=1)
-    return 0 if not failed else 1
+    return int(any(not row['pass'] for row in rows))
 
 
 if __name__ == '__main__':

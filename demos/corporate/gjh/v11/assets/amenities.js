@@ -1,5 +1,6 @@
 import {liftLayout,showcaseProducts} from './lift-layout.js';
-import {opaqueBatch} from './opaque-batch.js';
+import {createPackedDraw, shadowReceiverBounds} from './packed-draw.js';
+import {opaqueSurfaceMaterial} from './opaque-batch.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {fetchStartupAsset} from './startup-asset-pack.js';
 
@@ -117,10 +118,21 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
     }
     state[kind]=Object.freeze({status:record.status,reason:record.reason,identity:definition.sha,instances:definition.placements.length,primitives:record.primitives.length,dimensions:Object.freeze(record.size),placements:definition.placements,doorPose:kind==='showcase'?'closed':null});
   }
-  const opaqueMesh=opaqueBatch(T,opaque,shadows);if(opaqueMesh)group.add(opaqueMesh);
+  const batch = opaque.length ? createPackedDraw(T, opaque.map(geometry => {
+    geometry.computeBoundingBox();
+    return {geometries:[geometry], bounds:geometry.boundingBox, casterBounds:shadowReceiverBounds(geometry.boundingBox)};
+  }), opaqueSurfaceMaterial(T)) : null;
+  if (batch) {
+    batch.mesh.name = 'Opaque mall amenities';
+    batch.mesh.castShadow = shadows;
+    batch.mesh.receiveShadow = true;
+    group.add(batch.mesh);
+  }
+  const directions = [];
   for(const [x,y,z] of AMENITIES.signs.placements)for(const rear of [false,true]){
     const plane=new T.Mesh(new T.PlaneGeometry(2.04,.44),new T.MeshBasicMaterial({map:signTexture(T,x,rear)}));
     plane.position.set(x,y-.7,z+(rear?-.083:.083));plane.rotation.y=rear?Math.PI:0;plane.name='Actual store directions';group.add(plane);
+    directions.push({plane, rear});
   }
   if(expanded){collider(liftLayout.desk.x,.94,liftLayout.desk.z,2.88,1.88,.961);collider(liftLayout.showcase.x,.9,liftLayout.showcase.z,.75,1.8,.532);}
   else {collider(-12.5,.94,5.8,2.88,1.88,.961);collider(-7,.9,2.2,.75,1.8,.532);}
@@ -129,7 +141,10 @@ export async function addAmenities(T,scene,collider,createCollectProp,shadows,st
     const prop=createCollectProp(item.id);if(!prop)continue;prop.position.set(...item.position);group.add(prop);products++;
   }
   scene.add(group);
-  return {state:Object.freeze({...state,displayedProducts:products}),interactables:[
+  return {updateView(view) {
+    batch?.update(({bounds, casterBounds}) => view.frustum.intersectsBox(view.shadows && shadows ? casterBounds : bounds) ? 0 : -1);
+    for (const {plane, rear} of directions) plane.visible = (view.eye.z > plane.position.z) !== rear;
+  }, state:Object.freeze({...state,displayedProducts:products}),interactables:[
     {id:'service-desk',x:expanded?liftLayout.desk.x:-12.5,z:expanded?liftLayout.desk.z+1.1:6.9,radius:2},
     {id:'wayfinding-west',x:-4.2,z:6,radius:1.7},
     {id:'wayfinding-east',x:6,z:6,radius:1.7},
