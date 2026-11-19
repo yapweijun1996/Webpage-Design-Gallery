@@ -890,8 +890,9 @@ var loungeBench = {
   front: -0.456,
   backrestFront: 0.213
 };
-function isInFrontOfSeat(seat, z) {
-  return (z - seat.z) * seat.facing <= -seat.frontEdge;
+function isInFrontOfSeat(seat, { x, z }) {
+  const depth = (x - seat.x) * Math.sin(seat.angle) + (z - seat.z) * Math.cos(seat.angle);
+  return depth <= -seat.frontEdge;
 }
 
 // demos/corporate/gjh/v11/assets/player.js
@@ -1674,7 +1675,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const candidate = seats.find((s) => s.id === id), p = body.translation();
     if (!candidate)
       return false;
-    if (Math.abs(p.y - 0.875 - candidate.floor) > 0.5 || Math.hypot(p.x - candidate.exitX, p.z - candidate.exitZ) > candidate.clearance.interactionRadius || !isInFrontOfSeat(candidate, p.z))
+    if (Math.abs(p.y - 0.875 - candidate.floor) > 0.5 || Math.hypot(p.x - candidate.exitX, p.z - candidate.exitZ) > candidate.clearance.interactionRadius || !isInFrontOfSeat(candidate, p))
       return false;
     seat = candidate;
     const exit = { x: seat.exitX, y: seat.floor + 0.91, z: seat.exitZ }, target2 = seatBodyTarget(seat);

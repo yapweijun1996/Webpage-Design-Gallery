@@ -1,0 +1,7 @@
+# S11 · Hormel brand research
+
+Evidence checked 2026-11-19. Product imagery is linked to the first-party source where available.
+
+- GJH's current corporate homepage features Hormel under Our Brands. Its history records distribution rights for Hormel Foods, SPAM and California Mexico in the 2010s. The GJH eShop's brand menu includes SPAM and does not list Hormel as a separate storefront. The manufacturer has a separate HORMEL product catalog that confirms HORMEL Chili No Beans and HORMEL Chili with Beans. These are manufacturer-backed reference products; no current GJH listing for these SKUs was verified. [GJH home](https://gjhglobal.com/) · [GJH history](https://gjhglobal.com/about-us/) · [GJH eShop brands](https://www.gjheshop.com/shop/) · [HORMEL Chili product lineup](https://www.hormel.com/brands/hormel-chili/products/)
+- HORMEL Chili No Beans offers several package sizes with separate official images. The product feature page calls out its 15 oz can in the gallery. [Manufacturer product gallery](https://www.hormel.com/brands/hormel-chili/product/chili-no-beans/) · [Manufacturer 15 oz package reference](https://www.hormel.com/product/big-protein-plays-hormel-chili-no-beans/)
+- Existing 3D inventory: `s11-packing-station-{low,balanced}.glb` and `s11-deli-details.glb`. Packing bench with paper roll, deli trays and branded wall signals, plus generic canned stock. The layout and bench read clearly on both screens. Individual stock identity remains abstract.

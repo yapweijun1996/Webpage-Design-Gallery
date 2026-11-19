@@ -84,7 +84,6 @@ if (typeof document !== 'undefined') {
       progress.textContent = `${value.completed} of ${value.total} stages`;
       count.textContent = `${value.completed} / ${value.total}`;
       overlay.dataset.completed = value.completed;
-      overlay.style.setProperty('--loader-completed', value.completed);
       overlay.style.setProperty('--loader-progress', value.completed / value.total);
       steps.forEach((step, index) => {
         step.dataset.state = index < value.completed ? 'done' : index === value.completed ? 'current' : 'todo';

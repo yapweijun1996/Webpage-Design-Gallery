@@ -1,0 +1,7 @@
+# S04 · Borsch Med brand research
+
+Evidence checked 2026-11-19. Product imagery is linked to the first-party source where available.
+
+- GJH lists Borsch Med as a health supplement brand and documents a 2004 registration, a 2007 Lingzhi Cracked Spores Powder Capsule launch and a 2021 personal-care range including Pain Relief Plaster and Steam Eye Mask. [GJH Borsch Med](https://gjh.com.sg/borsch-med/) · [GJH brand history](https://www.gjh.com.sg/borsch-med-history/)
+- The verified 18-patch SKU is Borsch Med Mosquito Repellent Patch. Its eShop gallery identifies outer-pack, pouch and sticker photos. This is a clothing/surface-applied patch; the maker’s listing says to avoid direct skin application. A pain relief plaster is a different product category. Lingzhi 100% Cracked Spores Powder Capsule 200mg × 60 twin-pack also has front/side pack photos in the official product gallery. [18-patch eShop listing](https://www.gjheshop.com/product/borsch-med-mosquito-repellent-patch-18-patches/) · [Lingzhi eShop listing](https://www.gjheshop.com/product/borsch-med-100-lingzhi-cracked-spores-powder-capsule-200mg-x-60-capsules-twin-pack/)
+- Existing assets. Official mark `brands/S04-borsch-med.webp`; illustrated category art `brand-kit/S04-hero.webp`; `interiors/s04-patch-folio-{low,balanced,detailed}.glb` and `interiors/s04-borsch-details.glb` contain the folio, unlabelled patch cards and fixtures. Current runtime rows of colored packs are illustrative.

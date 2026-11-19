@@ -1,0 +1,7 @@
+# S03 · GOGO brand research
+
+Evidence checked 2026-11-19. Product imagery is linked to the first-party source where available.
+
+- GJH confirms GOGO is a line it manages and distributes covering drinks and potong ice cream, starting with canned drinks. Its two corporate pages give conflicting dates, and the product boilerplate on the GOGO page references unrelated abalone. [GJH GOGO](https://gjh.com.sg/gogo/) · [GJH corporate history](https://www.gjh.com.sg/about-us/)
+- Singapore HPB's historical list as of July 2016 records GoGo Premium Potong Ice Cream Assorted Real Fruit and GoGo Premium Potong Ice Cream Red Bean, both 6 × 65 g, plus a GOGO Potong Ice Cream Made with Real Fruits entry naming durian, mango, banana and cempedak. This is historical SKU evidence only. A current GOGO wrapper, product image and current availability were not corroborated. [Singapore HPB list](https://www.healthhub.sg/sites/assets/Assets/PDFs/HPB/Food/HCS%20products%20list%20for%20website%20updated%20till%2031%20July%2016.pdf)
+- Existing assets. Official mark `brands/S03-gogo.webp`, `gogo-logo.jpg`, `gogo-brand-cover.jpg`, category illustration `brand-kit/S03-hero.webp`, original `interiors/s03-ice-cream-cart-potong-{low,balanced}.glb`, `interiors/s03-gogo-details.glb`, and `gogo-bar-stool.glb`. The cart, display items and bar props are exhibit geometry. The repo's category evidence can be supplemented by the historical HPB records without implying a present-day SKU.

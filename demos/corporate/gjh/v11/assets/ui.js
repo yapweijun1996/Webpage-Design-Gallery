@@ -935,6 +935,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         labelInspect(`${action} ${records.get(nearby).name}`);
       }
       const iconName=seated||selectedInteraction?.kind==='sit'?'sit':selectedInteraction?.kind==='travel'?'lift':selectedInteraction?.kind==='open'&&selectedInteraction.door?'door':selectedInteraction?.kind==='pickup'?'pick-up':records.get(nearby)?.action==='map'?'map-pin':'quality-inspection';
+      setHudAttribute(inspectButton, 'data-action-icon', iconName);
       if(!interactionIcons.has(iconName))interactionIcons.set(iconName,icon(iconName,{size:18}));
       const actionIcon=interactionIcons.get(iconName);
       if(inspectButton.firstChild!==actionIcon){inspectButton.querySelector('svg')?.remove();inspectButton.prepend(actionIcon);}
