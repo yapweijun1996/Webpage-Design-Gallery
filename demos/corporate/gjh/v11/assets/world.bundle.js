@@ -4109,7 +4109,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   planterSmall: {
     asset_id: "GJH-PUB-007",
@@ -4132,7 +4132,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   directorySign: {
     asset_id: "GJH-PUB-016",
@@ -4157,7 +4157,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   floorLamp: {
     asset_id: "GJH-LGT-017",
@@ -4180,7 +4180,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   infoDesk: {
     asset_id: "GJH-PUB-018",
@@ -4205,7 +4205,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   garmentRail: {
     asset_id: "GJH-DSP-009",
@@ -4230,7 +4230,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   endcapShelf: {
     asset_id: "GJH-DSP-003",
@@ -4255,7 +4255,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   islandTable: {
     asset_id: "GJH-DSP-007",
@@ -4280,7 +4280,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   cashierCounter: {
     asset_id: "GJH-STF-016",
@@ -4305,7 +4305,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   framePanel: {
     asset_id: "GJH-STF-014",
@@ -4328,7 +4328,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   },
   globePendant: {
     asset_id: "GJH-LGT-008",
@@ -4351,7 +4351,7 @@ var INTERIOR_ADDITIONS = Object.freeze({
     lod_policy: "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
     uv_policy: "No textures or baking; flat PBR materials only.",
     collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+    rights: "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
   }
 });
 

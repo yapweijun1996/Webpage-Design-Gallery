@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "note": "Interior additions generated with Tripo Studio from owner-supplied reference images and converted to texture-free flat-colour static GLBs (Blender). Redistribution terms of Tripo output are unspecified; owner confirmation is pending. The two-seat bench (GJH-PUB-002) already exists in the pilot and is not replaced. Placed means mounted in the scene today; reserved assets are registered but not mounted.",
+  "note": "Interior additions generated with Tripo Studio from owner-supplied reference images and converted to texture-free flat-colour static GLBs (Blender). Owner confirmed on 2026-11-20 that Tripo output may be redistributed publicly in v11 and the gallery. The two-seat bench (GJH-PUB-002) already exists in the pilot and is not replaced. Placed means mounted in the scene today; reserved assets are registered but not mounted.",
   "assets": [
     {
       "asset_id": "GJH-PUB-001",
@@ -23,7 +23,7 @@
         "Warm cream"
       ],
       "triangles": 798,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-PUB-007",
@@ -47,7 +47,7 @@
         "Deep plant green"
       ],
       "triangles": 1795,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-PUB-016",
@@ -71,7 +71,7 @@
         "Warm cream"
       ],
       "triangles": 1397,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-LGT-017",
@@ -93,7 +93,7 @@
         "Warm cream"
       ],
       "triangles": 1498,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-PUB-018",
@@ -118,7 +118,7 @@
         "Warm cream"
       ],
       "triangles": 1798,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-DSP-009",
@@ -141,7 +141,7 @@
         "Brushed brass"
       ],
       "triangles": 1198,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-DSP-003",
@@ -165,7 +165,7 @@
         "Brushed brass"
       ],
       "triangles": 1497,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-DSP-007",
@@ -188,7 +188,7 @@
         "Brushed brass"
       ],
       "triangles": 997,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-STF-016",
@@ -212,7 +212,7 @@
         "Brushed brass"
       ],
       "triangles": 1375,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-STF-014",
@@ -235,7 +235,7 @@
         "Warm cream"
       ],
       "triangles": 398,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     },
     {
       "asset_id": "GJH-LGT-008",
@@ -257,7 +257,7 @@
         "Warm cream"
       ],
       "triangles": 1198,
-      "rights": "Tripo Studio output from owner reference images; redistribution licence unspecified; owner confirmation pending."
+      "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
     }
   ]
 }
