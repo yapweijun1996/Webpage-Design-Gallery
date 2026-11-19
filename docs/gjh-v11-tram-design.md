@@ -1,0 +1,14 @@
+# Ground tram after T1
+
+The grey box follows the [surveyed ground loop](gjh-v11-tram-route-report.md). Only the south side of the entrance has a clear candidate landing. Each stage below is future work.
+
+| Stage | Implementation and dependencies | Acceptance |
+|---|---|---|
+| T2 — Single-station ride | Start at the entrance. Register F/touch boarding, a moving seat anchor, and first-person or V chase view. Drive the car, seated body and exit state from one fixed-step clock. Lock walking while seated. Keep the exterior landing clear and check live occupancy before stopping or opening the exit. | Ride two laps without seat drift. Block boarding while carrying or pushing. Block a crowded exit, then restore walking, collision and the previous camera after a clear exit. Compare the chase framing at all four bends with the surveyed camera pocket. |
+| T3 — Car and 17 introductions | After T2, author a seat-anchored GLB with shared opaque materials and instanced repeated cars. Trigger localized brand, side and one short introduction by route distance, S11→S06, S01→S05, S12→S17, at about 1.5 m/s. Use the seat-eye captures to tune approach views, especially S11/S17. | Exactly 17 legible cards per lap in both views, including the loop seam. On Low the whole train uses at most 2,500 triangles, train and rail at most four added draws, with zero new lights or shadows. |
+| T4 — Three stations | Add the east stop after resolving S14/NPC landing conflicts. Prototype the western vertical rail, short bridge, opening in the gallery guard and interlocked gates beside the existing lift. Reroute affected pedestrians, wait for clear track and a clear landing, dock for eight seconds, and provide wait skipping and safe recovery from obstruction. | Verify boarding and alighting at each station, clear approach and egress, blocked-door recovery, alignment interlocks and the original lift round trip. Re-sweep the entire vertical journey and bridge before enabling the upper stop. |
+| T5 — Accessible brand tour | Build on T3 captions with pause/resume, skip, end and optional speech. Provide keyboard, screen-reader and 44 CSS px touch controls. Offer a static card tour for reduced motion. | Pause keeps distance and narration synchronized. Skip or end cancels old speech. Every brand remains accessible with audio off; restore focus to the station on exit. |
+
+## Device acceptance
+
+Use matched foreground runs with the debug flag off/on for T1 and with the ride off/on after T2. Follow the [probe protocol](gjh-v11-probes.md). On iPhone and Android start on Low at 30 FPS; target 60 FPS on tablet and PC. Record p95/p99, ≥50 ms frames, triangles, draw calls and dynamic render scale for cold entry, first lap and a warm ten-minute run. Require zero ≥50 ms early-entry frames. Enforce Low 220k/70, Balanced 300k/90 and Detailed 420k/110. Record separate short clips of turns and door approaches and compare each shop from the survey's seat pose.

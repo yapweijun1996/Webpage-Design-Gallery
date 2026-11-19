@@ -7,11 +7,11 @@ export function createFrameTrace(renderer) {
     const {geometries,textures} = renderer.info.memory;
     return {at:performance.now(), programs:programCount(), geometries, textures};
   }
-  function end(work, before, subject) {
+  function end(work, before, subject, force = false) {
     const ms = performance.now() - before.at;
     const {geometries,textures} = renderer.info.memory;
     const programs = programCount() - before.programs;
-    if (ms < 2 && !programs && textures === before.textures && geometries === before.geometries) return;
+    if (!force && ms < 2 && !programs && textures === before.textures && geometries === before.geometries) return;
     events[next] = {work, subject, at:before.at, ms, programs,
       addedPrograms:programs > 0 ? renderer.info.programs.slice(before.programs).map(({id,name,type}) => ({id,name,type})) : [],
       geometries:geometries-before.geometries, textures:textures-before.textures};
@@ -29,9 +29,16 @@ export function createFrameTrace(renderer) {
   function watchShadowMap() {
     if (shadowMap === renderer.shadowMap) return;
     shadowMap = renderer.shadowMap;
-    wrap(shadowMap, 'render', 'shadowMap.render', ([, scene]) => scene.name || scene.type);
+    const render = shadowMap.render;
+    shadowMap.render = function (lights, scene, camera) {
+      const active = this.enabled && (this.autoUpdate || this.needsUpdate);
+      const allocating = active && lights.some(light => !light.shadow?.map);
+      const before = start();
+      try { return render.call(this,lights,scene,camera); }
+      finally { end(allocating ? 'shadowMap.firstRender' : 'shadowMap.render',before,scene.name || scene.type,allocating); }
+    };
   }
-  for (const method of ['compile', 'render', 'initTexture', 'initRenderTarget']) {
+  for (const method of ['compile', 'render', 'initTexture', 'initRenderTarget', 'setRenderTarget']) {
     wrap(renderer, method, `renderer.${method}`, ([subject, camera]) => {
       const name = subject?.name || subject?.image?.src || subject?.type;
       if (method !== 'render') return name;

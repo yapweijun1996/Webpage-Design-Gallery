@@ -51,3 +51,5 @@ The recorded entry walks sampled p95 scene-frame intervals of 17.7 ms on the 144
 Four generated views describe one proposed room and its visitor circulation. Compare placements with the separately annotated floor plan.
 
 [1. Entrance](interior-concept.webp) · [2. Signature display](signature-display.webp) · [3. Furniture and aisle](furniture-angle.webp) · [4. Back toward the entrance](reverse-to-entry.webp)
+
+Published touch-emulated Chrome on build `95e5ba13a1d96807` used the joystick at the entrance and collision-aware waypoints inside. The route opened both stories, inspected and rotated all four 3D cans, picked up and returned each can, used Sit and Stand on both tasting stools and exited to the concourse. The Australia action added one item to the demo bag. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44555819324)

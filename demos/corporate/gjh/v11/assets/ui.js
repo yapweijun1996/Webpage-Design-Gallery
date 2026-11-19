@@ -90,6 +90,28 @@ export function createUI(expanded = false) {
   const inspectButton = document.getElementById('inspect');
   const nearbyCard = inspectPrompt.querySelector('.nearby-card');
   const inspectVerb = document.getElementById('inspect-verb');
+  const cycleShopButton = document.createElement('button');
+  const seatedShopButton = document.createElement('button');
+  for (const button of [cycleShopButton,seatedShopButton]) {
+    button.type = 'button';
+    button.hidden = true;
+    button.className = 'hud-control';
+    button.style.minWidth = button.style.minHeight = '44px';
+    inspectPrompt.append(button);
+  }
+  cycleShopButton.textContent = 'Next';
+  cycleShopButton.setAttribute('aria-label','Select next nearby action');
+  cycleShopButton.setAttribute('aria-keyshortcuts','] [');
+  cycleShopButton.title = 'Cycle nearby actions with [ or ]';
+  let shopCycleListener;
+  cycleShopButton.addEventListener('click',() => {
+    shopCycleListener?.();
+    scene.focus({preventScroll:true});
+  });
+  seatedShopButton.addEventListener('click',() => {
+    if (selectedInteraction?.shopAction?.seated) inspectNearby(selectedInteraction.id);
+    scene.focus({preventScroll:true});
+  });
   const hudText = new WeakMap();
   const hudLabels = new WeakMap();
   function setHudText(node, value) {
@@ -627,7 +649,11 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     // presentation mode for retained lifecycle/fallback coverage, but it must
     // not be an intermediate click for a nearby SKU: the readable product
     // viewer is the first surface opened from the user's Inspect action.
-    if (selectedInteraction?.id === id) interactionRegistry?.dispatch(selectedInteraction);
+    if (selectedInteraction?.id === id && !dialog.open && !bag.open && !amenityPanel.dialog.open) {
+      const result = interactionRegistry?.dispatch(selectedInteraction);
+      if (selectedInteraction?.shopAction) scene.focus({preventScroll:true});
+      return result;
+    }
   }
 
   function showGuide() {
@@ -785,6 +811,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   document.getElementById('list-title').tabIndex = -1;
 
   return {
+    onShopCycle(listener) { shopCycleListener = listener; },
     setInteractionRegistry(registry) {
       interactionRegistry = registry;
       unsubscribeInteractions?.();
@@ -925,6 +952,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       if (mallMap.open) updateMapDot();
       currentElevatorState=elevatorState;currentElevatorUpper=elevatorUpper;
       selectedInteraction = interaction;
+      const shopAction = interaction?.shopAction;
+      if (shopAction && !records.has(interaction.id)) records.set(interaction.id,{name:shopAction.name,action:'shop'});
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
         nearby = next;seatNotice=null;
@@ -952,14 +981,33 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
           : amenityAction ? `${amenityAction}: ${record.name}` : nearby ? `Inspect ${record.name}` : 'Inspect nearby display');
       }
       seated = isSeated;
+      const shopState = shopAction && interactionRegistry?.shopState(interaction.id);
+      const executing = shopState?.phase === 'executing';
+      const drawerOpen = shopAction?.productId && shopState?.phase === 'done' &&
+        interactionRegistry.get('pickup',shopAction.productId);
+      const shopLabel = executing ? 'Cancel' : drawerOpen ? 'Pick up' :
+        shopState?.phase === 'cancelled' ? 'Retry' : shopAction?.label;
+      const showCycle = !seated && Boolean(interactionRegistry?.canCycle());
+      if (cycleShopButton.hidden === showCycle) cycleShopButton.hidden = !showCycle;
+      const showSeatedAction = seated && Boolean(shopAction?.seated);
+      if (seatedShopButton.hidden === showSeatedAction) seatedShopButton.hidden = !showSeatedAction;
       document.body.classList.toggle('is-seated', seated);
       const cart = updateCartControls();
       const cartBlocksSeat = nearby && records.get(nearby).action === 'seat' && cart.active;
       if (seated) {
         const pose = seatPhase === 'align' ? 'Aligning' : seatPhase === 'sit' ? 'Sitting down' : seatPhase === 'stand' ? 'Standing up' : 'Seated';
-        setHudText(nearbyName, `${seatName || 'Bench'} · ${pose}`);
+        setHudText(nearbyName, showSeatedAction && shopState.message || `${seatName || 'Bench'} · ${pose}`);
         setHudText(inspectVerb, 'Stand');
         labelInspect(seatPhase === 'seated' ? 'Stand up from bench' : 'Cancel sitting and stand');
+        if (showSeatedAction) {
+          setHudText(seatedShopButton,shopLabel);
+          setHudAttribute(seatedShopButton,'aria-label',`${shopLabel}: ${shopAction.name}`);
+          setHudAttribute(seatedShopButton,'aria-keyshortcuts','F');
+        }
+      } else if (shopAction) {
+        setHudText(nearbyName,shopState.message || shopAction.name);
+        setHudText(inspectVerb,shopLabel);
+        labelInspect(`${shopLabel}: ${shopAction.name}`);
       } else if (nearby && selectedInteraction?.kind === 'sit') {
         setHudText(nearbyName, seatNotice || (cartBlocksSeat ? 'Stow your cart from Bag before sitting' : `${records.get(nearby).name} · Sit here`));
         setHudText(inspectVerb, 'Sit');
@@ -990,6 +1038,13 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       if (holdingProduct && !hasHeldProduct) seatNotice = null;
       if (seatNotice) setHudText(nearbyName, seatNotice);
       const inspectHidden = !nearby && !seated;
+      if (shopAction && !seated) {
+        inspectButton.style.minWidth = inspectButton.style.minHeight = '44px';
+        setHudAttribute(inspectButton,'aria-keyshortcuts','F');
+      } else if (inspectButton.style.minWidth) {
+        inspectButton.style.minWidth = inspectButton.style.minHeight = '';
+        setHudAttribute(inspectButton,'aria-keyshortcuts','');
+      }
       if (inspectButton.hidden !== inspectHidden) inspectButton.hidden = inspectHidden;
       if (nearbyCard.hidden !== inspectHidden) nearbyCard.hidden = inspectHidden;
       holdingProduct = hasHeldProduct;

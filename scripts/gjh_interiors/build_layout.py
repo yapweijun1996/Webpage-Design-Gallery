@@ -29,12 +29,18 @@ def project(shop):
             x, y, z = item['xyz']
             colliders.append(dict(center=[x, y+item['size'][1]/2, z], size=item['size'], yaw=item['yawDeg']))
     details = {}
+    if shop['slot'] == 'S03':
+        details['gogoStools'] = [dict(id=item['id'], standing=item['standing'], **placement(item))
+                                for item in items if item['socket'] == 'stools3']
     for obstacle in shop.get('retainedObstacles', []):
         if obstacle.get('socket') == 'kitchen-run':
             details['kitchenRun'] = obstacle
     if shop.get('centreFixture') == 'cookbase':
         counter = next(item for item in items if item['socket'] == 'cookbase')
         details['cookbase'] = {key: counter[key] for key in ('xyz', 'standing')}
+    if shop['slot'] == 'S04':
+        cabinet = next(item for item in items if item['socket'] == 'rightwall')
+        details['lingzhiStanding'] = cabinet['standing']
     if 'storyPanels' in shop:
         details['storyPanels'] = shop['storyPanels']
     if 'teaNiches' in shop:

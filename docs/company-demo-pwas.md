@@ -1,13 +1,13 @@
 # Company demo PWAs
 
-Release 1.2.0 contains 16 Goh Joo Hin designs, 15 Yeo Hiap Seng designs and 15 Thow Kwang Pottery Jungle designs. The company collection pages belong to the gallery application. Each demo has its own install name, stable identity, start URL, scope, manifest and service worker under its version directory. Open a demo directly to prepare it for offline use. Gallery comparison frames leave installation to the standalone page.
+This checkout (application 1.4.0, see `data/app.json`) contains 20 Goh Joo Hin designs, 15 Yeo Hiap Seng designs and 15 Thow Kwang Pottery Jungle designs. The company collection pages belong to the gallery application. Each demo has its own install name, stable identity, start URL, scope, manifest and service worker under its version directory. Open a demo directly to prepare it for offline use. Gallery comparison frames leave installation to the standalone page.
 
 ## Offline behavior
 
 | Application | After the first successful online visit | Requires a connection |
 | --- | --- | --- |
 | Gallery and three company collections | Directory, filters, translations, design metadata, collection artwork and thumbnails | Full gallery screenshots and first-time demo visits |
-| 45 standalone demos | The selected edition, its styles, scripts, images and local fonts. Yeo’s pack comparison and Thow Kwang’s kiln diagram remain interactive. | Other editions until first saved, official product links, directions, workshop schedules and booking |
+| 49 standalone demos | The selected edition, its styles, scripts, images and local fonts. Yeo’s pack comparison and Thow Kwang’s kiln diagram remain interactive. | Other editions until first saved, official product links, directions, workshop schedules and booking |
 | GJH V11 virtual mall | Saved lightweight reconnect page managed by the mall’s existing worker | 3D scene, product catalogue and shop links. [Mall profile](gjh-v11-pwa.md) |
 
 In a standalone demo, open **Install / offline** at the end of the page to see its saved release, request installation or check for updates. Supported browsers supply their installation prompt. On iOS the interface gives the Safari Share menu instructions. The gallery and V11 retain their existing settings controls. Browser storage quotas and eviction can require an online visit to rebuild local data.

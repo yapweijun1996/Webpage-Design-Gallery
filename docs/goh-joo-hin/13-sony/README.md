@@ -1,6 +1,6 @@
 # S13 · Sony
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -44,3 +44,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 Both input paths entered and browsed. Extra lighting, side display clearing and SKU interactions remain design work.
+
+## Catalogue exhibit
+
+The listening stand has a Personal Audio caption and a story with the Sony Singapore WH-1000XM6 and NW-A306 references. A small unprinted Walkman form on the left side cabinet uses the listed approximate dimensions. The existing headphone fixture represents the audio category.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)

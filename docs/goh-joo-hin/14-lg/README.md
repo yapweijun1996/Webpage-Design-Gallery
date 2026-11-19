@@ -1,6 +1,6 @@
 # S14 · LG
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -45,3 +45,9 @@ The screen shows an original dawn-coast still generated for this design study. I
 ## Runtime acceptance
 
 Both viewport flows passed with the current display. Proposed TV identity and room seating require a model and pose pass.
+
+## Catalogue exhibit
+
+The side wall shows a 1,222 × 703 × 45.1 mm unprinted cabinet study beside the enlarged gallery display. The story links to LG Singapore's OLED55C5PSA page and distinguishes the screen scales.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)

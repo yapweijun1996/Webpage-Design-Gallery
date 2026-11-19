@@ -62,7 +62,8 @@ const firstFrame = new Promise(resolve => { markFirstFrame = resolve; });
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
 const quality = createGraphicsQuality(change => {
   if (change === 'resolution' && quality.state) {
-    quality.apply(quality.state);
+    requestedProfile = quality.resolve(renderWidth);
+    scheduleTier();
     requestRender();
   } else resize();
 });
@@ -70,6 +71,7 @@ let renderRequested = false, forceRender = false, enteredAt = null;
 let simulationMs = 0, simulationSteps = 0;
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
+let shopActionsLoad, shopActionsAttemptZone, shopActionsTime;
 let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
 let nearby = null, currentZone = 'atrium', wasRiding = false;
@@ -301,10 +303,10 @@ function updateHUD() {
     world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();})
       .catch(error=>console.error('Upper deck brand wall could not load:',error));
   }
-  const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p});
+  const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p, zone});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  productControl?.update(p, nearby);
+  productControl?.update(p, interactions.productTarget(selectedInteraction));
   shelfFocus?.setNearby(nearby);
   ui.update({zone: currentZone, x: p.x, z: p.z, yaw:p.yaw, nearby, interaction:selectedInteraction, collectionActive:p.character.collection.active||p.productApproaching,isSeated:p.seated,seatPhase:p.seatPhase,seatName:p.seatName,elevatorState:elevator?.expanded?elevator.state:null,elevatorUpper:elevator?.upper,hasHeldProduct:Boolean(productControl&&p.character.physicalProduct.held)});
 }
@@ -366,6 +368,20 @@ function render(force = false) {
     const pose = player.state;
     const matrix = camera.matrixWorld.elements;
     const now = performance.now();
+    if (expanded && !startupOverlay.hidden) shopActionsTime = undefined;
+    if (expanded && startupOverlay.hidden) {
+      if (!shopActionsLoad && ['newmoon','mili','gogo'].includes(currentZone) && shopActionsAttemptZone !== currentZone) {
+        shopActionsAttemptZone = currentZone;
+        shopActionsLoad = import('./assets/interiors/shop-interactions.js')
+          .then(({installShopInteractions}) => {
+            if (!pageEnded && !fatal) return installShopInteractions(three, world.scene, interactions, ui.announce);
+          })
+          .then(() => { if (!pageEnded && !fatal) { updateHUD(); requestRender(); } })
+          .catch(error => { shopActionsLoad = null; console.error('Shop actions unavailable:', error); });
+      } else if (!shopActionsLoad && currentZone !== shopActionsAttemptZone) shopActionsAttemptZone = undefined;
+      if (interactions.advanceShopActions(currentZone, Math.min(.1, (now-(shopActionsTime ?? now))/1000), reducedMotion.matches)) updateHUD();
+      shopActionsTime = now;
+    }
     mallHud.update({position: pose, zone: currentZone, travelling: pose.elevatorTravel,
       enabled: !windowBlurred && !modes.paused() && document.body.classList.contains('is-3d') && startupOverlay.hidden,
       now, forward: {x: -matrix[8], z: -matrix[10]}});
@@ -438,7 +454,7 @@ function tierWork(profile, report, startup = false) {
     width:renderWidth, height:renderHeight, screenPixel, applyProfile, frameTrace, startup}, profile, report);
 }
 function tierKey(profile) {
-  return [profile.tier,profile.shadows,profile.basePixelRatio,profile.preference,renderWidth,renderHeight].join('/');
+  return [profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
 }
 function scheduleTier() {
   const profile=requestedProfile, active=quality.state;
@@ -448,12 +464,21 @@ function scheduleTier() {
     if (warmRunner.blocking || warmKey === key) return;
     warmRunner.stop('superseded');
   }
-  if(!tierQueue.pending && profile.tier===active.tier && profile.shadows===active.shadows &&
+  if(profile.tier===active.tier && profile.shadows===active.shadows &&
      (!world.signage || world.signage.getTier()===profile.tier) &&
      (!world.interiors || world.interiors.activeTier===profile.tier)){
-    tierQueue.cancel();
-    world.interiors?.setTier(profile.tier);
-    applyProfile(profile);
+    const width = Math.floor(renderWidth*profile.pixelRatio), height = Math.floor(renderHeight*profile.pixelRatio);
+    if (expanded && profile.shadows && !atmosphere.postPrepared(width,height)) {
+      void tierQueue.request(key, function* () {
+        yield* atmosphere.preparePost(width,height,()=>!manual && !modes.paused() ? 1 : 0);
+        applyProfile(profile);
+        requestRender();
+      }).catch(error=>console.warn('Mall render target preparation interrupted',error));
+    } else {
+      tierQueue.cancel();
+      world.interiors?.setTier(profile.tier);
+      applyProfile(profile);
+    }
     return;
   }
   void tierQueue.request(key,()=>tierWork(profile,createWarmReport())).catch(error=>{
@@ -642,11 +667,27 @@ ui.onTeleport(zone => {
 });
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
 ui.onView(visual => { if (visual) { last = performance.now(); requestRender(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
+ui.onShopCycle(() => { if (interactions.cycle(1)) { updateHUD(); requestRender(); } });
 document.addEventListener('keydown', event => {
-  if(event.code==='Escape'&&!modes.paused()){if(player?.state.seated){player.stand();updateHUD();}player?.cancelCollection();}
-  if (event.code === 'KeyF' && nearby && !modes.paused() && !event.repeat &&
-      !event.altKey && !event.ctrlKey && !event.metaKey &&
-      (event.target === canvas || event.target === document.body)) { event.preventDefault(); player.clearInput(); if(player.state.seated){player.stand();updateHUD();}else ui.inspectNearby(nearby); }
+  if (modes.paused() || event.defaultPrevented) return;
+  if (event.code === 'Escape') {
+    if (interactions?.cancelShopAction()) { event.preventDefault(); updateHUD(); requestRender(); return; }
+    if (player?.state.seated) { player.stand(); updateHUD(); }
+    player?.cancelCollection();
+  }
+  if (event.repeat || event.altKey || event.ctrlKey || event.metaKey ||
+      (event.target !== canvas && event.target !== document.body)) return;
+  if (event.code === 'BracketRight' || event.code === 'BracketLeft') {
+    if (interactions?.cycle(event.code === 'BracketRight' ? 1 : -1)) {
+      event.preventDefault(); updateHUD(); requestRender();
+    }
+  }
+  if (event.code === 'KeyF' && nearby) {
+    event.preventDefault(); player.clearInput();
+    if (player.state.seated && !selectedInteraction?.shopAction?.seated) player.stand();
+    else ui.inspectNearby(nearby);
+    updateHUD(); requestRender();
+  }
 });
 window.addEventListener('blur', () => { windowBlurred = true; pausePerformance();hideGuidance(); shelfFocus?.close(); modes.interrupt('window blur'); });
 window.addEventListener('focus', () => { windowBlurred = false; quality.resetSampling(); if (ready) { updateHUD(); requestRender(); } });
@@ -680,6 +721,7 @@ canvas.addEventListener('webglcontextlost', event => {
   mallTheme?.suspend();
   // Retire the reflection target and NPC bone textures against their original context.
   atmosphere?.releaseEnvironment();
+  atmosphere?.invalidatePost();
   npcs?.clearVisitors();
   player?.interruptGraphics(); elevator?.interrupt?.();
   if (!fatal) graphicsStatus = 'lost';
@@ -742,6 +784,7 @@ function validateRestoration() {
     quality.recover(); world.signage?.recover(); resize();
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
+    renderer.shadowMap.type = three.PCFSoftShadowMap;
     frameTrace?.watchShadowMap();
     try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
     world.prepareUpperLevel();
@@ -819,12 +862,15 @@ async function initialize() {
   window.mallLoader?.complete('physics');
   modelWarmup = createModelWarmup(T, renderer);
   tierQueue = createTierQueue(modelWarmup.enqueueSweep);
+  const warmShadows = () => requestedProfile?.shadows || quality.state?.shadows;
   const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
-    linear: () => expanded && quality.state?.tier === 'detailed' && renderWidth >= 1000, ...options
+    linear: () => expanded && Boolean(warmShadows()),
+    lighting: lights => warmShadows() ? atmosphere?.lightVariants(lights) : undefined,
+    ...options
   });
   const {createWorld} = await import('./assets/world.js');
   world = await createWorld(T, R, physics, expanded, warmModel,
-    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
+    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone');
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans]
@@ -833,8 +879,15 @@ async function initialize() {
   document.getElementById('loader-asset-notice').hidden = !assetRecords.some(record => record?.status === 'fallback');
   window.mallLoader?.complete('scene');
   atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds),
-    expanded ? {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane} : undefined);
-  try { if (!contextLost && !context.isContextLost()) atmosphere.restoreEnvironment(); } catch { /* Keep the mall usable without reflections. */ }
+    {frameTrace,...(expanded && {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane})});
+  try {
+    const environments = atmosphere.prepareEnvironments();
+    try {
+      while (!pageEnded && !contextLost && !context.isContextLost() && !environments.next().done) {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+      }
+    } finally { environments.return(); }
+  } catch { /* Keep the mall usable without reflections. */ }
   if (expanded) {
     try {
       const {createMallThemeCoordinator} = await loadOptionalThemeModule(() => import('./assets/mall-themes.js'));

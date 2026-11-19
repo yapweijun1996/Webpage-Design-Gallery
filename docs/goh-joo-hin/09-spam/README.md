@@ -1,6 +1,6 @@
 # S09 · SPAM
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -45,3 +45,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 The route passes. The baseline view documents the pendant sightline and provides the target for lighting revision.
+
+## Catalogue exhibit
+
+The pendants are smaller, higher and farther from the approach. The conveyor story names separate Classic, Lite and Less Sodium 340 g entries. Three unprinted rounded tins use the Classic listing’s nominal 100 × 56 × 83 mm envelope as a form study.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)

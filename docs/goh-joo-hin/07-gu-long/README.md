@@ -1,6 +1,6 @@
 # S07 · Gu Long
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -44,3 +44,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 Verified route passes. The retained pyramid, lanterns and artwork are current. Resolved cylinder edge detail is a proposed model change.
+
+## Catalogue exhibit
+
+The jade pyramid has a small stewed-pork plaque and a catalogue story. The story identifies separate Pork Chops and Stewed Pork 256 g listings. The Low pyramid remains a simplified exhibit, with product-specific label mapping pending.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)

@@ -7,6 +7,63 @@
 - Phases from `goal.md`: **P0** mall visual quality and shop-by-shop acceptance; **P1** multi-floor mall, enterable shops, seats and doors; **P2** engine extraction and district streaming; **P3** Singapore districts; **P4** Malaysia districts. These are goals, not completed-release claims.
 - Unless stated otherwise, paths in the tables below are relative to `demos/corporate/gjh/v11/`; test paths are relative to the repository root. Status describes this checkout, not the live site or another branch. **Implemented** means code exists, not that device or design acceptance passed; **Partial** means the stated target is incomplete; **Planned** means a goal without a verified implementation. Historical review documents can describe superseded layouts.
 
+## Repository-wide feature map
+
+Scanned from this checkout on 2026-11-19 (application version `1.4.0`, design-system `1.0.0`). Counts come from `data/designs.json` and the generator.
+
+**Detailed module maps** (per-module responsibilities, imports, state, tests, drift): [gallery platform](docs/module-map-gallery-platform.md), [GJH v11 runtime](docs/module-map-gjh-v11-runtime.md), [all other demos](docs/module-map-demos.md). Known drift they report: `ds.md` says application release 1.1.4 (actual 1.4.0); `docs/company-demo-pwas.md` still counts 16 GJH designs; `assets/deck-railings.js` is imported by nothing; `build_gallery.py --output` still writes some generated files into the repo root; no CI workflow runs the Playwright suites.
+
+### System layers
+
+```
+authoring sources                    generator                         generated outputs (never hand-edit)
+data/*.json  ─┐                                                      ┌ index.html, companies/**, designs/, compare/, offline.html
+demos/**/metadata.json ─┤                                            ├ data/designs.json, version.json, sw.js
+templates/gallery/* ───┤  scripts/build_gallery.py  ───────────────► ├ demos/**/pwa-sw.js, manifest, per-demo PWA files
+src/*.js, assets/*.css ┤  (validate → render → hash → emit)          ├ assets/tokens.css, icons.svg, gjh-themes.css
+design-system/*.json ──┤                                             ├ locales/en.json (runtime pack)
+locales/source/en.json ┘                                             └ style-atlas/index.html, v11 bundles, startup pack, Rapier split
+```
+
+### Feature areas
+
+| Area | What it does | Where the logic lives |
+|---|---|---|
+| Catalog and validation | Loads companies, categories, styles and every `demos/<category>/<company>/*/metadata.json`. Rejects duplicate IDs or slugs, non-HTTPS official sites, unknown categories or styles, route/version/company mismatches, non-integer `order`, missing demo files and non-PNG screenshots. Reads PNG size from the header. Checks the featured version and landing artwork per company. Sorts designs by company, `order`, `id`. | `scripts/build_gallery.py` (`load_catalog`) |
+| Static page generation | Renders home, company directory, one page per company, design details, compare and offline pages from `templates/gallery/*.html`. Pages work without JavaScript as links; filters and comparison are progressive enhancement. A company with one design drops its compare controls. | `build_pages`, `templates/gallery/` |
+| Browse, search, filter, sort | Company search, category filter, sort and pagination; per-company style filter and sort. State lives in the URL query (`popstate` restores it) so views are shareable. Selecting exactly two designs enables Compare. | `src/gallery.js` (`initCompanies`, `initCompany`) |
+| Design detail | Desktop, tablet and mobile screenshots (1440 / 768 / 390), live demo link, disclaimer; error state if the catalog or an image fails. | `src/gallery.js` (`initDesign`), `designs/index.html?company=&design=` |
+| Compare | Two live iframes or screenshots, device-width switch, optional relative scroll sync, fullscreen. | `src/gallery.js` (`initCompare`), `compare/index.html?company=&left=&right=` |
+| Appearance and language | Light / Dark / System and English / 简体中文 / Bahasa Melayu. Stored as `wdg.*` in `localStorage`, synchronised across tabs via `storage` events, memory fallback when blocked. Build fails on missing locale keys or broken placeholders; `locales/en.json` is generated from `locales/source/en.json`. The v11 mall reads the same language choice. | `src/preferences.js`, `src/preferences-boot.js`, `validate_locales`, `build_english_pack` |
+| Gallery PWA | Project-scoped shell cache `wdg:<path>:shell:<build>`. Install fetches `version.json`, checks the build matches, then verifies the SHA-256 of every precached file before commit; a failed or mixed release deletes only its own cache. Updates download in the background; the user clicks **Update to v…** to activate. Checks run on startup, tab return (throttled), reconnect and manually. Navigation failure redirects to `offline.html`. Demos are not precached by the gallery worker. | `templates/gallery/sw.js`, `src/pwa.js`, `pwa_outputs` |
+| Per-demo PWAs | Each demo gets its own install identity (manifest, theme colour read from its HTML, icons) and a verified offline cache, with shared update UI. | `scripts/build_demo_pwas.py`, `templates/gallery/demo-sw.js`, `src/demo-pwa.js`, `assets/demo-pwa.css` |
+| Release identity | `data/app.json` holds the semantic version. The build ID is the first 16 hex characters of a SHA-256 over the catalog, runtime resources, templates and generator scripts, so any shipped-byte change produces a new build. Output is `version.json`. | `release_info`, `runtime_resources` |
+| Design system SSOT | Tokens, icon registry and per-version GJH themes are JSON sources; the builder generates `tokens.css`, `icons.svg`, `gjh-themes.css` and demo `theme.css` (v20–v23). `check_ssot.py` is a ratchet that rejects new hard-coded colours or other debt, keyed by path, property and value, against `legacy-baseline.json`. Contract text is in `ds.md`. | `scripts/build_design_system.py`, `scripts/check_ssot.py`, `design-system/` |
+| Shared 3D onboarding UI | Framework-neutral welcome dialogs, key hints, input-specific controls, tips, Help and progress, with a six-profile preview page and a gamepad adapter. v11 uses it. | `assets/onboarding/`, `design-system/onboarding/`, `docs/3d-onboarding-components.md` |
+| Style atlas | Public index of reference images paired with the demos (64 WebP files under `style-atlas/images/`); built from `docs/landing-atlas/*/directions.json`, with image path validation. A 46-design visual audit exists. | `scripts/build_style_atlas.py`, `style-atlas/`, `scripts/render_anchor_audit.py`, `scripts/render_style_sheets.py` |
+| Landing review tools | Before/after capture of landings for review. | `scripts/review_landings.py`, `.agents/skills/gallery-landing-review/` |
+| Asset provenance | Verifies the recorded GJH / New Moon source library (page-context receipts, timestamps, hashes). Signage kit and GLB validators. Mall NPC assets are checked against size and SHA-256 receipts at build time. | `scripts/verify_gjh_asset_library.py`, `scripts/build_signage_kit.py`, `scripts/validate_signage_glb.py`, `build_gallery.py` (`pwa_outputs`) |
+| v11 generated runtime | Combined stylesheet, startup JS bundles (hash-checked; rebuild needs Bun 1.3.11), startup asset pack and the Rapier JS/WASM split. All are generated and checked by the main build. | `scripts/build_gjh_css.py`, `build_gjh_startup_js.py`, `build_gjh_startup_pack.py`, `build_rapier.py`, `data/gjh-startup-bundles.json`, `data/gjh-startup-assets.json` |
+| Mall offline worker | Separate scoped worker `pwa-sw.js` precaches only a small shell (offline page, manifest, two icons, stylesheet, loader, signage descriptors) and lazily caches verified NPC wardrobe GLBs on request. | `templates/gallery/gjh-v11-sw.js`, `pwa_outputs` |
+| Publishing | Push to `main` triggers the Pages workflow: SSOT check → Python unit tests → Node mall tests → `--check` → build to `_site` → deploy. Only gallery resources and known demo runtime assets are published, not research downloads or docs. Browser suites are not part of CI. | `.github/workflows/pages.yml`, `build_gallery.py --output` |
+
+### Catalog contents
+
+| Company | Designs | Featured | Notes |
+|---|---:|---|---|
+| Goh Joo Hin (`gjh`) | 20 | `v7` | v1, v5–v23. v10 is a 3D arcade; **v11 is the Virtual Mall** (detailed below); v12–v16 premium landings; v17–v19 landing editions; v20–v23 use generated theme CSS (v23 is New Moon Product Wall). |
+| Yeo Hiap Seng (`yeos`) | 15 | `v1` | The Drinks Index and later editions; shared folder for common CSS/JS. |
+| Thow Kwang Pottery Jungle (`thow-kwang`) | 15 | `v1` | Heritage concept with its own visitor research. |
+
+Categories: corporate, retail, food-beverage, heritage. Styles: corporate, heritage, minimal, editorial, immersive.
+
+### Test layers
+
+- `tests/test_*.py` (unit): gallery contract, design system, preferences, mall character, furnishings, interior pilot and shell, kiosk, New Moon assets, runtime build, original tin.
+- `tests/gjh_*.test.mjs` (Node, no npm): mall state and spatial logic, run in CI.
+- `tests/browser_*.py` (Playwright + Chrome): gallery, layout, theme, PWA, preferences, SSOT/accessibility, company demos and the many v11 journeys. Local only.
+- Counts in this checkout: 134 `test_*.py` / `browser_*.py` files; 58 `.mjs` files in `tests/`, of which 52 are `*.test.mjs` contracts.
+
 ## V11 architecture and feature inventory
 
 `index.html` loads generated `style.bundle.css` and `script.bundle.js`. Authoring starts in `style.css`, `script.js`, and `assets/*.js`. `script.js` creates the UI and mode coordinator, then initializes local Three.js, Rapier/WASM, the world, player, interactions and optional scene themes. `vendor/` contains Three.js, GLTFLoader, Rapier and their licences. `assets/modes.js` coordinates explore, menu, inspect, seated, cart and shop states; overlays and interruptions clear or suspend input (`script.js`, `assets/ui.js`).
@@ -57,7 +114,7 @@
 
 ## Rest of the repository
 
-- The static Gallery presents one company and eight design directions; older GJH demos under `demos/corporate/gjh/` are independent experiences, including v10's 3D arcade. Gallery sources are `data/`, `templates/gallery/`, `src/`, `assets/` and per-demo metadata; `scripts/build_gallery.py` generates and publishes them (`README.md`).
+- The gallery, generator, PWA and design-system features are mapped in [Repository-wide feature map](#repository-wide-feature-map) above; this section only keeps the script and test pointers.
 - `scripts/` also owns design-system, asset, Rapier and startup builders; `tests/` contains Python unit/browser and Node mall contracts. The Pages workflow and exact commands are below; demo resources are separate from Gallery's own PWA cache (`README.md`, `.github/workflows/pages.yml`).
 
 ## Build, tests and deployment
