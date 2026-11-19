@@ -55,7 +55,7 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
   const context = byId('hud-context'), held = byId('held-product-status'), hint = byId('hud-context-hint');
   const hintText = byId('hud-context-text'), arrow = byId('hud-nearby-arrow'), direction = byId('hud-nearby-direction');
   const prompt = byId('inspect-prompt'), nearbyName = byId('nearby-name'), inspect = byId('inspect');
-  const more = byId('hud-more-actions'), joystick = byId('joystick');
+  const more = byId('hud-more-actions');
   const total = byId('hud-objective-total'), toast = byId('hud-objective-toast');
   const dots = [...document.querySelectorAll('.hud-objective-dots i')];
   const progressLabels = goalKeys.map(key => document.querySelector(`[data-hud-progress="${key}"]`));
@@ -99,16 +99,6 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
     else tracker.bag(items);
     updateGoals();
   });
-  scene.addEventListener('pointerdown', function firstMove(event) {
-    if (event.pointerType !== 'touch' || event.button !== 0 || !active ||
-        joystick.closest('.is-seated') || joystick.closest('.is-panel-open')) return;
-    const bounds = joystick.getBoundingClientRect();
-    const onStick = event.clientX >= bounds.left && event.clientX <= bounds.right &&
-      event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-    if (!onStick && !byId('fullscreen-joystick').checked) return;
-    joystick.classList.add('has-moved');
-    scene.removeEventListener('pointerdown', firstMove);
-  }, true);
 
   function updateGoals() {
     const progress = tracker.progress(), state = progress.join('/');

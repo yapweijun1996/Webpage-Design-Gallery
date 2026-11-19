@@ -6,8 +6,8 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const css = read('../demos/corporate/gjh/v11/style.css');
 const tokens = read('../assets/tokens.css');
 
-function rule(selector) {
-  const lines = css.split('\n');
+function rule(selector, source = css) {
+  const lines = source.split('\n');
   const block = lines.findIndex(line => line.trimStart().startsWith(`${selector}{`));
   assert.notEqual(block, -1, `Expected a rule for ${selector}`);
   return lines.slice(block).join('\n').split('{')[1].split('}')[0];
@@ -18,6 +18,31 @@ function pixels(token) {
   assert.ok(value, `${token} must declare a pixel size`);
   return Number(value[1]);
 }
+
+const headerControls = '.is-3d .site-header :is(.header-location,.header-map,.bag-open,.view-toggle)';
+const cornerControls = '#mall-tools>summary,#hud-objectives>summary,.hud-rail :is(button,summary),#hud-more-actions';
+const chrome = '.is-3d :is(.site-header button,#mall-tools>summary,#hud-objectives>summary)';
+
+test('compact header and corner chips paint at 36px inside 44px or larger touch targets', () => {
+  const hud = rule('html[data-gjh-design="v11"] body.is-3d');
+  const insetToken = hud.match(/--hud-chrome-inset:var\(--([\w-]+)\)/)?.[1];
+  const target = pixels('size-control');
+  assert.ok(target >= 44);
+  assert.equal(target - 2 * pixels(insetToken), 36);
+  assert.match(rule(headerControls), /min-height:var\(--size-control\);min-width:var\(--size-control\)/);
+  assert.match(rule(cornerControls), /min-height:var\(--size-control\)/);
+  assert.match(rule('#mall-tools>summary'), /width:var\(--size-control\)/);
+  assert.match(rule('#mall-tools>summary,#hud-objectives>summary'), /width:max-content/);
+  assert.match(rule(chrome), /border:0;border-radius:0;background:transparent/);
+  const face = rule(`${chrome}::before`);
+  assert.match(face, /inset:var\(--hud-chrome-inset\)/);
+  assert.match(face, /pointer-events:none/);
+  assert.match(hud, /--gjh-header-size:calc\(var\(--size-control\) \+ var\(--space-1\)\)/);
+  assert.ok(target + pixels('space-1') < 52);
+  assert.match(hud, /--hud-corner-top:var\(--space-3\)/);
+  assert.ok(pixels('space-3') >= 12);
+  assert.match(rule('.scene-readouts,.hud-rail'), /top:var\(--hud-corner-top\)/);
+});
 
 test('compact HUD stacks Run above the raised joystick and reserves space for cards', () => {
   const html = read('../demos/corporate/gjh/v11/index.html');
@@ -38,7 +63,7 @@ test('compact HUD stacks Run above the raised joystick and reserves space for ca
   const landscape = compactRules.split('@media(max-height:560px) and (orientation:landscape){')[1];
   assert.ok(landscape?.includes('--hud-context-bottom:var(--hud-stick-bottom)'));
   assert.ok(landscape?.includes('--hud-context-right:calc(var(--hud-gutter-right) + var(--hud-stick-size) + var(--space-2))'));
-  assert.ok(css.includes('--hud-context-top:calc(var(--size-control) + var(--space-2) + var(--space-2))'));
+  assert.ok(css.includes('--hud-context-top:calc(var(--hud-corner-top) + var(--size-control) + var(--space-2))'));
   const tutorial = rule('body.is-3d .mall-overlay #guide-card');
   assert.ok(tutorial.includes('position:static') && tutorial.includes('min-height:0;overflow:auto'));
   const runRule = rule('.is-3d .touch-controls .run-toggle');
@@ -52,9 +77,10 @@ test('compact HUD stacks Run above the raised joystick and reserves space for ca
   assert.ok(css.includes('--hud-gutter-bottom:max(var(--space-1),env(safe-area-inset-bottom))'));
 
   const target = pixels('size-control'), gap = pixels('space-2');
+  const cornerTop = pixels('space-3');
   const run = target + pixels('space-3'), stick = target + pixels('space-8');
   const viewports = [320, 360, 375, 390, 393, 430].map(width => [width, 600]);
-  viewports.push([932, 430], [844, 390], [740, 320]);
+  viewports.push([393, 852], [360, 640], [852, 393], [932, 430], [844, 390], [740, 320]);
   for (const [width, height] of viewports) {
     for (const insets of [[0, 0, 0, 0], [47, 32, 34, 12]]) {
       const [left, right, bottom, top] = insets;
@@ -65,9 +91,9 @@ test('compact HUD stacks Run above the raised joystick and reserves space for ca
       const cardRight = shortLandscape ? stickLeft - gap : width - right - Math.max(right, gap);
       const cardWidth = Math.min(27 * 16, cardRight - left - Math.max(left, gap));
       const cardBottom = shortLandscape ? stickBottom : runTop - gap;
-      const header = target + Math.max(top, gap) + top;
-      const chipsBottom = header + gap + target;
-      const stackTop = header + target + 2 * gap;
+      const header = target + pixels('space-1') + top;
+      const chipsBottom = header + cornerTop + target;
+      const stackTop = chipsBottom + gap;
       const viewport = `${width}x${height} with insets ${insets}`;
       assert.ok(cardWidth >= 2 * target + 3 * gap, viewport);
       assert.ok(shortLandscape ? stickLeft - cardRight >= 8 : runTop - cardBottom >= 8, viewport);
@@ -75,16 +101,6 @@ test('compact HUD stacks Run above the raised joystick and reserves space for ca
       assert.ok(cardBottom - stackTop >= 2 * target + 2 * gap, viewport);
     }
   }
-});
-
-test('held item copy uses two lines above a wrapping row of full-size actions', () => {
-  const held = 'body.is-3d .mall-overlay #hud-context[data-context="held"]';
-  assert.ok(rule(held).includes('flex-direction:column'));
-  assert.ok(rule(`${held} .inspect-prompt`).includes('flex-wrap:wrap'));
-  const action = rule('body.is-3d .mall-overlay #hud-context .hud-held-action');
-  assert.ok(action.includes('min-height:var(--size-control)') && action.includes('max-width:100%'));
-  assert.ok(rule('body.is-3d .mall-overlay #hud-context .held-product-status').includes('-webkit-line-clamp:2'));
-  assert.ok(pixels('size-control') >= 44);
 });
 
 test('a closed map has no layout box at any viewport', () => {
@@ -96,14 +112,36 @@ test('location name can truncate in its own track without squeezing the dot or m
   const name = rule('.site-header #location-name');
   assert.ok(name.includes('overflow:hidden') && name.includes('text-overflow:ellipsis') && name.includes('white-space:nowrap'));
   assert.ok(css.includes('grid-template-columns:auto minmax(0,1fr)}'));
+  assert.match(rule('.is-3d #location-map>[data-icon]'), /display:none/);
 });
 
-test('the pickup label fits on one line while the product name ellipsizes', () => {
-  const action = rule('body.is-3d .mall-overlay #hud-context .hud-pickup-action');
+test('interaction and held-product cards share a padded flex row with nonwrapping actions', () => {
+  const card = 'body.is-3d .mall-overlay #hud-context';
+  assert.match(rule(card), /display:flex/);
+  assert.match(rule(`${card}:is([data-context="held"],[data-context="interaction"])`),
+    /gap:var\(--space-3\);padding:var\(--space-3\)/);
+  assert.ok(pixels('space-3') >= 12);
+  assert.match(rule(`${card} .inspect-prompt`), /display:flex;align-items:center;gap:inherit/);
+  assert.match(rule('#hud-context .nearby-card'), /flex:1 1 auto;align-items:center;min-width:0/);
+  const action = rule(`${card} :is(#inspect,.hud-pickup-action,.hud-held-action)`);
   assert.ok(action.includes('white-space:nowrap') && action.includes('width:max-content') && action.includes('max-width:none'));
-  const name = rule('body.is-3d .mall-overlay #hud-context #nearby-name');
-  const contextCopy = rule('body.is-3d .mall-overlay #hud-context :is(.held-product-status,#nearby-name)');
-  assert.ok(contextCopy.includes('overflow:hidden') && name.includes('text-overflow:ellipsis') && name.includes('white-space:nowrap'));
+  assert.match(rule(`${card} .hud-held-action`), /min-height:var\(--size-control\)/);
+  assert.match(rule(`${card} :is(.held-product-status,#nearby-name)`), /min-width:0;.*overflow:hidden;text-overflow:ellipsis/);
+  assert.match(rule(`${card} .held-product-status`), /-webkit-line-clamp:2/);
+  assert.match(rule(`${card} #nearby-name`), /white-space:nowrap/);
+});
+
+test('the HUD centers its icons and resting joystick knob independently of badges and labels', () => {
+  const center = /display:grid;.*place-items:center/;
+  const compactHeader = css.split('@media(max-width:999px){')[1];
+  assert.match(rule('.is-3d .site-header :is(.header-map,.bag-open,.view-toggle)', compactHeader), center);
+  assert.match(rule('.is-3d :is(.site-header button,#mall-tools>summary) svg'), /display:block;margin:0/);
+  assert.match(rule('.is-3d .hud-bag-count'), /position:absolute/);
+  assert.match(rule('#hud-more-actions'), center);
+  assert.match(rule('body.is-3d .mall-overlay :is(#inspect,#run-toggle,#mall-tools>summary,.hud-pickup-action)'), center);
+  assert.match(rule('.is-3d .touch-controls .joystick'), center);
+  assert.match(rule('.is-3d .touch-controls .joystick-thumb'), /position:static/);
+  assert.doesNotMatch(read('../demos/corporate/gjh/v11/index.html'), /joystick-label/);
 });
 
 test('the objective summary reserves room for all three progress dots', () => {
