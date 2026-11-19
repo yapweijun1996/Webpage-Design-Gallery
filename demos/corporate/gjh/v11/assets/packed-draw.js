@@ -1,4 +1,4 @@
-import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {mergeStaticGeometries} from './merge-static-geometries.js';
 
 export function mergeOpaqueMeshes(T, root) {
   root.updateMatrixWorld(true);
@@ -15,7 +15,7 @@ export function mergeOpaqueMeshes(T, root) {
   for (const [material, meshes] of batches) {
     if (meshes.length < 2) continue;
     const parts = meshes.map(mesh => mesh.geometry.clone().applyMatrix4(inverse.clone().multiply(mesh.matrixWorld)));
-    const geometry = mergeGeometries(parts);
+    const geometry = mergeStaticGeometries(T, parts);
     parts.forEach(part => part.dispose());
     if (!geometry) continue;
     const merged = new T.Mesh(geometry, material);
@@ -32,7 +32,7 @@ export function createPackedDraw(T, parts, material) {
   for (const geometry of sources) {
     if (!geometry.index) geometry.setIndex(Array.from({length: geometry.attributes.position.count}, (_, i) => i));
   }
-  const geometry = mergeGeometries(sources);
+  const geometry = mergeStaticGeometries(T, sources);
   const original = geometry.index.array;
   let offset = 0, capacity = 0;
   const ranges = parts.map(part => {

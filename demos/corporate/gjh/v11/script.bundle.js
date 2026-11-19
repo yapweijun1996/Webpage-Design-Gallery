@@ -3116,20 +3116,6 @@ function createModes({
 // demos/corporate/gjh/v11/script.js
 import { setupOriginalTin } from "./assets/original-tin.js";
 
-// demos/corporate/gjh/v11/vendor/BufferGeometryUtils.js
-import {
-  BufferAttribute,
-  BufferGeometry,
-  Float32BufferAttribute,
-  InstancedBufferAttribute,
-  InterleavedBuffer,
-  InterleavedBufferAttribute,
-  TriangleFanDrawMode,
-  TriangleStripDrawMode,
-  TrianglesDrawMode,
-  Vector3
-} from "./three.module.min.js";
-
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
 function createMallAtmosphere(T, renderer, scene, slots) {
   const accents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324, 4689030, 8666691, 7313040, 7831429, 6705273, 8549738, 4954515, 6449514];

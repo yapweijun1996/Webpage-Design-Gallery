@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
+import {mergeStaticGeometries} from '../demos/corporate/gjh/v11/assets/merge-static-geometries.js';
 import {boxFrontFaces, createPackedDraw, createInstanceVisibility, createProjectedBatch, distantDetail, projectedError} from '../demos/corporate/gjh/v11/assets/packed-draw.js';
 import {canDetail, makeCanLods, createCanDisplay} from '../demos/corporate/gjh/v11/assets/product-display-lod.js';
 import {simplifyBench} from '../demos/corporate/gjh/v11/assets/furnishings.js';
@@ -41,6 +42,27 @@ function modelParts(name) {
     return {geometry, material, matrix:new T.Matrix4()};
   }));
 }
+
+test('static merging keeps normalized interleaved values and offsets wide indices', () => {
+  const makeGeometry = (count, colour) => {
+    const geometry = new T.BufferGeometry();
+    geometry.setAttribute('position', new T.BufferAttribute(new Float32Array(count * 3), 3));
+    const array = new Uint8Array(count * 4);
+    array.set([255, ...colour], (count - 1) * 4);
+    geometry.setAttribute('color', new T.InterleavedBufferAttribute(new T.InterleavedBuffer(array, 4), 3, 1, true));
+    geometry.setIndex([0, 1, count - 1]);
+    return geometry;
+  };
+  const first = makeGeometry(65533, [1, 2, 3]);
+  const second = makeGeometry(3, [4, 5, 6]);
+  const merged = mergeStaticGeometries(T, [first, second]);
+  assert.ok(merged.index.array instanceof Uint32Array);
+  assert.deepEqual([...merged.index.array], [0, 1, 65532, 65533, 65534, 65535]);
+  assert.equal(merged.attributes.color.normalized, true);
+  assert.deepEqual([...merged.attributes.color.array.subarray(65532 * 3)], [1, 2, 3, 0, 0, 0, 0, 0, 0, 4, 5, 6]);
+  second.deleteAttribute('color');
+  assert.equal(mergeStaticGeometries(T, [first, second]), null);
+});
 
 test('instance culling packs matching transforms, finishes and refreshes bounds as the camera turns', () => {
   const mesh = new T.InstancedMesh(new T.BoxGeometry(), new T.MeshStandardMaterial(), 4);

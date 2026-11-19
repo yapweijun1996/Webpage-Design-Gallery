@@ -1,4 +1,4 @@
-import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {mergeStaticGeometries} from './merge-static-geometries.js';
 import {createPackedDraw} from './packed-draw.js';
 
 const DISPLAY_DISTANCE = 18;
@@ -75,7 +75,7 @@ export function makeCanLods(T, {geometry, material}) {
   if (material.name === 'Gold lacquered rim') {
     const bottom = lathe([[.03370,0],[.03735,0],[.03875,.00275],[.03775,.0045]],18);
     const top = lathe([[.03775,.1190],[.03875,.12084],[.03735,.12359],[.03370,.12359]],18);
-    const rims = mergeGeometries([bottom, top]);
+    const rims = mergeStaticGeometries(T, [bottom, top]);
     bottom.dispose(); top.dispose();
     return [geometry, geometry, rims];
   }

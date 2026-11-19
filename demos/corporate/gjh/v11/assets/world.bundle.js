@@ -7,8 +7,61 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/merge-static-geometries.js
+function mergeStaticGeometries(T, geometries) {
+  const first = geometries[0];
+  if (!first?.attributes.position)
+    return null;
+  const attributes = Object.entries(first.attributes);
+  const indexed = first.index !== null;
+  let vertices = 0, indexCount = 0;
+  for (const { attributes: source, index, morphAttributes } of geometries) {
+    if (index !== null !== indexed || Object.keys(source).length !== attributes.length || Object.keys(morphAttributes).length || !source.position)
+      return null;
+    vertices += source.position.count;
+    indexCount += index?.count ?? 0;
+  }
+  const result = new T.BufferGeometry;
+  for (const [name, layout] of attributes) {
+    const { itemSize, normalized, gpuType = T.FloatType } = layout;
+    const ArrayType = layout.array.constructor;
+    const array = new ArrayType(vertices * itemSize);
+    let offset = 0;
+    for (const { attributes: source } of geometries) {
+      const attribute2 = source[name];
+      if (!attribute2 || attribute2.array.constructor !== ArrayType || attribute2.itemSize !== itemSize || attribute2.normalized !== normalized || (attribute2.gpuType ?? T.FloatType) !== gpuType || attribute2.count !== source.position.count || attribute2.isFloat16BufferAttribute !== layout.isFloat16BufferAttribute)
+        return null;
+      if (attribute2.isInterleavedBufferAttribute) {
+        const { stride } = attribute2.data;
+        for (let vertex = 0;vertex < attribute2.count; vertex++) {
+          const start = vertex * stride + attribute2.offset;
+          array.set(attribute2.array.subarray(start, start + itemSize), offset + vertex * itemSize);
+        }
+      } else {
+        array.set(attribute2.array, offset);
+      }
+      offset += attribute2.count * itemSize;
+    }
+    const Attribute = layout.isFloat16BufferAttribute ? T.Float16BufferAttribute : T.BufferAttribute;
+    const attribute = new Attribute(array, itemSize, normalized);
+    attribute.gpuType = gpuType;
+    result.setAttribute(name, attribute);
+  }
+  if (indexed) {
+    const IndexArray = vertices > 65535 ? Uint32Array : Uint16Array;
+    const array = new IndexArray(indexCount);
+    let offset = 0, vertexOffset = 0;
+    for (const { attributes: attributes2, index } of geometries) {
+      for (let i = 0;i < index.count; i++)
+        array[offset++] = index.array[i] + vertexOffset;
+      vertexOffset += attributes2.position.count;
+    }
+    result.setIndex(new T.BufferAttribute(array, 1));
+  }
+  return result;
+}
+
 // demos/corporate/gjh/v11/assets/packed-draw.js
-import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
 function mergeOpaqueMeshes(T, root) {
   root.updateMatrixWorld(true);
   const inverse = root.matrixWorld.clone().invert(), batches = new Map;
@@ -24,7 +77,7 @@ function mergeOpaqueMeshes(T, root) {
     if (meshes.length < 2)
       continue;
     const parts = meshes.map((mesh) => mesh.geometry.clone().applyMatrix4(inverse.clone().multiply(mesh.matrixWorld)));
-    const geometry = mergeGeometries(parts);
+    const geometry = mergeStaticGeometries(T, parts);
     parts.forEach((part) => part.dispose());
     if (!geometry)
       continue;
@@ -40,7 +93,7 @@ function createPackedDraw(T, parts, material) {
     if (!geometry2.index)
       geometry2.setIndex(Array.from({ length: geometry2.attributes.position.count }, (_, i) => i));
   }
-  const geometry = mergeGeometries(sources);
+  const geometry = mergeStaticGeometries(T, sources);
   const original = geometry.index.array;
   let offset = 0, capacity = 0;
   const ranges = parts.map((part) => {
@@ -880,7 +933,7 @@ function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider }) {
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-import { mergeGeometries as mergeGeometries6 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/lift-layout.js
 var freeze = (value) => {
@@ -929,7 +982,7 @@ function showcaseProducts(items, expanded) {
 }
 
 // demos/corporate/gjh/v11/assets/opaque-batch.js
-import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
 function opaqueSurfaceMaterial(T) {
   const material = new T.MeshStandardMaterial({ vertexColors: true, side: T.DoubleSide });
   material.onBeforeCompile = (shader) => {
@@ -947,7 +1000,7 @@ metalnessFactor=vObSurface.y;`);
 function opaqueBatch(T, parts, shadows) {
   if (!parts.length)
     return null;
-  const geometry = mergeGeometries2(parts);
+  const geometry = mergeGeometries(parts);
   parts.forEach((part) => part.dispose());
   geometry.computeBoundingSphere();
   const material = opaqueSurfaceMaterial(T);
@@ -1204,7 +1257,7 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
 }
 
 // demos/corporate/gjh/v11/assets/upper-level.js
-import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/spatial.js
 var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
@@ -2381,7 +2434,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   function merged(name, parts, material, parent) {
     let mesh;
     if (material.transparent) {
-      mesh = new T.Mesh(mergeGeometries3(parts), material);
+      mesh = new T.Mesh(mergeGeometries2(parts), material);
       parts.forEach((part) => part.dispose());
     } else {
       const batch = createPackedDraw(T, parts.map((geometry) => {
@@ -3884,7 +3937,7 @@ function createProgressiveAtlas(T, sheet) {
 }
 
 // demos/corporate/gjh/v11/assets/shop-sign-vendor.js
-import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
 import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
 
 // demos/corporate/gjh/v11/assets/signage/hardware.js
@@ -4147,7 +4200,7 @@ function modelRelief(T, sign, module, mask, finishes) {
       g.dispose();
     return geometry;
   });
-  const merged = mergeGeometries4(pieces);
+  const merged = mergeGeometries3(pieces);
   pieces.forEach((g) => g.dispose());
   const remaining = mask.ink.slice();
   for (let j = Math.floor(y0 + (y1 - y0) * v);j < y0 + (y1 - y0) * (v + h); j++)
@@ -4215,7 +4268,7 @@ function* buildRelief(T, signs, tiles, modules, texture, detailed) {
   }
   if (!pieces.length)
     return null;
-  const geo = mergeGeometries4(pieces);
+  const geo = mergeGeometries3(pieces);
   pieces.forEach((g) => g.dispose());
   const Index = offset > 65535 ? Uint32Array : Uint16Array;
   const original = new Index(source), index = new T.BufferAttribute(new Index(source.length), 1);
@@ -4272,7 +4325,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     const hasEndTrim = config.finish === "timber-slat" || config.preset === "t3-cafe";
     signs.push({ config, matrix, mount, hardwareMatrix, centre, hasEndTrim, sphere: new T.Sphere(centre, config.size.width / 2 + 0.6) });
   });
-  const faces = new T.Mesh(mergeGeometries4(pieces), flat);
+  const faces = new T.Mesh(mergeGeometries3(pieces), flat);
   pieces.forEach((g) => g.dispose());
   faces.name = "Expanded branded shop signs";
   faces.layers.enable(1);
@@ -4567,7 +4620,7 @@ function addExpandedStorefronts(T, layout, scene, signs) {
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
-import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/window-studios.js
 var cream = 15984077;
@@ -6369,7 +6422,7 @@ function kelvinColour(T, kelvin) {
 function merged(parts) {
   if (!parts.length)
     return null;
-  const result = mergeGeometries4(parts);
+  const result = mergeGeometries3(parts);
   for (const geometry of parts)
     geometry.dispose();
   return result;
@@ -6716,7 +6769,7 @@ function* mergeInteriorAnchor(T, scene) {
           parts.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
           yield;
         }
-        const geometry = mergeGeometries4(parts);
+        const geometry = mergeGeometries3(parts);
         if (geometry) {
           anchor.add(new T.Mesh(geometry, material));
           for (const mesh of meshes)
@@ -7841,7 +7894,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       doorGlassMaterial.forceSinglePass = true;
     const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
     doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
-    const doorFrameGeometry = mergeGeometries6(doorFrameParts);
+    const doorFrameGeometry = mergeGeometries5(doorFrameParts);
     doorFrameParts.forEach((part) => part.dispose());
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const finishForRole = new Map;
