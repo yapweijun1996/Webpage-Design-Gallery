@@ -56,8 +56,9 @@ test('interior programme pins 17 world frames, anchors, floor fields, palettes, 
       .center.map(round),[door.x,0,door.z]);
     assertFields(store.frame,approved.frame);
     assertFields(store.anchor,approved.anchor);
-    const {pattern,colours,...floor} = store.floor;
+    const {pattern,colours,offset_m,inlay_offset_m,...floor} = store.floor;
     assert.deepEqual(floor,approved.floor);
+    assert(offset_m >= .003 && inlay_offset_m >= .003, store.id+' floor layers');
     assert(colours.every(value => store.palette[value] || /^#[0-9A-F]{6}$/.test(value)));
     for (const field of ['brand','style','concept','signature_family','palette','capture']) assert.deepEqual(store[field],approved[field]);
     assert.equal(store.accent_kelvin,approved.lighting.accent_kelvin);
@@ -112,9 +113,18 @@ function mockInteriorDownloads(t) {
   t.after(()=>{ delete globalThis.self; delete globalThis.createImageBitmap; });
 }
 
+function assertArtworkTexture(map,tier) {
+  assert.equal(map.generateMipmaps,true);
+  assert.equal(map.minFilter,T.LinearMipmapLinearFilter);
+  assert.equal(map.anisotropy,tier==='low' ? 2 : 4);
+  assert.equal(map.colorSpace,T.SRGBColorSpace);
+  assert.equal(map.premultiplyAlpha,false);
+}
+
 test('every tier fits its programme budget using parsed GLBs and the actual merged room meshes', async t => {
   mockInteriorDownloads(t);
-  const load = createInteriorModelLoader(T,assets,new GLTFLoader());
+  let graphicsTier = 'low';
+  const load = createInteriorModelLoader(T,assets,new GLTFLoader(),()=>graphicsTier);
   const models = new Map(), signal = new AbortController().signal;
   for (const receipt of manifest.assets) {
     const file = readFileSync(new URL(receipt.file,folder));
@@ -132,9 +142,13 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     const envelope = plans.get(receipt.store).anchor.envelope_whd_m;
     assert(bounds.getSize(new T.Vector3()).toArray().every((extent,i)=>extent <= envelope[i]+1e-5));
     assert(model.children.every(mesh=>!mesh.material.transparent),'Opaque floor kit');
+    const maps = model.children.flatMap(({material})=>[material.map,material.emissiveMap].filter(Boolean));
+    assert(maps.length > 0,receipt.file);
+    maps.forEach(map=>assertArtworkTexture(map,'low'));
     models.set(receipt.file,measured);
     disposeInteriorModel(model);
   }
+  graphicsTier = 'balanced';
   const modules = new Map(), atlasSources = new Set(), craftMaterials = new Set();
   for (const receipt of manifest.round2.details) {
     const asset = roomDetails[receipt.store], bytes = readFileSync(new URL(asset.file,folder));
@@ -155,8 +169,23 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
         assert.equal(mesh.instanceColor.count,mesh.count);
         instances += mesh.count;
       }
-      if (mesh.material.map) atlasSources.add(mesh.material.map.source);
+      if (mesh.material.map) {
+        atlasSources.add(mesh.material.map.source);
+        assertArtworkTexture(mesh.material.map,'balanced');
+      }
+      if (mesh.material.emissiveMap) assertArtworkTexture(mesh.material.emissiveMap,'balanced');
       if (mesh.material.name === 'Enamel') craftMaterials.add(mesh.material);
+    });
+    const floor = interiorStores[receipt.store].floor;
+    const rug = floor.position_m[1]+floor.offset_m;
+    model.traverse(mesh => {
+      if (!mesh.isMesh || mesh.isInstancedMesh) return;
+      const {position,normal} = mesh.geometry.attributes;
+      for (let i=0; i<position.count; i++) {
+        const y = position.getY(i);
+        if (Math.abs(normal.getY(i))>.999 && y > rug && y < rug+.012)
+          assert(y-rug>=.003,receipt.store+' inlay above the rug');
+      }
     });
     assert.equal(instances,receipt.instances);
     if (['S02','S04','S09'].includes(receipt.store)) assert(instances>=12);
@@ -275,7 +304,7 @@ test('new solid envelopes clear approved routes, seat exits, S01 pickups, and do
     const finish = floorFinish(T,store), normals = finish.attributes.normal, points = finish.attributes.position;
     for (let i=0;i<normals.count;i++) {
       assert(normals.getY(i)>.99,store.id+' floor winding');
-      assert.equal(round(points.getY(i)),round(floor_surface_y_m+.004));
+      assert.equal(round(points.getY(i)),round(floor_surface_y_m+store.floor.offset_m));
       assert(Math.abs(points.getX(i)) < w/2 && points.getZ(i) < d/2-.18 && points.getZ(i) > d/2-depth);
     }
     finish.dispose();
@@ -354,7 +383,10 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   let clock = 0;
   const runtime = createInteriorKit(T,scene,{
     now:()=>clock,
-    registerCollider:box=>colliders.push(box),
+    registerCollider(box) {
+      colliders.push(box);
+      return () => colliders.splice(colliders.indexOf(box),1);
+    },
     async loadModel({file}) {
       requests.push(file);
       const model = new T.Group();
@@ -390,7 +422,7 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
     for (let i=0; i<remaining; i++) await complete(await frame());
   };
 
-  assert.equal(colliders.length,stores.reduce((n,store)=>n+store.colliders.length,0));
+  assert.equal(colliders.length,0);
   const store = interiorStores.S02;
   go(store,'low');
   assert.equal(await frame(),undefined);
@@ -402,6 +434,7 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert(low.roots.includes(first));
   assert(!scene.getObjectById(first.id));
   assert.equal(runtime.report().preinstalled.shops,0);
+  assert.equal(colliders.length,0);
   go(interiorStores.S17,'low');
   const second = await frame();
   assert.equal(requests[1],roomDetails.S02.file);
@@ -416,6 +449,8 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert(first.parent.visible);
   await finishAll(15);
   assert.deepEqual(await lowReady,{shops:17,ms:272});
+  const colliderCount = stores.reduce((n,store)=>n+store.colliders.length,0);
+  assert.equal(colliders.length,colliderCount);
   const motion = modelsByFile.get(roomDetails.S02.file).userData.roomMotion;
   go(store,'low');
   const offset = motion.scroll.offset.x;
@@ -471,7 +506,9 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert.deepEqual(runtime.report(),{tier:'low',shops:1,drawCalls:1,triangles:12,modelsLoaded:59,
     bytes:[...manifest.assets,...manifest.round2.details].reduce((sum,asset)=>sum+asset.bytes,0),preinstalled:{shops:17,ms:0}});
 
+  assert.equal(colliders.length,colliderCount);
   runtime.invalidate();
+  assert.equal(colliders.length,0);
   go(store,'low');
   assert(!first.parent.visible);
   const restored = await frame();
@@ -479,7 +516,9 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert.equal(requests.length,59);
   await complete(restored);
   assert(first.parent.visible);
+  assert.equal(colliders.length,store.colliders.length);
   runtime.dispose();
+  assert.equal(colliders.length,0);
 });
 
 test('registration warms animated detail for the ground-floor screen and Detailed passes before showing it', async t => {
@@ -559,10 +598,10 @@ test('registration warms animated detail for the ground-floor screen and Detaile
 });
 
 test('a timed-out warm stage continues nearest-first and publishes later tiers with their signs', async t => {
-  const scene = new T.Scene(), files = [], visits = [];
+  const scene = new T.Scene(), files = [], visits = [], colliders = [];
   let now = 0, installedSigns = 'low', blockedSigns, failFile = roomDetails.S02.file;
   const interiors = createInteriorKit(T,scene,{
-    now:()=>now, registerCollider() {},
+    now:()=>now, registerCollider:box=>colliders.push(box),
     async loadModel({file}) {
       files.push(file);
       if (file === failFile) throw new Error('Unavailable fixture');
@@ -601,6 +640,7 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   low.runFrame();
   await frame();
   assert.equal(files[1],failFile);
+  assert.equal(colliders.length,0);
   now = 6000;
   low.runFrame();
   assert.equal(report.reason,'timeout');
@@ -609,6 +649,8 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   for (let i=0; i<16; i++) await frame();
   assert.equal(files[2],interiorStores.S17.files.low.file);
   assert.equal(interiors.report().preinstalled.shops,16);
+  const total = stores.reduce((n,store)=>n+store.colliders.length,0);
+  assert.equal(colliders.length,total-interiorStores.S02.colliders.length);
   low.runFrame();
   assert.deepEqual(visits,[]);
   failFile = null;
@@ -616,6 +658,7 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   await frame();
   assert.equal(interiors.report().preinstalled.shops,17);
   assert.equal(files.filter(file=>file===interiorStores.S02.files.low.file).length,1);
+  assert.equal(colliders.length,total);
   low.runFrame();
   assert.equal(report.background,'complete');
   assert.deepEqual(visits,[['low','low','low']]);

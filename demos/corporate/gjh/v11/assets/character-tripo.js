@@ -176,7 +176,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       poses.gripProduct(target, pole, palm.lerp(target, .3), waveWeight);
       transfer.update(dt, reducedMotion.matches);
     }
-    function update(actual, dt, requested = actual, sprintRate = 1, seat) {
+    function update(actual, dt, requested = actual, playbackRate = 1, seat) {
       if (disposed) return;
       const movement = resolveLocomotion(actual, requested, dt);
       if (movement !== animation) {
@@ -212,7 +212,8 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
         sitAction.time = sit.duration * seatWeight;
         sitAction.setEffectiveWeight(sitBlend);
       }
-      actions.run.setEffectiveTimeScale(sprintRate);
+      actions.run.setEffectiveTimeScale(playbackRate);
+      actions.walk.setEffectiveTimeScale(playbackRate);
       actions.idle.paused = reducedMotion.matches || seatWeight === 1;
       const blend = dt && !reducedMotion.matches ? 1 - Math.exp(-10 * dt) : 1;
       for (const key of movementKeys) {

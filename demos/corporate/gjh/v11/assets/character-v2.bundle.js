@@ -819,8 +819,10 @@ async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
     solver.solve(["RightShoulder", "RightElbow", "RightHand"], targetPoint);
     transfer.update(dt, reducedMotion.matches);
   }
-  function update(actual, dt, requested = actual, sprintRate = 1, seat) {
-    actions.run.setEffectiveTimeScale(sprintRate);
+  function update(actual, dt, requested = actual, playbackRate = 1, seat) {
+    actions.run.setEffectiveTimeScale(playbackRate);
+    actions.walk.setEffectiveTimeScale(playbackRate);
+    actions.push.setEffectiveTimeScale(playbackRate);
     const movement = resolveLocomotion(actual, requested, dt);
     const target = pushing && movement !== "idle" ? "push" : movement;
     if (target !== animation) {

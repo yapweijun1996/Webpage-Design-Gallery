@@ -236,8 +236,9 @@ async function createCharacterV1(T, prepareModel) {
   const resolveLocomotion = createLocomotionContinuity();
   actions.idle.paused = reducedMotion.matches;
   mixer.update(0);
-  function update(actual, dt, requested = actual, sprintRate = 1, seat) {
-    actions.run.setEffectiveTimeScale(sprintRate);
+  function update(actual, dt, requested = actual, playbackRate = 1, seat) {
+    actions.run.setEffectiveTimeScale(playbackRate);
+    actions.walk.setEffectiveTimeScale(playbackRate);
     const state = resolveLocomotion(actual, requested, dt);
     if (state !== animation) {
       if (state !== "idle") {
@@ -513,6 +514,12 @@ function limitCameraByObstacles(origin, direction, length, radius, obstacles) {
   }
   return clearance;
 }
+function sweepCameraClearance(physics, origin, rotation, direction, ball, length, capsule, body, bounds) {
+  const margin = 0.02;
+  const hit = physics.castShape(origin, rotation, direction, ball, margin, length, true, undefined, undefined, capsule, body);
+  const clearance = hit ? Math.max(0, hit.time_of_impact - margin) : length;
+  return limitCameraByObstacles(origin, direction, clearance, ball.radius, bounds);
+}
 function clampZoom(value) {
   return Number.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
 }
@@ -581,6 +588,49 @@ function createCameraController(getStorage = () => globalThis.sessionStorage) {
       return true;
     }
   };
+}
+
+// demos/corporate/gjh/v11/assets/movement.js
+var FIXED_STEP = 1 / 60;
+var MOVEMENT = Object.freeze({
+  desktopWalk: 3.4,
+  desktopRun: 5.2,
+  touchWalk: 3.1,
+  touchRun: 4.5,
+  cart: 1.8,
+  acceleration: 10,
+  deceleration: 18,
+  turnRate: 140 * Math.PI / 180,
+  stickDeadZone: 0.12,
+  stepHeight: 0.18,
+  cartRadius: 0.95,
+  walkClipSpeed: 2.65,
+  runClipSpeed: 5
+});
+function stickStrength(distance, radius) {
+  const dead = MOVEMENT.stickDeadZone;
+  return Math.max(0, Math.min(1, (distance / radius - dead) / (1 - dead)));
+}
+function advanceVelocity(velocity, forward, right, yaw, speed, dt) {
+  const magnitude = Math.hypot(forward, right);
+  const scale = speed / Math.max(1, magnitude);
+  const x = (Math.cos(yaw) * right - Math.sin(yaw) * forward) * scale;
+  const z = (-Math.cos(yaw) * forward - Math.sin(yaw) * right) * scale;
+  const dx = x - velocity.x, dz = z - velocity.z;
+  const difference = Math.hypot(dx, dz);
+  if (!difference)
+    return;
+  const braking = x * velocity.x + z * velocity.z < 0 || Math.hypot(x, z) < Math.hypot(velocity.x, velocity.z) - 0.00000001;
+  const fraction = Math.min(1, (braking ? MOVEMENT.deceleration : MOVEMENT.acceleration) * dt / difference);
+  velocity.x += dx * fraction;
+  velocity.z += dz * fraction;
+}
+function interpolate(from, to, alpha) {
+  return from + (to - from) * alpha;
+}
+function interpolateAngle(from, to, alpha) {
+  const difference = to - from;
+  return from + Math.atan2(Math.sin(difference), Math.cos(difference)) * alpha;
 }
 
 // demos/corporate/gjh/v11/assets/atrium-layout.js
@@ -876,18 +926,19 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(-2, 0.89, 12));
   const capsule = physics.createCollider(R.ColliderDesc.capsule(0.55, 0.3).setFriction(0), body);
   const controller = physics.createCharacterController(0.025);
-  controller.enableAutostep(0.2, 0.28, true);
+  controller.enableAutostep(MOVEMENT.stepHeight, 0.28, true);
   controller.enableSnapToGround(0.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4);
   controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set;
-  let vertical = 0, runToggle = true, stickX = 0, stickY = 0, injected = null;
+  let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
   let seated = false, pushing = false, elevatorTravel = null;
-  const walkingShape = new R.Capsule(0.55, 0.3), cartShape = new R.Cylinder(0.85, 1.4);
+  const walkingShape = new R.Capsule(0.55, 0.3), cartShape = new R.Cylinder(0.85, MOVEMENT.cartRadius);
   let seat = null, seatPhase = "idle", seatTime = 0, seatFrom = null, seatExit = null, seatStartAngle = 0, seatStartWeight = 0;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const reduceSeatMotion = () => reducedMotion.matches;
-  let yaw = 0, drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
+  let yaw = 0, facing = 0, previousYaw = 0, previousFacing = 0, previousPosition = null;
+  let drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
   let actionView = null, cameraDistance = null, cameraOccluded = false, productApproach = null, productHome = null;
   const view = createCameraController();
   const camera = new T.PerspectiveCamera(58, 1, CHASE_NEAR, 100);
@@ -900,6 +951,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   const anchor = new T.Vector3, candidateAnchor = new T.Vector3, probe = new T.Vector3;
   let cameraLift = 0, cameraClearance = 0, cameraRadius = 0.22;
   const movement = { x: 0, y: 0, z: 0 }, next = { x: 0, y: 0, z: 0 };
+  const velocity = { x: 0, z: 0 };
+  let collisionMs = 0, cameraQueryMs = 0, collisions = 0;
   const joystick = document.querySelector("#joystick"), thumb = joystick.querySelector(".joystick-thumb"), runButton = document.querySelector("#run-toggle");
   const cameraControls = document.querySelector("#camera-controls");
   const zoomIn = document.querySelector("#camera-zoom-in"), zoomOut = document.querySelector("#camera-zoom-out");
@@ -979,6 +1032,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   const clearInput = () => {
     const pair = takePinch(), dragId = drag?.id, stickId = stick?.id;
     keys.clear();
+    velocity.x = velocity.z = 0;
     drag = null;
     trackpadScale = 0;
     if (stick)
@@ -1056,7 +1110,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (!stickOrigin)
       return;
     const dx = stick.x - stickOrigin.x, dy = stick.y - stickOrigin.y;
-    const distance = Math.hypot(dx, dy), strength = Math.min(1, Math.max(0, (distance - 8) / 30));
+    const distance = Math.hypot(dx, dy), strength = stickStrength(distance, stick.pad.width / 2);
     if (strength)
       stick.pinchEligible = false;
     stickX = distance ? dx / distance * strength : 0;
@@ -1069,6 +1123,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (actionView)
       actionView.settled = true;
     yaw -= dx * 0.005;
+    previousYaw -= dx * 0.005;
     if (dy)
       setPitch(currentPitch() + dy * (cameraMode() === "first-person" ? 0.004 : 0.006));
   }
@@ -1205,9 +1260,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
     canvas.addEventListener(type, releasePointer);
   function beginActionView(kind, targetYaw) {
-    const previousYaw = actionView?.previousYaw ?? yaw;
+    const previousYaw2 = actionView?.previousYaw ?? yaw;
     const fromPitch = clampCameraPitch(currentPitch(), "third-person");
-    actionView = { kind, previousYaw, fromYaw: yaw, fromPitch, pitch: fromPitch, targetYaw, elapsed: 0, settled: false };
+    actionView = { kind, previousYaw: previousYaw2, fromYaw: yaw, fromPitch, pitch: fromPitch, targetYaw, elapsed: 0, settled: false };
     if (reduceSeatMotion()) {
       yaw = targetYaw;
       actionView.pitch = DEFAULT_PITCH;
@@ -1238,7 +1293,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   function startCollection(prop, id) {
     if (seated || !character.startCollection(prop, id))
       return false;
-    beginActionView("collection", visual.rotation.y + Math.PI + 0.55);
+    beginActionView("collection", facing + Math.PI + 0.55);
     return true;
   }
   function cancelCollection() {
@@ -1249,6 +1304,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   }
   let gamepad = null;
   function update(dt) {
+    previousPosition = body.translation();
+    previousFacing = facing;
+    previousYaw = yaw;
+    sync();
     if (isPaused()) {
       clearInput();
       return;
@@ -1256,14 +1315,20 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (elevatorTravel) {
       const trip = elevatorTravel;
       const before = trip.phase;
-      trip.elapsed = reduceSeatMotion() || trip.skip ? rideTime.exit : Math.min(rideTime.exit, trip.elapsed + dt);
+      const skip = reduceSeatMotion() || trip.skip;
+      trip.elapsed = skip ? rideTime.exit : Math.min(rideTime.exit, trip.elapsed + dt);
       sampleRide(trip.elapsed, trip);
       if (before !== trip.phase)
         trip.elevator.setRiding?.(trip.phase === "ride");
       trip.elevator.pose(trip);
       moveSeat(trip.position);
       const stepping = trip.elapsed > rideTime.open && trip.elapsed < rideTime.board || trip.elapsed > rideTime.reopen;
-      character.update(stepping ? "walk" : "idle", dt);
+      const gait = stepping ? "walk" : "idle";
+      const rate = stepping ? approachRate(trip.position, dt) : 1;
+      if (skip)
+        resetInterpolation();
+      sync();
+      character.update(gait, dt, gait, rate);
       if (!trip.chimed && trip.elapsed >= rideTime.arrive) {
         trip.chimed = true;
         trip.chime?.();
@@ -1287,15 +1352,16 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     }
     if (seated) {
       updateSeat(dt);
-      yaw += ((keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0)) * (110 * Math.PI / 180) * dt;
+      yaw += ((keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0)) * MOVEMENT.turnRate * dt;
       updateSeatCharacter(dt);
       return;
     }
     if (productApproach) {
       const a = productApproach, t = Math.min(1, (a.elapsed += dt) / 0.45), e = t * t * (3 - 2 * t);
       moveSeat({ x: a.from.x + (a.to.x - a.from.x) * e, y: 0.91, z: a.from.z + (a.to.z - a.from.z) * e });
-      visual.rotation.y = 0;
-      character.update("walk", dt);
+      facing = 0;
+      sync();
+      character.update("walk", dt, "walk", approachRate(body.translation(), dt));
       if (t === 1) {
         productApproach = null;
         if (a.returning)
@@ -1321,15 +1387,20 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       restoreActionView();
     const running = !pushing && (injected?.run ?? (stick !== null && runToggle || keys.has("ShiftLeft") || keys.has("ShiftRight")));
     const turning = (keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0);
-    yaw += turning * (110 * Math.PI / 180) * dt;
-    const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 7.5 : 2.65;
-    const dx = (-Math.sin(yaw) * forward + Math.cos(yaw) * right) / length, dz = (-Math.cos(yaw) * forward - Math.sin(yaw) * right) / length;
+    yaw += turning * MOVEMENT.turnRate * dt;
+    const speed = pushing ? MOVEMENT.cart : stick ? running ? MOVEMENT.touchRun : MOVEMENT.touchWalk : running ? MOVEMENT.desktopRun : MOVEMENT.desktopWalk;
+    advanceVelocity(velocity, forward, right, yaw, speed, dt);
     vertical = controller.computedGrounded() ? -0.5 : Math.max(-18, vertical - 24 * dt);
-    movement.x = dx * speed * dt;
+    movement.x = velocity.x * dt;
     movement.y = vertical * dt;
-    movement.z = dz * speed * dt;
+    movement.z = velocity.z * dt;
+    const queryStart = performance.now();
     controller.computeColliderMovement(capsule, movement);
-    const corrected = controller.computedMovement(), position = body.translation();
+    const corrected = controller.computedMovement();
+    collisionMs += performance.now() - queryStart;
+    if (Math.hypot(corrected.x - movement.x, corrected.z - movement.z) > 0.002)
+      collisions++;
+    const position = body.translation();
     next.x = position.x + corrected.x;
     next.y = position.y + corrected.y;
     next.z = position.z + corrected.z;
@@ -1338,23 +1409,38 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const walking = distance > 0.001;
     const state = walking ? running ? "run" : "walk" : "idle";
     const requested = Math.hypot(forward, right) > 0.001 ? running ? "run" : "walk" : "idle";
-    const sprintRate = running && dt > 0 ? Math.min(speed, distance / dt) / 5 : 1;
-    const firstPerson = cameraMode() === "first-person";
-    if (firstPerson)
-      visual.rotation.y = yaw;
-    character.update(state, dt, requested, sprintRate);
+    const referenceSpeed = pushing ? MOVEMENT.cart : running ? MOVEMENT.runClipSpeed : MOVEMENT.walkClipSpeed;
+    const playbackRate = dt > 0 ? distance / dt / referenceSpeed : 1;
+    if (cameraMode() === "first-person")
+      facing = yaw;
+    else if (walking || turning) {
+      const angle = walking ? Math.atan2(-corrected.x, -corrected.z) : yaw;
+      facing = interpolateAngle(facing, angle, 1 - Math.exp(-14 * dt));
+    }
+    visual.rotation.y = facing;
+    character.update(state, dt, requested, playbackRate);
     if (actionView?.kind === "collection" && !character.state.collection.active)
       restoreActionView();
-    if (!firstPerson && (walking || turning)) {
-      const angle = walking ? Math.atan2(-dx, -dz) : yaw, delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
-      visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
-    }
   }
-  function sync() {
+  function approachRate(position, dt) {
+    if (!dt)
+      return 1;
+    return Math.hypot(position.x - previousPosition.x, position.z - previousPosition.z) / dt / MOVEMENT.walkClipSpeed;
+  }
+  function sync(alpha = 1) {
     const p = body.translation();
-    visual.position.set(p.x, p.y - 0.875, p.z);
-    contact.position.set(p.x, Math.max(0.05, p.y - 0.83), p.z);
-    contact.rotation.z = visual.rotation.y;
+    const from = previousPosition ?? p;
+    const x = interpolate(from.x, p.x, alpha), y = interpolate(from.y, p.y, alpha), z = interpolate(from.z, p.z, alpha);
+    visual.position.set(x, y - 0.875, z);
+    const angle = alpha === 1 ? facing : interpolateAngle(previousFacing, facing, alpha);
+    visual.rotation.y = angle;
+    contact.position.set(x, Math.max(0.05, y - 0.83), z);
+    contact.rotation.z = angle;
+  }
+  function resetInterpolation() {
+    previousPosition = null;
+    previousYaw = yaw;
+    previousFacing = facing;
   }
   function sweepCamera(origin, point2, minimumY) {
     direction.copy(point2).sub(origin);
@@ -1365,9 +1451,10 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const length = limitCameraByFloor(origin.y, direction.y, distance, minimumY);
     if (!length)
       return 0;
-    const hit = physics.castShape(origin, cameraRotation, direction, cameraBall, 0.02, length, true, undefined, undefined, capsule, body);
-    const clearance = hit ? Math.max(0, hit.time_of_impact - 0.02) : length;
-    return limitCameraByObstacles(origin, direction, clearance, cameraRadius, cameraObstacles);
+    const start = performance.now();
+    const bounded = sweepCameraClearance(physics, origin, cameraRotation, direction, cameraBall, length, capsule, body, cameraObstacles);
+    cameraQueryMs += performance.now() - start;
+    return bounded;
   }
   function cameraCandidate(lift, out, minimumY, seatView) {
     candidateAnchor.copy(target);
@@ -1409,21 +1496,22 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       viewToggle.setAttribute("aria-pressed", String(firstPerson));
     renderedMode = mode;
   }
-  function updateCamera(dt, instant = false) {
-    sync();
+  function updateCamera(dt, instant = false, alpha = 1) {
+    sync(alpha);
+    const viewYaw = alpha === 1 ? yaw : interpolateAngle(previousYaw, yaw, alpha);
     const required = chaseRequired(), mode = view.mode(required), firstPerson = mode === "first-person";
     const zoom = view.zoom(required), immediate = instant || reducedMotion.matches;
     const pitch = currentPitch();
     if (firstPerson) {
       if (character.productPhase === "held")
-        visual.rotation.y = yaw;
+        visual.rotation.y = viewYaw;
       eyeFov = easeCameraValue(eyeFov, firstPersonFov(zoom), dt, immediate || !eyeFovInitialized);
       eyeFovInitialized = true;
       projectCamera(true);
       camera.position.copy(visual.position);
       camera.position.y += EYE_HEIGHT;
       const cosPitch2 = Math.cos(pitch);
-      sightline.set(-Math.sin(yaw) * cosPitch2, -Math.sin(pitch), -Math.cos(yaw) * cosPitch2).add(camera.position);
+      sightline.set(-Math.sin(viewYaw) * cosPitch2, -Math.sin(pitch), -Math.cos(viewYaw) * cosPitch2).add(camera.position);
       camera.lookAt(sightline);
       cameraLift = cameraClearance = 0;
       cameraRadius = EYE_CLEARANCE;
@@ -1442,7 +1530,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     cameraRadius = Math.max(0.22, camera.near * Math.tan(camera.fov * Math.PI / 360) * Math.hypot(1, camera.aspect) + 0.08);
     cameraBall.radius = cameraRadius;
     const sinPitch = Math.sin(renderedPitch), cosPitch = Math.cos(renderedPitch);
-    offset.set(Math.sin(yaw) * cosPitch, sinPitch, Math.cos(yaw) * cosPitch).multiplyScalar(cameraDistance);
+    offset.set(Math.sin(viewYaw) * cosPitch, sinPitch, Math.cos(viewYaw) * cosPitch).multiplyScalar(cameraDistance);
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
     const orbitHeight = seatView ? Math.max(0.9, framing.height * 0.7) : actionView ? 0 : framing.height * framingWeight;
@@ -1472,8 +1560,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       safe.copy(desired);
     const lookAhead = actionView ? 0 : framing.lookAhead * framingWeight;
     sightline.copy(target);
-    sightline.x -= Math.sin(yaw) * lookAhead;
-    sightline.z -= Math.cos(yaw) * lookAhead;
+    sightline.x -= Math.sin(viewYaw) * lookAhead;
+    sightline.z -= Math.cos(viewYaw) * lookAhead;
     camera.position.copy(safe);
     camera.lookAt(sightline);
     cameraClearance = camera.position.distanceTo(target);
@@ -1500,7 +1588,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       pushing = false;
       character.setCart(false);
       capsule.setShape(walkingShape);
-      controller.enableAutostep(0.2, 0.28, true);
+      controller.enableAutostep(MOVEMENT.stepHeight, 0.28, true);
       clearInput();
       injected = null;
       return true;
@@ -1518,8 +1606,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     character.setCart(true);
     clearInput();
     injected = null;
+    sync();
     character.update("idle", 0);
-    physics.step();
     return true;
   }
   const rotation = { x: 0, y: 0, z: 0, w: 1 };
@@ -1565,7 +1653,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const end = seatPhase === "sit" ? seatBodyTarget(seat) : seatExit;
     moveSeat({ x: seatFrom.x + (end.x - seatFrom.x) * e, y: seatFrom.y + (end.y - seatFrom.y) * e, z: seatFrom.z + (end.z - seatFrom.z) * e });
     const delta = Math.atan2(Math.sin(seat.angle - seatStartAngle), Math.cos(seat.angle - seatStartAngle));
-    visual.rotation.y = seatStartAngle + delta * e;
+    facing = seatStartAngle + delta * e;
     character.setSeatProgress(seatPhase === "sit" ? e : seatPhase === "stand" ? seatStartWeight * (1 - e) : 0);
     if (t === 1) {
       if (seatPhase === "align") {
@@ -1600,7 +1688,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     cancelCollection();
     seated = true;
     capsule.setEnabled(false);
-    seatStartAngle = visual.rotation.y;
+    seatStartAngle = facing;
     seatTime = 0;
     seatFrom = { ...p };
     seatPhase = "align";
@@ -1609,12 +1697,12 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     vertical = 0;
     if (reduceSeatMotion()) {
       moveSeat(target2);
-      visual.rotation.y = seat.angle;
+      facing = seat.angle;
       seatPhase = "seated";
       character.setSeated(true);
     }
+    resetInterpolation();
     updateSeatCharacter(0);
-    physics.step();
     updateCamera(0, reduceSeatMotion());
     return true;
   }
@@ -1631,14 +1719,14 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     clearInput();
     injected = null;
     seatFrom = { ...body.translation() };
-    seatStartAngle = visual.rotation.y;
+    seatStartAngle = facing;
     seatStartWeight = character.state.seatWeight;
     seatTime = 0;
     seatPhase = "stand";
     if (instant || reduceSeatMotion())
       finishStand();
+    resetInterpolation();
     updateSeatCharacter(0);
-    physics.step();
     updateCamera(0, instant || reduceSeatMotion());
     return true;
   }
@@ -1667,13 +1755,13 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     body.setNextKinematicTranslation({ x, y: 0.89, z });
     vertical = 0;
     yaw = destination.yaw || 0;
-    visual.rotation.y = yaw;
+    facing = yaw;
     clearInput();
     if (carryingProduct) {
       sync();
       character.update("idle", 0);
     }
-    physics.step();
+    resetInterpolation();
     updateCamera(0, true);
     return true;
   }
@@ -1743,7 +1831,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     clearInput();
     injected = null;
     restoreActionView();
-    sync();
+    resetInterpolation();
     updateCamera(0, true);
   }
   return {
@@ -1763,6 +1851,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     interruptGraphics,
     update,
     sync,
+    resetInterpolation,
     updateCamera,
     resizeCamera,
     teleport,
@@ -1793,7 +1882,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
         productHome = home;
         if (reduced) {
           moveSeat({ x: home.x, y: 0.91, z: home.z });
-          visual.rotation.y = 0;
+          facing = 0;
+          resetInterpolation();
           sync();
           character.update("idle", 0);
         } else
@@ -1810,7 +1900,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
         return false;
       if (reduceSeatMotion()) {
         moveSeat({ x: productHome.x, y: 0.91, z: productHome.z });
-        visual.rotation.y = 0;
+        facing = 0;
+        resetInterpolation();
         sync();
         character.returnProduct();
         character.update("idle", 0);
@@ -1842,9 +1933,29 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     setInput: (input) => {
       injected = input;
       if (Number.isFinite(input?.yaw))
-        yaw = input.yaw;
+        previousYaw = yaw = input.yaw;
       if (Number.isFinite(input?.pitch))
         setPitch(input.pitch);
+    },
+    get collisionTicks() {
+      return collisions;
+    },
+    sampleMovement() {
+      const { x, z } = body.translation();
+      return {
+        x,
+        z,
+        visualX: visual.position.x,
+        visualZ: visual.position.z,
+        cameraDistance: cameraClearance,
+        requestedCameraDistance: cameraDistance,
+        collisionTicks: collisions
+      };
+    },
+    takeQueryTimings(out) {
+      out.physicsMs += collisionMs;
+      out.cameraMs += cameraQueryMs;
+      collisionMs = cameraQueryMs = 0;
     },
     get chaseFov() {
       return framing.fov;
@@ -1859,7 +1970,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     },
     get state() {
       const p = body.translation();
-      return { x: p.x, y: p.y - 0.875, z: p.z, cameraOccluded, capsuleEnabled: capsule.isEnabled(), productApproaching: Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase: elevatorTravel?.phase || null, cartCapability: cartCapability(), cameraFocus: actionView?.kind || null, cameraDistance, cameraObstruction: { lift: cameraLift, distance: cameraClearance, radius: cameraRadius, avatarVisible: !cameraOccluded }, seatPhase, seatId: seat?.id || null, seatName: seat?.name || null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch: currentPitch(), character: character.state };
+      return { x: p.x, y: p.y - 0.875, z: p.z, cameraOccluded, capsuleEnabled: capsule.isEnabled(), productApproaching: Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase: elevatorTravel?.phase || null, cartCapability: cartCapability(), cameraFocus: actionView?.kind || null, cameraDistance, cameraObstruction: { lift: cameraLift, distance: cameraClearance, radius: cameraRadius, avatarVisible: !cameraOccluded }, seatPhase, seatId: seat?.id || null, seatName: seat?.name || null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state };
     }
   };
 }

@@ -1,6 +1,7 @@
 import {shopEntrance} from '../expanded-layout.js';
 import {atlasCells,atlasSize,plateRect} from './atlas-layout.js';
 import {bayWidth,fasciaBand} from './config.js';
+import {decalClearance} from '../surface-decals.js';
 
 // Shared dimensions for the two atlas decals and their projecting hardware socket.
 export const bladeSocket = Object.freeze({inset:.24, drop:.78, reach:.94, height:.69, thickness:.043});
@@ -22,15 +23,16 @@ export function createShopSign(T,config,bay) {
   const z=(anchor?.44:.23)+depth, y=(band.top+band.bottom)/2;
   const bladeX=-width/2+bladeSocket.inset, bladeY=y-bladeSocket.drop, bladeDepth=bladeSocket.reach;
   const positions=[],uvs=[],indices=[];
-  function panel(x,y,z,w,h,yaw,cell){
+  function panel(x,y,z,w,h,yaw,cell,offset=decalClearance){
     const start=positions.length/3, cs=Math.cos(yaw),sn=Math.sin(yaw);
     for(const [u,v] of [[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]])
-      positions.push(x+w*u*cs,y+h*v,z-w*u*sn);
+      positions.push(x+w*u*cs+offset*sn,y+h*v,z-w*u*sn+offset*cs);
     const [l,b,r,t]=uvRect(cell);
     uvs.push(l,b,r,b,r,t,l,t);
     indices.push(start,start+1,start+2,start,start+2,start+3);
   }
-  panel(0,y,z,width,height,0,cells.fascia);
+  // Keep the hardware and authored relief relative to their original fascia.
+  panel(0,y,z,width,height,0,cells.fascia,0);
   if(config.blade){
     // Separate outward-facing winding keeps the lettering legible from either end.
     for(const side of [-1,1])panel(bladeX+side*(bladeSocket.thickness/2+.001),bladeY,z+bladeDepth/2,

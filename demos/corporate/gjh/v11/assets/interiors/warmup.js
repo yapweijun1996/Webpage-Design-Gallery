@@ -64,7 +64,7 @@ function createInstaller(T, renderer, scene, accents) {
     const linear = () => tier === 'detailed';
     const options = {priority,signal,late:false};
     const results = await Promise.allSettled([
-      prepareModel(roots, {...options,linear,includeInSceneSweep:false}),
+      prepareModel(roots, {...options,linear,artworkTier:tier,includeInSceneSweep:false}),
       queue.enqueue(function* () {
         const programs = new Set();
         for (const output of linear() ? [false,true] : [false]) {

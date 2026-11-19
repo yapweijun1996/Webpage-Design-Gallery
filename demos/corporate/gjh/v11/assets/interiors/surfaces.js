@@ -1,4 +1,5 @@
 import {radians} from './config.js';
+import {decalHeight} from '../surface-decals.js';
 
 // Convex fields are tessellated in place. Borders and grout share edges with
 // their neighbours, so there are no overlapping floor faces in a finish.
@@ -27,6 +28,7 @@ function radialFloor(steps, radiusAt, rings, put) {
 export function floorFinish(T, store) {
   const floor = store.floor, [width,depth] = floor.field_width_depth_m;
   const [x,y,z] = floor.position_m, a = radians(floor.yaw_deg), c = Math.cos(a), s = Math.sin(a);
+  const finishY = decalHeight(y,floor.offset_m);
   const palette = store.palette.map(entry => entry.hex);
   const [,field,edge] = floor.colours.map(value => palette[value] ?? value);
   const color = new T.Color(field), trim = new T.Color(edge);
@@ -35,7 +37,7 @@ export function floorFinish(T, store) {
   const positions=[], colours=[];
   function put(points, finish) {
     for (let i=1;i<points.length-1;i++) for (const [u,v] of [points[0],points[i],points[i+1]]) {
-      positions.push(x+c*u*width+s*v*depth,y+.004,z-s*u*width+c*v*depth);
+      positions.push(x+c*u*width+s*v*depth,finishY,z-s*u*width+c*v*depth);
       colours.push(finish.r,finish.g,finish.b);
     }
   }

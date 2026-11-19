@@ -8,7 +8,7 @@ export function addExpandedStorefronts(T, layout, scene, signs) {
     frame: {material: new T.MeshStandardMaterial({color: 0x194635, roughness: .66}), matrices: []},
     brass: {material: new T.MeshStandardMaterial({color: 0xc9a55e, metalness: .65, roughness: .38}), matrices: []},
     accent: {material: new T.MeshStandardMaterial({color: 0xffffff, roughness: .58}), matrices: [], slots: []},
-    glass: {material: new T.MeshStandardMaterial({color: 0xb9d9d0, metalness: .05, roughness: .18,
+    glass: {material: new T.MeshBasicMaterial({color: 0xb9d9d0,
       transparent: true, opacity: .065, depthWrite: false}), matrices: []}
   };
   const transform = new T.Object3D();

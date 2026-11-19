@@ -88,8 +88,9 @@ async function createCharacterV1(T, prepareModel) {
   actions.idle.paused = reducedMotion.matches;
   mixer.update(0);
 
-  function update(actual, dt, requested = actual, sprintRate = 1, seat) {
-    actions.run.setEffectiveTimeScale(sprintRate);
+  function update(actual, dt, requested = actual, playbackRate = 1, seat) {
+    actions.run.setEffectiveTimeScale(playbackRate);
+    actions.walk.setEffectiveTimeScale(playbackRate);
     const state = resolveLocomotion(actual, requested, dt);
     if (state !== animation) {
       // Preserve footfall phase when changing pace, including interrupted fades.

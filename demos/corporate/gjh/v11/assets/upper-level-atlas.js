@@ -1,5 +1,6 @@
 // The upper level uses the shop kit's colour tokens and guttered atlas UVs.
 import {swatch} from './signage/tokens.js';
+import {extrudeArtworkGutter, setupArtworkTexture} from './artwork-textures.js';
 
 export const atlasPx = 256;
 export const categories = ['Fashion', 'Lifestyle', 'Tech & Games', 'Food & Drinks'];
@@ -11,7 +12,7 @@ export const cells = {
   sky:{x:54,y:164,w:3,h:89}, filament:{x:88,y:151,w:8,h:6}, louvres:{x:100,y:151,w:55,h:11}
 };
 
-export function paintUpperAtlas(T, mark) {
+export function paintUpperAtlas(T, mark, tier) {
   const canvas=document.createElement('canvas');
   canvas.width=canvas.height=atlasPx;
   const ctx=canvas.getContext('2d');
@@ -20,6 +21,7 @@ export function paintUpperAtlas(T, mark) {
   function inCell(cell,draw){
     ctx.save();ctx.translate(cell.x,cell.y);ctx.beginPath();ctx.rect(0,0,cell.w,cell.h);ctx.clip();
     draw(cell.w,cell.h);ctx.restore();
+    extrudeArtworkGutter(ctx,cell,1);
   }
   inCell(cells.directory,(w,h)=>{
     ctx.strokeStyle=brass; ctx.strokeRect(1.5,1.5,w-3,h-3);
@@ -98,6 +100,5 @@ export function paintUpperAtlas(T, mark) {
     ctx.fillStyle='#a68d64';ctx.fillRect(0,0,w,1);
   });
   inCell(cells.filament,(w,h)=>{ctx.fillStyle='#ffedba';ctx.fillRect(0,0,w,h);});
-  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
-  return map;
+  return setupArtworkTexture(T,new T.CanvasTexture(canvas),tier);
 }
