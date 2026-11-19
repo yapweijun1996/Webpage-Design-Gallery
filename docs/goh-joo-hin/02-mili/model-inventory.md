@@ -23,4 +23,7 @@ Product-specific models and pending source work are listed in the [shop brief](R
 | Object | Local placement | Runtime source |
 | --- | --- | --- |
 | Regular and vegetarian 510 g bottle forms | XZ (−0.39, 0.89) and (−0.16, 0.89), bottom Y 1.22 | [Room-detail generator](../../../scripts/gjh_interiors/rooms.py) and [Blender study](../../../models/gjh-mili-sauce-bottles/README.md) |
+| MILI Vegetarian Mock Duck 280 g unprinted tall tin | XZ (0.12, 0.89), bottom Y 1.22 | [Editable model, official photo and release asset](../../../models/gjh-mili-mock-duck/README.md) |
 | Sauce comparison sign and Inspect point | Sign on the front of the cookline. The standing point is XZ (0, 2.5). | [Cookline placement record](../../gjh-v11-interior-program.json) |
+
+The sample plate placement in the [room programme](../../gjh-v11-interior-program.json) now selects its own 540 exported vertices. This prevents the placement transform from moving portions of the sauce bottles.

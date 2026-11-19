@@ -1,6 +1,6 @@
 # S02 · MILI
 
-**Status: the sauce comparison and two unprinted bottle forms are implemented.** The four concept drawings show the wider proposal. Source-linked packaging art and the mock-duck model remain pending.
+**Status: the sauce comparison and two unprinted bottle forms are implemented.** The four concept drawings show the wider proposal. The 280 g Mock Duck counter now also includes an unprinted tall-tin study. Retail packaging art remains source-linked.
 
 [MILI brand research and primary product references](brand-research.md)
 
@@ -27,7 +27,7 @@ The Inspect point at the front of the cookline introduces MILI as a Goh Joo Hin 
 | --- | --- | --- |
 | MILI Vegetarian Oyster Sauce 510g | [Official GJH eShop imagery](https://www.gjheshop.com/product/mili-vegetarian-oyster-sauce-510g/) | Installed unprinted silhouette at the cookline. Uses the nominal 55 × 55 × 245 mm listing envelope and the shoulder and cap from the catalog view. |
 | MILI Oyster Sauce 510g | [Official GJH eShop imagery](https://www.gjheshop.com/product/mili-oyster-sauce-510g/) | Installed companion form. Both catalog photos support the shared shoulder profile and red-orange closure. The exact regional labels remain source links. |
-| MILI Vegetarian Mock Duck 280g | [Official GJH eShop listing](https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/) | Pending short tin with a verified rim and side profile. Keep the listing’s current availability separate from the exhibit. |
+| MILI Vegetarian Mock Duck 280g | [Official GJH eShop listing](https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/) | The [official photo](https://www.gjheshop.com/wp-content/uploads/2024/04/a08ee787192ce59100d8378c5118b4a8.jpg) shows a tall tin with gold-toned rims. The [unprinted runtime study](../../../models/gjh-mili-mock-duck/README.md) uses an estimated 76 × 113 mm diameter and height. Measured dimensions and retail artwork remain open. |
 
 Installed display assets are the [copper hood](../../../demos/corporate/gjh/v11/assets/interiors/s02-hawker-stall-exhaust-hood-balanced.glb) and [MILI detail pack](../../../demos/corporate/gjh/v11/assets/interiors/s02-mili-details.glb). The [editable Blender bottle study](../../../models/gjh-mili-sauce-bottles/README.md) records the measured envelope and inferred shoulder model. The models carry no retail label art.
 

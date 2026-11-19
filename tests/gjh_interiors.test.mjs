@@ -171,13 +171,19 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     if (receipt.store === 'S02') {
       const positions=model.children.find(mesh=>mesh.material?.name==='Enamel').geometry.attributes.position;
       const plate=plans.get('S02').items.find(i=>i.socket==='tasting-plate');
-      const heights=[];
-      for (let i=0;i<positions.count;i++) {
-        if (positions.getX(i)>.17 && positions.getX(i)<.80 && positions.getZ(i)>1.1 &&
-            positions.getZ(i)<1.68 && positions.getY(i)<1.4) heights.push(positions.getY(i));
+      const {firstVertex,vertexCount} = plate.bakedPart;
+      const [x,y,z] = plate.xyz;
+      const [width,height,depth] = plate.size;
+      const epsilon = .00001;
+      assert(firstVertex + vertexCount <= positions.count);
+      const heights = [];
+      for (let i=firstVertex;i<firstVertex+vertexCount;i++) {
+        assert(Math.abs(positions.getX(i)-x) <= width/2+epsilon, 'Plate range must not include the sauce bottles');
+        assert(Math.abs(positions.getZ(i)-z) <= depth/2+epsilon);
+        heights.push(positions.getY(i));
       }
-      assert.equal(heights.length,plate.bakedPart.vertexCount);
-      assert.equal(round(Math.min(...heights)),1.22);
+      assert.equal(round(Math.min(...heights)),y);
+      assert.equal(round(Math.max(...heights)),round(y+height));
     }
     let instances = 0;
     model.traverse(mesh => {

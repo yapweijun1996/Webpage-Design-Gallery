@@ -2,6 +2,7 @@
 from math import cos, pi, radians, sin, tau
 
 from mesh import CRAFT, PRINT, PULSE, SCROLL, Room, library_profile, logo
+from mili_mock_duck import add_mili_mock_duck
 
 GOLD, BONE, INK = "d7a95b", "f6ecd2", "203545"
 MINT, RED, SEA = "70cdb9", "c34339", "357675"
@@ -83,6 +84,8 @@ def mili(r,profiles):
     for i in range(3):
         r.lathe(.36+i*.11,counter_top+.041,1.40,.063,.073,GLOBE,["dc9552"],6)
     for k in range(3): leaf(r,-1.51+.16*k,2.04+k*.37,.47,.65,MINT)
+    # Append after the tasting plate so its existing baked vertex range stays valid.
+    r.mock_duck_face = add_mili_mock_duck(r.batches[CRAFT], .12, counter_top, .89)
 
 
 def gogo(r,_):

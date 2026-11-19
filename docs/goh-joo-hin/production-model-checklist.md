@@ -21,7 +21,8 @@ The four listings show a nominal 75 × 75 × 120 mm while the current GLBs are a
 
 - [ ] **Original Oyster Sauce 510 g.** Compare cap and shoulder against its exact [catalogue photographs](https://www.gjheshop.com/product/mili-oyster-sauce-510g/). Retain the 55 × 55 × 245 mm nominal envelope and track print artwork separately.
 - [ ] **Vegetarian Oyster Sauce 510 g.** Check the companion bottle and cap against the [separate source](https://www.gjheshop.com/product/mili-vegetarian-oyster-sauce-510g/). Confirm the current print edition before texture work.
-- [ ] **Vegetarian Mock Duck 280 g.** Model an unprinted short tin to the evidenced profile. Confirm actual can dimensions, end profile and edition against a matching sample or supplier data. [Official product identity](https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/)
+- [x] **Vegetarian Mock Duck 280 g, unprinted form study.** The official photo shows a tall straight-sided can with rolled rims. The 76 × 113 mm display estimate is a [316-triangle editable study](../../models/gjh-mili-mock-duck/README.md) in the room craft batch. [Official product and photo](https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/)
+- [ ] **Vegetarian Mock Duck 280 g, exact retail pack.** Confirm measured can dimensions, detailed ends and current print edition against a matching sample or supplier data.
 
 ## S03 GOGO
 

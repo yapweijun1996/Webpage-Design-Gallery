@@ -1,5 +1,5 @@
 {
-  "plan_sha256": "90825424b408a33985be9161cef788aa4d1836f332c2d7ba552b66db575827c5",
+  "plan_sha256": "9eedb1646af8fc24a541cdacf99b3f1d5f39553176dd4dd7896fbaa9a86b8db4",
   "assets": [
     {
       "file": "s01-crescent-header-low.glb",
@@ -3076,9 +3076,9 @@
       {
         "store": "S02",
         "file": "s02-mili-details.glb",
-        "bytes": 75440,
-        "sha256": "e33e7a00f17f2d0099a5c9719843638ad2a8ac6b7f7daf6a8fa045df5577e825",
-        "triangles": 1426,
+        "bytes": 84536,
+        "sha256": "d96264e886a4e253ed00d0cc01ef6550d76d2353fd7863411e46782d0d1bd630",
+        "triangles": 1742,
         "draws": 3,
         "instances": 8,
         "motion": [],
