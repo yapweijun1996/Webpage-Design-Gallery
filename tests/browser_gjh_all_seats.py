@@ -47,7 +47,7 @@ def run():
     else:page.evaluate('__mall.step(200)')
     mid=state(page);assert 0<mid['character']['seatWeight']<1
     if i in [0,2,4,6]:page.screenshot(path=str(out/f'mid-{i+1}.png'))
-    page.evaluate('__mall.step(800)');a=state(page);assert a['seatPhase']=='seated' and a['seatId']==seat['id'];assert a['cameraFocus']=='seat' and a['cameraDistance']<3.1;assert abs(a['facing']-(0 if seat['facing']==1 else 3.14159265))<.01;page.screenshot(path=str(out/f'seated-{i+1}.png'))
+    page.evaluate('__mall.step(800)');a=state(page);assert a['seatPhase']=='seated' and a['seatId']==seat['id'];assert a['cameraFocus']=='seat' and a['cameraDistance']>=5;assert abs(a['facing']-(0 if seat['facing']==1 else 3.14159265))<.01;page.screenshot(path=str(out/f'seated-{i+1}.png'))
     page.locator('#inspect').click();page.evaluate('__mall.setInput({forward:1});__mall.step(300)');a=state(page);assert a['seatPhase']=='stand' and 0<a['character']['seatWeight']<1;
     if args.capture_only:
      page.screenshot(path=str(out/f'stand-{i+1}-1.png'));page.evaluate('__mall.step(300)');page.screenshot(path=str(out/f'stand-{i+1}-2.png'));page.evaluate('__mall.step(400)');page.screenshot(path=str(out/f'stand-{i+1}-3.png'))

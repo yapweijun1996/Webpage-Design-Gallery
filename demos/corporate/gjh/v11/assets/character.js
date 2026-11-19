@@ -1,4 +1,6 @@
 /** Authored visitor presentation; locomotion and collision belong to player.js. */
+import {createSeatContact} from './seat-contact.js';
+
 export function createLocomotionContinuity() {
   // Bridge isolated contact corrections, never movement from rest or released input.
   let grace = 0;
@@ -67,6 +69,7 @@ async function createCharacterV1(T, prepareModel) {
   const seated = createSeatedPose(avatar);
   const visual = new T.Group();
   visual.add(avatar);
+  const seatContact = createSeatContact(T, visual, avatar);
   const cart=await createPushCart(T,avatar,visual,{prepareModel});
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clips = Object.freeze({idle: 'idle', walk: 'walk', run: 'sprint'});
@@ -85,7 +88,7 @@ async function createCharacterV1(T, prepareModel) {
   actions.idle.paused = reducedMotion.matches;
   mixer.update(0);
 
-  function update(actual, dt, requested = actual, sprintRate = 1) {
+  function update(actual, dt, requested = actual, sprintRate = 1, seat) {
     actions.run.setEffectiveTimeScale(sprintRate);
     const state = resolveLocomotion(actual, requested, dt);
     if (state !== animation) {
@@ -104,9 +107,11 @@ async function createCharacterV1(T, prepareModel) {
       action.setEffectiveWeight(Math.abs(weight - nextWeight) < .001 ? weight : nextWeight);
     }
     actions.idle.paused = reducedMotion.matches;
+    seatContact.restore();
     carryBag.restore(); collection.restore(); seated.restore(); cart.restore();
     mixer.update(dt);
     carryBag.apply(); collection.update(dt); seated.apply(); cart.apply();
+    if (seat && seated.active) seatContact.apply(seat, seated.weight);
   }
 
   return {
