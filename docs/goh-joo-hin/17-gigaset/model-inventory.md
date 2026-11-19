@@ -1,0 +1,27 @@
+# S17 Gigaset model inventory
+
+Upstream paths were checked against [Blender-3D-Gallery main `0b71ed7e`](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3). Coordinates are local XYZ metres. A catalogue candidate requires a fit and rights check before replacing a shipped asset. [Shop brief](README.md) · [Floor plan](floor-plan.webp)
+
+| Fixture | Placement | Web runtime | Blender Gallery |
+| --- | --- | --- | --- |
+| Gabled private-call alcove with open front | -0.55, 0.081, -2.95 | [Low GLB](../../../demos/corporate/gjh/v11/assets/interiors/s17-telephone-alcove-low.glb) · [Balanced GLB](../../../demos/corporate/gjh/v11/assets/interiors/s17-telephone-alcove-balanced.glb) · [Detailed GLB](../../../demos/corporate/gjh/v11/assets/interiors/s17-telephone-alcove-detailed.glb) | [Low](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s17-telephone-alcove-low.glb) · [Balanced](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s17-telephone-alcove-balanced.glb) · [Detailed](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/exports/gjh-v11-interiors/s17-telephone-alcove-detailed.glb) |
+| Real-scale generic handset in the alcove | -0.55, 1.09, -2.77 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/cordless-phone-display.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/cordless-phone-display/exports/optimized.glb). Reuse candidate. |
+| Small domestic writing desk | -2.9899999999999998, 0.081, -1.8 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/work-desk/exports/optimized.glb). Reuse candidate. |
+| Second unbranded dock on writing desk | -2.9899999999999998, 1.081, -1.52 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/cordless-phone-display.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/cordless-phone-display/exports/optimized.glb). Reuse candidate. |
+| Cork-coloured waiting seat in left window | -2.51, 0.081, 3.22 | [Matching runtime export](../../../demos/corporate/gjh/v11/assets/gallery-assets/lounge-sofa-bench.glb). Verify this socket uses the intended variant. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/lounge-sofa-bench/exports/optimized.glb). Reuse candidate. |
+| Domestic pendant above desk | -0.55, 3.3, -2.95 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-cylinder-pendant/exports/optimized.glb). Reuse candidate. |
+| Correspondence drawer cabinet | -3.03, 0.081, 0.4 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/filing-cabinet/exports/optimized.glb). Reuse candidate. |
+| Gable reading lamp | 3.19, 2.74, 0.3 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-wall-sconce/exports/optimized.glb). Reuse candidate. |
+| Chalk planter at end of runner | 2.63, 0.081, -3.68 | Room programme placement. See the room detail and source notes for its shipped representation. | [Existing export](https://github.com/yapweijun1996/Blender-3D-Gallery/blob/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/orchid-planter/exports/optimized.glb). Reuse candidate. |
+| Room detail pack | Slot origin | [Installed detail GLB](../../../demos/corporate/gjh/v11/assets/interiors/s17-telephone-details.glb) | Room detail generated using the [web repository source](../../../scripts/gjh_interiors/rooms.py). |
+
+Product-specific models and pending source work are listed in the [shop brief](README.md). Fixture GLBs and generic shelf stock are exhibit assets.
+
+## Product-specific inventory
+
+| Product | Placement | Runtime and proposed model |
+| --- | --- | --- |
+| Gigaset A170 | Left alcove phone tray | Pending exact handset and cradle. The A170 has an amber 34 × 22 mm display and a 159 × 48 × 30 mm handset. [Manufacturer gallery](https://www.gigaset.com/en_en/gigaset-a170/) |
+| Gigaset COMFORT 550A | Right alcove phone tray | Pending exact keypad and answering-machine base. The black 550A handset is 161 × 52 × 26 mm and its base is 43 × 123 × 99 mm. [Manufacturer gallery and specifications](https://www.gigaset.com/hq_en/gigaset-comfort-550/), with the black answering-machine variant selected. |
+
+[Generated shape study](product-model-reference.webp) shows the small A170-style charger and amber display beside the wider 550A-style answering station and TFT. The linked manufacturer galleries govern the final handset contours, keypad layout and cradle geometry.
