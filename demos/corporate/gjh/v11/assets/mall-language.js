@@ -315,6 +315,7 @@ const messages = new Map([
   ['Home','首页','Utama'], ['Shops','商店','Kedai'], ['Events','活动','Acara'], ['Rewards','奖励','Ganjaran'], ['Profile','个人资料','Profil'],
   ['Events, Rewards and Profile are unavailable in this demo.','此演示暂未开放活动、奖励及个人资料。','Acara, Ganjaran dan Profil tidak tersedia dalam demo ini.'],
   ['App & offline help','应用与离线设置','Aplikasi dan bantuan luar talian'],
+  ['Enter 3D mall','进入 3D 商场','Masuk pusat beli-belah 3D'], ['Page settings','页面设置','Tetapan halaman'], ['Switch to light theme','切换到浅色主题','Tukar ke tema cerah'], ['Switch to dark theme','切换到深色主题','Tukar ke tema gelap'],
   ['Check for updates','检查更新','Semak kemas kini'], ['Update','更新','Kemas kini'], ['Reload','重新载入','Muat semula'],
   ['Checking for updates…','正在检查更新…','Sedang menyemak kemas kini…'],
   ['No verified update is waiting.','已是最新版本。','Tiada kemas kini yang disahkan.'],
