@@ -32,6 +32,25 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 
 - [x] Show nearby shop directions only in the ground-floor public concourse. The 10-second New Moon keyboard route verified the outside direction, no other-shop direction while inside, and the Australia shelf Inspect action under More actions. A separate Detailed run with screen capture disabled recorded 18.6 ms p95 and zero intervals at or above 50 ms in this short desktop route.
 
+### Expanded V11 upper-floor circulation
+
+[Facilities plan and acceptance](docs/gjh-v11-public-facilities.md).
+
+- [x] Verify the public baseline lift round trip. Chrome loaded the redesigned Detailed cabin and reached 7.2 m. Both gates and thresholds behaved as expected while travelling and docked. The tested route left the cabin, walked a short distance across the upper landing and returned.
+- [ ] Identify the seat or nearby furniture conflict at the upper doorway and align the rendered model, collision envelope, sitting pose and stand exit.
+- [ ] Keep a continuous perimeter running route on the upper level, with safe lift approaches, rail guards and reachable seating. Verify a complete keyboard loop with checkpoints on all sides, safe re-entry and descent. Check a representative route in touch emulation and capture before/after evidence and frame timing.
+
+### Expanded V11 public restrooms
+
+- [ ] Replace the planned eastern ground-floor facilities block with three enterable rooms for Men, Women and an all-user Accessible restroom. Keep the northern service reserves closed. Design for a step-free public approach, clear entrances and privacy screens, using the BCA public-place guidance as a virtual design reference.
+- [ ] Add readable wayfinding and map/directory directions in the supported languages. Use lightweight fixture geometry, mirrors above the basins, an explicit tap on/off action and a short cosmetic flush response.
+- [ ] Verify the walking route, all three room entries and exits, faucet and flush actions, keyboard and touch affordances, translated labels, frame timing and the published build. Save browser evidence with the room plan and asset inventory.
+
+### V11 ambient motion during model preparation
+
+- [ ] Keep the approved teal-and-gold loading screen visibly active throughout a long pending stage. Use slow CSS transform and opacity motion independent of progress, and stop it when loading is ready, dismissed, failed or hidden. Honor reduced motion and preserve existing control focus and announcements.
+- [ ] Hold the real model stage for at least 10 seconds in Chrome, then check ready, failure/retry, visibility and reduced motion at desktop and 390 px. Measure timing with recording disabled before deployment.
+
 ## Mobile performance, controls and signage programme (2026-11-18)
 
 Owner device: iPhone, 393 px wide. Owner priorities: no lag on the phone, premium look, shop signage and interiors that read as real brands. Verification rule: judge from real browser screenshots and the walk probe (`docs/walk_probe.py`), not from agent summaries. Checklist: [taste engine checklist](docs/ui-ux/taste-engine-checklist.md).
