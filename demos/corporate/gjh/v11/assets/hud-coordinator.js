@@ -169,6 +169,7 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
       active = enabled;
       if (active && lastZone !== zone) {
         lastZone = zone;
+        lastSample = -Infinity;
         tracker.visit(zone);
         updateGoals();
       }
@@ -187,7 +188,7 @@ export function createMallHud({destinations, announce, scene, subscribeBag, subs
       pickupAction?.classList.toggle('hud-unavailable-action', !usePhysical);
       queue.set('held', showHeld);
       queue.set('interaction', canInteract);
-      if (!active || zone === 'upper' || travelling || canInteract || showHeld) {
+      if (!active || zone !== 'atrium' || travelling || canInteract || showHeld) {
         queue.set('nearby', null);
       } else if (now - lastSample >= 100) {
         lastSample = now;

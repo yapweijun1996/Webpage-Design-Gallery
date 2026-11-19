@@ -33,9 +33,6 @@ const cabinets = legacyCabinets
     }));
 const shelfXs = Object.freeze(cabinets.map(c=>c.x));
 const shelfTops = Object.freeze(interiorPilot ? [.6825, 1.1925, 1.7025] : [.451, .991, 1.531]);
-const facingCount = interiorPilot ? 11 : 17;
-const productOffsets = Object.freeze(Array.from({length: facingCount}, (_, i) => (i - (facingCount - 1) / 2) * .10));
-const reserveIndex = facingCount + Math.floor(facingCount / 2);
 // V2 stock sits at the front of the shelf so the short humanoid arm can reach it.
 const productOffsetZ = new URLSearchParams(location.search).get('visitor')==='v1' ? (interiorPilot ? 0 : .02) : .22;
 const shelfRotation = interiorPilot ? Math.PI : 0;
@@ -145,7 +142,7 @@ function fallbackShelf(T, scene, displayShelves = []) {
 // The native M056 has 29 independently transformed mesh nodes but only five
 // materials. Bake each node into shelf-local space and batch by its actual
 // material, retaining UVs, textures, emissive surfaces and the shelf instances.
-function batchShelf(T, primitives) {
+function batchShelf(T, primitives, lightNewMoon) {
   const buckets=new Map();
   for(const primitive of primitives){
     const geometry=primitive.geometry.index?primitive.geometry.toNonIndexed():primitive.geometry.clone();
@@ -158,6 +155,8 @@ function batchShelf(T, primitives) {
     // The imported trim and price rails share planes with the crown, posts
     // and shelf ends. Bias their finish without splitting the material batch.
     if (material.name === 'Champagne gold') decalMaterial(material,-3);
+    if (lightNewMoon && material.name === 'Warm wood baked grain') material.color.setRGB(1.35,1.58,1.8);
+    if (lightNewMoon && material.name === 'Emerald lacquer') material.color.set('#233d79');
     const geometry=mergeGeometries(parts);
     parts.forEach(part=>part.dispose());
     geometry.computeBoundingSphere();
@@ -184,11 +183,16 @@ function shelfShadowGeometry(primitives) {
 export async function addProducts(T, scene, textures, brass,showcase=[],displayShelves=[],heroCan=null,shopSlot,artworkTier=()=> 'low') {
   const displayLods = [];
   let shadowMesh = null, shadowLod = null;
+  const lightNewMoon = shopSlot === 1 && !interiorPilot;
+  const facingCount = lightNewMoon ? cabinetLayout.facingsPerRow : interiorPilot ? 11 : 17;
+  const spacing = lightNewMoon ? cabinetLayout.spacing : .10;
+  const productOffsets = Array.from({length:facingCount}, (_, index) => (index - (facingCount - 1) / 2) * spacing);
+  const reserveIndex = facingCount + Math.floor(facingCount / 2);
   const [shelfRecord, ...canRecords] = await Promise.all([
     loadAsset(T,shelf,'shelf',artworkTier), ...cans.map(item => loadAsset(T,item,'can',artworkTier))
   ]);
   const sourceShelfPrimitives=shelfRecord.primitives.length;
-  if(shelfRecord.status==='loaded')shelfRecord.primitives=batchShelf(T,shelfRecord.primitives);
+  if(shelfRecord.status==='loaded')shelfRecord.primitives=batchShelf(T,shelfRecord.primitives,lightNewMoon);
   if (shelfRecord.status === 'fallback') fallbackShelf(T, scene, displayShelves);
   else {
     const shadow = {geometry:shelfShadowGeometry(shelfRecord.primitives),
@@ -252,6 +256,12 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
       bounds:new T.Box3(), visible:true, detail:0
     }));
     if (record.status === 'loaded') {
+      if (lightNewMoon) for (const {material} of record.primitives) {
+        if (!material.isMeshStandardMaterial || !material.map) continue;
+        material.emissive.set(0xffffff);
+        material.emissiveMap = material.map;
+        material.emissiveIntensity = .12;
+      }
       loadedCans.push({primitives:record.primitives, placements:slots});
       stock.set(`new-moon-${sku}-front`, {record, placements:shelfPlacements, slot:slots[reserveIndex]});
     } else {

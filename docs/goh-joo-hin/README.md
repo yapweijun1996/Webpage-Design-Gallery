@@ -8,7 +8,7 @@ The 17 shops here are the V11 game’s authored roster. Some represent house bra
 
 | Unit | Shop |
 | --- | --- |
-| S01 | [New Moon](01-new-moon/brand-research.md) |
+| S01 | [New Moon](01-new-moon/brand-research.md) · [Design and player walkthrough](01-new-moon/README.md) |
 | S02 | [MILI](02-mili/brand-research.md) |
 | S03 | [GOGO](03-gogo/brand-research.md) |
 | S04 | [Borsch Med](04-borsch-med/brand-research.md) |

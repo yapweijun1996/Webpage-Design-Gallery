@@ -5176,6 +5176,7 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
       active = enabled;
       if (active && lastZone !== zone) {
         lastZone = zone;
+        lastSample = -Infinity;
         tracker.visit(zone);
         updateGoals();
       }
@@ -5194,7 +5195,7 @@ function createMallHud({ destinations, announce, scene, subscribeBag, subscribeI
       pickupAction?.classList.toggle("hud-unavailable-action", !usePhysical);
       queue.set("held", showHeld);
       queue.set("interaction", canInteract);
-      if (!active || zone === "upper" || travelling || canInteract || showHeld) {
+      if (!active || zone !== "atrium" || travelling || canInteract || showHeld) {
         queue.set("nearby", null);
       } else if (now - lastSample >= 100) {
         lastSample = now;
@@ -6403,6 +6404,7 @@ async function initialize() {
   });
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier);
+  ui.setBrandStories(world.newMoonExhibit);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
   if (world.productAssets?.shelf)

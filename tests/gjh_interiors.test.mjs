@@ -137,7 +137,7 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     assert.equal(file.length,receipt.bytes);
     assert.equal(sha(file),receipt.sha256);
     const doc = JSON.parse(file.subarray(20,20+file.readUInt32LE(12)));
-    assert(doc.images.every(image=>image.bufferView !== undefined && !image.uri));
+    assert((doc.images ?? []).every(image=>image.bufferView !== undefined && !image.uri));
     const model = await load({...receipt,tier:receipt.tier.toLowerCase()},signal);
     const measured = counts(model), bounds = new T.Box3().setFromObject(model);
     assert.equal(measured.triangles,receipt.triangles,receipt.file);
@@ -149,7 +149,8 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     assert(bounds.getSize(new T.Vector3()).toArray().every((extent,i)=>extent <= envelope[i]+1e-5));
     assert(model.children.every(mesh=>!mesh.material.transparent),'Opaque floor kit');
     const maps = model.children.flatMap(({material})=>[material.map,material.emissiveMap].filter(Boolean));
-    assert(maps.length > 0,receipt.file);
+    if (receipt.provenance.finish === 'solid-pbr') assert.equal(maps.length,0,receipt.file);
+    else assert(maps.length > 0,receipt.file);
     maps.forEach(map=>assertArtworkTexture(map,'low'));
     models.set(receipt.file,measured);
     disposeInteriorModel(model);
@@ -228,7 +229,7 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     for (const store of stores) {
       const asset = interiorAsset(store,tier);
       const anchor = models.get(asset.file);
-      const photoFaces = store.id === 'S01' ? 2 : 0;
+      const photoFaces = store.id === 'S01' ? 1 : 0;
       const total = {triangles:anchor.triangles+photoFaces*2,calls:anchor.calls+photoFaces};
       for (let i=0;i<=level;i++) {
         const detail = buildInteriorDecoration(T,store,materials,i);

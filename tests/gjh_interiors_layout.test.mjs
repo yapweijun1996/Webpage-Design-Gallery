@@ -128,9 +128,9 @@ test('New Moon validates the native GLB, scales all four cabinets and retains th
   });
   const {addProducts}=await import('../demos/corporate/gjh/v11/assets/products.js');
   const scene=new T.Scene();
-  const display=await addProducts(T,scene,new Map(),new T.MeshStandardMaterial());
+  const display=await addProducts(T,scene,new Map(),new T.MeshStandardMaterial(),[],[],null,1);
   assert.equal(display.assets.shelf.status,'loaded',display.assets.shelf.reason);
-  assert.equal(display.assets.totalInstances,204);
+  assert.equal(display.assets.totalInstances,132);
   const shelves=moon.items.filter(i=>i.socket==='shelves');
   for (const [index,cabinet] of shelves.entries()) {
     const shelf=display.shelves[index];

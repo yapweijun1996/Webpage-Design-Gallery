@@ -32,6 +32,8 @@ def project(shop):
     for obstacle in shop.get('retainedObstacles', []):
         if obstacle.get('socket') == 'kitchen-run':
             details['kitchenRun'] = obstacle
+    if 'storyPanels' in shop:
+        details['storyPanels'] = shop['storyPanels']
     if 'teaNiches' in shop:
         details['teaNiches'] = shop['teaNiches']
     return dict(**details, **{key:shop[key] for key in ('brand','style','concept','signature_family','frame','palette','floor','capture')},
@@ -47,7 +49,9 @@ def build(check=False):
     layouts = {s['slot']: project(s) for s in stores}
     shelves = [dict(xyz=i['xyz'],size=i['size'],scale=i['scale'],standing=i['standing'])
                for i in stores[0]['items'] if i['socket']=='shelves']
-    products = dict(origin=stores[0]['frame']['world_origin_m'], cabinets=shelves)
+    stock = stores[0]['stock_plan']
+    products = dict(origin=stores[0]['frame']['world_origin_m'], cabinets=shelves,
+                    facingsPerRow=stock['facings_per_row'], spacing=stock['spacing_m'])
     seats = [item['xyz'] for item in stores[1]['items'] if item['socket']=='seats']
     baked = {i['lod']['low']: dict(**i['bakedPart'], xyz=i['xyz']) for store in stores
              for i in store['items'] if 'bakedPart' in i}

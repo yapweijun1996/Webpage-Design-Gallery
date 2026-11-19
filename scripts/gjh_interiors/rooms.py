@@ -42,9 +42,7 @@ def placard(r,x,y,z,w,colour):
     r.badge(x,y,z+.03,w)
 
 
-def new_moon(r,profiles):
-    for i,(x,z) in enumerate(((-3.25,-2.4),(-2.55,-2.6),(2.86,-2.7))):
-        lantern(r,x,3.27+.28*(i%2),z,.32+.07*(i%2),.69,"efb94f",profiles["lantern"],5.65)
+def new_moon(r,_):
     # Two arcs with common tips give a genuine tapered crescent inlay.
     for i in range(24):
         def point(k,inner):

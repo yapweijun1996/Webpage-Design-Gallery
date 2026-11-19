@@ -10,7 +10,7 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 - [ ] M-lane (movement and physics): M1 baseline probe; M2 speeds (desktop 3.4/5.2 m/s, phone 3.1/4.5 m/s, dead zone 12%) and one physics step per tick; M3 passage fixes (cart contour, door occupancy, GOGO table, camera boxes); M4 first dynamic props (can, basket, ball); M5 acceptance on 17 shops.
 - [ ] S-lane (shop layouts and interactions): S0 collision sweep; S1 unified layout JSON; S2 GOGO, MILI, New Moon; S3 other 14 shops; S4 animated parts (drawers, bell, piano keys, cup level).
 - [ ] C-lane (character): C1 close-up baseline; C2 avatar lighting; C3 sampling and AA; C4 re-bake and LOD ladder; C5 modular chibi trial.
-- [ ] T-lane (mall train, brand tour): research pending, steps will be added here.
+- [ ] T-lane (mall tram, brand tour; details in the roadmap doc, section E): T1 grey-box route (new `tram-layout.js`, ~160 m ground loop at the existing brass floor line: entry station (10,39) west along x=-12, north, east along z=3, south along x=32, back along z=39, 2 m corner arcs; sweep car, passenger and camera envelopes every 0.25 m; one seat-view screenshot per shop); T2 single-station ride MVP (board with F, moving seat anchor, locked walking, first/third person via V, exit only when stopped and clear); T3 captions and real car (17 brand cards in route order S11-06, S01-05, S12-17 at about 1.5 m/s, Blender GLB with seat anchors, instanced cars, Low whole train <= 2,500 triangles and <= 4 draws); T4 three-station operation (south entrance, east mid station (32,22), upper gallery with a short lift-rail bridge, NPC waypoint changes, stop when someone is ahead); T5 brand story and accessibility (pause, skip shop, end, optional speech, 44 px controls, reduced-motion static cards). Main risk: NPCs walk the same route; S11 and S17 faces are seen obliquely.
 - [ ] P-lane (probes): real device targets, GPU timer, refresh rate, `--route shops` flicker route.
 - [ ] Running now: New Moon and all-shop flicker fix (photo mip-maps, decal offsets).
 - [ ] Owner real-device checks: iPhone and Android phone (export the performance JSON from the lap page).
@@ -27,6 +27,29 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 ### V11 touch Sit button alignment
 
 - [x] Centre the seated-person icon and `Sit` label on the same vertical centreline in the round nearby-action button. Stack them and align the pair optically within the circle. Verify a phone-viewport screenshot against the reported misalignment, retain the touch target size, and tap through Sit and Stand to confirm the interaction. Chrome touch emulation at 390 px measured a 56 × 56 px target and horizontal centre alignment within 0.01 px. [Chrome seat action](docs/gjh-v11-references/sit-button-runtime.jpg).
+
+### V11 nearby destination hint
+
+- [x] Show nearby shop directions only in the ground-floor public concourse. The 10-second New Moon keyboard route verified the outside direction, no other-shop direction while inside, and the Australia shelf Inspect action under More actions. A separate Detailed run with screen capture disabled recorded 18.6 ms p95 and zero intervals at or above 50 ms in this short desktop route.
+
+### Expanded V11 upper-floor circulation
+
+[Facilities plan and acceptance](docs/gjh-v11-public-facilities.md).
+
+- [x] Verify the public baseline lift round trip. Chrome loaded the redesigned Detailed cabin and reached 7.2 m. Both gates and thresholds behaved as expected while travelling and docked. The tested route left the cabin, walked a short distance across the upper landing and returned.
+- [ ] Identify the seat or nearby furniture conflict at the upper doorway and align the rendered model, collision envelope, sitting pose and stand exit.
+- [ ] Keep a continuous perimeter running route on the upper level, with safe lift approaches, rail guards and reachable seating. Verify a complete keyboard loop with checkpoints on all sides, safe re-entry and descent. Check a representative route in touch emulation and capture before/after evidence and frame timing.
+
+### Expanded V11 public restrooms
+
+- [ ] Replace the planned eastern ground-floor facilities block with three enterable rooms for Men, Women and an all-user Accessible restroom. Keep the northern service reserves closed. Design for a step-free public approach, clear entrances and privacy screens, using the BCA public-place guidance as a virtual design reference.
+- [ ] Add readable wayfinding and map/directory directions in the supported languages. Use lightweight fixture geometry, mirrors above the basins, an explicit tap on/off action and a short cosmetic flush response.
+- [ ] Verify the walking route, all three room entries and exits, faucet and flush actions, keyboard and touch affordances, translated labels, frame timing and the published build. Save browser evidence with the room plan and asset inventory.
+
+### V11 ambient motion during model preparation
+
+- [ ] Keep the approved teal-and-gold loading screen visibly active throughout a long pending stage. Use slow CSS transform and opacity motion independent of progress, and stop it when loading is ready, dismissed, failed or hidden. Honor reduced motion and preserve existing control focus and announcements.
+- [ ] Hold the real model stage for at least 10 seconds in Chrome, then check ready, failure/retry, visibility and reduced motion at desktop and 390 px. Measure timing with recording disabled before deployment.
 
 ## Mobile performance, controls and signage programme (2026-11-18)
 

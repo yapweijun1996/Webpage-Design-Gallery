@@ -2,7 +2,7 @@ import {interiorAsset,interiorStores,interiorTiers,radians,worldInteriorBox} fro
 import {prepareInteriorDecoration,interiorMaterials} from './decoration.js';
 import {createInteriorModelLoader,disposeInteriorModel} from './models.js';
 import {mergeStaticGeometries} from '../merge-static-geometries.js';
-import {decalClearance, decalHeight, decalMaterial} from '../surface-decals.js';
+import {decalClearance, decalMaterial} from '../surface-decals.js';
 import {setupArtworkTexture} from '../artwork-textures.js';
 
 import {roomDetails} from './detail-files.js';
@@ -63,14 +63,10 @@ export function createInteriorKit(T, scene, {
     const panel = (width,x,y,z,yaw = 0) =>
       new T.PlaneGeometry(width,width).rotateY(yaw)
         .translate(x+decalClearance*Math.sin(yaw),y,z+decalClearance*Math.cos(yaw));
-    // The original photograph shares the product and reading-stand texture.
-    const [x,y,z] = store.anchor.position_m;
+    // The reading stand shares the official photograph with the product panel.
     const stand = store.props.find(prop => prop.kind === 'photo');
     const [sx,sy,sz] = stand.position_m, a = radians(stand.yaw_deg);
-    const photos = [panel(1.51,x,y+1.10,decalHeight(z)),
-      panel(.69,sx+.05*Math.sin(a),sy+stand.envelope_whd_m[1]-.4,sz+.05*Math.cos(a),a)];
-    base.add(new T.Mesh(mergeStaticGeometries(T,photos),photo));
-    photos.forEach(geometry => geometry.dispose());
+    base.add(new T.Mesh(panel(.69,sx+.05*Math.sin(a),sy+stand.envelope_whd_m[1]-.4,sz+.05*Math.cos(a),a),photo));
     return base;
   }
 

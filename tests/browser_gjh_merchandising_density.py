@@ -30,15 +30,15 @@ def run():
                 page.wait_for_function('__mall?.ready && __sceneReady', timeout=60000)
                 page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus(); page.wait_for_function('document.activeElement.id === "scene"')
                 assets = page.evaluate('__mall.state.productAssets')
-                assert assets['totalInstances'] == 204
+                assert assets['totalInstances'] == 132
                 for record in assets['cans'].values():
-                    assert record['instances'] == 51 and record['frontFacings'] == 17
+                    assert record['instances'] == 33 and record['frontFacings'] == 11
                     # Exact float32 GLB source bounds, confirmed by unchanged asset hashes.
                     assert record['dimensions'] == [0.07750000059604645, 0.12399169057607651, 0.07750000059604645]
                     assert record['actualBoundsScale'] == [1.000000007690922, 1, 1.000000007690922]
-                    positions = record['placements']; assert len(positions) == 51
+                    positions = record['placements']; assert len(positions) == 33
                     assert sorted({p['y'] for p in positions}) == [.451, .991, 1.531]
-                    assert record['reserveIndex'] == 25
+                    assert record['reserveIndex'] == 16
                     for i,a in enumerate(positions):
                         for b in positions[i+1:]:
                             assert abs(a['y']-b['y'])>=.1239 or abs(a['x']-b['x'])>=.0775

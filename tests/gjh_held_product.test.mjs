@@ -13,7 +13,7 @@ const names = {[nz]: 'New Zealand Abalone 425g', [au]: 'Australia Abalone 425g'}
 function element() {
   const attributes = new Map(), classes = new Set();
   return {
-    children: [], listeners: {}, dataset: {}, hidden: true,
+    children: [], listeners: {}, dataset: {}, style: {}, hidden: true,
     classList: {
       add(...names) { names.forEach(name => classes.add(name)); },
       contains(name) { return classes.has(name); },
@@ -252,4 +252,25 @@ test('HUD connects pickup, bag and return and restores exploration after confirm
   mall.move(null, 15);
   update();
   assert.equal(context.dataset.context, 'quest');
+});
+
+test('HUD shows nearby shops only in the courtyard and restores the hint on exit', t => {
+  const mall = setup(t, true);
+  const hud = createMallHud({
+    scene: mall.select('#scene'),
+    destinations: [{id:'mili',label:'MILI',available:true,arrival:{x:0,z:-2}}],
+    announce() {},
+    subscribeBag: mall.store.subscribe,
+    subscribeInspect() {}
+  });
+  mall.select('#inspect-prompt').hidden = true;
+  const context = mall.select('#hud-context');
+  const update = (zone, now) => hud.update({position:{x:0,z:0},zone,enabled:true,now,forward:{x:0,z:-1}});
+
+  update('atrium', 100);
+  assert.equal(context.dataset.context, 'nearby');
+  update('newmoon', 120);
+  assert.equal(context.dataset.context, 'quest');
+  update('atrium', 140);
+  assert.equal(context.dataset.context, 'nearby');
 });

@@ -106,8 +106,9 @@ export function audit(shop,studio) {
     if (!connected(standing,reachable,capsule)) issues.push([id,'blocked route']);
     if (!connected(standing,wide,.6)) issues.push([id,'aisle < 1.2 m']);
     if (distance(standing,item)>item.reachDistance) issues.push([id,'out of reach']);
-    if (item.action.includes('pick up') && floor.clearance(standing)-capsule < .15-1e-8)
-      issues.push([id,'pick-up clearance < 0.15 m']);
+    const pickupMargin = shop.slot === 'S01' && item.socket === 'shelves' ? .25 : .15;
+    if (item.action.includes('pick up') && floor.clearance(standing)-capsule < pickupMargin-1e-8)
+      issues.push([id,`pick-up clearance < ${pickupMargin} m`]);
     const surface=shop.anchors[anchor];
     if (surface?.owner) {
       const parent=shop.items.find(candidate=>candidate.id===surface.owner);

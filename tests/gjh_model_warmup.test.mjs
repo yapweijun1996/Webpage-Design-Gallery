@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createModelWarmup} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
 
-test('model warm-up stages the exact renderable and restores the renderer after a failed draw', async () => {
+test('model warm-up stages the exact renderable and restores the renderer after a failed draw', async t => {
+  // Keep the frame budget deterministic while checking exact upload steps.
+  t.mock.method(performance, 'now', () => 0);
   const scene = new T.Scene(), model = new T.Group(), light = new T.PointLight();
   const map = new T.Texture(), alphaMap = new T.Texture();
   const material = new T.MeshStandardMaterial({map, emissiveMap:map, alphaMap});

@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const css = read('../demos/corporate/gjh/v11/style.css');
 const tokens = read('../assets/tokens.css');
+const theme = read('../assets/gjh-themes.css').split('html[data-gjh-design="v11"] {')[1].split('}')[0];
 
 function rule(selector, source = css) {
   const lines = source.split('\n');
@@ -33,7 +34,8 @@ test('compact header and corner chips paint at 36px inside 44px or larger touch 
   assert.match(rule(headerControls), /min-height:var\(--size-control\);min-width:var\(--size-control\)/);
   assert.match(rule(cornerControls), /min-height:var\(--size-control\)/);
   assert.match(rule(cornerChips), /width:max-content/);
-  assert.match(rule(chrome), /border:0;border-radius:(?:0|var\(--entry-flat\));background:transparent/);
+  assert.match(rule(chrome), /border:0;border-radius:var\(--entry-flat\);background:transparent/);
+  assert.match(theme, /--entry-flat:\s*0;/);
   const face = rule(`${chrome}::before`);
   assert.match(face, /inset:var\(--hud-chrome-inset\)/);
   assert.match(face, /pointer-events:none/);
@@ -58,6 +60,7 @@ test('compact HUD stacks Run above the raised joystick and reserves space for ca
   const compact = '@media(pointer:coarse),(max-width:650px)';
   const compactRules = css.split(`${compact}{`)[1];
   assert.ok(compactRules.includes('--hud-stick-bottom:calc(var(--hud-gutter-bottom) + var(--gjh-space-joystick-clearance))'));
+  assert.match(theme, /--gjh-space-joystick-clearance:\s*20px;/);
   assert.ok(compactRules.includes('--hud-run-bottom:calc(var(--hud-stick-bottom) + var(--hud-stick-size) + var(--space-2))'));
   assert.ok(compactRules.includes('--hud-context-bottom:calc(var(--hud-run-bottom) + var(--hud-control-size) + var(--space-2))'));
   const landscape = compactRules.split('@media(max-height:560px) and (orientation:landscape){')[1];

@@ -1,6 +1,7 @@
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
 import {filterWallArtwork, setupArtworkTexture} from './artwork-textures.js';
+import {heritagePanel, newMoonExhibit} from './new-moon-exhibit.js';
 import {decalClearance, decalHeight, decalMaterial, placeDecal} from './surface-decals.js';
 import {createShopVisibility} from './shop-visibility.js';
 import {buildPublicArchitecture} from './public-architecture.js';
@@ -533,7 +534,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   }
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
-    const wall = expanded ? (zone === 'newmoon' ? 'wood' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
+    const lightNewMoon = expanded && zone === 'newmoon';
+    const wall = expanded ? (lightNewMoon ? 'ivory' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
     if (expanded) {
       const floor = `${zone}Floor`;
       finishForRole.set(floor,'shopFloor');
@@ -543,9 +545,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     } else for (let i = 0; i < 18; i++) box(i % 3 ? 'timber' : 'timberAlt', x - 4.25 + i * .5, -.005, -5, .49, .04, 10);
     const backdrop = `${zone}Backdrop`;
     let rearWall = wall;
-    if (expanded && zone === 'newmoon') {
-      materials.newmoonLacquer = mat(interiorStores.S01.palette[3].hex);
-      rearWall = 'newmoonLacquer';
+    if (lightNewMoon) {
+      materials.newMoonOak = mat(interiorStores.S01.palette[0].hex);
+      materials.newMoonBlue = mat(interiorStores.S01.palette[3].hex);
     } else if (expanded) {
       materials[backdrop] = shopBackdrop(zone);
       rearWall = backdrop;
@@ -601,7 +603,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       for (const side of [-1,1]) {
         const bx=x+3.57*side, bz=-.66;
         if (zone === 'newmoon' || (zone === 'mili' && side < 0)) {
-          const casing=zone==='newmoon'?'wood':'oak';
+          const casing=lightNewMoon?'newMoonOak':'oak';
           box(casing,bx,1.98,bz-.32,1.96,3.45,.09);
           for (const edge of [-1,1]) box(casing,bx+edge*.96,1.98,bz,.075,3.45,.68);
           collider(bx,1.98,bz,2.0,3.46,.7);
@@ -645,10 +647,12 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       box('brass', x + side * 4.63, .245, -5.25, .025, .025, 10.15);
       box('oak', x + side * 4.65, 5.37, -5.25, .09, .16, 10.15);
       box('brass', x + side * 4.59, 5.26, -5.25, .025, .025, 10.15);
-      box('oak', x + side * 4.64, 1.08, -5.25, .075, .095, 10.15);
-      box('brass', x + side * 4.59, 1.15, -5.25, .025, .018, 10.15);
+      if (!lightNewMoon) {
+        box('oak', x + side * 4.64, 1.08, -5.25, .075, .095, 10.15);
+        box('brass', x + side * 4.59, 1.15, -5.25, .025, .018, 10.15);
+      }
       // Quiet wall bays remain behind the furniture, clear of the verified artwork.
-      if (side > 0 || zone === 'mili') for (const z of [-2.2, -5.2, -8.2]) {
+      if (!lightNewMoon && (side > 0 || zone === 'mili')) for (const z of [-2.2, -5.2, -8.2]) {
         for (const edge of [-1, 1]) {
           box('oak', x + side * 4.635, 2.85, z + edge * 1.13, .045, 2.55, .045);
           box('oak', x + side * 4.635, 2.85 + edge * 1.275, z, .045, .045, 2.3);
@@ -731,9 +735,28 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     if (zone === 'newmoon') {
       // The asset display owns its geometry and collision bounds; no legacy rack remains.
       lightPool(x, .054, -8.6, 7.5, 2.1);
-      const cover = art('new-moon-brand-cover.jpg', x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
-      box('brass', x - 4.665, 2.8, -5.8, .035, cover.scale.y + .14, 3.74);
-      box('oak', x - 4.67, 2.8, -5.8, .04, cover.scale.y + .28, 3.88);
+      if (lightNewMoon) {
+        const image = textures.get('new-moon-nz-425g-front.jpg').image;
+        textures.set('new-moon-heritage-panel', setupArtworkTexture(T, new T.CanvasTexture(heritagePanel(image)), artworkTier()));
+        const shop = interiorStores.S01;
+        const [ox, oy, oz] = shop.frame.world_origin_m;
+        const worldPoint = ([px, py, pz]) => [ox + px, oy + py, oz + pz];
+        for (const panel of shop.storyPanels) {
+          const yaw = panel.yawDeg * Math.PI / 180;
+          box(panel.material, ...worldPoint(panel.frame), ...panel.size);
+          art(panel.texture, ...worldPoint(panel.art), panel.width, yaw);
+          if (panel.caption) {
+            const serving = sign(newMoonExhibit[panel.id].tagline.toUpperCase(), ...worldPoint(panel.caption), 2.8, .19, true, 54);
+            serving.rotation.y = yaw;
+          }
+          const [px, pz] = panel.interactionXZ;
+          interactables.push({id:panel.id, x:ox+px, z:oz+pz, radius:panel.radius});
+        }
+      } else {
+        const cover = art('new-moon-brand-cover.jpg', x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
+        box('brass', x - 4.665, 2.8, -5.8, .035, cover.scale.y + .14, 3.74);
+        box('oak', x - 4.67, 2.8, -5.8, .04, cover.scale.y + .28, 3.88);
+      }
       let sampleCan = null;
       if (expanded) {
         // Rounded stone sampling island with a continuous brass plinth.
@@ -1271,7 +1294,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
-  return {signage, interiors:interiorKit, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, interiors:interiorKit, newMoonExhibit:expanded ? newMoonExhibit : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};

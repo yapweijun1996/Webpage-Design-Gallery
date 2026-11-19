@@ -348,6 +348,102 @@
               "radius",
               "centresZ"
             ]
+          },
+          "storyPanels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "frame": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "size": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "art": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "caption": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "material": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "texture": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "interactionXZ": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "width": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "radius": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "yawDeg": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "frame",
+                "size",
+                "art",
+                "id",
+                "material",
+                "texture",
+                "interactionXZ",
+                "width",
+                "radius",
+                "yawDeg"
+              ]
+            }
+          },
+          "stock_plan": {
+            "type": "object",
+            "properties": {
+              "facings_per_row": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "spacing_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
           }
         },
         "required": [

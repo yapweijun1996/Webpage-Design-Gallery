@@ -19,7 +19,7 @@ def run():
     if failed:
      use_individual_assets(page);page.route('**/assets/gjh-m056-shelf-lod1.glb',lambda r:r.fulfill(status=404,body=''))
     page.goto(mall_entry_url(url));page.wait_for_function('__mall.ready && __sceneReady',timeout=60000);page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus();page.wait_for_function('document.activeElement.id==="scene"')
-    assets=page.evaluate('__mall.state.productAssets');assert assets['shelf']['status']==('fallback' if failed else 'loaded');assert all(c['status']=='loaded' for c in assets['cans'].values());assert assets['totalInstances']==204
+    assets=page.evaluate('__mall.state.productAssets');assert assets['shelf']['status']==('fallback' if failed else 'loaded');assert all(c['status']=='loaded' for c in assets['cans'].values());assert assets['totalInstances']==132
     page.screenshot(path=str(out/f'entrance-{width}-{failed}.png'))
     page.evaluate('__mall.teleport("newmoon")');drive(page,400);drive(page,1500,forward=1);drive(page,300,right=-1);drive(page,2300,forward=1)
     page.screenshot(path=str(out/f'interior-{width}-{failed}.png'))
