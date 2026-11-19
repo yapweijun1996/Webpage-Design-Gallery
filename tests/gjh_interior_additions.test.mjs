@@ -31,7 +31,8 @@ test('interior additions match their files and the strict static loader rules', 
     const root = json.nodes.find(node => node.name === entry.asset_id);
     assert.equal(root?.extras?.asset_id, entry.asset_id);
     assert.equal(entry.dimensions_m.length, 3);
-    assert.match(entry.rights, /unspecified/);
+    // The owner confirmed redistribution on 2026-11-20; accept the confirmed wording or the older unspecified one.
+    assert.match(entry.rights, /unspecified|redistribution confirmed by the owner/);
   }
 });
 
