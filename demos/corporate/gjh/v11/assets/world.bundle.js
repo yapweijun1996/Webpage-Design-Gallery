@@ -8352,6 +8352,18 @@ var SURFACES = {
   balanced: { roughness: 0.91, emission: 1.04, washOpacity: 0.9 },
   detailed: { roughness: 0.85, emission: 1.1, washOpacity: 0.94 }
 };
+var SHOP_LAMPS = {
+  S01: 16764813,
+  S02: 15986113,
+  S03: 13107187,
+  S13: 14938623,
+  S14: 15200511,
+  S15: 16761981
+};
+function shopLampTint(T, id) {
+  const mood = interiorStores[id]?.ambient;
+  return SHOP_LAMPS[id] ?? (mood ? kelvinColour(T, mood.kelvin).getHex() : 16777215);
+}
 function createMallSurfaceAtmosphere(T, scene, {
   plane,
   poolMaterial,
@@ -8366,9 +8378,10 @@ function createMallSurfaceAtmosphere(T, scene, {
   const poolCount = pools.reduce((total, pool) => total + pool.transforms.length, 0);
   const washMesh = placeDecal(new T.InstancedMesh(plane, washMaterial, washes.length + poolCount), -1);
   const transform = new T.Object3D;
-  const stripSlots = [];
-  washes.forEach(([x, y, z, width, depth, yaw, pitch, coveStrip = false], index) => {
-    stripSlots.push(coveStrip);
+  const stripSlots = [], colours = [];
+  washes.forEach(([x, y, z, width, depth, yaw, pitch, compact = false, tint2 = 16777215, gain = 1], index) => {
+    stripSlots.push(compact);
+    colours.push(new T.Color(tint2).multiplyScalar(gain));
     transform.position.set(x, y, z);
     transform.rotation.set(pitch, yaw, 0, "YXZ");
     transform.scale.set(width, depth, 1);
@@ -8383,12 +8396,18 @@ function createMallSurfaceAtmosphere(T, scene, {
       poolSlots.set(key, { shop, deckLod });
       washMesh.setMatrixAt(stripSlots.length, matrix);
       stripSlots.push(key);
+      colours.push(new T.Color(16777215));
     });
   }
   washMesh.name = "Mall cove and storefront light wash";
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
-  const washVisibility = createInstanceVisibility(T, washMesh, { slots: stripSlots });
+  if (colours.length)
+    washMesh.setColorAt(0, colours[0]);
+  const washVisibility = createInstanceVisibility(T, washMesh, {
+    slots: stripSlots,
+    colours: colours.length ? colours : undefined
+  });
   const floorRoughness = floors.map((floor) => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
   let fixtureEmission = fixtures.emissiveIntensity;
@@ -8637,13 +8656,13 @@ var EVERYDAY = Object.freeze({
   id: "everyday",
   label: "Everyday",
   materials: Object.freeze({
-    floorTextured: 13681073,
-    floorFlat: 13155242,
+    floorTextured: 13286315,
+    floorFlat: 12628898,
     ceiling: 7892580,
     ceilingGlow: 9995892,
     ceilingGlowIntensity: 0.12,
     wall: 8616301,
-    green: 1059106,
+    green: 1586732,
     ivory: 11773070,
     brass: 11901794,
     wood: 7033149,
@@ -8656,13 +8675,13 @@ var EVERYDAY = Object.freeze({
     glassMetalness: 0.08,
     glow: 16770996,
     glowEmission: 16765066,
-    glowIntensity: 1.65,
+    glowIntensity: 1.78,
     liftStone: 14669252,
     liftGreen: 1587760,
     liftGate: 11901794,
     liftGlassOpacity: 0.24
   }),
-  lighting: Object.freeze({ sky: 15986406, ground: 7564388, ambient: 0.48, key: 16762772, keyIntensity: 1.72, fog: 6707789, exposure: 0.72 }),
+  lighting: Object.freeze({ sky: 16183011, ground: 8615784, ambient: 0.51, key: 16761744, keyIntensity: 1.62, fog: 6707789, exposure: 0.72 }),
   decorationRefs: Object.freeze([])
 });
 var LUNAR_NEW_YEAR = Object.freeze({
@@ -8759,6 +8778,63 @@ function createPlayerShadow(T, scene, key) {
 }
 
 // demos/corporate/gjh/v11/assets/world.js
+function addAtriumSkylight(T, scene, { minX: minX2, maxX: maxX2, minZ: minZ2, maxZ: maxZ2 }) {
+  const size = 256, canvas2 = document.createElement("canvas");
+  canvas2.width = canvas2.height = size;
+  const ctx = canvas2.getContext("2d");
+  if (!ctx)
+    return;
+  const sky = ctx.createLinearGradient(0, 0, size, size);
+  sky.addColorStop(0, "#c5dde4");
+  sky.addColorStop(0.58, "#e5eff0");
+  sky.addColorStop(1, "#fff0cf");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, size, size);
+  let seed = 271;
+  const random = () => ((seed = Math.imul(1664525, seed) + 1013904223 | 0) >>> 0) / 4294967296;
+  const leaves = ["#68765b", "#83916a", "#9da379", "#b5b894"];
+  function bough(x, y, length, angle, depth) {
+    const tipX = x + Math.cos(angle) * length, tipY = y + Math.sin(angle) * length;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(tipX, tipY);
+    ctx.strokeStyle = "#6d7057";
+    ctx.lineWidth = depth * 1.25;
+    ctx.lineCap = "round";
+    ctx.stroke();
+    if (depth > 1) {
+      for (const turn of [-0.62, 0.58])
+        bough(tipX, tipY, length * (0.55 + random() * 0.21), angle + turn, depth - 1);
+      return;
+    }
+    for (let i = 0;i < 25; i++) {
+      ctx.beginPath();
+      ctx.ellipse(tipX + (random() - 0.5) * 34, tipY + (random() - 0.5) * 24, 2 + random() * 5, 1 + random() * 3, angle, 0, Math.PI * 2);
+      ctx.fillStyle = leaves[i % leaves.length];
+      ctx.fill();
+    }
+  }
+  bough(-8, 200, 53, -0.91, 4);
+  bough(261, 52, 46, 2.4, 4);
+  bough(165, 259, 38, -2.11, 3);
+  const sheen = ctx.createLinearGradient(0, size, size, 0);
+  sheen.addColorStop(0, "rgba(255,249,230,0)");
+  sheen.addColorStop(0.53, "rgba(255,249,230,.23)");
+  sheen.addColorStop(0.83, "rgba(255,249,230,0)");
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, size, size);
+  const map = new T.CanvasTexture(canvas2);
+  map.colorSpace = T.SRGBColorSpace;
+  const geometry = new T.PlaneGeometry(1, 1, 24, 1), positions = geometry.attributes.position;
+  for (let i = 0;i < positions.count; i++) {
+    const angle = positions.getX(i) * Math.PI;
+    positions.setXYZ(i, (minX2 + maxX2) / 2 + 13.21 * Math.sin(angle), 13.1 + 3.99 * Math.cos(angle), (minZ2 + maxZ2) / 2 + positions.getY(i) * (maxZ2 - minZ2 + 0.14));
+  }
+  geometry.computeBoundingSphere();
+  const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({ map, toneMapped: false }));
+  mesh.name = "Atrium daylight glazing";
+  scene.add(mesh);
+}
 function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog }) {
   if (!expanded || !theme?.materials || !theme?.lighting)
     return false;
@@ -9233,8 +9309,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       materials2.shellFloor.roughness = 0.34;
       materials2.brass.roughness = 0.28;
       materials2.brass.metalness = 0.78;
-      materials2.green.roughness = 0.29;
-      materials2.green.metalness = 0.16;
+      materials2.green.roughness = 0.24;
+      materials2.green.metalness = 0.23;
       materials2.dark.roughness = 0.3;
       materials2.dark.metalness = 0.12;
     }
@@ -9391,6 +9467,9 @@ metalnessFactor=vSurface.y;`);
       shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
         finishMaterials.canopy = material;
       } }));
+      materials2.paving.color.set(13023397);
+      if (expandedLift)
+        addAtriumSkylight(T, scene, liftLayout.roofOpening);
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -9977,12 +10056,12 @@ metalnessFactor=vSurface.y;`);
       let warmStrip = function(x, z, width, depth) {
         const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
         for (const r of panels)
-          lightWash((r.minX + r.maxX) / 2, 8.32, (r.minZ + r.maxZ) / 2, Math.max(0.42, r.maxX - r.minX), Math.max(0.42, r.maxZ - r.minZ), 0, Math.PI / 2, true);
+          lightWash((r.minX + r.maxX) / 2, 8.31, (r.minZ + r.maxZ) / 2, Math.max(0.88, r.maxX - r.minX), Math.max(0.88, r.maxZ - r.minZ), 0, Math.PI / 2, true, 16764820, 1.55);
         const washWidth = width > depth ? width : 2.4, washDepth = width > depth ? 2.4 : depth;
         const bounds = { minX: x - washWidth / 2, maxX: x + washWidth / 2, minZ: z - washDepth / 2, maxZ: z + washDepth / 2 };
         const washes = expandedLift ? cutRectangle(bounds, liftLayout.roofOpening) : [bounds];
         for (const r of washes)
-          lightWash((r.minX + r.maxX) / 2, 8.367, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, r.maxZ - r.minZ, 0, Math.PI / 2);
+          lightWash((r.minX + r.maxX) / 2, 8.367, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, r.maxZ - r.minZ, 0, Math.PI / 2, false, 16765854, 1.25);
       };
       signage = await addShopSignAtlas(T, expandedLayout, scene);
       slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs, plainFinish);
@@ -9991,22 +10070,37 @@ metalnessFactor=vSurface.y;`);
         box("brass", x, 0.15, 0.31, 0.35, 0.24, 0.27);
         box("brass", x, 5.63, 0.29, 0.36, 0.065, 0.27);
         lightWash(x, 0.22, 0.449, 0.66, 0.58, 0, 0, true);
+        for (const side of [-1, 1])
+          lightWash(x + side * 0.122, 2.9, 0.394, 0.038, 5.35, 0, 0, true, 16763513, 2.3);
+        lightWash(x - 0.046, 2.76, 0.394, 0.155, 4.96, 0, 0, true, 11585189, 0.42);
+      }
+      for (const side of [-1, 1]) {
+        const { inset, depth } = atriumLayout.arcadePilaster;
+        const face = (side < 0 ? -15 : 35) + side * (inset - depth / 2 - 0.004), yaw = -side * Math.PI / 2;
+        for (let i = 0;i < 6; i++) {
+          const z = i * 8 + 0.12;
+          for (const edge of [-1, 1])
+            lightWash(face, 2.9, z + edge * 0.151, 0.038, 5.35, yaw, 0, true, 16763513, 2.2);
+          lightWash(face, 2.78, z + 0.045, 0.15, 4.96, yaw, 0, true, 11585189, 0.38);
+        }
       }
       for (const store2 of spatial.stores) {
         const x = storeCenterX(store2);
-        box("glow", x, 5.595, 0.416, 9.67, 0.035, 0.06);
+        box("glow", x, 5.595, 0.416, 9.67, 0.048, 0.07);
         for (const dx of [-3.2, 0, 3.2]) {
-          lightWash(x + dx, 5.41, 0.3, 3.85, 0.74, 0, 0, true);
+          lightWash(x + dx, 5.43, 0.3, 3.85, 0.82, 0, 0, true, 16763525, 1.75);
         }
       }
       for (const bay of expandedLayout.slots) {
         const { x, z, normalX, normalZ, yaw } = shopEntrance(bay);
         const frontage = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
+        const tint2 = shopLampTint(T, "S" + bay.number);
         const offset = 2.15;
-        lightWash(x + normalX * offset, 0.029, z + normalZ * offset, frontage * 0.78, 4.2, yaw, -Math.PI / 2);
-        lightWash(x - normalX * 0.28, 3.88, z - normalZ * 0.28, frontage * 0.72, 0.55, yaw, Math.PI / 2, true);
+        lightWash(x + normalX * offset, 0.029, z + normalZ * offset, frontage * 0.78, 4.2, yaw, -Math.PI / 2, false, tint2);
+        lightWash(x - normalX * 0.28, 3.88, z - normalZ * 0.28, frontage * 0.72, 0.72, yaw, Math.PI / 2, true, tint2, 1.7);
+        lightWash(x - normalX * 1.05, 0.052, z - normalZ * 1.05, 2.5, 2.5, yaw, -Math.PI / 2, true, tint2, 0.78);
         if (bay.number === "14") {
-          lightWash(x + normalX * 0.23, 2.21, z, frontage * 0.95, 3.6, yaw, 0, true);
+          lightWash(x + normalX * 0.23, 2.21, z, frontage * 0.95, 3.6, yaw, 0, true, tint2, 1.24);
           lightWash(x + normalX * 0.24, 1.55, z + 2.35, 2.65, 2.4, yaw, 0, true);
         }
       }
@@ -10227,6 +10321,7 @@ metalnessFactor=vSurface.y;`);
       if (batch.material === materials2.lightPool) {
         placeDecal(mesh, -1);
         if (expanded) {
+          mesh.instanceColor = new T.InstancedBufferAttribute(new Float32Array(batch.transforms.length * 3).fill(1), 3);
           standalonePools.push(mesh);
           poolBatches.push(batch);
         }

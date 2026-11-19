@@ -17,6 +17,18 @@ const SURFACES = {
   detailed:{roughness:.85, emission:1.10, washOpacity:.94}
 };
 
+// Fixture tints are in display sRGB. Kelvin and focus coordinates still come
+// from the shop programme. These tints describe the light, not the brand paint.
+const SHOP_LAMPS = {
+  S01:0xffcf8d, S02:0xf3edc1, S03:0xc7fff3,
+  S13:0xe3f1ff, S14:0xe7f0ff, S15:0xffc47d
+};
+
+export function shopLampTint(T, id) {
+  const mood = interiorStores[id]?.ambient;
+  return SHOP_LAMPS[id] ?? (mood ? kelvinColour(T,mood.kelvin).getHex() : 0xffffff);
+}
+
 export function createMallSurfaceAtmosphere(T, scene, {
   plane, poolMaterial, washes, floors, fixtures, vault, pools = [], shopNear
 }) {
@@ -26,9 +38,10 @@ export function createMallSurfaceAtmosphere(T, scene, {
   const poolCount = pools.reduce((total, pool) => total + pool.transforms.length, 0);
   const washMesh = placeDecal(new T.InstancedMesh(plane,washMaterial,washes.length + poolCount),-1);
   const transform = new T.Object3D();
-  const stripSlots = [];
-  washes.forEach(([x, y, z, width, depth, yaw, pitch, coveStrip = false], index) => {
-    stripSlots.push(coveStrip);
+  const stripSlots = [], colours = [];
+  washes.forEach(([x, y, z, width, depth, yaw, pitch, compact = false, tint = 0xffffff, gain = 1], index) => {
+    stripSlots.push(compact);
+    colours.push(new T.Color(tint).multiplyScalar(gain));
     transform.position.set(x,y,z);
     transform.rotation.set(pitch,yaw,0,'YXZ');
     transform.scale.set(width,depth,1);
@@ -43,12 +56,16 @@ export function createMallSurfaceAtmosphere(T, scene, {
       poolSlots.set(key,{shop, deckLod});
       washMesh.setMatrixAt(stripSlots.length,matrix);
       stripSlots.push(key);
+      colours.push(new T.Color(0xffffff));
     });
   }
   washMesh.name = 'Mall cove and storefront light wash';
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
-  const washVisibility = createInstanceVisibility(T, washMesh, {slots:stripSlots});
+  // Allocate the colour attribute before the visibility packer and warm-up.
+  if (colours.length) washMesh.setColorAt(0,colours[0]);
+  const washVisibility = createInstanceVisibility(T, washMesh, {slots:stripSlots,
+    colours:colours.length ? colours : undefined});
 
   const floorRoughness = floors.map(floor => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
@@ -135,9 +152,9 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const environmentIntensity = mood
       ? (expanded ? .91 : .74) + .20*(mood.kelvin-2700)/1300 + .10*accentLuminance
       : studioLighting.shop.intensity;
-    return {slot,x,z,mood,keyPosition,accentPosition,accent,environmentIntensity,
-      colourSoftening:expanded && store?.id === 'S01' ? .46 : 0,
-      doorFill:expanded && store?.id === 'S14' ? 1.38 : 1,
+    const lamp = expanded && SHOP_LAMPS[store?.id] ? new T.Color(shopLampTint(T,store.id)) : null;
+    return {slot,x,z,mood,keyPosition,accentPosition,accent,environmentIntensity,lamp,
+      doorFill:expanded && store?.id === 'S14' ? 1.65 : 1,
       temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
   });
   const lights = Array.from({length:2}, (_, index) => {
@@ -148,17 +165,49 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
   });
   scene.traverse(node => { if (node.isLight) node.layers.enable(2); });
   const visitorShadows = contact && plane ? createVisitorShadows(T, scene, plane, contact) : null;
+  const hemisphere = expanded && scene.children.find(node => node.isHemisphereLight);
+  const avatarMaterials = new Set();
+  const portraitMeshes = new WeakSet();
+  const avatarFill = new T.Color(0xffe9d5);
+  let portraitFill, visitorFill = .18;
+  function applyPortraitFill(material) {
+    material.emissive.copy(avatarFill);
+    material.emissiveIntensity = portraitFill ?? .024;
+  }
+  function bindPlayerLighting(visual) {
+    if (!expanded) return;
+    visual?.traverse(node => {
+      if (!node.isSkinnedMesh || portraitMeshes.has(node) ||
+          node.material?.customProgramCacheKey?.() !== 'gjh-tripo-portrait-v1') return;
+      portraitMeshes.add(node);
+      avatarMaterials.add(node.material);
+      applyPortraitFill(node.material);
+      const beforeRender = node.onBeforeRender;
+      // The same skin swaps material with its lower-resolution LOD.
+      node.onBeforeRender = function(renderer,scene,camera,geometry,material,group) {
+        beforeRender.call(this,renderer,scene,camera,geometry,material,group);
+        if (avatarMaterials.has(material)) return;
+        avatarMaterials.add(material);
+        applyPortraitFill(material);
+      };
+    });
+  }
+  function setPortraitFill(inside, publicZone) {
+    const amount = inside ? .032 : publicZone === 'atrium' ? .024 : .038;
+    if (amount === portraitFill) return;
+    portraitFill = amount;
+    visitorFill = inside ? .22 : publicZone === 'atrium' ? .18 : .27;
+    avatarMaterials.forEach(applyPortraitFill);
+  }
   let focus = null, strength = 0, previousTime;
-  const neutralFill = new T.Color(0xfff7eb);
   const applyFocusColors = () => lights.forEach((light,index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
     const key = new T.Color(theme?.lighting?.key ?? 0xffe5c1);
     for (const bay of bays) {
       const [main,accent] = bay.colors;
-      main.copy(key).lerp(bay.temperature,bay.mood ? .68 : .25).lerp(bay.accent,.08);
-      accent.copy(main).lerp(bay.accent,bay.mood ? .30 : 0);
-      main.lerp(neutralFill,bay.colourSoftening);
-      accent.lerp(neutralFill,bay.colourSoftening);
+      main.copy(key).lerp(bay.lamp ?? bay.temperature,bay.lamp ? .86 : bay.mood ? .68 : .25);
+      if (!bay.lamp) main.lerp(bay.accent,.08);
+      accent.copy(main).lerp(bay.accent,bay.lamp ? .10 : bay.mood ? .30 : 0);
     }
     if (focus) applyFocusColors();
     if (renderer && Number.isFinite(theme?.lighting?.exposure)) renderer.toneMappingExposure = theme.lighting.exposure;
@@ -175,6 +224,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const {x,y,z} = position;
     const inside = Math.abs(y) < 4 ? bays.find(bay => insideBay(x,z,bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position,atrium);
+    if (expanded) setPortraitFill(inside,publicZone);
     if (inside?.mood) {
       const {minX,maxX,minZ,maxZ} = inside.slot;
       const edge = Math.min(x-minX,maxX-x,z-minZ,maxZ-z);
@@ -371,15 +421,18 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     if (!state.admitted) return;
     const mask=camera.layers.mask, background=scene.background;
     const autoClear=renderer.autoClear, shadowAutoUpdate=renderer.shadowMap.autoUpdate;
+    const ambientIntensity = hemisphere?.intensity;
     const before=renderer.info.render.calls;
     try {
       // Keep the world's color, depth and shadow maps. Only visitors and the
       // same world lights participate; no mall geometry is resubmitted.
       camera.layers.set(2); scene.background=null;
       renderer.autoClear=false; renderer.shadowMap.autoUpdate=false;
+      if (hemisphere) hemisphere.intensity += visitorFill;
       if (shadowCall) visitorShadows.update(npcs.forEachVisible);
       renderer.render(scene,camera); state.submissions++;
     } finally {
+      if (hemisphere) hemisphere.intensity = ambientIntensity;
       visitorShadows?.hide();
       camera.layers.mask=mask; scene.background=background;
       renderer.autoClear=autoClear; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
@@ -420,7 +473,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       renderer.setRenderTarget(target); renderer.info.autoReset=autoReset; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
     }
   }
-  return {update,setLightFloor,lightVariants,interiorWarmLights:lights,preparePost,postPrepared,invalidatePost,applyTheme,releaseEnvironment,prepareEnvironments,restoreEnvironment,render,get state(){return state;}};
+  return {update,bindPlayerLighting,setLightFloor,lightVariants,interiorWarmLights:lights,preparePost,postPrepared,invalidatePost,applyTheme,releaseEnvironment,prepareEnvironments,restoreEnvironment,render,get state(){return state;}};
 }
 
 export function createVisitorShadows(T, scene, plane, contact) {

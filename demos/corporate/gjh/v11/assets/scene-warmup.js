@@ -64,6 +64,8 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
   modelWarmup, width, height, screenPixel, applyProfile, frameTrace, startup=false}, profile, report) {
   const {scene, signage, interiors} = world;
   const {tier, shadows} = profile;
+  // Bind the already-authored portrait material before the first tier draw.
+  atmosphere.bindPlayerLighting?.(player.visual);
   void world.bakedLighting?.prepare(tier);
   let interiorsReady = false, interiorError;
   void registerInteriorWarmup(interiors, {T, renderer, scene, lights:atmosphere.interiorWarmLights, tier},

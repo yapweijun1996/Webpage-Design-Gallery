@@ -3503,6 +3503,18 @@ function allowMallLightWash(deviceClass, context) {
   const adapter = debug && context.getParameter(debug.UNMASKED_RENDERER_WEBGL);
   return /GeForce|Quadro|NVIDIA RTX|Radeon RX (?!Vega |[0-9]+M Graphics)/i.test(adapter ?? "");
 }
+var SHOP_LAMPS = {
+  S01: 16764813,
+  S02: 15986113,
+  S03: 13107187,
+  S13: 14938623,
+  S14: 15200511,
+  S15: 16761981
+};
+function shopLampTint(T, id) {
+  const mood = interiorStores[id]?.ambient;
+  return SHOP_LAMPS[id] ?? (mood ? kelvinColour(T, mood.kelvin).getHex() : 16777215);
+}
 var STUDIO_LIGHTING = {
   atrium: { walls: 7497825, panels: 16771796, ceiling: 15524048, width: 7, intensity: 0.52, ceilingGain: 2.15 },
   corridor: { walls: 6709595, panels: 16115412, ceiling: 14142395, width: 5, intensity: 0.58 },
@@ -3541,6 +3553,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const accent = new T.Color(mood?.accent ?? classicAccents[index]);
     const accentLuminance = 0.2126 * accent.r + 0.7152 * accent.g + 0.0722 * accent.b;
     const environmentIntensity = mood ? (expanded ? 0.91 : 0.74) + 0.2 * (mood.kelvin - 2700) / 1300 + 0.1 * accentLuminance : studioLighting.shop.intensity;
+    const lamp = expanded && SHOP_LAMPS[store?.id] ? new T.Color(shopLampTint(T, store.id)) : null;
     return {
       slot: slot2,
       x,
@@ -3550,8 +3563,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       accentPosition,
       accent,
       environmentIntensity,
-      colourSoftening: expanded && store?.id === "S01" ? 0.46 : 0,
-      doorFill: expanded && store?.id === "S14" ? 1.38 : 1,
+      lamp,
+      doorFill: expanded && store?.id === "S14" ? 1.65 : 1,
       temperature: mood ? kelvinColour(T, mood.kelvin) : interiorWarm,
       colors: [new T.Color, new T.Color]
     };
@@ -3567,17 +3580,52 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       node.layers.enable(2);
   });
   const visitorShadows = contact && plane ? createVisitorShadows(T, scene, plane, contact) : null;
+  const hemisphere = expanded && scene.children.find((node) => node.isHemisphereLight);
+  const avatarMaterials = new Set;
+  const portraitMeshes = new WeakSet;
+  const avatarFill = new T.Color(16771541);
+  let portraitFill, visitorFill = 0.18;
+  function applyPortraitFill(material) {
+    material.emissive.copy(avatarFill);
+    material.emissiveIntensity = portraitFill ?? 0.024;
+  }
+  function bindPlayerLighting(visual) {
+    if (!expanded)
+      return;
+    visual?.traverse((node) => {
+      if (!node.isSkinnedMesh || portraitMeshes.has(node) || node.material?.customProgramCacheKey?.() !== "gjh-tripo-portrait-v1")
+        return;
+      portraitMeshes.add(node);
+      avatarMaterials.add(node.material);
+      applyPortraitFill(node.material);
+      const beforeRender = node.onBeforeRender;
+      node.onBeforeRender = function(renderer2, scene2, camera, geometry, material, group) {
+        beforeRender.call(this, renderer2, scene2, camera, geometry, material, group);
+        if (avatarMaterials.has(material))
+          return;
+        avatarMaterials.add(material);
+        applyPortraitFill(material);
+      };
+    });
+  }
+  function setPortraitFill(inside, publicZone) {
+    const amount = inside ? 0.032 : publicZone === "atrium" ? 0.024 : 0.038;
+    if (amount === portraitFill)
+      return;
+    portraitFill = amount;
+    visitorFill = inside ? 0.22 : publicZone === "atrium" ? 0.18 : 0.27;
+    avatarMaterials.forEach(applyPortraitFill);
+  }
   let focus = null, strength = 0, previousTime;
-  const neutralFill = new T.Color(16775147);
   const applyFocusColors = () => lights.forEach((light, index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
     const key = new T.Color(theme?.lighting?.key ?? 16770497);
     for (const bay of bays) {
       const [main, accent] = bay.colors;
-      main.copy(key).lerp(bay.temperature, bay.mood ? 0.68 : 0.25).lerp(bay.accent, 0.08);
-      accent.copy(main).lerp(bay.accent, bay.mood ? 0.3 : 0);
-      main.lerp(neutralFill, bay.colourSoftening);
-      accent.lerp(neutralFill, bay.colourSoftening);
+      main.copy(key).lerp(bay.lamp ?? bay.temperature, bay.lamp ? 0.86 : bay.mood ? 0.68 : 0.25);
+      if (!bay.lamp)
+        main.lerp(bay.accent, 0.08);
+      accent.copy(main).lerp(bay.accent, bay.lamp ? 0.1 : bay.mood ? 0.3 : 0);
     }
     if (focus)
       applyFocusColors();
@@ -3595,6 +3643,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const { x, y, z } = position;
     const inside = Math.abs(y) < 4 ? bays.find((bay) => insideBay(x, z, bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position, atrium);
+    if (expanded)
+      setPortraitFill(inside, publicZone);
     if (inside?.mood) {
       const { minX, maxX, minZ, maxZ } = inside.slot;
       const edge = Math.min(x - minX, maxX - x, z - minZ, maxZ - z);
@@ -3831,17 +3881,22 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       return;
     const mask = camera.layers.mask, background = scene.background;
     const autoClear = renderer.autoClear, shadowAutoUpdate = renderer.shadowMap.autoUpdate;
+    const ambientIntensity = hemisphere?.intensity;
     const before = renderer.info.render.calls;
     try {
       camera.layers.set(2);
       scene.background = null;
       renderer.autoClear = false;
       renderer.shadowMap.autoUpdate = false;
+      if (hemisphere)
+        hemisphere.intensity += visitorFill;
       if (shadowCall)
         visitorShadows.update(npcs.forEachVisible);
       renderer.render(scene, camera);
       state.submissions++;
     } finally {
+      if (hemisphere)
+        hemisphere.intensity = ambientIntensity;
       visitorShadows?.hide();
       camera.layers.mask = mask;
       scene.background = background;
@@ -3900,7 +3955,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       renderer.shadowMap.autoUpdate = shadowAutoUpdate;
     }
   }
-  return { update, setLightFloor, lightVariants, interiorWarmLights: lights, preparePost, postPrepared, invalidatePost, applyTheme, releaseEnvironment, prepareEnvironments, restoreEnvironment, render, get state() {
+  return { update, bindPlayerLighting, setLightFloor, lightVariants, interiorWarmLights: lights, preparePost, postPrepared, invalidatePost, applyTheme, releaseEnvironment, prepareEnvironments, restoreEnvironment, render, get state() {
     return state;
   } };
 }
@@ -4600,6 +4655,7 @@ function prepareTier({
 }, profile, report) {
   const { scene, signage, interiors } = world;
   const { tier, shadows } = profile;
+  atmosphere.bindPlayerLighting?.(player.visual);
   world.bakedLighting?.prepare(tier);
   let interiorsReady = false, interiorError;
   registerInteriorWarmup(interiors, { T, renderer, scene, lights: atmosphere.interiorWarmLights, tier }, { deferActivation: true }).then(() => {
