@@ -123,6 +123,14 @@ def borsch(r,_):
         x=-2.25+i*1.95
         r.ring(x,3.97,-1.6,.55,.21,.055,"c5dc77",PRINT,True)
     placard(r,2.7,2.13,-4.97,.94,"765285")
+    # Unprinted carton, pouch and sticker sheet on the original folio ledge.
+    r.box(-.89,1.283,-.23,.20,.26,.075,"dbc9a3")
+    r.box(-.89,1.301,-.187,.17,.053,.009,"7b9457")
+    r.box(-.59,1.202,-.205,.16,.115,.023,"b88e7d")
+    r.box(-.59,1.232,-.191,.16,.013,.007,"eee1bf")
+    r.box(-.36,1.168,-.22,.14,.022,.12,"fff5d4")
+    for x in (-.398,-.36,-.322):
+        r.lathe(x,1.180,-.218,.013,.004,((1,0),(1,1)),["c88b5c"],8)
 
 
 def herbal(r,profiles):
@@ -212,6 +220,12 @@ def skippy(r,_):
     for x in (-2.54,2.54):
         r.ring(x,3.91,.72,.53,.53,.059,"efb94f",PRINT,True)
     r.tag(-3.02,1.045,-1.26,.26)
+    # Both 500 g listings use the same 73 × 73 × 124 mm envelope.
+    body=((.85,0),(.98,.065),(1,.24),(1,.72),(.92,.82),(.87,.86))
+    lid=((.9,.842),(1,.876),(1,1))
+    for x,fill in [(-2.25,"b87d44"),(-2.06,"c58a4b")]:
+        r.lathe(x,2.113,-3.98,.0365,.124,body,[fill],10)
+        r.lathe(x,2.113,-3.98,.0365,.124,lid,["2f8188"],10)
 
 
 def spam(r,_):
@@ -222,7 +236,23 @@ def spam(r,_):
     for i in range(4):
         dx=-.83+i*.48
         loc.append((-.72+dx*cos(a),1.684,-1.10-dx*sin(a),1.15))
-    stock(r,CAN,[GOLD,"254d83","3e6e9d",GOLD],loc,.116,.27,.76,sides=8)
+    stock(r,CAN,[GOLD,"254d83","3e6e9d",GOLD],loc[3:],.116,.27,.76,sides=8)
+    # Retailer dimensions give the Classic tin a nominal 100 × 56 × 83 mm envelope.
+    # The anonymous sample colours separate the three variants without reproducing label art.
+    outline=[]
+    for corner in range(4):
+        angle=corner*pi/2
+        cx=.038 if corner in (0,3) else -.038
+        cz=.016 if corner<2 else -.016
+        for step in range(4):
+            t=angle+step*pi/6
+            outline.append((cx+.012*cos(t),cz+.012*sin(t)))
+    for x,col in [(-.83,"29467d"),(-.64,"506e9a"),(-.45,"314c65")]:
+        rings=[[(x+px,y,-3.92+pz) for px,pz in outline] for y in (.899,.906,.976,.982)]
+        for lower,upper,finish in zip(rings,rings[1:],[GOLD,col,GOLD]):
+            for p0,p1,p2,p3 in zip(lower,lower[1:]+lower[:1],upper[1:]+upper[:1],upper):
+                r.face((p1,p0,p3,p2),finish)
+        r.face(rings[-1][::-1],GOLD)
     r.box(-.62,1.40,-.633,2.43,.19,.06,"d1a753",yaw=a)
     r.panel(-.61,1.40,-.593,.82,.17,logo(9),yaw=a)
     placard(r,0,2.83,-3.99,2.08,"1d4072")

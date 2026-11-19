@@ -1,6 +1,6 @@
 # S08 · SKIPPY
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -26,8 +26,8 @@ World origin (-20, 0, 20), yaw 90°. Dimensions are authored metres. The [floor 
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| SKIPPY Creamy Peanut Butter 500g | One front shelf facing on the left half of the display | Pending source-matched body, teal cap and label map. GJH lists 73 × 73 × 124 mm. |
-| SKIPPY Chunky Peanut Butter 500g | Separate adjacent facing | Pending right-hand variant. Share geometry only after matching the two views. |
+| SKIPPY Creamy Peanut Butter 500g | One front shelf facing on the left half of the display | Installed unprinted jar form in the comparative rear-shelf pair. GJH lists 73 × 73 × 124 mm. |
+| SKIPPY Chunky Peanut Butter 500g | Separate adjacent facing | Installed unprinted companion jar with the same nominal dimensions. The separate catalog front and back views remain the reference for label work. |
 
 Link to the GJH regional pack instead of substituting a different market edition.
 
@@ -44,3 +44,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 Desktop and touch routes passed. SKU viewer and breakfast chair seating are therefore tracked independently from the existing jar fixture.
+
+## Catalogue exhibit
+
+The jar stand offers a Creamy and Chunky catalogue story. Two unprinted jar forms on the rear shelf follow the listed 73 × 73 × 124 mm envelope. The existing breakfast chair has no Sit action.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)

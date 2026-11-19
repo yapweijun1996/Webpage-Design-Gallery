@@ -9,6 +9,8 @@ const sage=0x76846a, charcoal=0x2d3032, silver=0xc4c3bd, white=0xf7f4e9;
 // Keeping the centre fixtures behind the threshold leaves a turning area in
 // front and two routes around each island. Countertop GLBs use this same datum.
 export const shopIslandZ = -.63;
+export const pzhCartonX = .54;
+export const pzhCartonStandingZ = shopIslandZ + 1.36;
 export const shopLamp = 0xffe6a7;
 const finishes = {
   4:[0xe2cfad,0xa77d82,0xf0dfc7],5:[0x69442c,0x8b5a38,0xe3c79c],
@@ -106,7 +108,10 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       box(x,h-.04,decalHeight(z+.48)-.0175,w-.05,.035,.035,shopLamp);
       // The Low room kit supplies linked, category-shaped stock to these bays.
       const featured = n===4 && x===0 || h===2.07 && x<0 && [5,6,7,8,10,11,12,17].includes(n);
-      if (!featured) packageRow(x,h+.05,z+.28,Math.floor(w/.27),.25,kind,c);
+      if (featured && (n===10 || n===11)) {
+        const pair = n===10 ? [0x993630,0x29282a] : [0x9a363a,0xb54b36];
+        for (const [i,colour] of pair.entries()) can(x+(i-.5)*.21,h+.043,z+.29,colour,.064,.106);
+      } else if (!featured) packageRow(x,h+.05,z+.28,Math.floor(w/.27),.25,kind,c);
     }
   }
   function sideShelf(s,c=oak,kind='tin') {
@@ -120,7 +125,12 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       // Merchandise is evenly grouped into bays with gaps between collections.
       for(let i=0;i<9;i++) {
         const z=back+.81+i*(span-1.66)/8;
-        if(kind==='tin') can(x-s*.19,y+.05,z,packColour(i+row,base),.10,.21);
+        if(n===4 && s===1 && row===2 && i===3) {
+          for (const offset of [-.084,.084]) {
+            box(x-.19,y+.194,z+offset,.14,.29,.147,pearl);
+            box(x-.264,y+.19,z+offset,.009,.083,.128,base);
+          }
+        } else if(kind==='tin') can(x-s*.19,y+.05,z,packColour(i+row,base),.10,.21);
         else box(x-s*.19,y+.19,z,.14,.28,.20,packColour(i+row,base));
       }
     }
@@ -239,7 +249,12 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
           tapered(wallX+.42,y+.37,nicheZ+dz,.098,.08,.13,pearl);
         }
       }
-      cabinet(0,island,2.5,.99,1.24,walnut,oak);blossomVase(-.43,1.2475,island,0x96a76a);
+      cabinet(0,island,2.5,.99,1.24,walnut,oak);
+      blossomVase(-.98,1.2475,island-.14,0x96a76a);
+      // A single unprinted study carton sits on the current counter.
+      box(pzhCartonX,1.365,island+.27,.28,.234,.151,0xba332b);
+      box(pzhCartonX,1.471,island+.27,.278,.022,.15,0xb5793f);
+      box(pzhCartonX,1.371,island+.349,.235,.063,.007,0xd9aa5d);
       break;
     }
     case 6: { // A timber drying rack above the service counter and a curved rear display niche.
@@ -315,9 +330,10 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
         for(let j=-5;j<=5;j++)box(cx+j*.143,.62,island+.563,.025,.74,.027,0x41546b);
       }, base);
       for(const z of [mid+.35,mid-2.65]){
-        column(2.30,3.54,z,.025,1.04,brass);
-        for(const [y,r] of [[3.16,.52],[3.04,.35],[2.95,.19]]){
-          tapered(2.30,y,z,r*.62,r,.10,brass);column(2.30,y-.054,z,r*.89,.025,shopLamp);
+        const pendantX = 2.92;
+        column(pendantX,3.74,z,.025,.64,brass);
+        for(const [y,r] of [[3.56,.43],[3.44,.31],[3.35,.16]]){
+          tapered(pendantX,y,z,r*.62,r,.10,brass);column(pendantX,y-.054,z,r*.89,.025,shopLamp);
         }
       }
       plant(side-1.15,rear+1.31,1.78);break;
