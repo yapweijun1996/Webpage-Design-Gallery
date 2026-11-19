@@ -1,3 +1,4 @@
+import {prepareTripoMaterial} from './character-tripo-material.js';
 import {createFirstPersonHand} from './visitor-carry-hand.js';
 import {createTripoPoses} from './character-tripo-pose.js';
 import {createPushCart} from './push-cart.js';
@@ -78,6 +79,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     if (meshCount !== 1 || !mesh.isSkinnedMesh || Array.isArray(mesh.material) || !mesh.material.map) {
       throw new Error('Expected one textured Tripo skin');
     }
+    prepareTripoMaterial(mesh.material);
     const hips = mesh.skeleton.bones.find(bone => /^mixamorig:?Hips$/.test(bone.name));
     if (!hips) throw new Error('Tripo hips missing');
     const clips = mapTripoClips(T, gltf.animations, hips);
@@ -121,7 +123,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     const eyeHand = createFirstPersonHand(T, visual);
     const transfer = createProductTransfer(T, avatar, wrist, visual, grip, eyeHand);
     lod = createVisitorLOD(T, placement, {
-      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareModel
+      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial: prepareTripoMaterial, prepareModel
     });
 
     const resolveLocomotion = createLocomotionContinuity();

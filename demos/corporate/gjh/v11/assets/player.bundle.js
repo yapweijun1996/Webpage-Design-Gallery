@@ -955,6 +955,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   let renderedPitch = DEFAULT_PITCH;
   const target = new T.Vector3, desired = new T.Vector3, offset = new T.Vector3, direction = new T.Vector3, safe = new T.Vector3;
   const sightline = new T.Vector3;
+  let lodViewportHeight = canvas.clientHeight;
   let framing = playerCameraFraming(model, expanded, canvas.clientWidth, canvas.clientHeight);
   const cameraBall = new R.Ball(0.22), cameraRotation = { x: 0, y: 0, z: 0, w: 1 };
   const anchor = new T.Vector3, candidateAnchor = new T.Vector3, probe = new T.Vector3;
@@ -1477,6 +1478,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   }
   function resizeCamera(width, height) {
     framing = playerCameraFraming(model, expanded, width, height);
+    lodViewportHeight = height;
     camera.aspect = width / height;
     projectCamera(renderedMode === "first-person", true);
   }
@@ -1575,7 +1577,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     camera.lookAt(sightline);
     cameraClearance = camera.position.distanceTo(target);
     presentView(mode, cameraClearance < (cameraOccluded && !changedMode ? 1.45 : 1.15), required);
-    character.updateLOD?.(camera);
+    character.updateLOD?.(camera, lodViewportHeight);
   }
   function cartCapability() {
     if (expanded && body.translation().y - 0.875 > liftLayout.upper / 2)

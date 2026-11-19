@@ -259,7 +259,9 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       if(alternates)stack.push(...alternates.filter(other=>other.geometry!==node.geometry || other.material!==node.material));
       if(prepared.has(node))continue;
       prepared.add(node);
-      meshes.push(node);
+      // Link the actual portrait material in the first existing compile batch.
+      if (node.isSkinnedMesh && node.material?.customProgramCacheKey?.() === 'gjh-tripo-portrait-v1') meshes.unshift(node);
+      else meshes.push(node);
       for (const texture of meshTextures(node,shadows)) textures.add(texture);
     }
     yield;

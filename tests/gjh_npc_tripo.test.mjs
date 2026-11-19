@@ -256,6 +256,9 @@ test('the shipped Tripo visitor and boy coexist with the separately loaded V2 cr
   assert.equal(variants.length,1);
   const [boy] = variants;
   const mesh = boy.getObjectByName(meshName);
+  const playerSkin = visitor.visual.getObjectByProperty('isSkinnedMesh', true);
+  assert.equal(mesh.material.customProgramCacheKey(), 'gjh-tripo-portrait-v1');
+  assert.equal(mesh.material.customProgramCacheKey(), playerSkin.material.customProgramCacheKey());
   assert.equal(mesh.geometry.index.count/3,6313);
   system.update(.016,{x:boy.position.x+13,y:0,z:boy.position.z});
   assert.equal(mesh.geometry.index.count/3,2630);

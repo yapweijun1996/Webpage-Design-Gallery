@@ -1,3 +1,4 @@
+import {prepareCrowdMaterial, prepareTripoMaterial} from './character-tripo-material.js';
 import {DoubleSide,PropertyBinding} from '../vendor/three.module.min.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {loadTripoNpc} from './npc-tripo.js';
@@ -293,6 +294,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     boyLoad=Promise.resolve().then(()=>loader(boyController.signal)).then(asset=>{
       if (!asset) return;
       if (disposed) { asset.dispose(); return; }
+      prepareTripoMaterial(asset.scene.getObjectByName(asset.meshName)?.material);
       callsPerNpc=Math.max(callsPerNpc,visibleDrawCalls(asset.scene));
       boy=asset;
       placeLoadedBoy=true;
@@ -383,6 +385,10 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     } else avatar.position.y=npc.seat ? -.13 : 0;
     avatar.traverse(node=>{
       node.layers.set(2);
+      if (!asset && node.isSkinnedMesh) {
+        const materials = Array.isArray(node.material) ? node.material : [node.material];
+        for (const material of materials) prepareCrowdMaterial(material, node.name);
+      }
       if(node.isMesh){node.castShadow=false;node.receiveShadow=true;node.raycast=ignoreRaycast;}
     });
     const mixer=new T.AnimationMixer(avatar), actions={};

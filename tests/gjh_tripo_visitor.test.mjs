@@ -423,6 +423,13 @@ test('the real animation-free LOD1 follows the LOD0 skeleton and switches back',
     assert.notEqual(mesh.geometry, highGeometry);
     assert.notEqual(mesh.material, highMaterial);
     assert.equal(mesh.skeleton, skeleton);
+    assert.equal(mesh.material.customProgramCacheKey(), 'gjh-tripo-portrait-v1');
+    assert.equal(mesh.material.customProgramCacheKey(), highMaterial.customProgramCacheKey());
+    // Same camera distance, two CSS heights. Only the smaller projection drops detail.
+    character.updateLOD(camera, 1600);
+    assert.equal(character.state.lod.level, 0);
+    character.updateLOD(camera, 300);
+    assert.equal(character.state.lod.level, 1);
     const knee = skeleton.bones.find(bone => bone.name.endsWith('LeftLeg'));
     const upright = knee.quaternion.clone();
     for (let i = 0; i < 30; i++) character.update('walk', 1 / 60);

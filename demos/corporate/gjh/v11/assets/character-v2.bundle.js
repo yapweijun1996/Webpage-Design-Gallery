@@ -111,9 +111,17 @@ function createFirstPersonHand(T, visual, dress) {
 }
 
 // demos/corporate/gjh/v11/assets/visitor-v2-lod.js
+function projectedVisitorLevel(heightPx, previous) {
+  if (heightPx >= 160)
+    return 0;
+  if (heightPx <= 64)
+    return 1;
+  return previous;
+}
 function createVisitorLOD(T, avatar, {
   url = new URL("./gjh-mall-visitor-v2-lod1.glb", import.meta.url),
   swapMaterial = false,
+  prepareMaterial,
   prepareModel
 } = {}) {
   const parts = [], position = new T.Vector3;
@@ -160,8 +168,10 @@ function createVisitorLOD(T, avatar, {
           for (let i = 0;i < indices.count; i++)
             for (let j = 0;j < 4; j++)
               indices.setComponent(i, j, map[indices.getComponent(i, j)]);
-          if (swapMaterial)
+          if (swapMaterial) {
+            prepareMaterial?.(low.material);
             part.lowMaterial = low.material;
+          }
         }
         if (swapMaterial)
           lowScene = gltf.scene;
@@ -213,13 +223,22 @@ function createVisitorLOD(T, avatar, {
     level = next;
   }
   return {
-    update(camera) {
+    update(camera, cssHeight) {
       if (disposed)
         return;
       distance = camera.position.distanceTo(avatar.getWorldPosition(position));
-      if (distance > 10)
+      let next = (level === 0 ? distance > 11 : distance > 9) ? 1 : 0;
+      if (swapMaterial && cssHeight > 0 && camera.isPerspectiveCamera) {
+        camera.updateWorldMatrix(true, false);
+        const footY = position.project(camera).y;
+        avatar.getWorldPosition(position).y += 1.7;
+        const heightPx = Math.abs(position.project(camera).y - footY) * cssHeight / 2;
+        if (Number.isFinite(heightPx))
+          next = projectedVisitorLevel(heightPx, level);
+      }
+      if (next)
         ensure();
-      switchLevel(available && (level === 0 ? distance > 11 : distance > 9) ? 1 : 0);
+      switchLevel(available ? next : 0);
     },
     dispose() {
       disposed = true;

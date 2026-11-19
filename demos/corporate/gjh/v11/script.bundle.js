@@ -2689,6 +2689,7 @@ function createUI(expanded = false) {
 }
 
 // demos/corporate/gjh/v11/assets/graphics-quality.js
+var AVATAR_ANISOTROPY = Object.freeze({ phone: 2, tablet: 4, desktop: 4 });
 var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
 var RESOLUTION_KEY = "gjh-v11-auto-resolution-v1";
 var MALL_FRAME_BUDGETS = Object.freeze({
@@ -4328,7 +4329,10 @@ function* prepareScene({
       if (prepared.has(node))
         continue;
       prepared.add(node);
-      meshes.push(node);
+      if (node.isSkinnedMesh && node.material?.customProgramCacheKey?.() === "gjh-tripo-portrait-v1")
+        meshes.unshift(node);
+      else
+        meshes.push(node);
       for (const texture of meshTextures(node, shadows))
         textures.add(texture);
     }
