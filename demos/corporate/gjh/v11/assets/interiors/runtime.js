@@ -75,13 +75,33 @@ export function createInteriorKit(T, scene, {
     group.name = `${store.id} ${store.style}`;
     group.position.set(...store.frame.world_origin_m);
     group.rotation.y = radians(store.frame.yaw_world_deg);
-    for (const box of store.colliders) registerCollider(worldInteriorBox(store,box));
     group.visible = false;
     scene.add(group);
-    return {store,group,distance:Infinity,near:false,phase:0,motion:null,models:new Map(),layers:[],ready:new Map(),shown:null};
+    return {store,group,distance:Infinity,near:false,phase:0,motion:null,models:new Map(),layers:[],ready:new Map(),shown:null,removeColliders:null};
   });
 
+  function installColliders(shop) {
+    if (shop.removeColliders) return;
+    const removals = [];
+    try {
+      for (const box of shop.store.colliders) {
+        const remove = registerCollider(worldInteriorBox(shop.store,box));
+        if (typeof remove === 'function') removals.push(remove);
+      }
+      shop.removeColliders = removals;
+    } catch (error) {
+      for (const remove of removals) remove();
+      throw error;
+    }
+  }
+
+  function removeColliders(shop) {
+    for (const remove of shop.removeColliders ?? []) remove();
+    shop.removeColliders = null;
+  }
+
   function show(shop, roots) {
+    installColliders(shop);
     for (const root of shop.shown ?? []) root.visible = false;
     for (const root of roots) root.visible = true;
     shop.shown = roots;
@@ -181,14 +201,13 @@ export function createInteriorKit(T, scene, {
       freshModels.clear();
       freshDecoration = undefined;
       if (models.length === required.length) {
+        // An early entrant sees only complete rooms and their matching proxies.
+        if (!activeTier && tier === initialTier) {
+          show(shop,roots);
+          report.tier = tier;
+        }
         shop.ready.set(tier,roots);
         report.preinstalled.shops++;
-      }
-      // On first install, including a loader timeout, publish each room only
-      // after it has finished. A tier switch keeps the previous full set.
-      if (!activeTier && tier === initialTier) {
-        report.tier = tier;
-        show(shop,roots);
       }
     } catch {
       // Keep the last usable kit and retry failed rooms on the same schedule.
@@ -272,6 +291,7 @@ export function createInteriorKit(T, scene, {
       request = initialTier = activeTier = undefined;
       report.preinstalled = {shops:0,ms:0};
       for (const shop of shops) {
+        removeColliders(shop);
         shop.ready.clear();
         for (const root of shop.shown ?? []) root.visible = false;
         shop.shown = null;
@@ -284,6 +304,7 @@ export function createInteriorKit(T, scene, {
       request?.resolve({...report.preinstalled});
       installer?.dispose();
       for (const shop of shops) {
+        removeColliders(shop);
         for (const model of shop.models.values()) disposeInteriorModel(model);
         shop.layers.forEach(layer => layer.traverse(mesh => {
           mesh.geometry?.dispose();

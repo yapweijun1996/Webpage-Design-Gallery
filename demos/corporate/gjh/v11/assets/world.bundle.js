@@ -7,6 +7,16 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/doorway-occupancy.js
+function createDoorwayOccupancy(R, physics, center, halfExtents, leaves) {
+  const shape = new R.Cuboid(...halfExtents);
+  const rotation = { x: 0, y: 0, z: 0, w: 1 };
+  const flags = R.QueryFilterFlags.EXCLUDE_FIXED | R.QueryFilterFlags.EXCLUDE_SENSORS;
+  const bodies = new Set(leaves.map((leaf) => leaf.body.handle));
+  const isOccupant = (collider) => !bodies.has(collider.parent()?.handle);
+  return () => Boolean(physics.intersectionWithShape(center, rotation, shape, flags, undefined, undefined, undefined, isOccupant));
+}
+
 // demos/corporate/gjh/v11/assets/merge-static-geometries.js
 function mergeStaticGeometries(T, geometries) {
   const first = geometries[0];
@@ -7185,13 +7195,34 @@ function createInteriorKit(T, scene, {
     group.name = `${store2.id} ${store2.style}`;
     group.position.set(...store2.frame.world_origin_m);
     group.rotation.y = radians(store2.frame.yaw_world_deg);
-    for (const box of store2.colliders)
-      registerCollider(worldInteriorBox(store2, box));
     group.visible = false;
     scene.add(group);
-    return { store: store2, group, distance: Infinity, near: false, phase: 0, motion: null, models: new Map, layers: [], ready: new Map, shown: null };
+    return { store: store2, group, distance: Infinity, near: false, phase: 0, motion: null, models: new Map, layers: [], ready: new Map, shown: null, removeColliders: null };
   });
+  function installColliders(shop) {
+    if (shop.removeColliders)
+      return;
+    const removals = [];
+    try {
+      for (const box of shop.store.colliders) {
+        const remove = registerCollider(worldInteriorBox(shop.store, box));
+        if (typeof remove === "function")
+          removals.push(remove);
+      }
+      shop.removeColliders = removals;
+    } catch (error) {
+      for (const remove of removals)
+        remove();
+      throw error;
+    }
+  }
+  function removeColliders(shop) {
+    for (const remove of shop.removeColliders ?? [])
+      remove();
+    shop.removeColliders = null;
+  }
   function show(shop, roots) {
+    installColliders(shop);
     for (const root of shop.shown ?? [])
       root.visible = false;
     for (const root of roots)
@@ -7304,12 +7335,12 @@ function createInteriorKit(T, scene, {
       freshModels.clear();
       freshDecoration = undefined;
       if (models2.length === required.length) {
+        if (!activeTier && tier === initialTier) {
+          show(shop, roots);
+          report.tier = tier;
+        }
         shop.ready.set(tier, roots);
         report.preinstalled.shops++;
-      }
-      if (!activeTier && tier === initialTier) {
-        report.tier = tier;
-        show(shop, roots);
       }
     } catch {} finally {
       for (const root of freshModels.values())
@@ -7402,6 +7433,7 @@ function createInteriorKit(T, scene, {
       request = initialTier = activeTier = undefined;
       report.preinstalled = { shops: 0, ms: 0 };
       for (const shop of shops) {
+        removeColliders(shop);
         shop.ready.clear();
         for (const root of shop.shown ?? [])
           root.visible = false;
@@ -7415,6 +7447,7 @@ function createInteriorKit(T, scene, {
       request?.resolve({ ...report.preinstalled });
       installer?.dispose();
       for (const shop of shops) {
+        removeColliders(shop);
         for (const model of shop.models.values())
           disposeInteriorModel(model);
         shop.layers.forEach((layer) => layer.traverse((mesh) => {
@@ -8551,7 +8584,8 @@ metalnessFactor=vSurface.y;`);
         physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
         leaves.push({ group, body, side });
       }
-      const door = { zone, x, open: 0, targetOpen: false, leaves };
+      const occupied = createDoorwayOccupancy(R, physics, { x, y: 1.8, z: 0.05 }, [2.29, 1.75, 0.08], leaves);
+      const door = { zone, x, open: 0, targetOpen: false, leaves, occupied };
       doors.push(door);
       if (expanded && zone === "newmoon") {
         cylinder("brass", x + 1.8, 4.46, -4, 0.028, 2.35);
@@ -8738,6 +8772,7 @@ metalnessFactor=vSurface.y;`);
           physics.createCollider(R.ColliderDesc.cuboid(normalZ ? 0.62 : 0.035, 1.93, normalZ ? 0.035 : 0.62), body);
           leaves.push({ side, body });
         }
+        const occupied = createDoorwayOccupancy(R, physics, { x: x + normalX * 0.025, y: 1.97, z: z + normalZ * 0.025 }, normalZ ? [halfOpening, 1.93, 0.08] : [0.08, 1.93, halfOpening], leaves);
         const door = {
           zone: `planned-space-${bay.number}`,
           x,
@@ -8745,7 +8780,7 @@ metalnessFactor=vSurface.y;`);
           open: 0,
           advance(visitor, dt, reducedMotion) {
             const dx = visitor.x - x, dz = visitor.z - z;
-            const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25;
+            const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25 || this.open > 0 && occupied();
             const next = reducedMotion ? Number(nearby) : Math.max(0, Math.min(1, this.open + (nearby ? 1 : -1) * dt * 3));
             if (next === this.open)
               return;
@@ -8839,10 +8874,8 @@ metalnessFactor=vSurface.y;`);
         packshot: textures.get("new-moon-nz-425g-front.jpg"),
         prepareModel,
         registerCollider({ center: [x, y, z], size: [w, h, d], yaw }) {
-          physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
-          const c = Math.abs(Math.cos(yaw)), s = Math.abs(Math.sin(yaw));
-          const dx = (w * c + d * s) / 2, dz = (w * s + d * c) / 2;
-          shopObstacles.push({ min: { x: x - dx, y: y - h / 2, z: z - dz }, max: { x: x + dx, y: y + h / 2, z: z + dz } });
+          const box2 = physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
+          return () => physics.removeCollider(box2, false);
         }
       });
     }

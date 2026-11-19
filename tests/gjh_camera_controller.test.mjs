@@ -4,6 +4,7 @@ import test from 'node:test';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
 import {createPlayer} from '../demos/corporate/gjh/v11/assets/player.js';
+import {createSeatAnchor} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
 import {
   chaseDistance, clampCameraPitch, clampZoom, createCameraController, easeCameraValue, firstPersonFov,
   limitCameraByFloor, limitCameraByObstacles, neutralFramingWeight
@@ -75,9 +76,11 @@ test('Tripo chase damps toward both pitches, clears the floor and roof, and reta
   const joystick = {width: 75, height: 75, left: 305, right: 380, top: 540, bottom: 615};
   const control = {addEventListener: noop, setAttribute: noop, querySelector: () => control,
     getBoundingClientRect: () => joystick, classList: {remove: noop}, style: {}};
-  const keyboard = new Map();
+  const keyboard = new Map(), runButtonHandlers = new Map(), runButtonAttributes = new Map();
+  const runButton = {...control, addEventListener: (type, handler) => runButtonHandlers.set(type, handler),
+    setAttribute: (name, value) => runButtonAttributes.set(name, value)};
   const browserGlobals = {
-    document: {addEventListener: (type, handler) => keyboard.set(type, handler), querySelector: () => control},
+    document: {addEventListener: (type, handler) => keyboard.set(type, handler), querySelector: selector => selector === '#run-toggle' ? runButton : control},
     window: {addEventListener: noop},
     location: {search: ''},
     matchMedia: () => ({matches: false}),
@@ -105,9 +108,9 @@ test('Tripo chase damps toward both pitches, clears the floor and roof, and reta
   const pointer = new Map();
   const canvas = {clientWidth: 393, clientHeight: 648, addEventListener: (type, handler) => pointer.set(type, handler),
     setPointerCapture: noop, focus: noop, dataset: {}};
-  const obstacles = [];
+  const obstacles = [], seats = [];
   const player = await createPlayer(T, R, physics, new T.Scene(), canvas, new T.MeshBasicMaterial(),
-    new T.PlaneGeometry(), [], obstacles, true);
+    new T.PlaneGeometry(), seats, obstacles, true);
   t.after(() => { player.dispose(); physics.free(); });
   assert.equal(player.state.character.model, 'gjh-tripo-visitor');
   const lookPitch = () => -Math.asin(player.camera.getWorldDirection(new T.Vector3()).y);
@@ -161,6 +164,54 @@ test('Tripo chase damps toward both pitches, clears the floor and roof, and reta
   settle();
   assert.ok(player.camera.position.y >= 7.2 + player.state.cameraObstruction.radius + .039);
   assert.ok(Math.abs(lookPitch() - radians(-30)) < .005);
+
+  await t.test('sit, stand and teleport preserve the fixed physics clock', () => {
+    const bench = physics.createCollider(R.ColliderDesc.cuboid(1.25,.32,.4).setTranslation(0,.32,0));
+    seats.push(createSeatAnchor({id:'test-seat',x:0,z:0,floor:0,exit:{x:0,z:-1.2},
+      pose:{angle:0,facing:1},clearance:{interactionRadius:1.65}},bench.handle));
+    const position = {x:0,y:.91,z:-1.2};
+    player.body.setTranslation(position,true);
+    player.body.setNextKinematicTranslation(position);
+    physics.step();
+    const tick = physics.step.bind(physics);
+    const step = t.mock.method(physics, 'step', tick);
+    assert(player.sit('test-seat'));
+    assert.equal(player.state.capsuleEnabled,false);
+    assert.equal(step.mock.callCount(),0);
+    for (let i = 0; i < 80; i++) { player.update(1 / 60); physics.step(); }
+    assert.equal(player.state.seatPhase,'seated');
+    assert(player.stand());
+    assert.equal(step.mock.callCount(),80);
+    for (let i = 0; i < 55; i++) { player.update(1 / 60); physics.step(); }
+    assert.equal(player.state.seated,false);
+    assert.equal(player.state.capsuleEnabled,true);
+    assert(player.sit('test-seat'));
+    assert(player.stand(true));
+    assert.equal(player.state.capsuleEnabled,true);
+    assert(player.teleport('atrium'));
+    assert.equal(step.mock.callCount(),135);
+    player.updateCamera(1 / 120, false, .5);
+    assert.equal(player.visual.position.z,player.state.z);
+  });
+
+  await t.test('joystick full push walks until Run is toggled, then uses touch run speed', () => {
+    assert.equal(runButtonAttributes.get('aria-pressed'),'false');
+    function fullPush() {
+      const point = {pointerType:'touch',clientX:342.5,clientY:577.5,pointerId:1,button:0};
+      pointer.get('pointerdown')(point);
+      pointer.get('pointermove')({...point,clientY:540});
+      for (let i = 0; i < 60; i++) { player.update(1 / 60); physics.step(); }
+      const start = player.state.z;
+      for (let i = 0; i < 12; i++) { player.update(1 / 60); physics.step(); }
+      const speed = (start - player.state.z) * 5;
+      pointer.get('pointerup')({...point,type:'pointerup'});
+      return speed;
+    }
+    assert.ok(Math.abs(fullPush() - 3.1) < .02);
+    runButtonHandlers.get('click')();
+    assert.equal(runButtonAttributes.get('aria-pressed'),'true');
+    assert.ok(Math.abs(fullPush() - 4.5) < .02);
+  });
 });
 
 test('zoom clamps numeric inputs and rejects invalid storage values', () => {

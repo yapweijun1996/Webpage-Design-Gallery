@@ -1,3 +1,4 @@
+import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
 import {createShopVisibility} from './shop-visibility.js';
 import {buildPublicArchitecture} from './public-architecture.js';
@@ -694,7 +695,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, .05));
       physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, .03), body); leaves.push({group, body, side});
     }
-    const door={zone, x, open:0, targetOpen:false, leaves};
+    const occupied = createDoorwayOccupancy(R,physics,{x,y:1.8,z:.05},[2.29,1.75,.08],leaves);
+    const door={zone, x, open:0, targetOpen:false, leaves, occupied};
     doors.push(door);
     if (expanded && zone === 'newmoon') {
       cylinder('brass', x + 1.8, 4.46, -4, .028, 2.35);
@@ -844,12 +846,14 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
         physics.createCollider(R.ColliderDesc.cuboid(normalZ ? .62 : .035,1.93,normalZ ? .035 : .62),body);
         leaves.push({side,body});
       }
+      const occupied = createDoorwayOccupancy(R,physics,{x:x+normalX*.025,y:1.97,z:z+normalZ*.025},
+        normalZ ? [halfOpening,1.93,.08] : [.08,1.93,halfOpening],leaves);
       const door={
         zone:`planned-space-${bay.number}`, x,z,open:0,
         advance(visitor,dt,reducedMotion) {
           const dx=visitor.x-x,dz=visitor.z-z;
-          const nearby=visitor.y<2 && Math.abs(dx*alongX+dz*alongZ)<2.25 &&
-            Math.abs(dx*normalX+dz*normalZ)<3.25;
+          const nearby=(visitor.y<2 && Math.abs(dx*alongX+dz*alongZ)<2.25 &&
+            Math.abs(dx*normalX+dz*normalZ)<3.25) || (this.open > 0 && occupied());
           const next=reducedMotion ? Number(nearby) : Math.max(0,Math.min(1,this.open+(nearby?1:-1)*dt*3));
           if (next===this.open) return;
           this.open=next;
@@ -943,11 +947,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     interiorKit = createInteriorKit(T, scene, {
       assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'),
       prepareModel, registerCollider({center:[x,y,z],size:[w,h,d],yaw}) {
-        physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
+        // The camera sweep already uses these oriented Rapier boxes.
+        const box = physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
           .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
-        const c = Math.abs(Math.cos(yaw)), s = Math.abs(Math.sin(yaw));
-        const dx = (w*c+d*s)/2, dz = (w*s+d*c)/2;
-        shopObstacles.push({min:{x:x-dx,y:y-h/2,z:z-dz},max:{x:x+dx,y:y+h/2,z:z+dz}});
+        return () => physics.removeCollider(box,false);
       }
     });
   }

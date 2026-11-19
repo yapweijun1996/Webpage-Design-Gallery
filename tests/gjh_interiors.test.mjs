@@ -354,7 +354,10 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   let clock = 0;
   const runtime = createInteriorKit(T,scene,{
     now:()=>clock,
-    registerCollider:box=>colliders.push(box),
+    registerCollider(box) {
+      colliders.push(box);
+      return () => colliders.splice(colliders.indexOf(box),1);
+    },
     async loadModel({file}) {
       requests.push(file);
       const model = new T.Group();
@@ -390,7 +393,7 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
     for (let i=0; i<remaining; i++) await complete(await frame());
   };
 
-  assert.equal(colliders.length,stores.reduce((n,store)=>n+store.colliders.length,0));
+  assert.equal(colliders.length,0);
   const store = interiorStores.S02;
   go(store,'low');
   assert.equal(await frame(),undefined);
@@ -402,6 +405,7 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert(low.roots.includes(first));
   assert(!scene.getObjectById(first.id));
   assert.equal(runtime.report().preinstalled.shops,0);
+  assert.equal(colliders.length,0);
   go(interiorStores.S17,'low');
   const second = await frame();
   assert.equal(requests[1],roomDetails.S02.file);
@@ -416,6 +420,8 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert(first.parent.visible);
   await finishAll(15);
   assert.deepEqual(await lowReady,{shops:17,ms:272});
+  const colliderCount = stores.reduce((n,store)=>n+store.colliders.length,0);
+  assert.equal(colliders.length,colliderCount);
   const motion = modelsByFile.get(roomDetails.S02.file).userData.roomMotion;
   go(store,'low');
   const offset = motion.scroll.offset.x;
@@ -471,7 +477,9 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert.deepEqual(runtime.report(),{tier:'low',shops:1,drawCalls:1,triangles:12,modelsLoaded:59,
     bytes:[...manifest.assets,...manifest.round2.details].reduce((sum,asset)=>sum+asset.bytes,0),preinstalled:{shops:17,ms:0}});
 
+  assert.equal(colliders.length,colliderCount);
   runtime.invalidate();
+  assert.equal(colliders.length,0);
   go(store,'low');
   assert(!first.parent.visible);
   const restored = await frame();
@@ -479,7 +487,9 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   assert.equal(requests.length,59);
   await complete(restored);
   assert(first.parent.visible);
+  assert.equal(colliders.length,store.colliders.length);
   runtime.dispose();
+  assert.equal(colliders.length,0);
 });
 
 test('registration warms animated detail for the ground-floor screen and Detailed passes before showing it', async t => {
@@ -559,10 +569,10 @@ test('registration warms animated detail for the ground-floor screen and Detaile
 });
 
 test('a timed-out warm stage continues nearest-first and publishes later tiers with their signs', async t => {
-  const scene = new T.Scene(), files = [], visits = [];
+  const scene = new T.Scene(), files = [], visits = [], colliders = [];
   let now = 0, installedSigns = 'low', blockedSigns, failFile = roomDetails.S02.file;
   const interiors = createInteriorKit(T,scene,{
-    now:()=>now, registerCollider() {},
+    now:()=>now, registerCollider:box=>colliders.push(box),
     async loadModel({file}) {
       files.push(file);
       if (file === failFile) throw new Error('Unavailable fixture');
@@ -601,6 +611,7 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   low.runFrame();
   await frame();
   assert.equal(files[1],failFile);
+  assert.equal(colliders.length,0);
   now = 6000;
   low.runFrame();
   assert.equal(report.reason,'timeout');
@@ -609,6 +620,8 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   for (let i=0; i<16; i++) await frame();
   assert.equal(files[2],interiorStores.S17.files.low.file);
   assert.equal(interiors.report().preinstalled.shops,16);
+  const total = stores.reduce((n,store)=>n+store.colliders.length,0);
+  assert.equal(colliders.length,total-interiorStores.S02.colliders.length);
   low.runFrame();
   assert.deepEqual(visits,[]);
   failFile = null;
@@ -616,6 +629,7 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   await frame();
   assert.equal(interiors.report().preinstalled.shops,17);
   assert.equal(files.filter(file=>file===interiorStores.S02.files.low.file).length,1);
+  assert.equal(colliders.length,total);
   low.runFrame();
   assert.equal(report.background,'complete');
   assert.deepEqual(visits,[['low','low','low']]);

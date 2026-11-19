@@ -4394,6 +4394,45 @@ function* prepareScene({
   }
 }
 
+// demos/corporate/gjh/v11/assets/movement.js
+var FIXED_STEP = 1 / 60;
+var MOVEMENT = Object.freeze({
+  desktopWalk: 3.4,
+  desktopRun: 5.2,
+  touchWalk: 3.1,
+  touchRun: 4.5,
+  cart: 1.8,
+  acceleration: 10,
+  deceleration: 18,
+  turnRate: 140 * Math.PI / 180,
+  stickDeadZone: 0.12,
+  stepHeight: 0.18,
+  cartRadius: 0.95,
+  walkClipSpeed: 2.65,
+  runClipSpeed: 5
+});
+function createFixedClock() {
+  let remaining = 0;
+  return {
+    reset() {
+      remaining = 0;
+    },
+    advance(seconds, tick) {
+      remaining = Math.min(0.1, remaining + Math.max(0, seconds));
+      let steps = 0;
+      while (remaining + 0.000000001 >= FIXED_STEP) {
+        tick();
+        remaining = Math.max(0, remaining - FIXED_STEP);
+        steps++;
+      }
+      return steps;
+    },
+    get alpha() {
+      return remaining / FIXED_STEP;
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/auto-door.js
 function shouldOpenStoreDoor(door, player) {
   return player.y < 2 && Math.hypot(player.x - door.x, player.z) < (door.targetOpen ? 5.2 : 4.8);
@@ -5092,8 +5131,11 @@ var elevator;
 var manual = false;
 var frame = 0;
 var last = 0;
-var accumulator = 0;
 var frames = 0;
+var fixedClock = createFixedClock();
+var movementTimings = { physicsMs: 0, cameraMs: 0 };
+var movementHistory = new Array(300);
+var movementFrame = 0;
 var three;
 var frameTrace;
 var modelWarmup;
@@ -5169,7 +5211,8 @@ function clearTransientState(event) {
   if (event.kind === "interrupt" && (!interaction?.character.physicalProduct?.held || interaction.productApproaching))
     player?.cancelCollection();
   manual = false;
-  accumulator = 0;
+  fixedClock.reset();
+  player?.resetInterpolation();
   last = performance.now();
 }
 var modes = createModes({
@@ -5196,9 +5239,22 @@ performanceMonitor.setEnabled(true);
 var measuringFrames = false;
 var lastMetricsUpdate = -Infinity;
 var maxFrameUploadMs = 0;
+function movementReport() {
+  const percentile = (index) => {
+    const values = movementHistory.map((frame2) => frame2[index]).filter(Number.isFinite).sort((a, b) => a - b);
+    return values[Math.ceil(values.length * 0.95) - 1] ?? null;
+  };
+  return {
+    frames: Math.min(movementFrame, movementHistory.length),
+    physicsP95Ms: percentile(0),
+    cameraQueryP95Ms: percentile(1),
+    collisionTicks: player?.collisionTicks ?? 0
+  };
+}
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
+    movement: movementReport(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
     refreshHz: quality.refreshHz,
@@ -5267,7 +5323,6 @@ function syncMode(signals = ui.modeSignals()) {
 ui.onModeState(syncMode);
 setupOriginalTin(ui);
 syncMode();
-var STEP = 1 / 60;
 async function loadOptionalThemeModule(loader) {
   let timer;
   try {
@@ -5417,6 +5472,7 @@ var snapshot = () => Object.freeze({
 });
 Object.defineProperty(window, "__mall", { value: Object.freeze({
   performanceReport,
+  movementSample: () => player && { ...player.sampleMovement(), frames },
   emote(name) {
     if (!canPlayEmote())
       return false;
@@ -5449,6 +5505,10 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
   setInput(input) {
     if (!ready || modes.paused())
       return;
+    if (manual && input === null) {
+      fixedClock.reset();
+      player.resetInterpolation();
+    }
     manual = input !== null;
     const clean = input === null ? null : { forward: Math.max(-1, Math.min(1, Number(input.forward) || 0)), right: Math.max(-1, Math.min(1, Number(input.right) || 0)), run: Boolean(input.run) };
     if (clean && Number.isFinite(input.yaw))
@@ -5462,9 +5522,11 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
       return snapshot();
     manual = true;
     quality.resetSampling();
-    const count = Math.max(0, Math.min(600, Math.floor(ms / (STEP * 1000))));
+    const count = Math.max(0, Math.min(600, Math.floor(ms / (FIXED_STEP * 1000))));
     for (let i = 0;i < count; i++)
       tick();
+    player.updateCamera(count * FIXED_STEP);
+    greetOnArrival();
     render();
     return snapshot();
   }
@@ -5505,37 +5567,42 @@ function greetOnArrival() {
     greetedOnArrival = player.emote("wave", { arrival: true });
   }
 }
+var fixedTick = () => tick(false);
 function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred)
     return;
   const p = player.state;
+  const doorsStart = performance.now();
   for (const door of world.doors) {
     if (door.advance) {
-      door.advance(p, STEP, reducedMotion2.matches);
+      door.advance(p, FIXED_STEP, reducedMotion2.matches);
       continue;
     }
-    const open = shouldOpenStoreDoor(door, p);
+    const open = shouldOpenStoreDoor(door, p) || door.open > 0 && door.occupied();
     door.targetOpen = open;
-    door.open = reducedMotion2.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
+    const next = reducedMotion2.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * FIXED_STEP * 3));
+    if (next === door.open)
+      continue;
+    door.open = next;
     for (const leaf of door.leaves) {
       const x = door.x + leaf.side * (1.16 + door.open * 2.28);
       leaf.group.position.x = x;
       leaf.body.setNextKinematicTranslation({ x, y: 1.8, z: 0.05 });
     }
   }
-  elevator?.update?.(STEP, p);
-  player.update(STEP);
+  movementTimings.physicsMs += performance.now() - doorsStart;
+  elevator?.update?.(FIXED_STEP, p);
+  player.update(FIXED_STEP);
+  const physicsStart = performance.now();
   physics.step();
-  player.sync();
+  movementTimings.physicsMs += performance.now() - physicsStart;
   if (npcs) {
     const start = frameTrace?.start();
-    npcs.update(STEP, player.state, reducedMotion2.matches);
+    npcs.update(FIXED_STEP, player.state, reducedMotion2.matches);
     frameTrace?.end("crowd.update", start);
   }
-  player.updateCamera(STEP);
   if (refreshHud)
     updateHUD();
-  greetOnArrival();
 }
 var lastGuidanceSample = -Infinity;
 var projectedTarget = null;
@@ -5774,7 +5841,7 @@ function animate(now) {
   updateModelPreload(now);
   if (advanceStartupWarm()) {
     last = now;
-    accumulator = 0;
+    fixedClock.reset();
     quality.resetSampling(now);
     return;
   }
@@ -5783,10 +5850,9 @@ function animate(now) {
     enteredAt ??= now;
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
-  if (advancing)
-    accumulator = Math.min(0.1, accumulator + Math.max(0, (now - last) / 1000));
-  else
-    accumulator = 0;
+  const elapsed = (now - last) / 1000;
+  if (!advancing)
+    fixedClock.reset();
   last = now;
   const callbackStart = performance.now();
   const pad = readStandardGamepad();
@@ -5807,11 +5873,7 @@ function animate(now) {
   const simulationStart = performance.now();
   let steps = 0;
   if (advancing && !modes.paused()) {
-    while (accumulator + 0.000000001 >= STEP) {
-      tick(false);
-      accumulator = Math.max(0, accumulator - STEP);
-      steps++;
-    }
+    steps = fixedClock.advance(elapsed, fixedTick);
     if (steps)
       updateHUD();
   }
@@ -5827,11 +5889,17 @@ function animate(now) {
     const renderStart = performance.now();
     const force = forceRender;
     renderRequested = forceRender = false;
+    if (advancing && !modes.paused() && !shelfFocus?.open) {
+      player.updateCamera(Math.min(0.1, slotMs / 1000), false, fixedClock.alpha);
+      greetOnArrival();
+    }
     pose = render(force);
     const renderEnd = performance.now();
     callbackMs = renderEnd - callbackStart;
     if (pose && live && !windowBlurred && startupOverlay.hidden) {
       measuringFrames = true;
+      player.takeQueryTimings(movementTimings);
+      movementHistory[movementFrame++ % movementHistory.length] = [movementTimings.physicsMs, movementTimings.cameraMs];
       performanceMonitor.frame(now, renderer.info, {
         simulationMs,
         renderMs: renderEnd - renderStart,
@@ -5854,13 +5922,15 @@ function animate(now) {
       pausePerformance();
   } else
     pausePerformance();
+  player.takeQueryTimings(movementTimings);
+  movementTimings.physicsMs = movementTimings.cameraMs = 0;
   simulationMs = simulationSteps = 0;
   quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel && !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered && now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost && ["explore", "cart"].includes(modes.current())));
 }
 function resume() {
   if (ready && !frame && !document.hidden) {
     last = performance.now();
-    accumulator = 0;
+    fixedClock.reset();
     quality.cadence.reset();
     frame = requestAnimationFrame(animate);
   }
@@ -6204,7 +6274,7 @@ async function initialize() {
     return;
   }
   physics = new R.World({ x: 0, y: -24, z: 0 });
-  physics.timestep = STEP;
+  physics.timestep = FIXED_STEP;
   window.mallLoader?.complete("physics");
   modelWarmup = createModelWarmup(T, renderer);
   tierQueue = createTierQueue(modelWarmup.enqueueSweep);
@@ -6441,6 +6511,7 @@ async function initialize() {
   resize();
   for (let i = 0;i < 5; i++)
     tick();
+  player.updateCamera(0, true);
   render(true);
   if (contextLost || context.isContextLost())
     return;

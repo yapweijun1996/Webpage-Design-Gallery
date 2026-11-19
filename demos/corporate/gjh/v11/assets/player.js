@@ -6,8 +6,9 @@ import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
 import {isShelfInReach} from './visitor-v2-contact.js';
 import {
   chaseDistance, clampCameraPitch, createCameraController, DEFAULT_PITCH, easeCameraValue, firstPersonFov,
-  limitCameraByFloor, limitCameraByObstacles, neutralFramingWeight
+  limitCameraByFloor, neutralFramingWeight, sweepCameraClearance
 } from './camera-controller.js';
+import {advanceVelocity, interpolate, interpolateAngle, MOVEMENT, stickStrength} from './movement.js';
 import {isInFrontOfSeat} from './seat-placements.js';
 
 const CAMERA_LIFTS = [1.1, 2.2];
@@ -41,16 +42,17 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(-2, .89, 12));
   const capsule = physics.createCollider(R.ColliderDesc.capsule(.55, .3).setFriction(0), body);
   const controller = physics.createCharacterController(.025);
-  controller.enableAutostep(.2, .28, true); controller.enableSnapToGround(.25);
+  controller.enableAutostep(MOVEMENT.stepHeight, .28, true); controller.enableSnapToGround(.25);
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
-  const keys = new Set(); let vertical = 0, runToggle = true, stickX = 0, stickY = 0, injected = null;
+  const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
   let seated = false, pushing=false, elevatorTravel=null;
-  // A conservative full-turn footprint encloses avatar and cart. No sweeping corners.
-  const walkingShape=new R.Capsule(.55,.3), cartShape=new R.Cylinder(.85,1.4);
+  // Keep the push proxy narrow enough to clear a 2.48 m opening.
+  const walkingShape=new R.Capsule(.55,.3), cartShape=new R.Cylinder(.85,MOVEMENT.cartRadius);
   let seat=null, seatPhase='idle', seatTime=0, seatFrom=null, seatExit=null, seatStartAngle=0, seatStartWeight=0;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const reduceSeatMotion=()=>reducedMotion.matches;
-  let yaw = 0, drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
+  let yaw = 0, facing = 0, previousYaw = 0, previousFacing = 0, previousPosition = null;
+  let drag = null, stick = null, stickOrigin = null, pinch = null, pinchTimer = 0;
   let actionView=null,cameraDistance=null,cameraOccluded=false,productApproach=null,productHome=null;
   const view = createCameraController();
   const camera = new T.PerspectiveCamera(58, 1, CHASE_NEAR, 100);
@@ -63,6 +65,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   const anchor=new T.Vector3(),candidateAnchor=new T.Vector3(),probe=new T.Vector3();
   let cameraLift=0,cameraClearance=0,cameraRadius=.22;
   const movement = {x: 0, y: 0, z: 0}, next = {x: 0, y: 0, z: 0};
+  const velocity = {x: 0, z: 0};
+  let collisionMs = 0, cameraQueryMs = 0, collisions = 0;
   const joystick = document.querySelector('#joystick'), thumb = joystick.querySelector('.joystick-thumb'), runButton = document.querySelector('#run-toggle');
   const cameraControls = document.querySelector('#camera-controls');
   const zoomIn = document.querySelector('#camera-zoom-in'), zoomOut = document.querySelector('#camera-zoom-out');
@@ -123,7 +127,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   const clearInput = () => {
     const pair = takePinch(), dragId = drag?.id, stickId = stick?.id;
-    keys.clear(); drag = null; trackpadScale = 0;
+    keys.clear(); velocity.x = velocity.z = 0; drag = null; trackpadScale = 0;
     if (stick) resetStick();
     releaseCapture(dragId); releaseCapture(stickId);
     releaseCapture(pair?.first.id); releaseCapture(pair?.second.id);
@@ -180,7 +184,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function dragStick() {
     if (!stickOrigin) return;
     const dx = stick.x - stickOrigin.x, dy = stick.y - stickOrigin.y;
-    const distance = Math.hypot(dx, dy), strength = Math.min(1, Math.max(0, (distance - 8) / 30));
+    const distance = Math.hypot(dx, dy), strength = stickStrength(distance, stick.pad.width / 2);
     if (strength) stick.pinchEligible = false;
     stickX = distance ? dx / distance * strength : 0; stickY = distance ? -dy / distance * strength : 0;
     thumb.style.transform = `translate(${stickX * 18}px, ${-stickY * 18}px)`;
@@ -188,7 +192,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function look(dx, dy) {
     if (!dx && !dy) return;
     if(actionView)actionView.settled=true;
-    yaw -= dx * .005;
+    yaw -= dx * .005; previousYaw -= dx * .005;
     if (dy) setPitch(currentPitch() + dy * (cameraMode() === 'first-person' ? .004 : .006));
   }
   function beginPinch(first, second, pending) {
@@ -294,21 +298,28 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function restoreActionView(){if(!actionView)return;yaw=actionView.previousYaw;actionView=null;}
   function updateActionView(dt){if(!actionView||actionView.settled)return;if(keys.has('KeyQ')||keys.has('KeyE')){actionView.settled=true;return;}actionView.elapsed+=dt;const t=Math.min(1,actionView.elapsed/.35),e=t*t*(3-2*t),v=actionView;const delta=Math.atan2(Math.sin(v.targetYaw-v.fromYaw),Math.cos(v.targetYaw-v.fromYaw));yaw=v.fromYaw+delta*e;v.pitch=v.fromPitch+(DEFAULT_PITCH-v.fromPitch)*e;if(t===1)v.settled=true;}
-  function startCollection(prop,id){if(seated||!character.startCollection(prop,id))return false;beginActionView('collection',visual.rotation.y+Math.PI+.55);return true;}
+  function startCollection(prop,id){if(seated||!character.startCollection(prop,id))return false;beginActionView('collection',facing+Math.PI+.55);return true;}
   function cancelCollection(){productApproach=null;character.cancelCollection();if(['collection','product'].includes(actionView?.kind))restoreActionView();}
   let gamepad = null;
   function update(dt) {
+    previousPosition = body.translation();
+    previousFacing = facing; previousYaw = yaw;
+    sync();
     if (isPaused()) { clearInput(); return; }
     if (elevatorTravel) {
       const trip = elevatorTravel;
       const before=trip.phase;
-      trip.elapsed=reduceSeatMotion()||trip.skip ? rideTime.exit : Math.min(rideTime.exit,trip.elapsed+dt);
+      const skip = reduceSeatMotion() || trip.skip;
+      trip.elapsed=skip ? rideTime.exit : Math.min(rideTime.exit,trip.elapsed+dt);
       sampleRide(trip.elapsed,trip);
       if (before!==trip.phase) trip.elevator.setRiding?.(trip.phase==='ride');
       trip.elevator.pose(trip);
       moveSeat(trip.position);
       const stepping=trip.elapsed>rideTime.open && trip.elapsed<rideTime.board || trip.elapsed>rideTime.reopen;
-      character.update(stepping?'walk':'idle',dt);
+      const gait = stepping ? 'walk' : 'idle';
+      const rate = stepping ? approachRate(trip.position, dt) : 1;
+      if (skip) resetInterpolation();
+      sync(); character.update(gait,dt,gait,rate);
       if(!trip.chimed && trip.elapsed>=rideTime.arrive){trip.chimed=true;trip.chime?.();}
       if(trip.elapsed>=rideTime.exit){
         trip.elevator.finishRide();elevatorTravel=null;capsule.setEnabled(true);vertical=0;
@@ -318,11 +329,11 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     updateActionView(dt);
     if(gamepad){yaw-=gamepad.lookX*1.9*dt;if(gamepad.lookY)setPitch(currentPitch()+gamepad.lookY*1.4*dt);}
-    if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*(110*Math.PI/180)*dt;updateSeatCharacter(dt);return;}
+    if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*MOVEMENT.turnRate*dt;updateSeatCharacter(dt);return;}
     if(productApproach){
       const a=productApproach,t=Math.min(1,(a.elapsed+=dt)/.45),e=t*t*(3-2*t);
       moveSeat({x:a.from.x+(a.to.x-a.from.x)*e,y:.91,z:a.from.z+(a.to.z-a.from.z)*e});
-      visual.rotation.y=0;character.update('walk',dt);
+      facing=0;sync();character.update('walk',dt,'walk',approachRate(body.translation(),dt));
       if(t===1){productApproach=null;if(a.returning)character.returnProduct();}
       return;
     }
@@ -342,34 +353,56 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(actionView?.kind==='elevator'&&Math.hypot(forward,right)>.1)restoreActionView();
     const running = !pushing && (injected?.run ?? ((stick !== null && runToggle) || keys.has('ShiftLeft') || keys.has('ShiftRight')));
     const turning = (keys.has('KeyQ') ? 1 : 0) - (keys.has('KeyE') ? 1 : 0);
-    yaw += turning * (110 * Math.PI / 180) * dt;
-    const length = Math.max(1, Math.hypot(forward, right)), speed = pushing ? 1.8 : running ? 7.5 : 2.65;
-    const dx = (-Math.sin(yaw) * forward + Math.cos(yaw) * right) / length, dz = (-Math.cos(yaw) * forward - Math.sin(yaw) * right) / length;
+    yaw += turning * MOVEMENT.turnRate * dt;
+    const speed = pushing ? MOVEMENT.cart
+      : stick ? (running ? MOVEMENT.touchRun : MOVEMENT.touchWalk)
+      : (running ? MOVEMENT.desktopRun : MOVEMENT.desktopWalk);
+    advanceVelocity(velocity, forward, right, yaw, speed, dt);
     vertical = controller.computedGrounded() ? -.5 : Math.max(-18, vertical - 24 * dt);
-    movement.x = dx * speed * dt; movement.y = vertical * dt; movement.z = dz * speed * dt;
+    movement.x = velocity.x * dt; movement.y = vertical * dt; movement.z = velocity.z * dt;
+    const queryStart = performance.now();
     controller.computeColliderMovement(capsule, movement);
-    const corrected = controller.computedMovement(), position = body.translation();
-    next.x = position.x + corrected.x; next.y = position.y + corrected.y; next.z = position.z + corrected.z; body.setNextKinematicTranslation(next);
+    const corrected = controller.computedMovement();
+    collisionMs += performance.now() - queryStart;
+    // Ground contact contributes to Rapier's collision count on every walk tick.
+    // Count only ticks where geometry materially changes the horizontal movement.
+    if (Math.hypot(corrected.x - movement.x, corrected.z - movement.z) > .002) collisions++;
+    const position = body.translation();
+    next.x = position.x + corrected.x; next.y = position.y + corrected.y; next.z = position.z + corrected.z;
+    body.setNextKinematicTranslation(next);
     const distance = Math.hypot(corrected.x, corrected.z);
     const walking = distance > .001;
     const state = walking ? running ? 'run' : 'walk' : 'idle';
     const requested = Math.hypot(forward, right) > .001 ? running ? 'run' : 'walk' : 'idle';
-    // The in-place sprint originally covered 5 metres per second at normal playback.
-    const sprintRate = running && dt > 0 ? Math.min(speed, distance / dt) / 5 : 1;
-    const firstPerson = cameraMode() === 'first-person';
-    if (firstPerson) visual.rotation.y = yaw;
-    character.update(state, dt, requested, sprintRate);
-    if(actionView?.kind==='collection'&&!character.state.collection.active)restoreActionView();
-    if (!firstPerson && (walking || turning)) {
-      const angle = walking ? Math.atan2(-dx, -dz) : yaw, delta = Math.atan2(Math.sin(angle - visual.rotation.y), Math.cos(angle - visual.rotation.y));
-      visual.rotation.y += delta * (1 - Math.exp(-14 * dt));
+    const referenceSpeed = pushing ? MOVEMENT.cart : running ? MOVEMENT.runClipSpeed : MOVEMENT.walkClipSpeed;
+    const playbackRate = dt > 0 ? distance / dt / referenceSpeed : 1;
+    if (cameraMode() === 'first-person') facing = yaw;
+    else if (walking || turning) {
+      const angle = walking ? Math.atan2(-corrected.x, -corrected.z) : yaw;
+      facing = interpolateAngle(facing, angle, 1 - Math.exp(-14 * dt));
     }
+    visual.rotation.y = facing;
+    character.update(state, dt, requested, playbackRate);
+    if(actionView?.kind==='collection'&&!character.state.collection.active)restoreActionView();
   }
-  function sync() {
-    const p = body.translation(); visual.position.set(p.x, p.y - .875, p.z);
+  function approachRate(position, dt) {
+    if (!dt) return 1;
+    return Math.hypot(position.x-previousPosition.x, position.z-previousPosition.z) / dt / MOVEMENT.walkClipSpeed;
+  }
+  function sync(alpha = 1) {
+    const p = body.translation();
+    const from = previousPosition ?? p;
+    const x = interpolate(from.x, p.x, alpha), y = interpolate(from.y, p.y, alpha), z = interpolate(from.z, p.z, alpha);
+    visual.position.set(x, y - .875, z);
+    const angle = alpha === 1 ? facing : interpolateAngle(previousFacing, facing, alpha);
+    visual.rotation.y = angle;
     // Clear the visual floor/rug inlays as well as the physical walking slab.
-    contact.position.set(p.x, Math.max(.05, p.y - .83), p.z);
-    contact.rotation.z = visual.rotation.y;
+    contact.position.set(x, Math.max(.05, y - .83), z);
+    contact.rotation.z = angle;
+  }
+  function resetInterpolation() {
+    previousPosition = null;
+    previousYaw = yaw; previousFacing = facing;
   }
   function sweepCamera(origin, point, minimumY) {
     direction.copy(point).sub(origin);
@@ -378,9 +411,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     direction.multiplyScalar(1 / distance);
     const length = limitCameraByFloor(origin.y, direction.y, distance, minimumY);
     if (!length) return 0;
-    const hit = physics.castShape(origin,cameraRotation,direction,cameraBall,.02,length,true,undefined,undefined,capsule,body);
-    const clearance = hit ? Math.max(0, hit.time_of_impact - .02) : length;
-    return limitCameraByObstacles(origin, direction, clearance, cameraRadius, cameraObstacles);
+    const start = performance.now();
+    const bounded = sweepCameraClearance(physics, origin, cameraRotation, direction, cameraBall, length, capsule, body, cameraObstacles);
+    cameraQueryMs += performance.now() - start;
+    return bounded;
   }
   function cameraCandidate(lift, out, minimumY, seatView) {
     candidateAnchor.copy(target); candidateAnchor.y += lift;
@@ -417,19 +451,20 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (renderedMode !== mode) viewToggle.setAttribute('aria-pressed', String(firstPerson));
     renderedMode = mode;
   }
-  function updateCamera(dt, instant = false) {
-    sync();
+  function updateCamera(dt, instant = false, alpha = 1) {
+    sync(alpha);
+    const viewYaw = alpha === 1 ? yaw : interpolateAngle(previousYaw, yaw, alpha);
     const required = chaseRequired(), mode = view.mode(required), firstPerson = mode === 'first-person';
     const zoom = view.zoom(required), immediate = instant || reducedMotion.matches;
     const pitch = currentPitch();
     if (firstPerson) {
-      if (character.productPhase === 'held') visual.rotation.y = yaw;
+      if (character.productPhase === 'held') visual.rotation.y = viewYaw;
       eyeFov = easeCameraValue(eyeFov, firstPersonFov(zoom), dt, immediate || !eyeFovInitialized);
       eyeFovInitialized = true;
       projectCamera(true);
       camera.position.copy(visual.position); camera.position.y += EYE_HEIGHT;
       const cosPitch = Math.cos(pitch);
-      sightline.set(-Math.sin(yaw) * cosPitch, -Math.sin(pitch), -Math.cos(yaw) * cosPitch).add(camera.position);
+      sightline.set(-Math.sin(viewYaw) * cosPitch, -Math.sin(pitch), -Math.cos(viewYaw) * cosPitch).add(camera.position);
       camera.lookAt(sightline);
       cameraLift = cameraClearance = 0; cameraRadius = EYE_CLEARANCE;
       presentView(mode, true, required);
@@ -448,7 +483,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     cameraRadius=Math.max(.22,camera.near*Math.tan(camera.fov*Math.PI/360)*Math.hypot(1,camera.aspect)+.08);
     cameraBall.radius=cameraRadius;
     const sinPitch = Math.sin(renderedPitch), cosPitch = Math.cos(renderedPitch);
-    offset.set(Math.sin(yaw)*cosPitch, sinPitch, Math.cos(yaw)*cosPitch).multiplyScalar(cameraDistance);
+    offset.set(Math.sin(viewYaw)*cosPitch, sinPitch, Math.cos(viewYaw)*cosPitch).multiplyScalar(cameraDistance);
     // Keep the Tripo entrance framing near neutral and orbit the avatar at both extremes.
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
@@ -477,7 +512,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(allowed<.9&&length>=2)safe.copy(desired);
     const lookAhead=actionView?0:framing.lookAhead * framingWeight;
     sightline.copy(target);
-    sightline.x-=Math.sin(yaw)*lookAhead;sightline.z-=Math.cos(yaw)*lookAhead;
+    sightline.x-=Math.sin(viewYaw)*lookAhead;sightline.z-=Math.cos(viewYaw)*lookAhead;
     camera.position.copy(safe);camera.lookAt(sightline);
     cameraClearance=camera.position.distanceTo(target);
     // In a genuinely enclosed corner no third-person view fits. Hide only the local
@@ -495,12 +530,12 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function setCart(value) {
     if(value&&!cartCapability().allowed)return false;
     if ((elevatorTravel || character.state.physicalProduct?.phase!=='empty' && character.state.physicalProduct) && value) return false;
-    if(!value){pushing=false;character.setCart(false);capsule.setShape(walkingShape);controller.enableAutostep(.2,.28,true);clearInput();injected=null;return true;}
+    if(!value){pushing=false;character.setCart(false);capsule.setShape(walkingShape);controller.enableAutostep(MOVEMENT.stepHeight,.28,true);clearInput();injected=null;return true;}
     if(pushing)return true;
     if(seated||!character.state.cart.available)return false;
     const p=body.translation();
     if(physics.intersectionWithShape(p,{x:0,y:0,z:0,w:1},cartShape,undefined,undefined,capsule,body))return false;
-    pushing=true;capsule.setShape(cartShape);controller.disableAutostep();character.setCart(true);clearInput();injected=null;character.update('idle',0);physics.step();return true;
+    pushing=true;capsule.setShape(cartShape);controller.disableAutostep();character.setCart(true);clearInput();injected=null;sync();character.update('idle',0);return true;
   }
   const rotation={x:0,y:0,z:0,w:1};
   function clearAt(position,ignoreBench=false){return !physics.intersectionWithShape(position,rotation,walkingShape,undefined,undefined,capsule,body,ignoreBench?c=>c.handle!==seat.collider:undefined);}
@@ -517,7 +552,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     seatTime+=dt;const duration=seatPhase==='align'?.35:.85,t=Math.min(1,seatTime/duration),e=t*t*(3-2*t);
     const end=seatPhase==='sit'?seatBodyTarget(seat):seatExit;
     moveSeat({x:seatFrom.x+(end.x-seatFrom.x)*e,y:seatFrom.y+(end.y-seatFrom.y)*e,z:seatFrom.z+(end.z-seatFrom.z)*e});
-    const delta=Math.atan2(Math.sin(seat.angle-seatStartAngle),Math.cos(seat.angle-seatStartAngle));visual.rotation.y=seatStartAngle+delta*e;
+    const delta=Math.atan2(Math.sin(seat.angle-seatStartAngle),Math.cos(seat.angle-seatStartAngle));facing=seatStartAngle+delta*e;
     character.setSeatProgress(seatPhase==='sit'?e:seatPhase==='stand'?seatStartWeight*(1-e):0);
     if(t===1){if(seatPhase==='align'){seatPhase='sit';seatTime=0;seatFrom={...body.translation()};seatStartAngle=seat.angle;}else if(seatPhase==='sit'){seatPhase='seated';character.setSeated(true);}else finishStand();}
   }
@@ -526,9 +561,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||!isInFrontOfSeat(candidate,p.z))return false;
     seat=candidate;const exit={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ},target=seatBodyTarget(seat);
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
-    seatExit=exit;clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=visual.rotation.y;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI);vertical=0;
-    if(reduceSeatMotion()){moveSeat(target);visual.rotation.y=seat.angle;seatPhase='seated';character.setSeated(true);}
-    updateSeatCharacter(0);physics.step();updateCamera(0,reduceSeatMotion());return true;
+    seatExit=exit;clearInput();injected=null;cancelCollection();seated=true;capsule.setEnabled(false);seatStartAngle=facing;seatTime=0;seatFrom={...p};seatPhase='align';seatStartWeight=0;beginActionView('seat',seat.angle+Math.PI);vertical=0;
+    if(reduceSeatMotion()){moveSeat(target);facing=seat.angle;seatPhase='seated';character.setSeated(true);}
+    resetInterpolation();updateSeatCharacter(0);updateCamera(0,reduceSeatMotion());return true;
   }
   function stand(instant=false) {
     if(!seated)return false;if(seatPhase==='stand'&&!instant)return true;
@@ -537,9 +572,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       .find(point=>clearAt(point)&&clearPath(from,point,true));
     if(!position)return false;
     seatExit=position;
-    clearInput();injected=null;seatFrom={...body.translation()};seatStartAngle=visual.rotation.y;seatStartWeight=character.state.seatWeight;seatTime=0;seatPhase='stand';
+    clearInput();injected=null;seatFrom={...body.translation()};seatStartAngle=facing;seatStartWeight=character.state.seatWeight;seatTime=0;seatPhase='stand';
     if(instant||reduceSeatMotion())finishStand();
-    updateSeatCharacter(0);physics.step();updateCamera(0,instant||reduceSeatMotion());return true;
+    resetInterpolation();updateSeatCharacter(0);updateCamera(0,instant||reduceSeatMotion());return true;
   }
   function teleport(zone) {
     if (elevatorTravel) return false;
@@ -549,10 +584,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const carryingProduct=character.state.physicalProduct?.held;
     if(!carryingProduct){productHome=null;character.resetProduct?.();}
     setCart(false);restoreActionView();seated=false;seatPhase='idle';seat=null;seatExit=null;character.setSeated(false);capsule.setEnabled(true);
-    const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = destination.yaw || 0; visual.rotation.y = yaw; clearInput();
+    const {x, z} = destination; body.setTranslation({x, y: .89, z}, true); body.setNextKinematicTranslation({x, y: .89, z}); vertical = 0; yaw = destination.yaw || 0; facing = yaw; clearInput();
     if(carryingProduct){sync();character.update('idle',0);}
-    // Update broad-phase query positions before spring-arm obstruction tests.
-    physics.step(); updateCamera(0, true); return true;
+    resetInterpolation(); updateCamera(0, true); return true;
   }
   function useElevator(elevator,chime) {
     const p=body.translation();
@@ -583,9 +617,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     elevatorTravel = null; trip.setHeight(floor);
     moveSeat({x:trip.elevator?.exit.x??trip.x, y:floor + .89, z:trip.elevator?.exit.z??trip.z});
     capsule.setEnabled(true); vertical = 0; clearInput(); injected = null;
-    restoreActionView(); sync(); updateCamera(0, true);
+    restoreActionView(); resetInterpolation(); updateCamera(0, true);
   }
-  return {body, capsule, camera, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  return {body, capsule, camera, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
     dispose: character.dispose,
     renderShelf(draw) {
@@ -599,14 +633,14 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       const from=body.translation(),home=token?.approach;
       if(!home||Math.hypot(from.x-home.x,from.z-home.z)>home.radius||!clearPath(from,{x:home.x,y:.91,z:home.z}))return false;
       const reduced=reduceSeatMotion(),ok=character.pickProduct({...token,approachDelay:reduced?0:.45});
-      if(ok){productHome=home;if(reduced){moveSeat({x:home.x,y:.91,z:home.z});visual.rotation.y=0;sync();character.update('idle',0);}else productApproach={from:{...from},to:home,elapsed:0};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);}return ok;
+      if(ok){productHome=home;if(reduced){moveSeat({x:home.x,y:.91,z:home.z});facing=0;resetInterpolation();sync();character.update('idle',0);}else productApproach={from:{...from},to:home,elapsed:0};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);}return ok;
     },
     returnProduct: ()=>{
       const from=body.translation();
       if(!productHome||!character.state.physicalProduct?.held||productApproach||
         !isShelfInReach({x:from.x,y:from.y-.875,z:from.z},productHome)||
         !clearPath(from,{x:productHome.x,y:.91,z:productHome.z}))return false;
-      if(reduceSeatMotion()){moveSeat({x:productHome.x,y:.91,z:productHome.z});visual.rotation.y=0;sync();character.returnProduct();character.update('idle',0);}else productApproach={from:{...from},to:productHome,elapsed:0,returning:true};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);return true;
+      if(reduceSeatMotion()){moveSeat({x:productHome.x,y:.91,z:productHome.z});facing=0;resetInterpolation();sync();character.returnProduct();character.update('idle',0);}else productApproach={from:{...from},to:productHome,elapsed:0,returning:true};clearInput();injected=null;beginActionView('product',-Math.PI/2+.5);return true;
     },
     bagProduct(id){
       if(productApproach||!character.bagProduct?.(id,reduceSeatMotion()))return false;
@@ -618,7 +652,18 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     customize: changes => character.customize?.(changes),
     setPaused: fn => { isPaused = fn; },
     setGamepadInput: input => { gamepad = input; },
-    setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) yaw = input.yaw; if (Number.isFinite(input?.pitch)) setPitch(input.pitch); },
+    setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) previousYaw = yaw = input.yaw; if (Number.isFinite(input?.pitch)) setPitch(input.pitch); },
+    get collisionTicks() { return collisions; },
+    sampleMovement() {
+      const {x,z} = body.translation();
+      return {x,z,visualX:visual.position.x,visualZ:visual.position.z,
+        cameraDistance:cameraClearance,requestedCameraDistance:cameraDistance,collisionTicks:collisions};
+    },
+    takeQueryTimings(out) {
+      out.physicsMs += collisionMs;
+      out.cameraMs += cameraQueryMs;
+      collisionMs = cameraQueryMs = 0;
+    },
     get chaseFov() { return framing.fov; },
     refreshCameraMode() {
       if (renderedMode !== cameraMode() || viewToggle.disabled !== chaseRequired()) updateCamera(0);
@@ -627,6 +672,6 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       const required = Boolean(shelfOpen || chaseRequired());
       return {mode: view.mode(required), zoom: view.zoom(required)};
     },
-    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, capsuleEnabled:capsule.isEnabled(), productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase:elevatorTravel?.phase||null, cartCapability:cartCapability(), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing: visual.rotation.y, pitch: currentPitch(), character: character.state}; }
+    get state() { const p = body.translation(); return {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, capsuleEnabled:capsule.isEnabled(), productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase:elevatorTravel?.phase||null, cartCapability:cartCapability(), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state}; }
   };
 }

@@ -42,6 +42,16 @@ export function limitCameraByObstacles(origin, direction, length, radius, obstac
   return clearance;
 }
 
+// Rapier sweeps against the oriented collider. Presentation-only bounds
+// cover features such as seat backs that have no physical collision.
+export function sweepCameraClearance(physics, origin, rotation, direction, ball, length, capsule, body, bounds) {
+  const margin = .02;
+  const hit = physics.castShape(origin, rotation, direction, ball, margin, length, true,
+    undefined, undefined, capsule, body);
+  const clearance = hit ? Math.max(0, hit.time_of_impact - margin) : length;
+  return limitCameraByObstacles(origin, direction, clearance, ball.radius, bounds);
+}
+
 export function clampZoom(value) {
   return Number.isFinite(value) ? Math.max(-1, Math.min(1, value)) : 0;
 }
