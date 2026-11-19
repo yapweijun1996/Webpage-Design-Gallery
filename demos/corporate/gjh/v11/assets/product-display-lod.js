@@ -3,6 +3,13 @@ import {createPackedDraw, shadowReceiverBounds} from './packed-draw.js';
 
 const DISPLAY_DISTANCE = 18;
 
+// At balcony distance an individual tin is a few screen pixels tall. Keep the
+// display furniture and labels, and restore stock on the ground-floor view.
+function balconyCanVisible(view, bounds) {
+  if (!view?.low || !view.deckVisible) return true;
+  return (bounds.max.y-bounds.min.y)*view.pixelScale >= 8*bounds.distanceToPoint(view.eye);
+}
+
 // The authored slot is the inventory identity. The GPU only needs a dense
 // prefix of visible placements, even when the current tier is above Low.
 export function createProductDisplayLod(T, meshes, placements, {shadow = false, shopSlot} = {}) {
@@ -36,6 +43,7 @@ export function createProductDisplayLod(T, meshes, placements, {shadow = false, 
       placements.forEach(({x, z, alwaysVisible}, index) => {
         const visible = (alwaysVisible || Math.hypot(visitor.x - x, visitor.y ?? 0, visitor.z - z) < DISPLAY_DISTANCE) &&
           (!view || (view.frustum.intersectsBox(bounds[index]) &&
+            (!placements[index].smallStock || balconyCanVisible(view,bounds[index])) &&
             (alwaysVisible || !view.shopVisibility?.occluded(shopSlot, bounds[index]))));
         if (visible !== inRange[index]) changed = true;
         inRange[index] = visible;
@@ -134,6 +142,7 @@ export function createCanDisplay(T, scene, records, shopSlot) {
         const {x, y, z, alwaysVisible, bounds} = slot;
         slot.visible = (alwaysVisible || Math.hypot(visitor.x-x, (visitor.y ?? y)-y, visitor.z-z) < DISPLAY_DISTANCE)
           && (!view || (view.frustum.intersectsBox(bounds) &&
+            balconyCanVisible(view,bounds) &&
             (alwaysVisible || !view.shopVisibility?.occluded(shopSlot,bounds))));
         if (slot.visible) {
           const distance = view ? view.eye.distanceTo(point.set(x,y,z)) : Math.hypot(visitor.x-x,visitor.z-z);

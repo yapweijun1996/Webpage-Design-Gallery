@@ -125,7 +125,7 @@ export function createSkylightDapple(T, scene, {panels, projection, contact, pre
           linear:() => false,lighting:undefined
         });
         map = texture;
-        mesh.visible = true;
+        mesh.visible = currentTier !== 'low';
       } catch {
         material.map = contact.map;
         texture.dispose();
@@ -133,8 +133,11 @@ export function createSkylightDapple(T, scene, {panels, projection, contact, pre
     }).catch(() => {});
     return request;
   }
+  let currentTier;
   function update(tier, reducedMotion, now = performance.now()) {
+    currentTier = tier;
     if (!map) return;
+    mesh.visible = tier !== 'low';
     const drift = (tier === 'balanced' || tier === 'detailed') && !reducedMotion ? now : 0;
     map.offset.set(.008*Math.sin(drift/67000), .006*Math.sin(drift/59000));
   }

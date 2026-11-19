@@ -73,16 +73,16 @@ export async function buildShopInteractionTargets(slots = Object.keys(interiorSt
     layouts[index].map(item => createShopInteractionTarget(slot,interiorStores[slot],item)));
 }
 
-export async function installShopInteractions(T, scene, registry, announce) {
+export async function installShopInteractions(T, scene, registry, announce, getTier) {
   const targets = await buildShopInteractionTargets(Object.values(interactiveShopSlots));
   // Existing seats retain their collision checks, stand behaviour and original IDs.
   const nearby = targets.filter(target => !target.shopAction.seat &&
     (!target.shopAction.zone.startsWith('planned-space-') || target.shopAction.effect));
-  registry.installShopActions(nearby, {announce, ...createShopActionVisual(T,scene,targets)});
+  registry.installShopActions(nearby, {announce, ...createShopActionVisual(T,scene,targets,getTier)});
   return nearby;
 }
 
-function createShopActionVisual(T, scene, targets) {
+function createShopActionVisual(T, scene, targets, getTier) {
   const items = new Map(targets.map(({id,shopAction:{item}}) => [id,item]));
   const shapes = new Map();
   let mesh;
@@ -122,8 +122,8 @@ function createShopActionVisual(T, scene, targets) {
     if (!mesh) {
       mesh = new T.Mesh(geometry,new T.MeshBasicMaterial());
       mesh.name = 'Shop action prop';
-      scene.add(mesh);
     }
+    if (!mesh.parent) scene.add(mesh);
     mesh.geometry = geometry;
     mesh.material.color.setHex(color);
     mesh.position.set(...position);
@@ -134,6 +134,10 @@ function createShopActionVisual(T, scene, targets) {
   const showroom = createShowroomFeedback(T,makeShape,merge);
   function present(target,t) {
     if (mesh) mesh.visible = false;
+    paint(target,t);
+    if (mesh && !mesh.visible && getTier?.() === 'low') mesh.removeFromParent();
+  }
+  function paint(target,t) {
     const action = target?.shopAction;
     if (!action?.effect) return;
     const {item,slot,effect} = action;

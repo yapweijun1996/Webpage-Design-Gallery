@@ -261,6 +261,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const mesh = new T.Mesh(plane, material);
     mesh.position.set(x + decalClearance * Math.sin(ry), y, z + decalClearance * Math.cos(ry));
     mesh.rotation.y = ry; mesh.scale.set(width, height, 1); scene.add(mesh);
+    mesh.userData.shopDecal = true;
     if (activeShopSlot !== null) queueShopUpload(activeShopSlot, mesh);
     return tagShopLod(mesh);
   }
@@ -278,6 +279,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const texture = setupArtworkTexture(T,new T.CanvasTexture(canvas),artworkTier());
     const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({map:texture,transparent:true}))));
     mesh.position.set(x, y, decalHeight(z)); mesh.scale.set(width, height, 1); scene.add(mesh);
+    mesh.userData.shopDecal = true;
     if (activeShopSlot !== null) queueShopUpload(activeShopSlot, mesh);
     return tagShopLod(mesh);
   }
@@ -618,8 +620,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
     if (expanded) {
       box('green', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
+      shopVisibility.addWall(Number(store.number),x,4.7,0,9.7,1.55,.5,true);
     }
     ceilingBox('cream', x, 5.8, -5.2, 9.7, .22, 10.4, null);
+    if (expanded) shopVisibility.addCeiling(Number(store.number),x,5.8,-5.2,9.7,10.4);
     activeShopSlot=expanded?Number(store.number):null;
     if (expanded && zone === 'newmoon') {
       // Recessed bronze-edged coffers draw the eye along the product aisle.
@@ -928,9 +932,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     if (expanded) addOriginalShopDetails(zone, x, {box, cylinder, solid, collider, seats});
     activeShopSlot=null;
     }
+  let slide;
   if (expanded) {
     signage=await addShopSignAtlas(T,expandedLayout,scene);
-    const slide = addExpandedStorefronts(T,expandedLayout,scene,signage.configs);
+    slide = addExpandedStorefronts(T,expandedLayout,scene,signage.configs,plainFinish);
     for (const x of atriumLayout.anchorPierXs) {
       box('green',x,2.83,.27,.29,5.66,.24);
       box('brass',x,.15,.31,.35,.24,.27);
@@ -1166,7 +1171,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     viewUpdates.push(batch.update);
   }
 
-  const stagingLods = [];
+  const stagingLods = [], standalonePools = [], poolBatches = [];
+  const shopNear = new Map();
+  let contactBatch;
   const glowParts = [];
   const lowCylinder = new T.CylinderGeometry(1, 1, 1, 12);
   const lowSphere = new T.SphereGeometry(1, 8, 5);
@@ -1182,10 +1189,23 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
     const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
     const source = surfaces ? batch.geometry.clone().setAttribute('instanceSurface', surfaces) : batch.geometry;
-    const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length);
+    const playerContact = expanded && !batch.deckLod && batch.material === contact;
+    const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length + Number(playerContact));
+    if (playerContact) {
+      mesh.count = batch.transforms.length;
+      contactBatch = mesh;
+    }
     if (batch.material === contact) placeDecal(mesh);
-    if (batch.material === materials.lightPool) placeDecal(mesh,-1);
+    if (batch.material === materials.lightPool) {
+      placeDecal(mesh,-1);
+      if (expanded) {
+        standalonePools.push(mesh);
+        poolBatches.push(batch);
+      }
+    }
     mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
+    if (batch.material === contact) mesh.name = 'Mall contact shadows';
+    if (batch.material === materials.lightPool) mesh.name = 'Mall floor and wall light pools';
     if (batch.material === materials.paving) {
       pavingMesh = mesh;
       if (mappedPaving) mesh.material = mappedPaving;
@@ -1268,7 +1288,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   const fill = expanded ? null : new T.DirectionalLight(0xe9d8c2,.45);
   if (fill) { fill.position.set(4,8,-5); scene.add(fill); }
   const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T,scene,{
-    plane:geometry.plane, poolMaterial:materials.lightPool, washes:atmosphereWashes,
+    plane:geometry.plane, poolMaterial:materials.lightPool, washes:atmosphereWashes, pools:poolBatches, shopNear,
     floors:[materials.shellFloor,materials.paving,materials.courtStone],
     fixtures:materials.glow, vault:materials.vaultOak
   }) : null;
@@ -1325,7 +1345,28 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       mesh.visible = !overlaps && (mesh.userData.shopSlot===undefined || mesh.userData.shopLodNear);
     }
   }
-  const shopNear = new Map(), eye = new T.Vector3(), projection = new T.Matrix4();
+  const eye = new T.Vector3(), projection = new T.Matrix4();
+  const decalBounds = new T.Box3();
+  const contactBounds = new T.Sphere(), savedContactBounds = new T.Sphere();
+  function drawWithPlayerContact(shadow, draw) {
+    if (!contactBatch || !shadow.visible) return draw();
+    const {count, boundingSphere, instanceMatrix} = contactBatch;
+    shadow.updateMatrix();
+    contactBatch.setMatrixAt(count,shadow.matrix);
+    instanceMatrix.clearUpdateRanges();
+    instanceMatrix.addUpdateRange(0,(count+1)*16);
+    instanceMatrix.needsUpdate = true;
+    geometry.plane.boundingSphere ?? geometry.plane.computeBoundingSphere();
+    savedContactBounds.copy(boundingSphere);
+    boundingSphere.union(contactBounds.copy(geometry.plane.boundingSphere).applyMatrix4(shadow.matrix));
+    contactBatch.count++;
+    shadow.visible = false;
+    try { return draw(); } finally {
+      shadow.visible = true;
+      contactBatch.count = count;
+      boundingSphere.copy(savedContactBounds);
+    }
+  }
   const view = {frustum:new T.Frustum(), eye, shopVisibility};
   let deckLodMeshes=null;
   function updateShopLods(visitor, shadows = true, tier, camera, height, focus, lightWash, reducedMotion = false) {
@@ -1338,6 +1379,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       return;
     }
     // The render loop and context recovery both supply the resolved tier here.
+    interactables.physicsProps?.setTier(tier);
+    restrooms?.updateDraw(tier);
+    slide?.setTier(tier);
+    materials.glass.forceSinglePass = tier === 'low';
+    shopVisibility.setOverheadCulling(tier === 'low');
     bakedLighting.setTier(tier);
     skylightDapple?.update(tier,reducedMotion);
     if (shadows && tier === 'detailed') playerShadow.update(visitor);
@@ -1356,6 +1402,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     interiorKit.update(visitor, camera && view);
     const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
     view.deckVisible = deckVisible;
+    view.low = tier === 'low';
     for (const [slot,bay] of shopBays) {
       const x = (bay.minX + bay.maxX) / 2;
       // The three occupied stores are visible through their north arcade doors.
@@ -1365,11 +1412,18 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     for (const mesh of shopLodMeshes) {
       const slot = mesh.userData.shopSlot;
       if (!shopNear.has(slot)) continue;
-      mesh.visible = mesh.userData.shopLodNear = shopNear.get(slot);
+      let near = shopNear.get(slot);
+      if (near && camera && tier === 'low' && mesh.userData.shopDecal) {
+        mesh.geometry.boundingBox ?? mesh.geometry.computeBoundingBox();
+        mesh.updateWorldMatrix(true,false);
+        near = !shopVisibility.occluded(slot,decalBounds.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld));
+      }
+      mesh.visible = mesh.userData.shopLodNear = near;
       if (mesh.visible && !deckVisible) furnishings.loadShopDetails(slot);
     }
     if(!deckLodMeshes){deckLodMeshes=[];scene.traverse(mesh=>{if(mesh.userData.deckLod)deckLodMeshes.push(mesh);});}
     for(const mesh of deckLodMeshes)mesh.visible=deckVisible;
+    for (const mesh of standalonePools) mesh.visible = tier !== 'low' && (!mesh.userData.deckLod || deckVisible);
     for (const update of shopLodUpdates) update(visitor, camera && view);
     furnishings.updateView(camera ? view : {deckVisible},shopNear);
     if (camera) {
@@ -1426,12 +1480,13 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     return brandWallPromise;
   }
   reserveProduct = registerPhysicsProps(T, R, physics, {
-    scene, interactables, reserveProduct, expanded, phone, prepareModel, interiors: interiorKit
+    scene, interactables, reserveProduct, expanded, phone, prepareModel, interiors: interiorKit,
+    initialTier: artworkTier()
   });
   return {signage, defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
-  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

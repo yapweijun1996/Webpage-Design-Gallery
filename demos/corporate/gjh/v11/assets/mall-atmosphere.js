@@ -17,11 +17,14 @@ const SURFACES = {
   detailed:{roughness:.85, emission:1.10, washOpacity:.94}
 };
 
-export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, washes, floors, fixtures, vault}) {
+export function createMallSurfaceAtmosphere(T, scene, {
+  plane, poolMaterial, washes, floors, fixtures, vault, pools = [], shopNear
+}) {
   // One main-pass batch shares the existing gradient texture. The opaque
   // surfaces keep their original shader programs and use the mall's PMREM.
   const washMaterial = poolMaterial.clone();
-  const washMesh = placeDecal(new T.InstancedMesh(plane,washMaterial,washes.length),-1);
+  const poolCount = pools.reduce((total, pool) => total + pool.transforms.length, 0);
+  const washMesh = placeDecal(new T.InstancedMesh(plane,washMaterial,washes.length + poolCount),-1);
   const transform = new T.Object3D();
   const stripSlots = [];
   washes.forEach(([x, y, z, width, depth, yaw, pitch, coveStrip = false], index) => {
@@ -32,6 +35,16 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
     transform.updateMatrix();
     washMesh.setMatrixAt(index,transform.matrix);
   });
+  const poolSlots = new Map();
+  for (const {transforms, slots, deckLod} of pools) {
+    transforms.forEach((matrix,index) => {
+      const shop = slots?.[index] ?? null;
+      const key = `pool:${deckLod}:${shop}`;
+      poolSlots.set(key,{shop, deckLod});
+      washMesh.setMatrixAt(stripSlots.length,matrix);
+      stripSlots.push(key);
+    });
+  }
   washMesh.name = 'Mall cove and storefront light wash';
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
@@ -58,13 +71,20 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
     fixtureEmission = intensity;
     fixtures.emissiveIntensity = fixtureEmission * preset.emission;
   }
-  const allowWash = strip => strip || broadWash;
-  function updateWash(frustum) {
-    washVisibility.update(frustum, allowWash);
+  function updateWash(view) {
+    washVisibility.update(view?.frustum, key => {
+      if (typeof key === 'boolean') return key || broadWash;
+      const {shop,deckLod} = poolSlots.get(key);
+      return preset === SURFACES.low && (!deckLod || view?.deckVisible) &&
+        (shop === null || shopNear?.get(shop));
+    }, false, (key,bounds) => {
+      const shop = poolSlots.get(key)?.shop;
+      return shop != null && view?.shopVisibility?.occluded(shop,bounds);
+    });
     washMesh.visible = washMesh.count > 0;
   }
   setTier('low');
-  return {setTier, setFixtureEmission, updateView(view) { updateWash(view.frustum); }};
+  return {setTier, setFixtureEmission, updateView: updateWash};
 }
 
 const STUDIO_LIGHTING = {

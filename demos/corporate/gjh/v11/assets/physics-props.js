@@ -17,6 +17,7 @@ export function createPhysicsPropPool(world, {phone = false} = {}) {
   function finish(slot) {
     slot.prop.mesh.visible = false;
     slot.prop.mesh.material.opacity = 1;
+    if (slot.prop.detach) slot.prop.mesh.removeFromParent();
     slot.prop = null;
     occupied--;
   }
@@ -53,6 +54,7 @@ export function createPhysicsPropPool(world, {phone = false} = {}) {
     prop.mesh.position.set(x, y, z);
     prop.mesh.quaternion.identity();
     prop.mesh.visible = true;
+    prop.mount?.();
     occupied++;
     slot.awake = !body.isSleeping();
     activeBodies += Number(slot.awake);
@@ -132,20 +134,36 @@ export function createPhysicsPropPool(world, {phone = false} = {}) {
     const {x, y, z} = slot.body.translation();
     return {x, y, z, sleeping:slot.body.isSleeping()};
   }
-  return {setZone, spawn, despawn, push, afterStep, sample,
+  function updateVisibility(position, compact) {
+    for (const {prop} of slots) {
+      if (!prop) continue;
+      const p = prop.mesh.position;
+      prop.mesh.visible = !compact || (Math.abs(position.y - p.y) < 3 &&
+        Math.hypot(position.x - p.x, position.z - p.z) <= 9);
+      if (prop.mesh.visible) prop.mount?.();
+      else if (prop.detach) prop.mesh.removeFromParent();
+    }
+  }
+  return {setZone, spawn, despawn, push, afterStep, sample, updateVisibility,
     get zone() { return zone; },
     get occupied() { return occupied; },
     get activeBodies() { return activeBodies; }};
 }
 
 function makeProp(T, R, world, scene, geometry, {name, radius, halfHeight, mass, color, ball, bounce, ccd}) {
-  const material = new T.MeshStandardMaterial({color, roughness: .78, transparent: true});
-  const mesh = new T.Mesh(geometry, material);
-  mesh.name = name;
-  mesh.visible = false;
-  scene.add(mesh);
+  let mesh;
   return {
-    mesh, radius, halfHeight, mass, floor: 0,
+    radius, halfHeight, mass, floor: 0, detach: false,
+    get mesh() {
+      if (!mesh) {
+        mesh = new T.Mesh(geometry(), new T.MeshStandardMaterial({color, roughness: .78, transparent: true}));
+        mesh.name = name;
+        mesh.visible = false;
+      }
+      return mesh;
+    },
+    get built() { return mesh; },
+    mount() { if (!mesh.parent) scene.add(mesh); },
     createBody(x, y, z) {
       const desc = R.RigidBodyDesc.dynamic().setTranslation(x, y, z)
         .setCcdEnabled(ccd).setCanSleep(true).setLinearDamping(ball ? .7 : 1.0).setAngularDamping(ball ? 1.6 : 4);
@@ -161,18 +179,34 @@ function makeProp(T, R, world, scene, geometry, {name, radius, halfHeight, mass,
 }
 
 export function registerPhysicsProps(T, R, world, {
-  scene, interactables, reserveProduct, expanded, phone, prepareModel, interiors
+  scene, interactables, reserveProduct, expanded, phone, prepareModel, interiors, initialTier
 }) {
   const pool = createPhysicsPropPool(world, {phone});
-  const can = makeProp(T, R, world, scene, new T.CylinderGeometry(.03875, .03875, .124, 12),
+  const can = makeProp(T, R, world, scene, () => new T.CylinderGeometry(.03875, .03875, .124, 12),
     {name: 'Dropped can', radius: .03875, halfHeight: .062, mass: .16, color: 0xc1a46d, bounce: .32, ccd: true});
-  const ball = makeProp(T, R, world, scene, new T.IcosahedronGeometry(.16, 1),
+  const ball = makeProp(T, R, world, scene, () => new T.IcosahedronGeometry(.16, 1),
     {name: 'Atrium ball', radius: .16, halfHeight: .16, mass: .28, color: 0xa74634, ball: true, bounce: .26, ccd: true});
   const basket = makeProp(T, R, world, scene,
-    new T.LatheGeometry([new T.Vector2(0, -.14), new T.Vector2(.16, -.14), new T.Vector2(.21, .14),
+    () => new T.LatheGeometry([new T.Vector2(0, -.14), new T.Vector2(.16, -.14), new T.Vector2(.21, .14),
       new T.Vector2(.19, .14), new T.Vector2(.14, -.115), new T.Vector2(0, -.115)], 12),
     {name: 'Atrium basket', radius: .21, halfHeight: .14, mass: .55, color: 0x8b6842, bounce: .06, ccd: false});
-  if (prepareModel) void prepareModel([can.mesh, ball.mesh, basket.mesh], {late: false}).catch(() => {});
+  const props = [can, ball, basket];
+  let compact, prewarmed = false;
+  function setTier(tier) {
+    const next = expanded && tier === 'low';
+    if (compact === next) return;
+    compact = next;
+    for (const prop of props) {
+      prop.detach = compact;
+      if (!compact) { void prop.mesh; prop.mount(); }
+      else if (prop.built && !prop.built.visible) prop.built.removeFromParent();
+    }
+    if (!compact && !prewarmed) {
+      prewarmed = true;
+      void prepareModel?.(props.map(prop => prop.mesh), {late: false}).catch(() => {});
+    }
+  }
+  setTier(initialTier);
 
   const ballX = expanded ? 11.4 : 3.5, basketX = expanded ? 13 : 5;
   const propZ = expanded ? 26 : 11;
@@ -213,6 +247,7 @@ export function registerPhysicsProps(T, R, world, {
   };
 
   function canReach(position) {
+    if (!dropped) return false;
     const phase = position?.character?.physicalProduct?.phase;
     const p = can.mesh.position;
     return Boolean(dropped && phase === 'empty' && !position.seated && !position.pushing && !position.elevatorTravel &&
@@ -226,6 +261,7 @@ export function registerPhysicsProps(T, R, world, {
   };
 
   interactables.physicsProps = {
+    setTier,
     sample: () => ({
       can: dropped ? {...pool.sample(can), id:dropped.id, floor:can.floor, halfHeight:can.halfHeight} : null,
       ball: pool.sample(ball), basket: pool.sample(basket), activeBodies:pool.activeBodies, bodyStepMs
@@ -237,9 +273,11 @@ export function registerPhysicsProps(T, R, world, {
         ballSpawned = basketSpawned = false;
       }
       // The two props are off the entry path and activate near their alcove.
-      if (next !== 'atrium' || Math.abs(position.x - ballX) > 7 || Math.abs(position.z - propZ) > 7) return;
-      if (!ballSpawned) ballSpawned = pool.spawn(ball, ballX, ball.radius + .015, propZ);
-      if (!basketSpawned) basketSpawned = pool.spawn(basket, basketX, basket.halfHeight + .015, propZ);
+      if (next === 'atrium' && Math.abs(position.x - ballX) <= 7 && Math.abs(position.z - propZ) <= 7) {
+        if (!ballSpawned) ballSpawned = pool.spawn(ball, ballX, ball.radius + .015, propZ);
+        if (!basketSpawned) basketSpawned = pool.spawn(basket, basketX, basket.halfHeight + .015, propZ);
+      }
+      pool.updateVisibility(position, compact);
     },
     drop(position) {
       if (!held || dropped || pool.zone === null) return false;
@@ -253,7 +291,7 @@ export function registerPhysicsProps(T, R, world, {
       });
     },
     floorAction: {
-      id: 'physics-floor-can', kind: 'pickup', anchor: can.mesh.position,
+      id: 'physics-floor-can', kind: 'pickup', get anchor() { return can.mesh.position; },
       // Use the standing-action HUD presentation for a moving registry target.
       shopAction: {name: 'Dropped can', label: 'Pick up'},
       availability: ({player}) => canReach(player),

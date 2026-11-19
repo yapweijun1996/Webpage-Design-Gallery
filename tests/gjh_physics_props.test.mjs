@@ -50,6 +50,32 @@ function fixtureProp(world) {
   };
 }
 
+test('Low builds nearby props on demand and detaches distant meshes without dropping their bodies', () => {
+  const world = fakePhysics(), scene = new T.Scene(), interactables = [];
+  let warmed = 0;
+  registerPhysicsProps(T,R,world,{scene,interactables,expanded:true,phone:true,initialTier:'low',
+    prepareModel:async () => { warmed++; }});
+  const props = interactables.physicsProps;
+  props.visit('atrium',{x:10,y:0,z:44});
+  assert.equal(scene.children.length,0);
+  assert.equal(warmed,0);
+  props.visit('atrium',{x:10,y:0,z:26});
+  assert.deepEqual(scene.children.map(mesh => mesh.name),['Atrium ball','Atrium basket']);
+  const ball = scene.children[0];
+  props.visit('atrium',{x:10,y:0,z:44});
+  assert.equal(ball.parent,null);
+  assert.equal(ball.visible,false);
+  assert.equal(props.sample().activeBodies,2);
+  props.visit('atrium',{x:10,y:0,z:26});
+  assert.equal(ball.parent,scene);
+  assert.equal(ball.visible,true);
+  props.setTier('balanced');
+  assert.equal(warmed,1);
+  assert.equal(scene.getObjectByName('Dropped can').visible,false);
+  props.setTier('low');
+  assert.equal(scene.getObjectByName('Dropped can'),undefined);
+});
+
 for (const [phone, capacity] of [[true, 6], [false, 12]]) {
   test(`prop pool enforces ${capacity} admissions and reuses slots across zones`, () => {
     const world = fakePhysics(), pool = createPhysicsPropPool(world, {phone});

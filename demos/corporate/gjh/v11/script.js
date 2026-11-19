@@ -59,6 +59,7 @@ let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true, entryPresentation;
 let lightWash=false;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
+let themeStage = null;
 let themeMidnightTimer;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
@@ -451,7 +452,7 @@ function render(force = false) {
         shopActionsLoad = import('./assets/interiors/shop-interactions.js')
           .then(async ({installShopInteractions}) => {
             if (pageEnded || fatal) return;
-            const targets = await installShopInteractions(three, world.scene, interactions, ui.announce);
+            const targets = await installShopInteractions(three, world.scene, interactions, ui.announce, () => quality.state?.tier);
             if (pageEnded || fatal) return;
             updateHUD(); requestRender();
             if (!testEnabled) return;
@@ -488,6 +489,7 @@ function render(force = false) {
       guidance?.update(selectedInteraction, label, camera, true);
     }
     const tier = quality.state?.tier;
+    elevator?.setDrawTier?.(tier);
     const detailed = expanded && quality.state?.shadows && renderWidth >= 1000;
     // Retain the direct pass until the Detailed interiors have their linear
     // programs. A downgrade can use the already warmed direct pass immediately.
@@ -509,7 +511,9 @@ function render(force = false) {
     const warmPhase = warmReport.background ?? warmReport.reason;
     programTrace?.sample('pre-draw', warmPhase, currentZone);
     programTrace?.player(pose);
-    if (shelfFocus?.open) player.renderShelf(draw); else draw();
+    if (shelfFocus?.open) player.renderShelf(draw);
+    else if (expanded && tier === 'low') world.drawWithPlayerContact(player.contactShadow,draw);
+    else draw();
     programTrace?.sample('live', warmPhase, currentZone);
     frames++;
     if (window.__sceneReady) ui.offerFirstGuide();
@@ -865,6 +869,7 @@ function resize() {
 }
 function applyProfile(profile) {
   profile = quality.apply(profile);
+  themeStage?.setTier?.(profile.tier);
   void elevator?.kit?.select(profile.tier);
   npcs?.setQuality({tier:profile.tier,mobile:renderWidth<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
   if (!contextLost) renderer.shadowMap.enabled = profile.shadows;
@@ -1034,7 +1039,13 @@ async function initialize() {
         }
         return stage;
       },commit(next,previous,stage){
-        try { if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');atmosphere.applyTheme(next);stage?.mount?.(); }
+        try {
+          if(!world.applyMallTheme(next) || (elevator?.applyMallTheme && !elevator.applyMallTheme(next))) throw new Error('Invalid theme');
+          atmosphere.applyTheme(next);
+          stage?.setTier?.(quality.state?.tier);
+          stage?.mount?.();
+          themeStage = stage;
+        }
         catch(error) { world.applyMallTheme(previous);elevator?.applyMallTheme?.(previous);atmosphere.applyTheme(previous);throw error; }
       }});
       if(!world.applyMallTheme(mallTheme.definition())) throw new Error('Invalid initial theme');

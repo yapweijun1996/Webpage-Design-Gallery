@@ -675,7 +675,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       character.update('idle', 0);
     }
   });
-  return {body, capsule, camera, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
     dispose() { tram?.dispose(); character.dispose?.(); },
     renderShelf(draw) {

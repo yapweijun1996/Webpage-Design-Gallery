@@ -1,4 +1,5 @@
 import {atriumLayout} from './atrium-layout.js';
+import {opaqueBatch} from './opaque-batch.js';
 
 const {garden,event}=atriumLayout;
 const point=(x,z)=>Object.freeze({x,z});
@@ -75,10 +76,34 @@ export function prepareChristmasDecor(T,scene,theme,{signal}={}) {
       add(cylinder,gold,p.x,5.91,p.z,.012,.22,.012);
       add(sphere,light,p.x,5.77,p.z,.09,.1,.09);
     }
+    const opaque = [], lowParts = [];
+    const lowSphere = geometry(new T.SphereGeometry(1,8,5));
     for(const [g,byMaterial] of batches)for(const [m,transforms] of byMaterial){
       const mesh=new T.InstancedMesh(g,m,transforms.length);transforms.forEach((transform,i)=>mesh.setMatrixAt(i,transform));
       mesh.computeBoundingSphere();mesh.receiveShadow=true;group.add(mesh);
+      if (!m.isMeshStandardMaterial) continue;
+      mesh.name = 'Christmas tree, gifts or garland';
+      opaque.push(mesh);
+      for (const transform of transforms) {
+        const part = (g === sphere ? lowSphere : g).clone().applyMatrix4(transform);
+        const count = part.attributes.position.count;
+        const colors = new Float32Array(count * 3), surfaces = new Float32Array(count * 2);
+        for (let i = 0; i < count; i++) {
+          m.color.toArray(colors, i * 3);
+          surfaces[i * 2] = m.roughness;
+          surfaces[i * 2 + 1] = m.metalness;
+        }
+        part.setAttribute('color', new T.BufferAttribute(colors,3));
+        part.setAttribute('obSurface', new T.BufferAttribute(surfaces,2));
+        lowParts.push(part);
+      }
     }
+    const lowBatch = opaqueBatch(T,lowParts,false);
+    lowBatch.name = 'Christmas tree, gifts and garland';
+    lowBatch.visible = false;
+    geometries.push(lowBatch.geometry);
+    materials.push(lowBatch.material);
+    group.add(lowBatch);
     const starShape=new T.Shape();
     for(let i=0;i<10;i++){
       const angle=Math.PI/2+i*Math.PI/5,r=i%2?.18:.42;
@@ -96,6 +121,11 @@ export function prepareChristmasDecor(T,scene,theme,{signal}={}) {
     const banner=new T.Mesh(geometry(new T.PlaneGeometry(CHRISTMAS_DECOR_LAYOUT.banner.width,CHRISTMAS_DECOR_LAYOUT.banner.height)),material(new T.MeshBasicMaterial({map:texture,side:T.DoubleSide})));
     banner.position.set(CHRISTMAS_DECOR_LAYOUT.banner.x,CHRISTMAS_DECOR_LAYOUT.banner.y,CHRISTMAS_DECOR_LAYOUT.banner.z);group.add(banner);
     if(signal?.aborted)throw new Error('Theme preparation cancelled');
-    return {value:theme,group,mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
+    return {value:theme,group,
+      setTier(tier) {
+        lowBatch.visible = tier === 'low';
+        for (const mesh of opaque) mesh.visible = !lowBatch.visible;
+      },
+      mount(){if(disposed)throw new Error('Theme stage was disposed');if(group.parent!==scene)scene.add(group);},dispose};
   } catch(error) {dispose();throw error;}
 }

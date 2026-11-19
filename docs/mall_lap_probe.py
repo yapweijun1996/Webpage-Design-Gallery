@@ -87,8 +87,10 @@ def apply_budget(row, device, tier, max_tris, max_draws):
     return row
 
 
-def capture(page, label, dwell_ms, walk_key=None, walk_ms=0):
-    start = page.evaluate('() => { mallProbe.timing = true; return performance.now(); }')
+def capture(page, label, dwell_ms, walk_key=None, walk_ms=0, draw_owners=False):
+    start = page.evaluate('owners => { mallProbe.startOwners(owners, __mall.state.graphics.sceneId); '
+                          'mallProbe.timing = true; return performance.now(); }',
+                          draw_owners)
     page.wait_for_timeout(dwell_ms)
     if walk_key:
         page.keyboard.down(walk_key)
@@ -96,20 +98,20 @@ def capture(page, label, dwell_ms, walk_key=None, walk_ms=0):
         page.keyboard.up(walk_key)
         page.wait_for_timeout(400)
     report = page.evaluate(REPORT, start)
-    page.evaluate('mallProbe.timing = false')
+    page.evaluate('() => { mallProbe.timing = false; mallProbe.startOwners(false); }')
     return {'stop': label, **stats(report.pop('gaps')), **report}
 
 
-def run_lap(page, lap):
+def run_lap(page, lap, draw_owners=False):
     rows = []
     for zone in ZONES:
         assert_teleport(page, zone)
         page.wait_for_timeout(300)
-        row = capture(page, f'L{lap} {zone}', 1500, 'w', 1500)
+        row = capture(page, f'L{lap} {zone}', 1500, 'w', 1500, draw_owners and zone == 'entry')
         rows.append(row)
     # Walk around the shaft and verify the arrival before sampling.
     reach_upper(page)
-    rows.append(capture(page, f'L{lap} upper-level', 2500, 'w', 1200))
+    rows.append(capture(page, f'L{lap} upper-level', 2500, 'w', 1200, draw_owners))
     return rows
 
 
@@ -162,7 +164,7 @@ def run_tier(browser, args, tier, dsf=None):
         page.wait_for_timeout(3000)
         rows = []
         for lap in range(1, args.laps + 1):
-            for row in run_lap(page, lap):
+            for row in run_lap(page, lap, args.draw_owners):
                 row.update(referenceHz=reference_hz, dsf=dsf or (2 if touch else 1),
                            cpuThrottle=args.cpu_throttle)
                 rows.append(apply_budget(row, device, tier, max_tris, max_draws))
@@ -175,6 +177,8 @@ def run_tier(browser, args, tier, dsf=None):
               f"{row.get('max', 0):6.1f} {row.get('slow50', 0):3} {row['drawCalls'] or 0:4} "
               f"{row['triangles'] or 0:7}  {row['renderScale']:4.0%}  {'ok' if row['budgetPass'] else 'FAIL':6}  "
               f"{'ok' if row['pass'] else 'FAIL'}")
+        if row.get('drawOwners'):
+            print('  ' + ', '.join(f"{owner['name']} #{owner['id']} ({owner['calls']})" for owner in row['drawOwners']))
     target, max_p95, min_fps = cadence(device, rows[-1]['referenceHz'])
     budget_passes = sum(row['budgetPass'] for row in rows)
     passes = sum(row['pass'] for row in rows)
@@ -202,6 +206,7 @@ def main():
     parser.add_argument('--max-draws', type=positive_int, help='Override the draw-call budget for the selected tiers')
     parser.add_argument('--laps', type=positive_int, default=2)
     parser.add_argument('--json', default='')
+    parser.add_argument('--draw-owners', action='store_true', help='Profile draw owners at entry and upper level')
     parser.add_argument('--refresh-hz', type=float, help='Known native refresh; overrides the detected reference')
     parser.add_argument('--cpu-throttle', type=positive_int, default=1)
     parser.add_argument('--dsf', type=int, choices=(2, 3), help='Compare a DSF 1 run with this DSF')

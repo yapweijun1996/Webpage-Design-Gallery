@@ -27,6 +27,8 @@ function createPhysicsPropPool(world, { phone = false } = {}) {
   function finish(slot) {
     slot.prop.mesh.visible = false;
     slot.prop.mesh.material.opacity = 1;
+    if (slot.prop.detach)
+      slot.prop.mesh.removeFromParent();
     slot.prop = null;
     occupied--;
   }
@@ -73,6 +75,7 @@ function createPhysicsPropPool(world, { phone = false } = {}) {
     prop.mesh.position.set(x, y, z);
     prop.mesh.quaternion.identity();
     prop.mesh.visible = true;
+    prop.mount?.();
     occupied++;
     slot.awake = !body.isSleeping();
     activeBodies += Number(slot.awake);
@@ -160,6 +163,18 @@ function createPhysicsPropPool(world, { phone = false } = {}) {
     const { x, y, z } = slot.body.translation();
     return { x, y, z, sleeping: slot.body.isSleeping() };
   }
+  function updateVisibility(position, compact) {
+    for (const { prop } of slots) {
+      if (!prop)
+        continue;
+      const p = prop.mesh.position;
+      prop.mesh.visible = !compact || Math.abs(position.y - p.y) < 3 && Math.hypot(position.x - p.x, position.z - p.z) <= 9;
+      if (prop.mesh.visible)
+        prop.mount?.();
+      else if (prop.detach)
+        prop.mesh.removeFromParent();
+    }
+  }
   return {
     setZone,
     spawn,
@@ -167,6 +182,7 @@ function createPhysicsPropPool(world, { phone = false } = {}) {
     push,
     afterStep,
     sample,
+    updateVisibility,
     get zone() {
       return zone;
     },
@@ -179,17 +195,28 @@ function createPhysicsPropPool(world, { phone = false } = {}) {
   };
 }
 function makeProp(T, R, world, scene, geometry, { name, radius, halfHeight, mass, color, ball, bounce, ccd }) {
-  const material = new T.MeshStandardMaterial({ color, roughness: 0.78, transparent: true });
-  const mesh = new T.Mesh(geometry, material);
-  mesh.name = name;
-  mesh.visible = false;
-  scene.add(mesh);
+  let mesh;
   return {
-    mesh,
     radius,
     halfHeight,
     mass,
     floor: 0,
+    detach: false,
+    get mesh() {
+      if (!mesh) {
+        mesh = new T.Mesh(geometry(), new T.MeshStandardMaterial({ color, roughness: 0.78, transparent: true }));
+        mesh.name = name;
+        mesh.visible = false;
+      }
+      return mesh;
+    },
+    get built() {
+      return mesh;
+    },
+    mount() {
+      if (!mesh.parent)
+        scene.add(mesh);
+    },
     createBody(x, y, z) {
       const desc = R.RigidBodyDesc.dynamic().setTranslation(x, y, z).setCcdEnabled(ccd).setCanSleep(true).setLinearDamping(ball ? 0.7 : 1).setAngularDamping(ball ? 1.6 : 4);
       const shape = ball ? R.ColliderDesc.ball(radius) : R.ColliderDesc.cylinder(halfHeight, radius);
@@ -207,12 +234,13 @@ function registerPhysicsProps(T, R, world, {
   expanded,
   phone,
   prepareModel,
-  interiors
+  interiors,
+  initialTier
 }) {
   const pool = createPhysicsPropPool(world, { phone });
-  const can = makeProp(T, R, world, scene, new T.CylinderGeometry(0.03875, 0.03875, 0.124, 12), { name: "Dropped can", radius: 0.03875, halfHeight: 0.062, mass: 0.16, color: 12690541, bounce: 0.32, ccd: true });
-  const ball = makeProp(T, R, world, scene, new T.IcosahedronGeometry(0.16, 1), { name: "Atrium ball", radius: 0.16, halfHeight: 0.16, mass: 0.28, color: 10962484, ball: true, bounce: 0.26, ccd: true });
-  const basket = makeProp(T, R, world, scene, new T.LatheGeometry([
+  const can = makeProp(T, R, world, scene, () => new T.CylinderGeometry(0.03875, 0.03875, 0.124, 12), { name: "Dropped can", radius: 0.03875, halfHeight: 0.062, mass: 0.16, color: 12690541, bounce: 0.32, ccd: true });
+  const ball = makeProp(T, R, world, scene, () => new T.IcosahedronGeometry(0.16, 1), { name: "Atrium ball", radius: 0.16, halfHeight: 0.16, mass: 0.28, color: 10962484, ball: true, bounce: 0.26, ccd: true });
+  const basket = makeProp(T, R, world, scene, () => new T.LatheGeometry([
     new T.Vector2(0, -0.14),
     new T.Vector2(0.16, -0.14),
     new T.Vector2(0.21, 0.14),
@@ -220,8 +248,27 @@ function registerPhysicsProps(T, R, world, {
     new T.Vector2(0.14, -0.115),
     new T.Vector2(0, -0.115)
   ], 12), { name: "Atrium basket", radius: 0.21, halfHeight: 0.14, mass: 0.55, color: 9136194, bounce: 0.06, ccd: false });
-  if (prepareModel)
-    prepareModel([can.mesh, ball.mesh, basket.mesh], { late: false }).catch(() => {});
+  const props = [can, ball, basket];
+  let compact, prewarmed = false;
+  function setTier(tier) {
+    const next = expanded && tier === "low";
+    if (compact === next)
+      return;
+    compact = next;
+    for (const prop of props) {
+      prop.detach = compact;
+      if (!compact) {
+        prop.mesh;
+        prop.mount();
+      } else if (prop.built && !prop.built.visible)
+        prop.built.removeFromParent();
+    }
+    if (!compact && !prewarmed) {
+      prewarmed = true;
+      prepareModel?.(props.map((prop) => prop.mesh), { late: false }).catch(() => {});
+    }
+  }
+  setTier(initialTier);
   const ballX = expanded ? 11.4 : 3.5, basketX = expanded ? 13 : 5;
   const propZ = expanded ? 26 : 11;
   let ballSpawned = false, basketSpawned = false;
@@ -259,6 +306,8 @@ function registerPhysicsProps(T, R, world, {
       return { ...report.call(this), activeBodies: pool.activeBodies, bodyStepMs };
     };
   function canReach(position) {
+    if (!dropped)
+      return false;
     const phase = position?.character?.physicalProduct?.phase;
     const p = can.mesh.position;
     return Boolean(dropped && phase === "empty" && !position.seated && !position.pushing && !position.elevatorTravel && p.y >= position.y - 0.2 && p.y <= position.y + 1.35 && Math.hypot(position.x - p.x, position.z - p.z) < 1.05);
@@ -270,6 +319,7 @@ function registerPhysicsProps(T, R, world, {
       product?.release();
   };
   interactables.physicsProps = {
+    setTier,
     sample: () => ({
       can: dropped ? { ...pool.sample(can), id: dropped.id, floor: can.floor, halfHeight: can.halfHeight } : null,
       ball: pool.sample(ball),
@@ -283,12 +333,13 @@ function registerPhysicsProps(T, R, world, {
         pool.setZone(next);
         ballSpawned = basketSpawned = false;
       }
-      if (next !== "atrium" || Math.abs(position.x - ballX) > 7 || Math.abs(position.z - propZ) > 7)
-        return;
-      if (!ballSpawned)
-        ballSpawned = pool.spawn(ball, ballX, ball.radius + 0.015, propZ);
-      if (!basketSpawned)
-        basketSpawned = pool.spawn(basket, basketX, basket.halfHeight + 0.015, propZ);
+      if (next === "atrium" && Math.abs(position.x - ballX) <= 7 && Math.abs(position.z - propZ) <= 7) {
+        if (!ballSpawned)
+          ballSpawned = pool.spawn(ball, ballX, ball.radius + 0.015, propZ);
+        if (!basketSpawned)
+          basketSpawned = pool.spawn(basket, basketX, basket.halfHeight + 0.015, propZ);
+      }
+      pool.updateVisibility(position, compact);
     },
     drop(position) {
       if (!held || dropped || pool.zone === null)
@@ -306,7 +357,9 @@ function registerPhysicsProps(T, R, world, {
     floorAction: {
       id: "physics-floor-can",
       kind: "pickup",
-      anchor: can.mesh.position,
+      get anchor() {
+        return can.mesh.position;
+      },
       shopAction: { name: "Dropped can", label: "Pick up" },
       availability: ({ player }) => canReach(player),
       handler() {
@@ -448,6 +501,13 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
   const effectMaterial = new T.MeshBasicMaterial({ color: 11593969 });
   const leafMaterial = new T.MeshStandardMaterial({ color: 4615012, roughness: 0.67 });
   const leafShape = new T.BoxGeometry(1, 1, 1);
+  const doorPanels = [];
+  const doorBatch = new T.InstancedMesh(leafShape, leafMaterial, restroomRooms.length * 2);
+  doorBatch.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  doorBatch.name = "Restroom sliding door leaves";
+  doorBatch.visible = false;
+  scene.add(doorBatch);
+  let doorBatchDirty = true;
   const streamShape = new T.CylinderGeometry(0.02, 0.014, 0.31, 8);
   const rippleShape = new T.TorusGeometry(0.14, 0.013, 5, 16);
   for (const room of restroomRooms) {
@@ -472,6 +532,7 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
       panel.scale.set(0.055, 2.2, panelWidth);
       panel.position.set(maxX, 1.1, z + side * panelWidth / 2);
       scene.add(panel);
+      doorPanels.push(panel);
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(maxX, 1.1, panel.position.z));
       physics.createCollider(R.ColliderDesc.cuboid(0.028, 1.1, panelWidth / 2), body);
       return { side, body, panel };
@@ -483,6 +544,7 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
       if (this.open === progress)
         return;
       this.open = progress;
+      doorBatchDirty = true;
       for (const { side, body, panel } of leaves) {
         panel.position.z = z + side * (panelWidth / 2 + progress * (half + 0.025));
         body.setNextKinematicTranslation({ x: maxX, y: 1.1, z: panel.position.z });
@@ -542,6 +604,23 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
     }
   }
   return {
+    updateDraw(tier) {
+      const low = tier === "low";
+      if (doorBatch.visible !== low) {
+        doorBatch.visible = low;
+        for (const panel of doorPanels)
+          panel.visible = !low;
+      }
+      if (low && doorBatchDirty) {
+        for (const [index, panel] of doorPanels.entries()) {
+          panel.updateMatrix();
+          doorBatch.setMatrixAt(index, panel.matrix);
+        }
+        doorBatch.instanceMatrix.needsUpdate = true;
+        doorBatch.computeBoundingSphere();
+        doorBatchDirty = false;
+      }
+    },
     fixtures: [...actions].map(([id, { kind }]) => ({ id, name: kind === "tap" ? "Handwashing basin" : "Toilet" })),
     prompt(id) {
       const action = actions.get(id);
@@ -1326,18 +1405,22 @@ function placeDecal(mesh, order = -2) {
 // demos/corporate/gjh/v11/assets/shop-visibility.js
 function createShopVisibility(T) {
   const walls = new Map;
+  const overhead = new Map;
   const eye = new T.Vector3;
   const inset = 0.015;
-  function addWall(slot, x, y, z, width, height, depth) {
-    if (!walls.has(slot))
-      walls.set(slot, []);
+  let cullOverhead = false;
+  function addWall(slot, x, y, z, width, height, depth, lowOnly = false) {
+    const blockers = lowOnly ? overhead : walls;
+    if (!blockers.has(slot))
+      blockers.set(slot, []);
     const across = width < depth ? "x" : "z";
     const along = across === "x" ? "z" : "x";
     const centre = { x, y, z };
     const halfSpan = (along === "x" ? width : depth) / 2;
-    walls.get(slot).push({
+    blockers.get(slot).push({
       across,
       along,
+      vertical: "y",
       plane: centre[across],
       left: centre[along] - halfSpan + inset,
       right: centre[along] + halfSpan - inset,
@@ -1346,7 +1429,7 @@ function createShopVisibility(T) {
     });
   }
   function covers(wall, bounds) {
-    const { across, along, plane, left, right, bottom, top } = wall;
+    const { across, along, vertical, plane, left, right, bottom, top } = wall;
     const start = eye[across], offset = plane - start;
     const near = offset > 0 ? bounds.min[across] : bounds.max[across];
     if (offset > 0 ? near <= plane + inset : near >= plane - inset)
@@ -1357,14 +1440,36 @@ function createShopVisibility(T) {
     const b = offset / (bounds.max[across] - start);
     const min = (origin, end) => origin + Math.min((end - origin) * a, (end - origin) * b);
     const max = (origin, end) => origin + Math.max((end - origin) * a, (end - origin) * b);
-    return min(eye[along], bounds.min[along]) >= left && max(eye[along], bounds.max[along]) <= right && min(eye.y, bounds.min.y) >= bottom && max(eye.y, bounds.max.y) <= top;
+    return min(eye[along], bounds.min[along]) >= left && max(eye[along], bounds.max[along]) <= right && min(eye[vertical], bounds.min[vertical]) >= bottom && max(eye[vertical], bounds.max[vertical]) <= top;
   }
   return {
     addWall,
+    addCeiling(slot, x, y, z, width, depth) {
+      if (!overhead.has(slot))
+        overhead.set(slot, []);
+      overhead.get(slot).push({
+        across: "y",
+        along: "x",
+        vertical: "z",
+        plane: y,
+        left: x - width / 2 + inset,
+        right: x + width / 2 - inset,
+        bottom: z - depth / 2 + inset,
+        top: z + depth / 2 - inset
+      });
+    },
+    setOverheadCulling(enabled) {
+      cullOverhead = enabled;
+    },
     setEye(position) {
       eye.copy(position);
     },
     occluded(slot, bounds) {
+      if (cullOverhead)
+        for (const blocker of overhead.get(slot) ?? []) {
+          if ((blocker.across !== "y" || eye.y > blocker.plane) && covers(blocker, bounds))
+            return true;
+        }
       const room = walls.get(slot);
       if (!room)
         return false;
@@ -5753,7 +5858,7 @@ async function addShopSignAtlas(T, layout, scene) {
 }
 
 // demos/corporate/gjh/v11/assets/expanded-storefronts.js
-function addExpandedStorefronts(T, layout, scene, signs) {
+function addExpandedStorefronts(T, layout, scene, signs, lowTrimMaterial) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
     frame: { material: new T.MeshStandardMaterial({ color: 1059362, roughness: 0.29, metalness: 0.16 }), matrices: [] },
@@ -5833,16 +5938,57 @@ function addExpandedStorefronts(T, layout, scene, signs) {
     scene.add(mesh);
     meshes[kind2] = mesh;
   }
+  const trim = ["frame", "brass", "accent"];
+  let lowTrim;
+  if (lowTrimMaterial) {
+    const count = trim.reduce((total, kind2) => total + batches[kind2].matrices.length, 0);
+    const surfaces = new T.InstancedBufferAttribute(new Float32Array(count * 2), 2);
+    const lowGeometry = geometry.clone().setAttribute("instanceSurface", surfaces);
+    lowTrim = new T.InstancedMesh(lowGeometry, lowTrimMaterial, count);
+    lowTrim.name = "Expanded storefront trim";
+    lowTrim.receiveShadow = true;
+    lowTrim.visible = false;
+    lowTrim.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    const color = new T.Color;
+    let offset = 0;
+    for (const kind2 of trim) {
+      const { matrices, material, colours } = batches[kind2];
+      batches[kind2].lowOffset = offset;
+      matrices.forEach((matrix, index) => {
+        const target = offset + index;
+        lowTrim.setMatrixAt(target, matrix);
+        lowTrim.setColorAt(target, colours ? color.set(colours[index]) : material.color);
+        surfaces.setXY(target, material.roughness, material.metalness);
+      });
+      offset += matrices.length;
+    }
+    lowTrim.computeBoundingSphere();
+    scene.add(lowTrim);
+  }
   const moved = new T.Matrix4;
-  return function slide(number, travel) {
+  function slide(number, travel) {
     for (const { kind: kind2, index, dx, dz } of slidingParts.get(number)) {
       moved.copy(batches[kind2].matrices[index]);
       moved.elements[12] += dx * travel;
       moved.elements[14] += dz * travel;
       meshes[kind2].setMatrixAt(index, moved);
       meshes[kind2].instanceMatrix.needsUpdate = true;
+      const offset = batches[kind2].lowOffset;
+      if (offset !== undefined) {
+        lowTrim.setMatrixAt(offset + index, moved);
+        lowTrim.instanceMatrix.needsUpdate = true;
+      }
     }
+  }
+  slide.setTier = (tier) => {
+    const low = tier === "low";
+    if (!lowTrim || lowTrim.visible === low)
+      return;
+    lowTrim.visible = low;
+    for (const kind2 of trim)
+      meshes[kind2].visible = !low;
   };
+  return slide;
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
@@ -8206,9 +8352,19 @@ var SURFACES = {
   balanced: { roughness: 0.91, emission: 1.04, washOpacity: 0.9 },
   detailed: { roughness: 0.85, emission: 1.1, washOpacity: 0.94 }
 };
-function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, floors, fixtures, vault }) {
+function createMallSurfaceAtmosphere(T, scene, {
+  plane,
+  poolMaterial,
+  washes,
+  floors,
+  fixtures,
+  vault,
+  pools = [],
+  shopNear
+}) {
   const washMaterial = poolMaterial.clone();
-  const washMesh = placeDecal(new T.InstancedMesh(plane, washMaterial, washes.length), -1);
+  const poolCount = pools.reduce((total, pool) => total + pool.transforms.length, 0);
+  const washMesh = placeDecal(new T.InstancedMesh(plane, washMaterial, washes.length + poolCount), -1);
   const transform = new T.Object3D;
   const stripSlots = [];
   washes.forEach(([x, y, z, width, depth, yaw, pitch, coveStrip = false], index) => {
@@ -8219,6 +8375,16 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
     transform.updateMatrix();
     washMesh.setMatrixAt(index, transform.matrix);
   });
+  const poolSlots = new Map;
+  for (const { transforms, slots, deckLod } of pools) {
+    transforms.forEach((matrix, index) => {
+      const shop = slots?.[index] ?? null;
+      const key = `pool:${deckLod}:${shop}`;
+      poolSlots.set(key, { shop, deckLod });
+      washMesh.setMatrixAt(stripSlots.length, matrix);
+      stripSlots.push(key);
+    });
+  }
   washMesh.name = "Mall cove and storefront light wash";
   washMesh.computeBoundingSphere();
   scene.add(washMesh);
@@ -8247,15 +8413,20 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
     fixtureEmission = intensity;
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
   }
-  const allowWash = (strip) => strip || broadWash;
-  function updateWash(frustum) {
-    washVisibility.update(frustum, allowWash);
+  function updateWash(view) {
+    washVisibility.update(view?.frustum, (key) => {
+      if (typeof key === "boolean")
+        return key || broadWash;
+      const { shop, deckLod } = poolSlots.get(key);
+      return preset2 === SURFACES.low && (!deckLod || view?.deckVisible) && (shop === null || shopNear?.get(shop));
+    }, false, (key, bounds) => {
+      const shop = poolSlots.get(key)?.shop;
+      return shop != null && view?.shopVisibility?.occluded(shop, bounds);
+    });
     washMesh.visible = washMesh.count > 0;
   }
   setTier("low");
-  return { setTier, setFixtureEmission, updateView(view) {
-    updateWash(view.frustum);
-  } };
+  return { setTier, setFixtureEmission, updateView: updateWash };
 }
 
 // demos/corporate/gjh/v11/assets/mall-baked-lighting.js
@@ -8385,7 +8556,7 @@ function createSkylightDapple(T, scene, {
           lighting: undefined
         });
         map = texture;
-        mesh.visible = true;
+        mesh.visible = currentTier !== "low";
       } catch {
         material.map = contact.map;
         texture.dispose();
@@ -8393,9 +8564,12 @@ function createSkylightDapple(T, scene, {
     }).catch(() => {});
     return request;
   }
+  let currentTier;
   function update(tier, reducedMotion, now = performance.now()) {
+    currentTier = tier;
     if (!map)
       return;
+    mesh.visible = tier !== "low";
     const drift = (tier === "balanced" || tier === "detailed") && !reducedMotion ? now : 0;
     map.offset.set(0.008 * Math.sin(drift / 67000), 0.006 * Math.sin(drift / 59000));
   }
@@ -8693,6 +8867,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       mesh.rotation.y = ry;
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
+      mesh.userData.shopDecal = true;
       if (activeShopSlot !== null)
         queueShopUpload(activeShopSlot, mesh);
       return tagShopLod(mesh);
@@ -8718,6 +8893,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       mesh.position.set(x, y, decalHeight(z));
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
+      mesh.userData.shopDecal = true;
       if (activeShopSlot !== null)
         queueShopUpload(activeShopSlot, mesh);
       return tagShopLod(mesh);
@@ -8862,6 +9038,27 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           }
         mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
+    }, drawWithPlayerContact = function(shadow2, draw2) {
+      if (!contactBatch || !shadow2.visible)
+        return draw2();
+      const { count, boundingSphere, instanceMatrix } = contactBatch;
+      shadow2.updateMatrix();
+      contactBatch.setMatrixAt(count, shadow2.matrix);
+      instanceMatrix.clearUpdateRanges();
+      instanceMatrix.addUpdateRange(0, (count + 1) * 16);
+      instanceMatrix.needsUpdate = true;
+      geometry.plane.boundingSphere ?? geometry.plane.computeBoundingSphere();
+      savedContactBounds.copy(boundingSphere);
+      boundingSphere.union(contactBounds.copy(geometry.plane.boundingSphere).applyMatrix4(shadow2.matrix));
+      contactBatch.count++;
+      shadow2.visible = false;
+      try {
+        return draw2();
+      } finally {
+        shadow2.visible = true;
+        contactBatch.count = count;
+        boundingSphere.copy(savedContactBounds);
+      }
     }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus, lightWash2, reducedMotion = false) {
       productDisplay?.setShadows(shadows);
       if (!expanded) {
@@ -8871,6 +9068,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         }
         return;
       }
+      interactables.physicsProps?.setTier(tier);
+      restrooms?.updateDraw(tier);
+      slide?.setTier(tier);
+      materials2.glass.forceSinglePass = tier === "low";
+      shopVisibility.setOverheadCulling(tier === "low");
       bakedLighting.setTier(tier);
       skylightDapple?.update(tier, reducedMotion);
       if (shadows && tier === "detailed")
@@ -8891,6 +9093,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       interiorKit.update(visitor, camera && view);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       view.deckVisible = deckVisible;
+      view.low = tier === "low";
       for (const [slot2, bay] of shopBays) {
         const x = (bay.minX + bay.maxX) / 2;
         const z = slot2 <= 3 ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
@@ -8900,7 +9103,13 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         const slot2 = mesh.userData.shopSlot;
         if (!shopNear.has(slot2))
           continue;
-        mesh.visible = mesh.userData.shopLodNear = shopNear.get(slot2);
+        let near = shopNear.get(slot2);
+        if (near && camera && tier === "low" && mesh.userData.shopDecal) {
+          mesh.geometry.boundingBox ?? mesh.geometry.computeBoundingBox();
+          mesh.updateWorldMatrix(true, false);
+          near = !shopVisibility.occluded(slot2, decalBounds.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld));
+        }
+        mesh.visible = mesh.userData.shopLodNear = near;
         if (mesh.visible && !deckVisible)
           furnishings.loadShopDetails(slot2);
       }
@@ -8913,6 +9122,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       }
       for (const mesh of deckLodMeshes)
         mesh.visible = deckVisible;
+      for (const mesh of standalonePools)
+        mesh.visible = tier !== "low" && (!mesh.userData.deckLod || deckVisible);
       for (const update of shopLodUpdates)
         update(visitor, camera && view);
       furnishings.updateView(camera ? view : { deckVisible }, shopNear);
@@ -9417,8 +9628,11 @@ metalnessFactor=vSurface.y;`);
       if (expanded) {
         box("green", x, 4.7, 0, 9.7, 1.55, 0.5, true);
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
+        shopVisibility.addWall(Number(store2.number), x, 4.7, 0, 9.7, 1.55, 0.5, true);
       }
       ceilingBox("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4, null);
+      if (expanded)
+        shopVisibility.addCeiling(Number(store2.number), x, 5.8, -5.2, 9.7, 10.4);
       activeShopSlot = expanded ? Number(store2.number) : null;
       if (expanded && zone === "newmoon") {
         for (const z of [-2.5, -5.4, -8.3]) {
@@ -9758,6 +9972,7 @@ metalnessFactor=vSurface.y;`);
         addOriginalShopDetails(zone, x, { box, cylinder, solid, collider, seats });
       activeShopSlot = null;
     }
+    let slide;
     if (expanded) {
       let warmStrip = function(x, z, width, depth) {
         const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
@@ -9770,7 +9985,7 @@ metalnessFactor=vSurface.y;`);
           lightWash((r.minX + r.maxX) / 2, 8.367, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, r.maxZ - r.minZ, 0, Math.PI / 2);
       };
       signage = await addShopSignAtlas(T, expandedLayout, scene);
-      const slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs);
+      slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs, plainFinish);
       for (const x of atriumLayout.anchorPierXs) {
         box("green", x, 2.83, 0.27, 0.29, 5.66, 0.24);
         box("brass", x, 0.15, 0.31, 0.35, 0.24, 0.27);
@@ -9983,7 +10198,9 @@ metalnessFactor=vSurface.y;`);
         scene.add(batch.mesh);
         viewUpdates.push(batch.update);
       }
-    const stagingLods = [];
+    const stagingLods = [], standalonePools = [], poolBatches = [];
+    const shopNear = new Map;
+    let contactBatch;
     const glowParts = [];
     const lowCylinder = new T.CylinderGeometry(1, 1, 1, 12);
     const lowSphere = new T.SphereGeometry(1, 8, 5);
@@ -9999,12 +10216,26 @@ metalnessFactor=vSurface.y;`);
       }
       const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
       const source = surfaces ? batch.geometry.clone().setAttribute("instanceSurface", surfaces) : batch.geometry;
-      const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length);
+      const playerContact = expanded && !batch.deckLod && batch.material === contact;
+      const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length + Number(playerContact));
+      if (playerContact) {
+        mesh.count = batch.transforms.length;
+        contactBatch = mesh;
+      }
       if (batch.material === contact)
         placeDecal(mesh);
-      if (batch.material === materials2.lightPool)
+      if (batch.material === materials2.lightPool) {
         placeDecal(mesh, -1);
+        if (expanded) {
+          standalonePools.push(mesh);
+          poolBatches.push(batch);
+        }
+      }
       mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
+      if (batch.material === contact)
+        mesh.name = "Mall contact shadows";
+      if (batch.material === materials2.lightPool)
+        mesh.name = "Mall floor and wall light pools";
       if (batch.material === materials2.paving) {
         pavingMesh = mesh;
         if (mappedPaving)
@@ -10103,6 +10334,8 @@ metalnessFactor=vSurface.y;`);
       plane: geometry.plane,
       poolMaterial: materials2.lightPool,
       washes: atmosphereWashes,
+      pools: poolBatches,
+      shopNear,
       floors: [materials2.shellFloor, materials2.paving, materials2.courtStone],
       fixtures: materials2.glow,
       vault: materials2.vaultOak
@@ -10140,7 +10373,9 @@ metalnessFactor=vSurface.y;`);
     sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);
     const signPoint = new T.Vector3;
     const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
-    const shopNear = new Map, eye = new T.Vector3, projection = new T.Matrix4;
+    const eye = new T.Vector3, projection = new T.Matrix4;
+    const decalBounds = new T.Box3;
+    const contactBounds = new T.Sphere, savedContactBounds = new T.Sphere;
     const view = { frustum: new T.Frustum, eye, shopVisibility };
     let deckLodMeshes = null;
     interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
@@ -10164,14 +10399,15 @@ metalnessFactor=vSurface.y;`);
       expanded,
       phone,
       prepareModel,
-      interiors: interiorKit
+      interiors: interiorKit,
+      initialTier: artworkTier()
     });
     return { signage, defaultExposure: EVERYDAY.lighting.exposure, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {}, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;
       return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
-    }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus() {
+    }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus() {
       return upperWarmStatus;
     }, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {

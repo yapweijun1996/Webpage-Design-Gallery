@@ -252,7 +252,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     const showcaseEnd = placements.length;
     if(heroCan && sku==='nz-425g')placements.push(new T.Vector3(...heroCan));
     const slots = placements.map(({x,y,z}, index) => ({
-      x, y, z, alwaysVisible:index >= shelfPlacements.length && index < showcaseEnd,
+      x, y, z, smallStock:true, alwaysVisible:index >= shelfPlacements.length && index < showcaseEnd,
       bounds:new T.Box3(), visible:true, detail:0
     }));
     if (record.status === 'loaded') {

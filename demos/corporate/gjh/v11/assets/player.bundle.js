@@ -2295,6 +2295,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     body,
     capsule,
     camera,
+    contactShadow: contact,
     get visual() {
       return visual;
     },

@@ -154,6 +154,7 @@ function createExpandedElevator(T,R,physics,scene,motion) {
   sync();
   return {
     replaceCabin(){fitted=true;cabin.visible=false;sync();},
+    setDrawTier(tier){deckGlass.material.forceSinglePass=tier==='low';},
     get height(){return height;},
     get calling(){return Boolean(call);},
     ...L, expanded:true,cameraObstacles:obstacles,applyMallTheme,

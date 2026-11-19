@@ -6206,6 +6206,7 @@ var brandWallStarted = false;
 var atmosphere = null;
 var npcs = null;
 var spatialHud = null;
+var themeStage = null;
 var themeMidnightTimer;
 var initialized = false;
 var fatal = false;
@@ -6767,7 +6768,7 @@ function render(force = false) {
         shopActionsLoad = import("./assets/interiors/shop-interactions.js").then(async ({ installShopInteractions }) => {
           if (pageEnded || fatal)
             return;
-          const targets = await installShopInteractions(three, world.scene, interactions, ui.announce);
+          const targets = await installShopInteractions(three, world.scene, interactions, ui.announce, () => quality.state?.tier);
           if (pageEnded || fatal)
             return;
           updateHUD();
@@ -6827,6 +6828,7 @@ function render(force = false) {
       guidance?.update(selectedInteraction, label, camera, true);
     }
     const tier = quality.state?.tier;
+    elevator?.setDrawTier?.(tier);
     const detailed = expanded && quality.state?.shadows && renderWidth >= 1000;
     const detailedReady = detailed && world.interiors?.activeTier === "detailed";
     if (expanded)
@@ -6849,6 +6851,8 @@ function render(force = false) {
     programTrace?.player(pose);
     if (shelfFocus?.open)
       player.renderShelf(draw);
+    else if (expanded && tier === "low")
+      world.drawWithPlayerContact(player.contactShadow, draw);
     else
       draw();
     programTrace?.sample("live", warmPhase, currentZone);
@@ -7368,6 +7372,7 @@ function resize() {
 }
 function applyProfile(profile) {
   profile = quality.apply(profile);
+  themeStage?.setTier?.(profile.tier);
   elevator?.kit?.select(profile.tier);
   npcs?.setQuality({ tier: profile.tier, mobile: renderWidth < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
   if (!contextLost)
@@ -7595,7 +7600,9 @@ async function initialize() {
           if (!world.applyMallTheme(next) || elevator?.applyMallTheme && !elevator.applyMallTheme(next))
             throw new Error("Invalid theme");
           atmosphere.applyTheme(next);
+          stage?.setTier?.(quality.state?.tier);
           stage?.mount?.();
+          themeStage = stage;
         } catch (error) {
           world.applyMallTheme(previous);
           elevator?.applyMallTheme?.(previous);

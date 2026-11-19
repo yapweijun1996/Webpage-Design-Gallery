@@ -18,6 +18,13 @@ export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,mat
   const effectMaterial = new T.MeshBasicMaterial({color:0xb0e8f1});
   const leafMaterial = new T.MeshStandardMaterial({color:0x466b64,roughness:.67});
   const leafShape = new T.BoxGeometry(1,1,1);
+  const doorPanels = [];
+  const doorBatch = new T.InstancedMesh(leafShape, leafMaterial, restroomRooms.length * 2);
+  doorBatch.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  doorBatch.name = 'Restroom sliding door leaves';
+  doorBatch.visible = false;
+  scene.add(doorBatch);
+  let doorBatchDirty = true;
   const streamShape = new T.CylinderGeometry(.020,.014,.31,8);
   const rippleShape = new T.TorusGeometry(.14,.013,5,16);
 
@@ -43,6 +50,7 @@ export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,mat
       panel.scale.set(.055,2.20,panelWidth);
       panel.position.set(maxX,1.10,z+side*panelWidth/2);
       scene.add(panel);
+      doorPanels.push(panel);
       const body=physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(maxX,1.10,panel.position.z));
       physics.createCollider(R.ColliderDesc.cuboid(.028,1.10,panelWidth/2),body);
       return {side,body,panel};
@@ -54,6 +62,7 @@ export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,mat
       const progress = reduced ? Number(near) : Math.max(0,Math.min(1,this.open+(near?1:-1)*dt*4.2));
       if (this.open===progress) return;
       this.open=progress;
+      doorBatchDirty = true;
       for (const {side,body,panel} of leaves) {
         panel.position.z=z+side*(panelWidth/2+progress*(half+.025));
         body.setNextKinematicTranslation({x:maxX,y:1.10,z:panel.position.z});
@@ -110,6 +119,22 @@ export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,mat
     }
   }
   return {
+    updateDraw(tier) {
+      const low = tier === 'low';
+      if (doorBatch.visible !== low) {
+        doorBatch.visible = low;
+        for (const panel of doorPanels) panel.visible = !low;
+      }
+      if (low && doorBatchDirty) {
+        for (const [index, panel] of doorPanels.entries()) {
+          panel.updateMatrix();
+          doorBatch.setMatrixAt(index, panel.matrix);
+        }
+        doorBatch.instanceMatrix.needsUpdate = true;
+        doorBatch.computeBoundingSphere();
+        doorBatchDirty = false;
+      }
+    },
     fixtures:[...actions].map(([id,{kind}])=>({id,name:kind==='tap'?'Handwashing basin':'Toilet'})),
     prompt(id){const action=actions.get(id);return action.kind==='flush'?'Flush':action.mesh.visible?'Turn tap off':'Turn tap on';},
     operate(id){

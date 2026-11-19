@@ -2,7 +2,7 @@ import {fasciaBand} from './signage/config.js';
 import {shopEntrance} from './expanded-layout.js';
 
 // Batch facade trim and sliding glass leaves across the expanded mall.
-export function addExpandedStorefronts(T, layout, scene, signs) {
+export function addExpandedStorefronts(T, layout, scene, signs, lowTrimMaterial) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
     frame: {material: new T.MeshStandardMaterial({color: 0x102a22, roughness: .29, metalness: .16}), matrices: []},
@@ -83,12 +83,51 @@ export function addExpandedStorefronts(T, layout, scene, signs) {
     scene.add(mesh);
     meshes[kind] = mesh;
   }
+  const trim = ['frame','brass','accent'];
+  let lowTrim;
+  if (lowTrimMaterial) {
+    const count = trim.reduce((total,kind) => total + batches[kind].matrices.length, 0);
+    const surfaces = new T.InstancedBufferAttribute(new Float32Array(count*2),2);
+    const lowGeometry = geometry.clone().setAttribute('instanceSurface',surfaces);
+    lowTrim = new T.InstancedMesh(lowGeometry,lowTrimMaterial,count);
+    lowTrim.name = 'Expanded storefront trim';
+    lowTrim.receiveShadow = true;
+    lowTrim.visible = false;
+    lowTrim.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    const color = new T.Color();
+    let offset = 0;
+    for (const kind of trim) {
+      const {matrices, material, colours} = batches[kind];
+      batches[kind].lowOffset = offset;
+      matrices.forEach((matrix,index) => {
+        const target = offset + index;
+        lowTrim.setMatrixAt(target,matrix);
+        lowTrim.setColorAt(target,colours ? color.set(colours[index]) : material.color);
+        surfaces.setXY(target,material.roughness,material.metalness);
+      });
+      offset += matrices.length;
+    }
+    lowTrim.computeBoundingSphere();
+    scene.add(lowTrim);
+  }
   const moved = new T.Matrix4();
-  return function slide(number, travel) {
+  function slide(number, travel) {
     for(const {kind,index,dx,dz} of slidingParts.get(number)) {
       moved.copy(batches[kind].matrices[index]);
       moved.elements[12]+=dx*travel; moved.elements[14]+=dz*travel;
       meshes[kind].setMatrixAt(index,moved); meshes[kind].instanceMatrix.needsUpdate=true;
+      const offset = batches[kind].lowOffset;
+      if (offset !== undefined) {
+        lowTrim.setMatrixAt(offset+index,moved);
+        lowTrim.instanceMatrix.needsUpdate = true;
+      }
     }
+  }
+  slide.setTier = tier => {
+    const low = tier === 'low';
+    if (!lowTrim || lowTrim.visible === low) return;
+    lowTrim.visible = low;
+    for (const kind of trim) meshes[kind].visible = !low;
   };
+  return slide;
 }

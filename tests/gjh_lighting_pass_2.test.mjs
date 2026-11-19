@@ -234,7 +234,7 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
     atmosphere.render(camera,false);
     assert.ok(renderer.info.render.calls>0);
     assert.equal(world.scene.getObjectByName(floorName).visible,true);
-    assert.ok(dapple.visible);
+    assert.equal(dapple.visible,tier!=='low');
     assert.equal(dapple.material.blending,T.AdditiveBlending);
     assert.equal(dapple.material.toneMapped,world.contact.toneMapped);
     assert.equal(dapple.material.type,world.contact.type);
@@ -244,11 +244,29 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
     assert.equal(dapple.material.map.generateMipmaps,false);
     assert.equal(world.scene.getObjectByName(ceilingName).visible,tier!=='low');
     assert.equal(world.scene.getObjectByName(floorName).material.map===world.contact.map,false);
+    assert.equal(world.scene.getObjectByName('Mall floor and wall light pools').visible,tier!=='low');
+    assert.equal(world.scene.getObjectByName('Restroom sliding door leaves').visible,tier==='low');
+    assert.equal(world.scene.getObjectByName('Expanded storefront trim').visible,tier==='low');
+    assert.equal(world.scene.getObjectByName('Atrium ball')?.visible ?? false,false);
+    assert.equal(Boolean(world.scene.getObjectByName('Mall tram')),false);
     if (shadows) assert.ok(key.target.position.distanceTo(new T.Vector3(pose.x,pose.y,pose.z))<.012);
     else assert.deepEqual(key.target.position.toArray(),[0,0,0]);
   }
   const map = dapple.material.map;
   world.updateShopLods(pose,false,'low',camera,700,false,false);
+  const contactBatch = world.scene.getObjectByName('Mall contact shadows');
+  const contact = new T.Mesh(world.plane,world.contact);
+  contact.position.set(10,.05,45);
+  const staticCount = contactBatch.count;
+  world.drawWithPlayerContact(contact, () => {
+    assert.equal(contact.visible,false);
+    assert.equal(contactBatch.count,staticCount+1);
+    const transform = new T.Matrix4();
+    contactBatch.getMatrixAt(staticCount,transform);
+    assert.ok(new T.Vector3().setFromMatrixPosition(transform).distanceTo(contact.position) < .0001);
+  });
+  assert.equal(contactBatch.count,staticCount);
+  assert.equal(contact.visible,true);
   assert.deepEqual(map.offset.toArray(),[0,0]);
   world.updateShopLods(pose,false,'balanced',camera,700,false,false);
   assert.notDeepEqual(map.offset.toArray(),[0,0]);
