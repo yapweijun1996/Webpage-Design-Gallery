@@ -28,6 +28,10 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 
 - [x] Centre the seated-person icon and `Sit` label on the same vertical centreline in the round nearby-action button. Stack them and align the pair optically within the circle. Verify a phone-viewport screenshot against the reported misalignment, retain the touch target size, and tap through Sit and Stand to confirm the interaction. Chrome touch emulation at 390 px measured a 56 × 56 px target and horizontal centre alignment within 0.01 px. [Chrome seat action](docs/gjh-v11-references/sit-button-runtime.jpg).
 
+### V11 nearby destination hint
+
+- [x] Show nearby shop directions only in the ground-floor public concourse. The 10-second New Moon keyboard route verified the outside direction, no other-shop direction while inside, and the Australia shelf Inspect action under More actions. A separate Detailed run with screen capture disabled recorded 18.6 ms p95 and zero intervals at or above 50 ms in this short desktop route.
+
 ## Mobile performance, controls and signage programme (2026-11-18)
 
 Owner device: iPhone, 393 px wide. Owner priorities: no lag on the phone, premium look, shop signage and interiors that read as real brands. Verification rule: judge from real browser screenshots and the walk probe (`docs/walk_probe.py`), not from agent summaries. Checklist: [taste engine checklist](docs/ui-ux/taste-engine-checklist.md).
