@@ -16,3 +16,9 @@ Blender-3D-Gallery links are pinned to verified upstream main `0b71ed7e`. “Can
 | Sconce, ceiling rails, disc and finishes | Rear perimeter, ceiling and island | Installed batched or procedural dressing. | [Wall sconce](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-wall-sconce) and [globe pendant](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3/models/mall-globe-pendant) are checked library options for future fixture-specific work. |
 
 The light concept retains the physical cabinet and tins. The new crescent and scalloped crown are wall fixtures above the browse lane. Use simulated vertical wash and shape the clear aisle around existing seat and shelf anchors. The heritage panel and tasting story use planar artwork and existing interaction patterns.
+
+## Production pass, 2026-11-20
+
+The existing four approved GLBs retain their exact bytes. The official NZ, AU, SA and MX packs show the current model's observable upper and lower metal rims. The editable sources already contain rolled seams, a recessed lid with a pull-tab assembly and a recessed base. The source images do not resolve the exact end profiles, closure type or physical dimensions per SKU. The Mexico wrap already keeps its unsourced 121° sector in plain base colours. An independent Codex CLI review agreed that the available references do not establish an additional geometry or artwork correction.
+
+The four official catalogue measurements are nominal. All 11 official source photos and the four published GLBs matched the [recorded checksums](../../evidence/v11-product-source-consistency.json). See the [S01 checklist](../production-model-checklist.md#s01-new-moon) for the four exact sample, edition and usage gaps.
