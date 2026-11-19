@@ -39,3 +39,21 @@ The 17 shops here are the V11 game’s authored roster. Some represent house bra
 The 17 interiors were entered in Chrome from the public map landing on revision `032e3885`. Desktop used keyboard movement. Touch emulation used Chrome’s dispatched touchscreen input through the installed joystick. The browser baseline shows the authored exhibits at comparable walking positions. Some separate focal captures use the in-app first-person camera to evaluate fixtures outside the default chase frame.
 
 [Desktop baseline contact sheet](player-walkthrough-baseline.webp)
+
+## Published showroom verification
+
+Every numbered concept packet includes four separate viewpoints, a floor plan, a product-model reference and a model inventory. The runtime work was checked in stages using desktop Chrome and a 390 px touch-emulated viewport. The entrance, exhibit action and return were verified in each group. The individual shop pages identify approximations, linked catalogue photographs and remaining package-art work.
+
+| Units | Verified published build |
+| --- | --- |
+| S01 New Moon | `a793a237cd50e587` desktop, `95e5ba13a1d96807` touch emulation |
+| S02 MILI | `f161060cbd89bbc0` |
+| S03 GOGO | `077553e3b1a6c526` |
+| S04 Borsch Med | `8e4599e605ef0138` |
+| S05 Pien Tze Huang | `c59b32c3eb100103` |
+| S06–S08 | `46a37ab996fabb31` |
+| S09–S11 | `45dfc89d1e194c56` |
+| S12–S14 | `ba278cec19153b4e` |
+| S15–S17 | `95e5ba13a1d96807` |
+
+The New Moon retest also exercised both stories, all four can previews and pickup/return interactions, both tasting seats and the demo bag. The last stage was followed by [continuous ground-floor circulation checks](../gjh-v11-public-facilities.md#continuous-ground-floor-loop). [Latest tested Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44555819324)

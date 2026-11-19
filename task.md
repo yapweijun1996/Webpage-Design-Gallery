@@ -26,8 +26,7 @@ Shipped on 2026-11-19 (main c06ed9ad): automatic festival theme, single sticky s
 - [x] Verify the three S06–S08 catalogue exhibits on published build `46a37ab996fabb31`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44552309398)
 - [x] Verify the three S09–S11 exhibits on published build `45dfc89d1e194c56`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44553308701)
 - [x] Verify the S12–S14 exhibits on published build `ba278cec19153b4e`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44554504937)
-- [ ] Verify the S15–S17 exhibits on the published build.
-- [ ] Verify the subsequent shop changes in runtime order.
+- [x] Verify S15–S17 on published build `95e5ba13a1d96807`. Repeat the full New Moon route at 390 px on the same build. [Published showroom verification](docs/goh-joo-hin/README.md#published-showroom-verification)
 
 ### V11 loader motion
 
@@ -53,6 +52,10 @@ Shipped on 2026-11-19 (main c06ed9ad): automatic festival theme, single sticky s
 - [x] Verify the public baseline lift round trip. Chrome loaded the redesigned Detailed cabin and reached 7.2 m. Both gates and thresholds behaved as expected while travelling and docked. The tested route left the cabin, walked a short distance across the upper landing and returned.
 - [x] Identify the seat or nearby furniture conflict at the upper doorway and align the rendered model, collision envelope, sitting pose and stand exit.
 - [x] Keep a continuous perimeter running route on the upper level, with safe lift approaches, rail guards and reachable seating. Verify a complete keyboard loop with checkpoints on all sides, safe re-entry and descent. Check a representative route in touch emulation and capture before/after evidence and frame timing.
+
+### Expanded V11 ground-floor circulation
+
+- [x] Complete the four-sided ground loop in headed Chrome with desktop keyboard and the 390 px touch joystick. Capture frame timing with recording disabled. [Recorded paths and frame timing](docs/gjh-v11-public-facilities.md#continuous-ground-floor-loop)
 
 ### Expanded V11 public restrooms
 
