@@ -25,7 +25,7 @@ function wrap(context, text, x, y, maxWidth, lineHeight, maxLines) {
   if (lines < maxLines && line) context.fillText(line, x, y + lines * lineHeight, maxWidth);
 }
 
-export async function addBrandWallAtlas(T, scene, deckY) {
+export async function addBrandWallAtlas(T, scene, deckY, prepareModel) {
   const kitResponse = await fetch(new URL('./brand-kit/brand-kit.json', import.meta.url));
   if (!kitResponse.ok) throw new Error('Brand-kit metadata unavailable');
   const kit = await kitResponse.json();
@@ -83,6 +83,8 @@ export async function addBrandWallAtlas(T, scene, deckY) {
   geometry.setIndex(indices); geometry.computeBoundingSphere();
   const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({map:texture,toneMapped:false}));
   mesh.name = 'Seventeen brand wall plaques'; mesh.userData.deckLod = true;
+  try { await prepareModel?.(mesh); }
+  catch (error) { geometry.dispose(); mesh.material.dispose(); texture.dispose(); throw error; }
   mesh.visible = false;
   scene.add(mesh);
   return {mesh,interactables,records};

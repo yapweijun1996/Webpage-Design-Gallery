@@ -41,7 +41,7 @@ let ready = false, player, world, physics, renderer, elevator, manual = false, f
 let three;
 let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmReport = createWarmReport();
-let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,atmosphere=null,npcs=null,spatialHud=null;
+let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let markFirstFrame;
@@ -207,7 +207,8 @@ const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:wor
     sceneId: world?.scene.uuid || null, cameraId: player?.camera.uuid || null, sceneChildren: world?.scene.children.length || 0,
     shadows: Boolean(renderer?.shadowMap.enabled), buffer: renderer ? [canvas.width, canvas.height] : null}),
   gpu: renderer ? {...renderer.info.memory} : null,
-  seats:world?.seats?.map(({id,name,x,z,exitX,exitZ,facing})=>({id,name,x,z,exitX,exitZ,facing}))||[],
+  seats:world?.seats?.map(({id,name,x,y,z,exitX,exitZ,facing,bounds})=>({id,name,x,y,z,exitX,exitZ,facing,
+    bounds:{min:{...bounds.min},max:{...bounds.max}}}))||[],
   doors: Object.freeze(Object.fromEntries((world?.doors || []).map(door => [door.zone, door.open]))),
   drawCalls: renderer?.info.render.calls || 0, renderTriangles: renderer?.info.render.triangles || 0,
   rendererResources: Object.freeze({geometries: renderer?.info.memory.geometries || 0, textures: renderer?.info.memory.textures || 0}), frames, reducedMotion: reducedMotion.matches,
@@ -244,6 +245,11 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 function updateHUD() {
   const p = player.state;
   currentZone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
+  if(expanded&&currentZone==='upper'&&!brandWallStarted){
+    brandWallStarted=true;
+    world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();})
+      .catch(error=>console.error('Upper deck brand wall could not load:',error));
+  }
   const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
@@ -654,7 +660,6 @@ async function initialize() {
   });
   const {createWorld} = await import('./assets/world.js'); world = await createWorld(T, R, physics, expanded, warmModel);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
-  if(world.brandStories)ui.setBrandStories(world.brandStories);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans]
     .flatMap(group => Object.values(group || {}));
   if (world.productAssets?.shelf) assetRecords.push(world.productAssets.shelf);

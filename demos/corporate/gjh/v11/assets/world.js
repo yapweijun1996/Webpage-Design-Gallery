@@ -16,7 +16,7 @@ import {createInteriorKit} from './interiors/runtime.js';
 import {interiorFloorColour,interiorStores} from './interiors/config.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
-import {createSeatPlacements, createSeatAnchor} from './seat-placements.js';
+import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere} from './mall-atmosphere.js';
 
@@ -152,7 +152,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
       material.dispose();
     } finally { sample.dispose(); }
   }
-  let activeShopSlot=null,activeDeck=false,brandWall=null,upperLevel=null,interiorModels=null,productDisplay=null;
+  let activeShopSlot=null,activeDeck=false,upperLevel=null,interiorModels=null,productDisplay=null;
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ', rz = 0) {
     const finish = finishForRole.get(material);
@@ -249,13 +249,15 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
   function bench(placement) {
-    const {x,z,facing}=placement;
-    const seatScale=new URLSearchParams(location.search).get('visitor') !== 'v1' ? .8 : 1;
-    const seatCollider=collider(x, .3*seatScale, z, placement.clearance.colliderWidth, .4*seatScale, placement.clearance.colliderDepth);
-    seats.push(createSeatAnchor(placement,seatCollider.handle));
-    const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*seatScale,bz,sx,sy*seatScale,sz);
-    if (!furnishings.place('bench', x, z, seatScale, facing, 0, null, activeShopSlot)) {
-      benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, .56, z, 2.55, .18, .9);
+    const {x,z,facing,group}=placement;
+    const modelPlaced=furnishings.place('bench', x, z, benchScale, facing, 0, placement.pose.angle, activeShopSlot);
+    const seatCollider=collider(x, .3*benchScale, z, placement.clearance.colliderWidth, .4*benchScale, placement.clearance.colliderDepth);
+    const footY=group==='atrium' ? (expanded ? .016 : 0) : (expanded ? .0245 : .015);
+    seats.push(createSeatAnchor(placement,seatCollider.handle,modelPlaced ? undefined : groundBenchFallback,benchScale,footY));
+    const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*benchScale,bz,sx,sy*benchScale,sz);
+    if (!modelPlaced) {
+      const {top,front}=groundBenchFallback;
+      benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, top-.09, z, 2.55, .18, -2*front);
       benchBox('seat', x, .94, z + facing * .35, 2.55, .7, .18);
       benchBox('brass', x, .47, z - facing * .451, 2.52, .035, .025);
       benchBox('oak', x, 1.285, z + facing * .35, 2.58, .065, .21);
@@ -537,11 +539,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
           box('brass', x + side * 3.85, 5.55, z, .06, .06, 2.24);
           box('brass', x, 5.55, z + side * 1.12, 7.75, .06, .06);
         }
-      }
-    } else if (expanded && zone === 'gogo') {
-      // Narrow angled timber fins make a light pergola over the lounge.
-      for (let z = -1.6; z > -9.3; z -= .95) {
-        box('oak', x - 2.56, 5.5, z, 3.8, .19, .35);
       }
     }
     if (expanded) {
@@ -868,22 +865,22 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     if(upperAssets){
       upperLevel=buildUpperLevel(T,upperAssets,{collider,lightWash});
       scene.add(upperLevel.group,upperLevel.panes);
-      const {addBrandWallAtlas}=await import('./brand-wall.js');
-      brandWall=await addBrandWallAtlas(T,scene,liftLayout.upper);
-      interactables.push(...brandWall.interactables);
     }
     const deckBench=placement=>{
       const {x,z,facing}=placement;
-      const slatted=upperLevel && placement.finish!=='upholstered';
-      if(!slatted && !furnishings.place('bench',x,z,.8,facing,liftLayout.upper,null,-1)){
+      const slattedProfile=upperLevel?.seatProfiles.get(placement.finish);
+      const modelPlaced=!slattedProfile && furnishings.place('bench',x,z,benchScale,facing,liftLayout.upper,placement.pose.angle,-1);
+      if(!slattedProfile && !modelPlaced){
+        const {top,front}=deckBenchFallback;
         box('wood',x,liftLayout.upper+.24,z,2.3,.32,.72);
-        box('seat',x,liftLayout.upper+.49,z,2.34,.18,.76);
+        box('seat',x,liftLayout.upper+top-.09,z,2.34,.18,-2*front);
         box('seat',x,liftLayout.upper+.82,z+facing*.28,2.34,.54,.16);
         box('brass',x,liftLayout.upper+.44,z-facing*.38,2.32,.025,.025);
       }
       // Leave capsule clearance between each bench and the adjacent planter.
       const seatCollider=collider(x,liftLayout.upper+.26,z,placement.clearance.colliderWidth,.5,placement.clearance.colliderDepth);
-      if(placement.accessible!==false)seats.push(createSeatAnchor(placement,seatCollider.handle));
+      if(placement.accessible!==false)seats.push(createSeatAnchor(placement,seatCollider.handle,
+        modelPlaced ? undefined : slattedProfile || deckBenchFallback,modelPlaced ? benchScale : 1));
     };
     for(const placement of seatPlacements.filter(item=>item.group==='deck'))deckBench(placement);
     for(const [x,z] of deckPlanters){
@@ -1012,10 +1009,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     // LOD controllers can continue updating visibility while the layer gate is closed.
     void prepareModel(meshes, {hide:true, late:false, priority}).catch(() => {});
   }
-  const benchSize=furnishingState.bench.dimensions,seatScale=new URLSearchParams(location.search).get('visitor')!=='v1'?.8:1;
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
-  const cameraObstacles=ceilingObstacles.concat(shopObstacles,seats.filter(seat=>seat.floor===0).map(seat=>({min:{x:seat.x-benchSize[0]/2,y:0,z:seat.z+.23*seat.facing-benchSize[2]/2},max:{x:seat.x+benchSize[0]/2,y:benchSize[1]*seatScale,z:seat.z+.23*seat.facing+benchSize[2]/2}})));
+  const cameraObstacles=ceilingObstacles.concat(shopObstacles,seats.map(seat=>seat.bounds));
   let upperWarmStatus=null,landingLights;
   function prepareUpperLevel(){
     if(!upperLevel)return;
@@ -1030,16 +1026,26 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     landingLights.environmentIntensity=scene.environmentIntensity;
     if(upperWarmStatus==='pending')return;
     upperWarmStatus='pending';
-    void warmModel([group,panes,cabinMark,brandWall.mesh],landingLights,{
+    void warmModel([group,panes,cabinMark],landingLights,{
       late:false,priority:()=>-100,linear:()=>false
     }).then(()=>{upperWarmStatus='ready';},error=>{
       upperWarmStatus='interrupted';console.warn('Upper level GPU warmup interrupted',error);
     });
   }
+  let brandWallPromise=null;
+  function ensureBrandWall(){
+    if(!expanded)return Promise.reject(new Error('Brand wall is only available in the expanded mall'));
+    if(!brandWallPromise)brandWallPromise=import('./brand-wall.js').then(({addBrandWallAtlas})=>addBrandWallAtlas(T,scene,liftLayout.upper,prepareModel)).then(result=>{
+      interactables.push(...result.interactables);
+      deckLodMeshes?.push(result.mesh);
+      return result;
+    });
+    return brandWallPromise;
+  }
   return {signage, interiors:interiorKit, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
-  }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, brandStories:brandWall?.records, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  }, scene, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

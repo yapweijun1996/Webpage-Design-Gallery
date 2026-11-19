@@ -1,0 +1,563 @@
+{
+  "scope": "Independent Cycles CPU staging review of exact Low anchors, shop detail GLBs and re-exported Three.js context. First three shells approximated with runtime socket dimensions, actual model props and source artwork. Fascia signs at measured rear positions use text stand-ins. In-game WebGL framing, tone mapping and movement pending browser.",
+  "sheets": {
+    "shelf-inspection.jpg": "1d8fb1a73242ff29faf281e83b8e34efb65f411f8fb576a42bfa115bb18fd9d1",
+    "shops-01-06.jpg": "d212a255449e83d8c07f38c3cf5e821fa5e5c29c614c17be533ab7c85a055bac",
+    "shops-07-12.jpg": "ac7c1f0baa616e918761258353c89084c99b188397b9a98d61e287ba2b663ea5",
+    "shops-13-17.jpg": "b5658fbb5def514236c8249fadeb0e79cbcaf60142d154978f9d0c0485b8904b"
+  },
+  "shops": [
+    {
+      "id": "S01",
+      "detail": "deb22472395a881a7550550ada2da523d60d7f4681331cb9d891260fe0f8c45a",
+      "anchor": "8253d15082bd4413d0011c68d33976a39f3c65f1f905b9a54502aa07ea74abf2",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "25dfda97c2b18947edf79bac373034fa5dceb381fb88591ea8a7a2efde497b98",
+      "image": "67408e8f89320fb8d1b94587899b39c59a18edb393f6af0a3288d07f1bc13636",
+      "camera": [
+        0.1,
+        2.0,
+        5.1
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S02",
+      "detail": "b12b639865f1bf7657ddda0f6234e781e808bac08b8d5be0728a05954f6a0ae4",
+      "anchor": "f4f2d421ce4a8140611f2a024c5415c07c3b634fdbc02e9a45f3c717a2c5eda7",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "1c60bb6984e3b84cb7309cfb96f53e0d8407e7d72ee156c51ef67b11737c01ba",
+      "image": "b3498f5220fa9b38b29239940dae99169100d8fdd76e8cd526646142f92988e0",
+      "camera": [
+        0.1,
+        2.0,
+        5.1
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S03",
+      "detail": "5fb627dcf761e9284d968a89852a0c5e92a1c613b7dea6e65495d4562c746520",
+      "anchor": "960a5c465acae790f0275372d0b01d778504f6e7b513f17f3980c669a77e7bc1",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "9fe5727f1b33bde368b2882be784a74182f608c8882efbd2f7e930a582ef0bd4",
+      "image": "55238e2f2dcaffaa8fb71b09745eed2ed479a9ff38d3c744e51ead100185ebf7",
+      "camera": [
+        0.1,
+        2.0,
+        5.1
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S04",
+      "detail": "832dd9f7c7c2699f992b2a2a07c884adae92a5b08f16f914486f104534e1b34f",
+      "anchor": "2fdb69a463e3d44d9e199065c78c50e23b14a6f853630efc2841c2f521276f78",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "3fd44582373a252a1c6582e3b6163d55f18da1612d34c58775e7ef35808e9f30",
+      "image": "4c7586594714cf741a419e5dac4148e62e085697c8dc79825839ed1932c9d264",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S05",
+      "detail": "cddc309aca0af6e993a5f250909ceccb06a6b614b965562f557f262c49749618",
+      "anchor": "cff15e8d0ded367f04d6a2f70338bcd3ed856fe3299d13f2be76eaa0ebd23607",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "e55bb66606e8ee0d86b89c29e4dde1c765dbd9613c13bc127874053b855afc88",
+      "image": "1efc08e3f376946348b88ec9c007c0299e487293d054e52bd8c7216b8764b41d",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S06",
+      "detail": "00277942dbefc3a0b6b6f8713cee4f0b9b2910c01a918fefeab0327a683f856e",
+      "anchor": "00b26ace36f7ef995f34ce3c94a9892f0d50b9f1d690c134ba1af5d3d42923fe",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "a9865259a88ae8cbab51d52935a5c1e4e1f5a237fd7d37e00211f1113fcc4c56",
+      "image": "c6ed26e4d7b736edb2d97ed019cc77387089b7ebacc42885c6f550caf35de94e",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S07",
+      "detail": "1ae48f02ea806483a1d06df471d2178a8a8875b91318ba8b03beeb44a75da66f",
+      "anchor": "165cbd958a7a722b958e52c8ee8048adeb2fee4ecd72b1037e2979840b21339d",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "de7ff95e1ba83aca10d0cd736a81ef5a979a693a05d5f1edce0583dab99898ec",
+      "image": "959325f10a8f9d8d5e2039e190766ef69b5ef9f3a9344ddee9d94cd6695b7d9a",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S08",
+      "detail": "210332d16146666f4495c26ec2ef3793d72e3146a32eb40744439f40e175cf4e",
+      "anchor": "f7f4b34d72db5ea7fcee66bac15d96e0524cd12838074481f8c2e2bacc069d0c",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "c78d3706b2f9669be83de6f66b41289f89cac308bd922de6bce05dd90230eedf",
+      "image": "4ca05e1725f33c21cc30e52caa4725b889fce3f2f3d28d091f925f2f977a297a",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S09",
+      "detail": "032edacbe6aaad9dbfc943358469d06d969fa25896a1b87b93144572ce838249",
+      "anchor": "ff23df0b9f975a8191d22b6bdc8358a3074bef05f07b6f96e7d0e05704e6317d",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "e1e854e11f0a9c27ae2885baf7195b88fdd20a782657008be5a1f6e6e189ce4e",
+      "image": "6e4755b5ace0a5dbac763293417f40642aefc7469e1d486346b4eef51feb5f33",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S10",
+      "detail": "70cf42760d3393f52c51595f7dbb0056234183e621003ac324251390283e45a7",
+      "anchor": "79bbc2b1edcdb4780ec82a13465ad4afac6c83bce99ebae6043051def19c69f8",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "32add47a9b76276391eef5131826f921b49493c992b151fb12aa1aac3e0847cb",
+      "image": "0ae7b180cbdb6de6f622a9bd44c440653c7f1c460f210b9d8595a85e1822e9d1",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S11",
+      "detail": "9649dfdcb6ab6a91d454d923267d07cfa5864d83de749b7f07c04b1941e770d2",
+      "anchor": "44533eec0de5583577be887da285c9d5d0ff5b8897dee6b691127bf1687a2b74",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "e9ac74b2c5ddb7eee15579a6559b26ea3ba25e3583bcee020da351be7b63b125",
+      "image": "1ffb7192472888ad8f6f9383751217bb66bea6db258c38fe84b8ecc3fda6ad04",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S12",
+      "detail": "e8799f9b97863ef9586e61e076476cfa39b5736721478631817cf5922658d874",
+      "anchor": "8ac539c73734beeb553d99490e4c8563012b16f865605cf624fc005e5c73efee",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "02a0dc33d5f367f46340c90dc19e8941993673e7bf3aad80edc0b9267e92e911",
+      "image": "e39a7a37a8ae16f6e1f1e0738a2f287081cbefe9e2312c873f7c4a6f5de63fc7",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S13",
+      "detail": "662c8f1f682adc7f8694101aa6744ef503d3a9c962669e3164a1add6f08227ea",
+      "anchor": "db06e6356e493284592d98444decee4b59a736bbda0f71742bff6b2f0580b543",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "e4fd20439378aa7f66a9b2f43a4a82bbe57ba6375e83bf7e481ca0884801c3e5",
+      "image": "9b0dcba8497df4ecdfcb5d3ea273248ed2cceb5c708b7e112b80d3670381e886",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S14",
+      "detail": "f7432c18148e289ad3eff00d0de6a389442fdf0eb486645170d209684a2c1e18",
+      "anchor": "b94f5c6e59cc4b3249c7c0eadbdc954d511da55d09b358c9778ac8bc096bbf30",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "99f71a1a6939128fe8642d74bb13f7506d42d12ce643f2cfbcf6182cda1e8b57",
+      "image": "8de69ec96e2b222c44a19242bc0bcb863f9a857bf5d8ce08309716d76bb971bc",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S15",
+      "detail": "57a79f4b9ae519d83be892eaed528e933beea4f1edbe3296379454b1240db9b1",
+      "anchor": "21798cd16c5777a953bfdcaa24691b5d8423e8f6047809ae15e2e59312ab2846",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "6bbb375b8ebaa9ec7db6561c42c13dfa5ebaa338e7f44770e26d9247d93b4d5c",
+      "image": "e04a1a8e39e674600864477737bc04106d6d5b0e509ab47647eb17b8e1d470df",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S16",
+      "detail": "0f32e9c78c008509137b8f850de327f8c85d2abdf006bb3ec7c266ce18098efa",
+      "anchor": "7457564cd2d1b86072a892e111c9be1b7ed64601ef6503176d4802287f844dd3",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "91b85e6360772d0371b6820638ac0eba02739db7febb53756486d1a3f466fb0c",
+      "image": "04e8c348173eec17317ce9afeaa11614077affa51ac580fd32da61798cd814b7",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    },
+    {
+      "id": "S17",
+      "detail": "0c9c8530ea5aae83e5492155cf1692abdfd69db1a68ecb11e1aed36f87796ccb",
+      "anchor": "cf41a7f1784cc7957bc166e90ebdd87c02ec95607e4630c7b7b7842153fd1bdb",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "26c7042aaf524eef5b461a4d81a31694d8ee4a6bc007b7addf82f2d560c6ef49",
+      "image": "1789cf96aeca6179ced9779a2e472ff60215095f370aa955d2307229c838456f",
+      "camera": [
+        0.1,
+        2.0,
+        4.59
+      ],
+      "aim": [
+        -0.12,
+        1.65,
+        -2.0
+      ],
+      "blender": "5.1.2"
+    }
+  ],
+  "entries": {
+    "S02-entry": {
+      "id": "S02",
+      "detail": "b12b639865f1bf7657ddda0f6234e781e808bac08b8d5be0728a05954f6a0ae4",
+      "anchor": "f4f2d421ce4a8140611f2a024c5415c07c3b634fdbc02e9a45f3c717a2c5eda7",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "1c60bb6984e3b84cb7309cfb96f53e0d8407e7d72ee156c51ef67b11737c01ba",
+      "image": "bbc6eba80da436d55e78776555a05aafe2ed154b4b238bb427b6d6fdd847bf35",
+      "camera": [
+        0.08,
+        2.44,
+        10.3
+      ],
+      "aim": [
+        0,
+        2.05,
+        -0.4
+      ],
+      "blender": "5.1.2"
+    },
+    "S02-return": {
+      "id": "S02",
+      "detail": "b12b639865f1bf7657ddda0f6234e781e808bac08b8d5be0728a05954f6a0ae4",
+      "anchor": "f4f2d421ce4a8140611f2a024c5415c07c3b634fdbc02e9a45f3c717a2c5eda7",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "1c60bb6984e3b84cb7309cfb96f53e0d8407e7d72ee156c51ef67b11737c01ba",
+      "image": "89542abbeddf7e7838f64d63bdb7d874709afeb444d393e34c475f867d446ab1",
+      "camera": [
+        0,
+        2.04,
+        1.7
+      ],
+      "aim": [
+        0,
+        4.57,
+        5.81
+      ],
+      "blender": "5.1.2"
+    },
+    "S03-entry": {
+      "id": "S03",
+      "detail": "5fb627dcf761e9284d968a89852a0c5e92a1c613b7dea6e65495d4562c746520",
+      "anchor": "960a5c465acae790f0275372d0b01d778504f6e7b513f17f3980c669a77e7bc1",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "9fe5727f1b33bde368b2882be784a74182f608c8882efbd2f7e930a582ef0bd4",
+      "image": "5915b607b1cf561b3c83a600f61a8be651b860d93fd31cdba70e3de138d182da",
+      "camera": [
+        0.08,
+        2.44,
+        10.3
+      ],
+      "aim": [
+        0,
+        2.05,
+        -0.4
+      ],
+      "blender": "5.1.2"
+    }
+  },
+  "shelves": {
+    "S05-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S05",
+      "detail": "cddc309aca0af6e993a5f250909ceccb06a6b614b965562f557f262c49749618",
+      "anchor": "cff15e8d0ded367f04d6a2f70338bcd3ed856fe3299d13f2be76eaa0ebd23607",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "e55bb66606e8ee0d86b89c29e4dde1c765dbd9613c13bc127874053b855afc88",
+      "image": "3ca28308d9aded5ae75e386a19fd053243d72dec2537d20ee2e525857238f137",
+      "camera": [
+        -2.98,
+        2.3,
+        -4.26
+      ],
+      "aim": [
+        -2.1,
+        2.25,
+        -5.08
+      ],
+      "blender": "5.1.2"
+    },
+    "S06-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S06",
+      "detail": "00277942dbefc3a0b6b6f8713cee4f0b9b2910c01a918fefeab0327a683f856e",
+      "anchor": "00b26ace36f7ef995f34ce3c94a9892f0d50b9f1d690c134ba1af5d3d42923fe",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "a9865259a88ae8cbab51d52935a5c1e4e1f5a237fd7d37e00211f1113fcc4c56",
+      "image": "b86d3f5361425b0de04fee5c20cc159654c34a44022d13691b981224028c5e6e",
+      "camera": [
+        -2.2,
+        2.27,
+        -2.84
+      ],
+      "aim": [
+        -2.04,
+        2.25,
+        -4.08
+      ],
+      "blender": "5.1.2"
+    },
+    "S07-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S07",
+      "detail": "1ae48f02ea806483a1d06df471d2178a8a8875b91318ba8b03beeb44a75da66f",
+      "anchor": "165cbd958a7a722b958e52c8ee8048adeb2fee4ecd72b1037e2979840b21339d",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "de7ff95e1ba83aca10d0cd736a81ef5a979a693a05d5f1edce0583dab99898ec",
+      "image": "791c2a32823980c231eb5eca69be3f0c3e5b6ef37bdca58c39b89a7963986580",
+      "camera": [
+        -2.09,
+        2.27,
+        -2.84
+      ],
+      "aim": [
+        -1.93,
+        2.25,
+        -4.08
+      ],
+      "blender": "5.1.2"
+    },
+    "S08-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S08",
+      "detail": "210332d16146666f4495c26ec2ef3793d72e3146a32eb40744439f40e175cf4e",
+      "anchor": "f7f4b34d72db5ea7fcee66bac15d96e0524cd12838074481f8c2e2bacc069d0c",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "c78d3706b2f9669be83de6f66b41289f89cac308bd922de6bce05dd90230eedf",
+      "image": "14bd6e7c396175c919a789f6093511dc040ddcccd8c319a32bd76fb0b84b1d93",
+      "camera": [
+        -2.12,
+        2.27,
+        -2.84
+      ],
+      "aim": [
+        -1.96,
+        2.25,
+        -4.08
+      ],
+      "blender": "5.1.2"
+    },
+    "S10-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S10",
+      "detail": "70cf42760d3393f52c51595f7dbb0056234183e621003ac324251390283e45a7",
+      "anchor": "79bbc2b1edcdb4780ec82a13465ad4afac6c83bce99ebae6043051def19c69f8",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "32add47a9b76276391eef5131826f921b49493c992b151fb12aa1aac3e0847cb",
+      "image": "b11515acabdd8dc0cb7316cc6155c052391fb9686541d667ab055119a2dcfff2",
+      "camera": [
+        -2.2600000000000002,
+        2.27,
+        -2.84
+      ],
+      "aim": [
+        -2.1,
+        2.25,
+        -4.08
+      ],
+      "blender": "5.1.2"
+    },
+    "S11-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S11",
+      "detail": "9649dfdcb6ab6a91d454d923267d07cfa5864d83de749b7f07c04b1941e770d2",
+      "anchor": "44533eec0de5583577be887da285c9d5d0ff5b8897dee6b691127bf1687a2b74",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "e9ac74b2c5ddb7eee15579a6559b26ea3ba25e3583bcee020da351be7b63b125",
+      "image": "a55549b59c04eff3b80427f5e59bd764df81e8d715c870b4ecc0d6106ca56c11",
+      "camera": [
+        -1.99,
+        2.27,
+        -2.84
+      ],
+      "aim": [
+        -1.83,
+        2.25,
+        -4.08
+      ],
+      "blender": "5.1.2"
+    },
+    "S12-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S12",
+      "detail": "e8799f9b97863ef9586e61e076476cfa39b5736721478631817cf5922658d874",
+      "anchor": "8ac539c73734beeb553d99490e4c8563012b16f865605cf624fc005e5c73efee",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "02a0dc33d5f367f46340c90dc19e8941993673e7bf3aad80edc0b9267e92e911",
+      "image": "fd6e7fd4259dc2ca83e5ba7e1dca8bbdc3bea79329195faf124102b5528975f0",
+      "camera": [
+        -2.3600000000000003,
+        2.27,
+        -2.84
+      ],
+      "aim": [
+        -2.2,
+        2.25,
+        -4.08
+      ],
+      "blender": "5.1.2"
+    },
+    "S17-shelf": {
+      "count": 4,
+      "vertexColorVariants": 3,
+      "id": "S17",
+      "detail": "0c9c8530ea5aae83e5492155cf1692abdfd69db1a68ecb11e1aed36f87796ccb",
+      "anchor": "cf41a7f1784cc7957bc166e90ebdd87c02ec95607e4630c7b7b7842153fd1bdb",
+      "atlas": "abf3cfc8f03ffeb7d8c23ed445a2946eee51db7d21844c1d2ace3e706737f4de",
+      "context": "26c7042aaf524eef5b461a4d81a31694d8ee4a6bc007b7addf82f2d560c6ef49",
+      "image": "26f0d73ae92ba2486219085a909edecf984a6b07bb9328d77055c0b7a4c11d84",
+      "camera": [
+        -3.22,
+        2.27,
+        -2.5999999999999996
+      ],
+      "aim": [
+        -3.06,
+        2.25,
+        -3.84
+      ],
+      "blender": "5.1.2"
+    }
+  }
+}

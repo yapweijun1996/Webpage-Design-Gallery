@@ -36,7 +36,7 @@ export async function loadUpperLevel(T) {
   return {map:paintUpperAtlas(T,logo),models:Object.fromEntries(Object.keys(models).map((key,i)=>[key,records[i]]))};
 }
 
-export function buildUpperLevel(T, {map,models}, {collider,lightWash}) {
+export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWash}) {
   const group=new T.Group();group.name='Premium Open Atrium';group.userData.deckLod=true;
   const floor=lift.upper, gold=[], emit=[], solids=[], prints=[], glass=[];
   const unit=new T.BoxGeometry(), plane=new T.PlaneGeometry(), transform=new T.Object3D();
@@ -105,21 +105,31 @@ export function buildUpperLevel(T, {map,models}, {collider,lightWash}) {
     emit.push(ring.applyMatrix4(matrix(x,.031,z,1,1,1,0,-Math.PI/2)));
     lightWash(x,floor+.019,z,1.72,1.72,0,-Math.PI/2);
   }
+  const furnitureOffset=.024;
   function furniture(kind,[x,z],sx,sy,sz,fallback){
-    const record=models[kind];
-    if(!record?.primitives.length){fallback(x,z);return;}
-    const pose=matrix(x,.024,z,sx,sy,sz);
+    const record=loadedModels[kind];
+    if(!record?.primitives.length){fallback?.(x,z);return false;}
+    const pose=matrix(x,furnitureOffset,z,sx,sy,sz);
     for(const p of record.primitives)tint(p.geometry,pose.clone().multiply(p.matrix),p.material.color);
     for(const geo of new Set(record.primitives.map(p=>p.geometry)))geo.dispose();
     for(const mat of new Set(record.primitives.map(p=>p.material)))mat.dispose();
+    return true;
   }
+  const seatProfiles=new Map();
+  const benchProfile=(width,top,depth,seatCentre=0)=>({size:[width,top,depth],top,front:-depth/2,seatCentre});
   function slats(x,z){
-    for(let i=-2;i<=2;i++)block(i%2?0xa96f44:0xb98552,x,.46,z+i*.12,2.12,.09,.103);
+    const width=2.12,centre=.46,thickness=.09,slatDepth=.103,spacing=.12;
+    for(let i=-2;i<=2;i++)block(i%2?0xa96f44:0xb98552,x,centre,z+i*spacing,width,thickness,slatDepth);
     for(const dx of [-.78,.78])brass(x+dx,.22,z,.08,.44,.50);
+    return benchProfile(width,centre+thickness/2,4*spacing+slatDepth);
   }
+  const [benchX,benchY,benchZ]=[1.52,1.1,1.55];
   for(const {finish,x,z} of atriumLayout.upperSeats){
-    if(finish==='oak')furniture('bench',[x,z],1.52,1.1,1.55,slats);
-    if(finish==='slats')slats(x,z);
+    if(finish==='oak' && furniture('bench',[x,z],benchX,benchY,benchZ)){
+      const [width,height,depth]=models.bench.dimensions_m;
+      // The oak model has a narrow gap between slats at its centreline.
+      seatProfiles.set(finish,benchProfile(width*benchX,furnitureOffset+height*benchY,depth*benchZ,-.04));
+    }else if(finish==='oak'||finish==='slats')seatProfiles.set(finish,slats(x,z));
   }
   furniture('table',table,.78,.81,.92,(x,z)=>{
     block(0xb98858,x,.64,z,.86,.09,.55);
@@ -277,5 +287,5 @@ export function buildUpperLevel(T, {map,models}, {collider,lightWash}) {
   const glazing=new T.MeshStandardMaterial({color:0xdeeff1,emissive:0xb3dbe2,emissiveIntensity:.22,
     transparent:true,opacity:.14,depthWrite:false,roughness:.22,side:T.DoubleSide,forceSinglePass:true});
   merged('Daylight glass',glass,glazing,panes);
-  return {group,panes,cabinMark};
+  return {group,panes,cabinMark,seatProfiles};
 }

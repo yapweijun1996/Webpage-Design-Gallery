@@ -26,6 +26,8 @@ New Moon product details automatically open an unofficial interactive 3D preview
 
 With Tripo or Visitor v2, choose **Pick up product** within reach of a New Moon shelf. **Add to bag** follows the held can throughout the mall, including after map travel, and adds one of that product to the demo bag. The visitor lowers the can in a short gesture. Reduced motion clears the hand immediately. The original shelf's facing is restored as a reusable display, consistent with the demo bag's cosmetic stock. **Return to shelf** is available within reach of the original shelf. Either action frees your hands for seats, the cart and the elevator. If your bag has nine of the product, it opens so you can make room.
 
+Approach a lounge bench from its open side and use **Sit**. The visitor faces the aisle and the camera frames the seated visitor from the open side at chase distance. **Stand** checks for a free spot in front of the bench and restores the previous view.
+
 ## Shared current-store spatial data
 
 The existing three storefronts use [assets/spatial.js](assets/spatial.js) for stable IDs, numbers, labels, nominal bounds and arrival anchors. The world, player, map and live directory consume these records; static directory HTML remains available without JavaScript. The records describe the current scene, not the proposed 17-store expansion. See the [stage 2 spatial pilot](../../../../docs/gjh-v11-stage2-spatial-pilot.md) for contracts, fallback behavior, evidence and remaining work.
@@ -94,6 +96,8 @@ The polish review captures spawn, walking, every interior and all panels at 1440
 
 ## Verification
 
+For the 393×700 MILI bench 2 probe, serve this worktree with `python3 -m http.server 8812 --bind 127.0.0.1`. With Playwright available to Node and `GALLERY_CHROME` set, run `node tests/probe_gjh_mili_seat.cjs` to capture the approach, seated pose and standing exit in headed Chrome.
+
 ```sh
 export GALLERY_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 ~/venvs/gallery/bin/python scripts/build_gallery.py
@@ -147,3 +151,7 @@ In the expanded layout, the additional storefront destinations use the IDs `plan
 Select the FPS counter in the 3D view to inspect frame cadence, simulation time, render submission time, draw calls and triangles. Reproduce a slowdown, open the counter and choose **Download report (JSON)**. Help includes a **Show FPS** setting. The report stays in the browser until downloaded.
 
 Reports include the last five seconds of individual frames, up to two minutes of one-second summaries and the latest twenty slow events within the past minute. World coordinates, zone and quality help locate a problem. Times use milliseconds relative to the report’s `timeOrigin`. Hidden and paused intervals are excluded. A `busy-callback` identifies at least 50 ms of synchronous callback work. A `raf-gap` identifies a long interval with a shorter current callback. The render metric measures CPU submission time; GPU completion can occur later. In DevTools, `window.__mall.performanceReport()` returns the same data.
+
+## Visitor arrivals page controls
+
+The arrivals header offers a language picker (English by default, 简体中文, Bahasa Melayu), a dark or light page theme (dark is the default and the choice is saved under `gjh-v11-color-scheme`) and a "Check for updates" button that shows the release version from `version.json` (for example v1.4.0) and reuses the existing update flow. The theme changes the arrivals page chrome only; the 3D mall keeps its own lighting. Tests: `tests/browser_gjh_demos.py` (`check_v11_arrival_tools`).

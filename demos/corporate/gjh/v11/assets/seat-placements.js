@@ -1,6 +1,23 @@
 import {atriumLayout} from './atrium-layout.js';
 import {liftLayout} from './lift-layout.js';
 import {spatial, storeCenterX} from './spatial.js';
+import {INTERIOR_PILOT} from './interior-pilot-registry.js';
+
+// The GLB origin is at floor level. Its backrest is on +Z and its open side
+// is -Z, which is also the visitor wrapper's forward axis.
+export const benchScale = .8;
+const loungeBench = {
+  size: INTERIOR_PILOT.bench.dimensions_m, top: .635,
+  flatFront: -.381, front: -.456, backrestFront: .213
+};
+export const groundBenchFallback = {
+  size: [2.58, 1.3175, .925], top: .65,
+  flatFront: -.45, front: -.45, backrestFront: .26
+};
+export const deckBenchFallback = {
+  size: [2.34, 1.09, .785], top: .508,
+  flatFront: -.38, front: -.38, backrestFront: .2
+};
 
 // The same authored placement drives geometry, collision and interaction.
 export function createSeatPlacements(expanded) {
@@ -8,15 +25,13 @@ export function createSeatPlacements(expanded) {
   const add = (group, x, z, facing = 1, name = null, floor = 0, accessible = true) => {
     const index = placements.length;
     const id = index === 0 ? 'courtyard-seat' : `bench-seat-${index + 1}`;
-    const anchor = {x, y:floor + .015, z:z - .23 * facing};
     const exit = {x, y:floor, z:z - 1.2 * facing};
-    const pose = {facing, angle:facing === 1 ? 0 : Math.PI,
-      cameraOffset:z < 0 ? (index % 2 === 0 ? -Math.PI / 2 : Math.PI / 2) * facing : .45};
+    const pose = {facing, angle:facing === 1 ? 0 : Math.PI};
     const clearance = {interactionRadius:1.65, capsuleRadius:.3,
       colliderWidth:group === 'deck' ? (accessible ? 2 : 2.3) : 2.5,
       colliderDepth:group === 'deck' ? .76 : .85};
     placements.push({id, group, name: name || (z > 0 ? `Courtyard bench ${index + 1}` : `${x < 5 ? 'MILI' : 'GOGO'} bench ${index % 2 + 1}`),
-      x, z, facing, floor, cameraOffset:pose.cameraOffset, accessible, anchor, exit, pose, clearance});
+      x, z, facing, floor, accessible, exit, pose, clearance});
   };
   if (expanded) {
     for (const lounge of atriumLayout.lounges) for (const [i, point] of lounge.seats.entries())
@@ -38,10 +53,21 @@ export function createSeatPlacements(expanded) {
   return placements;
 }
 
-export function createSeatAnchor(placement, collider) {
-  const {id, name, floor, anchor, exit, pose, clearance, accessible} = placement;
+export function createSeatAnchor(placement, collider, profile = loungeBench, scale = benchScale, footY = placement.floor) {
+  const {id, name, x, z, floor, exit, pose, clearance, accessible} = placement;
+  const centre = profile.seatCentre ?? (profile.flatFront + profile.backrestFront) / 2;
+  const anchor = {x, y:floor + profile.top * scale, z:z + centre * pose.facing};
+  const [width, height, depth] = profile.size;
+  const bounds = {
+    min:{x:x-width/2, y:floor, z:z-depth/2},
+    max:{x:x+width/2, y:floor+height*scale, z:z+depth/2}
+  };
   return {id, name, x:anchor.x, y:anchor.y, z:anchor.z,
     exitX:exit.x, exitZ:exit.z, floor, facing:pose.facing,
-    angle:pose.angle, cameraOffset:pose.cameraOffset, collider,
-    anchor, exit, pose, clearance, accessible};
+    angle:pose.angle, collider, footY, frontEdge:centre-profile.front,
+    anchor, exit, pose, bounds, clearance, accessible};
+}
+
+export function isInFrontOfSeat(seat, z) {
+  return (z - seat.z) * seat.facing <= -seat.frontEdge;
 }

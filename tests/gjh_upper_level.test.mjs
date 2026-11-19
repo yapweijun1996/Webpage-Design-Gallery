@@ -8,6 +8,8 @@ import {createElevatorV2} from '../demos/corporate/gjh/v11/assets/elevator-v2.js
 import {liftLayout as L} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
 import {createMallSurfaceAtmosphere} from '../demos/corporate/gjh/v11/assets/mall-atmosphere.js';
 import {cells,categories} from '../demos/corporate/gjh/v11/assets/upper-level-atlas.js';
+import {createSeatAnchor,createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
+import {addBrandWallAtlas} from '../demos/corporate/gjh/v11/assets/brand-wall.js';
 
 function localFetch(t) {
   t.mock.method(globalThis,'fetch',async url=>{
@@ -30,6 +32,19 @@ test('actual upper batches, gallery GLBs and tier washes fit the phone budget',a
   const scene=new T.Scene(),washes=[];
   const build=buildUpperLevel(T,assets,{collider:noop,lightWash:(...a)=>washes.push(a)});
   scene.add(build.group,build.panes,build.cabinMark);
+  const lounge=build.group.getObjectByName('Lounge, stone paving and shop arcade');
+  for(const placement of createSeatPlacements(true).filter(({group})=>group==='deck')){
+    const profile=build.seatProfiles.get(placement.finish);
+    if(placement.finish==='upholstered'){
+      assert.equal(profile,undefined);
+      continue;
+    }
+    const seat=createSeatAnchor(placement,1,profile,1);
+    const ray=new T.Raycaster(new T.Vector3(seat.x,seat.y+.2,seat.z),new T.Vector3(0,-1,0),0,.3);
+    const [hit]=ray.intersectObject(lounge);
+    assert.ok(hit,`${seat.name} has a seat surface`);
+    assert.ok(Math.abs(hit.point.y-seat.y)<.001,`${seat.name} anchor matches the rendered seat`);
+  }
   const atmosphere=createMallSurfaceAtmosphere(T,scene,{plane:new T.PlaneGeometry(),poolMaterial:new T.MeshBasicMaterial(),
     washes,floors:[],fixtures:new T.MeshStandardMaterial(),vault:new T.MeshStandardMaterial()});
   for(const tier of ['low','balanced','detailed','low']){
@@ -48,6 +63,34 @@ test('actual upper batches, gallery GLBs and tier washes fit the phone budget',a
   }
   assert.deepEqual(labels.filter(([,x])=>x===9).map(([label])=>label),['DIRECTORY','Upper Level',...categories]);
   for(const rect of [cells.mark,cells.directory,...cells.signs])assert(rect.x+rect.w<=256&&rect.y+rect.h<=256);
+});
+
+test('the brand wall warms before its mesh and story interactions are available',async t=>{
+  localFetch(t);
+  const noop=()=>{};
+  const ctx=new Proxy({measureText:value=>({width:value.length*8})},{get:(target,key)=>target[key]??noop});
+  globalThis.Image=class {set src(_url){queueMicrotask(()=>this.onerror());}};
+  globalThis.document={createElement:()=>({getContext:()=>ctx})};
+  t.after(()=>{delete globalThis.Image;delete globalThis.document;});
+  const scene=new T.Scene();
+  let revealMesh,finishUpload;
+  const started=new Promise(resolve=>{revealMesh=resolve;});
+  const upload=new Promise(resolve=>{finishUpload=resolve;});
+  const pending=addBrandWallAtlas(T,scene,L.upper,mesh=>{
+    revealMesh(mesh);
+    return upload;
+  });
+  const mesh=await started;
+  assert.equal(mesh.parent,null);
+  assert.equal(mesh.material.map.image.width,256);
+  finishUpload();
+  const wall=await pending;
+  assert.equal(wall.mesh,mesh);
+  assert.equal(mesh.parent,scene);
+  assert.equal(mesh.visible,false);
+  assert.equal(mesh.userData.deckLod,true);
+  assert.equal(wall.interactables.length,17);
+  assert.ok(wall.interactables.every(({id,y})=>wall.records[id]?.action==='brand-story' && y===L.upper));
 });
 
 test('walking capsule stops at outer edges, shaft sides, corners and the undocked gate',async t=>{

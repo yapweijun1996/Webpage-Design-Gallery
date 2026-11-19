@@ -133,6 +133,13 @@
     "detail": "Jump directly to New Moon from the first screen, view the 425g product or open its prefilled sales enquiry.", "items": ["New Moon", "MILI", "GOGO", "Borsch Med", "Sony"]
   },
   {
+    "key": "new-moon-product-wall", "version": "v23", "kind": "primary", "style": "Full-bleed product wall",
+    "headline": "New Moon abalone.", "action": "Explore New Moon", "image": "demos/corporate/gjh/v23/assets/new-moon-nz-425g-front.jpg",
+    "composition": "poster", "background": "#110e0c", "ink": "#ffffff", "accent": "#b91e17",
+    "notes": "Use the two tilted shelves and four official packshots from option B. Place the headline and red chapter link along the lower edge. On phones, keep the tins above the stacked label and link.",
+    "detail": "Open the New Moon brand chapter and its product-specific enquiry.", "items": ["Australia", "New Zealand", "South Africa", "Mexico"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

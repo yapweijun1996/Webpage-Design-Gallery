@@ -4,6 +4,7 @@ import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {createVisitorCustomization} from './visitor-v2-customization.js';
 import {createContactSolver,createProductTransfer} from './visitor-v2-contact.js';
 import {createPushCart} from './push-cart.js';
+import {createSeatContact} from './seat-contact.js';
 
 // Skinned v2 adapter; v1 remains available through the explicit visitor=v1 URL.
 export async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
@@ -26,6 +27,7 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   const visual = new T.Group(); visual.add(avatar);
   const cart = await createPushCart(T, avatar, visual, {prepareModel});
   const solver = createContactSolver(T, avatar);
+  const seatContact = createSeatContact(T, visual, avatar);
   const wrist = avatar.getObjectByName('RightHand'), skin = avatar.getObjectByName('V2_body_Warm_peach_skin');
   const transfer = createProductTransfer(T, avatar, wrist, visual, new T.Vector3(0, -.03, .045),
     createFirstPersonHand(T, visual, skin, wrist));
@@ -55,7 +57,7 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
     solver.solve(['RightShoulder','RightElbow','RightHand'], targetPoint);
     transfer.update(dt, reducedMotion.matches);
   }
-  function update(actual, dt, requested = actual, sprintRate = 1) {
+  function update(actual, dt, requested = actual, sprintRate = 1, seat) {
     actions.run.setEffectiveTimeScale(sprintRate);
     const movement = resolveLocomotion(actual, requested, dt);
     const target = pushing && movement !== 'idle' ? 'push' : movement;
@@ -72,6 +74,7 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
     }
     actions.sit.time = Math.min(actions.sit.getClip().duration - .00001, Math.max(0, seatWeight) * actions.sit.getClip().duration);
     actions.idle.paused = reducedMotion.matches;
+    seatContact.restore();
     mixer.update(dt);
     avatar.position.y=-.13*seatWeight;
     avatar.updateWorldMatrix(true,true);
@@ -86,7 +89,8 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
       if(hasPrevious){const distance=targetPoint.distanceTo(previous);for(const wheel of wheels)wheel.rotation.x+=distance/.07;}
       previous.copy(targetPoint);hasPrevious=true;
     }else hasPrevious=false;
-    if(seatWeight>0){
+    if (seatWeight > 0 && seat) contacts.feet=seatContact.apply(seat, seatWeight);
+    else if(seatWeight>0){
       for(const [side,x] of [['Left',.117],['Right',-.117]]){
         visual.localToWorld(targetPoint.set(x,.0617+.03*seatWeight,-.28*seatWeight));
         contacts.feet.push(solver.solveTwoBone([side+'Hip',side+'Knee',side+'Foot'],targetPoint,visual.localToWorld(new T.Vector3(x,.5,-1))));
