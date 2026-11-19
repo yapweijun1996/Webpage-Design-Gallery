@@ -211,9 +211,10 @@ test('an incompatible LOD leaves the high geometry in service and late models ar
 
 test('the shipped Tripo visitor and boy coexist with the separately loaded V2 crowd',async t=>{
   const assets = new URL('../demos/corporate/gjh/v11/assets/',import.meta.url);
+  const wardrobe = JSON.parse(await readFile(new URL('chibi-crowd/manifest.json',assets),'utf8'));
   const files = ['gjh-tripo-visitor.glb','gjh-tripo-visitor-lod1.glb','gjh-mall-visitor-v2.glb',
     'gjh-tripo-npc-boy.glb','gjh-tripo-npc-boy-lod1.glb',
-    ...['manifest.json','base_body.glb','hair-bob.glb','hand_gestures.glb','motion-clips.glb'].map(file=>'chibi-crowd/'+file)];
+    ...['manifest.json','hand_gestures.glb','motion-clips.glb',...wardrobe.modules.map(module=>module.file)].map(file=>'chibi-crowd/'+file)];
   const models = new Map(await Promise.all(files.map(async name=>[name,await readFile(new URL(name,assets))])));
   const globals = {
     fetch: async url=>{
@@ -277,17 +278,22 @@ test('the shipped Tripo visitor and boy coexist with the separately loaded V2 cr
   assert.deepEqual([sample.appearance,sample.tint,sample.variation],[repeated.appearance,repeated.tint,repeated.variation]);
   assert.notEqual(sample.variation,other.variation);
   for (const look of [sample,repeated,other]) {
-    assert.deepEqual(look.appearance,{body:'neutral-body',hair:'hair-bob'});
+    // Every modular NPC is dressed: a top (a dress also covers the bottom), shoes and hair on the neutral body.
+    const {body:bodyId,hair,top,bottom,shoes}=look.appearance;
+    assert.equal(bodyId,'neutral-body');
+    assert.ok(hair?.startsWith('hair-')&&top?.startsWith('top-')&&shoes==='shoes-sneakers',JSON.stringify(look.appearance));
+    assert.equal(bottom!==undefined,top!=='top-dress',JSON.stringify(look.appearance));
     assert.ok(look.variation>=.95 && look.variation<=1.05);
-    assert.equal(look.triangles,12506);
-    const body = look.avatar.getObjectByName('Base_Body');
-    const hair = look.avatar.getObjectByName('Hair_Bob');
-    assert.equal(body.skeleton,hair.skeleton);
-    body.skeleton.dispose();
+    assert.ok(look.triangles>9512 && look.triangles<=20000,String(look.triangles));
+    const bodyMesh = look.avatar.getObjectByName('Base_Body');
+    const skinned = [];
+    look.avatar.traverse(node=>{if(node.isSkinnedMesh)skinned.push(node);});
+    assert.ok(skinned.length>=4,'body, hair, shoes and clothing are separate skinned meshes');
+    for (const mesh of skinned) assert.equal(mesh.skeleton,bodyMesh.skeleton);
+    bodyMesh.skeleton.dispose();
     look.materials.forEach(material=>material.dispose());
   }
   assert.equal(sample.avatar.getObjectByName('Base_Body').geometry,repeated.avatar.getObjectByName('Base_Body').geometry);
-  assert.equal(sample.avatar.getObjectByName('Hair_Bob').geometry,repeated.avatar.getObjectByName('Hair_Bob').geometry);
   const clips = new Set();
   const started = performance.now();
   for (let i=0; i<600; i++) {
