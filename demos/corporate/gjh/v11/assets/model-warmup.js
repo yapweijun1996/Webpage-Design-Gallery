@@ -104,6 +104,7 @@ export function createModelWarmup(T, renderer) {
   const camera = new T.PerspectiveCamera();
   camera.position.z = 1;
   const staging = new T.Scene();
+  staging.name = 'Model warmup';
   staging.matrixWorldAutoUpdate = false;
   const target = new T.WebGLRenderTarget(1, 1);
   const scissor = new T.Vector4();

@@ -7,6 +7,31 @@ export function createWarmReport() {
   return {ms:0, probes:0, programs:0, textures:0, lightVariants:0, shadowCasters:0, skipped:false, reason:'pending'};
 }
 
+// Submit the real first view under the overlay and give its GPU work time to
+// finish. Polling never blocks the thread or waits for the full mall sweep.
+export function* prepareEntryFrame(gl, draw, now = () => performance.now()) {
+  const start = now(), deadline = start + 300;
+  const result = reason => ({reason, ms:Math.round(now() - start)});
+  draw();
+  if (gl.isContextLost()) return result('context-loss');
+  if (now() >= deadline) return result('timeout');
+  const fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+  if (!fence) return result('unavailable');
+  try {
+    gl.flush();
+    do {
+      yield;
+      if (gl.isContextLost()) return result('context-loss');
+      if (now() >= deadline) return result('timeout');
+      const status = gl.clientWaitSync(fence, 0, 0);
+      if (status === gl.WAIT_FAILED) return result('unavailable');
+      if (status !== gl.TIMEOUT_EXPIRED) return result('complete');
+    } while (true);
+  } finally {
+    if (!gl.isContextLost()) gl.deleteSync(fence);
+  }
+}
+
 // One owner for manual, adaptive and viewport-triggered tier requests. A
 // superseded iterator is closed before another can publish staged objects.
 export function createTierQueue(enqueue) {
@@ -36,7 +61,7 @@ export function createTierQueue(enqueue) {
 // Registration is eager so even an already-dismissed loader starts the room
 // queue. Closing the sweep releases its sign stage and leaves room RAFs running.
 export function prepareTier({T, renderer, world, player, expanded, elevator, atmosphere,
-  modelWarmup, width, height, screenPixel, applyProfile, startup=false}, profile, report) {
+  modelWarmup, width, height, screenPixel, applyProfile, frameTrace, startup=false}, profile, report) {
   const {scene, signage, interiors} = world;
   const {tier, shadows} = profile;
   let interiorsReady = false, interiorError;
@@ -55,7 +80,10 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
           updateLights:atmosphere.update, lightVariants:atmosphere.lightVariants,
           initTexture:modelWarmup.initTexture, alternatesFor:modelWarmup.alternatesFor}, report);
       }
-      if (signage) stage = yield* signage.prepareTier(tier, renderer);
+      if (signage) {
+        const signageWork = signage.prepareTier(tier, renderer);
+        stage = yield* (frameTrace ? frameTrace.steps('signage.prepare', signageWork) : signageWork);
+      }
       const replacing = stage && stage.meshes !== signage.activeMeshes();
       // The room installer fences the exact selected layers and lighting. A
       // scene traversal would also warm cached rooms from inactive tiers.
@@ -203,6 +231,7 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
   prepared=new WeakSet(), programs=new Set(), chase}, report) {
   const probe = camera.clone(false), staging = new T.Scene(), meshes = [], lights = [];
   const frustum = new T.Frustum(), viewProjection = new T.Matrix4();
+  staging.name = 'Mall scene warmup';
   staging.matrixWorldAutoUpdate = false;
   staging.environment = scene.environment;
   staging.environmentIntensity = scene.environmentIntensity;

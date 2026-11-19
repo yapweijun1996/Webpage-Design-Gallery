@@ -490,6 +490,62 @@ function createPerformancePanel({ snapshot, report = snapshot }) {
   };
 }
 
+// demos/corporate/gjh/v11/assets/frame-trace.js
+function createFrameTrace(renderer) {
+  const events = [], capacity = 2048;
+  let next = 0;
+  const programCount = () => renderer.info.programs?.length ?? 0;
+  function start() {
+    const { geometries, textures } = renderer.info.memory;
+    return { at: performance.now(), programs: programCount(), geometries, textures };
+  }
+  function end(work, before, subject) {
+    const ms = performance.now() - before.at;
+    const { geometries, textures } = renderer.info.memory;
+    const programs = programCount() - before.programs;
+    if (ms < 2 && !programs && textures === before.textures && geometries === before.geometries)
+      return;
+    events[next] = {
+      work,
+      subject,
+      at: before.at,
+      ms,
+      programs,
+      addedPrograms: programs > 0 ? renderer.info.programs.slice(before.programs).map(({ id, name, type }) => ({ id, name, type })) : [],
+      geometries: geometries - before.geometries,
+      textures: textures - before.textures
+    };
+    next = (next + 1) % capacity;
+  }
+  for (const method of ["compile", "render", "initTexture", "initRenderTarget"]) {
+    const original = renderer[method];
+    renderer[method] = function(...args) {
+      const before = start();
+      try {
+        return original.apply(this, args);
+      } finally {
+        const subject = args[0];
+        end(`renderer.${method}`, before, subject?.name || subject?.image?.src || subject?.type);
+      }
+    };
+  }
+  function* steps(label, work) {
+    try {
+      for (;; ) {
+        const before = start();
+        const step = work.next();
+        end(label, before);
+        if (step.done)
+          return step.value;
+        yield step.value;
+      }
+    } finally {
+      work.return();
+    }
+  }
+  return { start, end, steps, report: () => events.length < capacity ? events.slice() : [...events.slice(next), ...events.slice(0, next)] };
+}
+
 // assets/onboarding/components.js
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -2974,14 +3030,20 @@ import { setupOriginalTin } from "./assets/original-tin.js";
 function createMallAtmosphere(T, renderer, scene, slots) {
   const accents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324, 4689030, 8666691, 7313040, 7831429, 6705273, 8549738, 4954515, 6449514];
   const warm = new T.Color(16770497), interiorWarm = new T.Color(16766368);
-  const lights = slots.map((slot2, index) => {
-    const light = new T.PointLight(16770497, 28, 11, 2);
+  const bays = slots.map((slot2, index) => ({
+    x: (slot2.minX + slot2.maxX) / 2,
+    z: (slot2.minZ + slot2.maxZ) / 2,
+    accent: new T.Color(accents[index]),
+    color: new T.Color,
+    distance: 0
+  }));
+  const nearest = [];
+  const lights = Array.from({ length: Math.min(6, bays.length) }, (_, index) => {
+    const light = new T.PointLight(16770497, 0, 11, 2);
     light.name = `Shop ${String(index + 1).padStart(2, "0")} accent light`;
-    light.position.set((slot2.minX + slot2.maxX) / 2, 4.2, (slot2.minZ + slot2.maxZ) / 2);
-    light.visible = false;
-    light.castShadow = false;
+    light.position.y = 4.2;
     scene.add(light);
-    return { light, accent: new T.Color(accents[index]) };
+    return light;
   });
   scene.traverse((node) => {
     if (node.isLight)
@@ -2989,37 +3051,44 @@ function createMallAtmosphere(T, renderer, scene, slots) {
   });
   function applyTheme(theme) {
     warm.set(theme?.lighting?.key ?? 16770497).lerp(interiorWarm, 0.25);
-    for (const { light, accent } of lights)
-      light.color.copy(warm).lerp(accent, 0.08);
+    for (const bay of bays)
+      bay.color.copy(warm).lerp(bay.accent, 0.08);
+    for (let i = 0;i < Math.min(lights.length, nearest.length); i++)
+      lights[i].color.copy(nearest[i].color);
   }
   applyTheme(null);
-  const nearest = [];
-  const accentLimit = Math.min(6, lights.length);
-  const interiorWarmLights = { accents: lights.map((entry) => entry.light), limit: accentLimit };
   function update(position) {
+    const ground = Math.abs(position.y) < 6;
     nearest.length = 0;
-    for (const entry of lights) {
-      const dx = entry.light.position.x - position.x, dz = entry.light.position.z - position.z;
-      entry.distance = dx * dx + dz * dz;
-      entry.light.visible = false;
-      if (entry.distance < 24 * 24 && Math.abs(position.y) < 6)
-        nearest.push(entry);
-    }
+    if (ground)
+      for (const bay of bays) {
+        const dx = bay.x - position.x, dz = bay.z - position.z;
+        bay.distance = dx * dx + dz * dz;
+        if (bay.distance < 24 * 24)
+          nearest.push(bay);
+      }
     nearest.sort((a, b) => a.distance - b.distance);
-    for (let i = 0;i < Math.min(accentLimit, nearest.length); i++)
-      nearest[i].light.visible = true;
+    for (let i = 0;i < lights.length; i++) {
+      const light = lights[i], bay = nearest[i];
+      light.visible = ground;
+      light.intensity = bay ? 28 : 0;
+      if (bay) {
+        light.position.set(bay.x, 4.2, bay.z);
+        light.color.copy(bay.color);
+      }
+    }
   }
+  const accentSet = new Set(lights);
   function lightVariants(sceneLights) {
-    const accents2 = new Set(interiorWarmLights.accents);
     const fixed = sceneLights.filter((light) => {
-      if (accents2.has(light))
+      if (accentSet.has(light))
         return false;
       for (let node = light;node; node = node.parent)
         if (!node.visible)
           return false;
       return true;
     });
-    return Array.from({ length: accentLimit + 1 }, (_, n) => [...fixed, ...lights.slice(0, n).map((entry) => entry.light)]);
+    return [fixed, [...fixed, ...lights]];
   }
   let environment = null;
   function releaseEnvironment() {
@@ -3089,6 +3158,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       depthWrite: false
     });
     postScene = new T.Scene;
+    postScene.name = "Mall glow composite";
     postCamera = new T.Camera;
     quad = new T.Mesh(new T.PlaneGeometry(2, 2), composite);
     quad.frustumCulled = false;
@@ -3193,7 +3263,7 @@ function createMallAtmosphere(T, renderer, scene, slots) {
       renderer.shadowMap.autoUpdate = shadowAutoUpdate;
     }
   }
-  return { update, lightVariants, interiorWarmLights, preparePost, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
+  return { update, lightVariants, interiorWarmLights: lights, preparePost, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
     return state;
   } };
 }
@@ -3364,6 +3434,7 @@ function createModelWarmup(T, renderer) {
   const camera = new T.PerspectiveCamera;
   camera.position.z = 1;
   const staging = new T.Scene;
+  staging.name = "Model warmup";
   staging.matrixWorldAutoUpdate = false;
   const target = new T.WebGLRenderTarget(1, 1);
   const scissor = new T.Vector4;
@@ -3545,23 +3616,24 @@ var emptyInteriorReport = (tier) => ({
 function registerInteriorWarmup(interiors, { T, renderer, scene, lights, tier }, options) {
   return interiors?.prepare(tier, () => createInstaller(T, renderer, scene, lights), options) ?? Promise.resolve();
 }
-function createInstaller(T, renderer, scene, { accents, limit }) {
+function createInstaller(T, renderer, scene, accents) {
   const queue = createUploadScheduler({ budgetMs: 2, maxSteps: 12 });
   const staging = new T.Scene, lighting = new T.Scene, camera = new T.PerspectiveCamera;
+  staging.name = "Interior shader warmup";
   const target = new T.WebGLRenderTarget(1, 1);
   const accentSet = new Set(accents);
-  const fixed = scene.children.filter((node) => node.isLight && !accentSet.has(node)).map((light) => light.clone());
-  const variable = accents.slice(0, limit).map((light) => {
+  const lights = scene.children.filter((node) => node.isLight).map((light) => {
     const copy = light.clone();
-    copy.visible = true;
+    if (accentSet.has(light))
+      copy.visible = true;
     return copy;
   });
-  function compile(roots, count, linear, programs) {
+  function compile(roots, linear, programs) {
     const previous = renderer.getRenderTarget(), shadows = renderer.shadowMap.enabled;
     const face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
     try {
       staging.children = roots;
-      lighting.children = [...fixed, ...variable.slice(0, count)];
+      lighting.children = lights;
       lighting.environment = scene.environment;
       lighting.fog = scene.fog;
       renderer.shadowMap.enabled = linear;
@@ -3604,10 +3676,8 @@ function createInstaller(T, renderer, scene, { accents, limit }) {
       queue.enqueue(function* () {
         const programs = new Set;
         for (const output of linear() ? [false, true] : [false]) {
-          for (let count = 0;count <= variable.length; count++) {
-            for (const root of roots)
-              yield () => compile([root], count, output, programs);
-          }
+          for (const root of roots)
+            yield () => compile([root], output, programs);
         }
         for (const program of programs)
           while (!program.isReady())
@@ -3660,6 +3730,36 @@ function createInstaller(T, renderer, scene, { accents, limit }) {
 function createWarmReport() {
   return { ms: 0, probes: 0, programs: 0, textures: 0, lightVariants: 0, shadowCasters: 0, skipped: false, reason: "pending" };
 }
+function* prepareEntryFrame(gl, draw, now = () => performance.now()) {
+  const start = now(), deadline = start + 300;
+  const result = (reason) => ({ reason, ms: Math.round(now() - start) });
+  draw();
+  if (gl.isContextLost())
+    return result("context-loss");
+  if (now() >= deadline)
+    return result("timeout");
+  const fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+  if (!fence)
+    return result("unavailable");
+  try {
+    gl.flush();
+    do {
+      yield;
+      if (gl.isContextLost())
+        return result("context-loss");
+      if (now() >= deadline)
+        return result("timeout");
+      const status = gl.clientWaitSync(fence, 0, 0);
+      if (status === gl.WAIT_FAILED)
+        return result("unavailable");
+      if (status !== gl.TIMEOUT_EXPIRED)
+        return result("complete");
+    } while (true);
+  } finally {
+    if (!gl.isContextLost())
+      gl.deleteSync(fence);
+  }
+}
 function createTierQueue(enqueue) {
   let pending;
   function cancel() {
@@ -3699,6 +3799,7 @@ function prepareTier({
   height,
   screenPixel,
   applyProfile,
+  frameTrace,
   startup = false
 }, profile, report) {
   const { scene, signage, interiors } = world;
@@ -3735,8 +3836,10 @@ function prepareTier({
           alternatesFor: modelWarmup.alternatesFor
         }, report);
       }
-      if (signage)
-        stage = yield* signage.prepareTier(tier, renderer);
+      if (signage) {
+        const signageWork = signage.prepareTier(tier, renderer);
+        stage = yield* frameTrace ? frameTrace.steps("signage.prepare", signageWork) : signageWork;
+      }
       const replacing = stage && stage.meshes !== signage.activeMeshes();
       const exclude = [...interiors?.groups ?? []];
       if (replacing)
@@ -3936,6 +4039,7 @@ function* prepareScene({
 }, report) {
   const probe = camera.clone(false), staging = new T.Scene, meshes = [], lights = [];
   const frustum = new T.Frustum, viewProjection = new T.Matrix4;
+  staging.name = "Mall scene warmup";
   staging.matrixWorldAutoUpdate = false;
   staging.environment = scene.environment;
   staging.environmentIntensity = scene.environmentIntensity;
@@ -4919,6 +5023,7 @@ var last = 0;
 var accumulator = 0;
 var frames = 0;
 var three;
+var frameTrace;
 var modelWarmup;
 var tierQueue;
 var requestedProfile;
@@ -4926,6 +5031,7 @@ var warmRunner = null;
 var warmKey;
 var warmReport = createWarmReport();
 var sceneWarmFirst = true;
+var entryPresentation;
 var productControl = null;
 var shelfFocus = null;
 var guidance = null;
@@ -5013,6 +5119,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
+    ...frameTrace && { frameTrace: frameTrace.report() },
     uploads: { ...modelWarmup?.report() ?? { lateAdditions: 0, pendingUploads: 0 }, maxFrameUploadMs },
     warm: { ...warmReport, upperLevel: world?.upperWarmStatus ?? null },
     viewport: { width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio() },
@@ -5318,7 +5425,11 @@ function tick(refreshHud = true) {
   player.update(STEP);
   physics.step();
   player.sync();
-  npcs?.update(STEP, player.state, reducedMotion2.matches);
+  if (npcs) {
+    const start = frameTrace?.start();
+    npcs.update(STEP, player.state, reducedMotion2.matches);
+    frameTrace?.end("crowd.update", start);
+  }
   player.updateCamera(STEP);
   if (refreshHud)
     updateHUD();
@@ -5365,7 +5476,9 @@ function render(force = false) {
       renderer.shadowMap.enabled = detailedReady;
     world.updateShopLods(pose, renderer.shadowMap.enabled, tier);
     atmosphere?.update(pose);
+    const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion2);
+    frameTrace?.end("signage.update", signStart);
     const draw = () => {
       world.interiors?.beginFrame();
       try {
@@ -5426,6 +5539,7 @@ function tierWork(profile, report, startup = false) {
     height: renderHeight,
     screenPixel,
     applyProfile,
+    frameTrace,
     startup
   }, profile, report);
 }
@@ -5452,6 +5566,10 @@ function scheduleTier() {
     console.warn("Mall graphics tier preparation interrupted", error);
   });
 }
+function cancelEntryPresentation() {
+  entryPresentation?.return();
+  entryPresentation = null;
+}
 function advanceStartupWarm() {
   const loader = window.mallLoader;
   if (!loader || loader.ready || contextLost || restorePending || pageEnded)
@@ -5475,7 +5593,10 @@ function advanceStartupWarm() {
       lost: () => renderer.getContext().isContextLost(),
       onRelease(result) {
         if (result.reason !== "context-loss" && !pageEnded && !fatal) {
-          loader.complete("warm", result.skipped || result.ms >= 5750);
+          if (result.reason === "enter-now" && !loader.snapshot().dismissed) {
+            entryPresentation = prepareEntryFrame(renderer.getContext(), () => render(true));
+          } else
+            loader.complete("warm", result.skipped || result.ms >= 5750);
         }
       },
       onFinish(result) {
@@ -5484,6 +5605,21 @@ function advanceStartupWarm() {
           scheduleTier();
       }
     });
+  }
+  if (entryPresentation) {
+    if (loader.snapshot().dismissed) {
+      cancelEntryPresentation();
+      loader.complete("warm", true);
+    } else {
+      const step = entryPresentation.next();
+      if (step.done) {
+        entryPresentation = null;
+        warmReport.presentation = step.value;
+        if (step.value.reason !== "context-loss")
+          loader.complete("warm", true);
+      }
+    }
+    return true;
   }
   if (!warmRunner.blocking)
     return false;
@@ -5502,16 +5638,22 @@ function warmModels(pose, background = true) {
     return 0;
   const started = performance.now();
   const remaining = () => Math.max(0, 4 - (performance.now() - started));
+  const traceStart = frameTrace?.start();
   const runner = background && warmRunner;
   const sceneFirst = runner && sceneWarmFirst;
   if (runner)
     sceneWarmFirst = !sceneWarmFirst;
   if (sceneFirst)
     runner.runFrame(Math.min(2, remaining()));
+  const roomsStart = frameTrace?.start();
   world.interiors?.runFrame(remaining());
+  frameTrace?.end("interiors.install", roomsStart);
+  const modelsStart = frameTrace?.start();
   modelWarmup.runFrame(true, remaining());
+  frameTrace?.end("models.upload", modelsStart);
   if (runner && !sceneFirst)
     runner.runFrame(remaining());
+  frameTrace?.end("warm.slice", traceStart);
   const elapsed = performance.now() - started;
   maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
   return elapsed;
@@ -5607,6 +5749,7 @@ function fallback(message, terminal = true) {
   if (terminal) {
     fatal = true;
     graphicsStatus = "failed";
+    cancelEntryPresentation();
     world?.interiors?.dispose();
     modelWarmup?.dispose();
     markFirstFrame();
@@ -5725,6 +5868,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   interrupted = true;
   restorePending = true;
   losses++;
+  cancelEntryPresentation();
   warmRunner?.stop("context-loss");
   tierQueue?.cancel();
   world?.interiors?.invalidate();
@@ -5897,6 +6041,8 @@ async function initialize() {
   three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({ canvas, context, antialias: true });
+  if (new URLSearchParams(location.search).get("traceWarm") === "1")
+    frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
@@ -6161,6 +6307,7 @@ if (document.body.dataset.entryMode !== "directory")
   });
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
+    cancelEntryPresentation();
     pageEnded = true;
     elevator?.kit?.dispose();
     arrivalChime.dispose();

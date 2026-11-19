@@ -10,26 +10,25 @@ export function registerInteriorWarmup(interiors, {T,renderer,scene,lights,tier}
   return interiors?.prepare(tier, () => createInstaller(T,renderer,scene,lights), options) ?? Promise.resolve();
 }
 
-function createInstaller(T, renderer, scene, {accents,limit}) {
+function createInstaller(T, renderer, scene, accents) {
   const queue = createUploadScheduler({budgetMs:2,maxSteps:12});
   const staging = new T.Scene(), lighting = new T.Scene(), camera = new T.PerspectiveCamera();
+  staging.name = 'Interior shader warmup';
   const target = new T.WebGLRenderTarget(1,1);
   const accentSet = new Set(accents);
-  const fixed = scene.children.filter(node => node.isLight && !accentSet.has(node)).map(light => light.clone());
-  const variable = accents.slice(0,limit).map(light => {
+  const lights = scene.children.filter(node => node.isLight).map(light => {
     const copy = light.clone();
-    copy.visible = true;
+    if (accentSet.has(light)) copy.visible = true;
     return copy;
   });
 
-  function compile(roots, count, linear, programs) {
+  function compile(roots, linear, programs) {
     const previous = renderer.getRenderTarget(), shadows = renderer.shadowMap.enabled;
     const face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
     try {
-      // Point light counts change Three's program cache key. Use the exact
-      // kit materials and cover each count the concourse can select.
+      // The rooms only draw on the ground floor, which uses every accent slot.
       staging.children = roots;
-      lighting.children = [...fixed,...variable.slice(0,count)];
+      lighting.children = lights;
       lighting.environment = scene.environment;
       lighting.fog = scene.fog;
       renderer.shadowMap.enabled = linear;
@@ -69,9 +68,7 @@ function createInstaller(T, renderer, scene, {accents,limit}) {
       queue.enqueue(function* () {
         const programs = new Set();
         for (const output of linear() ? [false,true] : [false]) {
-          for (let count=0; count<=variable.length; count++) {
-            for (const root of roots) yield () => compile([root],count,output,programs);
-          }
+          for (const root of roots) yield () => compile([root],output,programs);
         }
         for (const program of programs) while (!program.isReady()) yield () => false;
       }, options)

@@ -1,6 +1,7 @@
 import {readStandardGamepad,gamepadMotion} from '../../../../assets/onboarding/gamepad.js';
 import {createPerformanceMonitor} from './assets/performance-monitor.js';
 import {createPerformancePanel} from './assets/performance-panel.js';
+import {createFrameTrace} from './assets/frame-trace.js';
 import {createUI} from './assets/ui.js';
 import {createGraphicsQuality} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
@@ -10,7 +11,7 @@ import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/ex
 import {createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {createArrivalChime} from './assets/elevator-chime.js';
 import {createModelWarmup} from './assets/model-warmup.js';
-import {createWarmReport, createWarmRunner, createTierQueue, prepareTier} from './assets/scene-warmup.js';
+import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
 import {emptyInteriorReport} from './assets/interiors/warmup.js';
 import {shouldOpenStoreDoor} from './assets/auto-door.js';
 import {createInteractionRegistry} from './assets/interaction-registry.js';
@@ -42,9 +43,9 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const startupOverlay = document.getElementById('app-loader');
 let greetedOnArrival = false, pageEnded = false;
 let ready = false, player, world, physics, renderer, elevator, manual = false, frame = 0, last = 0, accumulator = 0, frames = 0;
-let three;
+let three, frameTrace;
 let modelWarmup, tierQueue, requestedProfile;
-let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true;
+let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true, entryPresentation;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
@@ -89,6 +90,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector('[data-mall-version]')?.textContent.trim() || null,
     layout: expanded ? 'expanded' : 'classic',
+    ...(frameTrace && {frameTrace:frameTrace.report()}),
     uploads: {...(modelWarmup?.report() ?? {lateAdditions:0,pendingUploads:0}), maxFrameUploadMs},
     warm: {...warmReport, upperLevel:world?.upperWarmStatus ?? null},
     viewport: {width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio()},
@@ -288,7 +290,13 @@ function tick(refreshHud = true) {
       leaf.body.setNextKinematicTranslation({x, y: 1.8, z: .05});
     }
   }
-  elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync(); npcs?.update(STEP,player.state,reducedMotion.matches); player.updateCamera(STEP); if (refreshHud) updateHUD();
+  elevator?.update?.(STEP,p); player.update(STEP); physics.step(); player.sync();
+  if (npcs) {
+    const start = frameTrace?.start();
+    npcs.update(STEP,player.state,reducedMotion.matches);
+    frameTrace?.end('crowd.update', start);
+  }
+  player.updateCamera(STEP); if (refreshHud) updateHUD();
   greetOnArrival();
 }
 let lastGuidanceSample = -Infinity, projectedTarget = null;
@@ -325,7 +333,9 @@ function render(force = false) {
     if (expanded) renderer.shadowMap.enabled = detailedReady;
     world.updateShopLods(pose, renderer.shadowMap.enabled, tier);
     atmosphere?.update(pose);
+    const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion);
+    frameTrace?.end('signage.update', signStart);
     const draw=()=>{
       world.interiors?.beginFrame();
       try {
@@ -365,7 +375,7 @@ function updateModelPreload(now) {
 function tierWork(profile, report, startup = false) {
   const screenPixel = () => !startupOverlay.hidden || (!manual && !modes.paused()) ? 1 : 0;
   return prepareTier({T:three, renderer, world, player, expanded, elevator, atmosphere, modelWarmup,
-    width:renderWidth, height:renderHeight, screenPixel, applyProfile, startup}, profile, report);
+    width:renderWidth, height:renderHeight, screenPixel, applyProfile, frameTrace, startup}, profile, report);
 }
 function tierKey(profile) {
   return [profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
@@ -390,6 +400,10 @@ function scheduleTier() {
     console.warn('Mall graphics tier preparation interrupted',error);
   });
 }
+function cancelEntryPresentation() {
+  entryPresentation?.return();
+  entryPresentation = null;
+}
 function advanceStartupWarm() {
   const loader = window.mallLoader;
   if (!loader || loader.ready || contextLost || restorePending || pageEnded) return false;
@@ -408,7 +422,9 @@ function advanceStartupWarm() {
       lost:() => renderer.getContext().isContextLost(),
       onRelease(result) {
         if (result.reason !== 'context-loss' && !pageEnded && !fatal) {
-          loader.complete('warm', result.skipped || result.ms >= 5750);
+          if (result.reason === 'enter-now' && !loader.snapshot().dismissed) {
+            entryPresentation = prepareEntryFrame(renderer.getContext(), () => render(true));
+          } else loader.complete('warm', result.skipped || result.ms >= 5750);
         }
       },
       onFinish(result) {
@@ -416,6 +432,20 @@ function advanceStartupWarm() {
         if ((result.reason === 'complete' || result.background === 'complete') && loader.ready) scheduleTier();
       }
     });
+  }
+  if (entryPresentation) {
+    if (loader.snapshot().dismissed) {
+      cancelEntryPresentation();
+      loader.complete('warm', true);
+    } else {
+      const step = entryPresentation.next();
+      if (step.done) {
+        entryPresentation = null;
+        warmReport.presentation = step.value;
+        if (step.value.reason !== 'context-loss') loader.complete('warm', true);
+      }
+    }
+    return true;
   }
   if (!warmRunner.blocking) return false;
   warmRunner.runFrame();
@@ -430,13 +460,19 @@ function warmModels(pose, background = true) {
   if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active) return 0;
   const started = performance.now();
   const remaining = () => Math.max(0, 4 - (performance.now() - started));
+  const traceStart = frameTrace?.start();
   const runner = background && warmRunner;
   const sceneFirst = runner && sceneWarmFirst;
   if (runner) sceneWarmFirst = !sceneWarmFirst;
   if (sceneFirst) runner.runFrame(Math.min(2, remaining()));
+  const roomsStart = frameTrace?.start();
   world.interiors?.runFrame(remaining());
+  frameTrace?.end('interiors.install', roomsStart);
+  const modelsStart = frameTrace?.start();
   modelWarmup.runFrame(true, remaining());
+  frameTrace?.end('models.upload', modelsStart);
   if (runner && !sceneFirst) runner.runFrame(remaining());
+  frameTrace?.end('warm.slice', traceStart);
   const elapsed = performance.now() - started;
   maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
   return elapsed;
@@ -512,7 +548,7 @@ function animate(now) {
 function resume() { if (ready && !frame && !document.hidden) { last = performance.now(); accumulator = 0; frame = requestAnimationFrame(animate); } }
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
-  if (terminal) { fatal = true; graphicsStatus = 'failed'; world?.interiors?.dispose(); modelWarmup?.dispose(); markFirstFrame(); }
+  if (terminal) { fatal = true; graphicsStatus = 'failed'; cancelEntryPresentation(); world?.interiors?.dispose(); modelWarmup?.dispose(); markFirstFrame(); }
   pausePerformance();
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
@@ -545,6 +581,7 @@ canvas.addEventListener('webglcontextlost', event => {
   quality.resetSampling();
   window.mallLoader?.context(true);
   event.preventDefault(); contextLost = true; interrupted = true; restorePending = true; losses++;
+  cancelEntryPresentation();
   warmRunner?.stop('context-loss');
   tierQueue?.cancel();
   world?.interiors?.invalidate();
@@ -669,6 +706,7 @@ async function initialize() {
   three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({canvas, context, antialias: true});
+  if (new URLSearchParams(location.search).get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
@@ -833,5 +871,6 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
 window.addEventListener('pagehide', event=>{if(!event.persisted) {
+  cancelEntryPresentation();
   pageEnded = true; elevator?.kit?.dispose(); arrivalChime.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
 }});

@@ -442,9 +442,10 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   runtime.dispose();
 });
 
-test('registration warms the animated detail material for every lighting variant before showing it', async t => {
+test('registration warms animated detail for the ground-floor screen and Detailed passes before showing it', async t => {
   const scene = new T.Scene(), accent = new T.PointLight(), fixed = new T.DirectionalLight();
   fixed.castShadow = true;
+  accent.visible = false; // Installing from the upper floor still needs the ground-floor light slots.
   scene.add(accent,fixed);
   const compiled = new Set();
   const scroll = new T.Texture();
@@ -466,7 +467,7 @@ test('registration warms the animated detail material for every lighting variant
       const root = geometry.children.find(model=>model.userData.roomMotion);
       if (!root) return new Set();
       assert.equal(root.children[0].material,emitter);
-      compiled.add([Boolean(target),this.shadowMap.enabled,lighting.children.length].join('/'));
+      compiled.add([Boolean(target),this.shadowMap.enabled,lighting.children.filter(light=>light.visible).length].join('/'));
       return new Set([emitter]);
     }
   };
@@ -492,10 +493,11 @@ test('registration warms the animated detail material for every lighting variant
   t.after(()=>runtime.dispose());
   const [x,y,z] = interiorStores.S13.frame.world_origin_m;
   runtime.update({x,y,z});
-  const done = registerInteriorWarmup(runtime,{T,renderer,scene,tier:'detailed',lights:{accents:[accent],limit:1}});
+  const done = registerInteriorWarmup(runtime,{T,renderer,scene,tier:'detailed',lights:[accent]});
   const frame = async () => { runtime.runFrame(); await new Promise(resolve=>setImmediate(resolve)); };
   for (let i=0; i<12; i++) await frame();
-  assert.deepEqual([...compiled].sort(),['false/false/1','false/false/2','true/true/1','true/true/2']);
+  assert.deepEqual([...compiled].sort(),['false/false/2','true/true/2']);
+  assert.equal(accent.visible,false);
   assert.equal(target,null);
   assert.equal(renderer.shadowMap.enabled,false);
   const room = scene.children.find(group=>group.name.startsWith('S13 '));

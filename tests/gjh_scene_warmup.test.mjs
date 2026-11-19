@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
-import {createWarmReport, createWarmRunner, createTierQueue, mallProbePoses, prepareScene} from '../demos/corporate/gjh/v11/assets/scene-warmup.js';
+import {createWarmReport, createWarmRunner, createTierQueue, mallProbePoses, prepareEntryFrame, prepareScene} from '../demos/corporate/gjh/v11/assets/scene-warmup.js';
 import {createModelWarmup} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
 import {createLoaderState} from '../demos/corporate/gjh/v11/assets/loader.js';
 import {expandedLayout, shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
@@ -15,6 +15,40 @@ function clock() {
     advance(ms) { time += ms; if (timer && timer.at <= time) timer.callback(); }
   };
 }
+
+test('early entry draws once, waits for completion and releases a stalled fence at 300 ms', () => {
+  for (const outcome of ['complete','timeout','cancelled','context-loss']) {
+    const time = clock(), fence = {}, submissions = [];
+    let signalled = false, lost = false;
+    const gl = {
+      SYNC_GPU_COMMANDS_COMPLETE:1, TIMEOUT_EXPIRED:2, WAIT_FAILED:3, CONDITION_SATISFIED:4,
+      fenceSync(type, flags) { assert.deepEqual([type,flags], [1,0]); submissions.push('fence'); return fence; },
+      flush() { submissions.push('flush'); },
+      clientWaitSync(sync, flags, timeout) {
+        assert.deepEqual([sync,flags,timeout], [fence,0,0]);
+        submissions.push('poll');
+        return signalled ? 4 : 2;
+      },
+      isContextLost:() => lost,
+      deleteSync(sync) { assert.equal(sync, fence); submissions.push('delete'); }
+    };
+    const work = prepareEntryFrame(gl, () => submissions.push('view'), time.now);
+    assert.equal(work.next().done, false);
+    assert.deepEqual(submissions, ['view','fence','flush']);
+    time.advance(16);
+    assert.equal(work.next().done, false);
+    assert.equal(submissions.at(-1), 'poll');
+    if (outcome === 'cancelled') assert.equal(work.return().done, true);
+    else {
+      signalled = outcome === 'complete';
+      lost = outcome === 'context-loss';
+      time.advance(outcome === 'timeout' ? 284 : 16);
+      assert.deepEqual(work.next(), {done:true, value:{reason:outcome, ms:time.now()}});
+    }
+    assert.equal(submissions.filter(step => step === 'view').length, 1);
+    assert.equal(submissions.filter(step => step === 'delete').length, lost ? 0 : 1);
+  }
+});
 
 test('slices yield to paint at the budget and resume after visibility returns', () => {
   const time = clock(), report = createWarmReport(), outcomes = [];
