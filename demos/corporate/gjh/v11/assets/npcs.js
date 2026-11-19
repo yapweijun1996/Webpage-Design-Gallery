@@ -569,7 +569,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       for(const seat of seats) {
         if(visitors.length>=limit || seated>=seatedLimit) break;
         if(seat.accessible===false || seat.floor!==0 || seat.id===player.seatId || occupied(seat.id)) continue;
-        seatPoint.x=seat.x; seatPoint.y=seat.y||0; seatPoint.z=seat.z;
+        seatPoint.x=seat.x; seatPoint.y=seat.floor+.015; seatPoint.z=seat.z;
         const d=distance(seatPoint,player);
         if(d<PLAYER_CLEARANCE+1 || d>LOAD_DISTANCE || tooClose(seatPoint,2) || !clear(seat.exitX,seat.floor,seat.exitZ)) continue;
         spawn(seatPoint,seat); seated++;
