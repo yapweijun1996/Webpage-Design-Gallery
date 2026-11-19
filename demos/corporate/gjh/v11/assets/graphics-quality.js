@@ -50,7 +50,8 @@ export function resolveQuality({preference = 'auto', width, dpr = 1, cores, memo
     (androidChrome && !highPerformanceWebGL2);
   const choice = qualityPreference(preference);
   const phone = deviceClass === 'phone';
-  const initialTier = constrained ? 'low' : phone || width < 1000 ? 'balanced' : 'detailed';
+  // Owner decision: phones always start on Low (no lag is a must); dynamic resolution and tests decide the rest.
+  const initialTier = constrained || phone ? 'low' : width < 1000 ? 'balanced' : 'detailed';
   const tier = recovered ? 'low' : choice !== 'auto' ? choice : TIERS.includes(autoTier) ? autoTier : initialTier;
   let cap = 2;
   if (tier === 'low') cap = 1;

@@ -2683,7 +2683,7 @@ function resolveQuality({
   const lowEnd = positive(cores) && cores <= 4 || positive(memory) && memory <= 4 || androidChrome && !highPerformanceWebGL2;
   const choice = qualityPreference(preference);
   const phone = deviceClass === "phone";
-  const initialTier = constrained ? "low" : phone || width < 1000 ? "balanced" : "detailed";
+  const initialTier = constrained || phone ? "low" : width < 1000 ? "balanced" : "detailed";
   const tier = recovered ? "low" : choice !== "auto" ? choice : TIERS.includes(autoTier) ? autoTier : initialTier;
   let cap = 2;
   if (tier === "low")

@@ -30,7 +30,7 @@ test('Auto chooses a starting tier and an existing Auto tier survives a resize',
   assert.equal(resolveQuality({width:1440, memory:2}).tier, 'low');
   assert.equal(resolveQuality({width:1440, cores:8, memory:8}).tier, 'detailed');
   assert.equal(resolveQuality({width:820, deviceClass:'tablet'}).tier, 'balanced');
-  assert.equal(resolveQuality({width:1024, deviceClass:'phone'}).tier, 'balanced');
+  assert.equal(resolveQuality({width:1024, deviceClass:'phone'}).tier, 'low');
   assert.equal(resolveQuality({width:1440, autoTier:'balanced'}).tier, 'balanced');
   assert.equal(resolveQuality({width:1440, autoTier:'low'}).tier, 'low');
 });

@@ -24,7 +24,7 @@
     "demos/corporate/gjh/v11/assets/furnishings.js": "72c203f2c0721b6bbbc20fdd2fdb58ee15783213e328a9d25efd1693998bef3c",
     "demos/corporate/gjh/v11/assets/gallery-east-shops.js": "15c9ad21de87d94ea5cd6cdb2604af5bf9507430dda85eddb1606cb5f50f25fc",
     "demos/corporate/gjh/v11/assets/gallery-west-shops.js": "b7dde3333e09c39b567661e1c364ea395cf3127c13f964c1ee1e4231e1150884",
-    "demos/corporate/gjh/v11/assets/graphics-quality.js": "afa9e394b6c82a256ec231b3b5eeee8cf086662e8e2da422084104be1a9d14ce",
+    "demos/corporate/gjh/v11/assets/graphics-quality.js": "c45c94d5991797912c8144ae715dc46afbb8aa8415b10334da053bd847170a58",
     "demos/corporate/gjh/v11/assets/hud-coordinator.js": "28d0d6f56a64c5b63c81379f3141f501080e49b19baf26e2ea1e4946803d52de",
     "demos/corporate/gjh/v11/assets/icons.js": "be9bbf0e92cd420c9d27cc5848210a19a7930cc52ffb9bff709161a0eceea19b",
     "demos/corporate/gjh/v11/assets/interaction-registry.js": "ee0f35d7cd2c4e34f75c7be25fa4739a799deaaeaba675cea633f915d2b5c811",
@@ -90,7 +90,7 @@
     "demos/corporate/gjh/v11/script.js": "61321d203f33c6103d004aba7f81a5f51d7e71fe9764d38bd0954db6b0c8bc85"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "5c2c89be0f1fb522b24f3ccc411735773a46de31c98e589131d57edc0b794160",
+    "demos/corporate/gjh/v11/script.bundle.js": "e0dbc6d144e3136083efa768267240baa9760456239fc6aa8945f5ac275da320",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "f39206237161e688bb2edc2ced04dd1f4fec47773f1b4a0abb5161761ce6f8a4",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "b37beb2939680775a01e2efe2e3c6afe1280a690df4a159f0eda4415a181ddb9",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "ac0af850b42b5bff1c73691f24dfa4c524fee580eb713a29a05e8b661180ada0"
