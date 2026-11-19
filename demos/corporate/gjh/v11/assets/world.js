@@ -26,6 +26,7 @@ import {interiorFloorColour,interiorStores,worldInteriorBox} from './interiors/c
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
+import {gogoStoolSeat} from './interiors/gogo-seats.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere} from './mall-atmosphere.js';
 
@@ -831,7 +832,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       plant(x - 3.8, -8.8, 1.15); plant(x + 3.8, -8.8, 1.15); plant(x + 3.8, -2.5);
       if (zone === 'gogo') {
         if (expanded) {
-          const {frame, anchor} = interiorStores.S03;
+          const {frame, anchor, gogoStools} = interiorStores.S03;
           const [standingX, standingZ] = anchor.standing;
           const [originX, originY, originZ] = frame.world_origin_m;
           art('gogo-logo.jpg',originX-2.213,originY+1.60,originZ+2.669,.49,anchor.yaw_deg*Math.PI/180);
@@ -844,13 +845,17 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
           collider(cx,.59,cz,1.55,1.18,3.25);
           for(let dz=-1.55;dz<1.61;dz+=.10) box('jadeAlt',cx-.79,.65,cz+dz,.045,.88,.045);
           for(let dx=-.73;dx<.77;dx+=.10) box('jadeAlt',cx+dx,.65,cz+1.64,.045,.88,.045);
-          for(const dz of [-1,0,1]) {
-            if (!furnishings.place('barStool',cx-1.22,cz+dz,1,1,0,Math.PI/2,activeShopSlot)) {
-              cylinder('brass',cx-1.22,.36,cz+dz,.042,.65);
-              cylinder('brass',cx-1.22,.06,cz+dz,.23,.065);
-              cylinder('seat',cx-1.22,.72,cz+dz,.22,.12);
+          for (const stool of gogoStools) {
+            const sx = originX+stool.position_m[0], sz = originZ+stool.position_m[2];
+            const [width,height,depth] = stool.envelope_whd_m;
+            const placed = furnishings.place('barStool',sx,sz,1,1,0,Math.PI/2,activeShopSlot);
+            if (!placed) {
+              cylinder('brass',sx,.36,sz,.042,.65);
+              cylinder('brass',sx,.06,sz,.23,.065);
+              cylinder('seat',sx,.72,sz,.22,.12);
             }
-            collider(cx-1.22,.52,cz+dz,.48,1.04,.48);
+            const pan = collider(sx,height/2,sz,width,height,depth);
+            seats.push(gogoStoolSeat(frame,stool,pan.handle,placed));
           }
         }
         for (let z = -9.5; z < -2; z += .38) box('oak', x - 4.61, 2.6, z, .08, 4.7, .055);

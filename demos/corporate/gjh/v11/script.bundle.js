@@ -1366,6 +1366,29 @@ function createUI(expanded = false) {
   const inspectButton = document.getElementById("inspect");
   const nearbyCard = inspectPrompt.querySelector(".nearby-card");
   const inspectVerb = document.getElementById("inspect-verb");
+  const cycleShopButton = document.createElement("button");
+  const seatedShopButton = document.createElement("button");
+  for (const button2 of [cycleShopButton, seatedShopButton]) {
+    button2.type = "button";
+    button2.hidden = true;
+    button2.className = "hud-control";
+    button2.style.minWidth = button2.style.minHeight = "44px";
+    inspectPrompt.append(button2);
+  }
+  cycleShopButton.textContent = "Next";
+  cycleShopButton.setAttribute("aria-label", "Select next nearby action");
+  cycleShopButton.setAttribute("aria-keyshortcuts", "] [");
+  cycleShopButton.title = "Cycle nearby actions with [ or ]";
+  let shopCycleListener;
+  cycleShopButton.addEventListener("click", () => {
+    shopCycleListener?.();
+    scene.focus({ preventScroll: true });
+  });
+  seatedShopButton.addEventListener("click", () => {
+    if (selectedInteraction?.shopAction?.seated)
+      inspectNearby(selectedInteraction.id);
+    scene.focus({ preventScroll: true });
+  });
   const hudText = new WeakMap;
   const hudLabels = new WeakMap;
   function setHudText(node, value) {
@@ -2116,8 +2139,12 @@ function createUI(expanded = false) {
     return true;
   }
   function inspectNearby(id) {
-    if (selectedInteraction?.id === id)
-      interactionRegistry?.dispatch(selectedInteraction);
+    if (selectedInteraction?.id === id && !dialog.open && !bag.open && !amenityPanel.dialog.open) {
+      const result = interactionRegistry?.dispatch(selectedInteraction);
+      if (selectedInteraction?.shopAction)
+        scene.focus({ preventScroll: true });
+      return result;
+    }
   }
   function showGuide() {
     if (!canUsePanels())
@@ -2332,6 +2359,9 @@ function createUI(expanded = false) {
   }
   document.getElementById("list-title").tabIndex = -1;
   return {
+    onShopCycle(listener) {
+      shopCycleListener = listener;
+    },
     setInteractionRegistry(registry2) {
       interactionRegistry = registry2;
       unsubscribeInteractions?.();
@@ -2527,6 +2557,9 @@ function createUI(expanded = false) {
       currentElevatorState = elevatorState;
       currentElevatorUpper = elevatorUpper;
       selectedInteraction = interaction;
+      const shopAction = interaction?.shopAction;
+      if (shopAction && !records.has(interaction.id))
+        records.set(interaction.id, { name: shopAction.name, action: "shop" });
       const next = records.has(nextNearby) ? nextNearby : null;
       if (next !== nearby) {
         nearby = next;
@@ -2559,14 +2592,33 @@ function createUI(expanded = false) {
         labelInspect(isBrandStory ? `Read the ${record.brand} brand story` : isMap ? expanded ? "Open the expanded mall map from the directory kiosk" : "Open the three-store map from the directory kiosk" : amenityAction ? `${amenityAction}: ${record.name}` : nearby ? `Inspect ${record.name}` : "Inspect nearby display");
       }
       seated = isSeated;
+      const shopState = shopAction && interactionRegistry?.shopState(interaction.id);
+      const executing = shopState?.phase === "executing";
+      const drawerOpen = shopAction?.productId && shopState?.phase === "done" && interactionRegistry.get("pickup", shopAction.productId);
+      const shopLabel = executing ? "Cancel" : drawerOpen ? "Pick up" : shopState?.phase === "cancelled" ? "Retry" : shopAction?.label;
+      const showCycle = !seated && Boolean(interactionRegistry?.canCycle());
+      if (cycleShopButton.hidden === showCycle)
+        cycleShopButton.hidden = !showCycle;
+      const showSeatedAction = seated && Boolean(shopAction?.seated);
+      if (seatedShopButton.hidden === showSeatedAction)
+        seatedShopButton.hidden = !showSeatedAction;
       document.body.classList.toggle("is-seated", seated);
       const cart = updateCartControls();
       const cartBlocksSeat = nearby && records.get(nearby).action === "seat" && cart.active;
       if (seated) {
         const pose = seatPhase === "align" ? "Aligning" : seatPhase === "sit" ? "Sitting down" : seatPhase === "stand" ? "Standing up" : "Seated";
-        setHudText(nearbyName, `${seatName || "Bench"} · ${pose}`);
+        setHudText(nearbyName, showSeatedAction && shopState.message || `${seatName || "Bench"} · ${pose}`);
         setHudText(inspectVerb, "Stand");
         labelInspect(seatPhase === "seated" ? "Stand up from bench" : "Cancel sitting and stand");
+        if (showSeatedAction) {
+          setHudText(seatedShopButton, shopLabel);
+          setHudAttribute(seatedShopButton, "aria-label", `${shopLabel}: ${shopAction.name}`);
+          setHudAttribute(seatedShopButton, "aria-keyshortcuts", "F");
+        }
+      } else if (shopAction) {
+        setHudText(nearbyName, shopState.message || shopAction.name);
+        setHudText(inspectVerb, shopLabel);
+        labelInspect(`${shopLabel}: ${shopAction.name}`);
       } else if (nearby && selectedInteraction?.kind === "sit") {
         setHudText(nearbyName, seatNotice || (cartBlocksSeat ? "Stow your cart from Bag before sitting" : `${records.get(nearby).name} · Sit here`));
         setHudText(inspectVerb, "Sit");
@@ -2604,6 +2656,13 @@ function createUI(expanded = false) {
       if (seatNotice)
         setHudText(nearbyName, seatNotice);
       const inspectHidden = !nearby && !seated;
+      if (shopAction && !seated) {
+        inspectButton.style.minWidth = inspectButton.style.minHeight = "44px";
+        setHudAttribute(inspectButton, "aria-keyshortcuts", "F");
+      } else if (inspectButton.style.minWidth) {
+        inspectButton.style.minWidth = inspectButton.style.minHeight = "";
+        setHudAttribute(inspectButton, "aria-keyshortcuts", "");
+      }
       if (inspectButton.hidden !== inspectHidden)
         inspectButton.hidden = inspectHidden;
       if (nearbyCard.hidden !== inspectHidden)
@@ -4886,11 +4945,82 @@ function isInFrontOfSeat(seat, { x, z }) {
 }
 
 // demos/corporate/gjh/v11/assets/interaction-registry.js
+function createInteractionState({ announce = () => {}, present = () => {} } = {}) {
+  const states = new Map;
+  const idle = Object.freeze({ phase: "idle", message: "" });
+  let focused = null, active = null, displayed = null, dirty = false;
+  const read = (id) => states.get(id) ?? idle;
+  function set(item, phase, message = "") {
+    states.set(item.id, { phase, message });
+    if (message)
+      announce(message);
+  }
+  function focus(item) {
+    if (focused === item)
+      return;
+    if (focused && read(focused.id).phase === "focused")
+      states.delete(focused.id);
+    focused = item;
+    dirty = true;
+    if (item && read(item.id).phase === "idle")
+      set(item, "focused");
+  }
+  function start(item) {
+    if (active)
+      return active.item === item && cancel();
+    active = { item, elapsed: 0 };
+    set(item, "executing", item.shopAction.progress);
+    return true;
+  }
+  function cancel() {
+    if (!active)
+      return false;
+    set(active.item, "cancelled", "Cancelled. Try again.");
+    active = null;
+    dirty = true;
+    return true;
+  }
+  function advance(zone, delta, reducedMotion2 = false) {
+    let changed = false;
+    if (active && active.item.shopAction.zone !== zone)
+      changed = cancel();
+    if (active) {
+      const { item } = active;
+      active.elapsed += delta;
+      const progress = reducedMotion2 || !item.shopAction.duration ? 1 : Math.min(1, active.elapsed / item.shopAction.duration);
+      present(item, progress);
+      displayed = item;
+      if (progress < 1)
+        return changed;
+      set(item, "done", item.shopAction.done);
+      active = null;
+      changed = true;
+    }
+    const resting = focused && focused.shopAction.zone === zone && read(focused.id).phase === "done" ? focused : null;
+    if (resting !== displayed) {
+      present(resting, 1);
+      displayed = resting;
+    }
+    dirty = false;
+    return changed;
+  }
+  return {
+    read,
+    focus,
+    start,
+    cancel,
+    advance,
+    get needsFrame() {
+      return Boolean(active || dirty);
+    }
+  };
+}
 function createInteractionRegistry(entries, describe = () => ({})) {
   const cache = new WeakMap;
   const actions2 = new Map;
   const listeners = new Set;
-  let selectionContext = {};
+  const candidates = [];
+  let selectionContext = {}, selected = null, cycled = null, shops = null;
   function normalize(source) {
     let item = cache.get(source);
     if (!item) {
@@ -4924,29 +5054,68 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     return actions2.get(kind)?.get(id) || null;
   }
   function nearest(position, context = {}) {
-    let selected = null, distance = Infinity;
+    let best = null, priority = Infinity, distance = Infinity;
     selectionContext = context;
-    if (context.travelling)
-      return { item: null, distance };
-    for (const source of entries) {
+    const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
+    candidates.length = 0;
+    function consider(source) {
       const item = normalize(source);
       const floor = typeof item.floor === "number" ? item.floor : item.y;
       if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
-        continue;
+        return;
       if (item.seat && !isInFrontOfSeat(item.seat, position))
-        continue;
-      const d = Math.hypot(position.x - item.anchor.x, position.z - item.anchor.z);
-      if (d < item.radius && d < distance) {
-        selected = item;
+        return;
+      const point2 = item.standing ?? item.anchor;
+      const d = item.shopAction?.seated && context.player?.seated ? 0 : Math.hypot(position.x - point2.x, position.z - point2.z);
+      if (d >= item.radius)
+        return;
+      if (shopEntries && (!context.player?.seated || item.shopAction?.seated))
+        candidates.push({ item, distance: d });
+      const rank = item.shopAction?.seated && context.player?.seated ? -1 : !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
+      if (!item.shopAction?.productId && (rank < priority || rank === priority && d < distance)) {
+        best = item;
+        priority = rank;
         distance = d;
       }
     }
-    return { item: selected, distance };
+    if (!context.travelling)
+      for (const source of entries)
+        consider(source);
+    if (shopEntries)
+      for (const source of shopEntries)
+        consider(source);
+    const chosen = cycled && candidates.find((candidate) => candidate.item === cycled);
+    if (!chosen)
+      cycled = null;
+    selected = chosen?.item ?? best;
+    shops?.state.focus(selected?.shopAction ? selected : null);
+    return { item: selected, distance: chosen?.distance ?? distance };
+  }
+  function cycle(direction) {
+    if (!canCycle())
+      return false;
+    const index = candidates.findIndex((candidate) => candidate.item === selected);
+    const next = index < 0 ? direction < 0 ? candidates.length - 1 : 0 : (index + direction + candidates.length) % candidates.length;
+    cycled = candidates[next].item;
+    return true;
+  }
+  function canCycle() {
+    return candidates.some(({ item }) => item.shopAction) && (candidates.length > 1 || candidates[0]?.item !== selected);
   }
   function dispatch(item, context = selectionContext) {
     if (!item || item.availability && !item.availability(context, item))
       return false;
-    const result = item.handler?.(item, context) ?? false;
+    let result;
+    if (item.shopAction) {
+      if (item !== selected)
+        return false;
+      const { productId } = item.shopAction;
+      const pickup = productId && get("pickup", productId);
+      if (pickup && shops.state.read(item.id).phase === "done")
+        return dispatch(pickup, context);
+      result = shops.state.start(item);
+    } else
+      result = item.handler?.(item, context) ?? false;
     if (result)
       for (const listener of listeners)
         listener(item, context);
@@ -4956,7 +5125,32 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     listeners.add(listener);
     return () => listeners.delete(listener);
   }
-  return { normalize, nearest, dispatch, register, get, subscribe };
+  return {
+    normalize,
+    nearest,
+    dispatch,
+    register,
+    get,
+    subscribe,
+    cycle,
+    canCycle,
+    installShopActions(targets, presentation) {
+      shops = { byZone: new Map, state: createInteractionState(presentation) };
+      for (const item of targets) {
+        const zone = item.shopAction.zone;
+        if (!shops.byZone.has(zone))
+          shops.byZone.set(zone, []);
+        shops.byZone.get(zone).push(item);
+      }
+    },
+    shopState: (id) => shops?.state.read(id),
+    productTarget(item) {
+      const id = item?.shopAction?.productId;
+      return id && shops?.state.read(item.id).phase === "done" ? id : item?.id ?? null;
+    },
+    advanceShopActions: (zone, delta, reducedMotion2) => shops?.state.needsFrame && shops.state.advance(zone, delta, reducedMotion2),
+    cancelShopAction: () => shops?.state.cancel()
+  };
 }
 
 // demos/corporate/gjh/v11/assets/ux-spatial-hud.js
@@ -5376,6 +5570,9 @@ var selectedInteraction = null;
 var interactionDistance = Infinity;
 var windowBlurred = false;
 var interactions;
+var shopActionsLoad;
+var shopActionsAttemptZone;
+var shopActionsTime;
 var lastPreloadUpdate = -Infinity;
 var initialPreloadStarted = null;
 var preloadSettled = !expanded;
@@ -5736,11 +5933,11 @@ function updateHUD() {
       updateHUD();
     }).catch((error) => console.error("Upper deck brand wall could not load:", error));
   }
-  const selection = interactions.nearest(p, { travelling: Boolean(p.elevatorTravel), player: p });
+  const selection = interactions.nearest(p, { travelling: Boolean(p.elevatorTravel), player: p, zone });
   selectedInteraction = selection.item;
   interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
-  productControl?.update(p, nearby);
+  productControl?.update(p, interactions.productTarget(selectedInteraction));
   shelfFocus?.setNearby(nearby);
   ui.update({ zone: currentZone, x: p.x, z: p.z, yaw: p.yaw, nearby, interaction: selectedInteraction, collectionActive: p.character.collection.active || p.productApproaching, isSeated: p.seated, seatPhase: p.seatPhase, seatName: p.seatName, elevatorState: elevator?.expanded ? elevator.state : null, elevatorUpper: elevator?.upper, hasHeldProduct: Boolean(productControl && p.character.physicalProduct.held) });
 }
@@ -5811,6 +6008,29 @@ function render(force = false) {
     const pose = player.state;
     const matrix = camera.matrixWorld.elements;
     const now = performance.now();
+    if (expanded && !startupOverlay.hidden)
+      shopActionsTime = undefined;
+    if (expanded && startupOverlay.hidden) {
+      if (!shopActionsLoad && ["newmoon", "mili", "gogo"].includes(currentZone) && shopActionsAttemptZone !== currentZone) {
+        shopActionsAttemptZone = currentZone;
+        shopActionsLoad = import("./assets/interiors/shop-interactions.js").then(({ installShopInteractions }) => {
+          if (!pageEnded && !fatal)
+            return installShopInteractions(three, world.scene, interactions, ui.announce);
+        }).then(() => {
+          if (!pageEnded && !fatal) {
+            updateHUD();
+            requestRender();
+          }
+        }).catch((error) => {
+          shopActionsLoad = null;
+          console.error("Shop actions unavailable:", error);
+        });
+      } else if (!shopActionsLoad && currentZone !== shopActionsAttemptZone)
+        shopActionsAttemptZone = undefined;
+      if (interactions.advanceShopActions(currentZone, Math.min(0.1, (now - (shopActionsTime ?? now)) / 1000), reducedMotion2.matches))
+        updateHUD();
+      shopActionsTime = now;
+    }
     mallHud.update({
       position: pose,
       zone: currentZone,
@@ -6187,22 +6407,46 @@ ui.onView((visual) => {
       updateHUD();
   }
 });
+ui.onShopCycle(() => {
+  if (interactions.cycle(1)) {
+    updateHUD();
+    requestRender();
+  }
+});
 document.addEventListener("keydown", (event) => {
-  if (event.code === "Escape" && !modes.paused()) {
+  if (modes.paused() || event.defaultPrevented)
+    return;
+  if (event.code === "Escape") {
+    if (interactions?.cancelShopAction()) {
+      event.preventDefault();
+      updateHUD();
+      requestRender();
+      return;
+    }
     if (player?.state.seated) {
       player.stand();
       updateHUD();
     }
     player?.cancelCollection();
   }
-  if (event.code === "KeyF" && nearby && !modes.paused() && !event.repeat && !event.altKey && !event.ctrlKey && !event.metaKey && (event.target === canvas || event.target === document.body)) {
+  if (event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.target !== canvas && event.target !== document.body)
+    return;
+  if (event.code === "BracketRight" || event.code === "BracketLeft") {
+    if (interactions?.cycle(event.code === "BracketRight" ? 1 : -1)) {
+      event.preventDefault();
+      updateHUD();
+      requestRender();
+    }
+  }
+  if (event.code === "KeyF" && nearby) {
     event.preventDefault();
     player.clearInput();
-    if (player.state.seated) {
+    if (player.state.seated && !selectedInteraction?.shopAction?.seated)
       player.stand();
-      updateHUD();
-    } else
+    else
       ui.inspectNearby(nearby);
+    updateHUD();
+    requestRender();
   }
 });
 window.addEventListener("blur", () => {
