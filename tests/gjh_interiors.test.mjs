@@ -73,7 +73,8 @@ test('interior programme pins 17 world frames, anchors, floor fields, palettes, 
     for (const [index,item] of props.entries()) {
       const spec = approved.props.find(p=>p.socket===item.socket);
       assert.deepEqual(store.props[index],{socket:item.socket,kind:spec.kind,name:spec.name,
-        position_m:item.xyz,envelope_whd_m:item.size,yaw_deg:item.yawDeg});
+        position_m:item.xyz,envelope_whd_m:item.size,yaw_deg:item.yawDeg,
+        ...(item.seat && {seat:item.seat})});
     }
   }
 });

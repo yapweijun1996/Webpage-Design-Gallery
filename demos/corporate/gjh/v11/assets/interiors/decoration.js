@@ -213,10 +213,8 @@ export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
     }
   }
   for (const prop of store.props) {
-    for (const position of prop.instance_positions_m ?? [prop.position_m]) {
-      fixture(prop,position);
-      yield;
-    }
+    fixture(prop,prop.position_m);
+    yield;
   }
   if (detail) {
     origin = [0,0,0]; yaw = 0;

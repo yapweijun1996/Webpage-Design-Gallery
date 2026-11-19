@@ -185,6 +185,59 @@
                 "reachDistance": {
                   "type": "number",
                   "exclusiveMinimum": 0
+                },
+                "seat": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "exitOffsetXZ": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "top": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "facing": {
+                      "type": "number"
+                    },
+                    "angleDeg": {
+                      "type": "number"
+                    },
+                    "accessible": {
+                      "type": "boolean"
+                    },
+                    "interactionRadius": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "capsuleRadius": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "exitOffsetXZ",
+                    "top",
+                    "facing",
+                    "angleDeg",
+                    "accessible",
+                    "interactionRadius",
+                    "capsuleRadius"
+                  ]
                 }
               },
               "required": [
@@ -234,6 +287,67 @@
           "focal": {
             "type": "string",
             "minLength": 1
+          },
+          "retainedObstacles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "xyz": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "size": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "socket": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "xyz",
+                "size"
+              ]
+            }
+          },
+          "teaNiches": {
+            "type": "object",
+            "properties": {
+              "wallX": {
+                "type": "number"
+              },
+              "crownY": {
+                "type": "number"
+              },
+              "radius": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "centresZ": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "required": [
+              "wallX",
+              "crownY",
+              "radius",
+              "centresZ"
+            ]
           }
         },
         "required": [

@@ -10,6 +10,8 @@ The [machine-readable programme](gjh-v11-interior-program.json) contains every p
 
 Edit the shop's `items` in the [programme](gjh-v11-interior-program.json). Each row is one placed instance. Its ID, support, local transform, outer dimensions, collision owner, tier representation, action list, accessible name, standing point and horizontal reach travel together. The GLB provenance manifest retains the hash of the original design used to author those assets. The projections used by the kit, four New Moon cabinets and MILI benches come from the current programme.
 
+Each New Moon tasting stool carries its seat ID, pose, clearance and exit offset in its item’s `seat` record. The MILI kitchen uses the `kitchen-run` retained obstacle for its footprint and collider. GOGO’s `teaNiches` positions are local to its shop frame.
+
 Run `python3 scripts/gjh_interiors/build_layout.py` before the four gallery generators. Node checks the [schema](gjh-v11-interior-program.schema.json), generated projections and measured kit budgets. Run `node scripts/gjh_interiors/sweep.mjs` for the slot-by-slot floor report. The offline grid tests a 0.28 m capsule and a 0.60 m aisle radius from the open doorway, checks a 0.75 m turning radius, and includes the 14 wing studios' original collision boxes. Horizontal reach is measured to the item envelope. Wall and suspended items use authored mounting surfaces. The three sample rooms also have an entrance sightline test. Final camera visibility, mesh contacts and input delivery require a browser walkthrough.
 
 | Sample | Entrance focus | Side operation and return |

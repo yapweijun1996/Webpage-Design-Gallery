@@ -3,7 +3,10 @@ import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {test} from 'node:test';
 import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
-import {loadInteriorActions} from '../demos/corporate/gjh/v11/assets/interiors/config.js';
+import {addOriginalShopDetails} from '../demos/corporate/gjh/v11/assets/shop-anchor-details-first.js';
+import {plannedSpaces} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
+import {spatial} from '../demos/corporate/gjh/v11/assets/spatial.js';
+import {interiorStores,loadInteriorActions} from '../demos/corporate/gjh/v11/assets/interiors/config.js';
 import {audit,capsule,distance,floorGrid,obstacles,programme,studioBoxes} from '../scripts/gjh_interiors/sweep.mjs';
 
 const plan=JSON.parse(readFileSync(programme));
@@ -135,5 +138,35 @@ test('New Moon validates the native GLB, scales all four cabinets and retains th
     assert(Math.abs(shelf.max.x-shelf.min.x-cabinet.size[0])<1e-7);
     assert.deepEqual([shelf.pickup.x,shelf.pickup.z],cabinet.standing.map((v,k)=>v+moon.frame.world_origin_m[k*2]));
     assert(display.reserveProduct(shelf.id));
+  }
+});
+
+test('world shop details build from the validated layout for every shop zone',()=>{
+  validate(plan,schema,'programme');
+  for (const store of [...spatial.stores,...plannedSpaces]) {
+    const {frame}=interiorStores['S'+store.number];
+    const seats=[], colliders=[], crowns=[];
+    const checkNumbers=(...args)=>args.filter(v=>typeof v!=='string').forEach(v=>assert(Number.isFinite(v)));
+    const tools={box:checkNumbers,cylinder:checkNumbers,seats,
+      solid(...args) { checkNumbers(...args); crowns.push(args.slice(2,5)); },
+      collider(...args) { checkNumbers(...args); return {handle:colliders.push(args)}; }
+    };
+    assert.doesNotThrow(()=>addOriginalShopDetails(store.id,frame.world_origin_m[0],tools),store.id);
+    if (store.id==='newmoon') {
+      assert.deepEqual(seats.map(seat=>seat.id),['newmoon-tasting-stool-1','newmoon-tasting-stool-2']);
+      for (const [index,seat] of seats.entries()) {
+        const z=-6+[2.71,1.42][index];
+        assert.deepEqual([seat.x,seat.y,seat.z],[-8.51,frame.floor_surface_y_m+.693,z]);
+        assert.deepEqual(seat.exit,{x:-8.51-.95,y:frame.floor_surface_y_m,z});
+        assert.deepEqual(seat.pose,{angle:Math.PI/2,facing:0});
+        assert.equal(seat.accessible,true);
+        assert.deepEqual(seat.clearance,{interactionRadius:.8,capsuleRadius:.3,colliderWidth:.54,colliderDepth:.54});
+        assert.deepEqual(colliders[seat.collider-1],[-8.51,.35,z,.54,.7,.54]);
+      }
+    } else if (store.id==='mili') {
+      assert.deepEqual(colliders,[[-4.27,.56,-5.13,.82,1.1,6.94]]);
+    } else if (store.id==='gogo') {
+      assert.deepEqual(crowns.filter((_,i)=>i%2===0),[-2.10,-4.13,-6.16].map(z=>[14.6,2.75,z]));
+    }
   }
 });

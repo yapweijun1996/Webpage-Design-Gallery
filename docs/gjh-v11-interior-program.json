@@ -1190,7 +1190,21 @@
             1.2,
             3.6
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "seat": {
+            "id": "newmoon-tasting-stool-1",
+            "name": "New Moon tasting stool 1",
+            "exitOffsetXZ": [
+              -0.95,
+              0
+            ],
+            "top": 0.693,
+            "facing": 0,
+            "angleDeg": 90,
+            "accessible": true,
+            "interactionRadius": 0.8,
+            "capsuleRadius": 0.3
+          }
         },
         {
           "id": "S01-stools12",
@@ -1230,7 +1244,21 @@
             0.7,
             2.1
           ],
-          "reachDistance": 1.65
+          "reachDistance": 1.65,
+          "seat": {
+            "id": "newmoon-tasting-stool-2",
+            "name": "New Moon tasting stool 2",
+            "exitOffsetXZ": [
+              -0.95,
+              0
+            ],
+            "top": 0.693,
+            "facing": 0,
+            "angleDeg": 90,
+            "accessible": true,
+            "interactionRadius": 0.8,
+            "capsuleRadius": 0.3
+          }
         },
         {
           "id": "S01-pend1",
@@ -2754,7 +2782,8 @@
             0.82,
             1.1,
             6.94
-          ]
+          ],
+          "socket": "kitchen-run"
         },
         {
           "xyz": [
@@ -4091,7 +4120,17 @@
         }
       ],
       "focal": "S03-focal",
-      "centreFixture": "open floor"
+      "centreFixture": "open floor",
+      "teaNiches": {
+        "wallX": 4.6,
+        "crownY": 2.75,
+        "radius": 0.87,
+        "centresZ": [
+          3.9,
+          1.87,
+          -0.16
+        ]
+      }
     },
     {
       "id": "S04",

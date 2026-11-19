@@ -19,14 +19,22 @@ def project(shop):
     for spec in shop['props']:
         for item in items:
             if item['socket'] == spec['socket']:
-                props.append(dict(name=spec['name'], socket=spec['socket'], kind=spec['kind'],
-                                  **placement(item)))
+                prop = dict(name=spec['name'], socket=spec['socket'], kind=spec['kind'], **placement(item))
+                if 'seat' in item:
+                    prop['seat'] = item['seat']
+                props.append(prop)
     colliders = []
     for item in items:
         if item['collision'] == 'kit':
             x, y, z = item['xyz']
             colliders.append(dict(center=[x, y+item['size'][1]/2, z], size=item['size'], yaw=item['yawDeg']))
-    return dict(**{key:shop[key] for key in ('brand','style','concept','signature_family','frame','palette','floor','capture')},
+    details = {}
+    for obstacle in shop.get('retainedObstacles', []):
+        if obstacle.get('socket') == 'kitchen-run':
+            details['kitchenRun'] = obstacle
+    if 'teaNiches' in shop:
+        details['teaNiches'] = shop['teaNiches']
+    return dict(**details, **{key:shop[key] for key in ('brand','style','concept','signature_family','frame','palette','floor','capture')},
                 lighting=shop['lighting']['position_m'], accent_kelvin=shop['lighting']['accent_kelvin'],
                 centreFixture=shop.get('centreFixture'), props=props, anchor=dict(asset_id=focal['modelId'], **placement(focal)),
                 routes=shop['additional_clearance_segments'], pickups=[item['standing'] for item in items if item['socket']=='shelves'],
