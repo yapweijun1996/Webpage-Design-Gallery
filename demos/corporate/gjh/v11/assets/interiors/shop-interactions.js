@@ -1,7 +1,11 @@
 import {loadInteriorActions, interiorStores, worldInteriorBox} from './config.js';
 import {mergeStaticGeometries} from '../merge-static-geometries.js';
 
-export const interactiveShopSlots = Object.freeze({newmoon: 'S01', mili: 'S02', gogo: 'S03'});
+import {plannedSpaces} from '../expanded-layout.js';
+import {createShowroomFeedback} from './showroom-feedback.js';
+
+export const interactiveShopSlots = Object.freeze({newmoon: 'S01', mili: 'S02', gogo: 'S03',
+  ...Object.fromEntries(plannedSpaces.map(({id,number}) => [id,'S'+number]))});
 const shopsBySlot = Object.fromEntries(Object.entries(interactiveShopSlots).map(([zone, slot]) => [slot, zone]));
 
 const tea = {effect:'tea', label:'Pour tea', progress:'Pouring tea…', done:'Tea served.'};
@@ -19,6 +23,23 @@ const concreteActions = {
   'S03-fern3': water
 };
 
+const showroomEffects = {
+  'S04-focal':'leaf', 'S04-backright':'water',
+  'S05-focal':'drawer', 'S05-leftmid':'open',
+  'S06-focal':'spin', 'S06-onleft':'plate',
+  'S07-focal':'sample', 'S07-onleft':'plate',
+  'S08-focal':'lid', 'S08-onleft':'spread',
+  'S09-focal':'press', 'S09-onleft':'scan',
+  'S10-focal':'pearl', 'S10-backright':'water',
+  'S11-focal':'unbox', 'S11-onleft':'meter',
+  'S12-focal':'pair', 'S12-backright':'water',
+  'S13-focal':'listen', 'S13-onleft':'listen', 'S13-leftfront':'mute',
+  'S14-focal':'try', 'S14-backleft':'open',
+  'S15-focal':'play', 'S15-leftfront':'play', 'S15-pianoback':'mute',
+  'S16-focal':'torch', 'S16-leftfront':'meter',
+  'S17-handset':'ring', 'S17-onleft':'press'
+};
+
 function point(shop, xyz, yaw = 0) {
   return worldInteriorBox(shop, {center:xyz, yaw}).center;
 }
@@ -32,6 +53,8 @@ export function createShopInteractionTarget(slot, shop, item) {
   const name = item.a11y.en;
   const action = productId ? {
     effect:'drawer', label:'Open drawer', progress:'Opening drawer…', done:'Drawer open.'
+  } : item.a11y.action ? {
+    effect:showroomEffects[item.id], label:item.a11y.action, progress:item.a11y.action + '…', done:item.a11y.result
   } : concreteActions[item.id];
   const seated = action?.seated;
   return {id:item.id, kind:'shop', x, y, z, floor, standing:{x:sx,z:sz},
@@ -53,8 +76,9 @@ export async function buildShopInteractionTargets(slots = Object.keys(interiorSt
 export async function installShopInteractions(T, scene, registry, announce) {
   const targets = await buildShopInteractionTargets(Object.values(interactiveShopSlots));
   // Existing seats retain their collision checks, stand behaviour and original IDs.
-  const nearby = targets.filter(target => !target.shopAction.seat);
-  registry.installShopActions(nearby, {announce, present:createShopActionVisual(T,scene,targets)});
+  const nearby = targets.filter(target => !target.shopAction.seat &&
+    (!target.shopAction.zone.startsWith('planned-space-') || target.shopAction.effect));
+  registry.installShopActions(nearby, {announce, ...createShopActionVisual(T,scene,targets)});
   return nearby;
 }
 
@@ -107,7 +131,8 @@ function createShopActionVisual(T, scene, targets) {
     mesh.scale.set(...size);
     mesh.visible = true;
   }
-  return (target,t) => {
+  const showroom = createShowroomFeedback(T,makeShape,merge);
+  function present(target,t) {
     if (mesh) mesh.visible = false;
     const action = target?.shopAction;
     if (!action?.effect) return;
@@ -116,6 +141,7 @@ function createShopActionVisual(T, scene, targets) {
     const yaw = (shop.frame.yaw_world_deg + item.yawDeg) * Math.PI/180;
     const peak = Math.sin(Math.PI*t);
     const relative = (source,dx,dy,dz) => point(shop,[source.xyz[0]+dx,source.xyz[1]+dy,source.xyz[2]+dz]);
+    if (item.a11y.action) return showroom.present(target,t,draw);
     if (effect === 'drawer') {
       draw(relative(item,0,.54,item.size[2]/2-.12+.2*t),yaw,'drawer',0x84523b,[item.size[0]*.7,.19,.30]);
     } else if (effect === 'bell') {
@@ -137,5 +163,6 @@ function createShopActionVisual(T, scene, targets) {
       draw(relative(cup,isTea?0:-.29,isTea?.06:.09,isTea?0:.28),yaw,'disc',
         isTea?0x9c5734:0xe8a746,[.11,.06+.10*t,.11]);
     }
-  };
+  }
+  return {begin:showroom.begin, present};
 }

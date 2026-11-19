@@ -46,6 +46,7 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
   const point = new T.Vector3(), offset = new T.Vector3(), shelfPoint = new T.Vector3();
   const rotation = new T.Quaternion(), shelfRotation = new T.Quaternion(), carryRotation = new T.Quaternion();
   const bagScale = new T.Vector3();
+  const pickupOrigin = new T.Vector3(), pickupRotation = new T.Quaternion();
   let item = null, phase = 'empty', elapsed = 0, centerHeight = 0, firstPerson = false;
 
   function presentHand() { eyeHand?.show(firstPerson && (phase === 'held' || phase === 'bag')); }
@@ -73,6 +74,31 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
     elapsed = 0;
     presentHand();
   }
+  function releaseToFloor(spawn) {
+    if (phase !== 'held') return false;
+    const token = item, height = centerHeight;
+    // The first-person hand is a camera viewmodel. Use the world-space grip.
+    if (!spawn(token, worldCarry(), (center, orientation, halfHeight) => {
+      if (item) return false;
+      item = token;
+      centerHeight = height;
+      const base = pickupOrigin.set(0, -halfHeight, 0).applyQuaternion(orientation).add(center);
+      token.owner.worldToLocal(base);
+      token.owner.getWorldQuaternion(pickupRotation).invert().multiply(orientation);
+      token.owner.add(token.prop);
+      token.prop.position.copy(base);
+      token.prop.quaternion.copy(pickupRotation);
+      phase = 'pickup';
+      elapsed = 0;
+      return true;
+    })) return false;
+    token.prop.removeFromParent();
+    item = null;
+    phase = 'empty';
+    elapsed = 0;
+    presentHand();
+    return true;
+  }
   return {
     setFirstPerson(value) {
       firstPerson = value;
@@ -82,9 +108,12 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
     pick(token) {
       if (item || !token) return false;
       eyeHand?.prepare();
+      token.onPickup?.();
       item = token;
       item.owner = item.prop.parent;
       shelfRotation.copy(item.prop.quaternion);
+      pickupOrigin.copy(item.origin);
+      pickupRotation.copy(shelfRotation);
       centerHeight = (item.centerY ?? 0) * item.prop.getWorldScale(offset).y;
       phase = 'pickup';
       elapsed = -(token.approachDelay || 0);
@@ -121,7 +150,7 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
       }
       const t = T.MathUtils.clamp(elapsed / .9, 0, 1);
       const reach = phase === 'pickup' ? Math.min(1, t/.3)*(1-Math.max(0, (t-.3)/.7)) : Math.min(1, t/.7);
-      shelfPoint.copy(item.origin);
+      shelfPoint.copy(phase === 'pickup' ? pickupOrigin : item.origin);
       shelfPoint.y += .06;
       shelfPoint.z += .04;
       out.lerp(item.owner.localToWorld(shelfPoint), reach);
@@ -145,12 +174,18 @@ export function createProductTransfer(T, avatar, hand = avatar.getObjectByName('
       const contact = phase === 'pickup' ? T.MathUtils.smoothstep(t, .3, .45) :
         1 - T.MathUtils.smoothstep(t, .7, 1);
       const localGrip = item.owner.worldToLocal(worldCarry());
-      item.prop.position.lerpVectors(item.origin, localGrip, contact);
+      const pickup = phase === 'pickup';
+      item.prop.position.lerpVectors(pickup ? pickupOrigin : item.origin, localGrip, contact);
       item.owner.getWorldQuaternion(carryRotation).invert().multiply(facing.getWorldQuaternion(rotation));
-      item.prop.quaternion.slerpQuaternions(shelfRotation, carryRotation, contact);
+      item.prop.quaternion.slerpQuaternions(pickup ? pickupRotation : shelfRotation, carryRotation, contact);
       if (t === 1) {
         if (phase === 'return') reset();
-        else { phase = 'held'; hold(); presentHand(); }
+        else {
+          phase = 'held';
+          hold();
+          presentHand();
+          item.onHeld?.({id: item.id, releaseToFloor});
+        }
       }
     },
     get phase() { return phase; },

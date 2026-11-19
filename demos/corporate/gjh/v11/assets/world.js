@@ -1,3 +1,4 @@
+import {registerPhysicsProps} from './physics-props.js';
 import {addTramDebug} from './tram-layout.js';
 import {buildRestrooms} from './restrooms.js';
 import {miliExhibit} from './mili-exhibit.js';
@@ -1424,6 +1425,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
+  reserveProduct = registerPhysicsProps(T, R, physics, {
+    scene, interactables, reserveProduct, expanded, phone, prepareModel, interiors: interiorKit
+  });
   return {signage, defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
