@@ -34,9 +34,10 @@ test('availability and seat approach determine selection and dispatch', () => {
   let available = false, calls = 0;
   const registry = createInteractionRegistry([
     {id:'restricted',x:.1,z:0,radius:1,availability:()=>available,handler:()=>++calls},
-    {id:'seat',x:.2,z:0,radius:1,seat:{z:1,facing:1}},
+    {id:'seat',x:.2,z:0,radius:1,seat:{z:1,facing:1,frontEdge:.37}},
   ]);
   assert.equal(registry.nearest(position).item.id, 'seat');
+  assert.equal(registry.nearest({x:0,y:0,z:.7}).item, null);
   const restricted = registry.normalize({id:'restricted',x:0,z:0,radius:1,availability:()=>available,handler:()=>++calls});
   assert.equal(registry.dispatch(restricted), false);
   available = true;

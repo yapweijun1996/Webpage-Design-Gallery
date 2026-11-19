@@ -4,6 +4,7 @@ import {createPushCart} from './push-cart.js';
 import {disposeVisitorScene, loadVisitorGLTF} from './visitor-gltf.js';
 import {createProductTransfer} from './visitor-v2-contact.js';
 import {createVisitorLOD} from './visitor-v2-lod.js';
+import {createSeatContact} from './seat-contact.js';
 
 const model = 'gjh-tripo-visitor';
 const asset = `assets/${model}.glb`;
@@ -108,6 +109,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     }
     mixer.setTime(.5);
     const poses = createTripoPoses(T, mesh, visual, Boolean(sitAction));
+    const seatContact = createSeatContact(T, visual, placement, {tripo:true, prefix:hips.name.slice(0, -4)});
     if (sitAction) {
       sitAction.setEffectiveWeight(0).play();
       sitAction.paused = true;
@@ -179,7 +181,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       poses.gripProduct(target, pole, palm.lerp(target, .3), eye, waveWeight);
       transfer.update(dt, reducedMotion.matches);
     }
-    function update(actual, dt, requested = actual, sprintRate = 1) {
+    function update(actual, dt, requested = actual, sprintRate = 1, seat) {
       if (disposed) return;
       const movement = resolveLocomotion(actual, requested, dt);
       if (movement !== animation) {
@@ -226,12 +228,14 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       }
       // Mixer bindings can skip unchanged samples, especially in reduced motion.
       // Restore the animated base before applying a procedural pose again.
+      seatContact.restore();
       poses.restore();
       mixer.update(dt);
       if (seatWeight > 0 || pushing || transfer.phase !== 'empty') poses.save();
       if (seatWeight > 0) {
-        if (sitAction) poses.groundBoots(sitBlend);
-        else poses.sit(seatWeight);
+        if (!sitAction) poses.sit(seatWeight);
+        if (seat) seatContact.apply(seat, seatWeight);
+        else if (sitAction) poses.groundBoots(sitBlend);
       }
       if (transfer.phase !== 'empty') updateProduct(dt, emoteWeight);
       if (!pushing) { hasPrevious = false; return; }

@@ -5790,18 +5790,35 @@ function createInteriorKit(T, scene, {
 import { releaseStartupAssetPack } from "./startup-asset-pack.js";
 
 // demos/corporate/gjh/v11/assets/seat-placements.js
+var benchScale = 0.8;
+var loungeBench = {
+  size: INTERIOR_PILOT.bench.dimensions_m,
+  top: 0.635,
+  flatFront: -0.381,
+  front: -0.456,
+  backrestFront: 0.213
+};
+var groundBenchFallback = {
+  size: [2.58, 1.3175, 0.925],
+  top: 0.65,
+  flatFront: -0.45,
+  front: -0.45,
+  backrestFront: 0.26
+};
+var deckBenchFallback = {
+  size: [2.34, 1.09, 0.785],
+  top: 0.508,
+  flatFront: -0.38,
+  front: -0.38,
+  backrestFront: 0.2
+};
 function createSeatPlacements(expanded) {
   const placements = [];
   const add = (group, x, z, facing = 1, name = null, floor = 0, accessible = true) => {
     const index = placements.length;
     const id = index === 0 ? "courtyard-seat" : `bench-seat-${index + 1}`;
-    const anchor = { x, y: floor + 0.015, z: z - 0.23 * facing };
     const exit = { x, y: floor, z: z - 1.2 * facing };
-    const pose = {
-      facing,
-      angle: facing === 1 ? 0 : Math.PI,
-      cameraOffset: z < 0 ? (index % 2 === 0 ? -Math.PI / 2 : Math.PI / 2) * facing : 0.45
-    };
+    const pose = { facing, angle: facing === 1 ? 0 : Math.PI };
     const clearance = {
       interactionRadius: 1.65,
       capsuleRadius: 0.3,
@@ -5816,9 +5833,7 @@ function createSeatPlacements(expanded) {
       z,
       facing,
       floor,
-      cameraOffset: pose.cameraOffset,
       accessible,
-      anchor,
       exit,
       pose,
       clearance
@@ -5846,8 +5861,15 @@ function createSeatPlacements(expanded) {
   }
   return placements;
 }
-function createSeatAnchor(placement, collider) {
-  const { id, name, floor, anchor, exit, pose, clearance, accessible } = placement;
+function createSeatAnchor(placement, collider, profile2 = loungeBench, scale = benchScale, footY = placement.floor) {
+  const { id, name, x, z, floor, exit, pose, clearance, accessible } = placement;
+  const centre = (profile2.flatFront + profile2.backrestFront) / 2;
+  const anchor = { x, y: floor + profile2.top * scale, z: z + centre * pose.facing };
+  const [width, height, depth] = profile2.size;
+  const bounds = {
+    min: { x: x - width / 2, y: floor, z: z - depth / 2 },
+    max: { x: x + width / 2, y: floor + height * scale, z: z + depth / 2 }
+  };
   return {
     id,
     name,
@@ -5859,11 +5881,13 @@ function createSeatAnchor(placement, collider) {
     floor,
     facing: pose.facing,
     angle: pose.angle,
-    cameraOffset: pose.cameraOffset,
     collider,
+    footY,
+    frontEdge: centre - profile2.front,
     anchor,
     exit,
     pose,
+    bounds,
     clearance,
     accessible
   };
@@ -6094,14 +6118,16 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       collider(x, 0.4, z, 0.85, 0.8, 0.85);
       shadow(x, z, 2.1, 2.1);
     }, bench = function(placement) {
-      const { x, z, facing } = placement;
-      const seatScale2 = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
-      const seatCollider = collider(x, 0.3 * seatScale2, z, placement.clearance.colliderWidth, 0.4 * seatScale2, placement.clearance.colliderDepth);
-      seats.push(createSeatAnchor(placement, seatCollider.handle));
-      const benchBox = (m, bx, by, bz, sx, sy, sz) => box(m, bx, by * seatScale2, bz, sx, sy * seatScale2, sz);
-      if (!furnishings.place("bench", x, z, seatScale2, facing, 0, null, activeShopSlot)) {
+      const { x, z, facing, group } = placement;
+      const modelPlaced = furnishings.place("bench", x, z, benchScale, facing, 0, placement.pose.angle, activeShopSlot);
+      const seatCollider = collider(x, 0.3 * benchScale, z, placement.clearance.colliderWidth, 0.4 * benchScale, placement.clearance.colliderDepth);
+      const footY = group === "atrium" ? expanded ? 0.016 : 0 : expanded ? 0.0245 : 0.015;
+      seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : groundBenchFallback, benchScale, footY));
+      const benchBox = (m, bx, by, bz, sx, sy, sz) => box(m, bx, by * benchScale, bz, sx, sy * benchScale, sz);
+      if (!modelPlaced) {
+        const { top, front } = groundBenchFallback;
         benchBox("wood", x, 0.3, z, 2.5, 0.4, 0.85);
-        benchBox("seat", x, 0.56, z, 2.55, 0.18, 0.9);
+        benchBox("seat", x, top - 0.09, z, 2.55, 0.18, -2 * front);
         benchBox("seat", x, 0.94, z + facing * 0.35, 2.55, 0.7, 0.18);
         benchBox("brass", x, 0.47, z - facing * 0.451, 2.52, 0.035, 0.025);
         benchBox("oak", x, 1.285, z + facing * 0.35, 2.58, 0.065, 0.21);
@@ -7022,15 +7048,17 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       activeDeck = true;
       const deckBench = (placement) => {
         const { x, z, facing } = placement;
-        if (!furnishings.place("bench", x, z, 0.8, facing, liftLayout.upper, null, -1)) {
+        const modelPlaced = furnishings.place("bench", x, z, benchScale, facing, liftLayout.upper, placement.pose.angle, -1);
+        if (!modelPlaced) {
+          const { top, front } = deckBenchFallback;
           box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
-          box("seat", x, liftLayout.upper + 0.49, z, 2.34, 0.18, 0.76);
+          box("seat", x, liftLayout.upper + top - 0.09, z, 2.34, 0.18, -2 * front);
           box("seat", x, liftLayout.upper + 0.82, z + facing * 0.28, 2.34, 0.54, 0.16);
           box("brass", x, liftLayout.upper + 0.44, z - facing * 0.38, 2.32, 0.025, 0.025);
         }
         const seatCollider = collider(x, liftLayout.upper + 0.26, z, placement.clearance.colliderWidth, 0.5, placement.clearance.colliderDepth);
         if (placement.accessible !== false)
-          seats.push(createSeatAnchor(placement, seatCollider.handle));
+          seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : deckBenchFallback, modelPlaced ? benchScale : 1));
       };
       for (const placement of seatPlacements.filter((item) => item.group === "deck"))
         deckBench(placement);
@@ -7153,8 +7181,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
       prepareModel(meshes, { hide: true, late: false, priority }).catch(() => {});
     }
-    const benchSize = furnishingState.bench.dimensions, seatScale = new URLSearchParams(location.search).get("visitor") !== "v1" ? 0.8 : 1;
-    const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.filter((seat) => seat.floor === 0).map((seat) => ({ min: { x: seat.x - benchSize[0] / 2, y: 0, z: seat.z + 0.23 * seat.facing - benchSize[2] / 2 }, max: { x: seat.x + benchSize[0] / 2, y: benchSize[1] * seatScale, z: seat.z + 0.23 * seat.facing + benchSize[2] / 2 } })));
+    const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let brandWallPromise = null;
     return { signage, interiors: interiorKit, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
