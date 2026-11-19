@@ -66,17 +66,37 @@ if (typeof document !== 'undefined') {
   const steps = [...document.querySelectorAll('.app-loader-steps li')];
   const retry = document.getElementById('loader-retry');
   const enterNow = document.getElementById('loader-enter-now');
+  const motion = document.getElementById('loader-motion');
+  const directory = document.getElementById('loader-directory');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const detailsStep = steps.find(step => step.dataset.stage === 'warm');
-  let fadeTimer, restoreFocus = false;
+  let fadeTimer, restoreFocus = false, previousStatus, previousStep;
+  const motionKey = 'gjh-v11-loader-motion-paused';
+  let userPaused = false;
+  try { userPaused = sessionStorage.getItem(motionKey) === 'true'; } catch { /* Use this page's preference. */ }
+  function renderMotion(value) {
+    overlay.toggleAttribute('data-pending-motion', !value.failed && !value.ready && !value.dismissed && !value.contextLost);
+    overlay.toggleAttribute('data-motion-paused', Boolean(userPaused || value.hidden || value.contextLost || value.failed));
+    const hidden = reduced.matches || Boolean(value.failed);
+    if (hidden && document.activeElement === motion) (value.failed ? retry : directory).focus({preventScroll:true});
+    motion.hidden = hidden;
+  }
+  function motionLabel() {
+    motion.textContent = userPaused ? 'Resume motion' : 'Pause motion';
+  }
   function renderText(value) {
     const labels = loaderLabels(value, document.documentElement.lang);
-    if (status.textContent !== labels.status) status.textContent = labels.status;
-    if (detailsStep.textContent !== labels.lastStep) detailsStep.textContent = labels.lastStep;
+    if (previousStatus !== labels.status) {
+      status.textContent = labels.status;
+      previousStatus = labels.status;
+    }
+    if (previousStep !== labels.lastStep) {
+      detailsStep.textContent = labels.lastStep;
+      previousStep = labels.lastStep;
+    }
   }
   const state = createLoaderState(value => {
     renderText(value);
-    overlay.toggleAttribute('data-motion-paused', Boolean(value.hidden || value.contextLost || value.failed));
     overlay.toggleAttribute('data-failed', Boolean(value.failed));
     if (overlay.dataset.completed !== String(value.completed)) {
       progress.max = value.total;
@@ -92,6 +112,7 @@ if (typeof document !== 'undefined') {
     // Hiding Enter now can move focus to the body before the fade completes.
     if (value.ready && overlay.contains(document.activeElement)) restoreFocus = true;
     retry.hidden = !value.failed;
+    renderMotion(value);
     enterNow.hidden = !value.preparing || Boolean(value.failed);
     if (value.dismissed) {
       clearTimeout(fadeTimer);
@@ -104,18 +125,26 @@ if (typeof document !== 'undefined') {
         if (overlay.contains(active) || (restoreFocus && active === document.body))
           (document.querySelector('#experience:not([hidden]) #scene') || document.getElementById('store-list')).focus({preventScroll: true});
         overlay.hidden = true;
-      }, value.immediate || reduced.matches ? 0 : 250);
+      }, value.immediate || reduced.matches || userPaused ? 0 : 250);
     } else if (!overlay.hidden) {
       clearTimeout(fadeTimer);
       overlay.classList.remove('is-fading');
     }
   });
   state.visibility(document.hidden);
+  motionLabel();
+  motion.addEventListener('click', () => {
+    userPaused = !userPaused;
+    try { sessionStorage.setItem(motionKey, String(userPaused)); } catch { /* Use this page's preference. */ }
+    motionLabel();
+    renderMotion(state.snapshot());
+  });
+  reduced.addEventListener('change', () => renderMotion(state.snapshot()));
   new MutationObserver(() => renderText(state.snapshot())).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', () => state.visibility(document.hidden));
   retry.addEventListener('click', () => location.reload());
   enterNow.addEventListener('click', () => state.enterNow());
-  document.getElementById('loader-directory').addEventListener('click', () => {
+  directory.addEventListener('click', () => {
     state.dismiss();
     document.getElementById('store-list').focus({preventScroll: true});
   });

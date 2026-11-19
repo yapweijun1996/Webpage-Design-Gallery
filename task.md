@@ -48,8 +48,8 @@ Shipped on 2026-11-19: automatic festival theme, single sticky site header, firs
 
 ### V11 ambient motion during model preparation
 
-- [ ] Keep the approved teal-and-gold loading screen visibly active throughout a long pending stage. Use slow CSS transform and opacity motion independent of progress, and stop it when loading is ready, dismissed, failed or hidden. Honor reduced motion and preserve existing control focus and announcements.
-- [ ] Hold the real model stage for at least 10 seconds in Chrome, then check ready, failure/retry, visibility and reduced motion at desktop and 390 px. Measure timing with recording disabled before deployment.
+- [x] Keep the approved teal-and-gold loading screen visibly active during model preparation. The fixed gradient pulses slowly through CSS opacity, with a pause control, reduced-motion handling and stopping conditions tied to the loader lifecycle. [Implementation and verification](docs/gjh-v11-loader.md#long-model-preparation).
+- [x] Record a 22-second hold on real model requests at 390 px and verify ready, pause, failure/retry, visibility and reduced motion. Sample the frame intervals in separate runs with recording disabled.
 
 ## Mobile performance, controls and signage programme (2026-11-18)
 

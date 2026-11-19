@@ -72,6 +72,7 @@
     <div class="app-loader-card">
       <p class="app-loader-kicker">GJH Virtual Mall</p>
       <h2>Everyday, <em>explored.</em></h2>
+      <div class="app-loader-art" aria-hidden="true">
       <svg class="app-loader-atrium" viewBox="0 0 400 318" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id="loader-stone" x2="0%" y2="100%">
@@ -127,6 +128,8 @@
           <path d="M184 46c-31 5-62 31-76 54m108-54c31 5 62 31 76 54" opacity=".7"/>
         </g>
       </svg>
+        <span class="app-loader-ambient"></span>
+      </div>
       <div class="app-loader-progress">
         <div class="app-loader-progress-head"><strong id="loader-status" role="status" aria-live="polite">Preparing the mall…</strong><span id="loader-count" aria-hidden="true">0 / 5</span></div>
         <div class="app-loader-bar" aria-hidden="true"><i id="loader-fill"></i></div>
@@ -144,7 +147,10 @@
         <a id="loader-directory" href="#store-list">Browse the store directory <span data-icon="arrow-right" aria-hidden="true"></span></a>
         <button id="loader-retry" type="button" hidden>Retry 3D mall</button>
       </div>
-      <p class="app-loader-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
+      <div class="app-loader-footer">
+        <p class="app-loader-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
+        <button class="app-loader-motion" id="loader-motion" type="button" hidden>Pause motion</button>
+      </div>
     </div>
   </section>
   <noscript><style>#app-loader,#arrival-walk,.site-enter,.site-settings{display:none!important}</style></noscript>

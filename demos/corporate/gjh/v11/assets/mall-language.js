@@ -2,6 +2,8 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ['Pause motion','暂停动画','Jeda animasi'],
+  ['Resume motion','继续动画','Sambung animasi'],
   ['Objectives','目标','Objektif'],
   ['Visit three stores','参观三家商店','Lawati tiga kedai'],
   ['Inspect a product','查看一件商品','Periksa satu produk'],
