@@ -48,7 +48,9 @@ export function tramCaptionIndex(distance) {
 }
 
 export function tramEnabled(expanded, search) {
-  return expanded && new URLSearchParams(search).get('tram') === '1';
+  // On by default in the expanded mall (owner decision, 2026-11-20); ?tram=0 turns it off.
+  const flag = new URLSearchParams(search).get('tram');
+  return expanded && flag !== '0' && flag !== 'off';
 }
 
 export function tramBoardReason(player) {

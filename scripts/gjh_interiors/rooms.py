@@ -2,7 +2,9 @@
 from math import cos, pi, radians, sin, tau
 
 from mesh import CRAFT, PRINT, PULSE, SCROLL, Room, library_profile, logo
+from borsch_packs import add_borsch_lingzhi_pair, add_borsch_patch_pack
 from mili_mock_duck import add_mili_mock_duck
+from pzh_carton import add_pzh_carton
 
 GOLD, BONE, INK = "d7a95b", "f6ecd2", "203545"
 MINT, RED, SEA = "70cdb9", "c34339", "357675"
@@ -126,14 +128,10 @@ def borsch(r,_):
         x=-2.25+i*1.95
         r.ring(x,3.97,-1.6,.55,.21,.055,"c5dc77",PRINT,True)
     placard(r,2.7,2.13,-4.97,.94,"765285")
-    # Unprinted carton, pouch and sticker sheet on the original folio ledge.
-    r.box(-.89,1.283,-.23,.20,.26,.075,"dbc9a3")
-    r.box(-.89,1.301,-.187,.17,.053,.009,"7b9457")
-    r.box(-.59,1.202,-.205,.16,.115,.023,"b88e7d")
-    r.box(-.59,1.232,-.191,.16,.013,.007,"eee1bf")
-    r.box(-.36,1.168,-.22,.14,.022,.12,"fff5d4")
-    for x in (-.398,-.36,-.322):
-        r.lathe(x,1.180,-.218,.013,.004,((1,0),(1,1)),["c88b5c"],8)
+    add_borsch_patch_pack(r.batches[CRAFT])
+    # The shallow shelf reaches the cabinet from the existing right-wall stance.
+    r.box(3.736,1.452,-.55,.22,.036,.32,"d6c5af")
+    add_borsch_lingzhi_pair(r.batches[CRAFT],3.707,1.470,-.55,yaw=-pi/2)
 
 
 def herbal(r,profiles):
@@ -146,6 +144,7 @@ def herbal(r,profiles):
             r.ring(x+dx,r.floor,z+dz,rx,rz,.044,GOLD,PRINT,True,pi,2*pi,10)
         r.ribbon([(x-.44,r.floor,z),(x-.23,r.floor,z+.12),(x+.30,r.floor,z+.12)],
                  .041,GOLD,PRINT,True)
+    add_pzh_carton(r.batches[CRAFT], x=.54, y=1.2475, z=-.36)
 
 
 def wheel(r,_):

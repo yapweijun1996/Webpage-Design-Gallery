@@ -48,7 +48,7 @@ h1, h2, h3, p { margin-top: 0; }
 .preference-control { position: relative; display: block; }
 .preference-control > .gallery-icon { position: absolute; top: 50%; inset-inline-start: var(--space-2); width: var(--icon-sm); height: var(--icon-sm); transform: translateY(-50%); pointer-events: none; color: var(--muted); }
 .preference-control::after { content: ""; position: absolute; top: 50%; inset-inline-end: var(--space-2); width: 6px; height: 6px; border: solid currentColor; border-width: 0 1px 1px 0; transform: translateY(-70%) rotate(45deg); color: var(--muted); pointer-events: none; }
-.gallery-preferences select, .language-control select, .theme-toggle, .gallery-settings > summary, #check-update {
+.gallery-preferences select, .language-control select, .palette-control select, .theme-toggle, .gallery-settings > summary, #check-update {
   min-height: var(--header-control-size);
   padding: 0 var(--space-3);
   border: 1px solid var(--color-border-control);
@@ -58,7 +58,7 @@ h1, h2, h3, p { margin-top: 0; }
   font-size: var(--font-size-sm);
   line-height: var(--line-height-label);
 }
-.gallery-preferences select, .language-control select { appearance: none; padding-inline: calc(var(--space-2) + var(--icon-sm) + var(--space-1)) var(--space-5); }
+.gallery-preferences select, .language-control select, .palette-control select { appearance: none; padding-inline: calc(var(--space-2) + var(--icon-sm) + var(--space-1)) var(--space-5); }
 .theme-toggle { display: inline-flex; align-items: center; justify-content: center; width: var(--header-control-size); padding: 0; cursor: pointer; }
 .theme-toggle .gallery-icon { width: var(--icon-sm); height: var(--icon-sm); }
 /* Show the theme the button switches to: a moon in light mode, a sun in dark mode. */
@@ -70,7 +70,10 @@ h1, h2, h3, p { margin-top: 0; }
   .header-inner { --header-control-size: var(--size-control); }
   .gallery-settings > summary { display: flex; align-items: center; justify-content: center; gap: var(--space-2); cursor: pointer; list-style: none; }
   .gallery-settings > summary::-webkit-details-marker { display: none; }
-  .gallery-settings[open] > summary .gallery-icon { transform: rotate(180deg); }
+  /* Compact header buttons are icon-only; the Settings label stays available to assistive technology. */
+  .gallery-settings > summary { width: var(--header-control-size); padding: 0; gap: 0; }
+  .gallery-settings > summary .settings-arrow { display: none; }
+  .gallery-settings > summary .settings-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .settings-panel {
     position: absolute;
     inset-block-start: calc(100% + var(--space-2));
@@ -89,18 +92,15 @@ h1, h2, h3, p { margin-top: 0; }
   .gallery-preferences { flex-direction: column; align-items: stretch; }
   .gallery-preferences select { width: 100%; }
   /* Compact header: the language switch becomes a globe button over a native select. */
-  .language-control select { width: var(--header-control-size); padding: 0; color: transparent; cursor: pointer; }
-  .language-control select option { color: var(--ink); }
-  .language-control > .gallery-icon { inset-inline-start: 50%; transform: translate(-50%, -50%); color: var(--ink); }
-  .language-control::after { display: none; }
-  .language-control:hover select { background: var(--color-surface-subtle); }
+  :is(.language-control, .palette-control) select { width: var(--header-control-size); padding: 0; color: transparent; cursor: pointer; }
+  :is(.language-control, .palette-control) select option { color: var(--ink); }
+  :is(.language-control, .palette-control) > .gallery-icon { inset-inline-start: 50%; transform: translate(-50%, -50%); color: var(--ink); }
+  :is(.language-control, .palette-control)::after { display: none; }
+  :is(.language-control, .palette-control):hover select { background: var(--color-surface-subtle); }
 }
 @media (max-width: 650px) {
   .header-inner { --header-gutter: var(--layout-mobile-gutter); gap: var(--space-2); }
-  /* Mobile header buttons are icon-only; the Settings label stays available to assistive technology. */
-  .gallery-settings > summary { width: var(--header-control-size); padding: 0; gap: 0; }
-  .gallery-settings > summary .settings-arrow { display: none; }
-  .gallery-settings > summary .settings-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .header-actions { gap: var(--space-1); }
 }
 @media (max-width: 559px) {
   .header-inner { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand settings" "nav nav"; row-gap: 0; padding-block: var(--space-1); }

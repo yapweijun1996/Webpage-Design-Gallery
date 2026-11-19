@@ -834,7 +834,8 @@ function tramCaptionIndex(distance) {
   return index;
 }
 function tramEnabled(expanded, search) {
-  return expanded && new URLSearchParams(search).get("tram") === "1";
+  const flag = new URLSearchParams(search).get("tram");
+  return expanded && flag !== "0" && flag !== "off";
 }
 function tramBoardReason(player) {
   if (player.pushing)

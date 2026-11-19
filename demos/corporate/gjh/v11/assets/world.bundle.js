@@ -6632,9 +6632,6 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       }
       cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
       blossomVase(-0.98, 1.2475, island - 0.14, 9873258);
-      box(pzhCartonX, 1.365, island + 0.27, 0.28, 0.234, 0.151, 12202795);
-      box(pzhCartonX, 1.471, island + 0.27, 0.278, 0.022, 0.15, 11893055);
-      box(pzhCartonX, 1.371, island + 0.349, 0.235, 0.063, 0.007, 14264925);
       break;
     }
     case 6: {
@@ -7957,12 +7954,12 @@ var roomDetails = {
   },
   S04: {
     file: "s04-borsch-details.glb",
-    bytes: 34500,
+    bytes: 36060,
     roomDetail: true
   },
   S05: {
     file: "s05-herbal-details.glb",
-    bytes: 67544,
+    bytes: 70160,
     roomDetail: true
   },
   S06: {
