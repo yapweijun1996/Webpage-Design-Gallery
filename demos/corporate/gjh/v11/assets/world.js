@@ -538,11 +538,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
           box('brass', x, 5.55, z + side * 1.12, 7.75, .06, .06);
         }
       }
-    } else if (expanded && zone === 'gogo') {
-      // Narrow angled timber fins make a light pergola over the lounge.
-      for (let z = -1.6; z > -9.3; z -= .95) {
-        box('oak', x - 2.56, 5.5, z, 3.8, .19, .35);
-      }
     }
     if (expanded) {
       // Window displays face the arcade; keep the full sliding-door opening clear.
