@@ -357,7 +357,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       }
     }
   };
-  tree(garden.x - 0.8, garden.z, 5.9);
+  tree(garden.x - 3.4, garden.z + 1.2, 5.9);
   for (const lounge2 of atriumLayout.lounges) {
     const planter = lounge2.planters[lounge2.id === "west" ? 1 : 0];
     tree(planter.x, planter.z, 4.2);

@@ -4,7 +4,7 @@ import test from 'node:test';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
 import {atriumLayout} from '../demos/corporate/gjh/v11/assets/atrium-layout.js';
-import {expandedLayout, shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
+import {expandedLayout, plannedSpaces, shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {interiorStores, worldInteriorBox} from '../demos/corporate/gjh/v11/assets/interiors/config.js';
 import {createPlayer} from '../demos/corporate/gjh/v11/assets/player.js';
 import {buildPublicArchitecture} from '../demos/corporate/gjh/v11/assets/public-architecture.js';
@@ -44,53 +44,62 @@ function stubBrowser(t) {
   });
 }
 
-function publicFoliage(scene, physics) {
-  const foliage = [], matrix = new T.Matrix4(), transform = new T.Object3D();
-  const geometry = {box: new T.BoxGeometry(), plane: new T.PlaneGeometry()};
+function publicPlanting(scene, physics) {
+  const leaves = [], trunksAndBranches = [], matrix = new T.Matrix4(), transform = new T.Object3D();
+  const geometry = {box: new T.BoxGeometry(), plane: new T.PlaneGeometry(), cylinder: new T.CylinderGeometry(1, 1, 1, 32)};
   const materials = Object.fromEntries(['oak', 'courtStone', 'ivory'].map(name => [name, new T.MeshStandardMaterial()]));
+  const garden = atriumLayout.garden;
+  physics.createCollider(R.ColliderDesc.cuboid(garden.width / 2, garden.height / 2, garden.depth / 2)
+    .setTranslation(garden.x, garden.height / 2, garden.z));
   buildPublicArchitecture(T, {
-    scene, geometry, materials, garden: atriumLayout.garden, lightPool: noop,
+    scene, geometry, materials, garden, lightPool: noop,
     box(_material, x, y, z, width, height, depth, collision) {
       if (collision) physics.createCollider(R.ColliderDesc.cuboid(width / 2, height / 2, depth / 2).setTranslation(x, y, z));
     },
-    solid(type, _material, x, y, z, sx, sy, sz, ry, rx, order) {
-      if (type !== 'publicLeaf') return;
-      if (!geometry.publicLeaf.boundingBox) geometry.publicLeaf.computeBoundingBox();
+    solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ', rz = 0) {
+      // The tree builder uses YXZ for its angled timber cylinders.
+      const treeWood = type === 'cylinder' && material === 'wood' && order === 'YXZ';
+      if (!treeWood && type !== 'publicLeaf') return;
+      const shape = geometry[type];
+      if (!shape.boundingBox) shape.computeBoundingBox();
       transform.position.set(x, y, z);
       transform.scale.set(sx, sy, sz);
-      transform.rotation.set(rx, ry, 0, order);
+      transform.rotation.set(rx, ry, rz, order);
       matrix.compose(transform.position, transform.quaternion, transform.scale);
-      foliage.push(geometry.publicLeaf.boundingBox.clone().applyMatrix4(matrix));
+      (treeWood ? trunksAndBranches : leaves).push(shape.boundingBox.clone().applyMatrix4(matrix));
     }
   });
-  return foliage;
+  assert.ok(leaves.length > 0 && trunksAndBranches.length > 0, 'public leaves and tree trunks are present');
+  return [...leaves, ...trunksAndBranches];
 }
 
-test('shop arrivals keep public foliage out of the third-person view', async t => {
+test('all expanded teleport arrivals keep public planting out of the third-person foreground', async t => {
   stubBrowser(t);
   await R.init();
   const physics = new R.World({x: 0, y: -9.81, z: 0});
   const scene = new T.Scene();
-  const foliage = publicFoliage(scene, physics);
-  assert.ok(foliage.length > 0, 'public foliage is present');
+  const planting = publicPlanting(scene, physics);
   const canvas = {clientWidth: 393, clientHeight: 560, addEventListener: noop, dataset: {}};
   const player = await createPlayer(T, R, physics, scene, canvas, new T.MeshBasicMaterial(), new T.PlaneGeometry(), [], [], true);
   t.after(() => { player.dispose(); physics.free(); });
   assert.equal(player.state.character.model, 'gjh-tripo-visitor');
   const view = new T.PerspectiveCamera(), frustum = new T.Frustum(), projection = new T.Matrix4();
+  const zones = ['atrium', 'entry', ...[...spatial.stores, ...plannedSpaces].map(store => store.id)];
   const blocked = [];
 
   for (const [width, height] of [[393, 612], [1440, 900]]) {
     // The 3D canvas starts below the 52 CSS-pixel header (zero safe-area inset).
     player.resizeCamera(width, height - 52);
-    for (const [index, slot] of expandedLayout.slots.entries()) {
-      const id = spatial.stores[index]?.id ?? `planned-space-${slot.number}`;
-      assert.equal(player.teleport(id), true, id);
+    for (const id of zones) {
+      const arrival = `${id} at ${width}x${height}`;
+      assert.equal(player.teleport(id), true, arrival);
+      assert.equal(canvas.dataset.cameraView, 'third-person', arrival);
       player.camera.updateMatrixWorld(true);
       view.copy(player.camera);
       view.far = 1.5;
-      if (slot.number === '09') {
+      if (id === 'planned-space-09') {
         // Clear the entire image up to the interior anchor at the SPAM arrival.
+        const slot = expandedLayout.slots.find(slot => slot.number === '09');
         const {x, z} = shopEntrance(slot), {bottom, top} = fasciaBand(slot);
         const store = interiorStores.S09;
         const [ax, ay, az] = store.anchor.position_m;
@@ -104,8 +113,10 @@ test('shop arrivals keep public foliage out of the third-person view', async t =
       }
       view.updateProjectionMatrix();
       frustum.setFromProjectionMatrix(projection.multiplyMatrices(view.projectionMatrix, view.matrixWorldInverse));
-      if (foliage.some(box => frustum.intersectsBox(box))) blocked.push(`S${slot.number} at ${width}x${height}`);
+      if (planting.some(box => box.containsPoint(view.position) || frustum.intersectsBox(box))) {
+        blocked.push(arrival);
+      }
     }
   }
-  assert.deepEqual(blocked, [], 'public foliage intersects an arrival view');
+  assert.deepEqual(blocked, [], 'public planting intersects an arrival camera or view');
 });

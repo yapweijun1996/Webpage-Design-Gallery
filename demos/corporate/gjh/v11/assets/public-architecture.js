@@ -242,7 +242,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       }
     }
   };
-  tree(garden.x-.8,garden.z,5.9);
+  // Keep the trunk west of the atrium arrival's chase-camera corridor.
+  tree(garden.x-3.4,garden.z+1.2,5.9);
   for (const lounge of atriumLayout.lounges) {
     // Use the inner planter on the west lounge to clear the shop arrival views.
     const planter = lounge.planters[lounge.id === 'west' ? 1 : 0];
