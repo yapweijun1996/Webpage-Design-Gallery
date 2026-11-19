@@ -1,0 +1,566 @@
+{
+  "assets": [
+    {
+      "file": "about-hero-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 39284,
+      "sha256": "cfaa704b3a3b967c6160274f9f86ed9f36fb4daa4f77d53bd80e5980c871fb58",
+      "source": "Codex CLI built-in image generation, about-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Dusk view across calm water to a generic modern Asian skyline, thin amber horizon, dark left side; no text or logos."
+    },
+    {
+      "file": "about-hero-story.webp",
+      "dimensions": [
+        750,
+        1000
+      ],
+      "bytes": 67296,
+      "sha256": "8a272855f6a75149b550468a538048e522c8a93b54ce3c84ad435c345b0005b5",
+      "source": "Codex CLI built-in image generation, about-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Dusk view across calm water to a generic modern Asian skyline, thin amber horizon, dark left side; no text or logos."
+    },
+    {
+      "file": "about-hero-wide.webp",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 86536,
+      "sha256": "fe83eabfaae70a7208ef752cf76c50829a40e2ea8426b003fd3208ffefc8f7a3",
+      "source": "Codex CLI built-in image generation, about-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Dusk view across calm water to a generic modern Asian skyline, thin amber horizon, dark left side; no text or logos."
+    },
+    {
+      "file": "about-story.webp",
+      "dimensions": [
+        1100,
+        733
+      ],
+      "bytes": 103286,
+      "sha256": "f963e7e00b62e5fb087e53d8427c102147784c3336527a1aa446a19aca5d7adc",
+      "source": "Codex CLI built-in image generation, about-story.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Atmospheric 1940s-style Southeast Asian provision store with unlabelled tins and jars, lantern light, sepia-gold grade; illustrative, not archival."
+    },
+    {
+      "file": "borsch-med-logo.webp",
+      "dimensions": [
+        120,
+        45
+      ],
+      "bytes": 2052,
+      "sha256": "f1cc9e8eab957d5b1e373bcda20635673d7c7720c02b8b473791bce41fcaaf3b",
+      "source": "demos/corporate/gjh/v21/assets/borsch-med-logo.webp",
+      "sourceSha256": "2cab195a45e8d980a23f578b5f185f674df6eb10957832c8275741c5c7635cb2",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/06/bm-brand2.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#borsch-med-logo"
+    },
+    {
+      "file": "borsch-med-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 115436,
+      "sha256": "3a6f62616c73b912b0d34dc64a57ff312d41f7a48fd9d4d8b43a679f7b8c7e33",
+      "source": "assets/companies/gjh/landing-concepts/images/013.webp",
+      "sourceSha256": "5350ceee2173e42a7fa2f7ae670349986896fcf7dc5b4ad72c6fbb908adbd27e",
+      "kind": "AI-generated concept",
+      "libraryId": "013",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#013"
+    },
+    {
+      "file": "borsch-med-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 191678,
+      "sha256": "e9d1d4f1a7a92319d12d42ad87c5fc776613d861bbfe0211f2da0df0d93e3876",
+      "source": "assets/companies/gjh/landing-concepts/images/013.webp",
+      "sourceSha256": "5350ceee2173e42a7fa2f7ae670349986896fcf7dc5b4ad72c6fbb908adbd27e",
+      "kind": "AI-generated concept",
+      "libraryId": "013",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#013"
+    },
+    {
+      "file": "brands-hero-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 10256,
+      "sha256": "19404a6a72b422777983265e3897ef0dce78b0f0697c021e4aa34d087b066005",
+      "source": "Codex CLI built-in image generation, brands-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Unbranded matte black gift bag with gold rope handles and a plain black gift box on dark stone with a gold light ribbon; no marks."
+    },
+    {
+      "file": "brands-hero-story.webp",
+      "dimensions": [
+        750,
+        1000
+      ],
+      "bytes": 16180,
+      "sha256": "a9cf2ca834964bf295ba09be8afe5944236b0db9404353c415ff35bccc782f7a",
+      "source": "Codex CLI built-in image generation, brands-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Unbranded matte black gift bag with gold rope handles and a plain black gift box on dark stone with a gold light ribbon; no marks."
+    },
+    {
+      "file": "brands-hero-wide.webp",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 20706,
+      "sha256": "f8e2f014fadfa885d98a9a352a490ba34a256c792b459d77e9549d56a0d50a96",
+      "source": "Codex CLI built-in image generation, brands-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Unbranded matte black gift bag with gold rope handles and a plain black gift box on dark stone with a gold light ribbon; no marks."
+    },
+    {
+      "file": "business-hero-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 46182,
+      "sha256": "cd9a23cb1a85cebedcff2bd5b4d570d905f9458d9f5531862347e39e12040281",
+      "source": "Codex CLI built-in image generation, business-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Earth at night centred on Southeast Asia with gold city lights and arcing route lines, black space on the left; no text."
+    },
+    {
+      "file": "business-hero-story.webp",
+      "dimensions": [
+        750,
+        1000
+      ],
+      "bytes": 74344,
+      "sha256": "f1a5a4be06da8bdec05915bd2e0ed91ebb4b6e75f9f8835d08d638583135ed8b",
+      "source": "Codex CLI built-in image generation, business-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Earth at night centred on Southeast Asia with gold city lights and arcing route lines, black space on the left; no text."
+    },
+    {
+      "file": "business-hero-wide.webp",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 96030,
+      "sha256": "fb61a67eef0192160627632bbe7b1822e872b31fb4cbd55f1b877a92d94c2cb5",
+      "source": "Codex CLI built-in image generation, business-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Earth at night centred on Southeast Asia with gold city lights and arcing route lines, black space on the left; no text."
+    },
+    {
+      "file": "casio-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 23306,
+      "sha256": "fa6154af955836d15a22a19ecb8f4c70e681b0a4cb3c803f982fb66bea896a00",
+      "source": "assets/companies/gjh/landing-concepts/images/058.webp",
+      "sourceSha256": "13231859b8dd477a1994aa5c36ae33768aa5cd4db3e4aa5ba58cc94005579f24",
+      "kind": "AI-generated concept",
+      "libraryId": "058",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#058"
+    },
+    {
+      "file": "chibi-visitor.webp",
+      "dimensions": [
+        900,
+        900
+      ],
+      "bytes": 29528,
+      "sha256": "40194bf3288f58ac2bed4f01b8a99debfc77ba905891566eb20b2d4599a7c32d",
+      "source": "Codex CLI built-in image generation, chibi-visitor.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Single stylised 3D chibi visitor in a black jacket and white VR headset waving on a gold-lit platform; no lettering."
+    },
+    {
+      "file": "contact-hero-medium.webp",
+      "dimensions": [
+        960,
+        411
+      ],
+      "bytes": 28026,
+      "sha256": "d3edeb4c6bd9b551ea34b5e9ba7646ac0b6abacc894d146a09ecd3159d63a777",
+      "source": "Codex CLI built-in image generation, contact-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Night panorama of a Singapore-style waterfront with a generic observation wheel and towers, gold reflections; no text."
+    },
+    {
+      "file": "contact-hero-story.webp",
+      "dimensions": [
+        749,
+        1000
+      ],
+      "bytes": 49468,
+      "sha256": "1e2f38acb78b554e1186121608d7299f47a75b20c35489f8df595575396c3ebd",
+      "source": "Codex CLI built-in image generation, contact-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Night panorama of a Singapore-style waterfront with a generic observation wheel and towers, gold reflections; no text."
+    },
+    {
+      "file": "contact-hero-wide.webp",
+      "dimensions": [
+        1600,
+        685
+      ],
+      "bytes": 59616,
+      "sha256": "f6544f3a0505c58d9404ee3e56a0a4c870d2bbdfc63bb632ff82d3cc69744bf0",
+      "source": "Codex CLI built-in image generation, contact-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Night panorama of a Singapore-style waterfront with a generic observation wheel and towers, gold reflections; no text."
+    },
+    {
+      "file": "gigaset-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 30346,
+      "sha256": "2bcaa67e47369f05d0c08851219969d8659cd2bcbac0302022f757ee58c53ab0",
+      "source": "assets/companies/gjh/landing-concepts/images/066.webp",
+      "sourceSha256": "2a3f46f17c8d21e13397f2c3ec47dd266650f98987d462ceabe94a6bf166ef11",
+      "kind": "AI-generated concept",
+      "libraryId": "066",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#066"
+    },
+    {
+      "file": "gjh-logo.webp",
+      "dimensions": [
+        134,
+        59
+      ],
+      "bytes": 5026,
+      "sha256": "2ac164c707dc0f03337b98b0502f757f7e013fa50dbd47a05152a3860abfa877",
+      "source": "demos/corporate/gjh/v21/assets/gjh-logo.webp",
+      "sourceSha256": "277ff28fc547219821ffb89f2222e4d644f94d6cec639a0ae79953ce97bc262d",
+      "kind": "company-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/08/logo-trans.png",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gjh-corporate-logo"
+    },
+    {
+      "file": "gogo-logo.webp",
+      "dimensions": [
+        120,
+        40
+      ],
+      "bytes": 1836,
+      "sha256": "d1a695fe5e6123a6daa1625ca7e4a884b2e54f8f888a3604b48f26b25307646b",
+      "source": "demos/corporate/gjh/v21/assets/gogo-logo.webp",
+      "sourceSha256": "5696dc538967e71b2ca515452beb0216320ce42e0c81aa547af95275a6dc2851",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/gogo-brand.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#gogo-logo"
+    },
+    {
+      "file": "gogo-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 50766,
+      "sha256": "05320ed2f1ad70604f98eeb557b3416437f2701cf356710faf33d8959db80607",
+      "source": "assets/companies/gjh/landing-concepts/images/009.webp",
+      "sourceSha256": "79a0f622698061e531e7b5cbbf798a7e18de2504409a0353214340e5a70ddaf4",
+      "kind": "AI-generated concept",
+      "libraryId": "009",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#009"
+    },
+    {
+      "file": "gogo-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 82944,
+      "sha256": "70a791f92de02f825e74b8f14222a280bf943ec59a41f579807adb947efa934d",
+      "source": "assets/companies/gjh/landing-concepts/images/009.webp",
+      "sourceSha256": "79a0f622698061e531e7b5cbbf798a7e18de2504409a0353214340e5a70ddaf4",
+      "kind": "AI-generated concept",
+      "libraryId": "009",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#009"
+    },
+    {
+      "file": "gp-batteries-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 31030,
+      "sha256": "3913bbaa5dcf282a2156146df6da74e40eae5f23463cacacd14d5b751816341b",
+      "source": "assets/companies/gjh/landing-concepts/images/061.webp",
+      "sourceSha256": "138034d0ef228039826f51dad4137b42a05887d7b0889a6ae407009cd66b2953",
+      "kind": "AI-generated concept",
+      "libraryId": "061",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#061"
+    },
+    {
+      "file": "home-hero-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 45232,
+      "sha256": "6e4d2a7af1b107e2f33fabc781defd785006ee73eedc8149cf079b4c2454e337",
+      "source": "Codex CLI built-in image generation, home-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Curved glass-and-bronze flagship building at night on a calm Singapore waterfront, champagne-gold light ribbons, empty left side for text; no text or logos."
+    },
+    {
+      "file": "home-hero-story.webp",
+      "dimensions": [
+        750,
+        1000
+      ],
+      "bytes": 67822,
+      "sha256": "e92cd0b5130a905158a24a5588d6aced80ec355573e6e04bdd6010805d862e16",
+      "source": "Codex CLI built-in image generation, home-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Curved glass-and-bronze flagship building at night on a calm Singapore waterfront, champagne-gold light ribbons, empty left side for text; no text or logos."
+    },
+    {
+      "file": "home-hero-wide.webp",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 94346,
+      "sha256": "47a6d8e1a9329a71599005b6210a73342eb072037110a23cecc3614ab768d7bc",
+      "source": "Codex CLI built-in image generation, home-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Curved glass-and-bronze flagship building at night on a calm Singapore waterfront, champagne-gold light ribbons, empty left side for text; no text or logos."
+    },
+    {
+      "file": "lg-rail.webp",
+      "dimensions": [
+        520,
+        420
+      ],
+      "bytes": 25104,
+      "sha256": "c527a7d6d45233c12bef7ace71aa4f1ff657f4d9e7f2abe59251be18d3ac98e4",
+      "source": "assets/companies/gjh/landing-concepts/images/053.webp",
+      "sourceSha256": "3c056f9e0bd36d960738fd8e4f6ac66d9fcf22dd2f84374c962d50b5efe12d68",
+      "kind": "AI-generated concept",
+      "libraryId": "053",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#053"
+    },
+    {
+      "file": "mall-story.webp",
+      "dimensions": [
+        640,
+        800
+      ],
+      "bytes": 70312,
+      "sha256": "d9b2485ee0192fc2d8a1b9a6f01f3015cee2607ef50c05c56e87b64b766b4b9b",
+      "source": "demos/corporate/gjh/v11/assets/concept-atrium.webp",
+      "sourceSha256": "932932ae1a0042755749aae77c9991038bfdbc192ccf5c2fb5156fa5eab7e9f0",
+      "kind": "AI-generated concept",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/concept-imagery.json#concept-atrium.webp"
+    },
+    {
+      "file": "mall-wide.webp",
+      "dimensions": [
+        1200,
+        676
+      ],
+      "bytes": 166092,
+      "sha256": "acba59f1f2dbd493278f6a5e4011ca49c4689ac7da12c451d416eeb5f4f6d255",
+      "source": "demos/corporate/gjh/v11/assets/concept-atrium.webp",
+      "sourceSha256": "932932ae1a0042755749aae77c9991038bfdbc192ccf5c2fb5156fa5eab7e9f0",
+      "kind": "AI-generated concept",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/concept-imagery.json#concept-atrium.webp"
+    },
+    {
+      "file": "mili-logo.webp",
+      "dimensions": [
+        88,
+        54
+      ],
+      "bytes": 2242,
+      "sha256": "d7db6871a6ffd08479bcc453869532750a5fca0e2cc762cb92bdef4be459180b",
+      "source": "demos/corporate/gjh/v21/assets/mili-logo.webp",
+      "sourceSha256": "79ae467e1b813d13ac795dc69275a96b687423986b1965fc28b9652b381dcaca",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/mili-brand.jpg",
+      "sourceReceipt": "assets/companies/gjh/official/manifest.json#mili-logo"
+    },
+    {
+      "file": "mili-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 57258,
+      "sha256": "5fe98fb6b9dfc5f8dcf3cab8b6125cf849004d7e7ba117ffc283f5c1e19244b7",
+      "source": "assets/companies/gjh/landing-concepts/images/005.webp",
+      "sourceSha256": "91d9e1c0c4015c34381d947973af59da80c554e61f8d57a60d9c642b83d9e66a",
+      "kind": "AI-generated concept",
+      "libraryId": "005",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#005"
+    },
+    {
+      "file": "mili-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 99140,
+      "sha256": "859f7a181e462d1e505b683f4d6a299a5c71513c0677e5cb4af242b6ffefa4b7",
+      "source": "assets/companies/gjh/landing-concepts/images/005.webp",
+      "sourceSha256": "91d9e1c0c4015c34381d947973af59da80c554e61f8d57a60d9c642b83d9e66a",
+      "kind": "AI-generated concept",
+      "libraryId": "005",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#005"
+    },
+    {
+      "file": "new-moon-logo.webp",
+      "dimensions": [
+        156,
+        32
+      ],
+      "bytes": 5504,
+      "sha256": "b26dff9a6a761ce968053646d0c57e6b127c927058bdffd107a59f948468b37e",
+      "source": "demos/corporate/gjh/v21/assets/new-moon-logo.webp",
+      "sourceSha256": "ffc29bae8868c337db5cb61fa1073ae4107da1a7e62dd48ec8b591b19942f1cd",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/10/logo-newmoon-1.svg",
+      "sourceReceipt": "demos/corporate/gjh/v11/assets/brands/logo-sources.json#S01"
+    },
+    {
+      "file": "new-moon-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 50596,
+      "sha256": "de097c5b3094974fa27026c9bc55eff2f94bc783d1b0361d159504cd54855086",
+      "source": "assets/companies/gjh/landing-concepts/images/001.webp",
+      "sourceSha256": "24eff6d8e7e1b1b2b58877a43c2d29c082ceedfa5b87dbd331b2163860b13d23",
+      "kind": "AI-generated concept",
+      "libraryId": "001",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#001"
+    },
+    {
+      "file": "new-moon-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 90972,
+      "sha256": "78d7f198634f27caa1467bb89cd717427f23a2bed5fa2fbbc763f5176b158156",
+      "source": "assets/companies/gjh/landing-concepts/images/001.webp",
+      "sourceSha256": "24eff6d8e7e1b1b2b58877a43c2d29c082ceedfa5b87dbd331b2163860b13d23",
+      "kind": "AI-generated concept",
+      "libraryId": "001",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#001"
+    },
+    {
+      "file": "sony-logo.webp",
+      "dimensions": [
+        160,
+        42
+      ],
+      "bytes": 1710,
+      "sha256": "cb49aeb9acc7573e500373def76f119faeb73d61f780dd3e3aa727f0069642d4",
+      "source": "demos/corporate/gjh/v21/assets/sony-logo.webp",
+      "sourceSha256": "99dcc2565ce3547ebd4b3ae26ef0d4a0ae7a46371b8848a8a2a29125fedae1e3",
+      "kind": "brand-logo",
+      "sourceUrl": "https://www.gjhglobal.com/wp-content/uploads/2022/04/sony-brand.jpg",
+      "sourceReceipt": "demos/corporate/gjh/v8/assets/sources.json#sony-brand-tile"
+    },
+    {
+      "file": "sony-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 52404,
+      "sha256": "f2792ba89480fbacb4062d57e9ea93e626860153850f0f7638e01c16159cc2d9",
+      "source": "assets/companies/gjh/landing-concepts/images/049.webp",
+      "sourceSha256": "b9ea12ca2cdc2be4ca50ba221a5c041e17a445e47dc4e27382f04e848530d45f",
+      "kind": "AI-generated concept",
+      "libraryId": "049",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#049"
+    },
+    {
+      "file": "sony-wide.webp",
+      "dimensions": [
+        1440,
+        810
+      ],
+      "bytes": 150826,
+      "sha256": "a29db2ac24aa102c6f0ecb615ea873a6d87e12a8555f145b2e5068293a69aa08",
+      "source": "assets/companies/gjh/landing-concepts/images/049.webp",
+      "sourceSha256": "b9ea12ca2cdc2be4ca50ba221a5c041e17a445e47dc4e27382f04e848530d45f",
+      "kind": "AI-generated concept",
+      "libraryId": "049",
+      "sourceReceipt": "assets/companies/gjh/landing-concepts/manifest.json#049"
+    },
+    {
+      "file": "virtual-hero-medium.webp",
+      "dimensions": [
+        960,
+        540
+      ],
+      "bytes": 63658,
+      "sha256": "8f2a196dc25e172edca2e53277b5c3373017cc1df6c232ca20ff2ecf4981c824",
+      "source": "Codex CLI built-in image generation, virtual-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Stylised 3D concept render of a luxury curved-glass mall at dusk with blossom trees and small chibi visitors; blank facade, no lettering."
+    },
+    {
+      "file": "virtual-hero-story.webp",
+      "dimensions": [
+        750,
+        1000
+      ],
+      "bytes": 72372,
+      "sha256": "dccf1199529cca7e35f57e320fc857803f5c4c3437adbf834e3947843146ffba",
+      "source": "Codex CLI built-in image generation, virtual-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Stylised 3D concept render of a luxury curved-glass mall at dusk with blossom trees and small chibi visitors; blank facade, no lettering."
+    },
+    {
+      "file": "virtual-hero-wide.webp",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 125028,
+      "sha256": "66949ca979684ee61dfc6ea22e4f9b2d16ce2eed2d225f10c38955a41274edd7",
+      "source": "Codex CLI built-in image generation, virtual-hero.png (original 1664x936 or larger; not committed)",
+      "kind": "AI-generated concept",
+      "prompt": "Stylised 3D concept render of a luxury curved-glass mall at dusk with blossom trees and small chibi visitors; blank facade, no lettering."
+    }
+  ],
+  "fonts": [
+    {
+      "file": "instrument-serif.ttf",
+      "licence": "OFL-Instrument-Serif.txt",
+      "source": "demos/food-beverage/yeos/v1/assets/instrument-serif.ttf"
+    },
+    {
+      "file": "manrope-latin.woff2",
+      "licence": "OFL-Manrope.txt",
+      "source": "demos/corporate/gjh/v18/assets/manrope-latin.woff2"
+    }
+  ],
+  "icons": {
+    "file": "icons.svg",
+    "licence": "Lucide shapes, ISC licence; the vr symbol is an original drawing."
+  }
+}

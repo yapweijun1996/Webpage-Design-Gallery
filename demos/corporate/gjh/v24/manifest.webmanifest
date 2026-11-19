@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "Goh Joo Hin · Luxury Digital Experience",
+  "short_name": "Luxury Digital Experience",
+  "description": "Tour six pages: home, story, a filterable brand directory, business areas, the virtual mall entrance and an accessible enquiry form.",
+  "lang": "en-SG",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#080808",
+  "background_color": "#080808",
+  "icons": [
+    {
+      "src": "../../../../assets/icons/gallery-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

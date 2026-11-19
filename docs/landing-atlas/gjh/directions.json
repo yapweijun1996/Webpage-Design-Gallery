@@ -140,6 +140,13 @@
     "detail": "Open the New Moon brand chapter and its product-specific enquiry.", "items": ["Australia", "New Zealand", "South Africa", "Mexico"]
   },
   {
+    "key": "luxury-digital-experience", "version": "v24", "kind": "primary", "style": "Black and champagne-gold corporate site",
+    "headline": "Building a Bigger World", "action": "Explore GJH", "image": "demos/corporate/gjh/v24/assets/home-hero-wide.webp",
+    "composition": "poster", "background": "#080808", "ink": "#f5f0e8", "accent": "#d9b477",
+    "notes": "Follow the approved black-and-gold mockups: a cinematic architectural hero with the serif headline on the left, four entry cards overlapping its lower edge, and the same header, cards and footer across all six pages.",
+    "detail": "Open the brand directory, the business areas or the virtual mall entrance from the first screen.", "items": ["Our Brands", "Our Business", "Virtual World", "About GJH"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",
