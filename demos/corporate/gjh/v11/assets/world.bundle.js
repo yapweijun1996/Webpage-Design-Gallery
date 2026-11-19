@@ -695,7 +695,7 @@ var atriumLayout = Object.freeze({
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
   facilitiesBlock: Object.freeze({ x: 25, z: 10, width: 6, depth: 4, height: 3 }),
   upperSeats: Object.freeze([
-    Object.freeze({ x: -6.1, z: 8.8, facing: 1, finish: "oak" }),
+    Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
     Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
     Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
   ]),
@@ -3379,10 +3379,10 @@ var models = {
   lamp: { id: "GJH_NEW_lamp_floor", dimensions_m: [0.6, 1.7, 0.6], sha256: "5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2" },
   table: { id: "GJH_NEW_table_display", dimensions_m: [1.1, 0.85, 0.6], sha256: "30234aa8ff7d21761920ee1527f374076ded2ae2d296f6499edea2e2759d4ba9" }
 };
-var deckPlanters = [[-8.1, 12.8], [2.1, 12.8], [-8.1, 9.2], [2.1, 9.2]];
+var deckPlanters = [[-6.25, 13.8], [0.45, 13.8], [-7, 8], [0.45, 6.15]];
 var lamp = [-1.38, 5.75];
 var table = [-4.79, 6.05];
-var directory = { x: -2.96, z: 14.35, yaw: -Math.PI / 2, width: 2.46, height: 2.56 };
+var directory = { x: -2.96, z: 13.52, width: 2.46, height: 2.56 };
 var galleryVoid = Object.freeze({
   minX: liftLayout.slab.maxX,
   maxX: liftLayout.roofOpening.maxX - 1.53,
@@ -3413,9 +3413,9 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   group.userData.deckLod = true;
   const floor = liftLayout.upper, gold = [], emit = [], solids = [], prints = [], glass = [];
   const unit = new T.BoxGeometry, plane = new T.PlaneGeometry, transform = new T.Object3D;
-  function matrix(x2, y, z2, w, h, d, yaw2 = 0, pitch = 0) {
+  function matrix(x2, y, z2, w, h, d, yaw = 0, pitch = 0) {
     transform.position.set(x2, floor + y, z2);
-    transform.rotation.set(pitch, yaw2, 0, "YXZ");
+    transform.rotation.set(pitch, yaw, 0, "YXZ");
     transform.scale.set(w, h, d);
     transform.updateMatrix();
     return transform.matrix.clone();
@@ -3546,13 +3546,13 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   for (const y of [0.43, 2.14])
     brass(east + 0.025, y, cz, 0.035, 0.032, 3.09);
   print(cells.mark, east + 0.025, 1.32, cz, 2.06, 1.48, 1, -Math.PI / 2);
-  const { x, z, yaw, width, height } = directory;
-  block(6901045, x, 1.43, z, width + 0.1, height + 0.15, 0.15, yaw);
-  print(cells.directory, x - 0.083, 1.43, z, width, height, 1, yaw);
-  for (const dz of [-width / 2 - 0.045, width / 2 + 0.045])
-    led(x - 0.087, 1.43, z + dz, 0.031, height + 0.08, 0.031);
-  brass(x, 0.23, z, 0.13, 0.46, 1.25);
-  collider(x, floor + 1.31, z, 0.17, 2.62, width + 0.1);
+  const { x, z, width, height } = directory;
+  block(6901045, x, 1.43, z, width + 0.1, height + 0.15, 0.15);
+  print(cells.directory, x, 1.43, z - 0.083, width, height, 1, Math.PI);
+  for (const dx of [-width / 2 - 0.045, width / 2 + 0.045])
+    led(x + dx, 1.43, z - 0.087, 0.031, height + 0.08, 0.031);
+  brass(x, 0.23, z, 1.25, 0.46, 0.13);
+  collider(x, floor + 1.31, z, width + 0.1, 2.62, 0.17);
   const front = liftLayout.roofOpening.maxX, start = liftLayout.roofOpening.minZ, end = liftLayout.roofOpening.maxZ;
   const span = (end - start) / 4, mid = (start + end) / 2;
   block(12627340, front + 0.12, 1.17, mid, 0.42, 0.56, end - start + 0.14);

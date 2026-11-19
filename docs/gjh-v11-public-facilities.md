@@ -2,9 +2,13 @@
 
 ## Upper landing circulation
 
-**Status:** The public lift round trip and a short upper exit were verified on build `9945fcd8ff0f5e5e`. The reported seating obstruction and full perimeter run are under investigation.
+**Status:** The public lift round trip and a short upper exit were verified on build `9945fcd8ff0f5e5e`. The upper-floor correction passed local Chrome and focused collision checks on build `c2c28330cf5864ee`.
 
-The upper slab spans world X −9 to 3 and Z 4 to 16 at Y 7.2. The lift threshold faces west. The deck must retain its shaft and perimeter guards while providing enough uninterrupted aisle space to leave the lift, run around all four sides and return. Align each retained seat’s render footprint, collision proxy, sit pose and stand exit. The browser acceptance route will record ground boarding, upper exit, four perimeter checkpoints, return to the landing and descent. The earlier short exit established the lift baseline only. [Lift geometry and baseline](gjh-v11-stage7-lift-facilities.md)
+The upper slab spans world X −9 to 3 and Z 4 to 16 at Y 7.2. In the public baseline, the oak bench sat close to the west-facing lift threshold. The west planters left about 0.51 m to the rail, below the moving visitor’s 0.60 m capsule width with its controller margin. The south directory also left about 0.07 m to the story wall.
+
+The oak bench, matching collider and exit moved south of the landing. Four planters moved inboard. The directory rotated to face the inner aisle and moved away from the story wall. The lift cabin, safety gates, guarded opening and floor remained under their existing controller.
+
+On the local candidate, Chrome held Shift continuously and used real WASD through all four corners, returned to the lift and descended. The route stayed at 7.2 m and both transit doors were closed with thresholds disabled. A 390 × 844 touch-emulated run used the joystick to exit and return to the lift and tapped Ride in both directions after a keyboard approach on the ground floor. The desktop Detailed route sampled 301 scene-frame intervals at 16.7 ms p95, with zero at or above 50 ms. This is a short headless Chrome sample. [Before and after with recorded route](gjh-v11-references/upper-perimeter-runtime.webp) · [Lift geometry](gjh-v11-stage7-lift-facilities.md)
 
 ## Ground-floor restroom cluster
 

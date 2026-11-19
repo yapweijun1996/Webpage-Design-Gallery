@@ -12,9 +12,10 @@ const models = {
   lamp:{id:'GJH_NEW_lamp_floor',dimensions_m:[.6,1.7,.6],sha256:'5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2'},
   table:{id:'GJH_NEW_table_display',dimensions_m:[1.1,.85,.6],sha256:'30234aa8ff7d21761920ee1527f374076ded2ae2d296f6499edea2e2759d4ba9'}
 };
-export const deckPlanters=[[-8.1,12.8],[2.1,12.8],[-8.1,9.2],[2.1,9.2]];
+// Keep the planters inside the perimeter aisle and clear of the seat exits.
+export const deckPlanters=[[-6.25,13.8],[.45,13.8],[-7,8],[.45,6.15]];
 const lamp=[-1.38,5.75],table=[-4.79,6.05];
-const directory={x:-2.96,z:14.35,yaw:-Math.PI/2,width:2.46,height:2.56};
+const directory={x:-2.96,z:13.52,width:2.46,height:2.56};
 
 // The open lightwell starts at the platform's existing east balustrade.
 export const galleryVoid=Object.freeze({
@@ -156,13 +157,13 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   for(const y of [.43,2.14])brass(east+.025,y,cz,.035,.032,3.09);
   print(cells.mark,east+.025,1.32,cz,2.06,1.48,1,-Math.PI/2);
 
-  // The totem's back is timber, with a raised jade print and brass light reveal.
-  const {x,z,yaw,width,height}=directory;
-  block(0x694d35,x,1.43,z,width+.10,height+.15,.15,yaw);
-  print(cells.directory,x-.083,1.43,z,width,height,1,yaw);
-  for(const dz of [-width/2-.045,width/2+.045])led(x-.087,1.43,z+dz,.031,height+.08,.031);
-  brass(x,.23,z,.13,.46,1.25);
-  collider(x,floor+1.31,z,.17,2.62,width+.10);
+  // Face the lift from the inner aisle and leave the story wall approachable.
+  const {x,z,width,height}=directory;
+  block(0x694d35,x,1.43,z,width+.10,height+.15,.15);
+  print(cells.directory,x,1.43,z-.083,width,height,1,Math.PI);
+  for(const dx of [-width/2-.045,width/2+.045])led(x+dx,1.43,z-.087,.031,height+.08,.031);
+  brass(x,.23,z,1.25,.46,.13);
+  collider(x,floor+1.31,z,width+.10,2.62,.17);
 
   // The east cut face of the roof becomes the apron of one continuous arcade.
   // The four windows are architectural displays outside the walkable deck.
