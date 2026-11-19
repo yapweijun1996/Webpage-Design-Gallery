@@ -37,7 +37,7 @@ The built-in image generator made the interior proposal and unlabelled product s
 
 ## Runtime acceptance
 
-Desktop and 390 px touch-emulated Chrome followed the entrance route, opened the patch story in front of the folio and reached the separate Lingzhi story via the right aisle. Each action linked to its own official catalogue entry and used the static story image. The desktop run also checked the patch card’s Simplified Chinese and Malay titles. [Runtime Chrome captures](folio-runtime.webp)
+On published build `8e4599e605ef0138`, desktop and 390 px touch-emulated Chrome followed the entrance route, opened the patch story in front of the folio and reached the separate Lingzhi story via the right aisle. Each action linked to its own official catalogue entry and used the static story image. The desktop run also checked the patch card’s Simplified Chinese and Malay titles. [Runtime Chrome captures](folio-runtime.webp) · [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44550489149)
 
 ## Catalog images by display
 

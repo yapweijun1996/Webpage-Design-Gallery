@@ -9,6 +9,8 @@ const sage=0x76846a, charcoal=0x2d3032, silver=0xc4c3bd, white=0xf7f4e9;
 // Keeping the centre fixtures behind the threshold leaves a turning area in
 // front and two routes around each island. Countertop GLBs use this same datum.
 export const shopIslandZ = -.63;
+export const pzhCartonX = .54;
+export const pzhCartonStandingZ = shopIslandZ + 1.36;
 export const shopLamp = 0xffe6a7;
 const finishes = {
   4:[0xe2cfad,0xa77d82,0xf0dfc7],5:[0x69442c,0x8b5a38,0xe3c79c],
@@ -244,7 +246,12 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
           tapered(wallX+.42,y+.37,nicheZ+dz,.098,.08,.13,pearl);
         }
       }
-      cabinet(0,island,2.5,.99,1.24,walnut,oak);blossomVase(-.43,1.2475,island,0x96a76a);
+      cabinet(0,island,2.5,.99,1.24,walnut,oak);
+      blossomVase(-.98,1.2475,island-.14,0x96a76a);
+      // A single unprinted study carton sits on the current counter.
+      box(pzhCartonX,1.365,island+.27,.28,.234,.151,0xba332b);
+      box(pzhCartonX,1.471,island+.27,.278,.022,.15,0xb5793f);
+      box(pzhCartonX,1.371,island+.349,.235,.063,.007,0xd9aa5d);
       break;
     }
     case 6: { // A timber drying rack above the service counter and a curved rear display niche.

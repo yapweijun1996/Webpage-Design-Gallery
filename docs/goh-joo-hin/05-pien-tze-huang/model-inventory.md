@@ -21,5 +21,5 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| Manufacturer single 3 g unit carton | One sample on the shelf set into the drawer wall | Manufacturer-form single-carton concept. New verified carton GLB pending. |
+| Manufacturer single 3 g unit carton | Existing centre counter, local XZ (0.54, −0.36) | Original unprinted procedural display study, enlarged for readability. [Runtime geometry](../../../demos/corporate/gjh/v11/assets/window-studios.js) |
 | GJH 10-piece listing | Research reference only | Hold the group model until its package can be distinguished from the manufacturer’s one-unit carton. |

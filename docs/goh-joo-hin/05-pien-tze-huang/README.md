@@ -1,12 +1,12 @@
 # S05 · Pien Tze Huang
 
-**Status: concept packet for review.** The drawings locate the fixtures. The linked catalog images and brand research define the product identity. Final artwork and runtime acceptance are tracked separately.
+**Status: the single-carton exhibit is implemented.** The four concept views show a wider room proposal. The existing drawer wall and realistic product reference are documented together.
 
 [First-party brand research and product photo sources](brand-research.md)
 
 ## Player walkthrough
 
-The drawer case and wood craft are legible. The centre plant masks the porcelain sample in the mobile view.
+The drawer case and wood craft are legible. The earlier centre plant masked the porcelain sample in the mobile view. The current vase sits on the far-left side of the counter.
 
 [Chrome player baseline](player-baseline.webp)
 
@@ -16,7 +16,7 @@ Make the full drawer wall the anchor in warm walnut, bronze and deep cinnabar. U
 
 | Element | Placement and interaction |
 | --- | --- |
-| Main display | Stepped drawer bank with open porcelain niche, local XYZ (0, 0.081, -4.38), yaw 0°. Keep the rear drawer framework; show a measured sample on one shallow centre shelf. |
+| Main display | Stepped drawer bank with open porcelain niche, local XYZ (0, 0.081, -4.38), yaw 0°. Retain the rear drawer framework. Place an enlarged, unprinted study carton on the central counter so it is readable from the aisle. |
 | Visitor route | Threshold local XZ (0, 6). Follow the right cabinet edge past the centre counter. |
 | Fixtures and use points | Keep visitor-facing art as information. A future drawer handle action needs a separable node and an accessible approach. |
 
@@ -26,7 +26,7 @@ World origin (30, 0, -6), yaw 0°. Dimensions are authored metres. The [floor pl
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Manufacturer single 3 g unit carton | One sample on the shelf set into the drawer wall | Manufacturer-form single-carton concept. New verified carton GLB pending. |
+| Manufacturer single 3 g unit carton | One enlarged study on the existing centre counter | Installed unprinted procedural carton. Exact package measurements and artwork remain pending. |
 | GJH 10-piece listing | Research reference only | Hold the group model until its package can be distinguished from the manufacturer’s one-unit carton. |
 
 Maintain a source-backed distinction between the two package formats.
@@ -37,7 +37,7 @@ The built-in image generator made the interior proposal and unlabelled product s
 
 ## Runtime acceptance
 
-No package or gameplay change. Move the foreground plant during a future model-fit pass only if the final camera check confirms that the sample remains hidden.
+The existing corridor and cabinet remain in place. Desktop and 390 px touch-emulated Chrome entered the shop, opened the story from the front of the counter and continued to the rear via the right aisle. The story links to the manufacturer, separates the 3 g unit from the eShop’s 10-piece listing and opens with a static image. The desktop run also verified the Chinese and Malay story titles. [Runtime Chrome captures](carton-runtime.webp)
 
 ## Manufacturer image and carton formats
 
