@@ -12,9 +12,9 @@ export function allowMallLightWash(deviceClass, context) {
 }
 
 const SURFACES = {
-  low:{roughness:1, emission:1.12, washOpacity:.22},
-  balanced:{roughness:.82, emission:1.2, washOpacity:.32},
-  detailed:{roughness:.68, emission:1.38, washOpacity:.48}
+  low:{roughness:1, emission:1, washOpacity:.58},
+  balanced:{roughness:.91, emission:1.04, washOpacity:.61},
+  detailed:{roughness:.82, emission:1.10, washOpacity:.65}
 };
 
 export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, washes, floors, fixtures, vault}) {
@@ -40,17 +40,17 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
   const floorRoughness = floors.map(floor => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
   let fixtureEmission = fixtures.emissiveIntensity;
-  let preset, opacity;
+  let preset, broadWash;
   function setTier(tier, lightWash = true) {
     const next = Object.hasOwn(SURFACES,tier) ? SURFACES[tier] : SURFACES.low;
-    const nextOpacity = next === SURFACES.low || lightWash ? next.washOpacity : 0;
-    if (next === preset && nextOpacity === opacity) return false;
+    const nextBroadWash = next !== SURFACES.low && lightWash;
+    if (next === preset && nextBroadWash === broadWash) return false;
     preset = next;
-    opacity = nextOpacity;
+    broadWash = nextBroadWash;
     floors.forEach((floor,index) => { floor.roughness = floorRoughness[index] * preset.roughness; });
     vault.emissiveIntensity = vaultEmission * preset.emission;
     fixtures.emissiveIntensity = fixtureEmission * preset.emission;
-    washMaterial.opacity = opacity;
+    washMaterial.opacity = preset.washOpacity;
     updateWash();
     return true;
   }
@@ -58,16 +58,22 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
     fixtureEmission = intensity;
     fixtures.emissiveIntensity = fixtureEmission * preset.emission;
   }
-  const allowWash = strip => strip === (preset === SURFACES.low);
+  const allowWash = strip => strip || broadWash;
   function updateWash(frustum) {
-    if (opacity > 0) washVisibility.update(frustum, allowWash);
-    washMesh.visible = opacity > 0 && washMesh.count > 0;
+    washVisibility.update(frustum, allowWash);
+    washMesh.visible = washMesh.count > 0;
   }
   setTier('low');
   return {setTier, setFixtureEmission, updateView(view) { updateWash(view.frustum); }};
 }
 
 const STUDIO_LIGHTING = {
+  atrium: {walls:0x726861, panels:0xf7dfc5, ceiling:0xd1c9b9, width:7, intensity:.64},
+  corridor: {walls:0x66594f, panels:0xf5d7b7, ceiling:0xd7b995, width:5, intensity:.58},
+  shop: {walls:0x9e876d, panels:0xffe9d2, ceiling:0xffead3, width:3, intensity:.94}
+};
+
+const CLASSIC_STUDIO_LIGHTING = {
   atrium: {walls:0xb6a38c, panels:0xffeed9, ceiling:0xfff5e7, width:8, intensity:1},
   corridor: {walls:0xa99a82, panels:0xffe1bc, ceiling:0xffebd2, width:5, intensity:.9},
   shop: {walls:0x9e876d, panels:0xffd6a8, ceiling:0xffe6c8, width:3, intensity:.8}
@@ -90,10 +96,11 @@ function publicEnvironmentZone({x,y,z},atrium) {
 
 // Local lighting resources. All three PMREMs share the same shader layout.
 export function createMallAtmosphere(T, renderer, scene, slots, {
-  atrium = {x:0,z:8}, contact, plane, frameTrace
+  atrium = {x:0,z:8}, contact, plane, frameTrace, expanded = true
 } = {}) {
+  const studioLighting = expanded ? STUDIO_LIGHTING : CLASSIC_STUDIO_LIGHTING;
   const classicAccents = [0xb84739,0xd4a159,0x79a992,0x785a68,0x913f35,0x667887,0x9c4937,0x477aac,0x294f7c];
-  const interiorWarm = new T.Color(0xffd5a0);
+  const interiorWarm = new T.Color(expanded ? 0xffd6b0 : 0xffd5a0);
   const bays = slots.map((slot, index) => {
     const store = interiorStores['S'+slot.number], mood = store?.ambient;
     const x = (slot.minX + slot.maxX) / 2, z = (slot.minZ + slot.maxZ) / 2;
@@ -106,8 +113,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const accent = new T.Color(mood?.accent ?? classicAccents[index]);
     const accentLuminance = .2126*accent.r + .7152*accent.g + .0722*accent.b;
     const environmentIntensity = mood
-      ? .74 + .20*(mood.kelvin-2700)/1300 + .10*accentLuminance
-      : STUDIO_LIGHTING.shop.intensity;
+      ? (expanded ? .91 : .74) + .20*(mood.kelvin-2700)/1300 + .10*accentLuminance
+      : studioLighting.shop.intensity;
     return {slot,x,z,mood,keyPosition,accentPosition,accent,environmentIntensity,
       temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
   });
@@ -147,7 +154,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       const {minX,maxX,minZ,maxZ} = inside.slot;
       const edge = Math.min(x-minX,maxX-x,z-minZ,maxZ-z);
       const weight = Math.min(1,edge/1.6);
-      const outside = STUDIO_LIGHTING[publicZone].intensity;
+      const outside = studioLighting[publicZone].intensity;
       selectEnvironment('shop',outside + weight*(inside.environmentIntensity-outside));
     } else selectEnvironment(inside ? 'shop' : publicZone);
     const ground = setLightFloor(position);
@@ -175,8 +182,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       }
     }
     if (focus && nearest === focus) strength = Math.min(1,strength+fadeIn);
-    lights[0].intensity = 26 * strength;
-    lights[1].intensity = 18 * strength;
+    lights[0].intensity = (focus?.mood && expanded ? 38 : 26) * strength;
+    lights[1].intensity = (focus?.mood && expanded ? 24 : 18) * strength;
   }
 
   const accentSet = new Set(lights);
@@ -189,8 +196,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     return [fixed,[...fixed,...lights]];
   }
 
-  let environments = {}, currentZone = 'atrium', currentIntensity = STUDIO_LIGHTING.atrium.intensity;
-  function selectEnvironment(zone, intensity = STUDIO_LIGHTING[zone].intensity) {
+  let environments = {}, currentZone = 'atrium', currentIntensity = studioLighting.atrium.intensity;
+  function selectEnvironment(zone, intensity = studioLighting[zone].intensity) {
     currentZone = zone;
     currentIntensity = intensity;
     const environment = environments[zone];
@@ -218,7 +225,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const ceiling = new T.Mesh(geometry,materials[2]); ceiling.position.y=2.9; studio.add(ceiling);
     const next = {};
     try {
-      for (const [zone, {walls,panels,ceiling:colour,width}] of Object.entries(STUDIO_LIGHTING)) {
+      for (const [zone, {walls,panels,ceiling:colour,width}] of Object.entries(studioLighting)) {
         materials[0].color.set(walls);
         materials[1].color.set(panels).multiplyScalar(1.3);
         materials[2].color.set(colour).multiplyScalar(1.5);

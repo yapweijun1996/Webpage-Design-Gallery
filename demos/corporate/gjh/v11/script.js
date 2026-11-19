@@ -391,7 +391,7 @@ function render(force = false) {
     const detailedReady = detailed && world.interiors?.activeTier === 'detailed';
     if (expanded) renderer.shadowMap.enabled = detailedReady;
     world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera,
-      canvas.height, Boolean(shelfFocus?.open), lightWash);
+      canvas.height, Boolean(shelfFocus?.open), lightWash, reducedMotion.matches);
     atmosphere?.update(pose,now);
     const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion);
@@ -762,7 +762,7 @@ function validateRestoration() {
     atmosphere?.update(player.state);
     player.camera.updateMatrixWorld();
     sizeDrawingBuffer();
-    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash);
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash, reducedMotion.matches);
     world.updateSigns(player.camera, canvas, reducedMotion);
     renderer.render(world.scene, player.camera);
     // A real submitted scene and nonempty framebuffer must precede availability.
@@ -822,7 +822,7 @@ async function initialize() {
   // both shader logs in debug mode, even after a parallel link has completed.
   renderer.debug.checkShaderErrors = diagnostics.get('debugShaders') === '1';
   if (diagnostics.get('traceWarm') === '1') frameTrace = createFrameTrace(renderer);
-  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = expanded ? 1.03 : 1.08;
+  renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
   try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
@@ -840,6 +840,7 @@ async function initialize() {
   const {createWorld} = await import('./assets/world.js');
   world = await createWorld(T, R, physics, expanded, warmModel,
     () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone');
+  if (expanded) renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans]
@@ -848,7 +849,7 @@ async function initialize() {
   document.getElementById('loader-asset-notice').hidden = !assetRecords.some(record => record?.status === 'fallback');
   window.mallLoader?.complete('scene');
   atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds),
-    {frameTrace,...(expanded && {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane})});
+    {frameTrace,expanded,...(expanded && {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane})});
   try {
     const environments = atmosphere.prepareEnvironments();
     try {

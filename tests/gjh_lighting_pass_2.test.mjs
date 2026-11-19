@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createMallAtmosphere} from '../demos/corporate/gjh/v11/assets/mall-atmosphere.js';
-import {createMallBakedLighting} from '../demos/corporate/gjh/v11/assets/mall-baked-lighting.js';
+import {createMallBakedLighting, createSkylightDapple} from '../demos/corporate/gjh/v11/assets/mall-baked-lighting.js';
 import {createPlayerShadow} from '../demos/corporate/gjh/v11/assets/mall-player-shadow.js';
 import {expandedLayout} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {interiorStores, worldInteriorBox} from '../demos/corporate/gjh/v11/assets/interiors/config.js';
@@ -82,6 +82,31 @@ test('optional atlas failure leaves the world renderable through tier changes', 
   sweep.return();
 });
 
+test('the skylight decal stays hidden after an unavailable texture or failed upload', async () => {
+  for (const missing of [true,false]) {
+    const scene = new T.Scene(), contact = material(), texture = new T.Texture();
+    let requests = 0, disposals = 0;
+    texture.addEventListener('dispose',() => disposals++);
+    const projection = {minX:0,maxX:9,minZ:0,maxZ:9};
+    const dapple = createSkylightDapple(T,scene,{
+      projection,panels:[{...projection,y:.026}],contact,
+      load:async () => {
+        requests++;
+        if (missing) throw Error('No image');
+        return texture;
+      },
+      prepareModel:async () => { throw Error('Upload cancelled'); }
+    });
+    assert.equal(dapple.prepare(),dapple.prepare());
+    await dapple.prepare();
+    dapple.update('detailed',false,1000);
+    assert.equal(scene.children[0].visible,false);
+    assert.equal(scene.children[0].material.map,contact.map);
+    assert.equal(requests,1);
+    assert.equal(disposals,missing ? 0 : 1);
+  }
+});
+
 test('compact shadow is stable in the light image after sub-texel motion', () => {
   const scene=new T.Scene(), key=new T.DirectionalLight();
   key.position.set(-12,16,6);
@@ -141,7 +166,7 @@ test('authored moods route across all 17 shops with shared IBL and the same ligh
   atmosphere.update({x:36,y:0,z:44},5300);
   const near=scene.environmentIntensity;
   atmosphere.update({x:35.01,y:0,z:44},5500);
-  assert.ok(Math.abs(scene.environmentIntensity-.9)<Math.abs(near-.9));
+  assert.ok(Math.abs(scene.environmentIntensity-.58)<Math.abs(near-.58));
   atmosphere.update({x:-3,y:7.2,z:10},5700);
   assert.ok(lights.every(light=>!light.visible));
   assert.deepEqual(atmosphere.lightVariants(scene.children),[[fixed],[fixed,...lights]]);
@@ -197,6 +222,10 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
   };
   const atmosphere=createMallAtmosphere(three,renderer,world.scene,expandedLayout.slots);
   assert.equal(world.scene.getObjectByName(floorName).visible,false);
+  const dapple=world.scene.getObjectByName('Atrium skylight tree shadow');
+  assert.ok(dapple?.isInstancedMesh && !dapple.visible && !dapple.castShadow && !dapple.receiveShadow);
+  assert.equal(world.scene.children.filter(node=>node.isLight).length,4);
+  assert.equal(world.defaultExposure,.72);
   for (const [tier,shadows] of [['low',false],['balanced',false],['detailed',true]]) {
     renderer.shadowMap.enabled=shadows;
     world.updateShopLods(pose,shadows,tier,camera,700,false,false);
@@ -205,13 +234,28 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
     atmosphere.render(camera,false);
     assert.ok(renderer.info.render.calls>0);
     assert.equal(world.scene.getObjectByName(floorName).visible,true);
+    assert.ok(dapple.visible);
+    assert.equal(dapple.material.type,world.contact.type);
+    assert.equal(dapple.material.customProgramCacheKey(),world.contact.customProgramCacheKey());
+    assert.equal(dapple.material.map.wrapS,T.RepeatWrapping);
+    assert.equal(dapple.material.map.generateMipmaps,false);
     assert.equal(world.scene.getObjectByName(ceilingName).visible,tier!=='low');
     assert.equal(world.scene.getObjectByName(floorName).material.map===world.contact.map,false);
     if (shadows) assert.ok(key.target.position.distanceTo(new T.Vector3(pose.x,pose.y,pose.z))<.012);
     else assert.deepEqual(key.target.position.toArray(),[0,0,0]);
   }
+  const map = dapple.material.map;
+  world.updateShopLods(pose,false,'low',camera,700,false,false);
+  assert.deepEqual(map.offset.toArray(),[0,0]);
+  world.updateShopLods(pose,false,'balanced',camera,700,false,false);
+  assert.notDeepEqual(map.offset.toArray(),[0,0]);
+  world.updateShopLods(pose,false,'detailed',camera,700,false,false,true);
+  assert.deepEqual(map.offset.toArray(),[0,0]);
+  assert.equal(new T.Raycaster(new T.Vector3(liftLayout.x,2,liftLayout.z),new T.Vector3(0,-1,0))
+    .intersectObject(dapple).length,0,'tree shadows must leave the lift shaft clear');
   const ceiling=world.scene.getObjectByName(ceilingName);
   assert.equal(new T.Raycaster(new T.Vector3(liftLayout.x,7.3,liftLayout.z),new T.Vector3(0,1,0))
     .intersectObject(ceiling).length,0,'atlas geometry must keep the roof opening');
   assert.equal(textureRequests.filter(url=>url.includes('mall-light-ao')).length,2);
+  assert.equal(textureRequests.filter(url=>url.includes('mall-skylight-dapple-512.png')).length,1);
 });

@@ -72,23 +72,24 @@ test('surface atmosphere batches Low coves and desktop washes separately and dis
     return {roughness:floor.roughness, emission:fixture.material.emissiveIntensity, opacity:wash.material.opacity};
   });
   const [low, balanced, detailed, recovered] = observed;
-  assert.deepEqual(low,{roughness:.39,emission:1.2*1.12,opacity:.22});
+  assert.deepEqual(low,{roughness:.39,emission:1.2,opacity:.58});
   assert.deepEqual(recovered,low);
   assert.ok(detailed.roughness < balanced.roughness && balanced.roughness < low.roughness);
   assert.ok(detailed.emission > balanced.emission && balanced.emission > low.emission);
   assert.ok(detailed.opacity > balanced.opacity && balanced.opacity > low.opacity);
 
-  surfaces.setTier('detailed',false);
-  assert.equal(wash.visible,false);
-  surfaces.setTier('balanced',false);
-  assert.equal(wash.visible,false);
-  surfaces.setTier('detailed');
-  assert.equal(wash.visible,true);
+  for (const tier of ['balanced','detailed']) {
+    surfaces.setTier(tier,false);
+    assert.equal(wash.visible,true);
+    assert.equal(wash.count,1,'compact cove stays on without the broad wash');
+    surfaces.setTier(tier);
+    assert.equal(wash.count,2);
+  }
   surfaces.setFixtureEmission(.8);
   assert.ok(fixture.material.emissiveIntensity > .8);
   surfaces.setTier('low',false);
   assert.equal(wash.visible,true);
   assert.equal(wash.count,1);
-  assert.equal(fixture.material.emissiveIntensity,.8*1.12);
-  assert.equal(vault.emissiveIntensity,.32*1.12);
+  assert.equal(fixture.material.emissiveIntensity,.8);
+  assert.equal(vault.emissiveIntensity,.32);
 });

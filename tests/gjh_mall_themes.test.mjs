@@ -142,6 +142,8 @@ test('validated visual roles update real scene targets atomically before a futur
    assert.equal(fog.color.value,theme.lighting.fog);
    assert.equal(ambient.color.value,theme.lighting.sky);
    assert.equal(key.intensity,theme.lighting.keyIntensity);
+   assert.ok(theme.lighting.ambient >= .4 && theme.lighting.ambient <= .55);
+   assert.ok(theme.lighting.exposure >= .65 && theme.lighting.exposure <= .75);
  }
  assert.equal(applyMallThemeToWorld(EVERYDAY,target),true);
  assert.equal(materials.shellFloor.color.value,EVERYDAY.materials.floorFlat);
@@ -153,7 +155,7 @@ test('validated visual roles update real scene targets atomically before a futur
  assert.equal(materials.glass.opacity,.4);
  assert.equal(fog.color.value,0xddbf9f);
  assert.equal(ambient.intensity,1.15);
- for (const lighting of [{fog:-1},{keyIntensity:5.1},{exposure:Infinity}]) {
+ for (const lighting of [{fog:-1},{keyIntensity:5.1},{exposure:Infinity},{exposure:.49},{exposure:1.26}]) {
    assert.equal(applyMallThemeToWorld({...EVERYDAY,lighting:{...EVERYDAY.lighting,...lighting}},target),false);
    assert.equal(materials.shellWall.color.value,0x112233);
    assert.equal(fog.color.value,0xddbf9f);

@@ -5,8 +5,8 @@ import {shopEntrance} from './expanded-layout.js';
 export function addExpandedStorefronts(T, layout, scene, signs) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
-    frame: {material: new T.MeshStandardMaterial({color: 0x194635, roughness: .66}), matrices: []},
-    brass: {material: new T.MeshStandardMaterial({color: 0xc9a55e, metalness: .65, roughness: .38}), matrices: []},
+    frame: {material: new T.MeshStandardMaterial({color: 0x102f25, roughness: .29, metalness: .16}), matrices: []},
+    brass: {material: new T.MeshStandardMaterial({color: 0xc9a55e, metalness: .78, roughness: .28}), matrices: []},
     accent: {material: new T.MeshStandardMaterial({color: 0xffffff, roughness: .58}), matrices: [], slots: []},
     glass: {material: new T.MeshBasicMaterial({color: 0xb9d9d0,
       transparent: true, opacity: .065, depthWrite: false}), matrices: []}

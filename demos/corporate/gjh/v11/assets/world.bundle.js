@@ -1160,9 +1160,9 @@ var atriumLayout = Object.freeze({
 function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false, setCanopyMaterial, artworkTier = () => "low" }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
-  materials.vaultOak.color.set(12886652);
-  materials.vaultOak.emissive.set(10713934);
-  materials.vaultOak.emissiveIntensity = 0.32;
+  materials.vaultOak.color.set(10257515);
+  materials.vaultOak.emissive.set(10583642);
+  materials.vaultOak.emissiveIntensity = 0.14;
   const tau = 2 * Math.PI;
   const spandrel = new T.Shape;
   spandrel.moveTo(-1, 0);
@@ -1201,7 +1201,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     const piers = [19.05, 24.8, 30.55, 36.3, 42.05, 47.55];
     for (let bay = 0;bay < piers.length; bay++) {
       const z = piers[bay];
-      box("ivory", x, 2.55, z, 0.76, 5.1, 0.83, true);
+      box("green", x, 2.55, z, 0.76, 5.1, 0.83, true);
       box("oak", x, 0.2, z, 0.79, 0.39, 0.88);
       box("brass", x, 0.41, z, 0.79, 0.035, 0.88);
       box("ivory", x, 4.78, z, 0.88, 0.36, 1.03);
@@ -1214,7 +1214,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       }
     }
   }
-  materials.paving = new T.MeshStandardMaterial({ color: 14341062, roughness: 0.39, metalness: 0.06 });
+  materials.paving = new T.MeshStandardMaterial({ color: 11115919, roughness: 0.36, metalness: 0.07 });
   const pavingURL = new URL("concourse-limestone.webp", import.meta.url);
   new T.TextureLoader().load(pavingURL.href, (map) => {
     map.colorSpace = T.SRGBColorSpace;
@@ -1253,7 +1253,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     map.anisotropy = 4;
     materials.courtStone.map = map;
   }
-  materials.courtStone.color.set(7572865);
+  materials.courtStone.color.set(5203543);
+  materials.courtStone.roughness = 0.33;
   box("courtStone", 10, -0.006, 33, 6.05, 0.009, 29.6);
   for (const x of [6.95, 13.05]) {
     box("ivory", x, 0.004, 33, 0.12, 0.012, 29.6);
@@ -1269,12 +1270,13 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       box("oak", front + inside * 0.7, soffitY, z, 1.55, soffitHeight, 7.96);
       box("ivory", front + inside * 1.47, 6.02, z, 0.16, 0.52, 8);
       box("glow", front + inside * 1.38, 5.77, z, 0.06, 0.035, 7.75);
+      lightWash?.(front + inside * 1.3, 5.791, z, 0.75, 7.8, 0, Math.PI / 2, true);
       for (const dz of [-2.45, 2.45]) {
         box("brass", front + inside * 0.77, 5.78, z + dz, 0.31, 0.06, 0.31);
         box("glow", front + inside * 0.77, 5.737, z + dz, 0.21, 0.04, 0.21);
         lightWash?.(front + inside * 0.77, soffitY - soffitHeight / 2 - 0.008, z + dz, 1.25, 2.5, 0, Math.PI / 2);
       }
-      box("ivory", front + side * arcadePilaster.inset, 2.88, z - 3.88, arcadePilaster.depth, 5.76, 0.35);
+      box("green", front + side * arcadePilaster.inset, 2.88, z - 3.88, arcadePilaster.depth, 5.76, 0.35);
       for (const offset of [-2.48, 2.48]) {
         solid("archSpandrel", "green", front + inside * 0.235, 3.32, z + offset, 1.15, 0.53, 0.11, inside * Math.PI / 2);
       }
@@ -1419,6 +1421,7 @@ totalEmissiveRadiance *= vColor;`);
   for (const lounge2 of atriumLayout.lounges) {
     const planter = lounge2.planters[lounge2.id === "west" ? 1 : 0];
     tree(planter.x, planter.z, 4.2);
+    lightPool(planter.x, 0.091, planter.z, 2.2, 2.2);
   }
   for (const z of [8.37, 11.63])
     box("oak", -4.99, 5.27, z, 0.3, 3.14, 0.37);
@@ -1552,6 +1555,7 @@ totalEmissiveRadiance *= vColor;`);
   chandelier.name = "Gallery atrium chandelier";
   chandelier.userData.sourceStatus = "pending";
   chandelier.position.set(10, 5.98, 30.55);
+  lightPool(10, 0.054, 30.55, 4.8, 4.8);
   chandelier.visible = false;
   scene.add(chandelier);
   let requested = false;
@@ -5404,8 +5408,8 @@ async function addShopSignAtlas(T, layout, scene) {
 function addExpandedStorefronts(T, layout, scene, signs) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
-    frame: { material: new T.MeshStandardMaterial({ color: 1656373, roughness: 0.66 }), matrices: [] },
-    brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.65, roughness: 0.38 }), matrices: [] },
+    frame: { material: new T.MeshStandardMaterial({ color: 1060645, roughness: 0.29, metalness: 0.16 }), matrices: [] },
+    brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.78, roughness: 0.28 }), matrices: [] },
     accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
     glass: { material: new T.MeshBasicMaterial({
       color: 12179920,
@@ -7832,9 +7836,9 @@ function addFeatureKiosk({ x, z, box, cylinder, sign }) {
 
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
 var SURFACES = {
-  low: { roughness: 1, emission: 1.12, washOpacity: 0.22 },
-  balanced: { roughness: 0.82, emission: 1.2, washOpacity: 0.32 },
-  detailed: { roughness: 0.68, emission: 1.38, washOpacity: 0.48 }
+  low: { roughness: 1, emission: 1, washOpacity: 0.58 },
+  balanced: { roughness: 0.91, emission: 1.04, washOpacity: 0.61 },
+  detailed: { roughness: 0.82, emission: 1.1, washOpacity: 0.65 }
 };
 function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, floors, fixtures, vault }) {
   const washMaterial = poolMaterial.clone();
@@ -7856,20 +7860,20 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
   const floorRoughness = floors.map((floor) => floor.roughness);
   const vaultEmission = vault.emissiveIntensity;
   let fixtureEmission = fixtures.emissiveIntensity;
-  let preset2, opacity;
+  let preset2, broadWash;
   function setTier(tier, lightWash = true) {
     const next = Object.hasOwn(SURFACES, tier) ? SURFACES[tier] : SURFACES.low;
-    const nextOpacity = next === SURFACES.low || lightWash ? next.washOpacity : 0;
-    if (next === preset2 && nextOpacity === opacity)
+    const nextBroadWash = next !== SURFACES.low && lightWash;
+    if (next === preset2 && nextBroadWash === broadWash)
       return false;
     preset2 = next;
-    opacity = nextOpacity;
+    broadWash = nextBroadWash;
     floors.forEach((floor, index) => {
       floor.roughness = floorRoughness[index] * preset2.roughness;
     });
     vault.emissiveIntensity = vaultEmission * preset2.emission;
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
-    washMaterial.opacity = opacity;
+    washMaterial.opacity = preset2.washOpacity;
     updateWash();
     return true;
   }
@@ -7877,11 +7881,10 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
     fixtureEmission = intensity;
     fixtures.emissiveIntensity = fixtureEmission * preset2.emission;
   }
-  const allowWash = (strip) => strip === (preset2 === SURFACES.low);
+  const allowWash = (strip) => strip || broadWash;
   function updateWash(frustum) {
-    if (opacity > 0)
-      washVisibility.update(frustum, allowWash);
-    washMesh.visible = opacity > 0 && washMesh.count > 0;
+    washVisibility.update(frustum, allowWash);
+    washMesh.visible = washMesh.count > 0;
   }
   setTier("low");
   return { setTier, setFixtureEmission, updateView(view) {
@@ -7893,7 +7896,7 @@ function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, fl
 var { minX, maxX, minZ, maxZ } = expandedLayout.bounds;
 var bakeAtlasSplit = 0.5;
 var bakeAtlasGutter = 0.015625;
-function createLayer(T, panels, material, ceiling) {
+function createLayer(T, panels, material, ceiling, projection) {
   const positions = [], uv = [], indices = [], normals = [];
   const span = bakeAtlasSplit - 2 * bakeAtlasGutter;
   const start = (ceiling ? bakeAtlasSplit : 0) + bakeAtlasGutter;
@@ -7903,7 +7906,10 @@ function createLayer(T, panels, material, ceiling) {
       positions.push(x, y, z);
       normals.push(0, ceiling ? -1 : 1, 0);
       const row = start + (z - minZ) / (maxZ - minZ) * span;
-      uv.push((x - minX) / (maxX - minX), 1 - row);
+      if (projection) {
+        uv.push((x - projection.minX) / (projection.maxX - projection.minX), 1 - (z - projection.minZ) / (projection.maxZ - projection.minZ));
+      } else
+        uv.push((x - minX) / (maxX - minX), 1 - row);
     }
     for (const index of ceiling ? [0, 2, 1, 0, 3, 2] : [0, 1, 2, 0, 2, 3])
       indices.push(first + index);
@@ -7925,6 +7931,7 @@ function createMallBakedLighting(T, scene, {
   contact,
   phone,
   prepareModel,
+  skylightDapple,
   load: load2 = (url) => new T.TextureLoader().loadAsync(url)
 }) {
   const material = contact.clone();
@@ -7941,6 +7948,7 @@ function createMallBakedLighting(T, scene, {
     ceiling.visible = Boolean(warmed) && currentTier !== "low";
   }
   function prepare(tier) {
+    skylightDapple?.prepare();
     const size = atlasSize2(tier);
     if (!requests.has(size)) {
       const url = new URL(`mall-light-ao-${size}.webp`, import.meta.url).href;
@@ -7980,6 +7988,209 @@ function createMallBakedLighting(T, scene, {
   }
   return { prepare, setTier };
 }
+function createSkylightDapple(T, scene, {
+  panels,
+  projection,
+  contact,
+  prepareModel,
+  load: load2 = (url) => new T.TextureLoader().loadAsync(url)
+}) {
+  const material = contact.clone();
+  material.opacity = 0.78;
+  const mesh = createLayer(T, panels, material, false, projection);
+  mesh.name = "Atrium skylight tree shadow";
+  mesh.renderOrder = -2;
+  scene.add(mesh);
+  let request, map;
+  function prepare() {
+    request ??= Promise.resolve().then(async () => {
+      const texture = await load2(new URL("mall-skylight-dapple-512.png", import.meta.url).href);
+      texture.wrapS = texture.wrapT = T.RepeatWrapping;
+      texture.generateMipmaps = false;
+      texture.minFilter = T.LinearFilter;
+      material.map = texture;
+      try {
+        await prepareModel?.(mesh, {
+          late: false,
+          includeInSceneSweep: false,
+          priority: () => -10,
+          linear: () => false,
+          lighting: undefined
+        });
+        map = texture;
+        mesh.visible = true;
+      } catch {
+        material.map = contact.map;
+        texture.dispose();
+      }
+    }).catch(() => {});
+    return request;
+  }
+  function update(tier, reducedMotion, now = performance.now()) {
+    if (!map)
+      return;
+    const drift = (tier === "balanced" || tier === "detailed") && !reducedMotion ? now : 0;
+    map.offset.set(0.028 * Math.sin(drift / 53000), 0.02 * Math.sin(drift / 50000));
+  }
+  return { prepare, update };
+}
+
+// demos/corporate/gjh/v11/assets/festival-calendar.js
+var DAY_MS = 86400000;
+var isoDate = (day) => new Date(day * DAY_MS).toISOString().slice(0, 10);
+var LUNAR_NEW_YEAR_DATES = Object.freeze({
+  2026: "2026-02-17",
+  2027: "2027-02-06",
+  2028: "2028-01-26",
+  2029: "2029-02-13",
+  2030: "2030-02-03",
+  2031: "2031-01-23",
+  2032: "2032-02-11",
+  2033: "2033-01-31",
+  2034: "2034-02-19",
+  2035: "2035-02-08"
+});
+var DEEPAVALI_DATES = Object.freeze({
+  2026: "2026-11-08",
+  2027: "2027-10-29",
+  2028: "2028-10-17",
+  2029: "2029-11-05",
+  2030: "2030-10-26",
+  2031: "2031-11-14",
+  2032: "2032-11-02",
+  2033: "2033-10-22",
+  2034: "2034-11-09",
+  2035: "2035-10-30"
+});
+function lunarNewYearFromIntl(year) {
+  try {
+    const format = new Intl.DateTimeFormat("en-u-ca-chinese", {
+      month: "numeric",
+      day: "numeric",
+      timeZone: "UTC"
+    });
+    if (format.resolvedOptions().calendar !== "chinese")
+      return null;
+    for (let day = Date.UTC(year, 0, 20);day <= Date.UTC(year, 1, 21); day += DAY_MS) {
+      const parts = format.formatToParts(day);
+      if (parts.some((part) => part.type === "month" && part.value === "1") && parts.some((part) => part.type === "day" && part.value === "1")) {
+        return isoDate(day / DAY_MS);
+      }
+    }
+  } catch {}
+  return null;
+}
+function lunarNewYear(year) {
+  if (year === 2027 || year === 2030)
+    return LUNAR_NEW_YEAR_DATES[year];
+  return lunarNewYearFromIntl(year) ?? LUNAR_NEW_YEAR_DATES[year] ?? null;
+}
+var FESTIVAL_CALENDAR = Object.freeze([
+  Object.freeze({ theme: "lunar-new-year", dateForYear: lunarNewYear }),
+  Object.freeze({ theme: "christmas", dateForYear: (year) => `${year}-12-25` }),
+  Object.freeze({ theme: "deepavali", dateForYear: (year) => DEEPAVALI_DATES[year] })
+]);
+
+// demos/corporate/gjh/v11/assets/mall-themes.js
+var EVERYDAY = Object.freeze({
+  id: "everyday",
+  label: "Everyday",
+  materials: Object.freeze({
+    floorTextured: 11246990,
+    floorFlat: 10523522,
+    ceiling: 9469026,
+    ceilingGlow: 11240283,
+    ceilingGlowIntensity: 0.16,
+    wall: 8616301,
+    green: 1060133,
+    ivory: 11773070,
+    brass: 11901794,
+    wood: 7033149,
+    oak: 10520422,
+    timber: 10783591,
+    timberAlt: 10520419,
+    glass: 14150111,
+    glassOpacity: 0.19,
+    glassRoughness: 0.08,
+    glassMetalness: 0.08,
+    glow: 16770996,
+    glowEmission: 16765066,
+    glowIntensity: 1.65,
+    liftStone: 14669252,
+    liftGreen: 1587760,
+    liftGate: 11901794,
+    liftGlassOpacity: 0.24
+  }),
+  lighting: Object.freeze({ sky: 16115670, ground: 6508868, ambient: 0.48, key: 16760716, keyIntensity: 1.82, fog: 6705467, exposure: 0.72 }),
+  decorationRefs: Object.freeze([])
+});
+var LUNAR_NEW_YEAR = Object.freeze({
+  id: "lunar-new-year",
+  label: "Lunar New Year",
+  materials: Object.freeze({
+    ...EVERYDAY.materials,
+    ceiling: 10847069,
+    ceilingGlow: 12817515,
+    wall: 10451544,
+    green: 8133922,
+    ivory: 12953735,
+    brass: 13937235,
+    wood: 6766634,
+    oak: 10579779,
+    glass: 15328212,
+    glow: 16770222,
+    glowEmission: 16760694,
+    liftGreen: 7938087,
+    liftGate: 6955042
+  }),
+  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 16179662, ground: 7229760, ambient: 0.46, key: 16759683, keyIntensity: 1.76, fog: 7360570, exposure: 0.7 }),
+  decorationRefs: Object.freeze(["lunar-new-year"])
+});
+var CHRISTMAS = Object.freeze({
+  id: "christmas",
+  label: "Christmas",
+  materials: Object.freeze({
+    ...EVERYDAY.materials,
+    ceiling: 10256995,
+    ceilingGlow: 13084538,
+    wall: 9666924,
+    green: 1525304,
+    ivory: 12627347,
+    brass: 13676133,
+    wood: 6571827,
+    oak: 10583377,
+    glass: 14741223,
+    glow: 16771516,
+    glowEmission: 16763260,
+    liftGreen: 2181179,
+    liftGate: 3430474
+  }),
+  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 15853530, ground: 6443590, ambient: 0.5, key: 16760975, keyIntensity: 1.78, fog: 6706754, exposure: 0.72 }),
+  decorationRefs: Object.freeze(["christmas"])
+});
+var DEEPAVALI = Object.freeze({
+  id: "deepavali",
+  label: "Deepavali",
+  materials: Object.freeze({
+    ...EVERYDAY.materials,
+    ceiling: 10520430,
+    ceilingGlow: 13212546,
+    wall: 10585195,
+    green: 6170716,
+    ivory: 13151116,
+    brass: 14265689,
+    wood: 7359544,
+    oak: 10911058,
+    glass: 15524834,
+    glow: 16770216,
+    glowEmission: 16760176,
+    liftGreen: 6171744,
+    liftGate: 5321300
+  }),
+  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 16179920, ground: 6966849, ambient: 0.45, key: 16759167, keyIntensity: 1.8, fog: 7163200, exposure: 0.71 }),
+  decorationRefs: Object.freeze(["deepavali"])
+});
+var MALL_THEMES = Object.freeze([EVERYDAY, LUNAR_NEW_YEAR, CHRISTMAS, DEEPAVALI]);
 
 // demos/corporate/gjh/v11/assets/mall-player-shadow.js
 function createPlayerShadow(T, scene, key) {
@@ -8014,7 +8225,7 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
   const colors = ["floorTextured", "floorFlat", "ceiling", "ceilingGlow", "wall", "green", "ivory", "brass", "wood", "oak", "timber", "timberAlt", "glass", "glow", "glowEmission"];
   const lightColors = ["sky", "ground", "key", "fog"];
   const scalars = ["ceilingGlowIntensity", "glassOpacity", "glassRoughness", "glassMetalness", "glowIntensity"];
-  if (colors.some((k) => !Number.isInteger(m[k]) || m[k] < 0 || m[k] > 16777215) || lightColors.some((k) => !Number.isInteger(l[k]) || l[k] < 0 || l[k] > 16777215) || scalars.some((k) => !Number.isFinite(m[k]) || m[k] < 0 || m[k] > 3) || ["ambient", "keyIntensity"].some((k) => !Number.isFinite(l[k]) || l[k] < 0 || l[k] > 5) || !Number.isFinite(l.exposure) || l.exposure < 0.5 || l.exposure > 2 || ["glassOpacity", "glassRoughness", "glassMetalness"].some((k) => m[k] > 1))
+  if (colors.some((k) => !Number.isInteger(m[k]) || m[k] < 0 || m[k] > 16777215) || lightColors.some((k) => !Number.isInteger(l[k]) || l[k] < 0 || l[k] > 16777215) || scalars.some((k) => !Number.isFinite(m[k]) || m[k] < 0 || m[k] > 3) || ["ambient", "keyIntensity"].some((k) => !Number.isFinite(l[k]) || l[k] < 0 || l[k] > 5) || !Number.isFinite(l.exposure) || l.exposure < 0.5 || l.exposure > 1.25 || ["glassOpacity", "glassRoughness", "glassMetalness"].some((k) => m[k] > 1))
     return false;
   materials2.shellFloor.color.set(materials2.shellFloor.map ? m.floorTextured : m.floorFlat);
   materials2.shellCeiling.color.set(m.ceiling);
@@ -8163,6 +8374,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           sphere(i % 2 ? "leaf" : "foliage", x + Math.cos(a) * 0.26, (1.25 + i * 0.12) * tall, z + Math.sin(a) * 0.26, 0.36, 0.6 * tall, 0.34);
         }
       }
+      if (expanded)
+        lightPool(x, 0.091, z, 1.9, 1.9);
       collider(x, 0.4, z, 0.85, 0.8, 0.85);
       shadow(x, z, 2.1, 2.1);
     }, bench = function(placement) {
@@ -8279,7 +8492,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           }
         mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
       }
-    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus, lightWash2) {
+    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus, lightWash2, reducedMotion = false) {
       productDisplay?.setShadows(shadows);
       if (!expanded) {
         if (camera) {
@@ -8289,6 +8502,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         return;
       }
       bakedLighting.setTier(tier);
+      skylightDapple?.update(tier, reducedMotion);
       if (shadows && tier === "detailed")
         playerShadow.update(visitor);
       if (surfaceAtmosphere.setTier(tier, lightWash2) && mappedPaving)
@@ -8385,8 +8599,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
     const prepareModel = warmModel && ((model, options2) => warmModel(model, scene, options2));
-    scene.background = new T.Color(expanded ? 12244444 : 1650226);
-    scene.fog = new T.Fog(expanded ? 14268822 : 12037532, expanded ? 75 : 40, expanded ? 155 : 100);
+    scene.background = new T.Color(expanded ? 8493979 : 1650226);
+    scene.fog = new T.Fog(expanded ? EVERYDAY.lighting.fog : 12037532, expanded ? 75 : 40, expanded ? 155 : 100);
+    const ambient = new T.HemisphereLight(16772832, 7166779, 1.05);
+    const key = new T.DirectionalLight(16766368, expanded ? EVERYDAY.lighting.keyIntensity : 2.1);
     const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
     const materials2 = {
       jade: mat(2181182, { roughness: 0.24, metalness: 0.22 }),
@@ -8424,27 +8640,22 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           })
         ]);
         const natural = module.createNaturalSurfaceTextures(T);
-        if (natural.stone) {
+        if (natural.stone)
           materials2.shellFloor.map = natural.stone;
-          materials2.shellFloor.color.set(15260614);
-          materials2.shellFloor.roughness = 0.38;
-        }
         if (natural.wood)
           for (const name of ["wood", "oak", "timber", "timberAlt"])
             materials2[name].map = natural.wood;
       } catch {} finally {
         clearTimeout(timer);
       }
-      if (!materials2.shellFloor.map)
-        materials2.shellFloor.color.set(14338222);
-      materials2.shellCeiling.color.set(15788249);
-      materials2.shellCeiling.emissive.set(11772550);
-      materials2.shellCeiling.emissiveIntensity = 0.55;
-      materials2.shellWall.color.set(13223094);
-      materials2.glass.color.set(14150111);
-      materials2.glass.opacity = 0.19;
-      materials2.glass.roughness = 0.08;
-      materials2.glass.metalness = 0.08;
+      applyMallThemeToWorld(EVERYDAY, { expanded, materials: materials2, ambient, key, fog: scene.fog });
+      materials2.shellFloor.roughness = 0.36;
+      materials2.brass.roughness = 0.28;
+      materials2.brass.metalness = 0.78;
+      materials2.green.roughness = 0.29;
+      materials2.green.metalness = 0.16;
+      materials2.dark.roughness = 0.3;
+      materials2.dark.metalness = 0.12;
     }
     const geometry = {
       box: new T.BoxGeometry(1, 1, 1),
@@ -8476,7 +8687,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       finishMaterials.shopFloor = materials2.shellFloor.clone();
       finishMaterials.shopFloor.color.set(16777215);
       for (const [finish2, roles] of Object.entries({
-        matte: ["green", "dark", "ivory", "cream", "foliage", "leaf", "pot", "seat"],
+        matte: ["ivory", "green", "dark", "cream", "foliage", "leaf", "pot", "seat"],
         woodGrain: ["wood", "oak", "timber", "timberAlt"]
       })) {
         const base = materials2[roles[0]].clone();
@@ -8568,8 +8779,8 @@ metalnessFactor=vSurface.y;`);
     const poolCanvas = document.createElement("canvas");
     poolCanvas.width = poolCanvas.height = 64;
     const poolContext = poolCanvas.getContext("2d"), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
-    poolGradient.addColorStop(0, "rgba(255,226,171,.3)");
-    poolGradient.addColorStop(0.35, "rgba(255,226,171,.15)");
+    poolGradient.addColorStop(0, expanded ? "rgba(255,220,173,.37)" : "rgba(255,226,171,.3)");
+    poolGradient.addColorStop(0.35, expanded ? "rgba(255,222,178,.16)" : "rgba(255,226,171,.15)");
     poolGradient.addColorStop(1, "rgba(255,226,171,0)");
     poolContext.fillStyle = poolGradient;
     poolContext.fillRect(0, 0, 64, 64);
@@ -8714,7 +8925,9 @@ metalnessFactor=vSurface.y;`);
         collider(table2.x, 0.28, table2.z, 0.58, 0.56, 0.58);
         shadow(table2.x, table2.z, 1, 1);
         for (const planter of lounge2.planters) {
-          box("pot", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
+          box("green", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
+          const aisle = Math.sign(atriumLayout.garden.x - planter.x);
+          lightWash(planter.x + aisle * 0.354, 0.23, planter.z, 0.58, 0.45, aisle * Math.PI / 2, 0, true);
           box("wood", planter.x, 0.61, planter.z, 0.6, 0.025, 0.6);
           for (let i = 0;i < 9; i++) {
             const a = i * Math.PI * 2 / 9;
@@ -8781,7 +8994,9 @@ metalnessFactor=vSurface.y;`);
     for (const store2 of spatial.stores) {
       const zone = store2.id, x = storeCenterX(store2);
       const lightNewMoon = expanded && zone === "newmoon";
-      const wall = expanded ? lightNewMoon ? "ivory" : "cream" : zone === "mili" ? "cream" : "green";
+      const wall = expanded ? lightNewMoon ? "newMoonWall" : "cream" : zone === "mili" ? "cream" : "green";
+      if (lightNewMoon)
+        materials2.newMoonWall = mat(14142393);
       if (expanded) {
         const floor = `${zone}Floor`;
         finishForRole.set(floor, "shopFloor");
@@ -8807,13 +9022,12 @@ metalnessFactor=vSurface.y;`);
         box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
         if (expanded) {
           shopVisibility.addWall(Number(store2.number), x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5);
-          const frame = zone === "mili" ? "oak" : zone === "gogo" ? "jadeAlt" : "green";
           const windowX = x + side * 3.55;
           windowGlass.push({ position: new T.Vector3(windowX, 2.6, 0), scale: new T.Vector3(2.4, 5.2, 0.12) });
           collider(windowX, 2.6, 0, 2.4, 5.2, 0.12);
           box("shellWall", x + side * 3.55, 0.26, 0.1, 2.4, 0.52, 0.2);
           for (const edge of [-1, 1]) {
-            box(frame, x + side * 3.55 + edge * 1.15, 2.65, 0.1, 0.11, 5.05, 0.18);
+            box("green", x + side * 3.55 + edge * 1.15, 2.65, 0.1, 0.11, 5.05, 0.18);
             box("brass", x + side * 3.55, 2.6 + edge * 2.49, 0.12, 2.3, 0.06, 0.16);
           }
           box("brass", x + side * 3.55, 2.58, 0.12, 2.3, 0.035, 0.12);
@@ -8831,7 +9045,7 @@ metalnessFactor=vSurface.y;`);
         lightPool(x + side * 3.6, 0.053, 1.15, 3.4, 3.7);
       }
       if (expanded) {
-        box("dark", x, 4.7, 0, 9.7, 1.55, 0.5, true);
+        box("green", x, 4.7, 0, 9.7, 1.55, 0.5, true);
         box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
       }
       ceilingBox("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4, null);
@@ -8857,6 +9071,8 @@ metalnessFactor=vSurface.y;`);
             for (const y of [0.63, 1.4, 2.17, 2.94]) {
               box(casing, bx, y, bz, 1.95, 0.07, 0.7);
               box("glow", bx, y - 0.05, bz + 0.3, 1.84, 0.025, 0.035);
+              if (lightNewMoon)
+                lightWash(bx, y - 0.28, bz + 0.38, 1.85, 0.52, 0, 0, true);
               for (const dx of [-0.51, 0, 0.51]) {
                 cylinder(zone === "newmoon" ? "brass" : "cream", bx + dx, y + 0.19, bz + 0.11, 0.14, 0.29);
                 cylinder(zone === "newmoon" ? "wood" : "cream", bx + dx, y + 0.36, bz + 0.11, 0.095, 0.075);
@@ -9043,6 +9259,16 @@ metalnessFactor=vSurface.y;`);
         interactables.push(...productDisplay.interactables);
         for (const c of productDisplay.colliders)
           collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
+        if (expanded)
+          for (const shelf of productDisplay.shelves) {
+            const shelfX = (shelf.min.x + shelf.max.x) / 2, width = shelf.max.x - shelf.min.x;
+            const shelfZ = shelf.max.z + 0.024;
+            for (const fraction of [0.39, 0.63, 0.88]) {
+              const y = shelf.max.y * fraction;
+              box("glow", shelfX, y, shelfZ, width * 0.87, 0.022, 0.026);
+              lightWash(shelfX, y - 0.2, shelfZ + 0.02, width * 0.9, 0.44, 0, 0, true);
+            }
+          }
         for (const [index, country] of ["NEW ZEALAND", "AUSTRALIA", "SOUTH AFRICA", "MEXICO"].entries()) {
           sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, 0.16, true, expanded ? 78 : undefined);
         }
@@ -9178,6 +9404,7 @@ metalnessFactor=vSurface.y;`);
         const frontage = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
         const offset = 2.15;
         lightWash(x + normalX * offset, 0.029, z + normalZ * offset, frontage * 0.78, 4.2, yaw, -Math.PI / 2);
+        lightWash(x - normalX * 0.28, 3.88, z - normalZ * 0.28, frontage * 0.72, 0.55, yaw, Math.PI / 2, true);
       }
       for (const bay of expandedLayout.slots.slice(3)) {
         const { x, z, alongX, alongZ, normalX, normalZ } = shopEntrance(bay);
@@ -9228,6 +9455,13 @@ metalnessFactor=vSurface.y;`);
           warmStrip(x, z, 0.07, 6);
       for (const x of [-5, 10, 25])
         warmStrip(x, 3, 6, 0.07);
+      const { minX: roofWest, maxX: roofEast, minZ: roofNorth, maxZ: roofSouth } = liftLayout.roofOpening;
+      if (expandedLift) {
+        for (const x of [roofWest - 0.2, roofEast + 0.2])
+          warmStrip(x, (roofNorth + roofSouth) / 2, 0.07, roofSouth - roofNorth);
+        for (const z of [roofNorth - 0.2, roofSouth + 0.2])
+          warmStrip((roofWest + roofEast) / 2, z, roofEast - roofWest, 0.07);
+      }
       for (const x of [-9, 29])
         warmStrip(x, 20, 0.09, 27);
       for (const z of [6.5, 33.5])
@@ -9434,12 +9668,9 @@ metalnessFactor=vSurface.y;`);
     }
     lowCylinder.dispose();
     lowSphere.dispose();
-    const ambient = new T.HemisphereLight(expanded ? 16772570 : 16772832, expanded ? 9203797 : 7166779, 1.05);
-    scene.add(ambient);
-    const key = new T.DirectionalLight(expanded ? 16766114 : 16766368, expanded ? 2.25 : 2.1);
     key.position.set(...expanded ? [-12, 16, 6] : [-8, 15, 9]);
     key.castShadow = true;
-    scene.add(key);
+    scene.add(ambient, key);
     const playerShadow = expanded ? createPlayerShadow(T, scene, key) : null;
     if (!expanded) {
       key.shadow.mapSize.set(1024, 1024);
@@ -9447,16 +9678,27 @@ metalnessFactor=vSurface.y;`);
       key.shadow.normalBias = 0.05;
       key.shadow.bias = -0.0004;
     }
-    let bakedLighting;
+    let bakedLighting, skylightDapple;
     if (expanded) {
       const holes = expandedLift ? [...bakedFloors, liftLayout.shaft] : bakedFloors;
       const publicFloor = holes.reduce((panels, hole) => panels.flatMap((panel) => cutRectangle(panel, hole)), [expandedLayout.bounds]);
+      if (expandedLift) {
+        const { minX: minX2, maxX: maxX2, minZ: minZ2, maxZ: maxZ2 } = liftLayout.roofOpening;
+        const projection2 = { minX: minX2 + 2, maxX: maxX2 + 4, minZ: Math.max(0.4, minZ2), maxZ: maxZ2 - 1 };
+        skylightDapple = createSkylightDapple(T, scene, {
+          contact,
+          prepareModel,
+          projection: projection2,
+          panels: cutRectangle(projection2, liftLayout.shaft).map((rect) => ({ ...rect, y: 0.026 }))
+        });
+      }
       bakedLighting = createMallBakedLighting(T, scene, {
         contact,
         phone,
         prepareModel,
         floors: [...publicFloor.map((rect) => ({ ...rect, y: 0.014 })), ...bakedFloors],
-        ceilings: bakedCeilings
+        ceilings: bakedCeilings,
+        skylightDapple
       });
     }
     const fill = expanded ? null : new T.DirectionalLight(15325378, 0.45);
@@ -9522,7 +9764,7 @@ metalnessFactor=vSurface.y;`);
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let upperWarmStatus = null, landingLights;
     let brandWallPromise = null;
-    return { signage, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {}, getPreloadedModels() {
+    return { signage, defaultExposure: EVERYDAY.lighting.exposure, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {}, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;

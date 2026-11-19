@@ -60,8 +60,8 @@ test('three PMREMs are retained, swapped by zone without rebaking, and released 
   assert.ok(captured.every(({target,sigma}) => sigma === .04 &&
     target.texture.mapping === T.CubeUVReflectionMapping && target.height === 1024));
   const route = [
-    [10,1,12,0,1], [28,1,12,1,.9], [20,1,-2,2,.8],
-    [20,8,-2,0,1], [10,1,41,1,.9], [20,1,-2,2,.8]
+    [10,1,12,0,.64], [28,1,12,1,.58], [20,1,-2,2,.94],
+    [20,8,-2,0,.64], [10,1,41,1,.58], [20,1,-2,2,.94]
   ];
   for (const [x,y,z,index,intensity] of route) {
     atmosphere.update({x,y,z});
@@ -77,7 +77,7 @@ test('three PMREMs are retained, swapped by zone without rebaking, and released 
   assert.ok(captured.every(({disposed}) => disposed));
   atmosphere.restoreEnvironment();
   assert.equal(scene.environment,captured[5].target.texture);
-  assert.equal(scene.environmentIntensity,.8);
+  assert.equal(scene.environmentIntensity,.94);
   assert.equal(generatorDisposals.length,2);
   atmosphere.releaseEnvironment();
 });

@@ -8,7 +8,7 @@ export const bakeAtlasGutter = .015625;
 
 // Generate planar UVs in world metres once. The geometry is a single identity
 // instance so the decals use the same program as the existing contact batch.
-function createLayer(T, panels, material, ceiling) {
+function createLayer(T, panels, material, ceiling, projection) {
   const positions = [], uv = [], indices = [], normals = [];
   const span = bakeAtlasSplit - 2*bakeAtlasGutter;
   const start = (ceiling ? bakeAtlasSplit : 0) + bakeAtlasGutter;
@@ -18,7 +18,10 @@ function createLayer(T, panels, material, ceiling) {
       positions.push(x,y,z);
       normals.push(0,ceiling ? -1 : 1,0);
       const row = start + (z-minZ)/(maxZ-minZ)*span;
-      uv.push((x-minX)/(maxX-minX),1-row);
+      if (projection) {
+        uv.push((x-projection.minX)/(projection.maxX-projection.minX),
+          1-(z-projection.minZ)/(projection.maxZ-projection.minZ));
+      } else uv.push((x-minX)/(maxX-minX),1-row);
     }
     for (const index of ceiling ? [0,2,1,0,3,2] : [0,1,2,0,2,3]) indices.push(first+index);
   }
@@ -34,7 +37,7 @@ function createLayer(T, panels, material, ceiling) {
   return mesh;
 }
 
-export function createMallBakedLighting(T, scene, {floors, ceilings, contact, phone, prepareModel,
+export function createMallBakedLighting(T, scene, {floors, ceilings, contact, phone, prepareModel, skylightDapple,
   load = url => new T.TextureLoader().loadAsync(url)
 }) {
   const material = contact.clone();
@@ -51,6 +54,7 @@ export function createMallBakedLighting(T, scene, {floors, ceilings, contact, ph
     ceiling.visible = Boolean(warmed) && currentTier !== 'low';
   }
   function prepare(tier) {
+    void skylightDapple?.prepare();
     const size = atlasSize(tier);
     if (!requests.has(size)) {
       const url = new URL(`mall-light-ao-${size}.webp`,import.meta.url).href;
@@ -91,4 +95,47 @@ export function createMallBakedLighting(T, scene, {floors, ceilings, contact, ph
     apply();
   }
   return {prepare,setTier};
+}
+
+// Black source-over is a destination multiply by (1 - alpha). Reuse the
+// contact decal's shader layout and keep the mesh out of all shadow passes.
+export function createSkylightDapple(T, scene, {panels, projection, contact, prepareModel,
+  load = url => new T.TextureLoader().loadAsync(url)
+}) {
+  const material = contact.clone();
+  material.opacity = .78;
+  const mesh = createLayer(T,panels,material,false,projection);
+  mesh.name = 'Atrium skylight tree shadow';
+  mesh.renderOrder = -2;
+  scene.add(mesh);
+  let request, map;
+  function prepare() {
+    request ??= Promise.resolve().then(async () => {
+      const texture = await load(new URL('mall-skylight-dapple-512.png',import.meta.url).href);
+      texture.wrapS = texture.wrapT = T.RepeatWrapping;
+      texture.generateMipmaps = false;
+      texture.minFilter = T.LinearFilter;
+      material.map = texture;
+      try {
+        // A contact decal has no lighting variants. Warm one binding in
+        // the shared queue ahead of the larger optional room textures.
+        await prepareModel?.(mesh,{
+          late:false,includeInSceneSweep:false,priority:() => -10,
+          linear:() => false,lighting:undefined
+        });
+        map = texture;
+        mesh.visible = true;
+      } catch {
+        material.map = contact.map;
+        texture.dispose();
+      }
+    }).catch(() => {});
+    return request;
+  }
+  function update(tier, reducedMotion, now = performance.now()) {
+    if (!map) return;
+    const drift = (tier === 'balanced' || tier === 'detailed') && !reducedMotion ? now : 0;
+    map.offset.set(.028*Math.sin(drift/53000), .020*Math.sin(drift/50000));
+  }
+  return {prepare,update};
 }

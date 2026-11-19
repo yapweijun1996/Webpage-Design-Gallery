@@ -25,7 +25,7 @@ function arcadeBoxes(t) {
     scene: new T.Scene(), geometry: {box: new T.BoxGeometry()},
     materials: {oak:new T.MeshStandardMaterial(), courtStone:new T.MeshStandardMaterial(), ivory:new T.MeshStandardMaterial()},
     garden: atriumLayout.garden, solid: noop, lightPool: noop,
-    box(material, ...dimensions) { if (material === 'ivory') boxes.push(boxBounds(...dimensions)); }
+    box(material, ...dimensions) { if (material === 'ivory' || material === 'green') boxes.push(boxBounds(...dimensions)); }
   });
   return boxes;
 }

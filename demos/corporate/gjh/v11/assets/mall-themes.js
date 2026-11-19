@@ -6,35 +6,35 @@ export const THEME_STORAGE_KEY = 'gjh-v11-mall-theme-v1';
 const AUTOMATIC = {id:'automatic',label:'Automatic (follows the calendar)'};
 export const EVERYDAY = Object.freeze({
   id:'everyday', label:'Everyday',
-  materials:Object.freeze({floorTextured:0xe8dbc6,floorFlat:0xdac8ae,ceiling:0xf0e8d9,ceilingGlow:0xb3a286,ceilingGlowIntensity:.55,
-    wall:0xc9c4b6,green:0x153c30,ivory:0xe3d6b7,brass:0xb59b62,wood:0x6b4931,oak:0xa28055,timber:0xa48b67,timberAlt:0xa08763,
-    glass:0xd7e9df,glassOpacity:.19,glassRoughness:.08,glassMetalness:.08,glow:0xffe7b4,glowEmission:0xffd08a,glowIntensity:1.2,
+  materials:Object.freeze({floorTextured:0xab9d8e,floorFlat:0xa09382,ceiling:0x907c62,ceilingGlow:0xab835b,ceilingGlowIntensity:.16,
+    wall:0x83796d,green:0x102d25,ivory:0xb3a48e,brass:0xb59b62,wood:0x6b513d,oak:0xa08766,timber:0xa48b67,timberAlt:0xa08763,
+    glass:0xd7e9df,glassOpacity:.19,glassRoughness:.08,glassMetalness:.08,glow:0xffe7b4,glowEmission:0xffd08a,glowIntensity:1.65,
     liftStone:0xdfd5c4,liftGreen:0x183a30,liftGate:0xb59b62,liftGlassOpacity:.24}),
-  lighting:Object.freeze({sky:0xffedda,ground:0x8c7055,ambient:1.05,key:0xffd4a2,keyIntensity:2.25,fog:0xd9b996,exposure:1.03}),
+  lighting:Object.freeze({sky:0xf5e7d6,ground:0x635144,ambient:.48,key:0xffbf8c,keyIntensity:1.82,fog:0x66513b,exposure:.72}),
   decorationRefs:Object.freeze([])
 });
 export const LUNAR_NEW_YEAR = Object.freeze({
   id:'lunar-new-year',label:'Lunar New Year',
-  materials:Object.freeze({...EVERYDAY.materials,ceiling:0xf3dfc1,ceilingGlow:0xc3946b,wall:0xe0c8aa,
-    green:0x7c1d22,ivory:0xf4dfbb,brass:0xd4aa53,wood:0x67402a,oak:0xa16f43,
+  materials:Object.freeze({...EVERYDAY.materials,ceiling:0xa5835d,ceilingGlow:0xc3946b,wall:0x9f7a58,
+    green:0x7c1d22,ivory:0xc5a887,brass:0xd4aa53,wood:0x67402a,oak:0xa16f43,
     glass:0xe9e3d4,glow:0xffe4ae,glowEmission:0xffbf76,liftGreen:0x792027,liftGate:0x6a2022}),
-  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xffead7,ground:0x90694e,key:0xffd09a,keyIntensity:2.2,fog:0xe1b58f,exposure:1.01}),
+  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xf6e1ce,ground:0x6e5140,ambient:.46,key:0xffbb83,keyIntensity:1.76,fog:0x70503a,exposure:.70}),
   decorationRefs:Object.freeze(['lunar-new-year'])
 });
 export const CHRISTMAS = Object.freeze({
   id:'christmas',label:'Christmas',
-  materials:Object.freeze({...EVERYDAY.materials,ceiling:0xeee5d7,ceilingGlow:0xc7a77a,wall:0xe0d8c6,
-    green:0x174638,ivory:0xeee6d0,brass:0xd0ae65,wood:0x644733,oak:0xa17d51,
+  materials:Object.freeze({...EVERYDAY.materials,ceiling:0x9c8263,ceilingGlow:0xc7a77a,wall:0x93816c,
+    green:0x174638,ivory:0xc0ad93,brass:0xd0ae65,wood:0x644733,oak:0xa17d51,
     glass:0xe0eee7,glow:0xffe9bc,glowEmission:0xffc97c,liftGreen:0x21483b,liftGate:0x34584a}),
-  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xfff0d9,ground:0x857057,key:0xffd9ac,keyIntensity:2.2,fog:0xd7bc9f,exposure:1.03}),
+  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xf1e7da,ground:0x625246,ambient:.50,key:0xffc08f,keyIntensity:1.78,fog:0x665642,exposure:.72}),
   decorationRefs:Object.freeze(['christmas'])
 });
 export const DEEPAVALI = Object.freeze({
   id:'deepavali',label:'Deepavali',
-  materials:Object.freeze({...EVERYDAY.materials,ceiling:0xf1e0d5,ceilingGlow:0xc99b82,wall:0xe5d5c4,
-    green:0x5e285c,ivory:0xf5e6c8,brass:0xd9ad59,wood:0x704c38,oak:0xa67d52,
+  materials:Object.freeze({...EVERYDAY.materials,ceiling:0xa0876e,ceilingGlow:0xc99b82,wall:0xa1846b,
+    green:0x5e285c,ivory:0xc8ab8c,brass:0xd9ad59,wood:0x704c38,oak:0xa67d52,
     glass:0xece3e2,glow:0xffe4a8,glowEmission:0xffbd70,liftGreen:0x5e2c60,liftGate:0x513254}),
-  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xffeadc,ground:0x8e6b54,key:0xffce95,keyIntensity:2.15,fog:0xdcb492,exposure:1.04}),
+  lighting:Object.freeze({...EVERYDAY.lighting,sky:0xf6e2d0,ground:0x6a4e41,ambient:.45,key:0xffb97f,keyIntensity:1.80,fog:0x6d4d40,exposure:.71}),
   decorationRefs:Object.freeze(['deepavali'])
 });
 export const MALL_THEMES = Object.freeze([EVERYDAY,LUNAR_NEW_YEAR,CHRISTMAS,DEEPAVALI]);

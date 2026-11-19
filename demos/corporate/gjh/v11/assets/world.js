@@ -33,7 +33,8 @@ import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere} from './mall-atmosphere.js';
-import {createMallBakedLighting} from './mall-baked-lighting.js';
+import {createMallBakedLighting, createSkylightDapple} from './mall-baked-lighting.js';
+import {EVERYDAY} from './mall-themes.js';
 import {createPlayerShadow} from './mall-player-shadow.js';
 
 export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key, fog}) {
@@ -44,7 +45,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
   const scalars=['ceilingGlowIntensity','glassOpacity','glassRoughness','glassMetalness','glowIntensity'];
   if(colors.some(k=>!Number.isInteger(m[k])||m[k]<0||m[k]>0xffffff)||lightColors.some(k=>!Number.isInteger(l[k])||l[k]<0||l[k]>0xffffff)||
      scalars.some(k=>!Number.isFinite(m[k])||m[k]<0||m[k]>3)||['ambient','keyIntensity'].some(k=>!Number.isFinite(l[k])||l[k]<0||l[k]>5)||
-     !Number.isFinite(l.exposure)||l.exposure<.5||l.exposure>2||
+     !Number.isFinite(l.exposure)||l.exposure<.5||l.exposure>1.25||
      ['glassOpacity','glassRoughness','glassMetalness'].some(k=>m[k]>1)) return false;
   materials.shellFloor.color.set(materials.shellFloor.map?m.floorTextured:m.floorFlat);
   materials.shellCeiling.color.set(m.ceiling);materials.shellCeiling.emissive.set(m.ceilingGlow);materials.shellCeiling.emissiveIntensity=m.ceilingGlowIntensity;
@@ -84,8 +85,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   const seats=[], seatPlacements=createSeatPlacements(expanded);
   const scene = new T.Scene();
   const prepareModel = warmModel && ((model, options) => warmModel(model, scene, options));
-  scene.background = new T.Color(expanded ? 0xbad5dc : 0x192e32);
-  scene.fog = new T.Fog(expanded ? 0xd9b996 : 0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
+  scene.background = new T.Color(expanded ? 0x819b9b : 0x192e32);
+  scene.fog = new T.Fog(expanded ? EVERYDAY.lighting.fog : 0xb7ad9c, expanded ? 75 : 40, expanded ? 155 : 100);
+  const ambient = new T.HemisphereLight(0xffeee0,0x6d5b3b,1.05);
+  const key = new T.DirectionalLight(0xffd5a0,expanded ? EVERYDAY.lighting.keyIntensity : 2.1);
   const mat = (color, extra = {}) => new T.MeshStandardMaterial({color, roughness: .72, ...extra});
   const materials = {
     jade: mat(0x21483e, {roughness: .24, metalness: .22}), jadeAlt: mat(0x244c42, {roughness: .28, metalness: .18}),
@@ -111,14 +114,18 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Optional finish timeout')),2000);}),
       ]);
       const natural=module.createNaturalSurfaceTextures(T);
-      if(natural.stone){materials.shellFloor.map=natural.stone;materials.shellFloor.color.set(0xe8dbc6);materials.shellFloor.roughness=.38;}
+      if(natural.stone) materials.shellFloor.map=natural.stone;
       if(natural.wood)for(const name of ['wood','oak','timber','timberAlt'])materials[name].map=natural.wood;
     }catch{/* Retain usable solid finishes on module/canvas failure. */}
     finally{clearTimeout(timer);}
-    if(!materials.shellFloor.map) materials.shellFloor.color.set(0xdac8ae);
-    materials.shellCeiling.color.set(0xf0e8d9);materials.shellCeiling.emissive.set(0xb3a286);materials.shellCeiling.emissiveIntensity=.55;
-    materials.shellWall.color.set(0xc9c4b6);
-    materials.glass.color.set(0xd7e9df);materials.glass.opacity=.19;materials.glass.roughness=.08;materials.glass.metalness=.08;
+    applyMallThemeToWorld(EVERYDAY, {expanded, materials, ambient, key, fog:scene.fog});
+    materials.shellFloor.roughness = .36;
+    materials.brass.roughness = .28;
+    materials.brass.metalness = .78;
+    materials.green.roughness = .29;
+    materials.green.metalness = .16;
+    materials.dark.roughness = .30;
+    materials.dark.metalness = .12;
   }
   const geometry = {
     box: new T.BoxGeometry(1, 1, 1), cylinder: new T.CylinderGeometry(1, 1, 1, 32), sphere: new T.SphereGeometry(1, 12, 8),
@@ -146,7 +153,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     finishMaterials.shopFloor = materials.shellFloor.clone();
     finishMaterials.shopFloor.color.set(0xffffff);
     for (const [finish, roles] of Object.entries({
-      matte: ['green','dark','ivory','cream','foliage','leaf','pot','seat'],
+      matte: ['ivory','green','dark','cream','foliage','leaf','pot','seat'],
       woodGrain: ['wood','oak','timber','timberAlt']
     })) {
       const base = materials[roles[0]].clone();
@@ -284,7 +291,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   // One soft light texture and one instance batch serve every floor and wall wash.
   const poolCanvas = document.createElement('canvas'); poolCanvas.width = poolCanvas.height = 64;
   const poolContext = poolCanvas.getContext('2d'), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
-  poolGradient.addColorStop(0, 'rgba(255,226,171,.3)'); poolGradient.addColorStop(.35, 'rgba(255,226,171,.15)'); poolGradient.addColorStop(1, 'rgba(255,226,171,0)');
+  poolGradient.addColorStop(0, expanded ? 'rgba(255,220,173,.37)' : 'rgba(255,226,171,.3)');
+  poolGradient.addColorStop(.35, expanded ? 'rgba(255,222,178,.16)' : 'rgba(255,226,171,.15)');
+  poolGradient.addColorStop(1, 'rgba(255,226,171,0)');
   poolContext.fillStyle = poolGradient; poolContext.fillRect(0, 0, 64, 64);
   const poolTexture = new T.CanvasTexture(poolCanvas); poolTexture.colorSpace = T.SRGBColorSpace;
   materials.lightPool = decalMaterial(new T.MeshBasicMaterial({
@@ -304,6 +313,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       cylinder('wood', x, .9 * tall, z, .04, 1.2 * tall);
       for (let i = 0; i < 5; i++) { const a = i * 2.4; sphere(i % 2 ? 'leaf' : 'foliage', x + Math.cos(a) * .26, (1.25 + i * .12) * tall, z + Math.sin(a) * .26, .36, .6 * tall, .34); }
     }
+    if (expanded) lightPool(x,.091,z,1.9,1.9);
     collider(x, .4, z, .85, .8, .85); shadow(x, z, 2.1, 2.1);
   }
   function bench(placement) {
@@ -449,7 +459,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       cylinder('brass',table.x,.04,table.z,.2,.05);
       collider(table.x,.28,table.z,.58,.56,.58);shadow(table.x,table.z,1,1);
       for (const planter of lounge.planters) {
-        box('pot',planter.x,.3,planter.z,.7,.6,.7,true);
+        box('green',planter.x,.3,planter.z,.7,.6,.7,true);
+        const aisle = Math.sign(atriumLayout.garden.x-planter.x);
+        lightWash(planter.x+aisle*.354,.23,planter.z,.58,.45,aisle*Math.PI/2,0,true);
         box('wood',planter.x,.61,planter.z,.6,.025,.6);
         for (let i=0;i<9;i++) {
           const a=i*Math.PI*2/9;
@@ -551,7 +563,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
     const lightNewMoon = expanded && zone === 'newmoon';
-    const wall = expanded ? (lightNewMoon ? 'ivory' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
+    const wall = expanded ? (lightNewMoon ? 'newMoonWall' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
+    if (lightNewMoon) materials.newMoonWall = mat(0xd7cbb9);
     if (expanded) {
       const floor = `${zone}Floor`;
       finishForRole.set(floor,'shopFloor');
@@ -577,13 +590,12 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         shopVisibility.addWall(Number(store.number), x + side * 4.8, 2.85, -5.25, .22, 5.7, 10.5);
         // Glazing is physically solid but visually transparent: shoppers can
         // see the real existing interior without blocking the 4.7 m doorway.
-        const frame=zone==='mili'?'oak':zone==='gogo'?'jadeAlt':'green';
         const windowX = x + side * 3.55;
         windowGlass.push({position:new T.Vector3(windowX,2.6,0), scale:new T.Vector3(2.4,5.2,.12)});
         collider(windowX,2.6,0,2.4,5.2,.12);
         box('shellWall', x + side * 3.55, .26, .1, 2.4, .52, .2);
         for (const edge of [-1, 1]) {
-          box(frame, x + side * 3.55 + edge * 1.15, 2.65, .1, .11, 5.05, .18);
+          box('green', x + side * 3.55 + edge * 1.15, 2.65, .1, .11, 5.05, .18);
           box('brass', x + side * 3.55, 2.6 + edge * 2.49, .12, 2.3, .06, .16);
         }
         box('brass', x + side * 3.55, 2.58, .12, 2.3, .035, .12);
@@ -602,7 +614,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       lightPool(x + side * 3.6, .053, 1.15, 3.4, 3.7);
     }
     if (expanded) {
-      box('dark', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
+      box('green', x, 4.7, 0, 9.7, 1.55, .5, true); box('brass', x, 5.45, .3, 9.8, .045, .08);
     }
     ceilingBox('cream', x, 5.8, -5.2, 9.7, .22, 10.4, null);
     activeShopSlot=expanded?Number(store.number):null;
@@ -628,6 +640,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
           for (const y of [.63,1.40,2.17,2.94]) {
             box(casing,bx,y,bz,1.95,.07,.7);
             box('glow',bx,y-.05,bz+.3,1.84,.025,.035);
+            if (lightNewMoon) lightWash(bx,y-.28,bz+.38,1.85,.52,0,0,true);
             for(const dx of [-.51,0,.51]) {
               // Unlabelled ceramics and glassware form the window still life.
               cylinder(zone==='newmoon'?'brass':'cream',bx+dx,y+.19,bz+.11,.14,.29);
@@ -805,6 +818,15 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter(mesh => mesh.isMesh));
       interactables.push(...productDisplay.interactables);
       for (const c of productDisplay.colliders) collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
+      if (expanded) for (const shelf of productDisplay.shelves) {
+        const shelfX = (shelf.min.x+shelf.max.x)/2, width = shelf.max.x-shelf.min.x;
+        const shelfZ = shelf.max.z+.024;
+        for (const fraction of [.39,.63,.88]) {
+          const y = shelf.max.y*fraction;
+          box('glow',shelfX,y,shelfZ,width*.87,.022,.026);
+          lightWash(shelfX,y-.20,shelfZ+.02,width*.90,.44,0,0,true);
+        }
+      }
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
         sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true, expanded ? 78 : undefined);
       }
@@ -907,6 +929,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       const frontage = normalZ ? bay.maxX-bay.minX : bay.maxZ-bay.minZ;
       const offset = 2.15;
       lightWash(x+normalX*offset,.029,z+normalZ*offset,frontage*.78,4.2,yaw,-Math.PI/2);
+      lightWash(x-normalX*.28,3.88,z-normalZ*.28,frontage*.72,.55,yaw,Math.PI/2,true);
     }
     for (const bay of expandedLayout.slots.slice(3)) {
       const {x,z,alongX,alongZ,normalX,normalZ}=shopEntrance(bay);
@@ -971,6 +994,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     for(const x of [-12,32])for(const z of [10,22,34])warmStrip(x,z,.07,6);
     for(const x of [-5,10,25])warmStrip(x,3,6,.07);
     // Cove strips and suspended rings reuse emissive instances, not dynamic lights.
+    const {minX:roofWest,maxX:roofEast,minZ:roofNorth,maxZ:roofSouth} = liftLayout.roofOpening;
+    if (expandedLift) {
+      for (const x of [roofWest-.20,roofEast+.20]) warmStrip(x,(roofNorth+roofSouth)/2,.07,roofSouth-roofNorth);
+      for (const z of [roofNorth-.20,roofSouth+.20]) warmStrip((roofWest+roofEast)/2,z,roofEast-roofWest,.07);
+    }
     for(const x of [-9,29]) warmStrip(x,20,.09,27);
     for(const z of [6.5,33.5]) warmStrip(10,z,38,.09);
     for(const radius of [2.2,3.2]) solid('torus','glow',10,8.05,20,radius,radius,.8,0,-Math.PI/2);
@@ -1184,11 +1212,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   }
   lowCylinder.dispose();
   lowSphere.dispose();
-  const ambient = new T.HemisphereLight(expanded ? 0xffedda : 0xffeee0, expanded ? 0x8c7055 : 0x6d5b3b, 1.05);scene.add(ambient);
-  const key = new T.DirectionalLight(expanded ? 0xffd4a2 : 0xffd5a0, expanded ? 2.25 : 2.1);
   key.position.set(...(expanded ? [-12, 16, 6] : [-8, 15, 9]));
   key.castShadow = true;
-  scene.add(key);
+  scene.add(ambient,key);
   const playerShadow = expanded ? createPlayerShadow(T,scene,key) : null;
   if (!expanded) {
     key.shadow.mapSize.set(1024,1024);
@@ -1196,13 +1222,19 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     key.shadow.normalBias = .05;
     key.shadow.bias = -.0004;
   }
-  let bakedLighting;
+  let bakedLighting, skylightDapple;
   if (expanded) {
     const holes = expandedLift ? [...bakedFloors,liftLayout.shaft] : bakedFloors;
     const publicFloor = holes.reduce((panels,hole) => panels.flatMap(panel => cutRectangle(panel,hole)),
       [expandedLayout.bounds]);
+    if (expandedLift) {
+      const {minX,maxX,minZ,maxZ} = liftLayout.roofOpening;
+      const projection = {minX:minX+2,maxX:maxX+4,minZ:Math.max(.4,minZ),maxZ:maxZ-1};
+      skylightDapple = createSkylightDapple(T,scene,{contact,prepareModel,projection,
+        panels:cutRectangle(projection,liftLayout.shaft).map(rect => ({...rect,y:.026}))});
+    }
     bakedLighting = createMallBakedLighting(T,scene,{contact,phone,prepareModel,
-      floors:[...publicFloor.map(rect => ({...rect,y:.014})),...bakedFloors],ceilings:bakedCeilings});
+      floors:[...publicFloor.map(rect => ({...rect,y:.014})),...bakedFloors],ceilings:bakedCeilings,skylightDapple});
   }
   const fill = expanded ? null : new T.DirectionalLight(0xe9d8c2,.45);
   if (fill) { fill.position.set(4,8,-5); scene.add(fill); }
@@ -1267,7 +1299,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   const shopNear = new Map(), eye = new T.Vector3(), projection = new T.Matrix4();
   const view = {frustum:new T.Frustum(), eye, shopVisibility};
   let deckLodMeshes=null;
-  function updateShopLods(visitor, shadows = true, tier, camera, height, focus, lightWash) {
+  function updateShopLods(visitor, shadows = true, tier, camera, height, focus, lightWash, reducedMotion = false) {
     productDisplay?.setShadows(shadows);
     if (!expanded) {
       if (camera) {
@@ -1278,6 +1310,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
     // The render loop and context recovery both supply the resolved tier here.
     bakedLighting.setTier(tier);
+    skylightDapple?.update(tier,reducedMotion);
     if (shadows && tier === 'detailed') playerShadow.update(visitor);
     if (surfaceAtmosphere.setTier(tier, lightWash) && mappedPaving) mappedPaving.roughness = materials.paving.roughness;
     uploadVisitor = visitor;
@@ -1363,7 +1396,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
-  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};

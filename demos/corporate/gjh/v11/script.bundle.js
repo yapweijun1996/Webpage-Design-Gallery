@@ -3187,6 +3187,11 @@ function allowMallLightWash(deviceClass, context) {
   return /GeForce|Quadro|NVIDIA RTX|Radeon RX (?!Vega |[0-9]+M Graphics)/i.test(adapter ?? "");
 }
 var STUDIO_LIGHTING = {
+  atrium: { walls: 7497825, panels: 16244677, ceiling: 13748665, width: 7, intensity: 0.64 },
+  corridor: { walls: 6707535, panels: 16111543, ceiling: 14137749, width: 5, intensity: 0.58 },
+  shop: { walls: 10389357, panels: 16771538, ceiling: 16771795, width: 3, intensity: 0.94 }
+};
+var CLASSIC_STUDIO_LIGHTING = {
   atrium: { walls: 11969420, panels: 16772825, ceiling: 16774631, width: 8, intensity: 1 },
   corridor: { walls: 11115138, panels: 16769468, ceiling: 16772050, width: 5, intensity: 0.9 },
   shop: { walls: 10389357, panels: 16766632, ceiling: 16770760, width: 3, intensity: 0.8 }
@@ -3203,10 +3208,12 @@ function createMallAtmosphere(T, renderer, scene, slots, {
   atrium = { x: 0, z: 8 },
   contact,
   plane,
-  frameTrace
+  frameTrace,
+  expanded = true
 } = {}) {
+  const studioLighting = expanded ? STUDIO_LIGHTING : CLASSIC_STUDIO_LIGHTING;
   const classicAccents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324];
-  const interiorWarm = new T.Color(16766368);
+  const interiorWarm = new T.Color(expanded ? 16766640 : 16766368);
   const bays = slots.map((slot2, index) => {
     const store = interiorStores["S" + slot2.number], mood = store?.ambient;
     const x = (slot2.minX + slot2.maxX) / 2, z = (slot2.minZ + slot2.maxZ) / 2;
@@ -3216,7 +3223,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const accentPosition = anchor ? [anchor[0] - dx * 2, anchor[1] + 0.35, anchor[2] - dz * 2] : [x + dx * 1.8, 4.3, z + dz * 1.8];
     const accent = new T.Color(mood?.accent ?? classicAccents[index]);
     const accentLuminance = 0.2126 * accent.r + 0.7152 * accent.g + 0.0722 * accent.b;
-    const environmentIntensity = mood ? 0.74 + 0.2 * (mood.kelvin - 2700) / 1300 + 0.1 * accentLuminance : STUDIO_LIGHTING.shop.intensity;
+    const environmentIntensity = mood ? (expanded ? 0.91 : 0.74) + 0.2 * (mood.kelvin - 2700) / 1300 + 0.1 * accentLuminance : studioLighting.shop.intensity;
     return {
       slot: slot2,
       x,
@@ -3270,7 +3277,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       const { minX, maxX, minZ, maxZ } = inside.slot;
       const edge = Math.min(x - minX, maxX - x, z - minZ, maxZ - z);
       const weight = Math.min(1, edge / 1.6);
-      const outside = STUDIO_LIGHTING[publicZone].intensity;
+      const outside = studioLighting[publicZone].intensity;
       selectEnvironment("shop", outside + weight * (inside.environmentIntensity - outside));
     } else
       selectEnvironment(inside ? "shop" : publicZone);
@@ -3303,8 +3310,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     }
     if (focus && nearest === focus)
       strength = Math.min(1, strength + fadeIn);
-    lights[0].intensity = 26 * strength;
-    lights[1].intensity = 18 * strength;
+    lights[0].intensity = (focus?.mood && expanded ? 38 : 26) * strength;
+    lights[1].intensity = (focus?.mood && expanded ? 24 : 18) * strength;
   }
   const accentSet = new Set(lights);
   function lightVariants(sceneLights) {
@@ -3318,8 +3325,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     });
     return [fixed, [...fixed, ...lights]];
   }
-  let environments = {}, currentZone = "atrium", currentIntensity = STUDIO_LIGHTING.atrium.intensity;
-  function selectEnvironment(zone, intensity = STUDIO_LIGHTING[zone].intensity) {
+  let environments = {}, currentZone = "atrium", currentIntensity = studioLighting.atrium.intensity;
+  function selectEnvironment(zone, intensity = studioLighting[zone].intensity) {
     currentZone = zone;
     currentIntensity = intensity;
     const environment = environments[zone];
@@ -3355,7 +3362,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     studio.add(ceiling);
     const next = {};
     try {
-      for (const [zone, { walls, panels, ceiling: colour, width }] of Object.entries(STUDIO_LIGHTING)) {
+      for (const [zone, { walls, panels, ceiling: colour, width }] of Object.entries(studioLighting)) {
         materials[0].color.set(walls);
         materials[1].color.set(panels).multiplyScalar(1.3);
         materials[2].color.set(colour).multiplyScalar(1.5);
@@ -6083,7 +6090,7 @@ function render(force = false) {
     const detailedReady = detailed && world.interiors?.activeTier === "detailed";
     if (expanded)
       renderer.shadowMap.enabled = detailedReady;
-    world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera, canvas.height, Boolean(shelfFocus?.open), lightWash);
+    world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera, canvas.height, Boolean(shelfFocus?.open), lightWash, reducedMotion2.matches);
     atmosphere?.update(pose, now);
     const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion2);
@@ -6622,7 +6629,7 @@ function validateRestoration() {
     atmosphere?.update(player.state);
     player.camera.updateMatrixWorld();
     sizeDrawingBuffer();
-    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash);
+    world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash, reducedMotion2.matches);
     world.updateSigns(player.camera, canvas, reducedMotion2);
     renderer.render(world.scene, player.camera);
     const pixel = new Uint8Array(4);
@@ -6709,7 +6716,7 @@ async function initialize() {
     frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = expanded ? 1.03 : 1.08;
+  renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
   try {
@@ -6732,6 +6739,8 @@ async function initialize() {
   });
   const { createWorld } = await import("./assets/world.bundle.js");
   world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === "phone");
+  if (expanded)
+    renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
   const assetRecords = [world.furnishings, world.shell, world.amenities, world.productAssets?.cans].flatMap((group) => Object.values(group || {}));
@@ -6739,7 +6748,7 @@ async function initialize() {
     assetRecords.push(world.productAssets.shelf);
   document.getElementById("loader-asset-notice").hidden = !assetRecords.some((record) => record?.status === "fallback");
   window.mallLoader?.complete("scene");
-  atmosphere = createMallAtmosphere(T, renderer, world.scene, expanded ? expandedLayout.slots : spatial.stores.map((store) => store.bounds), { frameTrace, ...expanded && { atrium: expandedLayout.atrium, contact: world.contact, plane: world.plane } });
+  atmosphere = createMallAtmosphere(T, renderer, world.scene, expanded ? expandedLayout.slots : spatial.stores.map((store) => store.bounds), { frameTrace, expanded, ...expanded && { atrium: expandedLayout.atrium, contact: world.contact, plane: world.plane } });
   try {
     const environments = atmosphere.prepareEnvironments();
     try {

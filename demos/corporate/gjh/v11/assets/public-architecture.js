@@ -9,9 +9,9 @@ import {decalMaterial} from './surface-decals.js';
 export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false, setCanopyMaterial, artworkTier=()=> 'low'}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
-  materials.vaultOak.color.set(0xc4a27c);
-  materials.vaultOak.emissive.set(0xa37b4e);
-  materials.vaultOak.emissiveIntensity=.32;
+  materials.vaultOak.color.set(0x9c846b);
+  materials.vaultOak.emissive.set(0xa17e5a);
+  materials.vaultOak.emissiveIntensity=.14;
   const tau = 2 * Math.PI;
 
   // The masonry above each arch is a silhouette with a real opening. Reuse
@@ -58,7 +58,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     const piers=[19.05,24.8,30.55,36.3,42.05,47.55];
     for (let bay=0;bay<piers.length;bay++){
       const z=piers[bay];
-      box('ivory',x,2.55,z,.76,5.1,.83,true);
+      box('green',x,2.55,z,.76,5.1,.83,true);
       box('oak',x,.2,z,.79,.39,.88);
       box('brass',x,.41,z,.79,.035,.88);
       box('ivory',x,4.78,z,.88,.36,1.03);
@@ -74,7 +74,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
 
   // The continuous court uses staggered fossil limestone slabs. A primed
   // 512px original tile keeps mineral veining out of the frame loop.
-  materials.paving=new T.MeshStandardMaterial({color:0xdad3c6,roughness:.39,metalness:.06});
+  materials.paving=new T.MeshStandardMaterial({color:0xa99d8f,roughness:.36,metalness:.07});
   const pavingURL=new URL('concourse-limestone.webp',import.meta.url);
   new T.TextureLoader().load(pavingURL.href,map=>{
     map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;
@@ -101,7 +101,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     map.wrapS=map.wrapT=T.RepeatWrapping;map.repeat.set(4,15);map.anisotropy=4;
     materials.courtStone.map=map;
   }
-  materials.courtStone.color.set(0x738d81);
+  materials.courtStone.color.set(0x4f6657);
+  materials.courtStone.roughness = .33;
   box('courtStone',10,-.006,33,6.05,.009,29.6);
   for(const x of [6.95,13.05]){
     box('ivory',x,.004,33,.12,.012,29.6);
@@ -120,12 +121,13 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       box('oak',front+inside*.7,soffitY,z,1.55,soffitHeight,7.96);
       box('ivory',front+inside*1.47,6.02,z,.16,.52,8);
       box('glow',front+inside*1.38,5.77,z,.06,.035,7.75);
+      lightWash?.(front+inside*1.30,5.791,z,.75,7.8,0,Math.PI/2,true);
       for(const dz of [-2.45,2.45]){
         box('brass',front+inside*.77,5.78,z+dz,.31,.06,.31);
         box('glow',front+inside*.77,5.737,z+dz,.21,.04,.21);
         lightWash?.(front+inside*.77,soffitY-soffitHeight/2-.008,z+dz,1.25,2.5,0,Math.PI/2);
       }
-      box('ivory',front+side*arcadePilaster.inset,2.88,z-3.88,arcadePilaster.depth,5.76,.35);
+      box('green',front+side*arcadePilaster.inset,2.88,z-3.88,arcadePilaster.depth,5.76,.35);
       // Shallow arched window heads sit below the fascia and to either
       // side of the moving leaves. The storefront sign stays uninterrupted.
       for(const offset of [-2.48,2.48]){
@@ -262,6 +264,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     // Use the inner planter on the west lounge to clear the shop arrival views.
     const planter = lounge.planters[lounge.id === 'west' ? 1 : 0];
     tree(planter.x, planter.z, 4.2);
+    lightPool(planter.x,.091,planter.z,2.2,2.2);
   }
   // The elevator kit owns both landing portals. These columns support the gallery above it.
   for(const z of [8.37,11.63]) box('oak',-4.99,5.27,z,.30,3.14,.37);
@@ -372,6 +375,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   const chandelier = new T.Group();
   chandelier.name='Gallery atrium chandelier'; chandelier.userData.sourceStatus='pending';
   chandelier.position.set(10,5.98,30.55);
+  lightPool(10,.054,30.55,4.8,4.8);
   chandelier.visible=false;
   scene.add(chandelier);
   let requested=false;

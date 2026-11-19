@@ -1,0 +1,68 @@
+"""Build the tiled, edge-faded 512 px projection for the GJH atrium tree shadow."""
+
+import argparse
+import math
+from pathlib import Path
+import random
+
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
+
+
+SIZE = 512
+OUTPUT = (Path(__file__).resolve().parents[1]
+          / 'demos/corporate/gjh/v11/assets/mall-skylight-dapple-512.png')
+
+
+def build():
+    randomizer = random.Random(76119)
+    margin = 48
+    mask = Image.new('L', (SIZE + 2 * margin,) * 2)
+    draw = ImageDraw.Draw(mask)
+    # Overlapping leaf clusters leave pools of sunlight between the branches.
+    for _ in range(32):
+        center_x, center_y = [randomizer.uniform(0, SIZE) for _ in range(2)]
+        for _ in range(randomizer.randint(18, 42)):
+            angle = randomizer.uniform(0, math.tau)
+            distance = randomizer.uniform(0, 44)
+            x = (center_x + math.cos(angle) * distance) % SIZE + margin
+            y = (center_y + math.sin(angle) * distance) % SIZE + margin
+            length = randomizer.uniform(6, 21)
+            width = randomizer.uniform(3, 10)
+            alpha = randomizer.randint(75, 170)
+            for dx in (-SIZE, 0, SIZE):
+                for dy in (-SIZE, 0, SIZE):
+                    draw.ellipse((round(x + dx - length), round(y + dy - width),
+                                  round(x + dx + length), round(y + dy + width)), fill=alpha)
+    mask = mask.filter(ImageFilter.GaussianBlur(4.8))
+    tile = mask.crop((margin, margin, margin + SIZE, margin + SIZE))
+    tiled = Image.new('L', (SIZE, SIZE))
+    for row in range(2):
+        top, bottom = row * SIZE // 2, (row + 1) * SIZE // 2
+        for column in range(3):
+            left, right = column * SIZE // 3, (column + 1) * SIZE // 3
+            tiled.paste(tile.resize((right-left, bottom-top), Image.Resampling.LANCZOS), (left, top))
+
+    def edge_fade(pixel):
+        distance = min(pixel, SIZE - 1 - pixel)
+        # Leave a transparent gutter wider than the maximum UV drift.
+        blend = max(0, min(1, (distance - 18) / 35))
+        return blend * blend * (3 - 2 * blend)
+
+    fade = [edge_fade(pixel) for pixel in range(SIZE)]
+    envelope = Image.frombytes('L', (SIZE, SIZE), bytes(round(255*x*y) for y in fade for x in fade))
+    image = Image.new('RGBA', (SIZE, SIZE))
+    image.putalpha(ImageChops.multiply(tiled, envelope))
+    return image
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--check', action='store_true')
+    args = parser.parse_args()
+    result = build()
+    if args.check:
+        with Image.open(OUTPUT) as current:
+            if current.mode != result.mode or current.size != result.size or current.tobytes() != result.tobytes():
+                raise SystemExit(f'Regenerate {OUTPUT.name}')
+    else:
+        result.save(OUTPUT, optimize=True)
